@@ -14,10 +14,10 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** pre-release, in active development toward `v0.1.0`. The
+> **Status:** `v0.1.0` released, in active development. The
 > command reference below states clearly which subcommands are implemented
 > today versus planned for a later milestone. Interfaces may still change
-> before the first tagged release.
+> before `v1.0.0`.
 
 ## What symbrain is not
 
@@ -52,8 +52,8 @@ implement any of that itself.
 
 ## Quickstart
 
-Build from source (no tagged release yet — see the [Building](#building)
-section for the exact commands), then:
+Install the latest release or build from source (see the
+[Building](#building) section for the exact commands), then:
 
 ```bash
 # 1. Create the XDG config/data/cache directories, a default config,
@@ -230,7 +230,11 @@ reuses `corekit/configkit`'s fixed path resolution), so a profile written by
 
 ## Building
 
-There is no tagged release yet. Build from source:
+Download the archive for your platform from the [latest GitHub
+Release](https://github.com/danieljustus/symaira-brain/releases/latest),
+extract it, and place `symbrain` on your `PATH`.
+
+Or build from source:
 
 ```bash
 git clone https://github.com/danieljustus/symaira-brain.git
