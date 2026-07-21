@@ -1,0 +1,11 @@
+---
+description: Symaira brain managed instructions
+globs: **/*
+alwaysApply: true
+---
+
+<!-- symbrain:begin -->
+# Instructions
+
+Rules.
+<!-- symbrain:end -->
