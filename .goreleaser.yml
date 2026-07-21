@@ -85,6 +85,7 @@ release:
 
 brews:
   - name: symbrain
+    skip_upload: true
     repository:
       owner: danieljustus
       name: homebrew-tap
