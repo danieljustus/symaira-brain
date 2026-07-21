@@ -391,6 +391,47 @@ name = "wrong-name"`)
 	}
 }
 
+func TestValidateName(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool // true = valid
+	}{
+		{"cursor-arbeit", true},
+		{"personal", true},
+		{"restricted_2", true},
+		{"", false},
+		{"..", false},
+		{"../../etc/passwd", false},
+		{"has/slash", false},
+		{`has\backslash`, false},
+		{"has space", false},
+		{`has"quote`, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := ValidateName(tt.name)
+			if tt.want && err != nil {
+				t.Errorf("ValidateName(%q) = %v, want nil", tt.name, err)
+			}
+			if !tt.want && err == nil {
+				t.Errorf("ValidateName(%q) = nil, want an error", tt.name)
+			}
+		})
+	}
+}
+
+func TestLoad_PathTraversalNameRejected(t *testing.T) {
+	withHome(t)
+
+	_, err := Load("../../etc/passwd")
+	if err == nil {
+		t.Fatal("Load() error = nil, want error for a path-traversal name")
+	}
+	if got := exitcodes.ExitCodeFromError(err); got != exitcodes.ExitNoInput {
+		t.Errorf("ExitCodeFromError(err) = %d, want %d", got, exitcodes.ExitNoInput)
+	}
+}
+
 func TestExists(t *testing.T) {
 	home := withHome(t)
 	if Exists("ghost") {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -113,8 +114,28 @@ var knownServerAliases = map[string]bool{
 	ServerSkills: true,
 }
 
+// validNamePattern restricts profile names to a safe, unambiguous charset.
+// This also closes off path traversal: a name matching this pattern can
+// never contain "/", "\", "..", or quote characters, so it is always safe
+// to join into a filesystem path (Path) or embed in a TOML string value
+// (used by `symbrain profile add` to rewrite a template's [profile] name).
+var validNamePattern = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+
+// ValidateName reports whether name is safe to use as a profile: a
+// filesystem basename (via Path) and a TOML string value. Callers that
+// accept a profile name from user input (CLI args, in particular
+// `symbrain profile add`/`remove`) should call this before touching the
+// filesystem.
+func ValidateName(name string) error {
+	if !validNamePattern.MatchString(name) {
+		return fmt.Errorf(
+			"profile name %q must be non-empty and contain only letters, digits, '-', or '_'", name)
+	}
+	return nil
+}
+
 // Path returns the file path for profile name under xdg.ProfilesDir(),
-// without checking whether it exists.
+// without checking whether it exists or whether name is valid.
 func Path(name string) string {
 	return filepath.Join(xdg.ProfilesDir(), name+".toml")
 }
@@ -132,6 +153,11 @@ func Exists(name string) bool {
 // exitcodes.ExitNoInput / exitcodes.KindConfig, matching internal/config's
 // error-handling idiom, so callers can propagate exit code 2.
 func Load(name string) (*Profile, error) {
+	if err := ValidateName(name); err != nil {
+		return nil, exitcodes.Wrap(err, exitcodes.ExitNoInput, exitcodes.KindConfig,
+			fmt.Sprintf("profile: invalid name %q", name))
+	}
+
 	path := Path(name)
 	data, err := os.ReadFile(path)
 	if err != nil {
