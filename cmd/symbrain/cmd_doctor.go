@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/config"
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
@@ -44,13 +45,39 @@ type serverCheck struct {
 	InstallHint string `json:"install_hint,omitempty"`
 }
 
+// harnessCheck reports symbrain's install state in one harness's MCP
+// config: whether the config file exists and parses, whether symbrain is
+// registered in it, and — narrower than full profile validation, since
+// internal/profile does not exist yet (see #8) — whether the profile name
+// it's bound to has a corresponding file under
+// ~/.config/symbrain/profiles/. Full schema validation against a typed
+// profile loader is left for a follow-up once #8 lands.
+type harnessCheck struct {
+	Name         string `json:"name"`
+	ConfigPath   string `json:"config_path"`
+	ConfigFound  bool   `json:"config_found"`
+	ConfigParsed bool   `json:"config_parsed"`
+	ConfigError  string `json:"config_error,omitempty"`
+	Installed    bool   `json:"installed"`
+	// Profile is the --profile value bound in symbrain's MCP entry, if
+	// Installed and the entry carries one.
+	Profile string `json:"profile,omitempty"`
+	// ProfileExists reports whether ~/.config/symbrain/profiles/<Profile>.toml
+	// exists on disk. Only meaningful when Profile is non-empty.
+	ProfileExists bool `json:"profile_exists"`
+	// ProfileMissing flags a harness bound to a profile that doesn't exist
+	// on disk: Installed, Profile is set, and ProfileExists is false.
+	ProfileMissing bool `json:"profile_missing"`
+}
+
 type doctorReport struct {
-	ConfigDir dirCheck      `json:"config_dir"`
-	DataDir   dirCheck      `json:"data_dir"`
-	CacheDir  dirCheck      `json:"cache_dir"`
-	Config    configCheck   `json:"config"`
-	Servers   []serverCheck `json:"servers"`
-	Profiles  []string      `json:"profiles"`
+	ConfigDir dirCheck       `json:"config_dir"`
+	DataDir   dirCheck       `json:"data_dir"`
+	CacheDir  dirCheck       `json:"cache_dir"`
+	Config    configCheck    `json:"config"`
+	Servers   []serverCheck  `json:"servers"`
+	Profiles  []string       `json:"profiles"`
+	Harnesses []harnessCheck `json:"harnesses"`
 }
 
 // knownServers are the three state cores symbrain composes. A missing
@@ -96,6 +123,7 @@ func runDoctorChecks(ctx context.Context) *doctorReport {
 		Config:    checkConfig(),
 		Servers:   checkServers(ctx),
 		Profiles:  discoverProfiles(),
+		Harnesses: checkHarnesses(),
 	}
 
 	if dataDir, err := xdg.DataDir(); err == nil {
@@ -191,6 +219,67 @@ func discoverProfiles() []string {
 	return names
 }
 
+// checkHarnesses inspects every harness in the registry (#19) for whether
+// symbrain is installed and, if so, which profile it's bound to.
+func checkHarnesses() []harnessCheck {
+	checks := make([]harnessCheck, 0, len(harness.All))
+	for _, h := range harness.All {
+		checks = append(checks, checkHarness(h))
+	}
+	return checks
+}
+
+func checkHarness(h harness.Harness) harnessCheck {
+	check := harnessCheck{Name: string(h.Name)}
+
+	path, err := h.ConfigPath()
+	if err != nil {
+		check.ConfigError = err.Error()
+		return check
+	}
+	check.ConfigPath = path
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			check.ConfigError = err.Error()
+		}
+		return check
+	}
+	check.ConfigFound = true
+
+	doc, err := harness.Parse(h, data)
+	if err != nil {
+		check.ConfigError = exitcodes.FormatCLIError(err)
+		return check
+	}
+	check.ConfigParsed = true
+
+	entry, present := doc.Server(harness.ServerName)
+	if !present || !entry.IsSymbrain() {
+		return check
+	}
+	check.Installed = true
+
+	profile, ok := entry.Profile()
+	if !ok || profile == "" {
+		return check
+	}
+	check.Profile = profile
+	check.ProfileExists = profileFileExists(profile)
+	check.ProfileMissing = !check.ProfileExists
+	return check
+}
+
+// profileFileExists reports whether
+// ~/.config/symbrain/profiles/<name>.toml exists on disk. This is the
+// narrower check described in issue #21: full schema validation belongs to
+// internal/profile (issue #8), which doesn't exist yet on this branch.
+func profileFileExists(name string) bool {
+	info, err := os.Stat(filepath.Join(xdg.ProfilesDir(), name+".toml"))
+	return err == nil && !info.IsDir()
+}
+
 func printDoctorHuman(w io.Writer, r *doctorReport) {
 	fmt.Fprintln(w, "symbrain doctor")
 	fmt.Fprintln(w)
@@ -208,9 +297,14 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 	fmt.Fprintln(w)
 	if len(r.Profiles) == 0 {
 		fmt.Fprintln(w, "  →  no profiles found (run `symbrain init` for examples)")
-		return
+	} else {
+		fmt.Fprintf(w, "  ✓  profiles: %s\n", strings.Join(r.Profiles, ", "))
 	}
-	fmt.Fprintf(w, "  ✓  profiles: %s\n", strings.Join(r.Profiles, ", "))
+
+	fmt.Fprintln(w)
+	for _, h := range r.Harnesses {
+		printHarness(w, h)
+	}
 }
 
 func printDir(w io.Writer, label string, d dirCheck) {
@@ -240,5 +334,22 @@ func printServer(w io.Writer, s serverCheck) {
 		fmt.Fprintf(w, "  ✗  %-8s %s (version probe failed: %s)\n", s.Name, s.Path, s.ProbeError)
 	default:
 		fmt.Fprintf(w, "  →  %-8s not found on PATH — %s\n", s.Name, s.InstallHint)
+	}
+}
+
+func printHarness(w io.Writer, h harnessCheck) {
+	switch {
+	case !h.ConfigFound:
+		fmt.Fprintf(w, "  →  %-14s config not found: %s\n", h.Name, h.ConfigPath)
+	case !h.ConfigParsed:
+		fmt.Fprintf(w, "  ✗  %-14s %s (invalid config: %s)\n", h.Name, h.ConfigPath, h.ConfigError)
+	case !h.Installed:
+		fmt.Fprintf(w, "  →  %-14s config found, symbrain not installed: %s\n", h.Name, h.ConfigPath)
+	case h.Profile == "":
+		fmt.Fprintf(w, "  ✗  %-14s installed but no --profile bound: %s\n", h.Name, h.ConfigPath)
+	case h.ProfileMissing:
+		fmt.Fprintf(w, "  ✗  %-14s installed, bound to missing profile %q: %s\n", h.Name, h.Profile, h.ConfigPath)
+	default:
+		fmt.Fprintf(w, "  ✓  %-14s installed, profile %q: %s\n", h.Name, h.Profile, h.ConfigPath)
 	}
 }

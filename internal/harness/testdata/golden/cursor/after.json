@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "args": [
+        "--root",
+        "/tmp"
+      ],
+      "command": "mcp-filesystem"
+    },
+    "symbrain": {
+      "args": [
+        "serve",
+        "--profile",
+        "personal"
+      ],
+      "command": "symbrain"
+    }
+  }
+}
