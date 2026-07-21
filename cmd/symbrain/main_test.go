@@ -59,8 +59,10 @@ func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// --harness.
 	// "serve" is excluded: it is no longer a stub (see cmd_serve.go) and
 	// correctly requires --profile.
+	// "audit" is excluded: it is no longer a stub (see cmd_audit.go) and
+	// correctly requires a subcommand.
 	subcommands := []string{
-		"doctor", "sync", "audit", "version",
+		"doctor", "sync", "version",
 	}
 
 	for _, cmd := range subcommands {
