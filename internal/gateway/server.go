@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"time"
 
+	"github.com/danieljustus/symaira-brain/internal/audit"
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
 	"github.com/danieljustus/symaira-brain/internal/policy"
@@ -46,6 +48,21 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		return fmt.Errorf("gateway: build catalog: %w", err)
 	}
 
+	var auditLog *audit.Logger
+	if s.profile.Audit.Enabled {
+		cfg := audit.Config{
+			Enabled: true,
+			Verbose: false,
+		}
+		al, err := audit.Open(s.profile.Name, cfg)
+		if err != nil {
+			s.logger.Warn("failed to open audit log", "error", err)
+		} else {
+			auditLog = al
+			defer auditLog.Close()
+		}
+	}
+
 	srv := mcpserver.New("symbrain", "dev")
 	srv.SetInstructions(fmt.Sprintf("symbrain profile %q", s.profile.Name))
 
@@ -56,7 +73,16 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			Description: entry.Description,
 			InputSchema: entry.InputSchema,
 			Handler: func(ctx context.Context, input json.RawMessage) (any, error) {
-				return s.routeToolCall(ctx, entry, input)
+				start := time.Now()
+				result, err := s.routeToolCall(ctx, entry, input)
+				if auditLog != nil {
+					status := "ok"
+					if err != nil {
+						status = "error"
+					}
+					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status)
+				}
+				return result, err
 			},
 		})
 	}

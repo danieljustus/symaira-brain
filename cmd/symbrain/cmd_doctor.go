@@ -111,12 +111,13 @@ var knownServers = []struct {
 func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
+	vaultAgent := fs.String("vault-agent", "claude-code", "vault agent name for MCP handshake probe")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
 	}
 
-	report := runDoctorChecks(context.Background())
+	report := runDoctorChecks(context.Background(), *vaultAgent)
 
 	if *jsonOut {
 		if err := json.NewEncoder(stdout).Encode(report); err != nil {
@@ -132,7 +133,7 @@ func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	return exitcodes.ExitOK
 }
 
-func runDoctorChecks(ctx context.Context) *doctorReport {
+func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	report := &doctorReport{
 		ConfigDir: checkDir(xdg.ConfigDir()),
 		Config:    checkConfig(),
@@ -148,7 +149,7 @@ func runDoctorChecks(ctx context.Context) *doctorReport {
 		report.CacheDir = checkDir(cacheDir)
 	}
 
-	report.Handshakes = checkHandshakes(ctx)
+	report.Handshakes = checkHandshakes(ctx, vaultAgent)
 
 	return report
 }
@@ -299,7 +300,7 @@ func profileFileExists(name string) bool {
 
 const handshakeTimeout = 5 * time.Second
 
-func checkHandshakes(ctx context.Context) []profileHandshake {
+func checkHandshakes(ctx context.Context, vaultAgent string) []profileHandshake {
 	names, err := profile.ListNames()
 	if err != nil || len(names) == 0 {
 		return nil
@@ -344,7 +345,7 @@ func checkHandshakes(ctx context.Context) []profileHandshake {
 				continue
 			}
 
-			h := probeHandshake(ctx, path, name, alias, serverCfg)
+			h := probeHandshake(ctx, path, name, alias, vaultAgent, serverCfg)
 			results = append(results, h)
 		}
 	}
@@ -364,13 +365,20 @@ func aliasBinary(alias string) string {
 	}
 }
 
-func probeHandshake(ctx context.Context, path, profileName, alias string, serverCfg profile.ServerConfig) profileHandshake {
+func probeHandshake(ctx context.Context, path, profileName, alias, vaultAgent string, serverCfg profile.ServerConfig) profileHandshake {
 	h := profileHandshake{Profile: profileName, Server: alias}
 
 	handshakeCtx, cancel := context.WithTimeout(ctx, handshakeTimeout)
 	defer cancel()
 
-	c, err := broker.Spawn(path, broker.Options{Stderr: io.Discard})
+	args := []string{"serve"}
+	if alias == profile.ServerSkills {
+		args = []string{"serve", "--stdio"}
+	}
+	if alias == profile.ServerVault && vaultAgent != "" {
+		args = []string{"serve", "--stdio", "--agent", vaultAgent, "--allow-locked"}
+	}
+	c, err := broker.Spawn(path, broker.Options{Args: args, Stderr: io.Discard})
 	if err != nil {
 		h.Error = fmt.Sprintf("spawn: %v", err)
 		return h

@@ -20,6 +20,7 @@ import (
 func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
 	profileName := fs.String("profile", "", "profile name to serve (required)")
+	vaultAgent := fs.String("vault-agent", "", "vault agent name for --stdio mode (default: harness-detected or 'claude-code')")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
@@ -42,7 +43,7 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return exitcodes.ExitNoInput
 	}
 
-	servers := buildServers(p, cfg, stderr)
+	servers := buildServers(p, cfg, stderr, *vaultAgent)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -61,19 +62,25 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	return exitcodes.ExitOK
 }
 
-func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer) map[string]*broker.ManagedServer {
+func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaultAgent string) map[string]*broker.ManagedServer {
 	servers := make(map[string]*broker.ManagedServer)
 
 	type serverDef struct {
 		alias      string
 		binaryName string
 		override   string
+		args       []string
+	}
+
+	vaultArgs := []string{"serve", "--allow-locked"}
+	if vaultAgent != "" {
+		vaultArgs = []string{"serve", "--stdio", "--agent", vaultAgent, "--allow-locked"}
 	}
 
 	defs := []serverDef{
-		{"vault", "symvault", cfg.Servers.Vault.BinaryPath},
-		{"memory", "symmemory", cfg.Servers.Memory.BinaryPath},
-		{"skills", "symskills", cfg.Servers.Skills.BinaryPath},
+		{"vault", "symvault", cfg.Servers.Vault.BinaryPath, vaultArgs},
+		{"memory", "symmemory", cfg.Servers.Memory.BinaryPath, []string{"serve"}},
+		{"skills", "symskills", cfg.Servers.Skills.BinaryPath, []string{"serve", "--stdio"}},
 	}
 
 	for _, d := range defs {
@@ -91,6 +98,7 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer) map[
 		ms := broker.NewManagedServer(broker.ServerConfig{
 			Name:        d.alias,
 			BinaryPath:  path,
+			Args:        d.args,
 			MaxRestarts: 3,
 			Logger:      logkit.Default(),
 		})
