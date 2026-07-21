@@ -228,11 +228,11 @@ func writeHarnessConfig(t *testing.T, h harness.Harness, profile string) string 
 	return path
 }
 
-// writeProfileFile creates an (empty-content) profile file at
+// writeStubProfileFile creates an (empty-content) profile file at
 // ~/.config/symbrain/profiles/<name>.toml, the on-disk existence
 // checkHarness looks for per issue #21's narrower "no internal/profile
 // yet" fallback.
-func writeProfileFile(t *testing.T, home, name string) {
+func writeStubProfileFile(t *testing.T, home, name string) {
 	t.Helper()
 	dir := filepath.Join(home, ".config", "symbrain", "profiles")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -287,7 +287,7 @@ func TestCheckHarness_InstalledAndProfileExists(t *testing.T) {
 	home := harnessSandbox(t)
 	h := harnessByName(t, "claude")
 	writeHarnessConfig(t, h, "personal")
-	writeProfileFile(t, home, "personal")
+	writeStubProfileFile(t, home, "personal")
 
 	check := checkHarness(h)
 	if !check.Installed {
@@ -391,7 +391,7 @@ func TestCmdDoctor_HumanOutput_ReportsHarnessBindings(t *testing.T) {
 
 	installed := harnessByName(t, "cursor")
 	writeHarnessConfig(t, installed, "personal")
-	writeProfileFile(t, home, "personal")
+	writeStubProfileFile(t, home, "personal")
 
 	missing := harnessByName(t, "gemini")
 	writeHarnessConfig(t, missing, "ghost")
@@ -423,7 +423,7 @@ func TestCmdDoctor_JSON_HarnessesIncludeProfileBindingFields(t *testing.T) {
 
 	h := harnessByName(t, "codex")
 	writeHarnessConfig(t, h, "personal")
-	writeProfileFile(t, home, "personal")
+	writeStubProfileFile(t, home, "personal")
 
 	var stdout, stderr bytes.Buffer
 	code := cmdDoctor([]string{"--json"}, &stdout, &stderr)
