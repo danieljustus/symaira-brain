@@ -17,11 +17,12 @@ type Tool struct {
 }
 
 // Entry is one tool in the merged catalog, annotated with its source
-// server and the policy verdict that determined its exposure.
+// server, original (unprefixed) tool name, and the policy verdict.
 type Entry struct {
 	Tool
-	Server  string         `json:"server"`
-	Verdict policy.Verdict `json:"verdict"`
+	Server       string         `json:"server"`
+	OriginalName string         `json:"original_name"`
+	Verdict      policy.Verdict `json:"verdict"`
 }
 
 // Catalog is the merged, namespaced, policy-filtered tool list presented
@@ -75,9 +76,10 @@ func Build(servers []ServerTools) (*Catalog, error) {
 			// Evaluate policy against the original (unprefixed) tool name.
 			verdict := st.Report.Verdict(tool.Name)
 			entries = append(entries, Entry{
-				Tool:    Tool{Name: name, Description: tool.Description, InputSchema: tool.InputSchema},
-				Server:  st.Server,
-				Verdict: verdict,
+				Tool:         Tool{Name: name, Description: tool.Description, InputSchema: tool.InputSchema},
+				Server:       st.Server,
+				OriginalName: tool.Name,
+				Verdict:      verdict,
 			})
 		}
 	}

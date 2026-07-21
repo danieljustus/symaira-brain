@@ -306,6 +306,22 @@ func derefBool(p *bool, fallback bool) bool {
 	return *p
 }
 
+// Server returns the ServerConfig for the given alias (e.g. "vault",
+// "memory", "skills"). Returns a zero-value ServerConfig for unknown
+// aliases (disabled).
+func (p *Profile) Server(alias string) ServerConfig {
+	switch alias {
+	case ServerVault:
+		return p.Servers.Vault
+	case ServerMemory:
+		return p.Servers.Memory
+	case ServerSkills:
+		return p.Servers.Skills
+	default:
+		return ServerConfig{}
+	}
+}
+
 // ListNames returns the sorted profile names found under xdg.ProfilesDir()
 // (file basenames without ".toml"). It only lists the directory — it does
 // not parse or validate each file; use Load or LoadAll for that. A missing
