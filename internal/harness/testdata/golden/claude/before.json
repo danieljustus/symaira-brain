@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "other-tool": {
+      "args": [
+        "run"
+      ],
+      "command": "other-tool"
+    }
+  },
+  "userId": "u-123"
+}
