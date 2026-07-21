@@ -13,8 +13,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
+	"github.com/danieljustus/symaira-brain/internal/policy"
+	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
@@ -71,13 +74,25 @@ type harnessCheck struct {
 }
 
 type doctorReport struct {
-	ConfigDir dirCheck       `json:"config_dir"`
-	DataDir   dirCheck       `json:"data_dir"`
-	CacheDir  dirCheck       `json:"cache_dir"`
-	Config    configCheck    `json:"config"`
-	Servers   []serverCheck  `json:"servers"`
-	Profiles  []string       `json:"profiles"`
-	Harnesses []harnessCheck `json:"harnesses"`
+	ConfigDir  dirCheck           `json:"config_dir"`
+	DataDir    dirCheck           `json:"data_dir"`
+	CacheDir   dirCheck           `json:"cache_dir"`
+	Config     configCheck        `json:"config"`
+	Servers    []serverCheck      `json:"servers"`
+	Profiles   []string           `json:"profiles"`
+	Harnesses  []harnessCheck     `json:"harnesses"`
+	Handshakes []profileHandshake `json:"handshakes,omitempty"`
+}
+
+type profileHandshake struct {
+	Profile   string `json:"profile"`
+	Server    string `json:"server"`
+	Protocol  string `json:"protocol_version,omitempty"`
+	ToolCount int    `json:"tool_count"`
+	Exposed   int    `json:"exposed"`
+	Hidden    int    `json:"hidden"`
+	Unknown   int    `json:"unknown"`
+	Error     string `json:"error,omitempty"`
 }
 
 // knownServers are the three state cores symbrain composes. A missing
@@ -132,6 +147,8 @@ func runDoctorChecks(ctx context.Context) *doctorReport {
 	if cacheDir, err := xdg.CacheDir(); err == nil {
 		report.CacheDir = checkDir(cacheDir)
 	}
+
+	report.Handshakes = checkHandshakes(ctx)
 
 	return report
 }
@@ -280,6 +297,125 @@ func profileFileExists(name string) bool {
 	return err == nil && !info.IsDir()
 }
 
+const handshakeTimeout = 5 * time.Second
+
+func checkHandshakes(ctx context.Context) []profileHandshake {
+	names, err := profile.ListNames()
+	if err != nil || len(names) == 0 {
+		return nil
+	}
+
+	cfg, cfgErr := config.Load()
+	if cfgErr != nil {
+		cfg = config.Defaults()
+	}
+
+	var results []profileHandshake
+	for _, name := range names {
+		p, err := profile.Load(name)
+		if err != nil {
+			continue
+		}
+
+		for _, alias := range []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills} {
+			serverCfg := p.Server(alias)
+			if !serverCfg.Enabled {
+				continue
+			}
+
+			binaryName := aliasBinary(alias)
+			override := ""
+			switch alias {
+			case profile.ServerVault:
+				override = cfg.Servers.Vault.BinaryPath
+			case profile.ServerMemory:
+				override = cfg.Servers.Memory.BinaryPath
+			case profile.ServerSkills:
+				override = cfg.Servers.Skills.BinaryPath
+			}
+
+			path, err := broker.Discover(binaryName, override)
+			if err != nil {
+				results = append(results, profileHandshake{
+					Profile: name,
+					Server:  alias,
+					Error:   err.Error(),
+				})
+				continue
+			}
+
+			h := probeHandshake(ctx, path, name, alias, serverCfg)
+			results = append(results, h)
+		}
+	}
+	return results
+}
+
+func aliasBinary(alias string) string {
+	switch alias {
+	case profile.ServerVault:
+		return "symvault"
+	case profile.ServerMemory:
+		return "symmemory"
+	case profile.ServerSkills:
+		return "symskills"
+	default:
+		return alias
+	}
+}
+
+func probeHandshake(ctx context.Context, path, profileName, alias string, serverCfg profile.ServerConfig) profileHandshake {
+	h := profileHandshake{Profile: profileName, Server: alias}
+
+	handshakeCtx, cancel := context.WithTimeout(ctx, handshakeTimeout)
+	defer cancel()
+
+	c, err := broker.Spawn(path, broker.Options{Stderr: io.Discard})
+	if err != nil {
+		h.Error = fmt.Sprintf("spawn: %v", err)
+		return h
+	}
+	defer func() {
+		_ = c.Close()
+		if p := c.Process(); p != nil {
+			_ = p.Kill()
+		}
+	}()
+
+	result, err := c.Initialize(handshakeCtx)
+	if err != nil {
+		h.Error = fmt.Sprintf("initialize: %v", err)
+		return h
+	}
+
+	h.Protocol = result.ProtocolVersion
+
+	tools, err := c.ListTools(handshakeCtx)
+	if err != nil {
+		h.Error = fmt.Sprintf("tools/list: %v", err)
+		return h
+	}
+
+	h.ToolCount = len(tools)
+
+	liveNames := make([]string, len(tools))
+	for i, t := range tools {
+		liveNames[i] = t.Name
+	}
+
+	report, err := policy.Evaluate(alias, serverCfg, liveNames)
+	if err != nil {
+		h.Error = fmt.Sprintf("policy: %v", err)
+		return h
+	}
+
+	h.Exposed = len(report.Exposed)
+	h.Hidden = len(report.Hidden)
+	h.Unknown = len(report.Unknown)
+
+	return h
+}
+
 func printDoctorHuman(w io.Writer, r *doctorReport) {
 	fmt.Fprintln(w, "symbrain doctor")
 	fmt.Fprintln(w)
@@ -304,6 +440,14 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 	fmt.Fprintln(w)
 	for _, h := range r.Harnesses {
 		printHarness(w, h)
+	}
+
+	if len(r.Handshakes) > 0 {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "  profile handshakes:")
+		for _, h := range r.Handshakes {
+			printHandshake(w, h)
+		}
 	}
 }
 
@@ -352,4 +496,13 @@ func printHarness(w io.Writer, h harnessCheck) {
 	default:
 		fmt.Fprintf(w, "  ✓  %-14s installed, profile %q: %s\n", h.Name, h.Profile, h.ConfigPath)
 	}
+}
+
+func printHandshake(w io.Writer, h profileHandshake) {
+	if h.Error != "" {
+		fmt.Fprintf(w, "    ✗  %-10s %-8s handshake failed: %s\n", h.Profile, h.Server, h.Error)
+		return
+	}
+	fmt.Fprintf(w, "    ✓  %-10s %-8s protocol=%s tools=%d exposed=%d hidden=%d unknown=%d\n",
+		h.Profile, h.Server, h.Protocol, h.ToolCount, h.Exposed, h.Hidden, h.Unknown)
 }
