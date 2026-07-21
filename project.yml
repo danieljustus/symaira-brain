@@ -1,0 +1,138 @@
+name: SymBrain
+options:
+  bundleIdPrefix: com.symaira
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: false
+
+# NOTE: This uses a local path dependency for development. Merged/release
+# code must pin an exact tag instead (e.g. exactVersion: "0.5.0").
+packages:
+  symaira-appkit:
+    path: ../symaira-appkit
+
+targets:
+  SymBrainCore:
+    type: library.static
+    platform: macOS
+    sources:
+      - Sources/SymBrainCore
+    dependencies:
+      - package: symaira-appkit
+        product: SymairaTheme
+      - package: symaira-appkit
+        product: SymairaCLIRunner
+      - package: symaira-appkit
+        product: SymairaToolKit
+      - package: symaira-appkit
+        product: SymairaDaemonKit
+      - package: symaira-appkit
+        product: SymairaUpdateCheck
+    settings:
+      base:
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        SWIFT_VERSION: "6.0"
+
+  SymBrain:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/SymBrainApp
+    dependencies:
+      - target: SymBrainCore
+      - package: symaira-appkit
+        product: SymairaTheme
+      - package: symaira-appkit
+        product: SymairaCLIRunner
+      - package: symaira-appkit
+        product: SymairaToolKit
+      - package: symaira-appkit
+        product: SymairaDaemonKit
+      - package: symaira-appkit
+        product: SymairaUpdateCheck
+    settings:
+      base:
+        INFOPLIST_FILE: Sources/SymBrainApp/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.symaira.brain
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "-"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        SWIFT_VERSION: "6.0"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited)"
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+
+  SymBrainCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/SymBrainCoreTests
+    dependencies:
+      - target: SymBrainCore
+      - package: symaira-appkit
+        product: SymairaTheme
+      - package: symaira-appkit
+        product: SymairaCLIRunner
+      - package: symaira-appkit
+        product: SymairaToolKit
+      - package: symaira-appkit
+        product: SymairaDaemonKit
+      - package: symaira-appkit
+        product: SymairaUpdateCheck
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        SWIFT_VERSION: "6.0"
+
+  SymBrainMobile:
+    type: application
+    platform: iOS
+    sources:
+      - Sources/SymBrainMobile
+    dependencies:
+      - package: symaira-appkit
+        product: SymairaTheme
+    settings:
+      base:
+        INFOPLIST_FILE: Sources/SymBrainMobile/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.symaira.brain.mobile
+        PRODUCT_NAME: SymBrain
+        PRODUCT_MODULE_NAME: SymBrainMobile
+        CODE_SIGN_STYLE: Automatic
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+
+schemes:
+  SymBrain:
+    build:
+      targets:
+        SymBrain: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SymBrainCoreTests
+
+  SymBrainCore:
+    build:
+      targets:
+        SymBrainCore: all
+    test:
+      config: Debug
+      targets:
+        - SymBrainCoreTests
+
+  SymBrainMobile:
+    build:
+      targets:
+        SymBrainMobile: all
+    run:
+      config: Debug

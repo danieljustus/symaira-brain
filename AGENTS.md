@@ -23,7 +23,8 @@ Symbrain is explicitly **not**:
   symskills; symbrain only orchestrates it (shells out, parses `--json`).
 - **A memory store.** Symbrain persists no memories and no secrets itself. It
   only holds profiles, the instructions source, and an audit log.
-- **A GUI** in v0.1.0.
+- **A GUI** in v0.1.0 (though native SwiftUI apps now exist in `Sources/` as
+  the macOS and iOS clients for the CLI).
 
 ### Brain ↔ Guard Boundary (verbatim — do not weaken)
 
@@ -69,7 +70,14 @@ symaira-brain/
 │   │                      #   opencode, gemini): instructions + MCP config
 │   ├── harness/           # Harness registry: config paths, formats, backup
 │   └── skills/            # symskills orchestration (CLI shell-out, --json)
+├── Sources/               # Native SwiftUI apps (macOS + iOS)
+│   ├── SymBrainCore/      # Static library: CLI client, models, view models
+│   ├── SymBrainApp/       # macOS application (NavigationSplitView dashboard)
+│   └── SymBrainMobile/    # iOS companion (read-only overview)
+├── Tests/                 # Swift unit tests
+│   └── SymBrainCoreTests/ # Decoding tests for CLI JSON shapes
 ├── docs/                  # Local planning docs (git-ignored, not part of the module)
+├── project.yml            # Xcode project generation (xcodegen)
 ├── go.mod, go.sum
 ├── Makefile
 ├── README.md

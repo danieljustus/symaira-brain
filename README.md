@@ -30,7 +30,8 @@ each through its own profile, each seeing only what that profile exposes.
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
-- **Not a GUI**, at least not in `v0.1.0`.
+- **Not a GUI**, at least not in `v0.1.0` (though native SwiftUI apps now
+  exist in the repo — see [Native Apps](#native-apps)).
 
 ### symbrain vs. symguard
 
@@ -256,6 +257,31 @@ go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
 full architectural boundary rules referenced above.
+
+## Native Apps
+
+Native SwiftUI apps for macOS and iOS are included in the repo. They use
+[`symaira-appkit`](https://github.com/danieljustus/symaira-appkit) for
+theme, CLI runner, and tool detection.
+
+### Build from source
+
+```bash
+brew install xcodegen   # if not already installed
+xcodegen generate
+xcodebuild build -project SymBrain.xcodeproj -scheme SymBrain -destination 'platform=macOS'
+```
+
+### Open in Xcode
+
+```bash
+xcodegen generate
+open SymBrain.xcodeproj
+```
+
+**SymBrain** (macOS) is a full dashboard: doctor, profiles, harnesses, audit
+log, and settings. **SymBrainMobile** (iOS) is a read-only companion showing
+the state-core overview, tool registry, and setup guide.
 
 ## License
 
