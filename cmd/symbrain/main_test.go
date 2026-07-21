@@ -50,8 +50,10 @@ func TestRun_HelpExitsOK(t *testing.T) {
 }
 
 func TestRun_StubSubcommandsExitOK(t *testing.T) {
+	// "init" is excluded here: it writes real files under $HOME and has its
+	// own sandboxed tests in cmd_init_test.go.
 	subcommands := []string{
-		"init", "doctor", "profile", "serve",
+		"doctor", "profile", "serve",
 		"install", "uninstall", "sync", "audit", "version",
 	}
 
