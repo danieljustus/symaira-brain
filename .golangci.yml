@@ -1,0 +1,12 @@
+version: "2"
+
+linters:
+  default: standard
+  disable:
+    - errcheck
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
