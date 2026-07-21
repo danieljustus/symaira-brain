@@ -51,9 +51,11 @@ func TestRun_HelpExitsOK(t *testing.T) {
 
 func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// "init" is excluded here: it writes real files under $HOME and has its
-	// own sandboxed tests in cmd_init_test.go.
+	// own sandboxed tests in cmd_init_test.go. "profile" is excluded too:
+	// it is no longer a stub (see cmd_profile.go / cmd_profile_test.go) and
+	// now correctly exits ExitNoInput when called with no subcommand.
 	subcommands := []string{
-		"doctor", "profile", "serve",
+		"doctor", "serve",
 		"install", "uninstall", "sync", "audit", "version",
 	}
 
