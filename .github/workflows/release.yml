@@ -1,24 +1,19 @@
-name: CI
+name: Release
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags:
+      - 'v*'
 
 permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  contents: write
+  id-token: write # required for Cosign keyless signing
 
 jobs:
-  # golangci-lint has a known incompatibility with Go 1.26 in this
-  # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
-  # until golangci-lint ships a Go-1.26-compatible release — re-enable a
-  # dedicated lint job at that point.
-  build-test:
+  # Re-run the same gates as CI at tag time: a tag push does not go through
+  # the branch-triggered ci.yml, so the release job must not skip them.
+  test:
+    name: Pre-release checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -43,18 +38,16 @@ jobs:
       - name: Vet
         run: go vet ./...
 
-      # symbrain ships CGO-free; verify that build configuration explicitly.
       - name: Build (CGO-free)
         run: go build ./...
         env:
           CGO_ENABLED: "0"
 
-      # -race requires cgo, so this step deliberately does not set
-      # CGO_ENABLED=0 (unlike the build step above).
       - name: Test (race detector)
         run: go test -race ./...
 
   govulncheck:
+    name: govulncheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -68,14 +61,11 @@ jobs:
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
-  # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
-  # broken release config is caught long before a real release tag is
-  # pushed. Runs the real build/archive/checksum/SBOM pipeline a release
-  # would (--snapshot skips publishing); signing is skipped here because it
-  # needs the tag-triggered release workflow's ambient OIDC token, which a
-  # plain push/PR run does not have.
-  goreleaser-snapshot:
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    needs: [test, govulncheck]
+    environment: release
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
@@ -87,12 +77,20 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: 'v2.4.3'
+
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
-      - name: goreleaser release --snapshot --clean
+      - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --snapshot --clean --skip=sign
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
