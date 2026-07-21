@@ -469,7 +469,7 @@ func TestRunDoctorChecks_FlagsMissingProfileBinding(t *testing.T) {
 	h := harnessByName(t, "gemini")
 	writeHarnessConfig(t, h, "ghost")
 
-	report := runDoctorChecks(context.Background())
+	report := runDoctorChecks(context.Background(), "claude-code")
 
 	var found *harnessCheck
 	for i := range report.Harnesses {
