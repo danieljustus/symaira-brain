@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "args": [
+        "--root",
+        "/tmp"
+      ],
+      "command": "mcp-filesystem"
+    }
+  }
+}
