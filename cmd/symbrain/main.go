@@ -12,6 +12,14 @@ import (
 	"github.com/danieljustus/symaira-corekit/logkit"
 )
 
+// version is set at build time via ldflags:
+//
+//	go build -ldflags "-X main.version=v0.1.0"
+//
+// Default value is "dev" for untagged builds. The Makefile injects the
+// result of `git describe` automatically.
+var version = "dev"
+
 func main() {
 	logkit.InitDefault("symbrain")
 	os.Exit(int(run(os.Args[1:], os.Stdout, os.Stderr)))
