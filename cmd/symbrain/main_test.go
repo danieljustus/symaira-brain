@@ -51,10 +51,12 @@ func TestRun_HelpExitsOK(t *testing.T) {
 
 func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// "init" is excluded here: it writes real files under $HOME and has its
-	// own sandboxed tests in cmd_init_test.go.
+	// own sandboxed tests in cmd_init_test.go. "install"/"uninstall" are
+	// excluded too: they are no longer stubs (see cmd_install_test.go /
+	// cmd_uninstall_test.go) and correctly require --harness.
 	subcommands := []string{
 		"doctor", "profile", "serve",
-		"install", "uninstall", "sync", "audit", "version",
+		"sync", "audit", "version",
 	}
 
 	for _, cmd := range subcommands {
@@ -64,6 +66,24 @@ func TestRun_StubSubcommandsExitOK(t *testing.T) {
 
 		if code != exitcodes.ExitOK {
 			t.Fatalf("%s: exit code = %d, want %d (stderr: %q)", cmd, code, exitcodes.ExitOK, stderr.String())
+		}
+	}
+}
+
+func TestRun_InstallUninstallDispatch_RequireHarnessFlag(t *testing.T) {
+	// Bare "install"/"uninstall" (no --harness) must reach the real
+	// implementation via run()'s dispatch and fail with a usage error, not
+	// silently succeed like the old "not yet implemented" stub did.
+	for _, cmd := range []string{"install", "uninstall"} {
+		var stdout, stderr bytes.Buffer
+
+		code := run([]string{cmd}, &stdout, &stderr)
+
+		if code != exitcodes.ExitNoInput {
+			t.Fatalf("%s: exit code = %d, want %d (stderr: %q)", cmd, code, exitcodes.ExitNoInput, stderr.String())
+		}
+		if !strings.Contains(stderr.String(), "--harness is required") {
+			t.Fatalf("%s: stderr = %q, want it to mention --harness is required", cmd, stderr.String())
 		}
 	}
 }
