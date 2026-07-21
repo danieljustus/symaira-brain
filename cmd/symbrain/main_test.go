@@ -51,12 +51,14 @@ func TestRun_HelpExitsOK(t *testing.T) {
 
 func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// "init" is excluded here: it writes real files under $HOME and has its
-	// own sandboxed tests in cmd_init_test.go. "install"/"uninstall" are
-	// excluded too: they are no longer stubs (see cmd_install_test.go /
-	// cmd_uninstall_test.go) and correctly require --harness.
+	// own sandboxed tests in cmd_init_test.go. "profile" is excluded too: it
+	// is no longer a stub (see cmd_profile.go / cmd_profile_test.go) and now
+	// correctly exits ExitNoInput when called with no subcommand.
+	// "install"/"uninstall" are excluded too: they are no longer stubs (see
+	// cmd_install_test.go / cmd_uninstall_test.go) and correctly require
+	// --harness.
 	subcommands := []string{
-		"doctor", "profile", "serve",
-		"sync", "audit", "version",
+		"doctor", "serve", "sync", "audit", "version",
 	}
 
 	for _, cmd := range subcommands {
