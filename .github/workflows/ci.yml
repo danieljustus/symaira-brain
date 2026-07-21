@@ -20,8 +20,6 @@ jobs:
   # dedicated lint job at that point.
   build-test:
     runs-on: ubuntu-latest
-    env:
-      CGO_ENABLED: "0"
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
@@ -45,16 +43,19 @@ jobs:
       - name: Vet
         run: go vet ./...
 
-      - name: Build
+      # symbrain ships CGO-free; verify that build configuration explicitly.
+      - name: Build (CGO-free)
         run: go build ./...
+        env:
+          CGO_ENABLED: "0"
 
+      # -race requires cgo, so this step deliberately does not set
+      # CGO_ENABLED=0 (unlike the build step above).
       - name: Test (race detector)
         run: go test -race ./...
 
   govulncheck:
     runs-on: ubuntu-latest
-    env:
-      CGO_ENABLED: "0"
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
 
