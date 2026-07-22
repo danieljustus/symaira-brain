@@ -4,3 +4,5 @@ docs/
 .worktrees/
 /dist/
 .claude/
+.omo/
+.github/audit/
