@@ -1,6 +1,7 @@
 docs/
 .DS_Store
 /symbrain
+coverage.out
 .worktrees/
 /dist/
 .claude/
