@@ -213,8 +213,7 @@ boundary table above. Concretely:
   timeout; a missing one is a `doctor` warning, never a hard failure.
 
 Found a security issue? Please report it privately rather than opening a
-public issue — see the repository's security advisories page, or contact
-the maintainer directly.
+public issue — see [SECURITY.md](.github/SECURITY.md) for how to report it.
 
 ## XDG paths
 
@@ -260,7 +259,10 @@ go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 ```
 
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
-full architectural boundary rules referenced above.
+full architectural boundary rules referenced above. See
+[CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process, and
+[CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community
+expectations.
 
 ## Native Apps
 
