@@ -209,8 +209,8 @@ func TestClient_Notify_BrokenPipe(t *testing.T) {
 
 func TestManagedServer_LastError_InitiallyNil(t *testing.T) {
 	ms := NewManagedServer(ServerConfig{
-		Name:       "test",
-		Logger:     testLogger(t),
+		Name:   "test",
+		Logger: testLogger(t),
 	})
 	if got := ms.LastError(); got != nil {
 		t.Errorf("LastError() = %v, want nil", got)
@@ -255,8 +255,8 @@ func TestManagedServer_LastError_AfterCrash(t *testing.T) {
 
 func TestManagedServer_Version_BeforeStart(t *testing.T) {
 	ms := NewManagedServer(ServerConfig{
-		Name:       "test",
-		Logger:     testLogger(t),
+		Name:   "test",
+		Logger: testLogger(t),
 	})
 	// Version() before any spawn should return "".
 	if got := ms.Version(); got != "" {
