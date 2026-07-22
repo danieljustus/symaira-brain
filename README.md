@@ -260,7 +260,9 @@ go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
 full architectural boundary rules referenced above. See
-[CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process.
+[CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process, and
+[CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community
+expectations.
 
 ## Native Apps
 
