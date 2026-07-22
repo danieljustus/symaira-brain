@@ -70,6 +70,10 @@ type ServerConfig struct {
 	BackoffBase time.Duration
 	// ShutdownTimeout bounds the graceful shutdown (SIGTERM then kill).
 	ShutdownTimeout time.Duration
+	// Env, if non-nil, replaces the child's environment entirely (as
+	// os/exec.Cmd.Env does). A nil Env inherits the parent's environment.
+	// Used for testing with fake MCP binaries.
+	Env []string
 	// Logger receives lifecycle events. Nil uses slog.Default().
 	Logger *slog.Logger
 }
@@ -187,6 +191,7 @@ func (ms *ManagedServer) spawnAndInit(ctx context.Context) (*Client, error) {
 
 	opts := Options{
 		Args:   ms.cfg.Args,
+		Env:    ms.cfg.Env,
 		Stderr: os.Stderr,
 	}
 	c, err := Spawn(path, opts)
