@@ -378,8 +378,8 @@ func TestServeIO_InitializeAndListTools(t *testing.T) {
 		"method":  "initialize",
 		"params": map[string]any{
 			"protocolVersion": "2024-11-05",
-			"capabilities":   map[string]any{},
-			"clientInfo":     map[string]any{"name": "test", "version": "0.0.1"},
+			"capabilities":    map[string]any{},
+			"clientInfo":      map[string]any{"name": "test", "version": "0.0.1"},
 		},
 	})
 	resp := readJSONResponse(t, cr)
@@ -437,8 +437,8 @@ func TestServeIO_ToolCall(t *testing.T) {
 		"jsonrpc": "2.0", "id": float64(1), "method": "initialize",
 		"params": map[string]any{
 			"protocolVersion": "2024-11-05",
-			"capabilities":   map[string]any{},
-			"clientInfo":     map[string]any{"name": "test", "version": "0.0.1"},
+			"capabilities":    map[string]any{},
+			"clientInfo":      map[string]any{"name": "test", "version": "0.0.1"},
 		},
 	})
 	readJSONResponse(t, cr)
