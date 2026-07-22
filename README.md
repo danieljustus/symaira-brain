@@ -213,8 +213,7 @@ boundary table above. Concretely:
   timeout; a missing one is a `doctor` warning, never a hard failure.
 
 Found a security issue? Please report it privately rather than opening a
-public issue — see the repository's security advisories page, or contact
-the maintainer directly.
+public issue — see [SECURITY.md](.github/SECURITY.md) for how to report it.
 
 ## XDG paths
 
