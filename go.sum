@@ -1,4 +1,4 @@
 github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
 github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/danieljustus/symaira-corekit v0.4.4 h1:Tc43/GhIsCj+/msUWwNolGNcwt1T0/Bu8MbwaH/f8xs=
-github.com/danieljustus/symaira-corekit v0.4.4/go.mod h1:45ccz9S14g649OsZyzfgLp77od3WImLRPHaeO414fng=
+github.com/danieljustus/symaira-corekit v0.5.0 h1:vO2tqactWJg21aGAvybdQQwNQmdUwVBFg+ybSmfTsV4=
+github.com/danieljustus/symaira-corekit v0.5.0/go.mod h1:45ccz9S14g649OsZyzfgLp77od3WImLRPHaeO414fng=
