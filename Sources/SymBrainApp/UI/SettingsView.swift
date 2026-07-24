@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import SymairaTheme
 import SymBrainCore
 
@@ -6,6 +7,7 @@ struct SettingsView: View {
     let client: SymBrainClient
 
     @AppStorage("binaryPathOverride") private var binaryPathOverride = ""
+    @State private var binaryPathChanged = false
     @StateObject private var vm: SettingsViewModel
 
     init(client: SymBrainClient) {
@@ -49,11 +51,28 @@ struct SettingsView: View {
 
             TextField("/opt/homebrew/bin/symbrain", text: $binaryPathOverride)
                 .textFieldStyle(.roundedBorder)
+                .onChange(of: binaryPathOverride) { _, _ in
+                    binaryPathChanged = true
+                }
 
             Button("Reset to Auto-Detect") {
                 binaryPathOverride = ""
             }
             .symairaButtonStyle(.secondary)
+
+            // Restart notice when path has been changed or override is active
+            if binaryPathChanged || !binaryPathOverride.isEmpty {
+                SymairaNotice(
+                    title: "Restart Required",
+                    message: "Binary path changes take effect after a full app restart. Click below to quit and relaunch the app.",
+                    tone: .warning
+                )
+
+                Button(action: quitAndRelaunch) {
+                    Label("Quit & Relaunch", systemImage: "restart.circle")
+                }
+                .symairaButtonStyle(.primary)
+            }
         }
         .padding(SymairaSpacing.xLarge)
         .glassCard()
@@ -67,7 +86,17 @@ struct SettingsView: View {
                 .font(.headline)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
-            if let version = vm.versionInfo {
+            if let error = vm.errorMessage {
+                SymairaNotice(
+                    title: "Could Not Load Version",
+                    message: error,
+                    tone: .critical
+                )
+                Button(action: { Task { await vm.refresh() } }) {
+                    Label("Retry", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.secondary)
+            } else if let version = vm.versionInfo {
                 Grid(alignment: .leading, horizontalSpacing: SymairaSpacing.xLarge, verticalSpacing: SymairaSpacing.small) {
                     GridRow {
                         Text("Version").foregroundStyle(SymairaTheme.textSecondary)
@@ -139,5 +168,16 @@ struct SettingsView: View {
         }
         .padding(SymairaSpacing.xLarge)
         .glassCard()
+    }
+
+    // MARK: - Helpers
+
+    private func quitAndRelaunch() {
+        let bundleURL = Bundle.main.bundleURL
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = true
+        NSWorkspace.shared.open(bundleURL, configuration: config) { _, _ in
+            NSApplication.shared.terminate(nil)
+        }
     }
 }

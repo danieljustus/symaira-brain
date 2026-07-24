@@ -35,6 +35,10 @@ struct ContentView: View {
                         Image(systemName: mode.systemImage)
                             .frame(width: 20)
                         Text(mode.rawValue)
+                        if mode == .sync {
+                            Spacer()
+                            SymairaBadge("Planned", tone: .neutral)
+                        }
                     }
                 }
             }
