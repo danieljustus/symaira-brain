@@ -147,6 +147,7 @@ struct ProfilesView: View {
                             FlowLayout(spacing: SymairaSpacing.xSmall) {
                                 ForEach(policy.exposed, id: \.self) { tool in
                                     SymairaBadge(tool, tone: .positive)
+                                        .help(toolDescription(tool))
                                 }
                             }
                         }
@@ -157,6 +158,7 @@ struct ProfilesView: View {
                             FlowLayout(spacing: SymairaSpacing.xSmall) {
                                 ForEach(policy.hidden, id: \.self) { tool in
                                     SymairaBadge(tool, tone: .critical)
+                                        .help(toolDescription(tool))
                                 }
                             }
                         }
@@ -248,6 +250,28 @@ struct NewProfileSheet: View {
             errorMessage = error.localizedDescription
             return false
         }
+    }
+}
+
+// MARK: - Tool Descriptions
+
+/// Maps raw MCP tool identifiers to user-friendly one-line descriptions.
+private func toolDescription(_ tool: String) -> String {
+    switch tool {
+    case "symvault": return "Manage credentials and secrets"
+    case "symmemory": return "Persistent semantic memory and entity graph"
+    case "symskills": return "Skill catalog and installation"
+    case "symseek": return "Full-text search over indexed documents"
+    case "symfetch": return "Web page fetching and content extraction"
+    case "symscope": return "Local system inventory (ports, MCP servers, containers)"
+    case "symfritz": return "AVM FRITZ!Box router and smart-home control"
+    case "symprint": return "Markdown-to-PDF document generation"
+    case "symguard": return "Security gate for call-time policy enforcement"
+    case "symbrain": return "Agent-context multiplexer (this tool)"
+    case "symdesk": return "Markdown-vault workspace manager"
+    case "symrelate": return "Contact and relationship manager"
+    case "symmeet": return "Meeting artifact generation"
+    default: return "\(tool) — MCP server"
     }
 }
 
