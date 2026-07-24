@@ -197,9 +197,11 @@ jobs:
 
       - name: Set version in Info.plist
         run: |
-          plutil -replace CFBundleShortVersionString "${{ steps.version.outputs.version }}" Sources/SymBrainApp/Info.plist
-          plutil -replace CFBundleVersion "${{ github.run_number }}" Sources/SymBrainApp/Info.plist
-          echo "Updated version to ${{ steps.version.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          RUN_NUM="${{ github.run_number }}"
+          sed -i '' 's|<string>\$(MARKETING_VERSION)</string>|<string>'"${VERSION}"'</string>|' Sources/SymBrainApp/Info.plist
+          sed -i '' 's|<string>\$(CURRENT_PROJECT_VERSION)</string>|<string>'"${RUN_NUM}"'</string>|' Sources/SymBrainApp/Info.plist
+          echo "Updated version to ${VERSION}"
 
       - name: Generate Xcode project
         run: xcodegen generate
