@@ -2,6 +2,7 @@
 
 #if os(macOS)
 import Foundation
+import SymairaCLIRunner
 import SymairaToolKit
 import SymairaUpdateCheck
 
@@ -13,6 +14,8 @@ public final class DashboardViewModel: ObservableObject {
     @Published public var doctorReport: DoctorReport?
     @Published public var isLoading = false
     @Published public var errorMessage: String?
+    @Published public var errorDetail: String?
+    @Published public var isBinaryNotFound = false
 
     private let client: SymBrainClient
 
@@ -23,6 +26,8 @@ public final class DashboardViewModel: ObservableObject {
     public func refresh() async {
         isLoading = true
         errorMessage = nil
+        errorDetail = nil
+        isBinaryNotFound = false
         defer { isLoading = false }
 
         do {
@@ -31,7 +36,13 @@ public final class DashboardViewModel: ObservableObject {
             versionInfo = try await v
             doctorReport = try await d
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
+            if let cliError = error as? CLIRunnerError,
+               case .binaryNotFound = cliError {
+                isBinaryNotFound = true
+            }
         }
     }
 }
@@ -189,6 +200,7 @@ public final class SettingsViewModel: ObservableObject {
     @Published public var versionInfo: VersionInfo?
     @Published public var updateInfo: String?
     @Published public var isLoading = false
+    @Published public var errorMessage: String?
 
     private let client: SymBrainClient
 
@@ -198,9 +210,15 @@ public final class SettingsViewModel: ObservableObject {
 
     public func refresh() async {
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
 
-        versionInfo = try? await client.version()
+        do {
+            versionInfo = try await client.version()
+        } catch {
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+        }
     }
 
     public func checkForUpdate() async {
