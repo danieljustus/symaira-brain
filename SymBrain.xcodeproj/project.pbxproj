@@ -10,6 +10,7 @@
 		05E20C88D508F172F8EA4DDD /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = E2F3DE448537FE8B9962E1BA /* SymairaTheme */; };
 		0C920505646C039CBBD09B89 /* SymBrainMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */; };
 		1876D0749F97752B05EED258 /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 22DDC1B7D47B712C3444DF4D /* SymairaCLIRunner */; };
+		20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */; };
 		36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC6F1658F16C48F507A56 /* AuditLog.swift */; };
 		39FF1DA3FAAACE4FF6079632 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 607EFF1004A503E966196E05 /* SymairaUpdateCheck */; };
 		3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDFA6201EBE1C20A656FE31 /* Models.swift */; };
@@ -62,7 +63,7 @@
 		37D52B395108AFAD4ACBF29E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6BED06A4CD35FB3CFAB1FB43 /* symaira-appkit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "symaira-appkit"; path = "../symaira-appkit"; sourceTree = SOURCE_ROOT; };
+		6BED06A4CD35FB3CFAB1FB43 /* symaira-appkit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "symaira-appkit"; path = "../../../symaira-appkit"; sourceTree = SOURCE_ROOT; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
 		8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainMobileApp.swift; sourceTree = "<group>"; };
 		8B0DC6F1658F16C48F507A56 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
@@ -74,6 +75,7 @@
 		D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainApp.swift; sourceTree = "<group>"; };
 		D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileRootView.swift; sourceTree = "<group>"; };
+		DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatter.swift; sourceTree = "<group>"; };
 		EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncView.swift; sourceTree = "<group>"; };
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB797B558BCC85838B09E52D /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				8B0DC6F1658F16C48F507A56 /* AuditLog.swift */,
+				DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */,
 				2DDFA6201EBE1C20A656FE31 /* Models.swift */,
 				361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */,
 				FB797B558BCC85838B09E52D /* ViewModels.swift */,
@@ -330,7 +333,7 @@
 			mainGroup = 53110CFA69863692BA21C600;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E7929C564135D92C1A579CF2 /* XCLocalSwiftPackageReference "../symaira-appkit" */,
+				D2BB75B9775584A67267A91E /* XCLocalSwiftPackageReference "/Users/daniel/Dev/Symaira Dev/symaira-appkit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 93F8F0E856E9268B2B5206BD /* Products */;
@@ -402,6 +405,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */,
+				20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */,
 				3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */,
 				75B074873331D65288CB0625 /* SymBrainClient.swift in Sources */,
 				76E8895721D92EA46A646520 /* ViewModels.swift in Sources */,
@@ -631,7 +635,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -678,7 +682,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -702,7 +706,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -727,7 +731,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -790,9 +794,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E7929C564135D92C1A579CF2 /* XCLocalSwiftPackageReference "../symaira-appkit" */ = {
+		D2BB75B9775584A67267A91E /* XCLocalSwiftPackageReference "../../../symaira-appkit" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = "../symaira-appkit";
+			relativePath = "../../../symaira-appkit";
 		};
 /* End XCLocalSwiftPackageReference section */
 

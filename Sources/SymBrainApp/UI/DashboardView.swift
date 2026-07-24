@@ -19,6 +19,8 @@ struct DashboardView: View {
 
                 if vm.isLoading {
                     SymairaLoadingState("Running doctor...")
+                } else if vm.isBinaryNotFound {
+                    binaryNotFoundSection
                 } else if let error = vm.errorMessage {
                     SymairaNotice(
                         title: "Error",
@@ -58,6 +60,92 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: - Binary Not Found (First-Run Help)
+
+    private var binaryNotFoundSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            SymairaNotice(
+                title: "SymBrain CLI Not Found",
+                message: vm.errorMessage ?? "The symbrain CLI binary could not be found. Install it and try again.",
+                tone: .critical
+            )
+
+            VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                Text("Install via Homebrew")
+                    .font(.headline)
+                    .foregroundStyle(SymairaTheme.goldPrimary)
+
+                HStack(spacing: SymairaSpacing.small) {
+                    Text("brew install danieljustus/tap/symbrain")
+                        .font(.caption.monospaced())
+                        .foregroundStyle(SymairaTheme.textPrimary)
+                        .padding(SymairaSpacing.small)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+
+                    Button(action: {
+                        #if os(macOS)
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString("brew install danieljustus/tap/symbrain", forType: .string)
+                        #endif
+                    }) {
+                        Label("Copy", systemImage: "doc.on.doc")
+                    }
+                    .symairaButtonStyle(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                    Text("Quick Start")
+                        .font(.headline)
+                        .foregroundStyle(SymairaTheme.goldPrimary)
+
+                    installStep(1, "Install the CLI", "brew install danieljustus/tap/symbrain")
+                    installStep(2, "Initialize", "symbrain init")
+                    installStep(3, "Install per Harness", "symbrain install --harness claude --profile personal")
+                    installStep(4, "Check Health", "symbrain doctor")
+                }
+            }
+            .padding(SymairaSpacing.medium)
+            .glassCard()
+
+            HStack(spacing: SymairaSpacing.medium) {
+                Button(action: { Task { await vm.refresh() } }) {
+                    Label("Retry", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.primary)
+            }
+
+            Text("To configure a custom binary path, select Settings in the sidebar.")
+                .font(.caption)
+                .foregroundStyle(SymairaTheme.textSecondary)
+
+            if let detail = vm.errorDetail {
+                SymairaNotice(
+                    title: "Details",
+                    message: detail,
+                    tone: .neutral
+                )
+            }
+        }
+    }
+
+    private func installStep(_ number: Int, _ title: String, _ command: String) -> some View {
+        HStack(spacing: SymairaSpacing.small) {
+            Text("\(number)")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.black)
+                .frame(width: 22, height: 22)
+                .background(SymairaTheme.goldPrimary, in: Circle())
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SymairaTheme.textPrimary)
+            Text(command)
+                .font(.caption2.monospaced())
+                .foregroundStyle(SymairaTheme.textSecondary)
+        }
+    }
+
     // MARK: - Doctor Report
 
     private func doctorSection(_ report: DoctorReport) -> some View {
@@ -67,9 +155,9 @@ struct DashboardView: View {
                 .font(.headline)
                 .foregroundStyle(SymairaTheme.goldPrimary)
             HStack(spacing: SymairaSpacing.medium) {
-                dirCard("Config", status: report.configDir)
-                dirCard("Data", status: report.dataDir)
-                dirCard("Cache", status: report.cacheDir)
+                dirCard("Config", status: report.configDir, purpose: "Stores profile configuration and settings")
+                dirCard("Data", status: report.dataDir, purpose: "Stores persistent application data and audit logs")
+                dirCard("Cache", status: report.cacheDir, purpose: "Stores temporary cached data")
             }
 
             // Config
@@ -112,7 +200,7 @@ struct DashboardView: View {
 
     // MARK: - Cards
 
-    private func dirCard(_ title: String, status: DirStatus) -> some View {
+    private func dirCard(_ title: String, status: DirStatus, purpose: String) -> some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
             Text(title)
                 .font(.caption.weight(.semibold))
@@ -122,9 +210,29 @@ struct DashboardView: View {
                 .font(.caption2)
                 .foregroundStyle(SymairaTheme.textMuted)
                 .lineLimit(1)
+
+            if !status.exists {
+                Text(purpose)
+                    .font(.caption2)
+                    .foregroundStyle(SymairaTheme.textMuted)
+                    .padding(.top, SymairaSpacing.xSmall)
+
+                Button(action: { createDirectory(status.path) }) {
+                    Label("Create Directory", systemImage: "folder.badge.plus")
+                        .font(.caption)
+                }
+                .symairaButtonStyle(.secondary)
+                .padding(.top, SymairaSpacing.xSmall)
+            }
         }
         .padding(SymairaSpacing.medium)
         .glassCard()
+    }
+
+    private func createDirectory(_ path: String) {
+        let url = URL(fileURLWithPath: path)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        Task { await vm.refresh() }
     }
 
     private func configCard(_ config: ConfigStatus) -> some View {
@@ -134,16 +242,31 @@ struct DashboardView: View {
                     config.exists ? "Found" : "Not Found",
                     tone: config.exists ? .positive : .neutral
                 )
-                SymairaBadge(
-                    config.parsed ? "Parsed" : "Parse Error",
-                    tone: config.parsed ? .positive : .critical
-                )
+                // Only show parsed/parse-error badge when the file actually exists
+                if config.exists {
+                    SymairaBadge(
+                        config.parsed ? "Parsed" : "Parse Error",
+                        tone: config.parsed ? .positive : .critical
+                    )
+                }
             }
             Spacer()
-            Text(config.path)
-                .font(.caption2)
-                .foregroundStyle(SymairaTheme.textMuted)
-                .lineLimit(1)
+            VStack(alignment: .trailing, spacing: SymairaSpacing.xSmall) {
+                Text(config.path)
+                    .font(.caption2)
+                    .foregroundStyle(SymairaTheme.textMuted)
+                    .lineLimit(1)
+                if !config.exists {
+                    Text("File does not exist yet. Run symbrain init to create it.")
+                        .font(.caption2)
+                        .foregroundStyle(SymairaTheme.textMuted)
+                } else if let error = config.error {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(SymairaTheme.critical)
+                        .lineLimit(2)
+                }
+            }
         }
         .padding(SymairaSpacing.medium)
         .glassCard()
