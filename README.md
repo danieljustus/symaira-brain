@@ -14,7 +14,7 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.1.0` released, in active development. The
+> **Status:** `v0.2.1` released, in active development. The
 > command reference below states clearly which subcommands are implemented
 > today versus planned for a later milestone. Interfaces may still change
 > before `v1.0.0`.
@@ -30,7 +30,7 @@ each through its own profile, each seeing only what that profile exposes.
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
-- **Not a GUI**, at least not in `v0.1.0` (though native SwiftUI apps now
+- **Not a GUI**, at least not in `v0.2.1` (though native SwiftUI apps now
   exist in the repo — see [Native Apps](#native-apps)).
 
 ### symbrain vs. symguard
