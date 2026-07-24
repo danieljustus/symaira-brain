@@ -210,4 +210,3 @@ func TestDefaultRunner(t *testing.T) {
 		t.Errorf("DefaultRunner.Run failed or empty output: err=%v, out=%s", err, string(out))
 	}
 }
-

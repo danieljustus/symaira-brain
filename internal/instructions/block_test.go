@@ -305,4 +305,3 @@ func TestNewSource(t *testing.T) {
 		t.Errorf("ProjectPath = %q, want %q", sProj.ProjectPath, wantProjPath)
 	}
 }
-
