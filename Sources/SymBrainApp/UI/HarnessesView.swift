@@ -11,6 +11,11 @@ struct HarnessesView: View {
     @State private var selectedProfile: String?
     @State private var isInstallAction = true
 
+    // #75: Install-overwrite confirmation
+    @State private var showInstallConfirmation = false
+    @State private var pendingInstallHarness: String?
+    @State private var pendingInstallProfile: String?
+
     private let allHarnesses = ["claude", "claude-desktop", "cursor", "opencode", "codex", "gemini"]
 
     init(client: SymBrainClient) {
@@ -43,8 +48,33 @@ struct HarnessesView: View {
                 harness: selectedHarness ?? "",
                 profile: selectedProfile ?? "",
                 isInstall: isInstallAction,
-                client: client
+                client: client,
+                profiles: vm.profiles
             )
+        }
+        // #75: Confirmation before overwriting an installed harness config
+        .alert("Install Harness", isPresented: $showInstallConfirmation) {
+            Button("Cancel", role: .cancel) {
+                pendingInstallHarness = nil
+                pendingInstallProfile = nil
+            }
+            Button("Install", role: .destructive) {
+                if let h = pendingInstallHarness, let p = pendingInstallProfile {
+                    selectedHarness = h
+                    selectedProfile = p
+                    isInstallAction = true
+                    Task { await vm.install(harness: h, profile: p, dryRun: false) }
+                }
+                pendingInstallHarness = nil
+                pendingInstallProfile = nil
+            }
+        } message: {
+            if let h = pendingInstallHarness,
+               let p = pendingInstallProfile,
+               let status = vm.harnesses.first(where: { $0.name == h })
+            {
+                Text("Installing profile \"\(p)\" to harness \"\(h)\" will overwrite the existing configuration at:\n\(status.configPath)\n\nThis action cannot be undone.")
+            }
         }
     }
 
@@ -94,14 +124,20 @@ struct HarnessesView: View {
 
             Spacer()
 
-            // Install button
+            // #75: Install menu — confirm overwrite when already installed
             Menu {
                 ForEach(vm.profiles, id: \.name) { profile in
                     Button("\(profile.name)") {
-                        selectedHarness = name
-                        selectedProfile = profile.name
-                        isInstallAction = true
-                        Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
+                        if status?.installed == true {
+                            pendingInstallHarness = name
+                            pendingInstallProfile = profile.name
+                            showInstallConfirmation = true
+                        } else {
+                            selectedHarness = name
+                            selectedProfile = profile.name
+                            isInstallAction = true
+                            Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
+                        }
                     }
                 }
             } label: {
@@ -111,9 +147,10 @@ struct HarnessesView: View {
             .menuStyle(.borderlessButton)
             .frame(minWidth: 90)
 
-            // Dry-run preview
+            // Dry-run preview for install
             Button(action: {
                 selectedHarness = name
+                selectedProfile = nil  // #73: Clear stale profile so the picker shows
                 isInstallAction = true
                 showDryRunSheet = true
             }) {
@@ -123,8 +160,20 @@ struct HarnessesView: View {
             .buttonStyle(.plain)
             .foregroundStyle(SymairaTheme.textSecondary)
 
-            // Uninstall button
+            // Uninstall controls (only when installed)
             if status?.installed == true {
+                // #74: Dry Run for Uninstall
+                Button(action: {
+                    selectedHarness = name
+                    isInstallAction = false
+                    showDryRunSheet = true
+                }) {
+                    Label("Dry Run", systemImage: "doc.text.magnifyingglass")
+                        .font(.caption)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(SymairaTheme.textSecondary)
+
                 Button(action: {
                     Task { await vm.uninstall(harness: name, dryRun: false) }
                 }) {
@@ -144,13 +193,28 @@ struct HarnessesView: View {
 
 struct DryRunSheet: View {
     let harness: String
-    let profile: String
+    let initialProfile: String
     let isInstall: Bool
     let client: SymBrainClient
+    let profiles: [ProfileSummary]
 
     @Environment(\.dismiss) private var dismiss
     @State private var output: String = ""
-    @State private var isLoading = true
+    @State private var isLoading = false
+    @State private var hasRun = false
+    @State private var selectedProfile: String
+    @State private var errorMessage: String?
+
+    init(harness: String, profile: String, isInstall: Bool, client: SymBrainClient, profiles: [ProfileSummary]) {
+        self.harness = harness
+        self.initialProfile = profile
+        self.isInstall = isInstall
+        self.client = client
+        self.profiles = profiles
+        // #73: For install, default to first available profile if none specified
+        let initial = profile.isEmpty ? (profiles.first?.name ?? "") : profile
+        _selectedProfile = State(initialValue: initial)
+    }
 
     var body: some View {
         VStack(spacing: SymairaSpacing.xLarge) {
@@ -162,9 +226,50 @@ struct DryRunSheet: View {
                 .font(.subheadline)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
-            if isLoading {
+            if isInstall && !hasRun && !isLoading {
+                // #73: Profile picker for install dry run
+                VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+                    Text("Profile")
+                        .font(.headline)
+                        .foregroundStyle(SymairaTheme.textSecondary)
+
+                    if profiles.isEmpty {
+                        Text("No profiles available. Create one in the Profiles tab.")
+                            .font(.caption)
+                            .foregroundStyle(SymairaTheme.textMuted)
+                    } else {
+                        Picker("Profile", selection: $selectedProfile) {
+                            ForEach(profiles, id: \.name) { p in
+                                Text(p.name).tag(p.name)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                    }
+                }
+
+                if let error = errorMessage {
+                    SymairaNotice(title: "Error", message: error, tone: .critical)
+                }
+
+                HStack {
+                    Button("Cancel") { dismiss() }
+                        .symairaButtonStyle(.secondary)
+                    Spacer()
+                    Button("Run Dry Run") {
+                        guard !selectedProfile.isEmpty else {
+                            errorMessage = "Please select a profile."
+                            return
+                        }
+                        isLoading = true
+                        Task { await runDryRun() }
+                    }
+                    .symairaButtonStyle(.primary)
+                    .disabled(profiles.isEmpty || selectedProfile.isEmpty)
+                }
+            } else if isLoading {
                 SymairaLoadingState("Running dry run...")
-            } else {
+            } else if hasRun {
                 ScrollView {
                     Text(output)
                         .font(.system(.body, design: .monospaced))
@@ -173,24 +278,33 @@ struct DryRunSheet: View {
                         .padding(SymairaSpacing.medium)
                         .glassCard()
                 }
-            }
 
-            Button("Done") { dismiss() }
-                .symairaButtonStyle(.secondary)
+                Button("Done") { dismiss() }
+                    .symairaButtonStyle(.secondary)
+            }
         }
         .padding(SymairaSpacing.xLarge)
         .frame(width: 560, height: 420)
         .task {
-            do {
-                if isInstall {
-                    output = try await client.install(harness: harness, profile: profile, dryRun: true)
-                } else {
-                    output = try await client.uninstall(harness: harness, dryRun: true)
-                }
-            } catch {
-                output = "Error: \(error.localizedDescription)"
+            // #74: For uninstall, run immediately without profile picker
+            if !isInstall {
+                isLoading = true
+                await runDryRun()
             }
-            isLoading = false
         }
+    }
+
+    private func runDryRun() async {
+        do {
+            if isInstall {
+                output = try await client.install(harness: harness, profile: selectedProfile, dryRun: true)
+            } else {
+                output = try await client.uninstall(harness: harness, dryRun: true)
+            }
+        } catch {
+            output = "Error: \(error.localizedDescription)"
+        }
+        isLoading = false
+        hasRun = true
     }
 }
