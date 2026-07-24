@@ -125,7 +125,7 @@ jobs:
 
   macos-gui-dmg:
     name: macOS GUI DMG
-    runs-on: macos-15
+    runs-on: macos-14
     environment: release
     needs: [test, govulncheck]
     steps:
