@@ -190,7 +190,7 @@ jobs:
 
       - name: Patch project.yml for CI (replace local path dependency with pinned URL)
         run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\n    exactVersion: 0.2.0|" project.yml
+          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\n    exactVersion: 0.2.2|" project.yml
 
       - name: Install XcodeGen
         run: brew install xcodegen 2>/dev/null || brew upgrade xcodegen 2>/dev/null || true
