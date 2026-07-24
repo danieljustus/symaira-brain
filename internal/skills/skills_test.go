@@ -191,3 +191,22 @@ func runScript(script string, args ...string) ([]byte, error) {
 	cmd := exec.Command(script, args...)
 	return cmd.CombinedOutput()
 }
+
+func TestDefaultRunner(t *testing.T) {
+	r := DefaultRunner()
+	if r == nil {
+		t.Fatal("expected non-nil Runner")
+	}
+	if r.LookPath == nil {
+		t.Error("expected non-nil LookPath")
+	}
+	if r.Run == nil {
+		t.Error("expected non-nil Run")
+	}
+
+	_, _ = r.LookPath("go")
+	out, err := r.Run("go", "version")
+	if err != nil || len(out) == 0 {
+		t.Errorf("DefaultRunner.Run failed or empty output: err=%v, out=%s", err, string(out))
+	}
+}
