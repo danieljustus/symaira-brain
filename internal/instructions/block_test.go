@@ -288,3 +288,20 @@ func TestSource_Content_ProjectOnly(t *testing.T) {
 		t.Errorf("Content() = %q, want %q", got, want)
 	}
 }
+
+func TestNewSource(t *testing.T) {
+	sNoProj := NewSource("")
+	if sNoProj.GlobalPath == "" {
+		t.Error("expected non-empty GlobalPath")
+	}
+	if sNoProj.ProjectPath != "" {
+		t.Errorf("expected empty ProjectPath, got %q", sNoProj.ProjectPath)
+	}
+
+	projDir := filepath.Join("some", "project")
+	sProj := NewSource(projDir)
+	wantProjPath := filepath.Join(projDir, ProjectDirName, ProjectFileName)
+	if sProj.ProjectPath != wantProjPath {
+		t.Errorf("ProjectPath = %q, want %q", sProj.ProjectPath, wantProjPath)
+	}
+}
