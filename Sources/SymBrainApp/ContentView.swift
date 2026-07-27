@@ -30,21 +30,19 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             List(DisplayMode.allCases, id: \.self, selection: $displayMode) { mode in
-                Button(action: { displayMode = mode }) {
-                    HStack {
-                        Image(systemName: mode.systemImage)
-                            .frame(width: 20)
-                        Text(mode.rawValue)
-                        if mode == .sync {
-                            Spacer()
-                            SymairaBadge("Planned", tone: .neutral)
-                        }
+                HStack {
+                    Image(systemName: mode.systemImage)
+                        .frame(width: 20)
+                    Text(mode.rawValue)
+                    if mode == .sync {
+                        Spacer()
+                        SymairaBadge("Planned", tone: .neutral)
                     }
                 }
+                .tag(mode)
             }
             .scrollContentBackground(.hidden)
             .listStyle(.sidebar)
-            .buttonStyle(.plain)
             .frame(minWidth: 220, idealWidth: 240)
             .background(.clear)
             .navigationTitle("SymBrain")
