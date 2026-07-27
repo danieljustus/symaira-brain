@@ -125,7 +125,7 @@ jobs:
 
   macos-gui-dmg:
     name: macOS GUI DMG
-    runs-on: macos-14
+    runs-on: macos-15
     environment: release
     needs: [test, govulncheck]
     steps:
@@ -163,11 +163,13 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
-          if [ -z "${CERTIFICATE_P12:-}" ]; then
-            echo "::warning::CERTIFICATE_P12 secret is not set. Building unsigned."
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          for secret in CERTIFICATE_P12 CERTIFICATE_PASSWORD KEYCHAIN_PASSWORD; do
+            if [ -z "${!secret:-}" ]; then
+              echo "::error::$secret must be configured in the release environment."
+              exit 1
+            fi
+          done
+
           echo "signed=true" >> "$GITHUB_OUTPUT"
           KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -190,7 +192,7 @@ jobs:
 
       - name: Patch project.yml for CI (replace local path dependency with pinned URL)
         run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\n    exactVersion: 0.2.2|" project.yml
+          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\n    exactVersion: 0.5.0|" project.yml
 
       - name: Install XcodeGen
         run: brew install xcodegen 2>/dev/null || brew upgrade xcodegen 2>/dev/null || true
@@ -208,23 +210,15 @@ jobs:
 
       - name: Build and sign GUI app
         run: |
-          if [ "${{ steps.signing.outputs.signed }}" = "true" ]; then
-            xcodebuild -project SymBrain.xcodeproj \
-              -scheme SymBrain \
-              -configuration Release \
-              -derivedDataPath build \
-              CODE_SIGN_STYLE=Manual \
-              CODE_SIGN_IDENTITY="$CODESIGN_IDENTITY" \
-              DEVELOPMENT_TEAM="$TEAM_ID" \
-              CODE_SIGNING_ALLOWED=YES \
-              CODE_SIGNING_REQUIRED=YES
-          else
-            echo "::warning::Building GUI without code signing"
-            xcodebuild -project SymBrain.xcodeproj \
-              -scheme SymBrain \
-              -configuration Release \
-              -derivedDataPath build
-          fi
+          xcodebuild -project SymBrain.xcodeproj \
+            -scheme SymBrain \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="$CODESIGN_IDENTITY" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGNING_REQUIRED=YES
           APP_BUNDLE=$(find build -name 'SymBrain.app' -type d -maxdepth 4 | head -1)
           if [ -z "$APP_BUNDLE" ]; then
             echo "::error::App bundle not found after build"
@@ -233,30 +227,36 @@ jobs:
           echo "APP_BUNDLE=$APP_BUNDLE" >> "$GITHUB_ENV"
 
       - name: Prepare app bundle for notarization
-        if: steps.signing.outputs.signed == 'true'
         env:
           NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
-          NOTARY_API_ISSUER: ${{ secrets.NOTARY_API_ISSUER }}
           NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
         run: |
+          set -euo pipefail
+          for secret in NOTARY_API_KEY NOTARY_API_KEY_ID NOTARY_API_ISSUER_ID; do
+            if [ -z "${!secret:-}" ]; then
+              echo "::error::$secret must be configured in the release environment."
+              exit 1
+            fi
+          done
+
+          API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
+
           APP="${{ env.APP_BUNDLE }}"
           if [ -z "$APP" ] || [ ! -d "$APP" ]; then
             echo "::error::App bundle not found"
             exit 1
           fi
           ZIP_PATH="$RUNNER_TEMP/SymBrain.zip"
-          ditto -c -k --keepParent "$APP" "$ZIP_PATH"
-          if [ -n "${NOTARY_API_KEY:-}" ]; then
-            xcrun notarytool submit "$ZIP_PATH" \
-              --apple-id "${NOTARY_API_KEY_ID}" \
-              --team-id "${NOTARY_API_ISSUER}" \
-              --password "${NOTARY_API_KEY}" \
-              --wait
-            xcrun stapler staple "$APP"
-            echo "Notarization complete"
-          else
-            echo "::warning::NOTARY_API_KEY not set. Skipping notarization."
-          fi
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP_PATH"
+          xcrun notarytool submit "$ZIP_PATH" \
+            -d "$NOTARY_API_KEY_ID" \
+            -i "$NOTARY_API_ISSUER_ID" \
+            -k "$API_KEY_PATH" \
+            --wait
+          xcrun stapler staple "$APP"
+          echo "Notarization complete"
 
       - name: Create DMG
         id: dmg
@@ -277,6 +277,24 @@ jobs:
             "$DMG_PATH"
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
           echo "dmg_name=SymBrain-$VERSION.dmg" >> "$GITHUB_OUTPUT"
+
+      - name: Notarize and staple DMG
+        env:
+          NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          DMG_PATH="${{ steps.dmg.outputs.dmg_path }}"
+          API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
+          xcrun notarytool submit "$DMG_PATH" \
+            -d "$NOTARY_API_KEY_ID" \
+            -i "$NOTARY_API_ISSUER_ID" \
+            -k "$API_KEY_PATH" \
+            --wait
+          xcrun stapler staple "$DMG_PATH"
+          echo "DMG notarization complete"
 
       - name: Upload GUI app to release
         env:
