@@ -6,15 +6,14 @@ struct HarnessesView: View {
     let client: SymBrainClient
 
     @StateObject private var vm: HarnessesViewModel
-    @State private var showDryRunSheet = false
-    @State private var selectedHarness: String?
-    @State private var selectedProfile: String?
-    @State private var isInstallAction = true
+    // #83: Sheets are presented via .sheet(item:) with a request value captured
+    // at the exact moment of the button tap. With .sheet(isPresented:) SwiftUI
+    // evaluates the content closure before the @State update from the tap is
+    // applied, so the first sheet of a session was built with an empty harness.
+    @State private var dryRunRequest: DryRunRequest?
 
     // #75: Install-overwrite confirmation
-    @State private var showInstallConfirmation = false
-    @State private var pendingInstallHarness: String?
-    @State private var pendingInstallProfile: String?
+    @State private var pendingInstall: InstallConfirmation?
 
     private let allHarnesses = ["claude", "claude-desktop", "cursor", "opencode", "codex", "gemini"]
 
@@ -43,37 +42,36 @@ struct HarnessesView: View {
             .padding(SymairaSpacing.xLarge)
         }
         .task { await vm.refresh() }
-        .sheet(isPresented: $showDryRunSheet) {
+        .sheet(item: $dryRunRequest) { request in
             DryRunSheet(
-                harness: selectedHarness ?? "",
-                profile: selectedProfile ?? "",
-                isInstall: isInstallAction,
+                harness: request.harness,
+                profile: request.profile ?? "",
+                isInstall: request.isInstall,
                 client: client,
                 profiles: vm.profiles
             )
         }
-        // #75: Confirmation before overwriting an installed harness config
-        .alert("Install Harness", isPresented: $showInstallConfirmation) {
+        // #75: Confirmation before overwriting an installed harness config.
+        // The request value is passed via `presenting:` so the alert always
+        // reads the harness/profile captured at the moment of the menu tap.
+        .alert(
+            "Install Harness",
+            isPresented: Binding(
+                get: { pendingInstall != nil },
+                set: { if !$0 { pendingInstall = nil } }
+            ),
+            presenting: pendingInstall
+        ) { install in
             Button("Cancel", role: .cancel) {
-                pendingInstallHarness = nil
-                pendingInstallProfile = nil
+                pendingInstall = nil
             }
             Button("Install", role: .destructive) {
-                if let h = pendingInstallHarness, let p = pendingInstallProfile {
-                    selectedHarness = h
-                    selectedProfile = p
-                    isInstallAction = true
-                    Task { await vm.install(harness: h, profile: p, dryRun: false) }
-                }
-                pendingInstallHarness = nil
-                pendingInstallProfile = nil
+                Task { await vm.install(harness: install.harness, profile: install.profile, dryRun: false) }
+                pendingInstall = nil
             }
-        } message: {
-            if let h = pendingInstallHarness,
-               let p = pendingInstallProfile,
-               let status = vm.harnesses.first(where: { $0.name == h })
-            {
-                Text("Installing profile \"\(p)\" to harness \"\(h)\" will overwrite the existing configuration at:\n\(status.configPath)\n\nThis action cannot be undone.")
+        } message: { install in
+            if let status = vm.harnesses.first(where: { $0.name == install.harness }) {
+                Text("Installing profile \"\(install.profile)\" to harness \"\(install.harness)\" will overwrite the existing configuration at:\n\(status.configPath)\n\nThis action cannot be undone.")
             }
         }
     }
@@ -129,13 +127,8 @@ struct HarnessesView: View {
                 ForEach(vm.profiles, id: \.name) { profile in
                     Button("\(profile.name)") {
                         if status?.installed == true {
-                            pendingInstallHarness = name
-                            pendingInstallProfile = profile.name
-                            showInstallConfirmation = true
+                            pendingInstall = InstallConfirmation(harness: name, profile: profile.name)
                         } else {
-                            selectedHarness = name
-                            selectedProfile = profile.name
-                            isInstallAction = true
                             Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
                         }
                     }
@@ -149,10 +142,9 @@ struct HarnessesView: View {
 
             // Dry-run preview for install
             Button(action: {
-                selectedHarness = name
-                selectedProfile = nil  // #73: Clear stale profile so the picker shows
-                isInstallAction = true
-                showDryRunSheet = true
+                // #83: capture harness at tap time; profile is nil so the
+                // sheet's profile picker is shown (#73).
+                dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: true)
             }) {
                 Label("Dry Run", systemImage: "doc.text.magnifyingglass")
                     .font(.caption)
@@ -164,9 +156,7 @@ struct HarnessesView: View {
             if status?.installed == true {
                 // #74: Dry Run for Uninstall
                 Button(action: {
-                    selectedHarness = name
-                    isInstallAction = false
-                    showDryRunSheet = true
+                    dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)
                 }) {
                     Label("Dry Run", systemImage: "doc.text.magnifyingglass")
                         .font(.caption)
@@ -187,6 +177,27 @@ struct HarnessesView: View {
         .padding(SymairaSpacing.medium)
         .glassCard()
     }
+}
+
+// MARK: - Sheet / Alert Requests (#83)
+
+/// A dry-run request captured at the exact moment of the button tap.
+/// Presented via `.sheet(item:)` so the sheet content is always built from
+/// this value, never from externally captured, potentially stale `@State`.
+private struct DryRunRequest: Identifiable {
+    let id = UUID()
+    let harness: String
+    /// `nil` for an install dry run → the sheet shows its profile picker (#73).
+    let profile: String?
+    let isInstall: Bool
+}
+
+/// A pending install-overwrite confirmation (#75), captured at menu-tap time
+/// and handed to the alert via `presenting:`.
+private struct InstallConfirmation: Identifiable {
+    let id = UUID()
+    let harness: String
+    let profile: String
 }
 
 // MARK: - Dry Run Sheet
