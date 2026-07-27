@@ -219,6 +219,7 @@ jobs:
             DEVELOPMENT_TEAM="$TEAM_ID" \
             CODE_SIGNING_ALLOWED=YES \
             CODE_SIGNING_REQUIRED=YES \
+            CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
             OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
           APP_BUNDLE=$(find build -name 'SymBrain.app' -type d -maxdepth 6 | head -1)
           if [ -z "$APP_BUNDLE" ]; then
@@ -236,8 +237,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # --- Notarize app bundle (non-fatal) ---
-          NOTARIZED=false
           APP="${{ env.APP_BUNDLE }}"
           if [ -z "$APP" ] || [ ! -d "$APP" ]; then
             echo "::error::App bundle not found"
@@ -254,31 +253,16 @@ jobs:
           API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
           echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
 
+          # --- Notarize app bundle ---
           ZIP_PATH="$RUNNER_TEMP/SymBrain.zip"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP_PATH"
-
-          set +e
-          NOTARY_OUTPUT=$(xcrun notarytool submit "$ZIP_PATH" \
+          xcrun notarytool submit "$ZIP_PATH" \
             -d "$NOTARY_API_KEY_ID" \
             -i "$NOTARY_API_ISSUER_ID" \
             -k "$API_KEY_PATH" \
-            --wait 2>&1)
-          NOTARY_EXIT=$?
-          set -e
-
-          if [ $NOTARY_EXIT -eq 0 ]; then
-            echo "$NOTARY_OUTPUT"
-            if echo "$NOTARY_OUTPUT" | grep -q "status: Accepted"; then
-              xcrun stapler staple "$APP" && NOTARIZED=true
-              echo "App notarization complete"
-            else
-              echo "::warning::Notarization status not Accepted. Output:"
-              echo "$NOTARY_OUTPUT"
-            fi
-          else
-            echo "::warning::App notarization failed (exit $NOTARY_EXIT). DMG will be unsigned."
-            echo "$NOTARY_OUTPUT"
-          fi
+            --wait
+          xcrun stapler staple "$APP"
+          echo "App notarization complete"
 
           # --- Create DMG ---
           VERSION="${{ steps.version.outputs.version }}"
@@ -293,24 +277,14 @@ jobs:
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
           echo "dmg_name=SymBrain-$VERSION.dmg" >> "$GITHUB_OUTPUT"
 
-          # --- Notarize DMG (non-fatal) ---
-          if [ "$NOTARIZED" = true ]; then
-            set +e
-            DMG_NOTARY_OUTPUT=$(xcrun notarytool submit "$DMG_PATH" \
-              -d "$NOTARY_API_KEY_ID" \
-              -i "$NOTARY_API_ISSUER_ID" \
-              -k "$API_KEY_PATH" \
-              --wait 2>&1)
-            DMG_NOTARY_EXIT=$?
-            set -e
-            if [ $DMG_NOTARY_EXIT -eq 0 ]; then
-              echo "$DMG_NOTARY_OUTPUT"
-              xcrun stapler staple "$DMG_PATH" || echo "::warning::DMG stapling failed"
-              echo "DMG notarization complete"
-            else
-              echo "::warning::DMG notarization failed (exit $DMG_NOTARY_EXIT)"
-            fi
-          fi
+          # --- Notarize DMG ---
+          xcrun notarytool submit "$DMG_PATH" \
+            -d "$NOTARY_API_KEY_ID" \
+            -i "$NOTARY_API_ISSUER_ID" \
+            -k "$API_KEY_PATH" \
+            --wait
+          xcrun stapler staple "$DMG_PATH"
+          echo "DMG notarization complete"
 
       - name: Upload GUI app to release
         env:
