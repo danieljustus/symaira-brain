@@ -162,5 +162,33 @@ public struct SymBrainClient: Sendable {
         }
         return result.stdoutText
     }
+
+    // MARK: - sync --json
+
+    /// Run `symbrain sync --json` and decode the result.
+    public func sync() async throws -> SyncSummary {
+        guard let binary = resolveBinary() else {
+            throw CLIRunnerError.binaryNotFound(tool: "symbrain")
+        }
+        return try await runner.runDecoding(
+            SyncSummary.self,
+            executable: binary,
+            arguments: ["sync", "--json"]
+        )
+    }
+
+    /// Run `symbrain sync --json --dry-run` and decode the result.
+    public func sync(dryRun: Bool) async throws -> SyncSummary {
+        guard let binary = resolveBinary() else {
+            throw CLIRunnerError.binaryNotFound(tool: "symbrain")
+        }
+        var args = ["sync", "--json"]
+        if dryRun { args.append("--dry-run") }
+        return try await runner.runDecoding(
+            SyncSummary.self,
+            executable: binary,
+            arguments: args
+        )
+    }
 }
 #endif
