@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 	"github.com/danieljustus/symaira-corekit/logkit"
 )
@@ -28,12 +29,17 @@ func main() {
 // run dispatches the given args to the matching subcommand and returns the
 // process exit code. Output goes to stdout, diagnostics to stderr.
 func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	if len(args) < 1 {
+	format, normalized, err := globalOutput(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	if len(normalized) < 1 {
 		printUsage(stdout)
 		return exitcodes.ExitNoInput
 	}
 
-	cmd, rest := args[0], args[1:]
+	cmd, rest := normalized[0], normalized[1:]
 
 	switch cmd {
 	case "init":
@@ -41,7 +47,7 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "doctor":
 		return cmdDoctor(rest, stdout, stderr)
 	case "profile":
-		return cmdProfile(rest, stdout, stderr)
+		return cmdProfileWithFormat(rest, stdout, stderr, format)
 	case "serve":
 		return cmdServe(rest, stdout, stderr)
 	case "install":
@@ -49,11 +55,11 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "uninstall":
 		return cmdUninstall(rest, stdout, stderr)
 	case "sync":
-		return cmdSync(rest, stdout, stderr)
+		return cmdSyncWithFormat(rest, stdout, stderr, format)
 	case "audit":
 		return cmdAudit(rest, stdout, stderr)
 	case "version":
-		return cmdVersion(rest, stdout, stderr)
+		return cmdVersionWithFormat(rest, stdout, stderr, format)
 	case "help", "--help", "-h":
 		printUsage(stdout)
 		return exitcodes.ExitOK
@@ -64,11 +70,34 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	}
 }
 
+func globalOutput(args []string) (output.Format, []string, error) {
+	format, normalized, err := output.Extract(args)
+	if len(normalized) > 0 && isOutputCommand(normalized[0]) {
+		return format, normalized, err
+	}
+	// doctor intentionally retains its existing command-local --json flag;
+	// this issue only centralizes output for version, sync, and profile.
+	return output.FormatTable, args, nil
+}
+
+func isOutputCommand(command string) bool {
+	switch command {
+	case "version", "sync", "profile":
+		return true
+	default:
+		return false
+	}
+}
+
 func printUsage(w io.Writer) {
 	fmt.Fprint(w, `symbrain — portable agent-context layer for AI harnesses
 
 Usage:
   symbrain <command> [flags]
+
+Global output flags (version, sync, and profile):
+  --output table|json  Output format (default: table)
+  --json               Shorthand for --output json
 
 Commands:
   init        Create XDG directories, default config, and example profiles

@@ -4,7 +4,6 @@
 package sync
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/adapter"
 	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/instructions"
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-brain/internal/skills"
 )
 
@@ -162,21 +162,14 @@ func FormatSummary(w io.Writer, statuses []TargetStatus, skillsResults []skills.
 	}
 }
 
-// FormatSummaryJSON outputs the sync results as JSON.
-func FormatSummaryJSON(w io.Writer, statuses []TargetStatus, skillsResults []skills.Result) error {
-	type jsonOutput struct {
-		Targets []TargetStatus  `json:"targets"`
-		Skills  []skills.Result `json:"skills"`
-	}
-	out := jsonOutput{
-		Targets: statuses,
-		Skills:  skillsResults,
-	}
+// Summary is the stable JSON payload returned by the sync command.
+type Summary struct {
+	Targets []TargetStatus  `json:"targets"`
+	Skills  []skills.Result `json:"skills"`
+}
 
-	data, err := json.Marshal(out)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintln(w, string(data))
-	return nil
+// FormatSummaryJSON outputs the sync results as JSON through the shared
+// renderer. It remains as a compatibility helper for package-local callers.
+func FormatSummaryJSON(w io.Writer, statuses []TargetStatus, skillsResults []skills.Result) error {
+	return output.Render(w, output.FormatJSON, Summary{Targets: statuses, Skills: skillsResults})
 }
