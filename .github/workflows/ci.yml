@@ -95,7 +95,7 @@ jobs:
 
       # Pin the action to the v1.0.4 commit because the tag depends on deprecated action versions.
       - name: govulncheck
-        uses: golang/govulncheck-action@31f7c5463448f83528bd771c2d978d940080c9fd # v1.0.4
+        uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.0.4
         with:
           go-version-file: go.mod
           repo-checkout: false
