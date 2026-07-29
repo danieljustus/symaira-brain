@@ -23,7 +23,7 @@ Symbrain is explicitly **not**:
   symskills; symbrain only orchestrates it (shells out, parses `--json`).
 - **A memory store.** Symbrain persists no memories and no secrets itself. It
   only holds profiles, the instructions source, and an audit log.
-- **A GUI** in v0.1.0 (though native SwiftUI apps now exist in `Sources/` as
+- **A GUI** on its own (though native SwiftUI apps now exist in `Sources/` as
   the macOS and iOS clients for the CLI).
 
 ### Brain ↔ Guard Boundary (verbatim — do not weaken)
