@@ -49,6 +49,33 @@ func TestRun_HelpExitsOK(t *testing.T) {
 	}
 }
 
+func TestRun_GlobalOutputFlagWorksBeforeOrAfterVersionCommand(t *testing.T) {
+	for _, args := range [][]string{
+		{"version", "--json"},
+		{"--json", "version"},
+		{"version", "--output", "json"},
+	} {
+		t.Run(strings.Join(args, "_"), func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			code := run(args, &stdout, &stderr)
+			if code != exitcodes.ExitOK {
+				t.Fatalf("run(%v) = %d, want %d (stderr: %s)", args, code, exitcodes.ExitOK, stderr.String())
+			}
+			if !strings.HasPrefix(strings.TrimSpace(stdout.String()), "{") {
+				t.Fatalf("run(%v) output = %q, want JSON", args, stdout.String())
+			}
+		})
+	}
+}
+
+func TestRun_DoctorKeepsItsExistingCommandLocalJSONFlag(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"doctor", "--json"}, &stdout, &stderr)
+	if code == exitcodes.ExitNoInput && strings.Contains(stderr.String(), "flag provided but not defined") {
+		t.Fatalf("doctor lost its existing --json flag: %s", stderr.String())
+	}
+}
+
 func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// "init" is excluded here: it writes real files under $HOME and has its
 	// own sandboxed tests in cmd_init_test.go. "profile" is excluded too: it

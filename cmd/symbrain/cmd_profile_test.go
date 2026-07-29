@@ -216,6 +216,31 @@ enabled = true
 	}
 }
 
+func TestCmdProfileShow_JSONFlagBeforeName(t *testing.T) {
+	home := sandboxHome(t)
+	writeProfileFile(t, home, "restricted", `
+[profile]
+name = "restricted"
+
+[servers.vault]
+enabled = true
+mode = "request_only"
+`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdProfile([]string{"show", "--json", "restricted"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("profile show --json restricted = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+	var report map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatalf("output is not valid JSON: %v (output: %q)", err, stdout.String())
+	}
+	if report["name"] != "restricted" {
+		t.Fatalf("name = %v, want restricted", report["name"])
+	}
+}
+
 func TestCmdProfileShow_HumanOutputIncludesWarnings(t *testing.T) {
 	home := sandboxHome(t)
 	writeProfileFile(t, home, "warny", `
