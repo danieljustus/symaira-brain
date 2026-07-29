@@ -1,0 +1,73 @@
+name: Mutation testing
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: policy
+            package: internal/policy
+          - name: profile
+            package: internal/profile
+          - name: adapter
+            package: internal/adapter
+          - name: audit
+            package: internal/audit
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # go-mutesting is pinned for reproducibility. The bounded local spike
+      # against internal/policy exposed an incompatibility between its 2019
+      # x/tools dependency and Go 1.26, so this workflow records evidence only
+      # and deliberately publishes no fabricated mutation score.
+      - name: Run go-mutesting (informational)
+        shell: bash
+        run: |
+          set +e
+          mkdir -p mutation-results
+          timeout 10m go run github.com/zimmski/go-mutesting/cmd/go-mutesting@v0.0.0-20210610104036-6d9217011a00 "./${{ matrix.package }}" > mutation-results/run.log 2>&1
+          tool_status=$?
+          set -e
+          {
+            echo "tool: github.com/zimmski/go-mutesting"
+            echo "version: v0.0.0-20210610104036-6d9217011a00"
+            echo "package: ${{ matrix.package }}"
+            echo "exit_code: $tool_status"
+            echo "result: informational; no mutation score was published"
+            if [ "$tool_status" -eq 124 ]; then
+              echo "note: bounded run reached the 10-minute timeout"
+            else
+              echo "note: inspect run.log for tool output; non-zero exit is non-blocking"
+            fi
+          } > mutation-results/summary.txt
+          cat mutation-results/summary.txt
+          cat mutation-results/run.log
+          exit 0
+
+      - name: Upload mutation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mutation-${{ matrix.name }}
+          path: mutation-results/
+          if-no-files-found: error
