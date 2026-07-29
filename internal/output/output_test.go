@@ -34,6 +34,29 @@ func TestParseRejectsUnknownFormats(t *testing.T) {
 	}
 }
 
+func TestParseAcceptsValidFormats(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		explicit string
+		want     Format
+	}{
+		{name: "empty", explicit: "", want: FormatTable},
+		{name: "table", explicit: "table", want: FormatTable},
+		{name: "json", explicit: "json", want: FormatJSON},
+		{name: "case insensitive", explicit: "JSON", want: FormatJSON},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := Parse(test.explicit)
+			if err != nil {
+				t.Fatalf("Parse(%q) unexpected error: %v", test.explicit, err)
+			}
+			if got != test.want {
+				t.Fatalf("Parse(%q) = %q, want %q", test.explicit, got, test.want)
+			}
+		})
+	}
+}
+
 func TestExtractAcceptsGlobalFlagsAnywhere(t *testing.T) {
 	format, args, err := Extract([]string{"profile", "show", "name", "--json"})
 	if err != nil {
@@ -81,5 +104,46 @@ func TestRenderTableUsesTableFunction(t *testing.T) {
 	}
 	if got.String() != "table output\n" {
 		t.Fatalf("output = %q, want table output", got.String())
+	}
+}
+
+func TestRenderNilTableReturnsNil(t *testing.T) {
+	var got bytes.Buffer
+	if err := Render(&got, FormatTable, Rows{Table: nil}); err != nil {
+		t.Fatalf("Render nil Table: %v", err)
+	}
+	if got.Len() != 0 {
+		t.Fatalf("expected empty output for nil Table, got %q", got.String())
+	}
+}
+
+func TestRenderBadFormatReturnsError(t *testing.T) {
+	var got bytes.Buffer
+	if err := Render(&got, Format("bad"), nil); err == nil {
+		t.Fatal("Render with bad format returned nil error")
+	}
+}
+
+func TestExtractOutputEqualsPrefix(t *testing.T) {
+	format, args, err := Extract([]string{"--output=json", "version"})
+	if err != nil {
+		t.Fatalf("Extract --output=: %v", err)
+	}
+	if format != FormatJSON || strings.Join(args, " ") != "version" {
+		t.Fatalf("Extract --output= = (%q, %q), want (json, version)", format, strings.Join(args, " "))
+	}
+}
+
+func TestExtractConflictingFormatsReturnsError(t *testing.T) {
+	_, _, err := Extract([]string{"--json", "--output", "table"})
+	if err == nil {
+		t.Fatal("Extract with conflicting formats returned nil error")
+	}
+}
+
+func TestExtractMissingValueReturnsError(t *testing.T) {
+	_, _, err := Extract([]string{"--output"})
+	if err == nil {
+		t.Fatal("Extract --output without value returned nil error")
 	}
 }

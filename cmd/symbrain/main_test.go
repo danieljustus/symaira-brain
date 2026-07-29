@@ -146,3 +146,47 @@ func TestRun_InstallUninstallDispatch_RequireHarnessFlag(t *testing.T) {
 		}
 	}
 }
+
+func TestPeekCommand_ReturnsCommandName(t *testing.T) {
+	tests := []struct {
+		name string
+		args []string
+		want string
+	}{
+		{name: "simple", args: []string{"version"}, want: "version"},
+		{name: "with flags", args: []string{"--json", "version"}, want: "version"},
+		{name: "with output", args: []string{"--output", "json", "sync"}, want: "sync"},
+		{name: "with output equals", args: []string{"--output=table", "profile"}, want: "profile"},
+		{name: "empty", args: []string{}, want: ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := peekCommand(tt.args)
+			if got != tt.want {
+				t.Fatalf("peekCommand(%v) = %q, want %q", tt.args, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCmdVersion_RefusesExtraArgs(t *testing.T) {
+	// cmdVersion should fail when given extra positional args.
+	for _, args := range [][]string{
+		{"version", "extra"},
+		{"version", "--json", "unexpected"},
+	} {
+		var stdout, stderr bytes.Buffer
+		code := run(args, &stdout, &stderr)
+		if code != exitcodes.ExitNoInput {
+			t.Fatalf("run(%v) = %d, want ExitNoInput", args, code)
+		}
+	}
+}
+
+func TestCmdVersion_RejectsBadFormat(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"version", "--output", "yaml"}, &stdout, &stderr)
+	if code != exitcodes.ExitNoInput {
+		t.Fatalf("run(version --output yaml) = %d, want ExitNoInput", code)
+	}
+}

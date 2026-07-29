@@ -3,6 +3,7 @@ package audit
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -733,5 +734,111 @@ func TestPrintEntry_NoArgKeysOmitsKeysField(t *testing.T) {
 	output := buf.String()
 	if strings.Contains(output, "keys=") {
 		t.Errorf("output should not contain keys= when ArgKeys is empty: %q", output)
+	}
+}
+
+func TestDegraded_StartsFalse(t *testing.T) {
+	l := &Logger{f: nil}
+	if l.Degraded() {
+		t.Error("Degraded should be false for a fresh logger")
+	}
+}
+
+func TestDegraded_SetManually(t *testing.T) {
+	l := &Logger{degraded: true}
+	if !l.Degraded() {
+		t.Error("Degraded should be true when set")
+	}
+}
+
+func TestDegraded_WriteToClosedFile(t *testing.T) {
+	f := newTestFile(t)
+	path := f.Name()
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	l := &Logger{f: f, path: path, profile: "test", config: Config{Enabled: true}}
+	l.Log("memory", "test_tool", json.RawMessage(`{}`), 1*time.Millisecond, "ok")
+	if !l.Degraded() {
+		t.Error("Degraded should be true after writing to a closed file")
+	}
+}
+
+func TestTailFile_ReturnsAllLinesForSmallFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.jsonl")
+	if err := os.WriteFile(path, []byte("a\nb\nc\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lines, err := tailFile(path, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 3 {
+		t.Fatalf("got %d lines, want 3", len(lines))
+	}
+}
+
+func TestTailFile_ReturnsLastNLines(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.jsonl")
+	var sb strings.Builder
+	for i := 0; i < 20; i++ {
+		sb.WriteString(fmt.Sprintf("line %d\n", i))
+	}
+	if err := os.WriteFile(path, []byte(sb.String()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lines, err := tailFile(path, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 5 {
+		t.Fatalf("got %d lines, want 5", len(lines))
+	}
+	if lines[0] != "line 15" {
+		t.Fatalf("first line = %q, want \"line 15\"", lines[0])
+	}
+}
+
+func TestTailFile_EmptyFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "test.jsonl")
+	if err := os.WriteFile(path, []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lines, err := tailFile(path, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 0 {
+		t.Fatalf("got %d lines for empty file, want 0", len(lines))
+	}
+}
+
+func TestTailFile_MissingFile(t *testing.T) {
+	_, err := tailFile("/nonexistent/path.jsonl", 10)
+	if err == nil {
+		t.Fatal("expected error for missing file")
+	}
+}
+
+func TestTailFile_LargeFileReadsBackwardsInChunks(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "large.jsonl")
+	// Write a file larger than 64KB to force the backwards-chunk path
+	var sb strings.Builder
+	for i := 0; i < 2000; i++ {
+		sb.WriteString(fmt.Sprintf("{\"line\":%d,\"data\":\"%s\"}\n", i, strings.Repeat("x", 60)))
+	}
+	if err := os.WriteFile(path, []byte(sb.String()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	lines, err := tailFile(path, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(lines) != 5 {
+		t.Fatalf("got %d lines from large file, want 5", len(lines))
 	}
 }
