@@ -129,3 +129,61 @@ jobs:
           distribution: goreleaser
           version: '~> v2'
           args: release --snapshot --clean --skip=sign
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Generate coverage artifacts
+        run: make coverage
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage-${{ github.sha }}
+          path: |
+            coverage.json
+            badge.json
+            badge.svg
+
+  # coverage-data is a persistent orphan data branch, not a source branch.
+  # Repository settings must exempt it from branch cleanup and either leave
+  # it unprotected or grant this job the bypass needed for its force update.
+  # The workflow intentionally never deletes the branch.
+  publish-coverage-data:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: coverage-${{ github.sha }}
+
+      - name: Publish coverage-data branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan coverage-data
+          git rm -rf . 2>/dev/null || true
+          git add coverage.json badge.json badge.svg
+          git commit -m "ci: publish coverage for $GITHUB_SHA"
+          git push origin HEAD:coverage-data --force
