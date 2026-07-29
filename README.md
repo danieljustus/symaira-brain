@@ -1,6 +1,7 @@
 # symbrain
 
 [![CI](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml)
+[![Coverage](https://raw.githubusercontent.com/danieljustus/symaira-brain/coverage-data/badge.svg)](https://github.com/danieljustus/symaira-brain/tree/coverage-data)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8)](go.mod)
 
