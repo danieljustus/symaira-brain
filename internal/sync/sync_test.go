@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/instructions"
+	"github.com/danieljustus/symaira-brain/internal/skills"
 )
 
 func TestRun_GlobalAndProjectSources(t *testing.T) {
@@ -181,5 +182,35 @@ func TestFormatSummaryJSON(t *testing.T) {
 	}
 	if !strings.Contains(out, `"status":"created"`) {
 		t.Errorf("JSON missing status:created\n%s", out)
+	}
+}
+
+func TestFormatSummary_WithMessages(t *testing.T) {
+	statuses := []TargetStatus{
+		{Name: "claude", Path: "/tmp/CLAUDE.md", Status: "error", Message: "permission denied"},
+	}
+	var buf bytes.Buffer
+	FormatSummary(&buf, statuses, nil)
+	out := buf.String()
+	if !strings.Contains(out, "permission denied") {
+		t.Errorf("summary should include message: %s", out)
+	}
+}
+
+func TestFormatSummary_WithSkills(t *testing.T) {
+	statuses := []TargetStatus{
+		{Name: "claude", Path: "/tmp/CLAUDE.md", Status: "created"},
+	}
+	skillsResults := []skills.Result{
+		{Target: "my-skill", Status: "installed", Message: "v1.0.0"},
+	}
+	var buf bytes.Buffer
+	FormatSummary(&buf, statuses, skillsResults)
+	out := buf.String()
+	if !strings.Contains(out, "Skills:") {
+		t.Errorf("summary should include Skills section: %s", out)
+	}
+	if !strings.Contains(out, "my-skill") {
+		t.Errorf("summary should include skill name: %s", out)
 	}
 }
