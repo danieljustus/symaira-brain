@@ -195,7 +195,7 @@ jobs:
           perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\n    exactVersion: 0.5.0|" project.yml
 
       - name: Install XcodeGen
-        run: brew install xcodegen 2>/dev/null || brew upgrade xcodegen 2>/dev/null || true
+        run: brew install xcodegen create-dmg 2>/dev/null || brew upgrade xcodegen create-dmg 2>/dev/null || true
 
       - name: Set version in Info.plist
         run: |
@@ -264,16 +264,31 @@ jobs:
           xcrun stapler staple "$APP"
           echo "App notarization complete"
 
-          # --- Create DMG ---
+          # --- Create DMG with drag-to-Applications window ---
           VERSION="${{ steps.version.outputs.version }}"
           DMG_PATH="$RUNNER_TEMP/SymBrain-$VERSION.dmg"
           DMG_STAGING="$RUNNER_TEMP/dmg-staging"
           mkdir -p "$DMG_STAGING"
           cp -R "$APP" "$DMG_STAGING/"
-          hdiutil create -volname "SymBrain $VERSION" \
-            -srcfolder "$DMG_STAGING" \
-            -ov -format UDZO \
-            "$DMG_PATH"
+
+          # Copy volume icon so the mounted DMG shows the SymBrain icon
+          cp assets/dmg/.VolumeIcon.icns "$DMG_STAGING/.VolumeIcon.icns"
+          SetFile -a C "$DMG_STAGING" 2>/dev/null || true
+
+          # Create a shortcut to /Applications in the staging folder
+          ln -s /Applications "$DMG_STAGING/Applications"
+
+          create-dmg \
+            --volname "SymBrain $VERSION" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "SymBrain.app" 175 160 \
+            --hide-extension "SymBrain.app" \
+            --app-drop-link 425 160 \
+            "$DMG_PATH" \
+            "$DMG_STAGING"
+
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
           echo "dmg_name=SymBrain-$VERSION.dmg" >> "$GITHUB_OUTPUT"
 
