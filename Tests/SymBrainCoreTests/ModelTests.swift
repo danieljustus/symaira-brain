@@ -148,3 +148,61 @@ struct AuditEntryTests {
         #expect(entry.status == "ok")
     }
 }
+
+struct SyncSummaryTests {
+    @Test func decodesSyncSummaryJSON() throws {
+        let json = """
+        {
+            "targets": [
+                {"name": "agents", "path": "/path/.agents.md", "status": "updated"},
+                {"name": "claude", "path": "/path/claude.md", "status": "created"}
+            ],
+            "skills": [
+                {"name": "hermes-agent", "status": "updated", "message": "1 skill rendered", "duration_ms": 1234}
+            ]
+        }
+        """
+        let data = Data(json.utf8)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let summary = try decoder.decode(SyncSummary.self, from: data)
+
+        #expect(summary.targets.count == 2)
+        #expect(summary.targets[0].name == "agents")
+        #expect(summary.targets[0].path == "/path/.agents.md")
+        #expect(summary.targets[0].status == "updated")
+        #expect(summary.targets[1].name == "claude")
+        #expect(summary.targets[1].path == "/path/claude.md")
+        #expect(summary.targets[1].status == "created")
+
+        #expect(summary.skills.count == 1)
+        #expect(summary.skills[0].name == "hermes-agent")
+        #expect(summary.skills[0].status == "updated")
+        #expect(summary.skills[0].message == "1 skill rendered")
+        #expect(summary.skills[0].durationMs == 1234)
+    }
+
+    @Test func decodesSyncSummaryWithErrorAndSkippedTargets() throws {
+        let json = """
+        {
+            "targets": [
+                {"name": "opencode", "path": "/path/opencode.md", "status": "error", "message": "permission denied"},
+                {"name": "cursor", "path": "/path/cursor.md", "status": "skipped"},
+                {"name": "gemini", "path": "/path/gemini.md", "status": "unchanged"}
+            ],
+            "skills": []
+        }
+        """
+        let data = Data(json.utf8)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let summary = try decoder.decode(SyncSummary.self, from: data)
+
+        #expect(summary.targets.count == 3)
+        #expect(summary.targets[0].status == "error")
+        #expect(summary.targets[0].message == "permission denied")
+        #expect(summary.targets[1].status == "skipped")
+        #expect(summary.targets[2].status == "unchanged")
+        #expect(summary.skills.isEmpty)
+    }
+}
