@@ -51,7 +51,7 @@ func testProfile() *profile.Profile {
 // --- New() tests ---
 
 func TestNew_NilLogger(t *testing.T) {
-	s := New(testProfile(), nil, nil, nil)
+	s := New(testProfile(), nil, nil, nil, "dev")
 	if s == nil {
 		t.Fatal("New returned nil")
 	}
@@ -62,7 +62,7 @@ func TestNew_NilLogger(t *testing.T) {
 
 func TestNew_WithLogger(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(bytes.NewBuffer(nil), nil))
-	s := New(testProfile(), nil, logger, nil)
+	s := New(testProfile(), nil, logger, nil, "dev")
 	if s.logger != logger {
 		t.Error("logger should be the one provided")
 	}
@@ -81,7 +81,7 @@ func TestBuildCatalog_MergesToolsFromMultipleServers(t *testing.T) {
 		"memory": memory,
 	}
 
-	s := New(testProfile(), servers, slog.Default(), nil)
+	s := New(testProfile(), servers, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -118,7 +118,7 @@ func TestBuildCatalog_SkipsDisabledServers(t *testing.T) {
 		"memory": newManagedFake(t, "memory", `[]`),
 	}
 
-	s := New(p, servers, slog.Default(), nil)
+	s := New(p, servers, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -146,7 +146,7 @@ func TestBuildCatalog_PolicyFiltering(t *testing.T) {
 		"vault": vault,
 	}
 
-	s := New(p, servers, slog.Default(), nil)
+	s := New(p, servers, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -173,7 +173,7 @@ func TestBuildCatalog_PolicyFiltering(t *testing.T) {
 }
 
 func TestBuildCatalog_EmptyServers(t *testing.T) {
-	s := New(testProfile(), map[string]*broker.ManagedServer{}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{}, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -194,7 +194,7 @@ func TestRouteToolCall_Success(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"get_entry","description":"fetch secret"}]`)
 
-	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -229,7 +229,7 @@ func TestRouteToolCall_Success(t *testing.T) {
 }
 
 func TestRouteToolCall_MissingServer(t *testing.T) {
-	s := New(testProfile(), map[string]*broker.ManagedServer{}, slog.Default(), nil)
+	s := New(testProfile(), nil, slog.Default(), nil, "dev")
 
 	ctx := context.Background()
 	entry := catalog.Entry{
@@ -247,7 +247,7 @@ func TestRouteToolCall_ToolError(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"get_entry","description":"always errors","behavior":"toolerror"}]`)
 
-	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -277,7 +277,7 @@ func TestRouteToolCall_EmptyInput(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"health","description":"healthcheck"}]`)
 
-	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil, "dev")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -361,7 +361,7 @@ func TestServeIO_InitializeAndListTools(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"get_entry","description":"fetch secret"}]`)
 
-	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil, "dev")
 
 	sr, sw, cr, cw := bidirectionalPipe(t)
 
@@ -422,7 +422,7 @@ func TestServeIO_ToolCall(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"health","description":"healthcheck"}]`)
 
-	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil)
+	s := New(testProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.Default(), nil, "dev")
 
 	sr, sw, cr, cw := bidirectionalPipe(t)
 
@@ -469,7 +469,7 @@ func TestServeIO_ToolCall(t *testing.T) {
 }
 
 func TestServeIO_ClosedReaderReturnsNil(t *testing.T) {
-	s := New(testProfile(), nil, slog.Default(), nil)
+	s := New(testProfile(), nil, slog.Default(), nil, "dev")
 
 	sr, sw, cr, cw := bidirectionalPipe(t)
 	cw.Close()

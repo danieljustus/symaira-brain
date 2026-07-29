@@ -45,18 +45,22 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	servers := buildServers(p, cfg, stderr, *vaultAgent)
 
+	// Defer shutdown of all managed servers so child processes are
+	// always cleaned up, even when ServeIO returns an error.
+	defer func() {
+		for _, ms := range servers {
+			ms.Shutdown()
+		}
+	}()
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	gw := gateway.New(p, servers, logkit.Default(), cfg)
+	gw := gateway.New(p, servers, logkit.Default(), cfg, version)
 
 	if err := gw.ServeIO(ctx, os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
 		return exitcodes.ExitGeneric
-	}
-
-	for _, ms := range servers {
-		ms.Shutdown()
 	}
 
 	return exitcodes.ExitOK
