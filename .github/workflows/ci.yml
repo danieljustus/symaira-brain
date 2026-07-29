@@ -62,7 +62,7 @@ jobs:
       # -race requires cgo, so this step deliberately does not set
       # CGO_ENABLED=0 (unlike the build step above).
       - name: Test (race detector)
-        run: go test -race ./...
+        run: go test -race -shuffle=on ./...
 
   # Stdio hygiene gate: `symbrain serve` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
@@ -93,8 +93,13 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      # Pin the action to the v1.0.4 commit because the tag depends on deprecated action versions.
       - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        uses: golang/govulncheck-action@31f7c5463448f83528bd771c2d978d940080c9fd # v1.0.4
+        with:
+          go-version-file: go.mod
+          repo-checkout: false
+          go-package: ./...
 
   # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
   # broken release config is caught long before a real release tag is
