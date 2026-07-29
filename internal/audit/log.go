@@ -40,8 +40,8 @@ type Logger struct {
 	profile  string
 	config   Config
 	size     int64
-	degraded bool   // true after any write or rotation failure
-	dropped  int64  // total entries dropped due to write failures
+	degraded bool  // true after any write or rotation failure
+	dropped  int64 // total entries dropped due to write failures
 }
 
 // maxFileSize is the size threshold for log rotation (10 MB).
