@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/audit"
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-corekit/mcpserver"
@@ -20,16 +22,18 @@ import (
 // catalog to the harness and routes tools/call requests to the owning
 // child server by stripping the namespace prefix.
 type Server struct {
-	profile *profile.Profile
-	servers map[string]*broker.ManagedServer
-	cat     *catalog.Catalog
-	logger  *slog.Logger
+	profile            *profile.Profile
+	servers            map[string]*broker.ManagedServer
+	cat                *catalog.Catalog
+	logger             *slog.Logger
+	cfg                *config.Config
+	auditDegradedWarn  sync.Once
 }
 
-// New creates a gateway Server from a profile and pre-built managed
-// servers. The catalog is built lazily on the first ServeIO call (since
-// tools/list requires live child connections).
-func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *slog.Logger) *Server {
+// New creates a gateway Server from a profile, pre-built managed
+// servers, and the global config. The catalog is built lazily on the
+// first ServeIO call (since tools/list requires live child connections).
+func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *slog.Logger, cfg *config.Config) *Server {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -37,6 +41,7 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 		profile: p,
 		servers: servers,
 		logger:  logger,
+		cfg:     cfg,
 	}
 }
 
@@ -49,10 +54,18 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	}
 
 	var auditLog *audit.Logger
-	if s.profile.Audit.Enabled {
+	auditEnabled := s.profile.Audit.Enabled
+	if s.cfg != nil {
+		auditEnabled = auditEnabled || s.cfg.Audit.Enabled
+	}
+	if auditEnabled {
+		verb := false
+		if s.cfg != nil {
+			verb = s.cfg.Audit.Verbose
+		}
 		cfg := audit.Config{
 			Enabled: true,
-			Verbose: false,
+			Verbose: verb,
 		}
 		al, err := audit.Open(s.profile.Name, cfg)
 		if err != nil {
@@ -81,6 +94,11 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 						status = "error"
 					}
 					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status)
+					if auditLog.Degraded() {
+						s.auditDegradedWarn.Do(func() {
+							s.logger.Warn("audit log degraded; some entries may not be persisted")
+						})
+					}
 				}
 				return result, err
 			},

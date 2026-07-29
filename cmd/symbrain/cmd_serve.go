@@ -48,7 +48,7 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	gw := gateway.New(p, servers, logkit.Default())
+	gw := gateway.New(p, servers, logkit.Default(), cfg)
 
 	if err := gw.ServeIO(ctx, os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
