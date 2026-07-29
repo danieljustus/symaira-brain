@@ -235,4 +235,41 @@ public final class SettingsViewModel: ObservableObject {
         }
     }
 }
+// MARK: - SyncViewModel
+
+@MainActor
+public final class SyncViewModel: ObservableObject {
+    @Published public var syncSummary: SyncSummary?
+    @Published public var isLoading = false
+    @Published public var errorMessage: String?
+    @Published public var errorDetail: String?
+    @Published public var dryRun = false
+    @Published public var isBinaryNotFound = false
+
+    private let client: SymBrainClient
+
+    public init(client: SymBrainClient) {
+        self.client = client
+    }
+
+    public func sync() async {
+        isLoading = true
+        errorMessage = nil
+        errorDetail = nil
+        isBinaryNotFound = false
+        defer { isLoading = false }
+
+        do {
+            syncSummary = try await client.sync(dryRun: dryRun)
+        } catch {
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
+            if let cliError = error as? CLIRunnerError,
+               case .binaryNotFound = cliError {
+                isBinaryNotFound = true
+            }
+        }
+    }
+}
 #endif

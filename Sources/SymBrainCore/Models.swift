@@ -111,6 +111,34 @@ public struct EffectivePolicy: Decodable, Sendable {
     public let unknown: [String]
 }
 
+// MARK: - sync --json
+
+/// Top-level result of `symbrain sync --json`.
+public struct SyncSummary: Decodable, Sendable {
+    public let targets: [SyncTargetStatus]
+    public let skills: [SyncSkillResult]
+}
+
+/// Per-harness target status from `symbrain sync --json`.
+public struct SyncTargetStatus: Decodable, Sendable, Identifiable {
+    public let name: String
+    public let path: String
+    public let status: String
+    public let message: String?
+
+    public var id: String { name }
+}
+
+/// One skill result from `symbrain sync --json`.
+public struct SyncSkillResult: Decodable, Sendable, Identifiable {
+    public let name: String
+    public let status: String
+    public let message: String?
+    public let durationMs: Int64
+
+    public var id: String { name }
+}
+
 // MARK: - Audit log entry
 
 /// One JSONL audit record, matching the Go `audit.Entry` shape.

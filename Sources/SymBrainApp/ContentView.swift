@@ -34,10 +34,6 @@ struct ContentView: View {
                     Image(systemName: mode.systemImage)
                         .frame(width: 20)
                     Text(mode.rawValue)
-                    if mode == .sync {
-                        Spacer()
-                        SymairaBadge("Planned", tone: .neutral)
-                    }
                 }
                 .tag(mode)
             }
@@ -56,7 +52,7 @@ struct ContentView: View {
                 case .harnesses:
                     HarnessesView(client: client)
                 case .sync:
-                    SyncView()
+                    SyncView(client: client)
                 case .audit:
                     AuditView(client: client)
                 case .settings:
