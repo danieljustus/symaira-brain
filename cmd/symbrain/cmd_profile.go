@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
@@ -23,6 +23,15 @@ import (
 var confirmReader io.Reader = os.Stdin
 
 func cmdProfile(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := output.Extract(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain profile: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdProfileWithFormat(args, stdout, stderr, format)
+}
+
+func cmdProfileWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	if len(args) < 1 {
 		printProfileUsage(stderr)
 		return exitcodes.ExitNoInput
@@ -31,9 +40,9 @@ func cmdProfile(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	sub, rest := args[0], args[1:]
 	switch sub {
 	case "list":
-		return cmdProfileList(rest, stdout, stderr)
+		return cmdProfileListWithFormat(rest, stdout, stderr, format)
 	case "show":
-		return cmdProfileShow(rest, stdout, stderr)
+		return cmdProfileShowWithFormat(rest, stdout, stderr, format)
 	case "add":
 		return cmdProfileAdd(rest, stdout, stderr)
 	case "remove":
@@ -52,22 +61,21 @@ func printProfileUsage(w io.Writer) {
 	fmt.Fprint(w, `symbrain profile — manage profiles
 
 Usage:
-  symbrain profile list [--json]
-  symbrain profile show <name> [--json]
+  symbrain profile list
+  symbrain profile show <name>
   symbrain profile add <name> [--from personal|restricted]
   symbrain profile remove <name> [--force]
 
+Use the global --output table|json flag (or --json) for list and show.
 Flags may be written before or after the profile name.
 `)
 }
 
 // reorderFlagsFirst moves recognized long ("--flag") flags — and, for the
-// names listed in valueFlags, their following value — to the front of
-// args, leaving positional arguments after them in their original
-// relative order. The stdlib flag package stops parsing at the first
-// non-flag token, so without this a user could only write
-// `profile show --json myname`, never `profile show myname --json`, even
-// though this command's own usage text shows the name first.
+// names listed in valueFlags, their following value — to the front of args,
+// leaving positional arguments after them in their original relative order.
+// It is used by profile add/remove for their command-local flags; output
+// formatting is handled globally by internal/output.
 func reorderFlagsFirst(args []string, valueFlags map[string]bool) []string {
 	var flags, positionals []string
 	for i := 0; i < len(args); i++ {
@@ -110,10 +118,16 @@ func serverSummaries(p *profile.Profile) []serverSummary {
 }
 
 func cmdProfileList(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	args = reorderFlagsFirst(args, nil)
+	format, args, err := output.Extract(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain profile list: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdProfileListWithFormat(args, stdout, stderr, format)
+}
 
+func cmdProfileListWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("profile list", flag.ContinueOnError)
-	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
@@ -142,15 +156,17 @@ func cmdProfileList(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 		})
 	}
 
-	if *jsonOut {
-		if err := json.NewEncoder(stdout).Encode(entries); err != nil {
-			fmt.Fprintf(stderr, "symbrain profile list: %v\n", err)
-			return exitcodes.ExitGeneric
-		}
-		return exitcodes.ExitOK
+	rows := output.Rows{
+		JSON: entries,
+		Table: func(w io.Writer) error {
+			printProfileListHuman(w, entries)
+			return nil
+		},
 	}
-
-	printProfileListHuman(stdout, entries)
+	if err := output.Render(stdout, format, rows); err != nil {
+		fmt.Fprintf(stderr, "symbrain profile list: format output: %v\n", err)
+		return exitcodes.ExitGeneric
+	}
 	return exitcodes.ExitOK
 }
 
@@ -239,10 +255,16 @@ func buildServerShowReport(alias string, cfg profile.ServerConfig) profileShowSe
 }
 
 func cmdProfileShow(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	args = reorderFlagsFirst(args, nil)
+	format, args, err := output.Extract(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain profile show: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdProfileShowWithFormat(args, stdout, stderr, format)
+}
 
+func cmdProfileShowWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("profile show", flag.ContinueOnError)
-	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
@@ -261,15 +283,17 @@ func cmdProfileShow(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 
 	report := buildProfileShowReport(p)
 
-	if *jsonOut {
-		if err := json.NewEncoder(stdout).Encode(report); err != nil {
-			fmt.Fprintf(stderr, "symbrain profile show: %v\n", err)
-			return exitcodes.ExitGeneric
-		}
-		return exitcodes.ExitOK
+	rows := output.Rows{
+		JSON: report,
+		Table: func(w io.Writer) error {
+			printProfileShowHuman(w, report)
+			return nil
+		},
 	}
-
-	printProfileShowHuman(stdout, report)
+	if err := output.Render(stdout, format, rows); err != nil {
+		fmt.Fprintf(stderr, "symbrain profile show: format output: %v\n", err)
+		return exitcodes.ExitGeneric
+	}
 	return exitcodes.ExitOK
 }
 

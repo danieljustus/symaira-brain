@@ -154,10 +154,16 @@ Manage profiles with:
 
 ```bash
 symbrain profile list                          # every profile + servers summary
-symbrain profile show <name> [--json]           # full detail incl. effective tool list
+symbrain profile show <name>                   # full detail incl. effective tool list
 symbrain profile add <name> [--from personal|restricted]
 symbrain profile remove <name> [--force]
 ```
+
+For `version`, `sync`, and `profile`, output is explicitly a human-readable
+**table by default**. Use the global `--output json` flag (or its `--json`
+shorthand) for machine-readable output. The choice is not TTY-sensitive, so
+piping a command does not silently change its output format; the output flags
+may appear before or after the command's positional arguments.
 
 ## Command reference
 
@@ -167,10 +173,10 @@ Implemented today:
 |---|---|
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, and harness registrations |
-| `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` |
+| `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
-| `symbrain version [--json]` | Print version, Go runtime, and OS/arch |
+| `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
 
 Planned, not yet implemented (each prints a "not yet implemented" notice
 naming its target milestone rather than failing silently):
