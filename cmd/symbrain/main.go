@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -71,13 +72,38 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 }
 
 func globalOutput(args []string) (output.Format, []string, error) {
-	format, normalized, err := output.Extract(args)
-	if len(normalized) > 0 && isOutputCommand(normalized[0]) {
-		return format, normalized, err
+	// Identify the command first, so Extract is only called for commands
+	// that actually support global output flags. For all other commands,
+	// args pass through untouched — their own flag parsers handle --json,
+	// --output etc. locally.
+	cmd := peekCommand(args)
+	if !isOutputCommand(cmd) {
+		return output.FormatTable, args, nil
 	}
-	// doctor intentionally retains its existing command-local --json flag;
-	// this issue only centralizes output for version, sync, and profile.
-	return output.FormatTable, args, nil
+	format, normalized, err := output.Extract(args)
+	return format, normalized, err
+}
+
+// peekCommand scans args skipping known global output flags and their values
+// to find the command name. This avoids calling Extract (which can error on
+// dangling or unsupported values) for commands that don't support them.
+func peekCommand(args []string) string {
+	for i := 0; i < len(args); i++ {
+		switch {
+		case args[i] == "--json":
+			continue
+		case args[i] == "--output":
+			i++ // skip the value
+			continue
+		case strings.HasPrefix(args[i], "--output="):
+			continue
+		default:
+			if !strings.HasPrefix(args[i], "-") {
+				return args[i]
+			}
+		}
+	}
+	return ""
 }
 
 func isOutputCommand(command string) bool {

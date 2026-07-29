@@ -68,7 +68,7 @@ func Extract(args []string) (Format, []string, error) {
 			if err := setExplicit(&explicit, string(FormatJSON)); err != nil {
 				return FormatTable, cleaned, err
 			}
-		case arg == "--output" || arg == "--format":
+		case arg == "--output":
 			if i+1 >= len(args) {
 				return FormatTable, cleaned, fmt.Errorf("%s requires a value", arg)
 			}
@@ -78,10 +78,6 @@ func Extract(args []string) (Format, []string, error) {
 			}
 		case strings.HasPrefix(arg, "--output="):
 			if err := setExplicit(&explicit, strings.TrimPrefix(arg, "--output=")); err != nil {
-				return FormatTable, cleaned, err
-			}
-		case strings.HasPrefix(arg, "--format="):
-			if err := setExplicit(&explicit, strings.TrimPrefix(arg, "--format=")); err != nil {
 				return FormatTable, cleaned, err
 			}
 		default:

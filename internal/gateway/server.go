@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/audit"
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-corekit/mcpserver"
@@ -20,16 +23,20 @@ import (
 // catalog to the harness and routes tools/call requests to the owning
 // child server by stripping the namespace prefix.
 type Server struct {
-	profile *profile.Profile
-	servers map[string]*broker.ManagedServer
-	cat     *catalog.Catalog
-	logger  *slog.Logger
+	profile           *profile.Profile
+	servers           map[string]*broker.ManagedServer
+	cat               *catalog.Catalog
+	logger            *slog.Logger
+	cfg               *config.Config
+	version           string
+	auditDegradedWarn sync.Once
 }
 
-// New creates a gateway Server from a profile and pre-built managed
-// servers. The catalog is built lazily on the first ServeIO call (since
-// tools/list requires live child connections).
-func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *slog.Logger) *Server {
+// New creates a gateway Server from a profile, pre-built managed
+// servers, the global config, and a version string (typically set at
+// build time via ldflags). The catalog is built lazily on the first
+// ServeIO call (since tools/list requires live child connections).
+func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *slog.Logger, cfg *config.Config, version string) *Server {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -37,6 +44,8 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 		profile: p,
 		servers: servers,
 		logger:  logger,
+		cfg:     cfg,
+		version: version,
 	}
 }
 
@@ -49,10 +58,18 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	}
 
 	var auditLog *audit.Logger
-	if s.profile.Audit.Enabled {
+	auditEnabled := s.profile.Audit.Enabled
+	if s.cfg != nil {
+		auditEnabled = auditEnabled || s.cfg.Audit.Enabled
+	}
+	if auditEnabled {
+		verb := false
+		if s.cfg != nil {
+			verb = s.cfg.Audit.Verbose
+		}
 		cfg := audit.Config{
 			Enabled: true,
-			Verbose: false,
+			Verbose: verb,
 		}
 		al, err := audit.Open(s.profile.Name, cfg)
 		if err != nil {
@@ -63,7 +80,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		}
 	}
 
-	srv := mcpserver.New("symbrain", "dev")
+	srv := mcpserver.New("symbrain", s.version)
 	srv.SetInstructions(fmt.Sprintf("symbrain profile %q", s.profile.Name))
 
 	for _, entry := range s.cat.Exposed() {
@@ -81,6 +98,11 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 						status = "error"
 					}
 					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status)
+					if auditLog.Degraded() {
+						s.auditDegradedWarn.Do(func() {
+							s.logger.Warn("audit log degraded; some entries may not be persisted")
+						})
+					}
 				}
 				return result, err
 			},
@@ -150,13 +172,6 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input json.RawMessage) (any, error) {
 	originalName := entry.OriginalName
 
-	var args any
-	if len(input) > 0 {
-		if err := json.Unmarshal(input, &args); err != nil {
-			return nil, fmt.Errorf("invalid arguments: %w", err)
-		}
-	}
-
 	ms, ok := s.servers[entry.Server]
 	if !ok {
 		return nil, fmt.Errorf("server %q not found", entry.Server)
@@ -168,15 +183,20 @@ func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input j
 	}
 
 	if result.IsError {
-		text := ""
-		if len(result.Content) > 0 {
-			text = result.Content[0].Text
-		}
-		return nil, fmt.Errorf("tool error: %s", text)
+		return nil, fmt.Errorf("tool error: %s", joinContent(result.Content))
 	}
 
-	if len(result.Content) == 0 {
-		return map[string]any{}, nil
+	return joinContent(result.Content), nil
+}
+
+// joinContent joins the text of all content blocks with newline separators.
+func joinContent(content []broker.ContentBlock) string {
+	var sb strings.Builder
+	for _, block := range content {
+		if sb.Len() > 0 {
+			sb.WriteString("\n")
+		}
+		sb.WriteString(block.Text)
 	}
-	return result.Content[0].Text, nil
+	return sb.String()
 }

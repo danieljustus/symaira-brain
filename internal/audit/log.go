@@ -34,12 +34,14 @@ type Config struct {
 // Logger writes JSONL audit entries with strict redaction. It is safe
 // for concurrent use.
 type Logger struct {
-	mu      sync.Mutex
-	f       *os.File
-	path    string
-	profile string
-	config  Config
-	size    int64
+	mu       sync.Mutex
+	f        *os.File
+	path     string
+	profile  string
+	config   Config
+	size     int64
+	degraded bool  // true after any write or rotation failure
+	dropped  int64 // total entries dropped due to write failures
 }
 
 // maxFileSize is the size threshold for log rotation (10 MB).
@@ -108,12 +110,20 @@ func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Du
 
 	data, err := json.Marshal(entry)
 	if err != nil {
+		l.degraded = true
+		l.dropped++
 		return
 	}
 	data = append(data, '\n')
 
-	l.size += int64(len(data))
-	l.f.Write(data)
+	n, err := l.f.Write(data)
+	if err != nil {
+		l.degraded = true
+		l.dropped++
+	}
+	if n > 0 {
+		l.size += int64(n)
+	}
 
 	if l.size >= maxFileSize {
 		l.rotate()
@@ -173,6 +183,8 @@ func (l *Logger) rotate() {
 
 	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
+		l.degraded = true
+		l.f = nil
 		return
 	}
 	l.f = f
@@ -188,6 +200,20 @@ func (l *Logger) Close() error {
 	defer l.mu.Unlock()
 	return l.f.Close()
 }
+
+// Degraded reports whether the logger has encountered a write or rotation
+// failure since it was opened. The caller can use this to emit a warning
+// without exposing entry contents or argument values.
+func (l *Logger) Degraded() bool {
+	if l == nil {
+		return false
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.degraded
+}
+
+const tailChunkSize = 64 * 1024 // 64KB
 
 // Tail reads the last n entries from the audit log for the given profile
 // and writes them human-readably to w. If profile is empty, uses all
@@ -214,16 +240,10 @@ func Tail(w io.Writer, profile string, n int) error {
 	}
 
 	for _, path := range paths {
-		data, err := os.ReadFile(path)
+		lines, err := tailFile(path, n)
 		if err != nil {
 			continue
 		}
-
-		lines := strings.Split(strings.TrimSpace(string(data)), "\n")
-		if n > 0 && len(lines) > n {
-			lines = lines[len(lines)-n:]
-		}
-
 		prof := strings.TrimSuffix(filepath.Base(path), ".jsonl")
 		for _, line := range lines {
 			var entry Entry
@@ -236,6 +256,88 @@ func Tail(w io.Writer, profile string, n int) error {
 	}
 
 	return nil
+}
+
+// tailFile reads the last n lines from a JSONL file. For small files
+// (at most tailChunkSize) it reads the whole file at once; for larger
+// files it scans backwards from the end in bounded chunks, counting
+// newlines until enough lines are collected.
+func tailFile(path string, n int) ([]string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := info.Size()
+
+	if size == 0 {
+		return nil, nil
+	}
+
+	// Small files: read whole file.
+	if size <= tailChunkSize {
+		data := make([]byte, size)
+		if _, err := f.ReadAt(data, 0); err != nil {
+			return nil, err
+		}
+		return splitTailLines(data, n)
+	}
+
+	// Large files: scan backwards from the end.
+	buf := make([]byte, tailChunkSize)
+	newlinesFound := 0
+	cutoff := int64(0)
+	offset := size
+
+scan:
+	for offset > 0 {
+		readSize := int64(tailChunkSize)
+		if offset < readSize {
+			readSize = offset
+		}
+		offset -= readSize
+
+		if _, err := f.ReadAt(buf[:readSize], offset); err != nil {
+			return nil, err
+		}
+
+		// Count newlines backwards in this chunk.
+		for i := readSize - 1; i >= 0; i-- {
+			if buf[i] == '\n' {
+				newlinesFound++
+				if n > 0 && newlinesFound > n {
+					cutoff = offset + i + 1
+					break scan
+				}
+			}
+		}
+	}
+
+	data := make([]byte, size-cutoff)
+	if _, err := f.ReadAt(data, cutoff); err != nil {
+		return nil, err
+	}
+	return splitTailLines(data, n)
+}
+
+// splitTailLines splits byte content on newlines and returns the last n
+// lines (or all if n <= 0). It trims leading/trailing whitespace and
+// skips empty results.
+func splitTailLines(data []byte, n int) ([]string, error) {
+	s := strings.TrimSpace(string(data))
+	if s == "" {
+		return nil, nil
+	}
+	lines := strings.Split(s, "\n")
+	if n > 0 && len(lines) > n {
+		lines = lines[len(lines)-n:]
+	}
+	return lines, nil
 }
 
 func printEntry(w io.Writer, e Entry) {
