@@ -1,5 +1,6 @@
 import SwiftUI
 import SymairaTheme
+import SymairaUpdateCheck
 import SymBrainCore
 
 /// Observable holder for the SymBrainClient so it can be rebuilt at runtime
@@ -43,7 +44,24 @@ struct SymBrainApp: App {
                 .onChange(of: binaryPathOverride) { _, newValue in
                     clientHolder.rebuild(binaryPathOverride: newValue)
                 }
+                .task {
+                    await checkForUpdatesOnLaunch()
+                }
         }
         .windowStyle(.hiddenTitleBar)
+    }
+
+    // MARK: - Launch auto-update check
+
+    private func checkForUpdatesOnLaunch() async {
+        let prefs = UserDefaultsAutoUpdatePreferenceStore(keyPrefix: "com.symaira.brain")
+        guard prefs.autoCheckEnabled else { return }
+        let checker = AppUpdateChecker(
+            checker: UpdateChecker(owner: "danieljustus", repo: "symaira-brain"),
+            store: UserDefaultsSkippedVersionStore(key: "com.symaira.brain.updateSkippedTag"),
+            currentVersion: { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0" },
+            autoPrefs: prefs
+        )
+        await checker.checkOnLaunchIfEnabled()
     }
 }

@@ -116,7 +116,7 @@ public struct SymBrainClient: Sendable {
         }
         let result = try await runner.run(binary, arguments: args)
         guard result.exitCode == 0 else {
-            throw CLIRunnerError.executionFailed(code: result.exitCode, stderr: result.stderrText)
+            throw CLIRunnerError.executionFailed(code: result.exitCode, fullStderr: result.stderrText)
         }
         return result.stdoutText
     }
@@ -128,7 +128,7 @@ public struct SymBrainClient: Sendable {
         }
         let result = try await runner.run(binary, arguments: ["profile", "remove", name, "--force"])
         guard result.exitCode == 0 else {
-            throw CLIRunnerError.executionFailed(code: result.exitCode, stderr: result.stderrText)
+            throw CLIRunnerError.executionFailed(code: result.exitCode, fullStderr: result.stderrText)
         }
         return result.stdoutText
     }
@@ -144,7 +144,7 @@ public struct SymBrainClient: Sendable {
         if dryRun { args.append("--dry-run") }
         let result = try await runner.run(binary, arguments: args)
         guard result.exitCode == 0 else {
-            throw CLIRunnerError.executionFailed(code: result.exitCode, stderr: result.stderrText)
+            throw CLIRunnerError.executionFailed(code: result.exitCode, fullStderr: result.stderrText)
         }
         return result.stdoutText
     }
@@ -158,7 +158,7 @@ public struct SymBrainClient: Sendable {
         if dryRun { args.append("--dry-run") }
         let result = try await runner.run(binary, arguments: args)
         guard result.exitCode == 0 else {
-            throw CLIRunnerError.executionFailed(code: result.exitCode, stderr: result.stderrText)
+            throw CLIRunnerError.executionFailed(code: result.exitCode, fullStderr: result.stderrText)
         }
         return result.stdoutText
     }
