@@ -136,17 +136,73 @@ struct SettingsView: View {
                 .font(.headline)
                 .foregroundStyle(SymairaTheme.goldPrimary)
 
+            // Auto-check toggle
+            Toggle("Automatically check for updates on launch", isOn: Binding(
+                get: { vm.autoPrefs.autoCheckEnabled },
+                set: { vm.autoPrefs.autoCheckEnabled = $0 }
+            ))
+            .font(.caption)
+            .foregroundStyle(SymairaTheme.textSecondary)
+
+            // Status display
             if let info = vm.updateInfo {
-                SymairaNotice(title: nil, message: info, tone: .informative)
+                SymairaNotice(title: nil, message: info, tone: noticeTone)
             }
 
-            Button(action: { Task { await vm.checkForUpdate() } }) {
-                Label("Check for Updates", systemImage: "arrow.up.circle")
+            // Check for Updates button
+            if vm.isLoading {
+                SymairaLoadingState("Checking for updates...")
+            } else {
+                Button(action: { Task { await vm.checkForUpdate() } }) {
+                    Label("Check for Updates", systemImage: "arrow.up.circle")
+                }
+                .symairaButtonStyle(.secondary)
+                .disabled(vm.updateStatus.isInstalling)
             }
-            .symairaButtonStyle(.secondary)
+
+            // Install button when update is available
+            if case .available(let release) = vm.updateStatus {
+                Button(action: { Task { await vm.installUpdate(release) } }) {
+                    Label("Install \(release.tagName)", systemImage: "arrow.down.circle")
+                }
+                .symairaButtonStyle(.primary)
+
+                Button(action: { vm.skipUpdate(release) }) {
+                    Label("Skip This Version", systemImage: "xmark.circle")
+                }
+                .symairaButtonStyle(.secondary)
+            }
+
+            // Progress when installing
+            if case .installing(let progress) = vm.updateStatus {
+                ProgressView(value: progress)
+                    .progressViewStyle(.linear)
+                    .tint(SymairaTheme.goldPrimary)
+            }
+
+            // Relaunch button when ready
+            if case .readyToRelaunch = vm.updateStatus {
+                Button(action: { vm.relaunchAfterUpdate() }) {
+                    Label("Relaunch to Apply Update", systemImage: "restart.circle")
+                }
+                .symairaButtonStyle(.primary)
+            }
         }
         .padding(SymairaSpacing.xLarge)
         .glassCard()
+    }
+
+    // MARK: - Tone helper
+
+    private var noticeTone: SymairaTone {
+        switch vm.updateStatus {
+        case .available: return .informative
+        case .installing: return .informative
+        case .readyToRelaunch: return .informative
+        case .error: return .critical
+        case .skipped: return .informative
+        default: return .informative
+        }
     }
 
     // MARK: - About
@@ -177,7 +233,9 @@ struct SettingsView: View {
         let config = NSWorkspace.OpenConfiguration()
         config.createsNewApplicationInstance = true
         NSWorkspace.shared.open(bundleURL, configuration: config) { _, _ in
-            NSApplication.shared.terminate(nil)
+            Task { @MainActor in
+                NSApplication.shared.terminate(nil)
+            }
         }
     }
 }

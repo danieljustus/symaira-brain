@@ -74,6 +74,13 @@ private func formatCLIError(_ error: CLIRunnerError) -> FriendlyCLIError {
                 + "Run `brew update && brew upgrade` to fix this.",
             detail: "Schema mismatch: expected \(expected), got \(actual)"
         )
+
+    case .outputTruncated(let size):
+        return FriendlyCLIError(
+            message: "The command produced too much output (over \(size) bytes). "
+                + "Try narrowing the scope of the operation.",
+            detail: "Output truncated at \(size) bytes"
+        )
     }
 }
 

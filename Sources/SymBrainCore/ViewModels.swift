@@ -2,9 +2,19 @@
 
 #if os(macOS)
 import Foundation
+import AppKit
 import SymairaCLIRunner
 import SymairaToolKit
 import SymairaUpdateCheck
+
+// MARK: - AppUpdateStatus helpers
+
+extension AppUpdateStatus {
+    public var isInstalling: Bool {
+        if case .installing = self { return true }
+        return false
+    }
+}
 
 // MARK: - DashboardViewModel
 
@@ -201,11 +211,23 @@ public final class SettingsViewModel: ObservableObject {
     @Published public var updateInfo: String?
     @Published public var isLoading = false
     @Published public var errorMessage: String?
+    @Published public var updateStatus: AppUpdateStatus = .unknown
+
+    public let updateChecker: AppUpdateChecker
+    public var autoPrefs: UserDefaultsAutoUpdatePreferenceStore
 
     private let client: SymBrainClient
 
     public init(client: SymBrainClient) {
         self.client = client
+        let prefs = UserDefaultsAutoUpdatePreferenceStore(keyPrefix: "com.symaira.brain")
+        self.autoPrefs = prefs
+        self.updateChecker = AppUpdateChecker(
+            checker: UpdateChecker(owner: "danieljustus", repo: "symaira-brain"),
+            store: UserDefaultsSkippedVersionStore(key: "com.symaira.brain.updateSkippedTag"),
+            currentVersion: { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.0" },
+            autoPrefs: prefs
+        )
     }
 
     public func refresh() async {
@@ -222,16 +244,68 @@ public final class SettingsViewModel: ObservableObject {
     }
 
     public func checkForUpdate() async {
-        let checker = UpdateChecker(owner: "danieljustus", repo: "symaira-brain")
-        guard let version = versionInfo else { return }
-        do {
-            if let release = try await checker.check(currentVersion: version.version) {
-                updateInfo = "New version available: \(release.tagName)"
-            } else {
-                updateInfo = "You are up to date (\(version.version))"
+        await updateChecker.checkForUpdate(force: true)
+        refreshStatusFromChecker()
+    }
+
+    public func checkOnLaunchIfEnabled() async {
+        await updateChecker.checkOnLaunchIfEnabled()
+        refreshStatusFromChecker()
+    }
+
+    public func skipUpdate(_ release: ReleaseInfo) {
+        updateChecker.skip(release)
+        refreshStatusFromChecker()
+    }
+
+    public func installUpdate(_ release: ReleaseInfo) async {
+        updateStatus = .installing(progress: 0)
+        let applier = UpdateApplier(progress: { written, total in
+            let pct = total > 0 ? Double(written) / Double(total) : 0
+            Task { @MainActor in
+                self.updateStatus = .installing(progress: pct)
             }
+        })
+        do {
+            let installedURL = try await applier.applyBundle(release: release)
+            // The installed .app is at installedURL. Trigger relaunch.
+            updateStatus = .readyToRelaunch
+            _ = installedURL
         } catch {
-            updateInfo = "Update check failed: \(error.localizedDescription)"
+            updateStatus = .error(String(describing: error))
+        }
+    }
+
+    public func relaunchAfterUpdate() {
+        let bundleURL = Bundle.main.bundleURL
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = true
+        NSWorkspace.shared.open(bundleURL, configuration: config) { _, _ in
+            Task { @MainActor in
+                NSApplication.shared.terminate(nil)
+            }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func refreshStatusFromChecker() {
+        updateStatus = updateChecker.status
+        switch updateChecker.status {
+        case .unknown:
+            updateInfo = nil
+        case .upToDate:
+            updateInfo = "You are up to date"
+        case .available(let release):
+            updateInfo = "New version available: \(release.tagName)"
+        case .skipped(let release):
+            updateInfo = "Skipped version \(release.tagName)"
+        case .installing(let progress):
+            updateInfo = "Installing... \(Int(progress * 100))%"
+        case .readyToRelaunch:
+            updateInfo = "Update ready — relaunch to apply"
+        case .error(let message):
+            updateInfo = "Update check failed: \(message)"
         }
     }
 }
