@@ -228,7 +228,7 @@ struct SettingsView: View {
 
     // MARK: - Helpers
 
-    private func quitAndRelaunch() {
+    nonisolated private func quitAndRelaunch() {
         let bundleURL = Bundle.main.bundleURL
         let config = NSWorkspace.OpenConfiguration()
         config.createsNewApplicationInstance = true
