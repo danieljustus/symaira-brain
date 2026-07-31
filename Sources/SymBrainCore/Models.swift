@@ -130,13 +130,21 @@ public struct SyncTargetStatus: Decodable, Sendable, Identifiable {
 }
 
 /// One skill result from `symbrain sync --json`.
+/// The CLI emits `target` (not `name`) and may omit `duration_ms`.
 public struct SyncSkillResult: Decodable, Sendable, Identifiable {
     public let name: String
     public let status: String
     public let message: String?
-    public let durationMs: Int64
+    public let durationMs: Int64?
 
     public var id: String { name }
+
+    enum CodingKeys: String, CodingKey {
+        case name = "target"
+        case status
+        case message
+        case durationMs
+    }
 }
 
 // MARK: - Audit log entry
