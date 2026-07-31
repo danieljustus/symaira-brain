@@ -2,54 +2,107 @@ package harness
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 )
 
 // jsonDocument is the Document implementation for the five JSON-based
 // harnesses (claude, claude-desktop, cursor, opencode, gemini).
+// It uses orderedMap instead of map[string]any so that key order from
+// the original config file is preserved — without this, a dry-run diff
+// showed thousands of lines of key reordering noise for a single-entry
+// change.
 type jsonDocument struct {
-	genericDocument
+	root       *orderedMap
+	serversKey string
 }
 
-func newJSONDocument(root map[string]any, serversKey string) *jsonDocument {
-	return &jsonDocument{genericDocument{root: root, serversKey: serversKey}}
+func newJSONDocument(root *orderedMap, serversKey string) *jsonDocument {
+	return &jsonDocument{root: root, serversKey: serversKey}
 }
 
-// decodeJSONObject parses data as a single JSON object, rejecting anything
-// else (arrays, scalars, trailing garbage) as an unsupported/corrupt config.
-// json.Number is used for numeric literals so that a value symbrain never
-// touches (e.g. a port number) round-trips through Marshal with its
-// original textual form intact.
-func decodeJSONObject(data []byte) (map[string]any, error) {
-	dec := json.NewDecoder(bytes.NewReader(data))
-	dec.UseNumber()
-
-	var root map[string]any
-	if err := dec.Decode(&root); err != nil {
-		return nil, fmt.Errorf("parse json: %w", err)
+func (d *jsonDocument) servers() *orderedMap {
+	v, ok := d.root.get(d.serversKey)
+	if !ok {
+		return nil
 	}
-	if dec.More() {
-		return nil, fmt.Errorf("parse json: unexpected trailing content after the top-level value")
-	}
-	if root == nil {
-		root = map[string]any{}
-	}
-	return root, nil
+	m, _ := v.(*orderedMap)
+	return m
 }
 
-// Marshal re-encodes the document deterministically: two-space indent,
-// unescaped HTML characters, and Go's stable (alphabetical) map key
-// ordering — the same rendering used to build the golden fixtures, so a
-// config that starts in that canonical form round-trips byte-for-byte
-// through an install followed by an uninstall.
+func (d *jsonDocument) Server(name string) (Entry, bool) {
+	servers := d.servers()
+	if servers == nil {
+		return Entry{}, false
+	}
+	raw, ok := servers.get(name)
+	if !ok {
+		return Entry{}, false
+	}
+	m, ok := raw.(*orderedMap)
+	if !ok {
+		return Entry{}, false
+	}
+	// Convert *orderedMap back to map[string]any for entryFromMap.
+	return entryFromOrderedMap(m), true
+}
+
+func (d *jsonDocument) SetServer(name string, entry Entry) {
+	servers := d.servers()
+	if servers == nil {
+		servers = newOrderedMap()
+		d.root.set(d.serversKey, servers)
+	}
+	servers.set(name, entryToOrderedMap(entry))
+}
+
+func (d *jsonDocument) RemoveServer(name string) bool {
+	servers := d.servers()
+	if servers == nil {
+		return false
+	}
+	if _, ok := servers.get(name); !ok {
+		return false
+	}
+	servers.del(name)
+	if servers.len() == 0 {
+		d.root.del(d.serversKey)
+	}
+	return true
+}
+
+// Marshal re-encodes the document with two-space indent, unescaped HTML
+// characters, and key order preserved from the original config file.
 func (d *jsonDocument) Marshal() ([]byte, error) {
 	var buf bytes.Buffer
-	enc := json.NewEncoder(&buf)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(d.root); err != nil {
+	if err := d.root.marshalJSON(&buf, "", "  "); err != nil {
 		return nil, fmt.Errorf("encode json: %w", err)
 	}
+	// Append trailing newline to match the previous json.Encoder behavior,
+	// which appends '\n' after every Encode call.
+	buf.WriteByte('\n')
 	return buf.Bytes(), nil
+}
+
+// entryFromOrderedMap reads an Entry out of an *orderedMap representation.
+// Fields of an unexpected type are left zero rather than erroring — a
+// foreign entry that doesn't match the shape symbrain writes simply reports
+// as "not symbrain" via Entry.IsSymbrain.
+func entryFromOrderedMap(m *orderedMap) Entry {
+	var e Entry
+	if c, ok := m.get("command"); ok {
+		if s, ok := c.(string); ok {
+			e.Command = s
+		}
+	}
+	if rawArgs, ok := m.get("args"); ok {
+		if arr, ok := rawArgs.([]any); ok {
+			e.Args = make([]string, 0, len(arr))
+			for _, a := range arr {
+				if s, ok := a.(string); ok {
+					e.Args = append(e.Args, s)
+				}
+			}
+		}
+	}
+	return e
 }

@@ -1,13 +1,13 @@
 {
+  "theme": "dark",
   "mcpServers": {
     "symbrain": {
+      "command": "symbrain",
       "args": [
         "serve",
         "--profile",
         "restricted"
-      ],
-      "command": "symbrain"
+      ]
     }
-  },
-  "theme": "dark"
+  }
 }

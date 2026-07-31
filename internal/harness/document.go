@@ -38,7 +38,7 @@ func Empty(h Harness) Document {
 	case FormatTOML:
 		return newTOMLDocument(map[string]any{}, h.ServersKey)
 	default:
-		return newJSONDocument(map[string]any{}, h.ServersKey)
+		return newJSONDocument(newOrderedMap(), h.ServersKey)
 	}
 }
 
@@ -81,6 +81,7 @@ func wrapParseError(h Harness, err error) error {
 
 // entryToMap converts an Entry to the generic map representation stored in
 // a document's server table, shared by both the JSON and TOML backends.
+// For JSON documents, entryToOrderedMap is used instead to preserve key order.
 func entryToMap(e Entry) map[string]any {
 	args := make([]any, len(e.Args))
 	for i, a := range e.Args {

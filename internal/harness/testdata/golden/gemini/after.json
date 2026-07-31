@@ -1,12 +1,12 @@
 {
   "mcpServers": {
     "symbrain": {
+      "command": "symbrain",
       "args": [
         "serve",
         "--profile",
         "default"
-      ],
-      "command": "symbrain"
+      ]
     }
   }
 }
