@@ -65,6 +65,7 @@ public final class ProfilesViewModel: ObservableObject {
     @Published public var selectedProfile: ProfileDetail?
     @Published public var isLoading = false
     @Published public var errorMessage: String?
+    @Published public var errorDetail: String?
 
     private let client: SymBrainClient
 
@@ -75,24 +76,30 @@ public final class ProfilesViewModel: ObservableObject {
     public func loadProfiles() async {
         isLoading = true
         errorMessage = nil
+        errorDetail = nil
         defer { isLoading = false }
 
         do {
             profiles = try await client.profileList()
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
         }
     }
 
     public func selectProfile(_ name: String) async {
         isLoading = true
         errorMessage = nil
+        errorDetail = nil
         defer { isLoading = false }
 
         do {
             selectedProfile = try await client.profileShow(name: name)
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
         }
     }
 
@@ -102,7 +109,9 @@ public final class ProfilesViewModel: ObservableObject {
             await loadProfiles()
             return true
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
             return false
         }
     }
@@ -114,7 +123,9 @@ public final class ProfilesViewModel: ObservableObject {
             await loadProfiles()
             return true
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
             return false
         }
     }
@@ -128,6 +139,7 @@ public final class HarnessesViewModel: ObservableObject {
     @Published public var profiles: [ProfileSummary] = []
     @Published public var isLoading = false
     @Published public var errorMessage: String?
+    @Published public var errorDetail: String?
     @Published public var operationResult: String?
 
     private let client: SymBrainClient
@@ -139,6 +151,7 @@ public final class HarnessesViewModel: ObservableObject {
     public func refresh() async {
         isLoading = true
         errorMessage = nil
+        errorDetail = nil
         defer { isLoading = false }
 
         do {
@@ -148,7 +161,9 @@ public final class HarnessesViewModel: ObservableObject {
             harnesses = report.harnesses
             profiles = try await p
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
         }
     }
 
@@ -157,7 +172,9 @@ public final class HarnessesViewModel: ObservableObject {
             operationResult = try await client.install(harness: harness, profile: profile, dryRun: dryRun)
             await refresh()
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
         }
     }
 
@@ -166,7 +183,9 @@ public final class HarnessesViewModel: ObservableObject {
             operationResult = try await client.uninstall(harness: harness, dryRun: dryRun)
             await refresh()
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
+            errorDetail = friendly.detail
         }
     }
 }
