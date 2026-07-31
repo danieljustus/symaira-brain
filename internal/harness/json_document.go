@@ -106,5 +106,3 @@ func entryFromOrderedMap(m *orderedMap) Entry {
 	}
 	return e
 }
-
-
