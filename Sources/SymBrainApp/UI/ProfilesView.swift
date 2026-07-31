@@ -23,7 +23,16 @@ struct ProfilesView: View {
                 if vm.isLoading && vm.profiles.isEmpty {
                     SymairaLoadingState("Loading profiles...")
                 } else if let error = vm.errorMessage {
-                    SymairaNotice(title: "Error", message: error, tone: .critical)
+                    VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+                        SymairaNotice(title: "Error", message: error, tone: .critical)
+                        Button(action: { Task { await vm.loadProfiles() } }) {
+                            Label("Retry", systemImage: "arrow.clockwise")
+                        }
+                        .symairaButtonStyle(.primary)
+                        if let detail = vm.errorDetail {
+                            SymairaNotice(title: "Details", message: detail, tone: .neutral)
+                        }
+                    }
                 } else {
                     profileListSection
                 }
@@ -205,6 +214,10 @@ struct NewProfileSheet: View {
                 TextField("my-profile", text: $name)
                     .textFieldStyle(.roundedBorder)
 
+                Text("Use lowercase letters (a-z), digits (0-9), hyphens (-), and underscores (_). Names must start with a letter.")
+                    .font(.caption)
+                    .foregroundStyle(SymairaTheme.textMuted)
+
                 Text("Base template")
                     .font(.headline)
                     .foregroundStyle(SymairaTheme.textSecondary)
@@ -247,7 +260,8 @@ struct NewProfileSheet: View {
             _ = try await client.profileAdd(name: trimmed, from: template)
             return true
         } catch {
-            errorMessage = error.localizedDescription
+            let friendly = formatError(error)
+            errorMessage = friendly.message
             return false
         }
     }

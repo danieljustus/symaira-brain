@@ -30,7 +30,16 @@ struct HarnessesView: View {
                 if vm.isLoading {
                     SymairaLoadingState("Loading harnesses...")
                 } else if let error = vm.errorMessage {
-                    SymairaNotice(title: "Error", message: error, tone: .critical)
+                    VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+                        SymairaNotice(title: "Error", message: error, tone: .critical)
+                        Button(action: { Task { await vm.refresh() } }) {
+                            Label("Retry", systemImage: "arrow.clockwise")
+                        }
+                        .symairaButtonStyle(.primary)
+                        if let detail = vm.errorDetail {
+                            SymairaNotice(title: "Details", message: detail, tone: .neutral)
+                        }
+                    }
                 } else {
                     harnessListSection
                 }
