@@ -317,7 +317,7 @@ public final class SyncViewModel: ObservableObject {
     @Published public var isLoading = false
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
-    @Published public var dryRun = false
+    @Published public var dryRun = true
     @Published public var isBinaryNotFound = false
 
     private let client: SymBrainClient
