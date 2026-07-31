@@ -7,12 +7,12 @@
       "command": "other-tool"
     },
     "symbrain": {
+      "command": "symbrain",
       "args": [
         "serve",
         "--profile",
         "personal"
-      ],
-      "command": "symbrain"
+      ]
     }
   },
   "userId": "u-123"

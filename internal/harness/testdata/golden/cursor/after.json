@@ -8,12 +8,12 @@
       "command": "mcp-filesystem"
     },
     "symbrain": {
+      "command": "symbrain",
       "args": [
         "serve",
         "--profile",
         "personal"
-      ],
-      "command": "symbrain"
+      ]
     }
   }
 }
