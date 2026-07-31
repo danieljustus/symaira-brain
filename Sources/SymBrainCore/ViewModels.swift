@@ -276,7 +276,7 @@ public final class SettingsViewModel: ObservableObject {
         }
     }
 
-    public func relaunchAfterUpdate() {
+    nonisolated public func relaunchAfterUpdate() {
         let bundleURL = Bundle.main.bundleURL
         let config = NSWorkspace.OpenConfiguration()
         config.createsNewApplicationInstance = true
