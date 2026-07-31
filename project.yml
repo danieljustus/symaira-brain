@@ -11,7 +11,8 @@ options:
 # code must pin an exact tag instead (e.g. exactVersion: "0.5.0").
 packages:
   symaira-appkit:
-    path: ../symaira-appkit
+    url: https://github.com/danieljustus/symaira-appkit.git
+    exactVersion: 0.6.2
 
 targets:
   SymBrainCore:

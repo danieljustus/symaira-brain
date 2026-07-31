@@ -65,7 +65,6 @@
 		37D52B395108AFAD4ACBF29E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6BED06A4CD35FB3CFAB1FB43 /* symaira-appkit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "symaira-appkit"; path = "../symaira-appkit"; sourceTree = SOURCE_ROOT; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
 		8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainMobileApp.swift; sourceTree = "<group>"; };
 		8B0DC6F1658F16C48F507A56 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
@@ -126,7 +125,6 @@
 		53110CFA69863692BA21C600 = {
 			isa = PBXGroup;
 			children = (
-				859AFE5156AFB1CC82AA6214 /* Packages */,
 				B01A11F4CE698CE75076CDBA /* SymBrainApp */,
 				BE7F03B320601C0EBC16C78A /* SymBrainCore */,
 				80643F0FB10D70E98B759F51 /* SymBrainCoreTests */,
@@ -142,14 +140,6 @@
 			);
 			name = SymBrainCoreTests;
 			path = Tests/SymBrainCoreTests;
-			sourceTree = "<group>";
-		};
-		859AFE5156AFB1CC82AA6214 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				6BED06A4CD35FB3CFAB1FB43 /* symaira-appkit */,
-			);
-			name = Packages;
 			sourceTree = "<group>";
 		};
 		93F8F0E856E9268B2B5206BD /* Products */ = {
@@ -341,15 +331,15 @@
 			mainGroup = 53110CFA69863692BA21C600;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E7929C564135D92C1A579CF2 /* XCLocalSwiftPackageReference "../symaira-appkit" */,
+				4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 93F8F0E856E9268B2B5206BD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				35C2A402EE7ACE3492D6588E /* SymBrainCore */,
 				A16845D771919DAEB0CB123C /* SymBrain */,
+				35C2A402EE7ACE3492D6588E /* SymBrainCore */,
 				52504A71F31300EB6DC9318E /* SymBrainCoreTests */,
 				0B0CB50405A895D139BBF784 /* SymBrainMobile */,
 			);
@@ -662,7 +652,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -709,7 +699,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -733,7 +723,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -758,7 +748,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.4.0;
+				MARKETING_VERSION = 0.4.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -820,76 +810,96 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		E7929C564135D92C1A579CF2 /* XCLocalSwiftPackageReference "../symaira-appkit" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../symaira-appkit";
+/* Begin XCRemoteSwiftPackageReference section */
+		4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danieljustus/symaira-appkit.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.6.2;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		0054585A78E372D2085F559E /* SymairaCLIRunner */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaCLIRunner;
 		};
 		0D9415DDF8EC5FD7F8C6FBF5 /* SymairaUpdateCheck */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaUpdateCheck;
 		};
 		0EFDD552CB42AFE785E795E8 /* SymairaTheme */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaTheme;
 		};
 		22DDC1B7D47B712C3444DF4D /* SymairaCLIRunner */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaCLIRunner;
 		};
 		2A87C9F4E9912E7CF988285E /* SymairaTheme */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaTheme;
 		};
 		5276E77718EBA5C03DADB87B /* SymairaCLIRunner */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaCLIRunner;
 		};
 		6025731168C577D1D93D0797 /* SymairaTheme */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaTheme;
 		};
 		607EFF1004A503E966196E05 /* SymairaUpdateCheck */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaUpdateCheck;
 		};
 		634705A978FF032B20A7563A /* SymairaDaemonKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaDaemonKit;
 		};
 		9480D05289AD3EDD804ECC1C /* SymairaDaemonKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaDaemonKit;
 		};
 		99409AC8BA33F24A6846CF9D /* SymairaToolKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaToolKit;
 		};
 		9DA891F8B1B3498B6A3C122D /* SymairaToolKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaToolKit;
 		};
 		AF389000D8A706BB7516E603 /* SymairaToolKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaToolKit;
 		};
 		B01C3B8290EE49ABCDC052E3 /* SymairaUpdateCheck */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaUpdateCheck;
 		};
 		B5D3F52069DD9EDA308B6BBE /* SymairaDaemonKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaDaemonKit;
 		};
 		E2F3DE448537FE8B9962E1BA /* SymairaTheme */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaTheme;
 		};
 /* End XCSwiftPackageProductDependency section */
