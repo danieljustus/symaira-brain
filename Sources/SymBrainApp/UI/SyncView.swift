@@ -33,13 +33,12 @@ struct SyncView: View {
                     SymairaEmptyState(
                         systemImage: "arrow.triangle.2.circlepath",
                         title: "Sync Ready",
-                        message: "Run sync to propagate profile and skill changes to all installed harnesses."
+                        message: "Run sync to propagate profile and skill changes to your installed harnesses. Target files are written to each harness's configuration directory (e.g., ~/.claude/AGENTS.md, ~/.codex/AGENTS.md). Enable Dry Run to preview without writing."
                     )
                 }
             }
             .padding(SymairaSpacing.xLarge)
         }
-        .task { await vm.sync() }
     }
 
     // MARK: - Header
@@ -177,9 +176,11 @@ struct SyncView: View {
                 }
             }
             Spacer()
-            Text(formattedDuration(skill.durationMs))
-                .font(.caption2.monospaced())
-                .foregroundStyle(SymairaTheme.textMuted)
+            if let durationMs = skill.durationMs {
+                Text(formattedDuration(durationMs))
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(SymairaTheme.textMuted)
+            }
         }
         .padding(.vertical, SymairaSpacing.xSmall)
     }

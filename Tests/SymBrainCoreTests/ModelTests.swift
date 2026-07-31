@@ -158,7 +158,7 @@ struct SyncSummaryTests {
                 {"name": "claude", "path": "/path/claude.md", "status": "created"}
             ],
             "skills": [
-                {"name": "hermes-agent", "status": "updated", "message": "1 skill rendered", "duration_ms": 1234}
+                {"target": "hermes-agent", "status": "updated", "message": "1 skill rendered", "duration_ms": 1234}
             ]
         }
         """
@@ -204,5 +204,30 @@ struct SyncSummaryTests {
         #expect(summary.targets[1].status == "skipped")
         #expect(summary.targets[2].status == "unchanged")
         #expect(summary.skills.isEmpty)
+    }
+
+    @Test func decodesSyncSummaryWithCLIMissingDurationAndTargetKey() throws {
+        // Real CLI output: skills use "target" key and omit "duration_ms".
+        let json = """
+        {
+            "targets": [
+                {"name": "claude", "path": "/path/claude.md", "status": "created"}
+            ],
+            "skills": [
+                {"target": "claude", "status": "ok", "message": "2 skills rendered"}
+            ]
+        }
+        """
+        let data = Data(json.utf8)
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let summary = try decoder.decode(SyncSummary.self, from: data)
+
+        #expect(summary.targets.count == 1)
+        #expect(summary.skills.count == 1)
+        #expect(summary.skills[0].name == "claude")
+        #expect(summary.skills[0].status == "ok")
+        #expect(summary.skills[0].message == "2 skills rendered")
+        #expect(summary.skills[0].durationMs == nil)
     }
 }
