@@ -15,16 +15,19 @@ public struct SymBrainClient: Sendable {
 
     public init(
         userOverride: URL? = nil,
+        searchPATH: String? = nil,
+        extraDirectories: [String] = [
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+        ],
         runner: CLIRunner = CLIRunner()
     ) {
         self.runner = runner
         self.locator = BinaryLocator(
             bundle: nil,
             userOverride: userOverride,
-            extraDirectories: [
-                "/opt/homebrew/bin",
-                "/usr/local/bin",
-            ]
+            searchPATH: searchPATH,
+            extraDirectories: extraDirectories
         )
     }
 
@@ -33,7 +36,14 @@ public struct SymBrainClient: Sendable {
     /// Resolve the symbrain binary URL. Checks user override, PATH,
     /// Homebrew prefixes, and a repo-local dev fallback.
     public func resolveBinary() -> URL? {
-        if let located = locator.locate("symbrain") {
+        // BinaryLocator must be allowed to finish its complete search before
+        // trying the development fallback. In particular, Finder-launched
+        // apps have an empty PATH, so the Homebrew directories are essential.
+        // Homebrew's user-managed prefix can be group-writable on macOS,
+        // which is expected for a Homebrew installation. The locator still
+        // verifies the executable when possible; allow it to return the
+        // candidate so Finder-launched apps can use the documented install.
+        if let located = locator.locate("symbrain", allowUnverified: true) {
             return located.url
         }
         // Dev fallback: binary sitting next to the app source
@@ -45,6 +55,59 @@ public struct SymBrainClient: Sendable {
             return devPath
         }
         return nil
+    }
+
+    /// A user-facing explanation of the complete automatic search.
+    ///
+    /// This deliberately does not suggest PATH as the primary remedy: a
+    /// Finder-launched app commonly has no shell PATH at all.
+    public var binarySearchDiagnostic: String {
+        var lines = ["The “symbrain” CLI binary was not found. Searched directories:"]
+        if let userOverride = locator.userOverride {
+            let status = FileManager.default.isExecutableFile(
+                atPath: userOverride.path
+            ) ? "found" : "not found"
+            lines.append("- Binary Path Override (\(userOverride.path)): \(status)")
+        }
+        let pathDirectories = locator.searchPATH
+            .split(separator: ":")
+            .map(String.init)
+        if pathDirectories.isEmpty {
+            lines.append("- PATH (empty)")
+        } else {
+            lines += pathDirectories.map { directory in
+                "- \(directory): \(binaryStatus(in: directory))"
+            }
+        }
+        lines += locator.extraDirectories.map { directory in
+            "- \(directory): \(binaryStatus(in: directory))"
+        }
+        let devDirectory = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .path
+        lines.append("- \(devDirectory): \(binaryStatus(in: devDirectory)) (development fallback)")
+        lines.append("Install SymBrain with Homebrew or set a Binary Path Override in Settings.")
+        return lines.joined(separator: "\\n")
+    }
+
+    private func binaryStatus(in directory: String) -> String {
+        let path = URL(fileURLWithPath: directory).appendingPathComponent("symbrain").path
+        return FileManager.default.isExecutableFile(atPath: path) ? "found" : "not found"
+    }
+
+    // MARK: - init
+
+    /// Run `symbrain init` to create the initial configuration.
+    public func initialize() async throws -> String {
+        guard let binary = resolveBinary() else {
+            throw CLIRunnerError.binaryNotFound(tool: "symbrain")
+        }
+        let result = try await runner.run(binary, arguments: ["init"])
+        guard result.exitCode == 0 else {
+            throw CLIRunnerError.executionFailed(code: result.exitCode, fullStderr: result.stderrText)
+        }
+        return result.stdoutText
     }
 
     // MARK: - version --json

@@ -231,3 +231,38 @@ struct SyncSummaryTests {
         #expect(summary.skills[0].durationMs == nil)
     }
 }
+
+
+struct BinaryResolutionTests {
+    @Test func findsBinaryInExtraDirectoryWhenPathIsEmpty() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let binary = directory.appendingPathComponent("symbrain")
+        try Data("#!/bin/sh\nexit 0\n".utf8).write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: binary.path)
+
+        let client = SymBrainClient(searchPATH: "", extraDirectories: [directory.path])
+
+        #expect(client.resolveBinary() == binary)
+    }
+
+    @Test func missingBinaryDiagnosticListsPathAndEveryExtraDirectory() {
+        let first = "/tmp/symbrain-test-first"
+        let second = "/tmp/symbrain-test-second"
+        let client = SymBrainClient(
+            searchPATH: "/tmp/symbrain-test-path",
+            extraDirectories: [first, second]
+        )
+
+        let diagnostic = client.binarySearchDiagnostic
+
+        #expect(diagnostic.contains("/tmp/symbrain-test-path"))
+        #expect(diagnostic.contains(first))
+        #expect(diagnostic.contains(second))
+        #expect(diagnostic.contains("not found"))
+        #expect(!diagnostic.contains("available on your PATH"))
+    }
+}
