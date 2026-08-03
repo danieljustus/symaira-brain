@@ -63,6 +63,10 @@ type op struct {
 // newLines.
 func diffLines(oldLines, newLines []string) []op {
 	n, m := len(oldLines), len(newLines)
+	const maxInt = int(^uint(0) >> 1)
+	if n >= maxInt || m >= maxInt {
+		return nil
+	}
 
 	// lcs[i][j] = length of the LCS of oldLines[i:] and newLines[j:].
 	lcs := make([][]int, n+1)
