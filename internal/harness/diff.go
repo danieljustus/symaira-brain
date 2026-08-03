@@ -67,6 +67,9 @@ func diffLines(oldLines, newLines []string) []op {
 	if n >= maxInt || m >= maxInt {
 		return nil
 	}
+	if n > maxInt-m {
+		return nil
+	}
 
 	// lcs[i][j] = length of the LCS of oldLines[i:] and newLines[j:].
 	lcs := make([][]int, n+1)
