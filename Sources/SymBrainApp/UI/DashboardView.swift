@@ -6,6 +6,8 @@ struct DashboardView: View {
     let client: SymBrainClient
 
     @StateObject private var vm: DashboardViewModel
+    @State private var isInitializing = false
+    @State private var initializeError: String?
 
     init(client: SymBrainClient) {
         self.client = client
@@ -66,7 +68,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             SymairaNotice(
                 title: "SymBrain CLI Not Found",
-                message: vm.errorMessage ?? "The symbrain CLI binary could not be found. Install it and try again.",
+                message: client.binarySearchDiagnostic,
                 tone: .critical
             )
 
@@ -257,9 +259,24 @@ struct DashboardView: View {
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
                 if !config.exists {
-                    Text("File does not exist yet. Run symbrain init to create it.")
+                    Text("File does not exist yet. Initialize SymBrain to create it.")
                         .font(.caption2)
                         .foregroundStyle(SymairaTheme.textMuted)
+                    Button(action: { Task { await initializeConfig() } }) {
+                        Label(
+                            isInitializing ? "Initializing..." : "Run symbrain init",
+                            systemImage: isInitializing ? "hourglass" : "play.fill"
+                        )
+                        .font(.caption)
+                    }
+                    .symairaButtonStyle(.primary)
+                    .disabled(isInitializing)
+                    if let initializeError {
+                        Text(initializeError)
+                            .font(.caption2)
+                            .foregroundStyle(SymairaTheme.critical)
+                            .lineLimit(3)
+                    }
                 } else if let error = config.error {
                     Text(error)
                         .font(.caption2)
@@ -270,6 +287,20 @@ struct DashboardView: View {
         }
         .padding(SymairaSpacing.medium)
         .glassCard()
+    }
+
+    private func initializeConfig() async {
+        isInitializing = true
+        initializeError = nil
+        defer { isInitializing = false }
+
+        do {
+            _ = try await client.initialize()
+            await vm.refresh()
+        } catch {
+            let friendly = formatError(error)
+            initializeError = friendly.message
+        }
     }
 
     private func serverCard(_ server: ServerStatus) -> some View {
