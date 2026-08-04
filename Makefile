@@ -13,9 +13,13 @@ coverage:
 	@set -eu; \
 	tmp_dir="$$(mktemp -d)"; \
 	trap 'rm -rf "$$tmp_dir"' EXIT; \
+	profile="$${COVERAGE_PROFILE:-$$tmp_dir/coverage.out}"; \
+	test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
 	go list ./... > "$$tmp_dir/packages"; \
-	go test ./... -coverprofile="$$tmp_dir/coverage.out" 2>&1 | tee "$$tmp_dir/test.log"; \
-	total="$$(go tool cover -func="$$tmp_dir/coverage.out" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
+	if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
+		go test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
+	fi; \
+	total="$$(go tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
 	total="$${total:-0.0}"; \
 	commit_sha="$$(git rev-parse HEAD)"; \
 	{ \
@@ -23,7 +27,7 @@ coverage:
 		first=true; \
 		while IFS= read -r package; do \
 			[ -n "$$package" ] || continue; \
-			coverage="$$(awk -v package="$$package" '$$1 == "ok" && $$2 == package { for (i = 1; i <= NF; i++) if ($$i == "coverage:") { value = $$(i + 1); sub(/%$$/, "", value); if (value ~ /^[0-9]+([.][0-9]+)?$$/) print value; exit } }' "$$tmp_dir/test.log")"; \
+			coverage="$$(awk -v package="$$package" '$$1 == "ok" && $$2 == package { for (i = 1; i <= NF; i++) if ($$i == "coverage:") { value = $$(i + 1); sub(/%$$/, "", value); if (value ~ /^[0-9]+([.][0-9]+)?$$/) print value; exit } }' "$$test_log")"; \
 			coverage="$${coverage:-0.0}"; \
 			if [ "$$first" = true ]; then first=false; else printf ',\n'; fi; \
 			printf '    "%s": %s' "$$package" "$$coverage"; \
