@@ -151,6 +151,12 @@ func (ms *ManagedServer) RestartCount() int {
 	return ms.restartCount
 }
 
+// Args returns a copy of the child server's command-line arguments.
+// It exists for tests and diagnostics; callers must not mutate it.
+func (ms *ManagedServer) Args() []string {
+	return append([]string(nil), ms.cfg.Args...)
+}
+
 // ensureReady spawns and initializes the child if needed, or restarts it
 // after a crash. Returns an error if the server is degraded or stopped.
 func (ms *ManagedServer) ensureReady(ctx context.Context) (*Client, error) {
