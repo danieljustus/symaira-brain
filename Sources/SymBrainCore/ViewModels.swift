@@ -89,6 +89,11 @@ public final class ProfilesViewModel: ObservableObject {
     }
 
     public func selectProfile(_ name: String) async {
+        // Toggle: clicking the already-expanded profile collapses it.
+        if selectedProfile?.name == name {
+            selectedProfile = nil
+            return
+        }
         isLoading = true
         errorMessage = nil
         errorDetail = nil
@@ -233,7 +238,7 @@ public final class SettingsViewModel: ObservableObject {
     @Published public var updateStatus: AppUpdateStatus = .unknown
 
     public let updateChecker: AppUpdateChecker
-    public var autoPrefs: UserDefaultsAutoUpdatePreferenceStore
+    @Published public var autoPrefs: UserDefaultsAutoUpdatePreferenceStore
 
     private let client: SymBrainClient
 
