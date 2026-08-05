@@ -49,6 +49,22 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 	}
 }
 
+// auditSink is the subset of the audit.Logger API that ServeIO uses. It
+// is an interface so tests can substitute a fake logger (e.g. to force
+// the degraded-warning path) without changing production behavior.
+type auditSink interface {
+	Log(server, tool string, args json.RawMessage, duration time.Duration, status string)
+	Degraded() bool
+	Close() error
+}
+
+// auditOpen opens the profile's audit logger. It is a package variable
+// (test seam) so tests can inject a fake sink or force an open failure;
+// production code never reassigns it.
+var auditOpen = func(name string, cfg audit.Config) (auditSink, error) {
+	return audit.Open(name, cfg)
+}
+
 // ServeIO serves the MCP protocol over the given reader/writer pair
 // (stdin/stdout). It blocks until the client disconnects or ctx is
 // cancelled.
@@ -57,7 +73,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		return fmt.Errorf("gateway: build catalog: %w", err)
 	}
 
-	var auditLog *audit.Logger
+	var auditLog auditSink
 	auditEnabled := s.profile.Audit.Enabled
 	if s.cfg != nil {
 		auditEnabled = auditEnabled || s.cfg.Audit.Enabled
@@ -71,7 +87,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			Enabled: true,
 			Verbose: verb,
 		}
-		al, err := audit.Open(s.profile.Name, cfg)
+		al, err := auditOpen(s.profile.Name, cfg)
 		if err != nil {
 			s.logger.Warn("failed to open audit log", "error", err)
 		} else {
