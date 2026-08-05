@@ -37,6 +37,7 @@
 		DBAE902DB6B8A6F4D0097667 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96FDE0A3CE49598C93AA0D40 /* Assets.xcassets */; };
 		E326279CD59DE06D180EB126 /* SymairaToolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9DA891F8B1B3498B6A3C122D /* SymairaToolKit */; };
 		E8C7A8584EB099EA03D99F73 /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 0EFDD552CB42AFE785E795E8 /* SymairaTheme */; };
+		F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */; };
 		F2F5EB32E528F74CA1CB2601 /* SyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */; };
 /* End PBXBuildFile section */
 
@@ -78,6 +79,7 @@
 		D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileRootView.swift; sourceTree = "<group>"; };
 		DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatter.swift; sourceTree = "<group>"; };
+		E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncViewModelTests.swift; sourceTree = "<group>"; };
 		E451D0841FDC285609A50119 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncView.swift; sourceTree = "<group>"; };
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -137,6 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
+				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
 			);
 			name = SymBrainCoreTests;
 			path = Tests/SymBrainCoreTests;
@@ -414,6 +417,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
+				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -652,7 +656,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -699,7 +703,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -723,7 +727,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = SymBrain;
@@ -748,7 +752,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.4.1;
+				MARKETING_VERSION = 0.4.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
