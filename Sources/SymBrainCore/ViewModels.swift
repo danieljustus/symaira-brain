@@ -338,11 +338,69 @@ public final class SyncViewModel: ObservableObject {
     @Published public var errorDetail: String?
     @Published public var dryRun = true
     @Published public var isBinaryNotFound = false
+    /// True once the user has confirmed a live (writing) sync in this
+    /// session. The first live sync always asks for confirmation; later
+    /// ones run immediately (#148).
+    @Published public private(set) var liveSyncConfirmed = false
 
     private let client: SymBrainClient
 
     public init(client: SymBrainClient) {
         self.client = client
+    }
+
+    /// The directory `symbrain sync` resolves relative targets against.
+    /// The CLI defaults `--project` to its working directory, which the
+    /// runner inherits from this app (#147).
+    public var syncWorkingDirectory: String {
+        FileManager.default.currentDirectoryPath
+    }
+
+    /// True when pressing Sync Now may run without a confirmation alert:
+    /// dry-run previews are always safe, and a live sync only needs the
+    /// one-time confirmation per session (#148).
+    public var canSyncImmediately: Bool {
+        dryRun || liveSyncConfirmed
+    }
+
+    /// Handles a Dry Run toggle change (#148). Entering dry-run mode
+    /// refreshes the preview (safe — nothing is written). Leaving dry-run
+    /// mode must NOT run a sync: it only clears the stale preview so
+    /// results are shown as no longer current. Live syncs happen solely
+    /// via Sync Now.
+    public func dryRunChanged(to newValue: Bool) async {
+        if newValue {
+            await sync()
+        } else {
+            clearPreview()
+        }
+    }
+
+    /// Records that the user confirmed a live sync for this session (#148).
+    public func confirmLiveSync() {
+        liveSyncConfirmed = true
+    }
+
+    /// Clears the stale preview without touching the filesystem (#148).
+    public func clearPreview() {
+        syncSummary = nil
+        errorMessage = nil
+        errorDetail = nil
+        isBinaryNotFound = false
+    }
+
+    /// Resolves a reported target path for display. The CLI reports paths
+    /// relative to its project directory (e.g. "./CLAUDE.md"); they are
+    /// resolved against `syncWorkingDirectory` so the UI shows the real
+    /// absolute target (#147).
+    public func displayPath(for target: SyncTargetStatus) -> String {
+        if target.path.hasPrefix("/") {
+            return target.path
+        }
+        return URL(fileURLWithPath: syncWorkingDirectory)
+            .appendingPathComponent(target.path)
+            .standardizedFileURL
+            .path
     }
 
     public func sync() async {

@@ -6,6 +6,8 @@ struct SyncView: View {
     let client: SymBrainClient
 
     @StateObject private var vm: SyncViewModel
+    /// Confirmation for the first live (writing) sync of a session (#148).
+    @State private var showLiveSyncConfirmation = false
 
     init(client: SymBrainClient) {
         self.client = client
@@ -33,11 +35,22 @@ struct SyncView: View {
                     SymairaEmptyState(
                         systemImage: "arrow.triangle.2.circlepath",
                         title: "Sync Ready",
-                        message: "Run sync to propagate profile and skill changes to your installed harnesses. Target files are written to each harness's configuration directory (e.g., ~/.claude/AGENTS.md, ~/.codex/AGENTS.md). Enable Dry Run to preview without writing."
+                        message: "Run sync to propagate profile and skill changes to your installed harnesses. Instruction files are written relative to the working directory: CLAUDE.md for Claude, .cursor/rules/symbrain.mdc for Cursor, GEMINI.md for Gemini. Harnesses without an instruction adapter (e.g., Codex) are skipped. Enable Dry Run to preview without writing."
                     )
                 }
             }
             .padding(SymairaSpacing.xLarge)
+        }
+        // #148: the first live sync of a session asks for confirmation
+        // before writing, since it can overwrite harness configuration.
+        .alert("Run Live Sync?", isPresented: $showLiveSyncConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Run Sync", role: .destructive) {
+                vm.confirmLiveSync()
+                Task { await vm.sync() }
+            }
+        } message: {
+            Text("Dry Run is off. This writes instruction files into \(vm.syncWorkingDirectory) and can overwrite existing harness configuration.")
         }
     }
 
@@ -63,13 +76,23 @@ struct SyncView: View {
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             .toggleStyle(.switch)
-            .onChange(of: vm.dryRun) { _, _ in
-                Task { await vm.sync() }
+            .onChange(of: vm.dryRun) { _, newValue in
+                // #148: entering dry-run refreshes the preview (safe);
+                // leaving dry-run only clears the stale preview, never syncs.
+                Task { await vm.dryRunChanged(to: newValue) }
             }
 
             Spacer()
 
-            Button(action: { Task { await vm.sync() } }) {
+            // #148: a live (writing) sync runs only from Sync Now, and the
+            // first one of a session is gated behind a confirmation alert.
+            Button(action: {
+                if vm.canSyncImmediately {
+                    Task { await vm.sync() }
+                } else {
+                    showLiveSyncConfirmation = true
+                }
+            }) {
                 HStack(spacing: SymairaSpacing.medium) {
                     if vm.isLoading {
                         ProgressView()
@@ -101,6 +124,10 @@ struct SyncView: View {
                     .font(.caption)
                     .foregroundStyle(SymairaTheme.textMuted)
             } else {
+                // #147: relative targets are resolved against this directory.
+                Text("Paths resolve against \(vm.syncWorkingDirectory)")
+                    .font(.caption2)
+                    .foregroundStyle(SymairaTheme.textMuted)
                 VStack(spacing: SymairaSpacing.xSmall) {
                     ForEach(summary.targets) { target in
                         targetRow(target)
@@ -121,7 +148,7 @@ struct SyncView: View {
                         .foregroundStyle(SymairaTheme.textPrimary)
                     SymairaBadge(target.status, tone: statusTone(target.status))
                 }
-                Text(target.path)
+                Text(vm.displayPath(for: target))
                     .font(.caption2)
                     .foregroundStyle(SymairaTheme.textMuted)
                     .lineLimit(1)
