@@ -9,6 +9,16 @@ import (
 // UnifiedDiff's output, matching the conventional `diff -u` default.
 const diffContext = 3
 
+// maxDiffLines caps the size of the O(n·m) LCS table allocated by diffLines.
+// When either side of the diff exceeds this many lines, UnifiedDiff falls
+// back to an explicit notice instead of the table, keeping the worst-case
+// allocation at (maxDiffLines+1)² ints (~800 MB on 64-bit) rather than
+// growing quadratically with unbounded input (a ~50k-line harness config
+// would need ~20 GB and OOM the CLI). The cap is applied before any make()
+// call, so allocation sizes derived from input are provably bounded
+// (go/allocation-size-overflow).
+const maxDiffLines = 10000
+
 // UnifiedDiff renders a unified diff of the change from old to new content,
 // for `install --dry-run` / `uninstall --dry-run` output. It is a
 // self-contained, line-based implementation (longest-common-subsequence)
@@ -20,6 +30,14 @@ const diffContext = 3
 func UnifiedDiff(path string, old, new []byte) string {
 	oldLines := splitLines(old)
 	newLines := splitLines(new)
+
+	// Refuse to run the O(n·m) LCS over oversized inputs: render an explicit
+	// notice (still in unified-diff shape) instead of allocating a table that
+	// can reach ~20 GB for a ~50k-line config. The check happens before any
+	// allocation derived from input size.
+	if len(oldLines) > maxDiffLines || len(newLines) > maxDiffLines {
+		return tooLargeDiffNotice(path, len(oldLines), len(newLines))
+	}
 
 	ops := diffLines(oldLines, newLines)
 	hunks := groupHunks(ops)
@@ -33,6 +51,20 @@ func UnifiedDiff(path string, old, new []byte) string {
 	for _, h := range hunks {
 		writeHunk(&b, h)
 	}
+	return b.String()
+}
+
+// tooLargeDiffNotice renders an explicit notice instead of a full LCS diff
+// when either side of the change exceeds maxDiffLines. It keeps the
+// unified-diff output shape (both "---"/"+++" file headers) so consumers of
+// UnifiedDiff see a well-formed, honest result for oversized inputs instead
+// of an OOM or a silently empty diff.
+func tooLargeDiffNotice(path string, oldCount, newCount int) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "--- %s\n", path)
+	fmt.Fprintf(&b, "+++ %s\n", path)
+	fmt.Fprintf(&b, "file too large to diff: %d old lines, %d new lines (max %d); full diff skipped\n",
+		oldCount, newCount, maxDiffLines)
 	return b.String()
 }
 
@@ -68,6 +100,13 @@ func diffLines(oldLines, newLines []string) []op {
 		return nil
 	}
 	if n > maxInt-m {
+		return nil
+	}
+	// Bound the O(n·m) table below: UnifiedDiff already refuses to call this
+	// function when either side exceeds maxDiffLines; this guard makes the
+	// bound provable here as well, so the make() sizes below can never be
+	// computed from unbounded input (go/allocation-size-overflow).
+	if n > maxDiffLines || m > maxDiffLines {
 		return nil
 	}
 
