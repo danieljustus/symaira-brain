@@ -56,6 +56,8 @@ implement any of that itself.
 Install the latest release or build from source (see the
 [Building](#building) section for the exact commands), then:
 
+![symbrain doctor terminal output](assets/symbrain-doctor.svg)
+
 ```bash
 # 1. Create the XDG config/data/cache directories, a default config,
 #    and two example profiles ("personal" and "restricted").
@@ -276,6 +278,8 @@ expectations.
 Native SwiftUI apps for macOS and iOS are included in the repo. They use
 [`symaira-appkit`](https://github.com/danieljustus/symaira-appkit) for
 theme, CLI runner, and tool detection.
+
+![SymBrain macOS dashboard](assets/dashboard.png)
 
 ### Build from source
 

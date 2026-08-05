@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="568" viewBox="0 0 900 568" role="img" aria-label="symbrain doctor terminal output">
+  <defs>
+    <linearGradient id="termbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e1e2e"/>
+      <stop offset="1" stop-color="#181825"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="900" height="568" rx="14" fill="#1e1e2e"/>
+  <rect x="0" y="0" width="900" height="38" rx="14" fill="#313244"/>
+  <rect x="0" y="22" width="900" height="16" fill="#313244"/>
+  <circle cx="24" cy="19" r="6.5" fill="#f38ba8"/>
+  <circle cx="44" cy="19" r="6.5" fill="#f9e2af"/>
+  <circle cx="64" cy="19" r="6.5" fill="#a6e3a1"/>
+  <text x="82" y="24" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12.5" fill="#a6adc8">symbrain doctor — danieljustus/symaira-brain</text>
+  <text x="16" y="46" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#89b4fa">symbrain doctor</text>
+<text x="16" y="67" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4"></text>
+<text x="16" y="88" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  config dir   /Users/daniel/.config/symbrain</text>
+<text x="16" y="109" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  data dir     /Users/daniel/.local/share/symbrain</text>
+<text x="16" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  cache dir    /Users/daniel/.cache/symbrain</text>
+<text x="16" y="151" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  config.toml  not found (run `symbrain init`)</text>
+<text x="16" y="172" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4"></text>
+<text x="16" y="193" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  vault    /opt/homebrew/bin/symvault (0.12.1)</text>
+<text x="16" y="214" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  memory   /opt/homebrew/bin/symmemory (0.16.0)</text>
+<text x="16" y="235" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  skills   /opt/homebrew/bin/symskills (0.1.10)</text>
+<text x="16" y="256" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4"></text>
+<text x="16" y="277" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">  ✓  profiles: personal</text>
+<text x="16" y="298" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4"></text>
+<text x="16" y="319" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  claude         config found, symbrain not installed: /Users/daniel/.claude.json</text>
+<text x="16" y="340" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  claude-desktop config found, symbrain not installed: /Users/daniel/Library/Application Support/Claude/claude_desktop_config.json</text>
+<text x="16" y="361" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  cursor         config not found: /Users/daniel/.cursor/mcp.json</text>
+<text x="16" y="382" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  opencode       config not found: /Users/daniel/.config/opencode/config.json</text>
+<text x="16" y="403" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  codex          config found, symbrain not installed: /Users/daniel/.codex/config.toml</text>
+<text x="16" y="424" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#f9e2af">  →  gemini         config not found: /Users/daniel/.gemini/settings.json</text>
+<text x="16" y="445" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4"></text>
+<text x="16" y="466" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#cdd6f4">  profile handshakes:</text>
+<text x="16" y="487" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">    ✓  personal   vault    protocol=2024-11-05 tools=10 exposed=10 hidden=0 unknown=0</text>
+<text x="16" y="508" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">    ✓  personal   memory   protocol=2024-11-05 tools=9 exposed=8 hidden=0 unknown=1</text>
+<text x="16" y="529" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5" fill="#a6e3a1">    ✓  personal   skills   protocol=2024-11-05 tools=9 exposed=9 hidden=0 unknown=0</text>
+  <rect x="16" y="546" width="9" height="12.5" fill="#89b4fa" opacity="0.9">
+    <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.1s" repeatCount="indefinite"/>
+  </rect>
+</svg>
