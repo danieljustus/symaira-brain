@@ -735,3 +735,129 @@ func TestPrintEntry_NoArgKeysOmitsKeysField(t *testing.T) {
 		t.Errorf("output should not contain keys= when ArgKeys is empty: %q", output)
 	}
 }
+
+// TestTailFile_LargeFileBackwardScan exercises the >64 KB backward-scan
+// branch of tailFile: the last n entries must survive, in order.
+func TestTailFile_LargeFileBackwardScan(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	const totalEntries = 2000
+	logPath := filepath.Join(auditDir, "big.jsonl")
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < totalEntries; i++ {
+		e := Entry{
+			Timestamp:  "2026-01-01T00:00:00Z",
+			Profile:    "big",
+			Server:     "memory",
+			Tool:       "search",
+			DurationMS: int64(i),
+			Status:     "ok",
+		}
+		data, _ := json.Marshal(e)
+		if _, err := f.Write(append(data, '\n')); err != nil {
+			t.Fatal(err)
+		}
+	}
+	f.Close()
+
+	info, err := os.Stat(logPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Size() <= tailChunkSize {
+		t.Fatalf("fixture too small: %d bytes; backward scan needs > %d", info.Size(), tailChunkSize)
+	}
+
+	var out bytes.Buffer
+	if err := Tail(&out, "big", 10); err != nil {
+		t.Fatalf("Tail: %v", err)
+	}
+	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
+	if len(lines) != 10 {
+		t.Fatalf("expected 10 lines, got %d", len(lines))
+	}
+	// Last line must be the final entry (duration_ms = 1999).
+	last := lines[len(lines)-1]
+	if !strings.Contains(last, "1999ms") {
+		t.Errorf("last line should contain duration 1999ms: %q", last)
+	}
+	first := lines[0]
+	if !strings.Contains(first, "1990ms") {
+		t.Errorf("first line should contain duration 1990ms: %q", first)
+	}
+}
+
+// TestTailFile_LargeFileAllLines verifies the backward scan returns every
+// line when no count limit is given.
+func TestTailFile_LargeFileAllLines(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "big.jsonl")
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	line := `{"timestamp":"2026-01-01T00:00:00Z","profile":"big","server":"memory","tool":"search","duration_ms":1,"status":"ok"}`
+	for i := 0; i < 1500; i++ { // ~140 KB, above the 64 KB chunk size
+		if _, err := f.WriteString(line + "\n"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	f.Close()
+
+	lines, err := tailFile(logPath, 0)
+	if err != nil {
+		t.Fatalf("tailFile: %v", err)
+	}
+	if len(lines) != 1500 {
+		t.Fatalf("expected 1500 lines, got %d", len(lines))
+	}
+}
+
+// TestDegraded_StartsFalseAndFlipsOnWriteFailure covers the Degraded
+// reporting path: a closed underlying file turns subsequent Log calls
+// into dropped, degraded entries.
+func TestDegraded_StartsFalseAndFlipsOnWriteFailure(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	l, err := Open("degraded", Config{Enabled: true})
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	defer l.Close()
+
+	if l.Degraded() {
+		t.Error("fresh logger should not be degraded")
+	}
+
+	// Close the underlying file behind the logger's back, then log:
+	// the write fails and the logger flips to degraded.
+	if err := l.f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	l.Log("memory", "search", nil, time.Millisecond, "ok")
+
+	if !l.Degraded() {
+		t.Error("logger should be degraded after a write failure")
+	}
+	if l.dropped != 1 {
+		t.Errorf("dropped = %d, want 1", l.dropped)
+	}
+}
+
+// TestDegraded_NilLoggerIsNeverDegraded covers the nil-receiver guard.
+func TestDegraded_NilLoggerIsNeverDegraded(t *testing.T) {
+	var l *Logger
+	if l.Degraded() {
+		t.Error("nil logger should never report degraded")
+	}
+}
