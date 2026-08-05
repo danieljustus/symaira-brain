@@ -34,6 +34,18 @@ func TestParseRejectsUnknownFormats(t *testing.T) {
 	}
 }
 
+func TestParseAcceptsEmptyAndTableFormats(t *testing.T) {
+	for _, explicit := range []string{"", "table", " TABLE "} {
+		got, err := Parse(explicit)
+		if err != nil {
+			t.Fatalf("Parse(%q): %v", explicit, err)
+		}
+		if got != FormatTable {
+			t.Errorf("Parse(%q) = %q, want %q", explicit, got, FormatTable)
+		}
+	}
+}
+
 func TestExtractAcceptsGlobalFlagsAnywhere(t *testing.T) {
 	format, args, err := Extract([]string{"profile", "show", "name", "--json"})
 	if err != nil {
@@ -52,6 +64,33 @@ func TestExtractAcceptsGlobalFlagsAnywhere(t *testing.T) {
 	}
 	if format != FormatJSON || strings.Join(args, " ") != "version" {
 		t.Fatalf("Extract --output = (%q, %q), want (json, version)", format, strings.Join(args, " "))
+	}
+}
+
+func TestExtractRejectsInvalidAndConflictingFlags(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		args []string
+	}{
+		{name: "missing value", args: []string{"--output"}},
+		{name: "invalid value", args: []string{"--output=yaml"}},
+		{name: "conflicting values", args: []string{"--json", "--output", "table"}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if _, _, err := Extract(test.args); err == nil {
+				t.Fatalf("Extract(%v) returned nil error", test.args)
+			}
+		})
+	}
+}
+
+func TestExtractAcceptsEqualDuplicateFormats(t *testing.T) {
+	format, args, err := Extract([]string{"--output=json", "--json", "version"})
+	if err != nil {
+		t.Fatalf("Extract: %v", err)
+	}
+	if format != FormatJSON || strings.Join(args, " ") != "version" {
+		t.Fatalf("Extract = (%q, %q), want (json, version)", format, strings.Join(args, " "))
 	}
 }
 
@@ -81,5 +120,36 @@ func TestRenderTableUsesTableFunction(t *testing.T) {
 	}
 	if got.String() != "table output\n" {
 		t.Fatalf("output = %q, want table output", got.String())
+	}
+}
+
+func TestRenderTableWritesSimpleValuesAndAllowsEmptyRows(t *testing.T) {
+	var got bytes.Buffer
+	if err := Render(&got, FormatTable, "table output"); err != nil {
+		t.Fatalf("Render simple table: %v", err)
+	}
+	if err := Render(&got, FormatTable, Rows{}); err != nil {
+		t.Fatalf("Render empty rows: %v", err)
+	}
+	if got.String() != "table output\n" {
+		t.Fatalf("output = %q, want simple value only", got.String())
+	}
+}
+
+func TestRenderRejectsUnsupportedFormat(t *testing.T) {
+	if err := Render(io.Discard, Format("yaml"), nil); err == nil {
+		t.Fatal("Render(yaml) returned nil error")
+	}
+}
+
+type errorWriter struct{}
+
+func (errorWriter) Write([]byte) (int, error) {
+	return 0, io.ErrClosedPipe
+}
+
+func TestRenderPropagatesWriterErrors(t *testing.T) {
+	if err := Render(errorWriter{}, FormatTable, "value"); err == nil {
+		t.Fatal("Render() returned nil error for a failing writer")
 	}
 }
