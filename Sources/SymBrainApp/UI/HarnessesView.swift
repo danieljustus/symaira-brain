@@ -15,6 +15,9 @@ struct HarnessesView: View {
     // #75: Install-overwrite confirmation
     @State private var pendingInstall: InstallConfirmation?
 
+    // #149: Uninstall confirmation — uninstall rewrites the harness config.
+    @State private var pendingUninstall: UninstallConfirmation?
+
     private let allHarnesses = ["claude", "claude-desktop", "cursor", "opencode", "codex", "gemini"]
 
     init(client: SymBrainClient) {
@@ -83,6 +86,29 @@ struct HarnessesView: View {
                 Text("Installing profile \"\(install.profile)\" to harness \"\(install.harness)\" will overwrite the existing configuration at:\n\(status.configPath)\n\nThis action cannot be undone.")
             }
         }
+        // #149: Confirmation before uninstalling — uninstall rewrites the
+        // harness config. Mirrors the install confirmation (#75) so cancel
+        // leaves the config untouched.
+        .alert(
+            "Uninstall Harness",
+            isPresented: Binding(
+                get: { pendingUninstall != nil },
+                set: { if !$0 { pendingUninstall = nil } }
+            ),
+            presenting: pendingUninstall
+        ) { uninstall in
+            Button("Cancel", role: .cancel) {
+                pendingUninstall = nil
+            }
+            Button("Uninstall", role: .destructive) {
+                Task { await vm.uninstall(harness: uninstall.harness, dryRun: false) }
+                pendingUninstall = nil
+            }
+        } message: { uninstall in
+            if let status = vm.harnesses.first(where: { $0.name == uninstall.harness }) {
+                Text("Uninstalling harness \"\(uninstall.harness)\" will rewrite the configuration at:\n\(status.configPath)\n\nThis action cannot be undone.")
+            }
+        }
     }
 
     // MARK: - Header
@@ -131,41 +157,39 @@ struct HarnessesView: View {
 
             Spacer()
 
-            // #75: Install menu — confirm overwrite when already installed
-            Menu {
-                ForEach(vm.profiles, id: \.name) { profile in
-                    Button("\(profile.name)") {
-                        if status?.installed == true {
-                            pendingInstall = InstallConfirmation(harness: name, profile: profile.name)
-                        } else {
-                            Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
+            // #151: Fixed-width trailing region so the Install control starts
+            // at the same x on every harness row; the inner Spacer absorbs the
+            // width difference between installed and uninstalled rows.
+            HStack(spacing: SymairaSpacing.medium) {
+                // #75: Install menu — confirm overwrite when already installed
+                Menu {
+                    ForEach(vm.profiles, id: \.name) { profile in
+                        Button("\(profile.name)") {
+                            if status?.installed == true {
+                                pendingInstall = InstallConfirmation(harness: name, profile: profile.name)
+                            } else {
+                                Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
+                            }
                         }
                     }
+                } label: {
+                    Label("Install", systemImage: "arrow.down.to.line")
+                        .font(.caption)
                 }
-            } label: {
-                Label("Install", systemImage: "arrow.down.to.line")
-                    .font(.caption)
-            }
-            .menuStyle(.borderlessButton)
-            .frame(minWidth: 90)
+                // #151: bordered style with intrinsic width so the hit area is
+                // compact and visible (was an oversized invisible target with
+                // the label ~470pt away from its disclosure chevron).
+                .menuStyle(.button)
+                .buttonStyle(.bordered)
+                .fixedSize()
 
-            // Dry-run preview for install
-            Button(action: {
-                // #83: capture harness at tap time; profile is nil so the
-                // sheet's profile picker is shown (#73).
-                dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: true)
-            }) {
-                Label("Dry Run", systemImage: "doc.text.magnifyingglass")
-                    .font(.caption)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(SymairaTheme.textSecondary)
+                Spacer(minLength: SymairaSpacing.medium)
 
-            // Uninstall controls (only when installed)
-            if status?.installed == true {
-                // #74: Dry Run for Uninstall
+                // Dry-run preview for install
                 Button(action: {
-                    dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)
+                    // #83: capture harness at tap time; profile is nil so the
+                    // sheet's profile picker is shown (#73).
+                    dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: true)
                 }) {
                     Label("Dry Run", systemImage: "doc.text.magnifyingglass")
                         .font(.caption)
@@ -173,15 +197,31 @@ struct HarnessesView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
-                Button(action: {
-                    Task { await vm.uninstall(harness: name, dryRun: false) }
-                }) {
-                    Label("Uninstall", systemImage: "arrow.up.from.line")
-                        .font(.caption)
+                // Uninstall controls (only when installed)
+                if status?.installed == true {
+                    // #74: Dry Run for Uninstall
+                    Button(action: {
+                        dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)
+                    }) {
+                        Label("Dry Run", systemImage: "doc.text.magnifyingglass")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(SymairaTheme.textSecondary)
+
+                    // #149: Uninstall is gated behind a confirmation alert
+                    // (uninstall rewrites the harness config).
+                    Button(action: {
+                        pendingUninstall = UninstallConfirmation(harness: name)
+                    }) {
+                        Label("Uninstall", systemImage: "arrow.up.from.line")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(SymairaTheme.critical)
                 }
-                .buttonStyle(.plain)
-                .foregroundStyle(SymairaTheme.critical)
             }
+            .frame(width: 380, alignment: .trailing)
         }
         .padding(SymairaSpacing.medium)
         .glassCard()
@@ -207,6 +247,13 @@ private struct InstallConfirmation: Identifiable {
     let id = UUID()
     let harness: String
     let profile: String
+}
+
+/// A pending uninstall confirmation (#149), captured at button-tap time and
+/// handed to the alert via `presenting:`.
+private struct UninstallConfirmation: Identifiable {
+    let id = UUID()
+    let harness: String
 }
 
 // MARK: - Dry Run Sheet
