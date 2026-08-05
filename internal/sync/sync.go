@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/danieljustus/symaira-brain/internal/adapter"
 	"github.com/danieljustus/symaira-brain/internal/harness"
@@ -82,9 +83,9 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 func syncTarget(t adapter.Target, content, projectDir string, dryRun bool, stderr io.Writer) (TargetStatus, error) {
 	dir := projectDir
 	if t.Dir != "" {
-		dir = fmt.Sprintf("%s/%s", projectDir, t.Dir)
+		dir = filepath.Join(projectDir, t.Dir)
 	}
-	path := fmt.Sprintf("%s/%s", dir, t.Filename)
+	path := filepath.Join(dir, t.Filename)
 
 	existed := fileExists(path)
 
