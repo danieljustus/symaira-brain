@@ -99,6 +99,9 @@ struct ProfilesView: View {
             Task { await vm.selectProfile(profile.name) }
         }) {
             HStack {
+                Image(systemName: vm.selectedProfile?.name == profile.name ? "chevron.down" : "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(SymairaTheme.textSecondary)
                 VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                     Text(profile.name)
                         .font(.body.weight(.semibold))
@@ -236,6 +239,7 @@ struct NewProfileSheet: View {
             HStack {
                 Button("Cancel") { onDone() }
                     .symairaButtonStyle(.secondary)
+                    .keyboardShortcut(.cancelAction)
                 Spacer()
                 Button("Create") {
                     isCreating = true
@@ -246,6 +250,7 @@ struct NewProfileSheet: View {
                     }
                 }
                 .symairaButtonStyle(.primary)
+                .keyboardShortcut(.defaultAction)
                 .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || isCreating)
             }
         }

@@ -322,6 +322,7 @@ struct DryRunSheet: View {
                 HStack {
                     Button("Cancel") { dismiss() }
                         .symairaButtonStyle(.secondary)
+                        .keyboardShortcut(.cancelAction)
                     Spacer()
                     Button("Run Dry Run") {
                         guard !selectedProfile.isEmpty else {
@@ -332,6 +333,7 @@ struct DryRunSheet: View {
                         Task { await runDryRun() }
                     }
                     .symairaButtonStyle(.primary)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(profiles.isEmpty || selectedProfile.isEmpty)
                 }
             } else if isLoading {
