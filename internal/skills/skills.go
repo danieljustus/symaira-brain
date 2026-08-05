@@ -4,7 +4,9 @@ package skills
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -28,10 +30,19 @@ type Result struct {
 	Message string `json:"message,omitempty"`
 }
 
+// ErrTimeout is returned when a symskills invocation exceeds its sync
+// budget. Sync reports it as a per-target error result naming the target.
+var ErrTimeout = errors.New("symskills sync timed out")
+
 // Response is the top-level JSON structure returned by symskills --json.
 type Response struct {
 	Results []Result `json:"results"`
 }
+
+// waitDelay bounds how long Wait waits for a killed child's pipes to
+// close after the context expires, so a hung symskills child cannot
+// block sync beyond the grace period.
+const waitDelay = 2 * time.Second
 
 // Runner executes symskills commands.  The default implementation shells
 // out to the real binary; tests inject a fake.
@@ -39,21 +50,32 @@ type Runner struct {
 	// LookPath resolves the symskills binary.  Defaults to exec.LookPath.
 	LookPath func(name string) (string, error)
 	// Run executes a command and returns combined stdout+stderr.
+	// Kept for callers/tests that predate timeout enforcement; runSync
+	// prefers RunContext when set.
 	Run func(name string, args ...string) ([]byte, error)
+	// RunContext executes a command under a context and returns combined
+	// stdout+stderr.  When set, runSync uses it so a hung symskills
+	// child is killed once the sync budget expires.
+	RunContext func(ctx context.Context, name string, args ...string) ([]byte, error)
 }
 
 // DefaultRunner returns a Runner that uses exec.LookPath and os/exec.
 func DefaultRunner() *Runner {
+	run := func(ctx context.Context, name string, args ...string) ([]byte, error) {
+		cmd := exec.CommandContext(ctx, name, args...)
+		cmd.WaitDelay = waitDelay
+		var buf bytes.Buffer
+		cmd.Stdout = &buf
+		cmd.Stderr = &buf
+		err := cmd.Run()
+		return buf.Bytes(), err
+	}
 	return &Runner{
 		LookPath: exec.LookPath,
 		Run: func(name string, args ...string) ([]byte, error) {
-			cmd := exec.Command(name, args...)
-			var buf bytes.Buffer
-			cmd.Stdout = &buf
-			cmd.Stderr = &buf
-			err := cmd.Run()
-			return buf.Bytes(), err
+			return run(context.Background(), name, args...)
 		},
+		RunContext: run,
 	}
 }
 
@@ -107,12 +129,16 @@ func (r *Runner) Sync(targets []string, timeout time.Duration) ([]Result, string
 }
 
 func (r *Runner) runSync(target string, timeout time.Duration) (Result, error) {
-	_ = time.AfterFunc(timeout, func() {
-		// timeout is best-effort; the command will be killed by the OS
-		// if it exceeds this, but we don't enforce it here.
-	})
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
 
-	data, err := r.Run("symskills", "render", "--target", target, "--json")
+	data, err := r.runCommand(ctx, "symskills", "render", "--target", target, "--json")
+	// The budget expiring is the only way our context gets done, so the
+	// context state is authoritative even when the exec layer reports
+	// the kill as "signal: killed" instead of wrapping DeadlineExceeded.
+	if ctx.Err() != nil {
+		return Result{}, fmt.Errorf("%s: %w", target, ErrTimeout)
+	}
 	if err != nil {
 		return Result{}, fmt.Errorf("symskills render --target %s: %w", target, err)
 	}
@@ -131,4 +157,14 @@ func (r *Runner) runSync(target string, timeout time.Duration) (Result, error) {
 	}
 
 	return resp.Results[0], nil
+}
+
+// runCommand prefers the context-aware seam so a hung child is killed
+// once the sync budget expires; Run remains the fallback for callers
+// that predate timeout enforcement.
+func (r *Runner) runCommand(ctx context.Context, name string, args ...string) ([]byte, error) {
+	if r.RunContext != nil {
+		return r.RunContext(ctx, name, args...)
+	}
+	return r.Run(name, args...)
 }

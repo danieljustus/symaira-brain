@@ -1,11 +1,13 @@
 package skills
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -138,6 +140,73 @@ func TestSync_EmptyTargets(t *testing.T) {
 	}
 	if summary != "" {
 		t.Errorf("expected empty summary, got %q", summary)
+	}
+}
+
+// TestSync_TargetTimeout verifies that a runSync exceeding its budget is
+// surfaced as a per-target error result naming the timed-out target.
+func TestSync_TargetTimeout(t *testing.T) {
+	r := &Runner{
+		LookPath: func(name string) (string, error) {
+			return "/usr/bin/symskills", nil
+		},
+		RunContext: func(ctx context.Context, name string, args ...string) ([]byte, error) {
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(10 * time.Second):
+				t.Error("RunContext was not cancelled within the budget")
+				return []byte(`{"results":[]}`), nil
+			}
+		},
+	}
+
+	results, summary := r.Sync([]string{"claude"}, 50*time.Millisecond)
+
+	if len(results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(results))
+	}
+	if results[0].Status != "error" {
+		t.Errorf("status = %q, want error", results[0].Status)
+	}
+	if !strings.Contains(results[0].Message, "timed out") {
+		t.Errorf("message = %q, want timeout mention", results[0].Message)
+	}
+	if !strings.Contains(summary, "error") {
+		t.Errorf("summary = %q, want error mention", summary)
+	}
+}
+
+// TestDefaultRunner_TimeoutKillsHungChild verifies the production runner
+// actually kills a hung child once the context expires.
+func TestDefaultRunner_TimeoutKillsHungChild(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("shell-script fixture is POSIX-only")
+	}
+	dir := t.TempDir()
+	script := filepath.Join(dir, "symskills")
+	// exec replaces sh with sleep so the killed process is the sleeper.
+	content := "#!/bin/sh\nexec sleep 30\n"
+	if err := os.WriteFile(script, []byte(content), 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	r := DefaultRunner()
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	start := time.Now()
+	_, err := r.RunContext(ctx, script, "render", "--target", "claude", "--json")
+	elapsed := time.Since(start)
+
+	if err == nil {
+		t.Error("expected an error from the killed child")
+	}
+	if ctx.Err() == nil {
+		t.Error("expected the context to be expired after the kill")
+	}
+	if elapsed > 5*time.Second {
+		t.Errorf("hung child blocked RunContext for %v; expected prompt kill", elapsed)
 	}
 }
 
