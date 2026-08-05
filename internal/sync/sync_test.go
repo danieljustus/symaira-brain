@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/instructions"
+	"github.com/danieljustus/symaira-brain/internal/skills"
 )
 
 func TestRun_GlobalAndProjectSources(t *testing.T) {
@@ -162,6 +163,33 @@ func TestFormatSummary(t *testing.T) {
 	}
 	if !strings.Contains(out, "gemini:") || !strings.Contains(out, "unchanged") {
 		t.Errorf("summary missing gemini:unchanged\n%s", out)
+	}
+}
+
+func TestFormatSummaryIncludesMessagesAndSkills(t *testing.T) {
+	statuses := []TargetStatus{{
+		Name:    "claude",
+		Status:  "dry-run",
+		Message: "would update",
+	}}
+	skillsResults := []skills.Result{{
+		Target:  "claude",
+		Status:  "error",
+		Message: "symskills failed",
+	}}
+
+	var buf bytes.Buffer
+	FormatSummary(&buf, statuses, skillsResults)
+
+	out := buf.String()
+	for _, want := range []string{
+		"claude:      dry-run (would update)",
+		"Skills:",
+		"claude:      error (symskills failed)",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("summary missing %q\n%s", want, out)
+		}
 	}
 }
 

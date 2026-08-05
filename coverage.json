@@ -1,23 +1,23 @@
 {
   "schema_version": 1,
-  "commit_sha": "e87ee7c75359185a727c605590c806208861cec6",
-  "total": 78.6,
+  "commit_sha": "e07e0ecb9cbc20ef7b7a39325ebbfea0c8d5bb53",
+  "total": 83.7,
   "packages": {
-    "github.com/danieljustus/symaira-brain/cmd/symbrain": 70.8,
+    "github.com/danieljustus/symaira-brain/cmd/symbrain": 79.5,
     "github.com/danieljustus/symaira-brain/internal/adapter": 88.9,
-    "github.com/danieljustus/symaira-brain/internal/audit": 71.2,
-    "github.com/danieljustus/symaira-brain/internal/broker": 83.8,
+    "github.com/danieljustus/symaira-brain/internal/audit": 88.2,
+    "github.com/danieljustus/symaira-brain/internal/broker": 83.5,
     "github.com/danieljustus/symaira-brain/internal/catalog": 93.0,
     "github.com/danieljustus/symaira-brain/internal/config": 91.7,
-    "github.com/danieljustus/symaira-brain/internal/gateway": 68.4,
-    "github.com/danieljustus/symaira-brain/internal/harness": 90.4,
+    "github.com/danieljustus/symaira-brain/internal/gateway": 92.2,
+    "github.com/danieljustus/symaira-brain/internal/harness": 78.2,
     "github.com/danieljustus/symaira-brain/internal/instructions": 91.4,
-    "github.com/danieljustus/symaira-brain/internal/output": 69.0,
+    "github.com/danieljustus/symaira-brain/internal/output": 97.6,
     "github.com/danieljustus/symaira-brain/internal/policy": 98.8,
     "github.com/danieljustus/symaira-brain/internal/profile": 91.5,
     "github.com/danieljustus/symaira-brain/internal/security": 0.0,
-    "github.com/danieljustus/symaira-brain/internal/skills": 94.6,
-    "github.com/danieljustus/symaira-brain/internal/sync": 79.0,
-    "github.com/danieljustus/symaira-brain/internal/xdg": 0.0
+    "github.com/danieljustus/symaira-brain/internal/skills": 95.7,
+    "github.com/danieljustus/symaira-brain/internal/sync": 90.3,
+    "github.com/danieljustus/symaira-brain/internal/xdg": 86.7
   }
 }

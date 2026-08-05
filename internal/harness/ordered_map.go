@@ -334,23 +334,6 @@ func writeJSONString(w io.Writer, s string) error {
 	return nil
 }
 
-// toOrderedMap converts a map[string]any to *orderedMap, preserving the
-// Go map's iteration order (which is undefined but consistent within a
-// single process). Used only when constructing new entries from scratch
-// (SetServer), where the map has two keys in a known order. For TOML
-// interop, it shallow-converts the first level of nested maps.
-func toOrderedMap(m map[string]any) *orderedMap {
-	om := newOrderedMap()
-	for k, v := range m {
-		// For the entry map {"command": ..., "args": ...}, we want
-		// "command" before "args" consistently. Go map iteration is
-		// not specified, but for small maps with known keys we can
-		// enforce order explicitly.
-		om.set(k, v)
-	}
-	return om
-}
-
 // entryToOrderedMap is like entryToMap but returns an *orderedMap with a
 // stable key order ("command" first, then "args") for use in jsonDocument.
 func entryToOrderedMap(e Entry) *orderedMap {
