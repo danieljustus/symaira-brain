@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -30,6 +31,7 @@ type Server struct {
 	logger            *slog.Logger
 	cfg               *config.Config
 	version           string
+	degradations      []audit.Degradation
 	auditDegradedWarn sync.Once
 }
 
@@ -55,6 +57,7 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 // the degraded-warning path) without changing production behavior.
 type auditSink interface {
 	Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...audit.Classification)
+	LogDegradation(server, reason, level string)
 	Degraded() bool
 	Close() error
 }
@@ -94,11 +97,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		} else {
 			auditLog = al
 			defer auditLog.Close()
+			for _, degradation := range s.degradations {
+				auditLog.LogDegradation(degradation.Server, degradation.Reason, degradation.Level)
+			}
 		}
 	}
 
 	srv := mcpserver.New("symbrain", s.version)
-	srv.SetInstructions(fmt.Sprintf("symbrain profile %q", s.profile.Name))
+	srv.SetInstructions(s.instructions())
 
 	for _, entry := range s.cat.Exposed() {
 		entry := entry
@@ -133,11 +139,28 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	return srv.ServeIO(ctx, r, w)
 }
 
+// instructions returns the stable profile guidance and, when startup was
+// degraded, a deterministic one-line summary of the absent backends.
+func (s *Server) instructions() string {
+	base := fmt.Sprintf("symbrain profile %q", s.profile.Name)
+	if len(s.degradations) == 0 {
+		return base
+	}
+
+	servers := make([]string, 0, len(s.degradations))
+	for _, degradation := range s.degradations {
+		servers = append(servers, degradation.Server)
+	}
+	sort.Strings(servers)
+	return fmt.Sprintf("%s; degraded backends: %s", base, strings.Join(servers, ", "))
+}
+
 // buildCatalog queries each managed server for its tools, evaluates the
 // policy, and builds the merged catalog. It must be called before
 // registering tools with mcpserver.
 func (s *Server) buildCatalog(ctx context.Context) error {
 	var servers []catalog.ServerTools
+	s.degradations = nil
 
 	for alias, ms := range s.servers {
 		serverCfg := s.profile.Server(alias)
@@ -149,6 +172,11 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 		if err != nil {
 			s.logger.Warn("failed to list tools from child",
 				"server", alias, "error", err)
+			s.degradations = append(s.degradations, audit.Degradation{
+				Server: alias,
+				Reason: err.Error(),
+				Level:  "warning",
+			})
 			continue
 		}
 

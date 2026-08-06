@@ -61,6 +61,8 @@ func (f *fakeAuditSink) Log(string, string, json.RawMessage, time.Duration, stri
 	f.logCalls.Add(1)
 }
 
+func (f *fakeAuditSink) LogDegradation(string, string, string) {}
+
 func (f *fakeAuditSink) Degraded() bool { return f.degraded }
 
 func (f *fakeAuditSink) Close() error { return nil }
