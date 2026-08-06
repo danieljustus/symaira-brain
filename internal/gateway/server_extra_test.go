@@ -12,6 +12,7 @@ import (
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 )
 
@@ -481,5 +482,47 @@ func TestServeIO_ClosedReaderReturnsNil(t *testing.T) {
 	err := s.ServeIO(context.Background(), sr, sw)
 	if err != nil {
 		t.Errorf("ServeIO on closed reader should return nil, got: %v", err)
+	}
+}
+
+func TestInjectIdentity_UsesMappedProfileName(t *testing.T) {
+	s := New(testProfile(), nil, slog.Default(), &config.Config{Gateway: config.GatewayConfig{IdentityInjection: true}}, "dev")
+
+	got, err := s.injectIdentity("memory", json.RawMessage(`{"memory":"keep","client_id":"caller"}`))
+	if err != nil {
+		t.Fatalf("injectIdentity: %v", err)
+	}
+	var args map[string]any
+	if err := json.Unmarshal(got, &args); err != nil {
+		t.Fatalf("unmarshal injected args: %v", err)
+	}
+	if args["client_id"] != "test" {
+		t.Errorf("client_id = %v, want test", args["client_id"])
+	}
+	if args["memory"] != "keep" {
+		t.Errorf("memory = %v, want keep", args["memory"])
+	}
+}
+
+func TestInjectIdentity_DisabledAndUnmappedPreserveInput(t *testing.T) {
+	input := json.RawMessage(`{"client_id":"caller"}`)
+	for _, tc := range []struct {
+		name  string
+		alias string
+		cfg   *config.Config
+	}{
+		{name: "disabled", alias: "memory", cfg: &config.Config{Gateway: config.GatewayConfig{IdentityInjection: false}}},
+		{name: "unmapped", alias: "vault", cfg: &config.Config{}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := New(testProfile(), nil, slog.Default(), tc.cfg, "dev")
+			got, err := s.injectIdentity(tc.alias, input)
+			if err != nil {
+				t.Fatalf("injectIdentity: %v", err)
+			}
+			if !bytes.Equal(got, input) {
+				t.Errorf("input changed: got %s, want %s", got, input)
+			}
+		})
 	}
 }

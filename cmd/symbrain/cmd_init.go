@@ -28,6 +28,10 @@ enabled = true
 # or results, regardless of this setting).
 verbose = false
 
+[gateway]
+# Override mapped backend identity parameters with the active profile name.
+identity_injection = true
+
 [updatecheck]
 # Check GitHub releases for newer symbrain versions.
 enabled = true

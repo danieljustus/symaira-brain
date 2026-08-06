@@ -193,7 +193,11 @@ func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input j
 		return nil, fmt.Errorf("server %q not found", entry.Server)
 	}
 
-	result, err := ms.CallTool(ctx, originalName, input)
+	forwardedInput, err := s.injectIdentity(entry.Server, input)
+	if err != nil {
+		return nil, err
+	}
+	result, err := ms.CallTool(ctx, originalName, forwardedInput)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +207,37 @@ func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input j
 	}
 
 	return joinContent(result.Content), nil
+}
+
+// injectIdentity applies the explicit backend mapping to a tool-call argument
+// object. Calls to unmapped backends and calls with the feature disabled return
+// the original bytes unchanged so existing forwarding behavior is preserved.
+func (s *Server) injectIdentity(alias string, input json.RawMessage) (json.RawMessage, error) {
+	if s.cfg != nil && !s.cfg.Gateway.IdentityInjection {
+		return input, nil
+	}
+	parameter, ok := policy.IdentityParameter(alias)
+	if !ok {
+		return input, nil
+	}
+
+	args := make(map[string]json.RawMessage)
+	if len(input) > 0 {
+		if err := json.Unmarshal(input, &args); err != nil {
+			return nil, fmt.Errorf("gateway: decode arguments for %s: %w", alias, err)
+		}
+	}
+	profileName, err := json.Marshal(s.profile.Name)
+	if err != nil {
+		return nil, fmt.Errorf("gateway: encode profile identity: %w", err)
+	}
+	args[parameter] = profileName
+
+	forwarded, err := json.Marshal(args)
+	if err != nil {
+		return nil, fmt.Errorf("gateway: encode arguments for %s: %w", alias, err)
+	}
+	return forwarded, nil
 }
 
 // joinContent joins the text of all content blocks with newline separators.
