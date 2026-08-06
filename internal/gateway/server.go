@@ -319,7 +319,7 @@ func (s *Server) injectIdentity(alias string, input json.RawMessage) (json.RawMe
 	}
 	profileName, err := json.Marshal(s.profile.Name)
 	if err != nil {
-		return nil, fmt.Errorf("gateway: encode profile identity: %w", err)
+		return nil, fmt.Errorf("gateway: encode injected value: %w", err)
 	}
 	args[parameter] = profileName
 
