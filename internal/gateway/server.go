@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -53,7 +54,7 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 // is an interface so tests can substitute a fake logger (e.g. to force
 // the degraded-warning path) without changing production behavior.
 type auditSink interface {
-	Log(server, tool string, args json.RawMessage, duration time.Duration, status string)
+	Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...audit.Classification)
 	Degraded() bool
 	Close() error
 }
@@ -110,10 +111,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 				result, err := s.routeToolCall(ctx, entry, input)
 				if auditLog != nil {
 					status := "ok"
+					var classification audit.Classification
 					if err != nil {
 						status = "error"
+						if classified, ok := err.(*classifiedError); ok {
+							classification = classified.Classification
+						}
 					}
-					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status)
+					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status, classification)
 					if auditLog.Degraded() {
 						s.auditDegradedWarn.Do(func() {
 							s.logger.Warn("audit log degraded; some entries may not be persisted")
@@ -181,29 +186,86 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 	return nil
 }
 
+// classifiedError preserves the existing human-readable error message while
+// exposing the actionable category pair in the MCP tool-result text.
+type classifiedError struct {
+	message string
+	audit.Classification
+	cause error
+}
+
+func (e *classifiedError) Error() string {
+	payload := struct {
+		Message string `json:"message"`
+		audit.Classification
+	}{Message: e.message, Classification: e.Classification}
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return e.message
+	}
+	return string(data)
+}
+
+func (e *classifiedError) Unwrap() error { return e.cause }
+
+func classifyError(err error) audit.Classification {
+	var classified *classifiedError
+	var rpcErr *broker.RPCError
+	var timeoutErr *broker.TimeoutError
+	var closedErr *broker.ClosedError
+	switch {
+	case errors.As(err, &classified):
+		return classified.Classification
+	case errors.As(err, &rpcErr):
+		return audit.Classification{Category: "rpc", Retryable: false}
+	case errors.As(err, &timeoutErr):
+		return audit.Classification{Category: "timeout", Retryable: true}
+	case errors.As(err, &closedErr):
+		return audit.Classification{Category: "closed", Retryable: true}
+	default:
+		return audit.Classification{Category: "internal", Retryable: false}
+	}
+}
+
+func wrapClassifiedError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if classified, ok := err.(*classifiedError); ok {
+		return classified
+	}
+	return &classifiedError{
+		message:        err.Error(),
+		Classification: classifyError(err),
+		cause:          err,
+	}
+}
+
 // routeToolCall strips the namespace prefix from the catalog tool name,
-// finds the owning child server, and forwards the call. Errors are
-// mapped faithfully: RPC errors, timeouts, and tool-level errors are all
-// preserved.
+// finds the owning child server, and forwards the call. Errors are classified
+// while retaining their existing human-readable messages.
 func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input json.RawMessage) (any, error) {
 	originalName := entry.OriginalName
 
 	ms, ok := s.servers[entry.Server]
 	if !ok {
-		return nil, fmt.Errorf("server %q not found", entry.Server)
+		return nil, wrapClassifiedError(fmt.Errorf("server %q not found", entry.Server))
 	}
 
 	forwardedInput, err := s.injectIdentity(entry.Server, input)
 	if err != nil {
-		return nil, err
+		return nil, wrapClassifiedError(err)
 	}
 	result, err := ms.CallTool(ctx, originalName, forwardedInput)
 	if err != nil {
-		return nil, err
+		return nil, wrapClassifiedError(err)
 	}
 
 	if result.IsError {
-		return nil, fmt.Errorf("tool error: %s", joinContent(result.Content))
+		return nil, &classifiedError{
+			message:        fmt.Sprintf("tool error: %s", joinContent(result.Content)),
+			Classification: audit.Classification{Category: "tool", Retryable: false},
+		}
 	}
 
 	return joinContent(result.Content), nil

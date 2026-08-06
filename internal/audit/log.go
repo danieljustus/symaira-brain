@@ -21,8 +21,17 @@ type Entry struct {
 	Tool       string `json:"tool"`
 	DurationMS int64  `json:"duration_ms"`
 	Status     string `json:"status"`
+	Category   string `json:"category,omitempty"`
+	Retryable  bool   `json:"retryable"`
 	ArgKeys    string `json:"arg_keys,omitempty"`
 	ArgValues  string `json:"arg_values,omitempty"`
+}
+
+// Classification describes why a routed call failed and whether retrying it
+// unchanged is expected to help.
+type Classification struct {
+	Category  string `json:"category"`
+	Retryable bool   `json:"retryable"`
 }
 
 // Config controls audit logging behavior.
@@ -88,8 +97,9 @@ func Open(profile string, cfg Config) (*Logger, error) {
 
 // Log records a tool call. server is "vault", "memory", or "skills".
 // args are the raw JSON arguments (may be nil). duration is the call
-// wall-clock time. status is "ok", "error", or "timeout".
-func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string) {
+// wall-clock time. status is "ok", "error", or "timeout". An optional
+// classification records the reason for a failed call.
+func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...Classification) {
 	if l == nil || l.f == nil || !l.config.Enabled {
 		return
 	}
@@ -101,6 +111,10 @@ func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Du
 		Tool:       tool,
 		DurationMS: duration.Milliseconds(),
 		Status:     status,
+	}
+	if len(classifications) > 0 {
+		entry.Category = classifications[0].Category
+		entry.Retryable = classifications[0].Retryable
 	}
 
 	entry.ArgKeys, entry.ArgValues = redactArgs(server, tool, args, l.config.Verbose)
