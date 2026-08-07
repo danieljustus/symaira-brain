@@ -15,10 +15,8 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.4.3` released, in active development. The
-> command reference below states clearly which subcommands are implemented
-> today versus planned for a later milestone. Interfaces may still change
-> before `v1.0.0`.
+> **Status:** `v0.5.0` released, in active development. Interfaces may
+> still change before `v1.0.0`.
 
 ## What symbrain is not
 
@@ -31,7 +29,7 @@ each through its own profile, each seeing only what that profile exposes.
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
-- **Not a GUI**, at least not in `v0.4.3` (though native SwiftUI apps now
+- **Not a GUI**, at least not in `v0.5.0` (though native SwiftUI apps now
   exist in the repo — see [Native Apps](#native-apps)).
 
 ### symbrain vs. symguard
@@ -82,7 +80,12 @@ symbrain doctor
 ```
 
 Restart Claude Code (or reload its MCP connections) and the `symbrain`
-server appears with the tools your profile exposes.
+server appears with the tools your profile exposes. Every gateway
+connection also exposes two symbrain-owned tools that are never filtered
+by profile policy: `bootstrap` (call it first — it reports what this
+profile exposes and the live tool catalog) and `recipes` (promoted,
+recurring tool sequences as read-only context). See the
+[command reference](#command-reference).
 
 Supported `--harness` values: `claude`, `claude-desktop`, `cursor`,
 `opencode`, `codex`, `gemini`. `symbrain uninstall --harness <name>` reverses
@@ -161,6 +164,17 @@ symbrain profile add <name> [--from personal|restricted]
 symbrain profile remove <name> [--force]
 ```
 
+A profile can also be handed to `serve` as an explicit TOML file — e.g. a
+room-local profile checked into a project — without touching the profiles
+directory:
+
+```bash
+symbrain serve --profile-file ./room-profile.toml
+```
+
+`--profile-file` and `--profile` are mutually exclusive; the file is
+loaded verbatim.
+
 For `version`, `sync`, and `profile`, output is explicitly a human-readable
 **table by default**. Use the global `--output json` flag (or its `--json`
 shorthand) for machine-readable output. The choice is not TTY-sensitive, so
@@ -174,24 +188,30 @@ Implemented today:
 | Command | Purpose |
 |---|---|
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
-| `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, and harness registrations |
+| `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
+| `symbrain serve --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive |
+| `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
+| `symbrain audit tail [-n N] [--profile <name>]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile |
 | `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
 
-Planned, not yet implemented (each prints a "not yet implemented" notice
-naming its target milestone rather than failing silently):
+`install`/`uninstall` write a working MCP entry that *points at*
+`symbrain serve --profile <name>` — the harness spawns the gateway
+automatically when it connects. Alongside the policy-filtered child
+tools, the gateway registers two tools of its own that are never
+filtered:
 
-| Command | Purpose |
-|---|---|
-| `symbrain serve --profile <name>` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child |
-| `symbrain sync` | Push the canonical instructions/skills source out to installed harnesses |
-| `symbrain audit` | Inspect the local JSONL audit log |
-
-`install`/`uninstall` already write a working MCP entry that *points at*
-`symbrain serve --profile <name>` — that entry only becomes live once
-`serve` itself lands.
+- **`bootstrap`** — call this first in every session. It returns the
+  active profile's exposure summary (which cores and tool sets are
+  available) and the live tool catalog, names only — vault values are
+  never included.
+- **`recipes`** — list promoted recipes: recurring tool-call sequences
+  (episode names only, never arguments or values) that have recurred
+  across sessions for this profile. Read-only context — symbrain never
+  executes a recipe; artifacts that stabilize into durable authored
+  content belong to symskills.
 
 ## Security notes
 
