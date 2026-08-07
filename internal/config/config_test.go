@@ -84,6 +84,45 @@ binary_path = "/opt/symvault/symvault"
 	if cfg.UpdateCheck.Enabled != true {
 		t.Errorf("UpdateCheck.Enabled = %v, want true (default)", cfg.UpdateCheck.Enabled)
 	}
+	if cfg.Recipes.Enabled != true || cfg.Recipes.PromotionThreshold != 3 {
+		t.Errorf("Recipes = %+v, want {Enabled:true PromotionThreshold:3} (defaults)", cfg.Recipes)
+	}
+}
+
+func TestLoad_RecipesOverrides(t *testing.T) {
+	home := withHome(t)
+	writeConfig(t, home, `
+[recipes]
+enabled = false
+promotion_threshold = 5
+`)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if cfg.Recipes.Enabled {
+		t.Error("Recipes.Enabled = true, want false")
+	}
+	if cfg.Recipes.PromotionThreshold != 5 {
+		t.Errorf("Recipes.PromotionThreshold = %d, want 5", cfg.Recipes.PromotionThreshold)
+	}
+}
+
+func TestLoad_RecipesThresholdSanitized(t *testing.T) {
+	home := withHome(t)
+	writeConfig(t, home, `
+[recipes]
+promotion_threshold = 0
+`)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if cfg.Recipes.PromotionThreshold != 3 {
+		t.Errorf("Recipes.PromotionThreshold = %d, want default 3 for a non-positive value", cfg.Recipes.PromotionThreshold)
+	}
 }
 
 func TestLoad_EnvOverridesFileAndDefaults(t *testing.T) {

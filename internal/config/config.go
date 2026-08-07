@@ -25,6 +25,7 @@ type Config struct {
 	Gateway     GatewayConfig
 	UpdateCheck UpdateCheckConfig
 	Servers     ServersConfig
+	Recipes     RecipesConfig
 }
 
 // AuditConfig controls the JSONL audit log written by the gateway.
@@ -46,6 +47,18 @@ type GatewayConfig struct {
 // UpdateCheckConfig controls the optional GitHub release update check.
 type UpdateCheckConfig struct {
 	Enabled bool
+}
+
+// RecipesConfig controls episode recording and recipe promotion (see
+// internal/recipes). Recording is metadata-only — server and tool names,
+// never arguments or values — and nothing is exposed until a sequence
+// recurs across PromotionThreshold sessions.
+type RecipesConfig struct {
+	// Enabled turns session episode recording on or off entirely.
+	Enabled bool
+	// PromotionThreshold is the number of distinct sessions a sequence
+	// must recur in before it is promoted to an exposable recipe.
+	PromotionThreshold int
 }
 
 // ServersConfig optionally overrides the binary path for each state core.
@@ -78,6 +91,7 @@ type fileConfig struct {
 	Gateway        fileGatewayConfig     `json:"gateway"`
 	UpdateCheck    fileUpdateCheckConfig `json:"updatecheck"`
 	Servers        ServersConfig         `json:"servers"`
+	Recipes        fileRecipesConfig     `json:"recipes"`
 }
 
 type fileAuditConfig struct {
@@ -93,6 +107,11 @@ type fileUpdateCheckConfig struct {
 	Enabled *bool `json:"enabled"`
 }
 
+type fileRecipesConfig struct {
+	Enabled            *bool `json:"enabled"`
+	PromotionThreshold int   `json:"promotion_threshold"`
+}
+
 func fileDefaults() *fileConfig {
 	enabled := true
 	identityInjection := true
@@ -100,8 +119,14 @@ func fileDefaults() *fileConfig {
 		Audit:       fileAuditConfig{Enabled: &enabled, Verbose: false},
 		Gateway:     fileGatewayConfig{IdentityInjection: &identityInjection},
 		UpdateCheck: fileUpdateCheckConfig{Enabled: &enabled},
+		Recipes:     fileRecipesConfig{Enabled: &enabled, PromotionThreshold: defaultPromotionThreshold},
 	}
 }
+
+// defaultPromotionThreshold is the number of distinct sessions a tool
+// sequence must recur in before it becomes an exposable recipe. It is
+// configurable via [recipes] promotion_threshold.
+const defaultPromotionThreshold = 3
 
 // Defaults returns the configuration used for any value not set by the
 // config file or an environment override.
@@ -110,6 +135,10 @@ func Defaults() *Config {
 }
 
 func resolve(fc *fileConfig) *Config {
+	threshold := fc.Recipes.PromotionThreshold
+	if threshold <= 0 {
+		threshold = defaultPromotionThreshold
+	}
 	return &Config{
 		DefaultProfile: fc.DefaultProfile,
 		Audit: AuditConfig{
@@ -123,6 +152,10 @@ func resolve(fc *fileConfig) *Config {
 			Enabled: derefBool(fc.UpdateCheck.Enabled, true),
 		},
 		Servers: fc.Servers,
+		Recipes: RecipesConfig{
+			Enabled:            derefBool(fc.Recipes.Enabled, true),
+			PromotionThreshold: threshold,
+		},
 	}
 }
 

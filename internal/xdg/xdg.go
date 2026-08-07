@@ -44,6 +44,16 @@ func AuditDir() (string, error) {
 	return filepath.Join(dir, "audit"), nil
 }
 
+// RecipesDir returns the episode store directory under DataDir
+// (~/.local/share/symbrain/recipes).
+func RecipesDir() (string, error) {
+	dir, err := DataDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "recipes"), nil
+}
+
 // CacheDir returns the cache directory, respecting $XDG_CACHE_HOME;
 // defaults to ~/.cache/symbrain.
 func CacheDir() (string, error) {
