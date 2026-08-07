@@ -40,7 +40,8 @@ type AuditConfig struct {
 // GatewayConfig controls gateway-specific forwarding behavior.
 type GatewayConfig struct {
 	// IdentityInjection sets the mapped backend identity parameter to the
-	// active profile name before forwarding a tool call.
+	// active profile name when the caller did not supply its own value.
+	// A caller-supplied value always wins and is forwarded unchanged.
 	IdentityInjection bool
 }
 
