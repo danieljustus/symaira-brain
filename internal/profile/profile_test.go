@@ -443,3 +443,106 @@ name = "ghost"`)
 		t.Error("Exists(ghost) = false, want true")
 	}
 }
+
+func TestLoadFile_ValidRoomLocalProfile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "room-profile.toml")
+	contents := `[profile]
+name        = "room"
+description = "Room-local profile"
+
+[servers.vault]
+enabled = true
+mode    = "request_only"
+
+[servers.memory]
+enabled = true
+mode    = "read_only"
+
+[servers.skills]
+enabled = false
+`
+	if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	p, err := LoadFile(path)
+	if err != nil {
+		t.Fatalf("LoadFile() error = %v, want nil", err)
+	}
+	if p.Name != "room" || p.Description != "Room-local profile" {
+		t.Errorf("Name/Description = %q/%q, want room/...", p.Name, p.Description)
+	}
+	if !p.Servers.Vault.Enabled || p.Servers.Vault.Mode != VaultModeRequestOnly {
+		t.Errorf("Servers.Vault = %+v, want enabled=true mode=request_only", p.Servers.Vault)
+	}
+	if !p.Servers.Memory.Enabled || p.Servers.Memory.Mode != MemoryModeReadOnly {
+		t.Errorf("Servers.Memory = %+v, want enabled=true mode=read_only", p.Servers.Memory)
+	}
+}
+
+func TestLoadFile_Errors(t *testing.T) {
+	dir := t.TempDir()
+
+	t.Run("missing file", func(t *testing.T) {
+		_, err := LoadFile(filepath.Join(dir, "nope.toml"))
+		if err == nil {
+			t.Fatal("LoadFile() error = nil, want error for a missing file")
+		}
+		if got := exitcodes.ExitCodeFromError(err); got != exitcodes.ExitNoInput {
+			t.Errorf("ExitCodeFromError(err) = %d, want %d", got, exitcodes.ExitNoInput)
+		}
+	})
+
+	t.Run("invalid TOML", func(t *testing.T) {
+		path := filepath.Join(dir, "broken.toml")
+		if err := os.WriteFile(path, []byte("[profile\nname ="), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		if _, err := LoadFile(path); err == nil {
+			t.Fatal("LoadFile() error = nil, want error for invalid TOML")
+		}
+	})
+
+	t.Run("missing name", func(t *testing.T) {
+		path := filepath.Join(dir, "noname.toml")
+		if err := os.WriteFile(path, []byte("[servers.vault]\nenabled = true\n"), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		_, err := LoadFile(path)
+		if err == nil {
+			t.Fatal("LoadFile() error = nil, want error for a missing profile name")
+		}
+		if got := exitcodes.ExitCodeFromError(err); got != exitcodes.ExitNoInput {
+			t.Errorf("ExitCodeFromError(err) = %d, want %d", got, exitcodes.ExitNoInput)
+		}
+	})
+
+	t.Run("unsafe name", func(t *testing.T) {
+		path := filepath.Join(dir, "unsafe.toml")
+		contents := "[profile]\nname = \"../../evil\"\n"
+		if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		if _, err := LoadFile(path); err == nil {
+			t.Fatal("LoadFile() error = nil, want error for an unsafe profile name")
+		}
+	})
+
+	t.Run("name mismatch impossible by construction", func(t *testing.T) {
+		// LoadFile derives the name from the file itself, so the
+		// filename never needs to match — the file may be named anything.
+		path := filepath.Join(dir, "whatever-name.toml")
+		contents := "[profile]\nname = \"room\"\n"
+		if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		p, err := LoadFile(path)
+		if err != nil {
+			t.Fatalf("LoadFile() error = %v, want nil", err)
+		}
+		if p.Name != "room" {
+			t.Errorf("Name = %q, want %q", p.Name, "room")
+		}
+	})
+}

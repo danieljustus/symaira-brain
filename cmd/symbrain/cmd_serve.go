@@ -19,19 +19,15 @@ import (
 
 func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
-	profileName := fs.String("profile", "", "profile name to serve (required)")
+	profileName := fs.String("profile", "", "profile name to serve (required unless --profile-file is given)")
+	profileFile := fs.String("profile-file", "", "load the profile from this TOML file instead of the profiles directory")
 	vaultAgent := fs.String("vault-agent", "", "vault agent name for --stdio mode (default: harness-detected or 'claude-code')")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
 	}
 
-	if *profileName == "" {
-		fmt.Fprintln(stderr, "symbrain serve: --profile is required")
-		return exitcodes.ExitNoInput
-	}
-
-	p, err := profile.Load(*profileName)
+	p, err := resolveServeProfile(*profileName, *profileFile)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
 		return exitcodes.ExitNoInput
@@ -64,6 +60,22 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	}
 
 	return exitcodes.ExitOK
+}
+
+// resolveServeProfile loads the profile from exactly one of the two
+// mutually exclusive sources: the profiles directory (by name) or an
+// explicit TOML file (--profile-file, e.g. a room-local profile).
+func resolveServeProfile(name, file string) (*profile.Profile, error) {
+	if name == "" && file == "" {
+		return nil, fmt.Errorf("--profile is required (or --profile-file <path>)")
+	}
+	if name != "" && file != "" {
+		return nil, fmt.Errorf("--profile and --profile-file are mutually exclusive")
+	}
+	if file != "" {
+		return profile.LoadFile(file)
+	}
+	return profile.Load(name)
 }
 
 func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaultAgent string) map[string]*broker.ManagedServer {

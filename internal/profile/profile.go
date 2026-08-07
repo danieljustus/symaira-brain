@@ -167,6 +167,37 @@ func Load(name string) (*Profile, error) {
 	return parse(name, data)
 }
 
+// LoadFile reads, parses, and validates the profile at path. Unlike Load,
+// the profile name comes from the file's own [profile] name field, so the
+// file may live anywhere on disk — e.g. next to a room that carries its
+// agent profiles with it (see issue #189). The name is still validated
+// against the same safe charset, since it is used for the audit log and
+// instructions.
+func LoadFile(path string) (*Profile, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, exitcodes.Wrap(err, exitcodes.ExitNoInput, exitcodes.KindConfig,
+			fmt.Sprintf("profile: failed to read %s", path))
+	}
+
+	// Decode just the meta table to learn the profile's name, then run the
+	// full parse (which re-decodes and validates everything, including the
+	// name match).
+	var meta struct {
+		Profile fileProfileMeta `toml:"profile"`
+	}
+	if _, err := toml.Decode(string(data), &meta); err != nil {
+		return nil, exitcodes.Wrap(err, exitcodes.ExitNoInput, exitcodes.KindConfig,
+			fmt.Sprintf("profile: failed to parse TOML in %s", path))
+	}
+	name := meta.Profile.Name
+	if err := ValidateName(name); err != nil {
+		return nil, exitcodes.Wrap(err, exitcodes.ExitNoInput, exitcodes.KindConfig,
+			fmt.Sprintf("profile %q: invalid or missing name in %s", name, path))
+	}
+	return parse(name, data)
+}
+
 func parse(name string, data []byte) (*Profile, error) {
 	var fp fileProfile
 	meta, err := toml.Decode(string(data), &fp)
