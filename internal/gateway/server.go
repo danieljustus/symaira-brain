@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -18,6 +19,8 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
+	"github.com/danieljustus/symaira-brain/internal/recipes"
+	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/mcpserver"
 )
 
@@ -103,6 +106,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		}
 	}
 
+	// Episode recording captures this connection's tool-call sequence
+	// (names only) and flushes it as one episode when the session ends.
+	var recorder *episodeRecorder
+	if s.recipesEnabled() {
+		recorder = newEpisodeRecorder(s.profile.Name)
+		defer s.flushEpisode(recorder)
+	}
+
 	srv := mcpserver.New("symbrain", s.version)
 	srv.SetInstructions(s.instructions())
 
@@ -116,6 +127,16 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		Handler:     s.handleBootstrap,
 	})
 
+	// The recipes tool exposes promoted, recurring tool sequences as
+	// read-only context. Like bootstrap, it is gateway-owned and never
+	// policy-filtered.
+	srv.RegisterTool(&mcpserver.Tool{
+		Name:        "recipes",
+		Description: recipesToolDescription,
+		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+		Handler:     s.handleRecipes,
+	})
+
 	for _, entry := range s.cat.Exposed() {
 		entry := entry
 		srv.RegisterTool(&mcpserver.Tool{
@@ -125,6 +146,9 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			Handler: func(ctx context.Context, input json.RawMessage) (any, error) {
 				start := time.Now()
 				result, err := s.routeToolCall(ctx, entry, input)
+				if recorder != nil {
+					recorder.Add(entry.Server, entry.OriginalName)
+				}
 				if auditLog != nil {
 					status := "ok"
 					var classification audit.Classification
@@ -441,4 +465,114 @@ func (s *Server) vaultStatus() string {
 		return "absent"
 	}
 	return "present"
+}
+
+// recipesToolDescription is the read-only exposure surface for promoted
+// recipes: recurring tool sequences become portable agent context. Brain
+// exposes them; it never executes them.
+const recipesToolDescription = "List promoted recipes for this profile: " +
+	"tool-call sequences that recurred across multiple sessions, with their trigger " +
+	"conditions and provenance. Read-only — recipes are never executed by symbrain."
+
+// episodeRecorder accumulates the ordered tool-call sequence of one
+// gateway session (names only — never arguments or values) for
+// promotion into recipes.
+type episodeRecorder struct {
+	profile   string
+	startedAt string
+	mu        sync.Mutex
+	steps     []recipes.Step
+}
+
+func newEpisodeRecorder(profileName string) *episodeRecorder {
+	return &episodeRecorder{
+		profile:   profileName,
+		startedAt: time.Now().UTC().Format(time.RFC3339),
+	}
+}
+
+// Add records one forwarded tool invocation.
+func (r *episodeRecorder) Add(server, tool string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.steps = append(r.steps, recipes.Step{Server: server, Tool: tool})
+}
+
+// Episode returns the recorded sequence as a completed episode.
+func (r *episodeRecorder) Episode() recipes.Episode {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return recipes.Episode{
+		Profile:   r.profile,
+		Steps:     append([]recipes.Step(nil), r.steps...),
+		StartedAt: r.startedAt,
+		EndedAt:   time.Now().UTC().Format(time.RFC3339),
+	}
+}
+
+// recipesEnabled reports whether episode recording is active. It is off
+// when no config is attached (tests) or when [recipes] enabled=false.
+func (s *Server) recipesEnabled() bool {
+	return s.cfg != nil && s.cfg.Recipes.Enabled
+}
+
+// recipesThreshold returns the configured promotion threshold, falling
+// back to the package default when unset or invalid.
+func (s *Server) recipesThreshold() int {
+	if s.cfg != nil && s.cfg.Recipes.PromotionThreshold > 0 {
+		return s.cfg.Recipes.PromotionThreshold
+	}
+	return config.Defaults().Recipes.PromotionThreshold
+}
+
+// flushEpisode persists one completed session's sequence into the
+// profile's episode store. Empty sessions are skipped; failures are
+// logged, never fatal — behavioral history is best-effort.
+func (s *Server) flushEpisode(rec *episodeRecorder) {
+	ep := rec.Episode()
+	if len(ep.Steps) == 0 {
+		return
+	}
+	if err := appendEpisode(ep); err != nil {
+		s.logger.Warn("recipes: failed to store episode", "error", err)
+	}
+}
+
+// appendEpisode writes an episode to <data dir>/recipes/<profile>.jsonl.
+// It is a package variable (test seam) so tests can redirect the store
+// without touching the real XDG data dir.
+var appendEpisode = func(ep recipes.Episode) error {
+	dir, err := xdg.RecipesDir()
+	if err != nil {
+		return err
+	}
+	store := recipes.NewStore(filepath.Join(dir, ep.Profile+".jsonl"))
+	return store.Append(ep)
+}
+
+// handleRecipes implements the recipes tool: it loads the active
+// profile's episodes, promotes recurring sequences against the
+// configured threshold, and returns the recipes as read-only context.
+func (s *Server) handleRecipes(_ context.Context, _ json.RawMessage) (any, error) {
+	threshold := s.recipesThreshold()
+
+	dir, err := xdg.RecipesDir()
+	if err != nil {
+		return nil, err
+	}
+	store := recipes.NewStore(filepath.Join(dir, s.profile.Name+".jsonl"))
+	episodes, err := store.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	return struct {
+		Profile   string           `json:"profile"`
+		Threshold int              `json:"threshold"`
+		Recipes   []recipes.Recipe `json:"recipes"`
+	}{
+		Profile:   s.profile.Name,
+		Threshold: threshold,
+		Recipes:   recipes.Promote(episodes, threshold),
+	}, nil
 }
