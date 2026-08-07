@@ -488,7 +488,7 @@ func TestServeIO_ClosedReaderReturnsNil(t *testing.T) {
 func TestInjectIdentity_UsesMappedProfileName(t *testing.T) {
 	s := New(testProfile(), nil, slog.Default(), &config.Config{Gateway: config.GatewayConfig{IdentityInjection: true}}, "dev")
 
-	got, err := s.injectIdentity("memory", json.RawMessage(`{"memory":"keep","client_id":"caller"}`))
+	got, err := s.injectIdentity("memory", json.RawMessage(`{"memory":"keep"}`))
 	if err != nil {
 		t.Fatalf("injectIdentity: %v", err)
 	}
@@ -497,7 +497,30 @@ func TestInjectIdentity_UsesMappedProfileName(t *testing.T) {
 		t.Fatalf("unmarshal injected args: %v", err)
 	}
 	if args["client_id"] != "test" {
-		t.Errorf("client_id = %v, want test", args["client_id"])
+		t.Errorf("client_id = %v, want injected profile name test", args["client_id"])
+	}
+	if args["memory"] != "keep" {
+		t.Errorf("memory = %v, want keep", args["memory"])
+	}
+}
+
+func TestInjectIdentity_CallerValueWins(t *testing.T) {
+	s := New(testProfile(), nil, slog.Default(), &config.Config{Gateway: config.GatewayConfig{IdentityInjection: true}}, "dev")
+
+	input := json.RawMessage(`{"memory":"keep","client_id":"caller"}`)
+	got, err := s.injectIdentity("memory", input)
+	if err != nil {
+		t.Fatalf("injectIdentity: %v", err)
+	}
+	if !bytes.Equal(got, input) {
+		t.Errorf("input changed: got %s, want original %s", got, input)
+	}
+	var args map[string]any
+	if err := json.Unmarshal(got, &args); err != nil {
+		t.Fatalf("unmarshal injected args: %v", err)
+	}
+	if args["client_id"] != "caller" {
+		t.Errorf("client_id = %v, want caller-supplied value caller", args["client_id"])
 	}
 	if args["memory"] != "keep" {
 		t.Errorf("memory = %v, want keep", args["memory"])
