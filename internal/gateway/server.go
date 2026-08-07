@@ -106,6 +106,16 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	srv := mcpserver.New("symbrain", s.version)
 	srv.SetInstructions(s.instructions())
 
+	// The gateway-owned bootstrap tool is registered alongside the
+	// forwarded child tools. It is never filtered by policy: it is
+	// symbrain's own orientation surface, not a child capability.
+	srv.RegisterTool(&mcpserver.Tool{
+		Name:        "bootstrap",
+		Description: bootstrapToolDescription,
+		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+		Handler:     s.handleBootstrap,
+	})
+
 	for _, entry := range s.cat.Exposed() {
 		entry := entry
 		srv.RegisterTool(&mcpserver.Tool{
@@ -340,4 +350,95 @@ func joinContent(content []broker.ContentBlock) string {
 		sb.WriteString(block.Text)
 	}
 	return sb.String()
+}
+
+// bootstrapToolDescription is the imperative orientation instruction a
+// fresh harness sees in tools/list. The tool itself must be called first
+// in every session: it returns what this profile exposes and which tools
+// exist right now (names only — vault values are never included).
+const bootstrapToolDescription = "Call this first in every session. " +
+	"Returns the active profile's exposure summary (which cores and tool sets are available) " +
+	"and the live tool catalog (names only — vault values are never included)."
+
+// bootstrapResponse is the structured payload of the gateway-owned
+// bootstrap tool. Field names are snake_case per the repo's JSON contract.
+type bootstrapResponse struct {
+	Profile            string            `json:"profile"`
+	ProfileDescription string            `json:"profile_description,omitempty"`
+	GeneratedAt        string            `json:"generated_at"`
+	Servers            []bootstrapServer `json:"servers"`
+	Catalog            []string          `json:"catalog"`
+	Vault              bootstrapVault    `json:"vault"`
+}
+
+// bootstrapServer summarizes one state core's exposure under the active
+// profile. ExposedTools lists the namespaced tool names the harness can
+// actually call on that server.
+type bootstrapServer struct {
+	Server       string   `json:"server"`
+	Enabled      bool     `json:"enabled"`
+	Mode         string   `json:"mode,omitempty"`
+	ExposedTools []string `json:"exposed_tools"`
+	ExposedCount int      `json:"exposed_count"`
+}
+
+// bootstrapVault reports vault presence without ever touching the child:
+// a name-only entry listing would require an unlocked call, and bootstrap
+// degrades to a status note instead of prompting (see issue #185).
+type bootstrapVault struct {
+	Status  string `json:"status"`
+	Listing string `json:"listing"`
+}
+
+// handleBootstrap implements the bootstrap tool. It is deliberately a
+// pure read of in-memory state assembled by buildCatalog: the call is
+// cheap, never blocks on a child, never triggers a vault unlock prompt,
+// and needs no caching because the catalog is immutable per connection.
+func (s *Server) handleBootstrap(_ context.Context, _ json.RawMessage) (any, error) {
+	resp := bootstrapResponse{
+		Profile:            s.profile.Name,
+		ProfileDescription: s.profile.Description,
+		GeneratedAt:        time.Now().UTC().Format(time.RFC3339),
+		Catalog:            s.cat.Names(),
+	}
+
+	perServer := make(map[string][]string)
+	for _, entry := range s.cat.All() {
+		if entry.Verdict == policy.Exposed {
+			perServer[entry.Server] = append(perServer[entry.Server], entry.Name)
+		}
+	}
+
+	for _, alias := range []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills} {
+		cfg := s.profile.Server(alias)
+		tools := perServer[alias]
+		resp.Servers = append(resp.Servers, bootstrapServer{
+			Server:       alias,
+			Enabled:      cfg.Enabled,
+			Mode:         cfg.Mode,
+			ExposedTools: tools,
+			ExposedCount: len(tools),
+		})
+	}
+
+	resp.Vault = bootstrapVault{
+		Status:  s.vaultStatus(),
+		Listing: "unavailable-without-unlock",
+	}
+	return resp, nil
+}
+
+// vaultStatus derives vault's reportable presence without calling the
+// child: disabled or mode "off" reports "disabled", enabled and reachable
+// at catalog build reports "present", enabled but absent from the live
+// server set (e.g. binary not found at spawn) reports "absent".
+func (s *Server) vaultStatus() string {
+	cfg := s.profile.Server(profile.ServerVault)
+	if !cfg.Enabled || cfg.Mode == profile.VaultModeOff {
+		return "disabled"
+	}
+	if _, ok := s.servers[profile.ServerVault]; !ok {
+		return "absent"
+	}
+	return "present"
 }
