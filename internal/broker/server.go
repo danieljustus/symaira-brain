@@ -3,6 +3,7 @@ package broker
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -214,6 +215,12 @@ func (ms *ManagedServer) spawnAndInit(ctx context.Context) (*Client, error) {
 		_ = c.Close()
 		if p := c.Process(); p != nil {
 			_ = p.Kill()
+		}
+		var mismatch *ProtocolMismatchError
+		if errors.As(err, &mismatch) {
+			ms.state.Store(int32(StateDegraded))
+			ms.lastErr = err
+			return nil, err
 		}
 		ms.state.Store(int32(StateIdle))
 		return nil, fmt.Errorf("broker server %s: initialize: %w", ms.cfg.Name, err)

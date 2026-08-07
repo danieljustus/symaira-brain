@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -87,6 +88,41 @@ func TestIntegration_VersionJSON(t *testing.T) {
 	}
 	if payload.Version == "" {
 		t.Error("version is empty")
+	}
+}
+
+func TestClient_Initialize_ProtocolMismatch(t *testing.T) {
+	c := spawnFake(t, map[string]string{"FAKEMCP_PROTOCOL_VERSION": "2025-06-18"})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := c.Initialize(ctx)
+	var mismatch *ProtocolMismatchError
+	if !errors.As(err, &mismatch) {
+		t.Fatalf("Initialize() error = %v, want ProtocolMismatchError", err)
+	}
+	if mismatch.Expected != protocolVersion || mismatch.Actual != "2025-06-18" {
+		t.Fatalf("mismatch = %+v", mismatch)
+	}
+}
+
+func TestManagedServer_ProtocolMismatchDegrades(t *testing.T) {
+	ms := NewManagedServer(ServerConfig{
+		Name:            "memory",
+		BinaryPath:      fakeBinPath,
+		Env:             append(os.Environ(), "FAKEMCP_PROTOCOL_VERSION=2025-06-18"),
+		InitTimeout:     5 * time.Second,
+		ShutdownTimeout: time.Second,
+	})
+	_, err := ms.ListTools(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "2024-11-05") || !strings.Contains(err.Error(), "2025-06-18") {
+		t.Fatalf("ListTools() error = %v, want both protocol versions", err)
+	}
+	if got := ms.State(); got != StateDegraded {
+		t.Fatalf("state = %v, want StateDegraded", got)
+	}
+	if lastErr := ms.LastError(); lastErr == nil || !strings.Contains(lastErr.Error(), "protocol version mismatch") {
+		t.Fatalf("LastError = %v, want protocol mismatch", lastErr)
 	}
 }
 

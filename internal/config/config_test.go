@@ -40,6 +40,7 @@ func TestLoad_MissingFileYieldsDefaults(t *testing.T) {
 	want := Defaults()
 	if cfg.DefaultProfile != want.DefaultProfile ||
 		cfg.Audit != want.Audit ||
+		cfg.Gateway != want.Gateway ||
 		cfg.UpdateCheck != want.UpdateCheck ||
 		cfg.Servers != want.Servers {
 		t.Fatalf("Load() = %+v, want defaults %+v", cfg, want)
@@ -55,6 +56,9 @@ default_profile = "personal"
 enabled = false
 verbose = true
 
+[gateway]
+identity_injection = false
+
 [servers.vault]
 binary_path = "/opt/symvault/symvault"
 `)
@@ -69,6 +73,9 @@ binary_path = "/opt/symvault/symvault"
 	}
 	if cfg.Audit.Enabled != false || cfg.Audit.Verbose != true {
 		t.Errorf("Audit = %+v, want {Enabled:false Verbose:true}", cfg.Audit)
+	}
+	if cfg.Gateway.IdentityInjection {
+		t.Error("Gateway.IdentityInjection = true, want false")
 	}
 	if cfg.Servers.Vault.BinaryPath != "/opt/symvault/symvault" {
 		t.Errorf("Servers.Vault.BinaryPath = %q, want %q", cfg.Servers.Vault.BinaryPath, "/opt/symvault/symvault")
@@ -112,6 +119,15 @@ func TestLoad_EnvOverridesFileAndDefaults(t *testing.T) {
 			verify: func(t *testing.T, cfg *Config) {
 				if cfg.Servers.Skills.BinaryPath != "/custom/symskills" {
 					t.Errorf("Servers.Skills.BinaryPath = %q, want %q", cfg.Servers.Skills.BinaryPath, "/custom/symskills")
+				}
+			},
+		},
+		{
+			name: "env disables identity injection",
+			envs: map[string]string{"SYMBRAIN_GATEWAY_IDENTITY_INJECTION": "false"},
+			verify: func(t *testing.T, cfg *Config) {
+				if cfg.Gateway.IdentityInjection {
+					t.Error("Gateway.IdentityInjection = true, want false")
 				}
 			},
 		},

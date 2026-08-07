@@ -131,8 +131,12 @@ func handle(w io.Writer, defs []toolDef, byName map[string]toolDef, req rpcReque
 		if d := envMillis("FAKEMCP_INIT_DELAY_MS", 0); d > 0 {
 			time.Sleep(d)
 		}
+		protocol := os.Getenv("FAKEMCP_PROTOCOL_VERSION")
+		if protocol == "" {
+			protocol = "2024-11-05"
+		}
 		writeResult(w, *req.ID, map[string]any{
-			"protocolVersion": "2024-11-05",
+			"protocolVersion": protocol,
 			"capabilities":    map[string]any{"tools": map[string]any{}},
 			"serverInfo":      map[string]string{"name": "fakemcp", "version": version()},
 		})

@@ -15,6 +15,17 @@ func (e *RPCError) Error() string {
 	return fmt.Sprintf("mcp child returned JSON-RPC error %d: %s", e.Code, e.Message)
 }
 
+// ProtocolMismatchError means the child answered initialize with a protocol
+// version different from the one the broker sent.
+type ProtocolMismatchError struct {
+	Expected string
+	Actual   string
+}
+
+func (e *ProtocolMismatchError) Error() string {
+	return fmt.Sprintf("broker: protocol version mismatch: sent %q, child returned %q", e.Expected, e.Actual)
+}
+
 // TimeoutError reports that a request's context deadline elapsed before the
 // child responded. Op names the request method (e.g. "initialize",
 // "tools/call") for diagnostics.

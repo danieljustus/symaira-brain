@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/danieljustus/symaira-brain/internal/audit"
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
@@ -71,14 +72,15 @@ type harnessCheck struct {
 }
 
 type doctorReport struct {
-	ConfigDir  dirCheck           `json:"config_dir"`
-	DataDir    dirCheck           `json:"data_dir"`
-	CacheDir   dirCheck           `json:"cache_dir"`
-	Config     configCheck        `json:"config"`
-	Servers    []serverCheck      `json:"servers"`
-	Profiles   []string           `json:"profiles"`
-	Harnesses  []harnessCheck     `json:"harnesses"`
-	Handshakes []profileHandshake `json:"handshakes,omitempty"`
+	ConfigDir    dirCheck            `json:"config_dir"`
+	DataDir      dirCheck            `json:"data_dir"`
+	CacheDir     dirCheck            `json:"cache_dir"`
+	Config       configCheck         `json:"config"`
+	Servers      []serverCheck       `json:"servers"`
+	Profiles     []string            `json:"profiles"`
+	Harnesses    []harnessCheck      `json:"harnesses"`
+	Handshakes   []profileHandshake  `json:"handshakes,omitempty"`
+	Degradations []audit.Degradation `json:"degradations,omitempty"`
 }
 
 type profileHandshake struct {
@@ -147,6 +149,9 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	}
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
+	if degradations, err := audit.LatestDegradations(""); err == nil {
+		report.Degradations = degradations
+	}
 
 	return report
 }

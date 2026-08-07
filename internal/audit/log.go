@@ -1,6 +1,7 @@
 package audit
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,13 +17,35 @@ import (
 // Entry is one JSONL audit record for a routed tool call.
 type Entry struct {
 	Timestamp  string `json:"timestamp"`
+	SessionID  string `json:"session_id,omitempty"`
 	Profile    string `json:"profile"`
 	Server     string `json:"server"`
 	Tool       string `json:"tool"`
 	DurationMS int64  `json:"duration_ms"`
 	Status     string `json:"status"`
+	Category   string `json:"category,omitempty"`
+	Retryable  bool   `json:"retryable"`
+	Reason     string `json:"reason,omitempty"`
+	Level      string `json:"level,omitempty"`
 	ArgKeys    string `json:"arg_keys,omitempty"`
 	ArgValues  string `json:"arg_values,omitempty"`
+}
+
+// Degradation records a backend that was unavailable while a gateway session
+// built its catalog.
+type Degradation struct {
+	SessionID string `json:"session_id,omitempty"`
+	Profile   string `json:"profile,omitempty"`
+	Server    string `json:"server"`
+	Reason    string `json:"reason"`
+	Level     string `json:"level"`
+}
+
+// Classification describes why a routed call failed and whether retrying it
+// unchanged is expected to help.
+type Classification struct {
+	Category  string `json:"category"`
+	Retryable bool   `json:"retryable"`
 }
 
 // Config controls audit logging behavior.
@@ -38,6 +61,7 @@ type Logger struct {
 	f        *os.File
 	path     string
 	profile  string
+	session  string
 	config   Config
 	size     int64
 	degraded bool  // true after any write or rotation failure
@@ -81,6 +105,7 @@ func Open(profile string, cfg Config) (*Logger, error) {
 		f:       f,
 		path:    path,
 		profile: profile,
+		session: time.Now().UTC().Format(time.RFC3339Nano),
 		config:  cfg,
 		size:    size,
 	}, nil
@@ -88,19 +113,25 @@ func Open(profile string, cfg Config) (*Logger, error) {
 
 // Log records a tool call. server is "vault", "memory", or "skills".
 // args are the raw JSON arguments (may be nil). duration is the call
-// wall-clock time. status is "ok", "error", or "timeout".
-func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string) {
+// wall-clock time. status is "ok", "error", or "timeout". An optional
+// classification records the reason for a failed call.
+func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...Classification) {
 	if l == nil || l.f == nil || !l.config.Enabled {
 		return
 	}
 
 	entry := Entry{
 		Timestamp:  time.Now().UTC().Format(time.RFC3339Nano),
+		SessionID:  l.session,
 		Profile:    l.profile,
 		Server:     server,
 		Tool:       tool,
 		DurationMS: duration.Milliseconds(),
 		Status:     status,
+	}
+	if len(classifications) > 0 {
+		entry.Category = classifications[0].Category
+		entry.Retryable = classifications[0].Retryable
 	}
 
 	entry.ArgKeys, entry.ArgValues = redactArgs(server, tool, args, l.config.Verbose)
@@ -125,6 +156,46 @@ func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Du
 		l.size += int64(n)
 	}
 
+	if l.size >= maxFileSize {
+		l.rotate()
+	}
+}
+
+// LogDegradation records a backend omitted from the catalog during startup.
+func (l *Logger) LogDegradation(server, reason, level string) {
+	if l == nil || l.f == nil || !l.config.Enabled {
+		return
+	}
+
+	entry := Entry{
+		Timestamp: time.Now().UTC().Format(time.RFC3339Nano),
+		SessionID: l.session,
+		Profile:   l.profile,
+		Server:    server,
+		Status:    "degraded",
+		Reason:    reason,
+		Level:     level,
+	}
+	data, err := json.Marshal(entry)
+	if err != nil {
+		l.mu.Lock()
+		l.degraded = true
+		l.dropped++
+		l.mu.Unlock()
+		return
+	}
+	data = append(data, '\n')
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	n, err := l.f.Write(data)
+	if err != nil {
+		l.degraded = true
+		l.dropped++
+	}
+	if n > 0 {
+		l.size += int64(n)
+	}
 	if l.size >= maxFileSize {
 		l.rotate()
 	}
@@ -211,6 +282,67 @@ func (l *Logger) Degraded() bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.degraded
+}
+
+// LatestDegradations returns degradation records from the most recent session
+// in each matching profile log. An empty profile reads every profile log.
+func LatestDegradations(profile string) ([]Degradation, error) {
+	dir, err := xdg.AuditDir()
+	if err != nil {
+		return nil, fmt.Errorf("audit: resolve audit dir: %w", err)
+	}
+	pattern := filepath.Join(dir, "*.jsonl")
+	if profile != "" {
+		pattern = filepath.Join(dir, profile+".jsonl")
+	}
+	paths, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, fmt.Errorf("audit: find logs: %w", err)
+	}
+
+	var result []Degradation
+	for _, path := range paths {
+		f, err := os.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("audit: open %s: %w", path, err)
+		}
+		var entries []Entry
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			var entry Entry
+			if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+				continue
+			}
+			entries = append(entries, entry)
+		}
+		closeErr := f.Close()
+		if err := scanner.Err(); err != nil {
+			return nil, fmt.Errorf("audit: read %s: %w", path, err)
+		}
+		if closeErr != nil {
+			return nil, fmt.Errorf("audit: close %s: %w", path, closeErr)
+		}
+
+		lastSession := ""
+		for _, entry := range entries {
+			if entry.SessionID != "" {
+				lastSession = entry.SessionID
+			}
+		}
+		for _, entry := range entries {
+			if entry.Status != "degraded" || (lastSession != "" && entry.SessionID != lastSession) {
+				continue
+			}
+			result = append(result, Degradation{
+				SessionID: entry.SessionID,
+				Profile:   entry.Profile,
+				Server:    entry.Server,
+				Reason:    entry.Reason,
+				Level:     entry.Level,
+			})
+		}
+	}
+	return result, nil
 }
 
 const tailChunkSize = 64 * 1024 // 64KB
