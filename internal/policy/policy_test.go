@@ -7,6 +7,33 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/profile"
 )
 
+func TestIdentityParameter(t *testing.T) {
+	tests := []struct {
+		name      string
+		alias     string
+		wantParam string
+		wantOK    bool
+	}{
+		{name: "memory maps to client_id", alias: profile.ServerMemory, wantParam: "client_id", wantOK: true},
+		{name: "vault has no identity parameter", alias: profile.ServerVault, wantParam: "", wantOK: false},
+		{name: "skills has no identity parameter", alias: profile.ServerSkills, wantParam: "", wantOK: false},
+		{name: "unknown alias is not mapped", alias: "some_other_server", wantParam: "", wantOK: false},
+		{name: "empty alias is not mapped", alias: "", wantParam: "", wantOK: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := IdentityParameter(tt.alias)
+			if ok != tt.wantOK {
+				t.Fatalf("IdentityParameter(%q) ok = %v, want %v", tt.alias, ok, tt.wantOK)
+			}
+			if got != tt.wantParam {
+				t.Errorf("IdentityParameter(%q) = %q, want %q", tt.alias, got, tt.wantParam)
+			}
+		})
+	}
+}
+
 func TestEvaluate_VaultModes(t *testing.T) {
 	live := append(append([]string{}, KnownTools(profile.ServerVault)...), "vault_new_upstream_tool")
 
