@@ -249,24 +249,15 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 }
 
 // classifiedError preserves the existing human-readable error message while
-// exposing the actionable category pair in the MCP tool-result text.
+// keeping the actionable classification reachable through the embedded
+// public field for the audit log.
 type classifiedError struct {
 	message string
 	audit.Classification
 	cause error
 }
 
-func (e *classifiedError) Error() string {
-	payload := struct {
-		Message string `json:"message"`
-		audit.Classification
-	}{Message: e.message, Classification: e.Classification}
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return e.message
-	}
-	return string(data)
-}
+func (e *classifiedError) Error() string { return e.message }
 
 func (e *classifiedError) Unwrap() error { return e.cause }
 

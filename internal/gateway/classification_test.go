@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"encoding/json"
 	"errors"
 	"testing"
 
@@ -34,20 +33,17 @@ func TestClassifyError_CoversBrokerFailureTypes(t *testing.T) {
 
 func TestClassifiedError_ErrorCarriesUnchangedMessageAndClassification(t *testing.T) {
 	const message = "tool error: entry not found"
-	err := &classifiedError{message: message, Classification: audit.Classification{Category: "tool", Retryable: false}}
+	var err error = &classifiedError{message: message, Classification: audit.Classification{Category: "tool", Retryable: false}}
 
-	var payload struct {
-		Message   string `json:"message"`
-		Category  string `json:"category"`
-		Retryable bool   `json:"retryable"`
+	if got := err.Error(); got != message {
+		t.Errorf("Error() = %q, want the plain message %q", got, message)
 	}
-	if err := json.Unmarshal([]byte(err.Error()), &payload); err != nil {
-		t.Fatalf("classified error is not JSON: %v", err)
+
+	classified, ok := err.(*classifiedError)
+	if !ok {
+		t.Fatalf("error is %T, want *classifiedError", err)
 	}
-	if payload.Message != message {
-		t.Errorf("message = %q, want %q", payload.Message, message)
-	}
-	if payload.Category != "tool" || payload.Retryable {
-		t.Errorf("classification = {%q %v}, want {tool false}", payload.Category, payload.Retryable)
+	if classified.Classification.Category != "tool" || classified.Classification.Retryable {
+		t.Errorf("classification = {%q %v}, want {tool false}", classified.Classification.Category, classified.Classification.Retryable)
 	}
 }
