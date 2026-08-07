@@ -278,16 +278,10 @@ jobs:
           # Create a shortcut to /Applications in the staging folder
           ln -s /Applications "$DMG_STAGING/Applications"
 
-          create-dmg \
-            --volname "SymBrain $VERSION" \
-            --window-pos 200 120 \
-            --window-size 600 400 \
-            --icon-size 100 \
-            --icon "SymBrain.app" 175 160 \
-            --hide-extension "SymBrain.app" \
-            --app-drop-link 425 160 \
+          ./scripts/create-symaira-dmg.sh \
+            "$DMG_STAGING/SymBrain.app" \
             "$DMG_PATH" \
-            "$DMG_STAGING"
+            "SymBrain $VERSION"
 
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
           echo "dmg_name=SymBrain-$VERSION.dmg" >> "$GITHUB_OUTPUT"
