@@ -7,3 +7,6 @@ coverage.out
 .claude/
 .omo/
 .github/audit/
+.github/review/
+.github/coverage/
+.github/prerelease/

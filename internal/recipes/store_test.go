@@ -82,3 +82,35 @@ func TestStore_PrunesBeyondMax(t *testing.T) {
 		t.Errorf("Load() = %d episodes, want %d (pruned)", len(got), maxEpisodesPerStore)
 	}
 }
+
+func TestStore_FilePermissionsArePrivate(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "p.jsonl")
+	store := NewStore(path)
+
+	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("Stat: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o600 {
+		t.Errorf("episode file mode = %o, want 600 (behavioral history is private)", perm)
+	}
+
+	// Force a prune rewrite and check the rewritten file keeps 0600.
+	one := []Step{step("vault", "health"), step("memory", "memory_list")}
+	for i := 0; i < maxEpisodesPerStore+1; i++ {
+		if err := store.Append(episode("p", one)); err != nil {
+			t.Fatalf("Append #%d: %v", i, err)
+		}
+	}
+	info, err = os.Stat(path)
+	if err != nil {
+		t.Fatalf("Stat after prune: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o600 {
+		t.Errorf("episode file mode after prune = %o, want 600", perm)
+	}
+}

@@ -64,13 +64,26 @@ func TestDataDir_FallbackToHome(t *testing.T) {
 func TestAuditDir_SitsUnderDataDir(t *testing.T) {
 	base := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", base)
-
 	got, err := AuditDir()
 	if err != nil {
 		t.Fatalf("AuditDir: %v", err)
 	}
-	if want := filepath.Join(base, "symbrain", "audit"); got != want {
+	want := filepath.Join(base, "symbrain", "audit")
+	if got != want {
 		t.Errorf("AuditDir() = %q, want %q", got, want)
+	}
+}
+
+func TestRecipesDir_SitsUnderDataDir(t *testing.T) {
+	base := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", base)
+	got, err := RecipesDir()
+	if err != nil {
+		t.Fatalf("RecipesDir: %v", err)
+	}
+	want := filepath.Join(base, "symbrain", "recipes")
+	if got != want {
+		t.Errorf("RecipesDir() = %q, want %q", got, want)
 	}
 }
 
