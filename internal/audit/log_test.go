@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -218,6 +219,92 @@ func TestOpen_ExistingFilePreservesSize(t *testing.T) {
 	if l.size != int64(len(existing)) {
 		t.Errorf("l.size = %d, want %d", l.size, len(existing))
 	}
+}
+
+func TestLatestDegradations_ReturnsMostRecentSessionPerProfile(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	line := func(entry Entry) string {
+		data, err := json.Marshal(entry)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		return string(data) + "\n"
+	}
+
+	// prof.jsonl: two sessions; only the last session's degraded entry
+	// should be reported, and only with status "degraded".
+	profLog := filepath.Join(auditDir, "prof.jsonl")
+	prof := []string{
+		line(Entry{SessionID: "s1", Profile: "prof", Server: "vault", Status: "degraded", Reason: "old", Level: "warning"}),
+		line(Entry{SessionID: "s2", Profile: "prof", Server: "vault", Status: "ok"}),
+		line(Entry{SessionID: "s2", Profile: "prof", Server: "memory", Status: "degraded", Reason: "new", Level: "warning"}),
+	}
+	if err := os.WriteFile(profLog, []byte(joinLines(prof)), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// other.jsonl: single degraded entry in a different profile.
+	otherLog := filepath.Join(auditDir, "other.jsonl")
+	other := []string{
+		line(Entry{SessionID: "s9", Profile: "other", Server: "skills", Status: "degraded", Reason: "missing", Level: "error"}),
+	}
+	if err := os.WriteFile(otherLog, []byte(joinLines(other)), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("empty profile reads every profile log", func(t *testing.T) {
+		got, err := LatestDegradations("")
+		if err != nil {
+			t.Fatalf("LatestDegradations: %v", err)
+		}
+		want := []Degradation{
+			{SessionID: "s9", Profile: "other", Server: "skills", Reason: "missing", Level: "error"},
+			{SessionID: "s2", Profile: "prof", Server: "memory", Reason: "new", Level: "warning"},
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("LatestDegradations() = %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("profile filter reads only that profile", func(t *testing.T) {
+		got, err := LatestDegradations("prof")
+		if err != nil {
+			t.Fatalf("LatestDegradations: %v", err)
+		}
+		want := []Degradation{
+			{SessionID: "s2", Profile: "prof", Server: "memory", Reason: "new", Level: "warning"},
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("LatestDegradations(prof) = %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("missing audit dir yields empty result", func(t *testing.T) {
+		emptyDir := t.TempDir()
+		t.Setenv("XDG_DATA_HOME", emptyDir)
+		got, err := LatestDegradations("")
+		if err != nil {
+			t.Fatalf("LatestDegradations: %v", err)
+		}
+		if len(got) != 0 {
+			t.Errorf("LatestDegradations() = %+v, want empty", got)
+		}
+	})
+}
+
+func joinLines(lines []string) string {
+	var sb strings.Builder
+	for _, l := range lines {
+		sb.WriteString(l)
+	}
+	return sb.String()
 }
 
 func newTestFile(t *testing.T) *os.File {

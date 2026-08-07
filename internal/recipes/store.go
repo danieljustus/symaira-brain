@@ -14,6 +14,13 @@ import (
 // read on every promotion query and prunes the oldest history first.
 const maxEpisodesPerStore = 1000
 
+// minEpisodeLineBytes is a conservative floor for the serialized size of
+// one episode line (profile + at least one step + timestamps). pruneLocked
+// uses it to skip the full-file load when the store cannot possibly have
+// reached the cap yet, keeping Append amortized O(1) instead of O(n) per
+// write. Real lines (RFC3339 timestamps, longer names) are well above this.
+const minEpisodeLineBytes = 64
+
 // Store persists episodes as JSONL, one Episode per line, for a single
 // profile. It is safe for concurrent use and never fails on a malformed
 // line when loading (the line is skipped — history is best-effort).
@@ -44,7 +51,7 @@ func (s *Store) Append(ep Episode) error {
 		return err
 	}
 
-	f, err := os.OpenFile(s.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	f, err := os.OpenFile(s.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
 		return err
 	}
@@ -92,8 +99,21 @@ func (s *Store) Load() ([]Episode, error) {
 }
 
 // pruneLocked rewrites the file keeping only the newest
-// maxEpisodesPerStore episodes. Callers must hold s.mu.
+// maxEpisodesPerStore episodes. Callers must hold s.mu. When the file
+// cannot possibly have reached the cap (checked by size), it skips the
+// full read so Append stays cheap for small stores.
 func (s *Store) pruneLocked() error {
+	info, err := os.Stat(s.path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	if info.Size() < int64(maxEpisodesPerStore*minEpisodeLineBytes) {
+		return nil
+	}
+
 	episodes, err := s.loadLocked()
 	if err != nil {
 		return err
@@ -104,7 +124,7 @@ func (s *Store) pruneLocked() error {
 
 	keep := episodes[len(episodes)-maxEpisodesPerStore:]
 	tmp := s.path + ".tmp"
-	f, err := os.Create(tmp)
+	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		return err
 	}
