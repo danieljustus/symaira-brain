@@ -327,6 +327,9 @@ func (c *Client) Initialize(ctx context.Context) (*InitializeResult, error) {
 	if err := json.Unmarshal(raw, &result); err != nil {
 		return nil, fmt.Errorf("broker: parse initialize result: %w", err)
 	}
+	if result.ProtocolVersion != protocolVersion {
+		return nil, &ProtocolMismatchError{Expected: protocolVersion, Actual: result.ProtocolVersion}
+	}
 
 	// Best-effort per the spec: a child that can't take the notification
 	// (e.g. it exited right after responding) shouldn't fail an otherwise

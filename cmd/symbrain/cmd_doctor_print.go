@@ -43,6 +43,13 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 			printHandshake(w, h)
 		}
 	}
+	if len(r.Degradations) > 0 {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "  startup degradations:")
+		for _, d := range r.Degradations {
+			fmt.Fprintf(w, "    !  %-8s %s: %s\n", d.Server, d.Level, d.Reason)
+		}
+	}
 }
 
 func printDir(w io.Writer, label string, d dirCheck) {

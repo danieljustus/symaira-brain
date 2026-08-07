@@ -108,6 +108,21 @@ var memoryTools = struct {
 	},
 }
 
+// identityParameters is the versioned, explicit mapping of backend aliases to
+// the parameter that carries the active profile identity. An alias absent from
+// this table is intentionally forwarded without guessed identity fields.
+var identityParameters = map[string]string{
+	profile.ServerMemory: "client_id",
+}
+
+// IdentityParameter returns the mapped identity parameter for alias, if one is
+// known. The returned mapping is deliberately a copy of the table value so
+// callers cannot mutate the policy package's registry.
+func IdentityParameter(alias string) (string, bool) {
+	parameter, ok := identityParameters[alias]
+	return parameter, ok
+}
+
 // presetForMode returns the versioned tool list for alias's mode, and
 // whether the (alias, mode) combination is recognized at all. An empty,
 // non-nil-ok result (vault "off") is a valid preset that exposes nothing.

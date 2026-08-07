@@ -3,9 +3,11 @@ package gateway
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -29,6 +31,7 @@ type Server struct {
 	logger            *slog.Logger
 	cfg               *config.Config
 	version           string
+	degradations      []audit.Degradation
 	auditDegradedWarn sync.Once
 }
 
@@ -53,7 +56,8 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 // is an interface so tests can substitute a fake logger (e.g. to force
 // the degraded-warning path) without changing production behavior.
 type auditSink interface {
-	Log(server, tool string, args json.RawMessage, duration time.Duration, status string)
+	Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...audit.Classification)
+	LogDegradation(server, reason, level string)
 	Degraded() bool
 	Close() error
 }
@@ -93,11 +97,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		} else {
 			auditLog = al
 			defer auditLog.Close()
+			for _, degradation := range s.degradations {
+				auditLog.LogDegradation(degradation.Server, degradation.Reason, degradation.Level)
+			}
 		}
 	}
 
 	srv := mcpserver.New("symbrain", s.version)
-	srv.SetInstructions(fmt.Sprintf("symbrain profile %q", s.profile.Name))
+	srv.SetInstructions(s.instructions())
 
 	for _, entry := range s.cat.Exposed() {
 		entry := entry
@@ -110,10 +117,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 				result, err := s.routeToolCall(ctx, entry, input)
 				if auditLog != nil {
 					status := "ok"
+					var classification audit.Classification
 					if err != nil {
 						status = "error"
+						if classified, ok := err.(*classifiedError); ok {
+							classification = classified.Classification
+						}
 					}
-					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status)
+					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status, classification)
 					if auditLog.Degraded() {
 						s.auditDegradedWarn.Do(func() {
 							s.logger.Warn("audit log degraded; some entries may not be persisted")
@@ -128,11 +139,28 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	return srv.ServeIO(ctx, r, w)
 }
 
+// instructions returns the stable profile guidance and, when startup was
+// degraded, a deterministic one-line summary of the absent backends.
+func (s *Server) instructions() string {
+	base := fmt.Sprintf("symbrain profile %q", s.profile.Name)
+	if len(s.degradations) == 0 {
+		return base
+	}
+
+	servers := make([]string, 0, len(s.degradations))
+	for _, degradation := range s.degradations {
+		servers = append(servers, degradation.Server)
+	}
+	sort.Strings(servers)
+	return fmt.Sprintf("%s; degraded backends: %s", base, strings.Join(servers, ", "))
+}
+
 // buildCatalog queries each managed server for its tools, evaluates the
 // policy, and builds the merged catalog. It must be called before
 // registering tools with mcpserver.
 func (s *Server) buildCatalog(ctx context.Context) error {
 	var servers []catalog.ServerTools
+	s.degradations = nil
 
 	for alias, ms := range s.servers {
 		serverCfg := s.profile.Server(alias)
@@ -144,6 +172,11 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 		if err != nil {
 			s.logger.Warn("failed to list tools from child",
 				"server", alias, "error", err)
+			s.degradations = append(s.degradations, audit.Degradation{
+				Server: alias,
+				Reason: err.Error(),
+				Level:  "warning",
+			})
 			continue
 		}
 
@@ -181,28 +214,120 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 	return nil
 }
 
+// classifiedError preserves the existing human-readable error message while
+// exposing the actionable category pair in the MCP tool-result text.
+type classifiedError struct {
+	message string
+	audit.Classification
+	cause error
+}
+
+func (e *classifiedError) Error() string {
+	payload := struct {
+		Message string `json:"message"`
+		audit.Classification
+	}{Message: e.message, Classification: e.Classification}
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return e.message
+	}
+	return string(data)
+}
+
+func (e *classifiedError) Unwrap() error { return e.cause }
+
+func classifyError(err error) audit.Classification {
+	var classified *classifiedError
+	var rpcErr *broker.RPCError
+	var timeoutErr *broker.TimeoutError
+	var closedErr *broker.ClosedError
+	switch {
+	case errors.As(err, &classified):
+		return classified.Classification
+	case errors.As(err, &rpcErr):
+		return audit.Classification{Category: "rpc", Retryable: false}
+	case errors.As(err, &timeoutErr):
+		return audit.Classification{Category: "timeout", Retryable: true}
+	case errors.As(err, &closedErr):
+		return audit.Classification{Category: "closed", Retryable: true}
+	default:
+		return audit.Classification{Category: "internal", Retryable: false}
+	}
+}
+
+func wrapClassifiedError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if classified, ok := err.(*classifiedError); ok {
+		return classified
+	}
+	return &classifiedError{
+		message:        err.Error(),
+		Classification: classifyError(err),
+		cause:          err,
+	}
+}
+
 // routeToolCall strips the namespace prefix from the catalog tool name,
-// finds the owning child server, and forwards the call. Errors are
-// mapped faithfully: RPC errors, timeouts, and tool-level errors are all
-// preserved.
+// finds the owning child server, and forwards the call. Errors are classified
+// while retaining their existing human-readable messages.
 func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input json.RawMessage) (any, error) {
 	originalName := entry.OriginalName
 
 	ms, ok := s.servers[entry.Server]
 	if !ok {
-		return nil, fmt.Errorf("server %q not found", entry.Server)
+		return nil, wrapClassifiedError(fmt.Errorf("server %q not found", entry.Server))
 	}
 
-	result, err := ms.CallTool(ctx, originalName, input)
+	forwardedInput, err := s.injectIdentity(entry.Server, input)
 	if err != nil {
-		return nil, err
+		return nil, wrapClassifiedError(err)
+	}
+	result, err := ms.CallTool(ctx, originalName, forwardedInput)
+	if err != nil {
+		return nil, wrapClassifiedError(err)
 	}
 
 	if result.IsError {
-		return nil, fmt.Errorf("tool error: %s", joinContent(result.Content))
+		return nil, &classifiedError{
+			message:        fmt.Sprintf("tool error: %s", joinContent(result.Content)),
+			Classification: audit.Classification{Category: "tool", Retryable: false},
+		}
 	}
 
 	return joinContent(result.Content), nil
+}
+
+// injectIdentity applies the explicit backend mapping to a tool-call argument
+// object. Calls to unmapped backends and calls with the feature disabled return
+// the original bytes unchanged so existing forwarding behavior is preserved.
+func (s *Server) injectIdentity(alias string, input json.RawMessage) (json.RawMessage, error) {
+	if s.cfg != nil && !s.cfg.Gateway.IdentityInjection {
+		return input, nil
+	}
+	parameter, ok := policy.IdentityParameter(alias)
+	if !ok {
+		return input, nil
+	}
+
+	args := make(map[string]json.RawMessage)
+	if len(input) > 0 {
+		if err := json.Unmarshal(input, &args); err != nil {
+			return nil, fmt.Errorf("gateway: decode arguments for %s: %w", alias, err)
+		}
+	}
+	profileName, err := json.Marshal(s.profile.Name)
+	if err != nil {
+		return nil, fmt.Errorf("gateway: encode injected value: %w", err)
+	}
+	args[parameter] = profileName
+
+	forwarded, err := json.Marshal(args)
+	if err != nil {
+		return nil, fmt.Errorf("gateway: encode arguments for %s: %w", alias, err)
+	}
+	return forwarded, nil
 }
 
 // joinContent joins the text of all content blocks with newline separators.

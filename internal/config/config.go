@@ -22,6 +22,7 @@ type Config struct {
 	DefaultProfile string
 
 	Audit       AuditConfig
+	Gateway     GatewayConfig
 	UpdateCheck UpdateCheckConfig
 	Servers     ServersConfig
 }
@@ -33,6 +34,13 @@ type AuditConfig struct {
 	// Verbose additionally logs non-vault argument values (never vault
 	// arguments or results, regardless of this setting).
 	Verbose bool
+}
+
+// GatewayConfig controls gateway-specific forwarding behavior.
+type GatewayConfig struct {
+	// IdentityInjection sets the mapped backend identity parameter to the
+	// active profile name before forwarding a tool call.
+	IdentityInjection bool
 }
 
 // UpdateCheckConfig controls the optional GitHub release update check.
@@ -67,6 +75,7 @@ type ServerOverride struct {
 type fileConfig struct {
 	DefaultProfile string                `json:"default_profile"`
 	Audit          fileAuditConfig       `json:"audit"`
+	Gateway        fileGatewayConfig     `json:"gateway"`
 	UpdateCheck    fileUpdateCheckConfig `json:"updatecheck"`
 	Servers        ServersConfig         `json:"servers"`
 }
@@ -76,14 +85,20 @@ type fileAuditConfig struct {
 	Verbose bool  `json:"verbose"`
 }
 
+type fileGatewayConfig struct {
+	IdentityInjection *bool `json:"identity_injection"`
+}
+
 type fileUpdateCheckConfig struct {
 	Enabled *bool `json:"enabled"`
 }
 
 func fileDefaults() *fileConfig {
 	enabled := true
+	identityInjection := true
 	return &fileConfig{
 		Audit:       fileAuditConfig{Enabled: &enabled, Verbose: false},
+		Gateway:     fileGatewayConfig{IdentityInjection: &identityInjection},
 		UpdateCheck: fileUpdateCheckConfig{Enabled: &enabled},
 	}
 }
@@ -100,6 +115,9 @@ func resolve(fc *fileConfig) *Config {
 		Audit: AuditConfig{
 			Enabled: derefBool(fc.Audit.Enabled, true),
 			Verbose: fc.Audit.Verbose,
+		},
+		Gateway: GatewayConfig{
+			IdentityInjection: derefBool(fc.Gateway.IdentityInjection, true),
 		},
 		UpdateCheck: UpdateCheckConfig{
 			Enabled: derefBool(fc.UpdateCheck.Enabled, true),
