@@ -325,8 +325,11 @@ func (s *Server) routeToolCall(ctx context.Context, entry catalog.Entry, input j
 }
 
 // injectIdentity applies the explicit backend mapping to a tool-call argument
-// object. Calls to unmapped backends and calls with the feature disabled return
-// the original bytes unchanged so existing forwarding behavior is preserved.
+// object with caller-wins precedence: a parameter already supplied by the
+// caller is left untouched, and the profile name is injected only when the
+// parameter is absent. Calls to unmapped backends and calls with the feature
+// disabled return the original bytes unchanged so existing forwarding
+// behavior is preserved.
 func (s *Server) injectIdentity(alias string, input json.RawMessage) (json.RawMessage, error) {
 	if s.cfg != nil && !s.cfg.Gateway.IdentityInjection {
 		return input, nil
@@ -341,6 +344,9 @@ func (s *Server) injectIdentity(alias string, input json.RawMessage) (json.RawMe
 		if err := json.Unmarshal(input, &args); err != nil {
 			return nil, fmt.Errorf("gateway: decode arguments for %s: %w", alias, err)
 		}
+	}
+	if _, exists := args[parameter]; exists {
+		return input, nil
 	}
 	profileName, err := json.Marshal(s.profile.Name)
 	if err != nil {
