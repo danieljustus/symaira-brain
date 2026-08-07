@@ -267,18 +267,10 @@ jobs:
           # --- Create DMG with branded drag-to-Applications window ---
           VERSION="${{ steps.version.outputs.version }}"
           DMG_PATH="$RUNNER_TEMP/SymBrain-$VERSION.dmg"
-          DMG_STAGING="$RUNNER_TEMP/dmg-staging"
-          mkdir -p "$DMG_STAGING"
-          cp -R "$APP" "$DMG_STAGING/"
-
-          # Copy volume icon so the mounted DMG shows the SymBrain icon
-          cp assets/dmg/.VolumeIcon.icns "$DMG_STAGING/.VolumeIcon.icns"
-          SetFile -a C "$DMG_STAGING" 2>/dev/null || true
-
           # Branded installer window: background, icon positions, Applications
           # link are laid out via AppleScript (same as symaira-eraseme).
           ./scripts/create-symaira-dmg.sh \
-            "$DMG_STAGING/SymBrain.app" \
+            "$APP" \
             "$DMG_PATH" \
             "SymBrain $VERSION"
 
