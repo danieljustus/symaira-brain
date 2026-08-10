@@ -114,3 +114,60 @@ func TestStore_FilePermissionsArePrivate(t *testing.T) {
 		t.Errorf("episode file mode after prune = %o, want 600", perm)
 	}
 }
+
+func TestStore_DirectoryPermissionsArePrivate(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "recipes")
+	store := NewStore(filepath.Join(dir, "p.jsonl"))
+
+	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatalf("Stat: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o700 {
+		t.Errorf("episode directory mode = %o, want 700 (behavioral history metadata is private)", perm)
+	}
+}
+
+func TestStore_DoesNotAlterExistingDirectoryPermissions(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "external")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatalf("Mkdir: %v", err)
+	}
+	store := NewStore(filepath.Join(dir, "p.jsonl"))
+
+	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatalf("Stat: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o755 {
+		t.Errorf("existing directory mode = %o, want 755", perm)
+	}
+}
+
+func TestPrivateStore_RepairsExistingDirectoryPermissions(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "recipes")
+	if err := os.Mkdir(dir, 0o755); err != nil {
+		t.Fatalf("Mkdir: %v", err)
+	}
+	store := NewPrivateStore(filepath.Join(dir, "p.jsonl"))
+
+	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatalf("Stat: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o700 {
+		t.Errorf("managed directory mode = %o, want 700", perm)
+	}
+}

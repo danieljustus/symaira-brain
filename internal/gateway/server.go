@@ -543,7 +543,7 @@ var appendEpisode = func(ep recipes.Episode) error {
 	if err != nil {
 		return err
 	}
-	store := recipes.NewStore(filepath.Join(dir, ep.Profile+".jsonl"))
+	store := recipes.NewPrivateStore(filepath.Join(dir, ep.Profile+".jsonl"))
 	return store.Append(ep)
 }
 
@@ -557,7 +557,7 @@ func (s *Server) handleRecipes(_ context.Context, _ json.RawMessage) (any, error
 	if err != nil {
 		return nil, err
 	}
-	store := recipes.NewStore(filepath.Join(dir, s.profile.Name+".jsonl"))
+	store := recipes.NewPrivateStore(filepath.Join(dir, s.profile.Name+".jsonl"))
 	episodes, err := store.Load()
 	if err != nil {
 		return nil, err
