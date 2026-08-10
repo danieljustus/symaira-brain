@@ -15,7 +15,7 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.5.0` released, in active development. Interfaces may
+> **Status:** `v0.5.1` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## What symbrain is not
@@ -29,8 +29,9 @@ each through its own profile, each seeing only what that profile exposes.
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
-- **Not a GUI**, at least not in `v0.5.0` (though native SwiftUI apps now
-  exist in the repo — see [Native Apps](#native-apps)).
+- **Not a general-purpose GUI or desktop shell.** Native SwiftUI apps are
+  included as companion dashboards for symbrain's own profiles, harnesses,
+  audit log, and setup flows; the core product remains the CLI/MCP gateway.
 
 ### symbrain vs. symguard
 
