@@ -25,6 +25,10 @@
 //   - FAKEMCP_VERSION: the version string reported by both
 //     `fakemcp version --json` and the initialize serverInfo (default
 //     "0.0.0-fakemcp").
+//   - FAKEMCP_SPAWN_MARKER: when set to a file path, each spawned process
+//     appends one line (its PID) to that file at startup. Tests use it to
+//     count how many child processes were created, e.g. to prove a
+//     crash-restart race does not spawn duplicate children.
 package main
 
 import (
@@ -58,7 +62,23 @@ func main() {
 		fmt.Println(`{"version":"` + version() + `"}`)
 		return
 	}
+	if marker := os.Getenv("FAKEMCP_SPAWN_MARKER"); marker != "" {
+		recordSpawn(marker)
+	}
 	serve(os.Stdin, os.Stdout)
+}
+
+// recordSpawn appends one line (the PID) to the marker file so tests can
+// count how many child processes were spawned — each process records
+// exactly once, at startup.
+func recordSpawn(marker string) {
+	f, err := os.OpenFile(marker, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fakemcp: spawn marker: %v\n", err)
+		return
+	}
+	_, _ = fmt.Fprintf(f, "%d\n", os.Getpid())
+	_ = f.Close()
 }
 
 func version() string {
