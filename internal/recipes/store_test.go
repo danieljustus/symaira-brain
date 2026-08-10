@@ -171,3 +171,32 @@ func TestPrivateStore_RepairsExistingDirectoryPermissions(t *testing.T) {
 		t.Errorf("managed directory mode = %o, want 700", perm)
 	}
 }
+
+func TestPrivateStore_CreatesPrivateDirectory(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "nested", "recipes")
+	path := filepath.Join(dir, "p.jsonl")
+	store := NewPrivateStore(path)
+
+	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+
+	dirInfo, err := os.Stat(dir)
+	if err != nil {
+		t.Fatalf("Stat directory: %v", err)
+	}
+	if !dirInfo.IsDir() {
+		t.Fatalf("store path parent is not a directory: %s", dir)
+	}
+	if perm := dirInfo.Mode().Perm(); perm != 0o700 {
+		t.Errorf("new private directory mode = %o, want 700", perm)
+	}
+
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		t.Fatalf("Stat episode file: %v", err)
+	}
+	if perm := fileInfo.Mode().Perm(); perm != 0o600 {
+		t.Errorf("episode file mode = %o, want 600", perm)
+	}
+}
