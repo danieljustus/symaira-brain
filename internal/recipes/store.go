@@ -25,8 +25,9 @@ const minEpisodeLineBytes = 64
 // profile. It is safe for concurrent use and never fails on a malformed
 // line when loading (the line is skipped — history is best-effort).
 type Store struct {
-	path string
-	mu   sync.Mutex
+	path       string
+	privateDir bool
+	mu         sync.Mutex
 }
 
 // NewStore returns a Store writing to path (typically
@@ -36,14 +37,26 @@ func NewStore(path string) *Store {
 	return &Store{path: path}
 }
 
+// NewPrivateStore returns a Store for a symbrain-managed directory containing
+// behavioral history. It repairs the directory mode on Append; callers must
+// only use it for application-owned paths.
+func NewPrivateStore(path string) *Store {
+	return &Store{path: path, privateDir: true}
+}
+
 // Append writes one episode and prunes the file to the newest
 // maxEpisodesPerStore episodes when it exceeds the bound.
 func (s *Store) Append(ep Episode) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(s.path), 0o700); err != nil {
 		return err
+	}
+	if s.privateDir {
+		if err := os.Chmod(filepath.Dir(s.path), 0o700); err != nil {
+			return err
+		}
 	}
 
 	data, err := json.Marshal(ep)
