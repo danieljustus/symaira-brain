@@ -765,6 +765,28 @@ func TestRotate_RemovesOldestBeyondMax(t *testing.T) {
 	l.f.Close()
 }
 
+func TestRotate_ReopenFailureMarksLoggerDegraded(t *testing.T) {
+	f, err := os.CreateTemp(t.TempDir(), "audit-current-*")
+	if err != nil {
+		t.Fatalf("CreateTemp: %v", err)
+	}
+
+	l := &Logger{
+		f:    f,
+		path: filepath.Join(t.TempDir(), "missing", "audit.jsonl"),
+		size: maxFileSize,
+	}
+
+	l.rotate()
+
+	if l.f != nil {
+		t.Fatalf("rotate() file = %v, want nil after reopen failure", l.f)
+	}
+	if !l.Degraded() {
+		t.Fatal("rotate() did not mark logger degraded after reopen failure")
+	}
+}
+
 func TestPrintEntry_FormatsOutput(t *testing.T) {
 	e := Entry{
 		Timestamp:  "2026-06-15T14:30:00Z",
