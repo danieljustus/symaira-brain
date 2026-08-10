@@ -281,10 +281,31 @@ func (ms *ManagedServer) watchChild(c *Client) {
 	time.AfterFunc(backoff, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), ms.cfg.initTimeout())
 		defer cancel()
-		if _, err := ms.spawnAndInit(ctx); err != nil {
-			ms.cfg.logger().Error("restart failed", "server", ms.cfg.Name, "error", err)
-		}
+		ms.restartChild(ctx)
 	})
+}
+
+// restartChild spawns a replacement child after a crash-delayed restart.
+// It is invoked from the time.AfterFunc callback scheduled by watchChild,
+// where ms.mu is no longer held, so it re-acquires the lock and rechecks
+// the server state and the current client before spawning. This prevents
+// a request that arrived during the backoff window (ensureReady) from
+// racing the scheduled restart into a duplicate child process.
+func (ms *ManagedServer) restartChild(ctx context.Context) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+
+	state := ServerState(ms.state.Load())
+	if state == StateStopped || state == StateDegraded {
+		return
+	}
+	if ms.client.Load() != nil {
+		// A concurrent request already spawned a replacement child.
+		return
+	}
+	if _, err := ms.spawnAndInit(ctx); err != nil {
+		ms.cfg.logger().Error("restart failed", "server", ms.cfg.Name, "error", err)
+	}
 }
 
 // ListTools returns the child's tool list, spawning it if needed. Returns
