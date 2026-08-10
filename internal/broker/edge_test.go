@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -342,4 +344,58 @@ func TestReadLimitedLine_TwoChunks(t *testing.T) {
 	if string(line) != strings.Repeat("a", 512) {
 		t.Errorf("line length = %d, want 512", len(line))
 	}
+}
+
+func TestManagedServer_RestartChild_StateGuards(t *testing.T) {
+	for _, state := range []ServerState{StateStopped, StateDegraded} {
+		t.Run(state.String(), func(t *testing.T) {
+			ms := NewManagedServer(ServerConfig{
+				Name:       "guard",
+				BinaryPath: fakeBinPath,
+				Logger:     testLogger(t),
+			})
+			ms.state.Store(int32(state))
+
+			ms.restartChild(context.Background())
+
+			if got := ms.State(); got != state {
+				t.Fatalf("state after guarded restart = %v, want %v", got, state)
+			}
+			if got := ms.client.Load(); got != nil {
+				t.Fatalf("guarded restart installed client %p, want nil", got)
+			}
+		})
+	}
+}
+
+func TestManagedServer_RestartChild_SkipsWhenClientExists(t *testing.T) {
+	marker := filepath.Join(t.TempDir(), "spawns.log")
+	ms := NewManagedServer(ServerConfig{
+		Name:       "guard",
+		BinaryPath: fakeBinPath,
+		Env:        append(os.Environ(), "FAKEMCP_SPAWN_MARKER="+marker),
+		Logger:     testLogger(t),
+	})
+	defer ms.Shutdown()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if _, err := ms.ListTools(ctx); err != nil {
+		t.Fatalf("ListTools() error = %v", err)
+	}
+	original := ms.client.Load()
+	if original == nil {
+		t.Fatal("ListTools() did not install a client")
+	}
+	assertSpawnCount(t, marker, 1)
+
+	ms.restartChild(ctx)
+
+	if got := ms.client.Load(); got != original {
+		t.Fatalf("restartChild replaced existing client %p with %p", original, got)
+	}
+	if got := ms.State(); got != StateReady {
+		t.Fatalf("state after skipped restart = %v, want StateReady", got)
+	}
+	assertSpawnCount(t, marker, 1)
 }
