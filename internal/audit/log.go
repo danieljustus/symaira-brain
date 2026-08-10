@@ -248,9 +248,11 @@ func (l *Logger) rotate() {
 		if i+1 > maxBackups {
 			os.Remove(newPath)
 		}
-		os.Rename(old, newPath)
+		// Renames are best-effort: missing backups (ENOENT) are expected
+		// in the shift chain and a stale backup is not a data-loss risk.
+		_ = os.Rename(old, newPath)
 	}
-	os.Rename(l.path, l.path+".1")
+	_ = os.Rename(l.path, l.path+".1")
 
 	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {

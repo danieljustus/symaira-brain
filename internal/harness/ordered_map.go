@@ -179,7 +179,7 @@ func decodeJSONValue(dec *json.Decoder) (any, error) {
 // instead of json.Encoder so we control key order. Two-space indent and
 // no HTML escaping match the previous encoder behavior.
 func (m *orderedMap) marshalJSON(w io.Writer, prefix, indent string) error {
-	write := func(s string) { io.WriteString(w, s) }
+	write := func(s string) { _, _ = io.WriteString(w, s) }
 
 	if m == nil || len(m.keys) == 0 {
 		write("{}")
@@ -218,7 +218,7 @@ func (m *orderedMap) marshalJSON(w io.Writer, prefix, indent string) error {
 // nested objects. Other types fall through to json.Marshal.
 func marshalJSONValue(w io.Writer, v any, prefix, indent string) error {
 	if v == nil {
-		io.WriteString(w, "null")
+		_, _ = io.WriteString(w, "null")
 		return nil
 	}
 
@@ -228,15 +228,15 @@ func marshalJSONValue(w io.Writer, v any, prefix, indent string) error {
 	case []any:
 		return marshalJSONArray(w, val, prefix, indent)
 	case json.Number:
-		io.WriteString(w, val.String())
+		_, _ = io.WriteString(w, val.String())
 		return nil
 	case string:
 		return writeJSONString(w, val)
 	case bool:
 		if val {
-			io.WriteString(w, "true")
+			_, _ = io.WriteString(w, "true")
 		} else {
-			io.WriteString(w, "false")
+			_, _ = io.WriteString(w, "false")
 		}
 		return nil
 	default:
@@ -255,24 +255,24 @@ func marshalJSONValue(w io.Writer, v any, prefix, indent string) error {
 // marshalJSONArray writes a JSON array to w.
 func marshalJSONArray(w io.Writer, arr []any, prefix, indent string) error {
 	if len(arr) == 0 {
-		io.WriteString(w, "[]")
+		_, _ = io.WriteString(w, "[]")
 		return nil
 	}
 
-	io.WriteString(w, "[\n")
+	_, _ = io.WriteString(w, "[\n")
 	for i, val := range arr {
-		io.WriteString(w, prefix)
-		io.WriteString(w, indent)
+		_, _ = io.WriteString(w, prefix)
+		_, _ = io.WriteString(w, indent)
 		if err := marshalJSONValue(w, val, prefix+indent, indent); err != nil {
 			return err
 		}
 		if i < len(arr)-1 {
-			io.WriteString(w, ",")
+			_, _ = io.WriteString(w, ",")
 		}
-		io.WriteString(w, "\n")
+		_, _ = io.WriteString(w, "\n")
 	}
-	io.WriteString(w, prefix)
-	io.WriteString(w, "]")
+	_, _ = io.WriteString(w, prefix)
+	_, _ = io.WriteString(w, "]")
 	return nil
 }
 
@@ -280,23 +280,23 @@ func marshalJSONArray(w io.Writer, arr []any, prefix, indent string) error {
 // characters (<, >, &) are NOT escaped — matching SetEscapeHTML(false) on
 // the standard encoder.
 func writeJSONString(w io.Writer, s string) error {
-	io.WriteString(w, "\"")
+	_, _ = io.WriteString(w, "\"")
 	for _, r := range s {
 		switch r {
 		case '"':
-			io.WriteString(w, `\"`)
+			_, _ = io.WriteString(w, `\"`)
 		case '\\':
-			io.WriteString(w, `\\`)
+			_, _ = io.WriteString(w, `\\`)
 		case '\b':
-			io.WriteString(w, `\b`)
+			_, _ = io.WriteString(w, `\b`)
 		case '\f':
-			io.WriteString(w, `\f`)
+			_, _ = io.WriteString(w, `\f`)
 		case '\n':
-			io.WriteString(w, `\n`)
+			_, _ = io.WriteString(w, `\n`)
 		case '\r':
-			io.WriteString(w, `\r`)
+			_, _ = io.WriteString(w, `\r`)
 		case '\t':
-			io.WriteString(w, `\t`)
+			_, _ = io.WriteString(w, `\t`)
 		default:
 			if r < 0x20 {
 				fmt.Fprintf(w, `\u%04x`, r)
@@ -326,11 +326,11 @@ func writeJSONString(w io.Writer, s string) error {
 					buf[3] = byte(0x80 | (r & 0x3F))
 					n = 4
 				}
-				w.Write(buf[:n])
+				_, _ = w.Write(buf[:n])
 			}
 		}
 	}
-	io.WriteString(w, "\"")
+	_, _ = io.WriteString(w, "\"")
 	return nil
 }
 

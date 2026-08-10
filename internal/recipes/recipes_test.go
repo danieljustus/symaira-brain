@@ -138,7 +138,7 @@ func TestPromote_SortedByName(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("Promote() = %d recipes, want 2", len(got))
 	}
-	if !(got[0].Name < got[1].Name) {
+	if got[0].Name >= got[1].Name {
 		t.Errorf("recipes not sorted by name: %q >= %q", got[0].Name, got[1].Name)
 	}
 }

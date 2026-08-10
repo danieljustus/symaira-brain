@@ -580,7 +580,9 @@ func TestTail_AllProfiles(t *testing.T) {
 		}
 		data, _ := json.Marshal(entry)
 		data = append(data, '\n')
-		os.WriteFile(filepath.Join(auditDir, prof+".jsonl"), data, 0o600)
+		if err := os.WriteFile(filepath.Join(auditDir, prof+".jsonl"), data, 0o600); err != nil {
+			t.Fatalf("write profile log: %v", err)
+		}
 	}
 
 	var out bytes.Buffer
@@ -648,7 +650,9 @@ func TestRotate_CreatesBackup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.Write([]byte(`{"data":"existing"}` + "\n"))
+	if _, err := f.Write([]byte(`{"data":"existing"}` + "\n")); err != nil {
+		t.Fatal(err)
+	}
 	f.Close()
 
 	f, err = os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
@@ -684,9 +688,15 @@ func TestRotate_ShiftsExistingBackups(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "test.jsonl")
 
-	os.WriteFile(logPath+".1", []byte("backup1\n"), 0o600)
-	os.WriteFile(logPath+".2", []byte("backup2\n"), 0o600)
-	os.WriteFile(logPath, []byte("current\n"), 0o600)
+	if err := os.WriteFile(logPath+".1", []byte("backup1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(logPath+".2", []byte("backup2\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(logPath, []byte("current\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
@@ -723,9 +733,13 @@ func TestRotate_RemovesOldestBeyondMax(t *testing.T) {
 	logPath := filepath.Join(dir, "test.jsonl")
 
 	for i := 1; i <= maxBackups; i++ {
-		os.WriteFile(logPath+"."+strconv.Itoa(i), []byte("old\n"), 0o600)
+		if err := os.WriteFile(logPath+"."+strconv.Itoa(i), []byte("old\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
 	}
-	os.WriteFile(logPath, []byte("current\n"), 0o600)
+	if err := os.WriteFile(logPath, []byte("current\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
 	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
 	if err != nil {
