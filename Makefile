@@ -75,9 +75,12 @@ vet:
 
 ## lint: Run linters (golangci-lint if available, otherwise go vet)
 lint:
-	@command -v golangci-lint >/dev/null 2>&1 && \
-		golangci-lint run ./... || \
-		(echo "golangci-lint not installed, falling back to go vet" && $(MAKE) vet)
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run ./...; \
+	else \
+		echo "golangci-lint not installed, falling back to go vet"; \
+		$(MAKE) vet; \
+	fi
 
 ## fmt: Format all Go source files
 fmt:

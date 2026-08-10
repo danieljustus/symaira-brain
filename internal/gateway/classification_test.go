@@ -43,7 +43,7 @@ func TestClassifiedError_ErrorCarriesUnchangedMessageAndClassification(t *testin
 	if !ok {
 		t.Fatalf("error is %T, want *classifiedError", err)
 	}
-	if classified.Classification.Category != "tool" || classified.Classification.Retryable {
-		t.Errorf("classification = {%q %v}, want {tool false}", classified.Classification.Category, classified.Classification.Retryable)
+	if classified.Category != "tool" || classified.Retryable {
+		t.Errorf("classification = {%q %v}, want {tool false}", classified.Category, classified.Retryable)
 	}
 }
