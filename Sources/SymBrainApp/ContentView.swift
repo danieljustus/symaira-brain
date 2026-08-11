@@ -13,6 +13,9 @@ struct ContentView: View {
         case harnesses = "Harnesses"
         case sync = "Sync"
         case audit = "Audit"
+        case memory = "Memory"
+        case vault = "Vault"
+        case skills = "Skills"
         case settings = "Settings"
 
         var systemImage: String {
@@ -22,20 +25,34 @@ struct ContentView: View {
             case .harnesses: "terminal"
             case .sync: "arrow.triangle.2.circlepath"
             case .audit: "doc.text.magnifyingglass"
+            case .memory: "brain"
+            case .vault: "lock.square.stack"
+            case .skills: "square.stack.3d.up"
             case .settings: "gearshape"
             }
         }
+
+        /// Sidebar grouping: the broker screens SymBrain owns itself, and the
+        /// modules it fronts for the other Symaira tools.
+        static let brokerModes: [DisplayMode] = [
+            .dashboard, .profiles, .harnesses, .sync, .audit,
+        ]
+        static let moduleModes: [DisplayMode] = [.memory, .vault, .skills]
+        static let systemModes: [DisplayMode] = [.settings]
     }
 
     var body: some View {
         NavigationSplitView {
-            List(DisplayMode.allCases, id: \.self, selection: $displayMode) { mode in
-                HStack {
-                    Image(systemName: mode.systemImage)
-                        .frame(width: 20)
-                    Text(mode.rawValue)
+            List(selection: $displayMode) {
+                Section("Broker") {
+                    ForEach(DisplayMode.brokerModes, id: \.self, content: sidebarRow)
                 }
-                .tag(mode)
+                Section("Modules") {
+                    ForEach(DisplayMode.moduleModes, id: \.self, content: sidebarRow)
+                }
+                Section {
+                    ForEach(DisplayMode.systemModes, id: \.self, content: sidebarRow)
+                }
             }
             .scrollContentBackground(.hidden)
             .listStyle(.sidebar)
@@ -55,6 +72,12 @@ struct ContentView: View {
                     SyncView(client: client)
                 case .audit:
                     AuditView(client: client)
+                case .memory:
+                    MemoryView()
+                case .vault:
+                    VaultView()
+                case .skills:
+                    SkillsView()
                 case .settings:
                     SettingsView(client: client)
                 }
@@ -62,6 +85,15 @@ struct ContentView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .frame(minWidth: 900, minHeight: 580)
+    }
+
+    private func sidebarRow(_ mode: DisplayMode) -> some View {
+        HStack {
+            Image(systemName: mode.systemImage)
+                .frame(width: 20)
+            Text(mode.rawValue)
+        }
+        .tag(mode)
     }
 }
 

@@ -7,17 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */; };
 		05E20C88D508F172F8EA4DDD /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = E2F3DE448537FE8B9962E1BA /* SymairaTheme */; };
 		0C920505646C039CBBD09B89 /* SymBrainMobileApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */; };
+		0D9C664B7AA28DB4D716B319 /* SkillsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D24A10D6F4152E6F4337007 /* SkillsView.swift */; };
+		17388265342DF0FED40D14C6 /* VaultClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */; };
+		17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F7A7307C5362C46D956DDD /* MemoryView.swift */; };
 		1876D0749F97752B05EED258 /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 22DDC1B7D47B712C3444DF4D /* SymairaCLIRunner */; };
 		20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */; };
 		36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC6F1658F16C48F507A56 /* AuditLog.swift */; };
 		39FF1DA3FAAACE4FF6079632 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 607EFF1004A503E966196E05 /* SymairaUpdateCheck */; };
 		3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDFA6201EBE1C20A656FE31 /* Models.swift */; };
+		433E92DB0B45482A00A4FA09 /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B91F2C82B9EF019B92AA1 /* VaultView.swift */; };
 		44924707DC196AD3AF99D83E /* MobileRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */; };
+		4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */; };
 		521F6345DEFC9D796B9EAA2C /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 0054585A78E372D2085F559E /* SymairaCLIRunner */; };
 		636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D52B395108AFAD4ACBF29E /* SettingsView.swift */; };
+		64D0D1B79D20E858BF0F30F1 /* ModuleNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */; };
 		6964252A12F124217D3EB430 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
+		6BA42FABEA0041023B5B2A63 /* SkillsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C42924D7035EF242B3DFE19 /* SkillsModels.swift */; };
 		70604ADFC23CC217325131F7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3457B33557FD43EE491F5E5 /* ContentView.swift */; };
 		75B074873331D65288CB0625 /* SymBrainClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */; };
 		76E8895721D92EA46A646520 /* ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB797B558BCC85838B09E52D /* ViewModels.swift */; };
@@ -25,8 +33,11 @@
 		8CF4C06F57A2883FFFF98B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E451D0841FDC285609A50119 /* Assets.xcassets */; };
 		95F6922DD5837620CDB02E29 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		99A982ED21A300028A6C94EE /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9480D05289AD3EDD804ECC1C /* SymairaDaemonKit */; };
+		A08CEC3AE0AC46C2E5DD39DE /* MemoryClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB25C751770FF552A574E5CE /* MemoryClient.swift */; };
 		A6F3C9C208728639E3E29208 /* AuditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A61161A1B60801BA661D010 /* AuditView.swift */; };
 		A90FCDD127F8B4059F921F01 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 0D9415DDF8EC5FD7F8C6FBF5 /* SymairaUpdateCheck */; };
+		AB49BA080F2FF71CBE24000E /* ModuleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */; };
+		B118AE290BABA60839E4033E /* SkillsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */; };
 		B872D82DD78AD55CAE76D798 /* SymBrainApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */; };
 		BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */; };
 		BD582551E72C04A65130D6EA /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 2A87C9F4E9912E7CF988285E /* SymairaTheme */; };
@@ -39,6 +50,7 @@
 		E8C7A8584EB099EA03D99F73 /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 0EFDD552CB42AFE785E795E8 /* SymairaTheme */; };
 		F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */; };
 		F2F5EB32E528F74CA1CB2601 /* SyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */; };
+		F8905C81AAA96F712931839E /* ModuleViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,30 +71,42 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultClient.swift; sourceTree = "<group>"; };
 		0FBD3F0F9378282E7AC6067E /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		15AAC2C6738F79F00ED9913B /* SymBrainCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SymBrainCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D24A10D6F4152E6F4337007 /* SkillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsView.swift; sourceTree = "<group>"; };
 		2DDFA6201EBE1C20A656FE31 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainClient.swift; sourceTree = "<group>"; };
 		37D52B395108AFAD4ACBF29E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
+		596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsClient.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleNotice.swift; sourceTree = "<group>"; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
+		75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsModelTests.swift; sourceTree = "<group>"; };
 		8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainMobileApp.swift; sourceTree = "<group>"; };
 		8B0DC6F1658F16C48F507A56 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
 		96FDE0A3CE49598C93AA0D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleViewModels.swift; sourceTree = "<group>"; };
+		9C42924D7035EF242B3DFE19 /* SkillsModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsModels.swift; sourceTree = "<group>"; };
 		A2959FD69F38959DDA732319 /* ProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilesView.swift; sourceTree = "<group>"; };
 		B3457B33557FD43EE491F5E5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BF1B5B08039B41550F03B223 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModelTests.swift; sourceTree = "<group>"; };
 		C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSymBrainCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModels.swift; sourceTree = "<group>"; };
 		D66DEE385C4CA00E4B3D5438 /* SymBrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SymBrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainApp.swift; sourceTree = "<group>"; };
 		D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileRootView.swift; sourceTree = "<group>"; };
 		DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatter.swift; sourceTree = "<group>"; };
+		E34B91F2C82B9EF019B92AA1 /* VaultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultView.swift; sourceTree = "<group>"; };
 		E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncViewModelTests.swift; sourceTree = "<group>"; };
 		E451D0841FDC285609A50119 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncView.swift; sourceTree = "<group>"; };
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4F7A7307C5362C46D956DDD /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
+		FB25C751770FF552A574E5CE /* MemoryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryClient.swift; sourceTree = "<group>"; };
 		FB797B558BCC85838B09E52D /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -139,6 +163,8 @@
 			isa = PBXGroup;
 			children = (
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
+				C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */,
+				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
 			);
 			name = SymBrainCoreTests;
@@ -162,9 +188,13 @@
 				3A61161A1B60801BA661D010 /* AuditView.swift */,
 				D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */,
 				6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */,
+				F4F7A7307C5362C46D956DDD /* MemoryView.swift */,
+				60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */,
 				A2959FD69F38959DDA732319 /* ProfilesView.swift */,
 				37D52B395108AFAD4ACBF29E /* SettingsView.swift */,
+				2D24A10D6F4152E6F4337007 /* SkillsView.swift */,
 				EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */,
+				E34B91F2C82B9EF019B92AA1 /* VaultView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -199,8 +229,14 @@
 			children = (
 				8B0DC6F1658F16C48F507A56 /* AuditLog.swift */,
 				DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */,
+				FB25C751770FF552A574E5CE /* MemoryClient.swift */,
 				2DDFA6201EBE1C20A656FE31 /* Models.swift */,
+				D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */,
+				9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */,
+				596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */,
+				9C42924D7035EF242B3DFE19 /* SkillsModels.swift */,
 				361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */,
+				00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */,
 				FB797B558BCC85838B09E52D /* ViewModels.swift */,
 			);
 			name = SymBrainCore;
@@ -405,10 +441,14 @@
 				70604ADFC23CC217325131F7 /* ContentView.swift in Sources */,
 				BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */,
 				CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */,
+				17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */,
+				64D0D1B79D20E858BF0F30F1 /* ModuleNotice.swift in Sources */,
 				CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */,
 				636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */,
+				0D9C664B7AA28DB4D716B319 /* SkillsView.swift in Sources */,
 				B872D82DD78AD55CAE76D798 /* SymBrainApp.swift in Sources */,
 				F2F5EB32E528F74CA1CB2601 /* SyncView.swift in Sources */,
+				433E92DB0B45482A00A4FA09 /* VaultView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,6 +457,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
+				4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */,
+				040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */,
 				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,8 +469,14 @@
 			files = (
 				36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */,
 				20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */,
+				A08CEC3AE0AC46C2E5DD39DE /* MemoryClient.swift in Sources */,
 				3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */,
+				AB49BA080F2FF71CBE24000E /* ModuleModels.swift in Sources */,
+				F8905C81AAA96F712931839E /* ModuleViewModels.swift in Sources */,
+				B118AE290BABA60839E4033E /* SkillsClient.swift in Sources */,
+				6BA42FABEA0041023B5B2A63 /* SkillsModels.swift in Sources */,
 				75B074873331D65288CB0625 /* SymBrainClient.swift in Sources */,
+				17388265342DF0FED40D14C6 /* VaultClient.swift in Sources */,
 				76E8895721D92EA46A646520 /* ViewModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
