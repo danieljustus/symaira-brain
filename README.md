@@ -15,7 +15,7 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.5.1` released, in active development. Interfaces may
+> **Status:** `v0.6.0` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## What symbrain is not
@@ -320,8 +320,12 @@ open SymBrain.xcodeproj
 ```
 
 **SymBrain** (macOS) is a full dashboard: doctor, profiles, harnesses, audit
-log, and settings. **SymBrainMobile** (iOS) is a read-only companion showing
-the state-core overview, tool registry, and setup guide.
+log, and settings, plus a **Modules** sidebar for the three brokered state
+cores — **Memory** (browse, search, rules, and query log), **Vault** (session
+unlock with masked secrets, folder browsing, and TOTP), and **Skills** (library
+with per-harness install state and dry-run sync), each with the broker audit
+trail filtered to its own server. **SymBrainMobile** (iOS) is a read-only
+companion showing the state-core overview, tool registry, and setup guide.
 
 ## License
 
