@@ -108,6 +108,65 @@ jobs:
           repo-checkout: false
           go-package: ./...
 
+  # PR-time gate for the Swift GUI targets (Sources/, Tests/): the Go-only
+  # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
+  # Swift compile error or a failing SymBrainCoreTests used to surface only
+  # at release time (precedent: v0.5.1 GUI release-asset failure, #212,
+  # fixed by #215). Path-filtered inside the job so Go-only PRs do not pay
+  # macOS runner cost, while the check itself always reports so it can be
+  # required by the main protection ruleset.
+  gui:
+    runs-on: macos-15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect Swift-related changes
+        id: swift
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_SHA:-}" ] || [ "${BASE_SHA:-}" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | \
+             grep -Eq '^(Sources/|Tests/|project\.yml|SymBrain\.xcodeproj/)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Same local-path-to-URL patch release.yml applies: harmless no-op
+      # while project.yml pins a URL + exactVersion, but keeps CI working
+      # if a local path ever gets committed by accident.
+      - name: Patch project.yml for CI (replace local path dependency with pinned URL)
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\nexactVersion: 0.6.0|" project.yml
+
+      - name: Install XcodeGen
+        if: steps.swift.outputs.changed == 'true'
+        run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
+
+      - name: Generate Xcode project
+        if: steps.swift.outputs.changed == 'true'
+        run: xcodegen generate
+
+      - name: Build and test SymBrainCore
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          xcodebuild -project SymBrain.xcodeproj \
+            -scheme SymBrainCore \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build test
+
   # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
   # broken release config is caught long before a real release tag is
   # pushed. Runs the real build/archive/checksum/SBOM pipeline a release
