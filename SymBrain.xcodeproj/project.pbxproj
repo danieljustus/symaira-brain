@@ -23,7 +23,6 @@
 		4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */; };
 		521F6345DEFC9D796B9EAA2C /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 0054585A78E372D2085F559E /* SymairaCLIRunner */; };
 		636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D52B395108AFAD4ACBF29E /* SettingsView.swift */; };
-		64D0D1B79D20E858BF0F30F1 /* ModuleNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */; };
 		6964252A12F124217D3EB430 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		6BA42FABEA0041023B5B2A63 /* SkillsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C42924D7035EF242B3DFE19 /* SkillsModels.swift */; };
 		70604ADFC23CC217325131F7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3457B33557FD43EE491F5E5 /* ContentView.swift */; };
@@ -81,7 +80,6 @@
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
 		596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsClient.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleNotice.swift; sourceTree = "<group>"; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
 		75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsModelTests.swift; sourceTree = "<group>"; };
 		8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainMobileApp.swift; sourceTree = "<group>"; };
@@ -189,7 +187,6 @@
 				D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */,
 				6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */,
 				F4F7A7307C5362C46D956DDD /* MemoryView.swift */,
-				60C09185A945DA1AB29DAF3E /* ModuleNotice.swift */,
 				A2959FD69F38959DDA732319 /* ProfilesView.swift */,
 				37D52B395108AFAD4ACBF29E /* SettingsView.swift */,
 				2D24A10D6F4152E6F4337007 /* SkillsView.swift */,
@@ -442,7 +439,6 @@
 				BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */,
 				CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */,
 				17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */,
-				64D0D1B79D20E858BF0F30F1 /* ModuleNotice.swift in Sources */,
 				CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */,
 				636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */,
 				0D9C664B7AA28DB4D716B319 /* SkillsView.swift in Sources */,
@@ -868,7 +864,7 @@
 			repositoryURL = "https://github.com/danieljustus/symaira-appkit.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.6.2;
+				version = 0.9.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

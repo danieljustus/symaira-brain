@@ -32,7 +32,7 @@ struct VaultView: View {
 
             case .failed(let message):
                 VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
-                    ModuleNotice(title: "Vault unavailable", message: message, tone: .critical)
+                    SymairaNotice(title: "Vault unavailable", message: message, tone: .critical)
                     Button(action: { Task { await vm.refresh() } }) {
                         Label("Try Again", systemImage: "arrow.clockwise")
                     }
@@ -52,7 +52,7 @@ struct VaultView: View {
                 .labelsHidden()
 
                 if let error = vm.errorMessage {
-                    ModuleNotice(title: "Error", message: error, tone: .critical)
+                    SymairaNotice(title: "Error", message: error, tone: .critical)
                 }
 
                 switch tab {
@@ -156,7 +156,7 @@ struct VaultView: View {
 
     private var unlockSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.large) {
-            ModuleNotice(
+            SymairaNotice(
                 title: "Vault locked",
                 message: "Unlock the vault to browse entries. The passphrase is handed to "
                     + "symvault over stdin and never stored by SymBrain.",
@@ -191,9 +191,9 @@ struct VaultView: View {
 
             if let error = vm.errorMessage {
                 VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-                    ModuleNotice(title: "Unlock failed", message: error, tone: .critical)
+                    SymairaNotice(title: "Unlock failed", message: error, tone: .critical)
                     if let detail = vm.errorDetail {
-                        ModuleNotice(title: "Details", message: detail, tone: .neutral)
+                        SymairaNotice(title: "Details", message: detail, tone: .neutral)
                     }
                 }
             }

@@ -39,9 +39,9 @@ struct SkillsView: View {
 
                 if let error = vm.errorMessage {
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {
-                        ModuleNotice(title: "Error", message: error, tone: .critical)
+                        SymairaNotice(title: "Error", message: error, tone: .critical)
                         if let detail = vm.errorDetail {
-                            ModuleNotice(title: "Details", message: detail, tone: .neutral)
+                            SymairaNotice(title: "Details", message: detail, tone: .neutral)
                         }
                     }
                 }
@@ -126,7 +126,7 @@ struct SkillsView: View {
             }
 
             ForEach(vm.library?.issueMessages ?? [], id: \.self) { issue in
-                ModuleNotice(title: "Library issue", message: issue, tone: .warning)
+                SymairaNotice(title: "Library issue", message: issue, tone: .warning)
             }
 
             if vm.isLoading && vm.skills.isEmpty {
