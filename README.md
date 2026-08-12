@@ -31,7 +31,9 @@ each through its own profile, each seeing only what that profile exposes.
   audit log.
 - **Not a general-purpose GUI or desktop shell.** Native SwiftUI apps are
   included as companion dashboards for symbrain's own profiles, harnesses,
-  audit log, and setup flows; the core product remains the CLI/MCP gateway.
+  audit log, and setup flows, plus module screens for the three state cores it
+  brokers (Memory, Vault, Skills) driven through their own CLIs; the core
+  product remains the CLI/MCP gateway.
 
 ### symbrain vs. symguard
 

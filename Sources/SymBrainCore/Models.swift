@@ -160,7 +160,11 @@ public struct AuditEntry: Decodable, Sendable, Identifiable {
     public let argKeys: String?
     public let argValues: String?
 
-    public var id: String { "\(timestamp)-\(tool)-\(UUID())" }
+    /// Stable identity for list/table rendering. A fresh UUID per access would
+    /// change the row identity on every redraw and break selection.
+    public var id: String {
+        "\(timestamp)-\(profile)-\(server)-\(tool)-\(status)-\(durationMs)"
+    }
 
     /// Parsed date from the RFC3339Nano timestamp.
     public var parsedDate: Date? {

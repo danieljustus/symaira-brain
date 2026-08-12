@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danieljustus/symaira-appkit.git",
       "state" : {
-        "revision" : "39dbab726db39ecd88814ae5e9b20ff7705cebfa",
-        "version" : "0.6.2"
+        "revision" : "6d4645b12c24b31ac3e8f356905bb2e9148a96b9",
+        "version" : "0.9.2"
       }
     }
   ],
