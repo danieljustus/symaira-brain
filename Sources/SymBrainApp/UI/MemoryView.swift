@@ -110,12 +110,14 @@ struct MemoryView: View {
                 Label("New Memory", systemImage: "plus")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("New Memory")
             .disabled(vm.isBinaryNotFound)
 
             Button(action: { Task { await vm.refresh() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.secondary)
+            .accessibilityLabel("Refresh")
         }
     }
 
@@ -130,6 +132,7 @@ struct MemoryView: View {
                 Label("Check Again", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Check Again")
         }
     }
 
@@ -157,6 +160,7 @@ struct MemoryView: View {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Search")
             }
 
             if vm.isLoading && vm.memories.isEmpty {
@@ -250,10 +254,12 @@ struct MemoryView: View {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
                         .symairaButtonStyle(.secondary)
+                        .accessibilityLabel("Copy")
                         Button(role: .destructive, action: { memoryToDelete = memory }) {
                             Label("Delete", systemImage: "trash")
                         }
                         .symairaButtonStyle(.secondary)
+                        .accessibilityLabel("Delete")
                     }
                     .padding(.top, SymairaSpacing.small)
                 }
@@ -384,6 +390,7 @@ struct MemoryView: View {
                 Label("Run symmemory doctor", systemImage: "stethoscope")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Run symmemory doctor")
 
             if vm.isLoading {
                 SymairaLoadingState("Running health checks…")
@@ -516,6 +523,7 @@ struct ModuleActivityTable: View {
                     Label("Reload", systemImage: "arrow.clockwise")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Reload")
             }
 
             if entries.isEmpty {
