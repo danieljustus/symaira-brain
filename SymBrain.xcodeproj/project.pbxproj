@@ -23,6 +23,7 @@
 		4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */; };
 		521F6345DEFC9D796B9EAA2C /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 0054585A78E372D2085F559E /* SymairaCLIRunner */; };
 		636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D52B395108AFAD4ACBF29E /* SettingsView.swift */; };
+		677BD9064DAD4C7D78ADC4E0 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF3A8EC9DD9103D13D5D3B2 /* AppVersionInfo.swift */; };
 		6964252A12F124217D3EB430 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		6BA42FABEA0041023B5B2A63 /* SkillsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C42924D7035EF242B3DFE19 /* SkillsModels.swift */; };
 		70604ADFC23CC217325131F7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3457B33557FD43EE491F5E5 /* ContentView.swift */; };
@@ -37,6 +38,7 @@
 		A90FCDD127F8B4059F921F01 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 0D9415DDF8EC5FD7F8C6FBF5 /* SymairaUpdateCheck */; };
 		AB49BA080F2FF71CBE24000E /* ModuleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */; };
 		B118AE290BABA60839E4033E /* SkillsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */; };
+		B262714CE76A1CEFD79E91FC /* AppVersionInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */; };
 		B872D82DD78AD55CAE76D798 /* SymBrainApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */; };
 		BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */; };
 		BD582551E72C04A65130D6EA /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 2A87C9F4E9912E7CF988285E /* SymairaTheme */; };
@@ -79,6 +81,7 @@
 		37D52B395108AFAD4ACBF29E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
 		596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsClient.swift; sourceTree = "<group>"; };
+		5AF3A8EC9DD9103D13D5D3B2 /* AppVersionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfo.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
 		75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsModelTests.swift; sourceTree = "<group>"; };
@@ -103,6 +106,7 @@
 		E451D0841FDC285609A50119 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncView.swift; sourceTree = "<group>"; };
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfoTests.swift; sourceTree = "<group>"; };
 		F4F7A7307C5362C46D956DDD /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
 		FB25C751770FF552A574E5CE /* MemoryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryClient.swift; sourceTree = "<group>"; };
 		FB797B558BCC85838B09E52D /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
@@ -160,6 +164,7 @@
 		80643F0FB10D70E98B759F51 /* SymBrainCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */,
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
 				C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */,
 				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
@@ -224,6 +229,7 @@
 		BE7F03B320601C0EBC16C78A /* SymBrainCore */ = {
 			isa = PBXGroup;
 			children = (
+				5AF3A8EC9DD9103D13D5D3B2 /* AppVersionInfo.swift */,
 				8B0DC6F1658F16C48F507A56 /* AuditLog.swift */,
 				DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */,
 				FB25C751770FF552A574E5CE /* MemoryClient.swift */,
@@ -452,6 +458,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B262714CE76A1CEFD79E91FC /* AppVersionInfoTests.swift in Sources */,
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
 				4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */,
 				040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */,
@@ -463,6 +470,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				677BD9064DAD4C7D78ADC4E0 /* AppVersionInfo.swift in Sources */,
 				36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */,
 				20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */,
 				A08CEC3AE0AC46C2E5DD39DE /* MemoryClient.swift in Sources */,

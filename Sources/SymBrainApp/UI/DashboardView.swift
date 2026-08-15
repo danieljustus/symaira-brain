@@ -50,7 +50,9 @@ struct DashboardView: View {
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
                 if let version = vm.versionInfo {
-                    SymairaBadge("v\(version.version)", tone: .positive)
+                    // Name the component: this is the CLI's version, not the
+                    // app's, and the two routinely differ.
+                    SymairaBadge("symbrain CLI v\(version.version)", tone: .positive)
                     if let os = version.os, let arch = version.arch {
                         SymairaBadge("\(os)/\(arch)", tone: .neutral)
                     }

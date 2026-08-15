@@ -100,8 +100,15 @@ struct SettingsView: View {
                 .accessibilityLabel("Retry")
             } else if let version = vm.versionInfo {
                 Grid(alignment: .leading, horizontalSpacing: SymairaSpacing.xLarge, verticalSpacing: SymairaSpacing.small) {
+                    // The app and the CLI are versioned separately; label each
+                    // row with the component it describes so neither number is
+                    // mistaken for "the" version.
                     GridRow {
-                        Text("Version").foregroundStyle(SymairaTheme.textSecondary)
+                        Text("App").foregroundStyle(SymairaTheme.textSecondary)
+                        Text(AppVersionInfo.current()).foregroundStyle(SymairaTheme.textPrimary)
+                    }
+                    GridRow {
+                        Text("symbrain CLI").foregroundStyle(SymairaTheme.textSecondary)
                         Text(version.version).foregroundStyle(SymairaTheme.textPrimary)
                     }
                     if let goVersion = version.goVersion {
