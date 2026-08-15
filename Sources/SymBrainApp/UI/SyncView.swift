@@ -105,6 +105,7 @@ struct SyncView: View {
                 }
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel(vm.isLoading ? "Syncing" : "Sync Now")
             .disabled(vm.isLoading)
         }
         .padding(SymairaSpacing.medium)

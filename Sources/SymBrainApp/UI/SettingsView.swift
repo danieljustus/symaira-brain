@@ -72,6 +72,7 @@ struct SettingsView: View {
                     Label("Quit & Relaunch", systemImage: "restart.circle")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Quit & Relaunch")
             }
         }
         .padding(SymairaSpacing.xLarge)
@@ -96,6 +97,7 @@ struct SettingsView: View {
                     Label("Retry", systemImage: "arrow.clockwise")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Retry")
             } else if let version = vm.versionInfo {
                 Grid(alignment: .leading, horizontalSpacing: SymairaSpacing.xLarge, verticalSpacing: SymairaSpacing.small) {
                     GridRow {
@@ -157,6 +159,7 @@ struct SettingsView: View {
                     Label("Check for Updates", systemImage: "arrow.up.circle")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Check for Updates")
                 .disabled(vm.updateStatus.isInstalling)
             }
 
@@ -166,11 +169,13 @@ struct SettingsView: View {
                     Label("Install \(release.tagName)", systemImage: "arrow.down.circle")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Install \(release.tagName)")
 
                 Button(action: { vm.skipUpdate(release) }) {
                     Label("Skip This Version", systemImage: "xmark.circle")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Skip This Version")
             }
 
             // Progress when installing
@@ -186,6 +191,7 @@ struct SettingsView: View {
                     Label("Relaunch to Apply Update", systemImage: "restart.circle")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Relaunch to Apply Update")
             }
         }
         .padding(SymairaSpacing.xLarge)

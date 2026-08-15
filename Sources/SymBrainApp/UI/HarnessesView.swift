@@ -39,6 +39,7 @@ struct HarnessesView: View {
                             Label("Retry", systemImage: "arrow.clockwise")
                         }
                         .symairaButtonStyle(.primary)
+                        .accessibilityLabel("Retry")
                         if let detail = vm.errorDetail {
                             SymairaNotice(title: "Details", message: detail, tone: .neutral)
                         }
@@ -195,6 +196,7 @@ struct HarnessesView: View {
                         .font(.caption)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Dry Run")
                 .foregroundStyle(SymairaTheme.textSecondary)
 
                 // Uninstall controls (only when installed)
@@ -207,6 +209,7 @@ struct HarnessesView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Dry Run")
                     .foregroundStyle(SymairaTheme.textSecondary)
 
                     // #149: Uninstall is gated behind a confirmation alert
@@ -218,6 +221,7 @@ struct HarnessesView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Uninstall")
                     .foregroundStyle(SymairaTheme.critical)
                 }
             }

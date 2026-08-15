@@ -29,6 +29,7 @@ struct ProfilesView: View {
                             Label("Retry", systemImage: "arrow.clockwise")
                         }
                         .symairaButtonStyle(.primary)
+                        .accessibilityLabel("Retry loading profiles")
                         if let detail = vm.errorDetail {
                             SymairaNotice(title: "Details", message: detail, tone: .neutral)
                         }
@@ -80,6 +81,7 @@ struct ProfilesView: View {
                 Label("New Profile", systemImage: "plus")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("New profile")
         }
     }
 
@@ -93,43 +95,67 @@ struct ProfilesView: View {
         }
     }
 
+    /// Spoken description of a profile row: the name, its description and the
+    /// per-server exposure the badges show visually.
+    private func profileRowAccessibilityLabel(_ profile: ProfileSummary) -> String {
+        let servers = profile.servers
+            .map { "\($0.server) \($0.mode ?? ($0.enabled ? "on" : "off"))" }
+            .joined(separator: ", ")
+        var parts = ["Profile \(profile.name)", profile.description]
+        if !servers.isEmpty {
+            parts.append(servers)
+        }
+        return parts.joined(separator: ". ")
+    }
+
     @ViewBuilder
     private func profileRow(_ profile: ProfileSummary) -> some View {
-        Button(action: {
-            Task { await vm.selectProfile(profile.name) }
-        }) {
-            HStack {
-                Image(systemName: vm.selectedProfile?.name == profile.name ? "chevron.down" : "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(SymairaTheme.textSecondary)
-                VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                    Text(profile.name)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(SymairaTheme.textPrimary)
-                    Text(profile.description)
+        // The expand control and the delete control are siblings, not nested.
+        // A Button inside another Button's label collapses into a single
+        // element that exposes no accessible name and gives the inner control
+        // no independent focus.
+        HStack {
+            Button(action: {
+                Task { await vm.selectProfile(profile.name) }
+            }) {
+                HStack {
+                    Image(systemName: vm.selectedProfile?.name == profile.name ? "chevron.down" : "chevron.right")
                         .font(.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
+                    VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                        Text(profile.name)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(SymairaTheme.textPrimary)
+                        Text(profile.description)
+                            .font(.caption)
+                            .foregroundStyle(SymairaTheme.textSecondary)
+                    }
+                    Spacer()
+                    ForEach(profile.servers, id: \.server) { server in
+                        SymairaBadge(
+                            "\(server.server): \(server.mode ?? (server.enabled ? "on" : "off"))",
+                            tone: server.enabled ? .positive : .neutral
+                        )
+                    }
                 }
-                Spacer()
-                ForEach(profile.servers, id: \.server) { server in
-                    SymairaBadge(
-                        "\(server.server): \(server.mode ?? (server.enabled ? "on" : "off"))",
-                        tone: server.enabled ? .positive : .neutral
-                    )
-                }
-                Button(action: {
-                    profileToDelete = profile.name
-                    showDeleteConfirmation = true
-                }) {
-                    Image(systemName: "trash")
-                        .foregroundStyle(SymairaTheme.critical)
-                }
-                .buttonStyle(.plain)
+                .contentShape(Rectangle())
             }
-            .padding(SymairaSpacing.medium)
-            .glassCard()
+            .buttonStyle(.plain)
+            .accessibilityLabel(profileRowAccessibilityLabel(profile))
+            .accessibilityHint(vm.selectedProfile?.name == profile.name ? "Collapses the profile detail" : "Expands the profile detail")
+
+            Button(action: {
+                profileToDelete = profile.name
+                showDeleteConfirmation = true
+            }) {
+                Image(systemName: "trash")
+                    .foregroundStyle(SymairaTheme.critical)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Delete profile \(profile.name)")
         }
-        .buttonStyle(.plain)
+        .padding(SymairaSpacing.medium)
+        .glassCard()
 
         // Detail pane inline
         if vm.selectedProfile?.name == profile.name, let detail = vm.selectedProfile {

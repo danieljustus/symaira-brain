@@ -95,6 +95,7 @@ struct DashboardView: View {
                         Label("Copy", systemImage: "doc.on.doc")
                     }
                     .symairaButtonStyle(.secondary)
+                    .accessibilityLabel("Copy install command")
                 }
 
                 VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
@@ -116,6 +117,7 @@ struct DashboardView: View {
                     Label("Retry", systemImage: "arrow.clockwise")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Retry")
             }
 
             Text("To configure a custom binary path, select Settings in the sidebar.")
@@ -224,6 +226,7 @@ struct DashboardView: View {
                         .font(.caption)
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Create \(title) directory")
                 .padding(.top, SymairaSpacing.xSmall)
             }
         }
@@ -270,6 +273,7 @@ struct DashboardView: View {
                         .font(.caption)
                     }
                     .symairaButtonStyle(.primary)
+                    .accessibilityLabel(isInitializing ? "Initializing" : "Run symbrain init")
                     .disabled(isInitializing)
                     if let initializeError {
                         Text(initializeError)
