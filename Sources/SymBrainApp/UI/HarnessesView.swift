@@ -196,7 +196,7 @@ struct HarnessesView: View {
                         .font(.caption)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Dry Run")
+                .accessibilityLabel("Preview install for \(name)")
                 .foregroundStyle(SymairaTheme.textSecondary)
 
                 // Uninstall controls (only when installed)
@@ -209,7 +209,7 @@ struct HarnessesView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Dry Run")
+                    .accessibilityLabel("Preview uninstall for \(name)")
                     .foregroundStyle(SymairaTheme.textSecondary)
 
                     // #149: Uninstall is gated behind a confirmation alert
@@ -221,7 +221,7 @@ struct HarnessesView: View {
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Uninstall")
+                    .accessibilityLabel("Uninstall \(name)")
                     .foregroundStyle(SymairaTheme.critical)
                 }
             }
