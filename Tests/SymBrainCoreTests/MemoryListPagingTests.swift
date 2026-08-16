@@ -1,0 +1,69 @@
+import Foundation
+import Testing
+@testable import SymBrainCore
+
+/// The Memory list renders a bounded page (#226). Past roughly this many
+/// variable-height rows AppKit switches its table to estimated row heights and
+/// its span cache re-enters itself, which it reports as a reentrant
+/// table-delegate operation.
+@MainActor
+struct MemoryListPagingTests {
+    private func makeRecords(_ count: Int) throws -> [MemoryRecord] {
+        let objects = (0..<count).map { index in
+            """
+            {"id":"mem-\(index)","content":"memory \(index)","scope":"global",\
+            "created_at":"2026-08-16T07:00:00Z"}
+            """
+        }
+        let json = "[\(objects.joined(separator: ","))]"
+        // MemoryRecord declares explicit snake_case CodingKeys, so it decodes
+        // with a plain decoder — the same way MemoryClient reads the CLI.
+        return try JSONDecoder().decode([MemoryRecord].self, from: Data(json.utf8))
+    }
+
+    @Test func boundsAPageLargerThanTheLimit() throws {
+        let page = MemoryViewModel.boundedPage(try makeRecords(277))
+        #expect(page.count == MemoryViewModel.listPageSize)
+        // The page keeps the store's order, newest-first as the CLI returns it.
+        #expect(page.first?.id == "mem-0")
+        #expect(page.last?.id == "mem-\(MemoryViewModel.listPageSize - 1)")
+    }
+
+    @Test func keepsEveryRecordWhenUnderTheLimit() throws {
+        let records = try makeRecords(30)
+        let page = MemoryViewModel.boundedPage(records)
+        #expect(page.count == 30)
+        #expect(page == records)
+    }
+
+    @Test func keepsEveryRecordExactlyAtTheLimit() throws {
+        let page = MemoryViewModel.boundedPage(try makeRecords(MemoryViewModel.listPageSize))
+        #expect(page.count == MemoryViewModel.listPageSize)
+    }
+
+    @Test func pageSizeStaysBelowTheHeightEstimationThreshold() {
+        // Measured on macOS 27: 150 rows render clean, 277 rows reproduce the
+        // warning. The page size keeps headroom under the lower bound so the
+        // margin survives different row content and window heights.
+        #expect(MemoryViewModel.listPageSize <= 150)
+    }
+
+    // MARK: - Truncation hint
+
+    @Test func reportsTruncationOnlyWhenSomeRecordsAreHidden() throws {
+        let vm = MemoryViewModel()
+
+        vm.memories = try makeRecords(100)
+        vm.totalMemoryCount = 277
+        #expect(vm.isMemoryListTruncated)
+
+        vm.totalMemoryCount = 100
+        #expect(!vm.isMemoryListTruncated)
+    }
+
+    @Test func reportsNoTruncationBeforeAnythingIsLoaded() {
+        let vm = MemoryViewModel()
+        #expect(vm.memories.isEmpty)
+        #expect(!vm.isMemoryListTruncated)
+    }
+}

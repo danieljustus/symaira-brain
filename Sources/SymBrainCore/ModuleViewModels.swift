@@ -41,6 +41,10 @@ public final class MemoryViewModel: ObservableObject {
     @Published public var scope: MemoryScopeFilter = .all
     @Published public var selectedMemoryID: String?
 
+    /// How many memories the store holds for the current scope, before the
+    /// list is bounded to `listPageSize`.
+    @Published public var totalMemoryCount = 0
+
     @Published public var isLoading = false
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
@@ -58,6 +62,29 @@ public final class MemoryViewModel: ObservableObject {
 
     public var selectedMemory: MemoryRecord? {
         memories.first { $0.id == selectedMemoryID }
+    }
+
+    /// The Memory list renders at most this many rows.
+    ///
+    /// Past roughly this many variable-height rows AppKit switches the backing
+    /// table to *estimated* row heights. Its span cache then adjusts a span
+    /// mid-pass, resizes the table from inside that same pass, and re-enters
+    /// the cache — which AppKit reports as a reentrant table-delegate
+    /// operation and has said it will treat as a fatal assert. Rendering a
+    /// bounded page keeps every row measured directly, and also stops a large
+    /// store from building hundreds of row views for a pane a few dozen rows
+    /// tall.
+    public static let listPageSize = 100
+
+    /// The first `listPageSize` records — what the list actually renders.
+    public static func boundedPage(_ all: [MemoryRecord]) -> [MemoryRecord] {
+        Array(all.prefix(listPageSize))
+    }
+
+    /// True when the store holds more memories for this scope than the list
+    /// is showing. Drives the "showing N of M" hint under the list.
+    public var isMemoryListTruncated: Bool {
+        totalMemoryCount > memories.count
     }
 
     /// Loads everything the Memory screen shows. Individual sections degrade
@@ -86,11 +113,15 @@ public final class MemoryViewModel: ObservableObject {
         do {
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             if query.isEmpty {
-                memories = try await client.list(scope: scope.cliValue)
+                let all = try await client.list(scope: scope.cliValue)
+                totalMemoryCount = all.count
+                memories = Self.boundedPage(all)
             } else {
-                memories = try await client
+                let hits = try await client
                     .search(query: query, scope: scope.cliValue, limit: 50)
                     .map(\.memory)
+                totalMemoryCount = hits.count
+                memories = hits
             }
             if let selectedMemoryID, !memories.contains(where: { $0.id == selectedMemoryID }) {
                 self.selectedMemoryID = nil

@@ -177,6 +177,13 @@ struct MemoryView: View {
                     memoryList
                     memoryDetail
                 }
+
+                if vm.isMemoryListTruncated {
+                    Text("Showing \(vm.memories.count) of \(vm.totalMemoryCount) memories. "
+                        + "Search or pick a scope to narrow the list.")
+                        .font(.caption)
+                        .foregroundStyle(SymairaTheme.textMuted)
+                }
             }
         }
     }
