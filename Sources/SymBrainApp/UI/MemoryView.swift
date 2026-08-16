@@ -178,9 +178,8 @@ struct MemoryView: View {
                     memoryDetail
                 }
 
-                if vm.isMemoryListTruncated {
-                    Text("Showing \(vm.memories.count) of \(vm.totalMemoryCount) memories. "
-                        + "Search or pick a scope to narrow the list.")
+                if let note = vm.listTruncationNote {
+                    Text(note)
                         .font(.caption)
                         .foregroundStyle(SymairaTheme.textMuted)
                 }

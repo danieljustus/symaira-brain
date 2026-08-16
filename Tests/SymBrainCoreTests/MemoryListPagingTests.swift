@@ -65,5 +65,46 @@ struct MemoryListPagingTests {
         let vm = MemoryViewModel()
         #expect(vm.memories.isEmpty)
         #expect(!vm.isMemoryListTruncated)
+        #expect(vm.listTruncationNote == nil)
+    }
+
+    // MARK: - The note shown under the list
+
+    @Test func browsingNoteStatesTheRealTotal() throws {
+        let vm = MemoryViewModel()
+        vm.memories = try makeRecords(100)
+        vm.totalMemoryCount = 277
+
+        let note = try #require(vm.listTruncationNote)
+        #expect(note.contains("Showing 100 of 277 memories"))
+    }
+
+    /// A search that comes back full may be hiding further matches, and the
+    /// command reports no total — so the note must not invent one.
+    @Test func searchNoteClaimsNoTotalItCannotKnow() throws {
+        let vm = MemoryViewModel()
+        vm.memories = try makeRecords(MemoryViewModel.searchResultLimit)
+        vm.totalMemoryCount = MemoryViewModel.searchResultLimit
+        vm.searchMayHaveMoreMatches = true
+
+        let note = try #require(vm.listTruncationNote)
+        #expect(note.contains("Showing the first 50 matches"))
+        #expect(!note.contains(" of "))
+    }
+
+    @Test func silentWhenASearchDidNotFillItsLimit() throws {
+        let vm = MemoryViewModel()
+        vm.memories = try makeRecords(12)
+        vm.totalMemoryCount = 12
+        vm.searchMayHaveMoreMatches = false
+
+        #expect(vm.listTruncationNote == nil)
+    }
+
+    @Test func searchLimitStaysUnderThePageSize() {
+        // A search must never return more rows than the browse page renders,
+        // or searching could reintroduce the row volume this bound exists to
+        // avoid.
+        #expect(MemoryViewModel.searchResultLimit <= MemoryViewModel.listPageSize)
     }
 }

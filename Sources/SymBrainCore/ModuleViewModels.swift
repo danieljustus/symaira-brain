@@ -45,6 +45,12 @@ public final class MemoryViewModel: ObservableObject {
     /// list is bounded to `listPageSize`.
     @Published public var totalMemoryCount = 0
 
+    /// Set when the last load was a search that came back with exactly as many
+    /// hits as it asked for, so further matches may exist that were not
+    /// fetched. The search command reports no total, so the count of hidden
+    /// matches is unknowable without another query — only their possibility.
+    @Published public var searchMayHaveMoreMatches = false
+
     @Published public var isLoading = false
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
@@ -76,15 +82,36 @@ public final class MemoryViewModel: ObservableObject {
     /// tall.
     public static let listPageSize = 100
 
+    /// How many hits a search asks the CLI for.
+    public static let searchResultLimit = 50
+
     /// The first `listPageSize` records — what the list actually renders.
     public static func boundedPage(_ all: [MemoryRecord]) -> [MemoryRecord] {
         Array(all.prefix(listPageSize))
     }
 
     /// True when the store holds more memories for this scope than the list
-    /// is showing. Drives the "showing N of M" hint under the list.
+    /// is showing.
     public var isMemoryListTruncated: Bool {
         totalMemoryCount > memories.count
+    }
+
+    /// What to tell the user under the list when it is not showing everything,
+    /// or nil when the list is complete.
+    ///
+    /// Browsing knows the real total and states it. Searching does not — the
+    /// command reports no total — so it only says the results start at the
+    /// beginning, rather than inventing a number.
+    public var listTruncationNote: String? {
+        if isMemoryListTruncated {
+            return "Showing \(memories.count) of \(totalMemoryCount) memories. "
+                + "Search or pick a scope to narrow the list."
+        }
+        if searchMayHaveMoreMatches {
+            return "Showing the first \(memories.count) matches. "
+                + "Refine the search to narrow it."
+        }
+        return nil
     }
 
     /// Loads everything the Memory screen shows. Individual sections degrade
@@ -116,12 +143,14 @@ public final class MemoryViewModel: ObservableObject {
                 let all = try await client.list(scope: scope.cliValue)
                 totalMemoryCount = all.count
                 memories = Self.boundedPage(all)
+                searchMayHaveMoreMatches = false
             } else {
                 let hits = try await client
-                    .search(query: query, scope: scope.cliValue, limit: 50)
+                    .search(query: query, scope: scope.cliValue, limit: Self.searchResultLimit)
                     .map(\.memory)
                 totalMemoryCount = hits.count
                 memories = hits
+                searchMayHaveMoreMatches = hits.count == Self.searchResultLimit
             }
             if let selectedMemoryID, !memories.contains(where: { $0.id == selectedMemoryID }) {
                 self.selectedMemoryID = nil
