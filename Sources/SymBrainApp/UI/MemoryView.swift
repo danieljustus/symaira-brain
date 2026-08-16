@@ -177,6 +177,12 @@ struct MemoryView: View {
                     memoryList
                     memoryDetail
                 }
+
+                if let note = vm.listTruncationNote {
+                    Text(note)
+                        .font(.caption)
+                        .foregroundStyle(SymairaTheme.textMuted)
+                }
             }
         }
     }
