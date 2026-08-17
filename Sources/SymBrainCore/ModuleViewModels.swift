@@ -31,7 +31,11 @@ public enum MemoryScopeFilter: String, CaseIterable, Sendable, Identifiable {
 @MainActor
 public final class MemoryViewModel: ObservableObject {
     @Published public var versionInfo: VersionInfo?
-    @Published public var memories: [MemoryRecord] = []
+    @Published public var memories: [MemoryRecord] = [] {
+        didSet {
+            if memories.map(\.id) != oldValue.map(\.id) { listGeneration += 1 }
+        }
+    }
     @Published public var rules: [MemoryRule] = []
     @Published public var queryLog: MemoryQueryLog?
     @Published public var doctorReport: String?
@@ -84,6 +88,23 @@ public final class MemoryViewModel: ObservableObject {
 
     /// How many hits a search asks the CLI for.
     public static let searchResultLimit = 50
+
+    /// Changes every time the list's row set changes (#231).
+    ///
+    /// #230 bounded the rendered page so mounting the list stops reaching
+    /// AppKit's estimated-row-height code through row *volume*. A search
+    /// reaches the same code by the other route: SwiftUI's list coordinator
+    /// applies a row diff to the already-mounted table, and the span cache
+    /// re-enters itself from inside that update. Nothing in the row content
+    /// avoids it — uniform heights, a smaller page and a fixed row count were
+    /// all measured and none helped, because the trigger is the diff itself.
+    ///
+    /// The view keys the list on this value, so a changed result set replaces
+    /// the table instead of diffing it, taking the clean mount path. Every load
+    /// here fetches a complete result set rather than appending a page, so a
+    /// changed row set always means a new list rather than a scroll position
+    /// worth preserving.
+    @Published public private(set) var listGeneration = 0
 
     /// The first `listPageSize` records — what the list actually renders.
     public static func boundedPage(_ all: [MemoryRecord]) -> [MemoryRecord] {

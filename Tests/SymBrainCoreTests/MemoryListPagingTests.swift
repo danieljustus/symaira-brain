@@ -8,8 +8,8 @@ import Testing
 /// table-delegate operation.
 @MainActor
 struct MemoryListPagingTests {
-    private func makeRecords(_ count: Int) throws -> [MemoryRecord] {
-        let objects = (0..<count).map { index in
+    private func makeRecords(_ count: Int, firstIndex: Int = 0) throws -> [MemoryRecord] {
+        let objects = (firstIndex..<(firstIndex + count)).map { index in
             """
             {"id":"mem-\(index)","content":"memory \(index)","scope":"global",\
             "created_at":"2026-08-16T07:00:00Z"}
@@ -99,6 +99,36 @@ struct MemoryListPagingTests {
         vm.searchMayHaveMoreMatches = false
 
         #expect(vm.listTruncationNote == nil)
+    }
+
+    // MARK: - List identity (#231)
+
+    /// The view keys the list on `listGeneration`, so a changed row set has to
+    /// change it — that is what replaces the table instead of diffing it.
+    @Test func aChangedRowSetChangesTheListIdentity() throws {
+        let vm = MemoryViewModel()
+        let start = vm.listGeneration
+
+        vm.memories = try makeRecords(50)
+        let afterMount = vm.listGeneration
+        #expect(afterMount != start)
+
+        // A search replacing 50 rows with 50 different rows is the reported
+        // repro: same count, different entries.
+        vm.memories = try makeRecords(50, firstIndex: 500)
+        #expect(vm.listGeneration != afterMount)
+    }
+
+    /// Re-running the same query returns the same rows. SwiftUI would diff that
+    /// to nothing, so it must not force a remount and throw away the scroll
+    /// position and selection for no reason.
+    @Test func anUnchangedRowSetKeepsTheListIdentity() throws {
+        let vm = MemoryViewModel()
+        vm.memories = try makeRecords(30)
+        let generation = vm.listGeneration
+
+        vm.memories = try makeRecords(30)
+        #expect(vm.listGeneration == generation)
     }
 
     @Test func searchLimitStaysUnderThePageSize() {
