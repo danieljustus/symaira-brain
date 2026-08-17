@@ -31,7 +31,11 @@ public enum MemoryScopeFilter: String, CaseIterable, Sendable, Identifiable {
 @MainActor
 public final class MemoryViewModel: ObservableObject {
     @Published public var versionInfo: VersionInfo?
-    @Published public var memories: [MemoryRecord] = []
+    @Published public var memories: [MemoryRecord] = [] {
+        didSet {
+            if memories.map(\.id) != oldValue.map(\.id) { listGeneration += 1 }
+        }
+    }
     @Published public var rules: [MemoryRule] = []
     @Published public var queryLog: MemoryQueryLog?
     @Published public var doctorReport: String?
@@ -40,6 +44,16 @@ public final class MemoryViewModel: ObservableObject {
     @Published public var searchText = ""
     @Published public var scope: MemoryScopeFilter = .all
     @Published public var selectedMemoryID: String?
+
+    /// How many memories the store holds for the current scope, before the
+    /// list is bounded to `listPageSize`.
+    @Published public var totalMemoryCount = 0
+
+    /// Set when the last load was a search that came back with exactly as many
+    /// hits as it asked for, so further matches may exist that were not
+    /// fetched. The search command reports no total, so the count of hidden
+    /// matches is unknowable without another query — only their possibility.
+    @Published public var searchMayHaveMoreMatches = false
 
     @Published public var isLoading = false
     @Published public var errorMessage: String?
@@ -58,6 +72,67 @@ public final class MemoryViewModel: ObservableObject {
 
     public var selectedMemory: MemoryRecord? {
         memories.first { $0.id == selectedMemoryID }
+    }
+
+    /// The Memory list renders at most this many rows.
+    ///
+    /// Past roughly this many variable-height rows AppKit switches the backing
+    /// table to *estimated* row heights. Its span cache then adjusts a span
+    /// mid-pass, resizes the table from inside that same pass, and re-enters
+    /// the cache — which AppKit reports as a reentrant table-delegate
+    /// operation and has said it will treat as a fatal assert. Rendering a
+    /// bounded page keeps every row measured directly, and also stops a large
+    /// store from building hundreds of row views for a pane a few dozen rows
+    /// tall.
+    public static let listPageSize = 100
+
+    /// How many hits a search asks the CLI for.
+    public static let searchResultLimit = 50
+
+    /// Changes every time the list's row set changes (#231).
+    ///
+    /// #230 bounded the rendered page so mounting the list stops reaching
+    /// AppKit's estimated-row-height code through row *volume*. A search
+    /// reaches the same code by the other route: SwiftUI's list coordinator
+    /// applies a row diff to the already-mounted table, and the span cache
+    /// re-enters itself from inside that update. Nothing in the row content
+    /// avoids it — uniform heights, a smaller page and a fixed row count were
+    /// all measured and none helped, because the trigger is the diff itself.
+    ///
+    /// The view keys the list on this value, so a changed result set replaces
+    /// the table instead of diffing it, taking the clean mount path. Every load
+    /// here fetches a complete result set rather than appending a page, so a
+    /// changed row set always means a new list rather than a scroll position
+    /// worth preserving.
+    @Published public private(set) var listGeneration = 0
+
+    /// The first `listPageSize` records — what the list actually renders.
+    public static func boundedPage(_ all: [MemoryRecord]) -> [MemoryRecord] {
+        Array(all.prefix(listPageSize))
+    }
+
+    /// True when the store holds more memories for this scope than the list
+    /// is showing.
+    public var isMemoryListTruncated: Bool {
+        totalMemoryCount > memories.count
+    }
+
+    /// What to tell the user under the list when it is not showing everything,
+    /// or nil when the list is complete.
+    ///
+    /// Browsing knows the real total and states it. Searching does not — the
+    /// command reports no total — so it only says the results start at the
+    /// beginning, rather than inventing a number.
+    public var listTruncationNote: String? {
+        if isMemoryListTruncated {
+            return "Showing \(memories.count) of \(totalMemoryCount) memories. "
+                + "Search or pick a scope to narrow the list."
+        }
+        if searchMayHaveMoreMatches {
+            return "Showing the first \(memories.count) matches. "
+                + "Refine the search to narrow it."
+        }
+        return nil
     }
 
     /// Loads everything the Memory screen shows. Individual sections degrade
@@ -86,11 +161,17 @@ public final class MemoryViewModel: ObservableObject {
         do {
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             if query.isEmpty {
-                memories = try await client.list(scope: scope.cliValue)
+                let all = try await client.list(scope: scope.cliValue)
+                totalMemoryCount = all.count
+                memories = Self.boundedPage(all)
+                searchMayHaveMoreMatches = false
             } else {
-                memories = try await client
-                    .search(query: query, scope: scope.cliValue, limit: 50)
+                let hits = try await client
+                    .search(query: query, scope: scope.cliValue, limit: Self.searchResultLimit)
                     .map(\.memory)
+                totalMemoryCount = hits.count
+                memories = hits
+                searchMayHaveMoreMatches = hits.count == Self.searchResultLimit
             }
             if let selectedMemoryID, !memories.contains(where: { $0.id == selectedMemoryID }) {
                 self.selectedMemoryID = nil

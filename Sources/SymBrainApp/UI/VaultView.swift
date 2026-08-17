@@ -37,6 +37,7 @@ struct VaultView: View {
                         Label("Try Again", systemImage: "arrow.clockwise")
                     }
                     .symairaButtonStyle(.primary)
+                    .accessibilityLabel("Try Again")
                 }
 
             case .locked:
@@ -94,12 +95,14 @@ struct VaultView: View {
                     Label("Lock", systemImage: "lock.fill")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Lock")
             }
 
             Button(action: { Task { await vm.refresh() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.secondary)
+            .accessibilityLabel("Refresh")
         }
     }
 
@@ -148,6 +151,7 @@ struct VaultView: View {
                     Label("Check Again", systemImage: "arrow.clockwise")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Check Again")
             }
         }
     }
@@ -182,6 +186,7 @@ struct VaultView: View {
                     Label("Unlock", systemImage: "lock.open")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Unlock")
                 .disabled(vm.isUnlocking || vm.passphrase.isEmpty)
             }
 
@@ -212,6 +217,7 @@ struct VaultView: View {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Search")
             }
 
             if vm.isLoading && vm.entries.isEmpty {
@@ -254,6 +260,11 @@ struct VaultView: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(
+                            [entry.title, entry.path, entry.type ?? ""]
+                                .filter { !$0.isEmpty }
+                                .joined(separator: ". ")
+                        )
                         .listRowBackground(
                             vm.selectedPath == entry.path
                                 ? SymairaTheme.bgCardHover
