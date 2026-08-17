@@ -187,7 +187,19 @@ struct MemoryView: View {
         }
     }
 
+    /// Keyed on `listGeneration` so a changed result set mounts a fresh table
+    /// rather than diffing the mounted one, which is the path that re-enters
+    /// AppKit's row-span cache (#231). The wrapper keeps the split view's own
+    /// child identity — and so its divider position — stable across that
+    /// replacement.
     private var memoryList: some View {
+        ZStack {
+            keyedMemoryList
+        }
+        .frame(minWidth: 320, idealWidth: 420)
+    }
+
+    private var keyedMemoryList: some View {
         List(vm.memories, selection: $vm.selectedMemoryID) { memory in
             VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                 Text(memory.content)
@@ -215,7 +227,7 @@ struct MemoryView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .frame(minWidth: 320, idealWidth: 420)
+        .id(vm.listGeneration)
     }
 
     @ViewBuilder
