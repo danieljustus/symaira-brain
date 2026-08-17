@@ -96,6 +96,7 @@ struct SkillsView: View {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.secondary)
+            .accessibilityLabel("Refresh")
         }
     }
 
@@ -110,6 +111,7 @@ struct SkillsView: View {
                 Label("Check Again", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Check Again")
         }
     }
 
@@ -217,6 +219,7 @@ struct SkillsView: View {
                         Label("Copy Path", systemImage: "doc.on.doc")
                     }
                     .symairaButtonStyle(.secondary)
+                    .accessibilityLabel("Copy Path")
                     .padding(.top, SymairaSpacing.small)
                 }
                 .padding(SymairaSpacing.large)
@@ -255,11 +258,13 @@ struct SkillsView: View {
                     Label("Preview Sync", systemImage: "eye")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Preview Sync")
 
                 Button(action: { showSyncConfirmation = true }) {
                     Label("Sync", systemImage: "arrow.triangle.2.circlepath")
                 }
                 .symairaButtonStyle(.primary)
+                .accessibilityLabel("Sync")
             }
 
             // The counts sit on their own row: alongside the picker and the
@@ -499,6 +504,7 @@ struct SkillsView: View {
                 Label("Run symskills doctor", systemImage: "stethoscope")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Run symskills doctor")
 
             if vm.isLoading {
                 SymairaLoadingState("Running health checks…")

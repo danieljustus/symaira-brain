@@ -110,12 +110,14 @@ struct MemoryView: View {
                 Label("New Memory", systemImage: "plus")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("New Memory")
             .disabled(vm.isBinaryNotFound)
 
             Button(action: { Task { await vm.refresh() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.secondary)
+            .accessibilityLabel("Refresh")
         }
     }
 
@@ -130,6 +132,7 @@ struct MemoryView: View {
                 Label("Check Again", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Check Again")
         }
     }
 
@@ -157,6 +160,7 @@ struct MemoryView: View {
                     Label("Search", systemImage: "magnifyingglass")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Search")
             }
 
             if vm.isLoading && vm.memories.isEmpty {
@@ -173,11 +177,29 @@ struct MemoryView: View {
                     memoryList
                     memoryDetail
                 }
+
+                if let note = vm.listTruncationNote {
+                    Text(note)
+                        .font(.caption)
+                        .foregroundStyle(SymairaTheme.textMuted)
+                }
             }
         }
     }
 
+    /// Keyed on `listGeneration` so a changed result set mounts a fresh table
+    /// rather than diffing the mounted one, which is the path that re-enters
+    /// AppKit's row-span cache (#231). The wrapper keeps the split view's own
+    /// child identity — and so its divider position — stable across that
+    /// replacement.
     private var memoryList: some View {
+        ZStack {
+            keyedMemoryList
+        }
+        .frame(minWidth: 320, idealWidth: 420)
+    }
+
+    private var keyedMemoryList: some View {
         List(vm.memories, selection: $vm.selectedMemoryID) { memory in
             VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                 Text(memory.content)
@@ -205,7 +227,7 @@ struct MemoryView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .frame(minWidth: 320, idealWidth: 420)
+        .id(vm.listGeneration)
     }
 
     @ViewBuilder
@@ -250,10 +272,12 @@ struct MemoryView: View {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
                         .symairaButtonStyle(.secondary)
+                        .accessibilityLabel("Copy")
                         Button(role: .destructive, action: { memoryToDelete = memory }) {
                             Label("Delete", systemImage: "trash")
                         }
                         .symairaButtonStyle(.secondary)
+                        .accessibilityLabel("Delete")
                     }
                     .padding(.top, SymairaSpacing.small)
                 }
@@ -384,6 +408,7 @@ struct MemoryView: View {
                 Label("Run symmemory doctor", systemImage: "stethoscope")
             }
             .symairaButtonStyle(.primary)
+            .accessibilityLabel("Run symmemory doctor")
 
             if vm.isLoading {
                 SymairaLoadingState("Running health checks…")
@@ -516,6 +541,7 @@ struct ModuleActivityTable: View {
                     Label("Reload", systemImage: "arrow.clockwise")
                 }
                 .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Reload")
             }
 
             if entries.isEmpty {

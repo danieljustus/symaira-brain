@@ -65,6 +65,7 @@ struct AuditView: View {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .symairaButtonStyle(.secondary)
+            .accessibilityLabel("Refresh")
         }
     }
 
