@@ -22,7 +22,19 @@ public struct AuditLogReader: Sendable {
 
     /// Read the last `limit` entries from the given profile's audit log.
     /// If profile is nil, reads from all `.jsonl` files in the audit directory.
-    public func read(profile: String?, limit: Int = 200) -> [AuditEntry] {
+    /// If server is non-nil, only entries matching that server are included —
+    /// the limit then applies to matching entries only.
+    public func read(profile: String?, server: String? = nil, limit: Int = 200) async -> [AuditEntry] {
+        await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let result = self.readSync(profile: profile, server: server, limit: limit)
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
+    /// Synchronous implementation dispatched off the main actor.
+    private func readSync(profile: String?, server: String?, limit: Int) -> [AuditEntry] {
         var entries: [AuditEntry] = []
 
         if let profile {
@@ -37,6 +49,11 @@ public struct AuditLogReader: Sendable {
             for file in files where file.pathExtension == "jsonl" {
                 entries.append(contentsOf: parseFile(at: file))
             }
+        }
+
+        // Filter by server BEFORE sorting and limiting (#241)
+        if let server {
+            entries = entries.filter { $0.server == server }
         }
 
         // Sort newest first and limit

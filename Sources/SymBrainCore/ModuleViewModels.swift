@@ -4,6 +4,22 @@
 import AppKit
 import Foundation
 
+// MARK: - Runtime availability (Memory / Skills)
+
+/// Unified runtime-state enum for module view models that need a
+/// checking / missing / ready / failed lifecycle, matching
+/// VaultAvailability's shape but without the vault-specific `.locked` case.
+public enum RuntimeAvailability: Sendable, Equatable {
+    /// Not determined yet.
+    case checking
+    /// The CLI binary is not installed.
+    case missing
+    /// Installed and reachable — commands can run.
+    case ready
+    /// Installed, but the check itself failed.
+    case failed(String)
+}
+
 // MARK: - Memory
 
 /// Scope filter for the Memory module. `all` omits the CLI's `-s` flag.
@@ -58,6 +74,7 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
     @Published public var isBinaryNotFound = false
+    @Published public var availability: RuntimeAvailability = .checking
     @Published public var statusMessage: String?
 
     private let client: MemoryClient
@@ -68,6 +85,8 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public var isInstalled: Bool { client.isInstalled }
+
+    public var homebrewCommand: String { "brew install danieljustus/tap/symmemory" }
 
     public var selectedMemory: MemoryRecord? {
         memories.first { $0.id == selectedMemoryID }
@@ -143,16 +162,18 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
 
         guard client.isInstalled else {
             isBinaryNotFound = true
-            errorMessage = "The “symmemory” command could not be found. Install it with "
+            availability = .missing
+            errorMessage = "The \u{201C}symmemory\u{201D} command could not be found. Install it with "
                 + "`brew install danieljustus/tap/symmemory`."
             return
         }
 
+        availability = .ready
         versionInfo = try? await client.version()
         await loadMemories()
         await loadRules()
         await loadQueryLog()
-        loadActivity()
+        await loadActivity()
     }
 
     public func loadMemories() async {
@@ -198,9 +219,8 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     /// Reads the symbrain broker audit log and keeps the memory server's calls.
-    public func loadActivity() {
-        brokerActivity = auditReader.read(profile: nil, limit: 500)
-            .filter { $0.server == "memory" }
+    public func loadActivity() async {
+        brokerActivity = await auditReader.read(profile: nil, server: "memory", limit: 500)
     }
 
     public func runDoctor() async {
@@ -299,7 +319,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         defer { isLoading = false }
 
         availability = await client.availability()
-        loadActivity()
+        await loadActivity()
 
         switch availability {
         case .ready:
@@ -329,9 +349,8 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     /// Reads the symbrain broker audit log and keeps the vault server's calls.
-    public func loadActivity() {
-        brokerActivity = auditReader.read(profile: nil, limit: 500)
-            .filter { $0.server == "vault" }
+    public func loadActivity() async {
+        brokerActivity = await auditReader.read(profile: nil, server: "vault", limit: 500)
     }
 
     public func unlock() async {
@@ -427,6 +446,7 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
     @Published public var isBinaryNotFound = false
+    @Published public var availability: RuntimeAvailability = .checking
     @Published public var statusMessage: String?
 
     private let client: SkillsClient
@@ -437,6 +457,8 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public var isInstalled: Bool { client.isInstalled }
+
+    public var homebrewCommand: String { "brew install danieljustus/tap/symskills" }
 
     /// Library skills narrowed by the search field (name or description).
     public var skills: [SkillSummary] {
@@ -465,17 +487,19 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
 
         guard client.isInstalled else {
             isBinaryNotFound = true
-            errorMessage = "The “symskills” command could not be found. Install it with "
+            availability = .missing
+            errorMessage = "The \u{201C}symskills\u{201D} command could not be found. Install it with "
                 + "`brew install danieljustus/tap/symskills`."
             return
         }
 
+        availability = .ready
         versionLine = try? await client.version()
         await loadLibrary()
         await loadStatus()
         await loadTargets()
         await loadLog()
-        loadActivity()
+        await loadActivity()
     }
 
     public func loadLibrary() async {
@@ -516,9 +540,8 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     /// Reads the symbrain broker audit log and keeps the skills server's calls.
-    public func loadActivity() {
-        brokerActivity = auditReader.read(profile: nil, limit: 500)
-            .filter { $0.server == "skills" }
+    public func loadActivity() async {
+        brokerActivity = await auditReader.read(profile: nil, server: "skills", limit: 500)
     }
 
     public func runDoctor() async {

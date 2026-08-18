@@ -26,9 +26,24 @@ struct SkillsView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.large) {
             headerSection
 
-            if vm.isBinaryNotFound {
+            switch vm.availability {
+            case .checking:
+                SymairaLoadingState("Connecting to the skills server\u{2026}")
+
+            case .missing:
                 missingRuntimeSection
-            } else {
+
+            case .failed(let message):
+                VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+                    SymairaNotice(title: "Skills unavailable", message: message, tone: .critical)
+                    Button(action: { Task { await vm.refresh() } }) {
+                        Label("Try Again", systemImage: "arrow.clockwise")
+                    }
+                    .symairaButtonStyle(.primary)
+                    .accessibilityLabel("Try Again")
+                }
+
+            case .ready:
                 Picker("Section", selection: $tab) {
                     ForEach(Tab.allCases) { item in
                         Text(item.rawValue).tag(item)
@@ -104,14 +119,28 @@ struct SkillsView: View {
         SymairaEmptyState(
             systemImage: "square.stack.3d.up",
             title: "symskills not found",
-            message: vm.errorMessage
-                ?? "Install the Symaira Skills runtime, then reload this screen."
+            message: "Install the Symaira Skills runtime, then reload this screen."
         ) {
-            Button(action: { Task { await vm.refresh() } }) {
-                Label("Check Again", systemImage: "arrow.clockwise")
+            VStack(spacing: SymairaSpacing.medium) {
+                HStack(spacing: SymairaSpacing.small) {
+                    Text(vm.homebrewCommand)
+                        .font(.callout.monospaced())
+                        .foregroundStyle(SymairaTheme.goldPrimary)
+                        .textSelection(.enabled)
+                    Button {
+                        vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy command")
+                }
+                Button(action: { Task { await vm.refresh() } }) {
+                    Label("Check Again", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.primary)
+                .accessibilityLabel("Check Again")
             }
-            .symairaButtonStyle(.primary)
-            .accessibilityLabel("Check Again")
         }
     }
 
@@ -435,7 +464,7 @@ struct SkillsView: View {
         ModuleActivityTable(
             entries: vm.brokerActivity,
             emptyMessage: "Calls routed to the skills server through symbrain appear here.",
-            onRefresh: { vm.loadActivity() }
+            onRefresh: { Task { await vm.loadActivity() } }
         )
     }
 

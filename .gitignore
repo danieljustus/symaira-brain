@@ -10,3 +10,4 @@ coverage.out
 .github/review/
 .github/coverage/
 .github/prerelease/
+.build/

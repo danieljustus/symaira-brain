@@ -25,9 +25,24 @@ struct MemoryView: View {
         VStack(alignment: .leading, spacing: SymairaSpacing.large) {
             headerSection
 
-            if vm.isBinaryNotFound {
+            switch vm.availability {
+            case .checking:
+                SymairaLoadingState("Connecting to the memory server\u{2026}")
+
+            case .missing:
                 missingRuntimeSection
-            } else {
+
+            case .failed(let message):
+                VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+                    SymairaNotice(title: "Memory unavailable", message: message, tone: .critical)
+                    Button(action: { Task { await vm.refresh() } }) {
+                        Label("Try Again", systemImage: "arrow.clockwise")
+                    }
+                    .symairaButtonStyle(.primary)
+                    .accessibilityLabel("Try Again")
+                }
+
+            case .ready:
                 Picker("Section", selection: $tab) {
                     ForEach(Tab.allCases) { item in
                         Text(item.rawValue).tag(item)
@@ -111,7 +126,7 @@ struct MemoryView: View {
             }
             .symairaButtonStyle(.primary)
             .accessibilityLabel("New Memory")
-            .disabled(vm.isBinaryNotFound)
+            .disabled(vm.availability != .ready)
 
             Button(action: { Task { await vm.refresh() } }) {
                 Label("Refresh", systemImage: "arrow.clockwise")
@@ -125,14 +140,28 @@ struct MemoryView: View {
         SymairaEmptyState(
             systemImage: "brain",
             title: "symmemory not found",
-            message: vm.errorMessage
-                ?? "Install the Symaira Memory runtime, then reload this screen."
+            message: "Install the Symaira Memory runtime, then reload this screen."
         ) {
-            Button(action: { Task { await vm.refresh() } }) {
-                Label("Check Again", systemImage: "arrow.clockwise")
+            VStack(spacing: SymairaSpacing.medium) {
+                HStack(spacing: SymairaSpacing.small) {
+                    Text(vm.homebrewCommand)
+                        .font(.callout.monospaced())
+                        .foregroundStyle(SymairaTheme.goldPrimary)
+                        .textSelection(.enabled)
+                    Button {
+                        vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy command")
+                }
+                Button(action: { Task { await vm.refresh() } }) {
+                    Label("Check Again", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.primary)
+                .accessibilityLabel("Check Again")
             }
-            .symairaButtonStyle(.primary)
-            .accessibilityLabel("Check Again")
         }
     }
 
@@ -396,7 +425,7 @@ struct MemoryView: View {
         ModuleActivityTable(
             entries: vm.brokerActivity,
             emptyMessage: "Calls routed to the memory server through symbrain appear here.",
-            onRefresh: { vm.loadActivity() }
+            onRefresh: { Task { await vm.loadActivity() } }
         )
     }
 

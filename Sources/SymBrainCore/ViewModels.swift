@@ -215,7 +215,7 @@ public final class AuditViewModel: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        entries = auditReader.read(profile: selectedProfile)
+        entries = await auditReader.read(profile: selectedProfile)
     }
 
     public func loadProfiles() async {
