@@ -327,25 +327,9 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 
 	var result []Degradation
 	for _, path := range paths {
-		f, err := os.Open(path)
+		entries, err := tailEntries(path, 0) // 0 = all entries
 		if err != nil {
-			return nil, fmt.Errorf("audit: open %s: %w", path, err)
-		}
-		var entries []Entry
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			var entry Entry
-			if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
-				continue
-			}
-			entries = append(entries, entry)
-		}
-		closeErr := f.Close()
-		if err := scanner.Err(); err != nil {
 			return nil, fmt.Errorf("audit: read %s: %w", path, err)
-		}
-		if closeErr != nil {
-			return nil, fmt.Errorf("audit: close %s: %w", path, closeErr)
 		}
 
 		lastSession := ""
@@ -368,6 +352,35 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 		}
 	}
 	return result, nil
+}
+
+// tailEntries reads up to n entries (0 = all) from a JSONL file using a
+// buffered scanner with a 1 MB token limit to avoid silent truncation
+// on very long lines.
+func tailEntries(path string, n int) ([]Entry, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var entries []Entry
+	scanner := bufio.NewScanner(f)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	for scanner.Scan() {
+		var entry Entry
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			continue
+		}
+		entries = append(entries, entry)
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	if n > 0 && len(entries) > n {
+		entries = entries[len(entries)-n:]
+	}
+	return entries, nil
 }
 
 const tailChunkSize = 64 * 1024 // 64KB

@@ -149,7 +149,13 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	}
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
-	if degradations, err := audit.LatestDegradations(""); err == nil {
+	if degradations, err := audit.LatestDegradations(""); err != nil {
+		report.Degradations = []audit.Degradation{{
+			Server: "audit",
+			Reason: fmt.Sprintf("read audit log: %v", err),
+			Level:  "warning",
+		}}
+	} else {
 		report.Degradations = degradations
 	}
 
