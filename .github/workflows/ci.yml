@@ -20,6 +20,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fail if any action is referenced by mutable tag instead of SHA.
+  # Keeps the supply-chain surface small — tag moves are caught here.
+  pin-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check for unpinned actions
+        run: |
+          matches=$(grep -rn '^\s*uses:' .github/workflows/ --include='*.yml' \
+            | grep -v '@[0-9a-f]\{40\}' || true)
+          if [ -n "$matches" ]; then
+            echo "::error::Unpinned action references found (use SHA, not tag):"
+            echo "$matches"
+            exit 1
+          fi
+          echo "All actions are pinned to SHA."
+
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
