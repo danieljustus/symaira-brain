@@ -3,7 +3,6 @@
 #if os(macOS)
 import AppKit
 import Foundation
-import SymairaCLIRunner
 
 // MARK: - Memory
 
@@ -29,7 +28,7 @@ public enum MemoryScopeFilter: String, CaseIterable, Sendable, Identifiable {
 }
 
 @MainActor
-public final class MemoryViewModel: ObservableObject {
+public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var versionInfo: VersionInfo?
     @Published public var memories: [MemoryRecord] = [] {
         didSet {
@@ -248,26 +247,13 @@ public final class MemoryViewModel: ObservableObject {
         statusMessage = "\(label) copied to clipboard."
     }
 
-    private func clearError() {
-        errorMessage = nil
-        errorDetail = nil
-        isBinaryNotFound = false
-    }
-
-    private func report(_ error: Error) {
-        let friendly = formatError(error)
-        errorMessage = friendly.message
-        errorDetail = friendly.detail
-        if let cliError = error as? CLIRunnerError, case .binaryNotFound = cliError {
-            isBinaryNotFound = true
-        }
-    }
+    // clearError() and report(_:) are provided by ModuleViewModelProtocol.
 }
 
 // MARK: - Vault
 
 @MainActor
-public final class VaultViewModel: ObservableObject {
+public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var availability: VaultAvailability = .checking
     @Published public var versionLine: String?
     @Published public var entries: [VaultEntrySummary] = []
@@ -284,6 +270,7 @@ public final class VaultViewModel: ObservableObject {
     @Published public var isUnlocking = false
     @Published public var errorMessage: String?
     @Published public var errorDetail: String?
+    @Published public var isBinaryNotFound = false
     @Published public var statusMessage: String?
 
     private let client: VaultClient
@@ -413,22 +400,13 @@ public final class VaultViewModel: ObservableObject {
         statusMessage = "\(label) copied to clipboard."
     }
 
-    private func clearError() {
-        errorMessage = nil
-        errorDetail = nil
-    }
-
-    private func report(_ error: Error) {
-        let friendly = formatError(error)
-        errorMessage = friendly.message
-        errorDetail = friendly.detail
-    }
+    // clearError() and report(_:) are provided by ModuleViewModelProtocol.
 }
 
 // MARK: - Skills
 
 @MainActor
-public final class SkillsViewModel: ObservableObject {
+public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var versionLine: String?
     @Published public var library: SkillLibrary?
     @Published public var statusReport: SkillStatusReport?
@@ -596,20 +574,7 @@ public final class SkillsViewModel: ObservableObject {
         statusMessage = "\(label) copied to clipboard."
     }
 
-    private func clearError() {
-        errorMessage = nil
-        errorDetail = nil
-        isBinaryNotFound = false
-    }
-
-    private func report(_ error: Error) {
-        let friendly = formatError(error)
-        errorMessage = friendly.message
-        errorDetail = friendly.detail
-        if let cliError = error as? CLIRunnerError, case .binaryNotFound = cliError {
-            isBinaryNotFound = true
-        }
-    }
+    // clearError() and report(_:) are provided by ModuleViewModelProtocol.
 }
 
 // MARK: - Pasteboard
