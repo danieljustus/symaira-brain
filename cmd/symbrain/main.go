@@ -108,7 +108,7 @@ func peekCommand(args []string) string {
 
 func isOutputCommand(command string) bool {
 	switch command {
-	case "version", "sync", "profile":
+	case "version", "sync", "profile", "audit", "doctor":
 		return true
 	default:
 		return false
@@ -121,7 +121,7 @@ func printUsage(w io.Writer) {
 Usage:
   symbrain <command> [flags]
 
-Global output flags (version, sync, and profile):
+Global output flags (version, sync, profile, audit, and doctor):
   --output table|json  Output format (default: table)
   --json               Shorthand for --output json
 

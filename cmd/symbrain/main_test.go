@@ -77,26 +77,26 @@ func TestRun_DoctorKeepsItsExistingCommandLocalJSONFlag(t *testing.T) {
 }
 
 func TestRun_NonOutputCommandWithOutputFlagPassesThroughToCommand(t *testing.T) {
-	// audit does not support global output flags, so --output json and
-	// dangling --output must reach audit's own flag parser (which errors
+	// init does not support global output flags, so --output json and
+	// dangling --output must reach init's own flag parser (which errors
 	// on the unknown flag) rather than the global output handler.
 	for _, args := range [][]string{
-		{"audit", "--output", "json"},
-		{"audit", "--output"},
+		{"init", "--output", "json"},
+		{"init", "--output"},
 	} {
 		t.Run(strings.Join(args, "_"), func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
 			code := run(args, &stdout, &stderr)
-			// audit's own flag parser should fail with its own error, not
+			// init's own flag parser should fail with its own error, not
 			// a global "symbrain: --output requires a value" message.
 			if code != exitcodes.ExitNoInput {
 				t.Fatalf("run(%v) = %d, want %d", args, code, exitcodes.ExitNoInput)
 			}
-			if !strings.Contains(stderr.String(), "audit") {
-				t.Fatalf("run(%v) stderr = %q, want it to reference audit", args, stderr.String())
+			if !strings.Contains(stderr.String(), "init") {
+				t.Fatalf("run(%v) stderr = %q, want it to reference init", args, stderr.String())
 			}
 			if strings.HasPrefix(stderr.String(), "symbrain: ") {
-				t.Fatalf("run(%v) stderr = %q, want audit's own error not global prefix", args, stderr.String())
+				t.Fatalf("run(%v) stderr = %q, want init's own error not global prefix", args, stderr.String())
 			}
 		})
 	}

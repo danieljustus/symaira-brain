@@ -428,6 +428,50 @@ func Tail(w io.Writer, profile string, n int) error {
 	return nil
 }
 
+// TailEntries reads the last n entries from the audit log for the given
+// profile and returns them as a slice. If profile is empty, merges
+// entries from all profiles found in the audit directory.
+func TailEntries(profile string, n int) ([]Entry, error) {
+	dir, err := xdg.AuditDir()
+	if err != nil {
+		return nil, fmt.Errorf("audit: resolve audit dir: %w", err)
+	}
+
+	var paths []string
+	if profile != "" {
+		paths = []string{filepath.Join(dir, profile+".jsonl")}
+	} else {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return nil, fmt.Errorf("audit: read audit dir: %w", err)
+		}
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".jsonl") {
+				paths = append(paths, filepath.Join(dir, e.Name()))
+			}
+		}
+	}
+
+	var result []Entry
+	for _, path := range paths {
+		lines, err := tailFile(path, n)
+		if err != nil {
+			continue
+		}
+		prof := strings.TrimSuffix(filepath.Base(path), ".jsonl")
+		for _, line := range lines {
+			var entry Entry
+			if err := json.Unmarshal([]byte(line), &entry); err != nil {
+				continue
+			}
+			entry.Profile = prof
+			result = append(result, entry)
+		}
+	}
+
+	return result, nil
+}
+
 // tailFile reads the last n lines from a JSONL file. For small files
 // (at most tailChunkSize) it reads the whole file at once; for larger
 // files it scans backwards from the end in bounded chunks, counting
