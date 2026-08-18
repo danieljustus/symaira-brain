@@ -61,6 +61,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdAudit(rest, stdout, stderr)
 	case "version":
 		return cmdVersionWithFormat(rest, stdout, stderr, format)
+	case "vault", "memory", "skills":
+		return cmdPassthrough(cmd, rest, stderr)
 	case "help", "--help", "-h":
 		printUsage(stdout)
 		return exitcodes.ExitOK
@@ -134,6 +136,9 @@ Commands:
   uninstall   Remove symbrain from a harness
   sync        Sync instructions and skills to harnesses
   audit       Inspect the audit log
+  vault       Passthrough to symvault
+  memory      Passthrough to symmemory
+  skills      Passthrough to symskills
   version     Print version information
   help        Show this help message
 
