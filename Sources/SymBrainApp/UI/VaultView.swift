@@ -385,7 +385,7 @@ struct VaultView: View {
         ModuleActivityTable(
             entries: vm.brokerActivity,
             emptyMessage: "Calls routed to the vault server through symbrain appear here.",
-            onRefresh: { vm.loadActivity() }
+            onRefresh: { Task { await vm.loadActivity() } }
         )
     }
 }
