@@ -231,6 +231,39 @@ func logSecret() {
 	}
 }
 
+// TestMemoryContentNeverInAuditLog verifies that redactArgs always
+// redacts the "content" field value in verbose mode, regardless of
+// server. This prevents user-authored text (which may contain
+// credentials) from appearing verbatim in audit log output.
+func TestMemoryContentNeverInAuditLog(t *testing.T) {
+	t.Parallel()
+
+	root := findRepoRoot(t)
+	data, err := os.ReadFile(filepath.Join(root, "internal/audit/log.go"))
+	if err != nil {
+		t.Fatalf("read internal/audit/log.go: %v", err)
+	}
+	source := string(data)
+
+	// Verify contentFields map exists and includes "content".
+	if !strings.Contains(source, `"content": true`) {
+		t.Error("internal/audit/log.go must include \"content\" in contentFields map")
+	}
+
+	// Verify the redacted output literal is present.
+	if !strings.Contains(source, `[redacted]`) {
+		t.Error("internal/audit/log.go must emit [redacted] for content fields")
+	}
+
+	// Verify that the old direct %v logging pattern for content fields
+	// is no longer present in the verbose branch.
+	// The old pattern was: valParts = append(valParts, fmt.Sprintf("%s=%v", k, m[k]))
+	// The new pattern checks contentFields[k] before logging.
+	if strings.Contains(source, `fmt.Sprintf("%s=%v", k, m[k])`) {
+		t.Error("redactArgs still uses unsanitized logging — content fields are not redacted")
+	}
+}
+
 // TestHarnessConfigPathTraversal verifies that the harness config writer
 // does not use user-supplied paths directly in file operations without
 // validation. Path components must be validated to prevent traversal.

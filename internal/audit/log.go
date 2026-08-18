@@ -201,10 +201,25 @@ func (l *Logger) LogDegradation(server, reason, level string) {
 	}
 }
 
+// maxArgValueLen is the maximum length of a logged argument value in
+// verbose mode. Values longer than this are truncated to prevent the
+// audit log from growing unboundedly with user content.
+const maxArgValueLen = 256
+
+// contentFields contains argument key names whose values may carry
+// user-authored text (e.g. memory content, entity data). These are
+// always redacted in verbose mode regardless of server, to avoid
+// logging credentials or sensitive free-form text verbatim.
+var contentFields = map[string]bool{
+	"content": true,
+}
+
 // redactArgs applies the redaction policy:
 //   - vault_* tools: never log arguments or values in any mode
 //   - other servers: log argument KEYS only by default;
-//     verbose=true logs values too (still never for vault)
+//     verbose=true logs values too (still never for vault).
+//     Content-bearing fields (e.g. memory "content") are always
+//     redacted. Values are capped at maxArgValueLen characters.
 func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, values string) {
 	if len(args) == 0 {
 		return "", ""
@@ -229,7 +244,15 @@ func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, 
 	if verbose {
 		valParts := make([]string, 0, len(m))
 		for _, k := range keyList {
-			valParts = append(valParts, fmt.Sprintf("%s=%v", k, m[k]))
+			if contentFields[k] {
+				valParts = append(valParts, fmt.Sprintf("%s=[redacted]", k))
+				continue
+			}
+			v := fmt.Sprintf("%v", m[k])
+			if len(v) > maxArgValueLen {
+				v = v[:maxArgValueLen] + "…"
+			}
+			valParts = append(valParts, fmt.Sprintf("%s=%s", k, v))
 		}
 		values = strings.Join(valParts, ",")
 	}
@@ -304,25 +327,9 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 
 	var result []Degradation
 	for _, path := range paths {
-		f, err := os.Open(path)
+		entries, err := tailEntries(path, 0) // 0 = all entries
 		if err != nil {
-			return nil, fmt.Errorf("audit: open %s: %w", path, err)
-		}
-		var entries []Entry
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			var entry Entry
-			if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
-				continue
-			}
-			entries = append(entries, entry)
-		}
-		closeErr := f.Close()
-		if err := scanner.Err(); err != nil {
 			return nil, fmt.Errorf("audit: read %s: %w", path, err)
-		}
-		if closeErr != nil {
-			return nil, fmt.Errorf("audit: close %s: %w", path, closeErr)
 		}
 
 		lastSession := ""
@@ -345,6 +352,35 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 		}
 	}
 	return result, nil
+}
+
+// tailEntries reads up to n entries (0 = all) from a JSONL file using a
+// buffered scanner with a 1 MB token limit to avoid silent truncation
+// on very long lines.
+func tailEntries(path string, n int) ([]Entry, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var entries []Entry
+	scanner := bufio.NewScanner(f)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	for scanner.Scan() {
+		var entry Entry
+		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
+			continue
+		}
+		entries = append(entries, entry)
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	if n > 0 && len(entries) > n {
+		entries = entries[len(entries)-n:]
+	}
+	return entries, nil
 }
 
 const tailChunkSize = 64 * 1024 // 64KB
@@ -390,6 +426,50 @@ func Tail(w io.Writer, profile string, n int) error {
 	}
 
 	return nil
+}
+
+// TailEntries reads the last n entries from the audit log for the given
+// profile and returns them as a slice. If profile is empty, merges
+// entries from all profiles found in the audit directory.
+func TailEntries(profile string, n int) ([]Entry, error) {
+	dir, err := xdg.AuditDir()
+	if err != nil {
+		return nil, fmt.Errorf("audit: resolve audit dir: %w", err)
+	}
+
+	var paths []string
+	if profile != "" {
+		paths = []string{filepath.Join(dir, profile+".jsonl")}
+	} else {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return nil, fmt.Errorf("audit: read audit dir: %w", err)
+		}
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(e.Name(), ".jsonl") {
+				paths = append(paths, filepath.Join(dir, e.Name()))
+			}
+		}
+	}
+
+	var result []Entry
+	for _, path := range paths {
+		lines, err := tailFile(path, n)
+		if err != nil {
+			continue
+		}
+		prof := strings.TrimSuffix(filepath.Base(path), ".jsonl")
+		for _, line := range lines {
+			var entry Entry
+			if err := json.Unmarshal([]byte(line), &entry); err != nil {
+				continue
+			}
+			entry.Profile = prof
+			result = append(result, entry)
+		}
+	}
+
+	return result, nil
 }
 
 // tailFile reads the last n lines from a JSONL file. For small files
