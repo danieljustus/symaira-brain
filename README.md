@@ -235,7 +235,9 @@ boundary table above. Concretely:
   recorded as JSONL under `~/.local/share/symbrain/audit/<profile>.jsonl`
   with who/what/when. Vault call arguments and results are never written to
   the audit log or to any error string, regardless of the `verbose` audit
-  setting — `verbose` only adds non-vault tool arguments to the record.
+  setting — `verbose` only adds non-vault tool arguments to the record,
+  but content-bearing fields (e.g. memory `content`) are always redacted
+  and values are capped at 256 characters.
 - **Config files on disk:** profiles and the global config are written with
   `0o600` permissions; XDG directories are created `0o700`. Harness config
   files are backed up before symbrain edits them (`symbrain install` /
