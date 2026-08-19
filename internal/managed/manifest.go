@@ -37,6 +37,11 @@ type Core struct {
 	// HasCosign indicates whether cosign signatures (.sig/.pem) are
 	// published for this core's release archives.
 	HasCosign bool `json:"has_cosign"`
+	// SHA256 is the expected SHA-256 hash of the checksums.txt file
+	// published alongside this core's release archive. Used by the
+	// bump-core workflow to verify the checksums file before updating
+	// the manifest entry.
+	SHA256 string `json:"sha256"`
 }
 
 // LoadManifest returns the embedded default manifest.
