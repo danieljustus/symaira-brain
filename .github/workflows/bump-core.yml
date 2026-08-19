@@ -1,0 +1,173 @@
+# Bump a managed core's pinned version in the runtime manifest.
+#
+# Triggered by repository_dispatch events from the core repos
+# (symaira-vault, symaira-memory, symaira-skills) when they publish
+# a release. The workflow updates manifest.json and opens (or updates)
+# a PR so CI validates the new pin before it ships with the next
+# symbrain release.
+#
+# Event type: core-release
+# Payload:    { "core": "symvault", "tag": "v0.16.0" }
+#
+# --- Cross-repo dispatch setup ---
+#
+# Each core repo needs a step in its release workflow that sends a
+# repository_dispatch event. Add this after the release is published:
+#
+#   notify-brain:
+#     name: Notify symaira-brain
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Dispatch bump to symaira-brain
+#         uses: peter-evans/repository-dispatch@ff450c2680634550e8dbd8260003716373f28b2f # v3.0.2
+#         with:
+#           token: ${{ secrets.SYMBRAIN_DISPATCH_TOKEN }}
+#           repository: danieljustus/symaira-brain
+#           event-type: core-release
+#           client-payload: |
+#             { "core": "<core-name>", "tag": "${{ github.ref_name }}" }
+#
+# Replace <core-name> with one of: symvault, symmemory, symskills.
+#
+# Required secret (SYMBRAIN_DISPATCH_TOKEN):
+#   - Fine-grained PAT scoped to danieljustus/symaira-brain with
+#     Contents (read/write) and Pull Requests (read/write) permissions.
+#   - Add the secret to each core repo under Settings → Secrets → Actions.
+#   - On rotation, update all three core repos simultaneously.
+#
+# --- Idempotency ---
+#
+# The workflow uses a deterministic branch name (bump/<core>/<tag>) and
+# peter-evans/create-pull-request, which updates an existing PR on the
+# same branch instead of creating duplicates. Re-dispatching the same
+# event is safe.
+#
+# --- Manual test ---
+#
+#   gh api repos/danieljustus/symaira-brain/dispatches \
+#     -f event_type=core-release \
+#     -f client_payload[core]=symvault \
+#     -f client_payload[tag]=v0.15.3
+
+name: Bump Core
+
+on:
+  repository_dispatch:
+    types: [core-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: bump-${{ github.event.client_payload.core }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Validate payload
+        id: validate
+        run: |
+          set -euo pipefail
+
+          CORE="${{ github.event.client_payload.core }}"
+          TAG="${{ github.event.client_payload.tag }}"
+
+          if [ -z "$CORE" ] || [ -z "$TAG" ]; then
+            echo "::error::Missing required payload fields: core, tag"
+            exit 1
+          fi
+
+          # Validate core name against known managed cores
+          case "$CORE" in
+            symvault|symmemory|symskills) ;;
+            *)
+              echo "::error::Unknown core: $CORE (expected symvault, symmemory, or symskills)"
+              exit 1
+              ;;
+          esac
+
+          # Validate tag format
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "::error::Invalid tag format: $TAG (expected v*.*.*)"
+            exit 1
+          fi
+
+          echo "core=$CORE" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "branch=bump/${CORE}/${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch checksums from release
+        id: checksums
+        run: |
+          set -euo pipefail
+
+          CORE="${{ steps.validate.outputs.core }}"
+          TAG="${{ steps.validate.outputs.tag }}"
+
+          # Map core name to repo
+          case "$CORE" in
+            symvault)   REPO="danieljustus/symaira-vault" ;;
+            symmemory)  REPO="danieljustus/symaira-memory" ;;
+            symskills)  REPO="danieljustus/symaira-skills" ;;
+          esac
+
+          echo "Fetching checksums from $REPO@$TAG..."
+
+          # Download checksums.txt from the specific release
+          gh release download "$TAG" \
+            --repo "$REPO" \
+            --pattern "checksums.txt" \
+            --output /tmp/checksums.txt
+
+          SHA256=$(sha256sum /tmp/checksums.txt | cut -d' ' -f1)
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+          echo "Checksums SHA-256: $SHA256"
+
+      - name: Update manifest
+        run: |
+          set -euo pipefail
+
+          CORE="${{ steps.validate.outputs.core }}"
+          TAG="${{ steps.validate.outputs.tag }}"
+          SHA256="${{ steps.checksums.outputs.sha256 }}"
+          MANIFEST="internal/managed/manifest.json"
+
+          echo "Updating $MANIFEST: $CORE -> $TAG (sha256=$SHA256)"
+
+          # Update version and sha256 for the core entry
+          jq \
+            --arg core "$CORE" \
+            --arg version "$TAG" \
+            --arg sha256 "$SHA256" \
+            '.cores[$core].version = $version | .cores[$core].sha256 = $sha256' \
+            "$MANIFEST" > "${MANIFEST}.tmp"
+          mv "${MANIFEST}.tmp" "$MANIFEST"
+
+          echo "Updated manifest:"
+          jq --arg core "$CORE" '.cores[$core]' "$MANIFEST"
+
+      - name: Create or update pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          commit-message: "chore(managed): bump ${{ steps.validate.outputs.core }} to ${{ steps.validate.outputs.tag }}"
+          branch: ${{ steps.validate.outputs.branch }}
+          title: "bump ${{ steps.validate.outputs.core }} to ${{ steps.validate.outputs.tag }}"
+          body: |
+            Automated bump of the pinned version for `${{ steps.validate.outputs.core }}` in the runtime manifest.
+
+            - **Core:** `${{ steps.validate.outputs.core }}`
+            - **New version:** `${{ steps.validate.outputs.tag }}`
+            - **Checksums SHA-256:** `${{ steps.checksums.outputs.sha256 }}`
+
+            This PR was created by the `bump-core` workflow triggered by a `repository_dispatch` event from the core's release workflow.
+
+            CI will build against the new pin. Merge when green.
+          labels: |
+            automated
+            managed-runtime
+          delete-branch: true
