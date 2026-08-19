@@ -104,12 +104,24 @@ func TestCacheDir_FallbackToHome(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CACHE_HOME", "")
-
 	got, err := CacheDir()
 	if err != nil {
 		t.Fatalf("CacheDir: %v", err)
 	}
 	if want := filepath.Join(home, ".cache", "symbrain"); got != want {
 		t.Errorf("CacheDir() = %q, want %q", got, want)
+	}
+}
+
+func TestManagedBinDir(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	got, err := ManagedBinDir()
+	if err != nil {
+		t.Fatalf("ManagedBinDir: %v", err)
+	}
+	want := filepath.Join(home, ".symaira", "bin")
+	if got != want {
+		t.Errorf("ManagedBinDir() = %q, want %q", got, want)
 	}
 }

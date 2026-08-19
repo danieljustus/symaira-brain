@@ -8,8 +8,11 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
+
+	"github.com/danieljustus/symaira-brain/internal/xdg"
 )
 
 // maxLineBytes bounds a single newline-delimited JSON-RPC message read from
@@ -24,11 +27,15 @@ const maxLineBytes = 1 << 20
 // gain avoidable dependencies.
 const clientVersion = "dev"
 
-// Discover resolves the executable path for a child binary. An explicit
-// override (from config, see AGENTS.md "Standalone-First") always wins;
-// otherwise it falls back to exec.LookPath. A missing binary is reported as
-// a plain error — callers (broker.NewManagedServer, doctor) decide whether
-// that is fatal or a gracefully degraded server, per AGENTS.md.
+// Discover resolves the executable path for a child binary. The
+// resolution order is:
+//  1. Explicit override (from config BinaryPath) — always wins.
+//  2. Managed directory (~/.symaira/bin) — checked before PATH.
+//  3. PATH/exec.LookPath — includes Homebrew and other system installs.
+//
+// A missing binary is reported as a plain error — callers
+// (broker.NewManagedServer, doctor) decide whether that is fatal or a
+// gracefully degraded server, per AGENTS.md.
 func Discover(binaryName, override string) (string, error) {
 	if override != "" {
 		if _, err := os.Stat(override); err != nil {
@@ -36,9 +43,21 @@ func Discover(binaryName, override string) (string, error) {
 		}
 		return override, nil
 	}
+
+	// Check managed directory before PATH
+	if managedDir, err := xdg.ManagedBinDir(); err == nil {
+		managedPath := filepath.Join(managedDir, binaryName)
+		if info, err := os.Stat(managedPath); err == nil && info.Mode().IsRegular() {
+			// Verify it's executable
+			if info.Mode().Perm()&0111 != 0 {
+				return managedPath, nil
+			}
+		}
+	}
+
 	path, err := exec.LookPath(binaryName)
 	if err != nil {
-		return "", fmt.Errorf("broker: %q not found on PATH: %w", binaryName, err)
+		return "", fmt.Errorf("broker: %q not found on PATH or in managed directory: %w", binaryName, err)
 	}
 	return path, nil
 }

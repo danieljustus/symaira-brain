@@ -37,6 +37,7 @@ public struct VaultClient: Sendable {
         userOverride: URL? = nil,
         searchPATH: String? = nil,
         extraDirectories: [String] = [
+            "~/.symaira/bin",
             "/opt/homebrew/bin",
             "/usr/local/bin",
         ],

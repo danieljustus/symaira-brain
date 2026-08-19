@@ -16,6 +16,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/audit"
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
+	"github.com/danieljustus/symaira-brain/internal/managed"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
@@ -37,13 +38,15 @@ type configCheck struct {
 }
 
 type serverCheck struct {
-	Name        string `json:"name"`
-	Binary      string `json:"binary"`
-	Found       bool   `json:"found"`
-	Path        string `json:"path,omitempty"`
-	Version     string `json:"version,omitempty"`
-	ProbeError  string `json:"probe_error,omitempty"`
-	InstallHint string `json:"install_hint,omitempty"`
+	Name           string `json:"name"`
+	Binary         string `json:"binary"`
+	Found          bool   `json:"found"`
+	Path           string `json:"path,omitempty"`
+	Version        string `json:"version,omitempty"`
+	ManagedVersion string `json:"managed_version,omitempty"`
+	Origin         string `json:"origin,omitempty"` // "managed", "path", or "override"
+	ProbeError     string `json:"probe_error,omitempty"`
+	InstallHint    string `json:"install_hint,omitempty"`
 }
 
 // harnessCheck reports symbrain's install state in one harness's MCP
@@ -76,6 +79,7 @@ type doctorReport struct {
 	DataDir      dirCheck            `json:"data_dir"`
 	CacheDir     dirCheck            `json:"cache_dir"`
 	Config       configCheck         `json:"config"`
+	ManagedDir   dirCheck            `json:"managed_dir"`
 	Servers      []serverCheck       `json:"servers"`
 	Profiles     []string            `json:"profiles"`
 	Harnesses    []harnessCheck      `json:"harnesses"`
@@ -110,10 +114,15 @@ var knownServers = []struct {
 func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
+	fix := fs.Bool("fix", false, "repair missing or version-mismatched managed binaries")
 	vaultAgent := fs.String("vault-agent", "claude-code", "vault agent name for MCP handshake probe")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(args); err != nil {
 		return exitcodes.ExitNoInput
+	}
+
+	if *fix {
+		return runDoctorFix(stdout, stderr)
 	}
 
 	report := runDoctorChecks(context.Background(), *vaultAgent)
@@ -146,6 +155,9 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	}
 	if cacheDir, err := xdg.CacheDir(); err == nil {
 		report.CacheDir = checkDir(cacheDir)
+	}
+	if managedDir, err := xdg.ManagedBinDir(); err == nil {
+		report.ManagedDir = checkDir(managedDir)
 	}
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
@@ -182,17 +194,44 @@ func checkConfig() configCheck {
 
 func checkServers(ctx context.Context) []serverCheck {
 	checks := make([]serverCheck, 0, len(knownServers))
+
+	// Determine managed directory for version reporting
+	managedDir := ""
+	if dir, err := xdg.ManagedBinDir(); err == nil {
+		managedDir = dir
+	}
+
 	for _, s := range knownServers {
 		check := serverCheck{Name: s.name, Binary: s.binary}
+
+		// Check managed version first
+		if managedDir != "" {
+			if v, err := managed.InstalledVersion(ctx, managedDir, s.binary); err == nil && v != "" {
+				check.ManagedVersion = v
+			}
+		}
 
 		path, err := exec.LookPath(s.binary)
 		if err != nil {
 			check.InstallHint = s.installHint
+			if check.ManagedVersion != "" {
+				check.Found = true
+				check.Path = filepath.Join(managedDir, s.binary)
+				check.Origin = "managed"
+				check.Version = check.ManagedVersion
+			}
 			checks = append(checks, check)
 			continue
 		}
 		check.Found = true
 		check.Path = path
+
+		// Determine origin
+		if managedDir != "" && strings.HasPrefix(path, managedDir) {
+			check.Origin = "managed"
+		} else {
+			check.Origin = "path"
+		}
 
 		if version, err := probeVersion(ctx, path); err != nil {
 			check.ProbeError = err.Error()
@@ -304,4 +343,23 @@ func checkHarness(h harness.Harness) harnessCheck {
 func profileFileExists(name string) bool {
 	info, err := os.Stat(filepath.Join(xdg.ProfilesDir(), name+".toml"))
 	return err == nil && !info.IsDir()
+}
+
+// runDoctorFix repairs missing or version-mismatched managed binaries.
+func runDoctorFix(stdout, stderr io.Writer) exitcodes.ExitCode {
+	binDir, err := xdg.ManagedBinDir()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain doctor --fix: %v\n", err)
+		return exitcodes.ExitGeneric
+	}
+
+	fmt.Fprintf(stdout, "symbrain doctor --fix\n\n")
+
+	if err := managed.Fix(context.Background(), binDir, nil); err != nil {
+		fmt.Fprintf(stderr, "  ✗  repair failed: %v\n", err)
+		return exitcodes.ExitGeneric
+	}
+
+	fmt.Fprintf(stdout, "\nDone. Binaries installed to %s\n", binDir)
+	return exitcodes.ExitOK
 }
