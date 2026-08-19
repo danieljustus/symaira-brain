@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cores": {
+    "symvault": {
+      "version": "v0.15.3",
+      "repo": "danieljustus/symaira-vault",
+      "binary_name": "symvault",
+      "asset_prefix": "symaira-vault",
+      "has_cosign": true
+    },
+    "symmemory": {
+      "version": "v0.17.0",
+      "repo": "danieljustus/symaira-memory",
+      "binary_name": "symmemory",
+      "asset_prefix": "symmemory",
+      "has_cosign": false
+    },
+    "symskills": {
+      "version": "v0.4.0",
+      "repo": "danieljustus/symaira-skills",
+      "binary_name": "symskills",
+      "asset_prefix": "symaira-skills",
+      "has_cosign": true
+    }
+  }
+}

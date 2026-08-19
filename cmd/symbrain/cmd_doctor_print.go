@@ -17,6 +17,7 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 	printDir(w, "config dir", r.ConfigDir)
 	printDir(w, "data dir", r.DataDir)
 	printDir(w, "cache dir", r.CacheDir)
+	printDir(w, "managed dir", r.ManagedDir)
 	printConfig(w, r.Config)
 
 	fmt.Fprintln(w)
@@ -72,13 +73,21 @@ func printConfig(w io.Writer, c configCheck) {
 }
 
 func printServer(w io.Writer, s serverCheck) {
+	origin := ""
+	if s.Origin != "" {
+		origin = " [" + s.Origin + "]"
+	}
 	switch {
 	case s.Found && s.ProbeError == "":
-		fmt.Fprintf(w, "  ✓  %-8s %s (%s)\n", s.Name, s.Path, s.Version)
+		fmt.Fprintf(w, "  ✓  %-8s %s (%s)%s\n", s.Name, s.Path, s.Version, origin)
 	case s.Found:
-		fmt.Fprintf(w, "  ✗  %-8s %s (version probe failed: %s)\n", s.Name, s.Path, s.ProbeError)
+		fmt.Fprintf(w, "  ✗  %-8s %s (version probe failed: %s)%s\n", s.Name, s.Path, s.ProbeError, origin)
 	default:
-		fmt.Fprintf(w, "  →  %-8s not found on PATH — %s\n", s.Name, s.InstallHint)
+		if s.ManagedVersion != "" {
+			fmt.Fprintf(w, "  →  %-8s managed v%s (not on PATH)\n", s.Name, s.ManagedVersion)
+		} else {
+			fmt.Fprintf(w, "  →  %-8s not found on PATH — %s\n", s.Name, s.InstallHint)
+		}
 	}
 }
 

@@ -55,6 +55,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdInstall(rest, stdout, stderr)
 	case "uninstall":
 		return cmdUninstall(rest, stdout, stderr)
+	case "setup":
+		return cmdSetup(rest, stdout, stderr)
 	case "sync":
 		return cmdSyncWithFormat(rest, stdout, stderr, format)
 	case "audit":
@@ -130,6 +132,7 @@ Global output flags (version, sync, profile, audit, and doctor):
 Commands:
   init        Create XDG directories, default config, and example profiles
   doctor      Check environment, config, profiles, and child binaries
+  setup       Download and install pinned core binaries to ~/.symaira/bin
   profile     Manage profiles (list, show, add, remove)
   serve       Run the MCP gateway over stdio for a profile
   install     Register symbrain with a harness

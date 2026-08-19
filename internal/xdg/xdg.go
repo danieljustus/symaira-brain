@@ -3,6 +3,7 @@
 package xdg
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -58,6 +59,21 @@ func RecipesDir() (string, error) {
 // defaults to ~/.cache/symbrain.
 func CacheDir() (string, error) {
 	return resolve("XDG_CACHE_HOME", ".cache")
+}
+
+// ManagedBinDir returns ~/.symaira/bin, the directory where managed core
+// binaries (symvault, symmemory, symskills) are installed by
+// `symbrain setup` and repaired by `symbrain doctor --fix`.
+//
+// This directory is checked before PATH/exec.LookPath during binary
+// resolution, giving managed binaries priority over Homebrew or other
+// system installations.
+func ManagedBinDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("managed: cannot determine home directory: %w", err)
+	}
+	return filepath.Join(home, ".symaira", "bin"), nil
 }
 
 func resolve(envVar, fallbackRel string) (string, error) {
