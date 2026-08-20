@@ -36,6 +36,26 @@ func buildArchive(t *testing.T, binaryName string, data []byte) []byte {
 	return buf.Bytes()
 }
 
+func TestNewInstaller(t *testing.T) {
+	inst := NewInstaller("/tmp/example-bin")
+	if inst.BinDir != "/tmp/example-bin" {
+		t.Errorf("BinDir = %q, want /tmp/example-bin", inst.BinDir)
+	}
+	if inst.TempDir != "" {
+		t.Errorf("TempDir = %q, want empty (system default)", inst.TempDir)
+	}
+}
+
+func TestVerifyCosign_NotInstalled(t *testing.T) {
+	// Hide cosign from PATH so the graceful-degradation branch runs
+	// deterministically regardless of what is installed on this machine.
+	t.Setenv("PATH", t.TempDir())
+
+	if err := verifyCosign(context.Background(), "/nonexistent/artifact"); err != nil {
+		t.Errorf("verifyCosign with no cosign on PATH: got %v, want nil (graceful skip)", err)
+	}
+}
+
 // TestInstall_AgainstTestServer proves Install/downloadAndVerify/extractBinary
 // can be exercised against an httptest.Server via the injectable baseURL,
 // without touching the real network.

@@ -6,6 +6,16 @@ import (
 	"log/slog"
 )
 
+// coreInstaller is the subset of *Installer that Setup/Fix depend on.
+// Tests swap newInstaller to exercise the orchestration logic without
+// touching the network.
+type coreInstaller interface {
+	Install(ctx context.Context, core *Core) error
+}
+
+// newInstaller creates the coreInstaller Setup/Fix use. Overridable in tests.
+var newInstaller = func(binDir string) coreInstaller { return NewInstaller(binDir) }
+
 // Setup downloads and installs all pinned core versions into binDir.
 // It reports progress via the provided logger and returns an error if
 // any core fails to install.
@@ -19,7 +29,7 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 		return err
 	}
 
-	inst := NewInstaller(binDir)
+	inst := newInstaller(binDir)
 	var failed int
 
 	for name, core := range manifest.Cores {
@@ -54,7 +64,7 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 		return err
 	}
 
-	inst := NewInstaller(binDir)
+	inst := newInstaller(binDir)
 	var repaired, skipped, failed int
 
 	for name, core := range manifest.Cores {
