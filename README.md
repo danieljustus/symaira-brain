@@ -15,7 +15,7 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.6.0` released, in active development. Interfaces may
+> **Status:** `v0.7.0` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## What symbrain is not
