@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "managed_by": "symskills",
+  "target": "opencode",
+  "name": "demo",
+  "rendered_at": "/Users/demo/Library/Caches/symskills/render/demo",
+  "mode": "copy",
+  "installed": "2026-08-05T12:00:00Z",
+  "source_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,5 @@
+interface:
+  display_name: "golden-fixture-codex"
+  short_description: "A canonical fixture skill for per-target golden render tests"
+policy:
+  allow_implicit_invocation: true

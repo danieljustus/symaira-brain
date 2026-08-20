@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/instructions"
-	"github.com/danieljustus/symaira-brain/internal/skills"
+	"github.com/danieljustus/symaira-brain/internal/skillsbridge"
 )
 
 func TestRun_GlobalAndProjectSources(t *testing.T) {
@@ -172,7 +172,7 @@ func TestFormatSummaryIncludesMessagesAndSkills(t *testing.T) {
 		Status:  "dry-run",
 		Message: "would update",
 	}}
-	skillsResults := []skills.Result{{
+	skillsResults := []skillsbridge.Result{{
 		Target:  "claude",
 		Status:  "error",
 		Message: "symskills failed",

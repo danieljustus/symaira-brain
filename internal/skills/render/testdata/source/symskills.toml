@@ -1,0 +1,17 @@
+[skill]
+name = "golden-fixture"
+version = "1.0.0"
+
+[targets.opencode]
+enabled = true
+alias = "golden-fixture-open"
+
+[targets.claude]
+enabled = true
+
+[targets.codex]
+enabled = true
+alias = "golden-fixture-codex"
+
+[targets.hermes]
+enabled = true

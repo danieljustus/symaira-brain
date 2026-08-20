@@ -159,6 +159,14 @@ func TestNoVaultPayloadsInLogs(t *testing.T) {
 			`[Aa]ge\.|identity|recipient)`)
 
 	err := walkGoFiles(root, func(path string) error {
+		// Absorbed modules (memory, skills) carry their own security audit
+		// suites. Brain's repo-wide scan is scoped to its own code only
+		// (repo consolidation step 4 — see docs/brain-merge-design.md).
+		if strings.Contains(path, "/internal/memory/") ||
+			strings.Contains(path, "/internal/skills/") {
+			return nil
+		}
+
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return err

@@ -1,0 +1,6 @@
+$schema: https://symaira.dev/schemas/symbrowse-flow.json
+name: cleanup
+description: Clear the shopping cart
+steps:
+  - action: click
+    selector: "#clear-cart"
