@@ -246,8 +246,8 @@ names. Go structs use idiomatic CamelCase with `json:"snake_case"` tags.
 
 ### Code Belongs in the Public Core
 
-- No Pro, tenant, billing, or hosted-sync code in this repository. Multi-device
-  sync is a future `symaira-brain-pro` concern, not this repo's.
+- No tenant, billing, or hosted-sync code in this repository. There is no Pro
+  edition; multi-device sync is out of scope, not deferred elsewhere.
 
 ---
 

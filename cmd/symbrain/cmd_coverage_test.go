@@ -378,6 +378,77 @@ func TestCmdAuditTail_ProfileFilter(t *testing.T) {
 	}
 }
 
+func TestCmdAuditTailJSON_Output(t *testing.T) {
+	home := sandboxHome(t)
+	auditDir := filepath.Join(home, ".local", "share", "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	var buf bytes.Buffer
+	for i, tool := range []string{"get_entry", "search", "set_entry"} {
+		entry := map[string]any{
+			"timestamp":   fmt.Sprintf("2026-01-01T00:00:%02dZ", i),
+			"profile":     "personal",
+			"server":      "vault",
+			"tool":        tool,
+			"duration_ms": i * 10,
+			"status":      "ok",
+		}
+		data, _ := json.Marshal(entry)
+		buf.Write(data)
+		buf.WriteByte('\n')
+	}
+	if err := os.WriteFile(filepath.Join(auditDir, "personal.jsonl"), buf.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := cmdAudit([]string{"tail", "--json", "--profile", "personal", "-n", "2"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("cmdAudit tail --json = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	// Output should be a JSON array.
+	var entries []map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &entries); err != nil {
+		t.Fatalf("stdout is not valid JSON: %v\nstdout=%q", err, stdout.String())
+	}
+	if len(entries) != 2 {
+		t.Fatalf("expected 2 entries, got %d", len(entries))
+	}
+	// Verify the entries have the expected fields.
+	for _, e := range entries {
+		if _, ok := e["tool"]; !ok {
+			t.Errorf("entry missing 'tool' field: %v", e)
+		}
+	}
+}
+
+func TestCmdAuditTailJSON_EmptyAuditDir(t *testing.T) {
+	home := sandboxHome(t)
+	// Create the audit directory so TailEntries can read it (even if empty).
+	auditDir := filepath.Join(home, ".local", "share", "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := cmdAudit([]string{"tail", "--json"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("cmdAudit tail --json empty = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	// Output should be an empty JSON array.
+	var entries []map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &entries); err != nil {
+		t.Fatalf("stdout is not valid JSON: %v\nstdout=%q", err, stdout.String())
+	}
+	if len(entries) != 0 {
+		t.Fatalf("expected 0 entries for empty audit dir, got %d", len(entries))
+	}
+}
+
 func TestCmdAudit_UnknownSubcommand(t *testing.T) {
 	sandboxHome(t)
 
