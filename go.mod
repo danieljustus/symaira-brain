@@ -1,6 +1,6 @@
 module github.com/danieljustus/symaira-brain
 
-go 1.26.5
+go 1.26.7
 
 require github.com/danieljustus/symaira-corekit v0.9.1
 
