@@ -13,9 +13,13 @@ import (
 	"strings"
 )
 
-// downloadURL constructs the GitHub release asset download URL.
-func downloadURL(repo, asset string) string {
-	return fmt.Sprintf("https://github.com/%s/releases/latest/download/%s", repo, asset)
+// defaultBaseURL is the release host used when Installer.baseURL is unset.
+const defaultBaseURL = "https://github.com"
+
+// downloadURL constructs the release asset download URL against base
+// (e.g. "https://github.com" or a test server URL).
+func downloadURL(base, repo, asset string) string {
+	return fmt.Sprintf("%s/%s/releases/latest/download/%s", base, repo, asset)
 }
 
 // downloadFile downloads a URL to the given path. It returns the number
