@@ -21,11 +21,23 @@ type Installer struct {
 	// TempDir is a scratch directory for downloads. If empty, the
 	// system temp directory is used.
 	TempDir string
+	// baseURL is the release host to download from. If empty,
+	// defaultBaseURL (github.com) is used. Tests override this to
+	// point at an httptest.Server instead of the real network.
+	baseURL string
 }
 
 // NewInstaller creates an Installer targeting the given binary directory.
 func NewInstaller(binDir string) *Installer {
 	return &Installer{BinDir: binDir}
+}
+
+// releaseBaseURL returns the configured base URL, or defaultBaseURL when unset.
+func (inst *Installer) releaseBaseURL() string {
+	if inst.baseURL == "" {
+		return defaultBaseURL
+	}
+	return inst.baseURL
 }
 
 // Install downloads, verifies, and installs a single core binary.
@@ -55,7 +67,7 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 	defer os.RemoveAll(dlDir)
 
 	// Download the checksums file
-	checksumsURL := downloadURL(core.Repo, core.ChecksumAssetName())
+	checksumsURL := downloadURL(inst.releaseBaseURL(), core.Repo, core.ChecksumAssetName())
 	checksumsPath := filepath.Join(dlDir, "checksums.txt")
 	if _, err := downloadFile(ctx, checksumsURL, checksumsPath); err != nil {
 		return fmt.Errorf("managed: download checksums for %s: %w", core.BinaryName, err)
@@ -89,7 +101,7 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 // downloadAndVerify downloads an asset, checks its checksum, and
 // optionally verifies cosign. Returns the path to the downloaded file.
 func (inst *Installer) downloadAndVerify(ctx context.Context, core *Core, assetName, goos, goarch, checksumsPath, dlDir string) (string, error) {
-	url := downloadURL(core.Repo, assetName)
+	url := downloadURL(inst.releaseBaseURL(), core.Repo, assetName)
 	archivePath := filepath.Join(dlDir, assetName)
 	if _, err := downloadFile(ctx, url, archivePath); err != nil {
 		return "", err
