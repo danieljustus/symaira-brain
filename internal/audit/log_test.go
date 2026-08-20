@@ -642,6 +642,165 @@ func TestTail_SkipsInvalidJSON(t *testing.T) {
 	}
 }
 
+func TestTailEntries_SingleProfile(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	entries := []Entry{
+		{Timestamp: "2026-01-01T00:00:00Z", Profile: "personal", Server: "vault", Tool: "get_entry", DurationMS: 10, Status: "ok"},
+		{Timestamp: "2026-01-01T00:01:00Z", Profile: "personal", Server: "memory", Tool: "search", DurationMS: 20, Status: "ok"},
+		{Timestamp: "2026-01-01T00:02:00Z", Profile: "personal", Server: "vault", Tool: "set_entry", DurationMS: 30, Status: "error"},
+	}
+
+	var buf bytes.Buffer
+	for _, e := range entries {
+		data, _ := json.Marshal(e)
+		buf.Write(data)
+		buf.WriteByte('\n')
+	}
+	if err := os.WriteFile(filepath.Join(auditDir, "personal.jsonl"), buf.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := TailEntries("personal", 2)
+	if err != nil {
+		t.Fatalf("TailEntries: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 entries, got %d", len(got))
+	}
+	if got[0].Tool != "search" {
+		t.Errorf("first entry tool = %q, want search", got[0].Tool)
+	}
+	if got[1].Tool != "set_entry" {
+		t.Errorf("second entry tool = %q, want set_entry", got[1].Tool)
+	}
+	if got[0].Profile != "personal" {
+		t.Errorf("first entry profile = %q, want personal", got[0].Profile)
+	}
+}
+
+func TestTailEntries_MultiProfileMerge(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	// Write entries for two different profiles.
+	for _, prof := range []string{"personal", "work"} {
+		var buf bytes.Buffer
+		for i := 0; i < 3; i++ {
+			e := Entry{
+				Timestamp: "2026-01-01T00:00:00Z",
+				Profile:   prof,
+				Server:    "vault",
+				Tool:      prof + "_tool_" + strconv.Itoa(i),
+				Status:    "ok",
+			}
+			data, _ := json.Marshal(e)
+			buf.Write(data)
+			buf.WriteByte('\n')
+		}
+		if err := os.WriteFile(filepath.Join(auditDir, prof+".jsonl"), buf.Bytes(), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Empty profile = merge all.
+	got, err := TailEntries("", 10)
+	if err != nil {
+		t.Fatalf("TailEntries: %v", err)
+	}
+	if len(got) != 6 {
+		t.Fatalf("expected 6 merged entries, got %d", len(got))
+	}
+
+	// Verify both profiles present.
+	profiles := map[string]bool{}
+	for _, e := range got {
+		profiles[e.Profile] = true
+	}
+	if !profiles["personal"] || !profiles["work"] {
+		t.Errorf("expected both profiles, got %v", profiles)
+	}
+}
+
+func TestTailEntries_EmptyDir(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := TailEntries("", 10)
+	if err != nil {
+		t.Fatalf("TailEntries: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected 0 entries from empty dir, got %d", len(got))
+	}
+}
+
+func TestTailEntries_SkipsMalformedEntries(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	// Mix valid and invalid JSON lines.
+	var buf bytes.Buffer
+	valid, _ := json.Marshal(Entry{Timestamp: "2026-01-01T00:00:00Z", Server: "vault", Tool: "ok_tool", Status: "ok"})
+	buf.Write(valid)
+	buf.WriteByte('\n')
+	buf.WriteString("NOT JSON\n")
+	buf.WriteByte('\n')
+	buf.Write(valid)
+	buf.WriteByte('\n')
+
+	if err := os.WriteFile(filepath.Join(auditDir, "test.jsonl"), buf.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := TailEntries("test", 10)
+	if err != nil {
+		t.Fatalf("TailEntries: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 valid entries (malformed skipped), got %d", len(got))
+	}
+}
+
+func TestTailEntries_NonexistentProfile(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := TailEntries("nonexistent", 10)
+	if err != nil {
+		t.Fatalf("TailEntries: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("expected 0 entries for nonexistent profile, got %d", len(got))
+	}
+}
+
 func TestRotate_CreatesBackup(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "test.jsonl")
