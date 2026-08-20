@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symaira Memory Console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Symaira Memory Console</h1>
+    <div id="auth-section">
+      <input type="password" id="token-input" placeholder="Paste JWT token here...">
+      <button id="auth-btn">Authenticate</button>
+      <span id="auth-status"></span>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" data-tab="memories">Memories</button>
+    <button class="tab-btn" data-tab="search">Search</button>
+    <button class="tab-btn" data-tab="rules">Rules</button>
+    <button class="tab-btn" data-tab="entities">Entities</button>
+  </nav>
+
+  <main>
+    <section id="memories-tab" class="tab-content active">
+      <div class="add-memory-form">
+        <h3>Add Memory</h3>
+        <div class="form-row">
+          <textarea id="memory-content" placeholder="Enter memory content..." rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <select id="memory-scope">
+            <option value="global">Global</option>
+            <option value="project">Project</option>
+            <option value="user">User</option>
+            <option value="agent">Agent</option>
+            <option value="session">Session</option>
+          </select>
+          <input type="text" id="memory-meta-key" placeholder="Metadata key (optional)">
+          <input type="text" id="memory-meta-value" placeholder="Metadata value (optional)">
+          <button id="add-memory-btn">Add Memory</button>
+        </div>
+        <p id="add-memory-status"></p>
+      </div>
+      <div class="toolbar">
+        <label for="scope-filter">Scope:</label>
+        <select id="scope-filter">
+          <option value="">All</option>
+          <option value="global">Global</option>
+          <option value="project">Project</option>
+          <option value="user">User</option>
+          <option value="agent">Agent</option>
+          <option value="session">Session</option>
+        </select>
+        <button id="refresh-btn">Refresh</button>
+      </div>
+      <table id="memories-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Content</th>
+            <th>Scope</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="memories-body"></tbody>
+      </table>
+      <p id="memories-empty" class="empty-msg">No memories found.</p>
+    </section>
+
+    <section id="search-tab" class="tab-content">
+      <div class="toolbar">
+        <input type="text" id="search-query" placeholder="Search memories...">
+        <select id="search-scope">
+          <option value="">All scopes</option>
+          <option value="global">Global</option>
+          <option value="project">Project</option>
+          <option value="user">User</option>
+          <option value="agent">Agent</option>
+          <option value="session">Session</option>
+        </select>
+        <button id="search-btn">Search</button>
+      </div>
+      <table id="search-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Content</th>
+            <th>Scope</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="search-body"></tbody>
+      </table>
+      <p id="search-empty" class="empty-msg">Enter a query to search.</p>
+    </section>
+
+    <section id="rules-tab" class="tab-content">
+      <table id="rules-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Content</th>
+            <th>Scope</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="rules-body"></tbody>
+      </table>
+      <p id="rules-empty" class="empty-msg">No rules found.</p>
+    </section>
+
+    <section id="entities-tab" class="tab-content">
+      <table id="entities-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="entities-body"></tbody>
+      </table>
+      <p id="entities-empty" class="empty-msg">No entities found.</p>
+    </section>
+  </main>
+
+  <footer id="status-footer">
+    <span id="status-text">Disconnected</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

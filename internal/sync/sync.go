@@ -13,7 +13,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/instructions"
 	"github.com/danieljustus/symaira-brain/internal/output"
-	"github.com/danieljustus/symaira-brain/internal/skills"
+	"github.com/danieljustus/symaira-brain/internal/skillsbridge"
 )
 
 // TargetStatus is the outcome of syncing one adapter target.
@@ -27,7 +27,7 @@ type TargetStatus struct {
 // Run executes the sync operation.  It renders instruction targets for the
 // specified harnesses, then runs symskills orchestration.  When dryRun is
 // true no files are written.  Returns the per-target summary.
-func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer) ([]TargetStatus, []skills.Result, error) {
+func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer) ([]TargetStatus, []skillsbridge.Result, error) {
 	if len(harnessNames) == 0 {
 		for _, h := range harness.All {
 			harnessNames = append(harnessNames, string(h.Name))
@@ -74,7 +74,7 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 	}
 
 	// Run symskills orchestration.
-	runner := skills.DefaultRunner()
+	runner := skillsbridge.DefaultRunner()
 	skillsResults, _ := runner.Sync(harnessNames, 30_000_000_000) // 30s
 
 	return statuses, skillsResults, nil
@@ -141,7 +141,7 @@ func fileExists(path string) bool {
 }
 
 // FormatSummary prints a human-readable summary of the sync results.
-func FormatSummary(w io.Writer, statuses []TargetStatus, skillsResults []skills.Result) {
+func FormatSummary(w io.Writer, statuses []TargetStatus, skillsResults []skillsbridge.Result) {
 	fmt.Fprintln(w, "Instruction targets:")
 	for _, s := range statuses {
 		line := fmt.Sprintf("  %-12s %s", s.Name+":", s.Status)
@@ -165,12 +165,12 @@ func FormatSummary(w io.Writer, statuses []TargetStatus, skillsResults []skills.
 
 // Summary is the stable JSON payload returned by the sync command.
 type Summary struct {
-	Targets []TargetStatus  `json:"targets"`
-	Skills  []skills.Result `json:"skills"`
+	Targets []TargetStatus        `json:"targets"`
+	Skills  []skillsbridge.Result `json:"skills"`
 }
 
 // FormatSummaryJSON outputs the sync results as JSON through the shared
 // renderer. It remains as a compatibility helper for package-local callers.
-func FormatSummaryJSON(w io.Writer, statuses []TargetStatus, skillsResults []skills.Result) error {
+func FormatSummaryJSON(w io.Writer, statuses []TargetStatus, skillsResults []skillsbridge.Result) error {
 	return output.Render(w, output.FormatJSON, Summary{Targets: statuses, Skills: skillsResults})
 }

@@ -1,0 +1,6 @@
+$schema: https://symaira.dev/schemas/symbrowse-flow.json
+name: checkout-root
+description: Root-layout checkout flow
+steps:
+  - action: navigate
+    url: https://example.test/checkout
