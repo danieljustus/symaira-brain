@@ -89,6 +89,46 @@ jobs:
             test.log
           retention-days: 1
 
+  # Nested module gate: symguard lives in guard/ with its own go.mod, so the
+  # root build-test job never sees it (Go ignores subdirs with their own
+  # module file). This job keeps the absorbed security gateway built and
+  # tested on every push/PR (repo consolidation step 7).
+  guard:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: guard
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: guard/go.mod
+          cache: true
+
+      - name: Format check
+        run: |
+          fmt_out="$(gofmt -l .)"
+          if [ -n "$fmt_out" ]; then
+            echo "gofmt needs to be run on:"
+            echo "$fmt_out"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Build (CGO-free)
+        run: go build ./...
+        env:
+          CGO_ENABLED: "0"
+
+      - name: Test
+        run: go test -race -shuffle=on ./...
+
   # Stdio hygiene gate: `symbrain serve` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
   # shutdown (fake children). A dedicated job so a transport-breaking

@@ -25,7 +25,8 @@ each through its own profile, each seeing only what that profile exposes.
   search, etc.) are wired directly into the harness by the user — symbrain
   does not proxy them.
 - **Not a call-time policy enforcer.** See the boundary table below —
-  that job belongs to [`symguard`](https://github.com/danieljustus/symaira-guard).
+  that job belongs to [`symguard`](guard/) (nested module, absorbed
+  2026-08-21).
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
