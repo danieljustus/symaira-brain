@@ -17,6 +17,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
 	"github.com/danieljustus/symaira-brain/internal/config"
+	memorymcp "github.com/danieljustus/symaira-brain/internal/memory/mcp"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/recipes"
@@ -31,6 +32,7 @@ import (
 type Server struct {
 	profile           *profile.Profile
 	servers           map[string]*broker.ManagedServer
+	memoryServer      *memorymcp.Server
 	cat               *catalog.Catalog
 	logger            *slog.Logger
 	cfg               *config.Config
@@ -54,6 +56,13 @@ func New(p *profile.Profile, servers map[string]*broker.ManagedServer, logger *s
 		cfg:     cfg,
 		version: version,
 	}
+}
+
+// SetMemoryServer attaches the embedded symmemory MCP server (nil when the
+// memory core is unavailable or disabled). Kept as a setter rather than a
+// constructor argument so the many gateway test call sites stay unchanged.
+func (s *Server) SetMemoryServer(ms *memorymcp.Server) {
+	s.memoryServer = ms
 }
 
 // auditSink is the subset of the audit.Logger API that ServeIO uses. It
@@ -146,6 +155,24 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	// therefore no longer routed through routeToolCall or audited per-call.
 	if s.profile.Server(profile.ServerSkills).Enabled {
 		mcptools.Register(srv, mcptools.Options{Version: s.version})
+	}
+
+	// Memory is absorbed directly (repo consolidation step 4, phase 2b): the
+	// embedded memory server registers its tools in-process instead of a
+	// spawned symmemory child. Its own JWT/profile attribution is
+	// preconfigured by the caller; here we expose only the tools the profile
+	// policy allows (mode preset + tools_allow/tools_deny).
+	if s.memoryServer != nil && s.profile.Server(profile.ServerMemory).Enabled {
+		report, err := policy.EvaluatePreset(profile.ServerMemory, s.profile.Server(profile.ServerMemory))
+		if err != nil {
+			s.logger.Warn("failed to evaluate memory policy", "error", err)
+		} else {
+			allowed := make(map[string]bool, len(report.Exposed))
+			for _, name := range report.Exposed {
+				allowed[name] = true
+			}
+			s.memoryServer.RegisterTools(srv, allowed)
+		}
 	}
 
 	for _, entry := range s.cat.Exposed() {

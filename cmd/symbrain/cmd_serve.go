@@ -12,6 +12,10 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/gateway"
+	memoryconfig "github.com/danieljustus/symaira-brain/internal/memory/config"
+	memorydb "github.com/danieljustus/symaira-brain/internal/memory/db"
+	memorymcp "github.com/danieljustus/symaira-brain/internal/memory/mcp"
+	memorysecurity "github.com/danieljustus/symaira-brain/internal/memory/security"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 	"github.com/danieljustus/symaira-corekit/logkit"
@@ -41,6 +45,11 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	servers := buildServers(p, cfg, stderr, *vaultAgent)
 
+	// The memory core is embedded in-process (repo consolidation step 4
+	// phase 2b): open its SQLite DB + JWT provider and build its MCP server
+	// directly instead of spawning a symmemory child.
+	memoryServer := buildMemoryServer(p, stderr, version)
+
 	// Defer shutdown of all managed servers so child processes are
 	// always cleaned up, even when ServeIO returns an error.
 	defer func() {
@@ -53,6 +62,7 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	defer cancel()
 
 	gw := gateway.New(p, servers, logkit.Default(), cfg, version)
+	gw.SetMemoryServer(memoryServer)
 
 	if err := gw.ServeIO(ctx, os.Stdin, os.Stdout); err != nil {
 		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
@@ -95,7 +105,6 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 
 	defs := []serverDef{
 		{"vault", "symvault", cfg.Servers.Vault.BinaryPath, vaultArgs},
-		{"memory", "symmemory", cfg.Servers.Memory.BinaryPath, []string{"serve"}},
 	}
 
 	for _, d := range defs {
@@ -121,4 +130,32 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 	}
 
 	return servers
+}
+
+// buildMemoryServer opens the embedded symmemory runtime (config + SQLite DB
+// + JWT provider) and returns its MCP server, attributed to the given brain
+// profile. It returns nil when the memory core cannot be initialized, so the
+// gateway degrades gracefully (memory tools simply absent) instead of failing
+// the whole serve.
+func buildMemoryServer(p *profile.Profile, stderr io.Writer, version string) *memorymcp.Server {
+	memcfg, err := memoryconfig.Load()
+	if err != nil {
+		memcfg = memoryconfig.Defaults()
+	}
+
+	memdb, err := memorydb.Open(memcfg)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain serve: open memory db: %v\n", err)
+		return nil
+	}
+
+	memjwt, err := memorysecurity.NewJWTProvider(memcfg, memdb)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain serve: init memory JWT provider: %v\n", err)
+		return nil
+	}
+
+	memsrv := memorymcp.NewServer(memdb, memjwt, version, memcfg)
+	memsrv.SetClientIDOverride(p.Name)
+	return memsrv
 }
