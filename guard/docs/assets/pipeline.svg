@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" role="img" aria-labelledby="title desc">
+  <title id="title">symguard pipeline</title>
+  <desc id="desc">An AI client or agent sends tool calls through symguard, which scans and classifies them, applies local policy, and records an audit trail, before the call reaches MCP servers, CLIs, APIs, or Symaira tools.</desc>
+  <rect width="1000" height="300" fill="#ffffff"/>
+  <g font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+
+    <!-- Client box -->
+    <rect x="20" y="110" width="170" height="80" rx="8" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+    <text x="105" y="143" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">AI client / agent</text>
+    <text x="105" y="165" text-anchor="middle" font-size="11" fill="#4b5563">Claude · Hermes · Cursor · VS Code</text>
+
+    <!-- Arrow 1 -->
+    <text x="225" y="140" text-anchor="middle" font-size="10" fill="#6b7280">tool calls</text>
+    <path d="M 198 152 H 246" stroke="#6b7280" stroke-width="2" fill="none"/>
+    <polygon points="250,152 240,147 240,157" fill="#6b7280"/>
+
+    <!-- symguard container -->
+    <rect x="260" y="30" width="440" height="240" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+    <text x="480" y="58" text-anchor="middle" font-size="19" font-weight="700" fill="#1d4ed8">symguard</text>
+    <text x="480" y="78" text-anchor="middle" font-size="11" fill="#3b82f6">local-first security gateway — every call inspected</text>
+
+    <!-- Stage 1: scan -->
+    <rect x="280" y="92" width="400" height="44" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+    <text x="296" y="119" font-size="14" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">scan</text>
+    <text x="384" y="119" font-size="13" fill="#374151">discover MCP servers &amp; classify tool risk</text>
+
+    <!-- Stage 2: policy -->
+    <rect x="280" y="146" width="400" height="44" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+    <text x="296" y="173" font-size="14" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">policy</text>
+    <text x="384" y="173" font-size="13" fill="#374151">deny / ask / allow + human approval</text>
+
+    <!-- Stage 3: audit -->
+    <rect x="280" y="200" width="400" height="44" rx="6" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2"/>
+    <text x="296" y="227" font-size="14" font-weight="700" fill="#1d4ed8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">audit</text>
+    <text x="384" y="227" font-size="13" fill="#374151">append-only, hash-chained decision log</text>
+
+    <!-- Arrow 2 -->
+    <text x="740" y="140" text-anchor="middle" font-size="10" fill="#6b7280">guarded calls</text>
+    <path d="M 708 152 H 764" stroke="#6b7280" stroke-width="2" fill="none"/>
+    <polygon points="768,152 758,147 758,157" fill="#6b7280"/>
+
+    <!-- Tools box -->
+    <rect x="780" y="110" width="190" height="80" rx="8" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5"/>
+    <text x="875" y="143" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">MCP servers</text>
+    <text x="875" y="163" text-anchor="middle" font-size="11" fill="#4b5563">CLIs · APIs ·</text>
+    <text x="875" y="178" text-anchor="middle" font-size="11" fill="#4b5563">Symaira tools</text>
+
+  </g>
+</svg>

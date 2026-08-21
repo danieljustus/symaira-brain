@@ -1,4 +1,7 @@
-docs/
+# Local working docs — NOT published (design notes, research, diagrams).
+# Anchored to the repo root so nested modules (e.g. guard/) can keep their own
+# published docs/ directories.
+/docs/
 .DS_Store
 /symbrain
 coverage.out
