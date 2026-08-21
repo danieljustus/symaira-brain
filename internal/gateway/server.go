@@ -20,6 +20,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/recipes"
+	"github.com/danieljustus/symaira-brain/internal/skills/mcptools"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/mcpserver"
 )
@@ -136,6 +137,16 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
 		Handler:     s.handleRecipes,
 	})
+
+	// Skills are absorbed directly (repo consolidation step 4, phase 2):
+	// register symskills tools on the gateway server instead of spawning a
+	// symskills child process. Skills policy is enable/disable only (no mode
+	// preset), so a single Enabled gate reproduces the previous catalog
+	// filtering. Tools are gateway-owned like bootstrap/recipes and are
+	// therefore no longer routed through routeToolCall or audited per-call.
+	if s.profile.Server(profile.ServerSkills).Enabled {
+		mcptools.Register(srv, mcptools.Options{Version: s.version})
+	}
 
 	for _, entry := range s.cat.Exposed() {
 		entry := entry

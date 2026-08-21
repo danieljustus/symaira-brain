@@ -96,7 +96,6 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 	defs := []serverDef{
 		{"vault", "symvault", cfg.Servers.Vault.BinaryPath, vaultArgs},
 		{"memory", "symmemory", cfg.Servers.Memory.BinaryPath, []string{"serve"}},
-		{"skills", "symskills", cfg.Servers.Skills.BinaryPath, []string{"serve", "--stdio"}},
 	}
 
 	for _, d := range defs {
