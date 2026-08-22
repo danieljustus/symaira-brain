@@ -826,57 +826,54 @@ func TestParseClient_OS_InvalidJSON(t *testing.T) {
 func TestTransportDetection(t *testing.T) {
 	tests := []struct {
 		name         string
-		server       rawServer
+		config       string
 		wantTrans    Transport
 		wantCmd      string
 		wantFindings int
 	}{
 		{
 			name:         "command → stdio",
-			server:       rawServer{Command: "node", Args: []string{"s.js"}},
+			config:       `{"mcpServers": {"test": {"command": "node", "args": ["s.js"]}}}`,
 			wantTrans:    TransportStdio,
 			wantCmd:      "node",
 			wantFindings: 0,
 		},
 		{
 			name:         "url → http",
-			server:       rawServer{URL: "http://localhost:8080/sse"},
+			config:       `{"mcpServers": {"test": {"url": "http://localhost:8080/sse"}}}`,
 			wantTrans:    TransportHTTP,
 			wantCmd:      "http://localhost:8080/sse",
 			wantFindings: 0,
 		},
 		{
 			name:         "url + command → http, command preserved",
-			server:       rawServer{Command: "npx", URL: "http://localhost:8080/sse"},
+			config:       `{"mcpServers": {"test": {"command": "npx", "url": "http://localhost:8080/sse"}}}`,
 			wantTrans:    TransportHTTP,
 			wantCmd:      "npx",
 			wantFindings: 0,
 		},
 		{
 			name:         "neither command nor url → unsupported finding",
-			server:       rawServer{},
+			config:       `{"mcpServers": {"test": {}}}`,
 			wantFindings: 1,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			raw := map[string]rawServer{"test": tt.server}
-			servers, findings := rawServersToServers(ClientCursor, "test.json", raw)
-			if len(servers) != 1-tt.wantFindings {
-				t.Fatalf("got %d servers, want %d", len(servers), 1-tt.wantFindings)
-			}
-			if len(findings) != tt.wantFindings {
-				t.Fatalf("got %d findings, want %d", len(findings), tt.wantFindings)
-			}
+			fsys := &testFS{files: map[string][]byte{"test.json": []byte(tt.config)}}
+			servers, err := ParseClientWithFS(fsys, ClientCursor, "test.json")
 			if tt.wantFindings == 1 {
-				if findings[0].Status != StatusUnsupported {
-					t.Errorf("finding status = %q, want unsupported", findings[0].Status)
-				}
-				if findings[0].Path != "test.json" {
-					t.Errorf("finding path = %q, want test.json", findings[0].Path)
+				if err == nil {
+					t.Fatalf("expected error for unmappable entry, got nil")
 				}
 				return
+			}
+			if err != nil {
+				t.Fatalf("ParseClientWithFS() error = %v", err)
+			}
+			if len(servers) != 1 {
+				t.Fatalf("got %d servers, want 1", len(servers))
 			}
 			s := servers[0]
 			if s.Transport != tt.wantTrans {

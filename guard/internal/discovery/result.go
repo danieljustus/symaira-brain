@@ -3,6 +3,8 @@ package discovery
 import (
 	"fmt"
 	"os"
+
+	"github.com/danieljustus/symaira-corekit/mcpcfgkit"
 )
 
 // Status describes how completely a client's MCP configuration source was
@@ -50,58 +52,31 @@ func ScanAll() Result {
 // ScanAllWithFS is like [ScanAll] but uses the provided [FS] for file access,
 // making it straightforward to test.
 func ScanAllWithFS(fsys FS) Result {
-	var res Result
-	for _, src := range clientSources() {
-		servers, findings := scanSourceWithFS(fsys, src.Client, src.Path)
-		res.Servers = append(res.Servers, servers...)
-		res.Findings = append(res.Findings, findings...)
+	kit := mcpcfgkit.ScanAllWithFS(kitFS{fsys}, toKitSources(clientSourcePairs()))
+	res := Result{
+		Servers:  make([]Server, 0, len(kit.Servers)),
+		Findings: make([]Finding, 0, len(kit.Findings)),
+	}
+	for _, s := range kit.Servers {
+		res.Servers = append(res.Servers, fromKitServer(s))
+	}
+	for _, f := range kit.Findings {
+		res.Findings = append(res.Findings, Finding{
+			Client:  Client(f.Client),
+			Path:    f.Path,
+			Status:  Status(f.Status),
+			Message: f.Message,
+		})
+	}
+	// The historical contract reports missing files with this exact message.
+	for i := range res.Findings {
+		if res.Findings[i].Status == StatusUnsupported &&
+			containsNotExist(res.Findings[i].Message) {
+			res.Findings[i].Message = "config file not found"
+		}
 	}
 	return res
 }
 
-// scanSourceWithFS scans a single client source and returns its servers and
-// findings. Errors never propagate: they become unsupported findings.
-func scanSourceWithFS(fsys FS, client Client, path string) ([]Server, []Finding) {
-	data, err := fsys.ReadFile(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, []Finding{{
-				Client:  client,
-				Path:    path,
-				Status:  StatusUnsupported,
-				Message: "config file not found",
-			}}
-		}
-		return nil, []Finding{{
-			Client:  client,
-			Path:    path,
-			Status:  StatusUnsupported,
-			Message: fmt.Sprintf("read config: %v", err),
-		}}
-	}
-
-	servers, findings, err := parseClientData(client, path, data)
-	if err != nil {
-		findings = append(findings, Finding{
-			Client:  client,
-			Path:    path,
-			Status:  StatusUnsupported,
-			Message: fmt.Sprintf("parse config: %v", err),
-		})
-		return servers, findings
-	}
-	return servers, findings
-}
-
-// parseClientData parses a client config payload into servers and findings.
-// The error is returned unwrapped so each caller can add its own context.
-func parseClientData(client Client, path string, data []byte) ([]Server, []Finding, error) {
-	switch client {
-	case ClientHermes, ClientClaudeDesktop, ClientCursor, ClientVSCode:
-		return parseMCPserversFormat(client, path, data)
-	case ClientOpenCode:
-		return parseOpenCodeFormat(client, path, data)
-	default:
-		return nil, nil, fmt.Errorf("unsupported client %q", client)
-	}
-}
+var _ = fmt.Sprintf
+var _ = os.IsNotExist

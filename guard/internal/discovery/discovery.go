@@ -2,21 +2,18 @@
 // client applications. It supports Hermes, Claude Desktop, Cursor, VS Code
 // (and compatible clients), and OpenCode.
 //
-// Each client stores MCP configuration in a JSON file at a known location.
-// Discovery reads those files, parses the client-specific format, and
-// normalises servers into a common [Server] representation. [ScanAll]
-// reports every source that cannot be mapped as a [Finding]; the legacy
-// [DiscoverAll] and [ParseClient] helpers still skip missing files silently.
+// Since 2026-08-21 this package is a thin adapter over
+// corekit/mcpcfgkit — the shared discovery implementation behind symscope,
+// symguard, and symbrain (repo-konsolidierung.md §9). The public API is
+// unchanged; parsing, path resolution, and format handling live in corekit.
 package discovery
 
 import (
-	"encoding/json"
 	"fmt"
-	"maps"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strings"
+
+	"github.com/danieljustus/symaira-corekit/mcpcfgkit"
 )
 
 // Transport describes how a server is reached.
@@ -74,310 +71,58 @@ type osFS struct{}
 
 func (osFS) ReadFile(name string) ([]byte, error) { return os.ReadFile(name) }
 
-// homeDir returns the user's home directory using a best-effort approach.
-func homeDir() string {
-	if h, err := os.UserHomeDir(); err == nil {
-		return h
-	}
-	if h := os.Getenv("HOME"); h != "" {
-		return h
-	}
-	return "."
-}
+// kitFS adapts this package's read-only FS to mcpcfgkit.FS (which also asks
+// for Glob; globbing is not used by the guard scan paths, so it returns no
+// matches).
+type kitFS struct{ inner FS }
 
-// DiscoverAll scans all supported clients for MCP server configurations and
-// returns the combined, normalised list. Files that do not exist are skipped.
-func DiscoverAll() ([]Server, error) {
-	return DiscoverAllWithFS(osFS{})
-}
+func (k kitFS) ReadFile(path string) ([]byte, error) { return k.inner.ReadFile(path) }
+func (k kitFS) Glob(string) ([]string, error)        { return nil, nil }
 
-// DiscoverAllWithFS is like [DiscoverAll] but uses the provided [FS] for file
-// access, making it straightforward to test.
-func DiscoverAllWithFS(fsys FS) ([]Server, error) {
-	var all []Server
-	for _, src := range clientSources() {
-		servers, err := ParseClientWithFS(fsys, src.Client, src.Path)
-		if err != nil {
-			return nil, err
+// toKitSources maps this package's client/path pairs onto mcpcfgkit sources.
+// The explicit per-client keys mirror what the pre-kit implementation read.
+func toKitSources(pairs []struct {
+	client Client
+	path   string
+}) []mcpcfgkit.ScanSource {
+	out := make([]mcpcfgkit.ScanSource, 0, len(pairs))
+	for _, p := range pairs {
+		key := "mcpServers"
+		if p.client == ClientOpenCode {
+			key = "mcp"
 		}
-		all = append(all, servers...)
-	}
-	return all, nil
-}
-
-// clientSource pairs a client identifier with its config file path.
-type clientSource struct {
-	Client Client
-	Path   string
-}
-
-// clientSources returns the config file locations for all supported clients
-// on the current platform.
-func clientSources() []clientSource {
-	return clientSourcesForGOOS(runtime.GOOS, homeDir())
-}
-
-// clientSourcesForGOOS is the testable inner implementation of clientSources.
-// It accepts the OS name and home directory as parameters so that both the
-// macOS and Linux branches can be exercised on any platform.
-func clientSourcesForGOOS(goos, home string) []clientSource {
-	sources := []clientSource{
-		// Hermes — cross-platform.
-		{ClientHermes, filepath.Join(home, ".config", "hermes", "config.json")},
-
-		// Cursor — cross-platform.
-		{ClientCursor, filepath.Join(home, ".cursor", "mcp.json")},
-
-		// VS Code (and Cline/Roo/Continue) — cross-platform global/user scope.
-		{ClientVSCode, filepath.Join(home, ".vscode", "mcp.json")},
-
-		// OpenCode — cross-platform.
-		{ClientOpenCode, filepath.Join(home, ".config", "opencode", "config.json")},
-	}
-
-	// Claude Desktop — platform-specific path.
-	if goos == "darwin" {
-		sources = append(sources, clientSource{
-			ClientClaudeDesktop,
-			filepath.Join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json"),
-		})
-	} else {
-		// Linux / other: XDG-style or ~/.config/claude/claude_desktop_config.json
-		xdg := os.Getenv("XDG_CONFIG_HOME")
-		if xdg == "" {
-			xdg = filepath.Join(home, ".config")
-		}
-		sources = append(sources, clientSource{
-			ClientClaudeDesktop,
-			filepath.Join(xdg, "claude", "claude_desktop_config.json"),
+		out = append(out, mcpcfgkit.ScanSource{
+			Client: mcpcfgkit.Client(p.client),
+			Path:   p.path,
+			Key:    key,
 		})
 	}
-
-	return sources
-}
-
-// ParseClient reads and parses the MCP config for a single client at the
-// given path. If the file does not exist, an empty slice is returned with no
-// error.
-func ParseClient(client Client, path string) ([]Server, error) {
-	return ParseClientWithFS(osFS{}, client, path)
-}
-
-// ParseClientWithFS is like [ParseClient] but uses the provided [FS].
-// Findings produced while parsing are discarded; use [ScanAllWithFS] when
-// every unmappable source must be reported.
-func ParseClientWithFS(fsys FS, client Client, path string) ([]Server, error) {
-	data, err := fsys.ReadFile(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("discovery: read %s config %s: %w", client, path, err)
-	}
-
-	servers, _, err := parseClientData(client, path, data)
-	if err != nil {
-		return nil, fmt.Errorf("discovery: parse %s config: %w", client, err)
-	}
-	return servers, nil
-}
-
-// ---------------------------------------------------------------------------
-// Standard mcpServers format (Hermes, Claude Desktop, Cursor, VS Code)
-// ---------------------------------------------------------------------------
-
-// rawConfig represents the top-level JSON structure used by most clients.
-// The actual MCP servers live under the "mcpServers" key.
-type rawConfig struct {
-	MCPServers map[string]rawServer `json:"mcpServers"`
-}
-
-// rawServer is a single server entry within an mcpServers map.
-type rawServer struct {
-	Command string            `json:"command"`
-	Args    []string          `json:"args"`
-	URL     string            `json:"url"`
-	Env     map[string]string `json:"env"`
-}
-
-func parseMCPserversFormat(client Client, path string, data []byte) ([]Server, []Finding, error) {
-	var cfg rawConfig
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return nil, nil, err
-	}
-	servers, findings := rawServersToServers(client, path, cfg.MCPServers)
-	return servers, findings, nil
-}
-
-// rawServersToServers normalises a raw mcpServers map into Server values.
-// Entries that cannot be mapped (neither command nor url) become findings.
-func rawServersToServers(client Client, path string, raw map[string]rawServer) ([]Server, []Finding) {
-	if len(raw) == 0 {
-		return nil, nil
-	}
-	servers := make([]Server, 0, len(raw))
-	var findings []Finding
-	for name, rs := range raw {
-		s := Server{
-			Name:    name,
-			Client:  client,
-			Command: rs.Command,
-			Args:    rs.Args,
-		}
-
-		// Determine transport: URL → HTTP, otherwise stdio.
-		if rs.URL != "" {
-			s.Transport = TransportHTTP
-			if s.Command == "" {
-				s.Command = rs.URL
-			}
-		} else {
-			s.Transport = TransportStdio
-		}
-
-		// An entry with neither a command nor a URL cannot be launched or
-		// connected — report it instead of silently skipping it.
-		if s.Command == "" {
-			findings = append(findings, Finding{
-				Client:  client,
-				Path:    path,
-				Status:  StatusUnsupported,
-				Message: fmt.Sprintf("server %q is missing both command and url", name),
-			})
-			continue
-		}
-
-		// Env vars — preserve keys, redact values.
-		if len(rs.Env) > 0 {
-			s.EnvKeys = make([]string, 0, len(rs.Env))
-			s.EnvValues = make([]string, 0, len(rs.Env))
-			for k, v := range rs.Env {
-				s.EnvKeys = append(s.EnvKeys, k)
-				s.EnvValues = append(s.EnvValues, v)
-			}
-		}
-
-		servers = append(servers, s)
-	}
-	return servers, findings
-}
-
-// ---------------------------------------------------------------------------
-// OpenCode format — uses "mcp" key with type-based entries
-// ---------------------------------------------------------------------------
-
-// openCodeConfig is the top-level structure for ~/.config/opencode/config.json.
-type openCodeConfig struct {
-	MCP map[string]openCodeServer `json:"mcp"`
-}
-
-// openCodeServer represents a single MCP server entry in OpenCode's format.
-type openCodeServer struct {
-	Type        string            `json:"type"`        // "local" or "remote"
-	Command     string            `json:"command"`     // for local
-	Args        []string          `json:"args"`        // for local
-	URL         string            `json:"url"`         // for remote
-	Environment map[string]string `json:"environment"` // note: "environment", not "env"
-	Env         map[string]string `json:"env"`         // some versions may use "env"
-}
-
-func parseOpenCodeFormat(client Client, path string, data []byte) ([]Server, []Finding, error) {
-	var cfg openCodeConfig
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return nil, nil, err
-	}
-	if len(cfg.MCP) == 0 {
-		return nil, nil, nil
-	}
-
-	servers := make([]Server, 0, len(cfg.MCP))
-	var findings []Finding
-	for name, oc := range cfg.MCP {
-		s := Server{
-			Name:   name,
-			Client: client,
-		}
-
-		// Resolve transport type.
-		switch strings.ToLower(oc.Type) {
-		case "remote":
-			s.Transport = TransportHTTP
-			s.Command = oc.URL
-			if s.Command == "" {
-				findings = append(findings, Finding{
-					Client:  client,
-					Path:    path,
-					Status:  StatusUnsupported,
-					Message: fmt.Sprintf("server %q is remote but has no url", name),
-				})
-				continue
-			}
-		case "local", "":
-			// "local" or unspecified — default to stdio.
-			s.Transport = TransportStdio
-			s.Command = oc.Command
-			s.Args = oc.Args
-			if s.Command == "" {
-				findings = append(findings, Finding{
-					Client:  client,
-					Path:    path,
-					Status:  StatusUnsupported,
-					Message: fmt.Sprintf("server %q is local but has no command", name),
-				})
-				continue
-			}
-		default:
-			// Unknown type — try stdio, but flag the guess as approximate.
-			s.Transport = TransportStdio
-			s.Command = oc.Command
-			s.Args = oc.Args
-			if s.Command == "" {
-				findings = append(findings, Finding{
-					Client:  client,
-					Path:    path,
-					Status:  StatusUnsupported,
-					Message: fmt.Sprintf("server %q has unknown type %q and no command", name, oc.Type),
-				})
-				continue
-			}
-			findings = append(findings, Finding{
-				Client:  client,
-				Path:    path,
-				Status:  StatusApproximate,
-				Message: fmt.Sprintf("server %q has unknown type %q, treated as local", name, oc.Type),
-			})
-		}
-
-		// Merge env from both "environment" and "env" keys (some versions differ).
-		merged := mergeEnvMaps(oc.Environment, oc.Env)
-		if len(merged) > 0 {
-			s.EnvKeys = make([]string, 0, len(merged))
-			s.EnvValues = make([]string, 0, len(merged))
-			for k, v := range merged {
-				s.EnvKeys = append(s.EnvKeys, k)
-				s.EnvValues = append(s.EnvValues, v)
-			}
-		}
-
-		servers = append(servers, s)
-	}
-	return servers, findings, nil
-}
-
-// mergeEnvMaps combines two env maps. If both contain the same key, primary wins.
-func mergeEnvMaps(primary, secondary map[string]string) map[string]string {
-	if len(primary) == 0 && len(secondary) == 0 {
-		return nil
-	}
-	out := make(map[string]string, len(primary)+len(secondary))
-	maps.Copy(out, secondary)
-	maps.Copy(out, primary)
 	return out
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+// fromKitServer converts a corekit server into this package's representation.
+func fromKitServer(s mcpcfgkit.Server) Server {
+	out := Server{
+		Name:      s.Name,
+		Client:    Client(s.Client),
+		Command:   s.Command,
+		Args:      s.Args,
+		Transport: Transport(s.Transport),
+	}
+	// Prefer the split EnvKeys/EnvValues view when the kit produced one;
+	// otherwise derive both lists from the merged env map (deterministic
+	// order via sorted keys happens at the call sites that need it).
+	if len(s.EnvKeys) > 0 {
+		out.EnvKeys = s.EnvKeys
+		out.EnvValues = s.EnvValues
+	} else {
+		for k, v := range s.Env {
+			out.EnvKeys = append(out.EnvKeys, k)
+			out.EnvValues = append(out.EnvValues, v)
+		}
+	}
+	return out
+}
 
 // RedactedEnv returns a copy of EnvValues where every value is replaced with
 // "REDACTED". Useful for logging or display.
@@ -391,13 +136,220 @@ func (s Server) RedactedEnv() map[string]string {
 
 // String returns a short human-readable description of the server.
 func (s Server) String() string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "%s (%s/%s)", s.Name, s.Client, s.Transport)
+	b := fmt.Sprintf("%s (%s/%s)", s.Name, s.Client, s.Transport)
 	if s.Command != "" {
-		fmt.Fprintf(&b, " → %s", s.Command)
+		b += " → " + s.Command
 	}
 	if len(s.Args) > 0 {
-		fmt.Fprintf(&b, " %s", strings.Join(s.Args, " "))
+		b += " " + strings.Join(s.Args, " ")
 	}
-	return b.String()
+	return b
 }
+
+// clientSource pairs a client identifier with its config path. Kept as the
+// historical test-facing shape; sources now come from corekit/mcpcfgkit.
+type clientSource struct {
+	Client Client
+	Path   string
+}
+
+// clientSources returns the config file locations for all supported clients
+// on the current platform.
+func clientSources() []clientSource {
+	srcs := mcpcfgkit.DefaultSources()
+	out := make([]clientSource, 0, len(srcs))
+	for _, s := range srcs {
+		out = append(out, clientSource{Client: Client(s.Client), Path: s.Path})
+	}
+	return out
+}
+
+// clientSourcesForGOOS is the injectable variant kept for the platform
+// resolution tests (darwin vs linux XDG).
+func clientSourcesForGOOS(goos, home string) []clientSource {
+	srcs := mcpcfgkit.DefaultSourcesForPlatform(goos, home)
+	out := make([]clientSource, 0, len(srcs))
+	for _, s := range srcs {
+		out = append(out, clientSource{Client: Client(s.Client), Path: s.Path})
+	}
+	return out
+}
+
+// DiscoverAll scans all supported clients for MCP server configurations and
+// returns the combined, normalised list. Files that do not exist are skipped.
+func DiscoverAll() ([]Server, error) {
+	return DiscoverAllWithFS(osFS{})
+}
+
+// DiscoverAllWithFS is like [DiscoverAll] but uses the provided [FS] for file
+// access, making it straightforward to test. Missing config files are
+// skipped silently (historical behaviour); other failures surface as errors.
+func DiscoverAllWithFS(fsys FS) ([]Server, error) {
+	kit := mcpcfgkit.ScanAllWithFS(kitFS{fsys}, toKitSources(clientSourcePairs()))
+	servers := make([]Server, 0, len(kit.Servers))
+	for _, s := range kit.Servers {
+		servers = append(servers, fromKitServer(s))
+	}
+	for _, f := range kit.Findings {
+		if containsNotExist(f.Message) {
+			continue // missing files are not an error here
+		}
+		if f.Status == mcpcfgkit.StatusUnsupported {
+			return nil, fmt.Errorf("discovery: %s", f.String())
+		}
+	}
+	return servers, nil
+}
+
+// clientSourcePairs lists the config locations for all supported clients on
+// the current platform, in the historical order.
+func clientSourcePairs() []struct {
+	client Client
+	path   string
+} {
+	srcs := mcpcfgkit.DefaultSources()
+	pairs := make([]struct {
+		client Client
+		path   string
+	}, 0, len(srcs))
+	for _, s := range srcs {
+		c := Client(s.Client)
+		// The historical guard source list had no windsurf entry and used
+		// these exact clients; unknown additions from the shared list are
+		// still scanned but keep their own identifier.
+		pairs = append(pairs, struct {
+			client Client
+			path   string
+		}{c, s.Path})
+	}
+	return pairs
+}
+
+// ParseClient reads and parses the MCP config for a single client at the
+// given path. If the file does not exist, an empty slice is returned with no
+// error.
+func ParseClient(client Client, path string) ([]Server, error) {
+	return ParseClientWithFS(osFS{}, client, path)
+}
+
+// ParseClientWithFS is like [ParseClient] but uses the provided [FS].
+// Findings produced while parsing are discarded; use [ScanAllWithFS] when
+// every unmappable source must be reported.
+func ParseClientWithFS(fsys FS, client Client, path string) ([]Server, error) {
+	switch client {
+	case ClientHermes, ClientClaudeDesktop, ClientCursor, ClientVSCode, ClientOpenCode:
+	default:
+		return nil, fmt.Errorf("discovery: unsupported client %q", client)
+	}
+	key := "mcpServers"
+	if client == ClientOpenCode {
+		key = "mcp"
+	}
+	res := mcpcfgkit.ScanAllWithFS(kitFS{fsys}, []mcpcfgkit.ScanSource{{
+		Client: mcpcfgkit.Client(client),
+		Path:   path,
+		Key:    key,
+	}})
+	// Missing file → empty result, no error (legacy behaviour).
+	if len(res.Servers) == 0 && len(res.Findings) == 1 {
+		msg := res.Findings[0].Message
+		if containsNotExist(msg) || containsFold(msg, "key not found") {
+			// An empty/foreign document maps to zero servers, not an error
+			// (historical behaviour for `{}` configs).
+			return nil, nil
+		}
+	}
+	servers := make([]Server, 0, len(res.Servers))
+	for _, s := range res.Servers {
+		servers = append(servers, fromKitServer(s))
+	}
+	if len(res.Findings) > 0 {
+		return nil, fmt.Errorf("discovery: parse %s config: %s", client, res.Findings[0].String())
+	}
+	return servers, nil
+}
+
+func containsNotExist(msg string) bool {
+	return containsFold(msg, "no such file") || containsFold(msg, "file does not exist") ||
+		containsFold(msg, "cannot find the file")
+}
+
+func containsFold(s, sub string) bool {
+	return len(s) >= len(sub) && indexOfFold(s, sub) >= 0
+}
+
+func indexOfFold(s, sub string) int {
+	for i := 0; i+len(sub) <= len(s); i++ {
+		if matchAt(s, i, sub) {
+			return i
+		}
+	}
+	return -1
+}
+
+func matchAt(s string, at int, sub string) bool {
+	for j := 0; j < len(sub); j++ {
+		a := lowerByte(s[at+j])
+		b := lowerByte(sub[j])
+		if a != b {
+			return false
+		}
+	}
+	return true
+}
+
+func lowerByte(b byte) byte {
+	if b >= 'A' && b <= 'Z' {
+		return b + 32
+	}
+	return b
+}
+
+// mapFS is an in-memory FS for the test adapter shims.
+type mapFS struct{ files map[string][]byte }
+
+func (m *mapFS) ReadFile(path string) ([]byte, error) {
+	if data, ok := m.files[path]; ok {
+		return data, nil
+	}
+	return nil, &os.PathError{Op: "open", Path: path, Err: os.ErrNotExist}
+}
+
+// parseMCPserversFormat is the adapter shim for tests: parses an mcpServers
+// JSON payload through the shared kit and returns servers + findings.
+func parseMCPserversFormat(client Client, path string, data []byte) ([]Server, []Finding, error) {
+	fsys := &mapFS{files: map[string][]byte{path: data}}
+	key := "mcpServers"
+	if client == ClientOpenCode {
+		key = "mcp"
+	}
+	single := mcpcfgkit.ScanAllWithFS(kitFS{fsys}, []mcpcfgkit.ScanSource{{
+		Client: mcpcfgkit.Client(client),
+		Path:   path,
+		Key:    key,
+	}})
+	var (
+		servers  []Server
+		findings []Finding
+	)
+	for _, s := range single.Servers {
+		servers = append(servers, fromKitServer(s))
+	}
+	for _, f := range single.Findings {
+		findings = append(findings, Finding{
+			Client:  Client(f.Client),
+			Path:    f.Path,
+			Status:  Status(f.Status),
+			Message: f.Message,
+		})
+	}
+	return servers, findings, nil
+}
+
+// parseOpenCodeFormat is the adapter shim for tests: same path as the
+// mcpServers format but with OpenCode's "mcp" key and type-based entries.
+func parseOpenCodeFormat(client Client, path string, data []byte) ([]Server, []Finding, error) {
+	return parseMCPserversFormat(client, path, data)
+}
+
+var _ = fmt.Sprintf // keep fmt imported for the wrappers above
