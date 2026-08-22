@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/xdg"
+	"github.com/danieljustus/symaira-corekit/auditkit"
 )
 
 // Entry is one JSONL audit record for a routed tool call.
@@ -54,25 +55,24 @@ type Config struct {
 	Verbose bool
 }
 
-// Logger writes JSONL audit entries with strict redaction. It is safe
-// for concurrent use.
+// Logger writes JSONL audit entries with strict redaction. Entries are
+// persisted through corekit/auditkit's tamper-evident Sink (hash-chained,
+// rotatable), so the log gains chain verification and anchor checkpoints
+// without changing this package's API. It is safe for concurrent use.
 type Logger struct {
 	mu       sync.Mutex
-	f        *os.File
+	sink     *auditkit.Sink
 	path     string
 	profile  string
 	session  string
 	config   Config
-	size     int64
-	degraded bool  // true after any write or rotation failure
+	degraded bool  // true after any write failure
 	dropped  int64 // total entries dropped due to write failures
 }
 
-// maxFileSize is the size threshold for log rotation (10 MB).
+// maxFileSize is the size threshold for log rotation (10 MB). The auditkit
+// sink uses the same default; kept here for the config surface.
 const maxFileSize = 10 * 1024 * 1024
-
-// maxBackups is the number of rotated log files to keep.
-const maxBackups = 5
 
 // Open creates or opens the audit log file for the given profile. If
 // audit is disabled in config, returns a no-op logger.
@@ -90,24 +90,17 @@ func Open(profile string, cfg Config) (*Logger, error) {
 	}
 
 	path := filepath.Join(dir, profile+".jsonl")
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	sink, err := auditkit.OpenSink(path)
 	if err != nil {
 		return nil, fmt.Errorf("audit: open %s: %w", path, err)
 	}
 
-	info, _ := f.Stat()
-	var size int64
-	if info != nil {
-		size = info.Size()
-	}
-
 	return &Logger{
-		f:       f,
+		sink:    sink,
 		path:    path,
 		profile: profile,
 		session: time.Now().UTC().Format(time.RFC3339Nano),
 		config:  cfg,
-		size:    size,
 	}, nil
 }
 
@@ -116,7 +109,7 @@ func Open(profile string, cfg Config) (*Logger, error) {
 // wall-clock time. status is "ok", "error", or "timeout". An optional
 // classification records the reason for a failed call.
 func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...Classification) {
-	if l == nil || l.f == nil || !l.config.Enabled {
+	if l == nil || l.sink == nil || !l.config.Enabled {
 		return
 	}
 
@@ -145,25 +138,15 @@ func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Du
 		l.dropped++
 		return
 	}
-	data = append(data, '\n')
-
-	n, err := l.f.Write(data)
-	if err != nil {
+	if err := l.sink.Append(string(data)); err != nil {
 		l.degraded = true
 		l.dropped++
-	}
-	if n > 0 {
-		l.size += int64(n)
-	}
-
-	if l.size >= maxFileSize {
-		l.rotate()
 	}
 }
 
 // LogDegradation records a backend omitted from the catalog during startup.
 func (l *Logger) LogDegradation(server, reason, level string) {
-	if l == nil || l.f == nil || !l.config.Enabled {
+	if l == nil || l.sink == nil || !l.config.Enabled {
 		return
 	}
 
@@ -184,20 +167,12 @@ func (l *Logger) LogDegradation(server, reason, level string) {
 		l.mu.Unlock()
 		return
 	}
-	data = append(data, '\n')
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	n, err := l.f.Write(data)
-	if err != nil {
+	if err := l.sink.Append(string(data)); err != nil {
 		l.degraded = true
 		l.dropped++
-	}
-	if n > 0 {
-		l.size += int64(n)
-	}
-	if l.size >= maxFileSize {
-		l.rotate()
 	}
 }
 
@@ -260,41 +235,14 @@ func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, 
 	return keys, values
 }
 
-func (l *Logger) rotate() {
-	if l.f != nil {
-		l.f.Close()
-	}
-
-	for i := maxBackups; i >= 1; i-- {
-		old := fmt.Sprintf("%s.%d", l.path, i)
-		newPath := fmt.Sprintf("%s.%d", l.path, i+1)
-		if i+1 > maxBackups {
-			os.Remove(newPath)
-		}
-		// Renames are best-effort: missing backups (ENOENT) are expected
-		// in the shift chain and a stale backup is not a data-loss risk.
-		_ = os.Rename(old, newPath)
-	}
-	_ = os.Rename(l.path, l.path+".1")
-
-	f, err := os.OpenFile(l.path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		l.degraded = true
-		l.f = nil
-		return
-	}
-	l.f = f
-	l.size = 0
-}
-
 // Close closes the underlying file. The logger is unusable afterward.
 func (l *Logger) Close() error {
-	if l == nil || l.f == nil {
+	if l == nil || l.sink == nil {
 		return nil
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return l.f.Close()
+	return l.sink.Close()
 }
 
 // Degraded reports whether the logger has encountered a write or rotation

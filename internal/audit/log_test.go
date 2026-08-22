@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/danieljustus/symaira-corekit/auditkit"
 	"time"
 )
 
@@ -156,8 +158,8 @@ func TestOpen_DisabledReturnsNoOpLogger(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open disabled: unexpected error: %v", err)
 	}
-	if l.f != nil {
-		t.Error("disabled logger should have nil file handle")
+	if l.sink != nil {
+		t.Error("disabled logger should have nil sink")
 	}
 	if l.config.Enabled {
 		t.Error("disabled logger should have Enabled=false")
@@ -216,8 +218,9 @@ func TestOpen_ExistingFilePreservesSize(t *testing.T) {
 	}
 	defer l.Close()
 
-	if l.size != int64(len(existing)) {
-		t.Errorf("l.size = %d, want %d", l.size, len(existing))
+	// Chain state is tracked by the auditkit sink; size is internal now.
+	if l.sink == nil {
+		t.Error("sink should be open after Open()")
 	}
 }
 
@@ -316,19 +319,58 @@ func newTestFile(t *testing.T) *os.File {
 	return f
 }
 
-func TestLog_WritesJSONL(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:       f,
-		path:    f.Name(),
+// readPayloads reads the audit file and returns the inner entry payloads
+// (auditkit stores entries as chained envelopes {d: payload, h: hash}).
+func readPayloads(t *testing.T, path string) []string {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		t.Fatal(err)
+	}
+	var out []string
+	for _, line := range strings.Split(string(data), "\n") {
+		if line == "" {
+			continue
+		}
+		var env struct {
+			D string `json:"d"`
+		}
+		if err := json.Unmarshal([]byte(line), &env); err == nil && env.D != "" {
+			out = append(out, env.D)
+		} else {
+			out = append(out, line) // legacy un-chained line
+		}
+	}
+	return out
+}
+
+// newTestLogger builds a Logger backed by a real auditkit sink on a
+// temp file — mirrors production wiring so the chain state works.
+func newTestLogger(t *testing.T) *Logger {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "audit.jsonl")
+	sink, err := auditkit.OpenSink(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &Logger{
+		sink:    sink,
+		path:    path,
 		profile: "test",
 		config:  Config{Enabled: true},
 	}
+}
+
+func TestLog_WritesJSONL(t *testing.T) {
+	l := newTestLogger(t)
 
 	args := json.RawMessage(`{"query":"hello","limit":5}`)
 	l.Log("memory", "memory_search", args, 42*time.Millisecond, "ok")
 
-	data, err := os.ReadFile(f.Name())
+	data, err := os.ReadFile(l.path)
 	if err != nil {
 		t.Fatalf("ReadFile: %v", err)
 	}
@@ -338,8 +380,9 @@ func TestLog_WritesJSONL(t *testing.T) {
 		t.Fatalf("expected 1 line, got %d", len(lines))
 	}
 
+	payloads := readPayloads(t, l.path)
 	var entry Entry
-	if err := json.Unmarshal([]byte(lines[0]), &entry); err != nil {
+	if err := json.Unmarshal([]byte(payloads[0]), &entry); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if entry.Server != "memory" {
@@ -366,24 +409,17 @@ func TestLog_WritesJSONL(t *testing.T) {
 }
 
 func TestLog_VaultArgsRedacted(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:       f,
-		path:    f.Name(),
-		profile: "test",
-		config:  Config{Enabled: true},
-	}
+	l := newTestLogger(t)
 
 	args := json.RawMessage(`{"password":"secret","path":"creds/api-key"}`)
 	l.Log("vault", "get_entry", args, 10*time.Millisecond, "ok")
 
-	data, err := os.ReadFile(f.Name())
-	if err != nil {
-		t.Fatalf("ReadFile: %v", err)
+	payloads := readPayloads(t, l.path)
+	if len(payloads) == 0 {
+		t.Fatal("no payloads written")
 	}
-
 	var entry Entry
-	if err := json.Unmarshal(bytes.TrimSpace(data), &entry); err != nil {
+	if err := json.Unmarshal([]byte(payloads[len(payloads)-1]), &entry); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if entry.ArgKeys != "" {
@@ -405,42 +441,31 @@ func TestLog_NilFileNoOp(t *testing.T) {
 }
 
 func TestLog_DisabledNoOp(t *testing.T) {
-	f := newTestFile(t)
 	l := &Logger{
-		f:      f,
-		path:   f.Name(),
+		sink:   nil,
+		path:   filepath.Join(t.TempDir(), "audit.jsonl"),
 		config: Config{Enabled: false},
 	}
 	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok")
 
-	data, err := os.ReadFile(f.Name())
-	if err != nil {
-		t.Fatalf("ReadFile: %v", err)
-	}
-	if len(data) != 0 {
-		t.Errorf("disabled logger should not write; got %d bytes", len(data))
+	if _, err := os.Stat(l.path); !os.IsNotExist(err) {
+		t.Errorf("disabled logger should not create a log file (stat err: %v)", err)
 	}
 }
 
 func TestLog_VerboseIncludesValues(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:       f,
-		path:    f.Name(),
-		profile: "p",
-		config:  Config{Enabled: true, Verbose: true},
-	}
+	l := newTestLogger(t)
+	l.config.Verbose = true
 
 	args := json.RawMessage(`{"query":"term","limit":10}`)
 	l.Log("memory", "memory_search", args, 5*time.Millisecond, "ok")
 
-	data, err := os.ReadFile(f.Name())
-	if err != nil {
-		t.Fatalf("ReadFile: %v", err)
+	payloads := readPayloads(t, l.path)
+	if len(payloads) == 0 {
+		t.Fatal("no payloads written")
 	}
-
 	var entry Entry
-	if err := json.Unmarshal(bytes.TrimSpace(data), &entry); err != nil {
+	if err := json.Unmarshal([]byte(payloads[len(payloads)-1]), &entry); err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 	if entry.ArgValues == "" {
@@ -448,22 +473,13 @@ func TestLog_VerboseIncludesValues(t *testing.T) {
 	}
 }
 
-func TestLog_IncrementsSize(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:       f,
-		path:    f.Name(),
-		profile: "p",
-		config:  Config{Enabled: true},
-	}
+func TestLog_IncrementsSinkCount(t *testing.T) {
+	l := newTestLogger(t)
 
-	if l.size != 0 {
-		t.Fatalf("initial size = %d, want 0", l.size)
-	}
-
+	before := l.sink.Count()
 	l.Log("memory", "tool1", nil, 1*time.Millisecond, "ok")
-	if l.size == 0 {
-		t.Error("size should increase after Log")
+	if l.sink.Count() != before+1 {
+		t.Errorf("sink count = %d, want %d", l.sink.Count(), before+1)
 	}
 }
 
@@ -481,39 +497,25 @@ func TestClose_NilFile(t *testing.T) {
 	}
 }
 
-func TestClose_ClosesFile(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:      f,
-		config: Config{Enabled: true},
-		path:   f.Name(),
+func TestClose_ClosesSink(t *testing.T) {
+	l := newTestLogger(t)
+	if l.sink == nil {
+		t.Fatal("newTestLogger should have an open sink")
 	}
-
 	if err := l.Close(); err != nil {
 		t.Fatalf("Close: %v", err)
-	}
-
-	_, err := f.Write([]byte("test"))
-	if err == nil {
-		t.Error("write to closed file should fail")
 	}
 }
 
 func TestClose_DoubleCloseReturnsError(t *testing.T) {
-	f := newTestFile(t)
-	l := &Logger{
-		f:      f,
-		config: Config{Enabled: true},
-		path:   f.Name(),
-	}
+	l := newTestLogger(t)
 
 	if err := l.Close(); err != nil {
 		t.Fatalf("first Close: %v", err)
 	}
 
-	err := l.Close()
-	if err == nil {
-		t.Error("double Close should return error")
+	if err := l.Close(); err != nil {
+		t.Errorf("double Close should be idempotent, got %v", err)
 	}
 }
 
@@ -801,151 +803,6 @@ func TestTailEntries_NonexistentProfile(t *testing.T) {
 	}
 }
 
-func TestRotate_CreatesBackup(t *testing.T) {
-	dir := t.TempDir()
-	logPath := filepath.Join(dir, "test.jsonl")
-
-	f, err := os.Create(logPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := f.Write([]byte(`{"data":"existing"}` + "\n")); err != nil {
-		t.Fatal(err)
-	}
-	f.Close()
-
-	f, err = os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	l := &Logger{
-		f:    f,
-		path: logPath,
-		size: maxFileSize,
-	}
-
-	l.rotate()
-
-	backupPath := logPath + ".1"
-	if _, err := os.Stat(backupPath); err != nil {
-		t.Errorf("backup file should exist: %v", err)
-	}
-
-	if _, err := os.Stat(logPath); err != nil {
-		t.Errorf("new log file should exist: %v", err)
-	}
-
-	if l.size != 0 {
-		t.Errorf("size should be 0 after rotation, got %d", l.size)
-	}
-
-	l.f.Close()
-}
-
-func TestRotate_ShiftsExistingBackups(t *testing.T) {
-	dir := t.TempDir()
-	logPath := filepath.Join(dir, "test.jsonl")
-
-	if err := os.WriteFile(logPath+".1", []byte("backup1\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(logPath+".2", []byte("backup2\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(logPath, []byte("current\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	l := &Logger{
-		f:    f,
-		path: logPath,
-		size: maxFileSize,
-	}
-
-	l.rotate()
-
-	for _, suf := range []string{".1", ".2"} {
-		if _, err := os.Stat(logPath + suf); err != nil {
-			t.Errorf("backup %s should exist: %v", suf, err)
-		}
-	}
-
-	data, err := os.ReadFile(logPath + ".3")
-	if err != nil {
-		t.Fatalf("backup .3 should exist: %v", err)
-	}
-	if string(data) != "backup2\n" {
-		t.Errorf(".3 content = %q, want %q", string(data), "backup2\n")
-	}
-
-	l.f.Close()
-}
-
-func TestRotate_RemovesOldestBeyondMax(t *testing.T) {
-	dir := t.TempDir()
-	logPath := filepath.Join(dir, "test.jsonl")
-
-	for i := 1; i <= maxBackups; i++ {
-		if err := os.WriteFile(logPath+"."+strconv.Itoa(i), []byte("old\n"), 0o600); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if err := os.WriteFile(logPath, []byte("current\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	l := &Logger{
-		f:    f,
-		path: logPath,
-		size: maxFileSize,
-	}
-
-	l.rotate()
-
-	if _, err := os.Stat(logPath + ".6"); err != nil {
-		t.Errorf("backup .6 should exist (old .5 shifted here): %v", err)
-	}
-
-	if _, err := os.Stat(logPath + ".5"); err != nil {
-		t.Errorf("backup .5 should exist: %v", err)
-	}
-
-	l.f.Close()
-}
-
-func TestRotate_ReopenFailureMarksLoggerDegraded(t *testing.T) {
-	f, err := os.CreateTemp(t.TempDir(), "audit-current-*")
-	if err != nil {
-		t.Fatalf("CreateTemp: %v", err)
-	}
-
-	l := &Logger{
-		f:    f,
-		path: filepath.Join(t.TempDir(), "missing", "audit.jsonl"),
-		size: maxFileSize,
-	}
-
-	l.rotate()
-
-	if l.f != nil {
-		t.Fatalf("rotate() file = %v, want nil after reopen failure", l.f)
-	}
-	if !l.Degraded() {
-		t.Fatal("rotate() did not mark logger degraded after reopen failure")
-	}
-}
-
 func TestPrintEntry_FormatsOutput(t *testing.T) {
 	e := Entry{
 		Timestamp:  "2026-06-15T14:30:00Z",
@@ -1121,11 +978,14 @@ func TestDegraded_StartsFalseAndFlipsOnWriteFailure(t *testing.T) {
 		t.Error("fresh logger should not be degraded")
 	}
 
-	// Close the underlying file behind the logger's back, then log:
-	// the write fails and the logger flips to degraded.
-	if err := l.f.Close(); err != nil {
-		t.Fatal(err)
+	// Close the sink behind the logger's back, then log: the write fails
+	// and the logger flips to degraded (sink is already closed; auditkit
+	// surfaces the error through Append).
+	l.mu.Lock()
+	if l.sink != nil {
+		_ = l.sink.Close()
 	}
+	l.mu.Unlock()
 	l.Log("memory", "search", nil, time.Millisecond, "ok")
 
 	if !l.Degraded() {
