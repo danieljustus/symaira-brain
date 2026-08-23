@@ -76,6 +76,12 @@ symaira-brain/
 │   └── SymBrainMobile/    # iOS companion (read-only overview)
 ├── Tests/                 # Swift unit tests
 │   └── SymBrainCoreTests/ # Decoding tests for CLI JSON shapes
+├── guard/                 # Nested module: symguard security gateway (own go.mod,
+│   │                      #   module github.com/danieljustus/symaira-guard) —
+│   │                      #   absorbed 2026-08-21 (repo consolidation step 7,
+│   │                      #   relicensed MIT → Apache-2.0)
+│   ├── cmd/symguard/      #   CLI entrypoint (main package)
+│   └── internal/          #   private packages: policy, capability, audit, approval, …
 ├── docs/                  # Local planning docs (git-ignored, not part of the module)
 ├── project.yml            # Xcode project generation (xcodegen)
 ├── go.mod, go.sum
