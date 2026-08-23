@@ -80,6 +80,7 @@ type doctorReport struct {
 	CacheDir     dirCheck            `json:"cache_dir"`
 	Config       configCheck         `json:"config"`
 	ManagedDir   dirCheck            `json:"managed_dir"`
+	Builtins     []string            `json:"builtins"`
 	Servers      []serverCheck       `json:"servers"`
 	Profiles     []string            `json:"profiles"`
 	Harnesses    []harnessCheck      `json:"harnesses"`
@@ -98,18 +99,30 @@ type profileHandshake struct {
 	Error     string `json:"error,omitempty"`
 }
 
-// knownServers are the three state cores symbrain composes. A missing
-// binary is a warning (with an install hint), never an error — see
+// knownServers are the state cores symbrain still composes out of process.
+// A missing binary is a warning (with an install hint), never an error — see
 // AGENTS.md "Standalone-First".
+//
+// Only vault is on this list. Memory and skills were absorbed into this
+// binary by the repo consolidation (step 4) and are served from
+// internal/memory and internal/skills, so probing for symmemory/symskills
+// would report on tools that are no longer supposed to exist — and their
+// Homebrew formulae are deprecated, which made the install hints point
+// nowhere. Vault deliberately stays a separate process: the secret store is
+// built on the assumption that its caller is untrusted, and that boundary is
+// the security mechanism (repo-konsolidierung.md §4).
 var knownServers = []struct {
 	name        string
 	binary      string
 	installHint string
 }{
 	{"vault", "symvault", "brew install danieljustus/tap/symvault"},
-	{"memory", "symmemory", "brew install danieljustus/tap/symmemory"},
-	{"skills", "symskills", "brew install danieljustus/tap/symskills"},
 }
+
+// builtinServers are the state cores that ship inside this binary. Doctor
+// lists them so the report answers "is memory available?" rather than
+// silently omitting the question.
+var builtinServers = []string{"memory", "skills"}
 
 func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
@@ -145,6 +158,7 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	report := &doctorReport{
 		ConfigDir: checkDir(xdg.ConfigDir()),
 		Config:    checkConfig(),
+		Builtins:  builtinServers,
 		Servers:   checkServers(ctx),
 		Profiles:  discoverProfiles(),
 		Harnesses: checkHarnesses(),

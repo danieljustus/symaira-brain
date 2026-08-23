@@ -21,6 +21,9 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 	printConfig(w, r.Config)
 
 	fmt.Fprintln(w)
+	for _, name := range r.Builtins {
+		fmt.Fprintf(w, "  ✓  %-8s built in\n", name)
+	}
 	for _, s := range r.Servers {
 		printServer(w, s)
 	}
