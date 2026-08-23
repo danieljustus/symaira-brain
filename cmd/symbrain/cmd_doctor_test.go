@@ -96,25 +96,41 @@ func TestCheckServers_FoundButProbeFails(t *testing.T) {
 		t.Skip("fake binary is a POSIX shell script")
 	}
 	dir := t.TempDir()
-	fakeBinary(t, dir, "symmemory", "not json")
+	fakeBinary(t, dir, "symvault", "not json")
 	isolatedPATH(t, dir)
 
 	checks := checkServers(context.Background())
 
-	var memory *serverCheck
+	var vault *serverCheck
 	for i := range checks {
-		if checks[i].Name == "memory" {
-			memory = &checks[i]
+		if checks[i].Name == "vault" {
+			vault = &checks[i]
 		}
 	}
-	if memory == nil {
-		t.Fatal("no check for server \"memory\"")
+	if vault == nil {
+		t.Fatal("no check for server \"vault\"")
 	}
-	if !memory.Found {
-		t.Fatal("memory.Found = false, want true (binary is on PATH)")
+	if !vault.Found {
+		t.Fatal("vault.Found = false, want true (binary is on PATH)")
 	}
-	if memory.ProbeError == "" {
-		t.Error("memory.ProbeError is empty, want a parse error (output is not JSON)")
+	if vault.ProbeError == "" {
+		t.Error("vault.ProbeError is empty, want a parse error (output is not JSON)")
+	}
+}
+
+// TestCheckServers_AbsorbedCoresAreNotProbed pins the consolidation outcome:
+// memory and skills run inside this binary, so doctor must not report them
+// as missing sibling processes — and must not hand out install hints for
+// their deprecated Homebrew formulae.
+func TestCheckServers_AbsorbedCoresAreNotProbed(t *testing.T) {
+	checks := checkServers(context.Background())
+	for _, c := range checks {
+		if c.Name == "memory" || c.Name == "skills" {
+			t.Errorf("%s is built in and must not be probed as a sibling binary", c.Name)
+		}
+	}
+	if len(builtinServers) != 2 {
+		t.Errorf("builtinServers = %v, want memory and skills", builtinServers)
 	}
 }
 
