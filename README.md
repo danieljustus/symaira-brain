@@ -6,10 +6,12 @@
 [![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8)](go.mod)
 
 `symbrain` is the portable agent-context layer for AI coding harnesses. It
-multiplexes the three Symaira *state cores* — `symvault` (credentials),
-`symmemory` (memory/entities), and `symskills` (skill catalog) — behind one
-MCP gateway, with one **profile** per harness connection controlling exactly
-what that harness is allowed to see.
+exposes the three Symaira *state cores* — credentials, memory/entities, and
+the skill catalog — behind one MCP gateway, with one **profile** per harness
+connection controlling exactly what that harness is allowed to see.
+
+Memory and skills ship inside this binary (absorbed 2026-08-21); credentials
+stay behind the separate `symvault` process on purpose.
 
 Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —

@@ -8,15 +8,21 @@ This file documents coding conventions, project standards, and Symaira-specific 
 
 ## Product Boundary
 
-**Symbrain is the portable agent-context layer.** It multiplexes the three
-Symaira *state cores* — `symvault` (credentials), `symmemory` (memory/entities),
-`symskills` (skill SSOT) — behind one MCP gateway, with one profile per
-harness connection controlling what that harness is allowed to see.
+**Symbrain is the portable agent-context layer.** It exposes the three Symaira
+*state cores* — credentials, memory/entities, and the skill SSOT — behind one
+MCP gateway, with one profile per harness connection controlling what that
+harness is allowed to see.
+
+Two of the three now live in this repository: memory (`internal/memory`) and
+skills (`internal/skills`) were absorbed by the repo consolidation on
+2026-08-21 (steps 4 and 7), together with guard (`guard/`). Only `symvault`
+remains a separate process, deliberately — the secret store assumes its caller
+is untrusted, and that process boundary is the security mechanism.
 
 Symbrain is explicitly **not**:
 
-- **A generic MCP hub or aggregator.** It only multiplexes the state cores.
-  Tools like `symfetch`, `symseek`, `symprint`, `symfritz`, etc. are bound
+- **A generic MCP hub or aggregator.** It only serves the state cores. Other
+  tools (`symdesk`, `symbrowse`, `symcockpit`, `symfritz`, …) are bound
   directly to the harness by the user — symbrain does not proxy them.
 - **A second `symguard`.** See "Brain ↔ Guard Boundary" below.
 - **A second `symskills`.** Skill rendering/installation stays entirely in
@@ -44,7 +50,9 @@ Consequences:
 1. Symbrain implements **no** approval prompts, **no** risk classes, **no**
    schema pinning. A user who needs those puts `symguard` in front.
 2. Feature requests for per-call ask/deny policies, risk classification, or
-   approval flows belong in `symaira-guard`, not here — redirect them.
+   approval flows belong in the `guard/` module, not in the brain packages —
+   redirect them. (Guard was a separate repository until 2026-08-21; the
+   boundary is now a module boundary, and is no weaker for it.)
 3. What symbrain does today must stay guard-compatible: stable deterministic
    tool names (guard pins schemas), snake_case JSON, zero stdio pollution.
 
@@ -69,7 +77,10 @@ symaira-brain/
 │   ├── adapter/           # One small module per harness (claude, codex, cursor,
 │   │                      #   opencode, gemini): instructions + MCP config
 │   ├── harness/           # Harness registry: config paths, formats, backup
-│   └── skills/            # symskills orchestration (CLI shell-out, --json)
+│   ├── memory/            # Absorbed symmemory: store, entities, consolidation
+│   ├── skills/            # Absorbed symskills: skill SSOT, MCP tools
+│   └── skillsbridge/      # Legacy shell-out to a `symskills` binary, used by
+│                          #   `symbrain sync` — see "Known gap" below
 ├── Sources/               # Native SwiftUI apps (macOS + iOS)
 │   ├── SymBrainCore/      # Static library: CLI client, models, view models
 │   ├── SymBrainApp/       # macOS application (NavigationSplitView dashboard)
@@ -205,13 +216,22 @@ go build -o symbrain ./cmd/symbrain
 
 `symbrain` must work without any other Symaira tool installed:
 
-- **No compile-time imports** of sibling repos (`symvault`, `symmemory`,
-  `symskills`, `symguard`, etc.). The MCP client (broker) that talks to them
-  is implemented locally in `internal/broker`.
+- **No compile-time imports of separately released tools.** Since the
+  consolidation this means `symvault` and any tool outside this repo; memory,
+  skills and guard are now packages here and are linked directly. The MCP
+  client (broker) that talks to external children lives in `internal/broker`.
 - Children are found at runtime via `exec.LookPath` with a timeout, never
   assumed to be present.
 - If a child binary is missing, the corresponding server is simply left out
   of the catalog and `symbrain doctor` explains why — never a hard error.
+
+> **Known gap (2026-08-23).** `internal/skillsbridge` still resolves and runs a
+> `symskills` binary for `symbrain sync`, although that repo is archived and
+> its formula deprecated. With the old binary installed the sync reports
+> `exit status 9`; without it, skill rendering is silently skipped. The
+> in-process `internal/skills` package is not wired into `sync`. Do not
+> "fix" this by documenting the shell-out as intended — it is the same
+> half-finished absorption that repo-konsolidierung.md §10 tracks for ingest.
 
 ```go
 // Good — graceful degradation
