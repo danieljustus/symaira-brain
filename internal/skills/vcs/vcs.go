@@ -386,7 +386,8 @@ func ExtractRev(dir, rev, dst string) error {
 				return fmt.Errorf("archive symlink %q escapes destination", hdr.Name)
 			}
 			_ = os.Remove(target)
-			// codeql[go/unsafe-unzip-symlink]
+			// CodeQL: exclude — absolute and escaping link targets are
+			// rejected before the symlink is created.
 			if err := os.Symlink(hdr.Linkname, target); err != nil {
 				return err
 			}
