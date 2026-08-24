@@ -334,7 +334,8 @@ func ExtractRev(dir, rev, dst string) error {
 		// (prefix check on the joined target, EvalSymlinks parent
 		// resolution, absolute/dotdot linkname refusal) which CodeQL's
 		// taint model does not recognize.
-		// codeql[go/zipslip]
+		// CodeQL: exclude — target is confined below dstAbs and its
+		// resolved parent is checked before every extraction operation.
 		hdr, err := tr.Next()
 		if errors.Is(err, io.EOF) {
 			return nil
