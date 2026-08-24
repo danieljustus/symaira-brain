@@ -153,11 +153,11 @@ func TestLoad_EnvOverridesFileAndDefaults(t *testing.T) {
 			},
 		},
 		{
-			name: "env overrides nested server binary path",
-			envs: map[string]string{"SYMBRAIN_SERVERS_SKILLS_BINARY_PATH": "/custom/symskills"},
+			name: "env overrides external server binary path",
+			envs: map[string]string{"SYMBRAIN_SERVERS_VAULT_BINARY_PATH": "/custom/symvault"},
 			verify: func(t *testing.T, cfg *Config) {
-				if cfg.Servers.Skills.BinaryPath != "/custom/symskills" {
-					t.Errorf("Servers.Skills.BinaryPath = %q, want %q", cfg.Servers.Skills.BinaryPath, "/custom/symskills")
+				if cfg.Servers.Vault.BinaryPath != "/custom/symvault" {
+					t.Errorf("Servers.Vault.BinaryPath = %q, want %q", cfg.Servers.Vault.BinaryPath, "/custom/symvault")
 				}
 			},
 		},

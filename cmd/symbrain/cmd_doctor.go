@@ -105,7 +105,7 @@ type profileHandshake struct {
 //
 // Only vault is on this list. Memory and skills were absorbed into this
 // binary by the repo consolidation (step 4) and are served from
-// internal/memory and internal/skills, so probing for symmemory/symskills
+// internal/memory and internal/skills, so probing for sibling binaries
 // would report on tools that are no longer supposed to exist — and their
 // Homebrew formulae are deprecated, which made the install hints point
 // nowhere. Vault deliberately stays a separate process: the secret store is

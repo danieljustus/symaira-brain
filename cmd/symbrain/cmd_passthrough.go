@@ -1,8 +1,6 @@
-// cmd_passthrough — passthrough subcommands that exec the managed core binaries.
+// cmd_passthrough — passthrough subcommands that exec the external vault core.
 //
 // "symbrain vault <args...>"   → exec symvault <args...>
-// "symbrain memory <args...>"  → exec symmemory <args...>
-// "symbrain skills <args...>"  → exec symskills <args...>
 //
 // Pure exec semantics: argv, stdin/stdout/stderr, exit code and TTY
 // pass through untouched. Flag parsing by symbrain is intentionally
@@ -23,9 +21,7 @@ import (
 
 // passthroughMap links subcommand names to their core binary names.
 var passthroughMap = map[string]string{
-	"vault":  "symvault",
-	"memory": "symmemory",
-	"skills": "symskills",
+	"vault": "symvault",
 }
 
 // cmdPassthrough resolves the named core binary and exec's it with the
@@ -37,19 +33,12 @@ func cmdPassthrough(subcmd string, args []string, stderr io.Writer) exitcodes.Ex
 		return exitcodes.ExitNoInput
 	}
 
-	// Resolve the binary: config override → PATH lookup.
+	// Resolve the external vault binary: config override → PATH lookup.
 	// The managed dir (~/.symaira/bin) will be added to the search
 	// path by #242; until then, PATH/Homebrew is the only source.
 	override := ""
 	if cfg, err := config.Load(); err == nil {
-		switch subcmd {
-		case "vault":
-			override = cfg.Servers.Vault.BinaryPath
-		case "memory":
-			override = cfg.Servers.Memory.BinaryPath
-		case "skills":
-			override = cfg.Servers.Skills.BinaryPath
-		}
+		override = cfg.Servers.Vault.BinaryPath
 	}
 
 	binPath, err := broker.Discover(binaryName, override)

@@ -1,5 +1,5 @@
-// Package managed manages the lifecycle of core binaries (symvault,
-// symmemory, symskills) in a dedicated runtime directory (~/.symaira/bin).
+// Package managed manages the lifecycle of the external vault core binary
+// (symvault) in a dedicated runtime directory (~/.symaira/bin).
 //
 // It handles version pinning, download from GitHub releases, signature
 // verification (cosign + SHA-256 checksums), and atomic installation.

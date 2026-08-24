@@ -43,8 +43,8 @@ func TestSetup_AllSucceed(t *testing.T) {
 	if err := Setup(context.Background(), t.TempDir(), nil); err != nil {
 		t.Fatalf("Setup: %v", err)
 	}
-	if len(fake.calls) != 3 {
-		t.Errorf("Install called %d times, want 3 (one per manifest core)", len(fake.calls))
+	if len(fake.calls) != 1 {
+		t.Errorf("Install called %d times, want 1 (one per manifest core)", len(fake.calls))
 	}
 }
 
@@ -56,8 +56,8 @@ func TestSetup_PartialFailureReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("Setup with one failing core: got nil error, want error")
 	}
-	if !strings.Contains(err.Error(), "1/3") {
-		t.Errorf("Setup error = %q, want it to mention 1/3 failed", err.Error())
+	if !strings.Contains(err.Error(), "1/1") {
+		t.Errorf("Setup error = %q, want it to mention 1/1 failed", err.Error())
 	}
 }
 
@@ -76,7 +76,7 @@ func fakeVersionBinary(t *testing.T, binDir, name, version string) {
 	}
 }
 
-func TestFix_SkipsAlreadyCorrectAndRepairsRest(t *testing.T) {
+func TestFix_SkipsAlreadyCorrect(t *testing.T) {
 	binDir := t.TempDir()
 	// symvault is already at its pinned version (v0.15.3 per manifest.json) -> skip.
 	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
@@ -88,18 +88,13 @@ func TestFix_SkipsAlreadyCorrectAndRepairsRest(t *testing.T) {
 		t.Fatalf("Fix: %v", err)
 	}
 
-	for _, name := range fake.calls {
-		if name == "symvault" {
-			t.Errorf("Fix repaired already-correct core %q, want it skipped", name)
-		}
-	}
-	if len(fake.calls) != 2 {
-		t.Errorf("Fix repaired %d cores, want 2 (symmemory, symskills)", len(fake.calls))
+	if len(fake.calls) != 0 {
+		t.Errorf("Fix repaired %d cores, want 0", len(fake.calls))
 	}
 }
 
 func TestFix_PartialFailureReturnsError(t *testing.T) {
-	fake := &fakeInstaller{failFor: map[string]bool{"symmemory": true}}
+	fake := &fakeInstaller{failFor: map[string]bool{"symvault": true}}
 	withFakeInstaller(t, fake)
 
 	err := Fix(context.Background(), t.TempDir(), nil)
@@ -111,22 +106,19 @@ func TestFix_PartialFailureReturnsError(t *testing.T) {
 	}
 }
 
-func TestStatus_ReportsInstalledAndMissingVersions(t *testing.T) {
+func TestStatus_ReportsInstalledVersion(t *testing.T) {
 	binDir := t.TempDir()
-	fakeVersionBinary(t, binDir, "symskills", "v0.4.0")
+	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
 
 	versions, err := Status(context.Background(), binDir)
 	if err != nil {
 		t.Fatalf("Status: %v", err)
 	}
-	if versions["symskills"] != "v0.4.0" {
-		t.Errorf("Status()[symskills] = %q, want v0.4.0", versions["symskills"])
+	if versions["symvault"] != "v0.15.3" {
+		t.Errorf("Status()[symvault] = %q, want v0.15.3", versions["symvault"])
 	}
-	if versions["symvault"] != "" {
-		t.Errorf("Status()[symvault] = %q, want empty (not installed)", versions["symvault"])
-	}
-	if len(versions) != 3 {
-		t.Errorf("Status returned %d entries, want 3 (one per manifest core)", len(versions))
+	if len(versions) != 1 {
+		t.Errorf("Status returned %d entries, want 1 (one per manifest core)", len(versions))
 	}
 }
 
