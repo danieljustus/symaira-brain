@@ -1,7 +1,6 @@
-# Bump a managed core's pinned version in the runtime manifest.
+# Bump the external symvault core's pinned version in the runtime manifest.
 #
-# Triggered by repository_dispatch events from the core repos
-# (symaira-vault, symaira-memory, symaira-skills) when they publish
+# Triggered by repository_dispatch events from symaira-vault when it publishes
 # a release. The workflow updates manifest.json and opens (or updates)
 # a PR so CI validates the new pin before it ships with the next
 # symbrain release.
@@ -27,13 +26,13 @@
 #           client-payload: |
 #             { "core": "<core-name>", "tag": "${{ github.ref_name }}" }
 #
-# Replace <core-name> with one of: symvault, symmemory, symskills.
+# The only accepted core name is symvault.
 #
 # Required secret (SYMBRAIN_DISPATCH_TOKEN):
 #   - Fine-grained PAT scoped to danieljustus/symaira-brain with
 #     Contents (read/write) and Pull Requests (read/write) permissions.
 #   - Add the secret to each core repo under Settings → Secrets → Actions.
-#   - On rotation, update all three core repos simultaneously.
+#   - On rotation, update the secret in the symaira-vault repository.
 #
 # --- Idempotency ---
 #
@@ -82,14 +81,20 @@ jobs:
             exit 1
           fi
 
-          # Validate core name against known managed cores
+          # Validate core name against the remaining external core.
           case "$CORE" in
-            symvault|symmemory|symskills) ;;
+            symvault) ;;
             *)
-              echo "::error::Unknown core: $CORE (expected symvault, symmemory, or symskills)"
+              echo "::error::Unknown core: $CORE (expected symvault)"
               exit 1
               ;;
           esac
+
+          # Keep dispatch validation aligned with the runtime manifest.
+          if ! jq -e --arg core "$CORE" '.cores[$core] != null' internal/managed/manifest.json >/dev/null; then
+            echo "::error::Core $CORE has no entry in internal/managed/manifest.json"
+            exit 1
+          fi
 
           # Validate tag format
           if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
@@ -97,24 +102,20 @@ jobs:
             exit 1
           fi
 
-          echo "core=$CORE" >> "$GITHUB_OUTPUT"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "branch=bump/${CORE}/${TAG}" >> "$GITHUB_OUTPUT"
+          {
+            echo "core=$CORE"
+            echo "tag=$TAG"
+            echo "branch=bump/${CORE}/${TAG}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Fetch checksums from release
         id: checksums
         run: |
           set -euo pipefail
 
-          CORE="${{ steps.validate.outputs.core }}"
           TAG="${{ steps.validate.outputs.tag }}"
 
-          # Map core name to repo
-          case "$CORE" in
-            symvault)   REPO="danieljustus/symaira-vault" ;;
-            symmemory)  REPO="danieljustus/symaira-memory" ;;
-            symskills)  REPO="danieljustus/symaira-skills" ;;
-          esac
+          REPO="danieljustus/symaira-vault"
 
           echo "Fetching checksums from $REPO@$TAG..."
 
