@@ -196,12 +196,50 @@ Implemented today:
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
+| `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP server names (`--output table\|json`) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
 | `symbrain serve --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
+
+### Harness inventory schema
+
+`symbrain harness list --output json` emits schema version `1`:
+
+```json
+{
+  "schema_version": 1,
+  "project_dir": "/path/to/project",
+  "harnesses": [
+    {
+      "name": "claude",
+      "display_name": "Claude Code",
+      "global": {
+        "path": "~/.claude.json",
+        "exists": true,
+        "parsed": true,
+        "servers": ["symbrain"]
+      },
+      "project": {
+        "path": "/path/to/project/.mcp.json",
+        "exists": false,
+        "parsed": false,
+        "servers": []
+      }
+    }
+  ]
+}
+```
+
+`global` always describes the user-level config. `project` is included only
+for harnesses with a project-local config and when `--project DIR` was given.
+Missing files are reported with `exists: false`; malformed files keep
+`exists: true`, set `parsed: false`, and include an `error` without aborting
+the inventory. Consumers should treat `schema_version` as the compatibility
+boundary and silently fall back to their built-in harness list when `symbrain`
+is absent or returns an unsupported schema.
 
 `install`/`uninstall` write a working MCP entry that *points at*
 `symbrain serve --profile <name>` — the harness spawns the gateway

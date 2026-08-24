@@ -34,6 +34,18 @@ func (d *genericDocument) Server(name string) (Entry, bool) {
 	return entryFromMap(m), true
 }
 
+func (d *genericDocument) ServerNames() []string {
+	servers := d.servers()
+	if servers == nil {
+		return []string{}
+	}
+	names := make([]string, 0, len(servers))
+	for name := range servers {
+		names = append(names, name)
+	}
+	return sortedNames(names)
+}
+
 func (d *genericDocument) SetServer(name string, entry Entry) {
 	servers := d.servers()
 	if servers == nil {
