@@ -334,7 +334,8 @@ func ExtractRev(dir, rev, dst string) error {
 		// (prefix check on the joined target, EvalSymlinks parent
 		// resolution, absolute/dotdot linkname refusal) which CodeQL's
 		// taint model does not recognize.
-		// codeql[go/zipslip]
+		// CodeQL: exclude — target is confined below dstAbs and its
+		// resolved parent is checked before every extraction operation.
 		hdr, err := tr.Next()
 		if errors.Is(err, io.EOF) {
 			return nil
@@ -385,7 +386,8 @@ func ExtractRev(dir, rev, dst string) error {
 				return fmt.Errorf("archive symlink %q escapes destination", hdr.Name)
 			}
 			_ = os.Remove(target)
-			// codeql[go/unsafe-unzip-symlink]
+			// CodeQL: exclude — absolute and escaping link targets are
+			// rejected before the symlink is created.
 			if err := os.Symlink(hdr.Linkname, target); err != nil {
 				return err
 			}
