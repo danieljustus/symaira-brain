@@ -11,12 +11,16 @@ func TestIsVaultURI(t *testing.T) {
 		value string
 		want  bool
 	}{
+		{"symvault://symaira/memory/jwt", true},
+		{"symvault://my-secret", true},
+		{"symvault://a", true},
 		{"vault://symaira/memory/jwt", true},
 		{"vault://my-secret", true},
 		{"vault://a", true},
 		{"plain-value", false},
 		{"", false},
 		{"VaulT://case-sensitive", false},
+		{"SymVaulT://case-sensitive", false},
 		{"/path/to/file", false},
 		{"env:JWT_SECRET", false},
 	}
@@ -217,6 +221,46 @@ exit 1
 	}
 	if got != "fallback-for-unknown" {
 		t.Errorf("expected env fallback value, got %q", got)
+	}
+}
+
+func TestResolveSymvaultAndVaultPrefixResolveToSamePath(t *testing.T) {
+	// Both the canonical symvault:// prefix and the deprecated vault://
+	// alias must extract and pass the identical path to symvault.
+	dir := t.TempDir()
+	argsPath := filepath.Join(dir, "args.txt")
+	script := filepath.Join(dir, "symvault")
+	content := `#!/bin/sh
+printf '%s\n' "$@" >> "` + argsPath + `"
+echo "resolved-secret"
+`
+	if err := os.WriteFile(script, []byte(content), 0755); err != nil {
+		t.Fatalf("failed to write fake symvault: %v", err)
+	}
+
+	oldPath := os.Getenv("PATH")
+	os.Setenv("PATH", dir)
+	defer os.Setenv("PATH", oldPath)
+
+	symvaultGot, err := Resolve("symvault://symaira/memory/jwt", "UNUSED")
+	if err != nil {
+		t.Fatalf("expected symvault:// resolve to succeed, got error: %v", err)
+	}
+	vaultGot, err := Resolve("vault://symaira/memory/jwt", "UNUSED")
+	if err != nil {
+		t.Fatalf("expected vault:// resolve to succeed, got error: %v", err)
+	}
+	if symvaultGot != vaultGot {
+		t.Errorf("expected identical resolution, got symvault=%q vault=%q", symvaultGot, vaultGot)
+	}
+
+	rawArgs, err := os.ReadFile(argsPath)
+	if err != nil {
+		t.Fatalf("failed to read fake symvault args: %v", err)
+	}
+	want := "get\nsymaira/memory/jwt\n--print\nget\nsymaira/memory/jwt\n--print\n"
+	if string(rawArgs) != want {
+		t.Fatalf("symvault args = %q, want %q", string(rawArgs), want)
 	}
 }
 

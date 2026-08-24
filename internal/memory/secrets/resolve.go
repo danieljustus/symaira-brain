@@ -10,22 +10,27 @@ import (
 )
 
 const (
-	// vaultPrefix is the URI scheme for vault:// secret references.
+	// symvaultPrefix is the canonical URI scheme for secret references.
+	symvaultPrefix = "symvault://"
+	// vaultPrefix is a deprecated alias for symvaultPrefix, kept for
+	// backward compatibility with existing configs.
 	vaultPrefix = "vault://"
 	// vaultTimeout is the maximum time to wait for symvault subprocess.
 	vaultTimeout = 5 * time.Second
 )
 
-// IsVaultURI returns true if the value starts with vault://.
+// IsVaultURI returns true if the value starts with symvault:// (canonical)
+// or vault:// (deprecated alias).
 func IsVaultURI(value string) bool {
-	return strings.HasPrefix(value, vaultPrefix)
+	return strings.HasPrefix(value, symvaultPrefix) || strings.HasPrefix(value, vaultPrefix)
 }
 
-// Resolve attempts to resolve a secret value that may be a vault:// URI.
+// Resolve attempts to resolve a secret value that may be a symvault:// URI.
 //
 // Resolution order:
-//  1. Plain value (no vault:// prefix) → returned as-is
-//  2. vault://<path> → subprocess "symvault get <path> --print" with 5s timeout
+//  1. Plain value (no symvault:// or vault:// prefix) → returned as-is
+//  2. symvault://<path> (or the deprecated vault://<path> alias) →
+//     subprocess "symvault get <path> --print" with 5s timeout
 //  3. Fallback to env var named by envFallback (e.g. "JWT_SECRET_KEY")
 //
 // On success, the resolved plaintext is returned. On failure, a descriptive
@@ -35,7 +40,7 @@ func Resolve(value, envFallback string) (string, error) {
 		return value, nil
 	}
 
-	path := strings.TrimPrefix(value, vaultPrefix)
+	path := strings.TrimPrefix(strings.TrimPrefix(value, symvaultPrefix), vaultPrefix)
 
 	secret, err := execVaultGet(path)
 	if err == nil {
@@ -50,7 +55,7 @@ func Resolve(value, envFallback string) (string, error) {
 	}
 
 	return "", fmt.Errorf(
-		"secret resolution failed for vault://%s: %w; "+
+		"secret resolution failed for symvault://%s: %w; "+
 			"set env var %s as fallback or install symvault",
 		path, err, envFallback,
 	)
@@ -84,9 +89,9 @@ func execVaultGet(path string) (string, error) {
 	return secret, nil
 }
 
-// ResolveOrEnv is a convenience wrapper that resolves a vault:// value
+// ResolveOrEnv is a convenience wrapper that resolves a symvault:// value
 // and falls back to an environment variable. If the value is neither
-// a vault:// URI nor non-empty, the env var is returned directly.
+// a symvault:// URI nor non-empty, the env var is returned directly.
 func ResolveOrEnv(value, envName string) (string, error) {
 	if value != "" {
 		return Resolve(value, envName)

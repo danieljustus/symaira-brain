@@ -72,7 +72,7 @@ type JWTPayload struct {
 // to fall back to the default ~/.config/symmemory/jwt.secret location.
 //
 // Secret resolution order:
-//  1. cfg.JWT.Secret — vault:// URI resolved via symvault subprocess (5s timeout)
+//  1. cfg.JWT.Secret — symvault:// URI resolved via symvault subprocess (5s timeout)
 //  2. JWT_SECRET_KEY environment variable
 //  3. File at cfg.JWT.SecretPath (or default ~/.config/symmemory/jwt.secret)
 //  4. Auto-generate and persist a random 32-byte hex secret
@@ -81,14 +81,14 @@ func NewJWTProvider(cfg *config.Config, store RevocationStore) (*JWTProvider, er
 		cfg = config.Defaults()
 	}
 
-	// 1. Try vault:// resolution from config
+	// 1. Try symvault:// resolution from config
 	secret, err := secrets.Resolve(cfg.JWT.Secret, "JWT_SECRET_KEY")
 	if err != nil {
-		// vault:// resolution failed — propagate error with context
-		return nil, fmt.Errorf("JWT secret vault:// resolution failed: %w", err)
+		// symvault:// resolution failed — propagate error with context
+		return nil, fmt.Errorf("JWT secret symvault:// resolution failed: %w", err)
 	}
 
-	// 2. Try env var if vault:// didn't produce a value
+	// 2. Try env var if symvault:// didn't produce a value
 	if secret == "" {
 		secret = os.Getenv("JWT_SECRET_KEY")
 	}

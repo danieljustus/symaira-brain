@@ -242,6 +242,15 @@ if err != nil {
 }
 ```
 
+### Secret References
+
+Config values that name a secret (e.g. `jwt.secret`) accept a `symvault://<path>`
+URI, resolved via a `symvault get <path> --print` subprocess (5s timeout,
+env-var fallback). `vault://<path>` is accepted as a deprecated alias for
+backward compatibility — both resolve to the identical path and behavior.
+New configs and error messages should use `symvault://`; see
+`internal/memory/secrets/resolve.go`.
+
 ### XDG Paths
 
 | Purpose | Path | Env prefix |
