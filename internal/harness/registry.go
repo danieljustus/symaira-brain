@@ -44,6 +44,8 @@ const ServerName = "symbrain"
 type Harness struct {
 	// Name is the stable identifier used on the CLI (--harness <name>).
 	Name Name
+	// DisplayName is the human-readable name shown by inspection commands.
+	DisplayName string
 	// Format is the config file's serialization.
 	Format Format
 	// ServersKey is the top-level key/table that holds the map of
@@ -68,6 +70,7 @@ type Harness struct {
 var All = []Harness{
 	{
 		Name:            Claude,
+		DisplayName:     "Claude Code",
 		Format:          FormatJSON,
 		ServersKey:      "mcpServers",
 		ConfigPath:      homeJoin(".claude.json"),
@@ -77,34 +80,39 @@ var All = []Harness{
 		},
 	},
 	{
-		Name:       ClaudeDesktop,
-		Format:     FormatJSON,
-		ServersKey: "mcpServers",
-		ConfigPath: claudeDesktopConfigPath,
+		Name:        ClaudeDesktop,
+		DisplayName: "Claude Desktop",
+		Format:      FormatJSON,
+		ServersKey:  "mcpServers",
+		ConfigPath:  claudeDesktopConfigPath,
 	},
 	{
-		Name:       Cursor,
-		Format:     FormatJSON,
-		ServersKey: "mcpServers",
-		ConfigPath: homeJoin(".cursor", "mcp.json"),
+		Name:        Cursor,
+		DisplayName: "Cursor",
+		Format:      FormatJSON,
+		ServersKey:  "mcpServers",
+		ConfigPath:  homeJoin(".cursor", "mcp.json"),
 	},
 	{
-		Name:       Opencode,
-		Format:     FormatJSON,
-		ServersKey: "mcpServers",
-		ConfigPath: xdgConfigJoin("opencode", "config.json"),
+		Name:        Opencode,
+		DisplayName: "OpenCode",
+		Format:      FormatJSON,
+		ServersKey:  "mcpServers",
+		ConfigPath:  xdgConfigJoin("opencode", "config.json"),
 	},
 	{
-		Name:       Codex,
-		Format:     FormatTOML,
-		ServersKey: "mcp_servers",
-		ConfigPath: homeJoin(".codex", "config.toml"),
+		Name:        Codex,
+		DisplayName: "Codex CLI",
+		Format:      FormatTOML,
+		ServersKey:  "mcp_servers",
+		ConfigPath:  homeJoin(".codex", "config.toml"),
 	},
 	{
-		Name:       Gemini,
-		Format:     FormatJSON,
-		ServersKey: "mcpServers",
-		ConfigPath: homeJoin(".gemini", "settings.json"),
+		Name:        Gemini,
+		DisplayName: "Gemini CLI",
+		Format:      FormatJSON,
+		ServersKey:  "mcpServers",
+		ConfigPath:  homeJoin(".gemini", "settings.json"),
 	},
 }
 

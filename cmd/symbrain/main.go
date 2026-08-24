@@ -49,6 +49,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdDoctor(rest, stdout, stderr)
 	case "profile":
 		return cmdProfileWithFormat(rest, stdout, stderr, format)
+	case "harness":
+		return cmdHarnessWithFormat(rest, stdout, stderr, format)
 	case "serve":
 		return cmdServe(rest, stdout, stderr)
 	case "install":
@@ -112,7 +114,7 @@ func peekCommand(args []string) string {
 
 func isOutputCommand(command string) bool {
 	switch command {
-	case "version", "sync", "profile", "audit", "doctor":
+	case "version", "sync", "profile", "harness", "audit", "doctor":
 		return true
 	default:
 		return false
@@ -134,6 +136,7 @@ Commands:
   doctor      Check environment, config, profiles, and child binaries
   setup       Download and install pinned core binaries to ~/.symaira/bin
   profile     Manage profiles (list, show, add, remove)
+  harness     Inspect registered AI harnesses and their MCP servers
   serve       Run the MCP gateway over stdio for a profile
   install     Register symbrain with a harness
   uninstall   Remove symbrain from a harness

@@ -17,6 +17,8 @@ type Document interface {
 	// Server returns the entry registered under serverName in this
 	// document's server map, and whether one exists.
 	Server(serverName string) (Entry, bool)
+	// ServerNames returns all registered MCP server names in stable order.
+	ServerNames() []string
 	// SetServer inserts or overwrites the entry for serverName.
 	SetServer(serverName string, entry Entry)
 	// RemoveServer deletes serverName if present, reporting whether
