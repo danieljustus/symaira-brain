@@ -25,7 +25,7 @@ type Config struct {
 	Gateway     GatewayConfig
 	UpdateCheck UpdateCheckConfig
 	Servers     ServersConfig
-	Recipes     RecipesConfig
+	Patterns    PatternsConfig
 }
 
 // AuditConfig controls the JSONL audit log written by the gateway.
@@ -50,15 +50,15 @@ type UpdateCheckConfig struct {
 	Enabled bool
 }
 
-// RecipesConfig controls episode recording and recipe promotion (see
-// internal/recipes). Recording is metadata-only — server and tool names,
+// PatternsConfig controls episode recording and pattern promotion (see
+// internal/patterns). Recording is metadata-only — server and tool names,
 // never arguments or values — and nothing is exposed until a sequence
 // recurs across PromotionThreshold sessions.
-type RecipesConfig struct {
+type PatternsConfig struct {
 	// Enabled turns session episode recording on or off entirely.
 	Enabled bool
 	// PromotionThreshold is the number of distinct sessions a sequence
-	// must recur in before it is promoted to an exposable recipe.
+	// must recur in before it is promoted to an exposable pattern.
 	PromotionThreshold int
 }
 
@@ -92,7 +92,7 @@ type fileConfig struct {
 	Gateway        fileGatewayConfig     `json:"gateway"`
 	UpdateCheck    fileUpdateCheckConfig `json:"updatecheck"`
 	Servers        ServersConfig         `json:"servers"`
-	Recipes        fileRecipesConfig     `json:"recipes"`
+	Patterns       filePatternsConfig    `json:"patterns"`
 }
 
 type fileAuditConfig struct {
@@ -108,7 +108,7 @@ type fileUpdateCheckConfig struct {
 	Enabled *bool `json:"enabled"`
 }
 
-type fileRecipesConfig struct {
+type filePatternsConfig struct {
 	Enabled            *bool `json:"enabled"`
 	PromotionThreshold int   `json:"promotion_threshold"`
 }
@@ -120,13 +120,13 @@ func fileDefaults() *fileConfig {
 		Audit:       fileAuditConfig{Enabled: &enabled, Verbose: false},
 		Gateway:     fileGatewayConfig{IdentityInjection: &identityInjection},
 		UpdateCheck: fileUpdateCheckConfig{Enabled: &enabled},
-		Recipes:     fileRecipesConfig{Enabled: &enabled, PromotionThreshold: defaultPromotionThreshold},
+		Patterns:    filePatternsConfig{Enabled: &enabled, PromotionThreshold: defaultPromotionThreshold},
 	}
 }
 
 // defaultPromotionThreshold is the number of distinct sessions a tool
-// sequence must recur in before it becomes an exposable recipe. It is
-// configurable via [recipes] promotion_threshold.
+// sequence must recur in before it becomes an exposable pattern. It is
+// configurable via [patterns] promotion_threshold.
 const defaultPromotionThreshold = 3
 
 // Defaults returns the configuration used for any value not set by the
@@ -136,7 +136,7 @@ func Defaults() *Config {
 }
 
 func resolve(fc *fileConfig) *Config {
-	threshold := fc.Recipes.PromotionThreshold
+	threshold := fc.Patterns.PromotionThreshold
 	if threshold <= 0 {
 		threshold = defaultPromotionThreshold
 	}
@@ -153,8 +153,8 @@ func resolve(fc *fileConfig) *Config {
 			Enabled: derefBool(fc.UpdateCheck.Enabled, true),
 		},
 		Servers: fc.Servers,
-		Recipes: RecipesConfig{
-			Enabled:            derefBool(fc.Recipes.Enabled, true),
+		Patterns: PatternsConfig{
+			Enabled:            derefBool(fc.Patterns.Enabled, true),
 			PromotionThreshold: threshold,
 		},
 	}

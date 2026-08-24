@@ -1,4 +1,4 @@
-package recipes
+package patterns
 
 import (
 	"os"
@@ -116,7 +116,7 @@ func TestStore_FilePermissionsArePrivate(t *testing.T) {
 }
 
 func TestStore_DirectoryPermissionsArePrivate(t *testing.T) {
-	dir := filepath.Join(t.TempDir(), "recipes")
+	dir := filepath.Join(t.TempDir(), "patterns")
 	store := NewStore(filepath.Join(dir, "p.jsonl"))
 
 	if err := store.Append(episode("p", []Step{step("vault", "health")})); err != nil {
@@ -153,7 +153,7 @@ func TestStore_DoesNotAlterExistingDirectoryPermissions(t *testing.T) {
 }
 
 func TestPrivateStore_RepairsExistingDirectoryPermissions(t *testing.T) {
-	dir := filepath.Join(t.TempDir(), "recipes")
+	dir := filepath.Join(t.TempDir(), "patterns")
 	if err := os.Mkdir(dir, 0o755); err != nil {
 		t.Fatalf("Mkdir: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestPrivateStore_RepairsExistingDirectoryPermissions(t *testing.T) {
 }
 
 func TestPrivateStore_CreatesPrivateDirectory(t *testing.T) {
-	dir := filepath.Join(t.TempDir(), "nested", "recipes")
+	dir := filepath.Join(t.TempDir(), "nested", "patterns")
 	path := filepath.Join(dir, "p.jsonl")
 	store := NewPrivateStore(path)
 

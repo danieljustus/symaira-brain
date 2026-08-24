@@ -1,4 +1,4 @@
-package recipes
+package patterns
 
 import (
 	"strings"
@@ -88,7 +88,7 @@ func TestPromote_Threshold(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Promote(tt.episodes, tt.threshold)
 			if len(got) != tt.want {
-				t.Errorf("Promote() = %d recipes, want %d: %+v", len(got), tt.want, got)
+				t.Errorf("Promote() = %d patterns, want %d: %+v", len(got), tt.want, got)
 			}
 		})
 	}
@@ -104,7 +104,7 @@ func TestPromote_ProvenanceAndTrigger(t *testing.T) {
 
 	got := Promote(episodes, 3)
 	if len(got) != 1 {
-		t.Fatalf("Promote() = %d recipes, want 1", len(got))
+		t.Fatalf("Promote() = %d patterns, want 1", len(got))
 	}
 	r := got[0]
 
@@ -136,10 +136,10 @@ func TestPromote_SortedByName(t *testing.T) {
 
 	got := Promote(episodes, 3)
 	if len(got) != 2 {
-		t.Fatalf("Promote() = %d recipes, want 2", len(got))
+		t.Fatalf("Promote() = %d patterns, want 2", len(got))
 	}
 	if got[0].Name >= got[1].Name {
-		t.Errorf("recipes not sorted by name: %q >= %q", got[0].Name, got[1].Name)
+		t.Errorf("patterns not sorted by name: %q >= %q", got[0].Name, got[1].Name)
 	}
 }
 
