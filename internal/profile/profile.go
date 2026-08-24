@@ -54,8 +54,8 @@ type Profile struct {
 
 // Servers holds the three state-core server configs a profile can shape.
 // This is a fixed struct rather than a map — symbrain composes exactly
-// these three servers (see internal/config.ServersConfig for the same
-// convention on the global config side).
+// these three servers. Only vault has an external binary override in the
+// global config; memory and skills are embedded in symbrain.
 type Servers struct {
 	Vault  ServerConfig `json:"vault"`
 	Memory ServerConfig `json:"memory"`

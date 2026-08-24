@@ -62,13 +62,11 @@ type PatternsConfig struct {
 	PromotionThreshold int
 }
 
-// ServersConfig optionally overrides the binary path for each state core.
-// symbrain composes exactly these three servers, so this is a fixed struct
-// rather than an open map (configkit does not support map fields).
+// ServersConfig optionally overrides the binary path for external state-core
+// processes. Memory and skills are embedded in symbrain and have no child
+// binary to override.
 type ServersConfig struct {
-	Vault  ServerOverride `json:"vault"`
-	Memory ServerOverride `json:"memory"`
-	Skills ServerOverride `json:"skills"`
+	Vault ServerOverride `json:"vault"`
 }
 
 // ServerOverride pins a child server's binary path, bypassing PATH lookup.

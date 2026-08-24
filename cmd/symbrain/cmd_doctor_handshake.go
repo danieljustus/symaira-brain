@@ -36,7 +36,9 @@ func checkHandshakes(ctx context.Context, vaultAgent string) []profileHandshake 
 			continue
 		}
 
-		for _, alias := range []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills} {
+		// Memory and skills are embedded cores. Only vault remains an external
+		// process whose MCP handshake can be probed here.
+		for _, alias := range []string{profile.ServerVault} {
 			serverCfg := p.Server(alias)
 			if !serverCfg.Enabled {
 				continue
@@ -44,14 +46,7 @@ func checkHandshakes(ctx context.Context, vaultAgent string) []profileHandshake 
 
 			binaryName := aliasBinary(alias)
 			override := ""
-			switch alias {
-			case profile.ServerVault:
-				override = cfg.Servers.Vault.BinaryPath
-			case profile.ServerMemory:
-				override = cfg.Servers.Memory.BinaryPath
-			case profile.ServerSkills:
-				override = cfg.Servers.Skills.BinaryPath
-			}
+			override = cfg.Servers.Vault.BinaryPath
 
 			path, err := broker.Discover(binaryName, override)
 			if err != nil {
@@ -74,10 +69,6 @@ func aliasBinary(alias string) string {
 	switch alias {
 	case profile.ServerVault:
 		return "symvault"
-	case profile.ServerMemory:
-		return "symmemory"
-	case profile.ServerSkills:
-		return "symskills"
 	default:
 		return alias
 	}

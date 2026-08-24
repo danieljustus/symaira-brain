@@ -47,7 +47,7 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	// The memory core is embedded in-process (repo consolidation step 4
 	// phase 2b): open its SQLite DB + JWT provider and build its MCP server
-	// directly instead of spawning a symmemory child.
+	// directly instead of spawning a memory child.
 	memoryServer := buildMemoryServer(p, stderr, version)
 
 	// Defer shutdown of all managed servers so child processes are
@@ -132,7 +132,7 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 	return servers
 }
 
-// buildMemoryServer opens the embedded symmemory runtime (config + SQLite DB
+// buildMemoryServer opens the embedded memory runtime (config + SQLite DB
 // + JWT provider) and returns its MCP server, attributed to the given brain
 // profile. It returns nil when the memory core cannot be initialized, so the
 // gateway degrades gracefully (memory tools simply absent) instead of failing

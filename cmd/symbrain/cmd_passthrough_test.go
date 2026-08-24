@@ -68,7 +68,7 @@ func TestCmdPassthrough_ExitCodePropagation(t *testing.T) {
 	}
 
 	binDir := t.TempDir()
-	fakeBin := filepath.Join(binDir, "symmemory")
+	fakeBin := filepath.Join(binDir, "symvault")
 	script := "#!/bin/sh\nexit 42\n"
 	if err := os.WriteFile(fakeBin, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
@@ -76,15 +76,15 @@ func TestCmdPassthrough_ExitCodePropagation(t *testing.T) {
 	t.Setenv("PATH", binDir)
 
 	var stderr strings.Builder
-	code := cmdPassthrough("memory", nil, &stderr)
+	code := cmdPassthrough("vault", nil, &stderr)
 	if code != 42 {
-		t.Fatalf("cmdPassthrough(memory) = %v, want 42", code)
+		t.Fatalf("cmdPassthrough(vault) = %v, want 42", code)
 	}
 }
 
 // TestPassthroughMapKeys verifies the expected subcommands exist.
 func TestPassthroughMapKeys(t *testing.T) {
-	expected := []string{"vault", "memory", "skills"}
+	expected := []string{"vault"}
 	for _, name := range expected {
 		if _, ok := passthroughMap[name]; !ok {
 			t.Errorf("passthroughMap missing key %q", name)
@@ -92,5 +92,14 @@ func TestPassthroughMapKeys(t *testing.T) {
 	}
 	if len(passthroughMap) != len(expected) {
 		t.Errorf("passthroughMap has %d keys, want %d", len(passthroughMap), len(expected))
+	}
+}
+
+func TestCmdPassthrough_EmbeddedCoresAreNotPassthroughs(t *testing.T) {
+	var stderr strings.Builder
+	for _, name := range []string{"memory", "skills"} {
+		if code := cmdPassthrough(name, nil, &stderr); code != exitcodes.ExitNoInput {
+			t.Errorf("cmdPassthrough(%q) = %v, want %v", name, code, exitcodes.ExitNoInput)
+		}
 	}
 }

@@ -30,7 +30,7 @@ type Core struct {
 	// AssetPrefix is the archive filename prefix (e.g. "symaira-vault").
 	// The full asset name is constructed as:
 	//   <AssetPrefix>_<Version>_<os>_<arch>.tar.gz
-	// Some repos omit the version from the asset name (e.g. symmemory);
+	// Some releases omit the version from the asset name;
 	// set AssetPrefix to the exact binary name in that case and the
 	// download logic will try both patterns.
 	AssetPrefix string `json:"asset_prefix"`
@@ -73,7 +73,7 @@ func Platform() (goos, goarch string, err error) {
 // AssetName computes the release asset filename for a core on the
 // current platform. It tries the versioned pattern first
 // (<prefix>_<version>_<os>_<arch>.tar.gz), then the unversioned
-// pattern (<binary>_<os>_<arch>.tar.gz) for repos like symmemory.
+// pattern (<binary>_<os>_<arch>.tar.gz) for legacy releases.
 func (c *Core) AssetName(goos, goarch string) string {
 	osArch := osArchSuffix(goos, goarch)
 	versioned := fmt.Sprintf("%s_%s_%s.tar.gz", c.AssetPrefix, c.Version, osArch)
@@ -81,7 +81,7 @@ func (c *Core) AssetName(goos, goarch string) string {
 }
 
 // AssetNameAlt returns the unversioned asset name fallback (used by
-// repos like symmemory that don't include the version in the filename).
+// releases that don't include the version in the filename.
 func (c *Core) AssetNameAlt(goos, goarch string) string {
 	osArch := osArchSuffix(goos, goarch)
 	return fmt.Sprintf("%s_%s.tar.gz", c.BinaryName, osArch)
@@ -126,6 +126,6 @@ func (c *Core) BinaryPathInArchive(goos, goarch string) string {
 	if strings.HasPrefix(c.AssetPrefix, "symaira-vault") {
 		return fmt.Sprintf("%s_%s_%s/%s", c.AssetPrefix, c.Version, osArch, c.BinaryName)
 	}
-	// symmemory and symaira-skills put the binary at the archive root
+	// Non-vault archives put the binary at the archive root.
 	return c.BinaryName
 }

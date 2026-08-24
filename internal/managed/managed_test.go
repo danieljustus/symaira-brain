@@ -15,10 +15,10 @@ func TestLoadManifest(t *testing.T) {
 	if m.SchemaVersion != 1 {
 		t.Errorf("SchemaVersion = %d, want 1", m.SchemaVersion)
 	}
-	if len(m.Cores) != 3 {
-		t.Errorf("len(Cores) = %d, want 3", len(m.Cores))
+	if len(m.Cores) != 1 {
+		t.Errorf("len(Cores) = %d, want 1", len(m.Cores))
 	}
-	for _, name := range []string{"symvault", "symmemory", "symskills"} {
+	for _, name := range []string{"symvault"} {
 		c, ok := m.Cores[name]
 		if !ok {
 			t.Errorf("missing core %q", name)
@@ -52,11 +52,11 @@ func TestAssetName_Versioned(t *testing.T) {
 func TestAssetNameAlt_Unversioned(t *testing.T) {
 	core := &Core{
 		Version:     "v1.2.3",
-		BinaryName:  "symmemory",
-		AssetPrefix: "symmemory",
+		BinaryName:  "legacy-core",
+		AssetPrefix: "legacy-core",
 	}
 	got := core.AssetNameAlt("linux", "amd64")
-	want := "symmemory_linux_amd64.tar.gz"
+	want := "legacy-core_linux_amd64.tar.gz"
 	if got != want {
 		t.Errorf("AssetNameAlt() = %q, want %q", got, want)
 	}
@@ -75,14 +75,14 @@ func TestBinaryPathInArchive_Vault(t *testing.T) {
 	}
 }
 
-func TestBinaryPathInArchive_Memory(t *testing.T) {
+func TestBinaryPathInArchive_RootBinary(t *testing.T) {
 	core := &Core{
-		Version:     "v0.17.0",
-		BinaryName:  "symmemory",
-		AssetPrefix: "symmemory",
+		Version:     "v1.2.3",
+		BinaryName:  "example-core",
+		AssetPrefix: "example-core",
 	}
 	got := core.BinaryPathInArchive("darwin", "arm64")
-	want := "symmemory"
+	want := "example-core"
 	if got != want {
 		t.Errorf("BinaryPathInArchive() = %q, want %q", got, want)
 	}
