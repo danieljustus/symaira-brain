@@ -1,4 +1,4 @@
-package recipes
+package patterns
 
 import (
 	"bufio"
@@ -31,7 +31,7 @@ type Store struct {
 }
 
 // NewStore returns a Store writing to path (typically
-// <XDG data dir>/recipes/<profile>.jsonl). The file is created lazily
+// <XDG data dir>/patterns/<profile>.jsonl). The file is created lazily
 // on the first Append.
 func NewStore(path string) *Store {
 	return &Store{path: path}

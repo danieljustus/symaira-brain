@@ -89,7 +89,7 @@ Restart Claude Code (or reload its MCP connections) and the `symbrain`
 server appears with the tools your profile exposes. Every gateway
 connection also exposes two symbrain-owned tools that are never filtered
 by profile policy: `bootstrap` (call it first — it reports what this
-profile exposes and the live tool catalog) and `recipes` (promoted,
+profile exposes and the live tool catalog) and `patterns` (promoted,
 recurring tool sequences as read-only context). See the
 [command reference](#command-reference).
 
@@ -251,11 +251,19 @@ filtered:
   active profile's exposure summary (which cores and tool sets are
   available) and the live tool catalog, names only — vault values are
   never included.
-- **`recipes`** — list promoted recipes: recurring tool-call sequences
+- **`patterns`** — list promoted patterns: recurring tool-call sequences
   (episode names only, never arguments or values) that have recurred
   across sessions for this profile. Read-only context — symbrain never
-  executes a recipe; artifacts that stabilize into durable authored
+  executes a pattern; artifacts that stabilize into durable authored
   content belong to symskills.
+
+### Migration from `recipes`
+
+The gateway-owned MCP tool was renamed from `recipes` to `patterns` in the
+v0.8 line. Update clients that call the old tool name and rename the global
+configuration section from `[recipes]` to `[patterns]`. Episode history stays
+in the legacy `~/.local/share/symbrain/recipes/` directory and is read by the
+new implementation without migration.
 
 ## Security notes
 

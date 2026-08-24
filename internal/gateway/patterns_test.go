@@ -11,7 +11,7 @@ import (
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
-	"github.com/danieljustus/symaira-brain/internal/recipes"
+	"github.com/danieljustus/symaira-brain/internal/patterns"
 )
 
 // withDataHome points XDG_DATA_HOME at a fresh temp directory so the
@@ -23,17 +23,18 @@ func withDataHome(t *testing.T) string {
 	return dir
 }
 
-// recipesStorePath returns the episode file path under the given
+// patternsStorePath returns the episode file path under the given
 // XDG_DATA_HOME for profile name.
-func recipesStorePath(dataHome, profileName string) string {
+func patternsStorePath(dataHome, profileName string) string {
+	// The legacy directory name is retained so existing episode history remains readable.
 	return filepath.Join(dataHome, "symbrain", "recipes", profileName+".jsonl")
 }
 
 // seedEpisodes writes the given episodes directly into the profile's
 // store, as if previous sessions had flushed them.
-func seedEpisodes(t *testing.T, dataHome, profileName string, eps []recipes.Episode) {
+func seedEpisodes(t *testing.T, dataHome, profileName string, eps []patterns.Episode) {
 	t.Helper()
-	store := recipes.NewStore(recipesStorePath(dataHome, profileName))
+	store := patterns.NewStore(patternsStorePath(dataHome, profileName))
 	for _, ep := range eps {
 		if err := store.Append(ep); err != nil {
 			t.Fatalf("seed Append: %v", err)
@@ -41,41 +42,41 @@ func seedEpisodes(t *testing.T, dataHome, profileName string, eps []recipes.Epis
 	}
 }
 
-func recipesTestEpisodes() []recipes.Episode {
-	seq := []recipes.Step{{Server: "vault", Tool: "request_credential"}, {Server: "memory", Tool: "memory_search"}}
-	base := recipes.Episode{
+func patternsTestEpisodes() []patterns.Episode {
+	seq := []patterns.Step{{Server: "vault", Tool: "request_credential"}, {Server: "memory", Tool: "memory_search"}}
+	base := patterns.Episode{
 		Profile:   "test",
 		Steps:     seq,
 		StartedAt: "2026-08-01T09:00:00Z",
 		EndedAt:   "2026-08-01T09:05:00Z",
 	}
-	return []recipes.Episode{
+	return []patterns.Episode{
 		base,
 		{Profile: "test", Steps: seq, StartedAt: "2026-08-02T09:00:00Z", EndedAt: "2026-08-02T09:05:00Z"},
 		{Profile: "test", Steps: seq, StartedAt: "2026-08-03T09:00:00Z", EndedAt: "2026-08-03T09:05:00Z"},
 	}
 }
 
-func TestRecipesTool_ReturnsPromoted(t *testing.T) {
+func TestPatternsTool_ReturnsPromoted(t *testing.T) {
 	home := withDataHome(t)
-	seedEpisodes(t, home, "test", recipesTestEpisodes())
+	seedEpisodes(t, home, "test", patternsTestEpisodes())
 
 	s := New(testProfile(), nil, slog.Default(), &config.Config{
-		Recipes: config.RecipesConfig{Enabled: true, PromotionThreshold: 3},
+		Patterns: config.PatternsConfig{Enabled: true, PromotionThreshold: 3},
 	}, "dev")
 
-	raw, err := s.handleRecipes(context.Background(), json.RawMessage(`{}`))
+	raw, err := s.handlePatterns(context.Background(), json.RawMessage(`{}`))
 	if err != nil {
-		t.Fatalf("handleRecipes: %v", err)
+		t.Fatalf("handlePatterns: %v", err)
 	}
 	data, err := json.Marshal(raw)
 	if err != nil {
 		t.Fatalf("marshal: %v", err)
 	}
 	var resp struct {
-		Profile   string           `json:"profile"`
-		Threshold int              `json:"threshold"`
-		Recipes   []recipes.Recipe `json:"recipes"`
+		Profile   string             `json:"profile"`
+		Threshold int                `json:"threshold"`
+		Patterns  []patterns.Pattern `json:"patterns"`
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
@@ -84,10 +85,10 @@ func TestRecipesTool_ReturnsPromoted(t *testing.T) {
 	if resp.Profile != "test" || resp.Threshold != 3 {
 		t.Errorf("Profile/Threshold = %q/%d, want test/3", resp.Profile, resp.Threshold)
 	}
-	if len(resp.Recipes) != 1 {
-		t.Fatalf("recipes = %d, want 1", len(resp.Recipes))
+	if len(resp.Patterns) != 1 {
+		t.Fatalf("patterns = %d, want 1", len(resp.Patterns))
 	}
-	r := resp.Recipes[0]
+	r := resp.Patterns[0]
 	if r.Provenance.RecurrenceCount != 3 {
 		t.Errorf("RecurrenceCount = %d, want 3", r.Provenance.RecurrenceCount)
 	}
@@ -96,25 +97,25 @@ func TestRecipesTool_ReturnsPromoted(t *testing.T) {
 	}
 }
 
-func TestRecipesTool_EmptyStore(t *testing.T) {
+func TestPatternsTool_EmptyStore(t *testing.T) {
 	withDataHome(t)
 	s := New(testProfile(), nil, slog.Default(), &config.Config{
-		Recipes: config.RecipesConfig{Enabled: true, PromotionThreshold: 3},
+		Patterns: config.PatternsConfig{Enabled: true, PromotionThreshold: 3},
 	}, "dev")
 
-	raw, err := s.handleRecipes(context.Background(), json.RawMessage(`{}`))
+	raw, err := s.handlePatterns(context.Background(), json.RawMessage(`{}`))
 	if err != nil {
-		t.Fatalf("handleRecipes: %v", err)
+		t.Fatalf("handlePatterns: %v", err)
 	}
 	data, _ := json.Marshal(raw)
 	var resp struct {
-		Recipes []recipes.Recipe `json:"recipes"`
+		Patterns []patterns.Pattern `json:"patterns"`
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
-	if len(resp.Recipes) != 0 {
-		t.Errorf("recipes = %d, want 0 for an empty store", len(resp.Recipes))
+	if len(resp.Patterns) != 0 {
+		t.Errorf("patterns = %d, want 0 for an empty store", len(resp.Patterns))
 	}
 }
 
@@ -157,13 +158,13 @@ func runOneSession(t *testing.T, cfg *config.Config, tools []string) {
 
 func TestServeIO_RecordsAndPromotesEpisodes(t *testing.T) {
 	home := withDataHome(t)
-	cfg := &config.Config{Recipes: config.RecipesConfig{Enabled: true, PromotionThreshold: 2}}
+	cfg := &config.Config{Patterns: config.PatternsConfig{Enabled: true, PromotionThreshold: 2}}
 
 	runOneSession(t, cfg, []string{"vault_health", "vault_get_entry"})
 	runOneSession(t, cfg, []string{"vault_health", "vault_get_entry"})
 
 	// The store now has two identical episodes.
-	store := recipes.NewStore(recipesStorePath(home, "test"))
+	store := patterns.NewStore(patternsStorePath(home, "test"))
 	eps, err := store.Load()
 	if err != nil {
 		t.Fatalf("store.Load: %v", err)
@@ -179,19 +180,19 @@ func TestServeIO_RecordsAndPromotesEpisodes(t *testing.T) {
 
 	// With threshold 2 the sequence is promoted and exposed.
 	s := New(testProfile(), nil, slog.Default(), cfg, "dev")
-	raw, err := s.handleRecipes(context.Background(), json.RawMessage(`{}`))
+	raw, err := s.handlePatterns(context.Background(), json.RawMessage(`{}`))
 	if err != nil {
-		t.Fatalf("handleRecipes: %v", err)
+		t.Fatalf("handlePatterns: %v", err)
 	}
 	data, _ := json.Marshal(raw)
 	var resp struct {
-		Recipes []recipes.Recipe `json:"recipes"`
+		Patterns []patterns.Pattern `json:"patterns"`
 	}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
-	if len(resp.Recipes) != 1 {
-		t.Fatalf("recipes = %d, want 1 after 2 sessions at threshold 2", len(resp.Recipes))
+	if len(resp.Patterns) != 1 {
+		t.Fatalf("patterns = %d, want 1 after 2 sessions at threshold 2", len(resp.Patterns))
 	}
 }
 
@@ -200,15 +201,15 @@ func TestServeIO_NoRecordingWhenDisabled(t *testing.T) {
 
 	// No config attached (nil) — recording must be off.
 	runOneSession(t, nil, []string{"vault_health"})
-	if _, err := os.Stat(recipesStorePath(home, "test")); !os.IsNotExist(err) {
+	if _, err := os.Stat(patternsStorePath(home, "test")); !os.IsNotExist(err) {
 		t.Error("episode store created although recording is disabled (nil config)")
 	}
 
 	// Explicitly disabled.
 	home2 := withDataHome(t)
-	cfg := &config.Config{Recipes: config.RecipesConfig{Enabled: false, PromotionThreshold: 2}}
+	cfg := &config.Config{Patterns: config.PatternsConfig{Enabled: false, PromotionThreshold: 2}}
 	runOneSession(t, cfg, []string{"vault_health"})
-	if _, err := os.Stat(recipesStorePath(home2, "test")); !os.IsNotExist(err) {
-		t.Error("episode store created although [recipes] enabled=false")
+	if _, err := os.Stat(patternsStorePath(home2, "test")); !os.IsNotExist(err) {
+		t.Error("episode store created although [patterns] enabled=false")
 	}
 }

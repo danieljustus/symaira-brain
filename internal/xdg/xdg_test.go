@@ -74,16 +74,16 @@ func TestAuditDir_SitsUnderDataDir(t *testing.T) {
 	}
 }
 
-func TestRecipesDir_SitsUnderDataDir(t *testing.T) {
+func TestPatternsDir_SitsUnderDataDir(t *testing.T) {
 	base := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", base)
-	got, err := RecipesDir()
+	got, err := PatternsDir()
 	if err != nil {
-		t.Fatalf("RecipesDir: %v", err)
+		t.Fatalf("PatternsDir: %v", err)
 	}
 	want := filepath.Join(base, "symbrain", "recipes")
 	if got != want {
-		t.Errorf("RecipesDir() = %q, want %q", got, want)
+		t.Errorf("PatternsDir() = %q, want %q", got, want)
 	}
 }
 

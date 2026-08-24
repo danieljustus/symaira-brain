@@ -1,15 +1,15 @@
-// Package recipes turns repeated gateway sessions into reviewable,
-// versioned recipe artifacts (issue #186).
+// Package patterns turns repeated gateway sessions into reviewable,
+// versioned pattern artifacts (issue #186).
 //
 // An episode is the ordered tool-call sequence of one harness connection
 // as seen by the gateway routing layer — names only, never arguments or
-// values. A candidate is promoted to an exposable recipe only after the
+// values. A candidate is promoted to an exposable pattern only after the
 // same sequence recurs across a configurable number of sessions; the
 // promotion gate is what keeps the store from filling with one-off
-// noise. Brain exposes recipes as read-only context; it never executes
+// noise. Brain exposes patterns as read-only context; it never executes
 // them, and anything that stabilizes into a durable authored artifact
 // belongs to symskills, not here.
-package recipes
+package patterns
 
 import (
 	"crypto/sha256"
@@ -35,14 +35,14 @@ type Episode struct {
 	EndedAt   string `json:"ended_at"`
 }
 
-// Trigger states when a recipe applies: the profile and the first step
+// Trigger states when a pattern applies: the profile and the first step
 // of the recorded sequence.
 type Trigger struct {
 	Profile   string `json:"profile"`
 	FirstStep Step   `json:"first_step"`
 }
 
-// Provenance records where a recipe came from, so a promoted recipe is
+// Provenance records where a pattern came from, so a promoted pattern is
 // reviewable rather than an anonymous blob.
 type Provenance struct {
 	FirstSeenAt     string `json:"first_seen_at"`
@@ -50,9 +50,9 @@ type Provenance struct {
 	RecurrenceCount int    `json:"recurrence_count"`
 }
 
-// Recipe is a promoted, named, versioned artifact: the steps of a
+// Pattern is a promoted, named, versioned artifact: the steps of a
 // recurring episode plus its trigger conditions and provenance.
-type Recipe struct {
+type Pattern struct {
 	Name       string     `json:"name"`
 	Version    int        `json:"version"`
 	Profile    string     `json:"profile"`
@@ -77,7 +77,7 @@ func sequenceKey(profile string, steps []Step) string {
 	return sb.String()
 }
 
-// Name derives a deterministic, human-readable recipe name from the
+// Name derives a deterministic, human-readable pattern name from the
 // profile and first steps, disambiguated by a short hash of the full
 // sequence so distinct sequences never collide.
 func Name(profile string, steps []Step) string {
@@ -94,12 +94,12 @@ func Name(profile string, steps []Step) string {
 	return fmt.Sprintf("%s_%s", slug, hex.EncodeToString(sum[:])[:8])
 }
 
-// Promote returns the recipes whose exact sequence recurred in at least
+// Promote returns the patterns whose exact sequence recurred in at least
 // threshold distinct episodes, sorted by name for deterministic output.
 // Episodes with fewer than two steps are never promoted (a single tool
 // call is not an approach). The earliest and latest occurrences feed the
 // provenance record.
-func Promote(episodes []Episode, threshold int) []Recipe {
+func Promote(episodes []Episode, threshold int) []Pattern {
 	type acc struct {
 		profile string
 		steps   []Step
@@ -126,13 +126,13 @@ func Promote(episodes []Episode, threshold int) []Recipe {
 		a.last = ep.EndedAt
 	}
 
-	var recipes []Recipe
+	var patterns []Pattern
 	for _, key := range order {
 		a := groups[key]
 		if a.count < threshold {
 			continue
 		}
-		recipes = append(recipes, Recipe{
+		patterns = append(patterns, Pattern{
 			Name:    Name(a.profile, a.steps),
 			Version: 1,
 			Profile: a.profile,
@@ -149,6 +149,6 @@ func Promote(episodes []Episode, threshold int) []Recipe {
 		})
 	}
 
-	sort.Slice(recipes, func(i, j int) bool { return recipes[i].Name < recipes[j].Name })
-	return recipes
+	sort.Slice(patterns, func(i, j int) bool { return patterns[i].Name < patterns[j].Name })
+	return patterns
 }

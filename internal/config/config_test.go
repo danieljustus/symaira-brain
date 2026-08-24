@@ -84,15 +84,15 @@ binary_path = "/opt/symvault/symvault"
 	if cfg.UpdateCheck.Enabled != true {
 		t.Errorf("UpdateCheck.Enabled = %v, want true (default)", cfg.UpdateCheck.Enabled)
 	}
-	if cfg.Recipes.Enabled != true || cfg.Recipes.PromotionThreshold != 3 {
-		t.Errorf("Recipes = %+v, want {Enabled:true PromotionThreshold:3} (defaults)", cfg.Recipes)
+	if cfg.Patterns.Enabled != true || cfg.Patterns.PromotionThreshold != 3 {
+		t.Errorf("Patterns = %+v, want {Enabled:true PromotionThreshold:3} (defaults)", cfg.Patterns)
 	}
 }
 
-func TestLoad_RecipesOverrides(t *testing.T) {
+func TestLoad_PatternsOverrides(t *testing.T) {
 	home := withHome(t)
 	writeConfig(t, home, `
-[recipes]
+[patterns]
 enabled = false
 promotion_threshold = 5
 `)
@@ -101,18 +101,18 @@ promotion_threshold = 5
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	if cfg.Recipes.Enabled {
-		t.Error("Recipes.Enabled = true, want false")
+	if cfg.Patterns.Enabled {
+		t.Error("Patterns.Enabled = true, want false")
 	}
-	if cfg.Recipes.PromotionThreshold != 5 {
-		t.Errorf("Recipes.PromotionThreshold = %d, want 5", cfg.Recipes.PromotionThreshold)
+	if cfg.Patterns.PromotionThreshold != 5 {
+		t.Errorf("Patterns.PromotionThreshold = %d, want 5", cfg.Patterns.PromotionThreshold)
 	}
 }
 
-func TestLoad_RecipesThresholdSanitized(t *testing.T) {
+func TestLoad_PatternsThresholdSanitized(t *testing.T) {
 	home := withHome(t)
 	writeConfig(t, home, `
-[recipes]
+[patterns]
 promotion_threshold = 0
 `)
 
@@ -120,8 +120,8 @@ promotion_threshold = 0
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	if cfg.Recipes.PromotionThreshold != 3 {
-		t.Errorf("Recipes.PromotionThreshold = %d, want default 3 for a non-positive value", cfg.Recipes.PromotionThreshold)
+	if cfg.Patterns.PromotionThreshold != 3 {
+		t.Errorf("Patterns.PromotionThreshold = %d, want default 3 for a non-positive value", cfg.Patterns.PromotionThreshold)
 	}
 }
 

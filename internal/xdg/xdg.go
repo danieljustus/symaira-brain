@@ -45,9 +45,12 @@ func AuditDir() (string, error) {
 	return filepath.Join(dir, "audit"), nil
 }
 
-// RecipesDir returns the episode store directory under DataDir
-// (~/.local/share/symbrain/recipes).
-func RecipesDir() (string, error) {
+// PatternsDir returns the episode store directory under DataDir.
+//
+// The on-disk directory remains named "recipes" for compatibility with
+// stores written before the vocabulary rename; only the package and exposed
+// API use the new "patterns" name.
+func PatternsDir() (string, error) {
 	dir, err := DataDir()
 	if err != nil {
 		return "", err
