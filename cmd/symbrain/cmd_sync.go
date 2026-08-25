@@ -50,5 +50,10 @@ func cmdSyncWithFormat(args []string, stdout, stderr io.Writer, format output.Fo
 		fmt.Fprintf(stderr, "symbrain sync: format output: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	// A failed skills target is already visible in the output above; it
+	// still fails the command so scripts can detect a partial sync.
+	if sync.SkillsFailed(skillsResults) {
+		return exitcodes.ExitGeneric
+	}
 	return exitcodes.ExitOK
 }

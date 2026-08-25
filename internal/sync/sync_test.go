@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/instructions"
-	"github.com/danieljustus/symaira-brain/internal/skillsbridge"
+	"github.com/danieljustus/symaira-brain/internal/skillsrunner"
 )
 
 func TestRun_GlobalAndProjectSources(t *testing.T) {
@@ -85,6 +85,9 @@ func TestRun_GlobalAndProjectSources(t *testing.T) {
 
 func TestRun_DryRun(t *testing.T) {
 	project := t.TempDir()
+	// Sandbox HOME so the in-process skills runner scopes to a temp library
+	// instead of the developer's real one.
+	t.Setenv("HOME", t.TempDir())
 
 	var stderr bytes.Buffer
 	statuses, _, err := Run(project, []string{"claude"}, true, &stderr)
@@ -108,6 +111,7 @@ func TestRun_DryRun(t *testing.T) {
 
 func TestRun_UnsupportedHarness(t *testing.T) {
 	project := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 
 	var stderr bytes.Buffer
 	statuses, _, err := Run(project, []string{"claude-desktop"}, false, &stderr)
@@ -125,6 +129,7 @@ func TestRun_UnsupportedHarness(t *testing.T) {
 
 func TestRun_AllHarnesses(t *testing.T) {
 	project := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
 
 	var stderr bytes.Buffer
 	statuses, _, err := Run(project, nil, false, &stderr)
@@ -172,10 +177,10 @@ func TestFormatSummaryIncludesMessagesAndSkills(t *testing.T) {
 		Status:  "dry-run",
 		Message: "would update",
 	}}
-	skillsResults := []skillsbridge.Result{{
+	skillsResults := []skillsrunner.Result{{
 		Target:  "claude",
 		Status:  "error",
-		Message: "symskills failed",
+		Message: "skill render failed",
 	}}
 
 	var buf bytes.Buffer
@@ -185,7 +190,7 @@ func TestFormatSummaryIncludesMessagesAndSkills(t *testing.T) {
 	for _, want := range []string{
 		"claude:      dry-run (would update)",
 		"Skills:",
-		"claude:      error (symskills failed)",
+		"claude:      error (skill render failed)",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("summary missing %q\n%s", want, out)

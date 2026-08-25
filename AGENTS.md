@@ -225,13 +225,11 @@ go build -o symbrain ./cmd/symbrain
 - If a child binary is missing, the corresponding server is simply left out
   of the catalog and `symbrain doctor` explains why — never a hard error.
 
-> **Known gap (2026-08-23).** `internal/skillsbridge` still resolves and runs a
-> `symskills` binary for `symbrain sync`, although that repo is archived and
-> its formula deprecated. With the old binary installed the sync reports
-> `exit status 9`; without it, skill rendering is silently skipped. The
-> in-process `internal/skills` package is not wired into `sync`. Do not
-> "fix" this by documenting the shell-out as intended — it is the same
-> half-finished absorption that repo-konsolidierung.md §10 tracks for ingest.
+> **Verified (2026-08-25).** Skill rendering and installation for `symbrain sync`
+> run in-process through `internal/skills` via `internal/skillsrunner` — no
+> external `symskills` binary is resolved or executed. Removing the archived
+> binary from `PATH` does not skip any requested target; render/install
+> failures surface in JSON and human output with a non-zero exit status.
 
 ```go
 // Good — graceful degradation

@@ -263,16 +263,19 @@ func TestBuildServers_VaultAgentAddsStdioArgs(t *testing.T) {
 
 // ---- sync ----
 
-// TestCmdSync_DryRun_NoSymskills covers cmdSync end-to-end in-process:
+// TestCmdSyncDryRunNoLegacyBinary covers cmdSync end-to-end in-process:
 // a project dir with instructions, dry-run (no writes), and a PATH that
-// has no symskills so the skills orchestration degrades to skipped.
-func TestCmdSync_DryRun_NoSymskills(t *testing.T) {
+// has no symskills binary. The in-process skills runner still plans the
+// requested claude target (the old bridge skipped everything when the
+// binary was absent).
+func TestCmdSync_DryRunNoLegacyBinary(t *testing.T) {
 	sandboxHome(t)
 	project := t.TempDir()
 	if err := os.WriteFile(filepath.Join(project, "AGENTS.md"), []byte("# test project\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	// Strip symskills from PATH: the test needs no other external binaries.
+	// Strip symskills from PATH: the runner must not depend on it and the
+	// test needs no other external binaries.
 	t.Setenv("PATH", t.TempDir())
 
 	var stdout, stderr bytes.Buffer
@@ -285,8 +288,41 @@ func TestCmdSync_DryRun_NoSymskills(t *testing.T) {
 	if !strings.Contains(out, "claude:") {
 		t.Errorf("stdout = %q, want a claude target row", out)
 	}
-	if !strings.Contains(out, "symskills not found") {
-		t.Errorf("stdout = %q, want the symskills-absent hint", out)
+	if !strings.Contains(out, "Skills:") {
+		t.Errorf("stdout = %q, want a Skills section", out)
+	}
+	if !strings.Contains(out, "no skills rendered") {
+		t.Errorf("stdout = %q, want in-process skills result (no skills rendered)", out)
+	}
+}
+
+// TestCmdSyncSkillErrorExitNonZero proves a failed skills render is visible
+// in the output and fails the command with exitcodes.ExitGeneric.
+func TestCmdSyncSkillErrorExitNonZero(t *testing.T) {
+	home := sandboxHome(t)
+	project := t.TempDir()
+	if err := os.WriteFile(filepath.Join(project, "AGENTS.md"), []byte("# test project\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// A library with one skill that fails to render (malformed variant
+	// marker is a render-blocking validation error).
+	dir := filepath.Join(home, ".local", "share", "symskills", "library", "broken")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte("---\nname: broken\ndescription: renders to nothing\n---\n\n<!-- symskills:blok typo -->\n\nBody.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := cmdSync([]string{"--project", project, "claude"}, &stdout, &stderr)
+
+	if code != exitcodes.ExitGeneric {
+		t.Fatalf("cmdSync = %d, want %d (stdout: %s, stderr: %s)", code, exitcodes.ExitGeneric, stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "error") {
+		t.Errorf("stdout = %q, want an error status row", stdout.String())
 	}
 }
 
