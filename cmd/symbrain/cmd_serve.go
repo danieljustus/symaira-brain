@@ -21,8 +21,8 @@ import (
 	"github.com/danieljustus/symaira-corekit/logkit"
 )
 
-func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
+func cmdMcp(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	fs := flag.NewFlagSet("mcp", flag.ContinueOnError)
 	profileName := fs.String("profile", "", "profile name to serve (required unless --profile-file is given)")
 	profileFile := fs.String("profile-file", "", "load the profile from this TOML file instead of the profiles directory")
 	vaultAgent := fs.String("vault-agent", "", "vault agent name for --stdio mode (default: harness-detected or 'claude-code')")
@@ -33,13 +33,13 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	p, err := resolveServeProfile(*profileName, *profileFile)
 	if err != nil {
-		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
+		fmt.Fprintf(stderr, "symbrain mcp: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
 
 	cfg, err := config.Load()
 	if err != nil {
-		fmt.Fprintf(stderr, "symbrain serve: load config: %v\n", err)
+		fmt.Fprintf(stderr, "symbrain mcp: load config: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
 
@@ -65,7 +65,7 @@ func cmdServe(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	gw.SetMemoryServer(memoryServer)
 
 	if err := gw.ServeIO(ctx, os.Stdin, os.Stdout); err != nil {
-		fmt.Fprintf(stderr, "symbrain serve: %v\n", err)
+		fmt.Fprintf(stderr, "symbrain mcp: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
 
@@ -115,7 +115,7 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 
 		path, err := broker.Discover(d.binaryName, d.override)
 		if err != nil {
-			fmt.Fprintf(stderr, "symbrain serve: %s: %v\n", d.alias, err)
+			fmt.Fprintf(stderr, "symbrain mcp: %s: %v\n", d.alias, err)
 			continue
 		}
 
@@ -145,13 +145,13 @@ func buildMemoryServer(p *profile.Profile, stderr io.Writer, version string) *me
 
 	memdb, err := memorydb.Open(memcfg)
 	if err != nil {
-		fmt.Fprintf(stderr, "symbrain serve: open memory db: %v\n", err)
+		fmt.Fprintf(stderr, "symbrain mcp: open memory db: %v\n", err)
 		return nil
 	}
 
 	memjwt, err := memorysecurity.NewJWTProvider(memcfg, memdb)
 	if err != nil {
-		fmt.Fprintf(stderr, "symbrain serve: init memory JWT provider: %v\n", err)
+		fmt.Fprintf(stderr, "symbrain mcp: init memory JWT provider: %v\n", err)
 		return nil
 	}
 

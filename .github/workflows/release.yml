@@ -225,7 +225,7 @@ jobs:
             CODE_SIGNING_REQUIRED=YES \
             CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
             OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
-          APP_BUNDLE=$(find build -name 'SymBrain.app' -type d -maxdepth 6 | head -1)
+          APP_BUNDLE=$(find build -name 'Symaira Brain.app' -type d -maxdepth 6 | head -1)
           if [ -z "$APP_BUNDLE" ]; then
             echo "::error::App bundle not found after build"
             exit 1
@@ -258,7 +258,7 @@ jobs:
           echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
 
           # --- Notarize app bundle ---
-          ZIP_PATH="$RUNNER_TEMP/SymBrain.zip"
+          ZIP_PATH="$RUNNER_TEMP/Symaira-Brain.zip"
           ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP_PATH"
           xcrun notarytool submit "$ZIP_PATH" \
             -d "$NOTARY_API_KEY_ID" \
@@ -270,24 +270,24 @@ jobs:
 
           # --- Create DMG with branded drag-to-Applications window ---
           VERSION="${{ steps.version.outputs.version }}"
-          DMG_PATH="$RUNNER_TEMP/SymBrain-$VERSION.dmg"
+          DMG_PATH="$RUNNER_TEMP/Symaira-Brain-$VERSION-macos.dmg"
           DMG_STAGING="$RUNNER_TEMP/dmg-staging"
           mkdir -p "$DMG_STAGING"
           cp -R "$APP" "$DMG_STAGING/"
 
-          # Copy volume icon so the mounted DMG shows the SymBrain icon
+          # Copy volume icon so the mounted DMG shows the Symaira Brain icon
           cp assets/dmg/.VolumeIcon.icns "$DMG_STAGING/.VolumeIcon.icns"
           SetFile -a C "$DMG_STAGING" 2>/dev/null || true
 
           # Branded installer window: background, icon positions, Applications
           # link are laid out via AppleScript (same as symaira-eraseme).
           ./scripts/create-symaira-dmg.sh \
-            "$DMG_STAGING/SymBrain.app" \
+            "$DMG_STAGING/Symaira Brain.app" \
             "$DMG_PATH" \
-            "SymBrain $VERSION"
+            "Symaira Brain $VERSION"
 
           echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
-          echo "dmg_name=SymBrain-$VERSION.dmg" >> "$GITHUB_OUTPUT"
+          echo "dmg_name=Symaira-Brain-$VERSION-macos.dmg" >> "$GITHUB_OUTPUT"
 
           # --- Notarize DMG ---
           xcrun notarytool submit "$DMG_PATH" \

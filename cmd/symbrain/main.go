@@ -49,12 +49,20 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdDoctor(rest, stdout, stderr)
 	case "profile":
 		return cmdProfileWithFormat(rest, stdout, stderr, format)
+	case "config":
+		return cmdConfig(rest, stdout, stderr)
 	case "harness":
 		return cmdHarnessWithFormat(rest, stdout, stderr, format)
 	case "usage":
 		return cmdUsageWithFormat(rest, stdout, stderr, format)
+	case "mcp":
+		return cmdMcp(rest, stdout, stderr)
 	case "serve":
-		return cmdServe(rest, stdout, stderr)
+		// Deprecated alias for `symbrain mcp` (kept for one minor
+		// release). The notice goes to stderr only: stdout is the MCP
+		// JSON-RPC transport and must stay clean (Zero Stdio Pollution).
+		fmt.Fprintln(stderr, "symbrain: 'serve' is deprecated; use 'symbrain mcp' instead (serve will be removed in a future release)")
+		return cmdMcp(rest, stdout, stderr)
 	case "install":
 		return cmdInstall(rest, stdout, stderr)
 	case "uninstall":
@@ -140,9 +148,10 @@ Commands:
   doctor      Check environment, config, profiles, and child binaries
   setup       Download and install pinned core binaries to ~/.symaira/bin
   profile     Manage profiles (list, show, add, remove)
+  config      Inspect and edit the global config (path, get, set)
   harness     Inspect registered AI harnesses and their MCP servers
   usage       AI subscription/token usage per provider
-  serve       Run the MCP gateway over stdio for a profile
+  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)
   install     Register symbrain with a harness
   uninstall   Remove symbrain from a harness
   sync        Sync instructions and skills to harnesses

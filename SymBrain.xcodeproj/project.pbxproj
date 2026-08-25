@@ -726,6 +726,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain;
+				PRODUCT_NAME = "Symaira Brain";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 6.0;
@@ -770,7 +771,7 @@
 				MARKETING_VERSION = 0.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
-				PRODUCT_NAME = SymBrain;
+				PRODUCT_NAME = "Symaira Brain";
 				SDKROOT = iphoneos;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
@@ -794,7 +795,7 @@
 				MARKETING_VERSION = 0.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
-				PRODUCT_NAME = SymBrain;
+				PRODUCT_NAME = "Symaira Brain";
 				SDKROOT = iphoneos;
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
@@ -822,6 +823,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain;
+				PRODUCT_NAME = "Symaira Brain";
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
 				SWIFT_VERSION = 6.0;

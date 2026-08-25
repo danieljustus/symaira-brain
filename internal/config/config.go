@@ -17,7 +17,7 @@ const AppName = "symbrain"
 // profiles.
 type Config struct {
 	// DefaultProfile is the profile name used when a command needs one but
-	// none was given explicitly (e.g. a future `symbrain serve` without
+	// none was given explicitly (e.g. a future `symbrain mcp` without
 	// --profile).
 	DefaultProfile string
 

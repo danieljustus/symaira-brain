@@ -14,6 +14,9 @@ type Format string
 const (
 	// Table is the stable human-readable default. It is intentionally not
 	// TTY-sensitive so redirecting stdout does not change existing output.
+	// Note: `table` is this tool's `text` — the CLI vocabulary's
+	// text|json|yaml value set is deliberately satisfied by table|json
+	// (yaml is not offered; machine-readable output is json).
 	FormatTable Format = "table"
 	// JSON is the machine-readable representation.
 	FormatJSON Format = "json"
