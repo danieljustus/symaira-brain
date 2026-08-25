@@ -51,6 +51,9 @@ tools_deny = ["memory_set"]
 [servers.skills]
 enabled = false
 
+[servers.usage]
+enabled = true
+
 [audit]
 enabled = false
 `
@@ -162,6 +165,19 @@ enabled = false
 	}
 	if names["memory_set"] {
 		t.Fatalf("tools_deny failed: memory_set present in tools/list: %v", names)
+	}
+	if !names["get_ai_usage"] {
+		t.Fatalf("usage server enabled but get_ai_usage missing from tools/list: %v", names)
+	}
+
+	// The embedded usage tool answers with the schema-versioned report.
+	send(5, "tools/call", `{"name":"get_ai_usage","arguments":{}}`)
+	usageFrame := awaitResponse(5)
+	if strings.Contains(string(usageFrame), `"error"`) {
+		t.Fatalf("get_ai_usage returned an error frame: %s", usageFrame)
+	}
+	if !strings.Contains(string(usageFrame), "schema_version") {
+		t.Fatalf("get_ai_usage response lacks schema_version: %s", usageFrame)
 	}
 
 	// A failing tools/call: the child answers with isError:true.

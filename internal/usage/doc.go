@@ -5,9 +5,14 @@
 // contract between this port and symaira-cockpit's usage screen (issue
 // #22), which otherwise deadlock on each other's completion.
 //
-// Every provider's credential resolution here is portable — env vars and
-// plain file reads — never the macOS Keychain, and two providers (Cursor,
-// OpenCode) drop a SQLite-backed local-history strategy that would need a
-// new dependency decision to port cross-platform. See AllProviders and
-// each provider's doc comment for exactly what was and wasn't ported.
+// Credential resolution (issue #290): every provider reads its credentials
+// from an explicit env var first, and a symvault://<path> (or deprecated
+// vault://<path>) value is resolved through the secret store
+// (internal/memory/secrets) — never a second credential store. When the env
+// var is unset, providers with a native CLI credential file fall back to
+// that file strictly read-only (Codex, Copilot, Kimi, Claude, Nous Portal).
+// The macOS Keychain is never used, and two providers (Cursor, OpenCode)
+// drop a SQLite-backed local-history strategy that would need a new
+// dependency decision to port cross-platform. See AllProviders and each
+// provider's doc comment for exactly what was and wasn't ported.
 package usage

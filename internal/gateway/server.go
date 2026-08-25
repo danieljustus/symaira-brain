@@ -22,6 +22,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/skills/mcptools"
+	"github.com/danieljustus/symaira-brain/internal/usage"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/mcpserver"
 )
@@ -155,6 +156,19 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	// therefore no longer routed through routeToolCall or audited per-call.
 	if s.profile.Server(profile.ServerSkills).Enabled {
 		mcptools.Register(srv, mcptools.Options{Version: s.version})
+	}
+
+	// Usage is gateway-owned like bootstrap/patterns: the single
+	// get_ai_usage tool reports AI subscription/token usage from
+	// internal/usage (issue #290). It is profile-gated via the usage
+	// server's enabled flag (no mode preset, like skills).
+	if s.profile.Server(profile.ServerUsage).Enabled {
+		srv.RegisterTool(&mcpserver.Tool{
+			Name:        "get_ai_usage",
+			Description: getAIUsageToolDescription,
+			InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+			Handler:     s.handleAIUsage,
+		})
 	}
 
 	// Memory is absorbed directly (repo consolidation step 4, phase 2b): the
@@ -500,6 +514,22 @@ func (s *Server) vaultStatus() string {
 		return "absent"
 	}
 	return "present"
+}
+
+// getAIUsageToolDescription is the exposure surface for the AI usage
+// report: per-provider configured/auth status plus usage snapshots,
+// matching `symbrain usage --output json` (schema version 1, issue #289).
+const getAIUsageToolDescription = "Fetch AI subscription/token usage across providers " +
+	"(Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal, OpenCode, OpenRouter, Antigravity). " +
+	"Returns the schema-versioned usage report. Read-only."
+
+// handleAIUsage implements the get_ai_usage tool: it builds the usage
+// report with a bounded timeout and returns it as JSON. Unconfigured
+// providers are reported as not set up, never as errors.
+func (s *Server) handleAIUsage(ctx context.Context, _ json.RawMessage) (any, error) {
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	return usage.BuildReport(ctx, usage.AllProviders(nil)), nil
 }
 
 // patternsToolDescription is the read-only exposure surface for promoted

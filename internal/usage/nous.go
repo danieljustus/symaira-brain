@@ -28,6 +28,8 @@ const (
 // NousPortalUsageProvider.
 type NousPortalProvider struct {
 	accessToken   string
+	credErr       error
+	credSource    string
 	portalBaseURL string
 	client        *http.Client
 }
@@ -42,8 +44,13 @@ func NewNousPortalProvider(client *http.Client) *NousPortalProvider {
 	if baseURL == "" {
 		baseURL = nousDefaultPortalURL
 	}
+	accessToken, credSource, credErr := resolveFileCredential("NOUS_PORTAL_ACCESS_TOKEN", func() string {
+		return readNousAccessToken(nousAuthStorePath())
+	})
 	return &NousPortalProvider{
-		accessToken:   readNousAccessToken(nousAuthStorePath()),
+		accessToken:   accessToken,
+		credErr:       credErr,
+		credSource:    credSource,
 		portalBaseURL: baseURL,
 		client:        client,
 	}
@@ -62,7 +69,10 @@ func (p *NousPortalProvider) Strategies() []Strategy {
 
 func (p *NousPortalProvider) AuthStatus() AuthStatus {
 	if p.accessToken != "" {
-		return AuthStatus{Status: "available", Detail: "Signed in via Hermes CLI auth store", Source: "file"}
+		return AuthStatus{Status: "available", Detail: "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)", Source: p.credSource}
+	}
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
 	}
 	return AuthStatus{Status: "missing", Detail: "No Nous Portal credentials found — sign in with the Hermes CLI"}
 }

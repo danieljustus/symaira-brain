@@ -35,9 +35,13 @@ const (
 // Mirrors symaira-cockpit's KimiUsageProvider.
 type KimiProvider struct {
 	apiKey         string
+	apiErr         error
+	apiSource      string
 	cliAccessToken string
 	cliDeviceID    string
 	authToken      string
+	authErr        error
+	authSource     string
 	baseURL        string
 	client         *http.Client
 }
@@ -55,11 +59,17 @@ func NewKimiProvider(client *http.Client) *KimiProvider {
 	if baseURL == "" {
 		baseURL = kimiDefaultAPIBase
 	}
+	apiKey, apiSource, apiErr := resolveEnv("KIMI_CODE_API_KEY")
+	authToken, authSource, authErr := resolveEnv("KIMI_AUTH_TOKEN")
 	return &KimiProvider{
-		apiKey:         os.Getenv("KIMI_CODE_API_KEY"),
+		apiKey:         apiKey,
+		apiErr:         apiErr,
+		apiSource:      apiSource,
 		cliAccessToken: store.readAccessToken(),
 		cliDeviceID:    store.readDeviceID(),
-		authToken:      os.Getenv("KIMI_AUTH_TOKEN"),
+		authToken:      authToken,
+		authErr:        authErr,
+		authSource:     authSource,
 		baseURL:        baseURL,
 		client:         client,
 	}
@@ -110,16 +120,22 @@ func (p *KimiProvider) Strategies() []Strategy {
 }
 
 func (p *KimiProvider) AuthStatus() AuthStatus {
+	if p.cliAccessToken == "" && p.apiKey == "" && p.authToken == "" {
+		if p.apiErr != nil {
+			return authErrStatus(p.apiErr)
+		}
+		if p.authErr != nil {
+			return authErrStatus(p.authErr)
+		}
+		return AuthStatus{Status: "missing", Detail: "No Kimi Code CLI credentials found"}
+	}
 	if p.cliAccessToken != "" {
 		return AuthStatus{Status: "available", Detail: "Kimi Code CLI is signed in", Source: "cli"}
 	}
 	if p.apiKey != "" {
-		return AuthStatus{Status: "available", Detail: "API key from KIMI_CODE_API_KEY", Source: "env"}
+		return AuthStatus{Status: "available", Detail: "API key from KIMI_CODE_API_KEY", Source: p.apiSource}
 	}
-	if p.authToken != "" {
-		return AuthStatus{Status: "available", Detail: "Web auth token from KIMI_AUTH_TOKEN", Source: "env"}
-	}
-	return AuthStatus{Status: "missing", Detail: "No Kimi Code CLI credentials found"}
+	return AuthStatus{Status: "available", Detail: "Web auth token from KIMI_AUTH_TOKEN", Source: p.authSource}
 }
 
 // kimiCLICredentialStore reads the Kimi Code CLI credential file and device
@@ -206,7 +222,7 @@ func (e *kimiError) Error() string {
 		return "Kimi returned an invalid response"
 	case "status":
 		if e.status == 401 || e.status == 403 {
-			return fmt.Sprintf("Kimi rejected the credential (HTTP %d). Check the API key or sign in with the Kimi Code CLI again.", e.status)
+			return fmt.Sprintf("Kimi rejected the login (HTTP %d). Check the API access or sign in with the Kimi Code CLI again.", e.status)
 		}
 		return fmt.Sprintf("Kimi request failed with HTTP %d", e.status)
 	default:

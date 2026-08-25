@@ -119,18 +119,18 @@ func TestCheckServers_FoundButProbeFails(t *testing.T) {
 }
 
 // TestCheckServers_AbsorbedCoresAreNotProbed pins the consolidation outcome:
-// memory and skills run inside this binary, so doctor must not report them
-// as missing sibling processes — and must not hand out install hints for
-// their deprecated Homebrew formulae.
+// memory, skills and the embedded usage tool run inside this binary, so
+// doctor must not report them as missing sibling processes — and must not
+// hand out install hints for their deprecated Homebrew formulae.
 func TestCheckServers_AbsorbedCoresAreNotProbed(t *testing.T) {
 	checks := checkServers(context.Background())
 	for _, c := range checks {
-		if c.Name == "memory" || c.Name == "skills" {
+		if c.Name == "memory" || c.Name == "skills" || c.Name == "usage" {
 			t.Errorf("%s is built in and must not be probed as a sibling binary", c.Name)
 		}
 	}
-	if len(builtinServers) != 2 {
-		t.Errorf("builtinServers = %v, want memory and skills", builtinServers)
+	if len(builtinServers) != 3 {
+		t.Errorf("builtinServers = %v, want memory, skills and usage", builtinServers)
 	}
 }
 

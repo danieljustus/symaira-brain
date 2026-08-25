@@ -51,10 +51,12 @@ Usage:
 The global --output table|json flag (or --json) selects the output format.
 
 Providers: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,
-OpenCode, OpenRouter, Antigravity. Credential resolution is env vars and
-plain file reads only — see each provider's doc comment in
-internal/usage for the macOS-Keychain / local-database strategies not
-ported from the Swift original.
+OpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env
+var per provider, whose value may be a symvault://<path> URI resolved
+through the secret store; providers with a native CLI credential file
+fall back to it read-only when the env var is unset. See each provider's
+doc comment in internal/usage for the macOS-Keychain / local-database
+strategies not ported from the Swift original.
 `)
 }
 

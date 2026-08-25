@@ -33,6 +33,8 @@ const (
 // OpenCodeUsageProvider (web path only).
 type OpenCodeProvider struct {
 	cookieHeader      string
+	credErr           error
+	credSource        string
 	workspaceOverride string
 	client            *http.Client
 }
@@ -43,8 +45,11 @@ func NewOpenCodeProvider(client *http.Client) *OpenCodeProvider {
 	if client == nil {
 		client = http.DefaultClient
 	}
+	cookieHeader, credSource, credErr := resolveEnv("OPENCODE_COOKIE")
 	return &OpenCodeProvider{
-		cookieHeader:      os.Getenv("OPENCODE_COOKIE"),
+		cookieHeader:      cookieHeader,
+		credErr:           credErr,
+		credSource:        credSource,
 		workspaceOverride: os.Getenv("OPENCODE_WORKSPACE_ID"),
 		client:            client,
 	}
@@ -64,8 +69,11 @@ func (p *OpenCodeProvider) Strategies() []Strategy {
 }
 
 func (p *OpenCodeProvider) AuthStatus() AuthStatus {
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
+	}
 	if p.cookieHeader != "" {
-		return AuthStatus{Status: "available", Detail: "Cookie configured (OPENCODE_COOKIE)", Source: "env"}
+		return AuthStatus{Status: "available", Detail: "Cookie configured (OPENCODE_COOKIE)", Source: p.credSource}
 	}
 	if p.workspaceOverride != "" {
 		return AuthStatus{Status: "available", Detail: "Workspace override set", Source: "env"}

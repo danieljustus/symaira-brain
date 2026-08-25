@@ -46,14 +46,18 @@ func (r MoonshotRegion) currency() string {
 // for this pass is MOONSHOT_API_KEY only (see OpenRouterProvider's doc for
 // why). Mirrors symaira-cockpit's MoonshotUsageProvider.
 type MoonshotProvider struct {
-	apiKey string
-	region MoonshotRegion
-	client *http.Client
+	apiKey     string
+	credErr    error
+	credSource string
+	region     MoonshotRegion
+	client     *http.Client
 }
 
-// NewMoonshotProvider reads MOONSHOT_API_KEY and the MOONSHOT_REGION
-// override ("ai" default, or "cn") from the environment.
+// NewMoonshotProvider reads MOONSHOT_API_KEY (symvault:// URIs accepted)
+// and the MOONSHOT_REGION override ("ai" default, or "cn") from the
+// environment.
 func NewMoonshotProvider(client *http.Client) *MoonshotProvider {
+	apiKey, credSource, credErr := resolveEnv("MOONSHOT_API_KEY")
 	if client == nil {
 		client = http.DefaultClient
 	}
@@ -62,9 +66,11 @@ func NewMoonshotProvider(client *http.Client) *MoonshotProvider {
 		region = MoonshotRegionChina
 	}
 	return &MoonshotProvider{
-		apiKey: os.Getenv("MOONSHOT_API_KEY"),
-		region: region,
-		client: client,
+		apiKey:     apiKey,
+		credErr:    credErr,
+		credSource: credSource,
+		region:     region,
+		client:     client,
 	}
 }
 
@@ -80,10 +86,13 @@ func (p *MoonshotProvider) Strategies() []Strategy {
 }
 
 func (p *MoonshotProvider) AuthStatus() AuthStatus {
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
+	}
 	if p.apiKey == "" {
 		return AuthStatus{Status: "missing", Detail: "no API key configured (MOONSHOT_API_KEY)"}
 	}
-	return AuthStatus{Status: "available", Detail: "API key from MOONSHOT_API_KEY", Source: "env"}
+	return AuthStatus{Status: "available", Detail: "API key from MOONSHOT_API_KEY", Source: p.credSource}
 }
 
 // moonshotAPIStrategy fetches the Moonshot pay-as-you-go balance:

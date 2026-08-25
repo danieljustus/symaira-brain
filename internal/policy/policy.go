@@ -108,6 +108,13 @@ var memoryTools = struct {
 	},
 }
 
+// usageTools is the versioned tool list for the usage server. It has no
+// mode presets (like skills): enabled exposes the whole (single-tool)
+// universe, narrowed only by tools_allow/tools_deny.
+var usageTools = []string{
+	"get_ai_usage",
+}
+
 // identityParameters is the versioned, explicit mapping of backend aliases to
 // the parameter that carries the active profile identity. An alias absent from
 // this table is intentionally forwarded without guessed identity fields.
@@ -149,14 +156,17 @@ func presetForMode(alias, mode string) ([]string, bool) {
 }
 
 // universeFor returns the maximal versioned tool list this package knows
-// about for alias (vault's "full" preset, memory's "read_write" preset).
-// Skills has no bounded universe — see Evaluate — and returns nil.
+// about for alias (vault's "full" preset, memory's "read_write" preset,
+// usage's single tool). Skills has no bounded universe — see Evaluate —
+// and returns nil.
 func universeFor(alias string) []string {
 	switch alias {
 	case profile.ServerVault:
 		return vaultTools.Full
 	case profile.ServerMemory:
 		return memoryTools.ReadWrite
+	case profile.ServerUsage:
+		return usageTools
 	default:
 		return nil
 	}
@@ -182,11 +192,11 @@ func PresetTools(alias, mode string) ([]string, error) {
 }
 
 // Evaluate computes the exposure Report for one server alias
-// ("vault"|"memory"|"skills") given its resolved profile.ServerConfig and
-// the child's live tool list (typically from tools/list). Pass the
-// package's own KnownTools(alias) as liveTools to preview policy before a
-// live connection exists — see EvaluatePreset for vault/memory's ready-made
-// version of that.
+// ("vault"|"memory"|"skills"|"usage") given its resolved
+// profile.ServerConfig and the child's live tool list (typically from
+// tools/list). Pass the package's own KnownTools(alias) as liveTools to
+// preview policy before a live connection exists — see EvaluatePreset for
+// vault/memory's ready-made version of that.
 //
 // Resolution order, matching the profile schema's documented rules
 // (tools_allow/tools_deny override mode presets; deny always wins):
@@ -195,8 +205,10 @@ func PresetTools(alias, mode string) ([]string, error) {
 //     exposed — allow/deny are not consulted.
 //  2. Otherwise the base set is tools_allow if non-empty (an explicit
 //     allow list replaces the mode preset entirely), else the active
-//     mode's preset (vault/memory) or the full live list (skills, which
-//     has no modes and is always-full-when-enabled).
+//     mode's preset (vault/memory), the full live list (skills, which
+//     has no modes and is always-full-when-enabled), or the usage
+//     universe (usage has no modes; its single tool is always-full
+//     when enabled).
 //  3. tools_deny is then subtracted from the base set, unconditionally.
 //  4. The result is intersected with liveTools: only tools the child
 //     actually reports can be Exposed.
@@ -208,7 +220,7 @@ func PresetTools(alias, mode string) ([]string, error) {
 // preset list is never exposed just because it exists).
 func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Report, error) {
 	switch alias {
-	case profile.ServerVault, profile.ServerMemory, profile.ServerSkills:
+	case profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage:
 	default:
 		return nil, fmt.Errorf("policy: unknown server alias %q", alias)
 	}
@@ -233,6 +245,14 @@ func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Repo
 			base = toSet(cfg.ToolsAllow)
 		} else {
 			base = toSet(liveTools)
+		}
+	case profile.ServerUsage:
+		// No modes, bounded single-tool universe: default is the usage
+		// tool set, narrowed only by an explicit tools_allow.
+		if len(cfg.ToolsAllow) > 0 {
+			base = toSet(cfg.ToolsAllow)
+		} else {
+			base = toSet(usageTools)
 		}
 	default:
 		preset, ok := presetForMode(alias, cfg.Mode)
@@ -288,7 +308,7 @@ func EvaluatePreset(alias string, cfg profile.ServerConfig) (*Report, error) {
 // universe, so everything not exposed there is Hidden, never Unknown.
 func classify(alias string, liveTools []string, exposed map[string]bool) (hidden, unknown []string) {
 	universe := universeFor(alias)
-	bounded := alias == profile.ServerVault || alias == profile.ServerMemory
+	bounded := alias == profile.ServerVault || alias == profile.ServerMemory || alias == profile.ServerUsage
 	known := toSet(universe)
 
 	for _, tool := range liveTools {

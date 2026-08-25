@@ -19,9 +19,11 @@ const (
 // ClaudeProvider — Claude usage provider.
 //
 // Fallback chain:
-//  1. Admin API key (api) — ANTHROPIC_ADMIN_KEY env; queries the
+//  1. Admin API key (api) — ANTHROPIC_ADMIN_KEY env (symvault:// URIs
+//     accepted); queries the
 //     organization cost/usage report.
-//  2. OAuth (oauth) — ~/.claude/.credentials.json file fallback; queries
+//  2. OAuth (oauth) — ANTHROPIC_OAUTH_TOKEN env (symvault:// URIs
+//     accepted), else ~/.claude/.credentials.json file fallback; queries
 //     GET /api/oauth/usage (session + weekly windows).
 //
 // The Swift original's primary OAuth source — the macOS Keychain entry
@@ -31,9 +33,13 @@ const (
 // plain file reads), consistent with every other provider ported so far.
 // Mirrors symaira-cockpit's ClaudeUsageProvider.
 type ClaudeProvider struct {
-	adminKey   string
-	oauthToken string
-	client     *http.Client
+	adminKey    string
+	adminErr    error
+	adminSource string
+	oauthToken  string
+	oauthErr    error
+	oauthSource string
+	client      *http.Client
 }
 
 // NewClaudeProvider reads ANTHROPIC_ADMIN_KEY and the Claude CLI's own
@@ -42,10 +48,16 @@ func NewClaudeProvider(client *http.Client) *ClaudeProvider {
 	if client == nil {
 		client = http.DefaultClient
 	}
+	adminKey, adminSource, adminErr := resolveEnv("ANTHROPIC_ADMIN_KEY")
+	oauthToken, oauthSource, oauthErr := resolveFileCredential("ANTHROPIC_OAUTH_TOKEN", readClaudeFileToken)
 	return &ClaudeProvider{
-		adminKey:   os.Getenv("ANTHROPIC_ADMIN_KEY"),
-		oauthToken: readClaudeFileToken(),
-		client:     client,
+		adminKey:    adminKey,
+		adminErr:    adminErr,
+		adminSource: adminSource,
+		oauthToken:  oauthToken,
+		oauthErr:    oauthErr,
+		oauthSource: oauthSource,
+		client:      client,
 	}
 }
 
@@ -97,13 +109,19 @@ func (p *ClaudeProvider) Strategies() []Strategy {
 }
 
 func (p *ClaudeProvider) AuthStatus() AuthStatus {
+	if p.adminKey == "" && p.oauthToken == "" {
+		if p.adminErr != nil {
+			return authErrStatus(p.adminErr)
+		}
+		if p.oauthErr != nil {
+			return authErrStatus(p.oauthErr)
+		}
+		return AuthStatus{Status: "missing", Detail: "No Claude credentials found — add an admin key or sign in with the Claude CLI"}
+	}
 	if p.oauthToken != "" {
-		return AuthStatus{Status: "available", Detail: "Signed in via Claude Code OAuth token (file)", Source: "file"}
+		return AuthStatus{Status: "available", Detail: "Signed in via Claude Code OAuth token", Source: p.oauthSource}
 	}
-	if p.adminKey != "" {
-		return AuthStatus{Status: "available", Detail: "Admin API key from ANTHROPIC_ADMIN_KEY", Source: "env"}
-	}
-	return AuthStatus{Status: "missing", Detail: "No Claude credentials found — add an admin key or sign in with the Claude CLI"}
+	return AuthStatus{Status: "available", Detail: "Admin API key from ANTHROPIC_ADMIN_KEY", Source: p.adminSource}
 }
 
 type claudeError struct {
@@ -120,7 +138,7 @@ func (e *claudeError) Error() string {
 		return "Claude returned an invalid response"
 	case "status":
 		if e.status == 401 || e.status == 403 {
-			return fmt.Sprintf("Claude rejected the credentials (HTTP %d). Re-auth or switch the usage source.", e.status)
+			return fmt.Sprintf("Claude rejected the login (HTTP %d). Re-auth or switch the usage source.", e.status)
 		}
 		return fmt.Sprintf("Claude request failed with HTTP %d", e.status)
 	default:

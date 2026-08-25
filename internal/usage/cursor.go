@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -27,6 +26,8 @@ const (
 // path only).
 type CursorProvider struct {
 	cookieHeader string
+	credErr      error
+	credSource   string
 	client       *http.Client
 }
 
@@ -35,7 +36,8 @@ func NewCursorProvider(client *http.Client) *CursorProvider {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	return &CursorProvider{cookieHeader: os.Getenv("CURSOR_COOKIE"), client: client}
+	cookieHeader, credSource, credErr := resolveEnv("CURSOR_COOKIE")
+	return &CursorProvider{cookieHeader: cookieHeader, credErr: credErr, credSource: credSource, client: client}
 }
 
 func (p *CursorProvider) ID() string          { return cursorProviderID }
@@ -50,8 +52,11 @@ func (p *CursorProvider) Strategies() []Strategy {
 }
 
 func (p *CursorProvider) AuthStatus() AuthStatus {
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
+	}
 	if p.cookieHeader != "" {
-		return AuthStatus{Status: "available", Detail: "Cookie configured (CURSOR_COOKIE)", Source: "env"}
+		return AuthStatus{Status: "available", Detail: "Cookie configured (CURSOR_COOKIE)", Source: p.credSource}
 	}
 	return AuthStatus{Status: "missing", Detail: "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"}
 }

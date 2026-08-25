@@ -27,6 +27,8 @@ const (
 // symaira-cockpit's CopilotUsageProvider.
 type CopilotProvider struct {
 	accessToken    string
+	credErr        error
+	credSource     string
 	enterpriseHost string // "" = github.com
 	client         *http.Client
 }
@@ -37,8 +39,13 @@ func NewCopilotProvider(client *http.Client) *CopilotProvider {
 	if client == nil {
 		client = http.DefaultClient
 	}
+	accessToken, credSource, credErr := resolveFileCredential("COPILOT_ACCESS_TOKEN", func() string {
+		return readCopilotToken(copilotConfigDir())
+	})
 	return &CopilotProvider{
-		accessToken: readCopilotToken(copilotConfigDir()),
+		accessToken: accessToken,
+		credErr:     credErr,
+		credSource:  credSource,
 		client:      client,
 	}
 }
@@ -105,7 +112,10 @@ func (p *CopilotProvider) Strategies() []Strategy {
 
 func (p *CopilotProvider) AuthStatus() AuthStatus {
 	if p.accessToken != "" {
-		return AuthStatus{Status: "available", Detail: "Signed in via GitHub Copilot", Source: "file"}
+		return AuthStatus{Status: "available", Detail: "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)", Source: p.credSource}
+	}
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
 	}
 	return AuthStatus{Status: "missing", Detail: "No Copilot token found — sign in with the Copilot CLI"}
 }
@@ -128,7 +138,7 @@ func (e *copilotError) Error() string {
 		return "Copilot returned an invalid response"
 	case "status":
 		if e.status == 401 || e.status == 403 {
-			return fmt.Sprintf("Copilot rejected the token (HTTP %d). Re-authenticate with GitHub Copilot.", e.status)
+			return fmt.Sprintf("Copilot rejected the login (HTTP %d). Re-authenticate with GitHub Copilot.", e.status)
 		}
 		return fmt.Sprintf("Copilot request failed with HTTP %d", e.status)
 	default:

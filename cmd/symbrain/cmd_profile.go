@@ -100,6 +100,7 @@ func serverSummaries(p *profile.Profile) []serverSummary {
 		{Server: profile.ServerVault, Enabled: p.Servers.Vault.Enabled, Mode: p.Servers.Vault.Mode},
 		{Server: profile.ServerMemory, Enabled: p.Servers.Memory.Enabled, Mode: p.Servers.Memory.Mode},
 		{Server: profile.ServerSkills, Enabled: p.Servers.Skills.Enabled},
+		{Server: profile.ServerUsage, Enabled: p.Servers.Usage.Enabled},
 	}
 }
 
@@ -188,6 +189,7 @@ func buildProfileShowReport(p *profile.Profile) profileShowReport {
 			buildServerShowReport(profile.ServerVault, p.Servers.Vault),
 			buildServerShowReport(profile.ServerMemory, p.Servers.Memory),
 			buildServerShowReport(profile.ServerSkills, p.Servers.Skills),
+			buildServerShowReport(profile.ServerUsage, p.Servers.Usage),
 		},
 	}
 }
@@ -210,6 +212,9 @@ func buildServerShowReport(alias string, cfg profile.ServerConfig) profileShowSe
 	case profile.ServerSkills:
 		r.Note = "skills has no mode preset; effective tools are always-full-when-enabled, " +
 			"narrowed only by tools_allow/tools_deny, and require a live connection to enumerate"
+	case profile.ServerUsage:
+		r.Note = "usage has no mode preset; the single tool get_ai_usage is exposed when enabled, " +
+			"narrowed only by tools_allow/tools_deny"
 	}
 	return r
 }

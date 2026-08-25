@@ -278,8 +278,8 @@ func TestKimiAuthErrorIsUnderstandableWithoutTokenMaterial(t *testing.T) {
 		t.Fatalf("expected *kimiError, got %v (%T)", err, err)
 	}
 	message := strings.ToLower(kErr.Error())
-	if !strings.Contains(message, "credential") {
-		t.Errorf("error = %q, want it to mention credential", kErr.Error())
+	if !strings.Contains(message, "login") {
+		t.Errorf("error = %q, want it to mention login", kErr.Error())
 	}
 	if strings.Contains(kErr.Error(), "kimi-super-secret-key") {
 		t.Error("token material must never leak into the error")

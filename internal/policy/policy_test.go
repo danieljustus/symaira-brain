@@ -268,6 +268,61 @@ func TestEvaluate_Skills(t *testing.T) {
 	}
 }
 
+func TestEvaluate_Usage(t *testing.T) {
+	tests := []struct {
+		name        string
+		cfg         profile.ServerConfig
+		live        []string
+		wantExposed []string
+		wantHidden  []string
+		wantUnknown []string
+	}{
+		{
+			name:        "enabled exposes the single usage tool",
+			cfg:         profile.ServerConfig{Enabled: true},
+			live:        []string{"get_ai_usage"},
+			wantExposed: []string{"get_ai_usage"},
+		},
+		{
+			name:        "disabled exposes nothing",
+			cfg:         profile.ServerConfig{Enabled: false},
+			live:        []string{"get_ai_usage"},
+			wantExposed: []string{},
+			wantHidden:  []string{"get_ai_usage"},
+		},
+		{
+			name:        "tools_deny hides the usage tool",
+			cfg:         profile.ServerConfig{Enabled: true, ToolsDeny: []string{"get_ai_usage"}},
+			live:        []string{"get_ai_usage"},
+			wantExposed: []string{},
+			wantHidden:  []string{"get_ai_usage"},
+		},
+		{
+			name:        "unknown tool is never exposed (bounded universe)",
+			cfg:         profile.ServerConfig{Enabled: true},
+			live:        []string{"get_ai_usage", "usage_delete_all"},
+			wantExposed: []string{"get_ai_usage"},
+			wantUnknown: []string{"usage_delete_all"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			report, err := Evaluate(profile.ServerUsage, tt.cfg, tt.live)
+			if err != nil {
+				t.Fatalf("Evaluate() error = %v, want nil", err)
+			}
+			assertStringSet(t, "Exposed", report.Exposed, tt.wantExposed)
+			if tt.wantHidden != nil {
+				assertStringSet(t, "Hidden", report.Hidden, tt.wantHidden)
+			}
+			if tt.wantUnknown != nil {
+				assertStringSet(t, "Unknown", report.Unknown, tt.wantUnknown)
+			}
+		})
+	}
+}
+
 func TestEvaluate_UnknownServerAliasErrors(t *testing.T) {
 	_, err := Evaluate("nope", profile.ServerConfig{Enabled: true}, nil)
 	if err == nil {

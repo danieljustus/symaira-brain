@@ -90,7 +90,9 @@ server appears with the tools your profile exposes. Every gateway
 connection also exposes two symbrain-owned tools that are never filtered
 by profile policy: `bootstrap` (call it first — it reports what this
 profile exposes and the live tool catalog) and `patterns` (promoted,
-recurring tool sequences as read-only context). See the
+recurring tool sequences as read-only context). When the profile enables
+`[servers.usage]`, a third gateway-owned tool, `get_ai_usage`, reports AI
+subscription/token usage per provider (see `symbrain usage`). See the
 [command reference](#command-reference).
 
 Supported `--harness` values: `claude`, `claude-desktop`, `cursor`,
@@ -256,6 +258,12 @@ filtered:
   across sessions for this profile. Read-only context — symbrain never
   executes a pattern; artifacts that stabilize into durable authored
   content belong to symskills.
+- **`get_ai_usage`** — profile-gated via `[servers.usage] enabled`. Fetches
+  AI subscription/token usage across the ported providers (Claude, Codex,
+  Copilot, Cursor, Kimi, Moonshot, Nous Portal, OpenCode, OpenRouter,
+  Antigravity) and returns the same schema-versioned report as
+  `symbrain usage --output json`. Read-only; unconfigured providers are
+  reported as not set up, never as errors.
 
 ### Migration from `recipes`
 

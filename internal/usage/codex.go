@@ -22,6 +22,8 @@ const (
 // provider. Mirrors symaira-cockpit's CodexUsageProvider.
 type CodexProvider struct {
 	accessToken string
+	credErr     error
+	credSource  string
 	homeDir     string
 	client      *http.Client
 }
@@ -33,8 +35,13 @@ func NewCodexProvider(client *http.Client) *CodexProvider {
 		client = http.DefaultClient
 	}
 	home := codexHomeDir()
+	accessToken, credSource, credErr := resolveFileCredential("CODEX_ACCESS_TOKEN", func() string {
+		return readCodexAccessToken(home)
+	})
 	return &CodexProvider{
-		accessToken: readCodexAccessToken(home),
+		accessToken: accessToken,
+		credErr:     credErr,
+		credSource:  credSource,
 		homeDir:     home,
 		client:      client,
 	}
@@ -84,7 +91,10 @@ func (p *CodexProvider) Strategies() []Strategy {
 
 func (p *CodexProvider) AuthStatus() AuthStatus {
 	if p.accessToken != "" {
-		return AuthStatus{Status: "available", Detail: "Signed in via Codex CLI OAuth", Source: "file"}
+		return AuthStatus{Status: "available", Detail: "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)", Source: p.credSource}
+	}
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
 	}
 	if _, err := os.Stat(filepath.Join(p.homeDir, "auth.json")); err == nil {
 		return AuthStatus{Status: "expired", Detail: "Codex auth file found but no valid token — re-auth with the Codex CLI", Source: "file"}
