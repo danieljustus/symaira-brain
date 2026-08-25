@@ -311,3 +311,109 @@ jobs:
           if [ -n "${KEYCHAIN_PATH:-}" ] && [ -f "$KEYCHAIN_PATH" ]; then
             security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
           fi
+
+  # ---------------------------------------------------------------------------
+  # Homebrew distribution. The CLI Formula (Formula/symbrain.rb) is already
+  # pushed by GoReleaser (`brews:`) in the `release` job; this job publishes
+  # the macOS GUI as a cask (Casks/symbrain.rb) in danieljustus/homebrew-tap
+  # once the signed+notarized DMG is on the release, so the tap can never point
+  # at a partial release.
+  # ---------------------------------------------------------------------------
+  bump-homebrew:
+    name: Bump Homebrew cask
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    needs: [release, macos-gui-dmg]
+    steps:
+      - name: Determine version
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # On tag push (release workflow): use GITHUB_REF_NAME.
+          # On workflow_dispatch: use the provided input or the latest release
+          # tag (there is no source checkout here, so resolve via the GH API
+          # instead of git describe).
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ -n "${{ inputs.tag }}" ]]; then
+              TAG="${{ inputs.tag }}"
+            else
+              TAG="$(gh release list --repo danieljustus/symaira-brain --limit 1 --json tagName --jq '.[0].tagName')"
+            fi
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using tag=$TAG version=$VERSION"
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: danieljustus/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          path: homebrew-tap
+
+      - name: Download DMG asset and compute checksum
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          gh release download "${TAG}" \
+            --repo danieljustus/symaira-brain \
+            --pattern "Symaira-Brain-${VERSION}-macos.dmg" \
+            --dir artifacts
+          DMG_SHA256=$(shasum -a 256 "artifacts/Symaira-Brain-${VERSION}-macos.dmg" | awk '{print $1}')
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "DMG_SHA256=$DMG_SHA256" >> "$GITHUB_ENV"
+
+      - name: Write cask
+        run: |
+          set -euo pipefail
+          mkdir -p homebrew-tap/Casks
+          cat > homebrew-tap/Casks/symbrain.rb <<EOF
+          cask "symbrain" do
+            version "${VERSION}"
+            sha256 "${DMG_SHA256}"
+
+            url "https://github.com/danieljustus/symaira-brain/releases/download/v#{version}/Symaira-Brain-#{version}-macos.dmg"
+            name "Symaira Brain"
+            desc "Portable agent-context layer: one MCP gateway multiplexing vault, memory, and skills for AI harnesses"
+            homepage "https://github.com/danieljustus/symaira-brain"
+
+            livecheck do
+              url "https://github.com/danieljustus/symaira-brain/releases/latest"
+              strategy :header_match
+              regex(/Symaira-Brain-(\d+(?:\.\d+)*)-macos\.dmg/i)
+            end
+
+            depends_on macos: :sonoma
+
+            app "Symaira Brain.app"
+
+            zap trash: [
+              "~/Library/Application Support/Symaira Brain",
+              "~/Library/Preferences/com.symaira.brain.plist",
+              "~/Library/Caches/com.symaira.brain",
+            ]
+          end
+          EOF
+
+      - name: Commit and push cask
+        run: |
+          set -euo pipefail
+          cd homebrew-tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/symbrain.rb
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Bump symbrain to v${VERSION}"
+          git push
