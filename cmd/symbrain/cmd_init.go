@@ -46,6 +46,9 @@ enabled = true
 #
 # [servers.skills]
 # binary_path = ""
+#
+# [servers.usage]
+# binary_path = ""
 `
 
 const personalProfileTOML = `# Example profile: full access for trusted personal use.
@@ -62,6 +65,9 @@ enabled = true
 mode    = "read_write"
 
 [servers.skills]
+enabled = true
+
+[servers.usage]
 enabled = true
 
 [audit]
@@ -82,6 +88,9 @@ enabled = true
 mode    = "read_only"
 
 [servers.skills]
+enabled = true
+
+[servers.usage]
 enabled = true
 
 [audit]

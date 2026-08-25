@@ -103,8 +103,13 @@ enabled = true
 		t.Errorf("description = %v, want %q", e["description"], "Full access")
 	}
 	servers, ok := e["servers"].([]any)
-	if !ok || len(servers) != 3 {
-		t.Fatalf("servers = %v, want 3 entries", e["servers"])
+	if !ok || len(servers) != 4 {
+		t.Fatalf("servers = %v, want 4 entries (vault, memory, skills, usage)", e["servers"])
+	}
+	// usage defaults to disabled when absent from the profile file.
+	last := servers[3].(map[string]any)
+	if last["server"] != "usage" || last["enabled"] != false {
+		t.Fatalf("usage summary = %v, want {server:usage enabled:false}", last)
 	}
 }
 

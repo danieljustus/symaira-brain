@@ -16,15 +16,17 @@ const (
 // OpenRouterProvider — the first vertical AI-usage provider ported to Go.
 //
 // Data source: the credits/key API at https://openrouter.ai/api/v1.
-// Credential resolution for this pass is OPENROUTER_API_KEY only —
-// symvault-backed resolution needs a config.toml schema decision that is
-// out of scope here (issue #290 progress notes this as a follow-up).
+// Credential source: OPENROUTER_API_KEY env. A symvault://<path> (or
+// deprecated vault://<path>) value is resolved through the secret store
+// (internal/memory/secrets) — see resolveEnv.
 // Mirrors symaira-cockpit's OpenRouterUsageProvider
 // (tune/Sources/SymTuneCore/OpenRouterUsageProvider.swift).
 type OpenRouterProvider struct {
-	apiKey  string
-	baseURL string
-	client  *http.Client
+	apiKey     string
+	credErr    error
+	credSource string
+	baseURL    string
+	client     *http.Client
 }
 
 // NewOpenRouterProvider reads OPENROUTER_API_KEY and the OPENROUTER_API_URL
@@ -37,10 +39,13 @@ func NewOpenRouterProvider(client *http.Client) *OpenRouterProvider {
 	if baseURL == "" {
 		baseURL = openRouterDefaultBase
 	}
+	apiKey, credSource, credErr := resolveEnv("OPENROUTER_API_KEY")
 	return &OpenRouterProvider{
-		apiKey:  os.Getenv("OPENROUTER_API_KEY"),
-		baseURL: baseURL,
-		client:  client,
+		apiKey:     apiKey,
+		credErr:    credErr,
+		credSource: credSource,
+		baseURL:    baseURL,
+		client:     client,
 	}
 }
 
@@ -56,10 +61,13 @@ func (p *OpenRouterProvider) Strategies() []Strategy {
 }
 
 func (p *OpenRouterProvider) AuthStatus() AuthStatus {
+	if p.credErr != nil {
+		return authErrStatus(p.credErr)
+	}
 	if p.apiKey == "" {
 		return AuthStatus{Status: "missing", Detail: "no API key configured (OPENROUTER_API_KEY)"}
 	}
-	return AuthStatus{Status: "available", Detail: "API key from OPENROUTER_API_KEY", Source: "env"}
+	return AuthStatus{Status: "available", Detail: "API key from OPENROUTER_API_KEY", Source: p.credSource}
 }
 
 // openRouterAPIStrategy fetches OpenRouter credit/usage state via the key

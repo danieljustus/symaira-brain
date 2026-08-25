@@ -119,10 +119,11 @@ var knownServers = []struct {
 	{"vault", "symvault", "brew install danieljustus/tap/symvault"},
 }
 
-// builtinServers are the state cores that ship inside this binary. Doctor
-// lists them so the report answers "is memory available?" rather than
-// silently omitting the question.
-var builtinServers = []string{"memory", "skills"}
+// builtinServers are the state cores and embedded tools that ship inside
+// this binary. Doctor lists them so the report answers "is memory
+// available?" rather than "is the sibling binary present?" (usage is the
+// gateway-owned usage tool — embedded like memory and skills).
+var builtinServers = []string{"memory", "skills", "usage"}
 
 func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)

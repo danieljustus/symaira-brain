@@ -20,6 +20,7 @@ const (
 	ServerVault  = "vault"
 	ServerMemory = "memory"
 	ServerSkills = "skills"
+	ServerUsage  = "usage"
 )
 
 // Memory server modes.
@@ -52,14 +53,15 @@ type Profile struct {
 	Warnings []string `json:"warnings,omitempty"`
 }
 
-// Servers holds the three state-core server configs a profile can shape.
+// Servers holds the state-core/config server configs a profile can shape.
 // This is a fixed struct rather than a map — symbrain composes exactly
-// these three servers. Only vault has an external binary override in the
-// global config; memory and skills are embedded in symbrain.
+// these servers. Only vault has an external binary override in the
+// global config; memory, skills and usage are embedded in symbrain.
 type Servers struct {
 	Vault  ServerConfig `json:"vault"`
 	Memory ServerConfig `json:"memory"`
 	Skills ServerConfig `json:"skills"`
+	Usage  ServerConfig `json:"usage"`
 }
 
 // ServerConfig is one [servers.<alias>] table.
@@ -112,6 +114,7 @@ var knownServerAliases = map[string]bool{
 	ServerVault:  true,
 	ServerMemory: true,
 	ServerSkills: true,
+	ServerUsage:  true,
 }
 
 // validNamePattern restricts profile names to a safe, unambiguous charset.
@@ -245,8 +248,8 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 	if len(unknown) > 0 {
 		sort.Strings(unknown)
 		return Servers{}, nil, fmt.Errorf(
-			"unknown server alias(es): %s (must be one of %s, %s, %s)",
-			strings.Join(unknown, ", "), ServerVault, ServerMemory, ServerSkills)
+			"unknown server alias(es): %s (must be one of %s, %s, %s, %s)",
+			strings.Join(unknown, ", "), ServerVault, ServerMemory, ServerSkills, ServerUsage)
 	}
 
 	var warnings []string
@@ -264,7 +267,10 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 	skills, skillsWarnings := resolveSkills(raw[ServerSkills])
 	warnings = append(warnings, skillsWarnings...)
 
-	return Servers{Vault: vault, Memory: memory, Skills: skills}, warnings, nil
+	usage, usageWarnings := resolveUsage(raw[ServerUsage])
+	warnings = append(warnings, usageWarnings...)
+
+	return Servers{Vault: vault, Memory: memory, Skills: skills, Usage: usage}, warnings, nil
 }
 
 func resolveVault(fs fileServer) (ServerConfig, error) {
@@ -330,6 +336,24 @@ func resolveSkills(fs fileServer) (ServerConfig, []string) {
 	return sc, warnings
 }
 
+// resolveUsage never errors: usage has no modes in the spec, just
+// enabled/disabled plus optional tools_allow/tools_deny narrowing (the
+// single usage tool is get_ai_usage).
+func resolveUsage(fs fileServer) (ServerConfig, []string) {
+	sc := ServerConfig{
+		Enabled:    derefBool(fs.Enabled, false),
+		ToolsAllow: fs.ToolsAllow,
+		ToolsDeny:  fs.ToolsDeny,
+	}
+
+	var warnings []string
+	if fs.Mode != "" {
+		warnings = append(warnings, fmt.Sprintf(
+			"servers.usage: mode %q is ignored (usage has no modes)", fs.Mode))
+	}
+	return sc, warnings
+}
+
 func derefBool(p *bool, fallback bool) bool {
 	if p == nil {
 		return fallback
@@ -338,8 +362,8 @@ func derefBool(p *bool, fallback bool) bool {
 }
 
 // Server returns the ServerConfig for the given alias (e.g. "vault",
-// "memory", "skills"). Returns a zero-value ServerConfig for unknown
-// aliases (disabled).
+// "memory", "skills", "usage"). Returns a zero-value ServerConfig for
+// unknown aliases (disabled).
 func (p *Profile) Server(alias string) ServerConfig {
 	switch alias {
 	case ServerVault:
@@ -348,6 +372,8 @@ func (p *Profile) Server(alias string) ServerConfig {
 		return p.Servers.Memory
 	case ServerSkills:
 		return p.Servers.Skills
+	case ServerUsage:
+		return p.Servers.Usage
 	default:
 		return ServerConfig{}
 	}
