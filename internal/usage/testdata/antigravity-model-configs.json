@@ -1,0 +1,7 @@
+{
+  "code": 0,
+  "message": "",
+  "clientModelConfigs": [
+    { "label": "GPT-OSS", "modelOrAlias": { "model": "gpt-oss-20b" }, "quotaInfo": { "remainingFraction": 0.75, "resetTime": "2026-08-05T22:30:00Z" } }
+  ]
+}

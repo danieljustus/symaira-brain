@@ -46,6 +46,37 @@ func fakeErrorClient(err error) (*http.Client, *fakeTransport) {
 	return &http.Client{Transport: transport}, transport
 }
 
+// scriptedTransport returns one canned response per request, in order, and
+// records every request it saw. Mirrors symaira-cockpit's ScriptedNetwork
+// test seam (used where a strategy makes more than one HTTP call).
+type scriptedTransport struct {
+	responses []scriptedResponse
+	requests  []*http.Request
+}
+
+type scriptedResponse struct {
+	status int
+	body   []byte
+}
+
+func (t *scriptedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.requests = append(t.requests, req)
+	if len(t.requests) > len(t.responses) {
+		return nil, errBoom
+	}
+	r := t.responses[len(t.requests)-1]
+	return &http.Response{
+		StatusCode: r.status,
+		Body:       io.NopCloser(bytes.NewReader(r.body)),
+		Header:     make(http.Header),
+	}, nil
+}
+
+func scriptedClient(responses ...scriptedResponse) (*http.Client, *scriptedTransport) {
+	transport := &scriptedTransport{responses: responses}
+	return &http.Client{Transport: transport}, transport
+}
+
 func loadFixture(name string) []byte {
 	data, err := os.ReadFile("testdata/" + name)
 	if err != nil {

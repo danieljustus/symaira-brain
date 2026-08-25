@@ -95,9 +95,16 @@ func TestBuildReportRecordsChainFailure(t *testing.T) {
 	}
 }
 
-func TestAllProvidersReturnsThreeProviders(t *testing.T) {
+func TestAllProvidersReturnsTenProviders(t *testing.T) {
 	providers := AllProviders(nil)
-	if len(providers) != 3 {
-		t.Fatalf("AllProviders() = %d, want 3 (issue #290 progress: 8 more remain)", len(providers))
+	if len(providers) != 10 {
+		t.Fatalf("AllProviders() = %d, want 10", len(providers))
+	}
+	seen := map[string]bool{}
+	for _, p := range providers {
+		if seen[p.ID()] {
+			t.Errorf("duplicate provider id %q", p.ID())
+		}
+		seen[p.ID()] = true
 	}
 }

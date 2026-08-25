@@ -1,0 +1,16 @@
+{
+  "five_hour": {
+    "utilized": 45.0,
+    "limit": 100.0,
+    "resets_at": "2026-08-05T18:00:00Z"
+  },
+  "seven_day": {
+    "utilized": 120.0,
+    "limit": 400.0,
+    "resets_at": "2026-08-09T00:00:00Z"
+  },
+  "extra_usage": {
+    "used": 3.25,
+    "limit": 10.0
+  }
+}

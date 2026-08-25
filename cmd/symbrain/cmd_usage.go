@@ -50,9 +50,11 @@ Usage:
 
 The global --output table|json flag (or --json) selects the output format.
 
-Progress note: only OpenRouter, Moonshot and Nous Portal are ported so far
-(issue #290) — the remaining providers (Claude, Kimi, OpenCode, Cursor,
-Antigravity, Copilot, Codex) are tracked as follow-up work.
+Providers: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,
+OpenCode, OpenRouter, Antigravity. Credential resolution is env vars and
+plain file reads only — see each provider's doc comment in
+internal/usage for the macOS-Keychain / local-database strategies not
+ported from the Swift original.
 `)
 }
 
