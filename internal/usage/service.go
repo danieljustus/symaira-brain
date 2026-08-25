@@ -5,17 +5,29 @@ import (
 	"net/http"
 )
 
-// AllProviders returns every registered provider. Progress note (issue
-// #290): only the providers whose credential model needed no per-provider
-// architecture decision (plain API key or a portable auth-store file, no
-// macOS Keychain / CLI-OAuth-file complexity) are ported so far. The
-// remaining providers (Claude, Kimi, OpenCode, Cursor, Antigravity,
-// Copilot, Codex) are tracked as follow-up work on #290.
+// AllProviders returns every registered provider (issue #290: all 10 of
+// symaira-cockpit's AI-usage providers — OpenCodeWebUsageStrategy.swift is
+// a strategy within the OpenCode provider, not an 11th provider).
+//
+// Scope note: every provider's credential resolution here is portable (env
+// vars and plain file reads) — the Swift originals' macOS-Keychain
+// fallbacks are not ported, and two providers (Cursor, OpenCode) drop a
+// second, SQLite-database-backed local-history strategy that would need a
+// new dependency decision (CGO vs. a pure-Go/WASM SQLite reader) to port
+// cross-platform. Each provider's doc comment states exactly which of the
+// Swift original's strategies made the cut and why.
 func AllProviders(client *http.Client) []Provider {
 	return []Provider{
-		NewOpenRouterProvider(client),
+		NewClaudeProvider(client),
+		NewCodexProvider(client),
+		NewCopilotProvider(client),
+		NewCursorProvider(client),
+		NewKimiProvider(client),
 		NewMoonshotProvider(client),
 		NewNousPortalProvider(client),
+		NewOpenCodeProvider(client),
+		NewOpenRouterProvider(client),
+		NewAntigravityProvider(),
 	}
 }
 

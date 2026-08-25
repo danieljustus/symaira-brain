@@ -1,0 +1,1 @@
+{"workspaces":[{"id":"wrk_abc123def","name":"personal"},{"id":"wrk_xyz789ghi","name":"work"}]}

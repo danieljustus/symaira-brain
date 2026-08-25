@@ -1,0 +1,23 @@
+{
+  "code": 0,
+  "message": "",
+  "response": {
+    "description": "Quota summary",
+    "groups": [
+      {
+        "displayName": "Gemini Models",
+        "description": "Weekly and five-hour limits",
+        "buckets": [
+          { "bucketId": "gemini-weekly", "displayName": "Weekly limit", "remainingFraction": 0.42, "resetTime": "2026-08-10T00:00:00Z", "disabled": false },
+          { "bucketId": "gemini-5h", "displayName": "5-hour limit", "remainingFraction": 0.85, "resetTime": "2026-08-05T23:00:00Z", "disabled": false }
+        ]
+      },
+      {
+        "displayName": "Claude and GPT models",
+        "buckets": [
+          { "bucketId": "claude-weekly", "displayName": "Weekly limit", "remainingFraction": 0.1, "resetTime": "2026-08-10T00:00:00Z", "disabled": false }
+        ]
+      }
+    ]
+  }
+}

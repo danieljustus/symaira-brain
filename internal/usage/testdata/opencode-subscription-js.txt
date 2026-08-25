@@ -1,0 +1,1 @@
+{"result":{rollingUsage:{usagePercent:12.34,resetInSec:3600},weeklyUsage:{usagePercent:45.6,resetInSec:86400}}}

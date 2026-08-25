@@ -1,0 +1,13 @@
+{
+  "code": "ok",
+  "message": "",
+  "userStatus": {
+    "email": "user@example.com",
+    "cascadeModelConfigData": {
+      "clientModelConfigs": [
+        { "label": "Gemini 2.5 Pro", "modelOrAlias": { "model": "gemini-2.5-pro" }, "quotaInfo": { "remainingFraction": 0.33, "resetTime": "2026-08-05T23:00:00Z" } },
+        { "label": "", "modelOrAlias": { "model": "claude-sonnet-4" }, "quotaInfo": { "remainingFraction": 0.5 } }
+      ]
+    }
+  }
+}
