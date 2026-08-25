@@ -203,6 +203,7 @@ Implemented today:
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
 | `symbrain serve --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
+| `symbrain memory sync --remote <url> [--pull\|--push] [--token <t>\|--encrypted-relay]` | Bidirectional remote memory sync against a Symaira Memory server (see `MEMORY-SYNC-MIGRATION.md`) — replaces the archived `symmemory sync` workflow. Reuses the local database in place; no export/import. Tokens and relay passphrases come from `--token`/`--relay-passphrase` or the `SYMBRAIN_MEMORY_SYNC_TOKEN` / `SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE` env vars (`--output table\|json`) |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
 

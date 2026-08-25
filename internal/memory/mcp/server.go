@@ -114,6 +114,14 @@ func (s *Server) DB() *db.DB {
 	return s.service.db
 }
 
+// HTTPHandler returns the full HTTP API handler (routes plus auth, CORS,
+// CSRF and rate-limit middleware). StartHTTPServer binds this handler to a
+// listener; embedding it via http.ServeMux/httptest lets callers control the
+// listener themselves (custom ports, tests) without a separate binary.
+func (s *Server) HTTPHandler() http.Handler {
+	return s.httpMux()
+}
+
 func writeJSONError(w http.ResponseWriter, status int, code string, safeMsg string, internal error) {
 	if internal != nil {
 		slog.Error("HTTP error", "code", code, "msg", safeMsg, "err", internal)
