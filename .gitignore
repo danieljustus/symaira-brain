@@ -14,3 +14,15 @@ coverage.out
 .github/coverage/
 .github/prerelease/
 .build/
+
+# --- Symaira internal working artifacts (never published; see root AGENTS.md) ---
+.github/app-test/
+.github/admin/
+.github/branch-protection/
+**/docs/adopt/
+**/docs/teardown/
+**/docs/planned/
+**/docs/intern/
+**/docs/roadmap.md
+PLANUNG.md
+ARCHITEKTUR.md
