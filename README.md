@@ -1,9 +1,12 @@
-# symbrain
+# Symaira Brain
 
 [![CI](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/danieljustus/symaira-brain?label=Release)](https://github.com/danieljustus/symaira-brain/releases/latest)
 [![Coverage](https://raw.githubusercontent.com/danieljustus/symaira-brain/coverage-data/badge.svg)](https://github.com/danieljustus/symaira-brain/tree/coverage-data)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/danieljustus/symaira-brain)](LICENSE)
 [![Go Version](https://img.shields.io/badge/Go-1.26%2B-00ADD8)](go.mod)
+
+![symbrain doctor terminal output](assets/symbrain-doctor.svg)
 
 `symbrain` is the portable agent-context layer for AI coding harnesses. It
 exposes the three Symaira *state cores* — credentials, memory/entities, and
@@ -19,6 +22,24 @@ each through its own profile, each seeing only what that profile exposes.
 
 > **Status:** `v0.7.0` released, in active development. Interfaces may
 > still change before `v1.0.0`.
+
+## Why symbrain
+
+- **One gateway, three state cores.** Credentials, memory, and the skill
+  catalog behind a single MCP surface — one server to wire into a harness,
+  not three.
+- **Least exposure by profile, not by trust.** Each harness connection is
+  bound to a profile that controls what it sees, so a shared or untrusted
+  harness never even *sees* a tool that could read a secret.
+- **Portable across every major harness.** Register once in Claude Code,
+  Cursor, Codex, Gemini, or opencode and each talks to the same underlying
+  cores through its own profile.
+- **One binary, in-process.** Memory and skills are compiled in, so there is
+  no multi-process dance for the common case; vault stays separate on purpose
+  because that process boundary *is* the security mechanism.
+- **Composable with `symguard`.** Capability shaping (what an agent can see)
+  and conduct policing (what a call is allowed to do) are deliberately
+  separate — put symguard in front when you need call-time enforcement.
 
 ## What symbrain is not
 
@@ -55,12 +76,25 @@ If you need per-call approval, risk classification, or a tamper-evident
 audit trail, put `symguard` in front of your servers. symbrain does not
 implement any of that itself.
 
+## Install
+
+The fastest way is Homebrew:
+
+```bash
+brew install danieljustus/tap/symbrain
+```
+
+Or install a tagged release directly from the module path:
+
+```bash
+go install github.com/danieljustus/symaira-brain/cmd/symbrain@latest
+```
+
+To build from source instead, see the [Building](#building) section.
+
 ## Quickstart
 
-Install the latest release or build from source (see the
-[Building](#building) section for the exact commands), then:
-
-![symbrain doctor terminal output](assets/symbrain-doctor.svg)
+After installing `symbrain`:
 
 ```bash
 # 1. Create the XDG config/data/cache directories, a default config,
