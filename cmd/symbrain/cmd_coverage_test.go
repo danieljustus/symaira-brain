@@ -19,44 +19,44 @@ import (
 // These tests drive the command entry points directly (in-process) so the
 // coverage tooling sees the full command bodies, not just the dispatch
 // table. The MCP gateway test reuses the fake-MCP child pattern proven by
-// hygiene_test.go, but runs cmdServe in-process by swapping os.Stdin and
+// hygiene_test.go, but runs cmdMcp in-process by swapping os.Stdin and
 // os.Stdout.
 
-// ---- serve ----
+// ---- mcp ----
 
-func TestCmdServe_RequiresProfile(t *testing.T) {
+func TestCmdMcp_RequiresProfile(t *testing.T) {
 	sandboxHome(t)
 
 	var stdout, stderr bytes.Buffer
-	code := cmdServe(nil, &stdout, &stderr)
+	code := cmdMcp(nil, &stdout, &stderr)
 
 	if code != exitcodes.ExitNoInput {
-		t.Fatalf("serve without --profile = %d, want %d", code, exitcodes.ExitNoInput)
+		t.Fatalf("mcp without --profile = %d, want %d", code, exitcodes.ExitNoInput)
 	}
 	if !strings.Contains(stderr.String(), "--profile is required") {
 		t.Errorf("stderr = %q, want missing-profile hint", stderr.String())
 	}
 }
 
-func TestCmdServe_UnknownProfile(t *testing.T) {
+func TestCmdMcp_UnknownProfile(t *testing.T) {
 	sandboxHome(t)
 
 	var stdout, stderr bytes.Buffer
-	code := cmdServe([]string{"--profile", "ghost"}, &stdout, &stderr)
+	code := cmdMcp([]string{"--profile", "ghost"}, &stdout, &stderr)
 
 	if code != exitcodes.ExitNoInput {
-		t.Fatalf("serve with unknown profile = %d, want %d", code, exitcodes.ExitNoInput)
+		t.Fatalf("mcp with unknown profile = %d, want %d", code, exitcodes.ExitNoInput)
 	}
 	if !strings.Contains(stderr.String(), "ghost") {
 		t.Errorf("stderr = %q, want it to name the missing profile", stderr.String())
 	}
 }
 
-// TestCmdServe_StdioHandshake runs the real MCP gateway in-process: a
+// TestCmdMcp_StdioHandshake runs the real MCP gateway in-process: a
 // profile backed by fake-MCP children, a JSON-RPC initialize round-trip,
-// then stdin close -> clean exit. This exercises cmdServe and buildServers
+// then stdin close -> clean exit. This exercises cmdMcp and buildServers
 // (spawn, catalog, handshake, routing, shutdown) with coverage attribution.
-func TestCmdServe_StdioHandshake(t *testing.T) {
+func TestCmdMcp_StdioHandshake(t *testing.T) {
 	home := sandboxHome(t)
 	fakeMCP := buildFakemcpOnce(t)
 
@@ -105,7 +105,7 @@ enabled = false
 	var stderr bytes.Buffer
 	codeCh := make(chan exitcodes.ExitCode, 1)
 	go func() {
-		codeCh <- cmdServe([]string{"--profile", "stdio-test"}, &stderr, &stderr)
+		codeCh <- cmdMcp([]string{"--profile", "stdio-test"}, &stderr, &stderr)
 	}()
 
 	frames := make(chan json.RawMessage)
@@ -176,10 +176,10 @@ enabled = false
 	select {
 	case code = <-codeCh:
 		if code != exitcodes.ExitOK {
-			t.Fatalf("cmdServe = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+			t.Fatalf("cmdMcp = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
 		}
 	case <-time.After(15 * time.Second):
-		t.Fatalf("cmdServe did not exit after stdin close (stderr: %s)", stderr.String())
+		t.Fatalf("cmdMcp did not exit after stdin close (stderr: %s)", stderr.String())
 	}
 	// The gateway is done writing; closing the write end lets the
 	// scanner see EOF so we can verify the full stdout stream.

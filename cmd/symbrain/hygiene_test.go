@@ -15,7 +15,7 @@ import (
 
 // TestStdioHygiene_ServeEmitsOnlyJSONRPC is the CI hygiene gate for the
 // MCP gateway: across startup, initialize, tools/list, a failing
-// tools/call and shutdown, `symbrain serve` must emit nothing but
+// tools/call and shutdown, `symbrain mcp` must emit nothing but
 // JSON-RPC frames on stdout. Diagnostics belong on stderr; any other
 // stdout byte breaks the harness transport.
 func TestStdioHygiene_ServeEmitsOnlyJSONRPC(t *testing.T) {
@@ -61,7 +61,7 @@ enabled = false
 		t.Fatal(err)
 	}
 
-	cmd := exec.Command(symbrainBin, "serve", "--profile", "hygiene")
+	cmd := exec.Command(symbrainBin, "mcp", "--profile", "hygiene")
 	cmd.Env = append(os.Environ(),
 		"HOME="+home,
 		"SYMBRAIN_SERVERS_VAULT_BINARY_PATH="+vaultWrapper,
@@ -80,7 +80,7 @@ enabled = false
 	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {
-		t.Fatalf("start symbrain serve: %v", err)
+		t.Fatalf("start symbrain mcp: %v", err)
 	}
 
 	frames := make(chan json.RawMessage)
@@ -202,11 +202,11 @@ enabled = false
 	select {
 	case err := <-waitErr:
 		if err != nil {
-			t.Fatalf("symbrain serve exited with error: %v (stderr: %s)", err, stderr.String())
+			t.Fatalf("symbrain mcp exited with error: %v (stderr: %s)", err, stderr.String())
 		}
 	case <-time.After(15 * time.Second):
 		_ = cmd.Process.Kill()
-		t.Fatalf("symbrain serve did not exit after stdin close (stderr: %s)", stderr.String())
+		t.Fatalf("symbrain mcp did not exit after stdin close (stderr: %s)", stderr.String())
 	}
 	if err := <-scanErr; err != nil {
 		t.Fatalf("stdout hygiene violated: %v", err)

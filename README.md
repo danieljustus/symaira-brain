@@ -172,12 +172,12 @@ symbrain profile add <name> [--from personal|restricted]
 symbrain profile remove <name> [--force]
 ```
 
-A profile can also be handed to `serve` as an explicit TOML file — e.g. a
+A profile can also be handed to `mcp` as an explicit TOML file — e.g. a
 room-local profile checked into a project — without touching the profiles
 directory:
 
 ```bash
-symbrain serve --profile-file ./room-profile.toml
+symbrain mcp --profile-file ./room-profile.toml
 ```
 
 `--profile-file` and `--profile` are mutually exclusive; the file is
@@ -201,11 +201,19 @@ Implemented today:
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP server names (`--output table\|json`) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
-| `symbrain serve --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive |
+| `symbrain mcp --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive. `serve` is a deprecated alias for this command (stderr-only notice; see below) |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
 | `symbrain memory sync --remote <url> [--pull\|--push] [--token <t>\|--encrypted-relay]` | Bidirectional remote memory sync against a Symaira Memory server (see `MEMORY-SYNC-MIGRATION.md`) — replaces the archived `symmemory sync` workflow. Reuses the local database in place; no export/import. Tokens and relay passphrases come from `--token`/`--relay-passphrase` or the `SYMBRAIN_MEMORY_SYNC_TOKEN` / `SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE` env vars (`--output table\|json`) |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
+
+> The stdio gateway previously lived at `symbrain serve`; it moved to
+> `symbrain mcp` (per the CLI vocabulary, `<tool> mcp` starts the stdio MCP
+> server). `serve` remains as a deprecated alias for one minor release and
+> prints its notice to **stderr only**, keeping stdout a clean JSON-RPC
+> transport. Harness configs written by `install`/`sync` use `mcp`.
+> Re-run `symbrain install` (or `symbrain sync`) after upgrading to refresh
+> pre-existing harness entries.
 
 ### Harness inventory schema
 
@@ -245,7 +253,7 @@ boundary and silently fall back to their built-in harness list when `symbrain`
 is absent or returns an unsupported schema.
 
 `install`/`uninstall` write a working MCP entry that *points at*
-`symbrain serve --profile <name>` — the harness spawns the gateway
+`symbrain mcp --profile <name>` — the harness spawns the gateway
 automatically when it connects. Alongside the policy-filtered child
 tools, the gateway registers two tools of its own that are never
 filtered:

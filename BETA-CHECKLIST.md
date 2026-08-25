@@ -16,7 +16,7 @@ symbrain built from source (`go build ./cmd/symbrain`), real
 - [x] `symbrain init` creates `~/.config/symbrain/` with config and profile
       scaffold (personal.toml, restricted.toml). (2026-07-21)
 - [x] `symbrain install --harness claude --profile personal` writes the Claude
-      MCP config entry (`.claude.json`) pointing at `symbrain serve --profile personal`.
+      MCP config entry (`.claude.json`) pointing at `symbrain mcp --profile personal`.
       (2026-07-21)
 - [ ] Claude Code attaches and sees memory-, vault- and skills-tools through
       the single symbrain server. **Requires GUI harness — to be executed by
@@ -27,13 +27,13 @@ symbrain built from source (`go build ./cmd/symbrain`), real
 - [x] Profile `restricted` with `servers.vault.mode = "request_only"` and
       `servers.memory.mode = "read_only"` loads without warnings.
       (2026-07-21)
-- [x] Over `symbrain serve --profile restricted --vault-agent claude-code`
+- [x] Over `symbrain mcp --profile restricted --vault-agent claude-code`
       (real children), `tools/list` exposes `memory_search`/`memory_get`/
       `memory_list` (3 read-only), hides `memory_set`, and vault exposes
       only `vault_generate_password`/`vault_health`/`vault_request_credential`
       (request_only). `vault_get_entry` is hidden.
       (2026-07-21)
-- [x] Over `symbrain serve --profile personal --vault-agent claude-code`
+- [x] Over `symbrain mcp --profile personal --vault-agent claude-code`
       (real children), `tools/list` exposes 25 tools across all three state
       cores (vault=10, memory=4, skills=7). `vault_get_entry` is visible.
       `memory_set` is visible. (2026-07-21)
@@ -74,7 +74,7 @@ symbrain built from source (`go build ./cmd/symbrain`), real
    --stdio`). Fixed by adding per-server args.
 2. **Vault agent flag required**: `symvault serve --stdio` requires
    `--agent <name>` and `--allow-locked` for non-interactive use. Added
-   `--vault-agent` flag to `symbrain serve` and `symbrain doctor`.
+   `--vault-agent` flag to `symbrain mcp` and `symbrain doctor`.
 3. **Audit not wired into gateway**: The audit package was implemented but
    not integrated into the MCP gateway's tool call path. Fixed by adding
    audit logging in `Server.ServeIO`.

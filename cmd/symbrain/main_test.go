@@ -110,8 +110,9 @@ func TestRun_StubSubcommandsExitOK(t *testing.T) {
 	// "install"/"uninstall" are excluded too: they are no longer stubs (see
 	// cmd_install_test.go / cmd_uninstall_test.go) and correctly require
 	// --harness.
-	// "serve" is excluded: it is no longer a stub (see cmd_serve.go) and
-	// correctly requires --profile.
+	// "mcp" is excluded: it is no longer a stub (see cmd_serve.go) and
+	// correctly requires --profile (the deprecated "serve" alias routes
+	// to the same gateway).
 	// "audit" is excluded: it is no longer a stub (see cmd_audit.go) and
 	// correctly requires a subcommand.
 	subcommands := []string{

@@ -230,7 +230,7 @@ struct SettingsView: View {
                 .font(.body)
                 .foregroundStyle(SymairaTheme.textSecondary)
 
-            Text("Daemon supervision (symbrain serve) is coming in a future release.")
+            Text("Daemon supervision (symbrain mcp) is coming in a future release.")
                 .font(.caption)
                 .foregroundStyle(SymairaTheme.textMuted)
                 .italic()

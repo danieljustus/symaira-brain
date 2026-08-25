@@ -5,5 +5,5 @@ model = "o3"
     args = ["run"]
     command = "other-tool"
   [mcp_servers.symbrain]
-    args = ["serve", "--profile", "personal"]
+    args = ["mcp", "--profile", "personal"]
     command = "symbrain"

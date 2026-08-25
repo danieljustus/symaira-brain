@@ -13,12 +13,12 @@ type Entry struct {
 }
 
 // NewEntry builds the standard symbrain MCP entry that binds a harness
-// connection to profile: {"command": "symbrain", "args": ["serve",
+// connection to profile: {"command": "symbrain", "args": ["mcp",
 // "--profile", profile]} (or the TOML-equivalent table for codex).
 func NewEntry(profile string) Entry {
 	return Entry{
 		Command: ServerName,
-		Args:    []string{"serve", "--profile", profile},
+		Args:    []string{"mcp", "--profile", profile},
 	}
 }
 

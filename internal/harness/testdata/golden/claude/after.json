@@ -9,7 +9,7 @@
     "symbrain": {
       "command": "symbrain",
       "args": [
-        "serve",
+        "mcp",
         "--profile",
         "personal"
       ]

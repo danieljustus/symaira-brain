@@ -7,7 +7,7 @@ func TestNewEntry(t *testing.T) {
 	if e.Command != "symbrain" {
 		t.Errorf("Command = %q, want %q", e.Command, "symbrain")
 	}
-	want := []string{"serve", "--profile", "personal"}
+	want := []string{"mcp", "--profile", "personal"}
 	if len(e.Args) != len(want) {
 		t.Fatalf("Args = %v, want %v", e.Args, want)
 	}
@@ -49,10 +49,10 @@ func TestEntry_Profile(t *testing.T) {
 		want   string
 		wantOK bool
 	}{
-		{"space form", []string{"serve", "--profile", "personal"}, "personal", true},
-		{"equals form", []string{"serve", "--profile=restricted"}, "restricted", true},
-		{"missing", []string{"serve"}, "", false},
-		{"dangling flag", []string{"serve", "--profile"}, "", false},
+		{"space form", []string{"mcp", "--profile", "personal"}, "personal", true},
+		{"equals form", []string{"mcp", "--profile=restricted"}, "restricted", true},
+		{"missing", []string{"mcp"}, "", false},
+		{"dangling flag", []string{"mcp", "--profile"}, "", false},
 		{"empty args", nil, "", false},
 	}
 	for _, tc := range cases {
