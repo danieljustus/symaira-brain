@@ -1,28 +1,17 @@
 ## What's changed
 
 ### Features
-- #250 Add passthrough subcommands for vault, memory, and skills
-- #251 Managed core runtime — setup, doctor --fix, resolution order
-- #249 Unified runtime availability and async audit reader in GUI
-- #217 Add Memory, Vault and Skills module screens to macOS app
+- #302 In-process skill sync and remote memory sync — closes #300 #301. `symbrain sync` now runs skill rendering/installation in-process (no archived `symskills` binary needed), and `symbrain memory sync --remote` replaces the archived `symmemory` runtime workflow with pull/push/token/encrypted-relay modes.
+- #303 Canonicalize the `symbrain mcp` command and rename the app bundle to "Symaira Brain" — closes #295 #296. `serve` stays as a deprecated alias (stderr-only notice); a thin `config get/set/path` command is added; the macOS app bundle and DMG are renamed.
+- #305 Publish the SymBrain GUI as a Homebrew cask — closes #294. Every release now ships `Casks/symbrain.rb` in the tap at the same version as the CLI formula.
 
-### Fixes
-- #230 Bound the Memory list to prevent AppKit row-height cache reentry
-- #232 Replace Memory list instead of diffing when search changes rows
-- #229 Name component behind each version number; label buttons for assistive tech
-- #246 Audit improvements: redaction, scanner fix, --json flag
+### Docs
+- #304 Bring the README onto the shared Symaira structure — closes #299.
 
-### CI
-- #252 Auto-bump PRs for managed core releases
-- #220 Add PR-time build/test gate for Swift GUI targets
+### Chore
+- #298 Stop tracking internal working artifacts.
 
-### Dependencies
-- #224 Bump github.com/danieljustus/symaira-corekit to v0.9.1
-- #253 Bump actions-minor-patch group (2 updates)
+### Closed Issues
+- #300, #301, #295, #296, #299, #294
 
-### Testing
-- #256 Make Install/downloadAndVerify testable without network hits
-- #259 Add coverage tests for setup commands and audit TailEntries
-- #261 Add error-path tests for managed download/extract/install
-
-**Full Changelog**: https://github.com/danieljustus/symaira-brain/compare/v0.6.0...v0.7.0
+**Full Changelog**: https://github.com/danieljustus/symaira-brain/compare/v0.7.1...v0.7.2
