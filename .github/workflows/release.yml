@@ -50,7 +50,11 @@ jobs:
           CGO_ENABLED: "0"
 
       - name: Test (race detector)
-        run: go test -race ./...
+        # The memory/db package alone exceeds Go's default 10m test timeout
+        # on shared ubuntu runners when its benchmark-style tests run under
+        # -race (see TestEmbeddingRecommendation). Raise the bound instead
+        # of dropping -race.
+        run: go test -race -timeout 30m ./...
 
   govulncheck:
     name: govulncheck
