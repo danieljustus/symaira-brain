@@ -1,0 +1,14 @@
+{
+  "data": {
+    "label": "free-key",
+    "usage": 1.25,
+    "limit": null,
+    "is_free_tier": true,
+    "rate_limit": {
+      "requests": 20,
+      "interval": "10s"
+    },
+    "usage_period": null,
+    "total_credits": null
+  }
+}

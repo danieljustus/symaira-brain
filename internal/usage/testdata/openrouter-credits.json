@@ -1,0 +1,17 @@
+{
+  "data": {
+    "label": "test-key",
+    "usage": 7.25,
+    "limit": 50.0,
+    "is_free_tier": false,
+    "rate_limit": {
+      "requests": 500,
+      "interval": "10s"
+    },
+    "usage_period": {
+      "start_time": "2026-08-01T00:00:00Z",
+      "end_time": "2026-09-01T00:00:00Z"
+    },
+    "total_credits": 50.0
+  }
+}

@@ -51,6 +51,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdProfileWithFormat(rest, stdout, stderr, format)
 	case "harness":
 		return cmdHarnessWithFormat(rest, stdout, stderr, format)
+	case "usage":
+		return cmdUsageWithFormat(rest, stdout, stderr, format)
 	case "serve":
 		return cmdServe(rest, stdout, stderr)
 	case "install":
@@ -114,7 +116,7 @@ func peekCommand(args []string) string {
 
 func isOutputCommand(command string) bool {
 	switch command {
-	case "version", "sync", "profile", "harness", "audit", "doctor":
+	case "version", "sync", "profile", "harness", "audit", "doctor", "usage":
 		return true
 	default:
 		return false
@@ -127,7 +129,7 @@ func printUsage(w io.Writer) {
 Usage:
   symbrain <command> [flags]
 
-Global output flags (version, sync, profile, audit, and doctor):
+Global output flags (version, sync, profile, harness, audit, usage, and doctor):
   --output table|json  Output format (default: table)
   --json               Shorthand for --output json
 
@@ -137,6 +139,7 @@ Commands:
   setup       Download and install pinned core binaries to ~/.symaira/bin
   profile     Manage profiles (list, show, add, remove)
   harness     Inspect registered AI harnesses and their MCP servers
+  usage       AI subscription/token usage per provider
   serve       Run the MCP gateway over stdio for a profile
   install     Register symbrain with a harness
   uninstall   Remove symbrain from a harness
