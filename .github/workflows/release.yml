@@ -201,13 +201,8 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen 2>/dev/null || brew upgrade xcodegen 2>/dev/null || true
 
-      - name: Set version in Info.plist
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          RUN_NUM="${{ github.run_number }}"
-          sed -i '' 's|<string>\$(MARKETING_VERSION)</string>|<string>'"${VERSION}"'</string>|' Sources/SymBrainApp/Info.plist
-          sed -i '' 's|<string>\$(CURRENT_PROJECT_VERSION)</string>|<string>'"${RUN_NUM}"'</string>|' Sources/SymBrainApp/Info.plist
-          echo "Updated version to ${VERSION}"
+      - name: Set app version
+        run: ./scripts/set-app-version.sh "${{ steps.version.outputs.version }}"
 
       - name: Generate Xcode project
         run: xcodegen generate

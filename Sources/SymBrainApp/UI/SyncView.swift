@@ -5,13 +5,20 @@ import SymBrainCore
 struct SyncView: View {
     let client: SymBrainClient
 
+    /// Persist the Dry Run toggle symmetrically across launches (#310).
+    /// Both ON (safe default) and OFF states survive app relaunch deterministically.
+    @AppStorage("syncDryRun") private var dryRun = true
+
     @StateObject private var vm: SyncViewModel
     /// Confirmation for the first live (writing) sync of a session (#148).
     @State private var showLiveSyncConfirmation = false
 
     init(client: SymBrainClient) {
         self.client = client
-        _vm = StateObject(wrappedValue: SyncViewModel(client: client))
+        let initialDryRun = UserDefaults.standard.object(forKey: "syncDryRun") as? Bool ?? true
+        let viewModel = SyncViewModel(client: client)
+        viewModel.dryRun = initialDryRun
+        _vm = StateObject(wrappedValue: viewModel)
     }
 
     var body: some View {
@@ -40,6 +47,9 @@ struct SyncView: View {
                 }
             }
             .padding(SymairaSpacing.xLarge)
+        }
+        .onAppear {
+            vm.dryRun = dryRun
         }
         // #148: the first live sync of a session asks for confirmation
         // before writing, since it can overwrite harness configuration.
@@ -70,43 +80,56 @@ struct SyncView: View {
     // MARK: - Controls
 
     private var controlsSection: some View {
-        HStack(spacing: SymairaSpacing.medium) {
-            Toggle(isOn: $vm.dryRun) {
-                Text("Dry Run")
-                    .foregroundStyle(SymairaTheme.textSecondary)
-            }
-            .toggleStyle(.switch)
-            .onChange(of: vm.dryRun) { _, newValue in
-                // #148: entering dry-run refreshes the preview (safe);
-                // leaving dry-run only clears the stale preview, never syncs.
-                Task { await vm.dryRunChanged(to: newValue) }
-            }
-
-            Spacer()
-
-            // #148: a live (writing) sync runs only from Sync Now, and the
-            // first one of a session is gated behind a confirmation alert.
-            Button(action: {
-                if vm.canSyncImmediately {
-                    Task { await vm.sync() }
-                } else {
-                    showLiveSyncConfirmation = true
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            HStack(spacing: SymairaSpacing.medium) {
+                Toggle(isOn: $dryRun) {
+                    Text("Dry Run")
+                        .foregroundStyle(SymairaTheme.textSecondary)
                 }
-            }) {
-                HStack(spacing: SymairaSpacing.medium) {
-                    if vm.isLoading {
-                        ProgressView()
-                            .scaleEffect(0.7)
-                            .frame(width: 14, height: 14)
+                .toggleStyle(.switch)
+                .onChange(of: dryRun) { _, newValue in
+                    vm.dryRun = newValue
+                    // #148: entering dry-run refreshes the preview (safe);
+                    // leaving dry-run only clears the stale preview, never syncs.
+                    Task { await vm.dryRunChanged(to: newValue) }
+                }
+
+                Spacer()
+
+                // #148: a live (writing) sync runs only from Sync Now, and the
+                // first one of a session is gated behind a confirmation alert.
+                Button(action: {
+                    if vm.canSyncImmediately {
+                        Task { await vm.sync() }
                     } else {
-                        Image(systemName: "arrow.triangle.2.circlepath")
+                        showLiveSyncConfirmation = true
                     }
-                    Text("Sync Now")
+                }) {
+                    HStack(spacing: SymairaSpacing.medium) {
+                        if vm.isLoading {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                                .frame(width: 14, height: 14)
+                        } else {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                        }
+                        Text("Sync Now")
+                    }
                 }
+                .symairaButtonStyle(.primary)
+                .accessibilityLabel(vm.isLoading ? "Syncing" : "Sync Now")
+                .disabled(vm.isLoading)
             }
-            .symairaButtonStyle(.primary)
-            .accessibilityLabel(vm.isLoading ? "Syncing" : "Sync Now")
-            .disabled(vm.isLoading)
+
+            // Warning copy aligned with persisted-off behavior (#310):
+            // Informs the user that dry run stays disabled across relaunches until turned back on.
+            if !dryRun {
+                SymairaNotice(
+                    title: "Live Mode Armed",
+                    message: "Dry Run is disabled and stays off across app relaunches until enabled again. Live sync writes instruction files directly.",
+                    tone: .warning
+                )
+            }
         }
         .padding(SymairaSpacing.medium)
         .glassCard()
