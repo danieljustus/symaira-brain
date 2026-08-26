@@ -53,7 +53,7 @@ type LLMVerdictProvider struct {
 // NewLLMVerdictProvider builds the LLM verdict tier for the given config.
 func NewLLMVerdictProvider(cfg config.ConflictConfig) *LLMVerdictProvider {
 	return &LLMVerdictProvider{
-		client:   llm.NewClient(cfg.LLMURL, cfg.LLMModel, 0),
+		client:   llm.NewClient(cfg.LLMURL, cfg.LLMModel, cfg.LLMProvider, 0),
 		provider: cfg.LLMProvider,
 	}
 }
@@ -81,14 +81,10 @@ func (p *LLMVerdictProvider) Verdicts(ctx context.Context, pairs []Pair) ([]Verd
 
 	var raw string
 	var err error
-	if p.provider == "openai" {
-		raw, err = p.client.Query(ctx, systemPrompt, sb.String(), "openai", "")
-	} else {
-		// Ollama path: pin the verdict JSON schema. The generic Query
-		// would force the consolidation schema, which is the wrong
-		// response shape here.
-		raw, err = p.client.QueryOllamaWithSchema(ctx, systemPrompt, sb.String(), verdictResponseSchema())
-	}
+	// The verdict schema is pinned on both provider paths. (Previously the
+	// OpenAI path fell through to the consolidation schema, which is the
+	// wrong response shape for verdicts.)
+	raw, err = p.client.QueryWithSchema(ctx, systemPrompt, sb.String(), p.provider, verdictResponseSchema())
 	if err != nil {
 		return nil, fmt.Errorf("conflict: llm verdict query: %w", err)
 	}

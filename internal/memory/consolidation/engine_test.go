@@ -120,8 +120,8 @@ func TestNewEngineDefaults(t *testing.T) {
 
 	// Test Ollama defaults
 	eng := NewEngine(database, embeddings, "", "", "", false, "chat", 0)
-	if eng.llmClient.OllamaURL != "http://localhost:11434/api/generate" {
-		t.Errorf("expected Ollama default URL, got %s", eng.llmClient.OllamaURL)
+	if eng.llmClient.OllamaBase != "http://localhost:11434" {
+		t.Errorf("expected Ollama default URL, got %s", eng.llmClient.OllamaBase)
 	}
 	if eng.llmClient.OllamaModel != "llama3" {
 		t.Errorf("expected Ollama default model 'llama3', got %s", eng.llmClient.OllamaModel)
@@ -132,8 +132,8 @@ func TestNewEngineDefaults(t *testing.T) {
 
 	// Test OpenAI defaults
 	eng2 := NewEngine(database, embeddings, "", "", "openai", false, "chat", 0)
-	if eng2.llmClient.OllamaURL != "http://localhost:11434/api/generate" {
-		t.Errorf("expected Ollama default URL, got %s", eng2.llmClient.OllamaURL)
+	if eng2.llmClient.OllamaBase != "http://localhost:11434" {
+		t.Errorf("expected Ollama default URL, got %s", eng2.llmClient.OllamaBase)
 	}
 	if eng2.llmClient.OllamaModel != "llama3" {
 		t.Errorf("expected Ollama default model 'llama3', got %s", eng2.llmClient.OllamaModel)

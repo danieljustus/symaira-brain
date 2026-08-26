@@ -158,11 +158,12 @@ func mathAbs(f float32) float32 {
 	return f
 }
 
-// TestGenerateVectorUsesOllamakitEmbedEndpoint guards the shared-transport
-// switch (#438): the generator must talk to Ollama through ollamakit's
-// /api/embed endpoint (plural, "input" field) instead of a hand-rolled
-// http.Client against the legacy /api/embeddings endpoint.
-func TestGenerateVectorUsesOllamakitEmbedEndpoint(t *testing.T) {
+// TestGenerateVectorUsesLLMKitEmbedEndpoint guards the shared-transport
+// switch (#321): the generator must talk to Ollama through llmkit's
+// OpenAI-compatible /v1/embeddings endpoint (plural, "input" field)
+// instead of a hand-rolled http.Client against the legacy /api/embeddings
+// endpoint.
+func TestGenerateVectorUsesLLMKitEmbedEndpoint(t *testing.T) {
 	var gotPath, gotBody string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := io.ReadAll(r.Body)
@@ -173,8 +174,12 @@ func TestGenerateVectorUsesOllamakitEmbedEndpoint(t *testing.T) {
 			vec[i] = float32(i+1) / float32(DefaultDimensions)
 		}
 		_ = json.NewEncoder(w).Encode(struct {
-			Embeddings [][]float32 `json:"embeddings"`
-		}{Embeddings: [][]float32{vec}})
+			Data []struct {
+				Embedding []float32 `json:"embedding"`
+			} `json:"data"`
+		}{Data: []struct {
+			Embedding []float32 `json:"embedding"`
+		}{{Embedding: vec}}})
 	}))
 	defer server.Close()
 
@@ -192,8 +197,8 @@ func TestGenerateVectorUsesOllamakitEmbedEndpoint(t *testing.T) {
 	if len(result.Vector) != DefaultDimensions {
 		t.Fatalf("expected %d dimensions, got %d", DefaultDimensions, len(result.Vector))
 	}
-	if gotPath != "/api/embed" {
-		t.Errorf("expected request to ollamakit /api/embed, got path %q", gotPath)
+	if gotPath != "/v1/embeddings" {
+		t.Errorf("expected request to llmkit /v1/embeddings, got path %q", gotPath)
 	}
 	if !strings.Contains(gotBody, `"input"`) {
 		t.Errorf("expected request body with \"input\" field, got %s", gotBody)

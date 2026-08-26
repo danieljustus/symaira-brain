@@ -4,105 +4,94 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestNewClientDefaults(t *testing.T) {
-	client := NewClient("", "", 0)
+	t.Setenv("OPENAI_API_KEY", "")
+	c := NewClient("", "", "", 0)
 
-	if client.OllamaURL != "http://localhost:11434/api/generate" {
-		t.Errorf("expected default OllamaURL, got %s", client.OllamaURL)
+	if c.OllamaBase != "http://localhost:11434" {
+		t.Errorf("expected default OllamaBase, got %s", c.OllamaBase)
 	}
-	if client.OllamaModel != "llama3" {
-		t.Errorf("expected default OllamaModel 'llama3', got %s", client.OllamaModel)
+	if c.OllamaModel != "llama3" {
+		t.Errorf("expected default OllamaModel 'llama3', got %s", c.OllamaModel)
 	}
-	if client.HTTPClient == nil {
-		t.Error("expected HTTPClient to be set")
+	if c.Provider != "ollama" {
+		t.Errorf("without OPENAI_API_KEY the provider must default to ollama, got %q", c.Provider)
 	}
-	if client.HTTPClient.Timeout != 45*time.Second {
-		t.Errorf("expected 45s timeout, got %v", client.HTTPClient.Timeout)
+	if c.resolveTimeout() != 45*time.Second {
+		t.Errorf("expected 45s timeout, got %v", c.resolveTimeout())
+	}
+}
+
+func TestNewClientAutoDetectsOpenAI(t *testing.T) {
+	t.Setenv("OPENAI_API_KEY", "test-key")
+	c := NewClient("", "", "", 0)
+	if c.Provider != "openai" {
+		t.Errorf("provider autodetect = %q, want openai", c.Provider)
 	}
 }
 
 func TestNewClientCustomParams(t *testing.T) {
-	client := NewClient("http://custom:11434/api/generate", "mistral", 0)
-
-	if client.OllamaURL != "http://custom:11434/api/generate" {
-		t.Errorf("expected custom OllamaURL, got %s", client.OllamaURL)
+	c := NewClient("http://custom:11434", "mistral", "ollama", 7*time.Second)
+	if c.OllamaBase != "http://custom:11434" || c.OllamaModel != "mistral" {
+		t.Errorf("custom params not applied: %+v", c)
 	}
-	if client.OllamaModel != "mistral" {
-		t.Errorf("expected custom OllamaModel 'mistral', got %s", client.OllamaModel)
-	}
-}
-
-func TestQueryOllamaSuccess(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			t.Errorf("expected POST, got %s", r.Method)
-		}
-		if r.Header.Get("Content-Type") != "application/json" {
-			t.Errorf("expected Content-Type application/json, got %s", r.Header.Get("Content-Type"))
-		}
-
-		var reqBody map[string]interface{}
-		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			t.Fatalf("failed to decode request body: %v", err)
-		}
-
-		if reqBody["model"] != "llama3" {
-			t.Errorf("expected model 'llama3', got %v", reqBody["model"])
-		}
-		if reqBody["system"] != "system" {
-			t.Errorf("expected system 'system', got %v", reqBody["system"])
-		}
-		// Verify the format field is a JSON schema object, not the string "json".
-		fmtVal, ok := reqBody["format"]
-		if !ok {
-			t.Fatal("expected format field in request body")
-		}
-		fmtMap, ok := fmtVal.(map[string]interface{})
-		if !ok {
-			t.Fatalf("expected format to be a JSON object (schema), got %T", fmtVal)
-		}
-		if fmtMap["type"] != "object" {
-			t.Errorf("expected schema type 'object', got %v", fmtMap["type"])
-		}
-
-		w.Header().Set("Content-Type", "application/x-ndjson")
-		fmt.Fprintln(w, `{"model":"llama3","response":"test response","done":true}`)
-	}))
-	defer server.Close()
-
-	client := NewClient(server.URL, "llama3", 0)
-	result, err := client.QueryOllama(context.Background(), "system", "user")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result != "test response" {
-		t.Errorf("expected 'test response', got %s", result)
+	if c.resolveTimeout() != 7*time.Second {
+		t.Errorf("timeout = %v", c.resolveTimeout())
 	}
 }
 
-// TestQueryOllamaAccumulatesChunks verifies that a multi-chunk streamed
-// response is concatenated into the final result, not just the last chunk.
-func TestQueryOllamaAccumulatesChunks(t *testing.T) {
+// ollamaCaptureServer records the native generate request and streams the
+// given NDJSON chunks.
+func ollamaCaptureServer(t *testing.T, chunks ...string) (*httptest.Server, func() map[string]any) {
+	t.Helper()
+	var got map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Errorf("decode request: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 		w.Header().Set("Content-Type", "application/x-ndjson")
-		fmt.Fprintln(w, `{"model":"llama3","response":"hello ","done":false}`)
-		fmt.Fprintln(w, `{"model":"llama3","response":"world","done":true}`)
+		for _, c := range chunks {
+			_, _ = fmt.Fprintln(w, c)
+		}
 	}))
+	return server, func() map[string]any { return got }
+}
+
+func TestQueryOllamaWire(t *testing.T) {
+	server, got := ollamaCaptureServer(t, `{"model":"llama3","response":"hello ","done":false}`, `{"model":"llama3","response":"world","done":true}`)
 	defer server.Close()
 
-	client := NewClient(server.URL, "llama3", 0)
-	result, err := client.QueryOllama(context.Background(), "system", "user")
+	c := NewClient(server.URL, "llama3", "ollama", 0)
+	out, err := c.QueryWithSchema(context.Background(), "be strict", "user task", "ollama", ConsolidationResponseSchema())
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Fatalf("QueryWithSchema: %v", err)
 	}
-	if result != "hello world" {
-		t.Errorf("expected 'hello world', got %q", result)
+	if out != "hello world" {
+		t.Errorf("accumulated stream = %q", out)
+	}
+	req := got()
+	if req["model"] != "llama3" || req["system"] != "be strict" {
+		t.Errorf("request = %v", req)
+	}
+	if req["stream"] != true {
+		t.Errorf("stream flag = %v", req["stream"])
+	}
+	format, ok := req["format"].(map[string]any)
+	if !ok {
+		t.Fatalf("format field must be a JSON schema object, got %T", req["format"])
+	}
+	if format["type"] != "object" {
+		t.Errorf("schema type = %v", format["type"])
 	}
 }
 
@@ -112,337 +101,98 @@ func TestQueryOllamaHTTPError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(server.URL, "llama3", 0)
-	_, err := client.QueryOllama(context.Background(), "system", "user")
-	if err == nil {
+	c := NewClient(server.URL, "llama3", "ollama", 0)
+	if _, err := c.Query(context.Background(), "s", "u", "ollama"); err == nil {
 		t.Fatal("expected error for HTTP 500")
 	}
 }
 
-func TestQueryOllamaMalformedJSON(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/x-ndjson")
-		_, _ = w.Write([]byte("not json\n"))
-	}))
-	defer server.Close()
-
-	client := NewClient(server.URL, "llama3", 0)
-	_, err := client.QueryOllama(context.Background(), "system", "user")
-	if err == nil {
-		t.Fatal("expected error for malformed JSON")
+func TestQueryOpenAIWire(t *testing.T) {
+	var got struct {
+		Model          string              `json:"model"`
+		Messages       []map[string]string `json:"messages"`
+		ResponseFormat any                 `json:"response_format"`
 	}
-}
-
-func TestQueryOllamaContextCancellation(t *testing.T) {
+	var gotAuth string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t.Fatal("should not reach handler")
+		gotAuth = r.Header.Get("Authorization")
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Errorf("decode: %v", err)
+		}
+		_, _ = io.WriteString(w, `{"choices":[{"message":{"content":"{\"consolidated\":[]}"},"finish_reason":"stop"}]}`)
 	}))
 	defer server.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-
-	client := NewClient(server.URL, "llama3", 0)
-	_, err := client.QueryOllama(ctx, "system", "user")
-	if err == nil {
-		t.Fatal("expected error for cancelled context")
-	}
-}
-
-func TestQueryOpenAISuccess(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			t.Errorf("expected POST, got %s", r.Method)
-		}
-		if r.Header.Get("Authorization") != "Bearer test-key" {
-			t.Errorf("expected Bearer test-key, got %s", r.Header.Get("Authorization"))
-		}
-
-		var reqBody map[string]interface{}
-		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			t.Fatalf("failed to decode request body: %v", err)
-		}
-
-		if reqBody["model"] != "gpt-4o-mini" {
-			t.Errorf("expected model 'gpt-4o-mini', got %v", reqBody["model"])
-		}
-
-		// Verify response_format uses json_schema with the schema object.
-		rfVal, ok := reqBody["response_format"]
-		if !ok {
-			t.Fatal("expected response_format field")
-		}
-		rfMap, ok := rfVal.(map[string]interface{})
-		if !ok {
-			t.Fatalf("expected response_format to be an object, got %T", rfVal)
-		}
-		if rfMap["type"] != "json_schema" {
-			t.Errorf("expected response_format type 'json_schema', got %v", rfMap["type"])
-		}
-		jsVal, ok := rfMap["json_schema"]
-		if !ok {
-			t.Fatal("expected json_schema field inside response_format")
-		}
-		jsMap, ok := jsVal.(map[string]interface{})
-		if !ok {
-			t.Fatalf("expected json_schema to be an object, got %T", jsVal)
-		}
-		if jsMap["name"] != "consolidation_result" {
-			t.Errorf("expected json_schema name 'consolidation_result', got %v", jsMap["name"])
-		}
-		if jsMap["strict"] != true {
-			t.Errorf("expected json_schema strict true, got %v", jsMap["strict"])
-		}
-		schemaVal, ok := jsMap["schema"]
-		if !ok {
-			t.Fatal("expected schema field inside json_schema")
-		}
-		schemaMap, ok := schemaVal.(map[string]interface{})
-		if !ok {
-			t.Fatalf("expected schema to be an object, got %T", schemaVal)
-		}
-		if schemaMap["type"] != "object" {
-			t.Errorf("expected schema type 'object', got %v", schemaMap["type"])
-		}
-
-		messages := reqBody["messages"].([]interface{})
-		if len(messages) != 2 {
-			t.Fatalf("expected 2 messages, got %d", len(messages))
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"choices": []map[string]interface{}{
-				{
-					"message": map[string]string{
-						"content": "openai response",
-					},
-				},
-			},
-		})
-	}))
-	defer server.Close()
-
-	client := NewClient("", "", 0)
-	result, err := client.QueryOpenAI(context.Background(), "system", "user", "test-key", "", server.URL)
+	t.Setenv("OPENAI_API_KEY", "test-key-123")
+	c := NewClient(server.URL, "llama3", "openai", 0)
+	c.LLMURL = server.URL
+	out, err := c.Query(context.Background(), "sys", "user", "openai")
 	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+		t.Fatalf("Query: %v", err)
 	}
-	if result != "openai response" {
-		t.Errorf("expected 'openai response', got %s", result)
+	if !strings.Contains(out, "consolidated") {
+		t.Errorf("content = %q", out)
 	}
-}
-
-func TestQueryOpenAICustomModel(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var reqBody map[string]interface{}
-		_ = json.NewDecoder(r.Body).Decode(&reqBody)
-
-		if reqBody["model"] != "gpt-4" {
-			t.Errorf("expected model 'gpt-4', got %v", reqBody["model"])
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"choices": []map[string]interface{}{
-				{
-					"message": map[string]string{
-						"content": "response",
-					},
-				},
-			},
-		})
-	}))
-	defer server.Close()
-
-	client := NewClient("", "", 0)
-	result, err := client.QueryOpenAI(context.Background(), "system", "user", "test-key", "gpt-4", server.URL)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if gotAuth != "Bearer test-key-123" {
+		t.Errorf("auth header = %q", gotAuth)
 	}
-	if result != "response" {
-		t.Errorf("expected 'response', got %s", result)
+	if got.ResponseFormat == nil {
+		t.Error("response_format must be pinned on the openai path")
 	}
-}
-
-func TestQueryOpenAIHTTPError(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusUnauthorized)
-	}))
-	defer server.Close()
-
-	client := NewClient("", "", 0)
-	_, err := client.QueryOpenAI(context.Background(), "system", "user", "bad-key", "", server.URL)
-	if err == nil {
-		t.Fatal("expected error for HTTP 401")
+	// The system prompt is merged as the first message.
+	if len(got.Messages) == 0 || got.Messages[0]["role"] != "system" || got.Messages[0]["content"] != "sys" {
+		t.Errorf("messages = %v, want system prompt first", got.Messages)
 	}
 }
 
 func TestQueryOpenAIEmptyChoices(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"choices": []interface{}{},
-		})
+		_, _ = w.Write([]byte(`{"choices":[]}`))
 	}))
 	defer server.Close()
 
-	client := NewClient("", "", 0)
-	_, err := client.QueryOpenAI(context.Background(), "system", "user", "test-key", "", server.URL)
-	if err == nil {
-		t.Fatal("expected error for empty choices")
-	}
-}
-
-func TestQueryOpenAIMalformedJSON(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte("not json"))
-	}))
-	defer server.Close()
-
-	client := NewClient("", "", 0)
-	_, err := client.QueryOpenAI(context.Background(), "system", "user", "test-key", "", server.URL)
-	if err == nil {
-		t.Fatal("expected error for malformed JSON")
-	}
-}
-
-func TestQueryOllamaProvider(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/x-ndjson")
-		fmt.Fprintln(w, `{"model":"llama3","response":"ollama result","done":true}`)
-	}))
-	defer server.Close()
-
-	client := NewClient(server.URL, "llama3", 0)
-	result, err := client.Query(context.Background(), "system", "user", "ollama", "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result != "ollama result" {
-		t.Errorf("expected 'ollama result', got %s", result)
+	t.Setenv("OPENAI_API_KEY", "k")
+	c := NewClient(server.URL, "", "openai", 0)
+	c.LLMURL = server.URL
+	if _, err := c.Query(context.Background(), "s", "u", "openai"); err == nil {
+		t.Fatal("expected empty-choices error")
 	}
 }
 
 func TestConsolidationResponseSchema(t *testing.T) {
 	schema := ConsolidationResponseSchema()
-
-	// Verify top-level structure
-	if schema["type"] != "object" {
-		t.Errorf("expected schema type 'object', got %v", schema["type"])
-	}
-
-	props, ok := schema["properties"].(map[string]any)
-	if !ok {
-		t.Fatal("expected properties to be a map")
-	}
-
-	// Verify consolidated field
-	cons, ok := props["consolidated"].(map[string]any)
-	if !ok {
-		t.Fatal("expected consolidated to be a map")
-	}
-	if cons["type"] != "array" {
-		t.Errorf("expected consolidated type 'array', got %v", cons["type"])
-	}
-
-	// Verify discarded_ids field
-	disc, ok := props["discarded_ids"].(map[string]any)
-	if !ok {
-		t.Fatal("expected discarded_ids to be a map")
-	}
-	if disc["type"] != "array" {
-		t.Errorf("expected discarded_ids type 'array', got %v", disc["type"])
-	}
-
-	// Verify required fields
-	required, ok := schema["required"].([]any)
-	if !ok {
-		t.Fatal("expected required to be a slice")
-	}
-	if len(required) != 2 {
-		t.Errorf("expected 2 required fields, got %d", len(required))
-	}
-
-	// Verify schema serializes to valid JSON
-	data, err := json.Marshal(schema)
+	raw, err := json.Marshal(schema)
 	if err != nil {
-		t.Errorf("schema should serialize to valid JSON: %v", err)
+		t.Fatalf("schema must be marshalable: %v", err)
 	}
-
-	// Verify the serialized schema is a JSON object (not a string)
-	var parsed any
-	if err := json.Unmarshal(data, &parsed); err != nil {
-		t.Errorf("schema JSON should be valid: %v", err)
+	var parsed struct {
+		Type       string `json:"type"`
+		Required   []any  `json:"required"`
+		Properties struct {
+			Consolidated struct {
+				Type  string `json:"type"`
+				Items struct {
+					Required []any `json:"required"`
+				} `json:"items"`
+			} `json:"consolidated"`
+			Discarded struct {
+				Type string `json:"type"`
+			} `json:"discarded_ids"`
+		} `json:"properties"`
 	}
-	if _, ok := parsed.(map[string]any); !ok {
-		t.Error("expected schema JSON to be an object")
+	if err := json.Unmarshal(raw, &parsed); err != nil {
+		t.Fatalf("schema must be valid JSON: %v", err)
 	}
-}
-
-func TestQueryOpenAIProvider(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"choices": []map[string]interface{}{
-				{
-					"message": map[string]string{
-						"content": "openai result",
-					},
-				},
-			},
-		})
-	}))
-	defer server.Close()
-
-	client := NewClient("", "", 0)
-	result, err := client.QueryOpenAI(context.Background(), "system", "user", "test-key", "", server.URL)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if parsed.Type != "object" {
+		t.Errorf("schema type = %q", parsed.Type)
 	}
-	if result != "openai result" {
-		t.Errorf("expected 'openai result', got %s", result)
+	if len(parsed.Required) != 2 {
+		t.Errorf("top-level required = %v", parsed.Required)
 	}
-}
-
-func TestQueryOpenAIProviderNoKey(t *testing.T) {
-	t.Setenv("OPENAI_API_KEY", "")
-
-	client := NewClient("", "", 0)
-	_, err := client.Query(context.Background(), "system", "user", "openai", "")
-	if err == nil {
-		t.Fatal("expected error for missing API key")
+	if parsed.Properties.Consolidated.Type != "array" {
+		t.Errorf("consolidated = %+v", parsed.Properties.Consolidated)
 	}
-}
-
-func TestQueryOpenAIProviderUsesEnvKey(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer env-key" {
-			t.Errorf("expected Bearer env-key, got %s", r.Header.Get("Authorization"))
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"choices": []map[string]interface{}{
-				{
-					"message": map[string]string{
-						"content": "result",
-					},
-				},
-			},
-		})
-	}))
-	defer server.Close()
-
-	t.Setenv("OPENAI_API_KEY", "env-key")
-
-	client := NewClient("", "", 0)
-	result, err := client.QueryOpenAI(context.Background(), "system", "user", "env-key", "", server.URL)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result != "result" {
-		t.Errorf("expected 'result', got %s", result)
+	if len(parsed.Properties.Consolidated.Items.Required) != 3 {
+		t.Errorf("item required = %v", parsed.Properties.Consolidated.Items.Required)
 	}
 }

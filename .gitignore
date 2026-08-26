@@ -26,3 +26,4 @@ coverage.out
 **/docs/roadmap.md
 PLANUNG.md
 ARCHITEKTUR.md
+.app-test-build/
