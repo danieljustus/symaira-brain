@@ -49,6 +49,8 @@ struct SymBrainApp: App {
                 }
         }
         .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentMinSize)
+        .defaultSize(width: 1024, height: 680)
     }
 
     // MARK: - Launch auto-update check

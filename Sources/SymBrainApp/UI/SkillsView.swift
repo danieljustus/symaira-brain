@@ -44,13 +44,7 @@ struct SkillsView: View {
                 }
 
             case .ready:
-                Picker("Section", selection: $tab) {
-                    ForEach(Tab.allCases) { item in
-                        Text(item.rawValue).tag(item)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                ModuleTabStrip(selection: $tab)
 
                 if let error = vm.errorMessage {
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {
@@ -178,27 +172,42 @@ struct SkillsView: View {
     }
 
     private var skillList: some View {
-        List(vm.skills, selection: $vm.selectedSkillName) { skill in
-            VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                Text(skill.name)
-                    .font(.callout.weight(.medium))
-                    .foregroundStyle(SymairaTheme.textPrimary)
-                if let description = skill.description, !description.isEmpty {
-                    Text(description)
-                        .font(.caption)
-                        .foregroundStyle(SymairaTheme.textSecondary)
-                        .lineLimit(2)
-                }
-                HStack(spacing: SymairaSpacing.small) {
-                    ForEach(skill.targets, id: \.self) { target in
-                        SymairaBadge(target, tone: .informative)
+        List {
+            ForEach(vm.skills) { skill in
+                Button {
+                    vm.selectedSkillName = skill.name
+                } label: {
+                    VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                        Text(skill.name)
+                            .font(.callout.weight(.medium))
+                            .foregroundStyle(SymairaTheme.textPrimary)
+                        if let description = skill.description, !description.isEmpty {
+                            Text(description)
+                                .font(.caption)
+                                .foregroundStyle(SymairaTheme.textSecondary)
+                                .lineLimit(2)
+                        }
+                        HStack(spacing: SymairaSpacing.small) {
+                            ForEach(skill.targets, id: \.self) { target in
+                                SymairaBadge(target, tone: .informative)
+                            }
+                        }
                     }
+                    .padding(.vertical, SymairaSpacing.xSmall)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-            }
-            .padding(.vertical, SymairaSpacing.xSmall)
-            .contextMenu {
-                Button("Copy Name") { vm.copyToPasteboard(skill.name, label: "Skill name") }
-                Button("Copy Path") { vm.copyToPasteboard(skill.path, label: "Skill path") }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Skill: \(skill.name)")
+                .listRowBackground(
+                    vm.selectedSkillName == skill.name
+                        ? SymairaTheme.bgCardHover
+                        : Color.clear
+                )
+                .contextMenu {
+                    Button("Copy Name") { vm.copyToPasteboard(skill.name, label: "Skill name") }
+                    Button("Copy Path") { vm.copyToPasteboard(skill.path, label: "Skill path") }
+                }
             }
         }
         .scrollContentBackground(.hidden)

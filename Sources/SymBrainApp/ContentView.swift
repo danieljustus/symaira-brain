@@ -85,6 +85,7 @@ struct ContentView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .frame(minWidth: 900, minHeight: 580)
+        .background(WindowMinSizeConfigurator(minSize: CGSize(width: 900, height: 580)))
     }
 
     private func sidebarRow(_ mode: DisplayMode) -> some View {
@@ -110,5 +111,38 @@ struct SymairaScreen<Content: View>: View {
                 .padding(SymairaSpacing.large)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .frame(minWidth: 680, minHeight: 580, alignment: .topLeading)
     }
 }
+
+// MARK: - Window Minimum Size Configurator (#308)
+
+#if os(macOS)
+import AppKit
+
+/// Ensures the underlying AppKit `NSWindow` enforces minimum dimensions so
+/// the window can never collapse into a remnant during view transitions.
+private struct WindowMinSizeConfigurator: NSViewRepresentable {
+    let minSize: CGSize
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                window.minSize = minSize
+                window.contentMinSize = minSize
+            }
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        DispatchQueue.main.async {
+            if let window = nsView.window {
+                window.minSize = minSize
+                window.contentMinSize = minSize
+            }
+        }
+    }
+}
+#endif
