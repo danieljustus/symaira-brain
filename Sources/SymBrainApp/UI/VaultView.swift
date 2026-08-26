@@ -44,13 +44,7 @@ struct VaultView: View {
                 unlockSection
 
             case .ready:
-                Picker("Section", selection: $tab) {
-                    ForEach(Tab.allCases) { item in
-                        Text(item.rawValue).tag(item)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                ModuleTabStrip(selection: $tab)
 
                 if let error = vm.errorMessage {
                     SymairaNotice(title: "Error", message: error, tone: .critical)
