@@ -30,12 +30,15 @@ const memorySyncPassphraseEnv = "SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE"
 // the standard XDG path is reused in place — sync cursors and the oplog are
 // read/written on the existing DB, no export or import step.
 func cmdMemorySync(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := output.Extract(args)
+	format, args, err := extractFormat(args)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain memory sync: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
+	return cmdMemorySyncWithFormat(args, stdout, stderr, format)
+}
 
+func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("memory sync", flag.ContinueOnError)
 	remote := fs.String("remote", "", "base URL of the remote memory server (required)")
 	pull := fs.Bool("pull", false, "only pull remote changes (default when neither flag is set: both directions)")
@@ -47,7 +50,7 @@ func cmdMemorySync(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	timeout := fs.Duration("timeout", 60*time.Second, "per-run HTTP timeout")
 	fs.SetOutput(stderr)
 	fs.Usage = func() { printMemorySyncUsage(stderr) }
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() > 0 {

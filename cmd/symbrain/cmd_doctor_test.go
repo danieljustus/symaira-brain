@@ -175,26 +175,48 @@ func TestCmdDoctor_JSONIsSnakeCaseAndExitsOK(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	isolatedPATH(t, t.TempDir())
 
-	var stdout, stderr bytes.Buffer
-	code := cmdDoctor([]string{"--json"}, &stdout, &stderr)
-
-	if code != exitcodes.ExitOK {
-		t.Fatalf("cmdDoctor(--json) = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{name: "double-dash json", args: []string{"--json"}},
+		{name: "single-dash json", args: []string{"-json"}},
+		{name: "double-dash output json", args: []string{"--output", "json"}},
+		{name: "single-dash output json", args: []string{"-output", "json"}},
+		{name: "double-dash output=json", args: []string{"--output=json"}},
+		{name: "single-dash output=json", args: []string{"-output=json"}},
 	}
 
-	var report map[string]any
-	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
-		t.Fatalf("output is not valid JSON: %v (output: %q)", err, stdout.String())
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			home := t.TempDir()
+			t.Setenv("HOME", home)
+			isolatedPATH(t, t.TempDir())
 
-	for _, key := range []string{"config_dir", "data_dir", "cache_dir", "config", "servers", "profiles", "harnesses"} {
-		if _, ok := report[key]; !ok {
-			t.Errorf("JSON report missing key %q: %v", key, report)
-		}
+			var stdout, stderr bytes.Buffer
+			code := cmdDoctor(tt.args, &stdout, &stderr)
+
+			if code != exitcodes.ExitOK {
+				t.Fatalf("cmdDoctor(%v) = %d, want %d (stderr: %s)", tt.args, code, exitcodes.ExitOK, stderr.String())
+			}
+
+			trimmed := strings.TrimSpace(stdout.String())
+			if !strings.HasPrefix(trimmed, "{") {
+				t.Fatalf("cmdDoctor(%v) output does not start with '{': %q", tt.args, trimmed)
+			}
+
+			var report map[string]any
+			if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+				t.Fatalf("output is not valid JSON: %v (output: %q)", err, stdout.String())
+			}
+
+			for _, key := range []string{"config_dir", "data_dir", "cache_dir", "config", "servers", "profiles", "harnesses"} {
+				if _, ok := report[key]; !ok {
+					t.Errorf("JSON report missing key %q: %v", key, report)
+				}
+			}
+		})
 	}
 }
 

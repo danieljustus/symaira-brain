@@ -7,13 +7,23 @@ import (
 	"io"
 
 	"github.com/danieljustus/symaira-brain/internal/audit"
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
 func cmdAudit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain audit: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdAuditWithFormat(args, stdout, stderr, format)
+}
+
+func cmdAuditWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("audit", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 
@@ -24,7 +34,7 @@ func cmdAudit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	switch sub {
 	case "tail":
-		return cmdAuditTail(rest, stdout, stderr)
+		return cmdAuditTailWithFormat(rest, stdout, stderr, format)
 	case "":
 		fmt.Fprintln(stderr, "symbrain audit: subcommand required (tail)")
 		return exitcodes.ExitNoInput
@@ -35,16 +45,25 @@ func cmdAudit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 }
 
 func cmdAuditTail(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain audit tail: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdAuditTailWithFormat(args, stdout, stderr, format)
+}
+
+func cmdAuditTailWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("audit tail", flag.ContinueOnError)
 	profile := fs.String("profile", "", "filter by profile name")
 	n := fs.Int("n", 20, "number of entries to show")
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 
-	if *jsonOut {
+	if *jsonOut || format == output.FormatJSON {
 		return cmdAuditTailJSON(stdout, stderr, *profile, *n)
 	}
 

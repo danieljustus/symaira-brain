@@ -27,7 +27,7 @@ func cmdMcp(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	profileFile := fs.String("profile-file", "", "load the profile from this TOML file instead of the profiles directory")
 	vaultAgent := fs.String("vault-agent", "", "vault agent name for --stdio mode (default: harness-detected or 'claude-code')")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 

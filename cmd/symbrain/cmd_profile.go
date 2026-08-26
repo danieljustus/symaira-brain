@@ -23,7 +23,7 @@ import (
 var confirmReader io.Reader = os.Stdin
 
 func cmdProfile(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := output.Extract(args)
+	format, args, err := extractFormat(args)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain profile: %v\n", err)
 		return exitcodes.ExitNoInput
@@ -66,12 +66,12 @@ func reorderFlagsFirst(args []string, valueFlags map[string]bool) []string {
 	var flags, positionals []string
 	for i := 0; i < len(args); i++ {
 		a := args[i]
-		if !strings.HasPrefix(a, "--") {
+		if !strings.HasPrefix(a, "-") || a == "-" || a == "--" {
 			positionals = append(positionals, a)
 			continue
 		}
 		flags = append(flags, a)
-		name := strings.TrimPrefix(a, "--")
+		name := strings.TrimPrefix(strings.TrimPrefix(a, "--"), "-")
 		if valueFlags[name] && i+1 < len(args) {
 			i++
 			flags = append(flags, args[i])
@@ -220,7 +220,7 @@ func buildServerShowReport(alias string, cfg profile.ServerConfig) profileShowSe
 }
 
 func cmdProfileShow(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := output.Extract(args)
+	format, args, err := extractFormat(args)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain profile show: %v\n", err)
 		return exitcodes.ExitNoInput
@@ -231,7 +231,7 @@ func cmdProfileShow(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 func cmdProfileShowWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("profile show", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() != 1 {
@@ -299,7 +299,7 @@ func cmdProfileAdd(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("profile add", flag.ContinueOnError)
 	from := fs.String("from", "restricted", `template to create from: "personal" or "restricted"`)
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() != 1 {
@@ -344,7 +344,7 @@ func cmdProfileRemove(args []string, stdout, stderr io.Writer) exitcodes.ExitCod
 	fs := flag.NewFlagSet("profile remove", flag.ContinueOnError)
 	force := fs.Bool("force", false, "skip the confirmation prompt")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() != 1 {

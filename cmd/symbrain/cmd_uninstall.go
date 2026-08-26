@@ -17,7 +17,7 @@ func cmdUninstall(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	projectDir := fs.String("project", "", "project directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)")
 	dryRun := fs.Bool("dry-run", false, "print a unified diff of the change and write nothing")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 

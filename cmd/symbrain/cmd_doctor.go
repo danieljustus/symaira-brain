@@ -17,6 +17,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/managed"
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
@@ -126,12 +127,21 @@ var knownServers = []struct {
 var builtinServers = []string{"memory", "skills", "usage"}
 
 func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain doctor: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdDoctorWithFormat(args, stdout, stderr, format)
+}
+
+func cmdDoctorWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fix := fs.Bool("fix", false, "repair missing or version-mismatched managed binaries")
 	vaultAgent := fs.String("vault-agent", "claude-code", "vault agent name for MCP handshake probe")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 
@@ -141,7 +151,7 @@ func cmdDoctor(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	report := runDoctorChecks(context.Background(), *vaultAgent)
 
-	if *jsonOut {
+	if *jsonOut || format == output.FormatJSON {
 		if err := json.NewEncoder(stdout).Encode(report); err != nil {
 			fmt.Fprintf(stderr, "symbrain doctor: %v\n", err)
 			return exitcodes.ExitGeneric

@@ -27,7 +27,7 @@ func cmdConfig(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("config", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { printConfigUsage(stderr) }
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() < 1 {

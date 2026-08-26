@@ -52,8 +52,13 @@ func TestRun_HelpExitsOK(t *testing.T) {
 func TestRun_GlobalOutputFlagWorksBeforeOrAfterVersionCommand(t *testing.T) {
 	for _, args := range [][]string{
 		{"version", "--json"},
+		{"version", "-json"},
 		{"--json", "version"},
+		{"-json", "version"},
 		{"version", "--output", "json"},
+		{"version", "-output", "json"},
+		{"version", "--output=json"},
+		{"version", "-output=json"},
 	} {
 		t.Run(strings.Join(args, "_"), func(t *testing.T) {
 			var stdout, stderr bytes.Buffer
@@ -68,11 +73,57 @@ func TestRun_GlobalOutputFlagWorksBeforeOrAfterVersionCommand(t *testing.T) {
 	}
 }
 
-func TestRun_DoctorKeepsItsExistingCommandLocalJSONFlag(t *testing.T) {
-	var stdout, stderr bytes.Buffer
-	code := run([]string{"doctor", "--json"}, &stdout, &stderr)
-	if code == exitcodes.ExitNoInput && strings.Contains(stderr.String(), "flag provided but not defined") {
-		t.Fatalf("doctor lost its existing --json flag: %s", stderr.String())
+func TestRun_DoctorJSONVariantsProduceValidJSON(t *testing.T) {
+	for _, args := range [][]string{
+		{"doctor", "--json"},
+		{"doctor", "-json"},
+		{"--json", "doctor"},
+		{"-json", "doctor"},
+		{"doctor", "--output", "json"},
+		{"doctor", "-output", "json"},
+		{"doctor", "--output=json"},
+		{"doctor", "-output=json"},
+	} {
+		t.Run(strings.Join(args, "_"), func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			code := run(args, &stdout, &stderr)
+			if code != exitcodes.ExitOK {
+				t.Fatalf("run(%v) = %d, want %d (stderr: %s)", args, code, exitcodes.ExitOK, stderr.String())
+			}
+			trimmed := strings.TrimSpace(stdout.String())
+			if !strings.HasPrefix(trimmed, "{") {
+				t.Fatalf("run(%v) output does not start with '{': %q", args, trimmed)
+			}
+		})
+	}
+}
+
+func TestRun_SharedFlagNormalizationAcrossSubcommands(t *testing.T) {
+	// Proves that single and double dash flags work across multiple subcommands
+	tests := []struct {
+		name string
+		args []string
+	}{
+		{name: "harness list double-dash", args: []string{"harness", "list", "--json"}},
+		{name: "harness list single-dash", args: []string{"harness", "list", "-json"}},
+		{name: "profile list double-dash", args: []string{"profile", "list", "--json"}},
+		{name: "profile list single-dash", args: []string{"profile", "list", "-json"}},
+		{name: "audit tail double-dash", args: []string{"audit", "tail", "--json"}},
+		{name: "audit tail single-dash", args: []string{"audit", "tail", "-json"}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var stdout, stderr bytes.Buffer
+			code := run(tt.args, &stdout, &stderr)
+			if code != exitcodes.ExitOK {
+				t.Fatalf("run(%v) = %d, want %d (stderr: %s)", tt.args, code, exitcodes.ExitOK, stderr.String())
+			}
+			trimmed := strings.TrimSpace(stdout.String())
+			if !strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "{") {
+				t.Fatalf("run(%v) output is not JSON: %q", tt.args, trimmed)
+			}
+		})
 	}
 }
 
