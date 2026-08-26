@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -114,13 +116,20 @@ func TestRun_SharedFlagNormalizationAcrossSubcommands(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// audit tail reads the audit data dir; isolate XDG state and seed
+			// it so the test proves flag normalization, not a missing dir.
+			t.Setenv("XDG_DATA_HOME", t.TempDir())
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			if strings.HasPrefix(tt.name, "audit") {
+				_ = os.MkdirAll(filepath.Join(os.Getenv("XDG_DATA_HOME"), "symbrain", "audit"), 0o755)
+			}
 			var stdout, stderr bytes.Buffer
 			code := run(tt.args, &stdout, &stderr)
 			if code != exitcodes.ExitOK {
 				t.Fatalf("run(%v) = %d, want %d (stderr: %s)", tt.args, code, exitcodes.ExitOK, stderr.String())
 			}
 			trimmed := strings.TrimSpace(stdout.String())
-			if !strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "{") {
+			if !strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "{") && trimmed != "null" {
 				t.Fatalf("run(%v) output is not JSON: %q", tt.args, trimmed)
 			}
 		})
