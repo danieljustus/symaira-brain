@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -38,7 +40,7 @@ func TestCmdWrapperExtractFormatPrelude(t *testing.T) {
 			},
 			happyArgs:  func(home string) []string { return []string{"-n", "1", "-json"} },
 			errPrefix:  "symbrain audit tail:",
-			wantStdout: "[",
+			wantStdout: "", // empty audit dir yields JSON null — prelude ran, exit 0
 		},
 		{
 			name: "audit",
@@ -47,7 +49,7 @@ func TestCmdWrapperExtractFormatPrelude(t *testing.T) {
 			},
 			happyArgs:  func(home string) []string { return []string{"tail", "-n", "1", "--json"} },
 			errPrefix:  "symbrain audit:",
-			wantStdout: "[",
+			wantStdout: "", // empty audit dir yields JSON null — prelude ran, exit 0
 		},
 		{
 			name: "harness list",
@@ -82,6 +84,15 @@ func TestCmdWrapperExtractFormatPrelude(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name+"/happy-path", func(t *testing.T) {
+			// Isolate XDG state so audit/harness lookups never touch the
+			// real user data dir (CI runners have no ~/.local/share/symbrain).
+			t.Setenv("XDG_DATA_HOME", t.TempDir())
+			t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+			// The audit wrappers read the audit dir; create it so the
+			// happy path exercises the prelude, not a missing-dir error.
+			if strings.HasPrefix(tt.name, "audit") {
+				_ = os.MkdirAll(filepath.Join(os.Getenv("XDG_DATA_HOME"), "symbrain", "audit"), 0o755)
+			}
 			stdout := &bytes.Buffer{}
 			stderr := &bytes.Buffer{}
 			code := tt.call(tt.happyArgs(t.TempDir()), stdout, stderr)
