@@ -11,6 +11,15 @@ import (
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
+func cmdHarness(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain harness: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdHarnessWithFormat(args, stdout, stderr, format)
+}
+
 func cmdHarnessWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	if len(args) == 0 || args[0] != "list" {
 		printHarnessUsage(stderr)
@@ -20,7 +29,7 @@ func cmdHarnessWithFormat(args []string, stdout, stderr io.Writer, format output
 	fs := flag.NewFlagSet("harness list", flag.ContinueOnError)
 	projectDir := fs.String("project", "", "project directory to inspect for project-local harness config")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args[1:]); err != nil {
+	if err := fs.Parse(normalizeFlags(args[1:])); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() > 0 {

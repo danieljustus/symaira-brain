@@ -11,7 +11,7 @@ import (
 )
 
 func cmdSync(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := output.Extract(args)
+	format, args, err := extractFormat(args)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain sync: %v\n", err)
 		return exitcodes.ExitNoInput
@@ -24,7 +24,7 @@ func cmdSyncWithFormat(args []string, stdout, stderr io.Writer, format output.Fo
 	projectDir := fs.String("project", "", "project directory (default: current directory)")
 	dryRun := fs.Bool("dry-run", false, "show what would be written without making changes")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
@@ -12,6 +13,15 @@ import (
 // here — deliberately NOT through cmdPassthrough; keep it out of
 // passthroughMap.
 func cmdMemory(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain memory: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdMemoryWithFormat(args, stdout, stderr, format)
+}
+
+func cmdMemoryWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	if len(args) == 0 {
 		printMemoryUsage(stderr)
 		return exitcodes.ExitNoInput
@@ -21,7 +31,7 @@ func cmdMemory(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		printMemoryUsage(stdout)
 		return exitcodes.ExitOK
 	case "sync":
-		return cmdMemorySync(args[1:], stdout, stderr)
+		return cmdMemorySyncWithFormat(args[1:], stdout, stderr, format)
 	default:
 		fmt.Fprintf(stderr, "symbrain memory: unknown subcommand %q\n\n", args[0])
 		printMemoryUsage(stderr)

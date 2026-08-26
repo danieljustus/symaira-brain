@@ -100,7 +100,7 @@ enabled = true
 func cmdInit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("init", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 

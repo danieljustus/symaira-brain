@@ -30,7 +30,7 @@ func cmdSetup(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fix := fs.Bool("fix", false, "repair missing or version-mismatched binaries (alias for doctor --fix)")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 

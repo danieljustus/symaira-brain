@@ -17,7 +17,7 @@ import (
 const versionSchema = 1
 
 func cmdVersion(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := output.Extract(args)
+	format, args, err := extractFormat(args)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain version: %v\n", err)
 		return exitcodes.ExitNoInput
@@ -28,7 +28,7 @@ func cmdVersion(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 func cmdVersionWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("version", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() > 0 {

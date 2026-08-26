@@ -12,11 +12,20 @@ import (
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
+func cmdUsage(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
+	format, args, err := extractFormat(args)
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain usage: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	return cmdUsageWithFormat(args, stdout, stderr, format)
+}
+
 func cmdUsageWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("usage", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = func() { printUsageUsage(stderr) }
-	if err := fs.Parse(args); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() > 0 {

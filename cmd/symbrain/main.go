@@ -46,7 +46,7 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "init":
 		return cmdInit(rest, stdout, stderr)
 	case "doctor":
-		return cmdDoctor(rest, stdout, stderr)
+		return cmdDoctorWithFormat(rest, stdout, stderr, format)
 	case "profile":
 		return cmdProfileWithFormat(rest, stdout, stderr, format)
 	case "config":
@@ -72,9 +72,9 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "sync":
 		return cmdSyncWithFormat(rest, stdout, stderr, format)
 	case "memory":
-		return cmdMemory(rest, stdout, stderr)
+		return cmdMemoryWithFormat(rest, stdout, stderr, format)
 	case "audit":
-		return cmdAudit(rest, stdout, stderr)
+		return cmdAuditWithFormat(rest, stdout, stderr, format)
 	case "version":
 		return cmdVersionWithFormat(rest, stdout, stderr, format)
 	case "vault":
@@ -98,8 +98,7 @@ func globalOutput(args []string) (output.Format, []string, error) {
 	if !isOutputCommand(cmd) {
 		return output.FormatTable, args, nil
 	}
-	format, normalized, err := output.Extract(args)
-	return format, normalized, err
+	return extractFormat(args)
 }
 
 // peekCommand scans args skipping known global output flags and their values
@@ -108,12 +107,12 @@ func globalOutput(args []string) (output.Format, []string, error) {
 func peekCommand(args []string) string {
 	for i := 0; i < len(args); i++ {
 		switch {
-		case args[i] == "--json":
+		case args[i] == "--json" || args[i] == "-json":
 			continue
-		case args[i] == "--output":
+		case args[i] == "--output" || args[i] == "-output":
 			i++ // skip the value
 			continue
-		case strings.HasPrefix(args[i], "--output="):
+		case strings.HasPrefix(args[i], "--output=") || strings.HasPrefix(args[i], "-output="):
 			continue
 		default:
 			if !strings.HasPrefix(args[i], "-") {
