@@ -43,13 +43,7 @@ struct MemoryView: View {
                 }
 
             case .ready:
-                Picker("Section", selection: $tab) {
-                    ForEach(Tab.allCases) { item in
-                        Text(item.rawValue).tag(item)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                ModuleTabStrip(selection: $tab)
 
                 if let error = vm.errorMessage {
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {
@@ -229,30 +223,45 @@ struct MemoryView: View {
     }
 
     private var keyedMemoryList: some View {
-        List(vm.memories, selection: $vm.selectedMemoryID) { memory in
-            VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                Text(memory.content)
-                    .font(.callout)
-                    .foregroundStyle(SymairaTheme.textPrimary)
-                    .lineLimit(3)
-                HStack(spacing: SymairaSpacing.small) {
-                    SymairaBadge(memory.scope, tone: scopeTone(memory.scope))
-                    SymairaBadge(memory.displayTier, tone: .neutral)
-                    Text(memory.formattedCreatedAt)
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(SymairaTheme.textMuted)
+        List {
+            ForEach(vm.memories) { memory in
+                Button {
+                    vm.selectedMemoryID = memory.id
+                } label: {
+                    VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                        Text(memory.content)
+                            .font(.callout)
+                            .foregroundStyle(SymairaTheme.textPrimary)
+                            .lineLimit(3)
+                        HStack(spacing: SymairaSpacing.small) {
+                            SymairaBadge(memory.scope, tone: scopeTone(memory.scope))
+                            SymairaBadge(memory.displayTier, tone: .neutral)
+                            Text(memory.formattedCreatedAt)
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(SymairaTheme.textMuted)
+                        }
+                    }
+                    .padding(.vertical, SymairaSpacing.xSmall)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
-            }
-            .padding(.vertical, SymairaSpacing.xSmall)
-            .contextMenu {
-                Button("Copy Content") {
-                    vm.copyToPasteboard(memory.content, label: "Memory")
+                .buttonStyle(.plain)
+                .accessibilityLabel("Memory: \(memory.content)")
+                .listRowBackground(
+                    vm.selectedMemoryID == memory.id
+                        ? SymairaTheme.bgCardHover
+                        : Color.clear
+                )
+                .contextMenu {
+                    Button("Copy Content") {
+                        vm.copyToPasteboard(memory.content, label: "Memory")
+                    }
+                    Button("Copy ID") {
+                        vm.copyToPasteboard(memory.id, label: "Memory ID")
+                    }
+                    Divider()
+                    Button("Delete…", role: .destructive) { memoryToDelete = memory }
                 }
-                Button("Copy ID") {
-                    vm.copyToPasteboard(memory.id, label: "Memory ID")
-                }
-                Divider()
-                Button("Delete…", role: .destructive) { memoryToDelete = memory }
             }
         }
         .scrollContentBackground(.hidden)
@@ -627,3 +636,62 @@ struct ModuleActivityTable: View {
         }
     }
 }
+
+// MARK: - Shared module tab strip (#309)
+
+/// Pure-SwiftUI segmented tab strip for module screens.
+///
+/// Native AppKit segmented pickers (`Picker(...).pickerStyle(.segmented)`)
+/// conflict with selectable `List` and `Table` coordinators in AppKit hosting,
+/// causing tab clicks to be dropped or the tab strip to become inert (#309).
+/// This component uses pure SwiftUI buttons with explicit selection mutation.
+struct ModuleTabStrip<T: CaseIterable & Identifiable & Hashable & RawRepresentable>: View where T.AllCases: RandomAccessCollection, T.RawValue == String {
+    @Binding var selection: T
+    let tabs: [T]
+
+    init(selection: Binding<T>, tabs: [T] = Array(T.allCases)) {
+        self._selection = selection
+        self.tabs = tabs
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(tabs) { tab in
+                let isSelected = selection == tab
+                Button {
+                    selection = tab
+                } label: {
+                    Text(tab.rawValue)
+                        .font(.callout.weight(isSelected ? .semibold : .regular))
+                        .foregroundStyle(isSelected ? SymairaTheme.textPrimary : SymairaTheme.textSecondary)
+                        .padding(.horizontal, SymairaSpacing.medium)
+                        .padding(.vertical, 5)
+                        .background {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .fill(SymairaTheme.bgCardHover)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                            .stroke(SymairaTheme.goldPrimary.opacity(0.35), lineWidth: 1)
+                                    )
+                            }
+                        }
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tab.rawValue)
+                .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+            }
+        }
+        .padding(3)
+        .background(
+            Color.white.opacity(0.04),
+            in: RoundedRectangle(cornerRadius: SymairaRadius.control, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: SymairaRadius.control, style: .continuous)
+                .stroke(SymairaTheme.borderGlass, lineWidth: 1)
+        )
+    }
+}
+
