@@ -410,6 +410,7 @@ theme, CLI runner, and tool detection.
 
 ```bash
 brew install xcodegen   # if not already installed
+./scripts/set-app-version.sh
 xcodegen generate
 xcodebuild build -project SymBrain.xcodeproj -scheme SymBrain -destination 'platform=macOS'
 ```
@@ -417,6 +418,7 @@ xcodebuild build -project SymBrain.xcodeproj -scheme SymBrain -destination 'plat
 ### Open in Xcode
 
 ```bash
+./scripts/set-app-version.sh
 xcodegen generate
 open SymBrain.xcodeproj
 ```
