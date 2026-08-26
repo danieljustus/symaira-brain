@@ -122,19 +122,16 @@ func (c *Client) resolveTimeout() time.Duration {
 }
 
 // ollamaClient returns the native-Ollama llmkit client, built once.
+// Native calls (Generate, ChatStream) live at the scheme+host root, NOT
+// under the /v1 OpenAI-compatibility prefix, so the base URL is always
+// stripped to the bare host.
 func (c *Client) ollamaClient() (*llmkit.Client, error) {
 	if c.ollama == nil {
 		desc, ok := llmkit.Lookup("ollama")
 		if !ok {
 			return nil, fmt.Errorf("llm: ollama descriptor missing from embedded registry")
 		}
-		base := c.OllamaBase
-		// The registry descriptor already carries http://localhost:11434/v1;
-		// a configured bare host keeps working by normalizing it onto the
-		// OpenAI-compatible v1 path the transport speaks.
-		if !strings.HasSuffix(base, "/v1") {
-			base = strings.TrimRight(base, "/") + "/v1"
-		}
+		base := ollamaRoot(c.OllamaBase)
 		cl, err := llmkit.NewClient(desc, "", llmkit.WithBaseURL(base), llmkit.WithTimeout(c.resolveTimeout()))
 		if err != nil {
 			return nil, err
@@ -142,6 +139,18 @@ func (c *Client) ollamaClient() (*llmkit.Client, error) {
 		c.ollama = cl
 	}
 	return c.ollama, nil
+}
+
+// ollamaRoot strips any path (including the OpenAI-compatible /v1 prefix)
+// from a configured endpoint, because the native /api/* surface lives at
+// the scheme+host root.
+func ollamaRoot(raw string) string {
+	for i := 0; i < len(raw); i++ {
+		if raw[i] == '/' && i > len("http://") {
+			return raw[:i]
+		}
+	}
+	return raw
 }
 
 // openaiClient returns the OpenAI-wire llmkit client, built once.
