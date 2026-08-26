@@ -29,8 +29,16 @@ func helperServerCfg(t *testing.T, cfg *config.Config) *Server {
 }
 
 // runAttributedSession feeds a sequence of JSON-RPC request messages (framed)
-// into the attributed stdio server and returns the parsed responses in order.
-// Every message must be a request that produces exactly one response.
+// into the attributed stdio server and returns the parsed responses reordered
+// to match the request order. Every message must be a request that produces
+// exactly one response.
+//
+// Since symaira-corekit v0.12 (mcpserver.Server.ServeIO), tools/call requests
+// are dispatched concurrently, so responses can land on the wire in a
+// different order than the requests that produced them — matching the
+// JSON-RPC spec, which correlates responses to requests by "id", not by
+// position. This helper restores request order by "id" so existing
+// index-based assertions (responses[i] corresponds to msgs[i]) keep working.
 func runAttributedSession(t *testing.T, s *Server, msgs ...string) []map[string]interface{} {
 	t.Helper()
 	var input bytes.Buffer
@@ -44,11 +52,25 @@ func runAttributedSession(t *testing.T, s *Server, msgs ...string) []map[string]
 	// Read all responses from a single bufio.Reader: a fresh reader per
 	// response would discard bytes it read ahead into its internal buffer.
 	br := bufio.NewReader(&output)
-	responses := make([]map[string]interface{}, 0, len(msgs))
+	byID := make(map[string]map[string]interface{}, len(msgs))
 	for i := 0; i < len(msgs); i++ {
 		resp := readFramedResponseFrom(br)
 		if resp == nil {
 			t.Fatalf("missing response %d of %d", i, len(msgs))
+		}
+		byID[fmt.Sprint(resp["id"])] = resp
+	}
+	responses := make([]map[string]interface{}, 0, len(msgs))
+	for i, m := range msgs {
+		var req struct {
+			ID interface{} `json:"id"`
+		}
+		if err := json.Unmarshal([]byte(m), &req); err != nil {
+			t.Fatalf("request %d is not valid JSON: %v", i, err)
+		}
+		resp, ok := byID[fmt.Sprint(req.ID)]
+		if !ok {
+			t.Fatalf("no response with id %v for request %d", req.ID, i)
 		}
 		responses = append(responses, resp)
 	}
