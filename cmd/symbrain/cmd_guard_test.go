@@ -196,7 +196,7 @@ func TestGuardVersion_Placeholder(t *testing.T) {
 	// buildTime is an unexported function in the guard version package.
 	// Verify the version output still carries the compile-time placeholder.
 	var buf bytes.Buffer
-	guardversion.Run(nil, &buf)
+	_ = guardversion.Run(nil, &buf)
 	if !strings.Contains(buf.String(), "compile-time placeholder") {
 		t.Errorf("expected placeholder in version output, got: %s", buf.String())
 	}

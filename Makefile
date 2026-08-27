@@ -73,14 +73,8 @@ test-race:
 vet:
 	go vet ./...
 
-## lint: Run linters (golangci-lint if available, otherwise go vet)
-lint:
-	@if command -v golangci-lint >/dev/null 2>&1; then \
-		golangci-lint run ./...; \
-	else \
-		echo "golangci-lint not installed, falling back to go vet"; \
-		$(MAKE) vet; \
-	fi
+## lint: Deterministic lint gate (go vet + gofmt check, matches CI)
+lint: vet fmt-check
 
 ## fmt: Format all Go source files
 fmt:

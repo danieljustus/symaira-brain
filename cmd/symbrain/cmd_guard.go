@@ -41,7 +41,9 @@ func cmdGuard(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "scan":
 		return exitcodes.ExitCode(scan.Run(args[1:], stdout, stderr))
 	case "version":
-		guardversion.Run(args[1:], stdout)
+		if err := guardversion.Run(args[1:], stdout); err != nil {
+			return exitcodes.ExitGeneric
+		}
 		return exitcodes.ExitOK
 	case "help", "--help", "-h":
 		printGuardUsage(stdout)

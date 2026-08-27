@@ -40,7 +40,10 @@ func TestClientChanges_QueryAndDecode(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "tok-123", nil)
+	client, err := NewClient(ts.URL, "tok-123", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
 	resp, err := client.Changes(context.Background(), since, "", 100)
 	if err != nil {
 		t.Fatalf("Changes: %v", err)
@@ -79,7 +82,10 @@ func TestClientChanges_PaginationCursorWinsOverSince(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", nil)
+	client, err := NewClient(ts.URL, "", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
 	resp, err := client.Changes(context.Background(), time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), "bmV4dC1wYWdl", 0)
 	if err != nil {
 		t.Fatalf("Changes: %v", err)
@@ -115,7 +121,10 @@ func TestClientApply_RoundTrip(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", nil)
+	client, err := NewClient(ts.URL, "", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
 	res, err := client.Apply(context.Background(),
 		[]*db.Memory{testMemory("11111111-1111-1111-1111-111111111111", "a", time.Now())},
 		[]db.DeletedMemory{{ID: "22222222-2222-2222-2222-222222222222", DeletedAt: time.Now()}})
@@ -158,7 +167,10 @@ func TestClientRelay_RoundTrip(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "", nil)
+	client, err := NewClient(ts.URL, "", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
 	pulled, err := client.RelayPull(context.Background(), time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC), 100)
 	if err != nil {
 		t.Fatalf("RelayPull: %v", err)
@@ -184,8 +196,11 @@ func TestClientDo_HTTPError(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL, "bad-token", nil)
-	_, err := client.Changes(context.Background(), time.Time{}, "", 0)
+	client, err := NewClient(ts.URL, "bad-token", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+	_, err = client.Changes(context.Background(), time.Time{}, "", 0)
 	if err == nil {
 		t.Fatal("expected error for 401")
 	}
@@ -199,12 +214,39 @@ func TestClientDo_HTTPError(t *testing.T) {
 }
 
 func TestClientDo_TransportErrorWrapped(t *testing.T) {
-	client := NewClient("http://127.0.0.1:1", "", nil) // nothing listens there
-	_, err := client.Changes(context.Background(), time.Time{}, "", 0)
+	client, err := NewClient("http://127.0.0.1:1", "", nil) // nothing listens there
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+	_, err = client.Changes(context.Background(), time.Time{}, "", 0)
 	if err == nil {
 		t.Fatal("expected connection error")
 	}
 	if !strings.Contains(err.Error(), "request") {
 		t.Errorf("error %q lacks context", err)
+	}
+}
+
+func TestClientChanges_OversizedResponseBody(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		// Valid JSON prefix followed by enough padding to exceed maxResponseBody.
+		w.Write([]byte(`{"memories":[],"deleted":[],"server_time":"2026-08-25T10:00:00Z"`))
+		for i := 0; i < maxResponseBody+1; i++ {
+			w.Write([]byte(" "))
+		}
+	}))
+	defer ts.Close()
+
+	client, err := NewClient(ts.URL, "", nil)
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+	_, err = client.Changes(context.Background(), time.Time{}, "", 0)
+	if err == nil {
+		t.Fatal("expected error for oversized response body")
+	}
+	if !strings.Contains(err.Error(), "decode remote response") {
+		t.Errorf("error %q lacks expected context", err)
 	}
 }

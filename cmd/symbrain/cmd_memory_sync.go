@@ -40,12 +40,13 @@ func cmdMemorySync(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 
 func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("memory sync", flag.ContinueOnError)
-	remote := fs.String("remote", "", "base URL of the remote memory server (required)")
+	remote := fs.String("remote", "", "base URL of the remote memory server (required; must be https, except http://localhost or 127.0.0.1 for development)")
 	pull := fs.Bool("pull", false, "only pull remote changes (default when neither flag is set: both directions)")
 	push := fs.Bool("push", false, "only push local changes (default when neither flag is set: both directions)")
 	token := fs.String("token", "", "bearer token for the remote API (or $"+memorySyncTokenEnv+")")
 	relay := fs.Bool("encrypted-relay", false, "exchange client-side AES-encrypted blobs through the relay endpoint")
 	passphrase := fs.String("relay-passphrase", "", "passphrase for --encrypted-relay (or $"+memorySyncPassphraseEnv+")")
+	allowInsecure := fs.Bool("allow-insecure-http", false, "allow non-loopback http:// remotes; bearer tokens will be sent in the clear. Emits a warning.")
 	dbPath := fs.String("db", "", "database path override (default: the standard memory database)")
 	timeout := fs.Duration("timeout", 60*time.Second, "per-run HTTP timeout")
 	fs.SetOutput(stderr)
@@ -62,6 +63,26 @@ func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format out
 		printMemorySyncUsage(stderr)
 		return exitcodes.ExitNoInput
 	}
+	if *relay {
+		// Cheap CLI-level pre-check: relay requires a passphrase. We do
+		// this before the URL guard so the user sees the specific
+		// configuration error rather than a transport one.
+		passForCheck := *passphrase
+		if passForCheck == "" {
+			passForCheck = os.Getenv(memorySyncPassphraseEnv)
+		}
+		if passForCheck == "" {
+			fmt.Fprintf(stderr, "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or $%s)\n", memorySyncPassphraseEnv)
+			return exitcodes.ExitNoInput
+		}
+	}
+	if err := syncclient.ValidateRemoteURL(*remote, *allowInsecure); err != nil {
+		fmt.Fprintf(stderr, "symbrain memory sync: %v\n", err)
+		return exitcodes.ExitNoInput
+	}
+	if *allowInsecure {
+		fmt.Fprintf(stderr, "WARNING: --allow-insecure-http is set: bearer tokens will be sent in the clear to %s\n", *remote)
+	}
 	pullOnly, pushOnly := *pull, *push
 	if !pullOnly && !pushOnly {
 		pullOnly, pushOnly = true, true
@@ -73,10 +94,6 @@ func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format out
 	pass := *passphrase
 	if pass == "" {
 		pass = os.Getenv(memorySyncPassphraseEnv)
-	}
-	if *relay && pass == "" {
-		fmt.Fprintf(stderr, "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or $%s)\n", memorySyncPassphraseEnv)
-		return exitcodes.ExitNoInput
 	}
 
 	memcfg, err := config.Load()
@@ -97,14 +114,15 @@ func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format out
 	defer cancel()
 
 	result, err := syncclient.Run(ctx, syncclient.Options{
-		Remote:         *remote,
-		Token:          tok,
-		Pull:           pullOnly,
-		Push:           pushOnly,
-		EncryptedRelay: *relay,
-		Passphrase:     pass,
-		DB:             database,
-		Timeout:        *timeout,
+		Remote:            *remote,
+		Token:             tok,
+		Pull:              pullOnly,
+		Push:              pushOnly,
+		EncryptedRelay:    *relay,
+		Passphrase:        pass,
+		AllowInsecureHTTP: *allowInsecure,
+		DB:                database,
+		Timeout:           *timeout,
 	})
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain memory sync: %v\n", err)
@@ -156,6 +174,8 @@ Usage:
 
 Flags:
   --remote <url>          Base URL of the remote memory server (required).
+                          Must use https, except http://localhost or
+                          127.0.0.1 for local development.
   --pull                  Only pull remote changes into the local database.
   --push                  Only push local changes to the remote server.
                           (With neither flag, both directions run.)
@@ -167,6 +187,9 @@ Flags:
                           relay never sees plaintext memory content.
   --relay-passphrase <p>  Passphrase for --encrypted-relay. May come from
                           $%s instead. Both peers must share it.
+  --allow-insecure-http   Override the https requirement for non-loopback
+                          remotes. Bearer tokens will be sent in the clear;
+                          a WARNING is printed. Use only for testing.
   --db <path>             Database path override (default: the standard
                           memory database under the XDG data directory).
   --timeout <duration>    Per-run HTTP timeout (default 60s).

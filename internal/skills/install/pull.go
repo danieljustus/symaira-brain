@@ -100,7 +100,7 @@ func Pull(opts PullOptions) (PullResult, error) {
 	if err != nil {
 		return PullResult{Action: "locked", Target: opts.Target, Name: opts.Name}, err
 	}
-	defer lock.Release()
+	defer func() { _ = lock.Release() }()
 	libraryPath := filepath.Join(opts.LibraryDir, opts.Name)
 	bundle, err := skill.LoadBundle(libraryPath)
 	if err != nil {

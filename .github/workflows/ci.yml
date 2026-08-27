@@ -55,17 +55,8 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Format check
-        run: |
-          fmt_out="$(gofmt -l .)"
-          if [ -n "$fmt_out" ]; then
-            echo "gofmt needs to be run on:"
-            echo "$fmt_out"
-            exit 1
-          fi
-
-      - name: Vet
-        run: go vet ./...
+      - name: Lint (go vet + gofmt check, matches local make lint)
+        run: make lint
 
       # symbrain ships CGO-free; verify that build configuration explicitly.
       - name: Build (CGO-free)

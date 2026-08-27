@@ -24,19 +24,31 @@ const SchemaVersion = 1
 
 // Run prints version and build information to w.
 // When args contain "--json", the output is the versionkit.Info JSON payload.
-func Run(args []string, w io.Writer) {
+func Run(args []string, w io.Writer) error {
 	info := versionkit.New("symguard", version, SchemaVersion)
 
 	if hasFlag(args, "--json") {
-		info.Write(w)
-		fmt.Fprintln(w)
-		return
+		if err := info.Write(w); err != nil {
+			return err
+		}
+		_, err := fmt.Fprintln(w)
+		return err
 	}
 
-	fmt.Fprintln(w, info.String())
-	fmt.Fprintf(w, "  go      %s\n", runtime.Version())
-	fmt.Fprintf(w, "  os/arch %s/%s\n", runtime.GOOS, runtime.GOARCH)
-	fmt.Fprintf(w, "  built   %s\n", buildTime())
+	_, err := fmt.Fprintln(w, info.String())
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "  go      %s\n", runtime.Version())
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "  os/arch %s/%s\n", runtime.GOOS, runtime.GOARCH)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(w, "  built   %s\n", buildTime())
+	return err
 }
 
 func hasFlag(args []string, flag string) bool {

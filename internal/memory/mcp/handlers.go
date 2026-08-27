@@ -3,7 +3,9 @@ package mcp
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -15,6 +17,33 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/memory/web"
 	"github.com/google/uuid"
 )
+
+// maxRequestBody is the per-request body limit for MCP HTTP endpoints.
+// 1 MiB is well above typical JSON payloads and prevents unbounded memory
+// use from accidental or malicious large uploads.
+const maxRequestBody = 1 << 20
+
+// decodeBoundedJSON reads the entire request body (bounded by maxRequestBody),
+// unmarshals a single JSON value from it, and rejects trailing data. It returns
+// true on success; on failure it writes an error response and returns false.
+func decodeBoundedJSON(w http.ResponseWriter, r *http.Request, out any) bool {
+	limited := http.MaxBytesReader(w, r.Body, maxRequestBody)
+	all, err := io.ReadAll(limited)
+	if err != nil {
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			writeJSONError(w, http.StatusRequestEntityTooLarge, CodeInvalidRequest, "request body exceeds size limit", err)
+			return false
+		}
+		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+		return false
+	}
+	if err := json.Unmarshal(all, out); err != nil {
+		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+		return false
+	}
+	return true
+}
 
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -50,8 +79,7 @@ func (s *Server) handleTokenRevoke(w http.ResponseWriter, r *http.Request) {
 		Token string `json:"token"`
 		JTI   string `json:"jti"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
-		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+	if !decodeBoundedJSON(w, r, &args) {
 		return
 	}
 
@@ -107,8 +135,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		MinSharingLevel   string `json:"min_sharing_level"`
 		ClientID          string `json:"client_id"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
-		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+	if !decodeBoundedJSON(w, r, &args) {
 		return
 	}
 
@@ -169,8 +196,7 @@ func (s *Server) handleSet(w http.ResponseWriter, r *http.Request) {
 		Entities  []string          `json:"entities"`
 		Working   bool              `json:"working"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
-		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+	if !decodeBoundedJSON(w, r, &args) {
 		return
 	}
 
@@ -338,8 +364,7 @@ func (s *Server) handleSyncApply(w http.ResponseWriter, r *http.Request) {
 		Memories []*db.Memory       `json:"memories"`
 		Deleted  []db.DeletedMemory `json:"deleted"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+	if !decodeBoundedJSON(w, r, &body) {
 		return
 	}
 
@@ -443,8 +468,7 @@ func (s *Server) handleSyncRelay(w http.ResponseWriter, r *http.Request) {
 		var body struct {
 			Blobs []db.RelayBlob `json:"blobs"`
 		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			writeJSONError(w, http.StatusBadRequest, CodeInvalidRequest, "Bad request body", err)
+		if !decodeBoundedJSON(w, r, &body) {
 			return
 		}
 		var stored, skipped int

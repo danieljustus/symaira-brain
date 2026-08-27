@@ -491,9 +491,10 @@ Body beta.
 	imported := make(map[string]BatchImportResult)
 	var failed int
 	for _, r := range results {
-		if r.Status == BatchImported {
+		switch r.Status {
+		case BatchImported:
 			imported[r.Name] = r
-		} else if r.Status == BatchFailed {
+		case BatchFailed:
 			failed++
 		}
 	}

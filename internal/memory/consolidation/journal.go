@@ -102,7 +102,10 @@ func (eng *Engine) UndoLastConsolidation(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	// Rollback is best-effort: commit will finalize the transaction,
+	// and a rollback failure on a path that does not commit is surfaced
+	// by the caller's own error handling below.
+	defer func() { _ = tx.Rollback() }()
 
 	// Step 1: Delete all consolidated memories created by the run.
 	for _, id := range rs.NewMemoryIDs {
