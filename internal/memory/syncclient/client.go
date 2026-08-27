@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -20,6 +22,10 @@ const defaultTimeout = 60 * time.Second
 
 // defaultPageLimit is the per-request page size for pulls.
 const defaultPageLimit = 500
+
+// maxResponseBody is the per-response body limit for the sync client.
+// 10 MiB keeps memory use bounded while allowing large sync payloads.
+const maxResponseBody = 10 << 20
 
 // HTTPError reports a non-2xx response from the remote memory server.
 type HTTPError struct {
@@ -64,8 +70,15 @@ type RelayPushResult struct {
 	Skipped int `json:"skipped"`
 }
 
+// ErrInsecureRemote is returned by ValidateRemoteURL when the remote URL
+// uses plain HTTP and neither targets a loopback host nor is allowed by
+// the explicit override.
+var ErrInsecureRemote = errors.New("remote memory sync requires an https URL")
+
 // Client is a minimal HTTP client for the memory sync API. It is safe to
 // reuse across runs; the token is sent on every request when non-empty.
+// Construction validates the base URL: HTTPS is required, with a
+// loopback-HTTP escape hatch (see ValidateRemoteURL).
 type Client struct {
 	baseURL string
 	token   string
@@ -75,11 +88,77 @@ type Client struct {
 // NewClient returns a client for the given remote base URL. A nil http
 // client yields a default one with defaultTimeout. The token is optional;
 // empty disables the Authorization header.
-func NewClient(baseURL, token string, hc *http.Client) *Client {
+//
+// The remote URL is validated synchronously: it must parse, carry an http
+// or https scheme, and either use https or target a loopback host. Pass
+// NewClientWithOptions(..., allowInsecure=true) to override this guard
+// and ship bearer tokens over plain HTTP anyway; callers that do so are
+// responsible for the warning.
+func NewClient(baseURL, token string, hc *http.Client) (*Client, error) {
+	return NewClientWithOptions(baseURL, token, hc, false)
+}
+
+// NewClientWithOptions is NewClient with explicit control over the
+// insecure-HTTP override. When allowInsecure is true the caller is opting
+// into sending bearer tokens over plain HTTP and is responsible for
+// surfacing the warning to the user.
+func NewClientWithOptions(baseURL, token string, hc *http.Client, allowInsecure bool) (*Client, error) {
+	if err := ValidateRemoteURL(baseURL, allowInsecure); err != nil {
+		return nil, err
+	}
 	if hc == nil {
 		hc = &http.Client{Timeout: defaultTimeout}
 	}
-	return &Client{baseURL: strings.TrimRight(baseURL, "/"), token: token, http: hc}
+	return &Client{baseURL: strings.TrimRight(baseURL, "/"), token: token, http: hc}, nil
+}
+
+// ValidateRemoteURL checks that raw is a well-formed http(s) URL and that
+// it uses https, except for loopback hosts which are allowed over plain
+// HTTP for local development. When allowInsecure is true the https
+// requirement is dropped; callers that exercise this override should log
+// a clear warning alongside it.
+func ValidateRemoteURL(raw string, allowInsecure bool) error {
+	if raw == "" {
+		return errors.New("remote URL is required")
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return fmt.Errorf("parse remote URL: %w", err)
+	}
+	switch strings.ToLower(u.Scheme) {
+	case "https":
+		return nil
+	case "http":
+		host := u.Hostname()
+		if host == "" {
+			return fmt.Errorf("%w: http URL %q has no host", ErrInsecureRemote, raw)
+		}
+		if isLoopbackHost(host) {
+			return nil
+		}
+		if allowInsecure {
+			return nil
+		}
+		return fmt.Errorf("%w: %s (pass --allow-insecure-http to override)", ErrInsecureRemote, raw)
+	default:
+		if u.Scheme == "" {
+			return fmt.Errorf("parse remote URL: missing scheme in %q", raw)
+		}
+		return fmt.Errorf("remote URL scheme %q is not supported (use https, or http for loopback)", u.Scheme)
+	}
+}
+
+// isLoopbackHost reports whether host is a loopback name or IP. The
+// comparison is case-insensitive for host names and exact for IPs.
+func isLoopbackHost(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return false
+	}
+	return ip.IsLoopback()
 }
 
 // Changes fetches remote changes. When cursor is non-empty it is passed as
@@ -189,7 +268,8 @@ func (c *Client) do(ctx context.Context, method, target string, body any, out an
 		return &HTTPError{Status: resp.StatusCode, Code: apiErr.Code, Message: apiErr.Error}
 	}
 	if out != nil {
-		if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		limited := io.LimitReader(resp.Body, maxResponseBody)
+		if err := json.NewDecoder(limited).Decode(out); err != nil {
 			return fmt.Errorf("decode remote response: %w", err)
 		}
 	}

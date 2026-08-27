@@ -2594,3 +2594,54 @@ func TestCSRFBlockedAfterHostValidation(t *testing.T) {
 		t.Errorf("expected 403 (CSRF), got %d", res.StatusCode)
 	}
 }
+
+// --------------------------------------------------------------------------
+// Body bounding: oversized and trailing-JSON rejection
+// --------------------------------------------------------------------------
+
+func TestSyncApply_OversizedRequestBody(t *testing.T) {
+	s := helperServer(t)
+	token := helperAuthToken(t, s)
+	ts := httptest.NewServer(s.httpMux())
+	defer ts.Close()
+
+	// Build a valid JSON body slightly above the 1 MiB request limit.
+	padding := make([]byte, maxRequestBody-len(`{"memories":[]}`)+1)
+	for i := range padding {
+		padding[i] = 'a'
+	}
+	body := string(`{"memories":[]}`) + string(padding)
+	req, _ := http.NewRequest("POST", ts.URL+"/api/sync/apply", strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusRequestEntityTooLarge {
+		t.Errorf("expected 413 for oversized body, got %d", resp.StatusCode)
+	}
+}
+
+func TestSyncApply_TrailingJSONRejected(t *testing.T) {
+	s := helperServer(t)
+	token := helperAuthToken(t, s)
+	ts := httptest.NewServer(s.httpMux())
+	defer ts.Close()
+
+	payload := `{"memories":[]}` + `{"trailing":true}`
+	req, _ := http.NewRequest("POST", ts.URL+"/api/sync/apply", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected 400 for trailing JSON, got %d", resp.StatusCode)
+	}
+}
