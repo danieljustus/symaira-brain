@@ -3,6 +3,7 @@ package profile
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -60,13 +61,13 @@ enabled = true
 	if p.Name != "personal" || p.Description != "Full access for trusted personal use" {
 		t.Errorf("Name/Description = %q/%q, want personal/...", p.Name, p.Description)
 	}
-	if !p.Servers.Vault.Enabled || p.Servers.Vault.Mode != VaultModeFull {
-		t.Errorf("Servers.Vault = %+v, want enabled=true mode=full", p.Servers.Vault)
+	if !p.Server(ServerVault).Enabled || p.Server(ServerVault).Mode != VaultModeFull {
+		t.Errorf("Servers.Vault = %+v, want enabled=true mode=full", p.Server(ServerVault))
 	}
-	if !p.Servers.Memory.Enabled || p.Servers.Memory.Mode != MemoryModeReadWrite {
-		t.Errorf("Servers.Memory = %+v, want enabled=true mode=read_write", p.Servers.Memory)
+	if !p.Server(ServerMemory).Enabled || p.Server(ServerMemory).Mode != MemoryModeReadWrite {
+		t.Errorf("Servers.Memory = %+v, want enabled=true mode=read_write", p.Server(ServerMemory))
 	}
-	if !p.Servers.Skills.Enabled {
+	if !p.Server(ServerSkills).Enabled {
 		t.Errorf("Servers.Skills.Enabled = false, want true")
 	}
 	if !p.Audit.Enabled {
@@ -103,11 +104,11 @@ enabled = true
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	if p.Servers.Vault.Mode != VaultModeRequestOnly {
-		t.Errorf("Servers.Vault.Mode = %q, want %q", p.Servers.Vault.Mode, VaultModeRequestOnly)
+	if p.Server(ServerVault).Mode != VaultModeRequestOnly {
+		t.Errorf("Servers.Vault.Mode = %q, want %q", p.Server(ServerVault).Mode, VaultModeRequestOnly)
 	}
-	if p.Servers.Memory.Mode != MemoryModeReadOnly {
-		t.Errorf("Servers.Memory.Mode = %q, want %q", p.Servers.Memory.Mode, MemoryModeReadOnly)
+	if p.Server(ServerMemory).Mode != MemoryModeReadOnly {
+		t.Errorf("Servers.Memory.Mode = %q, want %q", p.Server(ServerMemory).Mode, MemoryModeReadOnly)
 	}
 }
 
@@ -123,7 +124,7 @@ name = "bare"
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
 
-	if p.Servers.Vault.Enabled || p.Servers.Memory.Enabled || p.Servers.Skills.Enabled {
+	if p.Server(ServerVault).Enabled || p.Server(ServerMemory).Enabled || p.Server(ServerSkills).Enabled {
 		t.Errorf("Servers = %+v, want all disabled by default", p.Servers)
 	}
 	if !p.Audit.Enabled {
@@ -148,11 +149,11 @@ enabled = true
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	if p.Servers.Vault.Mode != VaultModeRequestOnly {
-		t.Errorf("Servers.Vault.Mode = %q, want default %q", p.Servers.Vault.Mode, VaultModeRequestOnly)
+	if p.Server(ServerVault).Mode != VaultModeRequestOnly {
+		t.Errorf("Servers.Vault.Mode = %q, want default %q", p.Server(ServerVault).Mode, VaultModeRequestOnly)
 	}
-	if p.Servers.Memory.Mode != MemoryModeReadOnly {
-		t.Errorf("Servers.Memory.Mode = %q, want default %q", p.Servers.Memory.Mode, MemoryModeReadOnly)
+	if p.Server(ServerMemory).Mode != MemoryModeReadOnly {
+		t.Errorf("Servers.Memory.Mode = %q, want default %q", p.Server(ServerMemory).Mode, MemoryModeReadOnly)
 	}
 }
 
@@ -176,8 +177,8 @@ tools_deny  = ["memory_set"]
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	allow := p.Servers.Memory.ToolsAllow
-	deny := p.Servers.Memory.ToolsDeny
+	allow := p.Server(ServerMemory).ToolsAllow
+	deny := p.Server(ServerMemory).ToolsDeny
 	if len(allow) != 2 || allow[0] != "memory_search" || allow[1] != "memory_set" {
 		t.Errorf("ToolsAllow = %v, want [memory_search memory_set]", allow)
 	}
@@ -208,7 +209,9 @@ rate_limit  = 5
 	}
 }
 
-func TestLoad_UnknownServerAliasErrors(t *testing.T) {
+func TestLoad_ForeignServerWithoutTransportErrors(t *testing.T) {
+	// An unknown alias is now a foreign server (ADR 0001, D2/D4): it must
+	// declare a transport (command or url), otherwise the profile is invalid.
 	home := withHome(t)
 	writeProfile(t, home, "bad-alias", `
 [profile]
@@ -220,10 +223,175 @@ enabled = true
 
 	_, err := Load("bad-alias")
 	if err == nil {
-		t.Fatal("Load() error = nil, want error for unknown server alias")
+		t.Fatal("Load() error = nil, want error for foreign server without command/url")
+	}
+	if !strings.Contains(err.Error(), "requires command") {
+		t.Errorf("err = %q, want 'requires command (with optional args) or url'", err)
 	}
 	if got := exitcodes.ExitCodeFromError(err); got != exitcodes.ExitNoInput {
 		t.Errorf("ExitCodeFromError(err) = %d, want %d", got, exitcodes.ExitNoInput)
+	}
+}
+
+func TestLoad_CoreAliasCannotBeForeign(t *testing.T) {
+	// The four core aliases are reserved; redefining one with a foreign
+	// transport (command/args/url) is a collision and must be rejected.
+	home := withHome(t)
+	writeProfile(t, home, "vault-as-foreign", `
+[profile]
+name = "vault-as-foreign"
+
+[servers.vault]
+enabled = true
+command = "/usr/bin/some-mcp"
+`)
+
+	_, err := Load("vault-as-foreign")
+	if err == nil {
+		t.Fatal("Load() error = nil, want error for core alias carrying command")
+	}
+	if !strings.Contains(err.Error(), "not a foreign server") {
+		t.Errorf("err = %q, want 'not a foreign server'", err)
+	}
+}
+
+func TestLoad_ForeignServerWithCommandAndArgs(t *testing.T) {
+	home := withHome(t)
+	writeProfile(t, home, "with-foreign", `
+[profile]
+name = "with-foreign"
+
+[servers.zotero]
+enabled = true
+command = "/usr/local/bin/zotero-mcp"
+args = ["--stdio", "--log", "/tmp/z.log"]
+
+[servers.vault]
+enabled = true
+mode = "full"
+`)
+
+	p, err := Load("with-foreign")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+
+	z := p.Server("zotero")
+	if !z.Enabled || z.Command != "/usr/local/bin/zotero-mcp" {
+		t.Errorf("zotero = %+v, want enabled with command", z)
+	}
+	if len(z.Args) != 3 || z.Args[0] != "--stdio" || z.Args[1] != "--log" || z.Args[2] != "/tmp/z.log" {
+		t.Errorf("zotero args = %v, want [--stdio --log /tmp/z.log]", z.Args)
+	}
+	if IsCoreAlias("zotero") {
+		t.Error("zotero should not be a core alias")
+	}
+
+	// The four cores are still present with their defaults.
+	if !p.Server(ServerVault).Enabled || p.Server(ServerVault).Mode != VaultModeFull {
+		t.Errorf("vault = %+v, want enabled full", p.Server(ServerVault))
+	}
+	if p.Server(ServerMemory).Enabled || p.Server(ServerUsage).Enabled {
+		t.Error("memory/usage should stay disabled when absent")
+	}
+}
+
+func TestLoad_ForeignServerWithURL(t *testing.T) {
+	home := withHome(t)
+	writeProfile(t, home, "with-url", `
+[profile]
+name = "with-url"
+
+[servers.fig]
+enabled = true
+url = "https://mcp.example.com/sse"
+`)
+
+	p, err := Load("with-url")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	fig := p.Server("fig")
+	if !fig.Enabled || fig.URL != "https://mcp.example.com/sse" {
+		t.Errorf("fig = %+v, want enabled with url", fig)
+	}
+}
+
+func TestLoad_ForeignServerModeIgnoredWithWarning(t *testing.T) {
+	home := withHome(t)
+	writeProfile(t, home, "foreign-mode", `
+[profile]
+name = "foreign-mode"
+
+[servers.fig]
+enabled = true
+mode = "full"
+command = "/usr/bin/fig-mcp"
+`)
+
+	p, err := Load("foreign-mode")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	found := false
+	for _, w := range p.Warnings {
+		if strings.Contains(w, "fig") && strings.Contains(w, "mode") {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("Warnings = %v, want a mode-ignored warning for fig", p.Warnings)
+	}
+}
+
+func TestLoad_ForeignServerAccessValidation(t *testing.T) {
+	// Invalid access class is a hard error; "read" is carried; empty
+	// defaults to "write" (filter model, issue #335).
+	home := withHome(t)
+	writeProfile(t, home, "bad-access", `
+[profile]
+name = "bad-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+access = "exec"
+`)
+	if _, err := Load("bad-access"); err == nil {
+		t.Fatal("Load() error = nil, want error for invalid access class")
+	}
+
+	writeProfile(t, home, "read-access", `
+[profile]
+name = "read-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+access = "read"
+`)
+	p, err := Load("read-access")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if got := p.Server("fig").Access; got != "read" {
+		t.Errorf("fig access = %q, want %q", got, "read")
+	}
+
+	writeProfile(t, home, "default-access", `
+[profile]
+name = "default-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+`)
+	p2, err := Load("default-access")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if got := p2.Server("fig").Access; got != ForeignAccessWrite {
+		t.Errorf("fig access = %q, want default %q", got, ForeignAccessWrite)
 	}
 }
 
@@ -298,7 +466,7 @@ mode    = "full"
 	if err != nil {
 		t.Fatalf("Load() error = %v, want nil", err)
 	}
-	if !p.Servers.Skills.Enabled {
+	if !p.Server(ServerSkills).Enabled {
 		t.Error("Servers.Skills.Enabled = false, want true")
 	}
 	if len(p.Warnings) == 0 {
@@ -473,11 +641,11 @@ enabled = false
 	if p.Name != "room" || p.Description != "Room-local profile" {
 		t.Errorf("Name/Description = %q/%q, want room/...", p.Name, p.Description)
 	}
-	if !p.Servers.Vault.Enabled || p.Servers.Vault.Mode != VaultModeRequestOnly {
-		t.Errorf("Servers.Vault = %+v, want enabled=true mode=request_only", p.Servers.Vault)
+	if !p.Server(ServerVault).Enabled || p.Server(ServerVault).Mode != VaultModeRequestOnly {
+		t.Errorf("Servers.Vault = %+v, want enabled=true mode=request_only", p.Server(ServerVault))
 	}
-	if !p.Servers.Memory.Enabled || p.Servers.Memory.Mode != MemoryModeReadOnly {
-		t.Errorf("Servers.Memory = %+v, want enabled=true mode=read_only", p.Servers.Memory)
+	if !p.Server(ServerMemory).Enabled || p.Server(ServerMemory).Mode != MemoryModeReadOnly {
+		t.Errorf("Servers.Memory = %+v, want enabled=true mode=read_only", p.Server(ServerMemory))
 	}
 }
 

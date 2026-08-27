@@ -70,7 +70,7 @@ func (s *Server) SetMemoryServer(ms *memorymcp.Server) {
 // is an interface so tests can substitute a fake logger (e.g. to force
 // the degraded-warning path) without changing production behavior.
 type auditSink interface {
-	Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...audit.Classification)
+	Log(server, tool string, args json.RawMessage, duration time.Duration, status string, exposure audit.Exposure, classifications ...audit.Classification)
 	LogDegradation(server, reason, level string)
 	Degraded() bool
 	Close() error
@@ -210,7 +210,10 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 							classification = classified.Classification
 						}
 					}
-					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status, classification)
+					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status, audit.Exposure{
+						AccessClass:  entry.AccessClass,
+						AccessSource: entry.AccessSource,
+					}, classification)
 					if auditLog.Degraded() {
 						s.auditDegradedWarn.Do(func() {
 							s.logger.Warn("audit log degraded; some entries may not be persisted")
@@ -272,6 +275,7 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 				Name:        t.Name,
 				Description: t.Description,
 				InputSchema: t.InputSchema,
+				Annotations: translateAnnotations(t.Annotations),
 			}
 		}
 
@@ -280,7 +284,21 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 			liveNames[i] = t.Name
 		}
 
-		report, err := policy.Evaluate(alias, serverCfg, liveNames)
+		var report *policy.Report
+		if profile.IsCoreAlias(alias) {
+			report, err = policy.Evaluate(alias, serverCfg, liveNames)
+		} else {
+			// Foreign server: filter model — read/write access class plus
+			// allow/deny, driven by the upstream readOnlyHint annotation.
+			foreignTools := make([]policy.ForeignTool, len(tools))
+			for i, t := range tools {
+				foreignTools[i] = policy.ForeignTool{
+					Name:         t.Name,
+					ReadOnlyHint: readOnlyHint(t.Annotations),
+				}
+			}
+			report, err = policy.EvaluateForeign(alias, serverCfg, foreignTools)
+		}
 		if err != nil {
 			return fmt.Errorf("gateway: evaluate policy for %s: %w", alias, err)
 		}
@@ -298,6 +316,30 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 	}
 	s.cat = cat
 	return nil
+}
+
+// translateAnnotations copies broker.ToolAnnotations into the catalog's
+// mirror type (same shape, separate package to avoid an import cycle).
+func translateAnnotations(a *broker.ToolAnnotations) *catalog.ToolAnnotations {
+	if a == nil {
+		return nil
+	}
+	return &catalog.ToolAnnotations{
+		Title:           a.Title,
+		ReadOnlyHint:    a.ReadOnlyHint,
+		DestructiveHint: a.DestructiveHint,
+		IDempotentHint:  a.IDempotentHint,
+		OpenWorldHint:   a.OpenWorldHint,
+	}
+}
+
+// readOnlyHint extracts the readOnlyHint from broker annotations for the
+// foreign-server classifier. Absent annotations yield a nil hint.
+func readOnlyHint(a *broker.ToolAnnotations) *bool {
+	if a == nil {
+		return nil
+	}
+	return a.ReadOnlyHint
 }
 
 // classifiedError preserves the existing human-readable error message while

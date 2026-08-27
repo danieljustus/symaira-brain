@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
 )
 
 // openStore creates a store in a temp dir and points SYMGUARD_DATA at it so

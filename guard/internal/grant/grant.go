@@ -37,7 +37,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
 )
 
 // ErrNotFound is returned when a grant ID is not present in the store.

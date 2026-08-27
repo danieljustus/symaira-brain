@@ -40,9 +40,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/audit"
-	"github.com/danieljustus/symaira-guard/internal/config"
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/audit"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // State is the lifecycle state of a Proposal.

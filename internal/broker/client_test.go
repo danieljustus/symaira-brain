@@ -166,6 +166,67 @@ func TestClient_ListTools(t *testing.T) {
 	}
 }
 
+func TestClient_ListTools_ParsesAnnotations(t *testing.T) {
+	// MCP tools/list annotations must reach the Tool so the policy layer can
+	// classify a foreign server's tools by read-only/destructive hint
+	// (ADR 0001, D4). Hints are the server's own statement — absent
+	// annotations parse to a nil pointer, not a broken call.
+	c, peer := newTestClient(t)
+
+	done := make(chan struct{})
+	var tools []Tool
+	var callErr error
+	go func() {
+		tools, callErr = c.ListTools(context.Background())
+		close(done)
+	}()
+
+	req := peer.next()
+	peer.respond(req["id"].(float64), map[string]any{
+		"tools": []map[string]any{
+			{
+				"name":        "search",
+				"description": "read-only search",
+				"annotations": map[string]any{
+					"title":           "Search",
+					"readOnlyHint":    true,
+					"destructiveHint": false,
+					"idempotentHint":  true,
+					"openWorldHint":   false,
+				},
+			},
+			{"name": "plain", "description": "no annotations"},
+		},
+	})
+
+	<-done
+	if callErr != nil {
+		t.Fatalf("ListTools() error = %v", callErr)
+	}
+	if len(tools) != 2 {
+		t.Fatalf("tools = %+v, want 2", tools)
+	}
+	a := tools[0].Annotations
+	if a == nil {
+		t.Fatal("expected annotations on search tool")
+	}
+	if a.Title != "Search" {
+		t.Errorf("title = %q, want %q", a.Title, "Search")
+	}
+	if a.ReadOnlyHint == nil || !*a.ReadOnlyHint {
+		t.Errorf("readOnlyHint = %v, want true", a.ReadOnlyHint)
+	}
+	if a.DestructiveHint == nil || *a.DestructiveHint {
+		t.Errorf("destructiveHint = %v, want false", a.DestructiveHint)
+	}
+	if a.IDempotentHint == nil || !*a.IDempotentHint {
+		t.Errorf("idempotentHint = %v, want true", a.IDempotentHint)
+	}
+	if tools[1].Annotations != nil {
+		t.Errorf("plain tool annotations = %+v, want nil", tools[1].Annotations)
+	}
+}
+
 func TestClient_CallTool_Success(t *testing.T) {
 	c, peer := newTestClient(t)
 

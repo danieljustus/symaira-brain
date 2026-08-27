@@ -36,6 +36,12 @@ const (
 	VaultModeOff         = "off"
 )
 
+// Foreign server exposure access classes.
+const (
+	ForeignAccessRead  = "read"
+	ForeignAccessWrite = "write"
+)
+
 // Profile is the parsed, validated, defaulted representation of a profile
 // TOML file at ~/.config/symbrain/profiles/<name>.toml. One profile
 // controls what a single harness connection may see across the three
@@ -53,29 +59,44 @@ type Profile struct {
 	Warnings []string `json:"warnings,omitempty"`
 }
 
-// Servers holds the state-core/config server configs a profile can shape.
-// This is a fixed struct rather than a map — symbrain composes exactly
-// these servers. Only vault has an external binary override in the
-// global config; memory, skills and usage are embedded in symbrain.
-type Servers struct {
-	Vault  ServerConfig `json:"vault"`
-	Memory ServerConfig `json:"memory"`
-	Skills ServerConfig `json:"skills"`
-	Usage  ServerConfig `json:"usage"`
-}
+// Servers maps server aliases to their exposure configs. The four reserved
+// core aliases (vault, memory, skills, usage) are always present, resolved
+// with their mode presets and default-deny behavior. Any additional alias in
+// a profile file is a foreign server: it carries no mode preset and instead
+// requires a command (with optional args) or a url. (ADR 0001, D2/D4)
+type Servers map[string]ServerConfig
 
 // ServerConfig is one [servers.<alias>] table.
 type ServerConfig struct {
 	Enabled bool `json:"enabled"`
 	// Mode selects a named exposure preset (see internal/policy). Only
 	// meaningful for vault and memory; skills has no modes and ignores
-	// this field (a mode set there is dropped with a warning).
+	// this field (a mode set there is dropped with a warning). Foreign
+	// servers never carry a mode — their exposure is read/write classified
+	// per profile (issue #335).
 	Mode string `json:"mode,omitempty"`
 	// ToolsAllow and ToolsDeny override Mode's preset tool list. The two
 	// are mutually combinable; internal/policy resolves them with deny
 	// always winning over allow.
 	ToolsAllow []string `json:"tools_allow,omitempty"`
 	ToolsDeny  []string `json:"tools_deny,omitempty"`
+	// Command, Args and URL express the transport of a foreign server.
+	// A foreign server must set command (with optional args) or url.
+	// Core aliases must not set them (they are not foreign servers).
+	Command string   `json:"command,omitempty"`
+	Args    []string `json:"args,omitempty"`
+	URL     string   `json:"url,omitempty"`
+	// Access is the foreign-server exposure class: "read" exposes only
+	// tools classified as reading, "write" exposes reading and writing
+	// tools. Empty defaults to "write". Meaningless for core aliases
+	// (their mode preset governs exposure); ignored with a warning.
+	Access string `json:"access,omitempty"`
+	// ToolsRead and ToolsWrite are explicit read/write overrides for a
+	// foreign server's tools. An explicit entry wins over the upstream
+	// readOnlyHint annotation in both directions. Meaningless for core
+	// aliases; ignored with a warning.
+	ToolsRead  []string `json:"tools_read,omitempty"`
+	ToolsWrite []string `json:"tools_write,omitempty"`
 }
 
 // AuditConfig is the [audit] table. Enabled defaults to true.
@@ -97,13 +118,20 @@ type fileProfileMeta struct {
 	Description string `toml:"description"`
 }
 
-// fileServer is shared across all three server aliases; not every field is
-// meaningful for every alias (skills ignores Mode).
+// fileServer is shared across all server aliases; not every field is
+// meaningful for every alias (skills ignores Mode, foreign servers have no
+// Mode at all and must carry command/args or url).
 type fileServer struct {
 	Enabled    *bool    `toml:"enabled"`
 	Mode       string   `toml:"mode"`
 	ToolsAllow []string `toml:"tools_allow"`
 	ToolsDeny  []string `toml:"tools_deny"`
+	Command    string   `toml:"command"`
+	Args       []string `toml:"args"`
+	URL        string   `toml:"url"`
+	Access     string   `toml:"access"`
+	ToolsRead  []string `toml:"tools_read"`
+	ToolsWrite []string `toml:"tools_write"`
 }
 
 type fileAuditConfig struct {
@@ -239,38 +267,121 @@ func parse(name string, data []byte) (*Profile, error) {
 }
 
 func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
-	var unknown []string
-	for alias := range raw {
+	servers := make(Servers, len(raw)+len(knownServerAliases))
+	var warnings []string
+
+	// A core alias redefined as a foreign server (command/args/url set) is
+	// a collision: the four cores are reserved and always resolved as such.
+	// Access/tools_read/tools_write are foreign-only; a core setting them is
+	// ignored with a warning (the mode preset governs core exposure).
+	for alias, fs := range raw {
 		if !knownServerAliases[alias] {
-			unknown = append(unknown, alias)
+			continue
+		}
+		if fs.Command != "" || len(fs.Args) > 0 || fs.URL != "" {
+			return nil, nil, fmt.Errorf(
+				"servers.%s: core server cannot carry command/args/url — it is not a foreign server", alias)
+		}
+		if fs.Access != "" || len(fs.ToolsRead) > 0 || len(fs.ToolsWrite) > 0 {
+			warnings = append(warnings, fmt.Sprintf(
+				"servers.%s: access/tools_read/tools_write are ignored (core exposure is governed by the mode preset)", alias))
 		}
 	}
-	if len(unknown) > 0 {
-		sort.Strings(unknown)
-		return Servers{}, nil, fmt.Errorf(
-			"unknown server alias(es): %s (must be one of %s, %s, %s, %s)",
-			strings.Join(unknown, ", "), ServerVault, ServerMemory, ServerSkills, ServerUsage)
+
+	// The four core aliases are always present, resolved with their mode
+	// presets and default-deny behavior (absent from the file = disabled).
+	coreOrder := []string{ServerVault, ServerMemory, ServerSkills, ServerUsage}
+	for _, alias := range coreOrder {
+		fs := raw[alias]
+		switch alias {
+		case ServerVault:
+			sc, err := resolveVault(fs)
+			if err != nil {
+				return nil, nil, err
+			}
+			servers[alias] = sc
+		case ServerMemory:
+			sc, err := resolveMemory(fs)
+			if err != nil {
+				return nil, nil, err
+			}
+			servers[alias] = sc
+		case ServerSkills:
+			sc, sw := resolveSkills(fs)
+			warnings = append(warnings, sw...)
+			servers[alias] = sc
+		case ServerUsage:
+			sc, uw := resolveUsage(fs)
+			warnings = append(warnings, uw...)
+			servers[alias] = sc
+		}
+	}
+
+	// Anything else is a foreign server: it needs a transport and carries
+	// no mode preset.
+	var foreign []string
+	for alias := range raw {
+		if !knownServerAliases[alias] {
+			foreign = append(foreign, alias)
+		}
+	}
+	sort.Strings(foreign)
+	for _, alias := range foreign {
+		sc, warningsAdded, err := resolveForeign(alias, raw[alias])
+		if err != nil {
+			return nil, nil, err
+		}
+		warnings = append(warnings, warningsAdded...)
+		servers[alias] = sc
+	}
+
+	return servers, warnings, nil
+}
+
+// resolveForeign validates and resolves a server outside the four cores. A
+// foreign server has no mode preset — its exposure is read/write classified
+// per profile (issue #335) — and must declare a transport: command (with
+// optional args) or url.
+func resolveForeign(alias string, fs fileServer) (ServerConfig, []string, error) {
+	if fs.Command == "" && fs.URL == "" {
+		return ServerConfig{}, nil, fmt.Errorf(
+			"servers.%s: foreign server requires command (with optional args) or url", alias)
 	}
 
 	var warnings []string
-
-	vault, err := resolveVault(raw[ServerVault])
-	if err != nil {
-		return Servers{}, nil, err
+	if fs.Mode != "" {
+		warnings = append(warnings, fmt.Sprintf(
+			"servers.%s: mode %q is ignored (foreign servers have no mode presets)", alias, fs.Mode))
 	}
 
-	memory, err := resolveMemory(raw[ServerMemory])
-	if err != nil {
-		return Servers{}, nil, err
+	access := fs.Access
+	if access == "" {
+		access = ForeignAccessWrite
+	}
+	switch access {
+	case ForeignAccessRead, ForeignAccessWrite:
+	default:
+		return ServerConfig{}, nil, fmt.Errorf(
+			"servers.%s: invalid access %q (must be %q or %q)", alias, access, ForeignAccessRead, ForeignAccessWrite)
 	}
 
-	skills, skillsWarnings := resolveSkills(raw[ServerSkills])
-	warnings = append(warnings, skillsWarnings...)
+	return ServerConfig{
+		Enabled:    derefBool(fs.Enabled, false),
+		Command:    fs.Command,
+		Args:       fs.Args,
+		URL:        fs.URL,
+		Access:     access,
+		ToolsRead:  fs.ToolsRead,
+		ToolsWrite: fs.ToolsWrite,
+		ToolsAllow: fs.ToolsAllow,
+		ToolsDeny:  fs.ToolsDeny,
+	}, warnings, nil
+}
 
-	usage, usageWarnings := resolveUsage(raw[ServerUsage])
-	warnings = append(warnings, usageWarnings...)
-
-	return Servers{Vault: vault, Memory: memory, Skills: skills, Usage: usage}, warnings, nil
+// IsCoreAlias reports whether alias is one of the four reserved core servers
+// (vault, memory, skills, usage). Foreign servers are every other alias.
+func IsCoreAlias(alias string) bool {
+	return knownServerAliases[alias]
 }
 
 func resolveVault(fs fileServer) (ServerConfig, error) {
@@ -362,21 +473,13 @@ func derefBool(p *bool, fallback bool) bool {
 }
 
 // Server returns the ServerConfig for the given alias (e.g. "vault",
-// "memory", "skills", "usage"). Returns a zero-value ServerConfig for
-// unknown aliases (disabled).
+// "memory", "skills", "usage", or a foreign server alias). Returns a
+// zero-value ServerConfig for an alias absent from the profile.
 func (p *Profile) Server(alias string) ServerConfig {
-	switch alias {
-	case ServerVault:
-		return p.Servers.Vault
-	case ServerMemory:
-		return p.Servers.Memory
-	case ServerSkills:
-		return p.Servers.Skills
-	case ServerUsage:
-		return p.Servers.Usage
-	default:
+	if p.Servers == nil {
 		return ServerConfig{}
 	}
+	return p.Servers[alias]
 }
 
 // ListNames returns the sorted profile names found under xdg.ProfilesDir()

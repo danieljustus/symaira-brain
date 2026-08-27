@@ -21,7 +21,7 @@ enabled = true
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if !p.Servers.Usage.Enabled {
+	if !p.Server(ServerUsage).Enabled {
 		t.Error("usage enabled = false, want true")
 	}
 	if p.Server(ServerUsage).Enabled != true {
@@ -35,7 +35,7 @@ name = "usage-off"
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if p2.Servers.Usage.Enabled {
+	if p2.Server(ServerUsage).Enabled {
 		t.Error("usage enabled = true, want default false")
 	}
 
@@ -50,8 +50,8 @@ mode = "full"
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if p3.Servers.Usage.Mode != "" {
-		t.Errorf("usage mode = %q, want ignored", p3.Servers.Usage.Mode)
+	if p3.Server(ServerUsage).Mode != "" {
+		t.Errorf("usage mode = %q, want ignored", p3.Server(ServerUsage).Mode)
 	}
 	found := false
 	for _, w := range p3.Warnings {
@@ -79,7 +79,7 @@ tools_deny = ["get_ai_usage"]
 	if err != nil {
 		t.Fatalf("Load: %v", err)
 	}
-	if len(p.Servers.Usage.ToolsDeny) != 1 || p.Servers.Usage.ToolsDeny[0] != "get_ai_usage" {
-		t.Errorf("usage tools_deny = %v, want [get_ai_usage]", p.Servers.Usage.ToolsDeny)
+	if len(p.Server(ServerUsage).ToolsDeny) != 1 || p.Server(ServerUsage).ToolsDeny[0] != "get_ai_usage" {
+		t.Errorf("usage tools_deny = %v, want [get_ai_usage]", p.Server(ServerUsage).ToolsDeny)
 	}
 }

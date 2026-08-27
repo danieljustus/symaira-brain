@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
 )
 
 func TestDecision_Grant(t *testing.T) {

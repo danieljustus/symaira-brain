@@ -21,9 +21,18 @@ import (
 	"go/parser"
 	"go/token"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+)
+
+// Module import prefixes after the guard module was dissolved into the
+// root module (ADR 0001, D6). The process boundary that used to enforce
+// the Brain/Guard separation is gone, so the rule is carried here.
+const (
+	brainInternalPrefix = "github.com/danieljustus/symaira-brain/internal/"
+	guardInternalPrefix = "github.com/danieljustus/symaira-brain/guard/internal/"
 )
 
 // AllowedImports defines which packages may import which other packages.
@@ -82,10 +91,10 @@ func (a AllowedImports) Check(root string) []string {
 		for _, imp := range f.Imports {
 			impPath := strings.Trim(imp.Path.Value, `"`)
 			// Check if it imports another internal/ package
-			if !strings.HasPrefix(impPath, "github.com/danieljustus/symaira-guard/internal/") {
+			if !strings.HasPrefix(impPath, guardInternalPrefix) {
 				continue
 			}
-			impRel := strings.TrimPrefix(impPath, "github.com/danieljustus/symaira-guard/internal/")
+			impRel := strings.TrimPrefix(impPath, guardInternalPrefix)
 			if !allowed[impRel] {
 				violations = append(violations,
 					path+": imports "+impRel+" (not in allowed set for "+pkgRel+")")
@@ -95,6 +104,50 @@ func (a AllowedImports) Check(root string) []string {
 	})
 	if err != nil {
 		return []string{"walk error: " + err.Error()}
+	}
+
+	sort.Strings(violations)
+	return violations
+}
+
+// CheckBoundary returns violations of the Brain/Guard separation, which the
+// single-module merge (ADR 0001, D6) no longer enforces by a process
+// boundary: brain internal packages must not import anything under guard/,
+// and guard internal packages must not import brain's internal packages.
+// The CLI entrypoint (cmd/symbrain) wiring into guard/cmd is deliberately
+// outside both internal trees and therefore not constrained.
+func CheckBoundary(repoRoot string) []string {
+	var violations []string
+
+	for _, dir := range []string{"internal", filepath.Join("guard", "internal")} {
+		root := filepath.Join(repoRoot, dir)
+		if _, err := os.Stat(root); err != nil {
+			continue
+		}
+		_ = filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() || !strings.HasSuffix(path, ".go") ||
+				strings.HasSuffix(path, "_test.go") {
+				return nil
+			}
+			fset := token.NewFileSet()
+			f, perr := parser.ParseFile(fset, path, nil, parser.ImportsOnly)
+			if perr != nil {
+				return nil // skip unparseable files
+			}
+			for _, imp := range f.Imports {
+				impPath := strings.Trim(imp.Path.Value, `"`)
+				if dir == "internal" && strings.HasPrefix(impPath, "github.com/danieljustus/symaira-brain/guard/") {
+					violations = append(violations, path+": brain internal imports guard ("+impPath+")")
+				}
+				if dir == filepath.Join("guard", "internal") && strings.HasPrefix(impPath, brainInternalPrefix) {
+					violations = append(violations, path+": guard internal imports brain internal ("+impPath+")")
+				}
+			}
+			return nil
+		})
 	}
 
 	sort.Strings(violations)

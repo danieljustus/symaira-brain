@@ -69,10 +69,26 @@ type ServerInfo struct {
 // tools/list response. Description and InputSchema are kept as the child
 // sent them; the broker does not interpret or modify either (see
 // internal/catalog, which passes both through unmodified downstream too).
+// Annotations are parsed and passed through to the catalog layer — the
+// read-only/destructive hints are what the foreign-server exposure model
+// (internal/policy) reads to classify a tool when no explicit profile entry
+// exists (ADR 0001, D4).
 type Tool struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description,omitempty"`
-	InputSchema json.RawMessage `json:"inputSchema,omitempty"`
+	Name        string           `json:"name"`
+	Description string           `json:"description,omitempty"`
+	InputSchema json.RawMessage  `json:"inputSchema,omitempty"`
+	Annotations *ToolAnnotations `json:"annotations,omitempty"`
+}
+
+// ToolAnnotations mirrors the MCP tools/list annotations object. Hints are
+// a server's statement about itself, not a security boundary — what may
+// override what is decided by the policy layer.
+type ToolAnnotations struct {
+	Title           string `json:"title,omitempty"`
+	ReadOnlyHint    *bool  `json:"readOnlyHint,omitempty"`
+	DestructiveHint *bool  `json:"destructiveHint,omitempty"`
+	IDempotentHint  *bool  `json:"idempotentHint,omitempty"`
+	OpenWorldHint   *bool  `json:"openWorldHint,omitempty"`
 }
 
 type toolsListResult struct {

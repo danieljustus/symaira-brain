@@ -40,6 +40,10 @@ type Report struct {
 	Exposed []string `json:"exposed"`
 	Hidden  []string `json:"hidden"`
 	Unknown []string `json:"unknown"`
+	// Exposures records the per-tool read/write access classification and
+	// its source for foreign servers (see foreign.go). Absent (nil) for the
+	// four cores, whose mode presets carry the semantics.
+	Exposures map[string]ToolExposure `json:"exposures,omitempty"`
 }
 
 // Verdict returns the classification for tool. A tool absent from the

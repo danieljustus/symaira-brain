@@ -37,19 +37,28 @@ each through its own profile, each seeing only what that profile exposes.
 - **One binary, in-process.** Memory and skills are compiled in, so there is
   no multi-process dance for the common case; vault stays separate on purpose
   because that process boundary *is* the security mechanism.
-- **Composable with `symguard`.** Capability shaping (what an agent can see)
-  and conduct policing (what a call is allowed to do) are deliberately
-  separate — put symguard in front when you need call-time enforcement.
+- **Composable with the guard layer.** Capability shaping (what an agent can
+  see) and conduct policing (what a call is allowed to do) are deliberately
+  separate. The guard command set is absorbed as `symbrain guard`
+  (decide/scan/doctor/grants) — the retired standalone `symguard` binary
+  (ADR 0001, D6) — and its enforcement internals stay out of the brain
+  packages (import-direction enforced).
 
 ## What symbrain is not
 
-- **Not a generic MCP hub or aggregator.** It only multiplexes the three
-  state cores above. General-purpose tools (web fetch, browser automation,
-  search, etc.) are wired directly into the harness by the user — symbrain
-  does not proxy them.
+- **Not a convenience bundle — but it is a control point.** Aggregation
+  without a policy gain stays out: symbrain is not a comfortable single
+  connection so you have fewer entries in your harness config. Pass-through
+  whose declared purpose is exposure control and audit is in scope (ADR
+  0001, D1) — which harness may see which server, read-only or read-write,
+  and who used what tool when. Decision test: if removing the policy layer
+  left a still-useful convenience bundle, it is aggregation and stays out;
+  if the pass-through is worthless without the policy layer, it is a control
+  point. General-purpose tools (web fetch, browser automation, search, etc.)
+  are wired directly into the harness by the user unless a profile names them.
 - **Not a call-time policy enforcer.** See the boundary table below —
-  that job belongs to [`symguard`](guard/) (nested module, absorbed
-  2026-08-21).
+  that job belongs to the guard module, absorbed into this repository
+  and dissolved into the root module (`symbrain guard`, ADR 0001 D6).
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
@@ -59,9 +68,9 @@ each through its own profile, each seeing only what that profile exposes.
   brokers (Memory, Vault, Skills) driven through their own CLIs; the core
   product remains the CLI/MCP gateway.
 
-### symbrain vs. symguard
+### symbrain vs. the guard layer
 
-Both tools sit between a harness and its tool servers, but answer a
+Both sit between a harness and its tool servers, but answer a
 different question:
 
 | | **symbrain** | **symguard** |
@@ -73,8 +82,9 @@ different question:
 | Audit | Lightweight JSONL log (who/what/when, redacted) | Tamper-evident audit (hash chain) |
 
 If you need per-call approval, risk classification, or a tamper-evident
-audit trail, put `symguard` in front of your servers. symbrain does not
-implement any of that itself.
+audit trail, that is the guard layer's concern (`symbrain guard decide`
+and the guard policy engine). symbrain does not implement any of that in
+its brain packages.
 
 ## Install
 
@@ -223,6 +233,37 @@ shorthand) for machine-readable output. The choice is not TTY-sensitive, so
 piping a command does not silently change its output format; the output flags
 may appear before or after the command's positional arguments.
 
+### Foreign servers: symbrain as a filter, not a gatekeeper
+
+The four cores have a tool universe maintained in this repository, so
+symbrain can be a **default-deny gatekeeper** for them: anything not on the
+versioned preset list is `Unknown` and excluded. A foreign server (any alias
+beyond vault/memory/skills/usage) has no such reference list and none can be
+maintained — stretching the preset model over it would produce a permanent
+`Unknown` verdict for every tool, i.e. an outage. For foreign servers
+symbrain is therefore a **filter**:
+
+```toml
+[servers.fig]
+enabled   = true
+command   = "/usr/local/bin/fig-mcp"   # or: url = "https://..."
+access    = "read"                      # "read" or "write" (default: write)
+tools_read  = ["search", "get"]        # explicit overrides, win over the
+tools_write = ["set", "delete"]        # upstream readOnlyHint annotation
+tools_allow = ["search", "get", "set"] # optional narrowing
+tools_deny  = ["delete"]               # deny always wins
+```
+
+Evaluation order for a foreign server: `enabled` → `access` → `tools_allow` /
+`tools_deny`. A tool is classified **reading** when an explicit
+`tools_read`/`tools_write` entry names it, else when the upstream server
+marks it `readOnlyHint: true`, else it counts as **writing**. `access =
+"read"` exposes only reading tools; `access = "write"` exposes reading and
+writing tools. The resulting access class and what it was derived from are
+recorded per call in the audit log, so an exposure decision can be explained
+after the fact. The core aliases are untouched: their mode presets and
+default-deny behavior are byte-identical to before.
+
 ## Command reference
 
 Implemented today:
@@ -354,7 +395,7 @@ boundary table above. Concretely:
   process abusing the tools its profile *does* expose (e.g. a `personal`
   profile with `vault` in `full` mode). There is no per-call approval, no
   risk scoring, and no human-in-the-loop confirmation in symbrain itself —
-  that is `symguard`'s job.
+  that is the guard module's job (`symbrain guard`).
 - **Audit log:** when enabled (default: on), every routed tool call is
   recorded as JSONL under `~/.local/share/symbrain/audit/<profile>.jsonl`
   with who/what/when. Vault call arguments and results are never written to

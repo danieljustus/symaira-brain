@@ -3,8 +3,8 @@ package policy
 import (
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // fakeLookup implements GrantLookup for tests.

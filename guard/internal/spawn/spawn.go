@@ -17,8 +17,8 @@ import (
 	"path/filepath"
 	"slices"
 
-	"github.com/danieljustus/symaira-guard/internal/config"
-	"github.com/danieljustus/symaira-guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
 )
 
 // Allowlist is a compiled set of spawn entries with deny-by-default

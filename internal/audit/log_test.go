@@ -368,7 +368,7 @@ func TestLog_WritesJSONL(t *testing.T) {
 	l := newTestLogger(t)
 
 	args := json.RawMessage(`{"query":"hello","limit":5}`)
-	l.Log("memory", "memory_search", args, 42*time.Millisecond, "ok")
+	l.Log("memory", "memory_search", args, 42*time.Millisecond, "ok", Exposure{})
 
 	data, err := os.ReadFile(l.path)
 	if err != nil {
@@ -412,7 +412,7 @@ func TestLog_VaultArgsRedacted(t *testing.T) {
 	l := newTestLogger(t)
 
 	args := json.RawMessage(`{"password":"secret","path":"creds/api-key"}`)
-	l.Log("vault", "get_entry", args, 10*time.Millisecond, "ok")
+	l.Log("vault", "get_entry", args, 10*time.Millisecond, "ok", Exposure{})
 
 	payloads := readPayloads(t, l.path)
 	if len(payloads) == 0 {
@@ -432,12 +432,12 @@ func TestLog_VaultArgsRedacted(t *testing.T) {
 
 func TestLog_NilLoggerNoOp(t *testing.T) {
 	var l *Logger
-	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok")
+	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok", Exposure{})
 }
 
 func TestLog_NilFileNoOp(t *testing.T) {
 	l := &Logger{config: Config{Enabled: true}}
-	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok")
+	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok", Exposure{})
 }
 
 func TestLog_DisabledNoOp(t *testing.T) {
@@ -446,7 +446,7 @@ func TestLog_DisabledNoOp(t *testing.T) {
 		path:   filepath.Join(t.TempDir(), "audit.jsonl"),
 		config: Config{Enabled: false},
 	}
-	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok")
+	l.Log("vault", "get_entry", nil, 1*time.Millisecond, "ok", Exposure{})
 
 	if _, err := os.Stat(l.path); !os.IsNotExist(err) {
 		t.Errorf("disabled logger should not create a log file (stat err: %v)", err)
@@ -458,7 +458,7 @@ func TestLog_VerboseIncludesValues(t *testing.T) {
 	l.config.Verbose = true
 
 	args := json.RawMessage(`{"query":"term","limit":10}`)
-	l.Log("memory", "memory_search", args, 5*time.Millisecond, "ok")
+	l.Log("memory", "memory_search", args, 5*time.Millisecond, "ok", Exposure{})
 
 	payloads := readPayloads(t, l.path)
 	if len(payloads) == 0 {
@@ -477,7 +477,7 @@ func TestLog_IncrementsSinkCount(t *testing.T) {
 	l := newTestLogger(t)
 
 	before := l.sink.Count()
-	l.Log("memory", "tool1", nil, 1*time.Millisecond, "ok")
+	l.Log("memory", "tool1", nil, 1*time.Millisecond, "ok", Exposure{})
 	if l.sink.Count() != before+1 {
 		t.Errorf("sink count = %d, want %d", l.sink.Count(), before+1)
 	}
@@ -986,7 +986,7 @@ func TestDegraded_StartsFalseAndFlipsOnWriteFailure(t *testing.T) {
 		_ = l.sink.Close()
 	}
 	l.mu.Unlock()
-	l.Log("memory", "search", nil, time.Millisecond, "ok")
+	l.Log("memory", "search", nil, time.Millisecond, "ok", Exposure{})
 
 	if !l.Degraded() {
 		t.Error("logger should be degraded after a write failure")

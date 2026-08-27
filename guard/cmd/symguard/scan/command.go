@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/danieljustus/symaira-guard/internal/discovery"
-	"github.com/danieljustus/symaira-guard/internal/output"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/output"
 )
 
 // discoverAll is the discovery entry point used by Run. Tests override it to

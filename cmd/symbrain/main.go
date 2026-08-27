@@ -79,6 +79,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdVersionWithFormat(rest, stdout, stderr, format)
 	case "vault":
 		return cmdPassthrough(cmd, rest, stderr)
+	case "guard":
+		return cmdGuard(rest, stdout, stderr)
 	case "help", "--help", "-h":
 		printUsage(stdout)
 		return exitcodes.ExitOK
@@ -157,6 +159,7 @@ Commands:
   memory      Operate the embedded memory store (sync with a remote)
   audit       Inspect the audit log
   vault       Passthrough to symvault
+  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)
 
   version     Print version information
   help        Show this help message

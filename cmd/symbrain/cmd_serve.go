@@ -7,6 +7,8 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
@@ -127,6 +129,41 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 			Logger:      logkit.Default(),
 		})
 		servers[d.alias] = ms
+	}
+
+	// Foreign servers: a profile may name any stdio MCP server beyond the
+	// four cores (ADR 0001, D2/D4). URL-only foreign servers have no stdio
+	// transport yet — the HTTP MCP client is not built — so they are warned
+	// and skipped rather than failing the whole serve.
+	for alias, serverCfg := range p.Servers {
+		if profile.IsCoreAlias(alias) || !serverCfg.Enabled {
+			continue
+		}
+		if serverCfg.Command == "" {
+			fmt.Fprintf(stderr, "symbrain mcp: %s: url-only foreign server (no stdio transport yet); skipping\n", alias)
+			continue
+		}
+
+		var path string
+		var err error
+		if strings.ContainsRune(serverCfg.Command, os.PathSeparator) {
+			path, err = broker.Discover(filepath.Base(serverCfg.Command), serverCfg.Command)
+		} else {
+			path, err = broker.Discover(serverCfg.Command, "")
+		}
+		if err != nil {
+			fmt.Fprintf(stderr, "symbrain mcp: %s: %v\n", alias, err)
+			continue
+		}
+
+		ms := broker.NewManagedServer(broker.ServerConfig{
+			Name:        alias,
+			BinaryPath:  path,
+			Args:        serverCfg.Args,
+			MaxRestarts: 3,
+			Logger:      logkit.Default(),
+		})
+		servers[alias] = ms
 	}
 
 	return servers

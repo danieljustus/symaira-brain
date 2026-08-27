@@ -3,7 +3,7 @@ package sequence
 import (
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 func completedEvent(tool string, args any) model.ActionEvent {

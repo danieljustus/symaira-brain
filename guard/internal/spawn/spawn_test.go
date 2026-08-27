@@ -3,8 +3,8 @@ package spawn
 import (
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/config"
-	"github.com/danieljustus/symaira-guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
 )
 
 func TestAllowlist_Allows(t *testing.T) {

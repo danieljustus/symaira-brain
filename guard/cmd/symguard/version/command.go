@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/danieljustus/symaira-brain/guard/internal/update"
 	"github.com/danieljustus/symaira-corekit/versionkit"
-	"github.com/danieljustus/symaira-guard/internal/update"
 )
 
 // version is set at build time via ldflags.

@@ -267,11 +267,16 @@ Not a chat frontend, not a SIEM, not a cloud-only SaaS, not a VPN replacement, n
 
 ## Install
 
-```bash
-go install github.com/danieljustus/symaira-guard/cmd/symguard@latest
-```
+The standalone `symguard` binary is retired (ADR 0001, D6). Its command set is
+absorbed into `symbrain`:
 
-Or build from source:
+```bash
+# Install symbrain (see the repository root README)
+brew install danieljustus/tap/symbrain
+
+# The guard command set lives under `symbrain guard`
+symbrain guard doctor
+```
 
 ## Build
 
@@ -280,69 +285,63 @@ Requires Go 1.26+. Minimal external dependencies:
 parsing), [`danieljustus/symaira-corekit`](https://github.com/danieljustus/symaira-corekit)
 (version handshake and update checks), and
 [`golang.org/x/term`](https://golang.org/x/term) (TTY detection for default
-output formats).
+output formats). These live in the root module of `symaira-brain`; the guard
+packages are compiled as part of it.
 
 ```bash
-# Build the binary
-make build
+# From the repository root
+go build -o symbrain ./cmd/symbrain
 
-# Run tests
-make test
+# Run tests (guard packages are covered by the root ./...)
+go test ./...
 
 # Lint (golangci-lint or go vet fallback)
-make lint
-
-# Set a version string at build time
-make build VERSION=v1.0.0
-```
-
-Or directly with `go`:
-
-```bash
-go build -ldflags "-X main.version=dev" -o symguard ./cmd/symguard
 go vet ./...
-go test ./...
 ```
 
 ## Usage
 
 ```bash
 # Version info (human-readable)
-symguard version
+symbrain guard version
 
 # Version info (machine-readable JSON for GUI tools)
-symguard version --json
+symbrain guard version --json
 {"tool":"symguard","version":"dev","schema_version":1}
 
 # System health check
-symguard doctor
+symbrain guard doctor
 
 # Discover MCP servers across supported AI clients
-symguard scan
-symguard scan --format json
+symbrain guard scan
+symbrain guard scan --format json
 
 # Classify one tool call through the policy engine: one JSON request on
 # stdin, one JSON decision on stdout (every error path resolves to "deny")
-echo '{"command":"rm -rf /tmp/build","risk_class":"high","domain":"localhost"}' | symguard decide
+echo '{"command":"rm -rf /tmp/build","risk_class":"high","domain":"localhost"}' | symbrain guard decide
 {"decision":"confirm","reason":"high risk class requires confirmation"}
 
 # Standing grants
-symguard grants list
+symbrain guard grants list
 No active grants.
-symguard grants revoke <id>
-symguard grants revoke --all
+symbrain guard grants revoke <id>
+symbrain guard grants revoke --all
 ```
 
 ## Development
 
+The guard packages are part of the `symaira-brain` repository
+(`guard/` directory), not a standalone checkout.
+
 ```bash
-git clone https://github.com/danieljustus/symaira-guard.git
-cd symaira-guard
+# From the repository root
+git clone https://github.com/danieljustus/symaira-brain.git
+cd symaira-brain
 
-# Build
-go build -o symguard ./cmd/symguard
+# Build (guard is compiled into symbrain)
+go build -o symbrain ./cmd/symbrain
 
-# Test
+# Test (guard packages are covered by the root ./...)
 go test ./...
 
 # Lint
@@ -352,8 +351,9 @@ go vet ./...
 ## Status
 
 Working, early release. Implemented: the `version`, `doctor`, `scan`,
-`decide`, and `grants` CLI commands, backed by the policy, capability,
-grant, approval, audit, discovery, and spawn subsystems under `internal/`
-(run `ls internal/` for the current list). The MCP proxy, schema pinning,
-and remote access (sections 3, 4, and 6 above) are design intent only. See [docs/intern/IDEA.md](docs/intern/IDEA.md) for the
-full design document and [CHANGELOG.md](CHANGELOG.md) for release history.
+`decide`, and `grants` commands under `symbrain guard`, backed by the
+policy, capability, grant, approval, audit, discovery, and spawn subsystems
+under `internal/` (run `ls internal/` for the current list). The MCP proxy,
+schema pinning, and remote access (sections 3, 4, and 6 above) are design
+intent only. See [CHANGELOG.md](CHANGELOG.md) for release history (absorbed
+into the root module on 2026-08-27).

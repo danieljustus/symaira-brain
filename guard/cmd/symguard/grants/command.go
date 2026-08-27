@@ -11,7 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
 )
 
 // Run executes `symguard grants <list|revoke> ...` writing to w.

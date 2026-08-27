@@ -9,11 +9,25 @@ import (
 )
 
 // Tool mirrors broker.Tool but avoids an import cycle. The gateway
-// translates between the two when building the catalog.
+// translates between the two when building the catalog. Annotations are
+// carried so the policy layer can classify a tool by its read-only /
+// destructive hints (foreign-server exposure model).
 type Tool struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description,omitempty"`
-	InputSchema json.RawMessage `json:"inputSchema,omitempty"`
+	Name        string           `json:"name"`
+	Description string           `json:"description,omitempty"`
+	InputSchema json.RawMessage  `json:"inputSchema,omitempty"`
+	Annotations *ToolAnnotations `json:"annotations,omitempty"`
+}
+
+// ToolAnnotations mirrors broker.ToolAnnotations (MCP tools/list
+// annotations). The read-only/destructive hints drive foreign-server tool
+// classification in internal/policy.
+type ToolAnnotations struct {
+	Title           string `json:"title,omitempty"`
+	ReadOnlyHint    *bool  `json:"readOnlyHint,omitempty"`
+	DestructiveHint *bool  `json:"destructiveHint,omitempty"`
+	IDempotentHint  *bool  `json:"idempotentHint,omitempty"`
+	OpenWorldHint   *bool  `json:"openWorldHint,omitempty"`
 }
 
 // Entry is one tool in the merged catalog, annotated with its source
@@ -23,6 +37,11 @@ type Entry struct {
 	Server       string         `json:"server"`
 	OriginalName string         `json:"original_name"`
 	Verdict      policy.Verdict `json:"verdict"`
+	// AccessClass and AccessSource record the read/write classification of a
+	// foreign-server tool and what it was derived from (see policy.foreign).
+	// Empty for the four cores.
+	AccessClass  string `json:"access_class,omitempty"`
+	AccessSource string `json:"access_source,omitempty"`
 }
 
 // Catalog is the merged, namespaced, policy-filtered tool list presented
@@ -75,12 +94,24 @@ func Build(servers []ServerTools) (*Catalog, error) {
 
 			// Evaluate policy against the original (unprefixed) tool name.
 			verdict := st.Report.Verdict(tool.Name)
-			entries = append(entries, Entry{
-				Tool:         Tool{Name: name, Description: tool.Description, InputSchema: tool.InputSchema},
+			entry := Entry{
+				Tool: Tool{
+					Name:        name,
+					Description: tool.Description,
+					InputSchema: tool.InputSchema,
+					Annotations: tool.Annotations,
+				},
 				Server:       st.Server,
 				OriginalName: tool.Name,
 				Verdict:      verdict,
-			})
+			}
+			// Foreign servers record the resolved access class + source on
+			// the entry so the audit log can explain the exposure decision.
+			if exposure, ok := st.Report.Exposures[tool.Name]; ok {
+				entry.AccessClass = exposure.Class
+				entry.AccessSource = exposure.Source
+			}
+			entries = append(entries, entry)
 		}
 	}
 

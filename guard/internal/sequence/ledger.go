@@ -3,7 +3,7 @@ package sequence
 import (
 	"sort"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // Ledger is a structured record separating successful from failed calls per

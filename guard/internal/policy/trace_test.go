@@ -3,7 +3,7 @@ package policy
 import (
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 func TestEvaluate_TraceOffByDefault(t *testing.T) {

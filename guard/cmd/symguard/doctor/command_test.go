@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/audit"
-	"github.com/danieljustus/symaira-guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/audit"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
 )
 
 // hermeticEnv points every host-dependent path (config, discovery, home) at

@@ -74,6 +74,12 @@ type harnessCheck struct {
 	// ProfileMissing flags a harness bound to a profile that doesn't exist
 	// on disk: Installed, Profile is set, and ProfileExists is false.
 	ProfileMissing bool `json:"profile_missing"`
+	// Superseded lists MCP entries in this harness config that point at a
+	// superseded standalone core (symmemory/symskills) symbrain now serves
+	// in-process. A harness where Installed && len(Superseded) > 0 runs the
+	// gateway and the raw core side by side — a live tool collision, not
+	// just untidiness (issue #337).
+	Superseded []string `json:"superseded,omitempty"`
 }
 
 type doctorReport struct {
@@ -379,6 +385,16 @@ func checkHarness(h harness.Harness) harnessCheck {
 		return check
 	}
 	check.ConfigParsed = true
+
+	// Report superseded core entries (symmemory/symskills) registered in
+	// this harness config. They duplicate the in-process gateway tools.
+	for _, name := range doc.ServerNames() {
+		if entry, ok := doc.Server(name); ok {
+			if core, isSuperseded := entry.SupersededCore(); isSuperseded {
+				check.Superseded = append(check.Superseded, fmt.Sprintf("%s (superseded %s)", name, core))
+			}
+		}
+	}
 
 	entry, present := doc.Server(harness.ServerName)
 	if !present || !entry.IsSymbrain() {
