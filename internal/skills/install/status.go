@@ -250,6 +250,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 				out = append(out, *classified)
 				continue
 			}
+			//nolint:staticcheck // f.hash is a variable, not a constant, so a tagged switch is not possible here
 			switch {
 			case p.marker.SourceHash == f.hash:
 				st.Status = StatusInSync

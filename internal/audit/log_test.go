@@ -311,7 +311,7 @@ func joinLines(lines []string) string {
 	return sb.String()
 }
 
-func joinLines(lines []string) string {
+// readPayloads reads the audit file and returns the inner entry payloads
 // (auditkit stores entries as chained envelopes {d: payload, h: hash}).
 func readPayloads(t *testing.T, path string) []string {
 	t.Helper()

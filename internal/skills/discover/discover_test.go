@@ -47,9 +47,10 @@ func TestDiscoverScannedHarnessRoots(t *testing.T) {
 
 	var opencodeCand, claudeCand *Candidate
 	for i := range candidates {
-		if candidates[i].Target == render.TargetOpenCode {
+		switch candidates[i].Target {
+		case render.TargetOpenCode:
 			opencodeCand = &candidates[i]
-		} else if candidates[i].Target == render.TargetClaude {
+		case render.TargetClaude:
 			claudeCand = &candidates[i]
 		}
 	}

@@ -186,6 +186,11 @@ func TestNoVaultPayloadsInLogs(t *testing.T) {
 				if strings.Contains(line, `unknown key`) {
 					continue
 				}
+				// The --allow-insecure-http warning explicitly warns that
+				// bearer tokens travel in the clear; it does not log a token.
+				if strings.Contains(line, `--allow-insecure-http is set`) {
+					continue
+				}
 				t.Errorf("potential vault payload in log/error at %s:%d: %s", path, i+1, trimmed)
 			}
 		}

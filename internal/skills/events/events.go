@@ -194,9 +194,9 @@ func (l *Logger) Read(filter Filter) ([]Event, error) {
 // its size limit. All errors are swallowed: the operation being logged must
 // proceed regardless.
 func (l *Logger) append(line []byte) {
-	if err := l.rotateIfNeeded(int64(len(line))); err != nil {
-		// Degrade: still try to append to the current file.
-	}
+	// A rotation failure is non-fatal: we still try to append to the
+	// current file. The next call will retry rotation.
+	_ = l.rotateIfNeeded(int64(len(line)))
 	if err := os.MkdirAll(filepath.Dir(l.path), 0o755); err != nil {
 		return
 	}
