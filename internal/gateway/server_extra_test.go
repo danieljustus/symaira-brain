@@ -41,9 +41,9 @@ func testProfile() *profile.Profile {
 	return &profile.Profile{
 		Name: "test",
 		Servers: profile.Servers{
-			Vault:  profile.ServerConfig{Enabled: true, Mode: profile.VaultModeFull},
-			Memory: profile.ServerConfig{Enabled: true, Mode: profile.MemoryModeReadWrite},
-			Skills: profile.ServerConfig{Enabled: true},
+			"vault":  profile.ServerConfig{Enabled: true, Mode: profile.VaultModeFull},
+			"memory": profile.ServerConfig{Enabled: true, Mode: profile.MemoryModeReadWrite},
+			"skills": profile.ServerConfig{Enabled: true},
 		},
 		Audit: profile.AuditConfig{Enabled: false},
 	}
@@ -112,7 +112,7 @@ func TestBuildCatalog_SkipsDisabledServers(t *testing.T) {
 		`[{"name":"get_entry","description":"fetch secret"}]`)
 
 	p := testProfile()
-	p.Servers.Memory = profile.ServerConfig{Enabled: false}
+	p.Servers["memory"] = profile.ServerConfig{Enabled: false}
 
 	servers := map[string]*broker.ManagedServer{
 		"vault":  vault,
@@ -141,7 +141,9 @@ func TestBuildCatalog_PolicyFiltering(t *testing.T) {
 		`[{"name":"get_entry","description":"fetch secret"},{"name":"health","description":"hc"},{"name":"request_credential","description":"req"}]`)
 
 	p := testProfile()
-	p.Servers.Vault.Mode = profile.VaultModeRequestOnly
+	vaultCfg := p.Servers["vault"]
+	vaultCfg.Mode = profile.VaultModeRequestOnly
+	p.Servers["vault"] = vaultCfg
 
 	servers := map[string]*broker.ManagedServer{
 		"vault": vault,

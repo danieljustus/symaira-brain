@@ -213,7 +213,7 @@ func TestBuildServers_MissingBinaryWarnsAndSkips(t *testing.T) {
 	p := &profile.Profile{
 		Name: "vault-only",
 		Servers: profile.Servers{
-			Vault: profile.ServerConfig{Enabled: true, Mode: "full"},
+			"vault": profile.ServerConfig{Enabled: true, Mode: "full"},
 		},
 	}
 	cfg := &config.Config{Servers: config.ServersConfig{
@@ -240,7 +240,7 @@ func TestBuildServers_VaultAgentAddsStdioArgs(t *testing.T) {
 	p := &profile.Profile{
 		Name: "agent-test",
 		Servers: profile.Servers{
-			Vault: profile.ServerConfig{Enabled: true, Mode: "full"},
+			"vault": profile.ServerConfig{Enabled: true, Mode: "full"},
 		},
 	}
 	cfg := &config.Config{Servers: config.ServersConfig{

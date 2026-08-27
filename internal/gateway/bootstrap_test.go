@@ -140,9 +140,9 @@ func TestBootstrap_VaultOffAndDisabled(t *testing.T) {
 	for _, mode := range []string{profile.VaultModeOff, ""} {
 		p := testProfile()
 		if mode == "" {
-			p.Servers.Vault = profile.ServerConfig{Enabled: false}
+			p.Servers["vault"] = profile.ServerConfig{Enabled: false}
 		} else {
-			p.Servers.Vault = profile.ServerConfig{Enabled: true, Mode: mode}
+			p.Servers["vault"] = profile.ServerConfig{Enabled: true, Mode: mode}
 		}
 		s := serverWithCatalog(t, p, map[string][]string{"memory": {"memory_search"}})
 
@@ -168,7 +168,7 @@ func TestBootstrap_VaultAbsent(t *testing.T) {
 
 func TestBootstrap_SkillsDisabled(t *testing.T) {
 	p := testProfile()
-	p.Servers.Skills = profile.ServerConfig{Enabled: false}
+	p.Servers["skills"] = profile.ServerConfig{Enabled: false}
 	s := serverWithCatalog(t, p, map[string][]string{
 		"vault":  {"health"},
 		"memory": {"memory_search"},

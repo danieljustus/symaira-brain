@@ -51,9 +51,9 @@ func TestSmoke_RealCorePath(t *testing.T) {
 	p := &profile.Profile{
 		Name: "personal",
 		Servers: profile.Servers{
-			Vault:  profile.ServerConfig{Enabled: true, Mode: profile.VaultModeFull},
-			Memory: profile.ServerConfig{Enabled: true, Mode: profile.MemoryModeReadWrite},
-			Skills: profile.ServerConfig{Enabled: true},
+			"vault":  profile.ServerConfig{Enabled: true, Mode: profile.VaultModeFull},
+			"memory": profile.ServerConfig{Enabled: true, Mode: profile.MemoryModeReadWrite},
+			"skills": profile.ServerConfig{Enabled: true},
 		},
 	}
 

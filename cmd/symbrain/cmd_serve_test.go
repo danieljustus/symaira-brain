@@ -55,7 +55,7 @@ func TestResolveServeProfile_ByFile(t *testing.T) {
 	if p.Name != "room" {
 		t.Errorf("Name = %q, want %q", p.Name, "room")
 	}
-	if !p.Servers.Memory.Enabled {
+	if !p.Server("memory").Enabled {
 		t.Error("Memory should be enabled")
 	}
 }

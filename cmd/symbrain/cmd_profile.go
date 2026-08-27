@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -96,12 +97,34 @@ type serverSummary struct {
 }
 
 func serverSummaries(p *profile.Profile) []serverSummary {
-	return []serverSummary{
-		{Server: profile.ServerVault, Enabled: p.Servers.Vault.Enabled, Mode: p.Servers.Vault.Mode},
-		{Server: profile.ServerMemory, Enabled: p.Servers.Memory.Enabled, Mode: p.Servers.Memory.Mode},
-		{Server: profile.ServerSkills, Enabled: p.Servers.Skills.Enabled},
-		{Server: profile.ServerUsage, Enabled: p.Servers.Usage.Enabled},
+	aliases := sortedServerAliases(p.Servers)
+	sums := make([]serverSummary, 0, len(aliases))
+	for _, alias := range aliases {
+		cfg := p.Servers[alias]
+		sums = append(sums, serverSummary{Server: alias, Enabled: cfg.Enabled, Mode: cfg.Mode})
 	}
+	return sums
+}
+
+// sortedServerAliases returns the profile's server aliases in deterministic
+// order: the four core aliases in their canonical order (vault, memory,
+// skills, usage), then any foreign servers alphabetically.
+func sortedServerAliases(servers profile.Servers) []string {
+	aliases := make([]string, 0, len(servers))
+	coreOrder := []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage}
+	for _, alias := range coreOrder {
+		if _, ok := servers[alias]; ok {
+			aliases = append(aliases, alias)
+		}
+	}
+	var foreign []string
+	for alias := range servers {
+		if !profile.IsCoreAlias(alias) {
+			foreign = append(foreign, alias)
+		}
+	}
+	sort.Strings(foreign)
+	return append(aliases, foreign...)
 }
 
 func cmdProfileList(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
@@ -173,24 +196,28 @@ type profileShowServerReport struct {
 	Mode            string         `json:"mode,omitempty"`
 	ToolsAllow      []string       `json:"tools_allow,omitempty"`
 	ToolsDeny       []string       `json:"tools_deny,omitempty"`
+	Command         string         `json:"command,omitempty"`
+	Args            []string       `json:"args,omitempty"`
+	URL             string         `json:"url,omitempty"`
 	EffectivePolicy *policy.Report `json:"effective_policy,omitempty"`
 	// Note explains why EffectivePolicy is absent (skills has no mode
-	// preset — see internal/policy.EvaluatePreset).
+	// preset — see internal/policy.EvaluatePreset; foreign servers have
+	// no preset at all).
 	Note string `json:"note,omitempty"`
 }
 
 func buildProfileShowReport(p *profile.Profile) profileShowReport {
+	aliases := sortedServerAliases(p.Servers)
+	reports := make([]profileShowServerReport, 0, len(aliases))
+	for _, alias := range aliases {
+		reports = append(reports, buildServerShowReport(alias, p.Servers[alias]))
+	}
 	return profileShowReport{
 		Name:        p.Name,
 		Description: p.Description,
 		Audit:       p.Audit,
 		Warnings:    p.Warnings,
-		Servers: []profileShowServerReport{
-			buildServerShowReport(profile.ServerVault, p.Servers.Vault),
-			buildServerShowReport(profile.ServerMemory, p.Servers.Memory),
-			buildServerShowReport(profile.ServerSkills, p.Servers.Skills),
-			buildServerShowReport(profile.ServerUsage, p.Servers.Usage),
-		},
+		Servers:     reports,
 	}
 }
 
@@ -201,20 +228,25 @@ func buildServerShowReport(alias string, cfg profile.ServerConfig) profileShowSe
 		Mode:       cfg.Mode,
 		ToolsAllow: cfg.ToolsAllow,
 		ToolsDeny:  cfg.ToolsDeny,
+		Command:    cfg.Command,
+		Args:       cfg.Args,
+		URL:        cfg.URL,
 	}
-	switch alias {
-	case profile.ServerVault, profile.ServerMemory:
+	switch {
+	case profile.IsCoreAlias(alias) && (alias == profile.ServerVault || alias == profile.ServerMemory):
 		if report, err := policy.EvaluatePreset(alias, cfg); err == nil {
 			r.EffectivePolicy = report
 		} else {
 			r.Note = err.Error()
 		}
-	case profile.ServerSkills:
+	case alias == profile.ServerSkills:
 		r.Note = "skills has no mode preset; effective tools are always-full-when-enabled, " +
 			"narrowed only by tools_allow/tools_deny, and require a live connection to enumerate"
-	case profile.ServerUsage:
+	case alias == profile.ServerUsage:
 		r.Note = "usage has no mode preset; the single tool get_ai_usage is exposed when enabled, " +
 			"narrowed only by tools_allow/tools_deny"
+	default:
+		r.Note = "foreign server: no mode preset; exposure is read/write classified per profile"
 	}
 	return r
 }

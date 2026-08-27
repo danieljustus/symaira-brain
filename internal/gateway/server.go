@@ -272,6 +272,7 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 				Name:        t.Name,
 				Description: t.Description,
 				InputSchema: t.InputSchema,
+				Annotations: translateAnnotations(t.Annotations),
 			}
 		}
 
@@ -298,6 +299,21 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 	}
 	s.cat = cat
 	return nil
+}
+
+// translateAnnotations copies broker.ToolAnnotations into the catalog's
+// mirror type (same shape, separate package to avoid an import cycle).
+func translateAnnotations(a *broker.ToolAnnotations) *catalog.ToolAnnotations {
+	if a == nil {
+		return nil
+	}
+	return &catalog.ToolAnnotations{
+		Title:           a.Title,
+		ReadOnlyHint:    a.ReadOnlyHint,
+		DestructiveHint: a.DestructiveHint,
+		IDempotentHint:  a.IDempotentHint,
+		OpenWorldHint:   a.OpenWorldHint,
+	}
 }
 
 // classifiedError preserves the existing human-readable error message while

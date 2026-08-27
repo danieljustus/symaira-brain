@@ -58,6 +58,48 @@ func TestBuild_VaultPrefix(t *testing.T) {
 	}
 }
 
+func TestBuild_CarriesAnnotations(t *testing.T) {
+	// MCP tool annotations must survive catalog construction so the policy
+	// layer can classify foreign-server tools by read-only/destructive hint.
+	ro := true
+	destructive := false
+	annotated := Tool{
+		Name:        "search",
+		Description: "read-only search",
+		Annotations: &ToolAnnotations{
+			Title:           "Search",
+			ReadOnlyHint:    &ro,
+			DestructiveHint: &destructive,
+		},
+	}
+
+	c, err := Build([]ServerTools{
+		{
+			Server: "zotero",
+			Tools:  []Tool{annotated},
+			Report: &policy.Report{
+				Server:  "zotero",
+				Enabled: true,
+				Exposed: []string{"search"},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	exposed := c.Exposed()
+	if len(exposed) != 1 {
+		t.Fatalf("Exposed() = %d entries, want 1", len(exposed))
+	}
+	got := exposed[0].Annotations
+	if got == nil || got.Title != "Search" || got.ReadOnlyHint == nil || !*got.ReadOnlyHint {
+		t.Fatalf("annotations = %+v, want carried-through Search/readOnly=true", got)
+	}
+	if got.DestructiveHint == nil || *got.DestructiveHint {
+		t.Errorf("destructiveHint = %v, want false", got.DestructiveHint)
+	}
+}
+
 func TestBuild_MemoryPassthrough(t *testing.T) {
 	c, err := Build([]ServerTools{
 		{
