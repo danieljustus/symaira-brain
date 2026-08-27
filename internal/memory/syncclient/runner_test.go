@@ -3,6 +3,8 @@ package syncclient
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"net/http/httptest"
 	"path/filepath"
 	"strings"
@@ -425,5 +427,274 @@ func TestRun_Validation(t *testing.T) {
 				t.Errorf("error %q does not contain %q", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+// fakePushClient records Apply and RelayPush calls for batch assertions.
+type fakePushClient struct {
+	applyCalls       int
+	relayPushCalls   int
+	applyMemBatches  [][]*db.Memory
+	applyDelBatches  [][]db.DeletedMemory
+	relayBlobBatches [][]db.RelayBlob
+	failOnApplyNth   int
+	failOnRelayNth   int
+	applyErr         error
+	relayErr         error
+}
+
+func (f *fakePushClient) Apply(ctx context.Context, memories []*db.Memory, deleted []db.DeletedMemory) (*ApplyResult, error) {
+	f.applyCalls++
+	f.applyMemBatches = append(f.applyMemBatches, memories)
+	f.applyDelBatches = append(f.applyDelBatches, deleted)
+	if f.failOnApplyNth > 0 && f.applyCalls == f.failOnApplyNth {
+		return nil, f.applyErr
+	}
+	return &ApplyResult{Applied: len(memories), Deleted: len(deleted)}, nil
+}
+
+func (f *fakePushClient) RelayPush(ctx context.Context, blobs []db.RelayBlob) (*RelayPushResult, error) {
+	f.relayPushCalls++
+	f.relayBlobBatches = append(f.relayBlobBatches, blobs)
+	if f.failOnRelayNth > 0 && f.relayPushCalls == f.failOnRelayNth {
+		return nil, f.relayErr
+	}
+	return &RelayPushResult{Stored: len(blobs)}, nil
+}
+
+func TestPlainPush_Batches(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "batch-test-secret")
+	local := newTestPeer(t, "local")
+	const total = 2500
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, total)
+	for i := 0; i < total; i++ {
+		ids[i] = uuid.NewString()
+		storeMemory(t, local.db, ids[i], fmt.Sprintf("content %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	fake := &fakePushClient{}
+	res := &Result{}
+	_, err := plainPush(context.Background(), fake, Options{DB: local.db}, time.Time{}, res)
+	if err != nil {
+		t.Fatalf("plainPush: %v", err)
+	}
+	wantCalls := (total + pushBatchSize - 1) / pushBatchSize
+	if fake.applyCalls != wantCalls {
+		t.Errorf("apply calls = %d, want %d", fake.applyCalls, wantCalls)
+	}
+	totalSent := 0
+	for i, batch := range fake.applyMemBatches {
+		if len(batch) > pushBatchSize {
+			t.Errorf("batch %d size = %d, max %d", i, len(batch), pushBatchSize)
+		}
+		totalSent += len(batch)
+	}
+	if totalSent != total {
+		t.Errorf("total sent = %d, want %d", totalSent, total)
+	}
+	if res.PushedMemories != total {
+		t.Errorf("pushed memories = %d, want %d", res.PushedMemories, total)
+	}
+}
+
+func TestRelayPush_Batches(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "batch-test-secret")
+	local := newTestPeer(t, "local")
+	const total = 1100
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, total)
+	for i := 0; i < total; i++ {
+		ids[i] = uuid.NewString()
+		storeMemory(t, local.db, ids[i], fmt.Sprintf("content %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	fake := &fakePushClient{}
+	res := &Result{}
+	_, err := relayPush(context.Background(), fake, Options{DB: local.db, Passphrase: "phrase"}, time.Time{}, res)
+	if err != nil {
+		t.Fatalf("relayPush: %v", err)
+	}
+	wantCalls := (total + pushBatchSize - 1) / pushBatchSize
+	if fake.relayPushCalls != wantCalls {
+		t.Errorf("relay push calls = %d, want %d", fake.relayPushCalls, wantCalls)
+	}
+	totalSent := 0
+	for i, batch := range fake.relayBlobBatches {
+		if len(batch) > pushBatchSize {
+			t.Errorf("batch %d size = %d, max %d", i, len(batch), pushBatchSize)
+		}
+		totalSent += len(batch)
+	}
+	if totalSent != total {
+		t.Errorf("total sent = %d, want %d", totalSent, total)
+	}
+	if res.RelayStored != total {
+		t.Errorf("relay stored = %d, want %d", res.RelayStored, total)
+	}
+}
+
+func TestPlainPush_ResumesAfterFailure(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "batch-resume-test")
+	local := newTestPeer(t, "local")
+	const total = 2500
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, total)
+	for i := 0; i < total; i++ {
+		ids[i] = uuid.NewString()
+		storeMemory(t, local.db, ids[i], fmt.Sprintf("content %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	fake := &fakePushClient{failOnApplyNth: 1, applyErr: errors.New("simulated failure")}
+	res := &Result{}
+	_, err := plainPush(context.Background(), fake, Options{DB: local.db}, time.Time{}, res)
+	if err == nil {
+		t.Fatal("expected failure on first batch")
+	}
+	if fake.applyCalls != 1 {
+		t.Errorf("calls before failure = %d, want 1", fake.applyCalls)
+	}
+	sentBeforeFailure := 0
+	for _, b := range fake.applyMemBatches {
+		sentBeforeFailure += len(b)
+	}
+	if sentBeforeFailure != pushBatchSize {
+		t.Errorf("sent before failure = %d, want %d", sentBeforeFailure, pushBatchSize)
+	}
+
+	// Retry with the same cursor: only the first batch should be re-sent.
+	fake2 := &fakePushClient{}
+	res2 := &Result{}
+	cursor, err := local.db.GetSyncCursor("")
+	if err != nil {
+		t.Fatalf("GetSyncCursor: %v", err)
+	}
+	_, err = plainPush(context.Background(), fake2, Options{DB: local.db}, cursor, res2)
+	if err != nil {
+		t.Fatalf("retry plainPush: %v", err)
+	}
+	// First retry batch is the same first batch; total calls should equal wantCalls.
+	wantCalls := (total + pushBatchSize - 1) / pushBatchSize
+	if fake2.applyCalls != wantCalls {
+		t.Errorf("retry apply calls = %d, want %d", fake2.applyCalls, wantCalls)
+	}
+	totalSent := 0
+	for _, b := range fake2.applyMemBatches {
+		totalSent += len(b)
+	}
+	if totalSent != total {
+		t.Errorf("retry total sent = %d, want %d", totalSent, total)
+	}
+	// No duplicate counters from the aborted first run.
+	if res.PushedMemories != 0 {
+		t.Errorf("aborted run pushed = %d, want 0", res.PushedMemories)
+	}
+	if res2.PushedMemories != total {
+		t.Errorf("retry pushed = %d, want %d", res2.PushedMemories, total)
+	}
+}
+
+func TestRelayPush_ResumesAfterFailure(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "batch-resume-test")
+	local := newTestPeer(t, "local")
+	const total = 1100
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	ids := make([]string, total)
+	for i := 0; i < total; i++ {
+		ids[i] = uuid.NewString()
+		storeMemory(t, local.db, ids[i], fmt.Sprintf("content %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	fake := &fakePushClient{failOnRelayNth: 1, relayErr: errors.New("simulated failure")}
+	res := &Result{}
+	_, err := relayPush(context.Background(), fake, Options{DB: local.db, Passphrase: "phrase"}, time.Time{}, res)
+	if err == nil {
+		t.Fatal("expected failure on first batch")
+	}
+	if fake.relayPushCalls != 1 {
+		t.Errorf("calls before failure = %d, want 1", fake.relayPushCalls)
+	}
+
+	fake2 := &fakePushClient{}
+	res2 := &Result{}
+	cursor, err := local.db.GetSyncCursor("")
+	if err != nil {
+		t.Fatalf("GetSyncCursor: %v", err)
+	}
+	_, err = relayPush(context.Background(), fake2, Options{DB: local.db, Passphrase: "phrase"}, cursor, res2)
+	if err != nil {
+		t.Fatalf("retry relayPush: %v", err)
+	}
+	wantCalls := (total + pushBatchSize - 1) / pushBatchSize
+	if fake2.relayPushCalls != wantCalls {
+		t.Errorf("retry relay calls = %d, want %d", fake2.relayPushCalls, wantCalls)
+	}
+	totalSent := 0
+	for _, b := range fake2.relayBlobBatches {
+		totalSent += len(b)
+	}
+	if totalSent != total {
+		t.Errorf("retry total sent = %d, want %d", totalSent, total)
+	}
+	if res.RelayStored != 0 {
+		t.Errorf("aborted run stored = %d, want 0", res.RelayStored)
+	}
+	if res2.RelayStored != total {
+		t.Errorf("retry stored = %d, want %d", res2.RelayStored, total)
+	}
+}
+
+func TestRun_BatchedPushPlain(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "runner-test-batch-secret")
+	remote := newTestPeer(t, "remote")
+	local := newTestPeer(t, "local")
+
+	const total = 2500
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	for i := 0; i < total; i++ {
+		id := uuid.NewString()
+		storeMemory(t, local.db, id, fmt.Sprintf("local %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	res, err := Run(context.Background(), Options{
+		Remote: remote.url, Token: remote.token, Pull: false, Push: true, DB: local.db,
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if res.PushedMemories != total {
+		t.Errorf("pushed memories = %d, want %d", res.PushedMemories, total)
+	}
+}
+
+func TestRun_BatchedPushRelay(t *testing.T) {
+	t.Setenv("JWT_SECRET_KEY", "runner-test-batch-secret")
+	relayHost := newTestPeer(t, "relay")
+	local := newTestPeer(t, "local")
+
+	const total = 100
+	base := time.Date(2026, 8, 20, 10, 0, 0, 0, time.UTC)
+	for i := 0; i < total; i++ {
+		id := uuid.NewString()
+		storeMemory(t, local.db, id, fmt.Sprintf("relay %d", i), base.Add(time.Duration(i)*time.Millisecond))
+	}
+
+	res, err := Run(context.Background(), Options{
+		Remote: relayHost.url, Token: relayHost.token, Pull: false, Push: true,
+		EncryptedRelay: true, Passphrase: "batch-relay-pass", DB: local.db,
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if res.RelayStored != total {
+		t.Errorf("relay stored = %d, want %d", res.RelayStored, total)
+	}
+	// The relay stores ciphertext blobs; plaintext must not appear.
+	blobs, err := relayHost.db.GetRelayBlobsSince(time.Time{}, 10000)
+	if err != nil {
+		t.Fatalf("GetRelayBlobsSince: %v", err)
+	}
+	if len(blobs) != total {
+		t.Errorf("relay blobs = %d, want %d", len(blobs), total)
 	}
 }

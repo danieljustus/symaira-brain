@@ -716,6 +716,56 @@ func (db *DB) GetMemoriesSinceCursor(since time.Time, limit int, includeEmbeddin
 	return memories, nil
 }
 
+// GetMemoriesSinceCursorID returns memories updated after since, with
+// keyset pagination that handles ties on updated_at using the memory ID.
+// When lastID is empty it starts from since. After each page the caller
+// should pass the last row's UpdatedAt and ID as the new since and lastID
+// so no rows are lost when timestamps collide.
+func (db *DB) GetMemoriesSinceCursorID(since time.Time, lastID string, limit int, includeEmbeddings ...bool) ([]*Memory, error) {
+	if limit <= 0 {
+		limit = 50000
+	}
+	includeEmb := len(includeEmbeddings) > 0 && includeEmbeddings[0]
+
+	var query string
+	var args []any
+	if lastID == "" {
+		if includeEmb {
+			query = "SELECT " + memoryColumns + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC, id ASC LIMIT ?"
+		} else {
+			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC, id ASC LIMIT ?"
+		}
+		args = []any{since, limit}
+	} else {
+		if includeEmb {
+			query = "SELECT " + memoryColumns + " FROM memories WHERE updated_at > ? OR (updated_at = ? AND id > ?) ORDER BY updated_at ASC, id ASC LIMIT ?"
+		} else {
+			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE updated_at > ? OR (updated_at = ? AND id > ?) ORDER BY updated_at ASC, id ASC LIMIT ?"
+		}
+		args = []any{since, since, lastID, limit}
+	}
+
+	rows, err := db.conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+	var memories []*Memory
+	for rows.Next() {
+		var m *Memory
+		if includeEmb {
+			m, err = scanMemory(rows)
+		} else {
+			m, err = scanMemoryLite(rows)
+		}
+		if err != nil {
+			return nil, err
+		}
+		memories = append(memories, m)
+	}
+	return memories, nil
+}
+
 // GetRawMemories returns all memories with consolidation_status = 'raw'.
 func (db *DB) GetRawMemories() ([]*Memory, error) {
 	query := "SELECT " + memoryColumns + " FROM memories WHERE consolidation_status = 'raw' AND review_status = 'approved' AND retired_at IS NULL ORDER BY created_at ASC"
