@@ -9,15 +9,20 @@ import (
 
 // InventorySchemaVersion identifies the machine-readable harness inventory
 // contract. Consumers should reject unknown major schema versions.
-const InventorySchemaVersion = 1
+//
+// Schema 2 (this version) reports each server as an object with transport
+// detail (command/args/url and env-var names) instead of a bare name
+// string, so downstream consumers can reach servers without re-parsing
+// harness configs. See README "Harness inventory schema".
+const InventorySchemaVersion = 2
 
 // ConfigInventory describes one global or project-local harness config.
 type ConfigInventory struct {
-	Path    string   `json:"path"`
-	Exists  bool     `json:"exists"`
-	Parsed  bool     `json:"parsed"`
-	Error   string   `json:"error,omitempty"`
-	Servers []string `json:"servers"`
+	Path    string       `json:"path"`
+	Exists  bool         `json:"exists"`
+	Parsed  bool         `json:"parsed"`
+	Error   string       `json:"error,omitempty"`
+	Servers []ServerInfo `json:"servers"`
 }
 
 // HarnessInventory describes the known config locations and the MCP servers
@@ -76,7 +81,7 @@ func resolveConfigPath(resolve func() (string, error)) string {
 func inspectConfig(h Harness, path string) ConfigInventory {
 	result := ConfigInventory{
 		Path:    path,
-		Servers: []string{},
+		Servers: []ServerInfo{},
 	}
 	if path == "" {
 		result.Error = "resolve config path"
@@ -98,7 +103,11 @@ func inspectConfig(h Harness, path string) ConfigInventory {
 		return result
 	}
 	result.Parsed = true
-	result.Servers = doc.ServerNames()
+	for _, name := range doc.ServerNames() {
+		if info, ok := doc.ServerInfo(name); ok {
+			result.Servers = append(result.Servers, info)
+		}
+	}
 	return result
 }
 

@@ -21,7 +21,8 @@ type Manifest struct {
 
 // Core describes one managed core binary's pinned version and release source.
 type Core struct {
-	// Version is the pinned semver (e.g. "v0.15.3").
+	// Version is the pinned semver (e.g. "v0.15.3"). Release asset names
+	// omit the leading "v", so asset-name construction normalizes it away.
 	Version string `json:"version"`
 	// Repo is the GitHub <owner>/<repo> for release downloads.
 	Repo string `json:"repo"`
@@ -29,7 +30,7 @@ type Core struct {
 	BinaryName string `json:"binary_name"`
 	// AssetPrefix is the archive filename prefix (e.g. "symaira-vault").
 	// The full asset name is constructed as:
-	//   <AssetPrefix>_<Version>_<os>_<arch>.tar.gz
+	//   <AssetPrefix>_<version without v>_<os>_<arch>.tar.gz
 	// Some releases omit the version from the asset name;
 	// set AssetPrefix to the exact binary name in that case and the
 	// download logic will try both patterns.
@@ -42,6 +43,15 @@ type Core struct {
 	// bump-core workflow to verify the checksums file before updating
 	// the manifest entry.
 	SHA256 string `json:"sha256"`
+	// Platforms restricts which GOOS values this core ships for. Empty
+	// means every platform. A core whose list does not include the
+	// current GOOS is skipped silently — e.g. symcockpit is macOS-only
+	// and must never be reported as a failed install elsewhere.
+	Platforms []string `json:"platforms,omitempty"`
+	// AssetArch overrides the architecture segment of the release asset
+	// name. Some releases publish a single universal archive (e.g.
+	// "universal") instead of per-arch archives.
+	AssetArch string `json:"asset_arch,omitempty"`
 }
 
 // LoadManifest returns the embedded default manifest.
@@ -71,20 +81,18 @@ func Platform() (goos, goarch string, err error) {
 }
 
 // AssetName computes the release asset filename for a core on the
-// current platform. It tries the versioned pattern first
-// (<prefix>_<version>_<os>_<arch>.tar.gz), then the unversioned
-// pattern (<binary>_<os>_<arch>.tar.gz) for legacy releases.
+// current platform. The pinned version is normalized to drop a leading
+// "v" (Symaira release assets carry no prefix even when tags do) and a
+// core with an AssetArch override (e.g. "universal") uses that instead of
+// the per-arch suffix.
 func (c *Core) AssetName(goos, goarch string) string {
-	osArch := osArchSuffix(goos, goarch)
-	versioned := fmt.Sprintf("%s_%s_%s.tar.gz", c.AssetPrefix, c.Version, osArch)
-	return versioned
+	return fmt.Sprintf("%s_%s_%s.tar.gz", c.AssetPrefix, stripV(c.Version), c.osArchSuffix(goos, goarch))
 }
 
 // AssetNameAlt returns the unversioned asset name fallback (used by
 // releases that don't include the version in the filename.
 func (c *Core) AssetNameAlt(goos, goarch string) string {
-	osArch := osArchSuffix(goos, goarch)
-	return fmt.Sprintf("%s_%s.tar.gz", c.BinaryName, osArch)
+	return fmt.Sprintf("%s_%s.tar.gz", c.BinaryName, c.osArchSuffix(goos, goarch))
 }
 
 // ChecksumAssetName returns the checksum file asset name.
@@ -93,8 +101,39 @@ func (c *Core) ChecksumAssetName() string {
 	return "checksums.txt"
 }
 
-// osArchSuffix maps GOOS/GOARCH to the release archive convention.
-func osArchSuffix(goos, goarch string) string {
+// stripV normalizes a pinned version to the form used in release asset
+// names: Symaira releases publish archives without a leading "v" even
+// though their tags carry one.
+func stripV(version string) string {
+	return strings.TrimPrefix(version, "v")
+}
+
+// normalizeVersion strips a leading "v" (and surrounding whitespace) from
+// a version string so comparisons between an installed binary's reported
+// version and the manifest's pinned version work regardless of which form
+// each side uses.
+func normalizeVersion(version string) string {
+	return strings.TrimPrefix(strings.TrimSpace(version), "v")
+}
+
+// SupportsPlatform reports whether the core ships for the given GOOS. An
+// empty Platforms list means every platform.
+func (c *Core) SupportsPlatform(goos string) bool {
+	if len(c.Platforms) == 0 {
+		return true
+	}
+	for _, p := range c.Platforms {
+		if p == goos {
+			return true
+		}
+	}
+	return false
+}
+
+// osArchSuffix maps GOOS/GOARCH to the release archive convention. A core
+// with an AssetArch override uses that value instead of the derived arch
+// (e.g. a single "darwin_universal" archive for both arm64 and amd64).
+func (c *Core) osArchSuffix(goos, goarch string) string {
 	var os, arch string
 	switch goos {
 	case "darwin":
@@ -114,6 +153,9 @@ func osArchSuffix(goos, goarch string) string {
 	default:
 		arch = goarch
 	}
+	if c.AssetArch != "" {
+		arch = c.AssetArch
+	}
 	return os + "_" + arch
 }
 
@@ -121,10 +163,11 @@ func osArchSuffix(goos, goarch string) string {
 // executable lives. Some repos wrap binaries in a directory; others
 // put them at the root.
 func (c *Core) BinaryPathInArchive(goos, goarch string) string {
-	osArch := osArchSuffix(goos, goarch)
-	// symaira-vault wraps binaries in a versioned directory
+	osArch := c.osArchSuffix(goos, goarch)
+	// symaira-vault wraps binaries in a versioned directory named after
+	// the archive (which carries the version without a "v" prefix).
 	if strings.HasPrefix(c.AssetPrefix, "symaira-vault") {
-		return fmt.Sprintf("%s_%s_%s/%s", c.AssetPrefix, c.Version, osArch, c.BinaryName)
+		return fmt.Sprintf("%s_%s_%s/%s", c.AssetPrefix, stripV(c.Version), osArch, c.BinaryName)
 	}
 	// Non-vault archives put the binary at the archive root.
 	return c.BinaryName

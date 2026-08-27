@@ -21,15 +21,26 @@ func cmdHarness(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 }
 
 func cmdHarnessWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
-	if len(args) == 0 || args[0] != "list" {
+	if len(args) == 0 {
 		printHarnessUsage(stderr)
 		return exitcodes.ExitNoInput
 	}
+	switch args[0] {
+	case "list":
+		return cmdHarnessList(args[1:], stdout, stderr, format)
+	case "health":
+		return cmdHarnessHealth(args[1:], stdout, stderr, format)
+	default:
+		printHarnessUsage(stderr)
+		return exitcodes.ExitNoInput
+	}
+}
 
+func cmdHarnessList(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("harness list", flag.ContinueOnError)
 	projectDir := fs.String("project", "", "project directory to inspect for project-local harness config")
 	fs.SetOutput(stderr)
-	if err := fs.Parse(normalizeFlags(args[1:])); err != nil {
+	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() > 0 {
@@ -57,6 +68,7 @@ func printHarnessUsage(w io.Writer) {
 
 Usage:
   symbrain harness list [--project DIR]
+  symbrain harness health [--harness NAME] [--project DIR]
 
 The global --output table|json flag (or --json) selects the output format.
 `)
@@ -89,9 +101,13 @@ func printHarnessConfig(w io.Writer, label string, config harness.ConfigInventor
 	}
 }
 
-func joinHarnessServers(servers []string) string {
+func joinHarnessServers(servers []harness.ServerInfo) string {
 	if len(servers) == 0 {
 		return "(none)"
 	}
-	return strings.Join(servers, ",")
+	parts := make([]string, 0, len(servers))
+	for _, s := range servers {
+		parts = append(parts, s.Name+"["+s.Transport+"]")
+	}
+	return strings.Join(parts, ",")
 }

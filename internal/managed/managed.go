@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"runtime"
 )
 
 // coreInstaller is the subset of *Installer that Setup/Fix depend on.
@@ -33,6 +34,11 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 	var failed int
 
 	for name, core := range manifest.Cores {
+		if !core.SupportsPlatform(runtime.GOOS) {
+			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
+			continue
+		}
+
 		logger.Info("installing", "binary", name, "version", core.Version, "repo", core.Repo)
 
 		if err := inst.Install(ctx, &core); err != nil {
@@ -68,12 +74,20 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 	var repaired, skipped, failed int
 
 	for name, core := range manifest.Cores {
+		if !core.SupportsPlatform(runtime.GOOS) {
+			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
+			continue
+		}
+
 		existing, err := InstalledVersion(ctx, binDir, core.BinaryName)
 		if err != nil {
 			logger.Warn("cannot probe", "binary", name, "error", err)
 		}
 
-		if existing == core.Version {
+		// Compare versions with the "v" prefix normalized away: binaries
+		// report bare semver ("0.15.3") while the manifest pins the tag
+		// ("v0.15.3") — both must count as "already correct".
+		if normalizeVersion(existing) == normalizeVersion(core.Version) {
 			logger.Info("already correct", "binary", name, "version", existing)
 			skipped++
 			continue
@@ -116,6 +130,9 @@ func Status(ctx context.Context, binDir string) (map[string]string, error) {
 
 	versions := make(map[string]string, len(manifest.Cores))
 	for name, core := range manifest.Cores {
+		if !core.SupportsPlatform(runtime.GOOS) {
+			continue
+		}
 		v, _ := InstalledVersion(ctx, binDir, core.BinaryName)
 		versions[name] = v
 	}

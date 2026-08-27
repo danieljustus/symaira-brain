@@ -34,6 +34,22 @@ func (d *genericDocument) Server(name string) (Entry, bool) {
 	return entryFromMap(m), true
 }
 
+func (d *genericDocument) ServerInfo(name string) (ServerInfo, bool) {
+	servers := d.servers()
+	if servers == nil {
+		return ServerInfo{}, false
+	}
+	raw, ok := servers[name]
+	if !ok {
+		return ServerInfo{}, false
+	}
+	m, ok := raw.(map[string]any)
+	if !ok {
+		return ServerInfo{}, false
+	}
+	return serverInfoFromMap(m, name), true
+}
+
 func (d *genericDocument) ServerNames() []string {
 	servers := d.servers()
 	if servers == nil {

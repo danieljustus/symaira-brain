@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -83,10 +84,19 @@ type doctorReport struct {
 	ManagedDir   dirCheck            `json:"managed_dir"`
 	Builtins     []string            `json:"builtins"`
 	Servers      []serverCheck       `json:"servers"`
+	ManagedCores []managedCoreCheck  `json:"managed_cores,omitempty"`
 	Profiles     []string            `json:"profiles"`
 	Harnesses    []harnessCheck      `json:"harnesses"`
 	Handshakes   []profileHandshake  `json:"handshakes,omitempty"`
 	Degradations []audit.Degradation `json:"degradations,omitempty"`
+}
+
+// managedCoreCheck reports one managed runtime core's pinned and installed
+// version. Cores restricted to another platform are omitted entirely.
+type managedCoreCheck struct {
+	Name    string `json:"name"`
+	Pinned  string `json:"pinned"`
+	Version string `json:"version,omitempty"`
 }
 
 type profileHandshake struct {
@@ -183,6 +193,7 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	}
 	if managedDir, err := xdg.ManagedBinDir(); err == nil {
 		report.ManagedDir = checkDir(managedDir)
+		report.ManagedCores = managedCoreChecks(ctx, managedDir)
 	}
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
@@ -265,6 +276,30 @@ func checkServers(ctx context.Context) []serverCheck {
 		}
 		checks = append(checks, check)
 	}
+	return checks
+}
+
+// managedCoreChecks reports the install state of every managed runtime
+// core that ships for this platform. It complements the state-core server
+// checks: symcockpit is a managed binary but not a state core, so it
+// appears here (and only on macOS) rather than in the Servers section.
+func managedCoreChecks(ctx context.Context, binDir string) []managedCoreCheck {
+	manifest, err := managed.LoadManifest()
+	if err != nil {
+		return nil
+	}
+	checks := make([]managedCoreCheck, 0, len(manifest.Cores))
+	for name, core := range manifest.Cores {
+		if !core.SupportsPlatform(runtime.GOOS) {
+			continue
+		}
+		c := managedCoreCheck{Name: name, Pinned: core.Version}
+		if v, err := managed.InstalledVersion(ctx, binDir, core.BinaryName); err == nil && v != "" {
+			c.Version = v
+		}
+		checks = append(checks, c)
+	}
+	sort.Slice(checks, func(i, j int) bool { return checks[i].Name < checks[j].Name })
 	return checks
 }
 

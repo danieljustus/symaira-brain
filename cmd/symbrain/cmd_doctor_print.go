@@ -28,6 +28,17 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 		printServer(w, s)
 	}
 
+	if len(r.ManagedCores) > 0 {
+		fmt.Fprintln(w, "  managed cores:")
+		for _, c := range r.ManagedCores {
+			if c.Version != "" {
+				fmt.Fprintf(w, "    ✓  %-10s %s (pinned %s)\n", c.Name, c.Version, c.Pinned)
+			} else {
+				fmt.Fprintf(w, "    →  %-10s not installed (pinned %s) — run `symbrain doctor --fix`\n", c.Name, c.Pinned)
+			}
+		}
+	}
+
 	fmt.Fprintln(w)
 	if len(r.Profiles) == 0 {
 		fmt.Fprintln(w, "  →  no profiles found (run `symbrain init` for examples)")
