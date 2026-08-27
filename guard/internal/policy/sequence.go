@@ -1,8 +1,8 @@
 package policy
 
 import (
-	"github.com/danieljustus/symaira-guard/internal/model"
-	"github.com/danieljustus/symaira-guard/internal/sequence"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/sequence"
 )
 
 // SequenceRule is a stateful rule that detects repetitive tool-call patterns

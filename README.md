@@ -37,9 +37,12 @@ each through its own profile, each seeing only what that profile exposes.
 - **One binary, in-process.** Memory and skills are compiled in, so there is
   no multi-process dance for the common case; vault stays separate on purpose
   because that process boundary *is* the security mechanism.
-- **Composable with `symguard`.** Capability shaping (what an agent can see)
-  and conduct policing (what a call is allowed to do) are deliberately
-  separate — put symguard in front when you need call-time enforcement.
+- **Composable with the guard layer.** Capability shaping (what an agent can
+  see) and conduct policing (what a call is allowed to do) are deliberately
+  separate. The guard command set is absorbed as `symbrain guard`
+  (decide/scan/doctor/grants) — the retired standalone `symguard` binary
+  (ADR 0001, D6) — and its enforcement internals stay out of the brain
+  packages (import-direction enforced).
 
 ## What symbrain is not
 
@@ -54,8 +57,8 @@ each through its own profile, each seeing only what that profile exposes.
   point. General-purpose tools (web fetch, browser automation, search, etc.)
   are wired directly into the harness by the user unless a profile names them.
 - **Not a call-time policy enforcer.** See the boundary table below —
-  that job belongs to [`symguard`](guard/) (nested module, absorbed
-  2026-08-21).
+  that job belongs to the guard module, absorbed into this repository
+  and dissolved into the root module (`symbrain guard`, ADR 0001 D6).
 - **Not a memory store.** symbrain persists no memories and no secrets
   itself. It only holds profiles, the instructions source, and a local
   audit log.
@@ -65,9 +68,9 @@ each through its own profile, each seeing only what that profile exposes.
   brokers (Memory, Vault, Skills) driven through their own CLIs; the core
   product remains the CLI/MCP gateway.
 
-### symbrain vs. symguard
+### symbrain vs. the guard layer
 
-Both tools sit between a harness and its tool servers, but answer a
+Both sit between a harness and its tool servers, but answer a
 different question:
 
 | | **symbrain** | **symguard** |
@@ -79,8 +82,9 @@ different question:
 | Audit | Lightweight JSONL log (who/what/when, redacted) | Tamper-evident audit (hash chain) |
 
 If you need per-call approval, risk classification, or a tamper-evident
-audit trail, put `symguard` in front of your servers. symbrain does not
-implement any of that itself.
+audit trail, that is the guard layer's concern (`symbrain guard decide`
+and the guard policy engine). symbrain does not implement any of that in
+its brain packages.
 
 ## Install
 
@@ -360,7 +364,7 @@ boundary table above. Concretely:
   process abusing the tools its profile *does* expose (e.g. a `personal`
   profile with `vault` in `full` mode). There is no per-call approval, no
   risk scoring, and no human-in-the-loop confirmation in symbrain itself —
-  that is `symguard`'s job.
+  that is the guard module's job (`symbrain guard`).
 - **Audit log:** when enabled (default: on), every routed tool call is
   recorded as JSONL under `~/.local/share/symbrain/audit/<profile>.jsonl`
   with who/what/when. Vault call arguments and results are never written to

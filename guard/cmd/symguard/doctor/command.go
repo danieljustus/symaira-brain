@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/danieljustus/symaira-guard/internal/audit"
-	"github.com/danieljustus/symaira-guard/internal/config"
-	"github.com/danieljustus/symaira-guard/internal/discovery"
-	"github.com/danieljustus/symaira-guard/internal/spawn"
+	"github.com/danieljustus/symaira-brain/guard/internal/audit"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/spawn"
 )
 
 // Run prints system health and configuration information to w and returns

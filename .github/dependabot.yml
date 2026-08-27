@@ -10,19 +10,6 @@ updates:
           - "minor"
           - "patch"
 
-  # Temporary gate for the nested guard module (ADR 0001, D8): guard/ has
-  # its own go.mod until the module is dissolved (D6), so the root entry
-  # above never scans it. Removed together with guard/go.mod.
-  - package-ecosystem: "gomod"
-    directory: "/guard"
-    schedule:
-      interval: "weekly"
-    groups:
-      go-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

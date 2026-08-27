@@ -21,8 +21,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // Request is sent to the human for a decision on a pending tool call.

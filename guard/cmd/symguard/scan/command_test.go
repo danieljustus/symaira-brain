@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
 )
 
 // resultFixture returns a Result with two servers (one carrying env values

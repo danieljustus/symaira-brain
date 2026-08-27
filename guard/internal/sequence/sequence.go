@@ -69,7 +69,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // Defaults for Config fields when left zero.

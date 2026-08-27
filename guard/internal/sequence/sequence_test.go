@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // attempt builds a proxy-sourced ActionEvent in the requested state.

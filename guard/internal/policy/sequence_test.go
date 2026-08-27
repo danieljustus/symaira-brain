@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
-	"github.com/danieljustus/symaira-guard/internal/sequence"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/sequence"
 )
 
 func TestSequenceRule_Evaluate(t *testing.T) {

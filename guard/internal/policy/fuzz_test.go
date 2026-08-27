@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // FuzzEvaluate tests that arbitrary tool calls don't panic during evaluation.

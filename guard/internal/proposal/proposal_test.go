@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/audit"
-	"github.com/danieljustus/symaira-guard/internal/config"
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/audit"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 func testAgent() model.AgentIdentity {

@@ -35,5 +35,5 @@ credited to you unless you prefer to remain anonymous.
 See the [Security notes](../README.md#security-notes) section of the
 README for what `symbrain` protects against by design (least exposure at
 the profile/capability level) and what it explicitly does not protect
-against (call-time policy enforcement, which is
-[`symguard`](https://github.com/danieljustus/symaira-guard)'s job).
+against (call-time policy enforcement, which is the guard module's job —
+`symbrain guard`, absorbed into this repository).

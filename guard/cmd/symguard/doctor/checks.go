@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/danieljustus/symaira-guard/internal/discovery"
-	"github.com/danieljustus/symaira-guard/internal/spawn"
+	"github.com/danieljustus/symaira-brain/guard/internal/discovery"
+	"github.com/danieljustus/symaira-brain/guard/internal/spawn"
 )
 
 // ServerCheck is the doctor verdict for one discovered MCP server.

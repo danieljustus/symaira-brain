@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/danieljustus/symaira-guard/internal/config"
+	"github.com/danieljustus/symaira-brain/guard/internal/config"
 )
 
 // KeySize is the length of key material in bytes (256 bits).

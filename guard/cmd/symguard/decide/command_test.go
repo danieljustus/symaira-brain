@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/danieljustus/symaira-guard/internal/audit"
+	"github.com/danieljustus/symaira-brain/guard/internal/audit"
 )
 
 func TestEvaluate(t *testing.T) {

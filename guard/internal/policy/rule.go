@@ -40,8 +40,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/danieljustus/symaira-guard/internal/grant"
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/grant"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // RuleID is a stable, unique rule identifier.

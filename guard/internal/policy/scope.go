@@ -3,7 +3,7 @@ package policy
 import (
 	"fmt"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 // wildcardScope is the capability-package ScopeAll spelling. It is kept

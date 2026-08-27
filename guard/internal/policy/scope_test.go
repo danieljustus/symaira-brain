@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/danieljustus/symaira-guard/internal/model"
+	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
 func TestScopeCeiling(t *testing.T) {
