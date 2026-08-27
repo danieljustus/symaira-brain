@@ -20,7 +20,7 @@ Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.7.0` released, in active development. Interfaces may
+> **Status:** `v0.8.0` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## Why symbrain
@@ -230,7 +230,7 @@ Implemented today:
 | Command | Purpose |
 |---|---|
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
-| `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
+| `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit), profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
