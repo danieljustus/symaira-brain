@@ -144,6 +144,14 @@ Supported `--harness` values: `claude`, `claude-desktop`, `cursor`,
 step 2 and only ever touches the `symbrain` entry — every other server in
 that harness's config is left alone.
 
+`symbrain install` also migrates the harness away from the superseded
+standalone cores: MCP entries whose command resolves to `symmemory` or
+`symskills` (served in-process since the repo consolidation) are removed
+as part of the install — the existing backup restores them for rollback.
+Pass `--keep-superseded` to leave them in place; `symbrain doctor` flags
+a harness where symbrain and a superseded core are registered side by
+side.
+
 ## Profile guide
 
 A profile is a TOML file under `~/.config/symbrain/profiles/<name>.toml`
