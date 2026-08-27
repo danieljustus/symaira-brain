@@ -43,10 +43,16 @@ each through its own profile, each seeing only what that profile exposes.
 
 ## What symbrain is not
 
-- **Not a generic MCP hub or aggregator.** It only multiplexes the three
-  state cores above. General-purpose tools (web fetch, browser automation,
-  search, etc.) are wired directly into the harness by the user — symbrain
-  does not proxy them.
+- **Not a convenience bundle — but it is a control point.** Aggregation
+  without a policy gain stays out: symbrain is not a comfortable single
+  connection so you have fewer entries in your harness config. Pass-through
+  whose declared purpose is exposure control and audit is in scope (ADR
+  0001, D1) — which harness may see which server, read-only or read-write,
+  and who used what tool when. Decision test: if removing the policy layer
+  left a still-useful convenience bundle, it is aggregation and stays out;
+  if the pass-through is worthless without the policy layer, it is a control
+  point. General-purpose tools (web fetch, browser automation, search, etc.)
+  are wired directly into the harness by the user unless a profile names them.
 - **Not a call-time policy enforcer.** See the boundary table below —
   that job belongs to [`symguard`](guard/) (nested module, absorbed
   2026-08-21).
