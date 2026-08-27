@@ -59,9 +59,10 @@ each through its own profile, each seeing only what that profile exposes.
 - **Not a call-time policy enforcer.** See the boundary table below —
   that job belongs to the guard module, absorbed into this repository
   and dissolved into the root module (`symbrain guard`, ADR 0001 D6).
-- **Not a memory store.** symbrain persists no memories and no secrets
-  itself. It only holds profiles, the instructions source, and a local
-  audit log.
+- **Not a remote memory or credential store.** Memory and skills are
+  embedded in-process (absorbed 2026-08-21); credentials stay behind the
+  separate `symvault` process on purpose. symbrain brokers the external
+  vault and owns the embedded memory + skills stores.
 - **Not a general-purpose GUI or desktop shell.** Native SwiftUI apps are
   included as companion dashboards for symbrain's own profiles, harnesses,
   audit log, and setup flows, plus module screens for the three state cores it
@@ -280,16 +281,22 @@ Implemented today:
 |---|---|
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit), profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
+| `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
+| `symbrain usage` | AI subscription/token usage per provider |
+| `symbrain mcp --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive. `serve` is a deprecated alias for this command (stderr-only notice; see below) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
-| `symbrain mcp --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive. `serve` is a deprecated alias for this command (stderr-only notice; see below) |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
-| `symbrain memory sync --remote <url> [--pull\|--push] [--token <t>\|--encrypted-relay]` | Bidirectional remote memory sync against a Symaira Memory server (see `MEMORY-SYNC-MIGRATION.md`) — replaces the archived `symmemory sync` workflow. Reuses the local database in place; no export/import. Tokens and relay passphrases come from `--token`/`--relay-passphrase` or the `SYMBRAIN_MEMORY_SYNC_TOKEN` / `SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE` env vars (`--output table\|json`) |
+| `symbrain memory` | Operate the embedded memory store (sync with a remote) |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
+| `symbrain vault` | Passthrough to symvault |
+| `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |
 | `symbrain version` | Print version, Go runtime, and OS/arch (`--output table|json`, default `table`) |
+| `symbrain help` | Show this help message |
+
 
 > The stdio gateway previously lived at `symbrain serve`; it moved to
 > `symbrain mcp` (per the CLI vocabulary, `<tool> mcp` starts the stdio MCP
