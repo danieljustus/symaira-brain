@@ -31,13 +31,14 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 	}
 
 	inst := newInstaller(binDir)
-	var failed int
+	var failed, attempted int
 
 	for name, core := range manifest.Cores {
 		if !core.SupportsPlatform(runtime.GOOS) {
 			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
 			continue
 		}
+		attempted++
 
 		logger.Info("installing", "binary", name, "version", core.Version, "repo", core.Repo)
 
@@ -51,7 +52,10 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 	}
 
 	if failed > 0 {
-		return fmt.Errorf("managed: %d/%d cores failed to install", failed, len(manifest.Cores))
+		// attempted, not len(manifest.Cores): a platform-restricted core
+		// (e.g. macOS-only symcockpit) is skipped elsewhere, so the
+		// denominator must count only the cores this run actually tried.
+		return fmt.Errorf("managed: %d/%d cores failed to install", failed, attempted)
 	}
 	return nil
 }
@@ -71,13 +75,14 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 	}
 
 	inst := newInstaller(binDir)
-	var repaired, skipped, failed int
+	var repaired, skipped, failed, attempted int
 
 	for name, core := range manifest.Cores {
 		if !core.SupportsPlatform(runtime.GOOS) {
 			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
 			continue
 		}
+		attempted++
 
 		existing, err := InstalledVersion(ctx, binDir, core.BinaryName)
 		if err != nil {
@@ -114,7 +119,7 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 		"repaired", repaired, "skipped", skipped, "failed", failed)
 
 	if failed > 0 {
-		return fmt.Errorf("managed: %d/%d cores failed to repair", failed, len(manifest.Cores))
+		return fmt.Errorf("managed: %d/%d cores failed to repair", failed, attempted)
 	}
 	return nil
 }
