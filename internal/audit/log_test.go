@@ -3,6 +3,7 @@ package audit
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -310,16 +311,7 @@ func joinLines(lines []string) string {
 	return sb.String()
 }
 
-func newTestFile(t *testing.T) *os.File {
-	t.Helper()
-	f, err := os.CreateTemp(t.TempDir(), "audit-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	return f
-}
-
-// readPayloads reads the audit file and returns the inner entry payloads
+func joinLines(lines []string) string {
 // (auditkit stores entries as chained envelopes {d: payload, h: hash}).
 func readPayloads(t *testing.T, path string) []string {
 	t.Helper()
@@ -1001,5 +993,121 @@ func TestDegraded_NilLoggerIsNeverDegraded(t *testing.T) {
 	var l *Logger
 	if l.Degraded() {
 		t.Error("nil logger should never report degraded")
+	}
+}
+
+// TestMemoryContentNeverInAuditLog verifies that the "content" field is
+// redacted as "[redacted]" in verbose mode and that the old
+// fmt.Sprintf("%s=%v", k, m[k]) pattern no longer leaks raw content.
+func TestMemoryContentNeverInAuditLog(t *testing.T) {
+	args := json.RawMessage(`{"content":"private memory text","query":"search"}`)
+	_, values := redactArgs("memory", "memory_set", args, true)
+
+	if !strings.Contains(values, "[redacted]") {
+		t.Errorf("content should be redacted, got values: %s", values)
+	}
+	if strings.Contains(values, "private memory text") {
+		t.Errorf("content value must never appear in audit log, got: %s", values)
+	}
+	if strings.Contains(values, "content=private") {
+		t.Errorf("old fmt.Sprintf pattern should be gone, got: %s", values)
+	}
+}
+
+// TestRedactArgs_NestedSensitiveKeysRedacted verifies that sensitive keys
+// inside nested objects are redacted in verbose mode.
+func TestRedactArgs_NestedSensitiveKeysRedacted(t *testing.T) {
+	args := json.RawMessage(`{"user":{"credentials":{"password":"secret123"}},"query":"search"}`)
+	_, values := redactArgs("memory", "memory_search", args, true)
+
+	if !strings.Contains(values, "[redacted]") {
+		t.Errorf("nested password should be redacted, got: %s", values)
+	}
+	if strings.Contains(values, "secret123") {
+		t.Errorf("nested password value must not leak, got: %s", values)
+	}
+}
+
+// TestRedactArgs_ArrayWithSensitiveMapsRedacted verifies that sensitive
+// keys inside maps contained in arrays are redacted.
+func TestRedactArgs_ArrayWithSensitiveMapsRedacted(t *testing.T) {
+	args := json.RawMessage(`{"items":[{"password":"secret1"},{"token":"secret2"}],"name":"list"}`)
+	_, values := redactArgs("memory", "list_items", args, true)
+
+	if strings.Contains(values, "secret1") || strings.Contains(values, "secret2") {
+		t.Errorf("array element secrets should be redacted, got: %s", values)
+	}
+	if !strings.Contains(values, "[redacted]") {
+		t.Errorf("should contain [redacted], got: %s", values)
+	}
+}
+
+// TestRedactArgs_ForeignToolSensitiveKeysRedacted verifies redaction works
+// for non-core foreign servers.
+func TestRedactArgs_ForeignToolSensitiveKeysRedacted(t *testing.T) {
+	args := json.RawMessage(`{"api_key":"sk-123","action":"call"}`)
+	_, values := redactArgs("foreign-server", "some_tool", args, true)
+
+	if !strings.Contains(values, "[redacted]") {
+		t.Errorf("foreign tool api_key should be redacted, got: %s", values)
+	}
+	if strings.Contains(values, "sk-123") {
+		t.Errorf("foreign tool api_key value must not leak, got: %s", values)
+	}
+}
+
+// TestRedactArgs_CaseInsensitiveSensitiveKeys verifies that sensitive-key
+// matching is case-insensitive.
+func TestRedactArgs_CaseInsensitiveSensitiveKeys(t *testing.T) {
+	tests := []struct {
+		key   string
+		value string
+	}{
+		{"Password", "secret1"},
+		{"API_KEY", "secret2"},
+		{"Authorization", "Bearer abc"},
+		{"TOKEN", "secret3"},
+		{"Private_Key", "secret4"},
+		{"ClientSecret", "secret5"},
+	}
+
+	for _, tt := range tests {
+		args := fmt.Sprintf(`{"%s":"%s","query":"test"}`, tt.key, tt.value)
+		_, values := redactArgs("memory", "search", json.RawMessage(args), true)
+
+		if strings.Contains(values, tt.value) {
+			t.Errorf("case-insensitive: %s value should be redacted, got: %s", tt.key, values)
+		}
+		if !strings.Contains(values, "[redacted]") {
+			t.Errorf("case-insensitive: %s should produce [redacted], got: %s", tt.key, values)
+		}
+	}
+}
+
+// TestRedactArgs_CommonCredentialVariants verifies that common credential
+// key variants are all redacted.
+func TestRedactArgs_CommonCredentialVariants(t *testing.T) {
+	variants := []string{
+		`{"api_key":"val"}`,
+		`{"api-key":"val"}`,
+		`{"apikey":"val"}`,
+		`{"ApiKey":"val"}`,
+		`{"API_KEY":"val"}`,
+		`{"client_secret":"val"}`,
+		`{"client-secret":"val"}`,
+		`{"access_token":"val"}`,
+		`{"access-token":"val"}`,
+		`{"private_key":"val"}`,
+		`{"private-key":"val"}`,
+		`{"passphrase":"val"}`,
+		`{"pwd":"val"}`,
+		`{"credentials":"val"}`,
+	}
+
+	for _, args := range variants {
+		_, values := redactArgs("memory", "tool", json.RawMessage(args), true)
+		if !strings.Contains(values, "[redacted]") {
+			t.Errorf("variant %s should be redacted, got values: %s", args, values)
+		}
 	}
 }

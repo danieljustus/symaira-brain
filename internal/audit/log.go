@@ -85,7 +85,6 @@ type Logger struct {
 
 // maxFileSize is the size threshold for log rotation (10 MB). The auditkit
 // sink uses the same default; kept here for the config surface.
-const maxFileSize = 10 * 1024 * 1024
 
 // Open creates or opens the audit log file for the given profile. If
 // audit is disabled in config, returns a no-op logger.
@@ -198,20 +197,46 @@ func (l *Logger) LogDegradation(server, reason, level string) {
 // audit log from growing unboundedly with user content.
 const maxArgValueLen = 256
 
-// contentFields contains argument key names whose values may carry
-// user-authored text (e.g. memory content, entity data). These are
-// always redacted in verbose mode regardless of server, to avoid
-// logging credentials or sensitive free-form text verbatim.
-var contentFields = map[string]bool{
+// sensitiveKeys contains argument key names (lowercased) whose values
+// may carry credentials or other sensitive data. These are always
+// redacted in verbose mode regardless of server, to avoid logging
+// secrets verbatim. The set covers common case variants and separator
+// variants (underscore, hyphen, concatenated).
+var sensitiveKeys = map[string]bool{
+	// password
+	"password": true, "passwd": true, "pass": true, "pwd": true,
+	// token
+	"token": true, "access_token": true, "access-token": true, "accesstoken": true,
+	"refresh_token": true, "refresh-token": true, "refreshtoken": true,
+	// secret
+	"secret": true, "client_secret": true, "client-secret": true, "clientsecret": true,
+	// api key
+	"api_key": true, "api-key": true, "apikey": true,
+	// authorization / auth
+	"authorization": true, "auth": true, "bearer": true,
+	// credential
+	"credential": true, "credentials": true,
+	// private key
+	"private_key": true, "private-key": true, "privatekey": true,
+	// passphrase
+	"passphrase": true,
+	// content (existing behavior)
 	"content": true,
+}
+
+// isSensitiveKey reports whether key should be treated as sensitive,
+// matching case-insensitively.
+func isSensitiveKey(key string) bool {
+	k := strings.ToLower(key)
+	return sensitiveKeys[k]
 }
 
 // redactArgs applies the redaction policy:
 //   - vault_* tools: never log arguments or values in any mode
 //   - other servers: log argument KEYS only by default;
 //     verbose=true logs values too (still never for vault).
-//     Content-bearing fields (e.g. memory "content") are always
-//     redacted. Values are capped at maxArgValueLen characters.
+//     Sensitive fields are recursively redacted with "[redacted]".
+//     Values are capped at maxArgValueLen characters.
 func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, values string) {
 	if len(args) == 0 {
 		return "", ""
@@ -227,6 +252,8 @@ func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, 
 		return "", ""
 	}
 
+	redacted := redactMap(m)
+
 	keyList := make([]string, 0, len(m))
 	for k := range m {
 		keyList = append(keyList, k)
@@ -234,13 +261,9 @@ func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, 
 	keys = strings.Join(keyList, ",")
 
 	if verbose {
-		valParts := make([]string, 0, len(m))
+		valParts := make([]string, 0, len(keyList))
 		for _, k := range keyList {
-			if contentFields[k] {
-				valParts = append(valParts, fmt.Sprintf("%s=[redacted]", k))
-				continue
-			}
-			v := fmt.Sprintf("%v", m[k])
+			v := fmt.Sprintf("%v", redacted[k])
 			if len(v) > maxArgValueLen {
 				v = v[:maxArgValueLen] + "…"
 			}
@@ -250,6 +273,37 @@ func redactArgs(server, tool string, args json.RawMessage, verbose bool) (keys, 
 	}
 
 	return keys, values
+}
+
+// redactMap returns a copy of m with sensitive values replaced by "[redacted]",
+// recursing into nested maps and slices.
+func redactMap(m map[string]any) map[string]any {
+	result := make(map[string]any, len(m))
+	for k, v := range m {
+		if isSensitiveKey(k) {
+			result[k] = "[redacted]"
+		} else {
+			result[k] = redactValue(v)
+		}
+	}
+	return result
+}
+
+// redactValue recurses into maps and slices, returning a copy with any
+// sensitive nested values replaced by "[redacted]".
+func redactValue(v any) any {
+	switch val := v.(type) {
+	case map[string]any:
+		return redactMap(val)
+	case []any:
+		result := make([]any, len(val))
+		for i, item := range val {
+			result[i] = redactValue(item)
+		}
+		return result
+	default:
+		return v
+	}
 }
 
 // Close closes the underlying file. The logger is unusable afterward.
