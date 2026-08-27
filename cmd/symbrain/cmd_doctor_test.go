@@ -522,3 +522,50 @@ func TestRunDoctorChecks_FlagsMissingProfileBinding(t *testing.T) {
 		t.Error("ProfileMissing = false, want true")
 	}
 }
+
+func TestCheckHarness_FlagsSupersededCoreBesideSymbrain(t *testing.T) {
+	// A harness registering both symbrain and a superseded core
+	// (symmemory/symskills) is a live tool collision — doctor must report it
+	// with the exact fix (issue #337).
+	harnessSandbox(t)
+	h := harnessByName(t, "claude")
+	path, err := h.ConfigPath()
+	if err != nil {
+		t.Fatalf("ConfigPath: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	doc := harness.Empty(h)
+	doc.SetServer(harness.ServerName, harness.NewEntry("personal"))
+	doc.SetServer("symmemory", harness.Entry{Command: "/opt/homebrew/bin/symmemory", Args: []string{"serve"}})
+	data, err := doc.Marshal()
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	check := checkHarness(h)
+	if !check.Installed {
+		t.Fatal("Installed = false, want true")
+	}
+	if len(check.Superseded) != 1 || !strings.Contains(check.Superseded[0], "symmemory") {
+		t.Errorf("Superseded = %v, want [symmemory entry]", check.Superseded)
+	}
+}
+
+func TestCheckHarness_NoSupersededWhenOnlySymbrain(t *testing.T) {
+	harnessSandbox(t)
+	h := harnessByName(t, "claude")
+	writeHarnessConfig(t, h, "personal")
+
+	check := checkHarness(h)
+	if !check.Installed {
+		t.Fatal("Installed = false, want true")
+	}
+	if len(check.Superseded) != 0 {
+		t.Errorf("Superseded = %v, want none", check.Superseded)
+	}
+}

@@ -68,3 +68,31 @@ func TestEntry_Profile(t *testing.T) {
 		})
 	}
 }
+
+func TestEntry_SupersededCore(t *testing.T) {
+	cases := []struct {
+		name    string
+		command string
+		want    string
+		wantOK  bool
+	}{
+		{"bare symmemory", "symmemory", "symmemory", true},
+		{"absolute symmemory", "/opt/homebrew/bin/symmemory", "symmemory", true},
+		{"managed path symmemory", "/Users/daniel/.symaira/bin/symmemory", "symmemory", true},
+		{"bare symskills", "symskills", "symskills", true},
+		{"absolute symskills", "/opt/homebrew/bin/symskills", "symskills", true},
+		{"symvault untouched", "symvault", "", false},
+		{"symbrain untouched", "symbrain", "", false},
+		{"renamed entry untouched", "my-memory-tool", "", false},
+		{"empty command", "", "", false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			e := Entry{Command: tc.command}
+			got, ok := e.SupersededCore()
+			if ok != tc.wantOK || got != tc.want {
+				t.Errorf("SupersededCore() = %q/%v, want %q/%v", got, ok, tc.want, tc.wantOK)
+			}
+		})
+	}
+}

@@ -120,6 +120,19 @@ func printHarness(w io.Writer, h harnessCheck) {
 	default:
 		fmt.Fprintf(w, "  ✓  %-14s installed, profile %q: %s\n", h.Name, h.Profile, h.ConfigPath)
 	}
+
+	// Side-by-side superseded core entries are a live tool collision, not
+	// just untidiness (issue #337): the harness exposes both the gateway
+	// and the raw symmemory/symskills core, with the core losing on
+	// tool-name collisions. `symbrain install` migrates them out.
+	if len(h.Superseded) > 0 {
+		joined := strings.Join(h.Superseded, ", ")
+		if h.Installed {
+			fmt.Fprintf(w, "  !  %-14s superseded core entries registered beside symbrain: %s (run `symbrain install` to migrate)\n", h.Name, joined)
+		} else {
+			fmt.Fprintf(w, "  →  %-14s superseded core entries present (no symbrain): %s\n", h.Name, joined)
+		}
+	}
 }
 
 func printHandshake(w io.Writer, h profileHandshake) {

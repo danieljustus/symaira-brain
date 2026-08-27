@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
@@ -19,6 +20,7 @@ func cmdInstall(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	profileFlag := fs.String("profile", "", "profile to bind this harness connection to (default: the global config's default_profile)")
 	projectDir := fs.String("project", "", "project directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)")
 	dryRun := fs.Bool("dry-run", false, "print a unified diff of the change and write nothing")
+	keepSuperseded := fs.Bool("keep-superseded", false, "keep superseded symmemory/symskills MCP entries instead of migrating them out")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
@@ -43,7 +45,7 @@ func cmdInstall(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return exitcodes.ExitNoInput
 	}
 
-	return installInto(h, path, profile, *dryRun, stdout, stderr)
+	return installInto(h, path, profile, *dryRun, *keepSuperseded, stdout, stderr)
 }
 
 // resolveHarnessAndPath looks up the named harness and resolves the config
@@ -91,8 +93,11 @@ func joinNames() string {
 }
 
 // installInto writes (or dry-run previews) the symbrain MCP entry for
-// profile into the config file at path.
-func installInto(h harness.Harness, path, profile string, dryRun bool, stdout, stderr io.Writer) exitcodes.ExitCode {
+// profile into the config file at path. Unless keepSuperseded is set, it
+// also migrates the harness away from superseded core entries
+// (symmemory/symskills — served in-process since repo consolidation step 4)
+// so the gateway's tools are not duplicated (and colliding) with raw cores.
+func installInto(h harness.Harness, path, profile string, dryRun, keepSuperseded bool, stdout, stderr io.Writer) exitcodes.ExitCode {
 	original, readErr := os.ReadFile(path)
 	existed := readErr == nil
 	if readErr != nil && !os.IsNotExist(readErr) {
@@ -112,6 +117,24 @@ func installInto(h harness.Harness, path, profile string, dryRun bool, stdout, s
 		doc = harness.Empty(h)
 	}
 
+	// Migrate superseded core entries. Matching is conservative (command
+	// basename exactly symmemory/symskills); vault is deliberately never
+	// touched — it stays a separate server.
+	var migrated []string
+	if !keepSuperseded {
+		for _, name := range doc.ServerNames() {
+			entry, ok := doc.Server(name)
+			if !ok {
+				continue
+			}
+			if core, isSuperseded := entry.SupersededCore(); isSuperseded {
+				if doc.RemoveServer(name) {
+					migrated = append(migrated, fmt.Sprintf("%s (superseded %s)", name, core))
+				}
+			}
+		}
+	}
+
 	doc.SetServer(harness.ServerName, harness.NewEntry(profile))
 
 	newContent, err := doc.Marshal()
@@ -127,6 +150,9 @@ func installInto(h harness.Harness, path, profile string, dryRun bool, stdout, s
 			return exitcodes.ExitOK
 		}
 		fmt.Fprint(stdout, diff)
+		if len(migrated) > 0 {
+			fmt.Fprintf(stdout, "migrated superseded core entries: %s\n", strings.Join(migrated, ", "))
+		}
 		return exitcodes.ExitOK
 	}
 
@@ -138,6 +164,11 @@ func installInto(h harness.Harness, path, profile string, dryRun bool, stdout, s
 		}
 		if backupPath != "" {
 			fmt.Fprintf(stdout, "backed up %s to %s\n", path, backupPath)
+			if len(migrated) > 0 {
+				// Rollback documentation: the backup restores the superseded
+				// entries byte-for-byte.
+				fmt.Fprintf(stdout, "migrated superseded core entries: %s (roll back by restoring %s)\n", strings.Join(migrated, ", "), backupPath)
+			}
 		}
 	} else if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		fmt.Fprintf(stderr, "symbrain install: create %s: %v\n", filepath.Dir(path), err)
