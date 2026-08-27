@@ -1,8 +1,7 @@
-# AGENTS.md — Symaira Guard (`symguard`)
+# AGENTS.md — Symaira Guard (`guard/` module of `symaira-brain`)
 
-This file documents coding conventions, project standards, and Symaira-specific rules for AI agents and humans contributing to `symaira-guard`.
+This file documents coding conventions, project standards, and Symaira-specific rules for AI agents and humans contributing to the guard module of `symaira-brain` (formerly the standalone `symaira-guard` repository; absorbed 2026-08-21, dissolved into the root module and the `symguard` binary retired per ADR 0001, D6).
 
-**Design document:** [docs/intern/IDEA.md](docs/intern/IDEA.md)
 **README:** [README.md](README.md)
 
 ---
@@ -10,20 +9,20 @@ This file documents coding conventions, project standards, and Symaira-specific 
 ## Project Structure
 
 ```
-symaira-guard/
-├── cmd/symguard/          # CLI entrypoint (main package): routing only
-│   ├── main.go
-│   ├── main_test.go
-│   ├── decide/            # `symguard decide` command
+guard/
+├── cmd/symguard/          # Command implementations (no main package — the
+│   │                      #   standalone binary is retired; dispatch happens
+│   │                      #   via `symbrain guard` in cmd/symbrain)
+│   ├── decide/            # `symbrain guard decide` command
 │   │   └── command.go
-│   ├── doctor/            # `symguard doctor` command
+│   ├── doctor/            # `symbrain guard doctor` command
 │   │   ├── checks.go
 │   │   └── command.go
-│   ├── grants/            # `symguard grants` command
+│   ├── grants/            # `symbrain guard grants` command
 │   │   └── command.go
-│   ├── scan/              # `symguard scan` command
+│   ├── scan/              # `symbrain guard scan` command
 │   │   └── command.go
-│   └── version/           # `symguard version` command
+│   └── version/           # `symbrain guard version` command
 │       └── command.go
 ├── internal/              # Private packages (not importable outside this module)
 │   ├── approval/          # Data contract for pending approval requests and human decisions
@@ -40,11 +39,6 @@ symaira-guard/
 │   ├── sequence/          # Stateful bounded-window detector for repetitive tool-call patterns
 │   ├── spawn/             # Governs how stdio MCP servers are launched
 │   └── update/            # Update checking via corekit
-├── docs/                  # Documentation
-│   └── intern/            # Internal design docs (IDEA.md)
-├── go.mod
-├── go.sum
-├── Makefile
 ├── README.md
 └── AGENTS.md              # This file
 ```
@@ -67,7 +61,7 @@ corresponding feature is actually implemented.
 
 ### Module and Dependencies
 
-- Module path: `github.com/danieljustus/symaira-guard`
+- Module path: `github.com/danieljustus/symaira-brain/guard` (no own go.mod — dependencies live in the root module)
 - Go version: 1.26+ (see `go.mod`)
 - **Minimal dependencies.** Prefer the standard library. When a dependency is needed, justify it explicitly.
 - Current external dependency: `github.com/BurntSushi/toml` (TOML parsing only).
@@ -259,9 +253,7 @@ TTL). Guard may use the room as its approval backend through the frozen contract
 room performs no risk classification and never sits in the data path.
 
 > Feature requests for room-side risk classes, per-call ask/deny or policy evaluation
-> belong in this repo (`symaira-guard`) and must be implemented here, not in the room.
-> See [`symaira-room`'s approval backend contract](https://github.com/danieljustus/symaira-room/blob/main/docs/approval-contract.md)
-> for the frozen interface `symguard` uses when the room is the approval backend.
+> belong in the guard module of `symaira-brain` and must be implemented here, not in the room.
 
 ### Binary Name
 
@@ -336,7 +328,6 @@ When integrating with optional Symaira tools:
 ## Documentation
 
 - Keep README.md updated with build instructions, usage, and project overview.
-- Design decisions and architecture go in `docs/intern/IDEA.md`.
 - Code comments explain *why*, not *what*. The code itself shows *what*.
 - Package-level doc comments are mandatory for every package.
 

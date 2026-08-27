@@ -21,9 +21,12 @@ is untrusted, and that process boundary is the security mechanism.
 
 Symbrain is explicitly **not**:
 
-- **A generic MCP hub or aggregator.** It only serves the state cores. Other
-  tools (`symdesk`, `symbrowse`, `symcockpit`, `symfritz`, …) are bound
-  directly to the harness by the user — symbrain does not proxy them.
+- **A generic MCP hub or aggregator.** Symbrain is not a convenience bundle —
+  aggregation without a policy gain is out (ADR 0001). It bundles the state
+  cores and, where a profile explicitly names a foreign server, passes it
+  through for exposure control and audit. Other tools (`symdesk`, `symbrowse`,
+  `symcockpit`, `symfritz`, …) are bound directly to the harness by the user
+  unless a profile declares them.
 - **A second `symguard`.** See "Brain ↔ Guard Boundary" below.
 - **A second `symskills`.** Skill rendering/installation stays entirely in
   symskills; symbrain only orchestrates it (shells out, parses `--json`).
