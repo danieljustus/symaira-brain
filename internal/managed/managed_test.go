@@ -15,10 +15,10 @@ func TestLoadManifest(t *testing.T) {
 	if m.SchemaVersion != 1 {
 		t.Errorf("SchemaVersion = %d, want 1", m.SchemaVersion)
 	}
-	if len(m.Cores) != 1 {
-		t.Errorf("len(Cores) = %d, want 1", len(m.Cores))
+	if len(m.Cores) != 2 {
+		t.Errorf("len(Cores) = %d, want 2", len(m.Cores))
 	}
-	for _, name := range []string{"symvault"} {
+	for _, name := range []string{"symvault", "symcockpit"} {
 		c, ok := m.Cores[name]
 		if !ok {
 			t.Errorf("missing core %q", name)
@@ -34,6 +34,16 @@ func TestLoadManifest(t *testing.T) {
 			t.Errorf("core %q: BinaryName is empty", name)
 		}
 	}
+	cockpit := m.Cores["symcockpit"]
+	if len(cockpit.Platforms) != 1 || cockpit.Platforms[0] != "darwin" {
+		t.Errorf("symcockpit Platforms = %v, want [darwin]", cockpit.Platforms)
+	}
+	if cockpit.AssetArch != "universal" {
+		t.Errorf("symcockpit AssetArch = %q, want universal", cockpit.AssetArch)
+	}
+	if cockpit.HasCosign {
+		t.Error("symcockpit HasCosign = true, want false (no .sig/.pem assets)")
+	}
 }
 
 func TestAssetName_Versioned(t *testing.T) {
@@ -42,10 +52,40 @@ func TestAssetName_Versioned(t *testing.T) {
 		BinaryName:  "symvault",
 		AssetPrefix: "symaira-vault",
 	}
+	// Release assets omit the leading "v" even though tags carry it.
 	got := core.AssetName("darwin", "arm64")
-	want := "symaira-vault_v1.2.3_darwin_arm64.tar.gz"
+	want := "symaira-vault_1.2.3_darwin_arm64.tar.gz"
 	if got != want {
 		t.Errorf("AssetName() = %q, want %q", got, want)
+	}
+}
+
+func TestAssetName_NoVVersion(t *testing.T) {
+	core := &Core{
+		Version:     "0.4.0",
+		BinaryName:  "symcockpit",
+		AssetPrefix: "symcockpit",
+	}
+	got := core.AssetName("darwin", "arm64")
+	want := "symcockpit_0.4.0_darwin_arm64.tar.gz"
+	if got != want {
+		t.Errorf("AssetName() = %q, want %q", got, want)
+	}
+}
+
+func TestAssetName_Universal(t *testing.T) {
+	core := &Core{
+		Version:     "0.4.0",
+		BinaryName:  "symcockpit",
+		AssetPrefix: "symcockpit",
+		AssetArch:   "universal",
+	}
+	for _, goarch := range []string{"arm64", "amd64"} {
+		got := core.AssetName("darwin", goarch)
+		want := "symcockpit_0.4.0_darwin_universal.tar.gz"
+		if got != want {
+			t.Errorf("AssetName(darwin, %s) = %q, want %q", goarch, got, want)
+		}
 	}
 }
 
@@ -62,6 +102,40 @@ func TestAssetNameAlt_Unversioned(t *testing.T) {
 	}
 }
 
+func TestSupportsPlatform(t *testing.T) {
+	tests := []struct {
+		name      string
+		platforms []string
+		goos      string
+		want      bool
+	}{
+		{"empty means all", nil, "linux", true},
+		{"explicit match", []string{"darwin"}, "darwin", true},
+		{"explicit miss", []string{"darwin"}, "linux", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			core := &Core{Platforms: tt.platforms}
+			if got := core.SupportsPlatform(tt.goos); got != tt.want {
+				t.Errorf("SupportsPlatform(%q) = %v, want %v", tt.goos, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeVersion(t *testing.T) {
+	tests := []struct{ in, want string }{
+		{"v0.15.3", "0.15.3"},
+		{"0.15.3", "0.15.3"},
+		{" v1.2.3 ", "1.2.3"},
+	}
+	for _, tt := range tests {
+		if got := normalizeVersion(tt.in); got != tt.want {
+			t.Errorf("normalizeVersion(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
 func TestBinaryPathInArchive_Vault(t *testing.T) {
 	core := &Core{
 		Version:     "v0.15.3",
@@ -69,7 +143,7 @@ func TestBinaryPathInArchive_Vault(t *testing.T) {
 		AssetPrefix: "symaira-vault",
 	}
 	got := core.BinaryPathInArchive("darwin", "arm64")
-	want := "symaira-vault_v0.15.3_darwin_arm64/symvault"
+	want := "symaira-vault_0.15.3_darwin_arm64/symvault"
 	if got != want {
 		t.Errorf("BinaryPathInArchive() = %q, want %q", got, want)
 	}
@@ -99,15 +173,15 @@ func TestChecksumAssetName(t *testing.T) {
 
 func TestFindChecksumInFile(t *testing.T) {
 	content := `# checksums for symaira-vault
-abc123def456  symaira-vault_v0.15.3_darwin_arm64.tar.gz
-789abc012def  symaira-vault_v0.15.3_linux_amd64.tar.gz
+abc123def456  symaira-vault_0.15.3_darwin_arm64.tar.gz
+789abc012def  symaira-vault_0.15.3_linux_amd64.tar.gz
 `
 	f := filepath.Join(t.TempDir(), "checksums.txt")
 	if err := os.WriteFile(f, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := findChecksumInFile(f, "symaira-vault_v0.15.3_darwin_arm64.tar.gz")
+	got, err := findChecksumInFile(f, "symaira-vault_0.15.3_darwin_arm64.tar.gz")
 	if err != nil {
 		t.Fatalf("findChecksumInFile: %v", err)
 	}
@@ -118,7 +192,7 @@ abc123def456  symaira-vault_v0.15.3_darwin_arm64.tar.gz
 }
 
 func TestFindChecksumInFile_NotFound(t *testing.T) {
-	content := `abc123  symaira-vault_v0.15.3_darwin_arm64.tar.gz
+	content := `abc123  symaira-vault_0.15.3_darwin_arm64.tar.gz
 `
 	f := filepath.Join(t.TempDir(), "checksums.txt")
 	if err := os.WriteFile(f, []byte(content), 0o644); err != nil {

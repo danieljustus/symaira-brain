@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 // Installer handles downloading, verifying, and atomically installing
@@ -46,6 +47,12 @@ func (inst *Installer) releaseBaseURL() string {
 // failure aborts the install of that core with a clear error and leaves
 // no partial binary behind").
 func (inst *Installer) Install(ctx context.Context, core *Core) error {
+	// Cores with a platform restriction (e.g. macOS-only symcockpit) are
+	// skipped silently on other platforms — never a failed install.
+	if !core.SupportsPlatform(runtime.GOOS) {
+		return nil
+	}
+
 	goos, goarch, err := Platform()
 	if err != nil {
 		return err

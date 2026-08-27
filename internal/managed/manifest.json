@@ -8,6 +8,16 @@
       "asset_prefix": "symaira-vault",
       "has_cosign": true,
       "sha256": ""
+    },
+    "symcockpit": {
+      "version": "0.4.0",
+      "repo": "danieljustus/symaira-cockpit",
+      "binary_name": "symcockpit",
+      "asset_prefix": "symcockpit",
+      "has_cosign": false,
+      "sha256": "",
+      "platforms": ["darwin"],
+      "asset_arch": "universal"
     }
   }
 }

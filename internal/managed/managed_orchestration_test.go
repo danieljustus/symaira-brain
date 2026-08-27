@@ -36,6 +36,23 @@ func withFakeInstaller(t *testing.T, fake *fakeInstaller) {
 	t.Cleanup(func() { newInstaller = orig })
 }
 
+// supportedCoreNames returns the manifest core names whose platform list
+// includes the current GOOS — the set Setup/Fix/Status actually act on.
+func supportedCoreNames(t *testing.T) map[string]bool {
+	t.Helper()
+	m, err := LoadManifest()
+	if err != nil {
+		t.Fatalf("LoadManifest: %v", err)
+	}
+	out := make(map[string]bool, len(m.Cores))
+	for name, core := range m.Cores {
+		if core.SupportsPlatform(runtime.GOOS) {
+			out[name] = true
+		}
+	}
+	return out
+}
+
 func TestSetup_AllSucceed(t *testing.T) {
 	fake := &fakeInstaller{}
 	withFakeInstaller(t, fake)
@@ -43,8 +60,8 @@ func TestSetup_AllSucceed(t *testing.T) {
 	if err := Setup(context.Background(), t.TempDir(), nil); err != nil {
 		t.Fatalf("Setup: %v", err)
 	}
-	if len(fake.calls) != 1 {
-		t.Errorf("Install called %d times, want 1 (one per manifest core)", len(fake.calls))
+	if want := len(supportedCoreNames(t)); len(fake.calls) != want {
+		t.Errorf("Install called %d times, want %d (one per platform-supported manifest core)", len(fake.calls), want)
 	}
 }
 
@@ -56,8 +73,9 @@ func TestSetup_PartialFailureReturnsError(t *testing.T) {
 	if err == nil {
 		t.Fatal("Setup with one failing core: got nil error, want error")
 	}
-	if !strings.Contains(err.Error(), "1/1") {
-		t.Errorf("Setup error = %q, want it to mention 1/1 failed", err.Error())
+	wantFrac := fmt.Sprintf("1/%d", len(supportedCoreNames(t)))
+	if !strings.Contains(err.Error(), wantFrac) {
+		t.Errorf("Setup error = %q, want it to mention %s failed", err.Error(), wantFrac)
 	}
 }
 
@@ -78,8 +96,13 @@ func fakeVersionBinary(t *testing.T, binDir, name, version string) {
 
 func TestFix_SkipsAlreadyCorrect(t *testing.T) {
 	binDir := t.TempDir()
-	// symvault is already at its pinned version (v0.15.3 per manifest.json) -> skip.
-	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
+	// Every platform-supported core is already at its pinned version
+	// (symvault v0.15.3, symcockpit 0.4.0 per manifest.json) -> all skip.
+	for _, core := range mustManifest(t).Cores {
+		if core.SupportsPlatform(runtime.GOOS) {
+			fakeVersionBinary(t, binDir, core.BinaryName, core.Version)
+		}
+	}
 
 	fake := &fakeInstaller{}
 	withFakeInstaller(t, fake)
@@ -91,6 +114,15 @@ func TestFix_SkipsAlreadyCorrect(t *testing.T) {
 	if len(fake.calls) != 0 {
 		t.Errorf("Fix repaired %d cores, want 0", len(fake.calls))
 	}
+}
+
+func mustManifest(t *testing.T) *Manifest {
+	t.Helper()
+	m, err := LoadManifest()
+	if err != nil {
+		t.Fatalf("LoadManifest: %v", err)
+	}
+	return m
 }
 
 func TestFix_PartialFailureReturnsError(t *testing.T) {
@@ -108,7 +140,13 @@ func TestFix_PartialFailureReturnsError(t *testing.T) {
 
 func TestStatus_ReportsInstalledVersion(t *testing.T) {
 	binDir := t.TempDir()
-	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
+	// Install a fake binary per platform-supported core.
+	supported := supportedCoreNames(t)
+	for name, core := range mustManifest(t).Cores {
+		if supported[name] {
+			fakeVersionBinary(t, binDir, core.BinaryName, core.Version)
+		}
+	}
 
 	versions, err := Status(context.Background(), binDir)
 	if err != nil {
@@ -117,8 +155,17 @@ func TestStatus_ReportsInstalledVersion(t *testing.T) {
 	if versions["symvault"] != "v0.15.3" {
 		t.Errorf("Status()[symvault] = %q, want v0.15.3", versions["symvault"])
 	}
-	if len(versions) != 1 {
-		t.Errorf("Status returned %d entries, want 1 (one per manifest core)", len(versions))
+	if supported["symcockpit"] && versions["symcockpit"] != "0.4.0" {
+		t.Errorf("Status()[symcockpit] = %q, want 0.4.0", versions["symcockpit"])
+	}
+	if len(versions) != len(supported) {
+		t.Errorf("Status returned %d entries, want %d (one per platform-supported core)", len(versions), len(supported))
+	}
+	// A platform-restricted core never appears on an unsupported GOOS.
+	if !supported["symcockpit"] {
+		if _, ok := versions["symcockpit"]; ok {
+			t.Error("Status() includes symcockpit on a non-darwin platform, want omitted")
+		}
 	}
 }
 
