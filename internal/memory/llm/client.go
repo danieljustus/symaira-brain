@@ -1,19 +1,14 @@
 package llm
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/danieljustus/symaira-corekit/ollamakit"
+	"github.com/danieljustus/symaira-corekit/llmkit"
 )
 
 // ConsolidationResponseSchema returns a JSON Schema (draft-07) for the
@@ -60,188 +55,183 @@ func ConsolidationResponseSchema() map[string]any {
 	}
 }
 
+const (
+	defaultOllamaBase  = "http://localhost:11434"
+	defaultOllamaModel = "llama3"
+	defaultOpenAIModel = "gpt-4o-mini"
+	defaultTimeout     = 45 * time.Second
+)
+
+// Client is the memory-store's thin configuration adapter over
+// corekit/llmkit. It owns zero transport code: provider descriptors,
+// credential resolution (env:// / symvault://) and the wire dialect
+// handling all live in llmkit. What remains here is the brain-side
+// choice of provider, model and response schema.
 type Client struct {
-	OllamaURL   string
+	// OllamaBase is the base URL for native Ollama calls (scheme+host [+/v1]).
+	OllamaBase string
+	// OllamaModel is the local model name (default "llama3").
 	OllamaModel string
-	HTTPClient  *http.Client
-	ollama      *ollamakit.Client
+	// LLMURL is the OpenAI-compatible base URL for the cloud path; when
+	// empty the openai provider descriptor default applies.
+	LLMURL string
+	// LLMModel is the cloud model (default "gpt-4o-mini").
+	LLMModel string
+	// Provider selects the dialect: "ollama" (native) or "openai" (chat
+	// completions wire). Empty auto-detects via OPENAI_API_KEY.
+	Provider string
+	// Timeout is the per-request timeout; <=0 means defaultTimeout.
+	Timeout time.Duration
+
+	ollama *llmkit.Client // lazy
+	openai *llmkit.Client // lazy
 }
 
-func NewClient(ollamaURL, ollamaModel string, timeout time.Duration) *Client {
-	if ollamaURL == "" {
-		ollamaURL = "http://localhost:11434/api/generate"
-	}
-	if ollamaModel == "" {
-		ollamaModel = "llama3"
-	}
-	if timeout <= 0 {
-		timeout = 45 * time.Second
-	}
+// NewClient builds the llmkit-backed client. llmURL/llmModel are the
+// local-endpoint configuration (as before); the cloud path uses its own
+// defaults unless LLMURL/LLMModel are set explicitly.
+func NewClient(llmURL, llmModel, llmProvider string, timeout time.Duration) *Client {
 	c := &Client{
-		OllamaURL:   ollamaURL,
-		OllamaModel: ollamaModel,
-		HTTPClient: &http.Client{
-			Timeout: timeout,
-		},
+		OllamaBase:  llmURL,
+		OllamaModel: llmModel,
+		Provider:    llmProvider,
+		Timeout:     timeout,
 	}
-	c.ollama = ollamakit.New(ollamakit.Config{
-		BaseURL: ollamaBaseURL(ollamaURL),
-		Model:   ollamaModel,
-		Timeout: timeout,
-	})
+	if c.OllamaBase == "" {
+		c.OllamaBase = defaultOllamaBase
+	}
+	if c.OllamaModel == "" {
+		c.OllamaModel = defaultOllamaModel
+	}
+	if c.Provider == "" {
+		if os.Getenv("OPENAI_API_KEY") != "" {
+			c.Provider = "openai"
+		} else {
+			c.Provider = "ollama"
+		}
+	}
 	return c
 }
 
-// ollamaBaseURL strips a configured Ollama endpoint path (e.g.
-// "http://localhost:11434/api/generate") down to the scheme+host root
-// ollamakit.Config.BaseURL expects. Malformed input is passed through
-// unchanged so ollamakit's own defaulting takes over.
-func ollamaBaseURL(raw string) string {
-	u, err := url.Parse(raw)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return raw
+// resolveTimeout applies the default when no timeout was configured.
+func (c *Client) resolveTimeout() time.Duration {
+	if c.Timeout <= 0 {
+		return defaultTimeout
 	}
-	return u.Scheme + "://" + u.Host
+	return c.Timeout
 }
 
-func (c *Client) QueryOllama(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
-	return c.QueryOllamaWithSchema(ctx, systemPrompt, userPrompt, ConsolidationResponseSchema())
+// ollamaClient returns the native-Ollama llmkit client, built once.
+// Native calls (Generate, ChatStream) live at the scheme+host root, NOT
+// under the /v1 OpenAI-compatibility prefix, so the base URL is always
+// stripped to the bare host.
+func (c *Client) ollamaClient() (*llmkit.Client, error) {
+	if c.ollama == nil {
+		desc, ok := llmkit.Lookup("ollama")
+		if !ok {
+			return nil, fmt.Errorf("llm: ollama descriptor missing from embedded registry")
+		}
+		base := ollamaRoot(c.OllamaBase)
+		cl, err := llmkit.NewClient(desc, "", llmkit.WithBaseURL(base), llmkit.WithTimeout(c.resolveTimeout()))
+		if err != nil {
+			return nil, err
+		}
+		c.ollama = cl
+	}
+	return c.ollama, nil
 }
 
-// QueryOllamaWithSchema queries a local Ollama endpoint with an explicit
-// JSON-Schema (draft-07) constraint for the response. Unlike QueryOllama,
-// the caller controls the schema, which is required for response types
-// other than consolidation results.
-func (c *Client) QueryOllamaWithSchema(ctx context.Context, systemPrompt, userPrompt string, schema map[string]any) (string, error) {
-	body := map[string]any{
-		"model":  c.OllamaModel,
-		"prompt": userPrompt,
-		"system": systemPrompt,
-		"stream": true,
-		"format": schema,
+// ollamaRoot strips any path (including the OpenAI-compatible /v1 prefix)
+// from a configured endpoint, because the native /api/* surface lives at
+// the scheme+host root.
+func ollamaRoot(raw string) string {
+	for i := 0; i < len(raw); i++ {
+		if raw[i] == '/' && i > len("http://") {
+			return raw[:i]
+		}
 	}
+	return raw
+}
 
-	var reqBuf bytes.Buffer
-	if err := json.NewEncoder(&reqBuf).Encode(body); err != nil {
-		return "", fmt.Errorf("failed to encode Ollama request: %w", err)
+// openaiClient returns the OpenAI-wire llmkit client, built once.
+func (c *Client) openaiClient() (*llmkit.Client, error) {
+	if c.openai == nil {
+		desc, ok := llmkit.Lookup("openai")
+		if !ok {
+			return nil, fmt.Errorf("llm: openai descriptor missing from embedded registry")
+		}
+		opts := []llmkit.Option{llmkit.WithTimeout(c.resolveTimeout())}
+		if c.LLMURL != "" {
+			opts = append(opts, llmkit.WithBaseURL(c.LLMURL))
+		}
+		cl, err := llmkit.NewClient(desc, "", opts...)
+		if err != nil {
+			return nil, err
+		}
+		c.openai = cl
 	}
+	return c.openai, nil
+}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.OllamaURL, &reqBuf)
+// Query is the consolidation-shaped query: it pins the consolidation
+// response schema on both provider paths.
+func (c *Client) Query(ctx context.Context, systemPrompt, userPrompt, provider string) (string, error) {
+	return c.QueryWithSchema(ctx, systemPrompt, userPrompt, provider, ConsolidationResponseSchema())
+}
+
+// QueryWithSchema queries the configured provider with an explicit
+// JSON-Schema (draft-07) constraint. The provider parameter overrides the
+// client-level provider for call sites that mix dialects.
+func (c *Client) QueryWithSchema(ctx context.Context, systemPrompt, userPrompt, provider string, schema map[string]any) (string, error) {
+	if provider == "" {
+		provider = c.Provider
+	}
+	if provider == "openai" {
+		return c.queryOpenAI(ctx, systemPrompt, userPrompt, schema)
+	}
+	return c.queryOllama(ctx, systemPrompt, userPrompt, schema)
+}
+
+// queryOllama streams a native /api/generate call with the schema pinned in
+// Ollama's format field and the system prompt carried natively.
+func (c *Client) queryOllama(ctx context.Context, systemPrompt, userPrompt string, schema map[string]any) (string, error) {
+	cl, err := c.ollamaClient()
 	if err != nil {
-		return "", fmt.Errorf("failed to create Ollama request: %w", err)
+		return "", err
 	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to query Ollama: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 4<<10))
-		return "", fmt.Errorf("ollama returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
-	}
-
 	var out strings.Builder
-	scanner := bufio.NewScanner(resp.Body)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-	for scanner.Scan() {
-		line := scanner.Bytes()
-		if len(line) == 0 {
-			continue
-		}
-		var chunk struct {
-			Response string `json:"response"`
-			Done     bool   `json:"done"`
-		}
-		if err := json.Unmarshal(line, &chunk); err != nil {
-			return "", fmt.Errorf("failed to decode Ollama response chunk: %w", err)
-		}
-		out.WriteString(chunk.Response)
-		if chunk.Done {
-			break
-		}
+	err = cl.Generate(ctx, c.OllamaModel, userPrompt, func(ch llmkit.GenerateResponse) error {
+		out.WriteString(ch.Response)
+		return nil
+	}, llmkit.WithGenerateSystem(systemPrompt), llmkit.WithGenerateFormat(schema))
+	if err != nil {
+		return "", fmt.Errorf("failed to query ollama: %w", err)
 	}
-	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("ollama stream read error: %w", err)
-	}
-
 	return out.String(), nil
 }
 
-func (c *Client) QueryOpenAI(ctx context.Context, systemPrompt, userPrompt, apiKey, model, url string) (string, error) {
+// queryOpenAI performs a chat completion against the OpenAI-wire endpoint
+// with the schema pinned in response_format.
+func (c *Client) queryOpenAI(ctx context.Context, systemPrompt, userPrompt string, schema map[string]any) (string, error) {
+	cl, err := c.openaiClient()
+	if err != nil {
+		return "", err
+	}
+	model := c.LLMModel
 	if model == "" {
-		model = "gpt-4o-mini"
+		model = defaultOpenAIModel
 	}
-	if url == "" {
-		url = "https://api.openai.com/v1/chat/completions"
-	}
-
-	schema := ConsolidationResponseSchema()
-	reqBody, err := json.Marshal(map[string]interface{}{
-		"model": model,
-		"messages": []map[string]string{
-			{"role": "system", "content": systemPrompt},
-			{"role": "user", "content": userPrompt},
-		},
-		"response_format": map[string]interface{}{
-			"type": "json_schema",
-			"json_schema": map[string]interface{}{
-				"name":   "consolidation_result",
-				"strict": true,
-				"schema": schema,
-			},
-		},
-	})
+	rawSchema, err := json.Marshal(schema)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to encode response schema: %w", err)
 	}
-
-	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(reqBody))
+	choice, err := cl.Chat(ctx, model, []llmkit.Message{{Role: "user", Content: userPrompt}},
+		&llmkit.ChatOptions{
+			System:         systemPrompt,
+			ResponseFormat: rawSchema,
+		})
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to query openai: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-
-	resp, err := c.HTTPClient.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to query OpenAI: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("openai returned HTTP status %d", resp.StatusCode)
-	}
-
-	var res struct {
-		Choices []struct {
-			Message struct {
-				Content string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-		return "", err
-	}
-
-	if len(res.Choices) == 0 {
-		return "", fmt.Errorf("openai returned empty choices")
-	}
-
-	return res.Choices[0].Message.Content, nil
-}
-
-func (c *Client) Query(ctx context.Context, systemPrompt, userPrompt, provider, apiKey string) (string, error) {
-	if provider == "openai" {
-		if apiKey == "" {
-			apiKey = os.Getenv("OPENAI_API_KEY")
-		}
-		if apiKey == "" {
-			return "", fmt.Errorf("OPENAI_API_KEY environment variable is not set")
-		}
-		return c.QueryOpenAI(ctx, systemPrompt, userPrompt, apiKey, "", "")
-	}
-	return c.QueryOllama(ctx, systemPrompt, userPrompt)
+	return choice.Content, nil
 }

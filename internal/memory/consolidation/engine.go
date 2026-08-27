@@ -62,7 +62,7 @@ func NewEngine(database *db.DB, embeddings *extractor.EmbeddingsGenerator, llmUR
 	return &Engine{
 		database:    database,
 		embeddings:  embeddings,
-		llmClient:   llm.NewClient(llmURL, llmModel, llmTimeout),
+		llmClient:   llm.NewClient(llmURL, llmModel, llmProvider, llmTimeout),
 		llmProvider: llmProvider,
 		piiEnabled:  piiEnabled,
 		promptMode:  promptMode,
@@ -516,7 +516,7 @@ func (eng *Engine) consolidateWithLLM(ctx context.Context, scope string, memorie
 	var rawResponse string
 	var err error
 
-	rawResponse, err = eng.llmClient.Query(ctx, systemPrompt, userPrompt, eng.llmProvider, "")
+	rawResponse, err = eng.llmClient.Query(ctx, systemPrompt, userPrompt, eng.llmProvider)
 
 	if err != nil {
 		return nil, err

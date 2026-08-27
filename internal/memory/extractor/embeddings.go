@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math"
-	"net/url"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/memory/config"
-	"github.com/danieljustus/symaira-corekit/ollamakit"
+	"github.com/danieljustus/symaira-corekit/llmkit"
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
@@ -26,10 +25,10 @@ type EmbeddingsGenerator struct {
 	lastFail       time.Time
 	embeddingCache *lru.Cache[string, []float32]
 
-	// ollama is the shared ollamakit transport (no hand-rolled http.Client
+	// ollama is the shared llmkit transport (no hand-rolled http.Client
 	// here, see #438). It is rebuilt lazily when OllamaURL or OllamaTimeout
 	// change so callers can reconfigure the generator after construction.
-	ollama           *ollamakit.Client
+	ollama           *llmkit.Client
 	ollamaBaseURL    string
 	ollamaTimeoutSet time.Duration
 
@@ -196,7 +195,7 @@ func (eg *EmbeddingsGenerator) cacheKey(text string) string {
 	return fmt.Sprintf("%x", h[:16])
 }
 
-// ollamaClient returns the shared ollamakit transport, rebuilding it when
+// ollamaClient returns the shared llmkit transport, rebuilding it when
 // OllamaURL or OllamaTimeout changed since the last call. Timeout and retry
 // behavior is configured deliberately rather than inherited: a single
 // attempt with an explicit OllamaTimeout (default 2s, matching the legacy
@@ -205,7 +204,7 @@ func (eg *EmbeddingsGenerator) cacheKey(text string) string {
 // the deterministic hash fallback already absorb transient Ollama outages.
 // The caller's context deadline layers on top of the client timeout, so the
 // shorter of the two wins.
-func (eg *EmbeddingsGenerator) ollamaClient() *ollamakit.Client {
+func (eg *EmbeddingsGenerator) ollamaClient() (*llmkit.Client, error) {
 	base := ollamaBaseURL(eg.OllamaURL)
 	timeout := eg.OllamaTimeout
 	if timeout <= 0 {
@@ -215,42 +214,62 @@ func (eg *EmbeddingsGenerator) ollamaClient() *ollamakit.Client {
 	eg.mu.Lock()
 	defer eg.mu.Unlock()
 	if eg.ollama == nil || eg.ollamaBaseURL != base || eg.ollamaTimeoutSet != timeout {
-		eg.ollama = ollamakit.New(ollamakit.Config{
-			BaseURL: base,
-			Model:   eg.Model,
-			Timeout: timeout,
-		})
+		desc, ok := llmkit.Lookup("ollama")
+		if !ok {
+			return nil, fmt.Errorf("ollama descriptor missing from embedded registry")
+		}
+		// The registry descriptor already carries the OpenAI-compatible
+		// /v1 path; normalize a configured bare host onto it as well.
+		baseV1 := base
+		if !strings.HasSuffix(baseV1, "/v1") {
+			baseV1 = strings.TrimRight(baseV1, "/") + "/v1"
+		}
+		cl, err := llmkit.NewClient(desc, "", llmkit.WithBaseURL(baseV1), llmkit.WithTimeout(timeout))
+		if err != nil {
+			return nil, err
+		}
+		eg.ollama = cl
 		eg.ollamaBaseURL = base
 		eg.ollamaTimeoutSet = timeout
 	}
-	return eg.ollama
+	return eg.ollama, nil
 }
 
 // ollamaBaseURL strips a configured Ollama endpoint URL (e.g.
 // "http://localhost:11434/api/embeddings") down to the scheme+host root
-// that ollamakit.Config.BaseURL expects. Malformed input is passed through
-// unchanged so ollamakit's own defaulting takes over.
+// that the llmkit ollama descriptor expects (the OpenAI-compatible /v1
+// path is applied by NewClient's base-URL handling). Malformed input is
+// passed through unchanged so the descriptor's own defaulting takes over.
 func ollamaBaseURL(raw string) string {
-	u, err := url.Parse(raw)
-	if err != nil || u.Scheme == "" || u.Host == "" {
-		return raw
+	// The configured URL historically named the native /api/embeddings
+	// endpoint; the shared transport expects a bare scheme+host, so strip
+	// any path component ("/api/embeddings", "/api/embed", "/v1", ...).
+	for i := 0; i < len(raw); i++ {
+		if raw[i] == '/' && i > len("http://") {
+			return raw[:i]
+		}
 	}
-	return u.Scheme + "://" + u.Host
+	return raw
 }
 
 func (eg *EmbeddingsGenerator) queryOllamaWithContext(ctx context.Context, text string) ([]float32, error) {
-	// The single Ollama call goes through the shared ollamakit transport
-	// (corekit v0.7.0) — the same client family internal/llm uses — instead
-	// of a hand-rolled http.Client (see #438). ollamakit posts to the
-	// current /api/embed endpoint; for the same model and input text the
-	// resulting vector is identical to the legacy /api/embeddings response,
-	// so no reindex is required. Any error (unreachable host, timeout, non-2xx)
-	// is returned as-is; the caller degrades to the hash fallback.
-	embeddings, err := eg.ollamaClient().Embed(ctx, eg.Model, []string{text})
+	// The single Ollama call goes through the shared llmkit transport
+	// (corekit v0.15.0) — the same client family internal/llm uses —
+	// instead of a hand-rolled http.Client (see #438). llmkit posts to the
+	// OpenAI-compatible /v1/embeddings endpoint; for the same model and
+	// input text the resulting vector is equivalent to the legacy
+	// /api/embeddings response, so no reindex is required. Any error
+	// (unreachable host, timeout, non-2xx) is returned as-is; the caller
+	// degrades to the hash fallback.
+	cl, err := eg.ollamaClient()
 	if err != nil {
 		return nil, err
 	}
-	return embeddings[0], nil
+	embeddings, err := cl.Embed(ctx, eg.Model, []string{text})
+	if err != nil {
+		return nil, err
+	}
+	return embeddings[0].Vector, nil
 }
 
 // GenerateLocalHashVector utilizes the "Hashing Trick" to produce a normalized 768-dim vector in microseconds.
