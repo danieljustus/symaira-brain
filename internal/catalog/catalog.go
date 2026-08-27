@@ -37,6 +37,11 @@ type Entry struct {
 	Server       string         `json:"server"`
 	OriginalName string         `json:"original_name"`
 	Verdict      policy.Verdict `json:"verdict"`
+	// AccessClass and AccessSource record the read/write classification of a
+	// foreign-server tool and what it was derived from (see policy.foreign).
+	// Empty for the four cores.
+	AccessClass  string `json:"access_class,omitempty"`
+	AccessSource string `json:"access_source,omitempty"`
 }
 
 // Catalog is the merged, namespaced, policy-filtered tool list presented
@@ -89,7 +94,7 @@ func Build(servers []ServerTools) (*Catalog, error) {
 
 			// Evaluate policy against the original (unprefixed) tool name.
 			verdict := st.Report.Verdict(tool.Name)
-			entries = append(entries, Entry{
+			entry := Entry{
 				Tool: Tool{
 					Name:        name,
 					Description: tool.Description,
@@ -99,7 +104,14 @@ func Build(servers []ServerTools) (*Catalog, error) {
 				Server:       st.Server,
 				OriginalName: tool.Name,
 				Verdict:      verdict,
-			})
+			}
+			// Foreign servers record the resolved access class + source on
+			// the entry so the audit log can explain the exposure decision.
+			if exposure, ok := st.Report.Exposures[tool.Name]; ok {
+				entry.AccessClass = exposure.Class
+				entry.AccessSource = exposure.Source
+			}
+			entries = append(entries, entry)
 		}
 	}
 

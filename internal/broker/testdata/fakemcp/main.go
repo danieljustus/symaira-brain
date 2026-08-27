@@ -46,6 +46,9 @@ type toolDef struct {
 	Description string          `json:"description"`
 	InputSchema json.RawMessage `json:"input_schema"`
 	Behavior    string          `json:"behavior"`
+	// Annotations is emitted verbatim as the tool's MCP "annotations"
+	// object when present (e.g. {"readOnlyHint":true}).
+	Annotations map[string]any `json:"annotations,omitempty"`
 }
 
 func defaultTools() []toolDef {
@@ -164,6 +167,9 @@ func handle(w io.Writer, defs []toolDef, byName map[string]toolDef, req rpcReque
 		list := make([]map[string]any, 0, len(defs))
 		for _, d := range defs {
 			entry := map[string]any{"name": d.Name, "description": d.Description}
+			if len(d.Annotations) > 0 {
+				entry["annotations"] = d.Annotations
+			}
 			if len(d.InputSchema) > 0 {
 				var schema any
 				if err := json.Unmarshal(d.InputSchema, &schema); err == nil {

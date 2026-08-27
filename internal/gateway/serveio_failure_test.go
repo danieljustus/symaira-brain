@@ -57,7 +57,7 @@ type fakeAuditSink struct {
 	logCalls atomic.Int64
 }
 
-func (f *fakeAuditSink) Log(string, string, json.RawMessage, time.Duration, string, ...audit.Classification) {
+func (f *fakeAuditSink) Log(string, string, json.RawMessage, time.Duration, string, audit.Exposure, ...audit.Classification) {
 	f.logCalls.Add(1)
 }
 

@@ -344,6 +344,57 @@ command = "/usr/bin/fig-mcp"
 	}
 }
 
+func TestLoad_ForeignServerAccessValidation(t *testing.T) {
+	// Invalid access class is a hard error; "read" is carried; empty
+	// defaults to "write" (filter model, issue #335).
+	home := withHome(t)
+	writeProfile(t, home, "bad-access", `
+[profile]
+name = "bad-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+access = "exec"
+`)
+	if _, err := Load("bad-access"); err == nil {
+		t.Fatal("Load() error = nil, want error for invalid access class")
+	}
+
+	writeProfile(t, home, "read-access", `
+[profile]
+name = "read-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+access = "read"
+`)
+	p, err := Load("read-access")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if got := p.Server("fig").Access; got != "read" {
+		t.Errorf("fig access = %q, want %q", got, "read")
+	}
+
+	writeProfile(t, home, "default-access", `
+[profile]
+name = "default-access"
+
+[servers.fig]
+enabled = true
+command = "/usr/bin/fig-mcp"
+`)
+	p2, err := Load("default-access")
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if got := p2.Server("fig").Access; got != ForeignAccessWrite {
+		t.Errorf("fig access = %q, want default %q", got, ForeignAccessWrite)
+	}
+}
+
 func TestLoad_NameMismatchErrors(t *testing.T) {
 	home := withHome(t)
 	writeProfile(t, home, "on-disk-name", `

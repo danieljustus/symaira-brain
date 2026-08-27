@@ -36,6 +36,12 @@ const (
 	VaultModeOff         = "off"
 )
 
+// Foreign server exposure access classes.
+const (
+	ForeignAccessRead  = "read"
+	ForeignAccessWrite = "write"
+)
+
 // Profile is the parsed, validated, defaulted representation of a profile
 // TOML file at ~/.config/symbrain/profiles/<name>.toml. One profile
 // controls what a single harness connection may see across the three
@@ -80,6 +86,17 @@ type ServerConfig struct {
 	Command string   `json:"command,omitempty"`
 	Args    []string `json:"args,omitempty"`
 	URL     string   `json:"url,omitempty"`
+	// Access is the foreign-server exposure class: "read" exposes only
+	// tools classified as reading, "write" exposes reading and writing
+	// tools. Empty defaults to "write". Meaningless for core aliases
+	// (their mode preset governs exposure); ignored with a warning.
+	Access string `json:"access,omitempty"`
+	// ToolsRead and ToolsWrite are explicit read/write overrides for a
+	// foreign server's tools. An explicit entry wins over the upstream
+	// readOnlyHint annotation in both directions. Meaningless for core
+	// aliases; ignored with a warning.
+	ToolsRead  []string `json:"tools_read,omitempty"`
+	ToolsWrite []string `json:"tools_write,omitempty"`
 }
 
 // AuditConfig is the [audit] table. Enabled defaults to true.
@@ -112,6 +129,9 @@ type fileServer struct {
 	Command    string   `toml:"command"`
 	Args       []string `toml:"args"`
 	URL        string   `toml:"url"`
+	Access     string   `toml:"access"`
+	ToolsRead  []string `toml:"tools_read"`
+	ToolsWrite []string `toml:"tools_write"`
 }
 
 type fileAuditConfig struct {
@@ -252,6 +272,8 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 
 	// A core alias redefined as a foreign server (command/args/url set) is
 	// a collision: the four cores are reserved and always resolved as such.
+	// Access/tools_read/tools_write are foreign-only; a core setting them is
+	// ignored with a warning (the mode preset governs core exposure).
 	for alias, fs := range raw {
 		if !knownServerAliases[alias] {
 			continue
@@ -259,6 +281,10 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 		if fs.Command != "" || len(fs.Args) > 0 || fs.URL != "" {
 			return nil, nil, fmt.Errorf(
 				"servers.%s: core server cannot carry command/args/url — it is not a foreign server", alias)
+		}
+		if fs.Access != "" || len(fs.ToolsRead) > 0 || len(fs.ToolsWrite) > 0 {
+			warnings = append(warnings, fmt.Sprintf(
+				"servers.%s: access/tools_read/tools_write are ignored (core exposure is governed by the mode preset)", alias))
 		}
 	}
 
@@ -328,11 +354,25 @@ func resolveForeign(alias string, fs fileServer) (ServerConfig, []string, error)
 			"servers.%s: mode %q is ignored (foreign servers have no mode presets)", alias, fs.Mode))
 	}
 
+	access := fs.Access
+	if access == "" {
+		access = ForeignAccessWrite
+	}
+	switch access {
+	case ForeignAccessRead, ForeignAccessWrite:
+	default:
+		return ServerConfig{}, nil, fmt.Errorf(
+			"servers.%s: invalid access %q (must be %q or %q)", alias, access, ForeignAccessRead, ForeignAccessWrite)
+	}
+
 	return ServerConfig{
 		Enabled:    derefBool(fs.Enabled, false),
 		Command:    fs.Command,
 		Args:       fs.Args,
 		URL:        fs.URL,
+		Access:     access,
+		ToolsRead:  fs.ToolsRead,
+		ToolsWrite: fs.ToolsWrite,
 		ToolsAllow: fs.ToolsAllow,
 		ToolsDeny:  fs.ToolsDeny,
 	}, warnings, nil

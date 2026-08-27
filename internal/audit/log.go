@@ -30,6 +30,19 @@ type Entry struct {
 	Level      string `json:"level,omitempty"`
 	ArgKeys    string `json:"arg_keys,omitempty"`
 	ArgValues  string `json:"arg_values,omitempty"`
+	// AccessClass and AccessSource explain a foreign-server tool call's
+	// exposure decision (read/write class and what it was derived from).
+	// Empty for the four cores.
+	AccessClass  string `json:"access_class,omitempty"`
+	AccessSource string `json:"access_source,omitempty"`
+}
+
+// Exposure carries a foreign-server tool call's access classification into
+// the audit entry so an exposure decision can be explained after the fact.
+// The zero value is a core-server call (no foreign exposure semantics).
+type Exposure struct {
+	AccessClass  string `json:"access_class,omitempty"`
+	AccessSource string `json:"access_source,omitempty"`
 }
 
 // Degradation records a backend that was unavailable while a gateway session
@@ -104,23 +117,27 @@ func Open(profile string, cfg Config) (*Logger, error) {
 	}, nil
 }
 
-// Log records a tool call. server is "vault", "memory", or "skills".
-// args are the raw JSON arguments (may be nil). duration is the call
-// wall-clock time. status is "ok", "error", or "timeout". An optional
-// classification records the reason for a failed call.
-func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string, classifications ...Classification) {
+// Log records a tool call. server is "vault", "memory", or "skills" (or a
+// foreign server alias). args are the raw JSON arguments (may be nil).
+// duration is the call wall-clock time. status is "ok", "error", or
+// "timeout". exposure records the foreign-server access classification
+// (zero value for the four cores). An optional classification records the
+// reason for a failed call.
+func (l *Logger) Log(server, tool string, args json.RawMessage, duration time.Duration, status string, exposure Exposure, classifications ...Classification) {
 	if l == nil || l.sink == nil || !l.config.Enabled {
 		return
 	}
 
 	entry := Entry{
-		Timestamp:  time.Now().UTC().Format(time.RFC3339Nano),
-		SessionID:  l.session,
-		Profile:    l.profile,
-		Server:     server,
-		Tool:       tool,
-		DurationMS: duration.Milliseconds(),
-		Status:     status,
+		Timestamp:    time.Now().UTC().Format(time.RFC3339Nano),
+		SessionID:    l.session,
+		Profile:      l.profile,
+		Server:       server,
+		Tool:         tool,
+		DurationMS:   duration.Milliseconds(),
+		Status:       status,
+		AccessClass:  exposure.AccessClass,
+		AccessSource: exposure.AccessSource,
 	}
 	if len(classifications) > 0 {
 		entry.Category = classifications[0].Category

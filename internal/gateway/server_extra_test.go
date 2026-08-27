@@ -13,6 +13,7 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/catalog"
 	"github.com/danieljustus/symaira-brain/internal/config"
+	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
 )
 
@@ -104,6 +105,88 @@ func TestBuildCatalog_MergesToolsFromMultipleServers(t *testing.T) {
 		if !names[want] {
 			t.Errorf("missing exposed tool %q", want)
 		}
+	}
+}
+
+func TestBuildCatalog_ForeignServerReadAccess(t *testing.T) {
+	// A foreign server (beyond the four cores) is a filter, not a
+	// gatekeeper: access="read" exposes only tools classified as reading.
+	// readOnlyHint drives the classification, the resolved class + source
+	// land on the catalog entry for the audit log.
+	p := &profile.Profile{
+		Name: "test",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{Enabled: true, Command: "/bin/true", Access: profile.ForeignAccessRead},
+		},
+	}
+	fig := newManagedFake(t, "fig", `[
+		{"name":"search","description":"read-only search","annotations":{"readOnlyHint":true}},
+		{"name":"delete","description":"destructive","annotations":{"readOnlyHint":false}},
+		{"name":"blob","description":"no hint"}
+	]`)
+	servers := map[string]*broker.ManagedServer{"fig": fig}
+
+	s := New(p, servers, slog.Default(), nil, "dev")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := s.buildCatalog(ctx); err != nil {
+		t.Fatalf("buildCatalog: %v", err)
+	}
+
+	exposed := s.cat.Exposed()
+	for _, e := range exposed {
+		if e.OriginalName != "search" {
+			t.Errorf("foreign server exposed tool %q (orig %q), want only search", e.Name, e.OriginalName)
+		}
+	}
+	if len(exposed) != 1 {
+		t.Fatalf("Exposed() = %d entries, want 1 (fig_search)", len(exposed))
+	}
+
+	entry := exposed[0]
+	if entry.AccessClass != "read" || entry.AccessSource != policy.ExposureSourceReadOnlyHint {
+		t.Errorf("search access = %s/%s, want read/read_only_hint", entry.AccessClass, entry.AccessSource)
+	}
+}
+
+func TestBuildCatalog_ForeignServerExplicitToolsReadWins(t *testing.T) {
+	// An explicit tools_read entry overrides the upstream hint: a tool the
+	// server marks write-only is reclassified read and survives access="read".
+	p := &profile.Profile{
+		Name: "test",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{
+				Enabled:    true,
+				Command:    "/bin/true",
+				Access:     profile.ForeignAccessRead,
+				ToolsRead:  []string{"upsert"},
+				ToolsWrite: []string{"search"}, // overrides readOnlyHint=true
+			},
+		},
+	}
+	fig := newManagedFake(t, "fig", `[
+		{"name":"upsert","description":"marked write by server","annotations":{"readOnlyHint":false}},
+		{"name":"search","description":"marked read by server","annotations":{"readOnlyHint":true}}
+	]`)
+	servers := map[string]*broker.ManagedServer{"fig": fig}
+
+	s := New(p, servers, slog.Default(), nil, "dev")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := s.buildCatalog(ctx); err != nil {
+		t.Fatalf("buildCatalog: %v", err)
+	}
+
+	exposed := s.cat.Exposed()
+	if len(exposed) != 1 || exposed[0].OriginalName != "upsert" {
+		t.Fatalf("Exposed() = %+v, want only upsert (tools_read reclassifies, tools_write hides)", exposed)
+	}
+	if exposed[0].AccessSource != policy.ExposureSourceToolsRead {
+		t.Errorf("upsert access source = %q, want tools_read", exposed[0].AccessSource)
 	}
 }
 
