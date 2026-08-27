@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-brain/internal/policy"
 	"github.com/danieljustus/symaira-brain/internal/profile"
@@ -371,16 +372,17 @@ func cmdProfileAdd(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 // ---- remove ----
 
 func cmdProfileRemove(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	args = reorderFlagsFirst(args, nil)
+	args = reorderFlagsFirst(args, map[string]bool{"project": true})
 
 	fs := flag.NewFlagSet("profile remove", flag.ContinueOnError)
 	force := fs.Bool("force", false, "skip the confirmation prompt")
+	projectDir := fs.String("project", "", "project directory; check project-local harness configs for bindings")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
 	}
 	if fs.NArg() != 1 {
-		fmt.Fprintln(stderr, "usage: symbrain profile remove <name> [--force]")
+		fmt.Fprintln(stderr, "usage: symbrain profile remove <name> [--force] [--project <dir>]")
 		return exitcodes.ExitNoInput
 	}
 	name := fs.Arg(0)
@@ -394,9 +396,15 @@ func cmdProfileRemove(args []string, stdout, stderr io.Writer) exitcodes.ExitCod
 		return exitcodes.ExitNoInput
 	}
 
-	// TODO(#20, milestone m4): refuse removal if this profile is
-	// referenced by an installed harness's config, once internal/harness
-	// exists and tracks that binding.
+	bindings := harness.ProfileBindings(name, *projectDir)
+	if len(bindings) > 0 && !*force {
+		fmt.Fprintf(stderr, "symbrain profile remove: profile %q is still bound to harnesses:\n", name)
+		for _, b := range bindings {
+			fmt.Fprintf(stderr, "  - %s (%s)\n", b.Harness, b.Path)
+		}
+		fmt.Fprintln(stderr, "Refusing to remove. Use --force to override.")
+		return exitcodes.ExitGeneric
+	}
 
 	if !*force {
 		fmt.Fprintf(stdout, "Remove profile %q (%s)? [y/N]: ", name, profile.Path(name))
