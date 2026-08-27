@@ -232,7 +232,8 @@ Implemented today:
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
-| `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP server names (`--output table\|json`) |
+| `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
+| `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
 | `symbrain mcp --profile <name> \| --profile-file <path> [--vault-agent <name>]` | Run the MCP gateway over stdio: merges the vault/memory/skills catalog per the bound profile and routes `tools/call` to the right child. `--profile-file` loads the profile from an explicit TOML file (e.g. a room-local profile) instead of the profiles directory; the two flags are mutually exclusive. `serve` is a deprecated alias for this command (stderr-only notice; see below) |
@@ -251,11 +252,14 @@ Implemented today:
 
 ### Harness inventory schema
 
-`symbrain harness list --output json` emits schema version `1`:
+`symbrain harness list --output json` emits schema version `2`. Each
+server is an object carrying transport detail — how to reach it, not just
+its name — so downstream consumers (e.g. symcockpit's MCP health view)
+can connect without re-parsing harness configs:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "project_dir": "/path/to/project",
   "harnesses": [
     {
@@ -265,7 +269,14 @@ Implemented today:
         "path": "~/.claude.json",
         "exists": true,
         "parsed": true,
-        "servers": ["symbrain"]
+        "servers": [
+          {
+            "name": "symbrain",
+            "transport": "stdio",
+            "command": "symbrain",
+            "args": ["mcp", "--profile", "personal"]
+          }
+        ]
       },
       "project": {
         "path": "/path/to/project/.mcp.json",
@@ -278,6 +289,13 @@ Implemented today:
 }
 ```
 
+Per server, `transport` is `stdio` or `http` (inferred from the entry
+shape, or taken from an explicit `transport`/`type` field), `command` and
+`args` describe the stdio invocation, and `url` the HTTP endpoint.
+`env_names` lists the environment variable *names* an entry reads — **values
+are never emitted**, so a config carrying a plaintext key cannot leak it
+through the inventory.
+
 `global` always describes the user-level config. `project` is included only
 for harnesses with a project-local config and when `--project DIR` was given.
 Missing files are reported with `exists: false`; malformed files keep
@@ -285,6 +303,12 @@ Missing files are reported with `exists: false`; malformed files keep
 the inventory. Consumers should treat `schema_version` as the compatibility
 boundary and silently fall back to their built-in harness list when `symbrain`
 is absent or returns an unsupported schema.
+
+**Migration from schema 1.** Schema 1 reported `servers` as a list of bare
+name strings; schema 2 replaces each entry with an object. Consumers that
+only need names can read `.servers[].name`. A config entry with no command,
+args, or url (e.g. a bare name placeholder) still appears with only `name`
+and `transport` populated.
 
 `install`/`uninstall` write a working MCP entry that *points at*
 `symbrain mcp --profile <name>` — the harness spawns the gateway

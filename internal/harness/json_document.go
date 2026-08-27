@@ -46,6 +46,22 @@ func (d *jsonDocument) Server(name string) (Entry, bool) {
 	return entryFromOrderedMap(m), true
 }
 
+func (d *jsonDocument) ServerInfo(name string) (ServerInfo, bool) {
+	servers := d.servers()
+	if servers == nil {
+		return ServerInfo{}, false
+	}
+	raw, ok := servers.get(name)
+	if !ok {
+		return ServerInfo{}, false
+	}
+	m, ok := raw.(*orderedMap)
+	if !ok {
+		return ServerInfo{}, false
+	}
+	return serverInfoFromOrderedMap(m, name), true
+}
+
 func (d *jsonDocument) ServerNames() []string {
 	servers := d.servers()
 	if servers == nil {

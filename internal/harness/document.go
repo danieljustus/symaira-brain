@@ -17,6 +17,10 @@ type Document interface {
 	// Server returns the entry registered under serverName in this
 	// document's server map, and whether one exists.
 	Server(serverName string) (Entry, bool)
+	// ServerInfo returns the registered entry's transport detail for
+	// serverName (command/args/url and env-var *names*, never values),
+	// and whether one exists.
+	ServerInfo(serverName string) (ServerInfo, bool)
 	// ServerNames returns all registered MCP server names in stable order.
 	ServerNames() []string
 	// SetServer inserts or overwrites the entry for serverName.
