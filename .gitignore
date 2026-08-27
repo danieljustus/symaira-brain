@@ -1,7 +1,11 @@
 # Local working docs — NOT published (design notes, research, diagrams).
 # Anchored to the repo root so nested modules (e.g. guard/) can keep their own
 # published docs/ directories.
-/docs/
+# Exception: ADRs are deliberately public (root AGENTS.md "Deliberately public").
+# Excluding /docs/* rather than /docs/ is required — git cannot re-include a
+# path whose parent directory is itself excluded.
+/docs/*
+!/docs/adr/
 .DS_Store
 /symbrain
 coverage.out
