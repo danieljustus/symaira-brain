@@ -150,3 +150,70 @@ func TestHarnessHealth_HarnessFilter(t *testing.T) {
 		t.Fatalf("servers = %d, want 0 for unconfigured harness", len(report.Servers))
 	}
 }
+
+func TestHarnessHealth_StdioWithNoCommand_Skipped(t *testing.T) {
+	// A server entry with transport=stdio but no command must be skipped
+	// (probe cannot run without an executable), reported as not-probed.
+	t.Setenv("HOME", t.TempDir())
+	_ = buildFakeMCP(t)
+	h := harnessByName(t, "claude")
+	path, err := h.ConfigPath()
+	if err != nil {
+		t.Fatalf("ConfigPath(): %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	// entry with explicit stdio transport but no command field.
+	data := []byte(`{"mcpServers":{
+  "no-cmd": {"transport": "stdio"}
+}}`)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+
+	report, code, _ := runHarnessHealth(t)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("run() = %d, want 0", code)
+	}
+	if len(report.Servers) != 1 {
+		t.Fatalf("servers = %d, want 1", len(report.Servers))
+	}
+	entry := report.Servers[0]
+	if entry.Server != "no-cmd" {
+		t.Fatalf("server = %q, want %q", entry.Server, "no-cmd")
+	}
+	if entry.Healthy {
+		t.Error("server with no command reported healthy, want skipped")
+	}
+	if entry.Transport != "stdio" {
+		t.Errorf("Transport = %q, want %q", entry.Transport, "stdio")
+	}
+	if !strings.Contains(entry.Error, "not stdio") {
+		t.Errorf("Error = %q, want it to mention not-stdio skip", entry.Error)
+	}
+}
+
+func TestHarnessHealth_EmptyConfig_NoServers(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	h := harnessByName(t, "claude")
+	path, err := h.ConfigPath()
+	if err != nil {
+		t.Fatalf("ConfigPath(): %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	// Empty mcpServers object -> no entries to probe.
+	if err := os.WriteFile(path, []byte(`{"mcpServers":{}}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+
+	report, code, _ := runHarnessHealth(t)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("run() = %d, want 0", code)
+	}
+	if len(report.Servers) != 0 {
+		t.Fatalf("servers = %d, want 0 for empty config", len(report.Servers))
+	}
+}
