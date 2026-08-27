@@ -474,6 +474,38 @@ mode    = "full"
 	}
 }
 
+func TestLoad_CoreAliasAccessAndToolsIgnoredWithWarning(t *testing.T) {
+	home := withHome(t)
+	writeProfile(t, home, "vault-access", `
+[profile]
+name = "vault-access"
+
+[servers.vault]
+enabled = true
+access      = "read"
+tools_read  = ["get_entry"]
+tools_write = ["set_entry_field"]
+`)
+
+	p, err := Load("vault-access")
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if !p.Server(ServerVault).Enabled {
+		t.Error("Servers.Vault.Enabled = false, want true")
+	}
+	found := false
+	for _, w := range p.Warnings {
+		if strings.Contains(w, "access/tools_read/tools_write are ignored") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("Warnings = %v, want a warning about access/tools_read/tools_write being ignored on a core alias", p.Warnings)
+	}
+}
+
 func TestLoad_MalformedTOMLErrors(t *testing.T) {
 	home := withHome(t)
 	writeProfile(t, home, "malformed", `[profile

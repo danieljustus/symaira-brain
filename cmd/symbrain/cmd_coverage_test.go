@@ -261,6 +261,46 @@ func TestBuildServers_VaultAgentAddsStdioArgs(t *testing.T) {
 	}
 }
 
+func TestBuildServers_ForeignServerURLOnlyWarnsAndSkips(t *testing.T) {
+	p := &profile.Profile{
+		Name: "url-only",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{Enabled: true, URL: "https://mcp.example.com/sse"},
+		},
+	}
+	cfg := &config.Config{Servers: config.ServersConfig{}}
+
+	var stderr bytes.Buffer
+	servers := buildServers(p, cfg, &stderr, "")
+
+	if len(servers) != 0 {
+		t.Fatalf("buildServers with url-only foreign server = %d servers, want 0", len(servers))
+	}
+	if !strings.Contains(stderr.String(), "url-only foreign server") {
+		t.Errorf("stderr = %q, want url-only foreign server warning", stderr.String())
+	}
+}
+
+func TestBuildServers_ForeignServerDiscoverErrorWarnsAndSkips(t *testing.T) {
+	p := &profile.Profile{
+		Name: "discover-error",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{Enabled: true, Command: "nonexistent-binary-xyz"},
+		},
+	}
+	cfg := &config.Config{Servers: config.ServersConfig{}}
+
+	var stderr bytes.Buffer
+	servers := buildServers(p, cfg, &stderr, "")
+
+	if len(servers) != 0 {
+		t.Fatalf("buildServers with discover-error foreign server = %d servers, want 0", len(servers))
+	}
+	if !strings.Contains(stderr.String(), "fig") {
+		t.Errorf("stderr = %q, want warning naming fig", stderr.String())
+	}
+}
+
 // ---- sync ----
 
 // TestCmdSyncDryRunNoLegacyBinary covers cmdSync end-to-end in-process:

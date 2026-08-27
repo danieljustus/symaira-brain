@@ -231,6 +231,41 @@ func TestBuild_SchemaPassthrough(t *testing.T) {
 	}
 }
 
+func TestBuild_ForeignServerExposurePassThrough(t *testing.T) {
+	// A foreign-server report with Exposures populated must carry the
+	// access class and source onto the catalog entry for audit logging.
+	report := &policy.Report{
+		Server:  "zotero",
+		Enabled: true,
+		Exposed: []string{"search"},
+		Exposures: map[string]policy.ToolExposure{
+			"search": {Class: "read", Source: policy.ExposureSourceReadOnlyHint},
+		},
+	}
+
+	c, err := Build([]ServerTools{
+		{
+			Server: "zotero",
+			Tools:  []Tool{{Name: "search", Description: "read-only search"}},
+			Report: report,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+
+	entry := c.Lookup("search")
+	if entry == nil {
+		t.Fatal("Lookup(search) = nil")
+	}
+	if entry.AccessClass != "read" {
+		t.Errorf("AccessClass = %q, want read", entry.AccessClass)
+	}
+	if entry.AccessSource != policy.ExposureSourceReadOnlyHint {
+		t.Errorf("AccessSource = %q, want read_only_hint", entry.AccessSource)
+	}
+}
+
 func TestBuild_PolicyFiltering(t *testing.T) {
 	c, err := Build([]ServerTools{
 		{
