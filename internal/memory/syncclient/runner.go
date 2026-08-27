@@ -31,6 +31,11 @@ type Options struct {
 	EncryptedRelay bool
 	// Passphrase is required when EncryptedRelay is set. Never log it.
 	Passphrase string
+	// AllowInsecureHTTP opts in to sending bearer tokens over plain HTTP
+	// for non-loopback remotes. When false (the default) Run rejects
+	// http:// URLs that are not loopback. The CLI prints a clear warning
+	// whenever it sets this to true.
+	AllowInsecureHTTP bool
 	// DB is the local memory database whose sync state is reused (required).
 	DB *db.DB
 	// PageLimit bounds each pull page; 0 = defaultPageLimit.
@@ -75,6 +80,9 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 	if opts.EncryptedRelay && opts.Passphrase == "" {
 		return nil, errors.New("encrypted relay requires a passphrase")
 	}
+	if err := ValidateRemoteURL(opts.Remote, opts.AllowInsecureHTTP); err != nil {
+		return nil, err
+	}
 	timeout := opts.Timeout
 	if timeout <= 0 {
 		timeout = defaultTimeout
@@ -100,7 +108,10 @@ func Run(ctx context.Context, opts Options) (*Result, error) {
 		res.Mode = "push"
 	}
 
-	client := NewClient(opts.Remote, opts.Token, nil)
+	client, err := NewClientWithOptions(opts.Remote, opts.Token, nil, opts.AllowInsecureHTTP)
+	if err != nil {
+		return nil, fmt.Errorf("build sync client: %w", err)
+	}
 	pageLimit := opts.PageLimit
 	if pageLimit <= 0 {
 		pageLimit = defaultPageLimit
