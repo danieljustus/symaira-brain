@@ -264,6 +264,57 @@ author = "someone"
 	}
 }
 
+func TestCmdProfileShow_JSONIncludesForeignServerNote(t *testing.T) {
+	// Foreign servers (not vault/memory/skills/usage) carry no mode preset;
+	// buildServerShowReport must label them with the default-case note.
+	home := sandboxHome(t)
+	writeProfileFile(t, home, "foreign", `
+[profile]
+name = "foreign"
+description = "has a foreign server"
+
+[servers.my_tool]
+enabled = true
+command = "my-tool"
+`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdProfile([]string{"show", "foreign", "--json"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("profile show foreign --json = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	var report struct {
+		Servers []struct {
+			Server string `json:"server"`
+			Note   string `json:"note,omitempty"`
+		} `json:"servers"`
+	}
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatalf("output is not valid JSON: %v (output: %q)", err, stdout.String())
+	}
+
+	var foreign *struct {
+		Server string `json:"server"`
+		Note   string `json:"note,omitempty"`
+	}
+	for i := range report.Servers {
+		if report.Servers[i].Server == "my_tool" {
+			foreign = &report.Servers[i]
+			break
+		}
+	}
+	if foreign == nil {
+		t.Fatalf("no my_tool entry in servers: %+v", report.Servers)
+	}
+	if foreign.Note == "" {
+		t.Errorf("foreign server note is empty, want the default-case explanation")
+	}
+	if !strings.Contains(foreign.Note, "foreign server") {
+		t.Errorf("foreign note = %q, want it to mention 'foreign server'", foreign.Note)
+	}
+}
+
 // ---- add ----
 
 func TestCmdProfileAdd_FromRestrictedIsDefault(t *testing.T) {
