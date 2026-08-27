@@ -129,6 +129,18 @@ jobs:
       - name: Test
         run: go test -race -shuffle=on ./...
 
+      # Temporary vulnerability gate for the nested guard module (ADR 0001,
+      # D8): the root govulncheck job below never descends into guard/, so
+      # its dependencies would go unscanned. Removed together with
+      # guard/go.mod when the module is dissolved.
+      - name: govulncheck (guard module)
+        uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.0.4
+        with:
+          go-version-file: guard/go.mod
+          repo-checkout: false
+          work-dir: guard
+          go-package: ./...
+
   # Stdio hygiene gate: `symbrain mcp` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
   # shutdown (fake children). A dedicated job so a transport-breaking
