@@ -83,6 +83,10 @@ func probeHarnessHealth(name, projectDir string) harnessHealthReport {
 	collect := func(hName string, cfg harness.ConfigInventory) {
 		for _, info := range cfg.Servers {
 			if info.Transport != "stdio" || info.Command == "" {
+				// The skip path appends from the caller's goroutine while
+				// probe goroutines write entries concurrently, so it must
+				// share the same mutex (race detector, -race CI gate).
+				mu.Lock()
 				entries = append(entries, harnessHealthEntry{
 					Harness:   hName,
 					Config:    cfg.Path,
@@ -91,6 +95,7 @@ func probeHarnessHealth(name, projectDir string) harnessHealthReport {
 					Healthy:   false,
 					Error:     "not probed: " + info.Transport + " transport is not stdio",
 				})
+				mu.Unlock()
 				continue
 			}
 			wg.Add(1)
