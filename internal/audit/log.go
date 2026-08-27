@@ -330,6 +330,8 @@ func (l *Logger) Degraded() bool {
 
 // LatestDegradations returns degradation records from the most recent session
 // in each matching profile log. An empty profile reads every profile log.
+// It uses a bounded reverse reader to avoid loading the entire file into
+// memory for the common path.
 func LatestDegradations(profile string) ([]Degradation, error) {
 	dir, err := xdg.AuditDir()
 	if err != nil {
@@ -346,21 +348,14 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 
 	var result []Degradation
 	for _, path := range paths {
-		entries, err := tailEntries(path, 0) // 0 = all entries
+		entries, err := tailEntriesBounded(path, 0, func(entry Entry) bool {
+			return entry.Status == "degraded"
+		})
 		if err != nil {
 			return nil, fmt.Errorf("audit: read %s: %w", path, err)
 		}
 
-		lastSession := ""
 		for _, entry := range entries {
-			if entry.SessionID != "" {
-				lastSession = entry.SessionID
-			}
-		}
-		for _, entry := range entries {
-			if entry.Status != "degraded" || (lastSession != "" && entry.SessionID != lastSession) {
-				continue
-			}
 			result = append(result, Degradation{
 				SessionID: entry.SessionID,
 				Profile:   entry.Profile,
@@ -400,6 +395,132 @@ func tailEntries(path string, n int) ([]Entry, error) {
 		entries = entries[len(entries)-n:]
 	}
 	return entries, nil
+}
+
+// tailEntriesBounded reads entries from a JSONL file backwards in chunks,
+// stopping after the latest session is complete or after limit matching
+// entries are collected (0 = no limit). It never loads the entire file
+// into memory for the common path.
+//
+// The filter predicate is applied to each entry; only entries for which
+// filter returns true are returned. Results are returned in chronological
+// order (oldest first).
+func tailEntriesBounded(path string, limit int, filter func(Entry) bool) ([]Entry, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := info.Size()
+	if size == 0 {
+		return nil, nil
+	}
+
+	const chunkSize = 64 * 1024
+	var incomplete []byte // trailing partial line from the previous (later) chunk
+
+	var latestSession string
+	var results []Entry // collected in reverse chronological order
+
+	offset := size
+	for offset > 0 {
+		readSize := chunkSize
+		if offset < int64(readSize) {
+			readSize = int(offset)
+		}
+		offset -= int64(readSize)
+
+		chunk := make([]byte, readSize)
+		if _, err := f.ReadAt(chunk, offset); err != nil {
+			return nil, err
+		}
+
+		// Prepend any incomplete line from the next (later) chunk.
+		if len(incomplete) > 0 {
+			chunk = append(incomplete, chunk...)
+			incomplete = nil
+		}
+
+		// Split on newlines. The last element is incomplete if the chunk
+		// (after prepending) does not end with '\n'.
+		var lines [][]byte
+		start := 0
+		for i := 0; i < len(chunk); i++ {
+			if chunk[i] == '\n' {
+				lines = append(lines, chunk[start:i])
+				start = i + 1
+			}
+		}
+		if start < len(chunk) {
+			incomplete = chunk[start:]
+		}
+
+		// Process lines in reverse order (most recent first).
+		for i := len(lines) - 1; i >= 0; i-- {
+			line := lines[i]
+			if len(line) == 0 {
+				continue
+			}
+
+			var entry Entry
+			if err := json.Unmarshal(line, &entry); err != nil {
+				continue
+			}
+
+			if latestSession == "" {
+				if entry.SessionID != "" {
+					latestSession = entry.SessionID
+				} else {
+					continue
+				}
+			}
+
+			if entry.SessionID != latestSession {
+				// Completed the latest session; return in chronological order.
+				reverseEntries(results)
+				return results, nil
+			}
+
+			if filter == nil || filter(entry) {
+				results = append(results, entry)
+				if limit > 0 && len(results) >= limit {
+					reverseEntries(results)
+					return results, nil
+				}
+			}
+		}
+	}
+
+	// Process any remaining incomplete line (only possible for the first
+	// chunk when the file does not end with '\n').
+	if len(incomplete) > 0 {
+		var entry Entry
+		if err := json.Unmarshal(incomplete, &entry); err == nil {
+			if latestSession == "" {
+				if entry.SessionID != "" {
+					latestSession = entry.SessionID
+				}
+			} else if entry.SessionID == latestSession {
+				if filter == nil || filter(entry) {
+					results = append(results, entry)
+				}
+			}
+		}
+	}
+
+	reverseEntries(results)
+	return results, nil
+}
+
+func reverseEntries(entries []Entry) {
+	for i, j := 0, len(entries)-1; i < j; i, j = i+1, j-1 {
+		entries[i], entries[j] = entries[j], entries[i]
+	}
 }
 
 const tailChunkSize = 64 * 1024 // 64KB
