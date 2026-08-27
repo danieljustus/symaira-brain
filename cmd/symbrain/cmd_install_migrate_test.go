@@ -155,3 +155,27 @@ func TestCmdInstall_KeepSupersededLeavesEntries(t *testing.T) {
 		t.Error("symbrain entry missing after install")
 	}
 }
+
+func TestCmdInstall_MigrationSkipsMalformedEntry(t *testing.T) {
+	// A server entry that is not a map (e.g. a bare string) makes
+	// doc.Server(name) return !ok; the migration loop must skip it
+	// gracefully instead of crashing.
+	home := harnessSandbox(t)
+	path := filepath.Join(home, ".cursor", "mcp.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	raw := []byte(`{"mcpServers":{"broken":"not-a-map"}}`)
+	if err := os.WriteFile(path, raw, 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := cmdInstall([]string{"--harness", "cursor", "--profile", "personal"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("code = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "installed symbrain") {
+		t.Errorf("stdout = %q, want install success message", stdout.String())
+	}
+}

@@ -207,3 +207,16 @@ func TestRun_InstallUninstallDispatch_RequireHarnessFlag(t *testing.T) {
 		}
 	}
 }
+
+func TestRun_GuardDispatch(t *testing.T) {
+	// "guard version" must reach cmdGuard via run()'s dispatch and return
+	// the version output, proving the case "guard" branch at main.go:83.
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"guard", "version"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("run(guard version) = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "symguard") {
+		t.Errorf("stdout = %q, want symguard version output", stdout.String())
+	}
+}
