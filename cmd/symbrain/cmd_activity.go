@@ -23,11 +23,10 @@ const cliActivityFenceStart = "[UNTRUSTED_ACTIVITY_SUMMARY]"
 const cliActivityFenceEnd = "[/UNTRUSTED_ACTIVITY_SUMMARY]"
 
 func cmdActivity(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
-	format, args, err := extractFormat(args)
-	if err != nil {
-		fmt.Fprintf(stderr, "symbrain activity: %v\n", err)
-		return exitcodes.ExitNoInput
-	}
+	return cmdActivityWithFormat(args, stdout, stderr, output.FormatTable)
+}
+
+func cmdActivityWithFormat(args []string, stdout, stderr io.Writer, format output.Format) exitcodes.ExitCode {
 	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
 		printActivityUsage(stdout)
 		if len(args) == 0 {

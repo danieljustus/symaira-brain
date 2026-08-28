@@ -274,13 +274,40 @@ func (s *Store) Status() (Status, error) {
 	if err := s.db.Conn().QueryRow("SELECT COUNT(*) FROM activity_episodes WHERE expires_at > ?", now).Scan(&status.ActiveEpisodes); err != nil {
 		return Status{}, err
 	}
-	var earliest, latest sql.NullTime
+	var earliest, latest sql.NullString
 	if err := s.db.Conn().QueryRow("SELECT MIN(started_at), MAX(ended_at) FROM activity_segments WHERE expires_at > ?", now).Scan(&earliest, &latest); err != nil {
 		return Status{}, err
 	}
 	if earliest.Valid {
-		status.Earliest = &earliest.Time
-		status.Latest = &latest.Time
+		earliestTime, err := parseActivityTime(earliest.String)
+		if err != nil {
+			return Status{}, fmt.Errorf("parse earliest activity timestamp %q: %w", earliest.String, err)
+		}
+		latestTime, err := parseActivityTime(latest.String)
+		if err != nil {
+			return Status{}, fmt.Errorf("parse latest activity timestamp %q: %w", latest.String, err)
+		}
+		status.Earliest = &earliestTime
+		status.Latest = &latestTime
 	}
 	return status, nil
+}
+
+func parseActivityTime(raw string) (time.Time, error) {
+	layouts := []string{
+		"2006-01-02 15:04:05.999999999 -0700 MST",
+		"2006-01-02 15:04:05 -0700 MST",
+		"2006-01-02 15:04:05-07:00",
+		"2006-01-02 15:04:05",
+		time.RFC3339Nano,
+	}
+	var lastErr error
+	for _, layout := range layouts {
+		parsed, err := time.Parse(layout, raw)
+		if err == nil {
+			return parsed, nil
+		}
+		lastErr = err
+	}
+	return time.Time{}, lastErr
 }

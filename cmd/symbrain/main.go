@@ -74,7 +74,7 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "memory":
 		return cmdMemoryWithFormat(rest, stdout, stderr, format)
 	case "activity":
-		return cmdActivity(rest, stdout, stderr)
+		return cmdActivityWithFormat(rest, stdout, stderr, format)
 	case "audit":
 		return cmdAuditWithFormat(rest, stdout, stderr, format)
 	case "version":

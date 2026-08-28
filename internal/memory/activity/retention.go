@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/danieljustus/symaira-brain/internal/memory/db"
 )
 
 // Expire deletes rows whose configured expiry has passed. The operation is
@@ -21,17 +23,17 @@ func (s *Store) Expire(at ...time.Time) (RetentionResult, error) {
 		return RetentionResult{}, err
 	}
 	var result RetentionResult
-	if res, err := tx.Exec("DELETE FROM activity_episodes WHERE expires_at <= ?", now); err != nil {
+	if count, err := deleteCount(tx, "DELETE FROM activity_episodes WHERE expires_at <= ?", now); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Episodes = int(count)
+	} else {
+		result.Episodes = count
 	}
-	if res, err := tx.Exec("DELETE FROM activity_segments WHERE expires_at <= ?", now); err != nil {
+	if count, err := deleteCount(tx, "DELETE FROM activity_segments WHERE expires_at <= ?", now); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Segments = int(count)
+	} else {
+		result.Segments = count
 	}
 	if err := tx.Commit(); err != nil {
 		return RetentionResult{}, err
@@ -65,18 +67,18 @@ func (s *Store) DeleteEpisode(id string) (RetentionResult, error) {
 		return RetentionResult{}, err
 	}
 	result := RetentionResult{}
-	if res, err := tx.Exec("DELETE FROM activity_episodes WHERE id = ?", id); err != nil {
+	if count, err := deleteCount(tx, "DELETE FROM activity_episodes WHERE id = ?", id); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Episodes = int(count)
+	} else {
+		result.Episodes = count
 	}
 	for _, segmentID := range episode.SegmentIDs {
-		if res, err := tx.Exec("DELETE FROM activity_segments WHERE id = ?", segmentID); err != nil {
+		if count, err := deleteCount(tx, "DELETE FROM activity_segments WHERE id = ?", segmentID); err != nil {
 			_ = tx.Rollback()
 			return RetentionResult{}, err
-		} else if count, countErr := res.RowsAffected(); countErr == nil {
-			result.Segments += int(count)
+		} else {
+			result.Segments += count
 		}
 	}
 	if err := tx.Commit(); err != nil {
@@ -108,19 +110,19 @@ func (s *Store) ClearTimeRange(start, end time.Time) (RetentionResult, error) {
 		return RetentionResult{}, err
 	}
 	var result RetentionResult
-	if res, err := tx.Exec(`DELETE FROM activity_episodes
+	if count, err := deleteCount(tx, `DELETE FROM activity_episodes
 		WHERE ended_at > ? AND started_at < ?`, start.UTC(), end.UTC()); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Episodes = int(count)
+	} else {
+		result.Episodes = count
 	}
-	if res, err := tx.Exec(`DELETE FROM activity_segments
+	if count, err := deleteCount(tx, `DELETE FROM activity_segments
 		WHERE ended_at > ? AND started_at < ?`, start.UTC(), end.UTC()); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Segments = int(count)
+	} else {
+		result.Segments = count
 	}
 	if err := tx.Commit(); err != nil {
 		return RetentionResult{}, err
@@ -140,17 +142,17 @@ func (s *Store) ClearAll() (RetentionResult, error) {
 		return RetentionResult{}, err
 	}
 	var result RetentionResult
-	if res, err := tx.Exec("DELETE FROM activity_episodes"); err != nil {
+	if count, err := deleteCount(tx, "DELETE FROM activity_episodes"); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Episodes = int(count)
+	} else {
+		result.Episodes = count
 	}
-	if res, err := tx.Exec("DELETE FROM activity_segments"); err != nil {
+	if count, err := deleteCount(tx, "DELETE FROM activity_segments"); err != nil {
 		_ = tx.Rollback()
 		return RetentionResult{}, err
-	} else if count, countErr := res.RowsAffected(); countErr == nil {
-		result.Segments = int(count)
+	} else {
+		result.Segments = count
 	}
 	if err := tx.Commit(); err != nil {
 		return RetentionResult{}, err
@@ -163,6 +165,18 @@ func (s *Store) ClearAll() (RetentionResult, error) {
 
 // ClearAllActivity is an explicit alias for ClearAll.
 func (s *Store) ClearAllActivity() (RetentionResult, error) { return s.ClearAll() }
+
+func deleteCount(execer db.SQLExecer, query string, args ...any) (int, error) {
+	result, err := execer.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		return 0, nil
+	}
+	return int(count), nil
+}
 
 // ClearLastSession deletes the latest activity episode and its segment
 // provenance. A missing episode is a successful no-op.
