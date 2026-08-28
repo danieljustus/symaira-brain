@@ -151,90 +151,11 @@ func ComputeContentHash(content string) string {
 
 // saveMemoryExec is the shared implementation for SaveMemory and SaveMemoryTx.
 func saveMemoryExec(execer SQLExecer, m *Memory, quantizeBinary bool) error {
-	metadataJSON, err := json.Marshal(m.Metadata)
-	if err != nil {
-		return fmt.Errorf("failed to marshal metadata: %w", err)
+	now := time.Now().UTC()
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = now
 	}
-
-	embeddingJSON, err := json.Marshal(m.Embedding)
-	if err != nil {
-		return fmt.Errorf("failed to marshal embedding: %w", err)
-	}
-
-	embeddingDim := len(m.Embedding)
-	lshHash, err := ComputeLSH(m.Embedding)
-	if err != nil {
-		return err
-	}
-	var embBin []byte
-	if quantizeBinary && len(m.Embedding) > 0 {
-		embBin = BinarizeVector(m.Embedding)
-	}
-
-	// Compute content hash if not already set.
-	contentHash := m.ContentHash
-	if contentHash == "" {
-		contentHash = ComputeContentHash(m.Content)
-	}
-
-	status := m.ConsolidationStatus
-	if status == "" {
-		status = "raw"
-	}
-	reviewStatus := m.ReviewStatus
-	if reviewStatus == "" {
-		reviewStatus = ReviewApproved
-	}
-	decayFactor := m.DecayFactor
-	if decayFactor <= 0 || decayFactor > 1 {
-		decayFactor = 1.0
-	}
-	var retiredAt sql.NullTime
-	if m.RetiredAt != nil {
-		retiredAt.Time = m.RetiredAt.UTC()
-		retiredAt.Valid = true
-	}
-	var consolidatedInto sql.NullString
-	if m.ConsolidatedIntoID != "" {
-		consolidatedInto.String = m.ConsolidatedIntoID
-		consolidatedInto.Valid = true
-	}
-	var validFrom, validTo sql.NullTime
-	if m.ValidFrom != nil {
-		validFrom.Time = *m.ValidFrom
-		validFrom.Valid = true
-	} else {
-		now := time.Now().UTC()
-		validFrom.Time = now
-		validFrom.Valid = true
-	}
-	if m.ValidTo != nil {
-		validTo.Time = *m.ValidTo
-		validTo.Valid = true
-	}
-	var supersededBy sql.NullString
-	if m.SupersededBy != "" {
-		supersededBy.String = m.SupersededBy
-		supersededBy.Valid = true
-	}
-
-	tier := m.Tier
-	if tier == "" {
-		tier = "long_term"
-	}
-	accessCount := m.AccessCount
-	if accessCount == 0 {
-		accessCount = 1
-	}
-	var expiresAt sql.NullTime
-	if m.ExpiresAt != nil {
-		// Normalize to UTC: the persistence layer stores expires_at as
-		// text and the working-memory queries compare it lexicographically
-		// against datetime('now') (UTC). Storing local time (+0200 etc.)
-		// made expired working memories compare as not-yet-expired.
-		expiresAt.Time = m.ExpiresAt.UTC()
-		expiresAt.Valid = true
-	}
+	m.UpdatedAt = now
 
 	query := `INSERT INTO memories (id, content, scope, metadata, embedding, embedding_binary, embedding_dim, embedding_source, embedding_model, embedding_quantization, content_hash, lsh_hash, created_at, updated_at, created_by, updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, importance, valid_from, valid_to, superseded_by, tier, expires_at, access_count, last_access, prev_access, review_status, kind, decay_factor, retired_at)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -267,24 +188,11 @@ func saveMemoryExec(execer SQLExecer, m *Memory, quantizeBinary bool) error {
 			decay_factor=excluded.decay_factor,
 			retired_at=excluded.retired_at`
 
-	now := time.Now().UTC()
-	if m.CreatedAt.IsZero() {
-		m.CreatedAt = now
+	args, err := MemoryInsertArgs(m, now, quantizeBinary)
+	if err != nil {
+		return err
 	}
-	m.UpdatedAt = now
-
-	var lastAccess sql.NullTime
-	if m.LastAccess != nil {
-		lastAccess.Time = *m.LastAccess
-		lastAccess.Valid = true
-	}
-	var prevAccess sql.NullTime
-	if m.PrevAccess != nil {
-		prevAccess.Time = *m.PrevAccess
-		prevAccess.Valid = true
-	}
-
-	_, err = execer.Exec(query, m.ID, m.Content, m.Scope, string(metadataJSON), string(embeddingJSON), embBin, embeddingDim, m.EmbeddingSource, m.EmbeddingModel, m.EmbeddingQuantization, contentHash, lshHash, m.CreatedAt, m.UpdatedAt, m.CreatedBy, m.UpdatedBy, m.CreatedSession, m.UpdatedSession, status, consolidatedInto, m.Importance, validFrom, validTo, supersededBy, tier, expiresAt, accessCount, lastAccess, prevAccess, reviewStatus, m.Kind, decayFactor, retiredAt)
+	_, err = execer.Exec(query, args...)
 	return err
 }
 
@@ -422,15 +330,6 @@ func populateMemoryFields(m *Memory, metaStr string, consolidatedInto sql.NullSt
 	m.SupersededBy = supersededBy.String
 	return nil
 }
-
-// memoryColumns is the full 30-column SELECT list used by scanMemory.
-// Any change must be mirrored in scanMemory.
-const memoryColumns = "id, content, scope, metadata, embedding, embedding_binary, embedding_source, embedding_model, embedding_quantization, created_at, updated_at, created_by, updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, importance, valid_from, valid_to, superseded_by, tier, expires_at, access_count, last_access, prev_access, review_status, kind, decay_factor, retired_at"
-
-// memoryColumnsLite is the 25-column SELECT list used by scanMemoryLite
-// (omits embedding, embedding_binary, embedding_source, embedding_model, embedding_quantization).
-// Any change must be mirrored in scanMemoryLite.
-const memoryColumnsLite = "id, content, scope, metadata, created_at, updated_at, created_by, updated_by, created_session, updated_session, consolidation_status, consolidated_into_id, importance, valid_from, valid_to, superseded_by, tier, expires_at, access_count, last_access, prev_access, review_status, kind, decay_factor, retired_at"
 
 // scanMemory scans a full Memory row (including embedding) from *sql.Rows.
 func scanMemory(rows *sql.Rows) (*Memory, error) {
