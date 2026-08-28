@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/danieljustus/symaira-brain/internal/memory/activity"
 	"github.com/danieljustus/symaira-brain/internal/memory/config"
 	"github.com/danieljustus/symaira-brain/internal/memory/conflict"
 	"github.com/danieljustus/symaira-brain/internal/memory/db"
@@ -42,6 +43,7 @@ type Server struct {
 	rateLimiter      *RateLimiter
 	workingMemoryTTL time.Duration
 	bindAddr         string
+	activityStore    *activity.Store
 
 	// clientMu guards the MCP client attribution state below.
 	clientMu sync.Mutex
@@ -73,6 +75,14 @@ func NewServer(database *db.DB, jwtProvider *security.JWTProvider, version strin
 	if workingTTL == 0 {
 		workingTTL = 24 * time.Hour
 	}
+	activityStore, err := activity.NewStoreFromConfig(database, cfg)
+	if err != nil {
+		// The legacy constructor cannot return an error without breaking the
+		// HTTP server API. Keep activity tools unavailable rather than exposing
+		// a partially initialized store, but make the initialization failure
+		// observable to operators.
+		slog.Error("initialize activity store", "err", err)
+	}
 
 	return &Server{
 		service:          service,
@@ -85,6 +95,7 @@ func NewServer(database *db.DB, jwtProvider *security.JWTProvider, version strin
 		workingMemoryTTL: workingTTL,
 		bindAddr:         "127.0.0.1:8787",
 		overrideClientID: cfg.MCP.ClientID,
+		activityStore:    activityStore,
 	}
 }
 

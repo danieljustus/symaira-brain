@@ -73,6 +73,8 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return cmdSyncWithFormat(rest, stdout, stderr, format)
 	case "memory":
 		return cmdMemoryWithFormat(rest, stdout, stderr, format)
+	case "activity":
+		return cmdActivity(rest, stdout, stderr)
 	case "audit":
 		return cmdAuditWithFormat(rest, stdout, stderr, format)
 	case "version":
@@ -127,7 +129,7 @@ func peekCommand(args []string) string {
 
 func isOutputCommand(command string) bool {
 	switch command {
-	case "version", "sync", "memory", "profile", "harness", "audit", "doctor", "usage":
+	case "version", "sync", "memory", "activity", "profile", "harness", "audit", "doctor", "usage":
 		return true
 	default:
 		return false
@@ -140,7 +142,7 @@ func printUsage(w io.Writer) {
 Usage:
   symbrain <command> [flags]
 
-Global output flags (version, sync, memory, profile, harness, audit, usage, and doctor):
+Global output flags (version, sync, memory, activity, profile, harness, audit, usage, and doctor):
   --output table|json  Output format (default: table)
   --json               Shorthand for --output json
 
@@ -157,6 +159,7 @@ Commands:
   uninstall   Remove symbrain from a harness
   sync        Sync instructions and skills to harnesses
   memory      Operate the embedded memory store (sync with a remote)
+  activity    Read bounded activity summaries with explicit profile access
   audit       Inspect the audit log
   vault       Passthrough to symvault
   guard       Absorbed symguard commands (decide, scan, doctor, grants, version)
