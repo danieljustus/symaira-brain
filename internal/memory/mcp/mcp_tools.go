@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -652,7 +653,15 @@ func (s *Server) handleMemoryList(ctx context.Context, input json.RawMessage) (a
 		if err != nil {
 			return nil, fmt.Errorf("invalid arguments for 'memory_list': 'as_of' must be RFC3339: %w", err)
 		}
-		memories, err := s.service.ListMemoriesAsOf(args.Scope, asOf, limit)
+		var cursor *db.MemoryCursor
+		if args.Cursor != "" {
+			c, err := decodeMemoryCursor(args.Cursor)
+			if err != nil {
+				return nil, fmt.Errorf("invalid arguments for 'memory_list': invalid cursor: %w", err)
+			}
+			cursor = &db.MemoryCursor{Timestamp: c.Timestamp, ID: c.ID}
+		}
+		memories, err := s.service.ListMemoriesAsOfWithCursor(args.Scope, asOf, cursor, limit+1)
 		if err != nil {
 			return mcpError("Failed to list memories as of the given time", err)
 		}
@@ -661,19 +670,9 @@ func (s *Server) handleMemoryList(ctx context.Context, input json.RawMessage) (a
 			return "No memories were valid at that point in time.", nil
 		}
 
-		// Apply cursor-based pagination
-		if args.Cursor != "" {
-			cursorTime, err := parseCursor(args.Cursor)
-			if err != nil {
-				return nil, fmt.Errorf("invalid arguments for 'memory_list': invalid cursor: %w", err)
-			}
-			var filtered []*db.Memory
-			for _, m := range memories {
-				if m.CreatedAt.Before(cursorTime) {
-					filtered = append(filtered, m)
-				}
-			}
-			memories = filtered
+		atEnd := len(memories) <= limit
+		if !atEnd {
+			memories = memories[:limit]
 		}
 
 		// Apply payload size cap
@@ -681,7 +680,7 @@ func (s *Server) handleMemoryList(ctx context.Context, input json.RawMessage) (a
 			memories = truncatePayloadByBytes(memories, args.MaxPayloadBytes)
 		}
 
-		pageInfo := buildMemoryListPage(memories, len(memories) < limit)
+		pageInfo := buildMemoryListPage(memories, atEnd)
 		_, _ = s.service.LogQuery(s.attributionActor(), args.Scope, "", "memory_list", "as_of", args.AsOf, time.Since(startTime).Milliseconds())
 		data, _ := json.MarshalIndent(pageInfo, "", "  ")
 		return string(data), nil
@@ -693,28 +692,38 @@ func (s *Server) handleMemoryList(ctx context.Context, input json.RawMessage) (a
 		ClientID:        args.ClientID,
 	}
 
-	var queryText string
-	memories, err := s.service.ListWithPolicy(args.Scope, limit, policyFilter)
+	var cursor *db.MemoryCursor
+	if args.Cursor != "" {
+		c, err := decodeMemoryCursor(args.Cursor)
+		if err != nil {
+			return nil, fmt.Errorf("invalid arguments for 'memory_list': invalid cursor: %w", err)
+		}
+		cursor = &db.MemoryCursor{Timestamp: c.Timestamp, ID: c.ID}
+	}
+
+	memories, err := s.service.ListMemoriesLiteWithCursor(args.Scope, cursor, limit+1)
 	if err != nil {
 		return mcpError("Failed to list memories", err)
 	}
 
-	if args.Cursor != "" {
-		cursorTime, err := parseCursor(args.Cursor)
-		if err != nil {
-			return nil, fmt.Errorf("invalid arguments for 'memory_list': invalid cursor: %w", err)
-		}
+	// Apply policy filter in-memory (matches existing ListWithPolicy behavior).
+	if policyFilter.MaxSensitivity != "" || policyFilter.MinSharingLevel != "" || policyFilter.ClientID != "" {
 		var filtered []*db.Memory
 		for _, m := range memories {
-			if m.CreatedAt.Before(cursorTime) {
+			if db.PassesPolicyFilter(m, policyFilter) {
 				filtered = append(filtered, m)
 			}
 		}
 		memories = filtered
 	}
 
+	atEnd := len(memories) <= limit
+	if !atEnd {
+		memories = memories[:limit]
+	}
+
 	if len(memories) == 0 {
-		_, _ = s.service.LogQuery(s.attributionActor(), args.Scope, "", "memory_list", queryText, args.Scope, time.Since(startTime).Milliseconds())
+		_, _ = s.service.LogQuery(s.attributionActor(), args.Scope, "", "memory_list", "", args.Scope, time.Since(startTime).Milliseconds())
 		return "Memory store is empty.", nil
 	}
 
@@ -723,8 +732,8 @@ func (s *Server) handleMemoryList(ctx context.Context, input json.RawMessage) (a
 		memories = truncatePayloadByBytes(memories, args.MaxPayloadBytes)
 	}
 
-	pageInfo := buildMemoryListPage(memories, len(memories) < limit)
-	_, _ = s.service.LogQuery(s.attributionActor(), args.Scope, "", "memory_list", queryText, args.Scope, time.Since(startTime).Milliseconds())
+	pageInfo := buildMemoryListPage(memories, atEnd)
+	_, _ = s.service.LogQuery(s.attributionActor(), args.Scope, "", "memory_list", "", args.Scope, time.Since(startTime).Milliseconds())
 
 	data, _ := json.MarshalIndent(pageInfo, "", "  ")
 	return string(data), nil
@@ -1059,11 +1068,59 @@ func extractCursorFromResults[T interface{ GetCreatedAt() time.Time }](results [
 }
 
 // parseCursor parses a cursor string into a time.Time for pagination.
+// It supports both the legacy timestamp-only format and the new composite
+// (timestamp, id) format for backward compatibility.
 func parseCursor(cursor string) (time.Time, error) {
 	if cursor == "" {
 		return time.Time{}, nil
 	}
-	return time.Parse(time.RFC3339Nano, cursor)
+	_, err := decodeMemoryCursor(cursor)
+	if err != nil {
+		return time.Time{}, err
+	}
+	// For callers that only need the timestamp, extract it.
+	c, _ := decodeMemoryCursor(cursor)
+	return c.Timestamp, nil
+}
+
+// memoryCursor is the opaque pagination cursor for memory_list.
+// It is encoded as base64(JSON{"ts":"<RFC3339Nano>","id":"<memory-id>"}).
+type memoryCursor struct {
+	Timestamp time.Time `json:"ts"`
+	ID        string    `json:"id"`
+}
+
+// encodeMemoryCursor returns an opaque cursor string for the given memory.
+func encodeMemoryCursor(ts time.Time, id string) string {
+	c := memoryCursor{Timestamp: ts, ID: id}
+	b, _ := json.Marshal(c)
+	return base64.StdEncoding.EncodeToString(b)
+}
+
+// decodeMemoryCursor accepts both the new composite cursor and the legacy
+// timestamp-only cursor. Legacy cursors are raw RFC3339Nano timestamps or
+// base64-encoded RFC3339Nano timestamps (as used by the HTTP sync endpoint).
+func decodeMemoryCursor(cursor string) (memoryCursor, error) {
+	var c memoryCursor
+	if cursor == "" {
+		return c, nil
+	}
+	// Try new composite format first.
+	if b, err := base64.StdEncoding.DecodeString(cursor); err == nil {
+		if json.Unmarshal(b, &c) == nil && c.ID != "" {
+			return c, nil
+		}
+		// Might be a base64-encoded legacy timestamp.
+		if ts, err := time.Parse(time.RFC3339Nano, string(b)); err == nil {
+			return memoryCursor{Timestamp: ts}, nil
+		}
+	}
+	// Legacy: raw RFC3339Nano timestamp.
+	ts, err := time.Parse(time.RFC3339Nano, cursor)
+	if err != nil {
+		return c, err
+	}
+	return memoryCursor{Timestamp: ts}, nil
 }
 
 // memoryListPage is the paginated response for memory_list.
@@ -1077,7 +1134,8 @@ type memoryListPage struct {
 func buildMemoryListPage(memories []*db.Memory, atEnd bool) memoryListPage {
 	page := memoryListPage{Memories: memories}
 	if len(memories) > 0 && !atEnd {
-		page.NextCursor = memories[len(memories)-1].CreatedAt.UTC().Format(time.RFC3339Nano)
+		last := memories[len(memories)-1]
+		page.NextCursor = encodeMemoryCursor(last.CreatedAt, last.ID)
 	}
 	page.Truncated = !atEnd
 	return page

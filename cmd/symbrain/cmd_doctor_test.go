@@ -452,6 +452,51 @@ func TestCmdDoctor_HumanOutput_ReportsHarnessBindings(t *testing.T) {
 	}
 }
 
+func TestCmdDoctor_HumanOutput_ReportsSupersededBesideSymbrain(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake binary is a POSIX shell script")
+	}
+	home := harnessSandbox(t)
+	isolatedPATH(t, t.TempDir())
+
+	h := harnessByName(t, "claude")
+	path, err := h.ConfigPath()
+	if err != nil {
+		t.Fatalf("ConfigPath: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll: %v", err)
+	}
+	doc := harness.Empty(h)
+	doc.SetServer(harness.ServerName, harness.NewEntry("personal"))
+	doc.SetServer("symmemory", harness.Entry{Command: "/opt/homebrew/bin/symmemory", Args: []string{"serve"}})
+	data, err := doc.Marshal()
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	writeStubProfileFile(t, home, "personal")
+
+	var stdout, stderr bytes.Buffer
+	code := cmdDoctor(nil, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("cmdDoctor() = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	out := stdout.String()
+	if !strings.Contains(out, "superseded core entries registered beside symbrain") {
+		t.Errorf("stdout missing superseded-core warning beside symbrain: %q", out)
+	}
+	if !strings.Contains(out, "symmemory") {
+		t.Errorf("stdout missing the superseded server name symmemory: %q", out)
+	}
+	if !strings.Contains(out, "run `symbrain install` to migrate") {
+		t.Errorf("stdout missing the migration hint: %q", out)
+	}
+}
+
 func TestCmdDoctor_JSON_HarnessesIncludeProfileBindingFields(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")

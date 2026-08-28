@@ -298,6 +298,14 @@ func (s *MemoryService) ListMemoriesAsOf(scope string, asOf time.Time, limit int
 	return s.db.ListMemoriesAsOf(scope, asOf, 0, limit)
 }
 
+func (s *MemoryService) ListMemoriesAsOfWithCursor(scope string, asOf time.Time, cursor *db.MemoryCursor, limit int) ([]*db.Memory, error) {
+	return s.db.ListMemoriesAsOfWithCursor(scope, asOf, cursor, limit)
+}
+
+func (s *MemoryService) ListMemoriesLiteWithCursor(scope string, cursor *db.MemoryCursor, limit int) ([]*db.Memory, error) {
+	return s.db.ListMemoriesLiteWithCursor(scope, cursor, limit)
+}
+
 func (s *MemoryService) GetMemory(id string) (*db.Memory, error) {
 	return s.db.GetMemory(id)
 }
