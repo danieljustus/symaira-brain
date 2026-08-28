@@ -15,21 +15,25 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/skills/fsutil"
 	"github.com/danieljustus/symaira-brain/internal/skills/skill"
 	"github.com/danieljustus/symaira-brain/internal/skills/variant"
 	"gopkg.in/yaml.v3"
 )
 
-type Target string
+// Target is an alias of the registry-owned skill target identity. The
+// compatibility constants keep existing skills APIs source-compatible while
+// ensuring target names are declared only in internal/harness.
+type Target = harness.SkillTarget
 
 const (
-	TargetOpenCode    Target = "opencode"
-	TargetClaude      Target = "claude"
-	TargetCodex       Target = "codex"
-	TargetHermes      Target = "hermes"
-	TargetAntigravity Target = "antigravity"
-	TargetOpenClaw    Target = "openclaw"
+	TargetOpenCode    Target = harness.SkillTargetOpenCode
+	TargetClaude      Target = harness.SkillTargetClaude
+	TargetCodex       Target = harness.SkillTargetCodex
+	TargetHermes      Target = harness.SkillTargetHermes
+	TargetAntigravity Target = harness.SkillTargetAntigravity
+	TargetOpenClaw    Target = harness.SkillTargetOpenClaw
 )
 
 // init publishes the target registry to the skill package, which validates
@@ -164,8 +168,9 @@ func overlayDir(target Target) string {
 	return string(target)
 }
 
-// Targets is the single registry of all supported harness targets.
-var Targets = []TargetSpec{
+// builtInTargetSpecs contains target-specific rendering behavior. Harness
+// identity and capability membership remain owned by internal/harness.
+var builtInTargetSpecs = []TargetSpec{
 	{
 		Name:        TargetOpenCode,
 		DisplayName: "OpenCode",
@@ -275,6 +280,26 @@ var Targets = []TargetSpec{
 		},
 		Quirks: "Managed skills load from ~/.openclaw/skills (default state dir, docs: docs.openclaw.ai/tools/skills); also reads ~/.agents/skills and <workspace>/skills",
 	},
+}
+
+// Targets is derived from the harness registry. Runtime custom targets are
+// appended to this slice by RegisterCustomTargets and are never discarded.
+var Targets = buildTargets()
+
+func buildTargets() []TargetSpec {
+	targets := make([]TargetSpec, 0, len(builtInTargetSpecs))
+	for _, h := range harness.All {
+		if h.SkillTarget == harness.SkillTargetNone {
+			continue
+		}
+		for _, spec := range builtInTargetSpecs {
+			if spec.Name == Target(h.SkillTarget) {
+				targets = append(targets, spec)
+				break
+			}
+		}
+	}
+	return targets
 }
 
 // LookupSpec returns the TargetSpec for the given target and a boolean

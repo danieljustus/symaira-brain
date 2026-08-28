@@ -197,6 +197,9 @@ func TestInstallThenUninstall_RoundTripsToOriginalConfig(t *testing.T) {
 	}
 
 	for _, h := range harness.All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		t.Run(string(h.Name), func(t *testing.T) {
 			harnessSandbox(t)
 

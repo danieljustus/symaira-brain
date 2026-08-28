@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/danieljustus/symaira-brain/internal/harness"
 )
 
 // Target describes where an adapter writes its output file and how to
@@ -24,6 +26,32 @@ type Target struct {
 	// instructions.Source and the path to the project directory (for
 	// relative references).
 	Render func(content, projectDir string) string
+}
+
+// targetsByCapability names the concrete instruction implementations. The
+// harness registry owns which harness selects each implementation.
+var targetsByCapability = map[harness.InstructionAdapter]Target{
+	harness.InstructionAdapterAgents: AgentsTarget,
+	harness.InstructionAdapterClaude: ClaudeTarget,
+	harness.InstructionAdapterCursor: CursorTarget,
+	harness.InstructionAdapterGemini: GeminiTarget,
+}
+
+// TargetsForHarnesses derives the sync adapter map from the harness registry.
+// A missing adapter is deliberate and leaves the harness on sync's skipped
+// path; an unknown capability is a programmer error and is ignored here so a
+// malformed registry cannot make a sync invocation panic.
+func TargetsForHarnesses() map[string]Target {
+	targets := make(map[string]Target)
+	for _, h := range harness.All {
+		if h.InstructionAdapter == harness.InstructionAdapterNone {
+			continue
+		}
+		if target, ok := targetsByCapability[h.InstructionAdapter]; ok {
+			targets[string(h.Name)] = target
+		}
+	}
+	return targets
 }
 
 // Sync writes the adapter's output file into the resolved path under
