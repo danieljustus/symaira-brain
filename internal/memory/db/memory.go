@@ -743,28 +743,40 @@ func (db *DB) GetMemoriesSinceCursor(since time.Time, limit int, includeEmbeddin
 // should pass the last row's UpdatedAt and ID as the new since and lastID
 // so no rows are lost when timestamps collide.
 func (db *DB) GetMemoriesSinceCursorID(since time.Time, lastID string, limit int, includeEmbeddings ...bool) ([]*Memory, error) {
+	includeEmb := len(includeEmbeddings) > 0 && includeEmbeddings[0]
+	return db.getMemoriesSinceCursorID(since, lastID, limit, includeEmb, false)
+}
+
+// GetMemoriesSinceCursorIDForSync returns local changes eligible for sync.
+// Memories explicitly marked sync_exclude=true remain local (for example,
+// staged activity observations) and are intentionally omitted from the push
+// stream. The keyset cursor still advances over eligible rows normally.
+func (db *DB) GetMemoriesSinceCursorIDForSync(since time.Time, lastID string, limit int, includeEmbeddings ...bool) ([]*Memory, error) {
+	includeEmb := len(includeEmbeddings) > 0 && includeEmbeddings[0]
+	return db.getMemoriesSinceCursorID(since, lastID, limit, includeEmb, true)
+}
+
+func (db *DB) getMemoriesSinceCursorID(since time.Time, lastID string, limit int, includeEmb, excludeSync bool) ([]*Memory, error) {
 	if limit <= 0 {
 		limit = 50000
 	}
-	includeEmb := len(includeEmbeddings) > 0 && includeEmbeddings[0]
-
-	var query string
-	var args []any
-	if lastID == "" {
-		if includeEmb {
-			query = "SELECT " + memoryColumns + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC, id ASC LIMIT ?"
-		} else {
-			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE updated_at > ? ORDER BY updated_at ASC, id ASC LIMIT ?"
-		}
-		args = []any{since, limit}
-	} else {
-		if includeEmb {
-			query = "SELECT " + memoryColumns + " FROM memories WHERE updated_at > ? OR (updated_at = ? AND id > ?) ORDER BY updated_at ASC, id ASC LIMIT ?"
-		} else {
-			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE updated_at > ? OR (updated_at = ? AND id > ?) ORDER BY updated_at ASC, id ASC LIMIT ?"
-		}
-		args = []any{since, since, lastID, limit}
+	columns := memoryColumnsLite
+	if includeEmb {
+		columns = memoryColumns
 	}
+	predicate := "updated_at > ?"
+	if lastID != "" {
+		predicate = "(updated_at > ? OR (updated_at = ? AND id > ?))"
+	}
+	if excludeSync {
+		predicate = "(" + predicate + ") AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true'"
+	}
+	query := "SELECT " + columns + " FROM memories WHERE " + predicate + " ORDER BY updated_at ASC, id ASC LIMIT ?"
+	args := []any{since}
+	if lastID != "" {
+		args = append(args, since, lastID)
+	}
+	args = append(args, limit)
 
 	rows, err := db.conn.Query(query, args...)
 	if err != nil {
@@ -784,7 +796,7 @@ func (db *DB) GetMemoriesSinceCursorID(since time.Time, lastID string, limit int
 		}
 		memories = append(memories, m)
 	}
-	return memories, nil
+	return memories, rows.Err()
 }
 
 // GetRawMemories returns all memories with consolidation_status = 'raw'.
