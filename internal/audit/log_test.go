@@ -1468,3 +1468,47 @@ func TestTailEntriesBounded_LatestDegradationsIntegration(t *testing.T) {
 		t.Errorf("expected both alpha and beta profiles, got %v", profiles)
 	}
 }
+
+func TestTailEntriesBounded_ChunkBoundaryPreservesLine(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "audit.jsonl")
+	var content strings.Builder
+	appendEntry := func(session, tool string) {
+		data, err := json.Marshal(Entry{
+			SessionID: session,
+			Profile:   "profile",
+			Server:    "memory",
+			Tool:      tool,
+			Status:    "degraded",
+			Reason:    strings.Repeat("x", 256),
+		})
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		content.Write(data)
+		content.WriteByte('\n')
+	}
+
+	for i := 0; i < 500; i++ {
+		appendEntry("old", fmt.Sprintf("old-%d", i))
+	}
+	for i := 0; i < 700; i++ {
+		appendEntry("latest", fmt.Sprintf("latest-%d", i))
+	}
+	if err := os.WriteFile(path, []byte(strings.TrimSuffix(content.String(), "\n")), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := tailEntriesBounded(path, 0, nil)
+	if err != nil {
+		t.Fatalf("tailEntriesBounded: %v", err)
+	}
+	if len(got) != 700 {
+		t.Fatalf("expected 700 latest-session entries, got %d", len(got))
+	}
+	for i, entry := range got {
+		want := fmt.Sprintf("latest-%d", i)
+		if entry.Tool != want {
+			t.Errorf("entry %d tool = %q, want %q", i, entry.Tool, want)
+		}
+	}
+}

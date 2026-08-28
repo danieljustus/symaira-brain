@@ -421,96 +421,80 @@ func tailEntriesBounded(path string, limit int, filter func(Entry) bool) ([]Entr
 		return nil, nil
 	}
 
-	const chunkSize = 64 * 1024
-	var incomplete []byte // trailing partial line from the previous (later) chunk
-
+	var carry []byte // prefix of a line that continues into the next chunk
 	var latestSession string
 	var results []Entry // collected in reverse chronological order
+	consume := func(line []byte) bool {
+		if len(line) == 0 {
+			return false
+		}
+
+		var entry Entry
+		if err := json.Unmarshal(line, &entry); err != nil {
+			return false
+		}
+
+		if latestSession == "" {
+			if entry.SessionID == "" {
+				return false
+			}
+			latestSession = entry.SessionID
+		}
+
+		if entry.SessionID != latestSession {
+			return true
+		}
+		if filter == nil || filter(entry) {
+			results = append(results, entry)
+			return limit > 0 && len(results) >= limit
+		}
+		return false
+	}
 
 	offset := size
 	for offset > 0 {
-		readSize := chunkSize
-		if offset < int64(readSize) {
-			readSize = int(offset)
+		readSize := int64(tailChunkSize)
+		if offset < readSize {
+			readSize = offset
 		}
-		offset -= int64(readSize)
+		offset -= readSize
 
-		chunk := make([]byte, readSize)
+		chunk := make([]byte, int(readSize))
 		if _, err := f.ReadAt(chunk, offset); err != nil {
 			return nil, err
 		}
 
-		// Prepend any incomplete line from the next (later) chunk.
-		if len(incomplete) > 0 {
-			chunk = append(incomplete, chunk...)
-			incomplete = nil
-		}
-
-		// Split on newlines. The last element is incomplete if the chunk
-		// (after prepending) does not end with '\n'.
-		var lines [][]byte
-		start := 0
-		for i := 0; i < len(chunk); i++ {
-			if chunk[i] == '\n' {
-				lines = append(lines, chunk[start:i])
-				start = i + 1
-			}
-		}
-		if start < len(chunk) {
-			incomplete = chunk[start:]
+		// The first bytes of the later chunk may be a line fragment. Append
+		// that fragment to this chunk so the line is decoded exactly once.
+		if len(carry) > 0 {
+			chunk = append(chunk, carry...)
+			carry = nil
 		}
 
 		// Process lines in reverse order (most recent first).
-		for i := len(lines) - 1; i >= 0; i-- {
-			line := lines[i]
-			if len(line) == 0 {
+		lineEnd := len(chunk)
+		for i := len(chunk) - 1; i >= 0; i-- {
+			if chunk[i] != '\n' {
 				continue
 			}
-
-			var entry Entry
-			if err := json.Unmarshal(line, &entry); err != nil {
-				continue
-			}
-
-			if latestSession == "" {
-				if entry.SessionID != "" {
-					latestSession = entry.SessionID
-				} else {
-					continue
-				}
-			}
-
-			if entry.SessionID != latestSession {
-				// Completed the latest session; return in chronological order.
+			if consume(chunk[i+1 : lineEnd]) {
 				reverseEntries(results)
 				return results, nil
 			}
+			lineEnd = i
+		}
 
-			if filter == nil || filter(entry) {
-				results = append(results, entry)
-				if limit > 0 && len(results) >= limit {
-					reverseEntries(results)
-					return results, nil
-				}
-			}
+		// Keep the prefix before the earliest newline for the preceding
+		// chunk. At offset zero it is the complete first line.
+		if lineEnd > 0 {
+			carry = append([]byte(nil), chunk[:lineEnd]...)
 		}
 	}
 
-	// Process any remaining incomplete line (only possible for the first
-	// chunk when the file does not end with '\n').
-	if len(incomplete) > 0 {
-		var entry Entry
-		if err := json.Unmarshal(incomplete, &entry); err == nil {
-			if latestSession == "" {
-				if entry.SessionID != "" {
-					latestSession = entry.SessionID
-				}
-			} else if entry.SessionID == latestSession {
-				if filter == nil || filter(entry) {
-					results = append(results, entry)
-				}
-			}
-		}
+	if len(carry) > 0 && consume(carry) {
+		// The limit was reached while processing the earliest line.
+		reverseEntries(results)
+		return results, nil
 	}
 
 	reverseEntries(results)
