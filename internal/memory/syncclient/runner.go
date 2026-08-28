@@ -196,27 +196,64 @@ func plainPull(ctx context.Context, client *Client, opts Options, since time.Tim
 	}
 }
 
+// pushClient is the subset of Client used by the push paths. It exists so
+// tests can supply a fake that records batch counts without spinning up an
+// HTTP server.
+type pushClient interface {
+	Apply(ctx context.Context, memories []*db.Memory, deleted []db.DeletedMemory) (*ApplyResult, error)
+	RelayPush(ctx context.Context, blobs []db.RelayBlob) (*RelayPushResult, error)
+}
+
+// pushBatchSize bounds each push request so memory use and network payload
+// stay independent of total pending changes. It is kept well under the 1 MiB
+// request-body cap enforced by the remote memory API (#350) even when relay
+// blobs are base64-wrapped and encrypted.
+const pushBatchSize = 200
+
 // plainPush sends local changes since the cursor and returns the newest
 // local change timestamp sent.
-func plainPush(ctx context.Context, client *Client, opts Options, since time.Time, res *Result) (time.Time, error) {
-	memories, err := opts.DB.GetMemoriesSinceCursor(since, 0)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("read local changes: %w", err)
+func plainPush(ctx context.Context, client pushClient, opts Options, since time.Time, res *Result) (time.Time, error) {
+	var localMax time.Time
+	memSince := since
+	delSince := since
+	var memLastID string
+	var delLastID string
+
+	for {
+		memories, err := opts.DB.GetMemoriesSinceCursorID(memSince, memLastID, pushBatchSize)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("read local changes: %w", err)
+		}
+		deleted, err := opts.DB.GetDeletedSinceCursorID(delSince, delLastID, pushBatchSize)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("read local tombstones: %w", err)
+		}
+		if len(memories) == 0 && len(deleted) == 0 {
+			return localMax, nil
+		}
+		applied, err := client.Apply(ctx, memories, deleted)
+		if err != nil {
+			return time.Time{}, err
+		}
+		res.PushedMemories += applied.Applied
+		res.PushedDeletes += applied.Deleted
+		batchMax := maxLocalChangeTs(memories, deleted)
+		if batchMax.After(localMax) {
+			localMax = batchMax
+		}
+		if len(memories) > 0 {
+			memSince = memories[len(memories)-1].UpdatedAt
+			memLastID = memories[len(memories)-1].ID
+		}
+		if len(deleted) > 0 {
+			delSince = deleted[len(deleted)-1].DeletedAt
+			delLastID = deleted[len(deleted)-1].ID
+		}
+		if len(memories) < pushBatchSize && len(deleted) < pushBatchSize {
+			break
+		}
 	}
-	deleted, err := opts.DB.GetDeletedSince(since)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("read local tombstones: %w", err)
-	}
-	if len(memories) == 0 && len(deleted) == 0 {
-		return time.Time{}, nil
-	}
-	applied, err := client.Apply(ctx, memories, deleted)
-	if err != nil {
-		return time.Time{}, err
-	}
-	res.PushedMemories = applied.Applied
-	res.PushedDeletes = applied.Deleted
-	return maxLocalChangeTs(memories, deleted), nil
+	return localMax, nil
 }
 
 // relayPayload is the plaintext carried inside an encrypted relay blob.
@@ -296,42 +333,65 @@ func applyRelayBlob(engine *security.CryptoEngine, opts Options, b db.RelayBlob,
 
 // relayPush encrypts local changes into blobs and stores them on the remote
 // relay, returning the newest local change timestamp sent.
-func relayPush(ctx context.Context, client *Client, opts Options, since time.Time, res *Result) (time.Time, error) {
-	memories, err := opts.DB.GetMemoriesSinceCursor(since, 0)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("read local changes: %w", err)
-	}
-	deleted, err := opts.DB.GetDeletedSince(since)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("read local tombstones: %w", err)
-	}
-	if len(memories) == 0 && len(deleted) == 0 {
-		return time.Time{}, nil
-	}
+func relayPush(ctx context.Context, client pushClient, opts Options, since time.Time, res *Result) (time.Time, error) {
+	var localMax time.Time
+	memSince := since
+	delSince := since
+	var memLastID string
+	var delLastID string
 
 	engine := security.NewCryptoEngine()
-	blobs := make([]db.RelayBlob, 0, len(memories)+len(deleted))
-	for _, m := range memories {
-		blob, err := encryptRelay(engine, relayPayload{Memory: m}, opts.Passphrase)
+	for {
+		memories, err := opts.DB.GetMemoriesSinceCursorID(memSince, memLastID, pushBatchSize)
 		if err != nil {
-			return time.Time{}, err
+			return time.Time{}, fmt.Errorf("read local changes: %w", err)
 		}
-		blobs = append(blobs, db.RelayBlob{ID: m.ID, UpdatedAt: m.UpdatedAt, Blob: blob})
-	}
-	for _, d := range deleted {
-		blob, err := encryptRelay(engine, relayPayload{Deleted: &d}, opts.Passphrase)
+		deleted, err := opts.DB.GetDeletedSinceCursorID(delSince, delLastID, pushBatchSize)
 		if err != nil {
-			return time.Time{}, err
+			return time.Time{}, fmt.Errorf("read local tombstones: %w", err)
 		}
-		blobs = append(blobs, db.RelayBlob{ID: tombstoneBlobPrefix + d.ID, UpdatedAt: d.DeletedAt, Blob: blob})
-	}
+		if len(memories) == 0 && len(deleted) == 0 {
+			return localMax, nil
+		}
 
-	got, err := client.RelayPush(ctx, blobs)
-	if err != nil {
-		return time.Time{}, err
+		blobs := make([]db.RelayBlob, 0, len(memories)+len(deleted))
+		for _, m := range memories {
+			blob, err := encryptRelay(engine, relayPayload{Memory: m}, opts.Passphrase)
+			if err != nil {
+				return time.Time{}, err
+			}
+			blobs = append(blobs, db.RelayBlob{ID: m.ID, UpdatedAt: m.UpdatedAt, Blob: blob})
+		}
+		for _, d := range deleted {
+			blob, err := encryptRelay(engine, relayPayload{Deleted: &d}, opts.Passphrase)
+			if err != nil {
+				return time.Time{}, err
+			}
+			blobs = append(blobs, db.RelayBlob{ID: tombstoneBlobPrefix + d.ID, UpdatedAt: d.DeletedAt, Blob: blob})
+		}
+
+		got, err := client.RelayPush(ctx, blobs)
+		if err != nil {
+			return time.Time{}, err
+		}
+		res.RelayStored += got.Stored
+		batchMax := maxLocalChangeTs(memories, deleted)
+		if batchMax.After(localMax) {
+			localMax = batchMax
+		}
+		if len(memories) > 0 {
+			memSince = memories[len(memories)-1].UpdatedAt
+			memLastID = memories[len(memories)-1].ID
+		}
+		if len(deleted) > 0 {
+			delSince = deleted[len(deleted)-1].DeletedAt
+			delLastID = deleted[len(deleted)-1].ID
+		}
+		if len(memories) < pushBatchSize && len(deleted) < pushBatchSize {
+			break
+		}
 	}
-	res.RelayStored = got.Stored
-	return maxLocalChangeTs(memories, deleted), nil
+	return localMax, nil
 }
 
 func encryptRelay(engine *security.CryptoEngine, p relayPayload, passphrase string) ([]byte, error) {

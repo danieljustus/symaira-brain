@@ -37,6 +37,50 @@ func (db *DB) GetDeletedSince(since time.Time) ([]DeletedMemory, error) {
 	return deleted, rows.Err()
 }
 
+// GetDeletedSinceCursorID returns tombstones updated after since, with
+// keyset pagination. When lastID is empty it starts from since. After each
+// page the caller should pass the last row's DeletedAt and ID as the new
+// since and lastID so rows with equal timestamps are not lost.
+func (db *DB) GetDeletedSinceCursorID(since time.Time, lastID string, limit int) ([]DeletedMemory, error) {
+	if limit <= 0 {
+		limit = 50000
+	}
+	var query string
+	var args []any
+	if lastID == "" {
+		query = `SELECT o.memory_id, o.ts FROM sync_oplog o
+			WHERE o.op = 'delete'
+			  AND o.ts > ?
+			  AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id)
+			ORDER BY o.ts ASC, o.memory_id ASC
+			LIMIT ?`
+		args = []any{since, limit}
+	} else {
+		query = `SELECT o.memory_id, o.ts FROM sync_oplog o
+			WHERE (o.ts > ? OR (o.ts = ? AND o.memory_id > ?))
+			  AND o.event_id = (SELECT MAX(event_id) FROM sync_oplog WHERE memory_id = o.memory_id)
+			ORDER BY o.ts ASC, o.memory_id ASC
+			LIMIT ?`
+		args = []any{since, since, lastID, limit}
+	}
+
+	rows, err := db.conn.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var deleted []DeletedMemory
+	for rows.Next() {
+		var d DeletedMemory
+		if err := rows.Scan(&d.ID, &d.DeletedAt); err != nil {
+			return nil, err
+		}
+		deleted = append(deleted, d)
+	}
+	return deleted, rows.Err()
+}
+
 // GetTombstone reports whether the latest oplog entry for id is a delete,
 // returning its timestamp when it is.
 func (db *DB) GetTombstone(id string) (time.Time, bool, error) {
