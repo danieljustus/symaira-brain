@@ -193,4 +193,15 @@ func TestGetMemoriesSinceCursorIDForSyncExcludesMarkedActivity(t *testing.T) {
 	if len(memories) != 1 || memories[0].ID != "sync-normal" {
 		t.Fatalf("sync memories = %#v, want only sync-normal", memories)
 	}
+
+	// The cursor form must keep the exclusion predicate outside both keyset
+	// branches; otherwise a newer activity row bypasses the filter because SQL
+	// AND binds more tightly than OR.
+	memories, err = database.GetMemoriesSinceCursorIDForSync(memories[0].UpdatedAt, "sync-normal", 10)
+	if err != nil {
+		t.Fatalf("GetMemoriesSinceCursorIDForSync with cursor: %v", err)
+	}
+	if len(memories) != 0 {
+		t.Fatalf("cursor sync memories = %#v, want no excluded activity rows", memories)
+	}
 }

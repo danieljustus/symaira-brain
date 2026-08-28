@@ -769,7 +769,7 @@ func (db *DB) getMemoriesSinceCursorID(since time.Time, lastID string, limit int
 		predicate = "(updated_at > ? OR (updated_at = ? AND id > ?))"
 	}
 	if excludeSync {
-		predicate += " AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true'"
+		predicate = "(" + predicate + ") AND COALESCE(json_extract(metadata, '$.sync_exclude'), '') != 'true'"
 	}
 	query := "SELECT " + columns + " FROM memories WHERE " + predicate + " ORDER BY updated_at ASC, id ASC LIMIT ?"
 	args := []any{since}
