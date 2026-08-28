@@ -118,7 +118,6 @@ func TestDiffAgainstBaseThreeWayMatrix(t *testing.T) {
 		"SKILL.md":         "modified",
 		"lib-only.txt":     "added",
 		"harness-only.txt": "added",
-		"gone.txt":         "removed", // only in base
 		"del.txt":          "removed", // in base + rendered, deleted from harness
 		"kept.txt":         "removed", // in base + installed only (kept on harness side)
 	}
@@ -126,6 +125,9 @@ func TestDiffAgainstBaseThreeWayMatrix(t *testing.T) {
 		if byPath[path] != want {
 			t.Errorf("%s status = %q, want %q (got %+v)", path, byPath[path], want, byPath)
 		}
+	}
+	if _, ok := byPath["gone.txt"]; ok {
+		t.Errorf("baseline-only deletion on both current sides must be omitted: %+v", byPath)
 	}
 	if _, ok := byPath["both.txt"]; ok {
 		t.Errorf("unchanged both.txt must not appear: %+v", byPath)
