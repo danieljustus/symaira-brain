@@ -1020,20 +1020,21 @@ func (db *DB) SearchMemoriesFilteredWithTrust(queryVec []float32, querySource st
 func (db *DB) search(q *SearchQuery) ([]SearchResult, error) {
 	start := time.Now()
 
-	candidateIDs, err := db.lshCandidateIDs(q)
+	candidates, err := db.lshCandidates(q)
 	if err != nil {
 		return nil, err
 	}
-	if len(candidateIDs) == 0 {
+	candidates = db.filterCandidates(q, candidates)
+	if len(candidates) == 0 {
 		db.retrievalStats.Record(0, 0, time.Since(start))
 		return nil, nil
 	}
 
+	candidateIDs := db.prefilterCandidates(q, candidates)
 	results, err := db.hydrateCandidates(q, candidateIDs)
 	if err != nil {
 		return nil, err
 	}
-	results = db.applyFilters(q, results)
 	results = db.scoreAndRank(q, results)
 	results, err = db.applySpreading(q, results)
 	if err != nil {
@@ -1071,9 +1072,16 @@ func (db *DB) search(q *SearchQuery) ([]SearchResult, error) {
 	return final, nil
 }
 
-// lshCandidateIDs expands the query vector into LSH buckets and returns the
-// batched candidate memory IDs, scoped or unscoped.
-func (db *DB) lshCandidateIDs(q *SearchQuery) ([]string, error) {
+type searchCandidate struct {
+	memory          *Memory
+	embeddingBinary []byte
+	embeddingDim    int
+}
+
+// lshCandidates expands the query vector into LSH buckets and returns the
+// candidate identity, filter fields, and sign-bit vector. Full memory rows are
+// deliberately deferred until after filtering and the Hamming prefilter.
+func (db *DB) lshCandidates(q *SearchQuery) ([]searchCandidate, error) {
 	queryLSH, err := ComputeLSH(q.QueryVec)
 	if err != nil {
 		return nil, fmt.Errorf("search vector: %w", err)
@@ -1082,8 +1090,8 @@ func (db *DB) lshCandidateIDs(q *SearchQuery) ([]string, error) {
 
 	twClause, twArgs := TimeWindowClause(q.TimeWindow, "")
 
-	var candidateIDs []string
-	for i := 0; i < len(buckets) && len(candidateIDs) < searchMaxCandidates; i += searchBatchSize {
+	var candidates []searchCandidate
+	for i := 0; i < len(buckets) && len(candidates) < searchMaxCandidates; i += searchBatchSize {
 		end := i + searchBatchSize
 		if end > len(buckets) {
 			end = len(buckets)
@@ -1106,14 +1114,14 @@ func (db *DB) lshCandidateIDs(q *SearchQuery) ([]string, error) {
 				scopePlaceholders[j] = "?"
 				scopeArgs = append(scopeArgs, s)
 			}
-			query = "SELECT id FROM memories WHERE scope IN (" + strings.Join(scopePlaceholders, ", ") + ") AND consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
+			query = "SELECT id, embedding_binary, embedding_dim, metadata, created_at, valid_from, valid_to, superseded_by FROM memories WHERE scope IN (" + strings.Join(scopePlaceholders, ", ") + ") AND consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
 			scopeArgs = append(scopeArgs, q.QuerySource, q.Quantization)
 			args = append(scopeArgs, args...)
 		} else if q.Scope != "" {
-			query = "SELECT id FROM memories WHERE scope = ? AND consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
+			query = "SELECT id, embedding_binary, embedding_dim, metadata, created_at, valid_from, valid_to, superseded_by FROM memories WHERE scope = ? AND consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
 			args = append([]interface{}{q.Scope, q.QuerySource, q.Quantization}, args...)
 		} else {
-			query = "SELECT id FROM memories WHERE consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
+			query = "SELECT id, embedding_binary, embedding_dim, metadata, created_at, valid_from, valid_to, superseded_by FROM memories WHERE consolidation_status != 'archived' AND embedding_source = ? AND embedding_quantization = ? AND embedding IS NOT NULL AND lsh_hash IN (" + inClause + ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
 			args = append([]interface{}{q.QuerySource, q.Quantization}, args...)
 		}
 		if q.EntityID != "" {
@@ -1130,18 +1138,102 @@ func (db *DB) lshCandidateIDs(q *SearchQuery) ([]string, error) {
 		}
 		for rows.Next() {
 			var id string
-			if err := rows.Scan(&id); err != nil {
+			var embeddingBinary []byte
+			var embeddingDim sql.NullInt64
+			var metaStr string
+			var createdAt time.Time
+			var validFrom, validTo sql.NullTime
+			var supersededBy sql.NullString
+			if err := rows.Scan(&id, &embeddingBinary, &embeddingDim, &metaStr, &createdAt, &validFrom, &validTo, &supersededBy); err != nil {
 				_ = rows.Close()
 				return nil, err
 			}
-			candidateIDs = append(candidateIDs, id)
-			if len(candidateIDs) >= searchMaxCandidates {
+			m := &Memory{ID: id, CreatedAt: createdAt}
+			if err := populateMemoryFields(m, metaStr, sql.NullString{}, validFrom, validTo, supersededBy); err != nil {
+				_ = rows.Close()
+				return nil, err
+			}
+			candidates = append(candidates, searchCandidate{
+				memory:          m,
+				embeddingBinary: embeddingBinary,
+				embeddingDim:    int(embeddingDim.Int64),
+			})
+			if len(candidates) >= searchMaxCandidates {
 				break
 			}
 		}
 		_ = rows.Close()
 	}
-	return candidateIDs, nil
+	return candidates, nil
+}
+
+// lshCandidateIDs preserves the ID-only helper for callers that only need the
+// candidate ceiling and bucket behavior.
+func (db *DB) lshCandidateIDs(q *SearchQuery) ([]string, error) {
+	candidates, err := db.lshCandidates(q)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, len(candidates))
+	for i, candidate := range candidates {
+		ids[i] = candidate.memory.ID
+	}
+	return ids, nil
+}
+
+func (db *DB) filterCandidates(q *SearchQuery, candidates []searchCandidate) []searchCandidate {
+	filtered := make([]searchCandidate, 0, len(candidates))
+	for _, candidate := range candidates {
+		if candidate.embeddingDim != len(q.QueryVec) {
+			continue
+		}
+		if !passesTrustFilter(candidate.memory, q.TrustFilter) ||
+			!PassesPolicyFilter(candidate.memory, q.PolicyFilter) ||
+			!passesTimeWindow(candidate.memory, q.TimeWindow) {
+			continue
+		}
+		filtered = append(filtered, candidate)
+	}
+	return filtered
+}
+
+// prefilterCandidates returns IDs in the same order as the filtered candidate
+// set. A missing binary vector disables Hamming selection for the whole query,
+// preserving recall for stores written before binary quantization was enabled.
+func (db *DB) prefilterCandidates(q *SearchQuery, candidates []searchCandidate) []string {
+	if !db.prefilterEnabled || len(candidates) == 0 {
+		return candidateIDs(candidates)
+	}
+
+	prefilterN := q.Limit * 4
+	if prefilterN < 64 {
+		prefilterN = 64
+	}
+	if prefilterN > len(candidates) {
+		prefilterN = len(candidates)
+	}
+	candidateBins := make([][]byte, len(candidates))
+	for i, candidate := range candidates {
+		if candidate.embeddingBinary == nil {
+			return candidateIDs(candidates)
+		}
+		candidateBins[i] = candidate.embeddingBinary
+	}
+
+	keepIdx := HammingPrefilter(BinarizeVector(q.QueryVec), candidateBins, prefilterN)
+	ids := make([]string, 0, len(keepIdx))
+	for _, idx := range keepIdx {
+		ids = append(ids, candidates[idx].memory.ID)
+	}
+	return ids
+}
+
+func candidateIDs(candidates []searchCandidate) []string {
+	ids := make([]string, len(candidates))
+	for i, candidate := range candidates {
+		ids[i] = candidate.memory.ID
+	}
+	return ids
 }
 
 // hydrateCandidates loads the full memory rows for the candidate IDs,
@@ -1168,20 +1260,30 @@ func (db *DB) hydrateCandidates(q *SearchQuery, candidateIDs []string) ([]scored
 		if err != nil {
 			return nil, err
 		}
+		var hydrated = make(map[string]*Memory, len(chunk))
 		for rows.Next() {
 			m, err := scanMemory(rows)
 			if err != nil {
 				_ = rows.Close()
 				return nil, err
 			}
-			if len(m.Embedding) != len(q.QueryVec) {
+			if db.hydrationMetrics != nil {
+				db.hydrationMetrics.record(m.Embedding)
+			}
+			if len(m.Embedding) != len(q.QueryVec) || len(m.Embedding) == 0 {
 				continue
 			}
-			if len(m.Embedding) > 0 {
+			hydrated[m.ID] = m
+		}
+		_ = rows.Close()
+		// SQLite does not guarantee the order of an IN query. Restore the
+		// candidate order so ties retain the same deterministic behavior as the
+		// pre-hydration stages.
+		for _, id := range chunk {
+			if m := hydrated[id]; m != nil {
 				results = append(results, scoredMemory{m: m})
 			}
 		}
-		_ = rows.Close()
 	}
 	return results, nil
 }
@@ -1205,42 +1307,10 @@ func (db *DB) applyFilters(q *SearchQuery, results []scoredMemory) []scoredMemor
 	return filtered
 }
 
-// scoreAndRank applies the Hamming prefilter (when enabled), computes the
-// composite score for each candidate and sorts descending.
+// scoreAndRank computes the composite score for each hydrated candidate and
+// sorts the results descending. Candidate filtering and Hamming selection
+// happen before hydration in search.
 func (db *DB) scoreAndRank(q *SearchQuery, results []scoredMemory) []scoredMemory {
-	// Hamming prefilter: reduce cosine computations by selecting candidates
-	// closest in sign-bit space. Width is derived from the requested limit;
-	// when any candidate lacks a binary vector we skip entirely (see #534).
-	if db.prefilterEnabled && len(results) > 0 {
-		prefilterN := q.Limit * 4
-		if prefilterN < 64 {
-			prefilterN = 64
-		}
-		if prefilterN > len(results) {
-			prefilterN = len(results)
-		}
-
-		candidateBins := make([][]byte, 0, len(results))
-		skipPrefilter := false
-		for _, r := range results {
-			if r.m.EmbeddingBinary == nil {
-				skipPrefilter = true
-				break
-			}
-			candidateBins = append(candidateBins, r.m.EmbeddingBinary)
-		}
-
-		if !skipPrefilter {
-			queryBin := BinarizeVector(q.QueryVec)
-			keepIdx := HammingPrefilter(queryBin, candidateBins, prefilterN)
-			filtered := make([]scoredMemory, 0, len(keepIdx))
-			for _, idx := range keepIdx {
-				filtered = append(filtered, results[idx])
-			}
-			results = filtered
-		}
-	}
-
 	for i := range results {
 		relevance := CosineSimilarity(q.QueryVec, results[i].m.Embedding)
 		decay := results[i].m.DecayFactor
