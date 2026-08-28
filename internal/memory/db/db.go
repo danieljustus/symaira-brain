@@ -17,6 +17,7 @@ import (
 // DB wraps the SQL connection.
 type DB struct {
 	conn                  *sql.DB
+	path                  string
 	quantizeBinary        bool // store sign-bit binary vectors on save
 	prefilterEnabled      bool // use Hamming prefilter before cosine scoring
 	sparsemaxEnabled      bool // apply sparsemax (α=2) to fused hybrid scores
@@ -60,6 +61,10 @@ func Open(cfg *config.Config) (*DB, error) {
 	conn.SetMaxOpenConns(1)
 	conn.SetMaxIdleConns(1)
 	conn.SetConnMaxLifetime(0)
+	if _, err := conn.Exec("PRAGMA secure_delete = ON"); err != nil {
+		_ = conn.Close()
+		return nil, fmt.Errorf("failed to enable secure sqlite deletes: %w", err)
+	}
 
 	queryLogMaxEntries := cfg.QueryLog.MaxEntries
 	if queryLogMaxEntries <= 0 {
@@ -74,6 +79,7 @@ func Open(cfg *config.Config) (*DB, error) {
 
 	db := &DB{
 		conn:               conn,
+		path:               dbPath,
 		quantizeBinary:     cfg.HybridSearch.QuantizeToBinary,
 		prefilterEnabled:   cfg.HybridSearch.PrefilterEnabled,
 		sparsemaxEnabled:   cfg.HybridSearch.SparsemaxEnabled,
@@ -132,6 +138,11 @@ func (db *DB) Close() error {
 // Conn returns the underlying SQL connection.
 func (db *DB) Conn() *sql.DB {
 	return db.conn
+}
+
+// Path returns the on-disk SQLite database path.
+func (db *DB) Path() string {
+	return db.path
 }
 
 // BeginTransaction starts a new database transaction.
