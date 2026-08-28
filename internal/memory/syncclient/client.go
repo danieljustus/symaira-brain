@@ -54,8 +54,38 @@ type ApplyResult struct {
 	Applied             int `json:"applied"`
 	Skipped             int `json:"skipped"`
 	Deleted             int `json:"deleted"`
-	SkippedInvalidScope int `json:"skippedInvalidScope"`
-	SkippedInvalidID    int `json:"skippedInvalidID"`
+	SkippedInvalidScope int `json:"skipped_invalid_scope"`
+	SkippedInvalidID    int `json:"skipped_invalid_id"`
+}
+
+// UnmarshalJSON accepts both the canonical snake_case keys and the legacy
+// camelCase keys so that clients can migrate independently of the server.
+func (r *ApplyResult) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	getInt := func(snake, camel string) int {
+		if v, ok := raw[snake]; ok {
+			var i int
+			_ = json.Unmarshal(v, &i)
+			return i
+		}
+		if v, ok := raw[camel]; ok {
+			var i int
+			_ = json.Unmarshal(v, &i)
+			return i
+		}
+		return 0
+	}
+
+	r.Applied = getInt("applied", "applied")
+	r.Skipped = getInt("skipped", "skipped")
+	r.Deleted = getInt("deleted", "deleted")
+	r.SkippedInvalidScope = getInt("skipped_invalid_scope", "skippedInvalidScope")
+	r.SkippedInvalidID = getInt("skipped_invalid_id", "skippedInvalidID")
+	return nil
 }
 
 // RelayResponse mirrors GET /api/sync/relay on the remote server.
