@@ -11,11 +11,11 @@ import (
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
-// Name identifies one of the harnesses symbrain can install into.
+// Name identifies one harness known to symbrain.
 type Name string
 
-// The six harnesses symbrain knows how to configure, per
-// docs/ARCHITEKTUR.md §5.9.
+// The harness names known to symbrain.  Capability-only entries are
+// included here too, so downstream registries cannot silently drift.
 const (
 	Claude        Name = "claude"
 	ClaudeDesktop Name = "claude-desktop"
@@ -23,6 +23,35 @@ const (
 	Opencode      Name = "opencode"
 	Codex         Name = "codex"
 	Gemini        Name = "gemini"
+	Agents        Name = "agents"
+	Hermes        Name = "hermes"
+	Antigravity   Name = "antigravity"
+	OpenClaw      Name = "openclaw"
+)
+
+// InstructionAdapter identifies the instruction-file adapter used by a
+// harness.  The value is an adapter kind, not another harness registry.
+type InstructionAdapter string
+
+const (
+	InstructionAdapterNone   InstructionAdapter = ""
+	InstructionAdapterAgents InstructionAdapter = "agents"
+	InstructionAdapterClaude InstructionAdapter = "claude"
+	InstructionAdapterCursor InstructionAdapter = "cursor"
+	InstructionAdapterGemini InstructionAdapter = "gemini"
+)
+
+// SkillTarget identifies the in-process skills renderer target for a harness.
+type SkillTarget string
+
+const (
+	SkillTargetNone        SkillTarget = ""
+	SkillTargetOpenCode    SkillTarget = "opencode"
+	SkillTargetClaude      SkillTarget = "claude"
+	SkillTargetCodex       SkillTarget = "codex"
+	SkillTargetHermes      SkillTarget = "hermes"
+	SkillTargetAntigravity SkillTarget = "antigravity"
+	SkillTargetOpenClaw    SkillTarget = "openclaw"
 )
 
 // Format is the on-disk serialization of a harness's MCP config file.
@@ -39,8 +68,8 @@ const (
 // harness's server map (e.g. mcpServers.symbrain, [mcp_servers.symbrain]).
 const ServerName = "symbrain"
 
-// Harness describes one supported AI harness: where its MCP config file
-// lives, how it is structured, and how symbrain edits it.
+// Harness describes one known AI harness: its optional MCP config, and
+// the instruction and skills capabilities symbrain can use with it.
 type Harness struct {
 	// Name is the stable identifier used on the CLI (--harness <name>).
 	Name Name
@@ -57,6 +86,16 @@ type Harness struct {
 	// config file path.
 	ConfigPath func() (string, error)
 
+	// SupportsMCPInstall reports whether symbrain can install its MCP
+	// server entry into this harness's configuration.
+	SupportsMCPInstall bool
+	// InstructionAdapter selects the instruction-file adapter, when one
+	// exists. An empty value is an intentional unsupported capability.
+	InstructionAdapter InstructionAdapter
+	// SkillTarget selects the in-process skills renderer target, when one
+	// exists. An empty value is an intentional unsupported capability.
+	SkillTarget SkillTarget
+
 	// SupportsProject reports whether this harness also has a
 	// project-local config file in addition to its global one.
 	SupportsProject bool
@@ -65,54 +104,105 @@ type Harness struct {
 	ProjectConfigPath func(dir string) string
 }
 
-// All is the registry of every harness symbrain can install into, in the
-// order documented in docs/ARCHITEKTUR.md §5.9.
+// All is the single registry of every harness known to symbrain. Entries
+// that do not support MCP installation still participate in instruction or
+// skills derivation when they declare those capabilities.
 var All = []Harness{
 	{
-		Name:            Claude,
-		DisplayName:     "Claude Code",
-		Format:          FormatJSON,
-		ServersKey:      "mcpServers",
-		ConfigPath:      homeJoin(".claude.json"),
-		SupportsProject: true,
+		Name:               Claude,
+		DisplayName:        "Claude Code",
+		Format:             FormatJSON,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterClaude,
+		SkillTarget:        SkillTargetClaude,
+		ServersKey:         "mcpServers",
+		ConfigPath:         homeJoin(".claude.json"),
+		SupportsProject:    true,
 		ProjectConfigPath: func(dir string) string {
 			return filepath.Join(dir, ".mcp.json")
 		},
 	},
 	{
-		Name:        ClaudeDesktop,
-		DisplayName: "Claude Desktop",
-		Format:      FormatJSON,
-		ServersKey:  "mcpServers",
-		ConfigPath:  claudeDesktopConfigPath,
+		Name:               ClaudeDesktop,
+		DisplayName:        "Claude Desktop",
+		Format:             FormatJSON,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetNone,
+		ServersKey:         "mcpServers",
+		ConfigPath:         claudeDesktopConfigPath,
 	},
 	{
-		Name:        Cursor,
-		DisplayName: "Cursor",
-		Format:      FormatJSON,
-		ServersKey:  "mcpServers",
-		ConfigPath:  homeJoin(".cursor", "mcp.json"),
+		Name:               Cursor,
+		DisplayName:        "Cursor",
+		Format:             FormatJSON,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterCursor,
+		SkillTarget:        SkillTargetNone,
+		ServersKey:         "mcpServers",
+		ConfigPath:         homeJoin(".cursor", "mcp.json"),
 	},
 	{
-		Name:        Opencode,
-		DisplayName: "OpenCode",
-		Format:      FormatJSON,
-		ServersKey:  "mcpServers",
-		ConfigPath:  xdgConfigJoin("opencode", "config.json"),
+		Name:               Opencode,
+		DisplayName:        "OpenCode",
+		Format:             FormatJSON,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetOpenCode,
+		ServersKey:         "mcpServers",
+		ConfigPath:         xdgConfigJoin("opencode", "config.json"),
 	},
 	{
-		Name:        Codex,
-		DisplayName: "Codex CLI",
-		Format:      FormatTOML,
-		ServersKey:  "mcp_servers",
-		ConfigPath:  homeJoin(".codex", "config.toml"),
+		Name:               Codex,
+		DisplayName:        "Codex CLI",
+		Format:             FormatTOML,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetCodex,
+		ServersKey:         "mcp_servers",
+		ConfigPath:         homeJoin(".codex", "config.toml"),
 	},
 	{
-		Name:        Gemini,
-		DisplayName: "Gemini CLI",
-		Format:      FormatJSON,
-		ServersKey:  "mcpServers",
-		ConfigPath:  homeJoin(".gemini", "settings.json"),
+		Name:               Gemini,
+		DisplayName:        "Gemini CLI",
+		Format:             FormatJSON,
+		SupportsMCPInstall: true,
+		InstructionAdapter: InstructionAdapterGemini,
+		SkillTarget:        SkillTargetNone,
+		ServersKey:         "mcpServers",
+		ConfigPath:         homeJoin(".gemini", "settings.json"),
+	},
+	{
+		Name:               Agents,
+		DisplayName:        "AGENTS.md",
+		SupportsMCPInstall: false,
+		InstructionAdapter: InstructionAdapterAgents,
+		SkillTarget:        SkillTargetNone,
+		ConfigPath:         unsupportedConfigPath,
+	},
+	{
+		Name:               Hermes,
+		DisplayName:        "Hermes",
+		SupportsMCPInstall: false,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetHermes,
+		ConfigPath:         unsupportedConfigPath,
+	},
+	{
+		Name:               Antigravity,
+		DisplayName:        "Antigravity",
+		SupportsMCPInstall: false,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetAntigravity,
+		ConfigPath:         unsupportedConfigPath,
+	},
+	{
+		Name:               OpenClaw,
+		DisplayName:        "OpenClaw",
+		SupportsMCPInstall: false,
+		InstructionAdapter: InstructionAdapterNone,
+		SkillTarget:        SkillTargetOpenClaw,
+		ConfigPath:         unsupportedConfigPath,
 	},
 }
 
@@ -141,6 +231,10 @@ func Names() []string {
 	}
 	sort.Strings(names)
 	return names
+}
+
+func unsupportedConfigPath() (string, error) {
+	return "", fmt.Errorf("harness does not support MCP installation")
 }
 
 // homeJoin returns a ConfigPath resolver for $HOME/elem...

@@ -43,7 +43,7 @@ type Inventory struct {
 	Harnesses     []HarnessInventory `json:"harnesses"`
 }
 
-// List inspects every registered harness without modifying any config file.
+// List inspects every MCP-installable harness without modifying any config file.
 // Missing and malformed configs are represented in the result rather than
 // returned as an aggregate error, so consumers can inspect the whole machine.
 func List(projectDir string) Inventory {
@@ -57,6 +57,9 @@ func List(projectDir string) Inventory {
 		Harnesses:     make([]HarnessInventory, 0, len(All)),
 	}
 	for _, h := range All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		entry := HarnessInventory{
 			Name:        h.Name,
 			DisplayName: h.DisplayName,
@@ -85,6 +88,9 @@ type Binding struct {
 func ProfileBindings(profileName string, projectDir string) []Binding {
 	var bindings []Binding
 	for _, h := range All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		globalPath := resolveConfigPath(h.ConfigPath)
 		if b := bindingAt(h, globalPath, profileName); b != nil {
 			bindings = append(bindings, *b)

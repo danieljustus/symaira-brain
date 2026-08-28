@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/output"
 	"github.com/danieljustus/symaira-brain/internal/sync"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -29,6 +30,12 @@ func cmdSyncWithFormat(args []string, stdout, stderr io.Writer, format output.Fo
 	}
 
 	harnessNames := fs.Args()
+	for _, name := range harnessNames {
+		if _, err := harness.Lookup(name); err != nil {
+			fmt.Fprintf(stderr, "symbrain sync: %s\n", exitcodes.FormatCLIError(err))
+			return exitcodes.ExitNoInput
+		}
+	}
 	if *projectDir == "" {
 		*projectDir = "."
 	}

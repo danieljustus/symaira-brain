@@ -9,20 +9,26 @@ import (
 	"strings"
 	"time"
 
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/skills/config"
 	"github.com/danieljustus/symaira-brain/internal/skills/install"
 	"github.com/danieljustus/symaira-brain/internal/skills/render"
 	"github.com/danieljustus/symaira-brain/internal/skills/skill"
 )
 
-// HarnessMap maps symbrain harness names to the in-process render
-// targets that the absorbed symskills pipeline supports. Harnesses not
-// in this map are reported as skipped, matching the old bridge.
-var HarnessMap = map[string]render.Target{
-	"claude":   render.TargetClaude,
-	"codex":    render.TargetCodex,
-	"opencode": render.TargetOpenCode,
-	"hermes":   render.TargetHermes,
+// HarnessMap maps registered harness names to in-process skill targets.
+// It is derived once from the single harness registry; empty SkillTarget
+// values remain valid harnesses on the runner's skipped path.
+var HarnessMap = buildHarnessMap()
+
+func buildHarnessMap() map[string]render.Target {
+	targets := make(map[string]render.Target)
+	for _, h := range harness.All {
+		if h.SkillTarget != harness.SkillTargetNone {
+			targets[string(h.Name)] = render.Target(h.SkillTarget)
+		}
+	}
+	return targets
 }
 
 // DefaultTimeout is the per-target budget for render+install work. It

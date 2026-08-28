@@ -43,13 +43,10 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 		return nil, nil, fmt.Errorf("sync: load instructions: %w", err)
 	}
 
-	// Map harness names to adapters (skip harnesses without adapters).
-	supported := map[string]adapter.Target{
-		"agents": adapter.AgentsTarget,
-		"claude": adapter.ClaudeTarget,
-		"cursor": adapter.CursorTarget,
-		"gemini": adapter.GeminiTarget,
-	}
+	// Map registered harness names to adapters. The registry owns the
+	// capability relationship; harnesses without an adapter remain valid
+	// names and are reported as skipped below.
+	supported := adapter.TargetsForHarnesses()
 
 	var statuses []TargetStatus
 	for _, name := range harnessNames {
@@ -58,7 +55,7 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 			statuses = append(statuses, TargetStatus{
 				Name:    name,
 				Status:  "skipped",
-				Message: fmt.Sprintf("no instruction adapter for harness %q", name),
+				Message: fmt.Sprintf("harness %q has no instruction adapter", name),
 			})
 			continue
 		}

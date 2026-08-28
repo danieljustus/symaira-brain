@@ -10,7 +10,8 @@ import (
 )
 
 func TestLookup_KnownHarnesses(t *testing.T) {
-	for _, name := range []string{"claude", "claude-desktop", "cursor", "opencode", "codex", "gemini"} {
+	for _, h := range All {
+		name := string(h.Name)
 		t.Run(name, func(t *testing.T) {
 			h, err := Lookup(name)
 			if err != nil {
@@ -37,19 +38,28 @@ func TestLookup_Unknown(t *testing.T) {
 	}
 }
 
-func TestAll_SixHarnesses(t *testing.T) {
-	if len(All) != 6 {
-		t.Fatalf("len(All) = %d, want 6", len(All))
+func TestAll_HarnessesHaveExplicitCapabilities(t *testing.T) {
+	if len(All) != 10 {
+		t.Fatalf("len(All) = %d, want 10", len(All))
 	}
+	seen := make(map[Name]bool, len(All))
 	for _, h := range All {
+		if seen[h.Name] {
+			t.Errorf("duplicate harness %q", h.Name)
+		}
+		seen[h.Name] = true
 		if h.ConfigPath == nil {
 			t.Errorf("%s: ConfigPath is nil", h.Name)
 		}
-		if h.ServersKey == "" {
-			t.Errorf("%s: ServersKey is empty", h.Name)
-		}
-		if h.Format != FormatJSON && h.Format != FormatTOML {
-			t.Errorf("%s: Format = %q, want json or toml", h.Name, h.Format)
+		if h.SupportsMCPInstall {
+			if h.ServersKey == "" {
+				t.Errorf("%s: ServersKey is empty", h.Name)
+			}
+			if h.Format != FormatJSON && h.Format != FormatTOML {
+				t.Errorf("%s: Format = %q, want json or toml", h.Name, h.Format)
+			}
+		} else if h.ServersKey != "" {
+			t.Errorf("%s: non-MCP harness unexpectedly has ServersKey %q", h.Name, h.ServersKey)
 		}
 	}
 }
@@ -206,7 +216,7 @@ func TestLookup_ErrorMessageListsKnownHarnesses(t *testing.T) {
 		t.Fatal("Lookup() = nil error")
 	}
 	msg := exitcodes.FormatCLIError(err)
-	for _, name := range []string{"claude", "cursor", "codex", "gemini"} {
+	for _, name := range Names() {
 		if !strings.Contains(msg, name) {
 			t.Errorf("error message %q does not mention harness %q", msg, name)
 		}

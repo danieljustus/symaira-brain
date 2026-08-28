@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/instructions"
 )
 
@@ -8,7 +9,7 @@ import (
 // .cursor/rules/symbrain.mdc carries a YAML frontmatter header followed by
 // the managed block of instructions content.
 var CursorTarget = Target{
-	Name:     "cursor",
+	Name:     string(harness.Cursor),
 	Filename: "symbrain.mdc",
 	Dir:      ".cursor/rules",
 	Render: func(content, _ string) string {
