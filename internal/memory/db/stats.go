@@ -3,6 +3,7 @@ package db
 import (
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -93,4 +94,48 @@ type RetrievalStatsSnapshot struct {
 	ScoreMax          float64 `json:"score_max"`
 	ScoreAvg          float64 `json:"score_avg"`
 	AvgLatencyMs      float64 `json:"avg_latency_ms"`
+}
+
+// HydrationStatsSnapshot reports the amount of full-row and embedding work
+// performed by vector searches since the last reset.
+type HydrationStatsSnapshot struct {
+	RowsHydrated          int64
+	EmbeddingBytesDecoded int64
+}
+
+type hydrationMetrics struct {
+	rowsHydrated          atomic.Int64
+	embeddingBytesDecoded atomic.Int64
+}
+
+func (m *hydrationMetrics) record(embedding []float32) {
+	m.rowsHydrated.Add(1)
+	m.embeddingBytesDecoded.Add(int64(len(embedding) * 4))
+}
+
+func (m *hydrationMetrics) snapshot() HydrationStatsSnapshot {
+	return HydrationStatsSnapshot{
+		RowsHydrated:          m.rowsHydrated.Load(),
+		EmbeddingBytesDecoded: m.embeddingBytesDecoded.Load(),
+	}
+}
+
+func (m *hydrationMetrics) reset() {
+	m.rowsHydrated.Store(0)
+	m.embeddingBytesDecoded.Store(0)
+}
+
+// HydrationStats returns full-row hydration metrics for vector searches.
+func (db *DB) HydrationStats() HydrationStatsSnapshot {
+	if db.hydrationMetrics == nil {
+		return HydrationStatsSnapshot{}
+	}
+	return db.hydrationMetrics.snapshot()
+}
+
+// ResetHydrationStats clears full-row hydration metrics.
+func (db *DB) ResetHydrationStats() {
+	if db.hydrationMetrics != nil {
+		db.hydrationMetrics.reset()
+	}
 }

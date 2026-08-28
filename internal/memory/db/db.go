@@ -22,6 +22,7 @@ type DB struct {
 	sparsemaxEnabled      bool // apply sparsemax (α=2) to fused hybrid scores
 	perArmMultiplier      int  // per-arm result cap multiplier before fusion
 	retrievalStats        *RetrievalStats
+	hydrationMetrics      *hydrationMetrics
 	queryLogMaxEntries    int           // query_log row cap (default 1000)
 	queryLogMaxAge        time.Duration // query_log max entry age; 0 = disabled
 	queryLogRecordResults atomic.Bool   // record returned memory ids per query (issue #460)
@@ -78,6 +79,7 @@ func Open(cfg *config.Config) (*DB, error) {
 		sparsemaxEnabled:   cfg.HybridSearch.SparsemaxEnabled,
 		perArmMultiplier:   cfg.HybridSearch.PerArmMultiplier,
 		retrievalStats:     &RetrievalStats{},
+		hydrationMetrics:   &hydrationMetrics{},
 		queryLogMaxEntries: queryLogMaxEntries,
 		queryLogMaxAge:     queryLogMaxAge,
 	}
