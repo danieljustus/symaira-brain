@@ -147,10 +147,12 @@ type ContextConfig struct {
 
 // RetentionConfig controls data lifecycle governance.
 type RetentionConfig struct {
-	SessionTTL       string `json:"session_ttl"`        // e.g. "24h", "7d" (default "720h" = 30d)
-	AutoPurgeEnabled bool   `json:"auto_purge_enabled"` // enable background purge (default false)
-	AuditLogEnabled  bool   `json:"audit_log_enabled"`  // enable audit logging (default true)
-	AuditRetention   string `json:"audit_retention"`    // how long to keep audit logs (default "720h")
+	SessionTTL         string `json:"session_ttl"`          // e.g. "24h", "7d" (default "720h" = 30d)
+	AutoPurgeEnabled   bool   `json:"auto_purge_enabled"`   // enable background purge (default false)
+	AuditLogEnabled    bool   `json:"audit_log_enabled"`    // enable audit logging (default true)
+	AuditRetention     string `json:"audit_retention"`      // how long to keep audit logs (default "720h")
+	ActivitySegmentTTL string `json:"activity_segment_ttl"` // activity segment retention (default "48h")
+	ActivityEpisodeTTL string `json:"activity_episode_ttl"` // activity episode retention (default "720h")
 }
 
 // QueryLogConfig controls query log retention policy (issue #457) and the
@@ -375,10 +377,12 @@ func Defaults() *Config {
 			MaxExpandPerSrc: 3,
 		},
 		Retention: RetentionConfig{
-			SessionTTL:       "720h",
-			AutoPurgeEnabled: false,
-			AuditLogEnabled:  true,
-			AuditRetention:   "720h",
+			SessionTTL:         "720h",
+			AutoPurgeEnabled:   false,
+			AuditLogEnabled:    true,
+			AuditRetention:     "720h",
+			ActivitySegmentTTL: "48h",
+			ActivityEpisodeTTL: "720h",
 		},
 		QueryLog: QueryLogConfig{
 			MaxEntries:    1000,

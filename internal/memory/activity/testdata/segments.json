@@ -1,0 +1,22 @@
+[
+  {
+    "source": "codex-skysight",
+    "granularity": "10min",
+    "started_at": "2026-08-28T10:00:00Z",
+    "ended_at": "2026-08-28T10:10:00Z",
+    "applications": ["com.example.editor"],
+    "redacted_summary": "Reviewed the synthetic project fixture.",
+    "raw_ref": "source-session-001",
+    "prior_segment_ids": []
+  },
+  {
+    "source": "codex-skysight",
+    "granularity": "10min",
+    "started_at": "2026-08-28T10:10:00Z",
+    "ended_at": "2026-08-28T10:20:00Z",
+    "applications": ["com.example.editor", "com.example.terminal"],
+    "redacted_summary": "Ran the synthetic verification command.",
+    "raw_ref": "source-session-001",
+    "prior_segment_ids": ["prior-synthetic-segment"]
+  }
+]
