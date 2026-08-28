@@ -97,6 +97,14 @@ type TimeWindow struct {
 	To   *time.Time // memories must be valid at or before this time (valid_from <= To or valid_from IS NULL)
 }
 
+// MemoryCursor is the opaque keyset pagination cursor for memory_list.
+// It carries the last-seen (created_at, id) so the next page can resume
+// deterministically even when multiple rows share the same timestamp.
+type MemoryCursor struct {
+	Timestamp time.Time
+	ID        string
+}
+
 // TimeWindowClause returns SQL WHERE clause fragments and args for the time window.
 // Returns (whereClause, args) where whereClause includes the leading " AND ".
 func TimeWindowClause(tw TimeWindow, tableAlias string) (string, []interface{}) {
@@ -473,6 +481,64 @@ func (db *DB) ListMemoriesAsOf(scope string, asOf time.Time, offset, limit int) 
 	return memories, nil
 }
 
+// ListMemoriesAsOfWithCursor returns memories valid at the given time, using keyset pagination.
+// When cursor is nil or empty, it returns the most recent valid memories (first page).
+func (db *DB) ListMemoriesAsOfWithCursor(scope string, asOf time.Time, cursor *MemoryCursor, limit int) ([]*Memory, error) {
+	if limit <= 0 {
+		limit = 1000
+	}
+	const asOfClause = " AND (valid_from IS NULL OR valid_from <= ?) AND (valid_to IS NULL OR valid_to > ?)"
+	const expiredWorkingClause = " AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL"
+
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if cursor != nil && !cursor.Timestamp.IsZero() {
+		if cursor.ID != "" {
+			if scope != "" {
+				query = "SELECT " + memoryColumns + " FROM memories WHERE scope = ? AND consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " AND ((created_at < ?) OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, scope, asOf, asOf, cursor.Timestamp, cursor.Timestamp, cursor.ID, limit)
+			} else {
+				query = "SELECT " + memoryColumns + " FROM memories WHERE consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " AND ((created_at < ?) OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, asOf, asOf, cursor.Timestamp, cursor.Timestamp, cursor.ID, limit)
+			}
+		} else {
+			if scope != "" {
+				query = "SELECT " + memoryColumns + " FROM memories WHERE scope = ? AND consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " AND (created_at < ?) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, scope, asOf, asOf, cursor.Timestamp, limit)
+			} else {
+				query = "SELECT " + memoryColumns + " FROM memories WHERE consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " AND (created_at < ?) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, asOf, asOf, cursor.Timestamp, limit)
+			}
+		}
+	} else {
+		if scope != "" {
+			query = "SELECT " + memoryColumns + " FROM memories WHERE scope = ? AND consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " ORDER BY created_at DESC, id DESC LIMIT ?"
+			rows, err = db.conn.Query(query, scope, asOf, asOf, limit)
+		} else {
+			query = "SELECT " + memoryColumns + " FROM memories WHERE consolidation_status != 'archived'" + expiredWorkingClause + asOfClause + " ORDER BY created_at DESC, id DESC LIMIT ?"
+			rows, err = db.conn.Query(query, asOf, asOf, limit)
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var memories []*Memory
+	for rows.Next() {
+		m, err := scanMemory(rows)
+		if err != nil {
+			return nil, err
+		}
+		memories = append(memories, m)
+	}
+
+	return memories, nil
+}
+
 // ListMemoriesLite returns memories without embedding data, with pagination.
 func (db *DB) ListMemoriesLite(scope string, offset, limit int) ([]*Memory, error) {
 	var query string
@@ -485,6 +551,62 @@ func (db *DB) ListMemoriesLite(scope string, offset, limit int) ([]*Memory, erro
 	} else {
 		query = "SELECT " + memoryColumnsLite + " FROM memories WHERE consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL ORDER BY created_at DESC LIMIT ? OFFSET ?"
 		rows, err = db.conn.Query(query, limit, offset)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var memories []*Memory
+	for rows.Next() {
+		m, err := scanMemoryLite(rows)
+		if err != nil {
+			return nil, err
+		}
+		memories = append(memories, m)
+	}
+
+	return memories, nil
+}
+
+// ListMemoriesLiteWithCursor returns memories without embedding data, using keyset pagination.
+// When cursor is nil or empty, it returns the most recent memories (first page).
+// The ordering is deterministic: created_at DESC, id DESC.
+func (db *DB) ListMemoriesLiteWithCursor(scope string, cursor *MemoryCursor, limit int) ([]*Memory, error) {
+	if limit <= 0 {
+		limit = 1000
+	}
+	var query string
+	var rows *sql.Rows
+	var err error
+
+	if cursor != nil && !cursor.Timestamp.IsZero() {
+		if cursor.ID != "" {
+			if scope != "" {
+				query = "SELECT " + memoryColumnsLite + " FROM memories WHERE scope = ? AND consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL AND ((created_at < ?) OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, scope, cursor.Timestamp, cursor.Timestamp, cursor.ID, limit)
+			} else {
+				query = "SELECT " + memoryColumnsLite + " FROM memories WHERE consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL AND ((created_at < ?) OR (created_at = ? AND id < ?)) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, cursor.Timestamp, cursor.Timestamp, cursor.ID, limit)
+			}
+		} else {
+			if scope != "" {
+				query = "SELECT " + memoryColumnsLite + " FROM memories WHERE scope = ? AND consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL AND (created_at < ?) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, scope, cursor.Timestamp, limit)
+			} else {
+				query = "SELECT " + memoryColumnsLite + " FROM memories WHERE consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL AND (created_at < ?) ORDER BY created_at DESC, id DESC LIMIT ?"
+				rows, err = db.conn.Query(query, cursor.Timestamp, limit)
+			}
+		}
+	} else {
+		if scope != "" {
+			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE scope = ? AND consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL ORDER BY created_at DESC, id DESC LIMIT ?"
+			rows, err = db.conn.Query(query, scope, limit)
+		} else {
+			query = "SELECT " + memoryColumnsLite + " FROM memories WHERE consolidation_status != 'archived' AND (tier != 'working' OR expires_at IS NULL OR expires_at > datetime('now')) AND review_status = 'approved' AND retired_at IS NULL ORDER BY created_at DESC, id DESC LIMIT ?"
+			rows, err = db.conn.Query(query, limit)
+		}
 	}
 
 	if err != nil {
