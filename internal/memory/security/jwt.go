@@ -24,7 +24,10 @@ import (
 
 // DefaultRotationGracePeriod is the default duration that a rotated secret
 // remains valid as a fallback after key rotation.
-const DefaultRotationGracePeriod = 24 * time.Hour
+const (
+	DefaultRotationGracePeriod = 24 * time.Hour
+	jwtIssuer                  = "symaira-memory"
+)
 
 // DB interface for revocation persistence, avoiding circular imports.
 type RevocationStore interface {
@@ -353,7 +356,7 @@ func (jp *JWTProvider) GenerateToken(subject string, duration time.Duration) (st
 
 	payload := JWTPayload{
 		JWTID:     jti,
-		Issuer:    "symaira-memory",
+		Issuer:    jwtIssuer,
 		Subject:   subject,
 		IssuedAt:  now.Unix(),
 		ExpiresAt: now.Add(duration).Unix(),
@@ -415,6 +418,12 @@ func (jp *JWTProvider) VerifyToken(token string) (*JWTPayload, error) {
 	var payload JWTPayload
 	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
 		return nil, err
+	}
+	if strings.TrimSpace(payload.Subject) == "" {
+		return nil, errors.New("token has empty subject")
+	}
+	if payload.Issuer != jwtIssuer {
+		return nil, errors.New("invalid issuer")
 	}
 
 	// Check in-memory revocation list
