@@ -1,8 +1,10 @@
 package install
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/skills/render"
@@ -214,5 +216,52 @@ func TestStatusConvergedIsInSync(t *testing.T) {
 	}
 	if st := findByTarget(t, statuses, render.TargetOpenCode); st.Status != StatusInSync {
 		t.Fatalf("converged install = %s, want in-sync (%+v)", st.Status, st)
+	}
+}
+
+func TestDiffOmitsConvergedBaselineDeletion(t *testing.T) {
+	rendered := filepath.Join(t.TempDir(), "diffcase")
+	if err := os.MkdirAll(rendered, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	gone := filepath.Join(rendered, "gone.txt")
+	if err := os.WriteFile(gone, []byte("baseline\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	opts := Options{
+		BaseDir: filepath.Join(t.TempDir(), "base"),
+		Scope:   render.ScopeUser,
+		Target:  render.TargetOpenCode,
+	}
+	if err := WriteBaseSnapshot(rendered, render.TargetOpenCode, "diffcase", opts); err != nil {
+		t.Fatalf("WriteBaseSnapshot: %v", err)
+	}
+	if err := os.Remove(gone); err != nil {
+		t.Fatal(err)
+	}
+
+	installedDir := filepath.Join(t.TempDir(), "installed")
+	if err := os.MkdirAll(installedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	installed := filepath.Join(t.TempDir(), "diffcase")
+	if err := os.Symlink(installedDir, installed); err != nil {
+		t.Fatal(err)
+	}
+
+	changes, err := Diff(rendered, installed, opts)
+	if err != nil {
+		t.Fatalf("Diff: %v", err)
+	}
+	if len(changes) != 0 {
+		t.Fatalf("both current trees deleted the baseline file; Diff = %+v, want no changes", changes)
+	}
+	data, err := json.Marshal(changes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), `"status":"removed"`) || strings.Contains(string(data), "gone.txt") {
+		t.Fatalf("JSON must not report a false-positive removal: %s", data)
 	}
 }

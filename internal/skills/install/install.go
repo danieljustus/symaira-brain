@@ -566,8 +566,9 @@ func diffTwoWay(renderedPath, installedPath string) ([]Change, error) {
 // diffAgainstBase compares both the rendered tree and the installed tree
 // against the persisted base snapshot. A file is modified when either side
 // diverges from the base; added when it exists on a side but not in the
-// base; removed when it exists only in the base. The snapshot's own
-// manifest.json is excluded from the base side.
+// base; removed when only one current side has lost a base file. A file
+// deleted from both current sides is converged and omitted. The snapshot's
+// own manifest.json is excluded from the base side.
 func diffAgainstBase(renderedPath, installedPath, baseDir string) ([]Change, error) {
 	rendered, err := fileHashes(renderedPath)
 	if err != nil {
@@ -595,24 +596,8 @@ func diffAgainstBase(renderedPath, installedPath, baseDir string) ([]Change, err
 		paths[path] = true
 	}
 	for path := range paths {
-		_, inRendered := rendered[path]
-		_, inInstalled := installed[path]
-		_, inBase := base[path]
-		switch {
-		case inBase && !inRendered && !inInstalled:
-			status[path] = "removed"
-		case !inBase && !inRendered && inInstalled:
-			status[path] = "added" // harness-side addition
-		case !inBase && inRendered:
-			status[path] = "added"
-		case inBase && inRendered && !inInstalled:
-			status[path] = "removed" // deleted from the harness side
-		case inBase && !inRendered && inInstalled:
-			status[path] = "removed" // kept only on the harness side
-		default:
-			if installed[path] != base[path] || rendered[path] != base[path] {
-				status[path] = "modified"
-			}
+		if change, ok := changeStatusForDrift(ClassifyFile(base[path], rendered[path], installed[path]), base[path], rendered[path], installed[path]); ok {
+			status[path] = change
 		}
 	}
 	changes := []Change{}
@@ -630,6 +615,26 @@ func diffAgainstBase(renderedPath, installedPath, baseDir string) ([]Change, err
 	}
 	sort.Slice(changes, func(i, j int) bool { return changes[i].Path < changes[j].Path })
 	return changes, nil
+}
+
+func changeStatusForDrift(kind DriftKind, base, rendered, installed string) (string, bool) {
+	if kind == DriftUnchanged {
+		return "", false
+	}
+	// A baseline file deleted from both current trees is converged, not an
+	// actionable removal. Other converged paths keep Diff's historical output
+	// status so callers that use it to advance the baseline remain compatible.
+	if kind == DriftConverged && base != "" && rendered == "" && installed == "" {
+		return "", false
+	}
+	switch {
+	case base == "":
+		return "added", true
+	case rendered == "" || installed == "":
+		return "removed", true
+	default:
+		return "modified", true
+	}
 }
 
 // diffLine is one line of an edit script: unchanged (' '), present only in
