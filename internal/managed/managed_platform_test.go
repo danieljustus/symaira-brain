@@ -56,7 +56,10 @@ func TestFix_PlatformSkipDoesNotCountAsAttempted(t *testing.T) {
 		t.Skip("platform-skip path is unreachable on darwin in this test layout")
 	}
 
-	if err := Fix(context.Background(), t.TempDir(), nil); err != nil {
+	binDir := t.TempDir()
+	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
+
+	if err := Fix(context.Background(), binDir, nil); err != nil {
 		t.Fatalf("Fix with platform-skip: %v", err)
 	}
 	if len(fake.calls) != 0 {
