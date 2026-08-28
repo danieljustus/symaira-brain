@@ -49,6 +49,43 @@ func TestE2EEncryptionLoop(t *testing.T) {
 	}
 }
 
+func TestEncryptCachesKeyForRepeatedPassphrase(t *testing.T) {
+	originalDeriveKey := deriveKey
+	deriveCalls := 0
+	deriveKey = func(passphrase string, salt []byte) []byte {
+		deriveCalls++
+		return originalDeriveKey(passphrase, salt)
+	}
+	t.Cleanup(func() { deriveKey = originalDeriveKey })
+
+	engine := NewCryptoEngine()
+	passphrase := "bulk-test-passphrase"
+	var firstSalt []byte
+	for i := 0; i < 500; i++ {
+		ciphertext, err := engine.Encrypt([]byte("payload"), passphrase)
+		if err != nil {
+			t.Fatalf("Encrypt call %d: %v", i, err)
+		}
+		salt := ciphertext[1 : 1+saltSizeV1]
+		if i == 0 {
+			firstSalt = append([]byte(nil), salt...)
+		} else if !bytes.Equal(salt, firstSalt) {
+			t.Fatalf("Encrypt call %d generated a new salt for the same engine and passphrase", i)
+		}
+	}
+
+	if deriveCalls != 1 {
+		t.Fatalf("expected one key derivation for 500 encryptions, got %d", deriveCalls)
+	}
+
+	if _, err := engine.Encrypt([]byte("payload"), "different-passphrase"); err != nil {
+		t.Fatalf("Encrypt with a changed passphrase: %v", err)
+	}
+	if deriveCalls != 2 {
+		t.Fatalf("expected key cache rotation after passphrase change, got %d derivations", deriveCalls)
+	}
+}
+
 func buildLegacyPayload(t *testing.T, plaintext []byte, passphrase string) []byte {
 	t.Helper()
 

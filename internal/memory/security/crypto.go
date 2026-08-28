@@ -1,12 +1,14 @@
 package security
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
 	"io"
+	"sync"
 
 	"golang.org/x/crypto/pbkdf2"
 )
@@ -27,26 +29,77 @@ const (
 )
 
 // CryptoEngine handles Zero-Knowledge E2E encryption using AES-256-GCM.
-type CryptoEngine struct{}
+// It caches the derived key for repeated operations with one passphrase so
+// bulk relay syncs do not repeat the deliberately expensive KDF per payload.
+type CryptoEngine struct {
+	mu sync.Mutex
+
+	cachedPassphrase [sha256.Size]byte
+	cachedSalt       []byte
+	cachedKey        []byte
+	hasCachedKey     bool
+}
 
 // NewCryptoEngine creates a new crypto instance.
 func NewCryptoEngine() *CryptoEngine {
 	return &CryptoEngine{}
 }
 
-func (ce *CryptoEngine) DeriveKey(passphrase string, salt []byte) []byte {
+var deriveKey = func(passphrase string, salt []byte) []byte {
 	return pbkdf2.Key([]byte(passphrase), salt, PBKDF2Iterations, 32, sha256.New)
+}
+
+func (ce *CryptoEngine) DeriveKey(passphrase string, salt []byte) []byte {
+	return deriveKey(passphrase, salt)
+}
+
+func (ce *CryptoEngine) encryptionMaterial(passphrase string) (key, salt []byte, err error) {
+	passphraseHash := sha256.Sum256([]byte(passphrase))
+
+	ce.mu.Lock()
+	defer ce.mu.Unlock()
+
+	if ce.hasCachedKey && ce.cachedPassphrase == passphraseHash {
+		return append([]byte(nil), ce.cachedKey...), append([]byte(nil), ce.cachedSalt...), nil
+	}
+
+	salt = make([]byte, saltSizeV1)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return nil, nil, err
+	}
+	key = ce.DeriveKey(passphrase, salt)
+	ce.cachedPassphrase = passphraseHash
+	ce.cachedSalt = append(ce.cachedSalt[:0], salt...)
+	ce.cachedKey = append(ce.cachedKey[:0], key...)
+	ce.hasCachedKey = true
+	return append([]byte(nil), key...), append([]byte(nil), salt...), nil
+}
+
+func (ce *CryptoEngine) keyFor(passphrase string, salt []byte) []byte {
+	passphraseHash := sha256.Sum256([]byte(passphrase))
+
+	ce.mu.Lock()
+	defer ce.mu.Unlock()
+
+	if ce.hasCachedKey && ce.cachedPassphrase == passphraseHash && bytes.Equal(ce.cachedSalt, salt) {
+		return append([]byte(nil), ce.cachedKey...)
+	}
+
+	key := ce.DeriveKey(passphrase, salt)
+	ce.cachedPassphrase = passphraseHash
+	ce.cachedSalt = append(ce.cachedSalt[:0], salt...)
+	ce.cachedKey = append(ce.cachedKey[:0], key...)
+	ce.hasCachedKey = true
+	return append([]byte(nil), key...)
 }
 
 // Encrypt encrypts a raw byte payload using AES-256-GCM with a passphrase.
 // Output: [version(1)] [salt(16)] [nonce(12)] [ciphertext].
 func (ce *CryptoEngine) Encrypt(plaintext []byte, passphrase string) ([]byte, error) {
-	salt := make([]byte, saltSizeV1)
-	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+	key, salt, err := ce.encryptionMaterial(passphrase)
+	if err != nil {
 		return nil, err
 	}
-
-	key := ce.DeriveKey(passphrase, salt)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -107,7 +160,7 @@ func (ce *CryptoEngine) Decrypt(payload []byte, passphrase string) ([]byte, erro
 }
 
 func (ce *CryptoEngine) decryptPayload(passphrase string, salt, nonce, ciphertext []byte) ([]byte, error) {
-	key := ce.DeriveKey(passphrase, salt)
+	key := ce.keyFor(passphrase, salt)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
