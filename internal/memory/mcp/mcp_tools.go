@@ -225,6 +225,9 @@ func (s *Server) RegisterTools(srv *mcpserver.Server, allowed map[string]bool) {
 		},
 		)
 	}
+
+	// Activity reads are separately profile-gated and default-deny in policy.
+	s.registerActivityTools(srv, allowed)
 }
 
 func (s *Server) handleMemoryGet(ctx context.Context, input json.RawMessage) (any, error) {

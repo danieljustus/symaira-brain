@@ -119,6 +119,10 @@ var usageTools = []string{
 	"get_ai_usage",
 }
 
+// activityTools are deliberately not part of the default memory presets.
+// Profiles must explicitly grant these read tools via tools_allow.
+var activityTools = []string{"activity_get", "activity_search", "activity_status"}
+
 // identityParameters is the versioned, explicit mapping of backend aliases to
 // the parameter that carries the active profile identity. An alias absent from
 // this table is intentionally forwarded without guessed identity fields.
@@ -303,7 +307,11 @@ func EvaluatePreset(alias string, cfg profile.ServerConfig) (*Report, error) {
 			"policy: EvaluatePreset only supports %q and %q (skills has no mode preset)",
 			profile.ServerVault, profile.ServerMemory)
 	}
-	return Evaluate(alias, cfg, universeFor(alias))
+	liveTools := KnownTools(alias)
+	if alias == profile.ServerMemory {
+		liveTools = append(liveTools, activityTools...)
+	}
+	return Evaluate(alias, cfg, liveTools)
 }
 
 // classify partitions liveTools (skipping anything already in exposed)
@@ -314,6 +322,11 @@ func classify(alias string, liveTools []string, exposed map[string]bool) (hidden
 	universe := universeFor(alias)
 	bounded := alias == profile.ServerVault || alias == profile.ServerMemory || alias == profile.ServerUsage
 	known := toSet(universe)
+	if alias == profile.ServerMemory {
+		for _, tool := range activityTools {
+			known[tool] = true
+		}
+	}
 
 	for _, tool := range liveTools {
 		if exposed[tool] {

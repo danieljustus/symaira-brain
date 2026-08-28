@@ -293,6 +293,9 @@ Implemented today:
 | `symbrain memory list [--scope <scope>] [--limit <N>]` | List stored memories from the embedded database (`--output table|json`, default table; scope default all, limit default 100, max 1000) |
 | `symbrain memory search <query> [--scope <scope>] [--limit <N>]` | Search stored memories by semantic relevance (`--output table|json`, default table; scope default all, limit default 5) |
 | `symbrain memory sync --remote <url> [--pull|--push]` | Synchronize memories with a remote memory server (supports encrypted relay; see below) |
+| `symbrain activity search <query> --from <RFC3339> --to <RFC3339> --limit <N> --max-tokens <N>` | Search bounded, redacted activity summaries (explicit time and result/token bounds required) |
+| `symbrain activity get <id> --max-tokens <N>` | Read one bounded, redacted activity item with provenance |
+| `symbrain activity status --max-tokens <N>` | Show bounded activity-store status without content |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain vault` | Passthrough to symvault |
 | `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |
