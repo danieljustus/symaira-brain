@@ -70,6 +70,58 @@ func List(projectDir string) Inventory {
 	return result
 }
 
+// Binding records a single symbrain MCP entry bound to profileName in a
+// harness config file.
+type Binding struct {
+	Harness Name
+	Path    string
+	Profile string
+}
+
+// ProfileBindings scans every registered harness (global and project-local)
+// and returns the locations where a symbrain entry is bound to profileName.
+// Missing or unparseable configs are silently skipped so a stray harness
+// config outside the user's control does not prevent the scan.
+func ProfileBindings(profileName string, projectDir string) []Binding {
+	var bindings []Binding
+	for _, h := range All {
+		globalPath := resolveConfigPath(h.ConfigPath)
+		if b := bindingAt(h, globalPath, profileName); b != nil {
+			bindings = append(bindings, *b)
+		}
+		if h.SupportsProject && projectDir != "" {
+			projectPath := h.ProjectConfigPath(filepath.Clean(projectDir))
+			if b := bindingAt(h, projectPath, profileName); b != nil {
+				bindings = append(bindings, *b)
+			}
+		}
+	}
+	return bindings
+}
+
+func bindingAt(h Harness, path, profileName string) *Binding {
+	if path == "" {
+		return nil
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	doc, err := Parse(h, data)
+	if err != nil {
+		return nil
+	}
+	entry, ok := doc.Server(ServerName)
+	if !ok || !entry.IsSymbrain() {
+		return nil
+	}
+	profile, ok := entry.Profile()
+	if !ok || profile != profileName {
+		return nil
+	}
+	return &Binding{Harness: h.Name, Path: path, Profile: profile}
+}
+
 func resolveConfigPath(resolve func() (string, error)) string {
 	path, err := resolve()
 	if err != nil {
