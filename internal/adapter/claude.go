@@ -3,6 +3,7 @@ package adapter
 import (
 	"fmt"
 
+	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/instructions"
 )
 
@@ -10,7 +11,7 @@ import (
 // pointer referencing AGENTS.md plus the managed block for project-specific
 // additions, mirroring the pattern used across the Symaira workspace.
 var ClaudeTarget = Target{
-	Name:     "claude",
+	Name:     string(harness.Claude),
 	Filename: "CLAUDE.md",
 	Render: func(content, projectDir string) string {
 		pointer := fmt.Sprintf(

@@ -22,6 +22,9 @@ func TestGolden_InsertSymbrainEntry(t *testing.T) {
 	}
 
 	for _, h := range All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		t.Run(string(h.Name), func(t *testing.T) {
 			ext := "json"
 			if h.Format == FormatTOML {
@@ -68,6 +71,9 @@ func TestGolden_InsertSymbrainEntry(t *testing.T) {
 // masking an unrelated formatting drift instead of a real content bug.
 func TestGolden_BeforeFixturesAreCanonical(t *testing.T) {
 	for _, h := range All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		t.Run(string(h.Name), func(t *testing.T) {
 			ext := "json"
 			if h.Format == FormatTOML {
@@ -102,6 +108,9 @@ func TestGolden_BeforeFixturesAreCanonical(t *testing.T) {
 // invariant cmd_uninstall.go's round-trip test relies on.
 func TestGolden_RemoveServerRestoresBefore(t *testing.T) {
 	for _, h := range All {
+		if !h.SupportsMCPInstall {
+			continue
+		}
 		t.Run(string(h.Name), func(t *testing.T) {
 			ext := "json"
 			if h.Format == FormatTOML {
