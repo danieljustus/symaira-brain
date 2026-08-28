@@ -140,6 +140,15 @@ func (r *Registry) runToolImport(ctx context.Context, importer SessionImporter, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last import time: %w", err)
 	}
+	if inc, ok := importer.(IncrementalImporter); ok {
+		ownLast, err := inc.LastImportTime()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get importer cursor: %w", err)
+		}
+		if ownLast.After(lastImport) {
+			lastImport = ownLast
+		}
+	}
 
 	// If no previous import, start from 30 days ago
 	if lastImport.IsZero() {
@@ -181,6 +190,9 @@ func (r *Registry) runToolImport(ctx context.Context, importer SessionImporter, 
 			result.Errors++
 			continue
 		}
+		if untrusted, ok := importer.(UntrustedContentImporter); ok && untrusted.ContentIsUntrusted() {
+			facts = sanitizeImportedFacts(facts)
+		}
 
 		if r.extractOnImport {
 			if _, isTranscript := importer.(TranscriptImporter); isTranscript {
@@ -207,6 +219,12 @@ func (r *Registry) runToolImport(ctx context.Context, importer SessionImporter, 
 			if err := r.state.MarkImported(importer.Name(), session.SessionID, len(facts)); err != nil {
 				fmt.Fprintf(r.stderr, "Error marking session %s as imported: %v\n", session.SessionID, err)
 				result.Errors++
+			}
+			if inc, ok := importer.(IncrementalImporter); ok {
+				if err := inc.MarkImported(session); err != nil {
+					fmt.Fprintf(r.stderr, "Error marking importer cursor for %s: %v\n", session.SessionID, err)
+					result.Errors++
+				}
 			}
 		}
 	}
@@ -255,6 +273,9 @@ func (r *Registry) storeFacts(facts []ImportedFact, importer SessionImporter) er
 			CreatedAt:           fact.Timestamp,
 			UpdatedAt:           now,
 			ConsolidationStatus: "raw",
+		}
+		if staged, ok := importer.(StagedImporter); ok && staged.StageImportedFacts() {
+			memory.ReviewStatus = db.ReviewStaged
 		}
 
 		if r.embeddings != nil {
@@ -339,15 +360,33 @@ func (r *Registry) extractFacts(facts []ImportedFact) []ImportedFact {
 			Source:    first.Source,
 			SessionID: first.SessionID,
 			Timestamp: first.Timestamp,
-			Metadata: map[string]string{
+			Metadata: mergeMetadata(first.Metadata, map[string]string{
 				"method":       "extractive_summarization",
 				"fact_count":   fmt.Sprintf("%d", len(facts)),
 				"distilled_to": fmt.Sprintf("%d", len(distilled)),
-			},
+			}),
 		})
 	}
 
 	return distilled
+}
+
+func sanitizeImportedFacts(facts []ImportedFact) []ImportedFact {
+	for i := range facts {
+		facts[i].Content = security.SanitizeUntrustedContent(facts[i].Content)
+		if facts[i].Metadata == nil {
+			facts[i].Metadata = make(map[string]string)
+		}
+		facts[i].Metadata[security.UntrustedContentKey] = "true"
+		for j := range facts[i].Evidence {
+			facts[i].Evidence[j].Text = security.SanitizeUntrustedContent(facts[i].Evidence[j].Text)
+			facts[i].Evidence[j].EvidenceText = security.SanitizeUntrustedContent(facts[i].Evidence[j].EvidenceText)
+			if facts[i].Evidence[j].AlignmentStatus == evidencekit.AlignmentExact && facts[i].Evidence[j].Text != "" {
+				facts[i].Evidence[j].Span = evidencekit.Span{Start: 0, End: len(facts[i].Evidence[j].Text)}
+			}
+		}
+	}
+	return facts
 }
 
 func mergeMetadata(base, extra map[string]string) map[string]string {

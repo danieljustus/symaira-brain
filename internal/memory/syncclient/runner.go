@@ -220,7 +220,7 @@ func plainPush(ctx context.Context, client pushClient, opts Options, since time.
 	var delLastID string
 
 	for {
-		memories, err := opts.DB.GetMemoriesSinceCursorID(memSince, memLastID, pushBatchSize)
+		memories, err := opts.DB.GetMemoriesSinceCursorIDForSync(memSince, memLastID, pushBatchSize)
 		if err != nil {
 			return time.Time{}, fmt.Errorf("read local changes: %w", err)
 		}
@@ -342,7 +342,7 @@ func relayPush(ctx context.Context, client pushClient, opts Options, since time.
 
 	engine := security.NewCryptoEngine()
 	for {
-		memories, err := opts.DB.GetMemoriesSinceCursorID(memSince, memLastID, pushBatchSize)
+		memories, err := opts.DB.GetMemoriesSinceCursorIDForSync(memSince, memLastID, pushBatchSize)
 		if err != nil {
 			return time.Time{}, fmt.Errorf("read local changes: %w", err)
 		}

@@ -38,7 +38,7 @@ type SessionImporter interface {
 }
 
 // Categorizable is an optional interface for importers that belong to a specific category.
-// Categories group related importers: "code", "communication", "calendar", "documents", "notes".
+// Categories group related importers: "code", "communication", "calendar", "documents", "notes", "activity".
 type Categorizable interface {
 	Category() string
 }
@@ -72,8 +72,23 @@ type IncrementalImporter interface {
 // TranscriptImporter is an optional interface for importers that produce raw
 // conversation transcripts (e.g. JSONL logs, chat databases). When implemented
 // and extract-on-import is enabled, the registry runs extraction/summarization
-// on the raw facts before storing them. Curated-memory sources that are already
-// distilled should NOT implement this interface.
+// on the raw facts before storing them. Curated activity sources may also
+// implement this interface when their observations must remain fenced and
+// staged by the same import pipeline.
 type TranscriptImporter interface {
 	IsTranscript() bool
+}
+
+// StagedImporter marks sources whose facts must enter the review queue rather
+// than becoming live memories. It is intentionally optional so existing
+// importers retain their current behavior.
+type StagedImporter interface {
+	StageImportedFacts() bool
+}
+
+// UntrustedContentImporter marks sources whose content may contain
+// instruction-like text. The registry sanitizes these facts before extraction,
+// storage, embedding, or a future LLM handoff.
+type UntrustedContentImporter interface {
+	ContentIsUntrusted() bool
 }

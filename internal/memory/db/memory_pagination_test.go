@@ -2,6 +2,7 @@ package db
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -162,5 +163,34 @@ func TestListMemoriesLiteWithCursor_LegacyCursorCompatibility(t *testing.T) {
 	}
 	if results[0].ID != "legacy-1" {
 		t.Fatalf("expected legacy-1, got %s", results[0].ID)
+	}
+}
+
+func TestGetMemoriesSinceCursorIDForSyncExcludesMarkedActivity(t *testing.T) {
+	tempDir := t.TempDir()
+	cfg := config.Defaults()
+	cfg.Database.Path = filepath.Join(tempDir, "sync.db")
+	database, err := Open(cfg)
+	if err != nil {
+		t.Fatalf("failed to open database: %v", err)
+	}
+	defer func() { _ = database.Close() }()
+
+	ts := time.Date(2026, 8, 28, 12, 0, 0, 0, time.UTC)
+	for _, m := range []*Memory{
+		{ID: "sync-normal", Content: "normal", Scope: "global", CreatedAt: ts, UpdatedAt: ts, Metadata: map[string]string{"source": "test"}, ReviewStatus: ReviewApproved},
+		{ID: "sync-activity", Content: "activity", Scope: "global", CreatedAt: ts.Add(time.Minute), UpdatedAt: ts.Add(time.Minute), Metadata: map[string]string{"sync_exclude": "true"}, ReviewStatus: ReviewStaged},
+	} {
+		if err := database.SaveMemory(m); err != nil {
+			t.Fatalf("save %s: %v", m.ID, err)
+		}
+	}
+
+	memories, err := database.GetMemoriesSinceCursorIDForSync(time.Time{}, "", 10)
+	if err != nil {
+		t.Fatalf("GetMemoriesSinceCursorIDForSync: %v", err)
+	}
+	if len(memories) != 1 || memories[0].ID != "sync-normal" {
+		t.Fatalf("sync memories = %#v, want only sync-normal", memories)
 	}
 }
