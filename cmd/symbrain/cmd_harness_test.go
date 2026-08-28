@@ -26,8 +26,14 @@ func TestRunHarnessListJSON(t *testing.T) {
 	if report.SchemaVersion != harness.InventorySchemaVersion {
 		t.Fatalf("schema_version = %d, want %d", report.SchemaVersion, harness.InventorySchemaVersion)
 	}
-	if len(report.Harnesses) != len(harness.All) {
-		t.Fatalf("harness count = %d, want %d", len(report.Harnesses), len(harness.All))
+	want := 0
+	for _, h := range harness.All {
+		if h.SupportsMCPInstall {
+			want++
+		}
+	}
+	if len(report.Harnesses) != want {
+		t.Fatalf("harness count = %d, want %d", len(report.Harnesses), want)
 	}
 }
 

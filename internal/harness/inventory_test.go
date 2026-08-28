@@ -52,6 +52,23 @@ func TestList_ConfigMissing(t *testing.T) {
 	}
 }
 
+func TestList_OnlyMCPInstallHarnesses(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	report := List("")
+	for _, item := range report.Harnesses {
+		h, err := Lookup(string(item.Name))
+		if err != nil {
+			t.Fatalf("Lookup(%q): %v", item.Name, err)
+		}
+		if !h.SupportsMCPInstall {
+			t.Errorf("inventory includes capability-only harness %q", item.Name)
+		}
+	}
+	if got, want := len(report.Harnesses), 6; got != want {
+		t.Fatalf("inventory harness count = %d, want %d MCP-installable harnesses", got, want)
+	}
+}
+
 // TestList_ServerDetail verifies schema-2 inventory carries per-server
 // transport detail: command, args, transport inference, url, and env-var
 // names for both the JSON and TOML backends.
