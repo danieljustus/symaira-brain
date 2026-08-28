@@ -290,7 +290,9 @@ Implemented today:
 | `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain as an MCP server in a harness's config |
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain's entry from a harness's config (only that entry) |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push the canonical instructions/skills source out to installed harnesses (`--output table\|json`, default `table`) |
-| `symbrain memory` | Operate the embedded memory store (sync with a remote) |
+| `symbrain memory list [--scope <scope>] [--limit <N>]` | List stored memories from the embedded database (`--output table|json`, default table; scope default all, limit default 100, max 1000) |
+| `symbrain memory search <query> [--scope <scope>] [--limit <N>]` | Search stored memories by semantic relevance (`--output table|json`, default table; scope default all, limit default 5) |
+| `symbrain memory sync --remote <url> [--pull|--push]` | Synchronize memories with a remote memory server (supports encrypted relay; see below) |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log — last `N` entries (default 20), optionally filtered by profile. `--json` emits a JSON array of entries |
 | `symbrain vault` | Passthrough to symvault |
 | `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |

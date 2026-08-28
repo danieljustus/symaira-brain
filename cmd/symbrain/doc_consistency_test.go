@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -68,6 +71,37 @@ func TestHelpMatchesDocumentedCommands(t *testing.T) {
 	for i := range actual {
 		if actual[i] != documentedCommands[i] {
 			t.Fatalf("command mismatch at index %d: got %q, want %q", i, actual[i], documentedCommands[i])
+		}
+	}
+}
+
+func TestMemoryHelpMatchesREADME(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	if code := run([]string{"memory", "--help"}, &stdout, &stderr); code != exitcodes.ExitOK {
+		t.Fatalf("memory help exit code = %d, stderr: %s", code, stderr.String())
+	}
+	for _, subcommand := range []string{"list", "search", "sync"} {
+		if !strings.Contains(stdout.String(), "  "+subcommand) {
+			t.Errorf("memory help does not advertise %q:\n%s", subcommand, stdout.String())
+		}
+	}
+
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("runtime.Caller failed")
+	}
+	readme, err := os.ReadFile(filepath.Join(filepath.Dir(filename), "..", "..", "README.md"))
+	if err != nil {
+		t.Fatalf("read README: %v", err)
+	}
+	readmeText := strings.ReplaceAll(string(readme), "\r\n", "\n")
+	for _, invocation := range []string{
+		"symbrain memory list",
+		"symbrain memory search <query>",
+		"symbrain memory sync",
+	} {
+		if !strings.Contains(readmeText, invocation) {
+			t.Errorf("README does not document %q", invocation)
 		}
 	}
 }

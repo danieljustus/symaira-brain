@@ -30,6 +30,10 @@ func cmdMemoryWithFormat(args []string, stdout, stderr io.Writer, format output.
 	case "-h", "--help":
 		printMemoryUsage(stdout)
 		return exitcodes.ExitOK
+	case "list":
+		return cmdMemoryListWithFormat(args[1:], stdout, stderr, format)
+	case "search":
+		return cmdMemorySearchWithFormat(args[1:], stdout, stderr, format)
 	case "sync":
 		return cmdMemorySyncWithFormat(args[1:], stdout, stderr, format)
 	default:
@@ -46,8 +50,13 @@ Usage:
   symbrain memory <subcommand> [flags]
 
 Subcommands:
+  list        List stored memories (optionally filtered by scope)
+  search      Search memories by semantic relevance
   sync        Synchronize memories with a remote memory server
 
-Run 'symbrain memory sync --help' for details on the sync command.
+Use --output table|json (or --json) for the result format. Read commands
+accept --scope/-s, --limit/-l, and --db; search takes one query argument.
+Run 'symbrain memory <subcommand> --help' for details.
+For remote synchronization, run 'symbrain memory sync --help'.
 `)
 }
