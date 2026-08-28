@@ -330,6 +330,8 @@ func (l *Logger) Degraded() bool {
 
 // LatestDegradations returns degradation records from the most recent session
 // in each matching profile log. An empty profile reads every profile log.
+// It uses a bounded reverse reader to avoid loading the entire file into
+// memory for the common path.
 func LatestDegradations(profile string) ([]Degradation, error) {
 	dir, err := xdg.AuditDir()
 	if err != nil {
@@ -346,21 +348,14 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 
 	var result []Degradation
 	for _, path := range paths {
-		entries, err := tailEntries(path, 0) // 0 = all entries
+		entries, err := tailEntriesBounded(path, 0, func(entry Entry) bool {
+			return entry.Status == "degraded"
+		})
 		if err != nil {
 			return nil, fmt.Errorf("audit: read %s: %w", path, err)
 		}
 
-		lastSession := ""
 		for _, entry := range entries {
-			if entry.SessionID != "" {
-				lastSession = entry.SessionID
-			}
-		}
-		for _, entry := range entries {
-			if entry.Status != "degraded" || (lastSession != "" && entry.SessionID != lastSession) {
-				continue
-			}
 			result = append(result, Degradation{
 				SessionID: entry.SessionID,
 				Profile:   entry.Profile,
@@ -400,6 +395,116 @@ func tailEntries(path string, n int) ([]Entry, error) {
 		entries = entries[len(entries)-n:]
 	}
 	return entries, nil
+}
+
+// tailEntriesBounded reads entries from a JSONL file backwards in chunks,
+// stopping after the latest session is complete or after limit matching
+// entries are collected (0 = no limit). It never loads the entire file
+// into memory for the common path.
+//
+// The filter predicate is applied to each entry; only entries for which
+// filter returns true are returned. Results are returned in chronological
+// order (oldest first).
+func tailEntriesBounded(path string, limit int, filter func(Entry) bool) ([]Entry, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	size := info.Size()
+	if size == 0 {
+		return nil, nil
+	}
+
+	var carry []byte // prefix of a line that continues into the next chunk
+	var latestSession string
+	var results []Entry // collected in reverse chronological order
+	consume := func(line []byte) bool {
+		if len(line) == 0 {
+			return false
+		}
+
+		var entry Entry
+		if err := json.Unmarshal(line, &entry); err != nil {
+			return false
+		}
+
+		if latestSession == "" {
+			if entry.SessionID == "" {
+				return false
+			}
+			latestSession = entry.SessionID
+		}
+
+		if entry.SessionID != latestSession {
+			return true
+		}
+		if filter == nil || filter(entry) {
+			results = append(results, entry)
+			return limit > 0 && len(results) >= limit
+		}
+		return false
+	}
+
+	offset := size
+	for offset > 0 {
+		readSize := int64(tailChunkSize)
+		if offset < readSize {
+			readSize = offset
+		}
+		offset -= readSize
+
+		chunk := make([]byte, int(readSize))
+		if _, err := f.ReadAt(chunk, offset); err != nil {
+			return nil, err
+		}
+
+		// The first bytes of the later chunk may be a line fragment. Append
+		// that fragment to this chunk so the line is decoded exactly once.
+		if len(carry) > 0 {
+			chunk = append(chunk, carry...)
+			carry = nil
+		}
+
+		// Process lines in reverse order (most recent first).
+		lineEnd := len(chunk)
+		for i := len(chunk) - 1; i >= 0; i-- {
+			if chunk[i] != '\n' {
+				continue
+			}
+			if consume(chunk[i+1 : lineEnd]) {
+				reverseEntries(results)
+				return results, nil
+			}
+			lineEnd = i
+		}
+
+		// Keep the prefix before the earliest newline for the preceding
+		// chunk. At offset zero it is the complete first line.
+		if lineEnd > 0 {
+			carry = append([]byte(nil), chunk[:lineEnd]...)
+		}
+	}
+
+	if len(carry) > 0 && consume(carry) {
+		// The limit was reached while processing the earliest line.
+		reverseEntries(results)
+		return results, nil
+	}
+
+	reverseEntries(results)
+	return results, nil
+}
+
+func reverseEntries(entries []Entry) {
+	for i, j := 0, len(entries)-1; i < j; i, j = i+1, j-1 {
+		entries[i], entries[j] = entries[j], entries[i]
+	}
 }
 
 const tailChunkSize = 64 * 1024 // 64KB
