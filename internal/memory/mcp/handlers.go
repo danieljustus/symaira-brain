@@ -421,9 +421,13 @@ func (s *Server) handleSyncApply(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]int{
-		"applied":             applied,
-		"skipped":             skipped,
-		"deleted":             deleted,
+		"applied":               applied,
+		"skipped":               skipped,
+		"deleted":               deleted,
+		"skipped_invalid_scope": skippedInvalidScope,
+		"skipped_invalid_id":    skippedInvalidID,
+		// Compatibility window: legacy camelCase keys are preserved until
+		// all clients have migrated to the snake_case wire schema (#355).
 		"skippedInvalidScope": skippedInvalidScope,
 		"skippedInvalidID":    skippedInvalidID,
 	}); err != nil {

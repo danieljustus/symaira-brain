@@ -250,3 +250,43 @@ func TestClientChanges_OversizedResponseBody(t *testing.T) {
 		t.Errorf("error %q lacks expected context", err)
 	}
 }
+
+// TestApplyResult_WireSchema locks the external JSON shape for the sync
+// apply response and verifies backward compatibility with the legacy
+// camelCase keys during the #355 compatibility window.
+func TestApplyResult_WireSchema(t *testing.T) {
+	// Marshal must emit the canonical snake_case keys and must NOT emit
+	// the legacy camelCase keys.
+	res := ApplyResult{Applied: 2, Skipped: 1, Deleted: 0, SkippedInvalidScope: 3, SkippedInvalidID: 4}
+	b, err := json.Marshal(res)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatalf("Unmarshal marshal output: %v", err)
+	}
+	if _, ok := m["skipped_invalid_scope"]; !ok {
+		t.Errorf("missing snake_case key skipped_invalid_scope in %s", b)
+	}
+	if _, ok := m["skipped_invalid_id"]; !ok {
+		t.Errorf("missing snake_case key skipped_invalid_id in %s", b)
+	}
+	if _, ok := m["skippedInvalidScope"]; ok {
+		t.Errorf("legacy camelCase key skippedInvalidScope must not be emitted: %s", b)
+	}
+	if _, ok := m["skippedInvalidID"]; ok {
+		t.Errorf("legacy camelCase key skippedInvalidID must not be emitted: %s", b)
+	}
+
+	// Unmarshal must accept the legacy camelCase payload and populate fields.
+	legacy := `{"applied":5,"skipped":2,"deleted":1,"skippedInvalidScope":7,"skippedInvalidID":8}`
+	var parsed ApplyResult
+	if err := json.Unmarshal([]byte(legacy), &parsed); err != nil {
+		t.Fatalf("Unmarshal legacy camelCase: %v", err)
+	}
+	if parsed.Applied != 5 || parsed.Skipped != 2 || parsed.Deleted != 1 ||
+		parsed.SkippedInvalidScope != 7 || parsed.SkippedInvalidID != 8 {
+		t.Errorf("legacy parse = %+v", parsed)
+	}
+}
