@@ -468,8 +468,9 @@ type memoryIndex struct {
 
 // buildMemoryPrompt formats memories with short integer indices and returns
 // the prompt string plus the reverse mapping (index → UUID). Every memory's
-// content is treated as untrusted data (#493): instruction-injection
-// markers are neutralized line-wise before the block is composed.
+// content is treated as untrusted data (#493, #375): injection markers and
+// delimiter tags are neutralized, and each memory is wrapped in its own
+// explicit untrusted-data block before the batch block is composed.
 func buildMemoryPrompt(scope string, memories []*db.Memory) (string, []memoryIndex) {
 	var builder strings.Builder
 	builder.WriteString("<memory_content>\n")
@@ -477,7 +478,7 @@ func buildMemoryPrompt(scope string, memories []*db.Memory) (string, []memoryInd
 	for i, m := range memories {
 		idx := i + 1
 		indices[i] = memoryIndex{mem: m, uuid: m.ID}
-		content := security.SanitizeLines(m.Content)
+		content := security.SanitizeUntrustedContent(m.Content)
 		fmt.Fprintf(&builder, "- [%d] Content: %s\n  Created: %s\n", idx, content, m.CreatedAt.Format(time.RFC3339))
 	}
 	builder.WriteString("</memory_content>")

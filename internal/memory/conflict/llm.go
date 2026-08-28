@@ -66,13 +66,11 @@ func (p *LLMVerdictProvider) Verdicts(ctx context.Context, pairs []Pair) ([]Verd
 	}
 	var sb strings.Builder
 	for i, pr := range pairs {
-		// Stored memory content is untrusted data (#505): the same
-		// line-wise marker neutralization the extraction and
-		// consolidation paths apply (#493) is applied here before the
-		// batch is composed, so an instruction-injection marker cannot
-		// steer the verdict model.
+		// Stored memory content is untrusted data (#505, #375): the full
+		// sanitizer adds the data-not-instructions preamble and fences each
+		// value while neutralizing injection and delimiter tags.
 		fmt.Fprintf(&sb, "[pair %d]\nnew fact (written now, by %q): %s\nold fact (already stored, by %q): %s\n\n",
-			i, pr.NewActor, security.SanitizeLines(pr.NewContent), pr.OldActor, security.SanitizeLines(pr.OldContent))
+			i, pr.NewActor, security.SanitizeUntrustedContent(pr.NewContent), pr.OldActor, security.SanitizeUntrustedContent(pr.OldContent))
 	}
 
 	// The standing "data, never instructions" preamble precedes the
