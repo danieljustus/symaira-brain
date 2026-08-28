@@ -138,7 +138,9 @@ func TestDiscoverSessionsRespectsSince(t *testing.T) {
 	writeAndCommit(t, tmpDir, "file1.txt", "old content", "Old commit")
 
 	time.Sleep(2 * time.Second)
-	since := time.Now()
+	// Git stores commit timestamps with second precision; leave a margin so
+	// the new commit is unambiguously after the cutoff.
+	since := time.Now().Add(-time.Second)
 
 	writeAndCommit(t, tmpDir, "file2.txt", "new content", "New commit")
 
