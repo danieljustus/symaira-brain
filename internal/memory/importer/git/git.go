@@ -40,9 +40,10 @@ func (g *GitImporter) PrivacyLevel() importer.PrivacyLevel { return importer.Pri
 func (g *GitImporter) RequiresPIIGuard() bool { return false }
 
 func (g *GitImporter) DiscoverSessions(since time.Time) ([]importer.SessionRef, error) {
-	sinceStr := since.Format("2006-01-02")
-
-	args := []string{"-C", g.repoPath, "log", "--since=" + sinceStr, "--format=%H|%an|%ae|%aI|%s|%P", "--no-merges"}
+	args := []string{"-C", g.repoPath, "log", "--format=%H|%an|%ae|%aI|%s|%P", "--no-merges"}
+	if !since.IsZero() {
+		args = append(args, "--since="+since.UTC().Format(time.RFC3339Nano))
+	}
 	if g.author != "" {
 		args = append(args, "--author="+g.author)
 	}
