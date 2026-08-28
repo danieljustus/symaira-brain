@@ -40,14 +40,28 @@ func NewAuthMiddleware(jwts *security.JWTProvider, database *db.DB, requireProfi
 
 // resolveProfileForRole looks up the profile for payload.Subject in database, falling back to
 // override when set. It fails closed on a DB lookup error (denies rather than granting default
-// access), and — when requireProfile is set — denies write access to subjects with no stored
-// profile at all. In the permissive default it grants access to unknown subjects but logs a
+// access), and — when requireProfile is set — denies access to subjects with no stored profile
+// at all (fail closed). In the permissive default it grants access to unknown subjects but logs a
 // warning, since role enforcement is otherwise silently bypassable for any valid token whose
 // subject has no matching profile.
 func resolveProfileForRole(w http.ResponseWriter, payload *security.JWTPayload, override *db.Profile, database *db.DB, requireProfile bool, minRole security.Role) (*db.Profile, bool) {
-	profile := override
-	if profile != nil || payload == nil || payload.Subject == "" || database == nil {
-		return profile, true
+	if override != nil {
+		return override, true
+	}
+
+	if payload == nil || strings.TrimSpace(payload.Subject) == "" {
+		if requireProfile {
+			writeJSONError(w, http.StatusForbidden, CodeForbidden, "insufficient permissions: no profile registered for subject", nil)
+			return nil, false
+		}
+		return nil, true
+	}
+	if database == nil {
+		if requireProfile {
+			writeJSONError(w, http.StatusForbidden, CodeForbidden, "failed to verify permissions", nil)
+			return nil, false
+		}
+		return nil, true
 	}
 
 	p, err := database.GetProfileByName(payload.Subject)
@@ -56,7 +70,7 @@ func resolveProfileForRole(w http.ResponseWriter, payload *security.JWTPayload, 
 		return nil, false
 	}
 	if p == nil {
-		if requireProfile && minRole == security.RoleReadWrite {
+		if requireProfile {
 			writeJSONError(w, http.StatusForbidden, CodeForbidden, "insufficient permissions: no profile registered for subject", nil)
 			return nil, false
 		}
