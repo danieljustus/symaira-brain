@@ -289,6 +289,11 @@ func checkServers(ctx context.Context) []serverCheck {
 // core that ships for this platform. It complements the state-core server
 // checks: symcockpit is a managed binary but not a state core, so it
 // appears here (and only on macOS) rather than in the Servers section.
+//
+// The manifest-load error branch (lines 293-296) is unreachable in
+// practice: LoadManifest reads an embedded manifest.json that is
+// validated at compile time by go:embed; a corrupt embedded file would
+// fail to build. It is kept as defensive programming.
 func managedCoreChecks(ctx context.Context, binDir string) []managedCoreCheck {
 	manifest, err := managed.LoadManifest()
 	if err != nil {

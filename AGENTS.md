@@ -30,8 +30,10 @@ Symbrain is explicitly **not**:
 - **A second `symguard`.** See "Brain ↔ Guard Boundary" below.
 - **A second `symskills`.** Skill rendering/installation stays entirely in
   symskills; symbrain only orchestrates it (shells out, parses `--json`).
-- **A memory store.** Symbrain persists no memories and no secrets itself. It
-  only holds profiles, the instructions source, and an audit log.
+- **A remote memory or credential store.** Memory and skills are embedded
+  in-process (absorbed 2026-08-21); credentials stay behind the separate
+  `symvault` process on purpose. symbrain brokers the external vault and
+  owns the embedded memory + skills stores.
 - **A GUI** on its own (though native SwiftUI apps now exist in `Sources/` as
   the macOS and iOS clients for the CLI).
 
@@ -255,7 +257,7 @@ New configs and error messages should use `symvault://`; see
 ### XDG Paths
 
 | Purpose | Path | Env prefix |
-|---------|------|--------------|
+|---------|------|------------|
 | Config | `~/.config/symbrain/config.toml` | `SYMBRAIN_*` |
 | Data (audit log) | `~/.local/share/symbrain/` | `SYMBRAIN_*` |
 | Cache | `~/.cache/symbrain/` | `SYMBRAIN_*` |
@@ -292,6 +294,31 @@ names. Go structs use idiomatic CamelCase with `json:"snake_case"` tags.
 - Keep README.md updated with build instructions, usage, and project overview.
 - Code comments explain *why*, not *what*.
 - Package-level doc comments are mandatory for every package.
+
+---
+
+## CLI Command Reference
+
+| Command | Purpose |
+|---|---|
+| `symbrain init` | Create XDG directories, default config, and example profiles |
+| `symbrain doctor [--json]` | Check environment, config, profiles, and child binaries |
+| `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
+| `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` |
+| `symbrain config` | Inspect and edit the global config (path, get, set) |
+| `symbrain harness list [--project DIR]` | Inspect every known harness and its registered MCP servers |
+| `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of registered servers |
+| `symbrain usage` | AI subscription/token usage per provider |
+| `symbrain mcp --profile <name> \| --profile-file <path>` | Run the MCP gateway over stdio (`serve` is a deprecated alias) |
+| `symbrain install --harness <name> --profile <name> [--project DIR] [--dry-run]` | Register symbrain with a harness |
+| `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain from a harness |
+| `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push instructions/skills to installed harnesses |
+| `symbrain memory` | Operate the embedded memory store |
+| `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log |
+| `symbrain vault` | Passthrough to symvault |
+| `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |
+| `symbrain version` | Print version information |
+| `symbrain help` | Show this help message |
 
 ---
 
