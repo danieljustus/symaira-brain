@@ -1111,3 +1111,404 @@ func TestRedactArgs_CommonCredentialVariants(t *testing.T) {
 		}
 	}
 }
+
+// TestTailEntriesBounded_MultiProfile writes two profile logs and verifies
+// the bounded reader returns only degraded entries from the latest session
+// in each file.
+func TestTailEntriesBounded_MultiProfile(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	line := func(entry Entry) string {
+		data, err := json.Marshal(entry)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		return string(data) + "\n"
+	}
+
+	// prof.jsonl: two sessions; only the last session's degraded entry
+	// should be returned by the bounded reader.
+	profLog := filepath.Join(auditDir, "prof.jsonl")
+	if err := os.WriteFile(profLog, []byte(joinLines([]string{
+		line(Entry{SessionID: "s1", Profile: "prof", Server: "vault", Status: "degraded", Reason: "old", Level: "warning"}),
+		line(Entry{SessionID: "s2", Profile: "prof", Server: "vault", Status: "ok"}),
+		line(Entry{SessionID: "s2", Profile: "prof", Server: "memory", Status: "degraded", Reason: "new", Level: "warning"}),
+	})), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	// other.jsonl: single degraded entry in a different profile.
+	otherLog := filepath.Join(auditDir, "other.jsonl")
+	if err := os.WriteFile(otherLog, []byte(joinLines([]string{
+		line(Entry{SessionID: "s9", Profile: "other", Server: "skills", Status: "degraded", Reason: "missing", Level: "error"}),
+	})), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("prof latest session degraded only", func(t *testing.T) {
+		got, err := tailEntriesBounded(profLog, 0, func(entry Entry) bool {
+			return entry.Status == "degraded"
+		})
+		if err != nil {
+			t.Fatalf("tailEntriesBounded: %v", err)
+		}
+		if len(got) != 1 {
+			t.Fatalf("expected 1 degraded entry from latest session, got %d", len(got))
+		}
+		if got[0].Reason != "new" {
+			t.Errorf("Reason = %q, want new", got[0].Reason)
+		}
+	})
+
+	t.Run("other latest session degraded only", func(t *testing.T) {
+		got, err := tailEntriesBounded(otherLog, 0, func(entry Entry) bool {
+			return entry.Status == "degraded"
+		})
+		if err != nil {
+			t.Fatalf("tailEntriesBounded: %v", err)
+		}
+		if len(got) != 1 {
+			t.Fatalf("expected 1 degraded entry, got %d", len(got))
+		}
+		if got[0].Server != "skills" {
+			t.Errorf("Server = %q, want skills", got[0].Server)
+		}
+	})
+}
+
+// TestTailEntriesBounded_ServerFilteredRead verifies that the filter
+// predicate correctly selects entries by server.
+func TestTailEntriesBounded_ServerFilteredRead(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	logPath := filepath.Join(auditDir, "filter.jsonl")
+	line := func(entry Entry) string {
+		data, _ := json.Marshal(entry)
+		return string(data) + "\n"
+	}
+	if err := os.WriteFile(logPath, []byte(joinLines([]string{
+		line(Entry{SessionID: "s1", Profile: "p", Server: "vault", Status: "ok"}),
+		line(Entry{SessionID: "s1", Profile: "p", Server: "memory", Status: "ok"}),
+		line(Entry{SessionID: "s1", Profile: "p", Server: "vault", Status: "error"}),
+	})), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := tailEntriesBounded(logPath, 0, func(entry Entry) bool {
+		return entry.Server == "vault"
+	})
+	if err != nil {
+		t.Fatalf("tailEntriesBounded: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 vault entries, got %d", len(got))
+	}
+	for _, e := range got {
+		if e.Server != "vault" {
+			t.Errorf("Server = %q, want vault", e.Server)
+		}
+	}
+}
+
+// TestTailEntriesBounded_RotatedLargeLog writes a log larger than the
+// chunk size and verifies the bounded reader returns only entries from
+// the latest session without reading the entire file.
+func TestTailEntriesBounded_RotatedLargeLog(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	const totalEntries = 3000
+	logPath := filepath.Join(auditDir, "rotated.jsonl")
+	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Write many entries spanning multiple sessions.
+	for i := 0; i < totalEntries; i++ {
+		session := "old"
+		if i >= totalEntries-50 {
+			session = "latest"
+		}
+		entry := Entry{
+			Timestamp:  "2026-01-01T00:00:00Z",
+			SessionID:  session,
+			Profile:    "rot",
+			Server:     "memory",
+			Tool:       "search",
+			DurationMS: int64(i),
+			Status:     "ok",
+		}
+		data, _ := json.Marshal(entry)
+		if _, err := f.Write(append(data, '\n')); err != nil {
+			t.Fatal(err)
+		}
+	}
+	f.Close()
+
+	info, err := os.Stat(logPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Size() <= tailChunkSize {
+		t.Fatalf("fixture too small: %d bytes; backward scan needs > %d", info.Size(), tailChunkSize)
+	}
+
+	// The bounded reader should only read the latest session's entries,
+	// not the entire 3000-entry file.
+	got, err := tailEntriesBounded(logPath, 0, nil)
+	if err != nil {
+		t.Fatalf("tailEntriesBounded: %v", err)
+	}
+	if len(got) != 50 {
+		t.Fatalf("expected 50 entries from latest session, got %d", len(got))
+	}
+	for _, e := range got {
+		if e.SessionID != "latest" {
+			t.Errorf("SessionID = %q, want latest", e.SessionID)
+		}
+	}
+}
+
+// TestTailEntriesBounded_MalformedLineSkipping verifies that malformed
+// JSON lines are silently skipped during the backward scan.
+func TestTailEntriesBounded_MalformedLineSkipping(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	logPath := filepath.Join(auditDir, "malformed.jsonl")
+	content := joinLines([]string{
+		`{"session_id":"s1","profile":"p","server":"vault","tool":"x","status":"ok"}` + "\n",
+		"NOT JSON\n",
+		"\n",
+		`{"session_id":"s1","profile":"p","server":"memory","tool":"y","status":"degraded","reason":"bad","level":"warning"}` + "\n",
+	})
+	if err := os.WriteFile(logPath, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := tailEntriesBounded(logPath, 0, func(entry Entry) bool {
+		return entry.Status == "degraded"
+	})
+	if err != nil {
+		t.Fatalf("tailEntriesBounded: %v", err)
+	}
+	if len(got) != 1 {
+		t.Fatalf("expected 1 degraded entry (malformed skipped), got %d", len(got))
+	}
+	if got[0].Server != "memory" {
+		t.Errorf("Server = %q, want memory", got[0].Server)
+	}
+}
+
+// TestTailEntriesBounded_LimitBehavior verifies that the limit parameter
+// stops collection after N matching entries are found.
+func TestTailEntriesBounded_LimitBehavior(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("limit returns at most N entries", func(t *testing.T) {
+		logPath := filepath.Join(auditDir, "limit.jsonl")
+		var lines []string
+		for i := 0; i < 20; i++ {
+			lines = append(lines, fmt.Sprintf(`{"session_id":"s1","profile":"p","server":"vault","tool":"x","status":"degraded","reason":"r%d","level":"warning"}`+"\n", i))
+		}
+		if err := os.WriteFile(logPath, []byte(joinLines(lines)), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := tailEntriesBounded(logPath, 5, nil)
+		if err != nil {
+			t.Fatalf("tailEntriesBounded: %v", err)
+		}
+		if len(got) != 5 {
+			t.Fatalf("expected 5 entries with limit=5, got %d", len(got))
+		}
+		// Results should be the 5 most recent entries in chronological order.
+		if got[0].Reason != "r15" {
+			t.Errorf("first Reason = %q, want r15", got[0].Reason)
+		}
+		if got[4].Reason != "r19" {
+			t.Errorf("fifth Reason = %q, want r19", got[4].Reason)
+		}
+	})
+
+	t.Run("limit zero returns all matching entries", func(t *testing.T) {
+		logPath := filepath.Join(auditDir, "limit0.jsonl")
+		var lines []string
+		for i := 0; i < 10; i++ {
+			lines = append(lines, fmt.Sprintf(`{"session_id":"s1","profile":"p","server":"vault","tool":"x","status":"degraded","reason":"r%d","level":"warning"}`+"\n", i))
+		}
+		if err := os.WriteFile(logPath, []byte(joinLines(lines)), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := tailEntriesBounded(logPath, 0, nil)
+		if err != nil {
+			t.Fatalf("tailEntriesBounded: %v", err)
+		}
+		if len(got) != 10 {
+			t.Fatalf("expected 10 entries with limit=0, got %d", len(got))
+		}
+	})
+
+	t.Run("limit stops within latest session only", func(t *testing.T) {
+		// Two sessions; limit should stop within the latest session,
+		// not bleed into the older session.
+		logPath := filepath.Join(auditDir, "limit_session.jsonl")
+		var lines []string
+		for i := 0; i < 5; i++ {
+			lines = append(lines, fmt.Sprintf(`{"session_id":"old","profile":"p","server":"vault","tool":"x","status":"degraded","reason":"old-%d","level":"warning"}`+"\n", i))
+		}
+		for i := 0; i < 10; i++ {
+			lines = append(lines, fmt.Sprintf(`{"session_id":"new","profile":"p","server":"vault","tool":"x","status":"degraded","reason":"new-%d","level":"warning"}`+"\n", i))
+		}
+		if err := os.WriteFile(logPath, []byte(joinLines(lines)), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := tailEntriesBounded(logPath, 3, nil)
+		if err != nil {
+			t.Fatalf("tailEntriesBounded: %v", err)
+		}
+		if len(got) != 3 {
+			t.Fatalf("expected 3 entries, got %d", len(got))
+		}
+		for _, e := range got {
+			if e.SessionID != "new" {
+				t.Errorf("SessionID = %q, want new (limit must not bleed into older session)", e.SessionID)
+			}
+		}
+		if got[0].Reason != "new-7" {
+			t.Errorf("first Reason = %q, want new-7", got[0].Reason)
+		}
+	})
+}
+
+// TestTailEntriesBounded_LatestDegradationsIntegration verifies that
+// LatestDegradations uses the bounded path correctly for multi-profile
+// logs.
+func TestTailEntriesBounded_LatestDegradationsIntegration(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", dir)
+
+	auditDir := filepath.Join(dir, "symbrain", "audit")
+	if err := os.MkdirAll(auditDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+
+	line := func(entry Entry) string {
+		data, err := json.Marshal(entry)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		return string(data) + "\n"
+	}
+
+	// Two profiles, each with multiple sessions.
+	if err := os.WriteFile(filepath.Join(auditDir, "alpha.jsonl"), []byte(joinLines([]string{
+		line(Entry{SessionID: "a1", Profile: "alpha", Server: "vault", Status: "degraded", Reason: "old", Level: "warning"}),
+		line(Entry{SessionID: "a2", Profile: "alpha", Server: "vault", Status: "ok"}),
+		line(Entry{SessionID: "a2", Profile: "alpha", Server: "memory", Status: "degraded", Reason: "new", Level: "error"}),
+	})), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(auditDir, "beta.jsonl"), []byte(joinLines([]string{
+		line(Entry{SessionID: "b1", Profile: "beta", Server: "vault", Status: "degraded", Reason: "only", Level: "warning"}),
+	})), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := LatestDegradations("")
+	if err != nil {
+		t.Fatalf("LatestDegradations: %v", err)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 degradations, got %d", len(got))
+	}
+
+	profiles := map[string]bool{}
+	for _, d := range got {
+		profiles[d.Profile] = true
+		if d.Profile == "alpha" && d.Reason != "new" {
+			t.Errorf("alpha degradation Reason = %q, want new", d.Reason)
+		}
+		if d.Profile == "beta" && d.Reason != "only" {
+			t.Errorf("beta degradation Reason = %q, want only", d.Reason)
+		}
+	}
+	if !profiles["alpha"] || !profiles["beta"] {
+		t.Errorf("expected both alpha and beta profiles, got %v", profiles)
+	}
+}
+
+func TestTailEntriesBounded_ChunkBoundaryPreservesLine(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "audit.jsonl")
+	var content strings.Builder
+	appendEntry := func(session, tool string) {
+		data, err := json.Marshal(Entry{
+			SessionID: session,
+			Profile:   "profile",
+			Server:    "memory",
+			Tool:      tool,
+			Status:    "degraded",
+			Reason:    strings.Repeat("x", 256),
+		})
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		content.Write(data)
+		content.WriteByte('\n')
+	}
+
+	for i := 0; i < 500; i++ {
+		appendEntry("old", fmt.Sprintf("old-%d", i))
+	}
+	for i := 0; i < 700; i++ {
+		appendEntry("latest", fmt.Sprintf("latest-%d", i))
+	}
+	if err := os.WriteFile(path, []byte(strings.TrimSuffix(content.String(), "\n")), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := tailEntriesBounded(path, 0, nil)
+	if err != nil {
+		t.Fatalf("tailEntriesBounded: %v", err)
+	}
+	if len(got) != 700 {
+		t.Fatalf("expected 700 latest-session entries, got %d", len(got))
+	}
+	for i, entry := range got {
+		want := fmt.Sprintf("latest-%d", i)
+		if entry.Tool != want {
+			t.Errorf("entry %d tool = %q, want %q", i, entry.Tool, want)
+		}
+	}
+}

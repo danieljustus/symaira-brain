@@ -481,6 +481,107 @@ name = "byebye"`)
 	}
 }
 
+// ---- remove: harness binding guards ----
+
+func TestCmdProfileRemove_UnreferencedProfileRemoved(t *testing.T) {
+	home := sandboxHome(t)
+	writeProfileFile(t, home, "free", `[profile]
+name = "free"`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdProfile([]string{"remove", "free", "--force"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("profile remove free = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	path := filepath.Join(home, ".config", "symbrain", "profiles", "free.toml")
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("expected %s to be removed, stat err = %v", path, err)
+	}
+}
+
+func TestCmdProfileRemove_GlobalHarnessBindingRefuses(t *testing.T) {
+	home := harnessSandbox(t)
+	writeProfileFile(t, home, "bound-global", `[profile]
+name = "bound-global"`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdInstall([]string{"--harness", "claude", "--profile", "bound-global"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("install into claude = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	code = cmdProfile([]string{"remove", "bound-global"}, &stdout, &stderr)
+	if code != exitcodes.ExitGeneric {
+		t.Fatalf("profile remove bound-global = %d, want %d (stderr: %s)", code, exitcodes.ExitGeneric, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "is still bound to harnesses") {
+		t.Errorf("stderr = %q, want it to mention bound to harnesses", stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "claude") {
+		t.Errorf("stderr = %q, want it to mention the blocking harness", stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "Refusing to remove") {
+		t.Errorf("stderr = %q, want it to mention refusing to remove", stderr.String())
+	}
+
+	path := filepath.Join(home, ".config", "symbrain", "profiles", "bound-global.toml")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Errorf("expected %s to still exist after refused removal", path)
+	}
+}
+
+func TestCmdProfileRemove_ProjectHarnessBindingRefuses(t *testing.T) {
+	home := harnessSandbox(t)
+	projectDir := t.TempDir()
+	writeProfileFile(t, home, "bound-project", `[profile]
+name = "bound-project"`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdInstall([]string{"--harness", "claude", "--profile", "bound-project", "--project", projectDir}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("install into claude project = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	code = cmdProfile([]string{"remove", "bound-project", "--project", projectDir}, &stdout, &stderr)
+	if code != exitcodes.ExitGeneric {
+		t.Fatalf("profile remove bound-project = %d, want %d (stderr: %s)", code, exitcodes.ExitGeneric, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "is still bound to harnesses") {
+		t.Errorf("stderr = %q, want it to mention bound to harnesses", stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "claude") {
+		t.Errorf("stderr = %q, want it to mention the blocking harness", stderr.String())
+	}
+
+	path := filepath.Join(home, ".config", "symbrain", "profiles", "bound-project.toml")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Errorf("expected %s to still exist after refused removal", path)
+	}
+}
+
+func TestCmdProfileRemove_ForceRemovesDespiteGlobalBinding(t *testing.T) {
+	home := harnessSandbox(t)
+	writeProfileFile(t, home, "forced", `[profile]
+name = "forced"`)
+
+	var stdout, stderr bytes.Buffer
+	code := cmdInstall([]string{"--harness", "claude", "--profile", "forced"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("install into claude = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	code = cmdProfile([]string{"remove", "forced", "--force"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("profile remove forced --force = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	path := filepath.Join(home, ".config", "symbrain", "profiles", "forced.toml")
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("expected %s to be removed with --force, stat err = %v", path, err)
+	}
+}
+
 // ---- reorderFlagsFirst ----
 
 func TestReorderFlagsFirst(t *testing.T) {
