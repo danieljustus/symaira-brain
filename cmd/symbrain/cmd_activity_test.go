@@ -30,7 +30,7 @@ func newCLIActivityTestDB(t *testing.T, base time.Time) string {
 		ID: "cli-segment", Source: "symcockpit", Granularity: activity.Granularity10Min,
 		StartedAt: base, EndedAt: base.Add(10 * time.Minute),
 		Applications: []string{"Editor"}, RedactedSummary: "edited activity summary",
-		RawRef: "/opaque/cli.ref",
+		RawRef: "/opaque/cli.ref", ExpiresAt: base.Add(365 * 24 * time.Hour),
 	}); err != nil {
 		_ = database.Close()
 		t.Fatalf("save activity segment: %v", err)
