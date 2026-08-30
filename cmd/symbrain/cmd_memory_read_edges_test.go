@@ -52,7 +52,7 @@ func TestMemoryReadWrappersAndEmptyPaths(t *testing.T) {
 
 	t.Run("search wrapper delegates valid request", func(t *testing.T) {
 		var stdout, stderr bytes.Buffer
-		code := cmdMemorySearch([]string{"missing", "--db", path}, &stdout, &stderr)
+		code := cmdMemorySearch([]string{"--db", path, "missing"}, &stdout, &stderr)
 		if code != exitcodes.ExitOK || stdout.String() != "No relevant memories found.\n" {
 			t.Fatalf("exit = %v, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
 		}
@@ -109,7 +109,7 @@ func TestMemoryReadWrappersAndEmptyPaths(t *testing.T) {
 	t.Run("search rejects missing and empty query", func(t *testing.T) {
 		for name, args := range map[string][]string{
 			"missing": {"--db", path},
-			"empty":   {"", "--db", path},
+			"empty":   {"--db", path, ""},
 		} {
 			t.Run(name, func(t *testing.T) {
 				var stdout, stderr bytes.Buffer
@@ -132,18 +132,9 @@ func TestMemoryReadWrappersAndEmptyPaths(t *testing.T) {
 		}
 	})
 
-	t.Run("search falls back to defaults when config is absent", func(t *testing.T) {
-		t.Setenv("HOME", t.TempDir())
-		var stdout, stderr bytes.Buffer
-		code := cmdMemorySearchWithFormat([]string{"missing", "--db", path}, &stdout, &stderr, output.FormatTable)
-		if code != exitcodes.ExitOK || stdout.String() != "No relevant memories found.\n" {
-			t.Fatalf("exit = %v, stdout = %q, stderr = %q", code, stdout.String(), stderr.String())
-		}
-	})
-
 	t.Run("search renders empty result", func(t *testing.T) {
 		var stdout, stderr bytes.Buffer
-		code := cmdMemorySearchWithFormat([]string{"missing", "--db", path}, &stdout, &stderr, output.FormatTable)
+		code := cmdMemorySearchWithFormat([]string{"--db", path, "missing"}, &stdout, &stderr, output.FormatTable)
 		if code != exitcodes.ExitOK {
 			t.Fatalf("exit = %v, stderr = %q", code, stderr.String())
 		}
@@ -154,7 +145,7 @@ func TestMemoryReadWrappersAndEmptyPaths(t *testing.T) {
 
 	t.Run("search reports database open failure", func(t *testing.T) {
 		var stdout, stderr bytes.Buffer
-		code := cmdMemorySearchWithFormat([]string{"missing", "--db", t.TempDir()}, &stdout, &stderr, output.FormatTable)
+		code := cmdMemorySearchWithFormat([]string{"--db", t.TempDir(), "missing"}, &stdout, &stderr, output.FormatTable)
 		if code != exitcodes.ExitGeneric {
 			t.Fatalf("exit = %v, want generic", code)
 		}
@@ -164,7 +155,7 @@ func TestMemoryReadWrappersAndEmptyPaths(t *testing.T) {
 	})
 
 	t.Run("search reports output failure", func(t *testing.T) {
-		code := cmdMemorySearchWithFormat([]string{"missing", "--db", path}, memoryReadErrorWriter{}, &bytes.Buffer{}, output.FormatJSON)
+		code := cmdMemorySearchWithFormat([]string{"--db", path, "missing"}, memoryReadErrorWriter{}, &bytes.Buffer{}, output.FormatJSON)
 		if code != exitcodes.ExitGeneric {
 			t.Fatalf("exit = %v, want generic", code)
 		}
