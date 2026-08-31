@@ -21,6 +21,13 @@ jobs:
   test:
     name: Pre-release checks
     runs-on: ubuntu-latest
+    env:
+      # Several tests exercise HOME fallback paths. Do not let runner-level
+      # XDG variables redirect their fixtures to /home/runner/.config.
+      XDG_CONFIG_HOME: ""
+      XDG_DATA_HOME: ""
+      XDG_CACHE_HOME: ""
+      XDG_STATE_HOME: ""
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
