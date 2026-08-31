@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
+	"fmt"
 	"io"
 	"sync"
 
@@ -38,6 +40,9 @@ type CryptoEngine struct {
 	cachedSalt       []byte
 	cachedKey        []byte
 	hasCachedKey     bool
+	cacheKey         [32]byte
+	cacheKeyOnce     sync.Once
+	cacheKeyErr      error
 }
 
 // NewCryptoEngine creates a new crypto instance.
@@ -53,12 +58,31 @@ func (ce *CryptoEngine) DeriveKey(passphrase string, salt []byte) []byte {
 	return deriveKey(passphrase, salt)
 }
 
-func (ce *CryptoEngine) encryptionMaterial(passphrase string) (key, salt []byte, err error) {
-	passphraseHash := sha256.Sum256([]byte(passphrase))
+func (ce *CryptoEngine) passphraseFingerprint(passphrase string) ([sha256.Size]byte, error) {
+	ce.cacheKeyOnce.Do(func() {
+		_, ce.cacheKeyErr = io.ReadFull(rand.Reader, ce.cacheKey[:])
+	})
+	if ce.cacheKeyErr != nil {
+		return [sha256.Size]byte{}, fmt.Errorf("generate cache key: %w", ce.cacheKeyErr)
+	}
 
+	h := hmac.New(sha256.New, ce.cacheKey[:])
+	if _, err := h.Write([]byte(passphrase)); err != nil {
+		return [sha256.Size]byte{}, fmt.Errorf("fingerprint passphrase: %w", err)
+	}
+	var fingerprint [sha256.Size]byte
+	copy(fingerprint[:], h.Sum(nil))
+	return fingerprint, nil
+}
+
+func (ce *CryptoEngine) encryptionMaterial(passphrase string) (key, salt []byte, err error) {
 	ce.mu.Lock()
 	defer ce.mu.Unlock()
 
+	passphraseHash, err := ce.passphraseFingerprint(passphrase)
+	if err != nil {
+		return nil, nil, err
+	}
 	if ce.hasCachedKey && ce.cachedPassphrase == passphraseHash {
 		return append([]byte(nil), ce.cachedKey...), append([]byte(nil), ce.cachedSalt...), nil
 	}
@@ -76,11 +100,13 @@ func (ce *CryptoEngine) encryptionMaterial(passphrase string) (key, salt []byte,
 }
 
 func (ce *CryptoEngine) keyFor(passphrase string, salt []byte) []byte {
-	passphraseHash := sha256.Sum256([]byte(passphrase))
-
 	ce.mu.Lock()
 	defer ce.mu.Unlock()
 
+	passphraseHash, err := ce.passphraseFingerprint(passphrase)
+	if err != nil {
+		return nil
+	}
 	if ce.hasCachedKey && ce.cachedPassphrase == passphraseHash && bytes.Equal(ce.cachedSalt, salt) {
 		return append([]byte(nil), ce.cachedKey...)
 	}
