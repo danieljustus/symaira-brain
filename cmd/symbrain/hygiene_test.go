@@ -64,6 +64,7 @@ enabled = false
 	cmd := exec.Command(symbrainBin, "mcp", "--profile", "hygiene")
 	cmd.Env = append(os.Environ(),
 		"HOME="+home,
+		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
 		"SYMBRAIN_SERVERS_VAULT_BINARY_PATH="+vaultWrapper,
 		"SYMBRAIN_SERVERS_MEMORY_BINARY_PATH="+memoryWrapper,
 	)
