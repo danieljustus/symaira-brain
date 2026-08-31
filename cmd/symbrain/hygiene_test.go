@@ -64,6 +64,7 @@ enabled = false
 	cmd := exec.Command(symbrainBin, "mcp", "--profile", "hygiene")
 	cmd.Env = append(os.Environ(),
 		"HOME="+home,
+		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
 		"SYMBRAIN_SERVERS_VAULT_BINARY_PATH="+vaultWrapper,
 		"SYMBRAIN_SERVERS_MEMORY_BINARY_PATH="+memoryWrapper,
 	)
@@ -76,7 +77,7 @@ enabled = false
 	if err != nil {
 		t.Fatal(err)
 	}
-	var stderr strings.Builder
+	var stderr synchronizedBuffer
 	cmd.Stderr = &stderr
 
 	if err := cmd.Start(); err != nil {
@@ -211,6 +212,23 @@ enabled = false
 	if err := <-scanErr; err != nil {
 		t.Fatalf("stdout hygiene violated: %v", err)
 	}
+}
+
+type synchronizedBuffer struct {
+	mu  sync.Mutex
+	buf strings.Builder
+}
+
+func (b *synchronizedBuffer) Write(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *synchronizedBuffer) String() string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.String()
 }
 
 var (

@@ -67,6 +67,37 @@ func TestResolveEnvVaultURIFailure(t *testing.T) {
 	}
 }
 
+func TestResolveEnvSharedReferences(t *testing.T) {
+	old := vaultResolver
+	vaultResolver = fakeVault(map[string]string{
+		"env://SYMBRAIN_TEST_ENV_REFERENCE": "from-env-reference",
+		"keychain://service/account":        "from-keychain-reference",
+	})
+	t.Cleanup(func() { vaultResolver = old })
+
+	tests := []struct {
+		name      string
+		reference string
+		want      string
+		source    string
+	}{
+		{name: "env reference", reference: "env://SYMBRAIN_TEST_ENV_REFERENCE", want: "from-env-reference", source: "env"},
+		{name: "keychain reference", reference: "keychain://service/account", want: "from-keychain-reference", source: "keychain"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("SYMBRAIN_TEST_SHARED_REFERENCE", tt.reference)
+			got, source, err := resolveEnv("SYMBRAIN_TEST_SHARED_REFERENCE")
+			if err != nil {
+				t.Fatalf("resolveEnv: %v", err)
+			}
+			if got != tt.want || source != tt.source {
+				t.Fatalf("resolveEnv = (%q, %q), want (%q, %q)", got, source, tt.want, tt.source)
+			}
+		})
+	}
+}
+
 func TestResolveFileCredentialPrecedence(t *testing.T) {
 	old := vaultResolver
 	vaultResolver = fakeVault(map[string]string{"symvault://ai/codex/token": "from-vault"})

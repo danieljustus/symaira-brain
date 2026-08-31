@@ -126,7 +126,9 @@ func TestResolveVaultWithFakeSymvault(t *testing.T) {
 	content := `#!/bin/sh
 case "$1" in
   get)
-    case "$2" in
+    path="$2"
+    if [ "$path" = "--" ]; then path="$3"; fi
+    case "$path" in
       symaira/memory/jwt)
         echo "resolved-jwt-secret-from-vault"
         ;;
@@ -188,7 +190,7 @@ echo "resolved-with-print"
 	if err != nil {
 		t.Fatalf("failed to read fake symvault args: %v", err)
 	}
-	want := "get\nsymaira/memory/jwt\n--print\n"
+	want := "get\n--\nsymaira/memory/jwt\n--print\n"
 	if string(rawArgs) != want {
 		t.Fatalf("symvault args = %q, want %q", string(rawArgs), want)
 	}
@@ -258,7 +260,7 @@ echo "resolved-secret"
 	if err != nil {
 		t.Fatalf("failed to read fake symvault args: %v", err)
 	}
-	want := "get\nsymaira/memory/jwt\n--print\nget\nsymaira/memory/jwt\n--print\n"
+	want := "get\n--\nsymaira/memory/jwt\n--print\nget\n--\nsymaira/memory/jwt\n--print\n"
 	if string(rawArgs) != want {
 		t.Fatalf("symvault args = %q, want %q", string(rawArgs), want)
 	}
