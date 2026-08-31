@@ -519,6 +519,10 @@ var benchScales = []int{100, 1_000, 10_000}
 
 // TestEmbeddingStorageSize measures the database file size for each scale.
 func TestEmbeddingStorageSize(t *testing.T) {
+	if testing.Short() {
+		t.Skip("storage-size measurements are excluded from short test runs")
+	}
+
 	for _, scale := range benchScales {
 		t.Run(fmt.Sprintf("scale_%d", scale), func(t *testing.T) {
 			// JSON path
@@ -607,10 +611,11 @@ func TestEmbeddingSearchQuality(t *testing.T) {
 
 // TestEmbeddingBackupSize measures a "backup" (full DB copy) size for each format.
 func TestEmbeddingBackupSize(t *testing.T) {
-	scales := []int{100, 1_000, 10_000}
 	if testing.Short() {
-		scales = []int{100, 1_000}
+		t.Skip("backup-size measurements are excluded from short test runs")
 	}
+
+	scales := []int{100, 1_000, 10_000}
 
 	for _, scale := range scales {
 		t.Run(fmt.Sprintf("scale_%d", scale), func(t *testing.T) {
@@ -690,6 +695,10 @@ func TestEmbeddingEncodeDecodeRoundtrip(t *testing.T) {
 // TestEmbeddingRecommendation prints a comparative summary and a written
 // recommendation for the JSON-vs-BLOB storage decision.
 func TestEmbeddingRecommendation(t *testing.T) {
+	if testing.Short() {
+		t.Skip("embedding recommendation measurements are excluded from short test runs")
+	}
+
 	const scale = 1_000
 
 	// --- Size measurement ---
