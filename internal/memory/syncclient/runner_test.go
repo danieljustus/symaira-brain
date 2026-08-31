@@ -658,6 +658,7 @@ func TestRun_BatchedPushPlain(t *testing.T) {
 
 	res, err := Run(context.Background(), Options{
 		Remote: remote.url, Token: remote.token, Pull: false, Push: true, DB: local.db,
+		Timeout: 5 * time.Minute,
 	})
 	if err != nil {
 		t.Fatalf("Run: %v", err)
