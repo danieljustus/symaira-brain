@@ -75,7 +75,8 @@ type JWTPayload struct {
 // to fall back to the default ~/.config/symmemory/jwt.secret location.
 //
 // Secret resolution order:
-//  1. cfg.JWT.Secret — symvault:// URI resolved via symvault subprocess (5s timeout)
+//  1. cfg.JWT.Secret — shared secret reference (symvault://, vault://,
+//     env://, or keychain://) resolved with the shared subprocess deadline
 //  2. JWT_SECRET_KEY environment variable
 //  3. File at cfg.JWT.SecretPath (or default ~/.config/symmemory/jwt.secret)
 //  4. Auto-generate and persist a random 32-byte hex secret

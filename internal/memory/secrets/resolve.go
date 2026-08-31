@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
+
+	"github.com/danieljustus/symaira-corekit/secretref"
 )
 
 const (
@@ -14,9 +14,9 @@ const (
 	symvaultPrefix = "symvault://"
 	// vaultPrefix is a deprecated alias for symvaultPrefix, kept for
 	// backward compatibility with existing configs.
-	vaultPrefix = "vault://"
-	// vaultTimeout is the maximum time to wait for symvault subprocess.
-	vaultTimeout = 5 * time.Second
+	vaultPrefix    = "vault://"
+	envPrefix      = "env://"
+	keychainPrefix = "keychain://"
 )
 
 // IsVaultURI returns true if the value starts with symvault:// (canonical)
@@ -25,73 +25,59 @@ func IsVaultURI(value string) bool {
 	return strings.HasPrefix(value, symvaultPrefix) || strings.HasPrefix(value, vaultPrefix)
 }
 
-// Resolve attempts to resolve a secret value that may be a symvault:// URI.
+// IsSecretReference reports whether value uses one of the shared secret
+// reference schemes. Plain values remain literal for compatibility.
+func IsSecretReference(value string) bool {
+	return IsVaultURI(value) || strings.HasPrefix(value, envPrefix) || strings.HasPrefix(value, keychainPrefix)
+}
+
+// Resolve resolves a shared secret reference while preserving Brain's
+// historical treatment of non-reference values as literal plaintext.
 //
 // Resolution order:
-//  1. Plain value (no symvault:// or vault:// prefix) → returned as-is
-//  2. symvault://<path> (or the deprecated vault://<path> alias) →
-//     subprocess "symvault get <path> --print" with 5s timeout
-//  3. Fallback to env var named by envFallback (e.g. "JWT_SECRET_KEY")
+//  1. Plain value (no supported URI prefix) → returned as-is.
+//  2. symvault://<path> (or deprecated vault://<path>) → shared resolver.
+//  3. env://NAME or keychain://service/account → shared resolver.
+//  4. symvault failures fall back to envFallback for compatibility.
 //
 // On success, the resolved plaintext is returned. On failure, a descriptive
 // error is returned — the secret value is never included in error messages.
 func Resolve(value, envFallback string) (string, error) {
-	if !IsVaultURI(value) {
+	if value == "" || !IsSecretReference(value) {
 		return value, nil
 	}
 
-	path := strings.TrimPrefix(strings.TrimPrefix(value, symvaultPrefix), vaultPrefix)
+	reference := value
+	if strings.HasPrefix(value, vaultPrefix) {
+		reference = symvaultPrefix + strings.TrimPrefix(value, vaultPrefix)
+	}
 
-	secret, err := execVaultGet(path)
-	if err == nil {
+	secret, err := secretref.Resolve(context.Background(), reference, "")
+	if err == nil && secret != "" {
 		return secret, nil
 	}
+	if err == nil {
+		err = fmt.Errorf("shared resolver returned empty secret")
+	}
 
-	// Fallback: check environment variable
-	if envFallback != "" {
-		if env := os.Getenv(envFallback); env != "" {
-			return env, nil
+	// Keep the legacy fallback for vault references when the subprocess is
+	// unavailable or returns an error.
+	if IsVaultURI(value) && envFallback != "" {
+		if fallback := os.Getenv(envFallback); fallback != "" {
+			return fallback, nil
 		}
 	}
 
-	return "", fmt.Errorf(
-		"secret resolution failed for symvault://%s: %w; "+
-			"set env var %s as fallback or install symvault",
-		path, err, envFallback,
-	)
+	display := reference
+	if strings.HasPrefix(reference, symvaultPrefix) {
+		display = symvaultPrefix + strings.TrimPrefix(reference, symvaultPrefix)
+	}
+	return "", fmt.Errorf("secret resolution failed for %s: %w; set env var %s as fallback or install symvault", display, err, envFallback)
 }
 
-// execVaultGet runs "symvault get <path> --print" as a subprocess with a timeout.
-// Only the trimmed stdout is returned; stderr and exit codes are wrapped
-// into the error. The secret value is never logged.
-func execVaultGet(path string) (string, error) {
-	if _, err := exec.LookPath("symvault"); err != nil {
-		return "", fmt.Errorf("symvault not found in PATH: %w", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), vaultTimeout)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, "symvault", "get", path, "--print")
-	out, err := cmd.Output()
-	if err != nil {
-		if ctx.Err() == context.DeadlineExceeded {
-			return "", fmt.Errorf("symvault get timed out after %s", vaultTimeout)
-		}
-		return "", fmt.Errorf("symvault get failed: %w", err)
-	}
-
-	secret := strings.TrimSpace(string(out))
-	if secret == "" {
-		return "", fmt.Errorf("symvault get returned empty secret for path %q", path)
-	}
-
-	return secret, nil
-}
-
-// ResolveOrEnv is a convenience wrapper that resolves a symvault:// value
+// ResolveOrEnv is a convenience wrapper that resolves a shared reference
 // and falls back to an environment variable. If the value is neither
-// a symvault:// URI nor non-empty, the env var is returned directly.
+// a reference nor non-empty, the env var is returned directly.
 func ResolveOrEnv(value, envName string) (string, error) {
 	if value != "" {
 		return Resolve(value, envName)

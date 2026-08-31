@@ -64,7 +64,7 @@ const (
 
 // Client is the memory-store's thin configuration adapter over
 // corekit/llmkit. It owns zero transport code: provider descriptors,
-// credential resolution (env:// / symvault://) and the wire dialect
+// credential resolution (env:// / keychain:// / symvault://) and the wire dialect
 // handling all live in llmkit. What remains here is the brain-side
 // choice of provider, model and response schema.
 type Client struct {

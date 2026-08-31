@@ -3,24 +3,24 @@ package usage
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/danieljustus/symaira-brain/internal/memory/secrets"
 )
 
-// vaultResolver resolves symvault:// (and the deprecated vault:// alias)
-// secret URIs. It is a package-level variable so tests can substitute a
-// fake and never spawn a real symvault subprocess; production always uses
-// secrets.Resolve (internal/memory/secrets, issue #287).
+// vaultResolver resolves shared secret references. It is a package-level
+// variable so tests can substitute a fake and never spawn a real subprocess;
+// production uses the compatibility adapter in internal/memory/secrets.
 var vaultResolver = secrets.Resolve
 
 // resolveEnv reads a provider credential from the environment:
 //
 //   - unset → ("", "", nil): the caller falls back to its file-based source.
 //   - plain value → returned unchanged, source "env".
-//   - symvault://<path> (or deprecated vault://<path>) → looked up in the
-//     secret store, source "vault"; resolution failures return the error so
-//     the provider can surface an exact AuthStatus instead of silently
-//     reporting "not configured".
+//   - symvault://<path> or vault://<path> → looked up in the secret store,
+//     source "vault".
+//   - env://NAME or keychain://service/account → resolved by the shared
+//     resolver, with source "env" or "keychain".
 //
 // The secret value never appears in returned errors.
 func resolveEnv(envName string) (value, source string, err error) {
@@ -28,14 +28,25 @@ func resolveEnv(envName string) (value, source string, err error) {
 	if raw == "" {
 		return "", "", nil
 	}
-	if secrets.IsVaultURI(raw) {
+	if secrets.IsSecretReference(raw) {
 		secret, err := vaultResolver(raw, "")
 		if err != nil {
-			return "", "vault", fmt.Errorf("resolve %s: %w", envName, err)
+			return "", secretSource(raw), fmt.Errorf("resolve %s: %w", envName, err)
 		}
-		return secret, "vault", nil
+		return secret, secretSource(raw), nil
 	}
 	return raw, "env", nil
+}
+
+func secretSource(reference string) string {
+	switch {
+	case strings.HasPrefix(reference, "env://"):
+		return "env"
+	case strings.HasPrefix(reference, "keychain://"):
+		return "keychain"
+	default:
+		return "vault"
+	}
 }
 
 // resolveFileCredential resolves a credential with a file-based fallback:

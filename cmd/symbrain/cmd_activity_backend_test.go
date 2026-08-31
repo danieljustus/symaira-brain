@@ -32,6 +32,9 @@ func TestCmdActivityBackendErrorEdges(t *testing.T) {
 	} else if err := database.Close(); err != nil {
 		t.Fatal(err)
 	}
+	// Corekit v0.16.2 honors XDG_CONFIG_HOME. Restore the sandbox config
+	// root before the activity command reads the profile created above.
+	t.Setenv("XDG_CONFIG_HOME", "")
 
 	dbPath := newCLIActivityTestDB(t, base)
 	mutate := func(sql string, args ...any) {
