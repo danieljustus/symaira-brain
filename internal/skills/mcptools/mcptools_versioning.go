@@ -29,6 +29,7 @@ func registerVersioningTools(ctx *serverContext) {
 		Name:        "skills_discover_sources",
 		Description: "Discover unmanaged skill sources in known harness roots or explicit paths.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"paths":{"type":"array","items":{"type":"string"}},"scope":{"type":"string"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Discover Skill Sources", ReadOnlyHint: true},
 		Handler: func(_ context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Paths []string `json:"paths"`
@@ -57,6 +58,7 @@ func registerVersioningTools(ctx *serverContext) {
 		Name:        "skills_history",
 		Description: "List the versioned commit history of a library skill: revision, timestamp, operation (import/update/restore/unknown) and changed files.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"},"limit":{"type":"integer"}},"required":["name"]}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Skill History", ReadOnlyHint: true},
 		Handler: func(_ context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Name  string `json:"name"`
@@ -90,6 +92,7 @@ func registerVersioningTools(ctx *serverContext) {
 		Name:        "skills_restore",
 		Description: "Roll a library skill's files back to a previous revision by forward commit. Dry-run defaults to true; pass dry_run=false to write. Refuses invalid restored states and never discards uncommitted changes (pass allow_dirty=true to snapshot them first); sync=true re-installs stale targets.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"},"rev":{"type":"string"},"dry_run":{"type":"boolean"},"allow_dirty":{"type":"boolean"},"sync":{"type":"boolean"}},"required":["name","rev"]}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Restore Skill", ReadOnlyHint: false, DestructiveHint: true},
 		Handler: func(_ context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Name       string `json:"name"`

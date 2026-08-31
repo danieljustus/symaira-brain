@@ -19,6 +19,7 @@ func registerProfileTools(ctx *serverContext) {
 		Name:        "skills_profile_list",
 		Description: "List available context profiles (global and project).",
 		InputSchema: json.RawMessage(emptyObject),
+		Annotations: &mcpserver.ToolAnnotations{Title: "List Skill Profiles", ReadOnlyHint: true},
 		Handler: func(_ context.Context, _ json.RawMessage) (any, error) {
 			refs, err := profile.List(opts.ProfilesDir, opts.ProjectDir)
 			if err != nil {
@@ -31,6 +32,7 @@ func registerProfileTools(ctx *serverContext) {
 		Name:        "skills_profile_resolve",
 		Description: "Resolve a context profile and return the merged skill set.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Resolve Skill Profile", ReadOnlyHint: true},
 		Handler: func(_ context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Name string `json:"name"`
