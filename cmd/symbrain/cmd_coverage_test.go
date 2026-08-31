@@ -102,7 +102,7 @@ enabled = false
 		stdoutW.Close()
 	}()
 
-	var stderr bytes.Buffer
+	var stderr lockedBuffer
 	codeCh := make(chan exitcodes.ExitCode, 1)
 	go func() {
 		codeCh <- cmdMcp([]string{"--profile", "stdio-test"}, &stderr, &stderr)
