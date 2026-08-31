@@ -135,6 +135,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		Name:        "bootstrap",
 		Description: bootstrapToolDescription,
 		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Bootstrap", ReadOnlyHint: true, IdempotentHint: true},
 		Handler:     s.handleBootstrap,
 	})
 
@@ -145,6 +146,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 		Name:        "patterns",
 		Description: patternsToolDescription,
 		InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Patterns", ReadOnlyHint: true, IdempotentHint: true},
 		Handler:     s.handlePatterns,
 	})
 
@@ -167,6 +169,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			Name:        "get_ai_usage",
 			Description: getAIUsageToolDescription,
 			InputSchema: json.RawMessage(`{"type":"object","properties":{}}`),
+			Annotations: &mcpserver.ToolAnnotations{Title: "AI Usage", ReadOnlyHint: true, IdempotentHint: true},
 			Handler:     s.handleAIUsage,
 		})
 	}
@@ -195,6 +198,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			Name:        entry.Name,
 			Description: entry.Description,
 			InputSchema: entry.InputSchema,
+			Annotations: catalogEntryAnnotations(entry),
 			Handler: func(ctx context.Context, input json.RawMessage) (any, error) {
 				start := time.Now()
 				result, err := s.routeToolCall(ctx, entry, input)
@@ -316,6 +320,31 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 	}
 	s.cat = cat
 	return nil
+}
+
+// catalogEntryAnnotations converts the catalog mirror into the corekit
+// annotation type used by the gateway's tools/list response. A fallback
+// annotation is always returned for upstream tools that omitted annotations;
+// the explicit false Go value is intentionally retained even though corekit's
+// current wire encoder omits false readOnlyHint values.
+func catalogEntryAnnotations(entry catalog.Entry) *mcpserver.ToolAnnotations {
+	annotations := &mcpserver.ToolAnnotations{Title: entry.Name}
+	if entry.Annotations == nil {
+		return annotations
+	}
+	if entry.Annotations.ReadOnlyHint != nil {
+		annotations.ReadOnlyHint = *entry.Annotations.ReadOnlyHint
+	}
+	if entry.Annotations.DestructiveHint != nil {
+		annotations.DestructiveHint = *entry.Annotations.DestructiveHint
+	}
+	if entry.Annotations.IDempotentHint != nil {
+		annotations.IdempotentHint = *entry.Annotations.IDempotentHint
+	}
+	if entry.Annotations.OpenWorldHint != nil {
+		annotations.OpenWorldHint = *entry.Annotations.OpenWorldHint
+	}
+	return annotations
 }
 
 // translateAnnotations copies broker.ToolAnnotations into the catalog's

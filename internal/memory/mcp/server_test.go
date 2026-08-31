@@ -214,6 +214,10 @@ func TestJSONRPCToolsList(t *testing.T) {
 	for _, toolRaw := range tools {
 		tool := toolRaw.(map[string]interface{})
 		name, _ := tool["name"].(string)
+		annotations, ok := tool["annotations"].(map[string]interface{})
+		if !ok || len(annotations) == 0 {
+			t.Errorf("tool %q is missing annotations in tools/list", name)
+		}
 		if _, exists := expectedTools[name]; exists {
 			expectedTools[name] = true
 		}

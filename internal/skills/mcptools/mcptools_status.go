@@ -20,6 +20,7 @@ func registerStatusTool(ctx *serverContext) {
 		Name:        "skills_targets_status",
 		Description: "Read-only inventory and readiness status for supported AI-agent harnesses.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"scope":{"type":"string"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Skill Target Status", ReadOnlyHint: true},
 		Handler: func(_ context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Scope string `json:"scope"`

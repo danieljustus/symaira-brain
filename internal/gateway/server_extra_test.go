@@ -486,7 +486,8 @@ func TestServeIO_InitializeAndListTools(t *testing.T) {
 
 	var result struct {
 		Tools []struct {
-			Name string `json:"name"`
+			Name        string                     `json:"name"`
+			Annotations map[string]json.RawMessage `json:"annotations"`
 		} `json:"tools"`
 	}
 	if err := json.Unmarshal(listResp.Result, &result); err != nil {
@@ -498,6 +499,9 @@ func TestServeIO_InitializeAndListTools(t *testing.T) {
 	names := make(map[string]bool)
 	for _, tool := range result.Tools {
 		names[tool.Name] = true
+		if len(tool.Annotations) == 0 {
+			t.Errorf("tool %q is missing annotations in tools/list", tool.Name)
+		}
 	}
 	if !names["vault_get_entry"] {
 		t.Error("vault_get_entry should be in the tool list")

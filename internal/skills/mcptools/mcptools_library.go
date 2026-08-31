@@ -24,6 +24,7 @@ func registerLibraryTools(ctx *serverContext) {
 		Name:        "skills_list",
 		Description: "List skills in the symskills library.",
 		InputSchema: json.RawMessage(emptyObject),
+		Annotations: &mcpserver.ToolAnnotations{Title: "List Skills", ReadOnlyHint: true},
 		Handler: func(_ context.Context, _ json.RawMessage) (any, error) {
 			bundles, issues := skill.ListLibrary(opts.LibraryDir)
 			items := make([]skillListItem, 0, len(bundles))
@@ -58,6 +59,7 @@ func registerLibraryTools(ctx *serverContext) {
 		Name:        "skills_inspect",
 		Description: "Inspect one skill by path or library name.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Inspect Skill", ReadOnlyHint: true},
 		Handler: func(c context.Context, in json.RawMessage) (any, error) {
 			bundle, err := callInspect(c, svc, opts, in)
 			if err != nil {
@@ -77,6 +79,7 @@ func registerLibraryTools(ctx *serverContext) {
 		Name:        "skills_validate",
 		Description: "Validate one skill by path or library name.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Validate Skill", ReadOnlyHint: true},
 		Handler: func(c context.Context, in json.RawMessage) (any, error) {
 			result, err := callInspect(c, svc, opts, in)
 			if err != nil {

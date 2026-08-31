@@ -28,6 +28,7 @@ func registerRenderTools(ctx *serverContext) {
 		Name:        "skills_render_plan",
 		Description: "Render a skill or profile to the managed artifact directory and return planned target paths. Pass dry_run=true to preview without writing.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"},"target":{"type":"string"},"profile":{"type":"string"},"dry_run":{"type":"boolean"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Render Skill Plan", ReadOnlyHint: false, DestructiveHint: true},
 		Handler: func(c context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Target  string `json:"target"`
@@ -97,6 +98,7 @@ func registerRenderTools(ctx *serverContext) {
 		Name:        "skills_install",
 		Description: "Render and install a skill or profile. Dry-run defaults to true; pass dry_run=false for writes.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"},"target":{"type":"string"},"scope":{"type":"string"},"dry_run":{"type":"boolean"},"profile":{"type":"string"}}}`),
+		Annotations: &mcpserver.ToolAnnotations{Title: "Install Skill", ReadOnlyHint: false, DestructiveHint: true},
 		Handler: func(c context.Context, in json.RawMessage) (any, error) {
 			var args struct {
 				Target  string `json:"target"`

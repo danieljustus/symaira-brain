@@ -61,7 +61,8 @@ func TestRegisterExposesExpectedTools(t *testing.T) {
 	var resp struct {
 		Result struct {
 			Tools []struct {
-				Name string `json:"name"`
+				Name        string                     `json:"name"`
+				Annotations map[string]json.RawMessage `json:"annotations"`
 			} `json:"tools"`
 		} `json:"result"`
 	}
@@ -69,8 +70,24 @@ func TestRegisterExposesExpectedTools(t *testing.T) {
 		t.Fatalf("parse response %q: %v", out.String(), err)
 	}
 	names := map[string]bool{}
+	readOnly := map[string]bool{
+		"skills_list": true, "skills_inspect": true, "skills_validate": true,
+		"skills_profile_list": true, "skills_profile_resolve": true,
+		"skills_targets_status": true, "skills_discover_sources": true,
+		"skills_history": true,
+	}
 	for _, tool := range resp.Result.Tools {
 		names[tool.Name] = true
+		if len(tool.Annotations) == 0 {
+			t.Errorf("tool %q is missing annotations in tools/list", tool.Name)
+		}
+		if readOnly[tool.Name] {
+			var got bool
+			raw, ok := tool.Annotations["readOnlyHint"]
+			if !ok || json.Unmarshal(raw, &got) != nil || !got {
+				t.Errorf("tool %q readOnlyHint = %s, want true", tool.Name, raw)
+			}
+		}
 	}
 	for _, want := range []string{"skills_list", "skills_inspect", "skills_validate", "skills_profile_list", "skills_profile_resolve", "skills_render_plan", "skills_install", "skills_targets_status", "skills_discover_sources", "skills_history", "skills_restore"} {
 		if !names[want] {
