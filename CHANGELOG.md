@@ -37,7 +37,9 @@ the [Unreleased] section is moved into a dated version section.
   hardcoded array that had drifted from the registry (it still named
   `gemini` and never showed `antigravity`). Harnesses that support no MCP
   install at all are filtered out rather than shown as "Not Installed", and
-  an unreadable or absent config is now labelled as such.
+  an unreadable or absent config is now labelled as such. The Dashboard
+  lists every harness, so there the same harnesses are labelled "No MCP
+  Config" rather than filtered out.
 
 ### Fixed
 - An empty harness config file is treated as an empty JSON object instead of

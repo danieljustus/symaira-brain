@@ -152,22 +152,50 @@ struct HarnessesView: View {
         }
     }
 
+    private func harnessName(_ name: String) -> some View {
+        Text(name)
+            .font(.body.weight(.semibold))
+            .foregroundStyle(SymairaTheme.textPrimary)
+            .lineLimit(1)
+            .fixedSize()
+    }
+
+    /// Install state, plus the config problem that is not an install state:
+    /// a config symbrain cannot parse is a different thing from one where
+    /// symbrain simply is not registered, and install refuses either way.
+    @ViewBuilder
+    private func harnessBadges(_ status: HarnessStatus) -> some View {
+        SymairaBadge(status.installed ? "Installed" : "Not Installed", tone: status.installed ? .positive : .neutral)
+            .fixedSize()
+        if status.configFound && !status.configParsed {
+            SymairaBadge("Config Unreadable", tone: .critical)
+                .fixedSize()
+        } else if !status.configFound {
+            SymairaBadge("No Config Yet", tone: .neutral)
+                .fixedSize()
+        }
+    }
+
     private func harnessRow(_ status: HarnessStatus) -> some View {
         let name = status.name
 
         return HStack {
             VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
-                HStack {
-                    Text(name)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(SymairaTheme.textPrimary)
-                    SymairaBadge(status.installed ? "Installed" : "Not Installed", tone: status.installed ? .positive : .neutral)
-                    // A config symbrain cannot parse is a different problem
-                    // from "not installed", and install would refuse anyway.
-                    if status.configFound && !status.configParsed {
-                        SymairaBadge("Config Unreadable", tone: .critical)
-                    } else if !status.configFound {
-                        SymairaBadge("No Config Yet", tone: .neutral)
+                // A row carrying two badges does not fit beside the trailing
+                // controls once a tiled window undercuts the 900pt minimum
+                // the app asks for. Every label here is short and load
+                // bearing — squeezed into one line, SwiftUI hyphenates the
+                // badges mid-word ("Not Instal-led") and clips the harness
+                // name down to a single letter. So the badges drop onto
+                // their own line instead of anything being cut.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: SymairaSpacing.small) {
+                        harnessName(name)
+                        harnessBadges(status)
+                    }
+                    VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+                        harnessName(name)
+                        HStack(spacing: SymairaSpacing.small) { harnessBadges(status) }
                     }
                 }
                 Text(status.configPath)
