@@ -3,6 +3,7 @@ package harness
 import (
 	"errors"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -75,7 +76,14 @@ func TestParse_CorruptTOML_ReturnsTypedError(t *testing.T) {
 }
 
 func TestParse_EmptyObjectIsValid(t *testing.T) {
-	h, _ := Lookup("gemini")
+	// Discarding the Lookup error here used to hide the gemini -> antigravity
+	// rename: the lookup failed, h stayed a zero-value Harness, and Parse still
+	// passed via its JSON default. Assert the lookup so the next rename fails
+	// the test instead of quietly changing what it covers.
+	h, err := Lookup("antigravity")
+	if err != nil {
+		t.Fatalf("Lookup: %v", err)
+	}
 	doc, err := Parse(h, []byte("{}"))
 	if err != nil {
 		t.Fatalf("Parse(\"{}\"): %v", err)
@@ -169,5 +177,47 @@ func TestLoad_MissingFile_ReturnsNotExist(t *testing.T) {
 	}
 	if !os.IsNotExist(err) {
 		t.Errorf("Load() error = %v, want os.IsNotExist to be true", err)
+	}
+}
+
+// TestParse_EmptyFileIsAnEmptyDocument covers the branch that lets symbrain
+// install into a harness whose config file exists but was never written to.
+// Antigravity ships an empty ~/.gemini/config/mcp_config.json and `agy mcp
+// list` reads it as "no MCP servers configured"; treating that as a parse
+// error would refuse the install on a fresh setup. Malformed JSON must still
+// be rejected, which TestParse_CorruptJSON_ReturnsTypedError pins.
+func TestParse_EmptyFileIsAnEmptyDocument(t *testing.T) {
+	h, err := Lookup("antigravity")
+	if err != nil {
+		t.Fatalf("Lookup: %v", err)
+	}
+
+	for name, data := range map[string][]byte{
+		"empty":      {},
+		"whitespace": []byte("   \n\t\n"),
+	} {
+		t.Run(name, func(t *testing.T) {
+			doc, err := Parse(h, data)
+			if err != nil {
+				t.Fatalf("Parse(%q) = %v, want an empty document", data, err)
+			}
+			if names := doc.ServerNames(); len(names) != 0 {
+				t.Fatalf("ServerNames() = %v, want none", names)
+			}
+
+			// The document must be writable, not merely parseable — that is
+			// the whole point of accepting the empty file.
+			doc.SetServer(ServerName, Entry{Command: "symbrain", Args: []string{"mcp", "--profile", "personal"}})
+			out, err := doc.Marshal()
+			if err != nil {
+				t.Fatalf("Marshal: %v", err)
+			}
+			if !strings.Contains(string(out), `"symbrain"`) {
+				t.Fatalf("marshalled config does not carry the entry: %s", out)
+			}
+			if !strings.Contains(string(out), `"mcpServers"`) {
+				t.Fatalf("marshalled config missing the servers key: %s", out)
+			}
+		})
 	}
 }
