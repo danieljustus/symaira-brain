@@ -64,7 +64,13 @@ type harnessCheck struct {
 	ConfigFound  bool   `json:"config_found"`
 	ConfigParsed bool   `json:"config_parsed"`
 	ConfigError  string `json:"config_error,omitempty"`
-	Installed    bool   `json:"installed"`
+	// SupportsMCPInstall reports whether symbrain can register its MCP
+	// entry in this harness at all. A capability-only harness (skills or
+	// instructions but no MCP config) is never "installed" and must not be
+	// presented as merely uninstalled — consumers filter on this rather
+	// than hardcoding a list of installable harnesses.
+	SupportsMCPInstall bool `json:"supports_mcp_install"`
+	Installed          bool `json:"installed"`
 	// Profile is the --profile value bound in symbrain's MCP entry, if
 	// Installed and the entry carries one.
 	Profile string `json:"profile,omitempty"`
@@ -366,7 +372,7 @@ func checkHarnesses() []harnessCheck {
 }
 
 func checkHarness(h harness.Harness) harnessCheck {
-	check := harnessCheck{Name: string(h.Name)}
+	check := harnessCheck{Name: string(h.Name), SupportsMCPInstall: h.SupportsMCPInstall}
 
 	path, err := h.ConfigPath()
 	if err != nil {

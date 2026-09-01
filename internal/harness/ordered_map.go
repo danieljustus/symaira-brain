@@ -58,7 +58,17 @@ func (m *orderedMap) len() int {
 // original textual form. Nested objects are also decoded as *orderedMap to
 // preserve key order at every level. Trailing garbage after the top-level
 // object is rejected.
+//
+// An empty (or whitespace-only) file decodes to an empty object rather than
+// an error. Harnesses create their config file before anything is written
+// into it — Antigravity ships an empty ~/.gemini/config/mcp_config.json and
+// `agy mcp list` reads it as "no MCP servers configured" — and refusing to
+// edit that file would block installing into a fresh harness. This is not a
+// tolerance for malformed JSON: any non-empty content still has to parse.
 func decodeJSONObject(data []byte) (*orderedMap, error) {
+	if len(bytes.TrimSpace(data)) == 0 {
+		return newOrderedMap(), nil
+	}
 	dec := json.NewDecoder(bytes.NewReader(data))
 	dec.UseNumber()
 

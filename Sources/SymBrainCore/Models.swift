@@ -54,6 +54,10 @@ public struct HarnessStatus: Decodable, Sendable {
     public let configPath: String
     public let configFound: Bool
     public let configParsed: Bool
+    /// Whether symbrain can register an MCP entry in this harness at all.
+    /// A capability-only harness (skills or instructions, no MCP config) is
+    /// never installable and must not be offered as merely uninstalled.
+    public let supportsMcpInstall: Bool
     public let installed: Bool
     public let profile: String?
     public let profileExists: Bool

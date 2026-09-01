@@ -35,7 +35,8 @@ struct DoctorReportTests {
             ],
             "profiles": ["personal"],
             "harnesses": [
-                {"name": "claude", "config_path": "/Users/test/.claude.json", "config_found": true, "config_parsed": true, "installed": false, "profile": null, "profile_exists": false, "profile_missing": false}
+                {"name": "claude", "config_path": "/Users/test/.claude.json", "config_found": true, "config_parsed": true, "supports_mcp_install": true, "installed": false, "profile": null, "profile_exists": false, "profile_missing": false},
+                {"name": "hermes", "config_path": "", "config_found": false, "config_parsed": false, "supports_mcp_install": false, "installed": false, "profile": null, "profile_exists": false, "profile_missing": false}
             ]
         }
         """
@@ -53,8 +54,13 @@ struct DoctorReportTests {
         #expect(report.servers[0].found == true)
         #expect(report.servers[0].version == "0.10.1")
         #expect(report.profiles == ["personal"])
-        #expect(report.harnesses.count == 1)
+        #expect(report.harnesses.count == 2)
         #expect(report.harnesses[0].name == "claude")
+        // A capability-only harness is never installable; the Harnesses
+        // screen filters on this rather than hardcoding a list of names.
+        #expect(report.harnesses[0].supportsMcpInstall == true)
+        #expect(report.harnesses[1].name == "hermes")
+        #expect(report.harnesses[1].supportsMcpInstall == false)
     }
 }
 
@@ -188,7 +194,7 @@ struct SyncSummaryTests {
             "targets": [
                 {"name": "opencode", "path": "/path/opencode.md", "status": "error", "message": "permission denied"},
                 {"name": "cursor", "path": "/path/cursor.md", "status": "skipped"},
-                {"name": "gemini", "path": "/path/gemini.md", "status": "unchanged"}
+                {"name": "antigravity", "path": "/path/GEMINI.md", "status": "unchanged"}
             ],
             "skills": []
         }

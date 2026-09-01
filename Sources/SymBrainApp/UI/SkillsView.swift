@@ -2,14 +2,21 @@ import SwiftUI
 import SymairaTheme
 import SymBrainCore
 
-/// The embedded Symaira Skills module: browse the portable skill library,
+/// The skill core built into symbrain: browse the portable skill library,
 /// see how each harness install stands, inspect the harness inventory, and
-/// read both the symskills operation log and the symbrain broker audit trail
-/// for the skills server.
+/// read both the skill operation log and the broker audit trail for the
+/// skills server.
 struct SkillsView: View {
-    @StateObject private var vm = SkillsViewModel()
+    @StateObject private var vm: SkillsViewModel
     @State private var tab: Tab = .library
     @State private var showSyncConfirmation = false
+
+    /// Skills runs inside the same binary the rest of the app drives, so it
+    /// is handed the same client — a Settings binary-path override reaches
+    /// this screen too.
+    init(client: SymBrainClient) {
+        _vm = StateObject(wrappedValue: SkillsViewModel(client: SkillsClient(brain: client)))
+    }
 
     enum Tab: String, CaseIterable, Identifiable {
         case library = "Library"
@@ -88,15 +95,12 @@ struct SkillsView: View {
                 Text("Skills")
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
-                Text("Symaira Skills — portable skill library and harness installs")
+                Text("Portable skill library and harness installs — built into SymBrain")
                     .font(.subheadline)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
 
-            if let version = vm.versionLine, !version.isEmpty {
-                SymairaBadge(version, tone: .informative)
-            }
             if let status = vm.statusMessage {
                 SymairaBadge(status, tone: .positive)
             }
@@ -112,8 +116,8 @@ struct SkillsView: View {
     private var missingRuntimeSection: some View {
         SymairaEmptyState(
             systemImage: "square.stack.3d.up",
-            title: "symskills not found",
-            message: "Install the Symaira Skills runtime, then reload this screen."
+            title: "SymBrain CLI not found",
+            message: "Skills run inside symbrain. Install the symbrain CLI, then reload this screen."
         ) {
             VStack(spacing: SymairaSpacing.medium) {
                 HStack(spacing: SymairaSpacing.small) {
@@ -160,7 +164,7 @@ struct SkillsView: View {
                 SymairaEmptyState(
                     systemImage: "square.stack.3d.up.slash",
                     title: "No Skills",
-                    message: "The symskills library is empty, or nothing matches the search."
+                    message: "The skill library is empty, or nothing matches the search."
                 )
             } else {
                 HSplitView {
@@ -315,7 +319,7 @@ struct SkillsView: View {
             }
 
             if vm.isSyncing {
-                SymairaLoadingState("Running symskills sync…")
+                SymairaLoadingState("Running skill sync…")
             } else if let plan = vm.syncPlan {
                 syncPlanSection(
                     title: "Sync plan — nothing has been written",
@@ -416,7 +420,7 @@ struct SkillsView: View {
                 SymairaEmptyState(
                     systemImage: "desktopcomputer",
                     title: "No Harnesses Detected",
-                    message: "symskills found no supported agent harness on this Mac."
+                    message: "No supported agent harness was found on this Mac."
                 )
             } else {
                 Table(vm.targetsReport?.rows ?? []) {
@@ -477,7 +481,7 @@ struct SkillsView: View {
         )
     }
 
-    // MARK: - symskills log
+    // MARK: - skill operation log
 
     private var logSection: some View {
         Group {
@@ -485,7 +489,7 @@ struct SkillsView: View {
                 SymairaEmptyState(
                     systemImage: "list.bullet.rectangle.portrait",
                     title: "No Operations Logged",
-                    message: "symskills records every render, install and sync it performs."
+                    message: "Every render, install and sync the skill core performs is recorded here."
                 )
             } else {
                 Table(vm.logEntries) {
@@ -539,10 +543,10 @@ struct SkillsView: View {
     private var healthSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Button(action: { Task { await vm.runDoctor() } }) {
-                Label("Run symskills doctor", systemImage: "stethoscope")
+                Label("Run skills doctor", systemImage: "stethoscope")
             }
             .symairaButtonStyle(.primary)
-            .accessibilityLabel("Run symskills doctor")
+            .accessibilityLabel("Run skills doctor")
 
             if vm.isLoading {
                 SymairaLoadingState("Running health checks…")

@@ -252,15 +252,15 @@ var builtInTargetSpecs = []TargetSpec{
 			if scope == ScopeProject && project != "" {
 				return filepath.Join(project, ".agents")
 			}
-			return filepath.Join(home, ".gemini", "antigravity-cli")
+			return filepath.Join(home, ".gemini", "config")
 		},
 		SkillRoot: func(home, project string, scope Scope) string {
 			if scope == ScopeProject && project != "" {
 				return filepath.Join(project, ".agents", "skills")
 			}
-			return filepath.Join(home, ".gemini", "antigravity-cli", "skills")
+			return filepath.Join(home, ".gemini", "config", "skills")
 		},
-		Quirks: "Global skills live in ~/.gemini/antigravity-cli/skills (docs: antigravity.google/docs/skills); workspace skills share <project>/.agents/skills with Codex/OpenClaw",
+		Quirks: "Global skills live in ~/.gemini/config/skills — the shared config directory the app and the agy CLI both read, not the per-client ~/.gemini/antigravity-cli state directory; workspace skills share <project>/.agents/skills with Codex/OpenClaw",
 	},
 	{
 		Name:        TargetOpenClaw,

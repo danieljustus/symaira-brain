@@ -28,8 +28,10 @@ Symbrain is explicitly **not**:
   `symcockpit`, `symfritz`, …) are bound directly to the harness by the user
   unless a profile declares them.
 - **A second `symguard`.** See "Brain ↔ Guard Boundary" below.
-- **A second `symskills`.** Skill rendering/installation stays entirely in
-  symskills; symbrain only orchestrates it (shells out, parses `--json`).
+- **A second `symskills`.** Skill rendering/installation was absorbed on
+  2026-08-21 and now runs in-process through `internal/skills` (driven by
+  `internal/skillsrunner`). No external `symskills` binary is resolved or
+  executed, and the CLI surface lives here as `symbrain skills`.
 - **A remote memory or credential store.** Memory and skills are embedded
   in-process (absorbed 2026-08-21); credentials stay behind the separate
   `symvault` process on purpose. symbrain brokers the external vault and
@@ -80,12 +82,12 @@ symaira-brain/
 │   ├── audit/             # JSONL audit log, redaction rules
 │   ├── instructions/      # Canonical instructions source + managed blocks
 │   ├── adapter/           # One small module per harness (claude, codex, cursor,
-│   │                      #   opencode, gemini): instructions + MCP config
+│   │                      #   opencode, antigravity): instructions + MCP config
 │   ├── harness/           # Harness registry: config paths, formats, backup
 │   ├── memory/            # Absorbed symmemory: store, entities, consolidation
 │   ├── skills/            # Absorbed symskills: skill SSOT, MCP tools
-│   └── skillsbridge/      # Legacy shell-out to a `symskills` binary, used by
-│                          #   `symbrain sync` — see "Known gap" below
+│   └── skillsrunner/      # In-process render+install pipeline used by
+│                          #   `symbrain sync` and `symbrain skills`
 ├── Sources/               # Native SwiftUI apps (macOS + iOS)
 │   ├── SymBrainCore/      # Static library: CLI client, models, view models
 │   ├── SymBrainApp/       # macOS application (NavigationSplitView dashboard)

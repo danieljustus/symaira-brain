@@ -34,6 +34,14 @@ func cmdMemoryWithFormat(args []string, stdout, stderr io.Writer, format output.
 		return cmdMemoryListWithFormat(args[1:], stdout, stderr, format)
 	case "search":
 		return cmdMemorySearchWithFormat(args[1:], stdout, stderr, format)
+	case "set":
+		return cmdMemorySetWithFormat(args[1:], stdout, stderr, format)
+	case "delete":
+		return cmdMemoryDeleteWithFormat(args[1:], stdout, stderr, format)
+	case "rules":
+		return cmdMemoryRulesWithFormat(args[1:], stdout, stderr, format)
+	case "query-log":
+		return cmdMemoryQueryLogWithFormat(args[1:], stdout, stderr, format)
 	case "sync":
 		return cmdMemorySyncWithFormat(args[1:], stdout, stderr, format)
 	default:
@@ -52,6 +60,10 @@ Usage:
 Subcommands:
   list        List stored memories (optionally filtered by scope)
   search      Search memories by semantic relevance
+  set         Store a memory (requires --kind)
+  delete      Remove a memory by id
+  rules       List procedural rules
+  query-log   Inspect the memory retrieval log
   sync        Synchronize memories with a remote memory server
 
 Use --output table|json (or --json) for the result format. Read commands

@@ -35,7 +35,7 @@ var clientFormats = []ClientFormat{
 	{Name: "codex", FileName: "AGENTS.md", Description: "OpenAI Codex CLI (AGENTS.md in the project root)"},
 	{Name: "opencode", FileName: "AGENTS.md", Description: "OpenCode (AGENTS.md in the project root)"},
 	{Name: "cursor", FileName: ".cursorrules", Description: "Cursor (.cursorrules in the project root)"},
-	{Name: "gemini", FileName: "GEMINI.md", Description: "Gemini (GEMINI.md in the project root)"},
+	{Name: "antigravity", FileName: "GEMINI.md", Description: "Antigravity (GEMINI.md in the project root)"},
 }
 
 // Text returns the canonical embedded instruction document. The version

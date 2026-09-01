@@ -32,12 +32,14 @@ struct ContentView: View {
             }
         }
 
-        /// Sidebar grouping: the broker screens SymBrain owns itself, and the
-        /// modules it fronts for the other Symaira tools.
+        /// Sidebar grouping: the broker screens SymBrain owns itself, the
+        /// state cores that run inside this binary, and the one core that
+        /// stays a separate process on purpose (the vault).
         static let brokerModes: [DisplayMode] = [
             .dashboard, .profiles, .harnesses, .sync, .audit,
         ]
-        static let moduleModes: [DisplayMode] = [.memory, .vault, .skills]
+        static let coreModes: [DisplayMode] = [.memory, .skills]
+        static let externalModes: [DisplayMode] = [.vault]
         static let systemModes: [DisplayMode] = [.settings]
     }
 
@@ -47,8 +49,11 @@ struct ContentView: View {
                 Section("Broker") {
                     ForEach(DisplayMode.brokerModes, id: \.self, content: sidebarRow)
                 }
-                Section("Modules") {
-                    ForEach(DisplayMode.moduleModes, id: \.self, content: sidebarRow)
+                Section("Cores") {
+                    ForEach(DisplayMode.coreModes, id: \.self, content: sidebarRow)
+                }
+                Section("External") {
+                    ForEach(DisplayMode.externalModes, id: \.self, content: sidebarRow)
                 }
                 Section {
                     ForEach(DisplayMode.systemModes, id: \.self, content: sidebarRow)
@@ -73,11 +78,11 @@ struct ContentView: View {
                 case .audit:
                     AuditView(client: client)
                 case .memory:
-                    MemoryView()
+                    MemoryView(client: client)
                 case .vault:
                     VaultView()
                 case .skills:
-                    SkillsView()
+                    SkillsView(client: client)
                 case .settings:
                     SettingsView(client: client)
                 }

@@ -16,7 +16,7 @@ import (
 
 func cmdInstall(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("install", flag.ContinueOnError)
-	harnessName := fs.String("harness", "", "harness to install into: claude, claude-desktop, cursor, opencode, codex, gemini (required)")
+	harnessName := fs.String("harness", "", "harness to install into: claude, claude-desktop, cursor, opencode, codex, antigravity (required)")
 	profileFlag := fs.String("profile", "", "profile to bind this harness connection to (default: the global config's default_profile)")
 	projectDir := fs.String("project", "", "project directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)")
 	dryRun := fs.Bool("dry-run", false, "print a unified diff of the change and write nothing")

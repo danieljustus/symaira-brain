@@ -220,7 +220,7 @@ func TestList_ProjectLocalConfig(t *testing.T) {
 func TestList_MalformedConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	h := mustLookup(t, "gemini")
+	h := mustLookup(t, "antigravity")
 	path, err := h.ConfigPath()
 	if err != nil {
 		t.Fatalf("ConfigPath(): %v", err)

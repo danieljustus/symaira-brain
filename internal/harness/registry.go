@@ -22,7 +22,6 @@ const (
 	Cursor        Name = "cursor"
 	Opencode      Name = "opencode"
 	Codex         Name = "codex"
-	Gemini        Name = "gemini"
 	Agents        Name = "agents"
 	Hermes        Name = "hermes"
 	Antigravity   Name = "antigravity"
@@ -38,7 +37,11 @@ const (
 	InstructionAdapterAgents InstructionAdapter = "agents"
 	InstructionAdapterClaude InstructionAdapter = "claude"
 	InstructionAdapterCursor InstructionAdapter = "cursor"
-	InstructionAdapterGemini InstructionAdapter = "gemini"
+	// InstructionAdapterAntigravity writes GEMINI.md. Antigravity reads
+	// both GEMINI.md and AGENTS.md; the pointer file keeps its historical
+	// name so existing checkouts stay valid, and leaves AGENTS.md to the
+	// `agents` harness rather than having two harnesses write one file.
+	InstructionAdapterAntigravity InstructionAdapter = "antigravity"
 )
 
 // SkillTarget identifies the in-process skills renderer target for a harness.
@@ -163,14 +166,20 @@ var All = []Harness{
 		ConfigPath:         homeJoin(".codex", "config.toml"),
 	},
 	{
-		Name:               Gemini,
-		DisplayName:        "Gemini CLI",
+		// Antigravity replaced the Gemini CLI: only the Antigravity app
+		// and its `agy` CLI remain, and they share one global config
+		// directory at ~/.gemini/config (the ~/.gemini prefix is
+		// inherited, not a leftover Gemini CLI path). MCP servers live
+		// in mcp_config.json there, keyed by "mcpServers" — the same
+		// shape `agy mcp add` writes.
+		Name:               Antigravity,
+		DisplayName:        "Antigravity",
 		Format:             FormatJSON,
 		SupportsMCPInstall: true,
-		InstructionAdapter: InstructionAdapterGemini,
-		SkillTarget:        SkillTargetNone,
+		InstructionAdapter: InstructionAdapterAntigravity,
+		SkillTarget:        SkillTargetAntigravity,
 		ServersKey:         "mcpServers",
-		ConfigPath:         homeJoin(".gemini", "settings.json"),
+		ConfigPath:         homeJoin(".gemini", "config", "mcp_config.json"),
 	},
 	{
 		Name:               Agents,
@@ -186,14 +195,6 @@ var All = []Harness{
 		SupportsMCPInstall: false,
 		InstructionAdapter: InstructionAdapterNone,
 		SkillTarget:        SkillTargetHermes,
-		ConfigPath:         unsupportedConfigPath,
-	},
-	{
-		Name:               Antigravity,
-		DisplayName:        "Antigravity",
-		SupportsMCPInstall: false,
-		InstructionAdapter: InstructionAdapterNone,
-		SkillTarget:        SkillTargetAntigravity,
 		ConfigPath:         unsupportedConfigPath,
 	},
 	{

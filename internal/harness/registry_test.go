@@ -39,8 +39,8 @@ func TestLookup_Unknown(t *testing.T) {
 }
 
 func TestAll_HarnessesHaveExplicitCapabilities(t *testing.T) {
-	if len(All) != 10 {
-		t.Fatalf("len(All) = %d, want 10", len(All))
+	if len(All) != 9 {
+		t.Fatalf("len(All) = %d, want 9", len(All))
 	}
 	seen := make(map[Name]bool, len(All))
 	for _, h := range All {
@@ -110,7 +110,7 @@ func TestConfigPath_UsesHome(t *testing.T) {
 		{"claude", filepath.Join(home, ".claude.json")},
 		{"cursor", filepath.Join(home, ".cursor", "mcp.json")},
 		{"codex", filepath.Join(home, ".codex", "config.toml")},
-		{"gemini", filepath.Join(home, ".gemini", "settings.json")},
+		{"antigravity", filepath.Join(home, ".gemini", "config", "mcp_config.json")},
 	}
 	for _, tc := range cases {
 		t.Run(tc.harness, func(t *testing.T) {
