@@ -15,7 +15,12 @@ import (
 
 func TestActivityGetAndStatusHandlers(t *testing.T) {
 	s := helperServer(t)
-	base := time.Date(2026, 8, 30, 10, 0, 0, 0, time.UTC)
+	// Anchored to now, not to a fixed calendar date: the store stamps
+	// ExpiresAt = EndedAt + SegmentTTL (48h by default) and Search filters
+	// on expires_at > now, so a hardcoded date makes the test pass only
+	// until 48h after it — this one went red mid-day on 2026-09-01 and
+	// stayed red. activity_api_test.go already anchors the same way.
+	base := time.Now().UTC().Add(-time.Hour).Truncate(time.Second)
 	if err := s.activityStore.SaveSegment(activity.Segment{
 		Source:          "editor",
 		Granularity:     activity.Granularity10Min,
