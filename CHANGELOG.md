@@ -9,6 +9,8 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.10.0] - 2026-09-01
+
 ### Added
 - `symbrain memory set|delete|rules|query-log` — the embedded memory store is
   now fully operable from the CLI; `set` goes through the same governed write
