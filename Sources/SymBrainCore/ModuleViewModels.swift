@@ -45,7 +45,6 @@ public enum MemoryScopeFilter: String, CaseIterable, Sendable, Identifiable {
 
 @MainActor
 public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
-    @Published public var versionInfo: VersionInfo?
     @Published public var memories: [MemoryRecord] = [] {
         didSet {
             if memories.map(\.id) != oldValue.map(\.id) { listGeneration += 1 }
@@ -86,7 +85,9 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
 
     public var isInstalled: Bool { client.isInstalled }
 
-    public var homebrewCommand: String { "brew install danieljustus/tap/symmemory" }
+    /// Memory ships inside symbrain, so the only thing that can be missing
+    /// is symbrain itself.
+    public var homebrewCommand: String { "brew install danieljustus/tap/symbrain" }
 
     public var selectedMemory: MemoryRecord? {
         memories.first { $0.id == selectedMemoryID }
@@ -163,13 +164,12 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
         guard client.isInstalled else {
             isBinaryNotFound = true
             availability = .missing
-            errorMessage = "The \u{201C}symmemory\u{201D} command could not be found. Install it with "
-                + "`brew install danieljustus/tap/symmemory`."
+            errorMessage = "The \u{201C}symbrain\u{201D} command could not be found. Install it with "
+                + "`brew install danieljustus/tap/symbrain`."
             return
         }
 
         availability = .ready
-        versionInfo = try? await client.version()
         await loadMemories()
         await loadRules()
         await loadQueryLog()
@@ -426,7 +426,6 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
 @MainActor
 public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
-    @Published public var versionLine: String?
     @Published public var library: SkillLibrary?
     @Published public var statusReport: SkillStatusReport?
     @Published public var targetsReport: SkillTargetsReport?
@@ -458,7 +457,9 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
 
     public var isInstalled: Bool { client.isInstalled }
 
-    public var homebrewCommand: String { "brew install danieljustus/tap/symskills" }
+    /// Skills ships inside symbrain, so the only thing that can be missing
+    /// is symbrain itself.
+    public var homebrewCommand: String { "brew install danieljustus/tap/symbrain" }
 
     /// Library skills narrowed by the search field (name or description).
     public var skills: [SkillSummary] {
@@ -475,7 +476,7 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
         library?.skills.first { $0.name == selectedSkillName }
     }
 
-    /// The harnesses `symskills` knows about, for the target picker.
+    /// The harnesses the skill core knows about, for the target picker.
     public var targetOptions: [String] {
         ["all"] + (targetsReport?.rows.map(\.target) ?? [])
     }
@@ -488,13 +489,12 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
         guard client.isInstalled else {
             isBinaryNotFound = true
             availability = .missing
-            errorMessage = "The \u{201C}symskills\u{201D} command could not be found. Install it with "
-                + "`brew install danieljustus/tap/symskills`."
+            errorMessage = "The \u{201C}symbrain\u{201D} command could not be found. Install it with "
+                + "`brew install danieljustus/tap/symbrain`."
             return
         }
 
         availability = .ready
-        versionLine = try? await client.version()
         await loadLibrary()
         await loadStatus()
         await loadTargets()

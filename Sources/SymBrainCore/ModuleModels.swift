@@ -1,6 +1,6 @@
 // ModuleModels — Decodable types for the embedded Memory and Vault modules.
 //
-// These match the JSON emitted by `symmemory -o json ...` and
+// These match the JSON emitted by `symbrain memory --output json ...` and
 // `symvault --output json ...`.  Unlike the symbrain models they are decoded
 // with a plain JSONDecoder and explicit snake_case CodingKeys: both tools
 // return free-form dictionaries (memory metadata, vault fields) whose keys
@@ -104,7 +104,7 @@ func reportText(stdout: String, stderr: String) -> String {
 
 // MARK: - Memory records
 
-/// One entry from `symmemory list -o json` / `symmemory get <id> -o json`.
+/// One entry from `symbrain memory list --output json`.
 public struct MemoryRecord: Decodable, Sendable, Identifiable, Equatable {
     public let id: String
     public let content: String
@@ -157,7 +157,7 @@ public struct MemoryRecord: Decodable, Sendable, Identifiable, Equatable {
     }
 }
 
-/// One hit from `symmemory search <query> -o json`.
+/// One hit from `symbrain memory search <query> --output json`.
 public struct MemorySearchHit: Decodable, Sendable, Identifiable, Equatable {
     public let memory: MemoryRecord
     public let similarityScore: Double?
@@ -170,7 +170,7 @@ public struct MemorySearchHit: Decodable, Sendable, Identifiable, Equatable {
     public var id: String { memory.id }
 }
 
-/// One entry from `symmemory rule list -o json`.
+/// One entry from `symbrain memory rules --output json`.
 public struct MemoryRule: Decodable, Sendable, Identifiable, Equatable {
     public let id: String
     public let content: String
@@ -191,7 +191,7 @@ public struct MemoryRule: Decodable, Sendable, Identifiable, Equatable {
     public var formattedCreatedAt: String { formatModuleTimestamp(createdAt) }
 }
 
-/// Result of `symmemory query-log --json` — the MCP tool-call log.
+/// Result of `symbrain memory query-log --output json` — the tool-call log.
 public struct MemoryQueryLog: Decodable, Sendable, Equatable {
     public let totalQueries: Int
     public let toolBreakdown: [String: Int]?
@@ -226,7 +226,7 @@ public struct MemoryQueryLog: Decodable, Sendable, Equatable {
     }
 }
 
-/// One recorded MCP query from `symmemory query-log --json`.
+/// One recorded query from `symbrain memory query-log --output json`.
 public struct MemoryQueryLogEntry: Decodable, Sendable, Identifiable, Equatable {
     public let id: String
     public let actor: String?

@@ -293,6 +293,16 @@ Implemented today:
 | `symbrain memory list [--scope <scope>] [--limit <N>]` | List stored memories from the embedded database (`--output table|json`, default table; scope default all, limit default 100, max 1000) |
 | `symbrain memory search <query> [--scope <scope>] [--limit <N>]` | Search stored memories by semantic relevance (`--output table|json`, default table; scope default all, limit default 5) |
 | `symbrain memory sync --remote <url> [--pull|--push]` | Synchronize memories with a remote memory server (supports encrypted relay; see below) |
+| `symbrain memory set <content> --kind <kind> [--scope <scope>] [--staged]` | Store a memory in the embedded database through the same write path the MCP gateway uses (`--output table\|json`, default table) |
+| `symbrain memory delete <id>` | Remove a memory from the embedded database (`--output table\|json`, default table) |
+| `symbrain memory rules [--scope <scope>]` | List the procedural rules stored alongside memories (`--output table\|json`, default table) |
+| `symbrain memory query-log [--limit <N>] [--actor <name>]` | Inspect the memory retrieval log — totals, per-tool/per-actor breakdown, recent entries (`--output table\|json`, default table; limit default 50, max 1000) |
+| `symbrain skills list` | List the embedded skill library with each skill's install state (`--output table\|json`, default table) |
+| `symbrain skills status [--target <target>] [--scope user\|project]` | Classify installed skills against the library: in-sync, stale, harness-changed, conflict, orphaned, unmanaged (`--output table\|json`, default table) |
+| `symbrain skills targets [--scope user\|project]` | Show the harness targets skills can be installed into, with their skill roots (`--output table\|json`, default table) |
+| `symbrain skills log [--skill <name>] [--target <target>] [--limit <N>]` | Read the local skill operation log, newest first (`--output table\|json`, default table) |
+| `symbrain skills sync [--dry-run] [--target <target>] [--scope user\|project]` | Repair drifted installs; harness-side edits and conflicts are reported, never overwritten (`--output table\|json`, default table) |
+| `symbrain skills doctor` | Report the configured skill paths and per-target skill roots (`--output table\|json`, default table) |
 | `symbrain activity search <query> --from <RFC3339> --to <RFC3339> --limit <N> --max-tokens <N>` | Search bounded, redacted activity summaries (explicit time and result/token bounds required) |
 | `symbrain activity get <id> --max-tokens <N>` | Read one bounded, redacted activity item with provenance |
 | `symbrain activity status --max-tokens <N>` | Show bounded activity-store status without content |

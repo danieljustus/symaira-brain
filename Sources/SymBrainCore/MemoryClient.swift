@@ -1,82 +1,54 @@
-// MemoryClient — typed client over the `symmemory` CLI.
+// MemoryClient — typed client over `symbrain memory`.
 //
-// Mirrors SymBrainClient: BinaryLocator for discovery, SymairaCLIRunner for
-// execution.  JSON is decoded with a plain decoder and explicit CodingKeys so
-// free-form metadata keys survive verbatim (see ModuleModels).
+// Memory is not a separate tool: it is a core embedded in the symbrain
+// binary, and this client is a thin argument builder over the same
+// `symbrain` executable SymBrainClient runs. There is no second binary to
+// discover, no second version to report, and no separate install step.
+//
+// JSON is decoded with a plain decoder and explicit CodingKeys so free-form
+// metadata keys survive verbatim (see ModuleModels).
 
 #if os(macOS)
 import Foundation
 import SymairaCLIRunner
-import SymairaToolKit
 
-/// Locates and executes the `symmemory` CLI binary.
+/// Runs the `symbrain memory` subcommands.
 public struct MemoryClient: Sendable {
-    public static let binaryName = "symmemory"
+    /// The shared symbrain client — memory has no binary of its own.
+    public let brain: SymBrainClient
 
-    public let locator: BinaryLocator
-    public let runner: CLIRunner
-
-    public init(
-        userOverride: URL? = nil,
-        searchPATH: String? = nil,
-        extraDirectories: [String] = [
-            "~/.symaira/bin",
-            "/opt/homebrew/bin",
-            "/usr/local/bin",
-        ],
-        runner: CLIRunner = CLIRunner()
-    ) {
-        self.runner = runner
-        self.locator = BinaryLocator(
-            bundle: nil,
-            userOverride: userOverride,
-            searchPATH: searchPATH,
-            extraDirectories: extraDirectories
-        )
+    public init(brain: SymBrainClient = SymBrainClient()) {
+        self.brain = brain
     }
+
+    /// How many memories `list` asks the store for. The CLI caps a list at
+    /// 1000 rows; the GUI renders a bounded page of that anyway.
+    public static let listFetchLimit = 1000
 
     // MARK: - Binary resolution
 
-    /// Resolve the symmemory binary URL. Finder-launched apps have no shell
-    /// PATH, so the Homebrew prefixes carry the search; an unverified match is
-    /// accepted for the same reason as in SymBrainClient.
-    public func resolveBinary() -> URL? {
-        locator.locate(Self.binaryName, allowUnverified: true)?.url
-    }
-
-    public var isInstalled: Bool { resolveBinary() != nil }
+    public var isInstalled: Bool { brain.resolveBinary() != nil }
 
     private func executable() throws -> URL {
-        guard let binary = resolveBinary() else {
-            throw CLIRunnerError.binaryNotFound(tool: Self.binaryName)
+        guard let binary = brain.resolveBinary() else {
+            throw CLIRunnerError.binaryNotFound(tool: "symbrain")
         }
         return binary
     }
 
-    // MARK: - version
-
-    /// Run `symmemory version --json`.
-    public func version() async throws -> VersionInfo {
-        try await runner.runDecoding(
-            VersionInfo.self,
-            executable: try executable(),
-            arguments: ["version", "--json"],
-            timeout: 10
-        )
-    }
-
     // MARK: - doctor
 
-    /// Run `symmemory doctor` and return its report as text.
+    /// Run `symbrain doctor` and return its report as text.
     ///
-    /// `doctor` has no JSON mode and exits non-zero when a check fails while
-    /// still printing the complete report on stdout, so the report is
-    /// surfaced either way. stderr is only used when stdout is empty: on a
-    /// failing check the CLI also dumps its usage text there.
+    /// Memory has no health command of its own — one binary means one health
+    /// check, and `symbrain doctor` already reports memory among the cores it
+    /// serves. `doctor` has no JSON mode in the table sense used here and
+    /// exits non-zero when a check fails while still printing the complete
+    /// report on stdout, so the report is surfaced either way.
     public func doctor() async throws -> String {
-        let result = try await runner.runAllowingFailure(
+        let result = try await brain.runner.runAllowingFailure(
             try executable(),
-            arguments: ["doctor", "--no-color"],
+            arguments: ["doctor"],
             timeout: 60
         )
         return reportText(stdout: result.stdoutText, stderr: result.stderrText)
@@ -84,29 +56,29 @@ public struct MemoryClient: Sendable {
 
     // MARK: - memories
 
-    /// Run `symmemory list -o json [-s <scope>]`.
+    /// Run `symbrain memory list --output json [--scope <scope>]`.
     public func list(scope: String? = nil) async throws -> [MemoryRecord] {
-        var arguments = ["list", "-o", "json"]
+        var arguments = ["memory", "list", "--output", "json", "--limit", String(Self.listFetchLimit)]
         if let scope, !scope.isEmpty {
-            arguments += ["-s", scope]
+            arguments += ["--scope", scope]
         }
         return try await decodeList(MemoryRecord.self, arguments: arguments, timeout: 60)
     }
 
-    /// Run `symmemory search <query> -o json [-s <scope>] -l <limit>`.
+    /// Run `symbrain memory search <query> --output json [--scope <scope>]`.
     public func search(
         query: String,
         scope: String? = nil,
         limit: Int = 25
     ) async throws -> [MemorySearchHit] {
-        var arguments = ["search", query, "-o", "json", "-l", String(limit)]
+        var arguments = ["memory", "search", query, "--output", "json", "--limit", String(limit)]
         if let scope, !scope.isEmpty {
-            arguments += ["-s", scope]
+            arguments += ["--scope", scope]
         }
         return try await decodeList(MemorySearchHit.self, arguments: arguments, timeout: 60)
     }
 
-    /// Run `symmemory set <content> -s <scope> [--kind <kind>] [--staged]`.
+    /// Run `symbrain memory set <content> --scope <scope> [--kind <kind>] [--staged]`.
     @discardableResult
     public func set(
         content: String,
@@ -114,14 +86,14 @@ public struct MemoryClient: Sendable {
         kind: String? = nil,
         staged: Bool = false
     ) async throws -> String {
-        var arguments = ["set", content, "-s", scope, "--author", "gui:symbrain"]
+        var arguments = ["memory", "set", content, "--scope", scope, "--author", "gui:symbrain"]
         if let kind, !kind.isEmpty {
             arguments += ["--kind", kind]
         }
         if staged {
             arguments.append("--staged")
         }
-        let stdout = try await runner.runChecked(
+        let stdout = try await brain.runner.runChecked(
             try executable(),
             arguments: arguments,
             timeout: 120
@@ -129,12 +101,12 @@ public struct MemoryClient: Sendable {
         return String(data: stdout, encoding: .utf8) ?? ""
     }
 
-    /// Run `symmemory delete <id>`.
+    /// Run `symbrain memory delete <id>`.
     @discardableResult
     public func delete(id: String) async throws -> String {
-        let stdout = try await runner.runChecked(
+        let stdout = try await brain.runner.runChecked(
             try executable(),
-            arguments: ["delete", id],
+            arguments: ["memory", "delete", id],
             timeout: 30
         )
         return String(data: stdout, encoding: .utf8) ?? ""
@@ -142,20 +114,22 @@ public struct MemoryClient: Sendable {
 
     // MARK: - rules
 
-    /// Run `symmemory rule list -o json`.
+    /// Run `symbrain memory rules --output json`.
     public func rules() async throws -> [MemoryRule] {
-        try await decodeList(MemoryRule.self, arguments: ["rule", "list", "-o", "json"], timeout: 30)
+        try await decodeList(
+            MemoryRule.self,
+            arguments: ["memory", "rules", "--output", "json"],
+            timeout: 30
+        )
     }
 
     // MARK: - query log
 
-    /// Run `symmemory query-log --json --limit <limit>`.
-    ///
-    /// `query-log` predates the global `-o` flag and takes its own `--json`.
+    /// Run `symbrain memory query-log --output json --limit <limit>`.
     public func queryLog(limit: Int = 50) async throws -> MemoryQueryLog {
         try await decode(
             MemoryQueryLog.self,
-            arguments: ["query-log", "--json", "--limit", String(limit)],
+            arguments: ["memory", "query-log", "--output", "json", "--limit", String(limit)],
             timeout: 30
         )
     }
@@ -169,7 +143,7 @@ public struct MemoryClient: Sendable {
         arguments: [String],
         timeout: Double
     ) async throws -> [E] {
-        let stdout = try await runner.runChecked(
+        let stdout = try await brain.runner.runChecked(
             try executable(),
             arguments: arguments,
             timeout: timeout
@@ -190,7 +164,7 @@ public struct MemoryClient: Sendable {
         arguments: [String],
         timeout: Double
     ) async throws -> T {
-        let stdout = try await runner.runChecked(
+        let stdout = try await brain.runner.runChecked(
             try executable(),
             arguments: arguments,
             timeout: timeout

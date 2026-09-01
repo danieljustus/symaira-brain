@@ -9,6 +9,21 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Added
+- `symbrain memory set|delete|rules|query-log` — the embedded memory store is
+  now fully operable from the CLI; `set` goes through the same governed write
+  path (embedding, PII redaction, conflict detection, kind/staging) the MCP
+  gateway uses.
+- `symbrain skills list|status|targets|log|sync|doctor` — a CLI surface over
+  the embedded skill library, replacing the archived `symskills` binary.
+
+### Changed
+- The macOS and iOS apps no longer treat memory and skills as separate tools:
+  both screens drive `symbrain memory` / `symbrain skills` instead of the
+  standalone `symmemory` / `symskills` binaries, the per-module version badges
+  are gone, and a Settings binary-path override now reaches those screens too.
+  The sidebar groups them as built-in cores; only the vault stays external.
+
 ## Guard (absorbed module)
 
 The `symguard` security gateway was absorbed into this repository on

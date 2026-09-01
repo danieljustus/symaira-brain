@@ -2,14 +2,21 @@ import SwiftUI
 import SymairaTheme
 import SymBrainCore
 
-/// The embedded Symaira Memory module: browse, search and add memories,
-/// inspect rules, and read both the memory query log and the symbrain broker
-/// audit trail for the memory server.
+/// The memory core built into symbrain: browse, search and add memories,
+/// inspect rules, and read both the memory query log and the broker audit
+/// trail for the memory server.
 struct MemoryView: View {
-    @StateObject private var vm = MemoryViewModel()
+    @StateObject private var vm: MemoryViewModel
     @State private var tab: Tab = .memories
     @State private var showAddSheet = false
     @State private var memoryToDelete: MemoryRecord?
+
+    /// Memory runs inside the same binary the rest of the app drives, so it
+    /// is handed the same client — a Settings binary-path override reaches
+    /// this screen too.
+    init(client: SymBrainClient) {
+        _vm = StateObject(wrappedValue: MemoryViewModel(client: MemoryClient(brain: client)))
+    }
 
     enum Tab: String, CaseIterable, Identifiable {
         case memories = "Memories"
@@ -27,7 +34,7 @@ struct MemoryView: View {
 
             switch vm.availability {
             case .checking:
-                SymairaLoadingState("Connecting to the memory server\u{2026}")
+                SymairaLoadingState("Opening the memory store\u{2026}")
 
             case .missing:
                 missingRuntimeSection
@@ -102,15 +109,12 @@ struct MemoryView: View {
                 Text("Memory")
                     .font(.title.bold())
                     .foregroundStyle(SymairaTheme.textPrimary)
-                Text("Symaira Memory — persistent facts, rules and retrieval log")
+                Text("Persistent facts, rules and retrieval log — built into SymBrain")
                     .font(.subheadline)
                     .foregroundStyle(SymairaTheme.textSecondary)
             }
             Spacer()
 
-            if let version = vm.versionInfo {
-                SymairaBadge("symmemory \(version.version)", tone: .informative)
-            }
             if let status = vm.statusMessage {
                 SymairaBadge(status, tone: .positive)
             }
@@ -133,8 +137,8 @@ struct MemoryView: View {
     private var missingRuntimeSection: some View {
         SymairaEmptyState(
             systemImage: "brain",
-            title: "symmemory not found",
-            message: "Install the Symaira Memory runtime, then reload this screen."
+            title: "SymBrain CLI not found",
+            message: "Memory runs inside symbrain. Install the symbrain CLI, then reload this screen."
         ) {
             VStack(spacing: SymairaSpacing.medium) {
                 HStack(spacing: SymairaSpacing.small) {
@@ -341,7 +345,7 @@ struct MemoryView: View {
                 SymairaEmptyState(
                     systemImage: "list.bullet.rectangle",
                     title: "No Rules",
-                    message: "Procedural rules created with `symmemory rule add` appear here."
+                    message: "Procedural rules stored in the memory core appear here."
                 )
             } else {
                 Table(vm.rules) {
@@ -443,10 +447,10 @@ struct MemoryView: View {
     private var healthSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
             Button(action: { Task { await vm.runDoctor() } }) {
-                Label("Run symmemory doctor", systemImage: "stethoscope")
+                Label("Run symbrain doctor", systemImage: "stethoscope")
             }
             .symairaButtonStyle(.primary)
-            .accessibilityLabel("Run symmemory doctor")
+            .accessibilityLabel("Run symbrain doctor")
 
             if vm.isLoading {
                 SymairaLoadingState("Running health checks…")

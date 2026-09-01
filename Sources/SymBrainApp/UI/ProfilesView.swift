@@ -303,9 +303,9 @@ struct NewProfileSheet: View {
 /// Maps raw MCP tool identifiers to user-friendly one-line descriptions.
 private func toolDescription(_ tool: String) -> String {
     switch tool {
-    case "symvault": return "Manage credentials and secrets"
-    case "symmemory": return "Persistent semantic memory and entity graph"
-    case "symskills": return "Skill catalog and installation"
+    case "symvault", "vault": return "Manage credentials and secrets"
+    case "memory": return "Persistent semantic memory and entity graph"
+    case "skills": return "Skill catalog and installation"
     case "symseek": return "Full-text search over indexed documents"
     case "symfetch": return "Web page fetching and content extraction"
     case "symscope": return "Local system inventory (ports, MCP servers, containers)"

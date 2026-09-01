@@ -1,14 +1,14 @@
-// SkillsModels — Decodable types for the embedded Skills module.
+// SkillsModels — Decodable types for the embedded skills core.
 //
-// These match the JSON emitted by `symskills <command> --json`. As with the
-// Memory and Vault models they use a plain decoder and explicit snake_case
-// CodingKeys (see ModuleModels).
+// These match the JSON emitted by `symbrain skills <command> --output json`.
+// As with the Memory and Vault models they use a plain decoder and explicit
+// snake_case CodingKeys (see ModuleModels).
 
 import Foundation
 
 // MARK: - list --json
 
-/// Result of `symskills list --json`.
+/// Result of `symbrain skills list`.
 public struct SkillLibrary: Decodable, Sendable {
     public let skills: [SkillSummary]
     public let categoryCounts: [String: Int]?
@@ -26,7 +26,7 @@ public struct SkillLibrary: Decodable, Sendable {
     }
 }
 
-/// One library skill from `symskills list --json`.
+/// One library skill from `symbrain skills list`.
 public struct SkillSummary: Decodable, Sendable, Identifiable, Equatable {
     public let name: String
     public let description: String?
@@ -66,7 +66,7 @@ public struct SkillSummary: Decodable, Sendable, Identifiable, Equatable {
     }
 }
 
-/// One install reference inside a `symskills list --json` entry.
+/// One install reference inside a `symbrain skills list` entry.
 public struct SkillInstallRef: Decodable, Sendable, Equatable {
     public let target: String
     public let path: String?
@@ -81,7 +81,7 @@ public struct SkillInstallRef: Decodable, Sendable, Equatable {
 
 // MARK: - status --json
 
-/// Result of `symskills status --json`.
+/// Result of `symbrain skills status`.
 public struct SkillStatusReport: Decodable, Sendable {
     public let installs: [SkillInstallStatus]?
     public let summary: SkillStatusSummary?
@@ -89,7 +89,7 @@ public struct SkillStatusReport: Decodable, Sendable {
     public var rows: [SkillInstallStatus] { installs ?? [] }
 }
 
-/// One managed install from `symskills status --json`.
+/// One managed install from `symbrain skills status`.
 public struct SkillInstallStatus: Decodable, Sendable, Identifiable, Equatable {
     public let target: String
     public let name: String
@@ -116,7 +116,7 @@ public struct SkillInstallStatus: Decodable, Sendable, Identifiable, Equatable {
     }
 }
 
-/// The counts block of `symskills status --json`.
+/// The counts block of `symbrain skills status`.
 public struct SkillStatusSummary: Decodable, Sendable, Equatable {
     public let inSync: Int?
     public let stale: Int?
@@ -147,7 +147,7 @@ public struct SkillStatusSummary: Decodable, Sendable, Equatable {
         .filter { $0.count > 0 }
     }
 
-    /// True when a `symskills sync` would have work to do.
+    /// True when a `symbrain skills sync` would have work to do.
     public var needsSync: Bool {
         (stale ?? 0) > 0 || (harnessChanged ?? 0) > 0
     }
@@ -155,14 +155,14 @@ public struct SkillStatusSummary: Decodable, Sendable, Equatable {
 
 // MARK: - targets --json
 
-/// Result of `symskills targets --json`.
+/// Result of `symbrain skills targets`.
 public struct SkillTargetsReport: Decodable, Sendable {
     public let targets: [SkillTarget]?
 
     public var rows: [SkillTarget] { targets ?? [] }
 }
 
-/// One harness from `symskills targets --json`.
+/// One harness from `symbrain skills targets`.
 public struct SkillTarget: Decodable, Sendable, Identifiable, Equatable {
     public let target: String
     public let displayName: String?
@@ -203,7 +203,7 @@ public struct SkillTarget: Decodable, Sendable, Identifiable, Equatable {
 
 // MARK: - log --json
 
-/// One record from `symskills log --json` — the local operation history.
+/// One record from `symbrain skills log` — the local operation history.
 public struct SkillLogEntry: Decodable, Sendable, Identifiable, Equatable {
     public let ts: String
     public let event: String
@@ -238,7 +238,7 @@ public struct SkillLogEntry: Decodable, Sendable, Identifiable, Equatable {
 
 // MARK: - sync --json
 
-/// Result of `symskills sync [--dry-run] --json`.
+/// Result of `symbrain skills sync [--dry-run]`.
 public struct SkillSyncReport: Decodable, Sendable {
     public let results: [SkillSyncResult]?
 
@@ -259,7 +259,7 @@ public struct SkillSyncResult: Decodable, Sendable, Identifiable, Equatable {
 
 // MARK: - doctor --json
 
-/// Result of `symskills doctor --json`.
+/// Result of `symbrain skills doctor`.
 public struct SkillsDoctorReport: Decodable, Sendable {
     public let config: SkillsDoctorConfig?
     public let configPath: String?
@@ -316,7 +316,7 @@ public struct SkillsDoctorVCS: Decodable, Sendable {
     public let enabled: Bool?
 }
 
-/// One target path pair from `symskills doctor --json`.
+/// One target path pair from `symbrain skills doctor`.
 public struct SkillsDoctorTarget: Decodable, Sendable, Identifiable, Equatable {
     public let target: String
     public let user: String?

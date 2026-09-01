@@ -27,6 +27,7 @@ var documentedCommands = []string{
 	"uninstall",
 	"sync",
 	"memory",
+	"skills",
 	"activity",
 	"audit",
 	"vault",
