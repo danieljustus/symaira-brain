@@ -345,10 +345,20 @@ struct DashboardView: View {
                     .font(.body.weight(.semibold))
                     .foregroundStyle(SymairaTheme.textPrimary)
                 Spacer()
-                SymairaBadge(
-                    harness.installed ? "Installed" : "Not Installed",
-                    tone: harness.installed ? .positive : .neutral
-                )
+                // A harness that takes no MCP entry at all (skills and/or
+                // instructions only) is not "not installed" — there is
+                // nothing to install. Saying so reads as a missing step the
+                // user could take, and none exists.
+                if harness.supportsMcpInstall {
+                    SymairaBadge(
+                        harness.installed ? "Installed" : "Not Installed",
+                        tone: harness.installed ? .positive : .neutral
+                    )
+                    .fixedSize()
+                } else {
+                    SymairaBadge("No MCP Config", tone: .informative)
+                        .fixedSize()
+                }
             }
             if let profile = harness.profile {
                 Text("Profile: \(profile)")
