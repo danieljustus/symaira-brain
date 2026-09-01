@@ -154,10 +154,10 @@ func TestCmdInstall_BacksUpExistingConfig(t *testing.T) {
 
 func TestCmdInstall_CreatesNewConfigWhenNoneExists(t *testing.T) {
 	home := harnessSandbox(t)
-	path := filepath.Join(home, ".gemini", "settings.json")
+	path := filepath.Join(home, ".gemini", "config", "mcp_config.json")
 
 	var stdout, stderr bytes.Buffer
-	code := cmdInstall([]string{"--harness", "gemini", "--profile", "personal"}, &stdout, &stderr)
+	code := cmdInstall([]string{"--harness", "antigravity", "--profile", "personal"}, &stdout, &stderr)
 	if code != exitcodes.ExitOK {
 		t.Fatalf("code = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
 	}

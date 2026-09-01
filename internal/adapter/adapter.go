@@ -1,6 +1,6 @@
 // Package adapter contains one small module per supported harness (claude,
-// codex, cursor, opencode, gemini) that writes instructions and MCP server
-// configuration in that harness's own format.
+// codex, cursor, opencode, antigravity) that writes instructions and MCP
+// server configuration in that harness's own format.
 package adapter
 
 import (
@@ -31,10 +31,10 @@ type Target struct {
 // targetsByCapability names the concrete instruction implementations. The
 // harness registry owns which harness selects each implementation.
 var targetsByCapability = map[harness.InstructionAdapter]Target{
-	harness.InstructionAdapterAgents: AgentsTarget,
-	harness.InstructionAdapterClaude: ClaudeTarget,
-	harness.InstructionAdapterCursor: CursorTarget,
-	harness.InstructionAdapterGemini: GeminiTarget,
+	harness.InstructionAdapterAgents:      AgentsTarget,
+	harness.InstructionAdapterClaude:      ClaudeTarget,
+	harness.InstructionAdapterCursor:      CursorTarget,
+	harness.InstructionAdapterAntigravity: AntigravityTarget,
 }
 
 // TargetsForHarnesses derives the sync adapter map from the harness registry.

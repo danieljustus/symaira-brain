@@ -82,7 +82,7 @@ symaira-brain/
 │   ├── audit/             # JSONL audit log, redaction rules
 │   ├── instructions/      # Canonical instructions source + managed blocks
 │   ├── adapter/           # One small module per harness (claude, codex, cursor,
-│   │                      #   opencode, gemini): instructions + MCP config
+│   │                      #   opencode, antigravity): instructions + MCP config
 │   ├── harness/           # Harness registry: config paths, formats, backup
 │   ├── memory/            # Absorbed symmemory: store, entities, consolidation
 │   ├── skills/            # Absorbed symskills: skill SSOT, MCP tools

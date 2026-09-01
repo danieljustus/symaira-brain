@@ -193,7 +193,7 @@ func TestInstallThenUninstall_RoundTripsToOriginalConfig(t *testing.T) {
 		harness.Cursor:        "{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"args\": [\n        \"--root\",\n        \"/tmp\"\n      ],\n      \"command\": \"mcp-filesystem\"\n    }\n  }\n}\n",
 		harness.Opencode:      "{}\n",
 		harness.Codex:         "model = \"o3\"\n\n[mcp_servers]\n  [mcp_servers.other-tool]\n    args = [\"run\"]\n    command = \"other-tool\"\n",
-		harness.Gemini:        "{}\n",
+		harness.Antigravity:   "{}\n",
 	}
 
 	for _, h := range harness.All {

@@ -6,7 +6,7 @@ import (
 )
 
 // jsonDocument is the Document implementation for the five JSON-based
-// harnesses (claude, claude-desktop, cursor, opencode, gemini).
+// harnesses (claude, claude-desktop, cursor, opencode, antigravity).
 // It uses orderedMap instead of map[string]any so that key order from
 // the original config file is preserved — without this, a dry-run diff
 // showed thousands of lines of key reordering noise for a single-entry

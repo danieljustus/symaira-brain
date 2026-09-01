@@ -18,11 +18,37 @@ the [Unreleased] section is moved into a dated version section.
   the embedded skill library, replacing the archived `symskills` binary.
 
 ### Changed
+- The `gemini` harness is now `antigravity`. The Gemini CLI is retired; only
+  the Antigravity app and its `agy` CLI remain, so the registry entry moved
+  from `~/.gemini/settings.json` to Antigravity's own global MCP config at
+  `~/.gemini/config/mcp_config.json` and gained the skill target it was
+  missing. `--harness gemini` is no longer a valid value.
+- Antigravity's global skill root is `~/.gemini/config/skills`, the shared
+  config directory the app and the `agy` CLI actually read. Skills were
+  previously installed into `~/.gemini/antigravity-cli/skills`, a per-client
+  state directory Antigravity never reads, so they were rendered and linked
+  but never picked up.
 - The macOS and iOS apps no longer treat memory and skills as separate tools:
   both screens drive `symbrain memory` / `symbrain skills` instead of the
   standalone `symmemory` / `symskills` binaries, the per-module version badges
   are gone, and a Settings binary-path override now reaches those screens too.
   The sidebar groups them as built-in cores; only the vault stays external.
+- The Harnesses screen derives its list from `symbrain doctor` instead of a
+  hardcoded array that had drifted from the registry (it still named
+  `gemini` and never showed `antigravity`). Harnesses that support no MCP
+  install at all are filtered out rather than shown as "Not Installed", and
+  an unreadable or absent config is now labelled as such.
+
+### Fixed
+- An empty harness config file is treated as an empty JSON object instead of
+  a parse error. Antigravity ships an empty `mcp_config.json` and `agy mcp
+  list` reads it as "no MCP servers configured"; symbrain refused to edit it,
+  which blocked installing into a fresh Antigravity setup. Non-empty content
+  still has to parse.
+- `TestRun_StubSubcommandsExitOK` ran a real, unsandboxed `symbrain sync`
+  against the developer's `$HOME`, so an unmanaged skill in any harness skill
+  root failed a test about command dispatch. It now runs in a sandboxed home
+  and project directory.
 
 ## Guard (absorbed module)
 

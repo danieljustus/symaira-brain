@@ -18,7 +18,17 @@ struct HarnessesView: View {
     // #149: Uninstall confirmation — uninstall rewrites the harness config.
     @State private var pendingUninstall: UninstallConfirmation?
 
-    private let allHarnesses = ["claude", "claude-desktop", "cursor", "opencode", "codex", "gemini"]
+    /// The harnesses symbrain can install into, as reported by the CLI.
+    ///
+    /// This list used to be hardcoded here, which silently drifted from the
+    /// Go registry: it still named the retired `gemini` harness and never
+    /// showed `antigravity`. Deriving it from `symbrain doctor` keeps the
+    /// registry the single source of truth, and `supportsMcpInstall` filters
+    /// out the capability-only harnesses (skills/instructions but no MCP
+    /// config) that this screen cannot act on.
+    private var installableHarnesses: [HarnessStatus] {
+        vm.harnesses.filter(\.supportsMcpInstall)
+    }
 
     init(client: SymBrainClient) {
         self.client = client
@@ -129,14 +139,21 @@ struct HarnessesView: View {
 
     private var harnessListSection: some View {
         VStack(spacing: SymairaSpacing.medium) {
-            ForEach(allHarnesses, id: \.self) { name in
-                harnessRow(name)
+            if installableHarnesses.isEmpty {
+                SymairaNotice(
+                    title: "No harnesses reported",
+                    message: "symbrain doctor returned no harness that supports MCP installation.",
+                    tone: .warning
+                )
+            }
+            ForEach(installableHarnesses, id: \.name) { status in
+                harnessRow(status)
             }
         }
     }
 
-    private func harnessRow(_ name: String) -> some View {
-        let status = vm.harnesses.first { $0.name == name }
+    private func harnessRow(_ status: HarnessStatus) -> some View {
+        let name = status.name
 
         return HStack {
             VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
@@ -144,16 +161,19 @@ struct HarnessesView: View {
                     Text(name)
                         .font(.body.weight(.semibold))
                         .foregroundStyle(SymairaTheme.textPrimary)
-                    if let status {
-                        SymairaBadge(status.installed ? "Installed" : "Not Installed", tone: status.installed ? .positive : .neutral)
+                    SymairaBadge(status.installed ? "Installed" : "Not Installed", tone: status.installed ? .positive : .neutral)
+                    // A config symbrain cannot parse is a different problem
+                    // from "not installed", and install would refuse anyway.
+                    if status.configFound && !status.configParsed {
+                        SymairaBadge("Config Unreadable", tone: .critical)
+                    } else if !status.configFound {
+                        SymairaBadge("No Config Yet", tone: .neutral)
                     }
                 }
-                if let status {
-                    Text(status.configPath)
-                        .font(.caption2)
-                        .foregroundStyle(SymairaTheme.textMuted)
-                        .lineLimit(1)
-                }
+                Text(status.configPath)
+                    .font(.caption2)
+                    .foregroundStyle(SymairaTheme.textMuted)
+                    .lineLimit(1)
             }
 
             Spacer()
@@ -166,7 +186,7 @@ struct HarnessesView: View {
                 Menu {
                     ForEach(vm.profiles, id: \.name) { profile in
                         Button("\(profile.name)") {
-                            if status?.installed == true {
+                            if status.installed {
                                 pendingInstall = InstallConfirmation(harness: name, profile: profile.name)
                             } else {
                                 Task { await vm.install(harness: name, profile: profile.name, dryRun: false) }
@@ -200,7 +220,7 @@ struct HarnessesView: View {
                 .foregroundStyle(SymairaTheme.textSecondary)
 
                 // Uninstall controls (only when installed)
-                if status?.installed == true {
+                if status.installed {
                     // #74: Dry Run for Uninstall
                     Button(action: {
                         dryRunRequest = DryRunRequest(harness: name, profile: nil, isInstall: false)

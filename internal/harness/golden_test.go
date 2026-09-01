@@ -18,7 +18,7 @@ func TestGolden_InsertSymbrainEntry(t *testing.T) {
 		Cursor:        "personal",
 		Opencode:      "default",
 		Codex:         "personal",
-		Gemini:        "default",
+		Antigravity:   "default",
 	}
 
 	for _, h := range All {

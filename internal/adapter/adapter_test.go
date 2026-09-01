@@ -122,11 +122,11 @@ func TestSync_Cursor_FreshFile(t *testing.T) {
 	assertGolden(t, golden, string(got))
 }
 
-func TestSync_Gemini_FreshFile(t *testing.T) {
+func TestSync_Antigravity_FreshFile(t *testing.T) {
 	dir := t.TempDir()
-	content := "# Instructions\n\nGemini rules.\n"
+	content := "# Instructions\n\nAntigravity rules.\n"
 
-	path, created, err := Sync(GeminiTarget, content, dir)
+	path, created, err := Sync(AntigravityTarget, content, dir)
 	if err != nil {
 		t.Fatalf("Sync() error: %v", err)
 	}
@@ -139,7 +139,7 @@ func TestSync_Gemini_FreshFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	golden := filepath.Join("testdata", "gemini_fresh.golden")
+	golden := filepath.Join("testdata", "antigravity_fresh.golden")
 	assertGolden(t, golden, string(got))
 }
 

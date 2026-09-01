@@ -16,7 +16,7 @@ connection controlling exactly what that harness is allowed to see.
 Memory and skills ship inside this binary (absorbed 2026-08-21); credentials
 stay behind the separate `symvault` process on purpose.
 
-Point Claude Code, Cursor, Codex, Gemini, or opencode at `symbrain` once, and
+Point Claude Code, Cursor, Codex, Antigravity, or opencode at `symbrain` once, and
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
@@ -32,7 +32,7 @@ each through its own profile, each seeing only what that profile exposes.
   bound to a profile that controls what it sees, so a shared or untrusted
   harness never even *sees* a tool that could read a secret.
 - **Portable across every major harness.** Register once in Claude Code,
-  Cursor, Codex, Gemini, or opencode and each talks to the same underlying
+  Cursor, Codex, Antigravity, or opencode and each talks to the same underlying
   cores through its own profile.
 - **One binary, in-process.** Memory and skills are compiled in, so there is
   no multi-process dance for the common case; vault stays separate on purpose
@@ -141,7 +141,7 @@ subscription/token usage per provider (see `symbrain usage`). See the
 [command reference](#command-reference).
 
 Supported `--harness` values: `claude`, `claude-desktop`, `cursor`,
-`opencode`, `codex`, `gemini`. `symbrain uninstall --harness <name>` reverses
+`opencode`, `codex`, `antigravity`. `symbrain uninstall --harness <name>` reverses
 step 2 and only ever touches the `symbrain` entry — every other server in
 that harness's config is left alone.
 

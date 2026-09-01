@@ -179,10 +179,24 @@ func TestRun_StubSubcommandsExitOK(t *testing.T) {
 		"doctor", "sync", "version",
 	}
 
+	// "sync" writes instruction files and installs skills into every
+	// harness skill root it can resolve. Run the whole set inside a
+	// sandboxed HOME and project directory: unsandboxed, this asserted
+	// against whatever the developer happens to have on disk, and an
+	// unmanaged skill in any real harness root — which install correctly
+	// refuses to overwrite — failed the test for reasons that have nothing
+	// to do with the dispatcher this test covers.
+	harnessSandbox(t)
+	project := t.TempDir()
+
 	for _, cmd := range subcommands {
 		var stdout, stderr bytes.Buffer
 
-		code := run([]string{cmd}, &stdout, &stderr)
+		args := []string{cmd}
+		if cmd == "sync" {
+			args = append(args, "--project", project)
+		}
+		code := run(args, &stdout, &stderr)
 
 		if code != exitcodes.ExitOK {
 			t.Fatalf("%s: exit code = %d, want %d (stderr: %q)", cmd, code, exitcodes.ExitOK, stderr.String())

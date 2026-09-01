@@ -155,7 +155,7 @@ func TestRunBinaryPresenceChangesNothing(t *testing.T) {
 // mirroring the old bridge for harnesses the skills pipeline does not target.
 func TestRun_UnsupportedHarness(t *testing.T) {
 	opts := writeLibrary(t)
-	results, err := Run(context.Background(), []string{"cursor", "gemini"}, opts, false)
+	results, err := Run(context.Background(), []string{"cursor", "claude-desktop"}, opts, false)
 	if err != nil {
 		t.Fatalf("Run() error: %v", err)
 	}

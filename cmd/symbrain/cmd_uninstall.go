@@ -13,7 +13,7 @@ import (
 
 func cmdUninstall(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("uninstall", flag.ContinueOnError)
-	harnessName := fs.String("harness", "", "harness to remove symbrain from: claude, claude-desktop, cursor, opencode, codex, gemini (required)")
+	harnessName := fs.String("harness", "", "harness to remove symbrain from: claude, claude-desktop, cursor, opencode, codex, antigravity (required)")
 	projectDir := fs.String("project", "", "project directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)")
 	dryRun := fs.Bool("dry-run", false, "print a unified diff of the change and write nothing")
 	fs.SetOutput(stderr)

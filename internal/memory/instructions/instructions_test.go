@@ -1,6 +1,7 @@
 package instructions
 
 import (
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -136,8 +137,12 @@ func TestClientNamesSorted(t *testing.T) {
 	if !sort.StringsAreSorted(names) {
 		t.Errorf("ClientNames() not sorted: %v", names)
 	}
-	if names[0] != "claude-code" {
-		t.Errorf("expected claude-code first, got %q", names[0])
+	// Membership, not position: this used to pin names[0] to "claude-code",
+	// which only held because it happened to sort first. Renaming the
+	// gemini client to antigravity broke the assertion without breaking
+	// anything ClientNames() promises.
+	if !slices.Contains(names, "claude-code") {
+		t.Errorf("ClientNames() = %v, want it to contain claude-code", names)
 	}
 }
 

@@ -431,7 +431,7 @@ func TestCmdDoctor_HumanOutput_ReportsHarnessBindings(t *testing.T) {
 	writeHarnessConfig(t, installed, "personal")
 	writeStubProfileFile(t, home, "personal")
 
-	missing := harnessByName(t, "gemini")
+	missing := harnessByName(t, "antigravity")
 	writeHarnessConfig(t, missing, "ghost")
 
 	var stdout, stderr bytes.Buffer
@@ -549,14 +549,14 @@ func TestRunDoctorChecks_FlagsMissingProfileBinding(t *testing.T) {
 	harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
 
-	h := harnessByName(t, "gemini")
+	h := harnessByName(t, "antigravity")
 	writeHarnessConfig(t, h, "ghost")
 
 	report := runDoctorChecks(context.Background(), "claude-code")
 
 	var found *harnessCheck
 	for i := range report.Harnesses {
-		if report.Harnesses[i].Name == "gemini" {
+		if report.Harnesses[i].Name == "antigravity" {
 			found = &report.Harnesses[i]
 		}
 	}

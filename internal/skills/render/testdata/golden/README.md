@@ -40,7 +40,7 @@ contract in `internal/install.InstallPath`:
 | claude      | ~/.claude/skills/<name>                      | <project>/.claude/skills/<name>        |
 | codex       | ~/.agents/skills/<name>                      | <project>/.agents/skills/<name>        |
 | hermes      | ~/.hermes/skills/symaira/<name>              | <project>/.hermes/skills/<name>        |
-| antigravity | ~/.gemini/antigravity-cli/skills/<name>      | <project>/.agents/skills/<name>        |
+| antigravity | ~/.gemini/config/skills/<name>              | <project>/.agents/skills/<name>        |
 | openclaw    | ~/.openclaw/skills/<name>                    | <project>/.agents/skills/<name>        |
 
 Antigravity and OpenClaw global paths follow their official docs
