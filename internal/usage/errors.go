@@ -3,6 +3,7 @@ package usage
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // NotConfiguredError means the provider has no usable credential.
@@ -26,6 +27,21 @@ func (e *RateLimitedError) Error() string {
 		return fmt.Sprintf("AI usage provider %q is rate limited; retry in %ds", e.ProviderID, int(*e.RetryAfterSeconds))
 	}
 	return fmt.Sprintf("AI usage provider %q is rate limited", e.ProviderID)
+}
+
+// TimeoutError means a provider's fetch (its whole Strategies chain) did
+// not complete within its per-provider budget (issue #429), independent of
+// whatever context-cancellation string the underlying strategy or HTTP call
+// happened to surface. Reported the same way a "not configured" provider
+// is — as a status on ProviderUsage, never by aborting the rest of the
+// report — so one stalled provider can't starve the others.
+type TimeoutError struct {
+	ProviderID string
+	Timeout    time.Duration
+}
+
+func (e *TimeoutError) Error() string {
+	return fmt.Sprintf("AI usage provider %q timed out after %s", e.ProviderID, e.Timeout)
 }
 
 // ChainFailedError means every fallback strategy of a provider failed; each
