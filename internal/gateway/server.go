@@ -66,6 +66,12 @@ func (s *Server) SetMemoryServer(ms *memorymcp.Server) {
 	s.memoryServer = ms
 }
 
+// inProcessHandler is a type alias for the mcpserver.Tool.Handler
+// signature. It exists so wrapHandler and its callers can name the type
+// without depending on a named type from mcpserver (which has none) or
+// forcing every caller to spell the function signature out in full.
+type inProcessHandler = func(ctx context.Context, input json.RawMessage) (any, error)
+
 // auditSink is the subset of the audit.Logger API that ServeIO uses. It
 // is an interface so tests can substitute a fake logger (e.g. to force
 // the degraded-warning path) without changing production behavior.
@@ -154,10 +160,14 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	// register symskills tools on the gateway server instead of spawning a
 	// symskills child process. Skills policy is enable/disable only (no mode
 	// preset), so a single Enabled gate reproduces the previous catalog
-	// filtering. Tools are gateway-owned like bootstrap/patterns and are
-	// therefore no longer routed through routeToolCall or audited per-call.
+	// filtering. Tools are gateway-owned like bootstrap/patterns and are not
+	// routed through routeToolCall, but each individual tool handler is
+	// still wrapped through wrapInProcess so calls are audited (#422).
 	if s.profile.Server(profile.ServerSkills).Enabled {
-		mcptools.Register(srv, mcptools.Options{Version: s.version})
+		mcptools.Register(srv, mcptools.Options{
+			Version: s.version,
+			Wrap:    s.wrapInProcess(auditLog, recorder, "skills"),
+		})
 	}
 
 	// Usage is gateway-owned like bootstrap/patterns: the single
@@ -178,7 +188,8 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	// embedded memory server registers its tools in-process instead of a
 	// spawned symmemory child. Its own JWT/profile attribution is
 	// preconfigured by the caller; here we expose only the tools the profile
-	// policy allows (mode preset + tools_allow/tools_deny).
+	// policy allows (mode preset + tools_allow/tools_deny). Each tool
+	// handler is wrapped through wrapInProcess so calls are audited (#422).
 	if s.memoryServer != nil && s.profile.Server(profile.ServerMemory).Enabled {
 		report, err := policy.EvaluatePreset(profile.ServerMemory, s.profile.Server(profile.ServerMemory))
 		if err != nil {
@@ -188,48 +199,75 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 			for _, name := range report.Exposed {
 				allowed[name] = true
 			}
-			s.memoryServer.RegisterTools(srv, allowed)
+			s.memoryServer.RegisterTools(srv, allowed, s.wrapInProcess(auditLog, recorder, "memory"))
 		}
 	}
 
 	for _, entry := range s.cat.Exposed() {
 		entry := entry
+		exposure := audit.Exposure{AccessClass: entry.AccessClass, AccessSource: entry.AccessSource}
 		srv.RegisterTool(&mcpserver.Tool{
 			Name:        entry.Name,
 			Description: entry.Description,
 			InputSchema: entry.InputSchema,
 			Annotations: catalogEntryAnnotations(entry),
-			Handler: func(ctx context.Context, input json.RawMessage) (any, error) {
-				start := time.Now()
-				result, err := s.routeToolCall(ctx, entry, input)
-				if recorder != nil {
-					recorder.Add(entry.Server, entry.OriginalName)
-				}
-				if auditLog != nil {
-					status := "ok"
-					var classification audit.Classification
-					if err != nil {
-						status = "error"
-						if classified, ok := err.(*classifiedError); ok {
-							classification = classified.Classification
-						}
-					}
-					auditLog.Log(entry.Server, entry.OriginalName, input, time.Since(start), status, audit.Exposure{
-						AccessClass:  entry.AccessClass,
-						AccessSource: entry.AccessSource,
-					}, classification)
-					if auditLog.Degraded() {
-						s.auditDegradedWarn.Do(func() {
-							s.logger.Warn("audit log degraded; some entries may not be persisted")
-						})
-					}
-				}
-				return result, err
-			},
+			Handler: s.wrapHandler(auditLog, recorder, entry.Server, entry.OriginalName, exposure,
+				func(ctx context.Context, input json.RawMessage) (any, error) {
+					return s.routeToolCall(ctx, entry, input)
+				}),
 		})
 	}
 
 	return srv.ServeIO(ctx, r, w)
+}
+
+// wrapHandler builds the audit+episode closure applied around every tool
+// call the gateway serves — both child-server tools routed through the
+// catalog (routeToolCall) and gateway-owned in-process tools (memory,
+// skills) registered directly on srv. It records the call in the episode
+// recorder (names only) and, when auditLog is non-nil, emits one JSONL
+// entry per call carrying status, duration, exposure, and the resolved
+// error classification. auditLog and recorder may be nil (audit disabled /
+// patterns disabled respectively), in which case the corresponding
+// recording step is skipped.
+func (s *Server) wrapHandler(auditLog auditSink, recorder *episodeRecorder, server, tool string, exposure audit.Exposure, h inProcessHandler) inProcessHandler {
+	return func(ctx context.Context, input json.RawMessage) (any, error) {
+		start := time.Now()
+		result, err := h(ctx, input)
+		if recorder != nil {
+			recorder.Add(server, tool)
+		}
+		if auditLog != nil {
+			status := "ok"
+			var classification audit.Classification
+			if err != nil {
+				status = "error"
+				if classified, ok := err.(*classifiedError); ok {
+					classification = classified.Classification
+				}
+			}
+			auditLog.Log(server, tool, input, time.Since(start), status, exposure, classification)
+			if auditLog.Degraded() {
+				s.auditDegradedWarn.Do(func() {
+					s.logger.Warn("audit log degraded; some entries may not be persisted")
+				})
+			}
+		}
+		return result, err
+	}
+}
+
+// wrapInProcess partially applies wrapHandler for one gateway-owned
+// in-process tool server (memory or skills): every tool handler wrapped
+// through the returned function is audited under that fixed server name.
+// These tools have no catalog.Entry (they bypass routeToolCall entirely),
+// so their audit entries carry a zero-value exposure — the same as any
+// other core-alias catalog entry (see catalog.Build), since AccessClass/
+// AccessSource only ever apply to foreign (non-core) servers.
+func (s *Server) wrapInProcess(auditLog auditSink, recorder *episodeRecorder, server string) func(tool string, h inProcessHandler) inProcessHandler {
+	return func(tool string, h inProcessHandler) inProcessHandler {
+		return s.wrapHandler(auditLog, recorder, server, tool, audit.Exposure{}, h)
+	}
 }
 
 // instructions returns the stable profile guidance and, when startup was

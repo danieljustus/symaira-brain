@@ -20,7 +20,7 @@ func registerLibraryTools(ctx *serverContext) {
 	logger := ctx.logger
 	logPath := ctx.logPath
 
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_list",
 		Description: "List skills in the symskills library.",
 		InputSchema: json.RawMessage(emptyObject),
@@ -55,7 +55,7 @@ func registerLibraryTools(ctx *serverContext) {
 			return mcpJSON(map[string]any{"skills": items, "category_counts": categoryCounts, "issues": issues})
 		},
 	})
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_inspect",
 		Description: "Inspect one skill by path or library name.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"}}}`),
@@ -75,7 +75,7 @@ func registerLibraryTools(ctx *serverContext) {
 			}{bundle, rec})
 		},
 	})
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_validate",
 		Description: "Validate one skill by path or library name.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"}}}`),

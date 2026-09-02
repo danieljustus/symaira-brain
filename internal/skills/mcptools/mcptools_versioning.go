@@ -22,10 +22,9 @@ import (
 // skills_discover_sources, skills_history, and skills_restore.
 func registerVersioningTools(ctx *serverContext) {
 	opts := ctx.opts
-	svc := ctx.srv
 	logger := ctx.logger
 
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_discover_sources",
 		Description: "Discover unmanaged skill sources in known harness roots or explicit paths.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"paths":{"type":"array","items":{"type":"string"}},"scope":{"type":"string"}}}`),
@@ -54,7 +53,7 @@ func registerVersioningTools(ctx *serverContext) {
 			return mcpJSON(map[string]any{"candidates": candidates})
 		},
 	})
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_history",
 		Description: "List the versioned commit history of a library skill: revision, timestamp, operation (import/update/restore/unknown) and changed files.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"},"limit":{"type":"integer"}},"required":["name"]}`),
@@ -88,7 +87,7 @@ func registerVersioningTools(ctx *serverContext) {
 			return mcpJSON(map[string]any{"name": args.Name, "history": history})
 		},
 	})
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_restore",
 		Description: "Roll a library skill's files back to a previous revision by forward commit. Dry-run defaults to true; pass dry_run=false to write. Refuses invalid restored states and never discards uncommitted changes (pass allow_dirty=true to snapshot them first); sync=true re-installs stale targets.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"},"rev":{"type":"string"},"dry_run":{"type":"boolean"},"allow_dirty":{"type":"boolean"},"sync":{"type":"boolean"}},"required":["name","rev"]}`),
