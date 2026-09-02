@@ -148,7 +148,7 @@ func verifyCosign(ctx context.Context, artifactPath string, core *Core, allowUns
 
 	if reason != "" {
 		if allowUnsigned {
-			fmt.Fprintf(warnOut, "WARNING: skipping cosign verification for %s (--allow-unsigned): %s — publisher identity was NOT verified\n",
+			fmt.Fprintf(warnOut, "WARNING: skipping cosign verification for %s (--allow-unsigned): %s — the publisher was NOT authenticated\n",
 				filepath.Base(artifactPath), reason)
 			return nil
 		}
