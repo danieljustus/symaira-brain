@@ -160,7 +160,7 @@ Commands:
   install     Register symbrain with a harness
   uninstall   Remove symbrain from a harness
   sync        Sync instructions and skills to harnesses
-  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync)
+  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)
   skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)
   activity    Read bounded activity summaries with explicit profile access
   audit       Inspect the audit log
