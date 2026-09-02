@@ -1,4 +1,19 @@
 // Package config provides symskills configuration defaults.
+//
+// Path resolution (#427): the on-disk library, rendered, base-snapshot and
+// cache directories are resolved through the shared internal/paths
+// resolver, which namespaces them under symbrain/skills (honoring
+// XDG_DATA_HOME/XDG_CACHE_HOME) with a read-only fallback to the legacy
+// ~/.local/share/symskills and ~/.cache/symskills locations when only
+// those exist. The config file (config.toml) and its sibling profiles/
+// directory intentionally stay on the pre-existing ~/.config/symskills
+// convention (now correctly honoring XDG_CONFIG_HOME via
+// configkit.DefaultPath instead of the hardcoded $HOME join this package
+// used before): configkit.Loader ties the global config directory name to
+// the project-local override filename (./.symskills.toml) with no
+// legacy-fallback hook, so renamespacing it would either silently stop
+// reading existing project overrides or require changes to corekit itself,
+// which is out of scope for this change.
 package config
 
 import (
@@ -8,6 +23,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/danieljustus/symaira-corekit/configkit"
+
+	sharedpaths "github.com/danieljustus/symaira-brain/internal/paths"
 )
 
 type Config struct {
@@ -57,15 +74,7 @@ type targetsFile struct {
 func LoadTargets() ([]CustomTarget, error) {
 	var merged targetsFile
 
-	globalPath := filepath.Join(os.Getenv("HOME"), ".config", "symskills", "config.toml")
-	if home, err := os.UserHomeDir(); err == nil && os.Getenv("HOME") == "" {
-		globalPath = filepath.Join(home, ".config", "symskills", "config.toml")
-	}
-	paths := []string{globalPath}
-	if cwd, err := os.Getwd(); err == nil {
-		paths = append(paths, filepath.Join(cwd, ".symskills.toml"))
-	}
-	for _, path := range paths {
+	for _, path := range configSearchPaths() {
 		if err := mergeTargetsFile(&merged, path); err != nil {
 			return nil, err
 		}
@@ -95,13 +104,12 @@ func LoadCapabilities() (map[string]map[string]bool, error) {
 }
 
 // configSearchPaths returns the global config file followed by the project
-// config file, in the precedence order configkit uses.
+// config file, in the precedence order configkit uses. The global path is
+// ConfigPath() (XDG_CONFIG_HOME-aware via configkit.DefaultPath), matching
+// exactly what Load() itself reads so LoadTargets/LoadCapabilities can
+// never see a different file than Load() does.
 func configSearchPaths() []string {
-	globalPath := filepath.Join(os.Getenv("HOME"), ".config", "symskills", "config.toml")
-	if home, err := os.UserHomeDir(); err == nil && os.Getenv("HOME") == "" {
-		globalPath = filepath.Join(home, ".config", "symskills", "config.toml")
-	}
-	paths := []string{globalPath}
+	paths := []string{ConfigPath()}
 	if cwd, err := os.Getwd(); err == nil {
 		paths = append(paths, filepath.Join(cwd, ".symskills.toml"))
 	}
@@ -155,28 +163,34 @@ type CustomTarget struct {
 }
 
 func Defaults() *Config {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		home = "."
+	dataRoot := "."
+	if data, err := sharedpaths.SkillsDataDir(); err == nil {
+		dataRoot = data.Dir
+	}
+	cacheDir := "."
+	if cache, err := sharedpaths.SkillsCacheDir(); err == nil {
+		cacheDir = cache.Dir
 	}
 	return &Config{
-		LibraryDir:  filepath.Join(home, ".local", "share", "symskills", "library"),
-		RenderDir:   filepath.Join(home, ".local", "share", "symskills", "rendered"),
-		CacheDir:    filepath.Join(home, ".cache", "symskills"),
-		ProfilesDir: filepath.Join(home, ".config", "symskills", "profiles"),
-		BaseDir:     filepath.Join(home, ".local", "share", "symskills", "base"),
+		LibraryDir:  filepath.Join(dataRoot, "library"),
+		RenderDir:   filepath.Join(dataRoot, "rendered"),
+		CacheDir:    cacheDir,
+		ProfilesDir: filepath.Join(filepath.Dir(ConfigPath()), "profiles"),
+		BaseDir:     filepath.Join(dataRoot, "base"),
 		VCS:         VCSConfig{Enabled: boolPtr(true)},
 	}
 }
 
 func boolPtr(v bool) *bool { return &v }
 
+// ConfigPath returns the global symskills config file path:
+// $XDG_CONFIG_HOME/symskills/config.toml, or ~/.config/symskills/config.toml
+// when XDG_CONFIG_HOME is unset. Delegates to configkit.DefaultPath so this
+// always matches exactly what Load() reads (see the package doc comment for
+// why this directory is not namespaced under symbrain like the data/cache
+// dirs are).
 func ConfigPath() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return filepath.Join(".config", "symskills", "config.toml")
-	}
-	return filepath.Join(home, ".config", "symskills", "config.toml")
+	return configkit.DefaultPath("symskills")
 }
 
 func EnsureDirs(cfg *Config) error {

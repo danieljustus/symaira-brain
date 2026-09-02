@@ -7,6 +7,16 @@ import (
 )
 
 func TestDefaults(t *testing.T) {
+	// Isolate HOME and the XDG vars: a dev machine may have a real,
+	// legacy symskills install, which would make the "nothing exists yet"
+	// default flake against that machine's state (#427). Legacy fallback
+	// itself is covered separately in TestDefaults_FallsBackToLegacySymskills.
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", "")
+	t.Setenv("XDG_DATA_HOME", "")
+	t.Setenv("XDG_CACHE_HOME", "")
+
 	cfg := Defaults()
 
 	// Verify all paths are set
@@ -26,13 +36,15 @@ func TestDefaults(t *testing.T) {
 		t.Error("BaseDir should not be empty")
 	}
 
-	// Verify paths contain expected components
-	home, _ := os.UserHomeDir()
-	expectedLib := filepath.Join(home, ".local", "share", "symskills", "library")
-	expectedRender := filepath.Join(home, ".local", "share", "symskills", "rendered")
-	expectedCache := filepath.Join(home, ".cache", "symskills")
+	// Verify paths contain expected components. Library/Render/Base/Cache
+	// now resolve under the shared symbrain/skills namespace (#427);
+	// Profiles stays alongside config.toml under the unnamespaced
+	// ~/.config/symskills (see the package doc comment for why).
+	expectedLib := filepath.Join(home, ".local", "share", "symbrain", "skills", "library")
+	expectedRender := filepath.Join(home, ".local", "share", "symbrain", "skills", "rendered")
+	expectedCache := filepath.Join(home, ".cache", "symbrain", "skills")
 	expectedProfiles := filepath.Join(home, ".config", "symskills", "profiles")
-	expectedBase := filepath.Join(home, ".local", "share", "symskills", "base")
+	expectedBase := filepath.Join(home, ".local", "share", "symbrain", "skills", "base")
 
 	if cfg.LibraryDir != expectedLib {
 		t.Errorf("LibraryDir = %q, want %q", cfg.LibraryDir, expectedLib)
@@ -48,6 +60,47 @@ func TestDefaults(t *testing.T) {
 	}
 	if cfg.BaseDir != expectedBase {
 		t.Errorf("BaseDir = %q, want %q", cfg.BaseDir, expectedBase)
+	}
+}
+
+func TestDefaults_FallsBackToLegacySymskills(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", "")
+	t.Setenv("XDG_DATA_HOME", "")
+	t.Setenv("XDG_CACHE_HOME", "")
+
+	legacyData := filepath.Join(home, ".local", "share", "symskills")
+	legacyCache := filepath.Join(home, ".cache", "symskills")
+	if err := os.MkdirAll(legacyData, 0o755); err != nil {
+		t.Fatalf("MkdirAll(legacyData) error: %v", err)
+	}
+	if err := os.MkdirAll(legacyCache, 0o755); err != nil {
+		t.Fatalf("MkdirAll(legacyCache) error: %v", err)
+	}
+
+	cfg := Defaults()
+
+	expectedLib := filepath.Join(legacyData, "library")
+	if cfg.LibraryDir != expectedLib {
+		t.Errorf("LibraryDir = %q, want legacy %q", cfg.LibraryDir, expectedLib)
+	}
+	if cfg.CacheDir != legacyCache {
+		t.Errorf("CacheDir = %q, want legacy %q", cfg.CacheDir, legacyCache)
+	}
+}
+
+func TestSkillsConfigDir_HonorsXDGConfigHome(t *testing.T) {
+	// Legacy symskills ignored XDG_CONFIG_HOME entirely for LoadTargets and
+	// configSearchPaths; ConfigPath (and everything derived from it) must
+	// now honor it (#427).
+	base := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", base)
+
+	got := ConfigPath()
+	want := filepath.Join(base, "symskills", "config.toml")
+	if got != want {
+		t.Errorf("ConfigPath() = %q, want %q", got, want)
 	}
 }
 
