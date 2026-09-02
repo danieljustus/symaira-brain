@@ -29,6 +29,7 @@ func cmdSetup(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("setup", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fix := fs.Bool("fix", false, "repair missing or version-mismatched binaries (alias for doctor --fix)")
+	allowUnsigned := fs.Bool("allow-unsigned", false, "install even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
@@ -41,12 +42,12 @@ func cmdSetup(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	}
 
 	if *fix {
-		return runSetupFix(stdout, stderr, binDir, *jsonOut)
+		return runSetupFix(stdout, stderr, binDir, *jsonOut, *allowUnsigned)
 	}
-	return runSetupInstall(stdout, stderr, binDir, *jsonOut)
+	return runSetupInstall(stdout, stderr, binDir, *jsonOut, *allowUnsigned)
 }
 
-func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut bool) exitcodes.ExitCode {
+func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned bool) exitcodes.ExitCode {
 	ctx := context.Background()
 	manifest, err := managed.LoadManifest()
 	if err != nil {
@@ -55,6 +56,8 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut bool) exit
 	}
 
 	inst := managed.NewInstaller(binDir)
+	inst.AllowUnsigned = allowUnsigned
+	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 
 	for name, core := range manifest.Cores {
@@ -91,7 +94,7 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut bool) exit
 	return exitcodes.ExitOK
 }
 
-func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut bool) exitcodes.ExitCode {
+func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned bool) exitcodes.ExitCode {
 	ctx := context.Background()
 	manifest, err := managed.LoadManifest()
 	if err != nil {
@@ -100,6 +103,8 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut bool) exitcode
 	}
 
 	inst := managed.NewInstaller(binDir)
+	inst.AllowUnsigned = allowUnsigned
+	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 	var fixed, skipped int
 

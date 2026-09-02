@@ -74,3 +74,16 @@ func TestCmdSetup_FixJSONOutput(t *testing.T) {
 	}
 	_ = stdout.String()
 }
+
+// TestCmdSetup_AllowUnsignedFlag_Parses proves --allow-unsigned is a
+// recognized flag (not rejected as unknown) and that cmdSetup runs the
+// install path with it set, regardless of network outcome in this
+// environment.
+func TestCmdSetup_AllowUnsignedFlag_Parses(t *testing.T) {
+	sandboxHome(t)
+	var stdout, stderr bytes.Buffer
+	code := cmdSetup([]string{"--allow-unsigned", "--json"}, &stdout, &stderr)
+	if code == exitcodes.ExitNoInput {
+		t.Fatalf("--allow-unsigned was rejected as an unknown flag (stderr: %s)", stderr.String())
+	}
+}

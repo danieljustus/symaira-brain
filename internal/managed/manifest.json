@@ -7,7 +7,12 @@
       "binary_name": "symvault",
       "asset_prefix": "symaira-vault",
       "has_cosign": true,
-      "sha256": ""
+      "sha256": {
+        "symaira-vault_0.15.3_darwin_amd64.tar.gz": "5a60ed80138c97bafbae487bd1a6c1234e906c21a4d4fb86ac819e0182ef1deb",
+        "symaira-vault_0.15.3_darwin_arm64.tar.gz": "59a1f448e0cae06c4370df8392c628210a8b848193a9ffa8ca655234b393b744",
+        "symaira-vault_0.15.3_linux_amd64.tar.gz": "19448317d916451bd60ca1547577203a64a849339b38e9b95dfd3c0189a45017",
+        "symaira-vault_0.15.3_linux_arm64.tar.gz": "692262a4d3aae38729140797d48feff37c5806623c97a424add7aa2abe4db677"
+      }
     },
     "symcockpit": {
       "version": "0.4.0",
@@ -15,7 +20,9 @@
       "binary_name": "symcockpit",
       "asset_prefix": "symcockpit",
       "has_cosign": false,
-      "sha256": "",
+      "sha256": {
+        "symcockpit_0.4.0_darwin_universal.tar.gz": "9c44429ce035851b80c1df395f876d4e9a2900616a1460edb3ab021b068856da"
+      },
       "platforms": ["darwin"],
       "asset_arch": "universal"
     }

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -108,29 +109,58 @@ func findChecksumInFile(checksumsPath, assetName string) (string, error) {
 }
 
 // verifyCosign checks a cosign signature (.sig) and certificate (.pem)
-// against an artifact. Returns nil if cosign is not available (graceful
-// degradation per the issue's acceptance criteria).
-func verifyCosign(ctx context.Context, artifactPath string) error {
-	// Check if cosign is available
-	cosignPath, err := exec.LookPath("cosign")
-	if err != nil {
-		// cosign not installed — skip verification gracefully
-		return nil
+// against an artifact, pinning the verification to core's exact GitHub
+// Actions release-workflow identity and the GitHub OIDC issuer (see
+// Core.CertificateIdentity / Core.CertificateOIDCIssuer) — it does not
+// accept an artifact signed by any other identity.
+//
+// This fails closed by default: a missing cosign binary or missing
+// signature/certificate files is an error, not a silent skip. Passing
+// allowUnsigned=true downgrades that to a skip and prints a warning to
+// warnOut — the explicit, opt-in escape hatch (--allow-unsigned) for
+// environments that cannot install cosign or reach the signature
+// assets. warnOut defaults to os.Stderr when nil.
+func verifyCosign(ctx context.Context, artifactPath string, core *Core, allowUnsigned bool, warnOut io.Writer) error {
+	if warnOut == nil {
+		warnOut = os.Stderr
 	}
+
+	cosignPath, lookErr := exec.LookPath("cosign")
 
 	sigPath := artifactPath + ".sig"
 	pemPath := artifactPath + ".pem"
+	_, sigErr := os.Stat(sigPath)
+	_, pemErr := os.Stat(pemPath)
 
-	// Check if signature files exist
-	if _, err := os.Stat(sigPath); os.IsNotExist(err) {
-		return nil // no signature to verify
+	var reason string
+	switch {
+	case lookErr != nil:
+		reason = fmt.Sprintf("cosign is not installed on PATH (%v)", lookErr)
+	case os.IsNotExist(sigErr):
+		reason = fmt.Sprintf("signature file missing: %s", sigPath)
+	case os.IsNotExist(pemErr):
+		reason = fmt.Sprintf("certificate file missing: %s", pemPath)
+	case sigErr != nil:
+		reason = fmt.Sprintf("cannot read signature file %s: %v", sigPath, sigErr)
+	case pemErr != nil:
+		reason = fmt.Sprintf("cannot read certificate file %s: %v", pemPath, pemErr)
+	}
+
+	if reason != "" {
+		if allowUnsigned {
+			fmt.Fprintf(warnOut, "WARNING: skipping cosign verification for %s (--allow-unsigned): %s — publisher identity was NOT verified\n",
+				filepath.Base(artifactPath), reason)
+			return nil
+		}
+		return fmt.Errorf("cannot verify publisher signature for %s: %s (pass --allow-unsigned to install anyway at your own risk)",
+			filepath.Base(artifactPath), reason)
 	}
 
 	args := []string{"verify-blob", artifactPath,
 		"--signature", sigPath,
 		"--certificate", pemPath,
-		"--certificate-identity-regexp", ".*",
-		"--certificate-oidc-issuer-regexp", ".*",
+		"--certificate-identity", core.CertificateIdentity(),
+		"--certificate-oidc-issuer", core.CertificateOIDCIssuer(),
 	}
 
 	cmd := exec.CommandContext(ctx, cosignPath, args...)
