@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/memory/config"
+	"github.com/danieljustus/symaira-brain/internal/memory/paths"
 )
 
 // ---------------------------------------------------------------------------
@@ -623,8 +624,10 @@ func TestEmbeddingBackupSize(t *testing.T) {
 			jsonDB, jsonCleanup := benchOpenTempDB(t)
 			t.Cleanup(jsonCleanup)
 			seedJSONMemories(jsonDB, scale, "json")
-			jsonHome := os.Getenv("HOME")
-			jsonDBPath := filepath.Join(jsonHome, ".local", "share", "symmemory", "default.db")
+			jsonDBPath, err := paths.DatabasePath()
+			if err != nil {
+				t.Fatalf("resolve JSON db path: %v", err)
+			}
 			jsonRaw, err := os.ReadFile(jsonDBPath)
 			if err != nil {
 				t.Fatalf("read JSON db: %v", err)
@@ -634,8 +637,10 @@ func TestEmbeddingBackupSize(t *testing.T) {
 			blobDB, blobCleanup := benchOpenTempDB(t)
 			t.Cleanup(blobCleanup)
 			seedBLOBMemories(blobDB, scale, "blob")
-			blobHome := os.Getenv("HOME")
-			blobDBPath := filepath.Join(blobHome, ".local", "share", "symmemory", "default.db")
+			blobDBPath, err := paths.DatabasePath()
+			if err != nil {
+				t.Fatalf("resolve BLOB db path: %v", err)
+			}
 			blobRaw, err := os.ReadFile(blobDBPath)
 			if err != nil {
 				t.Fatalf("read BLOB db: %v", err)

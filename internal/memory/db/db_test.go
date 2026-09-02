@@ -10,6 +10,7 @@ import (
 
 	"github.com/danieljustus/symaira-brain/internal/memory/config"
 	"github.com/danieljustus/symaira-brain/internal/memory/extractor"
+	"github.com/danieljustus/symaira-brain/internal/memory/paths"
 )
 
 func TestDBSchemaAndOperations(t *testing.T) {
@@ -32,7 +33,10 @@ func TestDBSchemaAndOperations(t *testing.T) {
 	defer func() { _ = database.Close() }()
 
 	// Verify database file was created inside temp directory
-	expectedPath := filepath.Join(tempDir, ".local", "share", "symmemory", "default.db")
+	expectedPath, err := paths.DatabasePath()
+	if err != nil {
+		t.Fatalf("resolve database path: %v", err)
+	}
 	if _, err := os.Stat(expectedPath); os.IsNotExist(err) {
 		t.Errorf("database file was not created at expected path: %s", expectedPath)
 	}
@@ -386,7 +390,10 @@ func TestDatabaseFilePermissions(t *testing.T) {
 	}
 	defer func() { _ = database.Close() }()
 
-	dbPath := filepath.Join(tempDir, ".local", "share", "symmemory", "default.db")
+	dbPath, err := paths.DatabasePath()
+	if err != nil {
+		t.Fatalf("resolve database path: %v", err)
+	}
 
 	// Check directory permissions
 	dirPath := filepath.Dir(dbPath)
