@@ -1,7 +1,6 @@
 package audit
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -350,7 +349,7 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 	for _, path := range paths {
 		entries, err := tailEntriesBounded(path, 0, func(entry Entry) bool {
 			return entry.Status == "degraded"
-		})
+		}, true)
 		if err != nil {
 			return nil, fmt.Errorf("audit: read %s: %w", path, err)
 		}
@@ -368,44 +367,16 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 	return result, nil
 }
 
-// tailEntries reads up to n entries (0 = all) from a JSONL file using a
-// buffered scanner with a 1 MB token limit to avoid silent truncation
-// on very long lines.
-func tailEntries(path string, n int) ([]Entry, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	var entries []Entry
-	scanner := bufio.NewScanner(f)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
-	for scanner.Scan() {
-		var entry Entry
-		if err := json.Unmarshal(scanner.Bytes(), &entry); err != nil {
-			continue
-		}
-		entries = append(entries, entry)
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	if n > 0 && len(entries) > n {
-		entries = entries[len(entries)-n:]
-	}
-	return entries, nil
-}
-
 // tailEntriesBounded reads entries from a JSONL file backwards in chunks,
-// stopping after the latest session is complete or after limit matching
-// entries are collected (0 = no limit). It never loads the entire file
-// into memory for the common path.
+// stopping after limit matching entries are collected (0 = no limit) or,
+// when sessionScoped is true, after the latest session is complete. It
+// never loads the entire file into memory for the common path.
 //
-// The filter predicate is applied to each entry; only entries for which
-// filter returns true are returned. Results are returned in chronological
-// order (oldest first).
-func tailEntriesBounded(path string, limit int, filter func(Entry) bool) ([]Entry, error) {
+// The filter predicate, when non-nil, is applied to each entry; only
+// entries for which it returns true are counted toward limit and
+// returned. A nil filter matches every entry. Results are returned in
+// chronological order (oldest first).
+func tailEntriesBounded(path string, limit int, filter func(Entry) bool, sessionScoped bool) ([]Entry, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -434,15 +405,17 @@ func tailEntriesBounded(path string, limit int, filter func(Entry) bool) ([]Entr
 			return false
 		}
 
-		if latestSession == "" {
-			if entry.SessionID == "" {
-				return false
+		if sessionScoped {
+			if latestSession == "" {
+				if entry.SessionID == "" {
+					return false
+				}
+				latestSession = entry.SessionID
 			}
-			latestSession = entry.SessionID
-		}
 
-		if entry.SessionID != latestSession {
-			return true
+			if entry.SessionID != latestSession {
+				return true
+			}
 		}
 		if filter == nil || filter(entry) {
 			results = append(results, entry)
@@ -509,46 +482,44 @@ func reverseEntries(entries []Entry) {
 
 const tailChunkSize = 64 * 1024 // 64KB
 
+// auditLogPaths resolves the JSONL audit log paths to read for profile.
+// If profile is empty, it returns every profile log found in the audit
+// directory. This discovery is shared by Tail (via TailEntries) and
+// TailEntries so both read the same set of files for the same inputs.
+func auditLogPaths(profile string) ([]string, error) {
+	dir, err := xdg.AuditDir()
+	if err != nil {
+		return nil, fmt.Errorf("audit: resolve audit dir: %w", err)
+	}
+
+	if profile != "" {
+		return []string{filepath.Join(dir, profile+".jsonl")}, nil
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("audit: read audit dir: %w", err)
+	}
+	var paths []string
+	for _, e := range entries {
+		if !e.IsDir() && strings.HasSuffix(e.Name(), ".jsonl") {
+			paths = append(paths, filepath.Join(dir, e.Name()))
+		}
+	}
+	return paths, nil
+}
+
 // Tail reads the last n entries from the audit log for the given profile
 // and writes them human-readably to w. If profile is empty, uses all
 // profiles found in the audit directory.
 func Tail(w io.Writer, profile string, n int) error {
-	dir, err := xdg.AuditDir()
+	entries, err := TailEntries(profile, n)
 	if err != nil {
-		return fmt.Errorf("audit: resolve audit dir: %w", err)
+		return err
 	}
-
-	var paths []string
-	if profile != "" {
-		paths = []string{filepath.Join(dir, profile+".jsonl")}
-	} else {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return fmt.Errorf("audit: read audit dir: %w", err)
-		}
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".jsonl") {
-				paths = append(paths, filepath.Join(dir, e.Name()))
-			}
-		}
+	for _, entry := range entries {
+		printEntry(w, entry)
 	}
-
-	for _, path := range paths {
-		lines, err := tailFile(path, n)
-		if err != nil {
-			continue
-		}
-		prof := strings.TrimSuffix(filepath.Base(path), ".jsonl")
-		for _, line := range lines {
-			var entry Entry
-			if err := json.Unmarshal([]byte(line), &entry); err != nil {
-				continue
-			}
-			entry.Profile = prof
-			printEntry(w, entry)
-		}
-	}
-
 	return nil
 }
 
@@ -556,126 +527,25 @@ func Tail(w io.Writer, profile string, n int) error {
 // profile and returns them as a slice. If profile is empty, merges
 // entries from all profiles found in the audit directory.
 func TailEntries(profile string, n int) ([]Entry, error) {
-	dir, err := xdg.AuditDir()
+	paths, err := auditLogPaths(profile)
 	if err != nil {
-		return nil, fmt.Errorf("audit: resolve audit dir: %w", err)
-	}
-
-	var paths []string
-	if profile != "" {
-		paths = []string{filepath.Join(dir, profile+".jsonl")}
-	} else {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return nil, fmt.Errorf("audit: read audit dir: %w", err)
-		}
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".jsonl") {
-				paths = append(paths, filepath.Join(dir, e.Name()))
-			}
-		}
+		return nil, err
 	}
 
 	var result []Entry
 	for _, path := range paths {
-		lines, err := tailFile(path, n)
+		entries, err := tailEntriesBounded(path, n, nil, false)
 		if err != nil {
 			continue
 		}
 		prof := strings.TrimSuffix(filepath.Base(path), ".jsonl")
-		for _, line := range lines {
-			var entry Entry
-			if err := json.Unmarshal([]byte(line), &entry); err != nil {
-				continue
-			}
+		for _, entry := range entries {
 			entry.Profile = prof
 			result = append(result, entry)
 		}
 	}
 
 	return result, nil
-}
-
-// tailFile reads the last n lines from a JSONL file. For small files
-// (at most tailChunkSize) it reads the whole file at once; for larger
-// files it scans backwards from the end in bounded chunks, counting
-// newlines until enough lines are collected.
-func tailFile(path string, n int) ([]string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	info, err := f.Stat()
-	if err != nil {
-		return nil, err
-	}
-	size := info.Size()
-
-	if size == 0 {
-		return nil, nil
-	}
-
-	// Small files: read whole file.
-	if size <= tailChunkSize {
-		data := make([]byte, size)
-		if _, err := f.ReadAt(data, 0); err != nil {
-			return nil, err
-		}
-		return splitTailLines(data, n)
-	}
-
-	// Large files: scan backwards from the end.
-	buf := make([]byte, tailChunkSize)
-	newlinesFound := 0
-	cutoff := int64(0)
-	offset := size
-
-scan:
-	for offset > 0 {
-		readSize := int64(tailChunkSize)
-		if offset < readSize {
-			readSize = offset
-		}
-		offset -= readSize
-
-		if _, err := f.ReadAt(buf[:readSize], offset); err != nil {
-			return nil, err
-		}
-
-		// Count newlines backwards in this chunk.
-		for i := readSize - 1; i >= 0; i-- {
-			if buf[i] == '\n' {
-				newlinesFound++
-				if n > 0 && newlinesFound > n {
-					cutoff = offset + i + 1
-					break scan
-				}
-			}
-		}
-	}
-
-	data := make([]byte, size-cutoff)
-	if _, err := f.ReadAt(data, cutoff); err != nil {
-		return nil, err
-	}
-	return splitTailLines(data, n)
-}
-
-// splitTailLines splits byte content on newlines and returns the last n
-// lines (or all if n <= 0). It trims leading/trailing whitespace and
-// skips empty results.
-func splitTailLines(data []byte, n int) ([]string, error) {
-	s := strings.TrimSpace(string(data))
-	if s == "" {
-		return nil, nil
-	}
-	lines := strings.Split(s, "\n")
-	if n > 0 && len(lines) > n {
-		lines = lines[len(lines)-n:]
-	}
-	return lines, nil
 }
 
 func printEntry(w io.Writer, e Entry) {
