@@ -14,9 +14,8 @@ import (
 // skills_targets_status.
 func registerStatusTool(ctx *serverContext) {
 	opts := ctx.opts
-	svc := ctx.srv
 
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_targets_status",
 		Description: "Read-only inventory and readiness status for supported AI-agent harnesses.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"scope":{"type":"string"}}}`),

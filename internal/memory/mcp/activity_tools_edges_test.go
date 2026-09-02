@@ -178,7 +178,7 @@ func TestRegisterActivityToolsForAllowedProfile(t *testing.T) {
 		"activity_search": true,
 		"activity_get":    true,
 		"activity_status": true,
-	})
+	}, nil)
 	data, err := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
 		"id":      "test-1",

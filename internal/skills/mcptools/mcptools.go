@@ -15,6 +15,15 @@ import (
 
 const emptyObject = `{"type":"object","properties":{}}`
 
+// ToolWrapper wraps one MCP tool handler before it is registered on the
+// server. The brain gateway passes its audit+episode closure via
+// Options.Wrap so each individual symskills tool call (skills_install,
+// skills_restore, ...) is recorded in the JSONL audit log the same way
+// catalog-routed tool calls are (issue #422). A nil wrapper — the zero
+// value, used by every existing Options{} call site — leaves handlers
+// unwrapped.
+type ToolWrapper func(tool string, h func(ctx context.Context, input json.RawMessage) (any, error)) func(ctx context.Context, input json.RawMessage) (any, error)
+
 type Options struct {
 	LibraryDir  string
 	RenderDir   string
@@ -34,6 +43,11 @@ type Options struct {
 	// Nil means enabled (the default), so bare Options{} in tests keeps
 	// working.
 	VCSEnabled *bool
+	// Wrap, when non-nil, wraps every registered tool's Handler (see
+	// ToolWrapper). The brain gateway sets this to its audit+episode
+	// closure; a nil Wrap (every existing Options{} literal) leaves
+	// handlers unwrapped.
+	Wrap ToolWrapper
 }
 
 // skillListItem is one skills_list row: the frontmatter summary plus the
@@ -68,7 +82,7 @@ func mcpJSON(v any) (string, error) {
 // this file holds no tool bodies.
 func Register(srv *mcpserver.Server, opts Options) {
 	cfg, opts, logger, logPath := backfillDefaults(opts)
-	ctx := serverContext{srv: srv, opts: opts, cfg: cfg, logger: logger, logPath: logPath}
+	ctx := serverContext{srv: srv, opts: opts, cfg: cfg, logger: logger, logPath: logPath, wrap: opts.Wrap}
 	registerLibraryTools(&ctx)
 	registerProfileTools(&ctx)
 	registerRenderTools(&ctx)
