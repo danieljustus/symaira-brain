@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"testing"
@@ -212,6 +213,113 @@ enabled = false
 	if err := <-scanErr; err != nil {
 		t.Fatalf("stdout hygiene violated: %v", err)
 	}
+}
+
+// TestHygiene_SubcommandUsageCoverage is the CI hygiene gate for stale help
+// text: every subcommand case in cmdMemoryWithFormat's and
+// cmdSkillsWithFormat's dispatch switch must be named on the corresponding
+// command's line in printUsage's top-level usage text (main.go). Without
+// this, a new subcommand can ship with real behavior but no mention in
+// `symbrain help`, exactly the drift issue #424 fixed.
+func TestHygiene_SubcommandUsageCoverage(t *testing.T) {
+	mainSrc := readSourceFile(t, "main.go")
+	memoryLine := usageCommandLine(t, mainSrc, "memory")
+	skillsLine := usageCommandLine(t, mainSrc, "skills")
+
+	memorySrc := readSourceFile(t, "cmd_memory.go")
+	for _, verb := range dispatchSwitchCases(t, memorySrc, "cmdMemoryWithFormat") {
+		if !strings.Contains(memoryLine, verb) {
+			t.Errorf("cmd_memory.go subcommand %q is not mentioned in printUsage's memory line: %q", verb, memoryLine)
+		}
+	}
+
+	skillsSrc := readSourceFile(t, "cmd_skills.go")
+	for _, verb := range dispatchSwitchCases(t, skillsSrc, "cmdSkillsWithFormat") {
+		if !strings.Contains(skillsLine, verb) {
+			t.Errorf("cmd_skills.go subcommand %q is not mentioned in printUsage's skills line: %q", verb, skillsLine)
+		}
+	}
+}
+
+// readSourceFile reads a package source file by name. Tests run with the
+// package directory as the working directory, matching the relative paths
+// already used elsewhere in this file (e.g. the fakemcp build below).
+func readSourceFile(t *testing.T, name string) string {
+	t.Helper()
+	data, err := os.ReadFile(name)
+	if err != nil {
+		t.Fatalf("read %s: %v", name, err)
+	}
+	return string(data)
+}
+
+// usageCommandLine returns the single line inside printUsage's Commands
+// block that documents the given top-level command, e.g. "memory" or
+// "skills".
+func usageCommandLine(t *testing.T, mainSrc, command string) string {
+	t.Helper()
+	re := regexp.MustCompile(`(?m)^\s*` + regexp.QuoteMeta(command) + `\s.*$`)
+	match := re.FindString(mainSrc)
+	if match == "" {
+		t.Fatalf("printUsage in main.go has no %q command line", command)
+	}
+	return match
+}
+
+// dispatchSwitchCases extracts the quoted case labels of the first
+// "switch args[0] {" block inside the named function, excluding the
+// "-h"/"--help" cases which are flags rather than real subcommands.
+func dispatchSwitchCases(t *testing.T, src, funcName string) []string {
+	t.Helper()
+	fnIdx := strings.Index(src, "func "+funcName+"(")
+	if fnIdx < 0 {
+		t.Fatalf("function %s not found", funcName)
+	}
+	body := src[fnIdx:]
+	switchIdx := strings.Index(body, "switch args[0] {")
+	if switchIdx < 0 {
+		t.Fatalf("%s has no \"switch args[0] {\" dispatch block", funcName)
+	}
+	block := body[switchIdx:]
+
+	depth := 0
+	end := -1
+	for i, r := range block {
+		switch r {
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				end = i
+				break
+			}
+		}
+		if end >= 0 {
+			break
+		}
+	}
+	if end < 0 {
+		t.Fatalf("%s dispatch switch is not closed", funcName)
+	}
+	block = block[:end]
+
+	caseRe := regexp.MustCompile(`(?m)^\s*case\s+(.+):\s*$`)
+	quoteRe := regexp.MustCompile(`"([^"]+)"`)
+	var verbs []string
+	for _, caseMatch := range caseRe.FindAllStringSubmatch(block, -1) {
+		for _, quoted := range quoteRe.FindAllStringSubmatch(caseMatch[1], -1) {
+			verb := quoted[1]
+			if verb == "-h" || verb == "--help" {
+				continue
+			}
+			verbs = append(verbs, verb)
+		}
+	}
+	if len(verbs) == 0 {
+		t.Fatalf("%s dispatch switch yielded no subcommand cases", funcName)
+	}
+	return verbs
 }
 
 type synchronizedBuffer struct {
