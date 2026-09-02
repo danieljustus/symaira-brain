@@ -293,6 +293,7 @@ Implemented today:
 | `symbrain memory list [--scope <scope>] [--limit <N>]` | List stored memories from the embedded database (`--output table|json`, default table; scope default all, limit default 100, max 1000) |
 | `symbrain memory search <query> [--scope <scope>] [--limit <N>]` | Search stored memories by semantic relevance (`--output table|json`, default table; scope default all, limit default 5) |
 | `symbrain memory sync --remote <url> [--pull|--push]` | Synchronize memories with a remote memory server (supports encrypted relay; see below) |
+| `symbrain memory serve [--port <n>]` | Run the memory HTTP API (the same `/api/sync/*` surface `memory sync --remote` talks to) as a standalone process, bound to `127.0.0.1` (default port 8787) |
 | `symbrain memory set <content> --kind <kind> [--scope <scope>] [--staged]` | Store a memory in the embedded database through the same write path the MCP gateway uses (`--output table\|json`, default table) |
 | `symbrain memory delete <id>` | Remove a memory from the embedded database (`--output table\|json`, default table) |
 | `symbrain memory rules [--scope <scope>]` | List the procedural rules stored alongside memories (`--output table\|json`, default table) |
