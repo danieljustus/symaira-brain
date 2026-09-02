@@ -2,6 +2,7 @@ package managed
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -134,10 +135,10 @@ func TestInstall_AgainstTestServer(t *testing.T) {
 	checksumsContent := fmt.Sprintf("%s  %s\n", checksumHex, assetName)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+assetName, func(w http.ResponseWriter, r *http.Request) {
 		w.Write(archive)
 	})
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(checksumsContent))
 	})
 	server := httptest.NewServer(mux)
@@ -179,10 +180,10 @@ func TestInstall_ChecksumMismatch(t *testing.T) {
 	checksumsContent := fmt.Sprintf("%s  %s\n", strings.Repeat("0", 64), assetName)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+assetName, func(w http.ResponseWriter, r *http.Request) {
 		w.Write(archive)
 	})
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(checksumsContent))
 	})
 	server := httptest.NewServer(mux)
@@ -202,7 +203,7 @@ func TestInstall_ChecksumMismatch(t *testing.T) {
 
 // serveCore starts an httptest.Server that serves an archive and
 // matching checksums.txt for core, mimicking the GitHub
-// "releases/latest/download/<asset>" layout downloadURL constructs.
+// "releases/download/<tag>/<asset>" layout downloadURL constructs.
 // The archive (and sig/pem, when non-nil) are mirrored at both
 // assetName and altName: Install retries with the unversioned
 // AssetNameAlt whenever the first attempt errors — for these tests
@@ -222,21 +223,21 @@ func serveCore(t *testing.T, core *Core, assetName, altName string, archive, sig
 	mux := http.NewServeMux()
 	for _, name := range uniqueStrings(assetName, altName) {
 		name := name
-		mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+name, func(w http.ResponseWriter, r *http.Request) {
+		mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+name, func(w http.ResponseWriter, r *http.Request) {
 			w.Write(archive)
 		})
 		if sig != nil {
-			mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+name+".sig", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+name+".sig", func(w http.ResponseWriter, r *http.Request) {
 				w.Write(sig)
 			})
 		}
 		if pem != nil {
-			mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+name+".pem", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+name+".pem", func(w http.ResponseWriter, r *http.Request) {
 				w.Write(pem)
 			})
 		}
 	}
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(checksumsContent))
 	})
 	server := httptest.NewServer(mux)
@@ -396,10 +397,10 @@ func TestInstall_PinnedChecksum_UsedInsteadOfChecksumsTxt(t *testing.T) {
 	core.SHA256 = map[string]string{assetName: hex.EncodeToString(sum[:])}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/"+assetName, func(w http.ResponseWriter, r *http.Request) {
 		w.Write(archive)
 	})
-	mux.HandleFunc("/"+core.Repo+"/releases/latest/download/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v1.0.0/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
 		// Deliberately broken/unreachable — pinned verification must not need it.
 		http.Error(w, "not found", http.StatusNotFound)
 	})
@@ -412,4 +413,196 @@ func TestInstall_PinnedChecksum_UsedInsteadOfChecksumsTxt(t *testing.T) {
 	if err := inst.Install(context.Background(), core); err != nil {
 		t.Fatalf("Install with correct pinned checksum and broken checksums.txt: %v", err)
 	}
+}
+
+// TestInstall_RequestsPinnedTagNotLatestAlias proves downloads are
+// pinned to the manifest's Version rather than GitHub's
+// "releases/latest/download" alias — the regression this test exists to
+// catch: a real repo's "latest" release can move past the pinned
+// version (symaira-vault's did, v0.15.3 pinned vs. v0.21.1 latest as of
+// writing), and a "latest"-alias download of a *versioned* asset name
+// only works by accident when the pin happens to equal the newest
+// release. The server here only serves the tag-pinned path; a request
+// against "latest/download" would 404.
+func TestInstall_RequestsPinnedTagNotLatestAlias(t *testing.T) {
+	goos, goarch, err := Platform()
+	if err != nil {
+		t.Fatalf("Platform: %v", err)
+	}
+
+	core := &Core{
+		Version:     "v0.15.3",
+		Repo:        "example/example-core",
+		BinaryName:  "example-core",
+		AssetPrefix: "example-core",
+	}
+	binaryData := []byte("#!/bin/sh\necho example\n")
+	archive := buildArchive(t, core.BinaryName, binaryData)
+	assetName := core.AssetName(goos, goarch)
+	sum := sha256.Sum256(archive)
+	core.SHA256 = map[string]string{assetName: hex.EncodeToString(sum[:])}
+
+	var requestedPaths []string
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.15.3/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+		requestedPaths = append(requestedPaths, r.URL.Path)
+		w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	binDir := t.TempDir()
+	inst := &Installer{BinDir: binDir, baseURL: server.URL}
+
+	if err := inst.Install(context.Background(), core); err != nil {
+		t.Fatalf("Install: %v", err)
+	}
+
+	want := "/" + core.Repo + "/releases/download/v0.15.3/" + assetName
+	found := false
+	for _, p := range requestedPaths {
+		if p == want {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Errorf("archive requested at %v, want a request to %q (tag-pinned, not latest/download)", requestedPaths, want)
+	}
+}
+
+// TestInstall_ChecksumsVersionedNameFallsBackToBareName proves Install
+// retries with the bare "checksums.txt" fallback when the versioned
+// checksums asset name 404s — the convention symcockpit's releases
+// actually use, unlike symaira-vault's versioned
+// "<prefix>_<version>_checksums.txt".
+func TestInstall_ChecksumsVersionedNameFallsBackToBareName(t *testing.T) {
+	goos, goarch, err := Platform()
+	if err != nil {
+		t.Fatalf("Platform: %v", err)
+	}
+
+	core := &Core{
+		Version:     "0.4.0",
+		Repo:        "example/example-cockpit",
+		BinaryName:  "example-cockpit",
+		AssetPrefix: "example-cockpit",
+	}
+	binaryData := []byte("#!/bin/sh\necho example\n")
+	archive := buildArchive(t, core.BinaryName, binaryData)
+	assetName := core.AssetName(goos, goarch)
+	checksum := sha256.Sum256(archive)
+	checksumsContent := fmt.Sprintf("%s  %s\n", hex.EncodeToString(checksum[:]), assetName)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.4.0/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+		w.Write(archive)
+	})
+	// Only the bare name is served — the versioned name (tried first)
+	// must 404 and fall back to this one.
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.4.0/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(checksumsContent))
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	binDir := t.TempDir()
+	inst := &Installer{BinDir: binDir, baseURL: server.URL}
+
+	if err := inst.Install(context.Background(), core); err != nil {
+		t.Fatalf("Install: %v", err)
+	}
+	got, err := os.ReadFile(filepath.Join(binDir, core.BinaryName))
+	if err != nil {
+		t.Fatalf("read installed binary: %v", err)
+	}
+	if !bytes.Equal(got, binaryData) {
+		t.Errorf("installed content = %q, want %q", got, binaryData)
+	}
+}
+
+// buildZipArchive builds a .zip archive (Windows release format)
+// containing a single file at binaryName with the given data.
+func buildZipArchive(t *testing.T, binaryName string, data []byte) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	w, err := zw.Create(binaryName)
+	if err != nil {
+		t.Fatalf("zip create: %v", err)
+	}
+	if _, err := w.Write(data); err != nil {
+		t.Fatalf("zip write: %v", err)
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatalf("zip close: %v", err)
+	}
+	return buf.Bytes()
+}
+
+// TestInstall_WindowsZipArchive proves a full Install against a
+// Windows-shaped release: the requested asset name ends in .zip (not
+// .tar.gz), and extraction reads the zip format rather than assuming
+// gzip — the second half of the Windows asset-extension bug: fixing the
+// requested name alone would still fail extraction against a real
+// (non-gzip) .zip archive.
+func TestInstall_WindowsZipArchive(t *testing.T) {
+	core := &Core{
+		Version:     "v0.15.3",
+		Repo:        "example/example-core",
+		BinaryName:  "example-core",
+		AssetPrefix: "example-core",
+	}
+	binaryData := []byte("windows binary bytes")
+	assetName := core.AssetName("windows", "amd64")
+	if !strings.HasSuffix(assetName, ".zip") {
+		t.Fatalf("AssetName(windows, amd64) = %q, want a .zip suffix", assetName)
+	}
+	archive := buildZipArchive(t, core.BinaryName, binaryData)
+	checksum := sha256.Sum256(archive)
+	core.SHA256 = map[string]string{assetName: hex.EncodeToString(checksum[:])}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.15.3/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+		w.Write(archive)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	binDir := t.TempDir()
+	binaryData2, err := extractAndInstallForTest(t, server.URL, binDir, core, "windows", "amd64")
+	if err != nil {
+		t.Fatalf("install for windows: %v", err)
+	}
+	if !bytes.Equal(binaryData2, binaryData) {
+		t.Errorf("installed content = %q, want %q", binaryData2, binaryData)
+	}
+}
+
+// extractAndInstallForTest drives Install for a specific goos/goarch
+// pair rather than the host's own runtime.GOOS/GOARCH — Install itself
+// always targets the host platform, so this reimplements its download
+// -> extract -> atomicInstall sequence for the given platform to prove
+// Windows archives extract correctly without requiring the test to run
+// on Windows.
+func extractAndInstallForTest(t *testing.T, baseURL, binDir string, core *Core, goos, goarch string) ([]byte, error) {
+	t.Helper()
+	inst := &Installer{BinDir: binDir, baseURL: baseURL}
+	assetName := core.AssetName(goos, goarch)
+	dlDir := t.TempDir()
+	archivePath, err := inst.downloadAndVerify(context.Background(), core, assetName, goos, goarch, filepath.Join(dlDir, "checksums.txt"), dlDir)
+	if err != nil {
+		return nil, fmt.Errorf("downloadAndVerify: %w", err)
+	}
+	binaryData, err := extractBinary(archivePath, core, goos, goarch)
+	if err != nil {
+		return nil, fmt.Errorf("extractBinary: %w", err)
+	}
+	if err := os.MkdirAll(binDir, 0o755); err != nil {
+		return nil, err
+	}
+	if err := atomicInstall(binDir, core.BinaryName, binaryData); err != nil {
+		return nil, fmt.Errorf("atomicInstall: %w", err)
+	}
+	return os.ReadFile(filepath.Join(binDir, core.BinaryName))
 }

@@ -119,10 +119,14 @@ jobs:
 
           echo "Fetching checksums from $REPO@$TAG..."
 
-          # Download checksums.txt from the specific release
+          # Download the checksums file from the specific release.
+          # symaira-vault publishes it as "symaira-vault_<version>_checksums.txt"
+          # (no bare "checksums.txt" asset exists) — confirmed against
+          # the real release; see internal/managed/manifest.go's
+          # ChecksumAssetName for the runtime equivalent of this pattern.
           gh release download "$TAG" \
             --repo "$REPO" \
-            --pattern "checksums.txt" \
+            --pattern "symaira-vault_*_checksums.txt" \
             --output /tmp/checksums.txt
 
           SHA256=$(sha256sum /tmp/checksums.txt | cut -d' ' -f1)

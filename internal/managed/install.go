@@ -2,6 +2,7 @@ package managed
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"compress/gzip"
 	"context"
 	"encoding/json"
@@ -11,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // Installer handles downloading, verifying, and atomically installing
@@ -99,9 +101,19 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 	// point of pinning (verifying independently of this same-origin
 	// file). If an asset does need it and it's unavailable, that surfaces
 	// as a clear "checksum lookup" error from downloadAndVerify below.
-	checksumsURL := downloadURL(inst.releaseBaseURL(), core.Repo, core.ChecksumAssetName())
+	//
+	// Repos disagree on the checksums file's name: some version it
+	// alongside the archives (symaira-vault's
+	// "symaira-vault_0.15.3_checksums.txt"), others publish a bare
+	// "checksums.txt" (symcockpit). Try the versioned name first, then
+	// fall back to the bare one.
+	tag := core.Tag()
 	checksumsPath := filepath.Join(dlDir, "checksums.txt")
-	_, _ = downloadFile(ctx, checksumsURL, checksumsPath)
+	checksumsURL := downloadURL(inst.releaseBaseURL(), core.Repo, tag, core.ChecksumAssetName())
+	if _, err := downloadFile(ctx, checksumsURL, checksumsPath); err != nil {
+		altChecksumsURL := downloadURL(inst.releaseBaseURL(), core.Repo, tag, core.ChecksumAssetNameAlt())
+		_, _ = downloadFile(ctx, altChecksumsURL, checksumsPath)
+	}
 
 	// Try downloading the versioned asset first
 	archivePath, err := inst.downloadAndVerify(ctx, core, assetName, goos, goarch, checksumsPath, dlDir)
@@ -131,7 +143,8 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 // downloadAndVerify downloads an asset, checks its checksum, and
 // optionally verifies cosign. Returns the path to the downloaded file.
 func (inst *Installer) downloadAndVerify(ctx context.Context, core *Core, assetName, goos, goarch, checksumsPath, dlDir string) (string, error) {
-	url := downloadURL(inst.releaseBaseURL(), core.Repo, assetName)
+	tag := core.Tag()
+	url := downloadURL(inst.releaseBaseURL(), core.Repo, tag, assetName)
 	archivePath := filepath.Join(dlDir, assetName)
 	if _, err := downloadFile(ctx, url, archivePath); err != nil {
 		return "", err
@@ -166,8 +179,8 @@ func (inst *Installer) downloadAndVerify(ctx context.Context, core *Core, assetN
 		// local .sig/.pem files won't exist — verifyCosign's fail-closed
 		// check below reports that as a proper "cannot verify" error
 		// (or, with AllowUnsigned, a warning) rather than a raw HTTP error.
-		sigURL := downloadURL(inst.releaseBaseURL(), core.Repo, assetName+".sig")
-		pemURL := downloadURL(inst.releaseBaseURL(), core.Repo, assetName+".pem")
+		sigURL := downloadURL(inst.releaseBaseURL(), core.Repo, tag, assetName+".sig")
+		pemURL := downloadURL(inst.releaseBaseURL(), core.Repo, tag, assetName+".pem")
 		_, _ = downloadFile(ctx, sigURL, archivePath+".sig")
 		_, _ = downloadFile(ctx, pemURL, archivePath+".pem")
 
@@ -179,8 +192,17 @@ func (inst *Installer) downloadAndVerify(ctx context.Context, core *Core, assetN
 	return archivePath, nil
 }
 
-// extractBinary reads a tar.gz archive and returns the binary's bytes.
+// extractBinary reads a release archive and returns the binary's bytes.
+// Windows archives are .zip; every other platform's are .tar.gz.
 func extractBinary(archivePath string, core *Core, goos, goarch string) ([]byte, error) {
+	if strings.HasSuffix(archivePath, ".zip") {
+		return extractBinaryZip(archivePath, core, goos, goarch)
+	}
+	return extractBinaryTarGz(archivePath, core, goos, goarch)
+}
+
+// extractBinaryTarGz reads a tar.gz archive and returns the binary's bytes.
+func extractBinaryTarGz(archivePath string, core *Core, goos, goarch string) ([]byte, error) {
 	f, err := os.Open(archivePath)
 	if err != nil {
 		return nil, err
@@ -208,6 +230,36 @@ func extractBinary(archivePath string, core *Core, goos, goarch string) ([]byte,
 		name := header.Name
 		if name == targetName || filepath.Base(name) == core.BinaryName {
 			data, err := io.ReadAll(tr)
+			if err != nil {
+				return nil, fmt.Errorf("read binary from archive: %w", err)
+			}
+			return data, nil
+		}
+	}
+
+	return nil, fmt.Errorf("binary %q not found in archive", core.BinaryName)
+}
+
+// extractBinaryZip reads a zip archive (Windows release assets) and
+// returns the binary's bytes.
+func extractBinaryZip(archivePath string, core *Core, goos, goarch string) ([]byte, error) {
+	zr, err := zip.OpenReader(archivePath)
+	if err != nil {
+		return nil, fmt.Errorf("zip: %w", err)
+	}
+	defer zr.Close()
+
+	targetName := core.BinaryPathInArchive(goos, goarch)
+
+	for _, file := range zr.File {
+		name := file.Name
+		if name == targetName || filepath.Base(name) == core.BinaryName {
+			rc, err := file.Open()
+			if err != nil {
+				return nil, fmt.Errorf("open %s in zip: %w", name, err)
+			}
+			data, err := io.ReadAll(rc)
+			rc.Close()
 			if err != nil {
 				return nil, fmt.Errorf("read binary from archive: %w", err)
 			}

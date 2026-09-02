@@ -110,20 +110,38 @@ func Platform() (goos, goarch string, err error) {
 // current platform. The pinned version is normalized to drop a leading
 // "v" (Symaira release assets carry no prefix even when tags do) and a
 // core with an AssetArch override (e.g. "universal") uses that instead of
-// the per-arch suffix.
+// the per-arch suffix. Windows archives are published as .zip; every
+// other platform ships .tar.gz.
 func (c *Core) AssetName(goos, goarch string) string {
-	return fmt.Sprintf("%s_%s_%s.tar.gz", c.AssetPrefix, stripV(c.Version), c.osArchSuffix(goos, goarch))
+	return fmt.Sprintf("%s_%s_%s.%s", c.AssetPrefix, stripV(c.Version), c.osArchSuffix(goos, goarch), archiveExt(goos))
 }
 
 // AssetNameAlt returns the unversioned asset name fallback (used by
 // releases that don't include the version in the filename.
 func (c *Core) AssetNameAlt(goos, goarch string) string {
-	return fmt.Sprintf("%s_%s.tar.gz", c.BinaryName, c.osArchSuffix(goos, goarch))
+	return fmt.Sprintf("%s_%s.%s", c.BinaryName, c.osArchSuffix(goos, goarch), archiveExt(goos))
 }
 
-// ChecksumAssetName returns the checksum file asset name.
+// archiveExt returns the release archive extension for goos: Windows
+// builds are published as .zip, every other platform as .tar.gz.
+func archiveExt(goos string) string {
+	if goos == "windows" {
+		return "zip"
+	}
+	return "tar.gz"
+}
+
+// ChecksumAssetName returns the checksum file asset name published
+// alongside the versioned release archives (e.g.
+// "symaira-vault_0.15.3_checksums.txt"). Not every repo follows this
+// convention — see ChecksumAssetNameAlt for the bare-named fallback.
 func (c *Core) ChecksumAssetName() string {
-	// All repos publish a checksums.txt file
+	return fmt.Sprintf("%s_%s_checksums.txt", c.AssetPrefix, stripV(c.Version))
+}
+
+// ChecksumAssetNameAlt returns the bare "checksums.txt" fallback name
+// used by repos that don't version the checksums file (e.g. symcockpit).
+func (c *Core) ChecksumAssetNameAlt() string {
 	return "checksums.txt"
 }
 
@@ -197,6 +215,15 @@ func (c *Core) PinnedChecksum(assetName string) (string, bool) {
 	return sum, true
 }
 
+// Tag returns the GitHub release tag for the pinned version. Symaira
+// release tags always carry a leading "v" even when the manifest's
+// Version field omits one (e.g. symcockpit pins "0.4.0" but its actual
+// tag is "v0.4.0"), so this normalizes to that form regardless of which
+// form Version is stored in.
+func (c *Core) Tag() string {
+	return "v" + stripV(c.Version)
+}
+
 // CertificateIdentity returns the expected Sigstore certificate
 // identity for this core's release workflow: the GitHub Actions
 // workflow that produced the signed release, pinned to the exact
@@ -215,7 +242,7 @@ func (c *Core) CertificateIdentity() string {
 	if workflow == "" {
 		workflow = defaultReleaseWorkflow
 	}
-	return fmt.Sprintf("https://github.com/%s/.github/workflows/%s@refs/tags/v%s", c.Repo, workflow, stripV(c.Version))
+	return fmt.Sprintf("https://github.com/%s/.github/workflows/%s@refs/tags/%s", c.Repo, workflow, c.Tag())
 }
 
 // CertificateOIDCIssuer returns the expected Sigstore OIDC issuer for
