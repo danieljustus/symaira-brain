@@ -23,6 +23,22 @@ type serverContext struct {
 	cfg     *config.Config
 	logger  *events.Logger
 	logPath string
+	// wrap, when non-nil, wraps every tool Handler registered via
+	// registerTool (see ToolWrapper). It mirrors opts.Wrap; nil leaves
+	// handlers unwrapped.
+	wrap ToolWrapper
+}
+
+// registerTool registers t on the underlying mcpserver.Server, wrapping its
+// Handler through ctx.wrap first when one is set. Every tool-group
+// registration function (registerLibraryTools, registerRenderTools, ...)
+// calls this instead of ctx.srv.RegisterTool directly so the gateway's
+// audit+episode closure reaches every symskills tool call (issue #422).
+func (ctx *serverContext) registerTool(t *mcpserver.Tool) {
+	if ctx.wrap != nil {
+		t.Handler = ctx.wrap(t.Name, t.Handler)
+	}
+	ctx.srv.RegisterTool(t)
 }
 
 // backfillDefaults mirrors the per-field backfill that Register previously

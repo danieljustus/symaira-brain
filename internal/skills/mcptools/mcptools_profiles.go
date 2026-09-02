@@ -13,9 +13,8 @@ import (
 // skills_profile_list and skills_profile_resolve.
 func registerProfileTools(ctx *serverContext) {
 	opts := ctx.opts
-	svc := ctx.srv
 
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_profile_list",
 		Description: "List available context profiles (global and project).",
 		InputSchema: json.RawMessage(emptyObject),
@@ -28,7 +27,7 @@ func registerProfileTools(ctx *serverContext) {
 			return mcpJSON(map[string]any{"profiles": refs})
 		},
 	})
-	svc.RegisterTool(&mcpserver.Tool{
+	ctx.registerTool(&mcpserver.Tool{
 		Name:        "skills_profile_resolve",
 		Description: "Resolve a context profile and return the merged skill set.",
 		InputSchema: json.RawMessage(`{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}`),
