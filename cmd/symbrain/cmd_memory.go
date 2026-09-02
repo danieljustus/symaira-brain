@@ -44,6 +44,8 @@ func cmdMemoryWithFormat(args []string, stdout, stderr io.Writer, format output.
 		return cmdMemoryQueryLogWithFormat(args[1:], stdout, stderr, format)
 	case "sync":
 		return cmdMemorySyncWithFormat(args[1:], stdout, stderr, format)
+	case "serve":
+		return cmdMemoryServe(args[1:], stdout, stderr)
 	default:
 		fmt.Fprintf(stderr, "symbrain memory: unknown subcommand %q\n\n", args[0])
 		printMemoryUsage(stderr)
@@ -65,10 +67,12 @@ Subcommands:
   rules       List procedural rules
   query-log   Inspect the memory retrieval log
   sync        Synchronize memories with a remote memory server
+  serve       Run the memory HTTP API as a sync peer for 'memory sync --remote'
 
 Use --output table|json (or --json) for the result format. Read commands
 accept --scope/-s, --limit/-l, and --db; search takes one query argument.
 Run 'symbrain memory <subcommand> --help' for details.
 For remote synchronization, run 'symbrain memory sync --help'.
+To act as the remote peer for another machine's sync, run 'symbrain memory serve --help'.
 `)
 }
