@@ -22,6 +22,17 @@ type Installer struct {
 	// TempDir is a scratch directory for downloads. If empty, the
 	// system temp directory is used.
 	TempDir string
+	// AllowUnsigned downgrades a missing cosign binary or missing
+	// signature/certificate assets from a fatal error to a skip (with a
+	// warning printed to Warn). Off by default: installs fail closed
+	// when a core's publisher cannot be authenticated. This should only
+	// ever be set from an explicit, user-supplied flag (e.g.
+	// `symbrain setup --allow-unsigned`) — never defaulted on.
+	AllowUnsigned bool
+	// Warn receives warning output, such as the notice printed when
+	// AllowUnsigned causes verification to be skipped. Defaults to
+	// os.Stderr when nil.
+	Warn io.Writer
 	// baseURL is the release host to download from. If empty,
 	// defaultBaseURL (github.com) is used. Tests override this to
 	// point at an httptest.Server instead of the real network.
@@ -39,6 +50,14 @@ func (inst *Installer) releaseBaseURL() string {
 		return defaultBaseURL
 	}
 	return inst.baseURL
+}
+
+// warnOut returns the configured Warn writer, or os.Stderr when unset.
+func (inst *Installer) warnOut() io.Writer {
+	if inst.Warn == nil {
+		return os.Stderr
+	}
+	return inst.Warn
 }
 
 // Install downloads, verifies, and installs a single core binary.
@@ -73,12 +92,16 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 	}
 	defer os.RemoveAll(dlDir)
 
-	// Download the checksums file
+	// Download the checksums file. This is best-effort: it is only
+	// consulted as a fallback for an asset that has no pinned checksum
+	// in the manifest (see Core.SHA256), so a fetch failure here must
+	// not abort installs that don't need it — that would defeat the
+	// point of pinning (verifying independently of this same-origin
+	// file). If an asset does need it and it's unavailable, that surfaces
+	// as a clear "checksum lookup" error from downloadAndVerify below.
 	checksumsURL := downloadURL(inst.releaseBaseURL(), core.Repo, core.ChecksumAssetName())
 	checksumsPath := filepath.Join(dlDir, "checksums.txt")
-	if _, err := downloadFile(ctx, checksumsURL, checksumsPath); err != nil {
-		return fmt.Errorf("managed: download checksums for %s: %w", core.BinaryName, err)
-	}
+	_, _ = downloadFile(ctx, checksumsURL, checksumsPath)
 
 	// Try downloading the versioned asset first
 	archivePath, err := inst.downloadAndVerify(ctx, core, assetName, goos, goarch, checksumsPath, dlDir)
@@ -114,16 +137,41 @@ func (inst *Installer) downloadAndVerify(ctx context.Context, core *Core, assetN
 		return "", err
 	}
 
-	checksum, err := findChecksumInFile(checksumsPath, assetName)
-	if err != nil {
-		return "", fmt.Errorf("checksum lookup: %w", err)
-	}
-	if err := verifyChecksum(archivePath, checksum); err != nil {
-		return "", err
+	if pinned, ok := core.PinnedChecksum(assetName); ok {
+		// Preferred path: verify against the checksum embedded in the
+		// manifest at release-bump time (independently computed), not
+		// the checksums.txt fetched below over the same channel as the
+		// archive itself.
+		if err := verifyChecksum(archivePath, pinned); err != nil {
+			return "", fmt.Errorf("pinned checksum: %w", err)
+		}
+	} else {
+		// No pinned checksum for this asset yet (see manifest.json) —
+		// fall back to the fetched checksums.txt. This still catches
+		// corruption/transfer errors, but does not authenticate the
+		// publisher: checksums.txt travels over the same origin as the
+		// archive, so a compromise of that origin defeats it too.
+		checksum, err := findChecksumInFile(checksumsPath, assetName)
+		if err != nil {
+			return "", fmt.Errorf("checksum lookup: %w", err)
+		}
+		if err := verifyChecksum(archivePath, checksum); err != nil {
+			return "", err
+		}
 	}
 
 	if core.HasCosign {
-		if err := verifyCosign(ctx, archivePath); err != nil {
+		// Download the signature and certificate published alongside
+		// the archive. A failed/missing download here just means the
+		// local .sig/.pem files won't exist — verifyCosign's fail-closed
+		// check below reports that as a proper "cannot verify" error
+		// (or, with AllowUnsigned, a warning) rather than a raw HTTP error.
+		sigURL := downloadURL(inst.releaseBaseURL(), core.Repo, assetName+".sig")
+		pemURL := downloadURL(inst.releaseBaseURL(), core.Repo, assetName+".pem")
+		_, _ = downloadFile(ctx, sigURL, archivePath+".sig")
+		_, _ = downloadFile(ctx, pemURL, archivePath+".pem")
+
+		if err := verifyCosign(ctx, archivePath, core, inst.AllowUnsigned, inst.warnOut()); err != nil {
 			return "", fmt.Errorf("cosign: %w", err)
 		}
 	}

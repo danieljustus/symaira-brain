@@ -257,3 +257,81 @@ func TestInstalledVersion_Missing(t *testing.T) {
 		t.Errorf("InstalledVersion() = %q, want empty", v)
 	}
 }
+
+func TestCertificateIdentity_DefaultWorkflow(t *testing.T) {
+	core := &Core{Version: "v0.15.3", Repo: "danieljustus/symaira-vault"}
+	got := core.CertificateIdentity()
+	// Confirmed against the actual certificate SAN published for
+	// symaira-vault v0.15.3's release archives.
+	want := "https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.15.3"
+	if got != want {
+		t.Errorf("CertificateIdentity() = %q, want %q", got, want)
+	}
+}
+
+func TestCertificateIdentity_NoVVersion(t *testing.T) {
+	// symcockpit's manifest Version has no leading "v", but its actual
+	// git tags do — CertificateIdentity must normalize this the same
+	// way stripV/AssetName does.
+	core := &Core{Version: "0.4.0", Repo: "danieljustus/symaira-cockpit"}
+	got := core.CertificateIdentity()
+	want := "https://github.com/danieljustus/symaira-cockpit/.github/workflows/release.yml@refs/tags/v0.4.0"
+	if got != want {
+		t.Errorf("CertificateIdentity() = %q, want %q", got, want)
+	}
+}
+
+func TestCertificateIdentity_CustomWorkflow(t *testing.T) {
+	core := &Core{Version: "v1.0.0", Repo: "example/example-core", ReleaseWorkflow: "publish.yml"}
+	got := core.CertificateIdentity()
+	want := "https://github.com/example/example-core/.github/workflows/publish.yml@refs/tags/v1.0.0"
+	if got != want {
+		t.Errorf("CertificateIdentity() = %q, want %q", got, want)
+	}
+}
+
+func TestCertificateOIDCIssuer(t *testing.T) {
+	core := &Core{}
+	if got, want := core.CertificateOIDCIssuer(), "https://token.actions.githubusercontent.com"; got != want {
+		t.Errorf("CertificateOIDCIssuer() = %q, want %q", got, want)
+	}
+}
+
+func TestPinnedChecksum(t *testing.T) {
+	core := &Core{SHA256: map[string]string{"asset.tar.gz": "abc123"}}
+
+	if got, ok := core.PinnedChecksum("asset.tar.gz"); !ok || got != "abc123" {
+		t.Errorf("PinnedChecksum(asset.tar.gz) = (%q, %v), want (%q, true)", got, ok, "abc123")
+	}
+	if _, ok := core.PinnedChecksum("other.tar.gz"); ok {
+		t.Error("PinnedChecksum(other.tar.gz) = ok, want not-pinned")
+	}
+}
+
+func TestPinnedChecksum_NilMap(t *testing.T) {
+	core := &Core{}
+	if _, ok := core.PinnedChecksum("asset.tar.gz"); ok {
+		t.Error("PinnedChecksum on a core with a nil SHA256 map: got ok, want not-pinned")
+	}
+}
+
+// TestManifest_SHA256Pinned guards against the manifest regressing to
+// the pre-#423 state where sha256 was empty for every core (integrity
+// resting solely on the fetched checksums.txt / TLS to github.com).
+func TestManifest_SHA256Pinned(t *testing.T) {
+	m, err := LoadManifest()
+	if err != nil {
+		t.Fatalf("LoadManifest: %v", err)
+	}
+	for name, core := range m.Cores {
+		if len(core.SHA256) == 0 {
+			t.Errorf("core %q: SHA256 is empty — no pinned checksum for any asset", name)
+			continue
+		}
+		for asset, sum := range core.SHA256 {
+			if len(sum) != 64 {
+				t.Errorf("core %q asset %q: sha256 %q is not 64 hex chars", name, asset, sum)
+			}
+		}
+	}
+}

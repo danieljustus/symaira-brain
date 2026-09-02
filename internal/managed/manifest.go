@@ -38,11 +38,27 @@ type Core struct {
 	// HasCosign indicates whether cosign signatures (.sig/.pem) are
 	// published for this core's release archives.
 	HasCosign bool `json:"has_cosign"`
-	// SHA256 is the expected SHA-256 hash of the checksums.txt file
-	// published alongside this core's release archive. Used by the
-	// bump-core workflow to verify the checksums file before updating
-	// the manifest entry.
-	SHA256 string `json:"sha256"`
+	// ReleaseWorkflow is the GitHub Actions workflow filename (under
+	// .github/workflows/ in Repo) that produces this core's signed
+	// release assets. It is used to construct the expected Sigstore
+	// certificate identity for cosign verification. Empty means
+	// "release.yml" (the observed convention — confirmed against the
+	// actual certificate SAN published for symaira-vault's release
+	// archives; see CertificateIdentity).
+	ReleaseWorkflow string `json:"release_workflow,omitempty"`
+	// SHA256 pins the expected SHA-256 hash for release assets this
+	// core may download, keyed by exact asset filename (as produced by
+	// AssetName/AssetNameAlt). Populated at bump time by independently
+	// downloading and hashing the release archive — NOT by copying the
+	// value out of the fetched checksums.txt, since that file travels
+	// over the same channel as the archive and proves nothing about the
+	// archive's integrity on its own. downloadAndVerify checks a pinned
+	// entry when present; an asset/platform not yet present in this map
+	// falls back to the fetched checksums.txt (same-origin trust, weaker)
+	// until backfilled — this is the "clearly-marked TODO" path for
+	// assets that could not be independently verified when the manifest
+	// was last updated.
+	SHA256 map[string]string `json:"sha256"`
 	// Platforms restricts which GOOS values this core ships for. Empty
 	// means every platform. A core whose list does not include the
 	// current GOOS is skipped silently — e.g. symcockpit is macOS-only
@@ -53,6 +69,16 @@ type Core struct {
 	// "universal") instead of per-arch archives.
 	AssetArch string `json:"asset_arch,omitempty"`
 }
+
+// cosignOIDCIssuer is the Sigstore OIDC issuer for certificates minted
+// by GitHub Actions' ambient OIDC token. All Symaira release workflows
+// sign through GitHub Actions, so this issuer is pinned for every core
+// that publishes cosign signatures.
+const cosignOIDCIssuer = "https://token.actions.githubusercontent.com"
+
+// defaultReleaseWorkflow is the release workflow filename used when a
+// Core does not override ReleaseWorkflow.
+const defaultReleaseWorkflow = "release.yml"
 
 // LoadManifest returns the embedded default manifest.
 func LoadManifest() (*Manifest, error) {
@@ -157,6 +183,45 @@ func (c *Core) osArchSuffix(goos, goarch string) string {
 		arch = c.AssetArch
 	}
 	return os + "_" + arch
+}
+
+// PinnedChecksum returns the SHA-256 hex checksum pinned in the
+// manifest for the given release asset filename, and whether one is
+// pinned. See the SHA256 field doc for how this differs from (and is
+// preferred over) the fetched checksums.txt.
+func (c *Core) PinnedChecksum(assetName string) (string, bool) {
+	sum, ok := c.SHA256[assetName]
+	if !ok || sum == "" {
+		return "", false
+	}
+	return sum, true
+}
+
+// CertificateIdentity returns the expected Sigstore certificate
+// identity for this core's release workflow: the GitHub Actions
+// workflow that produced the signed release, pinned to the exact
+// release tag. This is the literal string cosign embeds as the
+// certificate's Subject Alternative Name when a workflow signs via
+// GitHub's ambient OIDC token, so verify-blob's --certificate-identity
+// can match it exactly rather than trusting any identity via a ".*"
+// regexp.
+//
+// Confirmed against symaira-vault v0.15.3's actual published
+// certificate:
+//
+//	https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.15.3
+func (c *Core) CertificateIdentity() string {
+	workflow := c.ReleaseWorkflow
+	if workflow == "" {
+		workflow = defaultReleaseWorkflow
+	}
+	return fmt.Sprintf("https://github.com/%s/.github/workflows/%s@refs/tags/v%s", c.Repo, workflow, stripV(c.Version))
+}
+
+// CertificateOIDCIssuer returns the expected Sigstore OIDC issuer for
+// this core's cosign signatures.
+func (c *Core) CertificateOIDCIssuer() string {
+	return cosignOIDCIssuer
 }
 
 // BinaryPath returns the path within an extracted tar.gz where the
