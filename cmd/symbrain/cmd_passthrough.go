@@ -33,9 +33,8 @@ func cmdPassthrough(subcmd string, args []string, stderr io.Writer) exitcodes.Ex
 		return exitcodes.ExitNoInput
 	}
 
-	// Resolve the external vault binary: config override → PATH lookup.
-	// The managed dir (~/.symaira/bin) will be added to the search
-	// path by #242; until then, PATH/Homebrew is the only source.
+	// Resolve the external vault binary: config override → managed dir
+	// (~/.symaira/bin) → PATH lookup, per broker.Discover.
 	override := ""
 	if cfg, err := config.Load(); err == nil {
 		override = cfg.Servers.Vault.BinaryPath
@@ -43,7 +42,7 @@ func cmdPassthrough(subcmd string, args []string, stderr io.Writer) exitcodes.Ex
 
 	binPath, err := broker.Discover(binaryName, override)
 	if err != nil {
-		fmt.Fprintf(stderr, "symbrain %s: %v\nHint: install %s or run `symbrain setup` once available.\n", subcmd, err, binaryName)
+		fmt.Fprintf(stderr, "symbrain %s: %v\nHint: install %s or run `symbrain setup`.\n", subcmd, err, binaryName)
 		return exitcodes.ExitGeneric
 	}
 
