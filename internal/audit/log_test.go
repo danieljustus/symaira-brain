@@ -868,7 +868,8 @@ func TestPrintEntry_NoArgKeysOmitsKeysField(t *testing.T) {
 }
 
 // TestTailFile_LargeFileBackwardScan exercises the >64 KB backward-scan
-// branch of tailFile: the last n entries must survive, in order.
+// branch of the shared bounded reader (tailEntriesBounded) via Tail: the
+// last n entries must survive, in order.
 func TestTailFile_LargeFileBackwardScan(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("XDG_DATA_HOME", dir)
@@ -928,7 +929,9 @@ func TestTailFile_LargeFileBackwardScan(t *testing.T) {
 }
 
 // TestTailFile_LargeFileAllLines verifies the backward scan returns every
-// line when no count limit is given.
+// entry when no count limit is given and session scoping is disabled
+// (the mode tailEntriesBounded runs in for Tail/TailEntries, formerly
+// handled by the separate tailFile reader).
 func TestTailFile_LargeFileAllLines(t *testing.T) {
 	dir := t.TempDir()
 	logPath := filepath.Join(dir, "big.jsonl")
@@ -944,12 +947,12 @@ func TestTailFile_LargeFileAllLines(t *testing.T) {
 	}
 	f.Close()
 
-	lines, err := tailFile(logPath, 0)
+	entries, err := tailEntriesBounded(logPath, 0, nil, false)
 	if err != nil {
-		t.Fatalf("tailFile: %v", err)
+		t.Fatalf("tailEntriesBounded: %v", err)
 	}
-	if len(lines) != 1500 {
-		t.Fatalf("expected 1500 lines, got %d", len(lines))
+	if len(entries) != 1500 {
+		t.Fatalf("expected 1500 entries, got %d", len(entries))
 	}
 }
 
@@ -1154,7 +1157,7 @@ func TestTailEntriesBounded_MultiProfile(t *testing.T) {
 	t.Run("prof latest session degraded only", func(t *testing.T) {
 		got, err := tailEntriesBounded(profLog, 0, func(entry Entry) bool {
 			return entry.Status == "degraded"
-		})
+		}, true)
 		if err != nil {
 			t.Fatalf("tailEntriesBounded: %v", err)
 		}
@@ -1169,7 +1172,7 @@ func TestTailEntriesBounded_MultiProfile(t *testing.T) {
 	t.Run("other latest session degraded only", func(t *testing.T) {
 		got, err := tailEntriesBounded(otherLog, 0, func(entry Entry) bool {
 			return entry.Status == "degraded"
-		})
+		}, true)
 		if err != nil {
 			t.Fatalf("tailEntriesBounded: %v", err)
 		}
@@ -1208,7 +1211,7 @@ func TestTailEntriesBounded_ServerFilteredRead(t *testing.T) {
 
 	got, err := tailEntriesBounded(logPath, 0, func(entry Entry) bool {
 		return entry.Server == "vault"
-	})
+	}, true)
 	if err != nil {
 		t.Fatalf("tailEntriesBounded: %v", err)
 	}
@@ -1273,7 +1276,7 @@ func TestTailEntriesBounded_RotatedLargeLog(t *testing.T) {
 
 	// The bounded reader should only read the latest session's entries,
 	// not the entire 3000-entry file.
-	got, err := tailEntriesBounded(logPath, 0, nil)
+	got, err := tailEntriesBounded(logPath, 0, nil, true)
 	if err != nil {
 		t.Fatalf("tailEntriesBounded: %v", err)
 	}
@@ -1311,7 +1314,7 @@ func TestTailEntriesBounded_MalformedLineSkipping(t *testing.T) {
 
 	got, err := tailEntriesBounded(logPath, 0, func(entry Entry) bool {
 		return entry.Status == "degraded"
-	})
+	}, true)
 	if err != nil {
 		t.Fatalf("tailEntriesBounded: %v", err)
 	}
@@ -1344,7 +1347,7 @@ func TestTailEntriesBounded_LimitBehavior(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := tailEntriesBounded(logPath, 5, nil)
+		got, err := tailEntriesBounded(logPath, 5, nil, true)
 		if err != nil {
 			t.Fatalf("tailEntriesBounded: %v", err)
 		}
@@ -1370,7 +1373,7 @@ func TestTailEntriesBounded_LimitBehavior(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := tailEntriesBounded(logPath, 0, nil)
+		got, err := tailEntriesBounded(logPath, 0, nil, true)
 		if err != nil {
 			t.Fatalf("tailEntriesBounded: %v", err)
 		}
@@ -1394,7 +1397,7 @@ func TestTailEntriesBounded_LimitBehavior(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got, err := tailEntriesBounded(logPath, 3, nil)
+		got, err := tailEntriesBounded(logPath, 3, nil, true)
 		if err != nil {
 			t.Fatalf("tailEntriesBounded: %v", err)
 		}
@@ -1498,7 +1501,7 @@ func TestTailEntriesBounded_ChunkBoundaryPreservesLine(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, err := tailEntriesBounded(path, 0, nil)
+	got, err := tailEntriesBounded(path, 0, nil, true)
 	if err != nil {
 		t.Fatalf("tailEntriesBounded: %v", err)
 	}
