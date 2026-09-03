@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
@@ -33,6 +34,7 @@ func TestCmdInit_FreshRunCreatesConfigAndProfiles(t *testing.T) {
 		filepath.Join(home, ".config", "symbrain", "config.toml"),
 		filepath.Join(home, ".config", "symbrain", "profiles", "personal.toml"),
 		filepath.Join(home, ".config", "symbrain", "profiles", "restricted.toml"),
+		filepath.Join(home, ".config", "symbrain", "profiles", "foreign-read-only.toml"),
 	} {
 		if _, err := os.Stat(p); err != nil {
 			t.Errorf("expected %s to exist: %v", p, err)
@@ -49,8 +51,8 @@ func TestCmdInit_FreshRunCreatesConfigAndProfiles(t *testing.T) {
 		}
 	}
 
-	if strings.Count(stdout.String(), "created ") != 3 {
-		t.Errorf("stdout = %q, want 3 'created' lines", stdout.String())
+	if strings.Count(stdout.String(), "created ") != 4 {
+		t.Errorf("stdout = %q, want 4 'created' lines", stdout.String())
 	}
 }
 
@@ -83,7 +85,39 @@ func TestCmdInit_SecondRunIsIdempotent(t *testing.T) {
 	if strings.Contains(stdout.String(), "created ") {
 		t.Errorf("second run should not create anything: %q", stdout.String())
 	}
-	if strings.Count(stdout.String(), "already exists") != 3 {
-		t.Errorf("second run stdout = %q, want 3 'already exists' lines", stdout.String())
+	if strings.Count(stdout.String(), "already exists") != 4 {
+		t.Errorf("second run stdout = %q, want 4 'already exists' lines", stdout.String())
+	}
+}
+
+// TestForeignReadOnlyProfile_LoadsWithoutWarnings proves the shipped
+// foreign-server example is not just syntactically valid TOML but a
+// profile the loader accepts cleanly — the acceptance criterion for
+// issue #444 is that a user has a working example to copy, not merely
+// one that parses.
+func TestForeignReadOnlyProfile_LoadsWithoutWarnings(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "foreign-read-only.toml")
+	if err := os.WriteFile(path, []byte(foreignReadOnlyProfileTOML), 0o644); err != nil {
+		t.Fatalf("write profile: %v", err)
+	}
+
+	p, err := profile.LoadFile(path)
+	if err != nil {
+		t.Fatalf("LoadFile: %v", err)
+	}
+	if len(p.Warnings) != 0 {
+		t.Errorf("Warnings = %v, want none", p.Warnings)
+	}
+
+	docs, ok := p.Servers["docs"]
+	if !ok {
+		t.Fatal("expected a foreign \"docs\" server in the example profile")
+	}
+	if docs.Access != profile.ForeignAccessRead {
+		t.Errorf("docs.Access = %q, want %q", docs.Access, profile.ForeignAccessRead)
+	}
+	if len(docs.ToolsRead) == 0 {
+		t.Error("docs.ToolsRead is empty — the example must show the tools_read fallback path, not just prose")
 	}
 }

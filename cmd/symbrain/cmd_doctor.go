@@ -94,21 +94,22 @@ type harnessCheck struct {
 }
 
 type doctorReport struct {
-	ConfigDir     dirCheck            `json:"config_dir"`
-	DataDir       dirCheck            `json:"data_dir"`
-	CacheDir      dirCheck            `json:"cache_dir"`
-	Config        configCheck         `json:"config"`
-	ManagedDir    dirCheck            `json:"managed_dir"`
-	Builtins      []string            `json:"builtins"`
-	Servers       []serverCheck       `json:"servers"`
-	ManagedCores  []managedCoreCheck  `json:"managed_cores,omitempty"`
-	MemoryDB      memoryDBCheck       `json:"memory_db"`
-	SkillsLibrary skillsLibraryCheck  `json:"skills_library"`
-	Profiles      []string            `json:"profiles"`
-	Harnesses     []harnessCheck      `json:"harnesses"`
-	Handshakes    []profileHandshake  `json:"handshakes,omitempty"`
-	Links         []linkCheck         `json:"links,omitempty"`
-	Degradations  []audit.Degradation `json:"degradations,omitempty"`
+	ConfigDir          dirCheck            `json:"config_dir"`
+	DataDir            dirCheck            `json:"data_dir"`
+	CacheDir           dirCheck            `json:"cache_dir"`
+	Config             configCheck         `json:"config"`
+	ManagedDir         dirCheck            `json:"managed_dir"`
+	Builtins           []string            `json:"builtins"`
+	Servers            []serverCheck       `json:"servers"`
+	ManagedCores       []managedCoreCheck  `json:"managed_cores,omitempty"`
+	MemoryDB           memoryDBCheck       `json:"memory_db"`
+	SkillsLibrary      skillsLibraryCheck  `json:"skills_library"`
+	Profiles           []string            `json:"profiles"`
+	Harnesses          []harnessCheck      `json:"harnesses"`
+	Handshakes         []profileHandshake  `json:"handshakes,omitempty"`
+	Links              []linkCheck         `json:"links,omitempty"`
+	ForeignAccessRisks []foreignAccessRisk `json:"foreign_access_risks,omitempty"`
+	Degradations       []audit.Degradation `json:"degradations,omitempty"`
 }
 
 // memoryDBCheck reports the embedded memory database's resolved path,
@@ -252,6 +253,7 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
 	report.Links = checkLinks(ctx, report.Harnesses)
+	report.ForeignAccessRisks = checkForeignAccessRisks()
 	if degradations, err := audit.LatestDegradations(""); err != nil {
 		report.Degradations = []audit.Degradation{{
 			Server: "audit",
