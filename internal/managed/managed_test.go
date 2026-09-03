@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 )
 
@@ -317,20 +318,39 @@ func TestPinnedChecksum_NilMap(t *testing.T) {
 
 // TestManifest_SHA256Pinned guards against the manifest regressing to
 // the pre-#423 state where sha256 was empty for every core (integrity
-// resting solely on the fetched checksums.txt / TLS to github.com).
+// resting solely on the fetched checksums.txt / TLS to github.com), and
+// against bump-core.yml regressing to writing a single scalar checksum
+// (the checksums.txt file's own hash) into what Core.SHA256 requires to
+// be a map keyed by exact release asset filename.
 func TestManifest_SHA256Pinned(t *testing.T) {
 	m, err := LoadManifest()
 	if err != nil {
 		t.Fatalf("LoadManifest: %v", err)
 	}
+	hexSum := regexp.MustCompile(`^[0-9a-f]{64}$`)
 	for name, core := range m.Cores {
 		if len(core.SHA256) == 0 {
 			t.Errorf("core %q: SHA256 is empty — no pinned checksum for any asset", name)
 			continue
 		}
+
+		wantAssets := map[string]bool{}
+		for _, goos := range []string{"darwin", "linux", "windows"} {
+			if !core.SupportsPlatform(goos) {
+				continue
+			}
+			for _, goarch := range []string{"arm64", "amd64"} {
+				wantAssets[core.AssetName(goos, goarch)] = true
+				wantAssets[core.AssetNameAlt(goos, goarch)] = true
+			}
+		}
+
 		for asset, sum := range core.SHA256 {
-			if len(sum) != 64 {
-				t.Errorf("core %q asset %q: sha256 %q is not 64 hex chars", name, asset, sum)
+			if !hexSum.MatchString(sum) {
+				t.Errorf("core %q asset %q: sha256 %q is not 64 lowercase hex chars", name, asset, sum)
+			}
+			if !wantAssets[asset] {
+				t.Errorf("core %q: SHA256 key %q does not match any AssetName/AssetNameAlt for the pinned version %q — stale or malformed entry", name, asset, core.Version)
 			}
 		}
 	}
