@@ -1,0 +1,25 @@
+{
+  "rate_limit": {
+    "primary_window": {
+      "window": "5h",
+      "utilized": 25.0,
+      "limit": 100.0,
+      "reset_date": "2026-08-05T18:00:00Z"
+    },
+    "secondary_window": {
+      "window": "1w",
+      "utilized": 200.0,
+      "limit": 800.0,
+      "reset_date": "2026-08-09T00:00:00Z"
+    }
+  },
+  "additional_rate_limits": [
+    {
+      "window": "codex-spark-weekly",
+      "title": "Codex Spark Weekly",
+      "utilized": 10.0,
+      "limit": 50.0,
+      "reset_date": "2026-08-09T00:00:00Z"
+    }
+  ]
+}
