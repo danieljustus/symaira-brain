@@ -108,30 +108,56 @@ jobs:
             echo "branch=bump/${CORE}/${TAG}"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Fetch checksums from release
+      - name: Compute per-asset checksums
         id: checksums
         run: |
           set -euo pipefail
 
+          CORE="${{ steps.validate.outputs.core }}"
           TAG="${{ steps.validate.outputs.tag }}"
-
           REPO="danieljustus/symaira-vault"
+          MANIFEST="internal/managed/manifest.json"
 
-          echo "Fetching checksums from $REPO@$TAG..."
+          # SHA256 in the manifest is keyed by exact release asset filename
+          # and must be computed independently of checksums.txt (which
+          # travels over the same channel as the archives and proves
+          # nothing about their integrity on its own — see the SHA256
+          # field doc in internal/managed/manifest.go). So: discover the
+          # published archive names for this core, download each one
+          # fresh, and hash the downloaded bytes ourselves.
+          ASSET_PREFIX=$(jq -r --arg core "$CORE" '.cores[$core].asset_prefix' "$MANIFEST")
 
-          # Download the checksums file from the specific release.
-          # symaira-vault publishes it as "symaira-vault_<version>_checksums.txt"
-          # (no bare "checksums.txt" asset exists) — confirmed against
-          # the real release; see internal/managed/manifest.go's
-          # ChecksumAssetName for the runtime equivalent of this pattern.
-          gh release download "$TAG" \
-            --repo "$REPO" \
-            --pattern "symaira-vault_*_checksums.txt" \
-            --output /tmp/checksums.txt
+          echo "Listing release archives for $REPO@$TAG (prefix: $ASSET_PREFIX)..."
+          mapfile -t ASSETS < <(gh release view "$TAG" --repo "$REPO" --json assets \
+            -q '.assets[].name' | grep -E "^${ASSET_PREFIX}_.*\.tar\.gz\$" || true)
 
-          SHA256=$(sha256sum /tmp/checksums.txt | cut -d' ' -f1)
-          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
-          echo "Checksums SHA-256: $SHA256"
+          if [ "${#ASSETS[@]}" -eq 0 ]; then
+            echo "::error::No release archives matching ${ASSET_PREFIX}_*.tar.gz found for $REPO@$TAG"
+            exit 1
+          fi
+
+          echo "Found ${#ASSETS[@]} archive(s): ${ASSETS[*]}"
+
+          SHA_JSON="{}"
+          for ASSET in "${ASSETS[@]}"; do
+            echo "Downloading $ASSET for independent hashing..."
+            gh release download "$TAG" --repo "$REPO" --pattern "$ASSET" --output "/tmp/$ASSET" --clobber
+            SUM=$(sha256sum "/tmp/$ASSET" | cut -d' ' -f1)
+            echo "  $ASSET -> $SUM"
+            SHA_JSON=$(jq --arg name "$ASSET" --arg sum "$SUM" '.[$name] = $sum' <<<"$SHA_JSON")
+            rm -f "/tmp/$ASSET"
+          done
+
+          echo "$SHA_JSON" > /tmp/sha256_map.json
+
+          {
+            echo "sha256_map<<SHA256_MAP_EOF"
+            echo "$SHA_JSON"
+            echo "SHA256_MAP_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Computed checksums:"
+          echo "$SHA_JSON"
 
       - name: Update manifest
         run: |
@@ -139,19 +165,25 @@ jobs:
 
           CORE="${{ steps.validate.outputs.core }}"
           TAG="${{ steps.validate.outputs.tag }}"
-          SHA256="${{ steps.checksums.outputs.sha256 }}"
           MANIFEST="internal/managed/manifest.json"
 
-          echo "Updating $MANIFEST: $CORE -> $TAG (sha256=$SHA256)"
+          echo "Updating $MANIFEST: $CORE -> $TAG"
 
-          # Update version and sha256 for the core entry
           jq \
             --arg core "$CORE" \
             --arg version "$TAG" \
-            --arg sha256 "$SHA256" \
-            '.cores[$core].version = $version | .cores[$core].sha256 = $sha256' \
+            --slurpfile sha /tmp/sha256_map.json \
+            '.cores[$core].version = $version | .cores[$core].sha256 = $sha[0]' \
             "$MANIFEST" > "${MANIFEST}.tmp"
           mv "${MANIFEST}.tmp" "$MANIFEST"
+
+          # Guard against ever again writing a scalar (or any non-object)
+          # into .cores[$core].sha256 — Core.SHA256 is a map[string]string
+          # and json.Unmarshal fails outright on a type mismatch.
+          if ! jq -e --arg core "$CORE" '.cores[$core].sha256 | type == "object" and length > 0' "$MANIFEST" >/dev/null; then
+            echo "::error::$MANIFEST: .cores[$CORE].sha256 is not a non-empty object after update"
+            exit 1
+          fi
 
           echo "Updated manifest:"
           jq --arg core "$CORE" '.cores[$core]' "$MANIFEST"
@@ -167,7 +199,13 @@ jobs:
 
             - **Core:** `${{ steps.validate.outputs.core }}`
             - **New version:** `${{ steps.validate.outputs.tag }}`
-            - **Checksums SHA-256:** `${{ steps.checksums.outputs.sha256 }}`
+
+            **Per-asset SHA-256** (independently computed by downloading and
+            hashing each archive — not copied from checksums.txt):
+
+            ```json
+            ${{ steps.checksums.outputs.sha256_map }}
+            ```
 
             This PR was created by the `bump-core` workflow triggered by a `repository_dispatch` event from the core's release workflow.
 
