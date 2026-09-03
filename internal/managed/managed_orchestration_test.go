@@ -97,7 +97,7 @@ func fakeVersionBinary(t *testing.T, binDir, name, version string) {
 func TestFix_SkipsAlreadyCorrect(t *testing.T) {
 	binDir := t.TempDir()
 	// Every platform-supported core is already at its pinned version
-	// (symvault v0.15.3, symcockpit 0.4.0 per manifest.json) -> all skip.
+	// (per manifest.json) -> all skip.
 	for _, core := range mustManifest(t).Cores {
 		if core.SupportsPlatform(runtime.GOOS) {
 			fakeVersionBinary(t, binDir, core.BinaryName, core.Version)
@@ -152,11 +152,13 @@ func TestStatus_ReportsInstalledVersion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Status: %v", err)
 	}
-	if versions["symvault"] != "v0.15.3" {
-		t.Errorf("Status()[symvault] = %q, want v0.15.3", versions["symvault"])
+	wantVault := mustManifest(t).Cores["symvault"].Version
+	if versions["symvault"] != wantVault {
+		t.Errorf("Status()[symvault] = %q, want %q", versions["symvault"], wantVault)
 	}
-	if supported["symcockpit"] && versions["symcockpit"] != "0.4.0" {
-		t.Errorf("Status()[symcockpit] = %q, want 0.4.0", versions["symcockpit"])
+	wantCockpit := mustManifest(t).Cores["symcockpit"].Version
+	if supported["symcockpit"] && versions["symcockpit"] != wantCockpit {
+		t.Errorf("Status()[symcockpit] = %q, want %q", versions["symcockpit"], wantCockpit)
 	}
 	if len(versions) != len(supported) {
 		t.Errorf("Status returned %d entries, want %d (one per platform-supported core)", len(versions), len(supported))
