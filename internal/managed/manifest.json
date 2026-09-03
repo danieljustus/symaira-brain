@@ -25,6 +25,21 @@
       },
       "platforms": ["darwin"],
       "asset_arch": "universal"
+    },
+    "symdesk": {
+      "version": "v0.11.1",
+      "repo": "danieljustus/symaira-desktop",
+      "binary_name": "symdesk",
+      "asset_prefix": "symaira-desktop",
+      "has_cosign": false,
+      "sha256": {
+        "symaira-desktop_0.11.1_darwin_amd64.tar.gz": "9f557091a74eecc4c9aeb0fb280130cc32fef1230d73ad5728f8f10f636dcc28",
+        "symaira-desktop_0.11.1_darwin_arm64.tar.gz": "a515e2e8afd11cc3296a29dd7d4c0be18a79a1f52ea4cc7ac388f1f9d6e045db",
+        "symaira-desktop_0.11.1_linux_amd64.tar.gz": "74f9b041d54b0af001aaf708ae47f21442ab0f8255341122e59ac9fe8046d209",
+        "symaira-desktop_0.11.1_linux_arm64.tar.gz": "5d0a639896d6e47c16b31f7cff26e3c658bb5b80aad0e9c38a0d8cf10904ed66",
+        "symaira-desktop_0.11.1_windows_amd64.zip": "ddeccd1b8abea9ac68d853344dc53fa39ed8707fd413426b06e6f860eac433ee",
+        "symaira-desktop_0.11.1_windows_arm64.zip": "07c78a9f1de264496172c7b5d311f7a39baefeda020f014b825efc178a866caa"
+      }
     }
   }
 }
