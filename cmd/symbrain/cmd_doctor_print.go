@@ -60,6 +60,13 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 			printHandshake(w, h)
 		}
 	}
+	if len(r.Links) > 0 {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "  links:")
+		for _, l := range r.Links {
+			printLink(w, l)
+		}
+	}
 	if len(r.Degradations) > 0 {
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "  startup degradations:")
@@ -162,6 +169,21 @@ func printHarness(w io.Writer, h harnessCheck) {
 			fmt.Fprintf(w, "  !  %-14s superseded core entries registered beside symbrain: %s (run `symbrain install` to migrate)\n", h.Name, joined)
 		} else {
 			fmt.Fprintf(w, "  →  %-14s superseded core entries present (no symbrain): %s\n", h.Name, joined)
+		}
+	}
+}
+
+func printLink(w io.Writer, l linkCheck) {
+	switch l.Status {
+	case linkPass:
+		fmt.Fprintf(w, "    ✓  %-55s %s\n", l.Name, l.Detail)
+	case linkUnknown:
+		fmt.Fprintf(w, "    →  %-55s %s\n", l.Name, l.Detail)
+	default:
+		if l.Remedy != "" {
+			fmt.Fprintf(w, "    ✗  %-55s %s — %s\n", l.Name, l.Detail, l.Remedy)
+		} else {
+			fmt.Fprintf(w, "    ✗  %-55s %s\n", l.Name, l.Detail)
 		}
 	}
 }
