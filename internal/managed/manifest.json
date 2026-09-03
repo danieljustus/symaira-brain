@@ -2,26 +2,26 @@
   "schema_version": 1,
   "cores": {
     "symvault": {
-      "version": "v0.15.3",
+      "version": "v0.21.1",
       "repo": "danieljustus/symaira-vault",
       "binary_name": "symvault",
       "asset_prefix": "symaira-vault",
       "has_cosign": true,
       "sha256": {
-        "symaira-vault_0.15.3_darwin_amd64.tar.gz": "5a60ed80138c97bafbae487bd1a6c1234e906c21a4d4fb86ac819e0182ef1deb",
-        "symaira-vault_0.15.3_darwin_arm64.tar.gz": "59a1f448e0cae06c4370df8392c628210a8b848193a9ffa8ca655234b393b744",
-        "symaira-vault_0.15.3_linux_amd64.tar.gz": "19448317d916451bd60ca1547577203a64a849339b38e9b95dfd3c0189a45017",
-        "symaira-vault_0.15.3_linux_arm64.tar.gz": "692262a4d3aae38729140797d48feff37c5806623c97a424add7aa2abe4db677"
+        "symaira-vault_0.21.1_darwin_amd64.tar.gz": "ab0e8ecdd6983e782ce02d7318b0b35238d8c494b22176cd707edf4ffdba2be2",
+        "symaira-vault_0.21.1_darwin_arm64.tar.gz": "97268174a82a62573be3ad2f31806264a0fdd4bb7a80a9933a0a00122a4b444f",
+        "symaira-vault_0.21.1_linux_amd64.tar.gz": "0491bf44251b7e2014375b9bf527efc147095dbb22a25df82982df5dd661e63c",
+        "symaira-vault_0.21.1_linux_arm64.tar.gz": "4e041fe81c2ae5b66900b7a8bd5ae25877afee93592b696d73d4c73653d6947d"
       }
     },
     "symcockpit": {
-      "version": "0.4.0",
+      "version": "0.5.3",
       "repo": "danieljustus/symaira-cockpit",
       "binary_name": "symcockpit",
       "asset_prefix": "symcockpit",
       "has_cosign": false,
       "sha256": {
-        "symcockpit_0.4.0_darwin_universal.tar.gz": "9c44429ce035851b80c1df395f876d4e9a2900616a1460edb3ab021b068856da"
+        "symcockpit_0.5.3_darwin_universal.tar.gz": "db78af4c948f569a525457b2fd8cb7eacff4246700c783d5af455b315f28c903"
       },
       "platforms": ["darwin"],
       "asset_arch": "universal"
