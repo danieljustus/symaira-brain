@@ -17,7 +17,7 @@ func TestConfigDir_XDG(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ConfigDir() error: %v", err)
 	}
-	expected := "/tmp/test-xdg-config/symmemory"
+	expected := "/tmp/test-xdg-config/symbrain/memory"
 	if dir != expected {
 		t.Errorf("ConfigDir() = %q, want %q", dir, expected)
 	}
@@ -30,7 +30,7 @@ func TestDataDir_XDG(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DataDir() error: %v", err)
 	}
-	expected := "/tmp/test-xdg-data/symmemory"
+	expected := "/tmp/test-xdg-data/symbrain/memory"
 	if dir != expected {
 		t.Errorf("DataDir() = %q, want %q", dir, expected)
 	}
@@ -43,7 +43,7 @@ func TestSecretPath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SecretPath() error: %v", err)
 	}
-	expected := "/tmp/test-xdg-config/symmemory/jwt.secret"
+	expected := "/tmp/test-xdg-config/symbrain/memory/jwt.secret"
 	if path != expected {
 		t.Errorf("SecretPath() = %q, want %q", path, expected)
 	}
@@ -56,7 +56,7 @@ func TestSecretPath_CustomName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SecretPath() error: %v", err)
 	}
-	expected := "/tmp/test-xdg-config/symmemory/api.key"
+	expected := "/tmp/test-xdg-config/symbrain/memory/api.key"
 	if path != expected {
 		t.Errorf("SecretPath() = %q, want %q", path, expected)
 	}
@@ -69,7 +69,7 @@ func TestDatabasePath_XDG(t *testing.T) {
 	if err != nil {
 		t.Fatalf("DatabasePath() error: %v", err)
 	}
-	expected := "/tmp/test-xdg-data/symmemory/default.db"
+	expected := "/tmp/test-xdg-data/symbrain/memory/default.db"
 	if path != expected {
 		t.Errorf("DatabasePath() = %q, want %q", path, expected)
 	}
