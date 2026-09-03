@@ -8,8 +8,82 @@ import (
 	"testing"
 )
 
-func TestCopilotParsesUserResponse(t *testing.T) {
+// The shape the endpoint returns today: every quota under
+// `quota_snapshots`, with the reset date on the envelope. Parsing only the
+// older `copilot.chat` shape is what left the card empty for a signed-in
+// Copilot account — the fetch succeeded and produced no meters.
+func TestCopilotParsesQuotaSnapshots(t *testing.T) {
 	client, _ := fakeClient(200, loadFixture("copilot-user.json"), nil)
+	strategy := &copilotAPIStrategy{accessToken: "ghu_test", host: "github.com", client: client}
+
+	snap, err := strategy.Fetch(context.Background())
+	if err != nil {
+		t.Fatalf("Fetch(): %v", err)
+	}
+
+	// 300 granted, 255 left — the meter reports what has been consumed.
+	premium := meterByLabel(snap.Meters, "Premium requests")
+	if premium == nil || premium.Used == nil || *premium.Used != "45" {
+		t.Fatalf("Premium requests = %v, want used=45", premium)
+	}
+	if premium.Limit == nil || *premium.Limit != "300" {
+		t.Errorf("Premium requests limit = %v, want 300", premium.Limit)
+	}
+	if premium.Unit != "requests" {
+		t.Errorf("Premium requests unit = %q, want requests", premium.Unit)
+	}
+	if premium.ResetsAt == nil || premium.ResetsAt.Format("2006-01-02") != "2026-10-01" {
+		t.Errorf("Premium requests ResetsAt = %v, want the envelope reset date", premium.ResetsAt)
+	}
+	// Chat and completions are unlimited on this plan: a bar that can never
+	// move is worse than no bar.
+	if len(snap.Meters) != 1 {
+		t.Errorf("len(Meters) = %d, want 1 (unlimited quotas skipped)", len(snap.Meters))
+	}
+}
+
+// A quota that reports only a remaining percentage still meters, and a
+// quota id GitHub adds later is labelled readably rather than skipped.
+func TestCopilotMetersPercentOnlyAndUnknownQuotas(t *testing.T) {
+	percent := 40.0
+	response := copilotUserResponse{
+		QuotaResetDate: "2026-10-01",
+		QuotaSnapshots: map[string]copilotQuotaSnapshot{
+			"agent_sessions": {QuotaID: "agent_sessions", PercentRemaining: &percent, HasQuota: true},
+		},
+	}
+
+	meters := response.meters()
+	if len(meters) != 1 {
+		t.Fatalf("len(meters) = %d, want 1", len(meters))
+	}
+	if meters[0].Label != "Agent sessions" {
+		t.Errorf("Label = %q, want %q", meters[0].Label, "Agent sessions")
+	}
+	if meters[0].Unit != "%" || meters[0].Used == nil || *meters[0].Used != "60" {
+		t.Errorf("meter = %+v, want 60%% used", meters[0])
+	}
+	if meters[0].ResetsAt == nil {
+		t.Error("expected the plain reset date to be parsed")
+	}
+}
+
+func TestCopilotSkipsQuotasItCannotMeter(t *testing.T) {
+	entitlement := 300.0
+	response := copilotUserResponse{QuotaSnapshots: map[string]copilotQuotaSnapshot{
+		"chat":                 {Entitlement: &entitlement, Unlimited: true, HasQuota: true},
+		"completions":          {Entitlement: &entitlement, HasQuota: false},
+		"premium_interactions": {HasQuota: true},
+	}}
+	if meters := response.meters(); len(meters) != 0 {
+		t.Errorf("meters = %+v, want none", meters)
+	}
+}
+
+// The previous shape is still accepted: the endpoint is undocumented, and
+// the parser should not break again if it moves back.
+func TestCopilotParsesLegacyUserResponse(t *testing.T) {
+	client, _ := fakeClient(200, loadFixture("copilot-user-legacy.json"), nil)
 	strategy := &copilotAPIStrategy{accessToken: "ghu_test", host: "github.com", client: client}
 
 	snap, err := strategy.Fetch(context.Background())

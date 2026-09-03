@@ -27,6 +27,8 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 	for _, s := range r.Servers {
 		printServer(w, s)
 	}
+	printMemoryDB(w, r.MemoryDB)
+	printSkillsLibrary(w, r.SkillsLibrary)
 
 	if len(r.ManagedCores) > 0 {
 		fmt.Fprintln(w, "  managed cores:")
@@ -103,6 +105,35 @@ func printServer(w io.Writer, s serverCheck) {
 			fmt.Fprintf(w, "  →  %-8s not found on PATH — %s\n", s.Name, s.InstallHint)
 		}
 	}
+}
+
+func printMemoryDB(w io.Writer, c memoryDBCheck) {
+	legacy := ""
+	if c.Legacy {
+		legacy = " (legacy symmemory install)"
+	}
+	switch {
+	case c.Error != "":
+		fmt.Fprintf(w, "  ✗  %-14s %s: %s\n", "memory db", c.Path, c.Error)
+	case !c.Exists:
+		fmt.Fprintf(w, "  →  %-14s not yet created: %s\n", "memory db", c.Path)
+	case !c.ModeOK:
+		fmt.Fprintf(w, "  ✗  %-14s %s (mode %s, want 0600)%s\n", "memory db", c.Path, c.Mode, legacy)
+	default:
+		fmt.Fprintf(w, "  ✓  %-14s %s (quick_check: %s)%s\n", "memory db", c.Path, c.QuickCheck, legacy)
+	}
+}
+
+func printSkillsLibrary(w io.Writer, c skillsLibraryCheck) {
+	legacy := ""
+	if c.Legacy {
+		legacy = " (legacy symskills install)"
+	}
+	if c.Error != "" {
+		fmt.Fprintf(w, "  !  %-14s %s (%d installed, %s)%s\n", "skills library", c.Path, c.Count, c.Error, legacy)
+		return
+	}
+	fmt.Fprintf(w, "  ✓  %-14s %s (%d installed)%s\n", "skills library", c.Path, c.Count, legacy)
 }
 
 func printHarness(w io.Writer, h harnessCheck) {

@@ -11,6 +11,9 @@ import (
 	"testing"
 
 	"github.com/danieljustus/symaira-brain/internal/harness"
+	memorydb "github.com/danieljustus/symaira-brain/internal/memory/db"
+	memorypaths "github.com/danieljustus/symaira-brain/internal/memory/paths"
+	skillsconfig "github.com/danieljustus/symaira-brain/internal/skills/config"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
@@ -612,5 +615,135 @@ func TestCheckHarness_NoSupersededWhenOnlySymbrain(t *testing.T) {
 	}
 	if len(check.Superseded) != 0 {
 		t.Errorf("Superseded = %v, want none", check.Superseded)
+	}
+}
+
+func TestCheckMemoryDB_NotYetCreated(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	check := checkMemoryDB()
+	if check.Exists {
+		t.Errorf("Exists = true, want false (no database file written yet)")
+	}
+	if check.Error != "" {
+		t.Errorf("Error = %q, want empty (an uncreated database is not a failure)", check.Error)
+	}
+}
+
+func TestCheckMemoryDB_ValidDB(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	db, err := memorydb.Open(nil)
+	if err != nil {
+		t.Fatalf("memorydb.Open: %v", err)
+	}
+	if err := db.Close(); err != nil {
+		t.Fatalf("db.Close: %v", err)
+	}
+
+	check := checkMemoryDB()
+	if !check.Exists {
+		t.Fatal("Exists = false, want true")
+	}
+	if check.Error != "" {
+		t.Fatalf("Error = %q, want empty", check.Error)
+	}
+	if !check.ModeOK {
+		t.Errorf("ModeOK = false (mode %s), want true", check.Mode)
+	}
+	if check.QuickCheck != "ok" {
+		t.Errorf("QuickCheck = %q, want %q", check.QuickCheck, "ok")
+	}
+	if check.Legacy {
+		t.Errorf("Legacy = true, want false (freshly resolved current path)")
+	}
+}
+
+func TestCheckMemoryDB_CorruptFile(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	if _, err := memorypaths.EnsureDataDir(); err != nil {
+		t.Fatalf("EnsureDataDir: %v", err)
+	}
+	path, err := memorypaths.DatabasePath()
+	if err != nil {
+		t.Fatalf("DatabasePath: %v", err)
+	}
+	if err := os.WriteFile(path, []byte("this is not a sqlite database"), 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	check := checkMemoryDB()
+	if !check.Exists {
+		t.Fatal("Exists = false, want true (the corrupt file is present)")
+	}
+	if check.Error == "" {
+		t.Error("Error is empty, want a quick_check/open failure for a corrupt database file")
+	}
+}
+
+func TestCheckSkillsLibrary_Empty(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	check := checkSkillsLibrary()
+	if check.Count != 0 {
+		t.Errorf("Count = %d, want 0", check.Count)
+	}
+	if check.Exists {
+		t.Errorf("Exists = true, want false (no library dir created)")
+	}
+	if check.Error != "" {
+		t.Errorf("Error = %q, want empty", check.Error)
+	}
+}
+
+func TestCheckSkillsLibrary_WithSkills(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	cfg := skillsconfig.Defaults()
+	for _, name := range []string{"alpha-skill", "beta-skill"} {
+		dir := filepath.Join(cfg.LibraryDir, name)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatalf("MkdirAll(%s): %v", dir, err)
+		}
+		content := "---\nname: " + name + "\ndescription: test skill\n---\nBody.\n"
+		if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0o644); err != nil {
+			t.Fatalf("WriteFile SKILL.md: %v", err)
+		}
+	}
+
+	check := checkSkillsLibrary()
+	if check.Count != 2 {
+		t.Errorf("Count = %d, want 2", check.Count)
+	}
+	if !check.Exists {
+		t.Error("Exists = false, want true")
+	}
+	if check.Error != "" {
+		t.Errorf("Error = %q, want empty", check.Error)
+	}
+}
+
+func TestCmdDoctor_JSONIncludesMemoryAndSkillsChecks(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake binary is a POSIX shell script")
+	}
+	t.Setenv("HOME", t.TempDir())
+	isolatedPATH(t, t.TempDir())
+
+	var stdout, stderr bytes.Buffer
+	code := cmdDoctor([]string{"--json"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK {
+		t.Fatalf("cmdDoctor(--json) = %d, want %d (stderr: %s)", code, exitcodes.ExitOK, stderr.String())
+	}
+
+	var report map[string]any
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatalf("output is not valid JSON: %v", err)
+	}
+	for _, key := range []string{"memory_db", "skills_library"} {
+		if _, ok := report[key]; !ok {
+			t.Errorf("JSON report missing key %q: %v", key, report)
+		}
 	}
 }

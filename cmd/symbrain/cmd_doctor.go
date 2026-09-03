@@ -18,9 +18,14 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/harness"
 	"github.com/danieljustus/symaira-brain/internal/managed"
+	memorypaths "github.com/danieljustus/symaira-brain/internal/memory/paths"
 	"github.com/danieljustus/symaira-brain/internal/output"
+	sharedpaths "github.com/danieljustus/symaira-brain/internal/paths"
+	skillsconfig "github.com/danieljustus/symaira-brain/internal/skills/config"
+	"github.com/danieljustus/symaira-brain/internal/skills/skill"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
+	"github.com/danieljustus/symaira-corekit/sqlitekit"
 )
 
 // probeTimeout bounds how long doctor waits for a child's `version --json`
@@ -89,18 +94,52 @@ type harnessCheck struct {
 }
 
 type doctorReport struct {
-	ConfigDir    dirCheck            `json:"config_dir"`
-	DataDir      dirCheck            `json:"data_dir"`
-	CacheDir     dirCheck            `json:"cache_dir"`
-	Config       configCheck         `json:"config"`
-	ManagedDir   dirCheck            `json:"managed_dir"`
-	Builtins     []string            `json:"builtins"`
-	Servers      []serverCheck       `json:"servers"`
-	ManagedCores []managedCoreCheck  `json:"managed_cores,omitempty"`
-	Profiles     []string            `json:"profiles"`
-	Harnesses    []harnessCheck      `json:"harnesses"`
-	Handshakes   []profileHandshake  `json:"handshakes,omitempty"`
-	Degradations []audit.Degradation `json:"degradations,omitempty"`
+	ConfigDir     dirCheck            `json:"config_dir"`
+	DataDir       dirCheck            `json:"data_dir"`
+	CacheDir      dirCheck            `json:"cache_dir"`
+	Config        configCheck         `json:"config"`
+	ManagedDir    dirCheck            `json:"managed_dir"`
+	Builtins      []string            `json:"builtins"`
+	Servers       []serverCheck       `json:"servers"`
+	ManagedCores  []managedCoreCheck  `json:"managed_cores,omitempty"`
+	MemoryDB      memoryDBCheck       `json:"memory_db"`
+	SkillsLibrary skillsLibraryCheck  `json:"skills_library"`
+	Profiles      []string            `json:"profiles"`
+	Harnesses     []harnessCheck      `json:"harnesses"`
+	Handshakes    []profileHandshake  `json:"handshakes,omitempty"`
+	Degradations  []audit.Degradation `json:"degradations,omitempty"`
+}
+
+// memoryDBCheck reports the embedded memory database's resolved path,
+// existence, file permission mode, and a read-only integrity check
+// (PRAGMA quick_check), so an unreadable or corrupt database no longer
+// gets a green doctor (#425). A database that has not been created yet
+// (Exists == false, Error == "") is not a failure — symbrain creates it
+// lazily on first use.
+type memoryDBCheck struct {
+	Path       string `json:"path"`
+	Exists     bool   `json:"exists"`
+	Mode       string `json:"mode,omitempty"`
+	ModeOK     bool   `json:"mode_ok"`
+	QuickCheck string `json:"quick_check,omitempty"`
+	// Legacy reports whether this path resolved to the pre-#427 standalone
+	// symmemory data directory (still honored as a read-only fallback)
+	// rather than the current symbrain-namespaced location.
+	Legacy bool   `json:"legacy,omitempty"`
+	Error  string `json:"error,omitempty"`
+}
+
+// skillsLibraryCheck reports the resolved skills library directory and
+// how many installed skills it contains (#425).
+type skillsLibraryCheck struct {
+	Path   string `json:"path"`
+	Exists bool   `json:"exists"`
+	Count  int    `json:"count"`
+	// Legacy reports whether this path resolved to the pre-#427 standalone
+	// symskills data directory rather than the current symbrain-namespaced
+	// location.
+	Legacy bool   `json:"legacy,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 // managedCoreCheck reports one managed runtime core's pinned and installed
@@ -189,12 +228,14 @@ func cmdDoctorWithFormat(args []string, stdout, stderr io.Writer, format output.
 
 func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	report := &doctorReport{
-		ConfigDir: checkDir(xdg.ConfigDir()),
-		Config:    checkConfig(),
-		Builtins:  builtinServers,
-		Servers:   checkServers(ctx),
-		Profiles:  discoverProfiles(),
-		Harnesses: checkHarnesses(),
+		ConfigDir:     checkDir(xdg.ConfigDir()),
+		Config:        checkConfig(),
+		Builtins:      builtinServers,
+		Servers:       checkServers(ctx),
+		MemoryDB:      checkMemoryDB(),
+		SkillsLibrary: checkSkillsLibrary(),
+		Profiles:      discoverProfiles(),
+		Harnesses:     checkHarnesses(),
 	}
 
 	if dataDir, err := xdg.DataDir(); err == nil {
@@ -289,6 +330,74 @@ func checkServers(ctx context.Context) []serverCheck {
 		checks = append(checks, check)
 	}
 	return checks
+}
+
+// checkMemoryDB resolves the embedded memory database's path (honoring
+// the #427 legacy-symmemory fallback) and reports its existence, file
+// permission mode, and a read-only PRAGMA quick_check — so a symbrain
+// whose memory database is unreadable or corrupt no longer gets a green
+// doctor. It opens the database directly via sqlitekit.Open rather than
+// through internal/memory/db.Open, since the latter runs migrations on
+// open; doctor must never mutate the database it is only inspecting.
+func checkMemoryDB() memoryDBCheck {
+	path, err := memorypaths.DatabasePath()
+	if err != nil {
+		return memoryDBCheck{Error: err.Error()}
+	}
+	check := memoryDBCheck{Path: path}
+	if loc, err := memorypaths.DataLocation(); err == nil {
+		check.Legacy = loc.Legacy
+	}
+
+	info, statErr := os.Stat(path)
+	if statErr != nil {
+		if os.IsNotExist(statErr) {
+			return check
+		}
+		check.Error = statErr.Error()
+		return check
+	}
+	check.Exists = true
+	mode := info.Mode().Perm()
+	check.Mode = fmt.Sprintf("%04o", mode)
+	check.ModeOK = mode == 0o600
+
+	conn, err := sqlitekit.Open(path)
+	if err != nil {
+		check.Error = fmt.Sprintf("open database: %v", err)
+		return check
+	}
+	defer func() { _ = conn.Close() }()
+
+	if err := conn.QueryRow("PRAGMA quick_check").Scan(&check.QuickCheck); err != nil {
+		check.Error = fmt.Sprintf("quick_check: %v", err)
+	}
+	return check
+}
+
+// checkSkillsLibrary resolves the skills library directory (honoring the
+// #427 legacy-symskills fallback) and reports how many skills it holds,
+// reusing skill.ListLibrary — the same loader `symbrain skills list` uses
+// — rather than reimplementing directory scanning.
+func checkSkillsLibrary() skillsLibraryCheck {
+	cfg, err := skillsconfig.Load()
+	if err != nil {
+		cfg = skillsconfig.Defaults()
+	}
+	check := skillsLibraryCheck{Path: cfg.LibraryDir}
+	if loc, err := sharedpaths.SkillsDataDir(); err == nil {
+		check.Legacy = loc.Legacy
+	}
+	if info, statErr := os.Stat(cfg.LibraryDir); statErr == nil && info.IsDir() {
+		check.Exists = true
+	}
+
+	bundles, issues := skill.ListLibrary(cfg.LibraryDir)
+	check.Count = len(bundles)
+	if len(issues) > 0 {
+		check.Error = fmt.Sprintf("%d skill(s) failed to load", len(issues))
+	}
+	return check
 }
 
 // managedCoreChecks reports the install state of every managed runtime

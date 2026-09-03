@@ -1,0 +1,14 @@
+{
+  "copilot": {
+    "chat": {
+      "premium_model_requests": {
+        "total_premium_requests_used": 45,
+        "total_premium_requests_included": 300,
+        "usage_reset_date": "2026-08-10T00:00:00Z"
+      }
+    }
+  },
+  "skills_chat": {
+    "total_premium_requests_used": 12
+  }
+}

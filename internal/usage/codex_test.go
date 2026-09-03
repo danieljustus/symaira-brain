@@ -6,10 +6,93 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
-func TestCodexParsesWhamUsage(t *testing.T) {
+// The shape the endpoint returns today: a percentage against an implicit
+// 100% cap, a window length in seconds, and a Unix reset timestamp — with
+// the per-model limits nested one level deeper than they used to be.
+// Parsing only the older shape is what made the card sit empty for a
+// signed-in Codex account: the fetch succeeded and produced no meters.
+func TestCodexParsesCurrentWhamUsage(t *testing.T) {
 	client, _ := fakeClient(200, loadFixture("codex-wham-usage.json"), nil)
+	strategy := &codexOAuthStrategy{accessToken: "sk-ant-oat-test", client: client}
+
+	snap, err := strategy.Fetch(context.Background())
+	if err != nil {
+		t.Fatalf("Fetch(): %v", err)
+	}
+
+	weekly := meterByLabel(snap.Meters, "1w")
+	if weekly == nil || weekly.Used == nil || *weekly.Used != "67" {
+		t.Fatalf("weekly meter = %v, want used=67", weekly)
+	}
+	if weekly.Limit == nil || *weekly.Limit != "100" {
+		t.Errorf("weekly limit = %v, want 100", weekly.Limit)
+	}
+	if weekly.Unit != "%" {
+		t.Errorf("weekly unit = %q, want %%", weekly.Unit)
+	}
+	if weekly.ResetsAt == nil || weekly.ResetsAt.Unix() != 1788764369 {
+		t.Errorf("weekly ResetsAt = %v, want the reset_at timestamp", weekly.ResetsAt)
+	}
+	// A null secondary_window contributes nothing rather than an empty meter.
+	if len(snap.Meters) != 3 {
+		t.Fatalf("len(Meters) = %d, want 3 (weekly + two Spark windows)", len(snap.Meters))
+	}
+	spark := meterByLabel(snap.Meters, "GPT-5.3-Codex-Spark 5h")
+	if spark == nil || spark.Used == nil || *spark.Used != "12" {
+		t.Errorf("Spark 5h meter = %v, want used=12", spark)
+	}
+	if meterByLabel(snap.Meters, "GPT-5.3-Codex-Spark 1w") == nil {
+		t.Error("expected the Spark weekly window as its own meter")
+	}
+}
+
+// A window that reports only how long until it resets still gets a
+// countdown, computed from the fetch time.
+func TestCodexFallsBackToRelativeReset(t *testing.T) {
+	seconds := int64(3_600)
+	percent := 40.0
+	window := &codexWindow{UsedPercent: &percent, ResetAfterSeconds: &seconds}
+	now := time.Date(2026, 9, 3, 12, 0, 0, 0, time.UTC)
+
+	meter := window.meter(now, "", "Session")
+	if meter == nil || meter.ResetsAt == nil {
+		t.Fatalf("meter = %v, want a reset time", meter)
+	}
+	if !meter.ResetsAt.Equal(now.Add(time.Hour)) {
+		t.Errorf("ResetsAt = %v, want %v", meter.ResetsAt, now.Add(time.Hour))
+	}
+	if meter.Label != "Session" {
+		t.Errorf("Label = %q, want the fallback label", meter.Label)
+	}
+}
+
+func TestCodexWindowLabelNamesWindowsByLength(t *testing.T) {
+	for _, testCase := range []struct {
+		seconds int64
+		want    string
+	}{
+		{604_800, "1w"},
+		{1_209_600, "2w"},
+		{86_400, "1d"},
+		{18_000, "5h"},
+		{1_800, "30m"},
+	} {
+		if got := codexWindowLabel(&testCase.seconds, "Session"); got != testCase.want {
+			t.Errorf("codexWindowLabel(%d) = %q, want %q", testCase.seconds, got, testCase.want)
+		}
+	}
+	if got := codexWindowLabel(nil, "Session"); got != "Session" {
+		t.Errorf("codexWindowLabel(nil) = %q, want the fallback", got)
+	}
+}
+
+// The previous shape is still accepted: the endpoint is undocumented, and
+// the parser should not break again if it moves back.
+func TestCodexParsesLegacyWhamUsage(t *testing.T) {
+	client, _ := fakeClient(200, loadFixture("codex-wham-usage-legacy.json"), nil)
 	strategy := &codexOAuthStrategy{accessToken: "sk-ant-oat-test", client: client}
 
 	snap, err := strategy.Fetch(context.Background())

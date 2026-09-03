@@ -23,23 +23,27 @@ const (
 //     accepted); queries the
 //     organization cost/usage report.
 //  2. OAuth (oauth) — ANTHROPIC_OAUTH_TOKEN env (symvault:// URIs
-//     accepted), else ~/.claude/.credentials.json file fallback; queries
-//     GET /api/oauth/usage (session + weekly windows).
+//     accepted), then ~/.claude/.credentials.json, then the macOS login
+//     keychain; queries GET /api/oauth/usage (session + weekly windows).
 //
-// The Swift original's primary OAuth source — the macOS Keychain entry
-// "Claude Code-credentials", including its "mcpOAuth-without-claudeAiOauth"
-// pitfall handling — is not ported: it is macOS-Keychain-specific and this
-// pass keeps every provider's credential source portable (env vars and
-// plain file reads), consistent with every other provider ported so far.
+// The keychain is where Claude Code actually stores its credentials on
+// macOS — the credentials file is what other platforms get — so a Mac with
+// a signed-in Claude Code but no file was reported as "not configured",
+// the state this provider was least able to explain. It is read through a
+// build-tagged helper (claude_keychain_darwin.go, a no-op elsewhere) so the
+// provider itself stays portable, mirroring the split corekit's secretref
+// package already uses. The file is still tried first: it never raises the
+// keychain approval panel.
 // Mirrors symaira-cockpit's ClaudeUsageProvider.
 type ClaudeProvider struct {
-	adminKey    string
-	adminErr    error
-	adminSource string
-	oauthToken  string
-	oauthErr    error
-	oauthSource string
-	client      *http.Client
+	adminKey       string
+	adminErr       error
+	adminSource    string
+	oauthToken     string
+	oauthErr       error
+	oauthSource    string
+	oauthExpiresAt *time.Time
+	client         *http.Client
 }
 
 // NewClaudeProvider reads ANTHROPIC_ADMIN_KEY and the Claude CLI's own
@@ -50,14 +54,24 @@ func NewClaudeProvider(client *http.Client) *ClaudeProvider {
 	}
 	adminKey, adminSource, adminErr := resolveEnv("ANTHROPIC_ADMIN_KEY")
 	oauthToken, oauthSource, oauthErr := resolveFileCredential("ANTHROPIC_OAUTH_TOKEN", readClaudeFileToken)
+	var oauthExpiresAt *time.Time
+	// Only reached when neither the env var nor the file produced a token:
+	// the keychain read can raise an approval panel, so it is the last
+	// source tried, never a redundant one.
+	if oauthToken == "" && oauthErr == nil {
+		if token, expiresAt := readClaudeKeychainCredential(); token != "" {
+			oauthToken, oauthSource, oauthExpiresAt = token, "keychain", expiresAt
+		}
+	}
 	return &ClaudeProvider{
-		adminKey:    adminKey,
-		adminErr:    adminErr,
-		adminSource: adminSource,
-		oauthToken:  oauthToken,
-		oauthErr:    oauthErr,
-		oauthSource: oauthSource,
-		client:      client,
+		adminKey:       adminKey,
+		adminErr:       adminErr,
+		adminSource:    adminSource,
+		oauthToken:     oauthToken,
+		oauthErr:       oauthErr,
+		oauthSource:    oauthSource,
+		oauthExpiresAt: oauthExpiresAt,
+		client:         client,
 	}
 }
 
@@ -119,6 +133,17 @@ func (p *ClaudeProvider) AuthStatus() AuthStatus {
 		return AuthStatus{Status: "missing", Detail: "No Claude credentials found — add an admin key or sign in with the Claude CLI"}
 	}
 	if p.oauthToken != "" {
+		// A token past its own declared expiry is still handed to the
+		// strategy chain — the endpoint is the authority on whether it
+		// works — but the status says what the resulting 401 would
+		// otherwise leave the user guessing about.
+		if p.oauthExpiresAt != nil && p.oauthExpiresAt.Before(time.Now()) {
+			return AuthStatus{
+				Status: "expired",
+				Detail: "Claude Code OAuth token expired — sign in again with the Claude CLI",
+				Source: p.oauthSource,
+			}
+		}
 		return AuthStatus{Status: "available", Detail: "Signed in via Claude Code OAuth token", Source: p.oauthSource}
 	}
 	return AuthStatus{Status: "available", Detail: "Admin API key from ANTHROPIC_ADMIN_KEY", Source: p.adminSource}
