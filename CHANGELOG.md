@@ -9,6 +9,61 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.11.0] - 2026-09-03
+
+### Added
+- `symbrain` now manages `symdesk` as a third managed core alongside
+  `symvault` and `symcockpit`: pinned, verified and installed by `symbrain
+  setup` the same way, with `symbrain doctor` reporting its version and
+  origin.
+- A scheduled workflow detects when a managed core's pinned version falls
+  behind its repo's latest GitHub release, so a stale pin is caught
+  automatically instead of only by reading the manifest.
+- `symbrain doctor` reports cross-core link health, not just per-binary
+  presence: whether the credential store is reachable and its lock state,
+  whether a configured secret reference actually resolves end to end, and
+  whether every profile on disk is bound to at least one harness.
+- `symbrain doctor` also flags a foreign (non-core) server configured with
+  `access = "read"` and no `tools_read` override — a shape that typically
+  exposes nothing, since most upstream MCP servers don't set the
+  `readOnlyHint` annotation that classification otherwise falls back to.
+  The gateway itself now explains an empty resulting exposure instead of
+  silently returning an empty tool list.
+- `symbrain init` ships a third example profile, `foreign-read-only.toml`,
+  showing the `tools_read` fallback pattern for a read-only foreign server.
+- `symbrain memory serve` runs the memory HTTP API as a standalone process.
+- `symbrain usage` reads Claude's OAuth token from the macOS Keychain.
+- Managed-core installs (`symvault`, `symcockpit`) verify a cosign signature
+  and pinned per-asset checksums independently of the fetched
+  `checksums.txt`.
+
+### Changed
+- `symvault` and `symcockpit`'s pinned versions were refreshed (`v0.15.3` →
+  `v0.21.1`, `0.4.0` → `0.5.3`) — the managed directory is checked before
+  `PATH`, so the stale pins were silently holding back fixes in the
+  credential store even after a newer install was available elsewhere.
+- AI usage provider fetches (Codex, Copilot, Claude) run in parallel with
+  per-provider timeouts instead of serially.
+- Memory and skills in-process tool calls are now audited the same way
+  external MCP server calls are.
+- The audit package's four overlapping tail-reading implementations were
+  consolidated into one.
+- The memory and skills XDG path conventions were unified.
+
+### Fixed
+- `bump-core.yml` computes per-asset checksums independently by downloading
+  and hashing each release archive, instead of writing a single scalar hash
+  of `checksums.txt` into a field the manifest requires to be a per-asset
+  map — the previous form broke `LoadManifest()`'s JSON parsing outright.
+- The managed-core installer's checksum asset name, Windows archive
+  extension, and version-pin resolution (`latest` alias vs. the manifest's
+  pinned tag) were corrected against symaira-vault's real published
+  releases.
+- Stale CLI help text and hints left over from the memory/skills core
+  absorption were corrected.
+- Usage parsing was updated for the Codex and Copilot payload shapes as
+  they exist today.
+
 ## [v0.10.0] - 2026-09-01
 
 ### Added

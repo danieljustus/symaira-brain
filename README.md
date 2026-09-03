@@ -20,7 +20,7 @@ Point Claude Code, Cursor, Codex, Antigravity, or opencode at `symbrain` once, a
 every one of them talks to the same underlying vault, memory, and skills —
 each through its own profile, each seeing only what that profile exposes.
 
-> **Status:** `v0.10.0` released, in active development. Interfaces may
+> **Status:** `v0.11.0` released, in active development. Interfaces may
 > still change before `v1.0.0`.
 
 ## Why symbrain
