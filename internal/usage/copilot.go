@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"sort"
 	"strings"
 	"time"
 )
@@ -187,10 +189,99 @@ func (s *copilotAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 		return nil, &copilotError{kind: "unparseable"}
 	}
 
+	return &UsageSnapshot{
+		ProviderID: copilotProviderID,
+		Meters:     payload.meters(),
+		FetchedAt:  time.Now().UTC(),
+		Source:     s.Source(),
+	}, nil
+}
+
+// Two generations of the copilot_internal/user payload are accepted. The
+// current one reports every quota under `quota_snapshots`, keyed by quota
+// id, with a shared reset date on the envelope. The older one carried a
+// single premium-request counter under `copilot.chat` — that shape no longer
+// comes back from github.com, but the endpoint is undocumented, so it stays
+// parseable rather than being deleted.
+type copilotUserResponse struct {
+	QuotaSnapshots    map[string]copilotQuotaSnapshot `json:"quota_snapshots"`
+	QuotaResetDate    string                          `json:"quota_reset_date"`
+	QuotaResetDateUTC *time.Time                      `json:"quota_reset_date_utc"`
+	// Legacy shape.
+	Copilot    *copilotState      `json:"copilot"`
+	SkillsChat *copilotSkillsChat `json:"skills_chat"`
+}
+
+// copilotQuotaOrder is the order quotas are rendered in: the one that
+// actually runs out first, then the two that are unlimited on most plans.
+// Anything the endpoint adds later follows, sorted, so a new quota shows up
+// without a release here.
+var copilotQuotaOrder = []string{"premium_interactions", "chat", "completions"}
+
+var copilotQuotaLabels = map[string]string{
+	"premium_interactions": "Premium requests",
+	"chat":                 "Chat",
+	"completions":          "Completions",
+}
+
+func (r copilotUserResponse) meters() []UsageMeter {
+	if meters := r.quotaSnapshotMeters(); len(meters) > 0 {
+		return meters
+	}
+	return r.legacyMeters()
+}
+
+func (r copilotUserResponse) quotaSnapshotMeters() []UsageMeter {
+	if len(r.QuotaSnapshots) == 0 {
+		return nil
+	}
+	resetsAt := r.resetsAt()
 	var meters []UsageMeter
-	// Premium-model requests quota as a meter with resetsAt.
-	if payload.Copilot != nil && payload.Copilot.Chat != nil && payload.Copilot.Chat.PremiumModelRequests != nil {
-		premium := payload.Copilot.Chat.PremiumModelRequests
+	for _, id := range copilotQuotaIDs(r.QuotaSnapshots) {
+		if meter := r.QuotaSnapshots[id].meter(id, resetsAt); meter != nil {
+			meters = append(meters, *meter)
+		}
+	}
+	return meters
+}
+
+func copilotQuotaIDs(snapshots map[string]copilotQuotaSnapshot) []string {
+	ids := make([]string, 0, len(snapshots))
+	for _, id := range copilotQuotaOrder {
+		if _, ok := snapshots[id]; ok {
+			ids = append(ids, id)
+		}
+	}
+	var extra []string
+	for id := range snapshots {
+		if !slices.Contains(copilotQuotaOrder, id) {
+			extra = append(extra, id)
+		}
+	}
+	sort.Strings(extra)
+	return append(ids, extra...)
+}
+
+// resetsAt prefers the timestamp form and falls back to parsing the plain
+// date, which is all older responses carry.
+func (r copilotUserResponse) resetsAt() *time.Time {
+	if r.QuotaResetDateUTC != nil {
+		return r.QuotaResetDateUTC
+	}
+	if r.QuotaResetDate == "" {
+		return nil
+	}
+	reset, err := time.Parse("2006-01-02", r.QuotaResetDate)
+	if err != nil {
+		return nil
+	}
+	return &reset
+}
+
+func (r copilotUserResponse) legacyMeters() []UsageMeter {
+	var meters []UsageMeter
+	if r.Copilot != nil && r.Copilot.Chat != nil && r.Copilot.Chat.PremiumModelRequests != nil {
+		premium := r.Copilot.Chat.PremiumModelRequests
 		var used, limit *string
 		if premium.TotalPremiumRequestsUsed != nil {
 			used = strPtr(formatAmount(float64(*premium.TotalPremiumRequestsUsed)))
@@ -206,25 +297,71 @@ func (s *copilotAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 			ResetsAt: premium.UsageResetDate,
 		})
 	}
-	if payload.SkillsChat != nil && payload.SkillsChat.TotalPremiumRequestsUsed != nil {
+	if r.SkillsChat != nil && r.SkillsChat.TotalPremiumRequestsUsed != nil {
 		meters = append(meters, UsageMeter{
 			Label: "Skills chat requests",
-			Used:  strPtr(formatAmount(float64(*payload.SkillsChat.TotalPremiumRequestsUsed))),
+			Used:  strPtr(formatAmount(float64(*r.SkillsChat.TotalPremiumRequestsUsed))),
 			Unit:  "requests",
 		})
 	}
-
-	return &UsageSnapshot{
-		ProviderID: copilotProviderID,
-		Meters:     meters,
-		FetchedAt:  time.Now().UTC(),
-		Source:     s.Source(),
-	}, nil
+	return meters
 }
 
-type copilotUserResponse struct {
-	Copilot    *copilotState      `json:"copilot"`
-	SkillsChat *copilotSkillsChat `json:"skills_chat"`
+type copilotQuotaSnapshot struct {
+	QuotaID          string   `json:"quota_id"`
+	Entitlement      *float64 `json:"entitlement"`
+	Remaining        *float64 `json:"remaining"`
+	PercentRemaining *float64 `json:"percent_remaining"`
+	Unlimited        bool     `json:"unlimited"`
+	HasQuota         bool     `json:"has_quota"`
+}
+
+// meter renders one quota as a request count where the plan grants a
+// countable entitlement, and as a percentage where it only reports how much
+// is left. An unlimited quota is skipped: a bar that can never move says
+// less than the absence of one, and the meter model has no "unlimited".
+func (q copilotQuotaSnapshot) meter(id string, resetsAt *time.Time) *UsageMeter {
+	if !q.HasQuota || q.Unlimited {
+		return nil
+	}
+	label := copilotQuotaLabels[id]
+	if label == "" {
+		label = copilotQuotaLabel(id)
+	}
+	if q.Entitlement != nil && *q.Entitlement > 0 {
+		remaining := 0.0
+		if q.Remaining != nil {
+			remaining = *q.Remaining
+		}
+		return &UsageMeter{
+			Label:    label,
+			Used:     strPtr(formatAmount(max(0, *q.Entitlement-remaining))),
+			Limit:    strPtr(formatAmount(*q.Entitlement)),
+			Unit:     "requests",
+			ResetsAt: resetsAt,
+		}
+	}
+	if q.PercentRemaining != nil {
+		return &UsageMeter{
+			Label:    label,
+			Used:     strPtr(formatAmount(max(0, 100-*q.PercentRemaining))),
+			Limit:    strPtr(formatAmount(100)),
+			Unit:     "%",
+			ResetsAt: resetsAt,
+		}
+	}
+	return nil
+}
+
+// copilotQuotaLabel turns an unknown quota id into something readable
+// ("agent_sessions" -> "Agent sessions") so a quota GitHub adds later is
+// still legible without a release here.
+func copilotQuotaLabel(id string) string {
+	label := strings.ReplaceAll(id, "_", " ")
+	if label == "" {
+		return id
+	}
+	return strings.ToUpper(label[:1]) + label[1:]
 }
 
 type copilotState struct {

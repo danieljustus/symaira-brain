@@ -26,10 +26,12 @@ var providerFetchTimeout = 8 * time.Second
 // a strategy within the OpenCode provider, not an 11th provider).
 //
 // Scope note: every provider's credential resolution here is portable (env
-// vars and plain file reads) — the Swift originals' macOS-Keychain
-// fallbacks are not ported, and two providers (Cursor, OpenCode) drop a
-// second, SQLite-database-backed local-history strategy that would need a
-// new dependency decision (CGO vs. a pure-Go/WASM SQLite reader) to port
+// vars and plain file reads), with one exception — Claude also reads the
+// macOS login keychain, because that is the only place Claude Code stores
+// its token on a Mac; it goes through a build-tagged helper that is a no-op
+// elsewhere. Two providers (Cursor, OpenCode) drop a second,
+// SQLite-database-backed local-history strategy that would need a new
+// dependency decision (CGO vs. a pure-Go/WASM SQLite reader) to port
 // cross-platform. Each provider's doc comment states exactly which of the
 // Swift original's strategies made the cut and why.
 //
