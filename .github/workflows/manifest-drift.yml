@@ -1,0 +1,34 @@
+# Reports when a pinned core version in internal/managed/manifest.json
+# has fallen behind its repo's latest GitHub release. Every pin is
+# maintained by hand (see Core.SHA256's doc comment in
+# internal/managed/manifest.go: a bump requires independently
+# downloading and hashing the release archive, not copying a value out
+# of checksums.txt), so nothing here bumps the manifest automatically —
+# it only reports drift for a human to act on.
+
+name: Manifest Drift Check
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check manifest drift
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: go run ./cmd/manifest-drift-check
