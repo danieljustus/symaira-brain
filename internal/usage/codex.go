@@ -3,6 +3,7 @@ package usage
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -124,46 +125,15 @@ func (s *codexOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 		return nil, err
 	}
 
+	now := time.Now().UTC()
 	var meters []UsageMeter
 	// Session (primary) and weekly (secondary) windows as separate meters.
 	if payload.RateLimit != nil {
-		for _, window := range []*codexWindow{payload.RateLimit.PrimaryWindow, payload.RateLimit.SecondaryWindow} {
-			if window == nil || window.Limit == nil || *window.Limit <= 0 {
-				continue
-			}
-			used := 0.0
-			if window.Utilized != nil {
-				used = *window.Utilized
-			}
-			meters = append(meters, UsageMeter{
-				Label:    window.Window,
-				Used:     strPtr(formatAmount(used)),
-				Limit:    strPtr(formatAmount(*window.Limit)),
-				Unit:     "%",
-				ResetsAt: window.ResetDate,
-			})
-		}
+		meters = append(meters, payload.RateLimit.meters(now, "")...)
 	}
 	// Model-specific additional rate limits (e.g. Codex Spark).
 	for _, extra := range payload.AdditionalRateLimits {
-		if extra.Limit == nil || *extra.Limit <= 0 {
-			continue
-		}
-		label := extra.Window
-		if extra.Title != nil {
-			label = *extra.Title
-		}
-		var used *string
-		if extra.Utilized != nil {
-			used = strPtr(formatAmount(*extra.Utilized))
-		}
-		meters = append(meters, UsageMeter{
-			Label:    label,
-			Used:     used,
-			Limit:    strPtr(formatAmount(*extra.Limit)),
-			Unit:     "%",
-			ResetsAt: extra.ResetDate,
-		})
+		meters = append(meters, extra.meters(now)...)
 	}
 
 	return &UsageSnapshot{
@@ -174,6 +144,12 @@ func (s *codexOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 	}, nil
 }
 
+// The wham payload has two generations of shape, and both are accepted:
+// the current one reports a window as `used_percent` against an implicit
+// 100% cap with a Unix `reset_at`, while the older one reported an explicit
+// `utilized`/`limit` pair with an RFC-3339 `reset_date`. Fields from both
+// live side by side here because the endpoint is undocumented and can move
+// back; whichever pair is populated is the one that produces the meter.
 type codexWhamUsage struct {
 	RateLimit            *codexRateLimit            `json:"rate_limit"`
 	AdditionalRateLimits []codexAdditionalRateLimit `json:"additional_rate_limits"`
@@ -184,17 +160,143 @@ type codexRateLimit struct {
 	SecondaryWindow *codexWindow `json:"secondary_window"`
 }
 
+// meters renders the primary and secondary windows, prefixing each label
+// with prefix (used by the per-model additional limits, empty otherwise).
+func (r *codexRateLimit) meters(now time.Time, prefix string) []UsageMeter {
+	if r == nil {
+		return nil
+	}
+	var meters []UsageMeter
+	for _, window := range []struct {
+		window   *codexWindow
+		fallback string
+	}{
+		{r.PrimaryWindow, "Session"},
+		{r.SecondaryWindow, "Weekly"},
+	} {
+		if meter := window.window.meter(now, prefix, window.fallback); meter != nil {
+			meters = append(meters, *meter)
+		}
+	}
+	return meters
+}
+
 type codexWindow struct {
+	// Current shape: a percentage of an implicit 100% cap, a window length
+	// in seconds, and a Unix reset timestamp.
+	UsedPercent        *float64 `json:"used_percent"`
+	LimitWindowSeconds *int64   `json:"limit_window_seconds"`
+	ResetAfterSeconds  *int64   `json:"reset_after_seconds"`
+	ResetAt            *int64   `json:"reset_at"`
+	// Legacy shape.
 	Window    string     `json:"window"`
 	Utilized  *float64   `json:"utilized"`
 	Limit     *float64   `json:"limit"`
 	ResetDate *time.Time `json:"reset_date"`
 }
 
+func (w *codexWindow) meter(now time.Time, prefix, fallbackLabel string) *UsageMeter {
+	if w == nil {
+		return nil
+	}
+	var used, limit float64
+	switch {
+	case w.Limit != nil && *w.Limit > 0:
+		limit = *w.Limit
+		if w.Utilized != nil {
+			used = *w.Utilized
+		}
+	case w.UsedPercent != nil:
+		used, limit = *w.UsedPercent, 100
+	default:
+		// Neither generation reported anything meterable for this window.
+		return nil
+	}
+
+	label := w.Window
+	if label == "" {
+		label = codexWindowLabel(w.LimitWindowSeconds, fallbackLabel)
+	}
+	if prefix != "" {
+		label = prefix + " " + label
+	}
+	return &UsageMeter{
+		Label:    label,
+		Used:     strPtr(formatAmount(used)),
+		Limit:    strPtr(formatAmount(limit)),
+		Unit:     "%",
+		ResetsAt: w.resetsAt(now),
+	}
+}
+
+// resetsAt prefers an absolute timestamp in either generation's spelling and
+// falls back to the relative countdown, so a meter keeps its "resets in …"
+// line even when only `reset_after_seconds` comes back.
+func (w *codexWindow) resetsAt(now time.Time) *time.Time {
+	if w.ResetDate != nil {
+		return w.ResetDate
+	}
+	if w.ResetAt != nil && *w.ResetAt > 0 {
+		reset := time.Unix(*w.ResetAt, 0).UTC()
+		return &reset
+	}
+	if w.ResetAfterSeconds != nil && *w.ResetAfterSeconds > 0 {
+		reset := now.Add(time.Duration(*w.ResetAfterSeconds) * time.Second)
+		return &reset
+	}
+	return nil
+}
+
+// codexWindowLabel names a window by its length, matching the short forms
+// the endpoint used to send itself ("5h", "1w").
+func codexWindowLabel(seconds *int64, fallback string) string {
+	if seconds == nil || *seconds <= 0 {
+		return fallback
+	}
+	switch value := *seconds; {
+	case value%(7*86_400) == 0:
+		return fmt.Sprintf("%dw", value/(7*86_400))
+	case value%86_400 == 0:
+		return fmt.Sprintf("%dd", value/86_400)
+	case value%3_600 == 0:
+		return fmt.Sprintf("%dh", value/3_600)
+	default:
+		return fmt.Sprintf("%dm", value/60)
+	}
+}
+
 type codexAdditionalRateLimit struct {
+	// Current shape: a named limit wrapping its own window pair.
+	LimitName string          `json:"limit_name"`
+	RateLimit *codexRateLimit `json:"rate_limit"`
+	// Legacy shape: one flat window per entry.
 	Window    string     `json:"window"`
 	Title     *string    `json:"title"`
 	Utilized  *float64   `json:"utilized"`
 	Limit     *float64   `json:"limit"`
 	ResetDate *time.Time `json:"reset_date"`
+}
+
+func (a codexAdditionalRateLimit) meters(now time.Time) []UsageMeter {
+	if a.RateLimit != nil {
+		return a.RateLimit.meters(now, a.LimitName)
+	}
+	if a.Limit == nil || *a.Limit <= 0 {
+		return nil
+	}
+	label := a.Window
+	if a.Title != nil {
+		label = *a.Title
+	}
+	var used *string
+	if a.Utilized != nil {
+		used = strPtr(formatAmount(*a.Utilized))
+	}
+	return []UsageMeter{{
+		Label:    label,
+		Used:     used,
+		Limit:    strPtr(formatAmount(*a.Limit)),
+		Unit:     "%",
+		ResetsAt: a.ResetDate,
+	}}
 }
