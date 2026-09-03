@@ -16,10 +16,10 @@ func TestLoadManifest(t *testing.T) {
 	if m.SchemaVersion != 1 {
 		t.Errorf("SchemaVersion = %d, want 1", m.SchemaVersion)
 	}
-	if len(m.Cores) != 2 {
-		t.Errorf("len(Cores) = %d, want 2", len(m.Cores))
+	if len(m.Cores) != 3 {
+		t.Errorf("len(Cores) = %d, want 3", len(m.Cores))
 	}
-	for _, name := range []string{"symvault", "symcockpit"} {
+	for _, name := range []string{"symvault", "symcockpit", "symdesk"} {
 		c, ok := m.Cores[name]
 		if !ok {
 			t.Errorf("missing core %q", name)
