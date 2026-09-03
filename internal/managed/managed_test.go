@@ -103,6 +103,36 @@ func TestAssetNameAlt_Unversioned(t *testing.T) {
 	}
 }
 
+// Windows release archives are .zip, not .tar.gz — confirmed against
+// symaira-vault's actual published assets (e.g.
+// "symaira-vault_0.15.3_windows_amd64.zip"). AssetName previously
+// appended ".tar.gz" unconditionally, so every Windows install 404'd.
+func TestAssetName_Windows(t *testing.T) {
+	core := &Core{
+		Version:     "v0.15.3",
+		BinaryName:  "symvault",
+		AssetPrefix: "symaira-vault",
+	}
+	got := core.AssetName("windows", "amd64")
+	want := "symaira-vault_0.15.3_windows_amd64.zip"
+	if got != want {
+		t.Errorf("AssetName() = %q, want %q", got, want)
+	}
+}
+
+func TestAssetNameAlt_Windows(t *testing.T) {
+	core := &Core{
+		Version:     "v1.2.3",
+		BinaryName:  "legacy-core",
+		AssetPrefix: "legacy-core",
+	}
+	got := core.AssetNameAlt("windows", "amd64")
+	want := "legacy-core_windows_amd64.zip"
+	if got != want {
+		t.Errorf("AssetNameAlt() = %q, want %q", got, want)
+	}
+}
+
 func TestSupportsPlatform(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -163,12 +193,42 @@ func TestBinaryPathInArchive_RootBinary(t *testing.T) {
 	}
 }
 
+// ChecksumAssetName must return the versioned name symaira-vault
+// actually publishes (e.g. "symaira-vault_0.15.3_checksums.txt") —
+// confirmed against the real release: there is no bare "checksums.txt"
+// asset. A prior version of this function always returned the literal
+// "checksums.txt", so the checksums fetch 404'd for every symvault
+// install.
 func TestChecksumAssetName(t *testing.T) {
-	core := &Core{AssetPrefix: "symaira-vault"}
+	core := &Core{Version: "v0.15.3", AssetPrefix: "symaira-vault"}
 	got := core.ChecksumAssetName()
-	want := "checksums.txt"
+	want := "symaira-vault_0.15.3_checksums.txt"
 	if got != want {
 		t.Errorf("ChecksumAssetName() = %q, want %q", got, want)
+	}
+}
+
+// symcockpit publishes a bare "checksums.txt" instead — the fallback
+// name Install retries when the versioned name 404s.
+func TestChecksumAssetNameAlt(t *testing.T) {
+	core := &Core{Version: "0.4.0", AssetPrefix: "symcockpit"}
+	got := core.ChecksumAssetNameAlt()
+	want := "checksums.txt"
+	if got != want {
+		t.Errorf("ChecksumAssetNameAlt() = %q, want %q", got, want)
+	}
+}
+
+func TestCoreTag(t *testing.T) {
+	tests := []struct{ version, want string }{
+		{"v0.15.3", "v0.15.3"},
+		{"0.4.0", "v0.4.0"}, // symcockpit pins the version without "v" even though its actual tag carries one.
+	}
+	for _, tt := range tests {
+		core := &Core{Version: tt.version}
+		if got := core.Tag(); got != tt.want {
+			t.Errorf("Tag() for Version %q = %q, want %q", tt.version, got, tt.want)
+		}
 	}
 }
 

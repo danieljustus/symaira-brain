@@ -170,8 +170,8 @@ func TestStatus_ReportsInstalledVersion(t *testing.T) {
 }
 
 func TestDownloadURL(t *testing.T) {
-	got := downloadURL("https://github.com", "danieljustus/symaira-vault", "symaira-vault_v0.15.3_darwin_arm64.tar.gz")
-	want := "https://github.com/danieljustus/symaira-vault/releases/latest/download/symaira-vault_v0.15.3_darwin_arm64.tar.gz"
+	got := downloadURL("https://github.com", "danieljustus/symaira-vault", "v0.15.3", "symaira-vault_0.15.3_darwin_arm64.tar.gz")
+	want := "https://github.com/danieljustus/symaira-vault/releases/download/v0.15.3/symaira-vault_0.15.3_darwin_arm64.tar.gz"
 	if got != want {
 		t.Errorf("downloadURL() = %q, want %q", got, want)
 	}

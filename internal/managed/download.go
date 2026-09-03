@@ -18,9 +18,16 @@ import (
 const defaultBaseURL = "https://github.com"
 
 // downloadURL constructs the release asset download URL against base
-// (e.g. "https://github.com" or a test server URL).
-func downloadURL(base, repo, asset string) string {
-	return fmt.Sprintf("%s/%s/releases/latest/download/%s", base, repo, asset)
+// (e.g. "https://github.com" or a test server URL), pinned to the
+// given release tag. Earlier versions of this function used GitHub's
+// "releases/latest/download/<asset>" alias, which silently drifts to
+// whatever the repo's newest release is — that only matched the
+// manifest's pinned Version by accident, and 404s on a versioned asset
+// name as soon as the repo publishes a newer release. Pinning to the
+// exact tag makes installs reproducible regardless of what the repo has
+// released since.
+func downloadURL(base, repo, tag, asset string) string {
+	return fmt.Sprintf("%s/%s/releases/download/%s/%s", base, repo, tag, asset)
 }
 
 // downloadFile downloads a URL to the given path. It returns the number
