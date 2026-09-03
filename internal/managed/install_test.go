@@ -51,6 +51,91 @@ func buildArchive(t *testing.T, binaryName string, data []byte) []byte {
 	return buf.Bytes()
 }
 
+// buildArchiveMulti builds a tar.gz containing multiple top-level files,
+// reproducing a release archive that packages more than one binary
+// together (e.g. symaira-desktop's archive ships both "symdesk" and
+// "symroom").
+func buildArchiveMulti(t *testing.T, files map[string][]byte) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	for name, data := range files {
+		if err := tw.WriteHeader(&tar.Header{Name: name, Mode: 0o755, Size: int64(len(data))}); err != nil {
+			t.Fatalf("tar header %q: %v", name, err)
+		}
+		if _, err := tw.Write(data); err != nil {
+			t.Fatalf("tar write %q: %v", name, err)
+		}
+	}
+	if err := tw.Close(); err != nil {
+		t.Fatalf("tar close: %v", err)
+	}
+	if err := gz.Close(); err != nil {
+		t.Fatalf("gzip close: %v", err)
+	}
+	return buf.Bytes()
+}
+
+// TestInstall_MultiBinaryArchivePicksNamedBinary reproduces the
+// symaira-desktop release layout, where one archive packages both
+// "symdesk" and "symroom": Install must extract exactly the binary
+// named by Core.BinaryName and ignore the other.
+func TestInstall_MultiBinaryArchivePicksNamedBinary(t *testing.T) {
+	goos, goarch, err := Platform()
+	if err != nil {
+		t.Fatalf("Platform: %v", err)
+	}
+
+	core := &Core{
+		Version:     "v0.11.1",
+		Repo:        "danieljustus/symaira-desktop",
+		BinaryName:  "symdesk",
+		AssetPrefix: "symaira-desktop",
+	}
+	symdeskData := []byte("#!/bin/sh\necho symdesk\n")
+	symroomData := []byte("#!/bin/sh\necho symroom\n")
+	archive := buildArchiveMulti(t, map[string][]byte{
+		"symdesk": symdeskData,
+		"symroom": symroomData,
+		"LICENSE": []byte("license text"),
+	})
+	checksum := sha256.Sum256(archive)
+	checksumHex := hex.EncodeToString(checksum[:])
+
+	assetName := core.AssetName(goos, goarch)
+	checksumsContent := fmt.Sprintf("%s  %s\n", checksumHex, assetName)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.11.1/"+assetName, func(w http.ResponseWriter, r *http.Request) {
+		w.Write(archive)
+	})
+	mux.HandleFunc("/"+core.Repo+"/releases/download/v0.11.1/checksums.txt", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(checksumsContent))
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	binDir := t.TempDir()
+	inst := &Installer{BinDir: binDir, baseURL: server.URL}
+
+	if err := inst.Install(context.Background(), core); err != nil {
+		t.Fatalf("Install: %v", err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(binDir, "symdesk"))
+	if err != nil {
+		t.Fatalf("read installed symdesk: %v", err)
+	}
+	if !bytes.Equal(got, symdeskData) {
+		t.Errorf("installed symdesk content = %q, want %q", got, symdeskData)
+	}
+
+	if _, err := os.Stat(filepath.Join(binDir, "symroom")); !os.IsNotExist(err) {
+		t.Errorf("symroom must not be installed alongside symdesk, stat err = %v", err)
+	}
+}
+
 func TestNewInstaller(t *testing.T) {
 	inst := NewInstaller("/tmp/example-bin")
 	if inst.BinDir != "/tmp/example-bin" {
