@@ -107,6 +107,7 @@ type doctorReport struct {
 	Profiles      []string            `json:"profiles"`
 	Harnesses     []harnessCheck      `json:"harnesses"`
 	Handshakes    []profileHandshake  `json:"handshakes,omitempty"`
+	Links         []linkCheck         `json:"links,omitempty"`
 	Degradations  []audit.Degradation `json:"degradations,omitempty"`
 }
 
@@ -250,6 +251,7 @@ func runDoctorChecks(ctx context.Context, vaultAgent string) *doctorReport {
 	}
 
 	report.Handshakes = checkHandshakes(ctx, vaultAgent)
+	report.Links = checkLinks(ctx, report.Harnesses)
 	if degradations, err := audit.LatestDegradations(""); err != nil {
 		report.Degradations = []audit.Degradation{{
 			Server: "audit",
