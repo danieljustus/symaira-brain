@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"log/slog"
+	"strings"
 	"testing"
 	"time"
 
@@ -187,6 +188,81 @@ func TestBuildCatalog_ForeignServerExplicitToolsReadWins(t *testing.T) {
 	}
 	if exposed[0].AccessSource != policy.ExposureSourceToolsRead {
 		t.Errorf("upsert access source = %q, want tools_read", exposed[0].AccessSource)
+	}
+}
+
+func TestBuildCatalog_ForeignServerReadAccessYieldingNothingDegrades(t *testing.T) {
+	// Most upstream servers don't set readOnlyHint, so every tool falls
+	// through to default_write and access=read hides all of them. That
+	// must not look like a silently broken profile — it should surface as
+	// a degradation naming the server and explaining why (issue #444).
+	p := &profile.Profile{
+		Name: "test",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{Enabled: true, Command: "/bin/true", Access: profile.ForeignAccessRead},
+		},
+	}
+	fig := newManagedFake(t, "fig", `[
+		{"name":"write_doc","description":"no hint"},
+		{"name":"delete_doc","description":"no hint either"}
+	]`)
+	servers := map[string]*broker.ManagedServer{"fig": fig}
+
+	s := New(p, servers, slog.Default(), nil, "dev")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := s.buildCatalog(ctx); err != nil {
+		t.Fatalf("buildCatalog: %v", err)
+	}
+
+	if len(s.cat.Exposed()) != 0 {
+		t.Fatalf("Exposed() = %+v, want none (both tools default_write, access=read hides both)", s.cat.Exposed())
+	}
+
+	if len(s.degradations) != 1 {
+		t.Fatalf("degradations = %+v, want exactly 1 explaining the empty exposure", s.degradations)
+	}
+	d := s.degradations[0]
+	if d.Server != "fig" {
+		t.Errorf("degradation.Server = %q, want fig", d.Server)
+	}
+	if !strings.Contains(d.Reason, "0 of 2 tools") || !strings.Contains(d.Reason, "tools_read") {
+		t.Errorf("degradation.Reason = %q, want it to name the tool count and mention tools_read", d.Reason)
+	}
+}
+
+func TestBuildCatalog_ForeignServerReadAccessWithSomeExposureDoesNotDegrade(t *testing.T) {
+	// The degradation is specifically for a fully empty exposure — a
+	// partial one (some tools read, some hidden) is exactly the filter
+	// model working as intended and must not warn.
+	p := &profile.Profile{
+		Name: "test",
+		Servers: profile.Servers{
+			"fig": profile.ServerConfig{Enabled: true, Command: "/bin/true", Access: profile.ForeignAccessRead},
+		},
+	}
+	fig := newManagedFake(t, "fig", `[
+		{"name":"search","description":"read-only","annotations":{"readOnlyHint":true}},
+		{"name":"write_doc","description":"no hint"}
+	]`)
+	servers := map[string]*broker.ManagedServer{"fig": fig}
+
+	s := New(p, servers, slog.Default(), nil, "dev")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := s.buildCatalog(ctx); err != nil {
+		t.Fatalf("buildCatalog: %v", err)
+	}
+
+	if len(s.cat.Exposed()) != 1 {
+		t.Fatalf("Exposed() = %+v, want exactly 1 (search)", s.cat.Exposed())
+	}
+	if len(s.degradations) != 0 {
+		t.Errorf("degradations = %+v, want none (partial exposure is the filter model working as intended)", s.degradations)
 	}
 }
 

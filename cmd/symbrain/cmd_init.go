@@ -97,6 +97,49 @@ enabled = true
 enabled = true
 `
 
+const foreignReadOnlyProfileTOML = `# Example profile: read-only access to a foreign (non-core) MCP server,
+# alongside restricted access to the four cores.
+[profile]
+name        = "foreign-read-only"
+description = "Read-only access to a foreign server, plus the four cores"
+
+[servers.vault]
+enabled = true
+mode    = "request_only"
+
+[servers.memory]
+enabled = true
+mode    = "read_only"
+
+[servers.skills]
+enabled = true
+
+[servers.usage]
+enabled = true
+
+# A foreign server — any alias beyond vault/memory/skills/usage — has no
+# in-repo tool universe, so symbrain filters its live tools instead of
+# gatekeeping against a preset list (see README.md "Foreign servers:
+# symbrain as a filter, not a gatekeeper").
+#
+# access = "read" exposes only tools classified as reading. Classification
+# precedence: an explicit tools_read/tools_write entry below wins; else the
+# upstream server's readOnlyHint annotation; else the tool counts as
+# writing. Most servers don't set readOnlyHint, so access = "read" alone
+# often exposes nothing — tools_read is how you classify a server from
+# this side when the upstream hint is missing (symbrain doctor flags a
+# read-access foreign server with no tools_read override). Replace "docs"
+# and its command with the real foreign server you want to expose.
+[servers.docs]
+enabled    = true
+command    = "/usr/local/bin/docs-mcp"   # or: url = "https://..."
+access     = "read"
+tools_read = ["search", "get"]           # tools you know are read-only
+
+[audit]
+enabled = true
+`
+
 func cmdInit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("init", flag.ContinueOnError)
 	fs.SetOutput(stderr)
@@ -136,6 +179,7 @@ func cmdInit(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		{xdg.ConfigPath(), defaultConfigTOML},
 		{filepath.Join(xdg.ProfilesDir(), "personal.toml"), personalProfileTOML},
 		{filepath.Join(xdg.ProfilesDir(), "restricted.toml"), restrictedProfileTOML},
+		{filepath.Join(xdg.ProfilesDir(), "foreign-read-only.toml"), foreignReadOnlyProfileTOML},
 	}
 
 	for _, f := range files {

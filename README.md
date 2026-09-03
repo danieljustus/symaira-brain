@@ -109,7 +109,8 @@ After installing `symbrain`:
 
 ```bash
 # 1. Create the XDG config/data/cache directories, a default config,
-#    and two example profiles ("personal" and "restricted").
+#    and three example profiles ("personal", "restricted", and
+#    "foreign-read-only").
 symbrain init
 
 # 2. Register symbrain as an MCP server in Claude Code's config, bound
@@ -158,7 +159,7 @@ side.
 A profile is a TOML file under `~/.config/symbrain/profiles/<name>.toml`
 that controls, per state core, whether it's exposed at all and — for vault
 and memory — which named **mode** shapes the tool list. `symbrain init`
-writes two starting points:
+writes three starting points:
 
 **`personal`** — full access for a trusted, single-user setup:
 
@@ -189,6 +190,17 @@ mode    = "read_only"
 
 [servers.skills]
 enabled = true
+```
+
+**`foreign-read-only`** — restricted core access plus one foreign (non-core)
+server exposed read-only, showing the `tools_read` fallback described below:
+
+```toml
+[servers.docs]
+enabled    = true
+command    = "/usr/local/bin/docs-mcp"   # or: url = "https://..."
+access     = "read"
+tools_read = ["search", "get"]           # tools you know are read-only
 ```
 
 The mode is what makes the difference concrete. Run `symbrain profile show
@@ -273,6 +285,19 @@ recorded per call in the audit log, so an exposure decision can be explained
 after the fact. The core aliases are untouched: their mode presets and
 default-deny behavior are byte-identical to before.
 
+**`access = "read"` depends on the upstream server telling you which tools
+are read-only.** Most MCP servers don't set the `readOnlyHint` annotation,
+so without it every tool falls through to the last rule in the precedence
+above ("else it counts as writing") — and `access = "read"` then hides
+all of them. This isn't a bug in the profile; it's a missing signal from
+the server you're filtering. `tools_read` is how you supply that
+classification yourself when the upstream hint is absent: list the tools
+you know are safe to expose, and `access = "read"` will expose exactly
+those. `symbrain init` writes a `foreign-read-only.toml` example profile
+showing this pattern, and `symbrain doctor` flags a profile that declares
+`access = "read"` with no `tools_read` override, since that combination
+typically exposes nothing.
+
 ## Command reference
 
 Implemented today:
@@ -280,7 +305,7 @@ Implemented today:
 | Command | Purpose |
 |---|---|
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
-| `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit), profiles, harness registrations, and recent gateway degradations (state-core crashes/restarts; `degradations` in `--json` output) |
+| `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit, symdesk), profiles, harness registrations, cross-core link health (vault reachability/lock state, secret reference resolution, profile-to-harness registration), foreign-server `access = "read"` risk (missing `tools_read`), and recent gateway degradations (state-core crashes/restarts, empty foreign-server exposure; `degradations` in `--json` output) |
 | `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |

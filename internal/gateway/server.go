@@ -345,6 +345,23 @@ func (s *Server) buildCatalog(ctx context.Context) error {
 			return fmt.Errorf("gateway: evaluate policy for %s: %w", alias, err)
 		}
 
+		// A foreign server under access=read that ends up exposing nothing
+		// looks identical to a broken profile: most upstream servers don't
+		// set readOnlyHint, so every tool falls through to default_write
+		// and access=read hides all of them (see internal/policy/foreign.go
+		// and symaira-corekit/mcpserver.go's doc comment on the annotation
+		// gap). Say why instead of presenting a silent empty tool list.
+		if !profile.IsCoreAlias(alias) && serverCfg.Access == profile.ForeignAccessRead &&
+			len(tools) > 0 && len(report.Exposed) == 0 {
+			s.degradations = append(s.degradations, audit.Degradation{
+				Server: alias,
+				Reason: fmt.Sprintf(
+					"access=read exposes 0 of %d tools: none is classified as reading (no readOnlyHint from the upstream server and no tools_read override) — add tools_read entries for the tools that should be exposed",
+					len(tools)),
+				Level: "warning",
+			})
+		}
+
 		servers = append(servers, catalog.ServerTools{
 			Server: alias,
 			Tools:  brokerTools,

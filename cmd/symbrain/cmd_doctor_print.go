@@ -67,6 +67,13 @@ func printDoctorHuman(w io.Writer, r *doctorReport) {
 			printLink(w, l)
 		}
 	}
+	if len(r.ForeignAccessRisks) > 0 {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "  foreign server access risks:")
+		for _, risk := range r.ForeignAccessRisks {
+			fmt.Fprintf(w, "    !  %s: %-14s %s\n", risk.Profile, risk.Server, risk.Detail)
+		}
+	}
 	if len(r.Degradations) > 0 {
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "  startup degradations:")
