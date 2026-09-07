@@ -4,7 +4,7 @@ options:
   deploymentTarget:
     macOS: "14.0"
     iOS: "17.0"
-  xcodeVersion: "16.0"
+  xcodeVersion: "26.0"
   generateEmptyDirectories: false
 
 # NOTE: This uses a local path dependency for development. Merged/release
@@ -41,6 +41,8 @@ targets:
     platform: macOS
     sources:
       - Sources/SymBrainApp
+    resources:
+      - assets/app-icon/AppIcon.icon
     dependencies:
       - target: SymBrainCore
       - package: symaira-appkit
@@ -95,6 +97,8 @@ targets:
     platform: iOS
     sources:
       - Sources/SymBrainMobile
+    resources:
+      - assets/app-icon/AppIcon.icon
     dependencies:
       - package: symaira-appkit
         product: SymairaTheme

@@ -137,13 +137,23 @@ jobs:
   # macOS runner cost, while the check itself always reports so it can be
   # required by the main protection ruleset.
   gui:
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+
+      - name: Verify Xcode 26 toolchain
+        run: |
+          set -euo pipefail
+          XCODE_VERSION="$(xcodebuild -version | sed -n '1p')"
+          echo "$XCODE_VERSION"
+          case "$XCODE_VERSION" in
+            Xcode\ 26.*|Xcode\ 27.*) ;;
+            *) echo "::error::Expected Xcode 26 or newer, got: $XCODE_VERSION"; exit 1 ;;
+          esac
 
       - name: Detect Swift-related changes
         id: swift
@@ -157,7 +167,7 @@ jobs:
             exit 0
           fi
           if git diff --name-only "$BASE_SHA...$HEAD_SHA" | \
-             grep -Eq '^(Sources/|Tests/|project\.yml|SymBrain\.xcodeproj/)'; then
+             grep -Eq '^(Sources/|Tests/|project\.yml|SymBrain\.xcodeproj/|assets/app-icon/|scripts/check-app-icons\.sh$)'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -183,14 +193,52 @@ jobs:
         if: steps.swift.outputs.changed == 'true'
         run: bash scripts/check-app-icons.sh
 
+      - name: Build SymBrain app
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          xcodebuild -project SymBrain.xcodeproj \
+            -scheme SymBrain \
+            -destination 'platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/SymBrain-macos-derived-data" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify compiled macOS AppIcon
+        if: steps.swift.outputs.changed == 'true'
+        run: bash scripts/check-app-icons.sh --bundle "$RUNNER_TEMP/SymBrain-macos-derived-data/Build/Products/Debug/Symaira Brain.app" --platform macOS
+
       - name: Build and test SymBrainCore
         if: steps.swift.outputs.changed == 'true'
         run: |
           xcodebuild -project SymBrain.xcodeproj \
             -scheme SymBrainCore \
             -destination 'platform=macOS' \
+            -derivedDataPath "$RUNNER_TEMP/SymBrain-macos-derived-data" \
             CODE_SIGNING_ALLOWED=NO \
             build test
+
+      - name: Resolve pinned iOS simulator
+        if: steps.swift.outputs.changed == 'true'
+        id: sim
+        run: |
+          set -euo pipefail
+          UDID=$(xcrun simctl list devices available --json | python3 -c "import json,re,sys; data=json.load(sys.stdin); cands=sorted(((int(m.group(1)), d['udid']) for lst in data['devices'].values() for d in lst for m in [re.fullmatch(r'iPhone (\\d+)', d['name'])] if m), reverse=True); print(cands[0][1]) if cands else sys.exit(1)")
+          test -n "$UDID" || { echo "::error::No available plain iPhone simulator found"; xcrun simctl list devices available; exit 1; }
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build SymBrainMobile
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          xcodebuild -project SymBrain.xcodeproj \
+            -scheme SymBrainMobile \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath "$RUNNER_TEMP/SymBrain-ios-derived-data" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify compiled iOS AppIcon
+        if: steps.swift.outputs.changed == 'true'
+        run: bash scripts/check-app-icons.sh --bundle "$RUNNER_TEMP/SymBrain-ios-derived-data/Build/Products/Debug-iphonesimulator/Symaira Brain.app" --platform iOS
 
   # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
   # broken release config is caught long before a real release tag is
