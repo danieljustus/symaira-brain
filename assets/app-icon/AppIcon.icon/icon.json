@@ -1,15 +1,11 @@
 {
-  "features": [
-    "refractivity",
-    "specular-location"
-  ],
   "fill": "automatic",
   "groups": [
     {
-      "name": "Brain \u2014 Vordergrund",
+      "name": "Brain — Vordergrund",
       "layers": [
         {
-          "name": "Brain \u2014 Vordergrund",
+          "name": "Brain — Vordergrund",
           "image-name": "signet.png",
           "glass": false,
           "fill-specializations": [
@@ -35,12 +31,6 @@
       ],
       "lighting": "individual",
       "specular": false,
-      "specular-highlight-placement": "inside",
-      "refractivity": {
-        "enabled": false,
-        "strength": 0,
-        "depth": 0
-      },
       "shadow": {
         "kind": "neutral",
         "opacity": 0.16
@@ -51,7 +41,7 @@
       }
     },
     {
-      "name": "Original Symaira S \u2014 hinter Signet freigestellt",
+      "name": "Original Symaira S — hinter Signet freigestellt",
       "layers": [
         {
           "name": "Original Symaira S",
@@ -64,12 +54,6 @@
       ],
       "lighting": "individual",
       "specular": true,
-      "specular-highlight-placement": "inside",
-      "refractivity": {
-        "enabled": true,
-        "strength": 0.15,
-        "depth": 0.24
-      },
       "shadow": {
         "kind": "neutral",
         "opacity": 0.25
