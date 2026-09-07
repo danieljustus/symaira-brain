@@ -44,8 +44,9 @@ targets:
     platform: macOS
     sources:
       - Sources/SymBrainApp
-    resources:
-      - assets/app-icon/AppIcon.icon
+      - path: assets/app-icon/AppIcon.icon
+        type: file
+        buildPhase: resources
     dependencies:
       - target: SymBrainCore
       - package: symaira-appkit
@@ -100,8 +101,9 @@ targets:
     platform: iOS
     sources:
       - Sources/SymBrainMobile
-    resources:
-      - assets/app-icon/AppIcon.icon
+      - path: assets/app-icon/AppIcon.icon
+        type: file
+        buildPhase: resources
     dependencies:
       - package: symaira-appkit
         product: SymairaTheme
