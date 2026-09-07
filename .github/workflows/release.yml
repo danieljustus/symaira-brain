@@ -234,6 +234,11 @@ jobs:
           fi
           echo "APP_BUNDLE=$APP_BUNDLE" >> "$GITHUB_ENV"
 
+      - name: Verify compiled AppIcon in release bundle
+        run: |
+          set -euo pipefail
+          bash scripts/check-app-icons.sh --bundle "$APP_BUNDLE" --platform macOS
+
       - name: Notarize app bundle and create DMG
         id: dmg
         env:
@@ -278,7 +283,7 @@ jobs:
           cp -R "$APP" "$DMG_STAGING/"
 
           # Copy volume icon so the mounted DMG shows the Symaira Brain icon
-          cp assets/dmg/.VolumeIcon.icns "$DMG_STAGING/.VolumeIcon.icns"
+          cp assets/app-icon/exports/AppIcon.icns "$DMG_STAGING/.VolumeIcon.icns"
           SetFile -a C "$DMG_STAGING" 2>/dev/null || true
 
           # Branded installer window: background, icon positions, Applications
