@@ -5,6 +5,9 @@ options:
     macOS: "14.0"
     iOS: "17.0"
   xcodeVersion: "26.0"
+  fileTypes:
+    "icon":
+      file: true
   generateEmptyDirectories: false
 
 # NOTE: This uses a local path dependency for development. Merged/release
