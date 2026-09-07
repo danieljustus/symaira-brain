@@ -179,6 +179,10 @@ jobs:
         if: steps.swift.outputs.changed == 'true'
         run: xcodegen generate
 
+      - name: Verify native AppIcon sources
+        if: steps.swift.outputs.changed == 'true'
+        run: bash scripts/check-app-icons.sh
+
       - name: Build and test SymBrainCore
         if: steps.swift.outputs.changed == 'true'
         run: |
