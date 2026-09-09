@@ -61,7 +61,11 @@ Usage:
 Keys live under ~/.config/symbrain/config.toml, e.g. default_profile,
 audit.enabled, audit.verbose, gateway.identity_injection,
 updatecheck.enabled, patterns.enabled, patterns.promotion_threshold,
-servers.vault.binary_path.
+servers.vault.binary_path, modules.browse.
+
+modules.* selects optional capability modules (default: all disabled).
+Enabling one only changes what 'symbrain setup'/'symbrain doctor --fix'
+install; it does not change any profile's tool exposure on its own.
 
 Note: get/set operate on the global file as stored. The config loader also
 merges a project-local .symbrain.toml and SYMBRAIN_* environment overrides

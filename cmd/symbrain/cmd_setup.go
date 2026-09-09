@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/managed"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -54,13 +55,18 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsi
 		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
 	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 
-	for name, core := range manifest.Cores {
+	for name, core := range manifest.ActiveCores(cfg.Modules.EnabledCores()) {
 		result := coreResult{Name: name, Version: core.Version}
 
 		if err := inst.Install(ctx, &core); err != nil {
@@ -101,6 +107,11 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
@@ -108,7 +119,7 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 	report := setupReport{BinDir: binDir}
 	var fixed, skipped int
 
-	for name, core := range manifest.Cores {
+	for name, core := range manifest.ActiveCores(cfg.Modules.EnabledCores()) {
 		result := coreResult{Name: name, Version: core.Version}
 
 		existing, _ := managed.InstalledVersion(ctx, binDir, core.BinaryName)

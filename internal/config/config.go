@@ -26,6 +26,33 @@ type Config struct {
 	UpdateCheck UpdateCheckConfig
 	Servers     ServersConfig
 	Patterns    PatternsConfig
+	Modules     ModulesConfig
+}
+
+// ModulesConfig selects which optional capability modules are enabled.
+// Every module defaults to disabled: choosing one is an explicit, visible
+// action (contract PB-2026-09-09 §7 — "no tool/permission exposure from
+// installation alone"), never a side effect of installing or updating
+// symbrain. Enabling a module here only affects whether `symbrain setup`/
+// `symbrain doctor --fix` install its managed binary; it does not by
+// itself add anything to a profile's tool exposure.
+type ModulesConfig struct {
+	// Browse enables symbrowse as a managed, optional web module.
+	Browse bool
+}
+
+// EnabledCores maps this config to the managed-core names (as used in
+// internal/managed's manifest) that are currently enabled, for use with
+// managed.Manifest.ActiveCores. The mapping from a friendly config key
+// (e.g. "modules.browse") to a manifest core name (e.g. "symbrowse") is
+// deliberately kept here rather than in internal/managed, which has no
+// reason to know about config's field names.
+func (m ModulesConfig) EnabledCores() map[string]bool {
+	enabled := make(map[string]bool)
+	if m.Browse {
+		enabled["symbrowse"] = true
+	}
+	return enabled
 }
 
 // AuditConfig controls the JSONL audit log written by the gateway.
@@ -91,6 +118,7 @@ type fileConfig struct {
 	UpdateCheck    fileUpdateCheckConfig `json:"updatecheck"`
 	Servers        ServersConfig         `json:"servers"`
 	Patterns       filePatternsConfig    `json:"patterns"`
+	Modules        fileModulesConfig     `json:"modules"`
 }
 
 type fileAuditConfig struct {
@@ -109,6 +137,15 @@ type fileUpdateCheckConfig struct {
 type filePatternsConfig struct {
 	Enabled            *bool `json:"enabled"`
 	PromotionThreshold int   `json:"promotion_threshold"`
+}
+
+// fileModulesConfig mirrors ModulesConfig. Every field defaults to false,
+// so — unlike the true-by-default configs above — a plain bool loses no
+// information here: absent and explicit-false are indistinguishable, but
+// both correctly resolve to "disabled" (see ServersConfig/Verbose for the
+// same reasoning already established in this file).
+type fileModulesConfig struct {
+	Browse bool `json:"browse"`
 }
 
 func fileDefaults() *fileConfig {
@@ -154,6 +191,9 @@ func resolve(fc *fileConfig) *Config {
 		Patterns: PatternsConfig{
 			Enabled:            derefBool(fc.Patterns.Enabled, true),
 			PromotionThreshold: threshold,
+		},
+		Modules: ModulesConfig{
+			Browse: fc.Modules.Browse,
 		},
 	}
 }
