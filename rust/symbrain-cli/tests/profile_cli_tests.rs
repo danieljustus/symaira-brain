@@ -234,8 +234,14 @@ fn remove_deletes_symlink_and_special_file_without_following() {
 
 #[test]
 fn remove_oracle_fixture_records_source_provenance() {
+    let fixture_name = if cfg!(target_os = "macos") {
+        "profile_remove_oracle_darwin.json"
+    } else {
+        "profile_remove_oracle_linux.json"
+    };
     let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/profile_remove_oracle.json");
+        .join("tests/fixtures")
+        .join(fixture_name);
     let fixture: serde_json::Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
     assert_eq!(fixture["schema_version"], 1);
     assert!(fixture["go_revision"].as_str().unwrap().len() >= 7);

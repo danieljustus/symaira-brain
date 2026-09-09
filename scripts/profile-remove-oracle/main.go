@@ -56,7 +56,7 @@ type caseDef struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
-	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/profile_remove_oracle.json", "fixture path")
+	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_"+runtime.GOOS+".json", "fixture path")
 	flag.Parse()
 	root := repoRoot()
 	generated := generate(root)
