@@ -92,7 +92,7 @@ func TestIntegration_VersionJSON(t *testing.T) {
 }
 
 func TestClient_Initialize_ProtocolMismatch(t *testing.T) {
-	c := spawnFake(t, map[string]string{"FAKEMCP_PROTOCOL_VERSION": "2025-06-18"})
+	c := spawnFake(t, map[string]string{"FAKEMCP_PROTOCOL_VERSION": "1999-01-01"})
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -101,7 +101,7 @@ func TestClient_Initialize_ProtocolMismatch(t *testing.T) {
 	if !errors.As(err, &mismatch) {
 		t.Fatalf("Initialize() error = %v, want ProtocolMismatchError", err)
 	}
-	if mismatch.Expected != protocolVersion || mismatch.Actual != "2025-06-18" {
+	if mismatch.Expected != protocolVersion || mismatch.Actual != "1999-01-01" {
 		t.Fatalf("mismatch = %+v", mismatch)
 	}
 }
@@ -110,12 +110,12 @@ func TestManagedServer_ProtocolMismatchDegrades(t *testing.T) {
 	ms := NewManagedServer(ServerConfig{
 		Name:            "memory",
 		BinaryPath:      fakeBinPath,
-		Env:             append(os.Environ(), "FAKEMCP_PROTOCOL_VERSION=2025-06-18"),
+		Env:             append(os.Environ(), "FAKEMCP_PROTOCOL_VERSION=1999-01-01"),
 		InitTimeout:     5 * time.Second,
 		ShutdownTimeout: time.Second,
 	})
 	_, err := ms.ListTools(context.Background())
-	if err == nil || !strings.Contains(err.Error(), "2024-11-05") || !strings.Contains(err.Error(), "2025-06-18") {
+	if err == nil || !strings.Contains(err.Error(), "2024-11-05") || !strings.Contains(err.Error(), "1999-01-01") {
 		t.Fatalf("ListTools() error = %v, want both protocol versions", err)
 	}
 	if got := ms.State(); got != StateDegraded {
@@ -123,6 +123,40 @@ func TestManagedServer_ProtocolMismatchDegrades(t *testing.T) {
 	}
 	if lastErr := ms.LastError(); lastErr == nil || !strings.Contains(lastErr.Error(), "protocol version mismatch") {
 		t.Fatalf("LastError = %v, want protocol mismatch", lastErr)
+	}
+}
+
+// TestClient_Initialize_AcceptsNewerCompatibleProtocolVersions guards the
+// actual fix from symaira-brain#536: a child reporting a newer published
+// MCP spec revision (not symbrain's own requested "2024-11-05") is not a
+// mismatch — it's normal MCP negotiation, and symbrain's broker only calls
+// the version-stable subset of the protocol (initialize/tools/list/
+// tools/call). Found via a real Swift/appkit-based child (symaira-cockpit's
+// SymScopeMCP) reporting "2025-06-18"; this test pins the fix with fakemcp
+// so it doesn't regress silently.
+func TestClient_Initialize_AcceptsNewerCompatibleProtocolVersions(t *testing.T) {
+	for _, version := range []string{"2025-03-26", "2025-06-18"} {
+		t.Run(version, func(t *testing.T) {
+			c := spawnFake(t, map[string]string{"FAKEMCP_PROTOCOL_VERSION": version})
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			result, err := c.Initialize(ctx)
+			if err != nil {
+				t.Fatalf("Initialize() with child protocolVersion %q: %v", version, err)
+			}
+			if result.ProtocolVersion != version {
+				t.Errorf("ProtocolVersion = %q, want %q", result.ProtocolVersion, version)
+			}
+
+			tools, err := c.ListTools(ctx)
+			if err != nil {
+				t.Fatalf("ListTools() after initialize with protocolVersion %q: %v", version, err)
+			}
+			if len(tools) == 0 {
+				t.Error("ListTools() returned no tools; want fakemcp's fixture tools")
+			}
+		})
 	}
 }
 
