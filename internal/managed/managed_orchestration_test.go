@@ -37,8 +37,30 @@ func withFakeInstaller(t *testing.T, fake *fakeInstaller) {
 }
 
 // supportedCoreNames returns the manifest core names whose platform list
-// includes the current GOOS — the set Setup/Fix/Status actually act on.
+// includes the current GOOS and are not opt-in optional cores — the set
+// Setup/Fix act on when called with no optional cores enabled (nil), which
+// is what every test below does.
 func supportedCoreNames(t *testing.T) map[string]bool {
+	t.Helper()
+	m, err := LoadManifest()
+	if err != nil {
+		t.Fatalf("LoadManifest: %v", err)
+	}
+	out := make(map[string]bool, len(m.Cores))
+	for name, core := range m.ActiveCores(nil) {
+		if core.SupportsPlatform(runtime.GOOS) {
+			out[name] = true
+		}
+	}
+	return out
+}
+
+// allPlatformSupportedCoreNames returns every manifest core name whose
+// platform list includes the current GOOS, optional or not — the set
+// Status reports on (unlike Setup/Fix, Status is a read-only diagnostic
+// view and deliberately does not hide disabled-but-installable optional
+// cores; it reports their installed state, or lack of one).
+func allPlatformSupportedCoreNames(t *testing.T) map[string]bool {
 	t.Helper()
 	m, err := LoadManifest()
 	if err != nil {
@@ -57,11 +79,11 @@ func TestSetup_AllSucceed(t *testing.T) {
 	fake := &fakeInstaller{}
 	withFakeInstaller(t, fake)
 
-	if err := Setup(context.Background(), t.TempDir(), nil); err != nil {
+	if err := Setup(context.Background(), t.TempDir(), nil, nil); err != nil {
 		t.Fatalf("Setup: %v", err)
 	}
 	if want := len(supportedCoreNames(t)); len(fake.calls) != want {
-		t.Errorf("Install called %d times, want %d (one per platform-supported manifest core)", len(fake.calls), want)
+		t.Errorf("Install called %d times, want %d (one per platform-supported, non-optional manifest core)", len(fake.calls), want)
 	}
 }
 
@@ -69,13 +91,31 @@ func TestSetup_PartialFailureReturnsError(t *testing.T) {
 	fake := &fakeInstaller{failFor: map[string]bool{"symvault": true}}
 	withFakeInstaller(t, fake)
 
-	err := Setup(context.Background(), t.TempDir(), nil)
+	err := Setup(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Setup with one failing core: got nil error, want error")
 	}
 	wantFrac := fmt.Sprintf("1/%d", len(supportedCoreNames(t)))
 	if !strings.Contains(err.Error(), wantFrac) {
 		t.Errorf("Setup error = %q, want it to mention %s failed", err.Error(), wantFrac)
+	}
+}
+
+func TestSetup_EnablesOptionalCore(t *testing.T) {
+	fake := &fakeInstaller{}
+	withFakeInstaller(t, fake)
+
+	if err := Setup(context.Background(), t.TempDir(), nil, map[string]bool{"symbrowse": true}); err != nil {
+		t.Fatalf("Setup: %v", err)
+	}
+	found := false
+	for _, name := range fake.calls {
+		if name == "symbrowse" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("Setup with symbrowse enabled did not install it; calls = %v", fake.calls)
 	}
 }
 
@@ -107,7 +147,7 @@ func TestFix_SkipsAlreadyCorrect(t *testing.T) {
 	fake := &fakeInstaller{}
 	withFakeInstaller(t, fake)
 
-	if err := Fix(context.Background(), binDir, nil); err != nil {
+	if err := Fix(context.Background(), binDir, nil, nil); err != nil {
 		t.Fatalf("Fix: %v", err)
 	}
 
@@ -129,7 +169,7 @@ func TestFix_PartialFailureReturnsError(t *testing.T) {
 	fake := &fakeInstaller{failFor: map[string]bool{"symvault": true}}
 	withFakeInstaller(t, fake)
 
-	err := Fix(context.Background(), t.TempDir(), nil)
+	err := Fix(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Fix with one failing core: got nil error, want error")
 	}
@@ -141,7 +181,7 @@ func TestFix_PartialFailureReturnsError(t *testing.T) {
 func TestStatus_ReportsInstalledVersion(t *testing.T) {
 	binDir := t.TempDir()
 	// Install a fake binary per platform-supported core.
-	supported := supportedCoreNames(t)
+	supported := allPlatformSupportedCoreNames(t)
 	for name, core := range mustManifest(t).Cores {
 		if supported[name] {
 			fakeVersionBinary(t, binDir, core.BinaryName, core.Version)

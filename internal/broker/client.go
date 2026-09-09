@@ -346,7 +346,7 @@ func (c *Client) Initialize(ctx context.Context) (*InitializeResult, error) {
 	if err := json.Unmarshal(raw, &result); err != nil {
 		return nil, fmt.Errorf("broker: parse initialize result: %w", err)
 	}
-	if result.ProtocolVersion != protocolVersion {
+	if !acceptableProtocolVersions[result.ProtocolVersion] {
 		return nil, &ProtocolMismatchError{Expected: protocolVersion, Actual: result.ProtocolVersion}
 	}
 

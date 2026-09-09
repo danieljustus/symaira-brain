@@ -2,6 +2,20 @@
   "manifest": {
     "schema_version": 1,
     "cores": {
+      "symbrowse": {
+        "version": "v0.8.0",
+        "repo": "danieljustus/symaira-browse",
+        "binary_name": "symbrowse",
+        "asset_prefix": "symbrowse",
+        "has_cosign": true,
+        "sha256": {
+          "symbrowse_0.8.0_darwin_amd64.tar.gz": "2606f1779ce671b93e64e6d70e2a821aad26f1ec8f48e80f22959466a8efd7da",
+          "symbrowse_0.8.0_darwin_arm64.tar.gz": "ce682ff06e2f9e74c02a5662498f04580065554ab67822a65a786e15b487c36b",
+          "symbrowse_0.8.0_linux_amd64.tar.gz": "580037291caab834738d28db8b803adf3d92b9bebfee937ce9c9055e888e5aa1",
+          "symbrowse_0.8.0_linux_arm64.tar.gz": "725e7d0ee18cc67a715f540ea5cbe25d17d7e0a9351158b8a8ec084d10165c62"
+        },
+        "optional": true
+      },
       "symcockpit": {
         "version": "0.5.3",
         "repo": "danieljustus/symaira-cockpit",
@@ -144,25 +158,25 @@
     {
       "id": "tar-valid",
       "format": "tar.gz",
-      "archive_hex": "1f8b08000000000000ffca4b2d2e494dd12faecc2dc9cfcf61a0093030303030373505d3060606e8b4818121121b246e68646868c4a060401be7a082d2e292c42206038aed42f7dc1001698939394989c9d903ed8e51303080a6191f0a08e67f0353b4fc6f60666c329affe901522b12934b06da11a360148c8251300ae80e00010000ffff1333ab25000c0000",
+      "archive_hex": "1f8b08000000000000ffca4b2d2e494dd12faecc2dc9cfcf61a009303030303037356530800074dac0c010890d1237343234346250308019404b505a5c9258c46040b15d70c7436998f82007698939394989c9d930fe28185980a6199fd8fc6f608a96ff0dcc8c4d46f33f3df27f6a456272098c330a46c1281805a360c400c0001333ab25000c0000",
       "expected_hex": "6578616374"
     },
     {
       "id": "tar-traversal",
       "format": "tar.gz",
-      "archive_hex": "1f8b08000000000000ffd2d3d32faecc2dc9cfcf61a0193030303030373505d3060606e8b48181813112db80c1c0d0d0c0c49441c180764e4280d2e292c42206038aed42f7dc100149892903ed8451300a46c1281805030000010000ffff6dd0cd4b00080000",
+      "archive_hex": "1f8b08000000000000ffd2d3d32faecc2dc9cfcf61a019303030303037356530800074dac0c0c018896dc0606068686062caa06000338096a0b4b824b188c18062bbe08e87d230f1410e92125360cc51300a46c128180523080006006dd0cd4b00080000",
       "error_contains": "unsafe"
     },
     {
       "id": "tar-symlink",
       "format": "tar.gz",
-      "archive_hex": "1f8b08000000000000ff2aaecc2dc9cfcf61a0253030303030373505d3060606e83426dbd0c8d0d49c41c148bf24b7403f293185968e2b2d2e492c623030a0d41c74cf8d8251300a46c1200780000000ffff3152a45c00060000",
+      "archive_hex": "1f8b08000000000000ff2aaecc2dc9cfcf61a0253030303030373565308000741a936d6864686acea060a45f925ba09f949802338816a0b4b824b188c1c000c62717c01d0fa561e2a360148c825130480160003152a45c00060000",
       "error_contains": "unsafe"
     },
     {
       "id": "tar-ambiguous",
       "format": "tar.gz",
-      "archive_hex": "1f8b08000000000000ffecd3310e85201004d03dcabfc11f02c4f358d0299bc81ae2ed4dac08adc1d5645f3374cc16c339fdcbb10af342a300c014e39500fa04e09b3708ce05e7e987618d1a7b917923dcfeab3fee233827ed0a4691547ee5fe83edff115259bb8231c6180567000000ffffedd4e23e000c0000",
+      "archive_hex": "1f8b08000000000000ffcacf4bd52faecc2dc9cfcf61a015303030303037356530800074dac0c0c018896dc0606068686268cca06000338096a0b4b824b188c18062bbe08e87d230f1410ef2f35261cc513002414979fea0ccff26a3f99f2ef9bfa43c1fc61c05a360148c82513082006000edd4e23e000c0000",
       "error_contains": "ambiguous"
     },
     {

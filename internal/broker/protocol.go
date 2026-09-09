@@ -2,11 +2,33 @@ package broker
 
 import "encoding/json"
 
-// protocolVersion is the MCP protocol version symbrain's broker negotiates
+// protocolVersion is the MCP protocol version symbrain's broker requests
 // during initialize. It matches corekit/mcpserver's ProtocolVersion so a
 // symbrain-gateway-fronted child and a corekit-based child agree by
 // construction.
 const protocolVersion = "2024-11-05"
+
+// acceptableProtocolVersions is every MCP spec revision the broker accepts
+// in a child's initialize response, even when it differs from what symbrain
+// requested. Per the MCP spec, a server that doesn't support the requested
+// version replies with a version it does support — rejecting that reply
+// outright is non-compliant, not "safer". These three are the published MCP
+// spec revisions as of this check (2026-09-09); the JSON-RPC methods
+// symbrain's broker actually uses (initialize, tools/list, tools/call) have
+// stable request/response shapes across all of them — the differences
+// between revisions are additive (elicitation, structured tool output,
+// OAuth resource metadata), not breaking changes to those three calls. A
+// child reporting anything outside this set is still rejected as
+// *ProtocolMismatchError, degrading that server rather than guessing.
+//
+// Found via a real (non-Go) MCP child: symaira-cockpit's SymairaMCP-based
+// servers (Swift/appkit) report "2025-06-18" while corekit/mcpserver-based
+// Go children still report "2024-11-05" — see symaira-brain#536.
+var acceptableProtocolVersions = map[string]bool{
+	"2024-11-05": true,
+	"2025-03-26": true,
+	"2025-06-18": true,
+}
 
 // clientName/clientVersion identify symbrain to child servers during the
 // initialize handshake's clientInfo field.

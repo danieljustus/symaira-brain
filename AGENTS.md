@@ -8,6 +8,8 @@ This file documents coding conventions, project standards, and Symaira-specific 
 
 ## Product Boundary
 
+**Accepted target: [PB-2026-09-09](docs/adr/0002-product-boundaries.md).** Brain owns portable agent context/control and the optional Browse and Operate modules. Browse remains actively developed; Operate is retained, not automatically replaced by Cua or Hermes. Brain GUI/CLI become the integrated credential-management surface, backed by the independently usable `symvault` service. Browser and OS-automation workers remain optional and permission-isolated; no master keys enter the gateway. Module moves and replacement UI are not yet completed. This target supersedes conflicting state-core-only and no-GUI scope restrictions below; existing commands and safety contracts remain until tested cutovers.
+
 **Symbrain is the portable agent-context layer.** It exposes the three Symaira
 *state cores* — credentials, memory/entities, and the skill SSOT — behind one
 MCP gateway, with one profile per harness connection controlling what that
@@ -17,7 +19,7 @@ Two of the three now live in this repository: memory (`internal/memory`) and
 skills (`internal/skills`) were absorbed by the repo consolidation on
 2026-08-21 (steps 4 and 7), together with guard (`guard/`). Only `symvault`
 remains a separate process, deliberately — the secret store assumes its caller
-is untrusted, and that process boundary is the security mechanism.
+is untrusted. The separate credential process is defense-in-depth alongside service-side authorization, scoped grants and protected IPC; it is not a complete same-user sandbox.
 
 Symbrain is explicitly **not**:
 
@@ -36,8 +38,7 @@ Symbrain is explicitly **not**:
   in-process (absorbed 2026-08-21); credentials stay behind the separate
   `symvault` process on purpose. symbrain brokers the external vault and
   owns the embedded memory + skills stores.
-- **A GUI** on its own (though native SwiftUI apps now exist in `Sources/` as
-  the macOS and iOS clients for the CLI).
+- **A second general credential service.** Brain owns human administration, including the planned credential UI, but delegates credential storage, cryptography and authorization to the separate service. Human administration must not automatically expand agent MCP exposure.
 
 ### Brain ↔ Guard Boundary (verbatim — do not weaken)
 

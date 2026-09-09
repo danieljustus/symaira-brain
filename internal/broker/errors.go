@@ -16,7 +16,9 @@ func (e *RPCError) Error() string {
 }
 
 // ProtocolMismatchError means the child answered initialize with a protocol
-// version different from the one the broker sent.
+// version the broker doesn't recognize as MCP-spec-compatible (see
+// acceptableProtocolVersions) — not merely a version different from the one
+// the broker sent, which alone is normal MCP negotiation.
 type ProtocolMismatchError struct {
 	Expected string
 	Actual   string

@@ -16,10 +16,10 @@ func TestLoadManifest(t *testing.T) {
 	if m.SchemaVersion != 1 {
 		t.Errorf("SchemaVersion = %d, want 1", m.SchemaVersion)
 	}
-	if len(m.Cores) != 3 {
-		t.Errorf("len(Cores) = %d, want 3", len(m.Cores))
+	if len(m.Cores) != 4 {
+		t.Errorf("len(Cores) = %d, want 4", len(m.Cores))
 	}
-	for _, name := range []string{"symvault", "symcockpit", "symdesk"} {
+	for _, name := range []string{"symvault", "symcockpit", "symdesk", "symbrowse"} {
 		c, ok := m.Cores[name]
 		if !ok {
 			t.Errorf("missing core %q", name)
@@ -44,6 +44,43 @@ func TestLoadManifest(t *testing.T) {
 	}
 	if cockpit.HasCosign {
 		t.Error("symcockpit HasCosign = true, want false (no .sig/.pem assets)")
+	}
+	for _, name := range []string{"symvault", "symcockpit", "symdesk"} {
+		if m.Cores[name].Optional {
+			t.Errorf("core %q: Optional = true, want false (existing mandatory cores must stay mandatory)", name)
+		}
+	}
+	browse := m.Cores["symbrowse"]
+	if !browse.Optional {
+		t.Error("symbrowse Optional = false, want true (contract PB-2026-09-09 §2: Browse is an optional Brain module)")
+	}
+	if !browse.HasCosign {
+		t.Error("symbrowse HasCosign = false, want true (release publishes .sig/.pem)")
+	}
+}
+
+func TestManifest_ActiveCores(t *testing.T) {
+	m, err := LoadManifest()
+	if err != nil {
+		t.Fatalf("LoadManifest: %v", err)
+	}
+
+	none := m.ActiveCores(nil)
+	if _, ok := none["symbrowse"]; ok {
+		t.Error("ActiveCores(nil) includes symbrowse, want excluded by default")
+	}
+	for _, name := range []string{"symvault", "symcockpit", "symdesk"} {
+		if _, ok := none[name]; !ok {
+			t.Errorf("ActiveCores(nil) is missing mandatory core %q", name)
+		}
+	}
+
+	enabled := m.ActiveCores(map[string]bool{"symbrowse": true})
+	if _, ok := enabled["symbrowse"]; !ok {
+		t.Error("ActiveCores with symbrowse enabled excludes it, want included")
+	}
+	if len(enabled) != len(none)+1 {
+		t.Errorf("ActiveCores with symbrowse enabled has %d cores, want %d (mandatory + symbrowse)", len(enabled), len(none)+1)
 	}
 }
 

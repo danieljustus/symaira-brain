@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"sort"
 
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/managed"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -56,14 +57,19 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsi
 		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
 	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 
-	for _, name := range sortedCoreNames(manifest) {
-		core := manifest.Cores[name]
+	for _, name := range sortedCoreNames(manifest.ActiveCores(cfg.Modules.EnabledCores())) {
+		core := manifest.ActiveCores(cfg.Modules.EnabledCores())[name]
 		result := coreResult{Name: name, Version: core.Version}
 		if !core.SupportsPlatform(runtime.GOOS) {
 			result.Status = "skipped"
@@ -112,6 +118,11 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
@@ -119,8 +130,8 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 	report := setupReport{BinDir: binDir}
 	var fixed, skipped int
 
-	for _, name := range sortedCoreNames(manifest) {
-		core := manifest.Cores[name]
+	for _, name := range sortedCoreNames(manifest.ActiveCores(cfg.Modules.EnabledCores())) {
+		core := manifest.ActiveCores(cfg.Modules.EnabledCores())[name]
 		result := coreResult{Name: name, Version: core.Version}
 		if !core.SupportsPlatform(runtime.GOOS) {
 			result.Status = "skipped"
@@ -173,9 +184,9 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 	return exitcodes.ExitOK
 }
 
-func sortedCoreNames(manifest *managed.Manifest) []string {
-	names := make([]string, 0, len(manifest.Cores))
-	for name := range manifest.Cores {
+func sortedCoreNames(cores map[string]managed.Core) []string {
+	names := make([]string, 0, len(cores))
+	for name := range cores {
 		names = append(names, name)
 	}
 	sort.Strings(names)

@@ -40,6 +40,20 @@
         "symaira-desktop_0.11.1_windows_amd64.zip": "ddeccd1b8abea9ac68d853344dc53fa39ed8707fd413426b06e6f860eac433ee",
         "symaira-desktop_0.11.1_windows_arm64.zip": "07c78a9f1de264496172c7b5d311f7a39baefeda020f014b825efc178a866caa"
       }
+    },
+    "symbrowse": {
+      "version": "v0.8.0",
+      "repo": "danieljustus/symaira-browse",
+      "binary_name": "symbrowse",
+      "asset_prefix": "symbrowse",
+      "has_cosign": true,
+      "optional": true,
+      "sha256": {
+        "symbrowse_0.8.0_darwin_amd64.tar.gz": "2606f1779ce671b93e64e6d70e2a821aad26f1ec8f48e80f22959466a8efd7da",
+        "symbrowse_0.8.0_darwin_arm64.tar.gz": "ce682ff06e2f9e74c02a5662498f04580065554ab67822a65a786e15b487c36b",
+        "symbrowse_0.8.0_linux_amd64.tar.gz": "580037291caab834738d28db8b803adf3d92b9bebfee937ce9c9055e888e5aa1",
+        "symbrowse_0.8.0_linux_arm64.tar.gz": "725e7d0ee18cc67a715f540ea5cbe25d17d7e0a9351158b8a8ec084d10165c62"
+      }
     }
   }
 }
