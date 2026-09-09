@@ -1,22 +1,17 @@
-//! Independent subprocess coverage for the native MCP CLI cutover.
+//! Independent subprocess evidence for the native MCP CLI migration.
 
 use std::io::Write;
 use std::process::{Command, Output, Stdio};
-use std::thread;
-use std::time::{Duration, Instant};
 
 use tempfile::TempDir;
 
+#[cfg(unix)]
+#[path = "support/mcp_lifecycle.rs"]
+mod mcp_lifecycle;
+
 const FAKE_MCP: &str = r#"#!/usr/bin/python3
 import json
-import os
 import sys
-import time
-
-pid_file = os.environ.get("FAKE_MCP_PID_FILE")
-if pid_file:
-    with open(pid_file, "w", encoding="ascii") as f:
-        f.write(str(os.getpid()))
 
 def send(request_id, result=None, error=None):
     response = {"jsonrpc": "2.0", "id": request_id}
@@ -76,11 +71,16 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .args(args)
+        .env_clear()
         .env("HOME", root.path().join("home"))
         .env("XDG_CONFIG_HOME", root.path().join("config"))
+        .env("XDG_DATA_HOME", root.path().join("home/.local/share"))
+        .env("XDG_CACHE_HOME", root.path().join("cache"))
+        .env("XDG_STATE_HOME", root.path().join("state"))
+        .env("XDG_RUNTIME_DIR", root.path().join("runtime"))
         .env("PATH", root.path().join("empty-path"))
-        .env_remove("SYMBRAIN_GO_BINARY")
-        .env_remove("SYMBRAIN_SERVERS_VAULT_BINARY_PATH")
+        .env("TMPDIR", root.path())
+        .current_dir(root.path())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -281,73 +281,7 @@ fn enabled_unported_skills_server_fails_closed_without_placeholder_tools() {
 #[cfg(unix)]
 #[test]
 fn sigterm_cancels_gateway_and_terminates_child_process_group() {
-    let root = TempDir::new().unwrap();
-    let fake = write_fake(&root);
-    let profile = write_profile(&root, &fake);
-    let pid_file = root.path().join("child.pid");
-    let mut child = command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()])
-        .env("FAKE_MCP_PID_FILE", &pid_file)
-        .spawn()
-        .unwrap();
-
-    let deadline = Instant::now() + Duration::from_secs(5);
-    while !pid_file.exists() && Instant::now() < deadline {
-        thread::sleep(Duration::from_millis(10));
-    }
-    assert!(pid_file.exists(), "child was not spawned");
-    let child_deadline = Instant::now() + Duration::from_secs(5);
-    let child_pid: i32 = loop {
-        if let Some(pid) = std::fs::read_to_string(&pid_file)
-            .ok()
-            .and_then(|contents| contents.trim().parse().ok())
-        {
-            break pid;
-        }
-        assert!(Instant::now() < child_deadline, "child pid was not written");
-        thread::sleep(Duration::from_millis(10));
-    };
-    Command::new("/bin/kill")
-        .args(["-TERM", &child.id().to_string()])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .unwrap();
-
-    let deadline = Instant::now() + Duration::from_secs(5);
-    let status = loop {
-        if let Some(status) = child.try_wait().unwrap() {
-            break status;
-        }
-        assert!(
-            Instant::now() < deadline,
-            "native mcp did not stop after SIGTERM"
-        );
-        thread::sleep(Duration::from_millis(10));
-    };
-    assert!(status.success(), "status={status:?}");
-
-    let child_deadline = Instant::now() + Duration::from_secs(2);
-    while Instant::now() < child_deadline {
-        let alive = Command::new("/bin/kill")
-            .args(["-0", &child_pid.to_string()])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|status| status.success());
-        if !alive {
-            break;
-        }
-        thread::sleep(Duration::from_millis(10));
-    }
-    let child_alive = Command::new("/bin/kill")
-        .args(["-0", &child_pid.to_string()])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .is_ok_and(|status| status.success());
-    assert!(!child_alive, "child process survived shutdown");
-    let output = child.wait_with_output().unwrap();
-    assert!(output.stdout.is_empty());
+    mcp_lifecycle::assert_sigterm_shutdown();
 }
 
 #[test]
