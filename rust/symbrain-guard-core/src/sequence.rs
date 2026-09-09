@@ -48,7 +48,7 @@ impl Config {
             } else {
                 self.threshold
             },
-            window_size: if self.window_size == 0 {
+            window_size: if self.window_size <= 0 {
                 DEFAULT_WINDOW_SIZE
             } else {
                 self.window_size
@@ -557,6 +557,19 @@ mod tests {
             ]
         );
         assert_eq!(detector.window_len(), 2);
+    }
+
+    #[test]
+    fn non_positive_window_size_uses_default() {
+        let mut detector = Detector::new(Config {
+            enabled: true,
+            window_size: -1,
+            ..Config::default()
+        });
+        let event = attempt("read_file", serde_json::json!("a"));
+        detector.evaluate(&event);
+        detector.evaluate(&event);
+        assert_eq!(detector.evaluate(&event).decision, Decision::Deny);
     }
 
     #[test]
