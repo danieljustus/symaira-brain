@@ -59,7 +59,7 @@ type caseDef struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
-	output := flag.String("output", "rust/symbrain-harness/tests/fixtures/install_oracle.json", "output path")
+	output := flag.String("output", "rust/symbrain-harness/tests/fixtures/install_oracle_"+runtime.GOOS+".json", "output path")
 	flag.Parse()
 	root := repoRoot()
 	generated := generate(root)
