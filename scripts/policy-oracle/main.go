@@ -20,14 +20,20 @@ func runProfileCase(tc ProfileTestCase) ProfileExpectation {
 	}
 	defer os.RemoveAll(home)
 
+	// Keep the oracle hermetic: configkit honors XDG_CONFIG_HOME when it is
+	// set (as on some Linux runners), so HOME alone is not enough to isolate
+	// profile.Load from the runner's configuration.
+	origHome := os.Getenv("HOME")
+	origXDGConfigHome := os.Getenv("XDG_CONFIG_HOME")
+	os.Setenv("HOME", home)
+	os.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	defer os.Setenv("HOME", origHome)
+	defer os.Setenv("XDG_CONFIG_HOME", origXDGConfigHome)
+
 	pdir := filepath.Join(home, ".config", "symbrain", "profiles")
 	if err := os.MkdirAll(pdir, 0755); err != nil {
 		return ProfileExpectation{ID: tc.ID, Success: false, ErrorSubstr: err.Error()}
 	}
-
-	origHome := os.Getenv("HOME")
-	os.Setenv("HOME", home)
-	defer os.Setenv("HOME", origHome)
 
 	filePath := filepath.Join(pdir, tc.Name+".toml")
 	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
