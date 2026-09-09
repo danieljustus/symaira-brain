@@ -27,10 +27,11 @@ import (
 var timestampPattern = regexp.MustCompile(`\.bak\.[0-9]{8}T[0-9]{6}Z(\.[0-9]+)?`)
 
 type fileState struct {
-	Path  string `json:"path"`
-	Type  string `json:"type"`
-	Mode  uint32 `json:"mode"`
-	Bytes []byte `json:"bytes,omitempty"`
+	Path   string `json:"path"`
+	Type   string `json:"type"`
+	Mode   uint32 `json:"mode"`
+	Target string `json:"target,omitempty"`
+	Bytes  []byte `json:"bytes,omitempty"`
 }
 
 type result struct {
@@ -312,6 +313,10 @@ func files(root string) []fileState {
 		state := fileState{Path: normalize(root, filepath.ToSlash(relative)), Mode: uint32(info.Mode().Perm())}
 		if entry.IsDir() {
 			state.Type = "dir"
+		} else if entry.Type()&os.ModeSymlink != 0 {
+			state.Type = "symlink"
+			target, _ := os.Readlink(path)
+			state.Target = normalize(root, target)
 		} else if info.Mode().IsRegular() {
 			state.Type = "file"
 			state.Bytes, _ = os.ReadFile(path)
