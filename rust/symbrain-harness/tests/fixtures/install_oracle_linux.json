@@ -125,7 +125,7 @@
         "personal"
       ],
       "exit": 0,
-      "stdout": "installed symbrain into \u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json (harness: claude-desktop, profile: personal)\n",
+      "stdout": "installed symbrain into \u003croot\u003e/config/Claude/claude_desktop_config.json (harness: claude-desktop, profile: personal)\n",
       "stderr": "",
       "files": [
         {
@@ -139,6 +139,17 @@
           "mode": 448
         },
         {
+          "path": "config/Claude",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/Claude/claude_desktop_config.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
           "path": "data",
           "type": "dir",
           "mode": 448
@@ -147,27 +158,6 @@
           "path": "home",
           "type": "dir",
           "mode": 448
-        },
-        {
-          "path": "home/Library",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support/Claude",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support/Claude/claude_desktop_config.json",
-          "type": "file",
-          "mode": 384,
-          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
         },
         {
           "path": "project",
