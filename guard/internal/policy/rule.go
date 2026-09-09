@@ -40,7 +40,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/danieljustus/symaira-brain/guard/internal/grant"
 	"github.com/danieljustus/symaira-brain/guard/internal/model"
 )
 
@@ -263,34 +262,6 @@ func bucketOf(d model.Decision) Bucket {
 	}
 }
 
-// GrantLookup reports the active grants held by a subject. It is the policy
-// engine's read seam into the grant store (internal/grant).
-type GrantLookup interface {
-	ActiveForSubject(subject string) []*grant.Grant
-}
-
-// EvaluateWithGrants evaluates a tool call and consults the grant store:
-// when the static result would ask the human and the subject holds at least
-// one active grant, the decision is upgraded to allow. A standing grant only
-// ever upgrades Ask — it never overrides an explicit decision such as deny,
-// redact, or sandbox.
-func (c *Catalog) EvaluateWithGrants(subject string, call model.ToolCall, defaults model.Decision, lookup GrantLookup) Result {
-	res := c.Evaluate(call, defaults)
-	if res.Decision != model.DecisionAsk {
-		return res
-	}
-	if subject == "" || lookup == nil || len(lookup.ActiveForSubject(subject)) == 0 {
-		return res
-	}
-	return Result{
-		Rule:       res.Rule,
-		Decision:   model.DecisionAllow,
-		Reason:     "covered by standing grant",
-		Matched:    res.Matched,
-		Precedence: res.Precedence,
-	}
-}
-
 // matches checks whether a tool call satisfies the match criteria.
 // It returns an error when the criteria cannot be evaluated against the
 // call (for example CommandContains against non-string args). Callers
@@ -304,6 +275,9 @@ func matches(m MatchCriteria, call model.ToolCall) (bool, error) {
 		return false, nil
 	}
 	if m.Capability != "" && m.Capability != call.Capability {
+		return false, nil
+	}
+	if m.Remote != "" && m.Remote != call.Remote {
 		return false, nil
 	}
 	if len(m.CommandContains) > 0 {
