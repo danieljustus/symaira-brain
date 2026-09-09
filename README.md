@@ -1,5 +1,7 @@
 # Symaira Brain
 
+> **Accepted product direction — implementation pending:** Brain is the primary agent-context/control product. The accepted target adds optional Browse and Operate modules and integrates credential management in Brain GUI/CLI while keeping the separate, independently usable symvault service. Browse remains actively developed and Operate is retained. These module/UI cutovers are not yet shipped; the current commands below remain authoritative for existing installations. See [PB-2026-09-09](docs/adr/0002-product-boundaries.md).
+
 [![CI](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/danieljustus/symaira-brain?label=Release)](https://github.com/danieljustus/symaira-brain/releases/latest)
 [![Coverage](https://raw.githubusercontent.com/danieljustus/symaira-brain/coverage-data/badge.svg)](https://github.com/danieljustus/symaira-brain/tree/coverage-data)
@@ -36,7 +38,7 @@ each through its own profile, each seeing only what that profile exposes.
   cores through its own profile.
 - **One binary, in-process.** Memory and skills are compiled in, so there is
   no multi-process dance for the common case; vault stays separate on purpose
-  because that process boundary *is* the security mechanism.
+  as defense-in-depth alongside credential-service authorization, scoped grants and protected IPC.
 - **Composable with the guard layer.** Capability shaping (what an agent can
   see) and conduct policing (what a call is allowed to do) are deliberately
   separate. The guard command set is absorbed as `symbrain guard`
