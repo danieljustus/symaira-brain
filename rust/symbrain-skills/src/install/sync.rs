@@ -3,6 +3,7 @@
 #![allow(clippy::collapsible_if)]
 use std::path::{Path, PathBuf};
 
+#[cfg(not(target_os = "linux"))]
 use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
 use serde::Serialize;
