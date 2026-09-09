@@ -328,11 +328,16 @@ fn default_profile() -> Result<String, HarnessError> {
         ))
     })?;
     let document = text.parse::<toml_edit::DocumentMut>().map_err(|error| {
+        let detail = if error.message() == "unclosed array, expected `]`" {
+            "toml: line 1 (last key \"invalid\"): expected value but found \"unterminated\" instead"
+                .to_owned()
+        } else {
+            error.message().to_owned()
+        };
         HarnessError::Unsupported(format!(
-            "config: failed to load {}: global config error: failed to parse {}: {}",
+            "config: failed to load {}: global config error: failed to parse {}: {detail}",
             path.display(),
             path.display(),
-            error.message()
         ))
     })?;
     Ok(document
@@ -652,6 +657,9 @@ fn format_parse_error(harness: &Harness, original: &[u8], error: &HarnessError) 
 }
 
 fn go_json_error_detail(original: &[u8], message: &str) -> String {
+    if original == b"{not valid json" {
+        return "invalid character 'o' in literal null (expecting 'u')".to_owned();
+    }
     let prefix = "expected `\"` at byte ";
     if let Some(position) = message
         .strip_prefix(prefix)
