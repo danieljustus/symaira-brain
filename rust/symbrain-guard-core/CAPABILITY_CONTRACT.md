@@ -39,7 +39,16 @@ then apply `in_scope` and the identity's policy ceiling. Like Go's ceiling,
 The four new crate dependencies are pinned: `base64` supplies the wire codec;
 RustCrypto `hkdf`, `hmac`, and `sha2` supply domain-separated key derivation,
 SHA-256, and constant-time MAC verification. The lockfile adds only their
-dependency graph. No cryptographic primitive is implemented locally.
+cryptographic dependency graph. The key-storage slice additionally pins
+`getrandom` for operating-system CSPRNG bytes. No cryptographic primitive is
+implemented locally.
+
+The key-storage adapter mirrors the Go persistence boundary: it resolves
+`$XDG_DATA_HOME/symguard/capability.key` (or the home/temp fallback), loads
+existing material unchanged, rejects present material shorter than 32 bytes,
+and creates first-run material with owner-only `0600` permissions on Unix.
+Random generation and persistence are still an adapter boundary; no CLI or
+production path selects the Rust implementation.
 
 ## Reproduce
 
@@ -75,14 +84,15 @@ passed. An initial Clippy test-iterator lint was corrected before acceptance.
 
 ## Remaining contracts and gates
 
-- Random JTI issuance, issuer-computed TTL, entropy errors, key generation,
-  XDG paths, key-file persistence and permission behavior remain in Go. They
-  require a separate I/O adapter; this crate adds no stubs for them.
+- Key loading, first-run generation and file persistence now have a Rust adapter
+  with focused macOS tests; native Linux/Windows permission behavior and
+  production caller integration remain pending. The Go implementation remains
+  the issuance and rollback oracle.
 - Purpose matching against a concrete operation, replay tracking, revocation,
-  and CLI/gateway wiring are outside these pure Go primitives.
+  and CLI/gateway wiring are outside these pure primitives.
 - The fixture harness calls Go and Rust separately in-process and has no
   interchangeable binary candidate interface; binary self-identity rejection
   is not supported. Source pinning and fixture drift rejection are exercised.
 - Exhaustive parser fuzzing/property tests, native Linux/Windows runs, release
   gates, and performance/value benchmarks remain pending. This checkpoint is
-  bounded fixture parity, not full migration or cutover approval.
+  bounded fixture and key-storage parity, not full migration or cutover approval.

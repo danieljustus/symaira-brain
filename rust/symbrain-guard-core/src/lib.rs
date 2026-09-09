@@ -8,6 +8,7 @@
 
 pub mod capability;
 mod capability_wire;
+pub mod key_storage;
 pub mod marginal;
 pub mod model;
 pub mod model_validation;
