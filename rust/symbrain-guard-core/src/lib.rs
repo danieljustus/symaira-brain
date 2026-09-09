@@ -11,6 +11,7 @@ pub mod model;
 pub mod model_validation;
 pub mod policy;
 pub mod scope;
+pub mod sequence;
 
 pub use marginal::{
     RiskLevel, classify_risk, classify_risk_with_reason, marginal_capability_check,
@@ -25,4 +26,9 @@ pub use model::{
 pub use model_validation::{validate_action_event, validate_action_event_json};
 pub use policy::{
     Bucket, Catalog, MatchCriteria, Options, PolicyError, Precedence, Result, Rule, RuleId, Version,
+};
+pub use sequence::{
+    Config as SequenceConfig, Detector as SequenceDetector, Evaluation as SequenceEvaluation,
+    Ledger as SequenceLedger, LedgerEntry as SequenceLedgerEntry,
+    REASON_PREFIX as SEQUENCE_REASON_PREFIX,
 };
