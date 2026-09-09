@@ -3,10 +3,11 @@
 #![allow(clippy::collapsible_if)]
 use std::path::{Path, PathBuf};
 
-#[cfg(not(target_os = "linux"))]
 use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
 use serde::Serialize;
+#[cfg(unix)]
+use std::os::fd::AsFd;
 
 use super::replace::FaultPoint;
 use crate::model::{MAX_RESOURCE_ENTRIES, SkillError};
@@ -56,15 +57,27 @@ pub(crate) fn sync_dir(
     fault: Option<FaultPoint>,
 ) -> Result<(), SkillError> {
     fail(fault, FaultPoint::Sync)?;
-    // Linux opens capability directories with O_PATH, whose descriptors
-    // cannot be passed to fsync. File contents and the atomic rename are still
-    // synced; avoid turning every otherwise-valid install into EBADF on Linux.
-    #[cfg(target_os = "linux")]
+    #[cfg(unix)]
     {
-        let _ = (root, path);
-        Ok(())
+        // cap-std directories are O_PATH capabilities on Linux. Reopen the
+        // same directory through the retained capability so fsync receives a
+        // usable directory fd without weakening no-follow traversal.
+        let directory = root
+            .open_dir_nofollow(path)
+            .map_err(|error| SkillError(format!("open directory for sync: {error}")))?;
+        let fd = rustix::fs::openat(
+            directory.as_fd(),
+            ".",
+            rustix::fs::OFlags::RDONLY
+                | rustix::fs::OFlags::DIRECTORY
+                | rustix::fs::OFlags::CLOEXEC,
+            rustix::fs::Mode::empty(),
+        )
+        .map_err(|error| SkillError(format!("open directory for sync: {error}")))?;
+        rustix::fs::fsync(&fd)
+            .map_err(|error| SkillError(format!("sync staged directory: {error}")))
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix))]
     {
         root.open_dir_nofollow(path)
             .map_err(|error| SkillError(format!("open directory for sync: {error}")))?
@@ -264,5 +277,26 @@ fn failed(status: &super::InstallStatus, error: String) -> SyncResult {
         mode: status.mode.clone(),
         allow_executable: status.allow_executable,
         error,
+    }
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+    use cap_std::ambient_authority;
+    use tempfile::tempdir;
+
+    #[test]
+    fn sync_dir_fsyncs_capability_directory_and_propagates_open_errors() {
+        let temp = tempdir().expect("temporary directory");
+        let root = Dir::open_ambient_dir(temp.path(), ambient_authority()).expect("open root");
+        root.create_dir("nested").expect("create nested directory");
+
+        sync_dir(&root, Path::new("nested"), None).expect("directory fsync");
+
+        std::fs::write(temp.path().join("not-a-directory"), b"x").expect("write fixture");
+        let error = sync_dir(&root, Path::new("not-a-directory"), None)
+            .expect_err("non-directory must not be treated as synced");
+        assert!(error.0.contains("open directory for sync"));
     }
 }

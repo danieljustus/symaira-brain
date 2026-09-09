@@ -43,6 +43,8 @@ fn collect_files(
 }
 
 use fs2::FileExt;
+#[cfg(unix)]
+use std::os::fd::AsFd;
 
 fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result<std::fs::File> {
     let name = destination
@@ -266,15 +268,24 @@ fn sync_tree(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resu
 
 fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Result<()> {
     fault(fault_operation, "sync-dir")?;
-    // Linux opens capability directories with O_PATH, whose descriptors
-    // cannot be passed to fsync. File contents and the atomic rename are still
-    // synced; avoid turning every otherwise-valid install into EBADF on Linux.
-    #[cfg(target_os = "linux")]
+    #[cfg(unix)]
     {
-        let _ = (root, path);
-        Ok(())
+        // cap-std directories are O_PATH capabilities on Linux. Reopen the
+        // same directory through the retained capability so fsync receives a
+        // usable directory fd without weakening no-follow traversal.
+        let directory = root.open_dir_nofollow(path)?;
+        let fd = rustix::fs::openat(
+            directory.as_fd(),
+            ".",
+            rustix::fs::OFlags::RDONLY
+                | rustix::fs::OFlags::DIRECTORY
+                | rustix::fs::OFlags::CLOEXEC,
+            rustix::fs::Mode::empty(),
+        )
+        .map_err(io::Error::from)?;
+        rustix::fs::fsync(&fd).map_err(io::Error::from)
     }
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(not(unix))]
     {
         root.open_dir_nofollow(path)?.into_std_file().sync_all()
     }
@@ -298,4 +309,25 @@ fn file_mode(metadata: &cap_std::fs::Metadata) -> u32 {
 
 fn io_error(error: &io::Error) -> SkillError {
     SkillError(format!("materialize: {error}"))
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::*;
+    use cap_std::ambient_authority;
+    use tempfile::tempdir;
+
+    #[test]
+    fn sync_dir_fsyncs_materialization_directory_and_propagates_errors() {
+        let temp = tempdir().expect("temporary directory");
+        let root = Dir::open_ambient_dir(temp.path(), ambient_authority()).expect("open root");
+        root.create_dir("nested").expect("create nested directory");
+
+        sync_dir(&root, Path::new("nested"), None).expect("directory fsync");
+
+        std::fs::write(temp.path().join("not-a-directory"), b"x").expect("write fixture");
+        let error = sync_dir(&root, Path::new("not-a-directory"), None)
+            .expect_err("non-directory must not be treated as synced");
+        assert_eq!(error.kind(), io::ErrorKind::NotADirectory);
+    }
 }

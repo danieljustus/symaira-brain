@@ -217,12 +217,7 @@ pub fn write_snapshot_for_scope(
             0o644,
             fault,
         )?;
-        #[cfg(not(target_os = "linux"))]
-        root.open_dir_nofollow(&stage_name)
-            .map_err(|error| SkillError(format!("open base stage: {error}")))?
-            .into_std_file()
-            .sync_all()
-            .map_err(|error| SkillError(format!("sync base stage: {error}")))?;
+        super::sync::sync_dir(&root, Path::new(&stage_name), None)?;
         publish_base(
             &root,
             &stage_name,
