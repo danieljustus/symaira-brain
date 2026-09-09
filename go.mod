@@ -2,7 +2,7 @@ module github.com/danieljustus/symaira-brain
 
 go 1.26.7
 
-require github.com/danieljustus/symaira-corekit v0.16.2
+require github.com/danieljustus/symaira-corekit v0.17.0
 
 require (
 	github.com/BurntSushi/toml v1.6.0
@@ -10,13 +10,13 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	golang.org/x/crypto v0.55.0
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/crypto v0.56.0
+	golang.org/x/oauth2 v0.37.0
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.41.0
-	golang.org/x/time v0.15.0
+	golang.org/x/time v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.57.0
+	modernc.org/sqlite v1.58.0
 	pgregory.net/rapid v1.3.0
 )
 
@@ -40,7 +40,7 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	modernc.org/libc v1.74.4 // indirect
+	modernc.org/libc v1.75.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.11.0 // indirect
+	modernc.org/memory v1.12.1 // indirect
 )
