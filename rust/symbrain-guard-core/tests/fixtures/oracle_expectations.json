@@ -1,0 +1,919 @@
+{
+  "cases": [
+    {
+      "id": "source_proxy",
+      "kind": "validate_source",
+      "input": "proxy",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "source_hook",
+      "kind": "validate_source",
+      "input": "hook",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "source_artifact",
+      "kind": "validate_source",
+      "input": "artifact",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "source_scan",
+      "kind": "validate_source",
+      "input": "scan",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "source_decide",
+      "kind": "validate_source",
+      "input": "decide",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "source_unknown",
+      "kind": "validate_source",
+      "input": "future",
+      "success": false,
+      "error": "model: unknown source type \"future\""
+    },
+    {
+      "id": "decision_allow",
+      "kind": "validate_decision",
+      "input": "allow",
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "decision_unknown",
+      "kind": "validate_decision",
+      "input": "future",
+      "success": false,
+      "error": "model: unknown decision \"future\""
+    },
+    {
+      "id": "no_decision_default",
+      "kind": "no_decision",
+      "input": {
+        "failure_mode": "",
+        "diagnostic": "fixed diagnostic"
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\"}"
+    },
+    {
+      "id": "no_decision_deny",
+      "kind": "no_decision",
+      "input": {
+        "failure_mode": "deny",
+        "diagnostic": "fixed diagnostic"
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\"}"
+    },
+    {
+      "id": "no_decision_allow",
+      "kind": "no_decision",
+      "input": {
+        "failure_mode": "allow",
+        "diagnostic": "fixed diagnostic"
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"allow\"}"
+    },
+    {
+      "id": "no_decision_unknown",
+      "kind": "no_decision",
+      "input": {
+        "failure_mode": "bogus",
+        "diagnostic": "fixed diagnostic"
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\"}"
+    },
+    {
+      "id": "event_id_injected",
+      "kind": "event_id",
+      "input": {
+        "counter": 42,
+        "source": "proxy"
+      },
+      "success": true,
+      "output_json": "\"evt_1_proxy_42\""
+    },
+    {
+      "id": "expiry_zero",
+      "kind": "expired",
+      "input": {
+        "deadline": "",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "expiry_future",
+      "kind": "expired",
+      "input": {
+        "deadline": "2026-08-06T13:00:00Z",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "expiry_exact",
+      "kind": "expired",
+      "input": {
+        "deadline": "2026-08-06T12:00:00Z",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "expiry_past",
+      "kind": "expired",
+      "input": {
+        "deadline": "2026-08-06T11:00:00Z",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "request_valid",
+      "kind": "validate_request",
+      "input": {
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "deadline": "0001-01-01T00:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "request_missing_server",
+      "kind": "validate_request",
+      "input": {
+        "call": {
+          "server": "",
+          "tool": "read_file"
+        },
+        "deadline": "0001-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid decision request: model: call server is required"
+    },
+    {
+      "id": "request_unknown_failure",
+      "kind": "validate_request",
+      "input": {
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "failure_mode": "bogus",
+        "deadline": "0001-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid decision request: model: unknown failure mode \"bogus\""
+    },
+    {
+      "id": "event_valid",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "event_missing_id",
+      "kind": "validate_event",
+      "input": {
+        "id": "",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: event ID is required"
+    },
+    {
+      "id": "event_bad_schema",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 2,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: unsupported schema version 2"
+    },
+    {
+      "id": "event_unknown_source",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "future",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: unknown source type \"future\""
+    },
+    {
+      "id": "event_unknown_state",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "future",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: unknown action state \"future\""
+    },
+    {
+      "id": "event_missing_timestamp",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": ""
+      },
+      "success": false,
+      "error": "model: event timestamp is required"
+    },
+    {
+      "id": "event_missing_agent",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": ""
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: event agent ID is required"
+    },
+    {
+      "id": "event_missing_server",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid event call: model: call server is required"
+    },
+    {
+      "id": "event_missing_tool",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": ""
+        },
+        "state": "requested",
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid event call: model: call tool is required"
+    },
+    {
+      "id": "event_bad_control_decision",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "control_response": {
+          "decision": "future"
+        },
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid control response: model: unknown decision \"future\""
+    },
+    {
+      "id": "event_bad_retry_after",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "control_response": {
+          "decision": "allow",
+          "retry_after": -1
+        },
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid control response: retry_after must not be negative"
+    },
+    {
+      "id": "event_bad_evaluation",
+      "kind": "validate_event",
+      "input": {
+        "id": "evt_1_proxy_1",
+        "schema_version": 1,
+        "source": "proxy",
+        "agent": {
+          "agent_id": "agent-1"
+        },
+        "client": {},
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "state": "requested",
+        "evaluation": {
+          "decision": "future"
+        },
+        "timestamp": "2026-08-06T12:00:00Z"
+      },
+      "success": false,
+      "error": "model: invalid evaluation: model: unknown decision \"future\""
+    },
+    {
+      "id": "policy_deny_bucket_wins",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "allow-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "allow",
+            "match": {
+              "server": "filesystem",
+              "tool": "read_file"
+            },
+            "reason": "allow first"
+          },
+          {
+            "id": "deny-1",
+            "version": "1.0.0",
+            "precedence": 20,
+            "decision": "deny",
+            "match": {
+              "server": "filesystem",
+              "tool": "read_file"
+            },
+            "reason": "deny wins"
+          }
+        ],
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "default": "allow",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"deny-1\",\"version\":\"1.0.0\",\"precedence\":20,\"decision\":\"deny\",\"match\":{\"server\":\"filesystem\",\"tool\":\"read_file\"},\"reason\":\"deny wins\"},\"decision\":\"deny\",\"reason\":\"deny wins\",\"matched\":true,\"precedence\":20,\"bucket\":\"deny\"}"
+    },
+    {
+      "id": "policy_require_failure",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "req-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "require",
+            "match": {
+              "tool": "read_file"
+            },
+            "reason": "must read"
+          },
+          {
+            "id": "allow-1",
+            "version": "1.0.0",
+            "precedence": 20,
+            "decision": "allow",
+            "match": {
+              "server": "filesystem"
+            },
+            "reason": "filesystem"
+          }
+        ],
+        "call": {
+          "server": "filesystem",
+          "tool": "write_file"
+        },
+        "default": "allow",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"req-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"require\",\"match\":{\"tool\":\"read_file\"},\"reason\":\"must read\"},\"decision\":\"deny\",\"reason\":\"require rule \\\"req-1\\\" did not hold\",\"matched\":false,\"precedence\":10,\"bucket\":\"require\"}"
+    },
+    {
+      "id": "policy_defensive_deny",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "deny-cmd",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "deny",
+            "match": {
+              "command_contains": [
+                "rm -rf"
+              ]
+            },
+            "reason": "danger"
+          }
+        ],
+        "call": {
+          "server": "filesystem",
+          "tool": "execute",
+          "args": 42
+        },
+        "default": "allow",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"deny-cmd\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"deny\",\"match\":{\"command_contains\":[\"rm -rf\"]},\"reason\":\"danger\"},\"decision\":\"deny\",\"reason\":\"deny rule \\\"deny-cmd\\\" could not be evaluated\",\"matched\":false,\"precedence\":10,\"bucket\":\"deny\"}"
+    },
+    {
+      "id": "policy_trace",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "deny-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "deny",
+            "match": {
+              "server": "db"
+            },
+            "reason": "db denied"
+          },
+          {
+            "id": "req-1",
+            "version": "1.0.0",
+            "precedence": 20,
+            "decision": "require",
+            "match": {
+              "tool": "read_file"
+            },
+            "reason": "read required"
+          },
+          {
+            "id": "allow-1",
+            "version": "1.0.0",
+            "precedence": 30,
+            "decision": "allow",
+            "match": {
+              "server": "filesystem",
+              "tool": "read_file"
+            },
+            "reason": "read allowed"
+          }
+        ],
+        "call": {
+          "server": "filesystem",
+          "tool": "read_file"
+        },
+        "default": "deny",
+        "trace": true
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"allow-1\",\"version\":\"1.0.0\",\"precedence\":30,\"decision\":\"allow\",\"match\":{\"server\":\"filesystem\",\"tool\":\"read_file\"},\"reason\":\"read allowed\"},\"decision\":\"allow\",\"reason\":\"read allowed\",\"matched\":true,\"precedence\":30,\"bucket\":\"allow\",\"trace\":[{\"rule_id\":\"deny-1\",\"matched\":false,\"decision\":\"deny\",\"bucket\":\"deny\"},{\"rule_id\":\"req-1\",\"matched\":true,\"decision\":\"require\",\"bucket\":\"require\"},{\"rule_id\":\"allow-1\",\"matched\":true,\"decision\":\"allow\",\"bucket\":\"allow\"}]}"
+    },
+    {
+      "id": "policy_remote_match",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "remote-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "remote": "remote-a"
+            },
+            "reason": "remote ask"
+          }
+        ],
+        "call": {
+          "server": "s",
+          "tool": "t",
+          "remote": "remote-a"
+        },
+        "default": "deny",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"remote-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"remote\":\"remote-a\"},\"reason\":\"remote ask\"},\"decision\":\"ask\",\"reason\":\"remote ask\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_remote_missing",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "remote-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "remote": "remote-a"
+            },
+            "reason": "remote ask"
+          }
+        ],
+        "call": {
+          "server": "s",
+          "tool": "t"
+        },
+        "default": "deny",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\",\"reason\":\"default capability decision\",\"matched\":false}"
+    },
+    {
+      "id": "policy_remote_mismatch",
+      "kind": "evaluate",
+      "input": {
+        "rules": [
+          {
+            "id": "remote-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "remote": "remote-a"
+            },
+            "reason": "remote ask"
+          }
+        ],
+        "call": {
+          "server": "s",
+          "tool": "t",
+          "remote": "remote-b"
+        },
+        "default": "deny",
+        "trace": false
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\",\"reason\":\"default capability decision\",\"matched\":false}"
+    },
+    {
+      "id": "catalog_criteria_before_precedence",
+      "kind": "catalog_validate",
+      "input": {
+        "rules": [
+          {
+            "id": "good",
+            "version": "1.0.0",
+            "precedence": 20,
+            "decision": "allow",
+            "match": {
+              "server": "s"
+            },
+            "reason": "good"
+          },
+          {
+            "id": "bad-match",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "allow",
+            "match": {},
+            "reason": "bad"
+          }
+        ],
+        "version": "1.0.0"
+      },
+      "success": false,
+      "error": "rules[1] \"bad-match\": match must specify at least one criterion"
+    },
+    {
+      "id": "catalog_unknown_decision",
+      "kind": "catalog_validate",
+      "input": {
+        "rules": [
+          {
+            "id": "bad-decision",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "future",
+            "match": {
+              "server": "s"
+            },
+            "reason": "bad"
+          }
+        ],
+        "version": "1.0.0"
+      },
+      "success": false,
+      "error": "rules[0] \"bad-decision\": model: unknown decision \"future\""
+    },
+    {
+      "id": "merge_precedence",
+      "kind": "merge",
+      "input": {
+        "left": {
+          "rules": [
+            {
+              "id": "left",
+              "version": "1.0.0",
+              "precedence": 10,
+              "decision": "allow",
+              "match": {
+                "server": "s"
+              },
+              "reason": "left"
+            }
+          ],
+          "version": "1.0.0"
+        },
+        "right": {
+          "rules": [
+            {
+              "id": "right",
+              "version": "1.0.0",
+              "precedence": 10,
+              "decision": "deny",
+              "match": {
+                "server": "s"
+              },
+              "reason": "right"
+            }
+          ],
+          "version": "1.0.0"
+        }
+      },
+      "success": true,
+      "output_json": "{\"rules\":[{\"id\":\"left\",\"version\":\"1.0.0\",\"precedence\":1,\"decision\":\"allow\",\"match\":{\"server\":\"s\"},\"reason\":\"left\"},{\"id\":\"right\",\"version\":\"1.0.0\",\"precedence\":2,\"decision\":\"deny\",\"match\":{\"server\":\"s\"},\"reason\":\"right\"}],\"version\":\"1.0.0\"}"
+    },
+    {
+      "id": "merge_duplicate",
+      "kind": "merge",
+      "input": {
+        "left": {
+          "rules": [
+            {
+              "id": "left",
+              "version": "1.0.0",
+              "precedence": 10,
+              "decision": "allow",
+              "match": {
+                "server": "s"
+              },
+              "reason": "left"
+            }
+          ],
+          "version": "1.0.0"
+        },
+        "right": {
+          "rules": [
+            {
+              "id": "left",
+              "version": "1.0.0",
+              "precedence": 10,
+              "decision": "deny",
+              "match": {
+                "server": "x"
+              },
+              "reason": "duplicate"
+            }
+          ],
+          "version": "1.0.0"
+        }
+      },
+      "success": false,
+      "error": "rules[1]: duplicate rule ID \"left\""
+    },
+    {
+      "id": "scope_pass",
+      "kind": "scope_ceiling",
+      "input": {
+        "scope": [
+          "shell"
+        ],
+        "capability": "shell",
+        "result": {
+          "decision": "allow",
+          "reason": "allowed",
+          "matched": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"allow\",\"reason\":\"allowed\",\"matched\":true}"
+    },
+    {
+      "id": "scope_narrow",
+      "kind": "scope_ceiling",
+      "input": {
+        "scope": [
+          "read_public"
+        ],
+        "capability": "shell",
+        "result": {
+          "decision": "allow",
+          "reason": "allowed",
+          "matched": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "scope_denied_passthrough",
+      "kind": "scope_ceiling",
+      "input": {
+        "scope": [
+          "*"
+        ],
+        "capability": "shell",
+        "result": {
+          "decision": "deny",
+          "reason": "blocked",
+          "matched": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"deny\",\"reason\":\"blocked\",\"matched\":true}"
+    },
+    {
+      "id": "marginal_shell_private",
+      "kind": "marginal",
+      "input": {
+        "tool": "read_private",
+        "already_allowed": {
+          "shell": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"marginal\":true,\"reason\":\"no marginal capability over already-allowed tool: shell\",\"risk\":1,\"risk_reason\":\"no marginal capability over already-allowed tool: shell\"}"
+    },
+    {
+      "id": "marginal_false_value_ignored",
+      "kind": "marginal",
+      "input": {
+        "tool": "read_private",
+        "already_allowed": {
+          "shell": false
+        }
+      },
+      "success": true,
+      "output_json": "{\"marginal\":false,\"risk\":2}"
+    },
+    {
+      "id": "marginal_unknown",
+      "kind": "marginal",
+      "input": {
+        "tool": "unknown",
+        "already_allowed": {
+          "shell": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"marginal\":false,\"risk\":0}"
+    },
+    {
+      "id": "marginal_credential_use_does_not_cover_secret",
+      "kind": "marginal",
+      "input": {
+        "tool": "read_secret",
+        "already_allowed": {
+          "credential_use": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"marginal\":false,\"risk\":4}"
+    },
+    {
+      "id": "marginal_secret_does_not_cover_credential_use",
+      "kind": "marginal",
+      "input": {
+        "tool": "credential_use",
+        "already_allowed": {
+          "read_secret": true
+        }
+      },
+      "success": true,
+      "output_json": "{\"marginal\":false,\"risk\":3}"
+    }
+  ]
+}

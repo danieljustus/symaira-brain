@@ -306,6 +306,9 @@ func matches(m MatchCriteria, call model.ToolCall) (bool, error) {
 	if m.Capability != "" && m.Capability != call.Capability {
 		return false, nil
 	}
+	if m.Remote != "" && m.Remote != call.Remote {
+		return false, nil
+	}
 	if len(m.CommandContains) > 0 {
 		args, ok := call.Args.(string)
 		if !ok {

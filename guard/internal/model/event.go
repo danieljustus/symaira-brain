@@ -144,7 +144,11 @@ type ToolCall struct {
 	ArgsRef    string `json:"args_ref,omitempty"`   // safe reference to the raw args
 	ResultRef  string `json:"result_ref,omitempty"` // safe reference to the raw result
 	Capability string `json:"capability,omitempty"` // risk-class key (e.g. "shell", "read_secret")
+	Purpose    string `json:"purpose,omitempty"`    // bound approval purpose
+	Resource   string `json:"resource,omitempty"`   // resource being accessed
+	Scope      string `json:"scope,omitempty"`      // resource scope being accessed
 	RiskClass  string `json:"risk_class,omitempty"` // resolved risk classification
+	Remote     string `json:"remote,omitempty"`     // remote/domain identity used by policy matching
 	Error      string `json:"error,omitempty"`      // non-empty when the call failed
 }
 
