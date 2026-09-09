@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "go_revision": "4b6be3b0e55212af630bb5cc57637a2ea6e31e62",
-  "generator_sha256": "49cc468e35dedd8f8afa9f4aa9e5fc1da6988718af6328801d227d080d0c939a",
+  "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
+  "generator_sha256": "cff8212ee73c6401f861bd99441e2efe36455417f4234f70b06efbb813b7e1c2",
   "go_sources": {
     "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
     "cmd/symbrain/cmd_profile_add.go": "3883ad6634df715ab3b991ef887e78b0d3ef30138aa3a5260e4181d827d86f03",

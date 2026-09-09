@@ -324,15 +324,16 @@ func repoRoot() string {
 	return filepath.Clean(filepath.Join(filepath.Dir(file), "..", ".."))
 }
 func gitRevision(root string) string {
-	output, err := exec.Command("git", "-C", root, "rev-parse", "HEAD").Output()
+	args := []string{"-C", root, "log", "-1", "--format=%H", "--"}
+	args = append(args, oracleSourceFiles()...)
+	output, err := exec.Command("git", args...).Output()
 	if err != nil {
 		fatalf("resolve Go revision: %v", err)
 	}
 	return strings.TrimSpace(string(output))
 }
-func sourceHashes(root string) map[string]string {
-	hashes := map[string]string{}
-	for _, relative := range []string{
+func oracleSourceFiles() []string {
+	return []string{
 		"cmd/symbrain/cmd_profile.go",
 		"cmd/symbrain/cmd_profile_add.go",
 		"cmd/symbrain/cmd_profile_list.go",
@@ -356,7 +357,11 @@ func sourceHashes(root string) map[string]string {
 		"internal/profile/remove_other.go",
 		"internal/profile/remove_unix.go",
 		"internal/xdg/xdg.go",
-	} {
+	}
+}
+func sourceHashes(root string) map[string]string {
+	hashes := map[string]string{}
+	for _, relative := range oracleSourceFiles() {
 		hashes[relative] = fileSHA256(filepath.Join(root, filepath.FromSlash(relative)))
 	}
 	return hashes
