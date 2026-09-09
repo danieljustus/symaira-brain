@@ -118,6 +118,7 @@ fn fixture_core() -> Core {
         sha256: BTreeMap::new(),
         platforms: Vec::new(),
         asset_arch: String::new(),
+        optional: false,
     }
 }
 

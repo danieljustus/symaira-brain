@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
-  "generator_sha256": "00ac0a799a6710bef806128bc1f05d4c0f1f62e3831477b1a14124b14f6b72d8",
+  "generator_sha256": "777e2bec29479ebce2c1b3cca76c15e92d133dcefa1fdbb06004f1d210e9515d",
   "go_sources": {
     "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
     "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
@@ -125,7 +125,7 @@
         "personal"
       ],
       "exit": 0,
-      "stdout": "installed symbrain into \u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json (harness: claude-desktop, profile: personal)\n",
+      "stdout": "installed symbrain into \u003croot\u003e/config/Claude/claude_desktop_config.json (harness: claude-desktop, profile: personal)\n",
       "stderr": "",
       "files": [
         {
@@ -139,6 +139,17 @@
           "mode": 448
         },
         {
+          "path": "config/Claude",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/Claude/claude_desktop_config.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
           "path": "data",
           "type": "dir",
           "mode": 448
@@ -147,27 +158,6 @@
           "path": "home",
           "type": "dir",
           "mode": 448
-        },
-        {
-          "path": "home/Library",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support/Claude",
-          "type": "dir",
-          "mode": 448
-        },
-        {
-          "path": "home/Library/Application Support/Claude/claude_desktop_config.json",
-          "type": "file",
-          "mode": 384,
-          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
         },
         {
           "path": "project",

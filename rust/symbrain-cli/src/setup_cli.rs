@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::io::Write;
 
@@ -54,12 +55,25 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
             return exit::GENERIC;
         }
     };
+    let enabled = match enabled_cores() {
+        Ok(enabled) => enabled,
+        Err(error) => {
+            let prefix = if parsed.fix {
+                "symbrain setup --fix"
+            } else {
+                "symbrain setup"
+            };
+            let _ = writeln!(stderr, "{prefix}: {error}");
+            return exit::GENERIC;
+        }
+    };
     if parsed.fix {
         run_fix(
             &manifest,
             &bin_dir,
             parsed.json,
             parsed.allow_unsigned,
+            &enabled,
             stdout,
             stderr,
         )
@@ -69,6 +83,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
             &bin_dir,
             parsed.json,
             parsed.allow_unsigned,
+            &enabled,
             stdout,
             stderr,
         )
@@ -80,6 +95,7 @@ fn run_install(
     bin_dir: &std::path::Path,
     json: bool,
     allow_unsigned: bool,
+    enabled: &BTreeMap<String, bool>,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
@@ -99,11 +115,11 @@ fn run_install(
     };
     let mut report = SetupReport {
         bin_dir: bin_dir.display().to_string(),
-        results: Vec::with_capacity(manifest.cores.len()),
+        results: Vec::new(),
         errors: Vec::new(),
     };
 
-    for (name, core) in &manifest.cores {
+    for (name, core) in manifest.active_cores(enabled) {
         if !core.supports_platform(platform.os) {
             report.results.push(CoreResult {
                 name: name.clone(),
@@ -120,7 +136,7 @@ fn run_install(
             }
             continue;
         }
-        match installer.install(core, platform, stderr) {
+        match installer.install(&core, platform, stderr) {
             Ok(InstallOutcome::Installed) => {
                 report.results.push(CoreResult {
                     name: name.clone(),
@@ -172,6 +188,7 @@ fn run_fix(
     bin_dir: &std::path::Path,
     json: bool,
     allow_unsigned: bool,
+    enabled: &BTreeMap<String, bool>,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
@@ -191,13 +208,13 @@ fn run_fix(
     };
     let mut report = SetupReport {
         bin_dir: bin_dir.display().to_string(),
-        results: Vec::with_capacity(manifest.cores.len()),
+        results: Vec::new(),
         errors: Vec::new(),
     };
     let mut fixed = 0;
     let mut skipped = 0;
 
-    for (name, core) in &manifest.cores {
+    for (name, core) in manifest.active_cores(enabled) {
         if !core.supports_platform(platform.os) {
             skipped += 1;
             report.results.push(CoreResult {
@@ -231,7 +248,7 @@ fn run_fix(
             continue;
         }
 
-        match installer.install(core, platform, stderr) {
+        match installer.install(&core, platform, stderr) {
             Ok(InstallOutcome::Installed) => {
                 fixed += 1;
                 report.results.push(CoreResult {
@@ -277,6 +294,50 @@ fn run_fix(
     } else {
         exit::GENERIC
     }
+}
+
+fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
+    let mut enabled = BTreeMap::new();
+    if let Some(value) = std::env::var_os("SYMBRAIN_MODULES_BROWSE") {
+        let value = value.to_string_lossy();
+        enabled.insert(
+            "symbrowse".to_string(),
+            value.parse::<bool>().map_err(|_| {
+                format!("config: invalid boolean SYMBRAIN_MODULES_BROWSE={value:?}")
+            })?,
+        );
+    }
+    let path = symbrain_core::xdg::config_path();
+    let bytes = match std::fs::read(&path) {
+        Ok(bytes) => bytes,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(enabled),
+        Err(error) => return Err(format!("config: read {}: {error}", path.display())),
+    };
+    let mut from_file = parse_enabled_cores(&bytes, &path)?;
+    from_file.extend(enabled);
+    Ok(from_file)
+}
+
+fn parse_enabled_cores(
+    bytes: &[u8],
+    path: &std::path::Path,
+) -> Result<BTreeMap<String, bool>, String> {
+    let text = std::str::from_utf8(bytes)
+        .map_err(|error| format!("config: parse {}: {error}", path.display()))?;
+    let document: toml_edit::DocumentMut = text
+        .parse()
+        .map_err(|error| format!("config: parse {}: {error}", path.display()))?;
+    let mut enabled = BTreeMap::new();
+    if let Some(value) = document.get("modules").and_then(|item| item.get("browse")) {
+        let browse = value.as_bool().ok_or_else(|| {
+            format!(
+                "config: modules.browse must be boolean in {}",
+                path.display()
+            )
+        })?;
+        enabled.insert("symbrowse".to_string(), browse);
+    }
+    Ok(enabled)
 }
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<SetupArgs, u8> {
@@ -342,6 +403,26 @@ mod tests {
         assert!(!parsed.allow_unsigned);
         assert!(!parsed.json);
         assert!(stderr.is_empty());
+    }
+
+    #[test]
+    fn optional_browse_selection_matches_go_default_and_explicit_values() {
+        let path = std::path::Path::new("config.toml");
+        let empty = parse_enabled_cores(b"", path).unwrap();
+        assert!(!empty.get("symbrowse").copied().unwrap_or(false));
+        assert!(
+            parse_enabled_cores(b"[modules]\nbrowse = false\n", path)
+                .unwrap()
+                .get("symbrowse")
+                .is_some_and(|value| !value)
+        );
+        assert!(
+            parse_enabled_cores(b"[modules]\nbrowse = true\n", path)
+                .unwrap()
+                .get("symbrowse")
+                .is_some_and(|value| *value)
+        );
+        assert!(parse_enabled_cores(b"[modules]\nbrowse = 1\n", path).is_err());
     }
 
     #[test]

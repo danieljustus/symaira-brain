@@ -113,19 +113,6 @@ jobs:
       - name: Rust quality and Go parity gates
         run: make rust-check parity-smoke
 
-      - name: Generate native Linux install oracle artifact
-        if: always()
-        run: go run ./scripts/install-oracle -output "$RUNNER_TEMP/install_oracle_linux.json"
-
-      - name: Upload native Linux install oracle artifact
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: install-oracle-linux-${{ github.sha }}
-          path: ${{ runner.temp }}/install_oracle_linux.json
-          if-no-files-found: error
-          retention-days: 1
-
       # Keep the protocol subprocess contract visible and independently
       # executable. `rust-check` already covers this test, but a named gate
       # prevents stdout/lifecycle regressions from disappearing inside a

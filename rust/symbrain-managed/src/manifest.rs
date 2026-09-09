@@ -80,6 +80,8 @@ pub struct Core {
     pub platforms: Vec<String>,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub asset_arch: String,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub optional: bool,
 }
 
 impl Manifest {
@@ -89,6 +91,20 @@ impl Manifest {
     /// Returns a schema error when JSON decoding fails.
     pub fn parse(bytes: &[u8]) -> Result<Self, ManagedError> {
         serde_json::from_slice(bytes).map_err(|error| ManagedError::Manifest(error.to_string()))
+    }
+
+    /// Returns the cores selected for installation. Optional cores are
+    /// opt-in; an absent selection means none of them are active.
+    #[must_use]
+    pub fn active_cores(
+        &self,
+        enabled: &std::collections::BTreeMap<String, bool>,
+    ) -> BTreeMap<String, Core> {
+        self.cores
+            .iter()
+            .filter(|(name, core)| !core.optional || enabled.get(*name).copied().unwrap_or(false))
+            .map(|(name, core)| (name.clone(), core.clone()))
+            .collect()
     }
 
     /// Loads the repository's embedded production manifest.
@@ -240,4 +256,27 @@ fn strip_v(version: &str) -> &str {
 
 fn archive_extension(os: &str) -> &'static str {
     if os == "windows" { "zip" } else { "tar.gz" }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn active_cores_defaults_to_mandatory_only() {
+        let manifest = Manifest::load_embedded().unwrap();
+        let empty = BTreeMap::new();
+        let active = manifest.active_cores(&empty);
+        assert!(!active.contains_key("symbrowse"));
+        assert!(active.contains_key("symvault"));
+    }
+
+    #[test]
+    fn active_cores_honors_explicit_false_and_true() {
+        let manifest = Manifest::load_embedded().unwrap();
+        let disabled = BTreeMap::from([("symbrowse".to_string(), false)]);
+        assert!(!manifest.active_cores(&disabled).contains_key("symbrowse"));
+        let enabled = BTreeMap::from([("symbrowse".to_string(), true)]);
+        assert!(manifest.active_cores(&enabled).contains_key("symbrowse"));
+    }
 }
