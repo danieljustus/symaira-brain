@@ -117,9 +117,15 @@ mod tests {
 
     fn script(contents: &str) -> tempfile::TempDir {
         let dir = tempfile::tempdir().expect("tempdir");
+        // Publish the executable with an atomic rename. Linux rejects execve
+        // with ETXTBSY while the target is still open for writing; writing the
+        // final pathname directly made this fixture race cargo's parallel
+        // test execution on the hosted runner.
         let path = dir.path().join("probe");
-        fs::write(&path, contents).expect("write probe");
-        fs::set_permissions(&path, fs::Permissions::from_mode(0o700)).expect("chmod probe");
+        let staging = dir.path().join("probe.staging");
+        fs::write(&staging, contents).expect("write probe");
+        fs::set_permissions(&staging, fs::Permissions::from_mode(0o700)).expect("chmod probe");
+        fs::rename(&staging, &path).expect("publish probe");
         dir
     }
 
