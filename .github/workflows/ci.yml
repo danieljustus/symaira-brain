@@ -110,6 +110,11 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      - name: Install pinned Rust audit tools
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo install cargo-deny --version 0.20.2 --locked
+
       - name: Rust quality and Go parity gates
         run: make rust-check parity-smoke
 
@@ -140,6 +145,11 @@ jobs:
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+
+      - name: Install pinned Rust audit tools
+        run: |
+          cargo install cargo-audit --version 0.22.2 --locked
+          cargo install cargo-deny --version 0.20.2 --locked
 
       - name: Rust quality and Go parity gates on macOS
         run: make rust-check parity-smoke

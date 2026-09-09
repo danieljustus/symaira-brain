@@ -1004,6 +1004,7 @@ dependencies = [
  "cap-std",
  "chrono",
  "libc",
+ "rustix",
  "serde",
  "serde_json",
  "tempfile",

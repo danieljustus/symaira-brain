@@ -7,6 +7,8 @@ use cap_std::fs::OpenOptionsExt;
 use cap_std::fs::Permissions;
 use cap_std::fs::{Dir, OpenOptions};
 use std::io::{self, Read, Write};
+#[cfg(unix)]
+use std::os::fd::AsFd;
 use std::path::{Component, Path, PathBuf};
 #[cfg(windows)]
 use windows_sys::Win32::Storage::FileSystem::{
@@ -203,7 +205,7 @@ impl AtomicFile {
                 .rename(&temporary_name, &self.parent, &self.name)?;
             renamed = true;
             #[cfg(not(windows))]
-            self.parent.try_clone()?.into_std_file().sync_all()?;
+            sync_directory(&self.parent)?;
             Ok(())
         })();
         if !renamed {
@@ -211,6 +213,24 @@ impl AtomicFile {
         }
         result
     }
+}
+
+#[cfg(unix)]
+fn sync_directory(parent: &Dir) -> io::Result<()> {
+    use rustix::fs::{self, OFlags};
+
+    // cap-std directories are O_PATH capabilities on Linux. O_PATH fds are
+    // ideal for no-follow traversal but Linux rejects fsync(O_PATH). Reopen
+    // the same directory through the retained capability, then fsync that
+    // read-only directory fd; this never falls back to a path-based reopen.
+    let fd = fs::openat(
+        parent.as_fd(),
+        ".",
+        OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
+        fs::Mode::empty(),
+    )
+    .map_err(io::Error::from)?;
+    fs::fsync(&fd).map_err(io::Error::from)
 }
 
 fn open_parent_capability(root: &Dir, parent: &Path, create: bool) -> io::Result<Dir> {

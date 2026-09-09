@@ -6,6 +6,8 @@ use cap_std::fs::PermissionsExt as CapPermissionsExt;
 use cap_std::fs::{Dir, OpenOptions, Permissions};
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Read, Write};
+#[cfg(unix)]
+use std::os::fd::AsFd;
 use std::path::{Path, PathBuf};
 
 use super::atomic::{cleanup_file, join_cleanup_error, reserve_name};
@@ -302,9 +304,26 @@ impl AtomicFile {
 
     #[cfg(unix)]
     fn sync_parent(&self) -> io::Result<()> {
-        self.parent.try_clone()?.into_std_file().sync_all()
+        sync_directory(&self.parent)
     }
 }
+#[cfg(unix)]
+fn sync_directory(parent: &Dir) -> io::Result<()> {
+    use rustix::fs::{self, OFlags};
+
+    // cap-std uses O_PATH for directory capabilities on Linux, and Linux
+    // rejects fsync(O_PATH). Reopen through the retained directory fd so the
+    // sync remains capability-scoped instead of falling back to a pathname.
+    let fd = fs::openat(
+        parent.as_fd(),
+        ".",
+        OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC,
+        fs::Mode::empty(),
+    )
+    .map_err(io::Error::from)?;
+    fs::fsync(&fd).map_err(io::Error::from)
+}
+
 pub(super) fn backup_name(base: &OsStr, timestamp: &str, suffix: u32) -> PathBuf {
     let mut name = base.to_os_string();
     name.push(".bak.");

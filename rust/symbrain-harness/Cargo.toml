@@ -17,6 +17,9 @@ cap-std.workspace = true
 cap-fs-ext.workspace = true
 libc.workspace = true
 
+[target.'cfg(unix)'.dependencies]
+rustix.workspace = true
+
 [lints.rust]
 unsafe_code = "deny"
 
