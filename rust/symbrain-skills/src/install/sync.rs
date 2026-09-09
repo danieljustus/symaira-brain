@@ -55,11 +55,22 @@ pub(crate) fn sync_dir(
     fault: Option<FaultPoint>,
 ) -> Result<(), SkillError> {
     fail(fault, FaultPoint::Sync)?;
-    root.open_dir_nofollow(path)
-        .map_err(|error| SkillError(format!("open directory for sync: {error}")))?
-        .into_std_file()
-        .sync_all()
-        .map_err(|error| SkillError(format!("sync staged directory: {error}")))
+    // Linux opens capability directories with O_PATH, whose descriptors
+    // cannot be passed to fsync. File contents and the atomic rename are still
+    // synced; avoid turning every otherwise-valid install into EBADF on Linux.
+    #[cfg(target_os = "linux")]
+    {
+        let _ = (root, path);
+        Ok(())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        root.open_dir_nofollow(path)
+            .map_err(|error| SkillError(format!("open directory for sync: {error}")))?
+            .into_std_file()
+            .sync_all()
+            .map_err(|error| SkillError(format!("sync staged directory: {error}")))
+    }
 }
 
 /// Conflict policy used by [`sync`].
