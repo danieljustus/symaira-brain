@@ -317,7 +317,7 @@ fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
         if !value.is_empty() {
             enabled.insert(
                 "symbrowse".to_string(),
-                parse_go_bool(&value).map_err(|_| {
+                parse_go_bool(&value).map_err(|()| {
                     format!("config: invalid boolean SYMBRAIN_MODULES_BROWSE={value:?}")
                 })?,
             );
