@@ -32,7 +32,6 @@ pub const MEMORY_TOOLS_READ_ONLY: &[&str] = &[
     "memory_get",
     "memory_list",
     "memory_search",
-    "query_log",
 ];
 
 /// Memory tools exposed under the `read_write` preset.
@@ -41,14 +40,10 @@ pub const MEMORY_TOOLS_READ_WRITE: &[&str] = &[
     "entity_relate",
     "entity_resolve",
     "graph_neighbors",
-    "memory_candidates",
     "memory_get",
     "memory_list",
-    "memory_promote",
-    "memory_reject",
     "memory_search",
     "memory_set",
-    "query_log",
 ];
 
 /// Usage tools exposed by the usage server.
