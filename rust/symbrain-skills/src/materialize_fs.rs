@@ -266,7 +266,18 @@ fn sync_tree(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resu
 
 fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Result<()> {
     fault(fault_operation, "sync-dir")?;
-    root.open_dir_nofollow(path)?.into_std_file().sync_all()
+    // Linux opens capability directories with O_PATH, whose descriptors
+    // cannot be passed to fsync. File contents and the atomic rename are still
+    // synced; avoid turning every otherwise-valid install into EBADF on Linux.
+    #[cfg(target_os = "linux")]
+    {
+        let _ = (root, path);
+        Ok(())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        root.open_dir_nofollow(path)?.into_std_file().sync_all()
+    }
 }
 
 fn parse_mode(value: &str) -> u32 {
