@@ -1,0 +1,2945 @@
+{
+  "oracle_revision": "0ccb0fe6c5afe668714d647eaa3497f8e6ed3f79",
+  "source_sha256": {
+    "guard/internal/capability/deny.go": "ffe4b3b4e51820349accaaed064cf0fbe649f5880e244a4ea50455ec7257695b",
+    "guard/internal/capability/key.go": "3d76a04e526ad161eec9b8e6f5bd625762df2d1bc994f5f51c18e7ddfedc88fe",
+    "guard/internal/capability/token.go": "10aae786fa817b8bce89f752ad18c56dc6d16a8d9820175e674b3fa683a10a68",
+    "guard/internal/policy/scope.go": "f98d3b3d02d1f869cbdb1bf7abcd5f9ebc934b3646c4d409bfdf66a346a4388b"
+  },
+  "generator_sha256": {
+    "oracle_cases_test.go": "a85450482df592eaf3f4af3f0ea2fd7b6730ec32009cb8fb7bc82271136310af",
+    "oracle_test.go": "a8d953f1b2f30ac7aca07cfc51326cf8d37f6c8ceed684ac11cd9e37d88192f4"
+  },
+  "cases": [
+    {
+      "id": "derive-0",
+      "kind": "derive",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material: key material must be at least 32 bytes, got 0",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "derive-1",
+      "kind": "derive",
+      "master_hex": "ab",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material: key material must be at least 32 bytes, got 1",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "derive-31",
+      "kind": "derive",
+      "master_hex": "ababababababababababababababababababababababababababababababab",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material: key material must be at least 32 bytes, got 31",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "derive-32",
+      "kind": "derive",
+      "master_hex": "abababababababababababababababababababababababababababababababab",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"64452fd9838e1d601b513b9124cd99f401872ca67c1b349f670bf7df3987c21c\""
+    },
+    {
+      "id": "derive-64",
+      "kind": "derive",
+      "master_hex": "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"53d334a9e76dfd762b39846fb0738851346209ac0f6a33f4ab5958fe5056ff76\""
+    },
+    {
+      "id": "sign-valid",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ\""
+    },
+    {
+      "id": "verify-valid",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-html-unicode",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "\u003cbot\u003e\u0026\u2028\u2029é😀\n\t\u0000",
+        "purpose": "quote\"slash\\",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiXHUwMDNjYm90XHUwMDNlXHUwMDI2XHUyMDI4XHUyMDI5w6nwn5iAXG5cdFx1MDAwMCIsInB1cnBvc2UiOiJxdW90ZVwic2xhc2hcXCIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJXQmpROUwtWVpNSERmYlpuT3JhcVZTdDRpWU5VVllMZzY3TjBmUFhXb05FIn0\""
+    },
+    {
+      "id": "verify-html-unicode",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHUwMDNjYm90XHUwMDNlXHUwMDI2XHUyMDI4XHUyMDI5w6nwn5iAXG5cdFx1MDAwMCIsInB1cnBvc2UiOiJxdW90ZVwic2xhc2hcXCIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJXQmpROUwtWVpNSERmYlpuT3JhcVZTdDRpWU5VVllMZzY3TjBmUFhXb05FIn0",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"\\u003cbot\\u003e\\u0026\\u2028\\u2029é😀\\n\\t\\u0000\",\"purpose\":\"quote\\\"slash\\\\\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-nil-scope",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": null,
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOm51bGwsImlhdCI6OTQ2Njg0Nzk5LCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoiMVU3cHRnUk1KVGI2bXAtZERtV2loczdmSkF4XzlIc3BQbzZzOVl1M3lmNCJ9\""
+    },
+    {
+      "id": "verify-nil-scope",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOm51bGwsImlhdCI6OTQ2Njg0Nzk5LCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoiMVU3cHRnUk1KVGI2bXAtZERtV2loczdmSkF4XzlIc3BQbzZzOVl1M3lmNCJ9",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":null,\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-empty-scope",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOltdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6Il90c0VHOU1Oc2JBb19iZERRS0s4MGtyYXdDcFljOWFUWDlfZlRFWWszdG8ifQ\""
+    },
+    {
+      "id": "verify-empty-scope",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOltdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6Il90c0VHOU1Oc2JBb19iZERRS0s4MGtyYXdDcFljOWFUWDlfZlRFWWszdG8ifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-wildcard",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "*"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiKiJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6ImZQMUlmay1uaUQyTnphNXRyd3JFeEU5M2o1bXEtRzkzT09YY3FrU01PVEUifQ\""
+    },
+    {
+      "id": "verify-wildcard",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiKiJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6ImZQMUlmay1uaUQyTnphNXRyd3JFeEU5M2o1bXEtRzkzT09YY3FrU01PVEUifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"*\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-duplicate-regular",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "shell",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsic2hlbGwiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjRaS09QVlRSVWxma1lJbjhLZkxJakVic1gyUTZTRl9kNkxmNEozdm5sNmMifQ\""
+    },
+    {
+      "id": "verify-duplicate-regular",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsic2hlbGwiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjRaS09QVlRSVWxma1lJbjhLZkxJakVic1gyUTZTRl9kNkxmNEozdm5sNmMifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"shell\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-explicit-control-plane",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "symguard:config:set"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsic3ltZ3VhcmQ6Y29uZmlnOnNldCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjhUVWpsbDgyVlVTNGxxbDIzanZ2dTllaGNxQTltQW1KTWNqb0VDSlE0dlkifQ\""
+    },
+    {
+      "id": "verify-explicit-control-plane",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsic3ltZ3VhcmQ6Y29uZmlnOnNldCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjhUVWpsbDgyVlVTNGxxbDIzanZ2dTllaGNxQTltQW1KTWNqb0VDSlE0dlkifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"symguard:config:set\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-expired",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684798,
+        "exp": 946684799,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OCwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6InJRTThRQnJhUlY4RzBKYVdUM0EtZHpPRktGb2o4UDgtVThVOHhTWW9CRHcifQ\""
+    },
+    {
+      "id": "verify-expired",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OCwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6InJRTThRQnJhUlY4RzBKYVdUM0EtZHpPRktGb2o4UDgtVThVOHhTWW9CRHcifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: token expired",
+      "error_kind": "expired"
+    },
+    {
+      "id": "sign-expiry-equal-now",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946684800,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ4MDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlZSMnF6Yi16LXBZdVI3YWxhWFBBaGJjNHFIX2FFbmp2RkRzaEp2QUt4Tm8ifQ\""
+    },
+    {
+      "id": "verify-expiry-equal-now",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ4MDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlZSMnF6Yi16LXBZdVI3YWxhWFBBaGJjNHFIX2FFbmp2RkRzaEp2QUt4Tm8ifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: token expired",
+      "error_kind": "expired"
+    },
+    {
+      "id": "sign-expiry-one-second",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946684801,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ4MDEsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6Im9zb0hHbTcyUFZ1VDdIM3dGanEzaUgtQ3ZsMGhpc3J1Z0tBb1VUcDRiMWMifQ\""
+    },
+    {
+      "id": "verify-expiry-one-second",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ4MDEsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6Im9zb0hHbTcyUFZ1VDdIM3dGanEzaUgtQ3ZsMGhpc3J1Z0tBb1VUcDRiMWMifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946684801,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-future-iat-accepted",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684860,
+        "exp": 946684920,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDg2MCwiZXhwIjo5NDY2ODQ5MjAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6ImtIQkQ3aHZLVnhmSHJZTEhHaWdfbzlxeHR2TzNxYjFlSlJEVC0wQm5iWEEifQ\""
+    },
+    {
+      "id": "verify-future-iat-accepted",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDg2MCwiZXhwIjo5NDY2ODQ5MjAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6ImtIQkQ3aHZLVnhmSHJZTEhHaWdfbzlxeHR2TzNxYjFlSlJEVC0wQm5iWEEifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684860,\"exp\":946684920,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "sign-empty-subject",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IktZTTdBajdsNFRpVEVKVE9MTmxtazVVREJmeUJxbkoyc09sOU5WTTBQWDAifQ\""
+    },
+    {
+      "id": "verify-empty-subject",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IktZTTdBajdsNFRpVEVKVE9MTmxtazVVREJmeUJxbkoyc09sOU5WTTBQWDAifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: subject, purpose, and jti must be non-empty",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-empty-purpose",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6IiIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJOZC12b242VjJyQ3pKMDlvT3NCSDl3b01WQVVkd2RvU1FCOHItQVkxY0lJIn0\""
+    },
+    {
+      "id": "verify-empty-purpose",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6IiIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJOZC12b242VjJyQ3pKMDlvT3NCSDl3b01WQVVkd2RvU1FCOHItQVkxY0lJIn0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: subject, purpose, and jti must be non-empty",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-empty-jti",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": ""
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IiJ9LCJzaWciOiJIRmJwSlN5VTNLNEwxcUh2SnZxYnAzQVBpdzhmbUVpNmNQVm94M0FjcDQwIn0\""
+    },
+    {
+      "id": "verify-empty-jti",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IiJ9LCJzaWciOiJIRmJwSlN5VTNLNEwxcUh2SnZxYnAzQVBpdzhmbUVpNmNQVm94M0FjcDQwIn0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: subject, purpose, and jti must be non-empty",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-zero-iat",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 0,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjAsImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJYVlpkZ0trdTdzbUxCdXEwNUJZRmdOeGhFNjg0RktTTDdHRWdBM2ppRU80In0\""
+    },
+    {
+      "id": "verify-zero-iat",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjAsImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJYVlpkZ0trdTdzbUxCdXEwNUJZRmdOeGhFNjg0RktTTDdHRWdBM2ppRU80In0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: iat must be positive",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-negative-iat",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": -1,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOi0xLCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoiSzVXaUd0UW4xellkMUd0WFFlOVgtNUtUbVhtVmVPbExMTjM1dEhka1dhSSJ9\""
+    },
+    {
+      "id": "verify-negative-iat",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOi0xLCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoiSzVXaUd0UW4xellkMUd0WFFlOVgtNUtUbVhtVmVPbExMTjM1dEhka1dhSSJ9",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: iat must be positive",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-exp-before-iat",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946684798,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ3OTgsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlR1VXk1ZHhHRmhiQWJjU3BodzRjZGVaYnFrdG50NnpCRXJZX25lTjRNQmMifQ\""
+    },
+    {
+      "id": "verify-exp-before-iat",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ3OTgsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlR1VXk1ZHhHRmhiQWJjU3BodzRjZGVaYnFrdG50NnpCRXJZX25lTjRNQmMifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: exp must be after iat",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-exp-equal-iat",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 946684799,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlZ4dnc3RVdJZXNiV3BiUmhtZkVGa1BkV1ZPZ0hJTm9iLUF3cXQxNmxBUVkifQ\""
+    },
+    {
+      "id": "verify-exp-equal-iat",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlZ4dnc3RVdJZXNiV3BiUmhtZkVGa1BkV1ZPZ0hJTm9iLUF3cXQxNmxBUVkifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: exp must be after iat",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-empty-scope-entry",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          ""
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiIl0sImlhdCI6OTQ2Njg0Nzk5LCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoibkEtZkFBUnZCRUh6NWJwYkQ3S0RYYjJDMlY1WDVoTUhYMVIzXzRvSXNoQSJ9\""
+    },
+    {
+      "id": "verify-empty-scope-entry",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiIl0sImlhdCI6OTQ2Njg0Nzk5LCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoibkEtZkFBUnZCRUh6NWJwYkQ3S0RYYjJDMlY1WDVoTUhYMVIzXzRvSXNoQSJ9",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: empty scope entry",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-duplicate-wildcard",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "*",
+          "shell",
+          "*"
+        ],
+        "iat": 946684799,
+        "exp": 946685100,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiKiIsInNoZWxsIiwiKiJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6InIxdndJZzlmQkNZSTJBVVhUeE93T0NybHNKNTRuQ09udC1HNmdYVkthTUkifQ\""
+    },
+    {
+      "id": "verify-duplicate-wildcard",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsiKiIsInNoZWxsIiwiKiJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6InIxdndJZzlmQkNZSTJBVVhUeE93T0NybHNKNTRuQ09udC1HNmdYVkthTUkifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: duplicate wildcard scope",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-claims-before-expiry",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684798,
+        "exp": 946684799,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OCwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjhvREdLUnp3NHh1U2ZiZGcyQm15anpEV25mWmpNc0tTUXdGM1g5VXhTck0ifQ\""
+    },
+    {
+      "id": "verify-claims-before-expiry",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OCwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjhvREdLUnp3NHh1U2ZiZGcyQm15anpEV25mWmpNc0tTUXdGM1g5VXhTck0ifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: capability: invalid claims: subject, purpose, and jti must be non-empty",
+      "error_kind": "invalid_claims"
+    },
+    {
+      "id": "sign-max-int64-expiry",
+      "kind": "sign",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "claims": {
+        "sub": "build-bot",
+        "purpose": "job-4821",
+        "scope": [
+          "read_public",
+          "shell"
+        ],
+        "iat": 946684799,
+        "exp": 9223372036854775807,
+        "jti": "00112233445566778899aabbccddeeff"
+      },
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5MjIzMzcyMDM2ODU0Nzc1ODA3LCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJQOEpPenBPeUszUzVvcVdBMFc4OHNEUC1kbUw0QUtBaW1SWGc2SldScFB3In0\""
+    },
+    {
+      "id": "verify-max-int64-expiry",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5MjIzMzcyMDM2ODU0Nzc1ODA3LCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9LCJzaWciOiJQOEpPenBPeUszUzVvcVdBMFc4OHNEUC1kbUw0QUtBaW1SWGc2SldScFB3In0",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":9223372036854775807,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "verify-key-priority-0",
+      "kind": "verify",
+      "token": "%%%",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "verify-key-priority-1",
+      "kind": "verify",
+      "master_hex": "ab",
+      "token": "%%%",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "verify-key-priority-31",
+      "kind": "verify",
+      "master_hex": "ababababababababababababababababababababababababababababababab",
+      "token": "%%%",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: no key material",
+      "error_kind": "no_key_material"
+    },
+    {
+      "id": "verify-wrong-key",
+      "kind": "verify",
+      "master_hex": "abababababababababababababababababababababababababababababababab",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-claim-tamper",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYXR0YWNrZXIiLCJwdXJwb3NlIjoiam9iLTQ4MjEiLCJzY29wZSI6WyJyZWFkX3B1YmxpYyIsInNoZWxsIl0sImlhdCI6OTQ2Njg0Nzk5LCJleHAiOjk0NjY4NTEwMCwianRpIjoiMDAxMTIyMzM0NDU1NjY3Nzg4OTlhYWJiY2NkZGVlZmYifSwic2lnIjoiM2NXRXdWN2NXOVZBTzNsVmNCUkxpaURNTjJRSmZpa01Nd3lHVDVwZmxEQSJ9",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-signature-tamper",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IkFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUEifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-missing-signature",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IiJ9",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-malformed-signature",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IiUlJSJ9",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-signature-padding",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREE9In0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "verify-signature-crlf",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IlxyXG4zY1dFd1Y3Y1c5VkFPM2xWY0JSTGlpRE1OMlFKZmlrTU13eUdUNXBmbERBXG4ifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "verify-signature-before-claims",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODQ3OTksImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-wire-empty",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-wire-empty",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-wire-garbage",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "not-a-token",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-wire-garbage",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "not-a-token",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-wire-non-base64",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "%%%",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-wire-non-base64",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "%%%",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-wire-padding",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ=",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-wire-padding",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ=",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-wire-crlf",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "\r\neyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ\n",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ\""
+    },
+    {
+      "id": "verify-wire-crlf",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "\r\neyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ\n",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "decode-wire-whitespace",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": " eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-wire-whitespace",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": " eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-null",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "bnVsbA",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-null",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "bnVsbA",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-empty-object",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e30",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-empty-object",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e30",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-array",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "W10",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-array",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "W10",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-number",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "MQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-number",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "MQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-null-fields",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOm51bGwsInNpZyI6bnVsbH0",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-null-fields",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOm51bGwsInNpZyI6bnVsbH0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-unknown",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJ1bmtub3duIjp7ImZ1dHVyZSI6dHJ1ZX19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-unknown",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJ1bmtub3duIjp7ImZ1dHVyZSI6dHJ1ZX19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-claims-array",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOltdfQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-claims-array",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOltdfQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-sig-number",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJzaWciOjQyfQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-sig-number",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJzaWciOjQyfQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-sub-number",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjo0Mn19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-sub-number",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjo0Mn19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-iat-float",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjoxLjB9fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-iat-float",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjoxLjB9fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-iat-exponent",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjoxZTJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-iat-exponent",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjoxZTJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-negative-zero",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjotMCwiZXhwIjotMH19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-negative-zero",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0IjotMCwiZXhwIjotMH19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-iat-overflow",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0Ijo5MjIzMzcyMDM2ODU0Nzc1ODA4fX0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-iat-overflow",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsiaWF0Ijo5MjIzMzcyMDM2ODU0Nzc1ODA4fX0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-scope-null-item",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOltudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbIiJdLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-scope-null-item",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOltudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-duplicate-scope-null",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOltudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbInNoZWxsIl0sImlhdCI6MCwiZXhwIjowLCJqdGkiOiIifSwic2lnIjoiIn0\""
+    },
+    {
+      "id": "verify-json-duplicate-scope-null",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOltudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-scope-shrink-regrow",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiLCJuZXR3b3JrIl0sInNjb3BlIjpbbnVsbF0sInNjb3BlIjpbbnVsbCxudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbInNoZWxsIiwibmV0d29yayJdLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-scope-shrink-regrow",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiLCJuZXR3b3JrIl0sInNjb3BlIjpbbnVsbF0sInNjb3BlIjpbbnVsbCxudWxsXX19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-scope-empty-resets",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOltdLCJzY29wZSI6W251bGxdfX0",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbIiJdLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-scope-empty-resets",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOltdLCJzY29wZSI6W251bGxdfX0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-scope-null-resets",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOm51bGwsInNjb3BlIjpbbnVsbF19fQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbIiJdLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-scope-null-resets",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXSwic2NvcGUiOm51bGwsInNjb3BlIjpbbnVsbF19fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-duplicate-claims-scope",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXX0sImNsYWltcyI6eyJzY29wZSI6W251bGxdfX0",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpbInNoZWxsIl0sImlhdCI6MCwiZXhwIjowLCJqdGkiOiIifSwic2lnIjoiIn0\""
+    },
+    {
+      "id": "verify-json-duplicate-claims-scope",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOlsic2hlbGwiXX0sImNsYWltcyI6eyJzY29wZSI6W251bGxdfX0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-scope-number",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOls0Ml19fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-scope-number",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic2NvcGUiOls0Ml19fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-trailing-json",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e30ge30",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-trailing-json",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e30ge30",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-broken",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOg",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "verify-json-broken",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOg",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: decode: capability: malformed token",
+      "error_kind": "malformed"
+    },
+    {
+      "id": "decode-json-duplicate-merge",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoicyJ9LCJjbGFpbXMiOnsicHVycG9zZSI6InAifSwic2lnIjoicyIsInNpZyI6bnVsbH0",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoicyIsInB1cnBvc2UiOiJwIiwic2NvcGUiOm51bGwsImlhdCI6MCwiZXhwIjowLCJqdGkiOiIifSwic2lnIjoicyJ9\""
+    },
+    {
+      "id": "verify-json-duplicate-merge",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoicyJ9LCJjbGFpbXMiOnsicHVycG9zZSI6InAifSwic2lnIjoicyIsInNpZyI6bnVsbH0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-case-fold",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJDTEFJTVMiOnsiU1VCIjoicyIsIlBVUlBPU0UiOiJwIiwixb9DT1BFIjpbXX0sIlNJRyI6InMifQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoicyIsInB1cnBvc2UiOiJwIiwic2NvcGUiOltdLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6InMifQ\""
+    },
+    {
+      "id": "verify-json-case-fold",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJDTEFJTVMiOnsiU1VCIjoicyIsIlBVUlBPU0UiOiJwIiwixb9DT1BFIjpbXX0sIlNJRyI6InMifQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-unpaired-high-surrogate",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkODAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoi77-9IiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-unpaired-high-surrogate",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkODAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-unpaired-low-surrogate",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkYzAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoi77-9IiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-unpaired-low-surrogate",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkYzAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-surrogate-pair",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkODNkXHVkZTAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoi8J-YgCIsInB1cnBvc2UiOiIiLCJzY29wZSI6bnVsbCwiaWF0IjowLCJleHAiOjAsImp0aSI6IiJ9LCJzaWciOiIifQ\""
+    },
+    {
+      "id": "verify-json-surrogate-pair",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXHVkODNkXHVkZTAwIn19",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-literal-surrogate-escape",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXFx1ZDgwMCJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiXFx1ZDgwMCIsInB1cnBvc2UiOiIiLCJzY29wZSI6bnVsbCwiaWF0IjowLCJleHAiOjAsImp0aSI6IiJ9LCJzaWciOiIifQ\""
+    },
+    {
+      "id": "verify-json-literal-surrogate-escape",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoiXFx1ZDgwMCJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-invalid-utf8",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoi4oIifX0",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoi77-977-9IiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-json-invalid-utf8",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJjbGFpbXMiOnsic3ViIjoi4oIifX0",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "decode-json-reordered-valid",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJzaWciOiIzY1dFd1Y3Y1c5VkFPM2xWY0JSTGlpRE1OMlFKZmlrTU13eUdUNXBmbERBIiwidW5rbm93biI6dHJ1ZSwiY2xhaW1zIjp7InN1YiI6ImJ1aWxkLWJvdCIsInB1cnBvc2UiOiJqb2ItNDgyMSIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiYnVpbGQtYm90IiwicHVycG9zZSI6ImpvYi00ODIxIiwic2NvcGUiOlsicmVhZF9wdWJsaWMiLCJzaGVsbCJdLCJpYXQiOjk0NjY4NDc5OSwiZXhwIjo5NDY2ODUxMDAsImp0aSI6IjAwMTEyMjMzNDQ1NTY2Nzc4ODk5YWFiYmNjZGRlZWZmIn0sInNpZyI6IjNjV0V3VjdjVzlWQU8zbFZjQlJMaWlETU4yUUpmaWtNTXd5R1Q1cGZsREEifQ\""
+    },
+    {
+      "id": "verify-json-reordered-valid",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "eyJzaWciOiIzY1dFd1Y3Y1c5VkFPM2xWY0JSTGlpRE1OMlFKZmlrTU13eUdUNXBmbERBIiwidW5rbm93biI6dHJ1ZSwiY2xhaW1zIjp7InN1YiI6ImJ1aWxkLWJvdCIsInB1cnBvc2UiOiJqb2ItNDgyMSIsInNjb3BlIjpbInJlYWRfcHVibGljIiwic2hlbGwiXSwiaWF0Ijo5NDY2ODQ3OTksImV4cCI6OTQ2Njg1MTAwLCJqdGkiOiIwMDExMjIzMzQ0NTU2Njc3ODg5OWFhYmJjY2RkZWVmZiJ9fQ",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"sub\":\"build-bot\",\"purpose\":\"job-4821\",\"scope\":[\"read_public\",\"shell\"],\"iat\":946684799,\"exp\":946685100,\"jti\":\"00112233445566778899aabbccddeeff\"}"
+    },
+    {
+      "id": "decode-noncanonical-base64",
+      "kind": "decode",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e31",
+      "scope": null,
+      "now": 946684800,
+      "output": "\"eyJjbGFpbXMiOnsic3ViIjoiIiwicHVycG9zZSI6IiIsInNjb3BlIjpudWxsLCJpYXQiOjAsImV4cCI6MCwianRpIjoiIn0sInNpZyI6IiJ9\""
+    },
+    {
+      "id": "verify-noncanonical-base64",
+      "kind": "verify",
+      "master_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "token": "e31",
+      "scope": null,
+      "now": 946684800,
+      "error": "capability: invalid signature",
+      "error_kind": "invalid_signature"
+    },
+    {
+      "id": "scope-00-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-00-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-00-2",
+      "kind": "scope",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-00-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-01-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "network",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-01-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "network",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-01-2",
+      "kind": "scope",
+      "scope": [
+        "network"
+      ],
+      "target": "network",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-01-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "network",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-02-0",
+      "kind": "scope",
+      "scope": null,
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-02-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-02-2",
+      "kind": "scope",
+      "scope": [
+        ""
+      ],
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-02-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-03-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "shell:sub",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-03-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "shell:sub",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-03-2",
+      "kind": "scope",
+      "scope": [
+        "shell:sub"
+      ],
+      "target": "shell:sub",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-03-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "shell:sub",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-04-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:config",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-04-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-04-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:config"
+      ],
+      "target": "symguard:config",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-04-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:config",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-05-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-05-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-05-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:shell"
+      ],
+      "target": "symguard:shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-05-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:shell",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-06-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "Symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-06-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "Symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-06-2",
+      "kind": "scope",
+      "scope": [
+        "Symguard:config:set"
+      ],
+      "target": "Symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":true}"
+    },
+    {
+      "id": "scope-06-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "Symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":false,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-07-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:config:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-07-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-07-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:config:"
+      ],
+      "target": "symguard:config:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-07-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:config:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-08-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-08-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-08-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:config:set"
+      ],
+      "target": "symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-08-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:config:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-09-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:grant:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-09-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:grant:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-09-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:grant:"
+      ],
+      "target": "symguard:grant:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-09-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:grant:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-10-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:grant:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-10-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:grant:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-10-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:grant:set"
+      ],
+      "target": "symguard:grant:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-10-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:grant:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-11-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:policy:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-11-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:policy:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-11-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:policy:"
+      ],
+      "target": "symguard:policy:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-11-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:policy:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-12-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:policy:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-12-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:policy:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-12-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:policy:set"
+      ],
+      "target": "symguard:policy:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-12-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:policy:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-13-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:token:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-13-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:token:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-13-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:token:"
+      ],
+      "target": "symguard:token:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-13-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:token:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-14-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:token:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-14-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:token:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-14-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:token:set"
+      ],
+      "target": "symguard:token:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-14-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:token:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-15-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:audit:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-15-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:audit:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-15-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:audit:"
+      ],
+      "target": "symguard:audit:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-15-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:audit:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-16-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:audit:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-16-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:audit:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-16-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:audit:set"
+      ],
+      "target": "symguard:audit:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-16-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:audit:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-17-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:identity:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-17-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:identity:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-17-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:identity:"
+      ],
+      "target": "symguard:identity:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-17-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:identity:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-18-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:identity:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-18-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:identity:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-18-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:identity:set"
+      ],
+      "target": "symguard:identity:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-18-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:identity:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-19-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:capability:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-19-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:capability:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-19-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:capability:"
+      ],
+      "target": "symguard:capability:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-19-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:capability:",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-20-0",
+      "kind": "scope",
+      "scope": null,
+      "target": "symguard:capability:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-20-1",
+      "kind": "scope",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:capability:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-20-2",
+      "kind": "scope",
+      "scope": [
+        "symguard:capability:set"
+      ],
+      "target": "symguard:capability:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "scope-20-3",
+      "kind": "scope",
+      "scope": [
+        "shell*"
+      ],
+      "target": "symguard:capability:set",
+      "now": 946684800,
+      "output": "{\"deny_control_plane\":true,\"in_scope\":false}"
+    },
+    {
+      "id": "ceiling-allow-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-allow-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"allow\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-allow-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-allow-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"allow\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-allow-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-allow-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "allow",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"allow\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-ask-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-ask-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"ask\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-ask-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-ask-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"ask\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-ask-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-ask-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "ask",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"ask\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-deny-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "deny",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-require-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-require-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"require\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-require-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-require-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"require\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-require-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-require-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "require",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"require\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-redact-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-redact-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"redact\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-redact-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-redact-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"redact\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-redact-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-redact-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "redact",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"redact\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-readonly-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-readonly-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"readonly\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-readonly-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-readonly-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"readonly\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-readonly-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-readonly-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "readonly",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"readonly\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-sandbox-0",
+      "kind": "ceiling",
+      "scope": null,
+      "target": "shell",
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-sandbox-1",
+      "kind": "ceiling",
+      "scope": [
+        "shell"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"sandbox\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-sandbox-2",
+      "kind": "ceiling",
+      "scope": [
+        "network"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"shell\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-sandbox-3",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "shell",
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"sandbox\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    },
+    {
+      "id": "ceiling-sandbox-4",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"deny\",\"reason\":\"capability \\\"\\\" not granted by token scope\",\"matched\":false}"
+    },
+    {
+      "id": "ceiling-sandbox-5",
+      "kind": "ceiling",
+      "scope": [
+        "*"
+      ],
+      "target": "symguard:config:set",
+      "result": {
+        "decision": "sandbox",
+        "reason": "identity-policy",
+        "matched": true,
+        "precedence": 7
+      },
+      "now": 946684800,
+      "output": "{\"decision\":\"sandbox\",\"reason\":\"identity-policy\",\"matched\":true,\"precedence\":7}"
+    }
+  ]
+}

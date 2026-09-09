@@ -6,6 +6,8 @@
 
 #![deny(unsafe_code)]
 
+pub mod capability;
+mod capability_wire;
 pub mod marginal;
 pub mod model;
 pub mod model_validation;
