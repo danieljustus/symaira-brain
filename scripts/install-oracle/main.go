@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"runtime"
 	"sort"
@@ -70,6 +71,7 @@ func main() {
 	if *check {
 		existing, err := os.ReadFile(*output)
 		if err != nil || !bytes.Equal(existing, data) {
+			diagnoseMismatch(existing, generated)
 			fatalf("%s is out of date; run go run ./scripts/install-oracle", *output)
 		}
 		fmt.Printf("PASS: install oracle deterministic check passed (%d cases)\n", len(generated.Cases))
@@ -82,6 +84,59 @@ func main() {
 		fatalf("write %s: %v", *output, err)
 	}
 	fmt.Printf("Wrote %s (%d cases)\n", *output, len(generated.Cases))
+}
+
+func diagnoseMismatch(existing []byte, generated oracle) {
+	var expected oracle
+	if err := json.Unmarshal(existing, &expected); err != nil {
+		fmt.Fprintf(os.Stderr, "install oracle diagnostic: existing fixture is not valid JSON: %v\n", err)
+		return
+	}
+	for _, field := range []struct {
+		name string
+		old  any
+		new  any
+	}{
+		{"schema_version", expected.SchemaVersion, generated.SchemaVersion},
+		{"go_revision", expected.GoRevision, generated.GoRevision},
+		{"generator_sha256", expected.GeneratorSHA256, generated.GeneratorSHA256},
+		{"go_sources", expected.GoSources, generated.GoSources},
+	} {
+		if !reflect.DeepEqual(field.old, field.new) {
+			fmt.Fprintf(os.Stderr, "install oracle diagnostic: %s differs\n", field.name)
+		}
+	}
+	if len(expected.Cases) != len(generated.Cases) {
+		fmt.Fprintf(os.Stderr, "install oracle diagnostic: case count old=%d new=%d\n", len(expected.Cases), len(generated.Cases))
+	}
+	for i := 0; i < len(expected.Cases) && i < len(generated.Cases); i++ {
+		oldCase, newCase := expected.Cases[i], generated.Cases[i]
+		if reflect.DeepEqual(oldCase, newCase) {
+			continue
+		}
+		fmt.Fprintf(os.Stderr, "install oracle diagnostic: case %q differs\n", newCase.ID)
+		if oldCase.Exit != newCase.Exit {
+			fmt.Fprintf(os.Stderr, "  exit old=%d new=%d\n", oldCase.Exit, newCase.Exit)
+		}
+		if oldCase.Stdout != newCase.Stdout {
+			fmt.Fprintf(os.Stderr, "  stdout differs old=%q new=%q\n", oldCase.Stdout, newCase.Stdout)
+		}
+		if oldCase.Stderr != newCase.Stderr {
+			fmt.Fprintf(os.Stderr, "  stderr differs old=%q new=%q\n", oldCase.Stderr, newCase.Stderr)
+		}
+		if !reflect.DeepEqual(oldCase.Files, newCase.Files) {
+			fmt.Fprintf(os.Stderr, "  files differ old_count=%d new_count=%d\n", len(oldCase.Files), len(newCase.Files))
+			for j := 0; j < len(oldCase.Files) && j < len(newCase.Files); j++ {
+				oldFile, newFile := oldCase.Files[j], newCase.Files[j]
+				if reflect.DeepEqual(oldFile, newFile) {
+					continue
+				}
+				fmt.Fprintf(os.Stderr, "  file[%d] old=(%s,%s,%d,%d bytes) new=(%s,%s,%d,%d bytes)\n",
+					j, oldFile.Path, oldFile.Type, oldFile.Mode, len(oldFile.Bytes),
+					newFile.Path, newFile.Type, newFile.Mode, len(newFile.Bytes))
+			}
+		}
+	}
 }
 
 func generate(root string) oracle {
