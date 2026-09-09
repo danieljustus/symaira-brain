@@ -329,6 +329,63 @@ profile enables still works. Disabling `modules.browse` again does not
 remove an already-installed binary or touch profiles that reference it; it
 only stops `setup`/`doctor --fix` from reinstalling it.
 
+### Scope (optional module)
+
+Scope (ports, containers, background daemons, local MCP-server health) is
+`symcockpit scope`, part of the `symcockpit` binary Brain already installs
+as a mandatory core — there is no separate `modules.scope` toggle to flip,
+just a profile entry:
+
+```toml
+[servers.scope]
+enabled = true
+command = "symcockpit"
+args    = ["scope", "serve"]
+access  = "write"   # none of its 7 tools declare readOnlyHint; "read" hides all of them
+```
+
+All 7 tools (`scan`, `ports_list`, `ports_suggest`, `mcp_list`, `mcp_health`,
+`daemons_list`, `conflicts`) are read-only diagnostics by design — Scope
+does no writes and starts no probes/watchers on its own; it only inspects
+what's already running when a tool is called. Enabling Scope does not
+enable Operate or Browse, and never grants privileged writes.
+
+### Operate (optional module — narrow this yourself)
+
+Operate is a materially different risk profile from Browse and Scope: its
+20 MCP tools include real input injection (`click`, `type_text`,
+`press_keys`, `scroll`, `drag`), app control (`launch_app`, `focus_window`,
+`menu_action`), and screen/window content reads (`snapshot`, `query_ui`,
+`query_ui_ocr`, `find_ui`, `list_apps`, `list_windows`, `list_displays`).
+None declare `readOnlyHint`. **This README does not recommend a profile
+that exposes any of those 17** — that needs its own deliberate review,
+tracked in symaira-cockpit#259.
+
+Only 3 tools are metadata-only with no live screen/window content and no
+side effects, verified against the real binary (not just read from source):
+`version`, `permissions_status`, `get_policy`. A profile that wants Operate
+available at all today should narrow to exactly those:
+
+```toml
+[servers.operate]
+enabled     = true
+command     = "symcockpit"
+args        = ["operate", "serve"]
+access      = "read"
+tools_read  = ["version", "permissions_status", "get_policy"]
+tools_allow = ["version", "permissions_status", "get_policy"]
+```
+
+Both `tools_read` (so `access = "read"` doesn't hide them — none carry
+`readOnlyHint`) and `tools_allow` (the actual enforcement: the gateway
+never registers a tool outside it, confirmed by attempting `list_apps`
+against this exact profile and getting `Unknown tool`, not partial data)
+are required. **Operate's own policy layer does not independently gate
+this** — on a machine where Operate's TCC permissions are already granted
+(check with `symcockpit operate doctor`), `tools_allow` above is the *only*
+thing standing between a profile and the input/screen tools. Widening it
+is a security decision, not a config tweak.
+
 ## Command reference
 
 Implemented today:
