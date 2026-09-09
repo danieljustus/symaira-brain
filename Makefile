@@ -147,7 +147,7 @@ rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard
 	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 	cargo test --workspace --all-features --locked
 	cargo test --workspace --doc --all-features --locked
-	cargo audit --locked
+	cargo audit
 	cargo deny check
 
 ## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
