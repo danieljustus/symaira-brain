@@ -48,9 +48,6 @@ var supersetEffects = map[CapabilityEffect]map[CapabilityEffect]bool{
 	EffectNetwork: {
 		EffectReadPublic: true,
 	},
-	EffectCredentialUse: {
-		EffectReadSecret: true,
-	},
 	EffectDeploy: {
 		EffectWriteFile: true,
 		EffectNetwork:   true,
@@ -75,7 +72,10 @@ func MarginalCapabilityCheck(toolCap string, alreadyAllowed map[string]bool) boo
 		return false // unknown capability, can't assess
 	}
 
-	for allowedCap := range alreadyAllowed {
+	for allowedCap, allowed := range alreadyAllowed {
+		if !allowed {
+			continue
+		}
 		allowedEffect, ok := capabilityEffects[allowedCap]
 		if !ok {
 			continue
