@@ -68,6 +68,12 @@ type Core struct {
 	// name. Some releases publish a single universal archive (e.g.
 	// "universal") instead of per-arch archives.
 	AssetArch string `json:"asset_arch,omitempty"`
+	// Optional marks this core as opt-in (contract PB-2026-09-09 §1/§7):
+	// Setup/Fix skip it unless the caller explicitly selects it, see
+	// Manifest.ActiveCores. Existing cores omit this field, so the zero
+	// value (false) preserves today's behavior — every core already in
+	// the manifest keeps installing unconditionally.
+	Optional bool `json:"optional,omitempty"`
 }
 
 // cosignOIDCIssuer is the Sigstore OIDC issuer for certificates minted
@@ -87,6 +93,22 @@ func LoadManifest() (*Manifest, error) {
 		return nil, fmt.Errorf("managed: parse manifest: %w", err)
 	}
 	return &m, nil
+}
+
+// ActiveCores returns the subset of m.Cores that a caller should install:
+// every non-optional core, plus any optional core named (true) in enabled.
+// enabled may be nil, which selects no optional cores — the least-privilege
+// default from contract PB-2026-09-09 §7: no optional module installs
+// merely from running setup/fix, only from an explicit prior selection.
+func (m *Manifest) ActiveCores(enabled map[string]bool) map[string]Core {
+	active := make(map[string]Core, len(m.Cores))
+	for name, core := range m.Cores {
+		if core.Optional && !enabled[name] {
+			continue
+		}
+		active[name] = core
+	}
+	return active
 }
 
 // Platform returns the GOOS/GOARCH pair mapped to the release asset
