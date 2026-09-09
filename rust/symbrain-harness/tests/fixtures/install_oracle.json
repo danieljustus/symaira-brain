@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "go_revision": "4b6be3b0e55212af630bb5cc57637a2ea6e31e62",
+  "go_revision": "61ebe03212390b7aa022ad7cd35690348f4cbb8a",
   "generator_sha256": "ab8cb7cd744464b56bcd6bf744864cc8a10ebab8a1da1f2f8d1ea4ff252968b2",
   "go_sources": {
     "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
