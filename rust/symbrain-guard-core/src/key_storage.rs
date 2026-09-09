@@ -5,7 +5,9 @@
 //! and choose when to pass them to [`crate::capability::derive_key`].
 
 use std::{
-    env, fmt, fs, io,
+    env, fmt,
+    fs::{self, OpenOptions},
+    io::{self, Write},
     path::{Path, PathBuf},
 };
 
@@ -149,9 +151,25 @@ pub fn load_or_create_key(path: impl AsRef<Path>) -> Result<Vec<u8>, KeyError> {
         fs::create_dir_all(parent).map_err(|error| io_error("create directory", parent, error))?;
     }
     let key = generate_key()?;
-    fs::write(path, &key).map_err(|error| io_error("write", path, error))?;
+    write_key(path, &key)?;
     set_owner_only_permissions(path)?;
     Ok(key)
+}
+
+fn write_key(path: &Path, key: &[u8]) -> Result<(), KeyError> {
+    let mut options = OpenOptions::new();
+    options.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options
+        .open(path)
+        .map_err(|error| io_error("write", path, error))?;
+    file.write_all(key)
+        .map_err(|error| io_error("write", path, error))?;
+    Ok(())
 }
 
 fn set_owner_only_permissions(path: &Path) -> Result<(), KeyError> {
