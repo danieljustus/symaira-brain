@@ -50,7 +50,7 @@ type ClaudeProvider struct {
 // credential file (~/.claude/.credentials.json) from the environment.
 func NewClaudeProvider(client *http.Client) *ClaudeProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	adminKey, adminSource, adminErr := resolveEnv("ANTHROPIC_ADMIN_KEY")
 	oauthToken, oauthSource, oauthErr := resolveFileCredential("ANTHROPIC_OAUTH_TOKEN", readClaudeFileToken)
@@ -84,7 +84,7 @@ func claudeCredentialsPath() string {
 // tokens), preferring the "default" account, then any account with an
 // access token.
 func readClaudeFileToken() string {
-	data, err := os.ReadFile(claudeCredentialsPath())
+	data, err := readCredentialFile(claudeCredentialsPath())
 	if err != nil {
 		return ""
 	}
@@ -191,11 +191,14 @@ func (s *claudeAdminAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, err
 	}
 	req.Header.Set("Authorization", "Bearer "+s.apiKey)
 
-	resp, err := s.client.Do(req)
+	resp, err := doUsageRequest(ctx, s.client, req, false)
 	if err != nil {
 		return nil, &claudeError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := readUsageBodyAndClose(resp.Body)
+	if err != nil {
+		return nil, &claudeError{kind: "unparseable"}
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -205,7 +208,7 @@ func (s *claudeAdminAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, err
 	}
 
 	var payload claudeCostReport
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+	if err := json.Unmarshal(data, &payload); err != nil {
 		return nil, &claudeError{kind: "unparseable"}
 	}
 
@@ -249,11 +252,14 @@ func (s *claudeOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error)
 	req.Header.Set("Authorization", "Bearer "+s.accessToken)
 	req.Header.Set("anthropic-beta", "oauth-2025-04-20")
 
-	resp, err := s.client.Do(req)
+	resp, err := doUsageRequest(ctx, s.client, req, false)
 	if err != nil {
 		return nil, &claudeError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := readUsageBodyAndClose(resp.Body)
+	if err != nil {
+		return nil, &claudeError{kind: "unparseable"}
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -263,7 +269,7 @@ func (s *claudeOAuthStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error)
 	}
 
 	var payload claudeOAuthUsage
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+	if err := json.Unmarshal(data, &payload); err != nil {
 		return nil, &claudeError{kind: "unparseable"}
 	}
 

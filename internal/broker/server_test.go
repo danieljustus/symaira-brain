@@ -86,6 +86,77 @@ func TestManagedServer_LazySpawn(t *testing.T) {
 	}
 }
 
+func TestManagedServer_CallTimeoutConfig(t *testing.T) {
+	ms := NewManagedServer(ServerConfig{
+		Name:            "test",
+		BinaryPath:      fakeBinPath,
+		CallTimeout:     40 * time.Millisecond,
+		ShutdownTimeout: time.Second,
+		Env:             append(os.Environ(), "FAKEMCP_SLOW_MS=500"),
+		Logger:          testLogger(t),
+	})
+	defer ms.Shutdown()
+
+	_, err := ms.CallTool(context.Background(), "slow", nil)
+	var timeoutErr *TimeoutError
+	if !errors.As(err, &timeoutErr) {
+		t.Fatalf("configured timeout error = %v (%T), want *TimeoutError", err, err)
+	}
+}
+
+func TestManagedServer_CallTimeoutPreservesEarlierCallerDeadline(t *testing.T) {
+	ms := NewManagedServer(ServerConfig{
+		Name:            "test",
+		BinaryPath:      fakeBinPath,
+		CallTimeout:     time.Second,
+		ShutdownTimeout: time.Second,
+		Env:             append(os.Environ(), "FAKEMCP_SLOW_MS=500"),
+		Logger:          testLogger(t),
+	})
+	defer ms.Shutdown()
+	if _, err := ms.ListTools(context.Background()); err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
+	defer cancel()
+	started := time.Now()
+	_, err := ms.CallTool(ctx, "slow", nil)
+	if elapsed := time.Since(started); elapsed >= 300*time.Millisecond {
+		t.Fatalf("caller deadline was not preserved: elapsed %s", elapsed)
+	}
+	var timeoutErr *TimeoutError
+	if !errors.As(err, &timeoutErr) {
+		t.Fatalf("caller deadline error = %v (%T), want *TimeoutError", err, err)
+	}
+}
+
+func TestManagedServer_CallTimeoutPreservesExplicitCancellation(t *testing.T) {
+	ms := NewManagedServer(ServerConfig{
+		Name:            "test",
+		BinaryPath:      fakeBinPath,
+		CallTimeout:     time.Second,
+		ShutdownTimeout: time.Second,
+		Env:             append(os.Environ(), "FAKEMCP_SLOW_MS=500"),
+		Logger:          testLogger(t),
+	})
+	defer ms.Shutdown()
+	if _, err := ms.ListTools(context.Background()); err != nil {
+		t.Fatalf("ListTools: %v", err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	_, err := ms.CallTool(ctx, "slow", nil)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("explicit cancellation error = %v, want context.Canceled", err)
+	}
+	var timeoutErr *TimeoutError
+	if errors.As(err, &timeoutErr) {
+		t.Fatalf("explicit cancellation became TimeoutError: %v", err)
+	}
+}
+
 func TestManagedServer_CrashRestart_Degraded(t *testing.T) {
 	ms := NewManagedServer(ServerConfig{
 		Name:        "test",

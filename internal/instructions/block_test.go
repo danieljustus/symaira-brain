@@ -3,6 +3,7 @@ package instructions
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -303,5 +304,58 @@ func TestNewSource(t *testing.T) {
 	wantProjPath := filepath.Join(projDir, ProjectDirName, ProjectFileName)
 	if sProj.ProjectPath != wantProjPath {
 		t.Errorf("ProjectPath = %q, want %q", sProj.ProjectPath, wantProjPath)
+	}
+}
+
+func TestRender_EscapesReservedMarkersAndIsIdempotent(t *testing.T) {
+	content := "literal " + BeginMarker + " and " + EndMarker + "\n"
+	first := Render("prefix\n", content)
+	if !strings.Contains(first, EscapedBeginMarker) || !strings.Contains(first, EscapedEndMarker) {
+		t.Fatalf("reserved markers were not escaped: %q", first)
+	}
+	if strings.Contains(first, "\n"+BeginMarker+" and ") || strings.Contains(first, " and "+EndMarker+"\n") {
+		t.Fatalf("raw reserved marker survived in managed content: %q", first)
+	}
+	if got := Render(first, content); got != first {
+		t.Fatalf("reserved-marker render is not idempotent\nfirst=%q\nsecond=%q", first, got)
+	}
+}
+
+func TestRender_EscapedMarkerEncodingIsInjective(t *testing.T) {
+	reserved := Render("", BeginMarker+"\n"+BeginMarker+"\n")
+	escaped := Render("", EscapedBeginMarker+"\n")
+	if reserved == escaped {
+		t.Fatal("two begin markers and one existing escape token collided")
+	}
+	if got := Render(escaped, EscapedBeginMarker+"\n"); got != escaped {
+		t.Fatal("escaped marker encoding is not idempotent")
+	}
+}
+
+func TestRender_PrefixCodeEscapesSentinelAndPreservesOrdinaryContent(t *testing.T) {
+	content := "ordinary text <!-- symbrain: ordinary -->\n" +
+		EscapeSentinel + "\n" + EscapedBeginMarker + "\n" + EscapedEndMarker + "\n" +
+		BeginMarker + BeginMarker + "\n" + EndMarker
+	first := Render("", content)
+	second := Render(first, content)
+	if first != second {
+		t.Fatalf("prefix-code render is not idempotent\nfirst=%q\nsecond=%q", first, second)
+	}
+	managedStart := strings.Index(first, BeginMarker) + len(BeginMarker) + 1
+	managedEnd := strings.LastIndex(first, EndMarker)
+	managed := first[managedStart:managedEnd]
+	if strings.Contains(managed, BeginMarker) || strings.Contains(managed, EndMarker) {
+		t.Fatal("raw reserved markers survived in managed content")
+	}
+}
+
+func TestRender_PrefixCodePreservesArbitraryBytes(t *testing.T) {
+	content := string([]byte{0xff, 0x00, 0xfe, '\n'}) + EscapeSentinel + BeginMarker
+	first := Render("", content)
+	if !strings.Contains(first, string([]byte{0xff, 0x00, 0xfe, '\n'})) {
+		t.Fatal("arbitrary non-UTF-8 content was not preserved")
+	}
+	if got := Render(first, content); got != first {
+		t.Fatal("arbitrary-byte prefix-code render is not idempotent")
 	}
 }

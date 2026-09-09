@@ -1,0 +1,70 @@
+contract_id,seam,fixture_or_input,go_oracle,rust_test,platforms,comparison,status
+CLI-001,CLI,no arguments,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-002,CLI,help aliases,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-003,CLI,version JSON flag positions,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-004,CLI,version human output,target/go/symbrain-go,scripts/rust-differential.py,all,semantic,green
+CLI-005,CLI,unknown command,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-005A,CLI,config path and extra argument,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-005B,CLI,config get whole file and missing,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-005C,CLI,config get dotted keys and values,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-005D,CLI,config get error and permission diagnostics,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-005E,CLI,config set and unrelated fallback,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green
+CLI-006,CLI,full command tree and flags,target/go/symbrain-go,pending,all,bytes,pending
+CLI-007,CLI,profile help list show add plus native remove (20-case source-bound oracle: bindings force confirmation EOF/oversized malformed profile malformed harness refusal symlink special-file empty-directory symlinked profiles root relative project symlink project and terminator cases),target/go/symbrain-go,scripts/profile-remove-oracle;rust/symbrain-cli/tests/profile_cli_tests.rs;scripts/rust-differential.py,macos-local;linux-unverified;windows-static-unverified,bytes-and-filesystem-manifest,blocked-local-disk-INVALID-TEST
+CLI-008,CLI,audit tail flags profile filters limits JSON table errors and Go envelope defect,target/go/symbrain-go,scripts/rust-differential.py;rust/symbrain-audit/tests,all,bytes,green
+CLI-009,CLI,native install entry bytes default profile environment override Claude project constraint malformed-before-side-effect refusal dry-run superseded migration keep flag collision-safe backups symlink rejection rollback and parent/file modes,scripts/install-oracle;target/go/symbrain-go,rust/symbrain-cli/src/install_cli.rs;rust/symbrain-harness/tests,macos;linux;windows-compile,bytes-and-filesystem-manifest,green-macos-linux-windows-compile
+CLI-010,CLI,native uninstall symbrain-only removal foreign-name protection missing/absent no-op dry-run collision-safe backups symlink rejection rollback and atomic modes,scripts/install-oracle;target/go/symbrain-go,rust/symbrain-cli/src/install_cli.rs;rust/symbrain-harness/tests,macos;linux;windows-compile,bytes-and-filesystem-manifest,green-macos-linux-windows-compile
+MCP-000,MCP,JSON-RPC models line and Content-Length framing limits malformed partial notification null-ID invalid-envelope and hardened header cases,scripts/mcp-oracle,rust/symbrain-mcp/tests,all,raw-frames,fixture-ready
+MCP-FUZZ,MCP,arbitrary frame streams and JSON-RPC envelopes with retained Go-oracle seeds,fuzz/fuzz_targets,make rust-fuzz-smoke,macos-linux,no-crash-or-hang,fixture-ready
+BRK-001,broker,spawn initialize list call timeout crash restart backoff bounded stderr capture shutdown process-group cleanup and discover,scripts/broker-oracle,rust/symbrain-broker/tests,all,semantic,green
+BRK-002,broker,Rust fake child echo tool-error slow crash mismatch marker and descendant behaviors,internal/broker/testdata/fakemcp,rust/symbrain-broker/src/bin/fakemcp.rs;rust/symbrain-broker/tests,all,semantic,green
+MAN-001,managed,embedded manifest platform asset tag identity URL and archive-path contracts,internal/managed/rust_oracle_test.go,rust/symbrain-managed/tests,all,bytes-and-semantic,green
+ARC-001,managed,SHA-256 tar.gz zip exact selection ambiguity traversal links and atomic executable install,internal/managed/rust_oracle_test.go,rust/symbrain-managed/tests,all,bytes-and-filesystem-manifest,green
+SET-001,managed setup,local HTTP release fixtures install repair allow-unsigned ordering platform skips and version probes,target/go/symbrain-go,scripts/rust-differential.py;rust/symbrain-managed/tests,all,bytes-and-filesystem-manifest,green
+VLT-001,vault passthrough,opaque argv inherited stdio and child exit/signal status,scripts/rust-differential.py,rust/symbrain-cli/src/passthrough.rs,macos-linux,bytes-and-status,green
+VLT-002,vault passthrough,configured managed PATH lookup precedence and missing diagnostics,scripts/rust-differential.py,rust/symbrain-cli/src/passthrough.rs,macos-linux,bytes-and-diagnostics,green
+MCP-001,MCP,initialize and capability negotiation,scripts/mcp-oracle,rust/symbrain-mcp/tests/gateway_protocol_tests.rs,all,raw-frames,fixture-ready
+MCP-002,MCP,tools/list names descriptions schemas,scripts/mcp-oracle,rust/symbrain-mcp/tests/gateway_protocol_tests.rs,all,parsed-json,fixture-ready
+MCP-003,MCP,tools/call routing errors cancellation,scripts/mcp-oracle,rust/symbrain-mcp/tests/gateway_protocol_tests.rs,all,raw-frames,fixture-ready
+MCP-004,MCP,zero stdout pollution,scripts/mcp-oracle,rust/symbrain-mcp/tests/gateway_protocol_tests.rs,all,raw-bytes,fixture-ready
+MCP-005,MCP CLI,"native `mcp --profile`/`--profile-file` and deprecated `serve` alias with foreign stdio child, malformed frames, notification silence, EOF, SIGTERM cleanup, zero stdout pollution, profile/flag failures, and no-Go-path subprocess proof",none,rust/symbrain-cli/tests/mcp_cli_tests.rs,macos,raw-frames-and-process-lifecycle,green-macos-embedded-handlers-blocked
+GW-001,gateway,initialize and capability negotiation,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,raw-frames,fixture-ready
+GW-002,gateway,tools/list catalog metadata and stable order,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,parsed-json,fixture-ready
+GW-003,gateway,namespaced child tools/call routing hidden-tool behavior and error classification,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,raw-frames-and-semantic,fixture-ready
+GW-004,gateway,stdout contains only JSON-RPC frames,scripts/gateway-oracle,rust/symbrain-gateway/tests/gateway_tests.rs,all,raw-bytes,fixture-ready
+DOC-001,doctor,isolated XDG doctor JSON and human output,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,fixture-ready
+CFG-001,filesystem,XDG and legacy path precedence,target/go/symbrain-go,pending,all,filesystem-manifest,pending
+CFG-002,filesystem,atomic writes permissions symlinks,target/go/symbrain-go,scripts/rust-differential.py,all,filesystem-manifest,green
+PRF-001,profile,TOML schema defaults and server validation,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
+POL-001,policy,core presets and default-deny matrices,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
+POL-002,policy,foreign server read-write classification and hints,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
+CAT-001,catalog,namespacing collisions sorting annotations schemas and routing metadata,scripts/catalog-oracle,rust/symbrain-catalog/tests,all,bytes-and-semantic,green
+AUD-001,audit,JSONL schema hash chain redaction bounded tail degradation filters and permissions,scripts/audit-oracle,rust/symbrain-audit/tests,all,bytes-and-semantic,green
+PAT-001,patterns,episode JSONL deterministic names recurrence promotion provenance pruning and permissions,scripts/patterns-activity-oracle,rust/symbrain-activity/tests;rust/symbrain-patterns,all,bytes-and-semantic,green
+ACT-001,activity,validation ordering bounded tokens Unicode fencing profile access and safe read shapes,scripts/patterns-activity-oracle,rust/symbrain-activity/tests,all,bytes-and-semantic,green
+DB-001,SQLite,schema migrations and pragmas,target/go/symbrain-go,pending,all,schema-and-query-snapshot,pending
+DB-002,SQLite,NULL timestamps ordering locks,target/go/symbrain-go,pending,all,semantic,pending
+SEC-001,security,secret resolution and redaction,target/go/symbrain-go,pending,all,bytes,pending
+SEC-002,security,guard decisions grants audit chain,target/go/symbrain-go,pending,all,bytes-and-files,pending
+SEC-003,security,Guard request/decision models validation fail-closed outputs injected time and IDs,guard/scripts/guard-oracle,rust/symbrain-guard-core/tests/oracle_tests.rs,all,exact-json-and-errors,fixture-ready
+SEC-004,security,Guard static buckets precedence merge scope ceilings marginal capability risk and reasons,guard/scripts/guard-oracle,rust/symbrain-guard-core/tests/oracle_tests.rs,all,exact-json-and-errors,fixture-ready
+DIST-001,distribution,archive and binary names,current release,pending,all,artifact-manifest,pending
+DIST-002,distribution,checksums signatures SBOM Homebrew,current release,pending,all,artifact-manifest,pending
+GUI-001,Swift client,version and command JSON schemas,target/go/symbrain-go,pending,macos-ios,parsed-json,pending
+HAR-001,harness,exact nine-entry registry and injected Darwin/Linux/Windows config paths,internal/harness/registry_test.go;internal/harness/testdata,rust/symbrain-harness/tests/harness_tests.rs,all,registry-and-filesystem-manifest,fixture-ready
+HAR-002,harness,entry classification and server inventory transport/env redaction,internal/harness/entry_test.go;internal/harness/serverinfo_test.go,rust/symbrain-harness/tests/harness_tests.rs,all,semantic,fixture-ready
+HAR-003,harness,ordered JSON unknown-field duplicate-key numeric-lexeme and golden mutation behavior,internal/harness/testdata/golden,rust/symbrain-harness/tests/harness_tests.rs,all,bytes,fixture-ready
+HAR-004,harness,TOML document parsing mutation and golden behavior,internal/harness/testdata/golden,rust/symbrain-harness/tests/harness_tests.rs,all,bytes,fixture-ready
+HAR-005,harness,atomic timestamped backups permissions and bounded unified diffs,internal/harness/backup_test.go;internal/harness/diff_test.go,rust/symbrain-harness/tests/harness_tests.rs,all,bytes-and-filesystem-manifest,fixture-ready
+HAR-006,harness,read-only inventory missing/malformed configs and profile bindings,internal/harness/inventory_test.go,rust/symbrain-harness/tests/harness_tests.rs,all,semantic-and-redaction,fixture-ready
+INS-001,instructions,first managed block replace absent append begin-only malformed/multiple markers CRLF arbitrary bytes and prefix-code reserved-marker escaping with sentinel and collision proofs,scripts/instructions-oracle,rust/symbrain-instructions/tests/instruction_tests.rs,all,raw-bytes,fixture-ready
+INS-002,instructions,global absolute XDG source project path direct concatenation missing-file behavior bounded regular-file/no-follow reads deterministic symlink/directory/per-file/merged-limit verdicts with exact normalized Go/Rust diagnostics and `instructions: read <path>:` wrapper,scripts/instructions-oracle,rust/symbrain-instructions/tests/instruction_tests.rs,macos;linux;windows-static,raw-bytes-and-exact-diagnostics,green-unix-windows-static-native-runtime-unclaimed
+ADR-001,adapter,Agents managed block with existing prefix/suffix malformed markers CRLF/non-UTF-8 and marker-bearing content,scripts/adapters-oracle,rust/symbrain-adapter/tests/adapter_tests.rs,macos;linux;windows-static,raw-bytes-and-path,green-unix-windows-static-native-runtime-unclaimed
+ADR-002,adapter,Claude pointer plus managed block for fresh and existing CLAUDE.md targets,scripts/adapters-oracle,rust/symbrain-adapter/tests/adapter_tests.rs,macos;linux;windows-static,raw-bytes-and-path,green-unix-windows-static-native-runtime-unclaimed
+ADR-003,adapter,Cursor fixed YAML header plus managed block at .cursor/rules/symbrain.mdc,scripts/adapters-oracle,rust/symbrain-adapter/tests/adapter_tests.rs,macos;linux;windows-static,raw-bytes-and-path,green-unix-windows-static-native-runtime-unclaimed
+ADR-004,adapter,Antigravity managed block in GEMINI.md with existing-byte preservation,scripts/adapters-oracle,rust/symbrain-adapter/tests/adapter_tests.rs,macos;linux;windows-static,raw-bytes-and-path,green-unix-windows-static-native-runtime-unclaimed
+ADR-005,adapter,registry-derived skips for Claude Desktop OpenCode Codex Hermes and OpenClaw,scripts/adapters-oracle,rust/symbrain-adapter/tests/adapter_tests.rs,all,registry-and-skips,fixture-ready
+SKL-001,skills model and variants,tracked Go render source fixtures for frontmatter manifest resources overlays markers malformed cases and target resolution,scripts/skills-oracle,rust/symbrain-skills/tests,all,semantic-and-bytes,fixture-ready
+SKL-002,skills install,Phase 7.3A user-scope OpenCode copy install marker/base snapshots custom BaseDir executable policy dry-run and atomic failure behavior,scripts/skills-install-oracle,rust/symbrain-skills/tests/install_tests.rs,macos;linux;windows-static,filesystem-and-marker-bytes,fixture-ready
+SKL-003,skills status,Phase 7.3A deterministic status scan with managed/unmanaged/orphaned entries malformed/legacy markers and three-way stale harness-changed conflict converged added/deleted drift,scripts/skills-install-oracle,rust/symbrain-skills/tests/install_tests.rs,macos;linux;windows-static,semantic-and-drift-files,fixture-ready
+USE-001,usage,native report for Claude Codex Copilot Cursor Kimi Moonshot Nous OpenCode OpenRouter Antigravity with provider-specific request/auth/error fixtures reset timestamps Copilot entitlement math Moonshot region/currency OpenCode workspace and Antigravity local probe,scripts/usage-oracle,rust/symbrain-usage/tests/usage_tests.rs;rust/symbrain-cli/src/usage_cli.rs,macos;linux;windows-native-unclaimed,semantic-json-table-and-request-fixtures,green-focused-full-gate-blocked-disk-space

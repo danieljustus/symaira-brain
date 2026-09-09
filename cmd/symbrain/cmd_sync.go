@@ -40,9 +40,9 @@ func cmdSyncWithFormat(args []string, stdout, stderr io.Writer, format output.Fo
 		*projectDir = "."
 	}
 
-	statuses, skillsResults, err := sync.Run(*projectDir, harnessNames, *dryRun, stderr)
-	if err != nil {
-		fmt.Fprintf(stderr, "symbrain sync: %v\n", err)
+	statuses, skillsResults, runErr := sync.Run(*projectDir, harnessNames, *dryRun, stderr)
+	if runErr != nil && statuses == nil && skillsResults == nil {
+		fmt.Fprintf(stderr, "symbrain sync: %v\n", runErr)
 		return exitcodes.ExitGeneric
 	}
 
@@ -57,9 +57,13 @@ func cmdSyncWithFormat(args []string, stdout, stderr io.Writer, format output.Fo
 		fmt.Fprintf(stderr, "symbrain sync: format output: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
-	// A failed skills target is already visible in the output above; it
-	// still fails the command so scripts can detect a partial sync.
-	if sync.SkillsFailed(skillsResults) {
+	if runErr != nil {
+		fmt.Fprintf(stderr, "symbrain sync: %v\n", runErr)
+		return exitcodes.ExitGeneric
+	}
+	// Failed targets and skills are already visible in the output above; they
+	// still fail the command so scripts can detect a partial sync.
+	if sync.TargetsFailed(statuses) || sync.SkillsFailed(skillsResults) {
 		return exitcodes.ExitGeneric
 	}
 	return exitcodes.ExitOK

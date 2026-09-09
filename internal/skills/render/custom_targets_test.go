@@ -3,6 +3,7 @@ package render
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -155,6 +156,93 @@ func TestRenderCustomTargetMetadata(t *testing.T) {
 	}
 	if string(data) != "custom metadata\n" {
 		t.Fatalf("metadata = %q", data)
+	}
+}
+
+func TestRenderCustomTargetMetadataUsesOneBoundedSnapshot(t *testing.T) {
+	before := customTargetsSnapshot()
+	t.Cleanup(func() { Targets = Targets[:before] })
+
+	template := filepath.Join(t.TempDir(), "metadata.txt")
+	original := []byte{0x00, 0x01, 0xff, '\n'}
+	if err := os.WriteFile(template, original, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := RegisterCustomTargets([]CustomTargetSpec{{
+		Name: "metadata-snapshot", SkillRootUser: "/tmp/metadata-snapshot/skills",
+		MetadataFile: "meta/config.bin", MetadataTemplate: template,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "SKILL.md"), "---\nname: snapshot-skill\ndescription: test\n---\nBody.\n")
+	bundle, err := skill.LoadBundle(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	item, err := RenderTarget(bundle, Target("metadata-snapshot"))
+	if err != nil {
+		t.Fatalf("RenderTarget: %v", err)
+	}
+	if err := os.WriteFile(template, []byte("changed"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out := filepath.Join(t.TempDir(), "rendered", "metadata-snapshot", item.Name)
+	if err := writeRendered(bundle, out, item, Target("metadata-snapshot"), sourceTreeHash(bundle)); err != nil {
+		t.Fatalf("writeRendered: %v", err)
+	}
+	got, err := os.ReadFile(filepath.Join(out, "meta", "config.bin"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(original) {
+		t.Fatalf("materialized template bytes changed: %x", got)
+	}
+}
+
+func TestRenderCustomTargetMetadataRejectsSymlinkAndOversize(t *testing.T) {
+	before := customTargetsSnapshot()
+	t.Cleanup(func() { Targets = Targets[:before] })
+	root := t.TempDir()
+	template := filepath.Join(root, "template")
+	if err := os.WriteFile(template, []byte("safe"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if runtime.GOOS != "windows" {
+		link := filepath.Join(root, "template-link")
+		if err := os.Symlink(template, link); err != nil {
+			t.Fatal(err)
+		}
+		if err := RegisterCustomTargets([]CustomTargetSpec{{Name: "metadata-symlink", SkillRootUser: "/tmp/metadata-symlink/skills", MetadataFile: "meta.txt", MetadataTemplate: link}}); err != nil {
+			t.Fatal(err)
+		}
+		bundleRoot := t.TempDir()
+		writeFile(t, filepath.Join(bundleRoot, "SKILL.md"), "---\nname: symlink-skill\ndescription: test\n---\nBody.\n")
+		bundle, err := skill.LoadBundle(bundleRoot)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := RenderTarget(bundle, Target("metadata-symlink")); err == nil {
+			t.Fatal("symlink metadata template was accepted")
+		}
+		Targets = Targets[:before]
+	}
+
+	large := filepath.Join(root, "large")
+	if err := os.WriteFile(large, make([]byte, skill.MaxInputSize+1), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := RegisterCustomTargets([]CustomTargetSpec{{Name: "metadata-large", SkillRootUser: "/tmp/metadata-large/skills", MetadataFile: "meta.txt", MetadataTemplate: large}}); err != nil {
+		t.Fatal(err)
+	}
+	bundleRoot := t.TempDir()
+	writeFile(t, filepath.Join(bundleRoot, "SKILL.md"), "---\nname: large-skill\ndescription: test\n---\nBody.\n")
+	bundle, err := skill.LoadBundle(bundleRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := RenderTarget(bundle, Target("metadata-large")); err == nil || !strings.Contains(err.Error(), "maximum input size") {
+		t.Fatalf("oversized metadata template error = %v", err)
 	}
 }
 

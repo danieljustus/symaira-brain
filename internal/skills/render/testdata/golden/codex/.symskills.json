@@ -1,3 +1,41 @@
 {
-  "source_hash": "b71095b1d1cb4e2af6044fefba5205d4a5a7d88f1c4c4d4cf3984bc8f92b0796"
+  "output_digest": "6211fc181d566698ffc42dac32d8dee86bb6ce0896bb5925a91e8aa269df9da9",
+  "output_manifest": [
+    {
+      "path": "SKILL.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 523,
+      "sha256": "343928fe461c3c94c2bf0c4397c7e3356cc28fb5a22363d0ed729c4ee9fb077e"
+    },
+    {
+      "path": "agents",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "agents/openai.yaml",
+      "kind": "file",
+      "mode": "0644",
+      "size": 176,
+      "sha256": "2924e33fda1e0a90a8dbac08ef637c8be2c6c115d19c477a2e8cf481c73e38e9"
+    },
+    {
+      "path": "scripts",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "scripts/helper.sh",
+      "kind": "file",
+      "mode": "0644",
+      "size": 92,
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    }
+  ],
+  "source_hash": "41a7db06404c1d8aef10136e3d23b38fc490fed93a8a266e2607617f8b38d06e"
 }

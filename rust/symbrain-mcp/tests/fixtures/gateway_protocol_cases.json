@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"id": "initialize", "transport": "line", "method": "initialize"},
+    {"id": "tools-list", "transport": "line", "method": "tools/list"},
+    {"id": "tools-call", "transport": "line", "method": "tools/call"},
+    {"id": "initialized-notification", "transport": "line", "method": "notifications/initialized", "response": false},
+    {"id": "cancelled-notification", "transport": "line", "method": "notifications/cancelled", "response": false},
+    {"id": "null-id", "transport": "line", "request_id": null, "response": true},
+    {"id": "framed-response", "transport": "content-length", "response": true},
+    {"id": "malformed-line", "transport": "line", "parse_error": true},
+    {"id": "partial-body", "transport": "content-length", "frame_error": true}
+  ]
+}

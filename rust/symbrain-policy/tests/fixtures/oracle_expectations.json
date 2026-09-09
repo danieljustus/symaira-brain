@@ -1,0 +1,1567 @@
+{
+  "profile_cases": [
+    {
+      "id": "prof_personal",
+      "input_name": "personal",
+      "input_toml": "[profile]\nname = \"personal\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode = \"full\"\n\n[servers.memory]\nenabled = true\nmode = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "success": true,
+      "name": "personal",
+      "description": "Full access for trusted personal use",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": true,
+          "mode": "read_write"
+        },
+        "skills": {
+          "enabled": true
+        },
+        "usage": {
+          "enabled": true
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "full"
+        }
+      }
+    },
+    {
+      "id": "prof_restricted",
+      "input_name": "restricted",
+      "input_toml": "[profile]\nname = \"restricted\"\ndescription = \"Least-privilege profile\"\n\n[servers.vault]\nenabled = true\nmode = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "success": true,
+      "name": "restricted",
+      "description": "Least-privilege profile",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": true,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": true
+        },
+        "usage": {
+          "enabled": true
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_foreign_read_only",
+      "input_name": "foreign-read-only",
+      "input_toml": "[profile]\nname = \"foreign-read-only\"\ndescription = \"Foreign server read-only access\"\n\n[servers.vault]\nenabled = true\nmode = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[servers.docs]\nenabled = true\ncommand = \"/usr/local/bin/docs-mcp\"\naccess = \"read\"\ntools_read = [\"search\", \"get\"]\n\n[audit]\nenabled = true\n",
+      "success": true,
+      "name": "foreign-read-only",
+      "description": "Foreign server read-only access",
+      "audit": true,
+      "servers": {
+        "docs": {
+          "enabled": true,
+          "command": "/usr/local/bin/docs-mcp",
+          "access": "read",
+          "tools_read": [
+            "search",
+            "get"
+          ]
+        },
+        "memory": {
+          "enabled": true,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": true
+        },
+        "usage": {
+          "enabled": true
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_minimal_defaults",
+      "input_name": "minimal",
+      "input_toml": "[profile]\nname = \"minimal\"\n",
+      "success": true,
+      "name": "minimal",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_server_without_mode_defaults",
+      "input_name": "no-mode",
+      "input_toml": "[profile]\nname = \"no-mode\"\n\n[servers.vault]\nenabled = true\n\n[servers.memory]\nenabled = true\n",
+      "success": true,
+      "name": "no-mode",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": true,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_inline_all",
+      "input_name": "inline-all",
+      "input_toml": "profile = { name = \"inline-all\", description = \"fully inline\" }\naudit = { enabled = false }\nservers = { vault = { enabled = true, mode = \"full\" }, memory = { enabled = true, mode = \"read_write\" }, skills = { enabled = true }, usage = { enabled = true } }\n",
+      "success": true,
+      "name": "inline-all",
+      "description": "fully inline",
+      "servers": {
+        "memory": {
+          "enabled": true,
+          "mode": "read_write"
+        },
+        "skills": {
+          "enabled": true
+        },
+        "usage": {
+          "enabled": true
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "full"
+        }
+      }
+    },
+    {
+      "id": "prof_nested_inline_and_dotted",
+      "input_name": "combo",
+      "input_toml": "[profile]\nname = \"combo\"\n\n[servers]\nvault = { enabled = true, mode = \"request_only\" }\nmemory = { enabled = true, mode = \"read_only\" }\n\n[servers.echo]\ncommand = \"/bin/echo\"\nargs = [\"test\"]\n",
+      "success": true,
+      "name": "combo",
+      "audit": true,
+      "servers": {
+        "echo": {
+          "enabled": false,
+          "command": "/bin/echo",
+          "args": [
+            "test"
+          ],
+          "access": "write"
+        },
+        "memory": {
+          "enabled": true,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_foreign_url",
+      "input_name": "foreign-url",
+      "input_toml": "[profile]\nname = \"foreign-url\"\n\n[servers.fig]\nenabled = true\nurl = \"https://mcp.example.com/sse\"\n",
+      "success": true,
+      "name": "foreign-url",
+      "audit": true,
+      "servers": {
+        "fig": {
+          "enabled": true,
+          "url": "https://mcp.example.com/sse",
+          "access": "write"
+        },
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_foreign_default_access",
+      "input_name": "foreign-def-access",
+      "input_toml": "[profile]\nname = \"foreign-def-access\"\n\n[servers.myapi]\nenabled = true\ncommand = \"/usr/bin/myapi\"\n",
+      "success": true,
+      "name": "foreign-def-access",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "myapi": {
+          "enabled": true,
+          "command": "/usr/bin/myapi",
+          "access": "write"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      }
+    },
+    {
+      "id": "prof_warnings_unknown_keys",
+      "input_name": "warn-keys",
+      "input_toml": "[profile]\nname = \"warn-keys\"\nauthor = \"Daniel\"\n\n[audit]\nenabled = true\nextra_audit = 123\n",
+      "success": true,
+      "name": "warn-keys",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "unknown key \"audit.extra_audit\"",
+        "unknown key \"profile.author\""
+      ]
+    },
+    {
+      "id": "prof_warnings_dotted_subtables_leaf_only",
+      "input_name": "warn-dotted",
+      "input_toml": "[profile]\nname = \"warn-dotted\"\n\n[servers.vault]\nenabled = true\nfoo.bar = 1\n\n[servers.vault.sub1.sub2]\nleaf = 42\n\n[unknown.top]\ndeep_leaf = 99\n",
+      "success": true,
+      "name": "warn-dotted",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "unknown key \"servers.vault.foo.bar\"",
+        "unknown key \"servers.vault.sub1.sub2\"",
+        "unknown key \"servers.vault.sub1.sub2.leaf\"",
+        "unknown key \"unknown.top\"",
+        "unknown key \"unknown.top.deep_leaf\""
+      ]
+    },
+    {
+      "id": "prof_warnings_skills_mode",
+      "input_name": "warn-skills-mode",
+      "input_toml": "[profile]\nname = \"warn-skills-mode\"\n\n[servers.skills]\nenabled = true\nmode = \"full\"\n",
+      "success": true,
+      "name": "warn-skills-mode",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": true
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "servers.skills: mode \"full\" is ignored (skills has no modes)"
+      ]
+    },
+    {
+      "id": "prof_warnings_usage_mode",
+      "input_name": "warn-usage-mode",
+      "input_toml": "[profile]\nname = \"warn-usage-mode\"\n\n[servers.usage]\nenabled = true\nmode = \"full\"\n",
+      "success": true,
+      "name": "warn-usage-mode",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": true
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "servers.usage: mode \"full\" is ignored (usage has no modes)"
+      ]
+    },
+    {
+      "id": "prof_warnings_foreign_mode",
+      "input_name": "warn-foreign-mode",
+      "input_toml": "[profile]\nname = \"warn-foreign-mode\"\n\n[servers.echo]\nenabled = true\ncommand = \"/bin/echo\"\nmode = \"full\"\n",
+      "success": true,
+      "name": "warn-foreign-mode",
+      "audit": true,
+      "servers": {
+        "echo": {
+          "enabled": true,
+          "command": "/bin/echo",
+          "access": "write"
+        },
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": false,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "servers.echo: mode \"full\" is ignored (foreign servers have no mode presets)"
+      ]
+    },
+    {
+      "id": "prof_warnings_core_access_tools",
+      "input_name": "warn-core-access",
+      "input_toml": "[profile]\nname = \"warn-core-access\"\n\n[servers.vault]\nenabled = true\naccess = \"read\"\ntools_read = [\"get_entry\"]\ntools_write = [\"set_entry_field\"]\n",
+      "success": true,
+      "name": "warn-core-access",
+      "audit": true,
+      "servers": {
+        "memory": {
+          "enabled": false,
+          "mode": "read_only"
+        },
+        "skills": {
+          "enabled": false
+        },
+        "usage": {
+          "enabled": false
+        },
+        "vault": {
+          "enabled": true,
+          "mode": "request_only"
+        }
+      },
+      "warnings": [
+        "servers.vault: access/tools_read/tools_write are ignored (core exposure is governed by the mode preset)"
+      ]
+    },
+    {
+      "id": "prof_error_name_mismatch",
+      "input_name": "expected-name",
+      "input_toml": "[profile]\nname = \"actual-different-name\"\n",
+      "success": false,
+      "error_substr": "profile \"expected-name\": name mismatch: profile.name \"actual-different-name\" does not match filename \"expected-name\""
+    },
+    {
+      "id": "prof_error_invalid_name_chars",
+      "input_name": "bad/name",
+      "input_toml": "[profile]\nname = \"bad/name\"\n",
+      "success": false,
+      "error_substr": "profile: invalid name \"bad/name\": profile name \"bad/name\" must be non-empty and contain only letters, digits, '-', or '_'"
+    },
+    {
+      "id": "prof_error_invalid_name_traversal",
+      "input_name": "../../etc",
+      "input_toml": "[profile]\nname = \"../../etc\"\n",
+      "success": false,
+      "error_substr": "profile: invalid name \"../../etc\": profile name \"../../etc\" must be non-empty and contain only letters, digits, '-', or '_'"
+    },
+    {
+      "id": "prof_error_missing_name",
+      "input_name": "",
+      "input_toml": "[profile]\nname = \"\"\n",
+      "success": false,
+      "error_substr": "profile: invalid name \"\": profile name \"\" must be non-empty and contain only letters, digits, '-', or '_'"
+    },
+    {
+      "id": "prof_error_malformed_toml",
+      "input_name": "broken",
+      "input_toml": "[profile\nname = \"broken\"\n",
+      "success": false,
+      "error_substr": "profile \"broken\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_invalid_vault_mode",
+      "input_name": "bad-vault",
+      "input_toml": "[profile]\nname = \"bad-vault\"\n\n[servers.vault]\nenabled = true\nmode = \"godmode\"\n",
+      "success": false,
+      "error_substr": "profile \"bad-vault\": invalid servers: servers.vault: invalid mode \"godmode\" (must be one of request_only, full, off)"
+    },
+    {
+      "id": "prof_error_invalid_memory_mode",
+      "input_name": "bad-memory",
+      "input_toml": "[profile]\nname = \"bad-memory\"\n\n[servers.memory]\nenabled = true\nmode = \"write_only\"\n",
+      "success": false,
+      "error_substr": "profile \"bad-memory\": invalid servers: servers.memory: invalid mode \"write_only\" (must be one of read_only, read_write)"
+    },
+    {
+      "id": "prof_error_foreign_missing_transport",
+      "input_name": "bad-foreign",
+      "input_toml": "[profile]\nname = \"bad-foreign\"\n\n[servers.orphan]\nenabled = true\n",
+      "success": false,
+      "error_substr": "profile \"bad-foreign\": invalid servers: servers.orphan: foreign server requires command (with optional args) or url"
+    },
+    {
+      "id": "prof_error_foreign_invalid_access",
+      "input_name": "bad-access",
+      "input_toml": "[profile]\nname = \"bad-access\"\n\n[servers.custom]\nenabled = true\ncommand = \"/usr/bin/tool\"\naccess = \"admin\"\n",
+      "success": false,
+      "error_substr": "profile \"bad-access\": invalid servers: servers.custom: invalid access \"admin\" (must be \"read\" or \"write\")"
+    },
+    {
+      "id": "prof_error_core_with_command",
+      "input_name": "bad-core-collision",
+      "input_toml": "[profile]\nname = \"bad-core-collision\"\n\n[servers.vault]\nenabled = true\ncommand = \"/bin/custom-vault\"\n",
+      "success": false,
+      "error_substr": "profile \"bad-core-collision\": invalid servers: servers.vault: core server cannot carry command/args/url — it is not a foreign server"
+    },
+    {
+      "id": "prof_error_wrong_profile_type",
+      "input_name": "wrong-profile-type",
+      "input_toml": "profile = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-profile-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_profile_name_type",
+      "input_name": "wrong-profile-name",
+      "input_toml": "[profile]\nname = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-profile-name\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_profile_description_type",
+      "input_name": "wrong-profile-desc",
+      "input_toml": "[profile]\nname = \"wrong-profile-desc\"\ndescription = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-profile-desc\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_audit_type",
+      "input_name": "wrong-audit-type",
+      "input_toml": "audit = \"yes\"\n\n[profile]\nname = \"wrong-audit-type\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-audit-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_audit_enabled_type",
+      "input_name": "wrong-audit-enabled",
+      "input_toml": "[profile]\nname = \"wrong-audit-enabled\"\n\n[audit]\nenabled = \"yes\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-audit-enabled\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_entry_int",
+      "input_name": "wrong-server-entry-int",
+      "input_toml": "[profile]\nname = \"wrong-server-entry-int\"\n\n[servers]\nvault = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-entry-int\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_entry_str",
+      "input_name": "wrong-server-entry-str",
+      "input_toml": "[profile]\nname = \"wrong-server-entry-str\"\n\n[servers]\nvault = \"bad\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-entry-str\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_entry_arr",
+      "input_name": "wrong-server-entry-arr",
+      "input_toml": "[profile]\nname = \"wrong-server-entry-arr\"\n\n[servers]\nvault = [1, 2]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-entry-arr\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_inline_int",
+      "input_name": "wrong-server-inline-int",
+      "input_toml": "servers = { vault = 123 }\n\n[profile]\nname = \"wrong-server-inline-int\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-inline-int\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_inline_str",
+      "input_name": "wrong-server-inline-str",
+      "input_toml": "servers = { vault = \"bad\" }\n\n[profile]\nname = \"wrong-server-inline-str\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-inline-str\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_enabled_type",
+      "input_name": "wrong-server-enabled",
+      "input_toml": "[profile]\nname = \"wrong-server-enabled\"\n\n[servers.vault]\nenabled = \"true\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-enabled\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_server_mode_type",
+      "input_name": "wrong-server-mode",
+      "input_toml": "[profile]\nname = \"wrong-server-mode\"\n\n[servers.vault]\nmode = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-mode\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_command_type",
+      "input_name": "wrong-server-cmd",
+      "input_toml": "[profile]\nname = \"wrong-server-cmd\"\n\n[servers.echo]\ncommand = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-cmd\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_url_type",
+      "input_name": "wrong-server-url",
+      "input_toml": "[profile]\nname = \"wrong-server-url\"\n\n[servers.fig]\nurl = true\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-url\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_access_type",
+      "input_name": "wrong-server-access",
+      "input_toml": "[profile]\nname = \"wrong-server-access\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\naccess = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-server-access\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_allow_type",
+      "input_name": "wrong-tools-allow-type",
+      "input_toml": "[profile]\nname = \"wrong-tools-allow-type\"\n\n[servers.vault]\ntools_allow = \"all\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-allow-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_allow_elem",
+      "input_name": "wrong-tools-allow-elem",
+      "input_toml": "[profile]\nname = \"wrong-tools-allow-elem\"\n\n[servers.vault]\ntools_allow = [123]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-allow-elem\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_deny_type",
+      "input_name": "wrong-tools-deny-type",
+      "input_toml": "[profile]\nname = \"wrong-tools-deny-type\"\n\n[servers.vault]\ntools_deny = 123\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-deny-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_deny_elem",
+      "input_name": "wrong-tools-deny-elem",
+      "input_toml": "[profile]\nname = \"wrong-tools-deny-elem\"\n\n[servers.vault]\ntools_deny = [true]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-deny-elem\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_args_type",
+      "input_name": "wrong-args-type",
+      "input_toml": "[profile]\nname = \"wrong-args-type\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\nargs = \"foo\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-args-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_args_elem",
+      "input_name": "wrong-args-elem",
+      "input_toml": "[profile]\nname = \"wrong-args-elem\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\nargs = [123]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-args-elem\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_read_type",
+      "input_name": "wrong-tools-read-type",
+      "input_toml": "[profile]\nname = \"wrong-tools-read-type\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\ntools_read = \"read\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-read-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_read_elem",
+      "input_name": "wrong-tools-read-elem",
+      "input_toml": "[profile]\nname = \"wrong-tools-read-elem\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\ntools_read = [123]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-read-elem\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_write_type",
+      "input_name": "wrong-tools-write-type",
+      "input_toml": "[profile]\nname = \"wrong-tools-write-type\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\ntools_write = \"write\"\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-write-type\": failed to parse TOML"
+    },
+    {
+      "id": "prof_error_wrong_tools_write_elem",
+      "input_name": "wrong-tools-write-elem",
+      "input_toml": "[profile]\nname = \"wrong-tools-write-elem\"\n\n[servers.echo]\ncommand = \"/bin/echo\"\ntools_write = [false]\n",
+      "success": false,
+      "error_substr": "profile \"wrong-tools-write-elem\": failed to parse TOML"
+    }
+  ],
+  "policy_cases": [
+    {
+      "id": "pol_vault_request_only",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "request_only"
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "request_only",
+      "exposed": [
+        "generate_password",
+        "health",
+        "request_credential"
+      ],
+      "hidden": [
+        "find_entries",
+        "get_entry",
+        "get_entry_metadata",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_full",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "full"
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "full",
+      "exposed": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_off",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "off"
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "off",
+      "hidden": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_disabled",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": false,
+        "mode": "full"
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "mode": "full",
+      "hidden": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_allow_overrides",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "request_only",
+        "tools_allow": [
+          "health"
+        ]
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "request_only",
+      "exposed": [
+        "health"
+      ],
+      "hidden": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_deny_removes",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "request_only",
+        "tools_deny": [
+          "health"
+        ]
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "request_only",
+      "exposed": [
+        "generate_password",
+        "request_credential"
+      ],
+      "hidden": [
+        "find_entries",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_vault_deny_wins_over_allow",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "request_only",
+        "tools_allow": [
+          "health",
+          "generate_password"
+        ],
+        "tools_deny": [
+          "health"
+        ]
+      },
+      "input_live_tools": [
+        "find_entries",
+        "generate_password",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami",
+        "vault_extra_tool"
+      ],
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "request_only",
+      "exposed": [
+        "generate_password"
+      ],
+      "hidden": [
+        "find_entries",
+        "get_entry",
+        "get_entry_metadata",
+        "health",
+        "request_credential",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ],
+      "unknown": [
+        "vault_extra_tool"
+      ]
+    },
+    {
+      "id": "pol_memory_read_only",
+      "input_server": "memory",
+      "input_config": {
+        "enabled": true,
+        "mode": "read_only"
+      },
+      "input_live_tools": [
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search",
+        "memory_set",
+        "activity_get",
+        "activity_search",
+        "activity_status",
+        "mem_extra"
+      ],
+      "success": true,
+      "server": "memory",
+      "enabled": true,
+      "mode": "read_only",
+      "exposed": [
+        "entity_list",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search"
+      ],
+      "hidden": [
+        "activity_get",
+        "activity_search",
+        "activity_status",
+        "entity_relate",
+        "memory_set"
+      ],
+      "unknown": [
+        "mem_extra"
+      ]
+    },
+    {
+      "id": "pol_memory_read_write",
+      "input_server": "memory",
+      "input_config": {
+        "enabled": true,
+        "mode": "read_write"
+      },
+      "input_live_tools": [
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search",
+        "memory_set",
+        "activity_get",
+        "activity_search",
+        "activity_status",
+        "mem_extra"
+      ],
+      "success": true,
+      "server": "memory",
+      "enabled": true,
+      "mode": "read_write",
+      "exposed": [
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search",
+        "memory_set"
+      ],
+      "hidden": [
+        "activity_get",
+        "activity_search",
+        "activity_status"
+      ],
+      "unknown": [
+        "mem_extra"
+      ]
+    },
+    {
+      "id": "pol_memory_activity_explicit_allow",
+      "input_server": "memory",
+      "input_config": {
+        "enabled": true,
+        "mode": "read_only",
+        "tools_allow": [
+          "memory_get",
+          "activity_get",
+          "activity_status"
+        ]
+      },
+      "input_live_tools": [
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search",
+        "memory_set",
+        "activity_get",
+        "activity_search",
+        "activity_status",
+        "mem_extra"
+      ],
+      "success": true,
+      "server": "memory",
+      "enabled": true,
+      "mode": "read_only",
+      "exposed": [
+        "activity_get",
+        "activity_status",
+        "memory_get"
+      ],
+      "hidden": [
+        "activity_search",
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_list",
+        "memory_search",
+        "memory_set"
+      ],
+      "unknown": [
+        "mem_extra"
+      ]
+    },
+    {
+      "id": "pol_skills_full_live",
+      "input_server": "skills",
+      "input_config": {
+        "enabled": true
+      },
+      "input_live_tools": [
+        "skill_search",
+        "skill_install",
+        "custom_skill"
+      ],
+      "success": true,
+      "server": "skills",
+      "enabled": true,
+      "exposed": [
+        "custom_skill",
+        "skill_install",
+        "skill_search"
+      ]
+    },
+    {
+      "id": "pol_skills_allow_narrowing",
+      "input_server": "skills",
+      "input_config": {
+        "enabled": true,
+        "tools_allow": [
+          "skill_search"
+        ]
+      },
+      "input_live_tools": [
+        "skill_search",
+        "skill_install",
+        "custom_skill"
+      ],
+      "success": true,
+      "server": "skills",
+      "enabled": true,
+      "exposed": [
+        "skill_search"
+      ],
+      "hidden": [
+        "custom_skill",
+        "skill_install"
+      ]
+    },
+    {
+      "id": "pol_skills_deny",
+      "input_server": "skills",
+      "input_config": {
+        "enabled": true,
+        "tools_deny": [
+          "custom_skill"
+        ]
+      },
+      "input_live_tools": [
+        "skill_search",
+        "skill_install",
+        "custom_skill"
+      ],
+      "success": true,
+      "server": "skills",
+      "enabled": true,
+      "exposed": [
+        "skill_install",
+        "skill_search"
+      ],
+      "hidden": [
+        "custom_skill"
+      ]
+    },
+    {
+      "id": "pol_usage_single_tool",
+      "input_server": "usage",
+      "input_config": {
+        "enabled": true
+      },
+      "input_live_tools": [
+        "get_ai_usage",
+        "unknown_usage_tool"
+      ],
+      "success": true,
+      "server": "usage",
+      "enabled": true,
+      "exposed": [
+        "get_ai_usage"
+      ],
+      "unknown": [
+        "unknown_usage_tool"
+      ]
+    },
+    {
+      "id": "pol_usage_deny",
+      "input_server": "usage",
+      "input_config": {
+        "enabled": true,
+        "tools_deny": [
+          "get_ai_usage"
+        ]
+      },
+      "input_live_tools": [
+        "get_ai_usage",
+        "unknown_usage_tool"
+      ],
+      "success": true,
+      "server": "usage",
+      "enabled": true,
+      "hidden": [
+        "get_ai_usage"
+      ],
+      "unknown": [
+        "unknown_usage_tool"
+      ]
+    },
+    {
+      "id": "pol_preset_eval_vault",
+      "input_server": "vault",
+      "input_config": {
+        "enabled": true,
+        "mode": "request_only"
+      },
+      "preset_eval": true,
+      "success": true,
+      "server": "vault",
+      "enabled": true,
+      "mode": "request_only",
+      "exposed": [
+        "generate_password",
+        "health",
+        "request_credential"
+      ],
+      "hidden": [
+        "find_entries",
+        "get_entry",
+        "get_entry_metadata",
+        "set_entry_field",
+        "symaira_audit_self",
+        "symaira_search",
+        "symaira_whoami"
+      ]
+    },
+    {
+      "id": "pol_preset_eval_memory",
+      "input_server": "memory",
+      "input_config": {
+        "enabled": true,
+        "mode": "read_write"
+      },
+      "preset_eval": true,
+      "success": true,
+      "server": "memory",
+      "enabled": true,
+      "mode": "read_write",
+      "exposed": [
+        "entity_list",
+        "entity_relate",
+        "entity_resolve",
+        "graph_neighbors",
+        "memory_get",
+        "memory_list",
+        "memory_search",
+        "memory_set"
+      ],
+      "hidden": [
+        "activity_get",
+        "activity_search",
+        "activity_status"
+      ]
+    },
+    {
+      "id": "pol_foreign_default_access_write",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool"
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_alpha"
+        },
+        {
+          "name": "tool_beta"
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "exposed": [
+        "tool_alpha",
+        "tool_beta"
+      ],
+      "exposures": {
+        "tool_alpha": {
+          "class": "write",
+          "source": "default_write"
+        },
+        "tool_beta": {
+          "class": "write",
+          "source": "default_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_access_read_unannotated",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "read"
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_alpha"
+        },
+        {
+          "name": "tool_beta"
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "hidden": [
+        "tool_alpha",
+        "tool_beta"
+      ],
+      "exposures": {
+        "tool_alpha": {
+          "class": "write",
+          "source": "default_write"
+        },
+        "tool_beta": {
+          "class": "write",
+          "source": "default_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_access_read_annotated_hint_read",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "read"
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_ro",
+          "read_only_hint": true
+        },
+        {
+          "name": "tool_rw",
+          "read_only_hint": false
+        },
+        {
+          "name": "tool_none"
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "exposed": [
+        "tool_ro"
+      ],
+      "hidden": [
+        "tool_none",
+        "tool_rw"
+      ],
+      "exposures": {
+        "tool_none": {
+          "class": "write",
+          "source": "default_write"
+        },
+        "tool_ro": {
+          "class": "read",
+          "source": "read_only_hint"
+        },
+        "tool_rw": {
+          "class": "write",
+          "source": "default_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_access_read_override_tools_read",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "read",
+        "tools_read": [
+          "tool_rw"
+        ]
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_ro",
+          "read_only_hint": true
+        },
+        {
+          "name": "tool_rw",
+          "read_only_hint": false
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "exposed": [
+        "tool_ro",
+        "tool_rw"
+      ],
+      "exposures": {
+        "tool_ro": {
+          "class": "read",
+          "source": "read_only_hint"
+        },
+        "tool_rw": {
+          "class": "read",
+          "source": "tools_read"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_access_write_override_tools_write",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "write",
+        "tools_write": [
+          "tool_ro"
+        ]
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_ro",
+          "read_only_hint": true
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "exposed": [
+        "tool_ro"
+      ],
+      "exposures": {
+        "tool_ro": {
+          "class": "write",
+          "source": "tools_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_deny_wins",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "write",
+        "tools_allow": [
+          "tool_a",
+          "tool_b"
+        ],
+        "tools_deny": [
+          "tool_a"
+        ]
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_a"
+        },
+        {
+          "name": "tool_b"
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true,
+      "exposed": [
+        "tool_b"
+      ],
+      "hidden": [
+        "tool_a"
+      ],
+      "exposures": {
+        "tool_a": {
+          "class": "write",
+          "source": "default_write"
+        },
+        "tool_b": {
+          "class": "write",
+          "source": "default_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_disabled",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": false,
+        "command": "/usr/bin/tool"
+      },
+      "input_foreign_tools": [
+        {
+          "name": "tool_a"
+        }
+      ],
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "hidden": [
+        "tool_a"
+      ],
+      "exposures": {
+        "tool_a": {
+          "class": "write",
+          "source": "default_write"
+        }
+      }
+    },
+    {
+      "id": "pol_foreign_empty_read",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "read"
+      },
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true
+    },
+    {
+      "id": "pol_foreign_empty_write",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": true,
+        "command": "/usr/bin/tool",
+        "access": "write"
+      },
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign",
+      "enabled": true
+    },
+    {
+      "id": "pol_foreign_empty_disabled",
+      "input_server": "myforeign",
+      "input_config": {
+        "enabled": false,
+        "command": "/usr/bin/tool"
+      },
+      "is_foreign": true,
+      "success": true,
+      "server": "myforeign"
+    }
+  ]
+}

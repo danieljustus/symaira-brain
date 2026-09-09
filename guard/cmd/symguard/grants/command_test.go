@@ -2,6 +2,8 @@ package grants
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -36,11 +38,16 @@ func reopen(t *testing.T, dir string) *grant.Store {
 func addGrant(t *testing.T, st *grant.Store, id, subject string, scope grant.Scope) {
 	t.Helper()
 	if err := st.Add(&grant.Grant{
-		ID:        id,
-		Scope:     scope,
-		Origin:    grant.Origin{Epoch: 1722924000, Via: "approval"},
-		GrantedAt: time.Date(2026, 8, 6, 10, 0, 0, 0, time.UTC),
-		Subject:   subject,
+		ID:           id,
+		Scope:        scope,
+		Origin:       grant.Origin{Epoch: 1722924000, Via: "approval"},
+		GrantedAt:    time.Date(2026, 8, 6, 10, 0, 0, 0, time.UTC),
+		Subject:      subject,
+		Capability:   "read_private",
+		Purpose:      "test-purpose",
+		Resource:     "fs/read_file",
+		ScopeCeiling: []string{"session"},
+		ExpiresAt:    time.Now().Add(time.Hour),
 	}); err != nil {
 		t.Fatalf("store.Add(%s) error = %v", id, err)
 	}
@@ -148,6 +155,34 @@ func TestRun_RevokeUsageErrors(t *testing.T) {
 				t.Errorf("expected usage on error, got: %s", out)
 			}
 		})
+	}
+}
+
+func TestRun_LegacyIncompleteGrantCanListAndRevoke(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("SYMGUARD_DATA", dir)
+	legacy := `[{"id":"legacy","scope":"device","subject":"agent-1","granted_at":"2026-08-06T10:00:00Z"}]`
+	if err := os.WriteFile(filepath.Join(dir, "grants.json"), []byte(legacy), 0o600); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+
+	var list bytes.Buffer
+	Run([]string{"list"}, &list)
+	if !strings.Contains(list.String(), "legacy") || !strings.Contains(list.String(), "agent-1") {
+		t.Fatalf("legacy grant missing from list: %s", list.String())
+	}
+
+	var revoke bytes.Buffer
+	Run([]string{"revoke", "legacy"}, &revoke)
+	if !strings.Contains(revoke.String(), "Revoked grant legacy.") {
+		t.Fatalf("legacy revoke output = %q", revoke.String())
+	}
+	fresh, err := grant.Open(dir)
+	if err != nil {
+		t.Fatalf("reopen legacy store error = %v", err)
+	}
+	if g, ok := fresh.Get("legacy"); !ok || !g.Revoked {
+		t.Fatal("legacy grant was not retained as a revoked tombstone")
 	}
 }
 

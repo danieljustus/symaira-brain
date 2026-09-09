@@ -35,9 +35,32 @@ func Backup(path string) (string, error) {
 		return "", fmt.Errorf("harness: read %s: %w", path, err)
 	}
 
-	backupPath := path + ".bak." + time.Now().UTC().Format(backupTimeFormat)
-	if err := fsutil.AtomicWriteFile(backupPath, data, info.Mode().Perm()); err != nil {
-		return "", fmt.Errorf("harness: write backup %s: %w", backupPath, err)
+	base := path + ".bak." + time.Now().UTC().Format(backupTimeFormat)
+	for suffix := 0; suffix < 1000; suffix++ {
+		backupPath := base
+		if suffix > 0 {
+			backupPath = fmt.Sprintf("%s.%d", base, suffix)
+		}
+		reserved, reserveErr := os.OpenFile(
+			backupPath,
+			os.O_WRONLY|os.O_CREATE|os.O_EXCL,
+			info.Mode().Perm(),
+		)
+		if reserveErr != nil {
+			if os.IsExist(reserveErr) {
+				continue
+			}
+			return "", fmt.Errorf("harness: reserve backup %s: %w", backupPath, reserveErr)
+		}
+		if err := reserved.Close(); err != nil {
+			_ = os.Remove(backupPath)
+			return "", fmt.Errorf("harness: close backup %s: %w", backupPath, err)
+		}
+		if err := fsutil.AtomicWriteFile(backupPath, data, info.Mode().Perm()); err != nil {
+			_ = os.Remove(backupPath)
+			return "", fmt.Errorf("harness: write backup %s: %w", backupPath, err)
+		}
+		return backupPath, nil
 	}
-	return backupPath, nil
+	return "", fmt.Errorf("harness: reserve backup %s: too many timestamp collisions", base)
 }

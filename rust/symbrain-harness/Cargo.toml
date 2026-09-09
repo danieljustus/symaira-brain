@@ -1,0 +1,25 @@
+[package]
+name = "symbrain-harness"
+description = "Native harness configuration registry and inventory for Symaira Brain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml_edit.workspace = true
+tempfile.workspace = true
+cap-std.workspace = true
+cap-fs-ext.workspace = true
+libc.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

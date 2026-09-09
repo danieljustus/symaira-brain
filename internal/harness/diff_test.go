@@ -2,6 +2,7 @@ package harness
 
 import (
 	"bytes"
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
@@ -124,18 +125,32 @@ func TestUnifiedDiff_TooLarge_ReturnsNotice(t *testing.T) {
 		got := UnifiedDiff("f", nil, new)
 		checkTooLargeNotice(t, got, 0, maxDiffLines+1)
 	})
+	t.Run("balanced inputs exceed comparison-cell cap", func(t *testing.T) {
+		old := bytes.Repeat([]byte("old line\n"), 2500)
+		new := bytes.Repeat([]byte("new line\n"), 2500)
+		got := UnifiedDiff("f", old, new)
+		checkTooLargeNotice(t, got, 2500, 2500)
+	})
 }
 
 func checkTooLargeNotice(t *testing.T, got string, oldCount, newCount int) {
 	t.Helper()
+	want := fmt.Sprintf("--- f\n+++ f\nfile too large to diff safely: %d old lines, %d new lines (max %d lines and %d comparison cells); full diff skipped\n",
+		oldCount, newCount, maxDiffLines, maxDiffComparisonCells)
+	if got != want {
+		t.Fatalf("unexpected safety notice:\ngot:  %q\nwant: %q", got, want)
+	}
 	if !strings.HasPrefix(got, "--- f\n+++ f\n") {
 		t.Fatalf("notice missing unified-diff file headers: %q", truncate(got))
 	}
-	if !strings.Contains(got, "file too large to diff") {
+	if !strings.Contains(got, "file too large to diff safely") {
 		t.Errorf("notice missing explanation: %q", truncate(got))
 	}
 	if !strings.Contains(got, "max "+strconv.Itoa(maxDiffLines)) {
 		t.Errorf("notice missing cap value: %q", truncate(got))
+	}
+	if !strings.Contains(got, strconv.Itoa(maxDiffComparisonCells)+" comparison cells") {
+		t.Errorf("notice missing comparison-cell cap: %q", truncate(got))
 	}
 	// The notice must not contain per-line diff content.
 	for _, marker := range []string{"\n-old line", "\n+new line"} {

@@ -177,6 +177,37 @@ func TestRenderRejectsUnknownCapabilityName(t *testing.T) {
 	}
 }
 
+func TestForcedRenderClearsCompatibilityAfterOverlay(t *testing.T) {
+	snapshotRegistry(t)
+	if err := DeclareCapabilities(map[string]map[string]bool{"codex": {CapSubagents: false}}); err != nil {
+		t.Fatalf("DeclareCapabilities: %v", err)
+	}
+	root := filepath.Join(t.TempDir(), "forced-overlay")
+	writeFile(t, filepath.Join(root, "SKILL.md"), `---
+name: forced-overlay
+description: A forced render with an overlay compatibility claim.
+---
+
+Body.
+`)
+	writeFile(t, filepath.Join(root, "symskills.toml"), "[skill]\nname = \"forced-overlay\"\nrequires = [\"subagents\"]\n")
+	writeFile(t, filepath.Join(root, "overlays", "codex", "frontmatter.toml"), "compatibility = \"codex\"\n")
+	bundle, err := skill.LoadBundle(root)
+	if err != nil {
+		t.Fatalf("LoadBundle: %v", err)
+	}
+	item, err := RenderTarget(bundle, TargetCodex, RenderMeta{IgnoreCapabilities: true})
+	if err != nil {
+		t.Fatalf("forced render: %v", err)
+	}
+	if item.Frontmatter.Compatibility != "" {
+		t.Fatalf("forced render regained compatibility after overlay: %q", item.Frontmatter.Compatibility)
+	}
+	if strings.Contains(item.SkillMD, "compatibility:") {
+		t.Fatalf("forced output contains compatibility after overlay:\n%s", item.SkillMD)
+	}
+}
+
 // TestRenderDropsForeignTargetMetadata: metadata namespaced under a harness
 // name is that harness's convention and must not travel to the others.
 func TestRenderDropsForeignTargetMetadata(t *testing.T) {

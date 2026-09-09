@@ -9,7 +9,9 @@ import (
 )
 
 //go:embed manifest.json
-var defaultManifestJSON []byte
+var embeddedManifestJSON []byte
+
+var defaultManifestJSON = embeddedManifestJSON
 
 // Manifest defines the pinned versions for each managed core binary.
 type Manifest struct {
@@ -158,6 +160,12 @@ func stripV(version string) string {
 // each side uses.
 func normalizeVersion(version string) string {
 	return strings.TrimPrefix(strings.TrimSpace(version), "v")
+}
+
+// VersionsMatch compares binary-reported and manifest-pinned versions while
+// ignoring the optional release-tag prefix and surrounding whitespace.
+func VersionsMatch(installed, wanted string) bool {
+	return normalizeVersion(installed) == normalizeVersion(wanted)
 }
 
 // SupportsPlatform reports whether the core ships for the given GOOS. An

@@ -12,7 +12,10 @@ var CursorTarget = Target{
 	Name:     string(harness.Cursor),
 	Filename: "symbrain.mdc",
 	Dir:      ".cursor/rules",
-	Render: func(content, _ string) string {
+	Render: func(existing, content, _ string) string {
+		if existing != "" {
+			return instructions.Render(existing, content)
+		}
 		header := "---\n" +
 			"description: Symaira brain managed instructions\n" +
 			"globs: **/*\n" +

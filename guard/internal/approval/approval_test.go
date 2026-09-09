@@ -18,8 +18,12 @@ func TestDecision_Grant(t *testing.T) {
 		wantScope grant.Scope
 	}{
 		{
-			name:      "approved with ttl creates session grant",
-			dec:       Decision{ID: "req-1", Approved: true, TTL: 5 * time.Minute, DecidedAt: decided},
+			name: "approved with ttl creates session grant",
+			dec: Decision{
+				ID: "req-1", Approved: true, TTL: 5 * time.Minute, DecidedAt: decided,
+				Capability: "read_secret", Purpose: "job-1", Resource: "vault/item-1",
+				ScopeCeiling: []string{"vault"},
+			},
 			subject:   "agent-1",
 			wantScope: grant.ScopeSession,
 		},
@@ -76,6 +80,16 @@ func TestDecision_Grant(t *testing.T) {
 			if !g.GrantedAt.Equal(decided) {
 				t.Errorf("grant granted_at = %v, want %v", g.GrantedAt, decided)
 			}
+			if g.Capability != tt.dec.Capability || g.Purpose != tt.dec.Purpose || g.Resource != tt.dec.Resource {
+				t.Errorf("grant binding = %+v, want decision binding", g)
+			}
+			if len(g.ScopeCeiling) != len(tt.dec.ScopeCeiling) ||
+				(len(tt.dec.ScopeCeiling) > 0 && g.ScopeCeiling[0] != tt.dec.ScopeCeiling[0]) {
+				t.Errorf("grant scope ceiling = %v, want %v", g.ScopeCeiling, tt.dec.ScopeCeiling)
+			}
+			if !g.ExpiresAt.Equal(decided.Add(tt.dec.TTL)) {
+				t.Errorf("grant expires_at = %v, want %v", g.ExpiresAt, decided.Add(tt.dec.TTL))
+			}
 			if g.Revoked {
 				t.Error("fresh grant is already revoked")
 			}
@@ -90,7 +104,11 @@ func TestDecision_GrantEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("grant.Open() error = %v", err)
 	}
-	dec := Decision{ID: "req-1", Approved: true, TTL: 10 * time.Minute, DecidedAt: time.Now()}
+	dec := Decision{
+		ID: "req-1", Approved: true, TTL: 10 * time.Minute, DecidedAt: time.Now(),
+		Capability: "read_secret", Purpose: "job-1", Resource: "vault/item-1",
+		ScopeCeiling: []string{"vault"},
+	}
 	g, err := dec.Grant("agent-1")
 	if err != nil {
 		t.Fatalf("Grant() error = %v", err)

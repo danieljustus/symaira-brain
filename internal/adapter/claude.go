@@ -7,13 +7,16 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/instructions"
 )
 
-// ClaudeTarget is the adapter for Claude Code.  CLAUDE.md carries a thin
+// ClaudeTarget is the adapter for Claude Code. CLAUDE.md carries a thin
 // pointer referencing AGENTS.md plus the managed block for project-specific
-// additions, mirroring the pattern used across the Symaira workspace.
+// additions. Existing files are rendered in place to preserve user bytes.
 var ClaudeTarget = Target{
 	Name:     string(harness.Claude),
 	Filename: "CLAUDE.md",
-	Render: func(content, projectDir string) string {
+	Render: func(existing, content, _ string) string {
+		if existing != "" {
+			return instructions.Render(existing, content)
+		}
 		pointer := fmt.Sprintf(
 			"<!-- symbrain:managed-pointer -->\n"+
 				"This file is managed by `symbrain sync`. "+
