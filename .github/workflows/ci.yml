@@ -110,6 +110,37 @@ jobs:
       - name: Rust quality and Go parity gates
         run: make rust-check parity-smoke
 
+      # Keep the protocol subprocess contract visible and independently
+      # executable. `rust-check` already covers this test, but a named gate
+      # prevents stdout/lifecycle regressions from disappearing inside a
+      # workspace-wide test log.
+      - name: Rust MCP stdio and lifecycle gate
+        run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+  # The migration's Rust CLI contains filesystem, process, and stdio paths
+  # whose macOS behavior cannot be established by Linux CI or cross-builds.
+  # Windows remains explicitly tracked in the contract matrix until the
+  # portable Go-oracle launcher and native runner coverage are available.
+  rust-migration-macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Rust quality and Go parity gates on macOS
+        run: make rust-check parity-smoke
+
+      - name: Rust MCP stdio and lifecycle gate on macOS
+        run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
   # Stdio hygiene gate: `symbrain mcp` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
   # shutdown (fake children). A dedicated job so a transport-breaking

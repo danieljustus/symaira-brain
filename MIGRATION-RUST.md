@@ -1,7 +1,10 @@
 # Go → Rust migration
 
-The migration is deliberately incremental. The Go implementation at commit
-`4b6be3b` remains the executable oracle until every contract row is green.
+The migration is deliberately incremental. Go remains the executable oracle
+until every contract row is green. Every oracle command is built from the
+immutable revision selected by `GO_ORACLE_REF` (default: the checked-out
+`HEAD` resolved to a commit) through a temporary `git archive`; dirty source
+files cannot silently become the reference behavior.
 The Rust binary already owns top-level help, `version`, all `config` actions,
 and `profile help|list|show|add` plus `audit tail`; the native core also owns
 profile policy, the deterministic merged tool catalog, and the redacting
@@ -126,11 +129,14 @@ machine-readable status is tracked in
 ```sh
 make rust-check
 make parity-smoke
+make rust-fuzz-smoke
 make test
 ```
 
 `parity-smoke` builds both implementations with the same `dev` version and
-runs language-neutral black-box cases in isolated HOME/XDG directories.
+runs language-neutral black-box cases in isolated HOME/XDG directories. To
+recheck a historical candidate, pass its immutable Go reference explicitly,
+for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 
 ## Cutover order
 
