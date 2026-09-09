@@ -601,6 +601,30 @@ make fmt         # gofmt -w -s .
 go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 ```
 
+The incremental Rust workspace currently contains `symbrain-guard-core`.
+Its [PR workflow](.github/workflows/rust.yml) runs the existing Go fixture
+checks (including the revision-pinned capability oracle), locked Rust
+checks/tests, and independent dependency-policy jobs on every PR to `main`.
+Use the toolchain in `rust-toolchain.toml` and the pinned audit tools:
+
+```bash
+cargo install cargo-audit --version 0.22.2 --locked
+cargo install cargo-deny --version 0.20.2 --locked
+go test ./.github/tests -count=1
+make rust-guard-check
+make rust-audit
+make rust-deny
+```
+
+`rust-audit` reads `Cargo.lock`; `rust-deny` checks the locked dependency
+graph for all platforms against [deny.toml](deny.toml). Failures block
+their jobs. These library and dependency checks do not establish native
+MCP process/stdio behavior. Native macOS/Linux/Windows MCP tests, scheduled
+bounded fuzzing, and phase-quality evidence remain open in
+[#532](https://github.com/danieljustus/symaira-brain/issues/532), pending the
+corresponding Rust packages and test tooling. Go remains the production
+implementation and rollback path.
+
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
 full architectural boundary rules referenced above. See
 [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process, and

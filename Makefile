@@ -5,8 +5,11 @@ BINARY := symbrain
 MODULE := github.com/danieljustus/symaira-brain
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 LDFLAGS := -X main.version=$(VERSION)
+# Keep fixture checks on the Go toolchain declared by this checkout.
+GO_ORACLE_TOOLCHAIN := $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
 
 .PHONY: build test test-race coverage lint fmt-check fmt vet clean
+.PHONY: rust-guard-check rust-audit rust-deny
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -88,3 +91,21 @@ fmt-check:
 clean:
 	rm -f $(BINARY)
 	go clean -testcache
+
+## rust-guard-check: Check the existing guard library against its Go oracles
+rust-guard-check:
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
+	cargo fmt --all --check
+	cargo check --workspace --all-targets --all-features --locked
+	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	cargo test --workspace --all-targets --all-features --locked
+	cargo test --workspace --doc --all-features --locked
+
+## rust-audit: Audit the committed lockfile without resolving or updating it
+rust-audit:
+	cargo audit --file Cargo.lock --deny warnings
+
+## rust-deny: Enforce dependency/license policy without changing Cargo.lock
+rust-deny:
+	cargo deny --locked --all-features check
