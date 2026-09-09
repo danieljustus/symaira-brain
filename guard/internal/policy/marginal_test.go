@@ -104,10 +104,10 @@ func TestClassifyRisk_NoCappingWithoutMarginal(t *testing.T) {
 	}
 }
 
-func TestMarginalCapabilityCheck_CredentialUseSuperset(t *testing.T) {
-	// Credential use encompasses read_secret
-	if !MarginalCapabilityCheck("read_secret", map[string]bool{"credential_use": true}) {
-		t.Error("credential_use should encompass read_secret")
+func TestMarginalCapabilityCheck_CredentialUseDoesNotRevealSecret(t *testing.T) {
+	// Credential use permits using a credential, not revealing its material.
+	if MarginalCapabilityCheck("read_secret", map[string]bool{"credential_use": true}) {
+		t.Error("credential_use must not encompass read_secret")
 	}
 }
 
@@ -127,14 +127,14 @@ func TestMarginalCapabilityCheck_DestructiveSuperset(t *testing.T) {
 	}
 }
 
-func TestMarginalCapabilityCheck_ReadSecretNotCappedByShell(t *testing.T) {
-	// Verify inverse: read_secret is NOT encompassed by shell
-	if MarginalCapabilityCheck("read_secret", map[string]bool{"shell": true}) {
-		t.Error("read_secret should not be capped by shell")
-	}
-	// But it IS encompassed by credential_use
-	if !MarginalCapabilityCheck("read_secret", map[string]bool{"credential_use": true}) {
-		t.Error("read_secret should be capped by credential_use")
+func TestMarginalCapabilityCheck_ReadSecretNotCappedByShellOrCredentialUse(t *testing.T) {
+	// Secret material remains distinct from execution and credential use.
+	for name, allowed := range map[string]bool{"shell": true, "credential_use": true} {
+		t.Run(name, func(t *testing.T) {
+			if MarginalCapabilityCheck("read_secret", map[string]bool{name: allowed}) {
+				t.Errorf("%s must not encompass read_secret", name)
+			}
+		})
 	}
 }
 
