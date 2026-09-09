@@ -300,6 +300,35 @@ showing this pattern, and `symbrain doctor` flags a profile that declares
 `access = "read"` with no `tools_read` override, since that combination
 typically exposes nothing.
 
+### Browse (optional module)
+
+[PB-2026-09-09](docs/product-boundaries.md) makes Browse an optional Brain
+module — Symaira's own MCP server, not a third-party foreign one, but wired
+through the same foreign-server mechanism above (`browse` is not one of the
+four reserved core aliases). Nothing installs or activates it by default:
+
+```bash
+symbrain config set modules.browse true   # opt in to installing it at all
+symbrain setup                            # now also installs symbrowse
+```
+
+Then enable it in a profile like any foreign server:
+
+```toml
+[servers.browse]
+enabled = true
+command = "symbrowse"
+args    = ["mcp"]
+access  = "write"   # browse tools change page state; "read" is stricter
+```
+
+A profile that enables `browse` while `symbrowse` isn't installed degrades
+visibly (a warning naming the missing binary on the gateway's stderr) rather
+than failing the whole `symbrain mcp` session — every other server the
+profile enables still works. Disabling `modules.browse` again does not
+remove an already-installed binary or touch profiles that reference it; it
+only stops `setup`/`doctor --fix` from reinstalling it.
+
 ## Command reference
 
 Implemented today:
