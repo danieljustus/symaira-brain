@@ -49,6 +49,14 @@ enabled = true
 #
 # [servers.usage]
 # binary_path = ""
+
+# Optional capability modules (PB-2026-09-09). Every module defaults to
+# disabled: enabling one only changes what 'symbrain setup'/'symbrain
+# doctor --fix' install, never a profile's tool exposure by itself — a
+# module still needs its own [servers.<alias>] entry in a profile (see
+# "Foreign servers" in README.md) to actually appear as tools.
+# [modules]
+# browse = false
 `
 
 const personalProfileTOML = `# Example profile: full access for trusted personal use.
