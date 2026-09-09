@@ -542,7 +542,7 @@
       ],
       "exit": 2,
       "stdout": "",
-      "stderr": "symbrain install: \u003croot\u003e/home/.claude.json: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\n",
+      "stderr": "symbrain install: \u003croot\u003e/home/.claude.json: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\n",
       "files": [
         {
           "path": "cache",

@@ -197,7 +197,10 @@ fn snapshot(root: &Path) -> Vec<ObservedFile> {
                     file_type: "symlink".into(),
                     mode,
                     bytes: None,
-                    target: Some(fs::read_link(&path).unwrap().to_string_lossy().into()),
+                    target: Some(normalize(
+                        fs::read_link(&path).unwrap().to_string_lossy().as_bytes(),
+                        root,
+                    )),
                 });
             } else if metadata.is_dir() {
                 out.push(ObservedFile {

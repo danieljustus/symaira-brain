@@ -657,9 +657,6 @@ fn format_parse_error(harness: &Harness, original: &[u8], error: &HarnessError) 
 }
 
 fn go_json_error_detail(original: &[u8], message: &str) -> String {
-    if original == b"{not valid json" {
-        return "invalid character 'o' in literal null (expecting 'u')".to_owned();
-    }
     let prefix = "expected `\"` at byte ";
     if let Some(position) = message
         .strip_prefix(prefix)
