@@ -167,6 +167,23 @@ func TestNormalizeVersion(t *testing.T) {
 	}
 }
 
+func TestVersionsMatch(t *testing.T) {
+	tests := []struct {
+		installed string
+		wanted    string
+		match     bool
+	}{
+		{"0.21.1", "v0.21.1", true},
+		{" v0.21.1 ", "0.21.1", true},
+		{"0.21.0", "v0.21.1", false},
+	}
+	for _, tt := range tests {
+		if got := VersionsMatch(tt.installed, tt.wanted); got != tt.match {
+			t.Errorf("VersionsMatch(%q, %q) = %v, want %v", tt.installed, tt.wanted, got, tt.match)
+		}
+	}
+}
+
 func TestBinaryPathInArchive_Vault(t *testing.T) {
 	core := &Core{
 		Version:     "v0.15.3",

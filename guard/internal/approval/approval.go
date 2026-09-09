@@ -44,6 +44,13 @@ type Decision struct {
 	Reason    string        `json:"reason,omitempty"`
 	TTL       time.Duration `json:"ttl,omitempty"`
 	DecidedAt time.Time     `json:"decided_at"`
+	// Binding fields are copied into a standing grant. Empty bindings are
+	// intentionally not authorization wildcards; the policy engine fails
+	// closed on them.
+	Capability   string   `json:"capability,omitempty"`
+	Purpose      string   `json:"purpose,omitempty"`
+	Resource     string   `json:"resource,omitempty"`
+	ScopeCeiling []string `json:"scope_ceiling,omitempty"`
 }
 
 // Grant converts an approved decision with a non-zero TTL into a standing,
@@ -63,10 +70,15 @@ func (d Decision) Grant(subject string) (*grant.Grant, error) {
 		decided = time.Now()
 	}
 	return &grant.Grant{
-		ID:        grant.NewID(),
-		Scope:     grant.ScopeSession,
-		Origin:    grant.Origin{Epoch: decided.Unix(), Via: "approval"},
-		GrantedAt: decided,
-		Subject:   subject,
+		ID:           grant.NewID(),
+		Scope:        grant.ScopeSession,
+		Origin:       grant.Origin{Epoch: decided.Unix(), Via: "approval"},
+		GrantedAt:    decided,
+		Subject:      subject,
+		Capability:   d.Capability,
+		Purpose:      d.Purpose,
+		Resource:     d.Resource,
+		ScopeCeiling: append([]string(nil), d.ScopeCeiling...),
+		ExpiresAt:    decided.Add(d.TTL),
 	}, nil
 }

@@ -11,11 +11,16 @@ import (
 
 func testGrant(id, subject string, scope Scope) *Grant {
 	return &Grant{
-		ID:        id,
-		Scope:     scope,
-		Origin:    Origin{Epoch: 1722924000, Via: "approval"},
-		GrantedAt: time.Date(2026, 8, 6, 10, 0, 0, 0, time.UTC),
-		Subject:   subject,
+		ID:           id,
+		Scope:        scope,
+		Origin:       Origin{Epoch: 1722924000, Via: "approval"},
+		GrantedAt:    time.Date(2026, 8, 6, 10, 0, 0, 0, time.UTC),
+		Subject:      subject,
+		Capability:   "read_private",
+		Purpose:      "test-purpose",
+		Resource:     "fs/read_file",
+		ScopeCeiling: []string{"session"},
+		ExpiresAt:    time.Now().Add(time.Hour),
 	}
 }
 
@@ -110,6 +115,11 @@ func TestStore_AddValidation(t *testing.T) {
 		{"empty ID", testGrant("", "agent-1", ScopeSession), true},
 		{"unknown scope", testGrant("g3", "agent-1", Scope("cluster")), true},
 		{"empty subject", testGrant("g4", "", ScopeSession), true},
+		{"incomplete authorization binding", func() *Grant {
+			g := testGrant("g5", "agent-1", ScopeSession)
+			g.Capability = ""
+			return g
+		}(), true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -244,6 +254,11 @@ func TestStore_Persistence(t *testing.T) {
 		t.Fatalf("Open() error = %v", err)
 	}
 	device := testGrant("g-device", "agent-1", ScopeDevice)
+	device.Capability = "read_secret"
+	device.Purpose = "job-1"
+	device.Resource = "vault/item-1"
+	device.ScopeCeiling = []string{"vault"}
+	device.ExpiresAt = time.Now().Add(time.Hour)
 	session := testGrant("g-session", "agent-1", ScopeSession)
 	if err := st.Add(device); err != nil {
 		t.Fatalf("Add(device) error = %v", err)
@@ -257,8 +272,15 @@ func TestStore_Persistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("reopen Open() error = %v", err)
 	}
-	if _, ok := st2.Get("g-device"); !ok {
+	if g, ok := st2.Get("g-device"); !ok {
 		t.Error("device grant lost after reopen")
+	} else {
+		if g.Capability != device.Capability || g.Purpose != device.Purpose || g.Resource != device.Resource {
+			t.Errorf("reopened binding = %+v, want capability/purpose/resource from persisted grant", g)
+		}
+		if len(g.ScopeCeiling) != 1 || g.ScopeCeiling[0] != "vault" || !g.ExpiresAt.Equal(device.ExpiresAt) {
+			t.Errorf("reopened scope/expiry = %+v, want persisted scope ceiling and expiry", g)
+		}
 	}
 	if _, ok := st2.Get("g-session"); ok {
 		t.Error("session grant persisted, want in-memory only")
@@ -313,6 +335,25 @@ func TestStore_LoadFailsClosed(t *testing.T) {
 				t.Error("Open() = nil error, want fail-closed error")
 			}
 		})
+	}
+}
+
+func TestStore_LegacyGrantLoadsButCannotAuthorize(t *testing.T) {
+	dir := t.TempDir()
+	legacy := `[{"id":"legacy","scope":"device","subject":"agent-1","granted_at":"2026-08-06T10:00:00Z","expires_at":"0001-01-01T00:00:00Z"}]`
+	if err := os.WriteFile(filepath.Join(dir, "grants.json"), []byte(legacy), 0o600); err != nil {
+		t.Fatalf("WriteFile() error = %v", err)
+	}
+	st, err := Open(dir)
+	if err != nil {
+		t.Fatalf("Open() legacy grant error = %v", err)
+	}
+	g, ok := st.Get("legacy")
+	if !ok {
+		t.Fatal("legacy grant was not retained for migration-safe listing")
+	}
+	if g.Authorizes("read_secret", "job-1", "vault/item-1", "vault", time.Now()) {
+		t.Fatal("legacy unbound grant must fail closed and never authorize")
 	}
 }
 

@@ -11,6 +11,11 @@
 coverage.out
 .worktrees/
 /dist/
+/target/
+/fuzz/target/
+/fuzz/artifacts/
+__pycache__/
+*.pyc
 .claude/
 .omo/
 .github/audit/

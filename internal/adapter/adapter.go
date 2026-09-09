@@ -1,6 +1,3 @@
-// Package adapter contains one small module per supported harness (claude,
-// codex, cursor, opencode, antigravity) that writes instructions and MCP
-// server configuration in that harness's own format.
 package adapter
 
 import (
@@ -9,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/danieljustus/symaira-brain/internal/harness"
+	"github.com/danieljustus/symaira-brain/internal/instructions"
 )
 
 // Target describes where an adapter writes its output file and how to
@@ -22,14 +20,11 @@ type Target struct {
 	// Empty means projectDir itself.
 	Dir string
 	// Render transforms the canonical instructions content into the
-	// harness-specific format. It receives the full merged content from
-	// instructions.Source and the path to the project directory (for
-	// relative references).
-	Render func(content, projectDir string) string
+	// harness-specific format. Existing bytes are supplied so user content
+	// outside the managed block can be preserved verbatim.
+	Render func(existing, content, projectDir string) string
 }
 
-// targetsByCapability names the concrete instruction implementations. The
-// harness registry owns which harness selects each implementation.
 var targetsByCapability = map[harness.InstructionAdapter]Target{
 	harness.InstructionAdapterAgents:      AgentsTarget,
 	harness.InstructionAdapterClaude:      ClaudeTarget,
@@ -38,9 +33,6 @@ var targetsByCapability = map[harness.InstructionAdapter]Target{
 }
 
 // TargetsForHarnesses derives the sync adapter map from the harness registry.
-// A missing adapter is deliberate and leaves the harness on sync's skipped
-// path; an unknown capability is a programmer error and is ignored here so a
-// malformed registry cannot make a sync invocation panic.
 func TargetsForHarnesses() map[string]Target {
 	targets := make(map[string]Target)
 	for _, h := range harness.All {
@@ -54,45 +46,49 @@ func TargetsForHarnesses() map[string]Target {
 	return targets
 }
 
-// Sync writes the adapter's output file into the resolved path under
-// projectDir.  When the file already exists it is passed through Render
-// which manages the block markers to preserve user content outside them.
-// Returns (path, created, error) where created reports whether the file
-// was newly created (true) or updated in place (false).
+// Sync writes the adapter's output file into a validated path beneath
+// projectDir. The retained parent capability spans read, render, and write.
 func Sync(t Target, content, projectDir string) (string, bool, error) {
-	dir := projectDir
+	relativeTarget := t.Filename
 	if t.Dir != "" {
-		dir = filepath.Join(projectDir, t.Dir)
+		relativeTarget = filepath.Join(t.Dir, t.Filename)
 	}
+	path := filepath.Join(projectDir, relativeTarget)
 
-	path := filepath.Join(dir, t.Filename)
-	existed := fileExists(path)
-
-	var existing string
-	if existed {
-		data, err := os.ReadFile(path)
-		if err != nil {
+	file, err := instructions.OpenAtomicFile(projectDir, relativeTarget, false)
+	if err != nil && !os.IsNotExist(err) {
+		return "", false, fmt.Errorf("adapter %s: open %s: %w", t.Name, path, err)
+	}
+	existed := false
+	var existingBytes []byte
+	if err == nil {
+		existingBytes, err = file.ReadBounded()
+		existed = err == nil
+		if err != nil && !os.IsNotExist(err) {
+			_ = file.Close()
 			return "", false, fmt.Errorf("adapter %s: read %s: %w", t.Name, path, err)
 		}
-		existing = string(data)
 	}
+	if file != nil {
+		defer file.Close()
+	}
+	existing := string(existingBytes)
 
-	rendered := t.Render(content, projectDir)
+	rendered := t.Render(existing, content, projectDir)
 	if rendered == existing {
 		return path, false, nil
 	}
 
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-		return "", false, fmt.Errorf("adapter %s: mkdir %s: %w", t.Name, filepath.Dir(path), err)
+	if file == nil {
+		file, err = instructions.OpenAtomicFile(projectDir, relativeTarget, true)
+		if err != nil {
+			return "", false, fmt.Errorf("adapter %s: open %s for write: %w", t.Name, path, err)
+		}
+		defer file.Close()
 	}
-	if err := os.WriteFile(path, []byte(rendered), 0o600); err != nil {
+	if err := file.Write([]byte(rendered)); err != nil {
 		return "", false, fmt.Errorf("adapter %s: write %s: %w", t.Name, path, err)
 	}
 
 	return path, !existed, nil
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
 }

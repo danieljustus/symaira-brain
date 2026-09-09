@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"runtime"
+	"sort"
 
 	"github.com/danieljustus/symaira-brain/internal/managed"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
@@ -60,8 +62,17 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsi
 	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 
-	for name, core := range manifest.Cores {
+	for _, name := range sortedCoreNames(manifest) {
+		core := manifest.Cores[name]
 		result := coreResult{Name: name, Version: core.Version}
+		if !core.SupportsPlatform(runtime.GOOS) {
+			result.Status = "skipped"
+			if !jsonOut {
+				fmt.Fprintf(stdout, "  -  %s %s (unsupported platform)\n", name, core.Version)
+			}
+			report.Results = append(report.Results, result)
+			continue
+		}
 
 		if err := inst.Install(ctx, &core); err != nil {
 			result.Status = "error"
@@ -108,11 +119,21 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 	report := setupReport{BinDir: binDir}
 	var fixed, skipped int
 
-	for name, core := range manifest.Cores {
+	for _, name := range sortedCoreNames(manifest) {
+		core := manifest.Cores[name]
 		result := coreResult{Name: name, Version: core.Version}
+		if !core.SupportsPlatform(runtime.GOOS) {
+			result.Status = "skipped"
+			skipped++
+			if !jsonOut {
+				fmt.Fprintf(stdout, "  -  %s %s (unsupported platform)\n", name, core.Version)
+			}
+			report.Results = append(report.Results, result)
+			continue
+		}
 
 		existing, _ := managed.InstalledVersion(ctx, binDir, core.BinaryName)
-		if existing == core.Version {
+		if managed.VersionsMatch(existing, core.Version) {
 			result.Status = "skipped"
 			skipped++
 			if !jsonOut {
@@ -150,4 +171,13 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 		return exitcodes.ExitGeneric
 	}
 	return exitcodes.ExitOK
+}
+
+func sortedCoreNames(manifest *managed.Manifest) []string {
+	names := make([]string, 0, len(manifest.Cores))
+	for name := range manifest.Cores {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }

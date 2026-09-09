@@ -1,0 +1,33 @@
+{
+  "pragmas": {
+    "foreign_keys": "1",
+    "journal_mode": "wal",
+    "secure_delete": "1"
+  },
+  "migrations": 37,
+  "null_order": [
+    "null",
+    "early",
+    "late"
+  ],
+  "lock_result": "begin-immediate-ok",
+  "activity_validation": [
+    "valid",
+    "query-required=activity query is required"
+  ],
+  "catalog": [
+    "activity_get",
+    "activity_search",
+    "activity_status",
+    "entity_list",
+    "memory_get",
+    "memory_list",
+    "memory_search",
+    "memory_set",
+    "query_log"
+  ],
+  "tool_errors": [
+    "activity_search: limit and max_tokens are required; unbounded queries are refused",
+    "memory_set: content and kind are required"
+  ]
+}

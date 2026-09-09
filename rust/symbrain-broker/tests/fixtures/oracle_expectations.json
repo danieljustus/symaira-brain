@@ -1,0 +1,16 @@
+{
+  "tool_names": [
+    "crash",
+    "echo",
+    "slow",
+    "toolerror"
+  ],
+  "echo_text": "{\"x\":1}",
+  "tool_error": true,
+  "tool_error_text": "toolerror: intentional failure for toolerror",
+  "timeout_category": "timeout",
+  "mismatch_category": "protocol_mismatch",
+  "mismatch_state": "degraded",
+  "crash_spawn_count": 2,
+  "crash_state": "ready"
+}

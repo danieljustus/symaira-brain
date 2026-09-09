@@ -1,0 +1,30 @@
+[package]
+name = "symbrain-gateway"
+description = "Native MCP gateway domain for Symaira Brain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+symbrain-audit.workspace = true
+symbrain-broker.workspace = true
+symbrain-catalog.workspace = true
+symbrain-core.workspace = true
+symbrain-memory.workspace = true
+symbrain-mcp.workspace = true
+symbrain-patterns.workspace = true
+symbrain-policy.workspace = true
+symbrain-activity.workspace = true
+symbrain-usage.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

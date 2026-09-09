@@ -105,6 +105,11 @@ type Logger struct {
 	maxBytes int64
 }
 
+// fileMu serializes all Logger instances, not only calls sharing one Logger.
+// The event log is process-global state and callers commonly construct a
+// short-lived logger per request.
+var fileMu sync.Mutex
+
 // New returns a Logger writing to path with the default rotation limit.
 // toolVersion is stamped into every record that does not set its own.
 func New(path, toolVersion string) *Logger {
@@ -116,6 +121,9 @@ func New(path, toolVersion string) *Logger {
 func NewWithLimit(path, toolVersion string, maxBytes int64) *Logger {
 	if maxBytes <= 0 {
 		maxBytes = DefaultMaxBytes
+	}
+	if strings.TrimSpace(toolVersion) == "" {
+		toolVersion = "dev"
 	}
 	return &Logger{path: path, version: toolVersion, maxBytes: maxBytes}
 }
@@ -139,6 +147,8 @@ func (l *Logger) Record(ev Event) {
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	fileMu.Lock()
+	defer fileMu.Unlock()
 	if ev.TS == "" {
 		ev.TS = time.Now().UTC().Format(time.RFC3339)
 	}
@@ -165,6 +175,8 @@ func (l *Logger) Read(filter Filter) ([]Event, error) {
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	fileMu.Lock()
+	defer fileMu.Unlock()
 	var out []Event
 	for _, path := range []string{rotatedPath(l.path), l.path} {
 		data, err := os.ReadFile(path)

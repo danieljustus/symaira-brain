@@ -1,0 +1,4 @@
+# libFuzzer corpus seeds deliberately contain protocol-level CRLF bytes.
+# Treat them as binary so Git preserves those exact bytes and diff checks do not
+# mistake the carriage returns for accidental trailing whitespace.
+fuzz/corpus/** binary

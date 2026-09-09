@@ -39,7 +39,7 @@ func TestGoldenVariantRender(t *testing.T) {
 				t.Fatalf("RenderTarget(%s): %v", target, err)
 			}
 			outDir := t.TempDir()
-			if err := writeRendered(bundle.Root, outDir, rendered, target, sourceTreeHash(bundle.Root)); err != nil {
+			if err := writeRendered(bundle, outDir, rendered, target, sourceTreeHash(bundle)); err != nil {
 				t.Fatalf("writeRendered(%s): %v", target, err)
 			}
 

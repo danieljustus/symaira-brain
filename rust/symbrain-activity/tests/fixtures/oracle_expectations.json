@@ -1,0 +1,324 @@
+{
+  "patterns": {
+    "episodes": [
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "memory",
+            "tool": "memory_search"
+          },
+          {
+            "server": "vault",
+            "tool": "request_credential"
+          }
+        ],
+        "started_at": "2026-08-01T09:00:00Z",
+        "ended_at": "2026-08-01T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "memory",
+            "tool": "memory_search"
+          },
+          {
+            "server": "vault",
+            "tool": "request_credential"
+          }
+        ],
+        "started_at": "2026-08-02T09:00:00Z",
+        "ended_at": "2026-08-02T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "memory",
+            "tool": "memory_search"
+          },
+          {
+            "server": "vault",
+            "tool": "request_credential"
+          }
+        ],
+        "started_at": "2026-08-03T09:00:00Z",
+        "ended_at": "2026-08-03T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "skills",
+            "tool": "skills_list"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_install"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_status"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_log"
+          }
+        ],
+        "started_at": "2026-08-04T09:00:00Z",
+        "ended_at": "2026-08-04T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "skills",
+            "tool": "skills_list"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_install"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_status"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_log"
+          }
+        ],
+        "started_at": "2026-08-05T09:00:00Z",
+        "ended_at": "2026-08-05T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "skills",
+            "tool": "skills_list"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_install"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_status"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_log"
+          }
+        ],
+        "started_at": "2026-08-06T09:00:00Z",
+        "ended_at": "2026-08-06T09:05:00Z"
+      },
+      {
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "vault",
+            "tool": "health"
+          }
+        ],
+        "started_at": "2026-08-07T09:00:00Z",
+        "ended_at": "2026-08-07T09:05:00Z"
+      }
+    ],
+    "threshold": 3,
+    "patterns": [
+      {
+        "name": "personal_memory_memory_search_vault_request_credential_f6f4eae2",
+        "version": 1,
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "memory",
+            "tool": "memory_search"
+          },
+          {
+            "server": "vault",
+            "tool": "request_credential"
+          }
+        ],
+        "trigger": {
+          "profile": "personal",
+          "first_step": {
+            "server": "memory",
+            "tool": "memory_search"
+          }
+        },
+        "provenance": {
+          "first_seen_at": "2026-08-01T09:00:00Z",
+          "last_seen_at": "2026-08-03T09:05:00Z",
+          "recurrence_count": 3
+        }
+      },
+      {
+        "name": "personal_skills_skills_list_skills_skills_install_skills_skills_status_d8dd44aa",
+        "version": 1,
+        "profile": "personal",
+        "steps": [
+          {
+            "server": "skills",
+            "tool": "skills_list"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_install"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_status"
+          },
+          {
+            "server": "skills",
+            "tool": "skills_log"
+          }
+        ],
+        "trigger": {
+          "profile": "personal",
+          "first_step": {
+            "server": "skills",
+            "tool": "skills_list"
+          }
+        },
+        "provenance": {
+          "first_seen_at": "2026-08-04T09:00:00Z",
+          "last_seen_at": "2026-08-06T09:05:00Z",
+          "recurrence_count": 3
+        }
+      }
+    ],
+    "names": [
+      "personal_memory_memory_search_vault_request_credential_f6f4eae2",
+      "personal_skills_skills_list_skills_skills_install_skills_skills_status_d8dd44aa"
+    ],
+    "store_line": "{\"profile\":\"personal\",\"steps\":[{\"server\":\"memory\",\"tool\":\"memory_search\"},{\"server\":\"vault\",\"tool\":\"request_credential\"}],\"started_at\":\"2026-08-01T09:00:00Z\",\"ended_at\":\"2026-08-01T09:05:00Z\"}\n"
+  },
+  "activity": {
+    "validation": [
+      {
+        "id": "valid",
+        "query": "editor",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T10:00:00Z",
+        "limit": 2,
+        "max_tokens": 20
+      },
+      {
+        "id": "query-required",
+        "query": " ",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T10:00:00Z",
+        "limit": 2,
+        "max_tokens": 20,
+        "error": "activity query is required"
+      },
+      {
+        "id": "query-too-long",
+        "query": "\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T10:00:00Z",
+        "limit": 2,
+        "max_tokens": 20,
+        "error": "activity query exceeds 512 characters"
+      },
+      {
+        "id": "window-order",
+        "query": "x",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T09:00:00Z",
+        "limit": 2,
+        "max_tokens": 20,
+        "error": "activity query requires an increasing from/to window"
+      },
+      {
+        "id": "window-range",
+        "query": "x",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-08T09:00:00.000000001Z",
+        "limit": 2,
+        "max_tokens": 20,
+        "error": "activity query window exceeds 168h0m0s"
+      },
+      {
+        "id": "limit",
+        "query": "x",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T10:00:00Z",
+        "limit": 0,
+        "max_tokens": 20,
+        "error": "activity query limit must be between 1 and 50"
+      },
+      {
+        "id": "tokens",
+        "query": "x",
+        "from": "2026-08-01T09:00:00Z",
+        "to": "2026-08-01T10:00:00Z",
+        "limit": 2,
+        "max_tokens": 0,
+        "error": "activity query max_tokens must be between 1 and 4000"
+      }
+    ],
+    "items": [
+      {
+        "id": "z",
+        "kind": "segment",
+        "source": "symcockpit",
+        "granularity": "10min",
+        "started_at": "2026-08-01T10:00:00Z",
+        "ended_at": "2026-08-01T10:10:00Z",
+        "applications": [
+          "Editor"
+        ],
+        "summary": "editor second",
+        "provenance": {
+          "source": "symcockpit"
+        },
+        "tokens": 0
+      },
+      {
+        "id": "a",
+        "kind": "segment",
+        "source": "symcockpit",
+        "granularity": "10min",
+        "started_at": "2026-08-01T09:00:00Z",
+        "ended_at": "2026-08-01T09:10:00Z",
+        "applications": [
+          "Editor"
+        ],
+        "summary": "editor ok",
+        "provenance": {
+          "source": "symcockpit"
+        },
+        "tokens": 0
+      }
+    ],
+    "page": {
+      "results": [
+        {
+          "id": "a",
+          "kind": "segment",
+          "source": "symcockpit",
+          "granularity": "10min",
+          "started_at": "2026-08-01T09:00:00Z",
+          "ended_at": "2026-08-01T09:10:00Z",
+          "applications": [
+            "Editor"
+          ],
+          "summary": "editor ok",
+          "provenance": {
+            "source": "symcockpit"
+          },
+          "tokens": 3
+        }
+      ],
+      "truncated": true,
+      "used_tokens": 3,
+      "max_tokens": 5
+    }
+  }
+}

@@ -54,6 +54,9 @@ type InstallStatus struct {
 	Mode        Mode          `json:"mode,omitempty"`
 	InstalledAt string        `json:"installed_at,omitempty"`
 	SourceHash  string        `json:"source_hash,omitempty"`
+	// AllowExecutable records the install policy so sync does not silently
+	// change resource permissions on a later reinstall.
+	AllowExecutable bool `json:"allow_executable,omitempty"`
 	// Error carries the reason an install could not be classified or
 	// re-installed (broken bundle, failed comparison render). The status
 	// stays one of the kinds above; sync skips entries with an error.
@@ -142,17 +145,22 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 				continue
 			}
 			st := InstallStatus{
-				Target:      target,
-				Name:        entry.Name(),
-				Path:        path,
-				Status:      StatusStale,
-				Mode:        marker.Mode,
-				InstalledAt: marker.Installed,
-				SourceHash:  marker.SourceHash,
+				Target:          target,
+				Name:            entry.Name(),
+				Path:            path,
+				Status:          StatusStale,
+				Mode:            marker.Mode,
+				InstalledAt:     marker.Installed,
+				SourceHash:      marker.SourceHash,
+				AllowExecutable: marker.AllowExecutable,
 			}
 			if merr != nil {
 				st.Error = merr.Error()
 				out = append(out, st)
+				continue
+			}
+			if marker.ManagedBy != "symskills" || string(marker.Target) != string(target) || marker.Name != entry.Name() || (marker.Mode != ModeCopy && marker.Mode != ModeSymlink) {
+				out = append(out, InstallStatus{Target: target, Name: entry.Name(), Path: path, Status: StatusUnmanaged, Mode: marker.Mode, InstalledAt: marker.Installed, SourceHash: marker.SourceHash, AllowExecutable: marker.AllowExecutable})
 				continue
 			}
 			installs[entry.Name()] = append(installs[entry.Name()], pending{target: target, path: path, marker: marker})
@@ -178,7 +186,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 			for _, p := range pend {
 				out = append(out, InstallStatus{
 					Target: p.target, Name: name, Path: p.path, Status: StatusOrphaned,
-					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash,
+					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash, AllowExecutable: p.marker.AllowExecutable,
 				})
 			}
 			continue
@@ -188,7 +196,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 			for _, p := range pend {
 				out = append(out, InstallStatus{
 					Target: p.target, Name: name, Path: p.path, Status: StatusStale,
-					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash,
+					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash, AllowExecutable: p.marker.AllowExecutable,
 					Error: err.Error(),
 				})
 			}
@@ -207,7 +215,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 			for _, p := range pend {
 				out = append(out, InstallStatus{
 					Target: p.target, Name: name, Path: p.path, Status: StatusStale,
-					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash,
+					Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash, AllowExecutable: p.marker.AllowExecutable,
 					Error: err.Error(),
 				})
 			}
@@ -232,7 +240,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 		for _, p := range pend {
 			st := InstallStatus{
 				Target: p.target, Name: name, Path: p.path, Status: StatusStale,
-				Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash,
+				Mode: p.marker.Mode, InstalledAt: p.marker.Installed, SourceHash: p.marker.SourceHash, AllowExecutable: p.marker.AllowExecutable,
 			}
 			f, ok := fresh[p.target]
 			if !ok {
@@ -296,7 +304,7 @@ func Status(opts StatusOptions) ([]InstallStatus, error) {
 // coarse source-hash comparison — the pre-#124 behavior for installs that
 // predate base snapshots.
 func classifyStatusInstall(target render.Target, name, installedPath, freshPath string, marker Marker, opts StatusOptions) *InstallStatus {
-	baseDir, err := BasePath(target, name, Options{HomeDir: opts.HomeDir, ProjectDir: opts.ProjectDir, Scope: opts.Scope, BaseDir: opts.BaseDir})
+	baseDir, err := basePathForRead(target, name, Options{HomeDir: opts.HomeDir, ProjectDir: opts.ProjectDir, Scope: opts.Scope, BaseDir: opts.BaseDir})
 	if err != nil {
 		return nil
 	}
@@ -316,7 +324,7 @@ func classifyStatusInstall(target render.Target, name, installedPath, freshPath 
 	outcome := SummarizeDrift(drifts)
 	st := &InstallStatus{
 		Target: target, Name: name, Path: installedPath, Status: outcome.Status,
-		Mode: marker.Mode, InstalledAt: marker.Installed, SourceHash: marker.SourceHash,
+		Mode: marker.Mode, InstalledAt: marker.Installed, SourceHash: marker.SourceHash, AllowExecutable: marker.AllowExecutable,
 	}
 	if outcome.Status == StatusConflict || outcome.Status == StatusHarnessChanged {
 		st.Drift = drifts

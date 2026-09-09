@@ -52,6 +52,9 @@ func (s *Store) Add(g *Grant) error {
 	if g.Subject == "" {
 		return errors.New("grant: add grant with empty subject")
 	}
+	if !g.bindingValid() {
+		return errors.New("grant: add grant with incomplete authorization binding")
+	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()

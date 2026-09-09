@@ -1,0 +1,31 @@
+[package]
+name = "symbrain-broker"
+description = "MCP child-process broker with lifecycle management"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+test-fakemcp = []
+
+[[bin]]
+name = "symbrain-fakemcp"
+path = "src/bin/fakemcp.rs"
+required-features = ["test-fakemcp"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+symbrain-mcp.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

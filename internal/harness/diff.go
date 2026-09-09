@@ -9,15 +9,10 @@ import (
 // UnifiedDiff's output, matching the conventional `diff -u` default.
 const diffContext = 3
 
-// maxDiffLines caps the size of the O(n·m) LCS table allocated by diffLines.
-// When either side of the diff exceeds this many lines, UnifiedDiff falls
-// back to an explicit notice instead of the table, keeping the worst-case
-// allocation at (maxDiffLines+1)² ints (~800 MB on 64-bit) rather than
-// growing quadratically with unbounded input (a ~50k-line harness config
-// would need ~20 GB and OOM the CLI). The cap is applied before any make()
-// call, so allocation sizes derived from input are provably bounded
-// (go/allocation-size-overflow).
+// maxDiffLines and maxDiffComparisonCells cap the O(n·m) LCS table allocated
+// by diffLines. Both checks run before any allocation derived from input.
 const maxDiffLines = 10000
+const maxDiffComparisonCells = 4000000
 
 // UnifiedDiff renders a unified diff of the change from old to new content,
 // for `install --dry-run` / `uninstall --dry-run` output. It is a
@@ -35,7 +30,9 @@ func UnifiedDiff(path string, old, new []byte) string {
 	// notice (still in unified-diff shape) instead of allocating a table that
 	// can reach ~20 GB for a ~50k-line config. The check happens before any
 	// allocation derived from input size.
-	if len(oldLines) > maxDiffLines || len(newLines) > maxDiffLines {
+	oldCells, newCells := len(oldLines)+1, len(newLines)+1
+	tooManyCells := oldCells > maxDiffComparisonCells/newCells
+	if len(oldLines) > maxDiffLines || len(newLines) > maxDiffLines || tooManyCells {
 		return tooLargeDiffNotice(path, len(oldLines), len(newLines))
 	}
 
@@ -55,7 +52,7 @@ func UnifiedDiff(path string, old, new []byte) string {
 }
 
 // tooLargeDiffNotice renders an explicit notice instead of a full LCS diff
-// when either side of the change exceeds maxDiffLines. It keeps the
+// when either input limit is exceeded. It keeps the
 // unified-diff output shape (both "---"/"+++" file headers) so consumers of
 // UnifiedDiff see a well-formed, honest result for oversized inputs instead
 // of an OOM or a silently empty diff.
@@ -63,8 +60,8 @@ func tooLargeDiffNotice(path string, oldCount, newCount int) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "--- %s\n", path)
 	fmt.Fprintf(&b, "+++ %s\n", path)
-	fmt.Fprintf(&b, "file too large to diff: %d old lines, %d new lines (max %d); full diff skipped\n",
-		oldCount, newCount, maxDiffLines)
+	fmt.Fprintf(&b, "file too large to diff safely: %d old lines, %d new lines (max %d lines and %d comparison cells); full diff skipped\n",
+		oldCount, newCount, maxDiffLines, maxDiffComparisonCells)
 	return b.String()
 }
 

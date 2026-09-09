@@ -1,0 +1,856 @@
+{
+  "schema_version": 1,
+  "providers": [
+    {
+      "id": "claude",
+      "strategy": "oauth",
+      "fallback": [
+        "oauth"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://api.anthropic.com/api/oauth/usage",
+        "headers": {
+          "anthropic-beta": "oauth-2025-04-20"
+        }
+      },
+      "response": {
+        "extra_usage": {
+          "limit": 10,
+          "used": 3.25
+        },
+        "five_hour": {
+          "limit": 100,
+          "resets_at": "2026-08-05T18:00:00Z",
+          "utilized": 45
+        },
+        "seven_day": {
+          "limit": 400,
+          "resets_at": "2026-08-09T00:00:00Z",
+          "utilized": 120
+        }
+      },
+      "snapshot": {
+        "provider_id": "claude",
+        "meters": [
+          {
+            "label": "five_hour",
+            "used": "45",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-05T18:00:00Z"
+          },
+          {
+            "label": "seven_day",
+            "used": "120",
+            "limit": "400",
+            "unit": "%",
+            "resets_at": "2026-08-09T00:00:00Z"
+          },
+          {
+            "label": "Extra usage",
+            "used": "3.25",
+            "limit": "10",
+            "unit": "USD"
+          }
+        ],
+        "currency": "USD",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "oauth"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"claude\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"claude\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "codex",
+      "strategy": "oauth",
+      "fallback": [
+        "oauth"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://chatgpt.com/backend-api/wham/usage",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "additional_rate_limits": [
+          {
+            "limit_name": "GPT-5.3-Codex-Spark",
+            "metered_feature": "codex_bengalfox",
+            "rate_limit": {
+              "allowed": true,
+              "limit_reached": false,
+              "primary_window": {
+                "limit_window_seconds": 18000,
+                "reset_after_seconds": 18000,
+                "reset_at": 1788438998,
+                "used_percent": 12
+              },
+              "secondary_window": {
+                "limit_window_seconds": 604800,
+                "reset_after_seconds": 604800,
+                "reset_at": 1789025798,
+                "used_percent": 3
+              }
+            }
+          }
+        ],
+        "credits": {
+          "balance": "0",
+          "has_credits": false,
+          "unlimited": false
+        },
+        "email": "dev@example.com",
+        "model_usage": {},
+        "plan_type": "prolite",
+        "rate_limit": {
+          "allowed": true,
+          "limit_reached": false,
+          "primary_window": {
+            "limit_window_seconds": 604800,
+            "reset_after_seconds": 343371,
+            "reset_at": 1788764369,
+            "used_percent": 67
+          },
+          "secondary_window": null
+        },
+        "user_id": "user-synthetic"
+      },
+      "snapshot": {
+        "provider_id": "codex",
+        "meters": [
+          {
+            "label": "1w",
+            "used": "67",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-07T06:59:29Z"
+          },
+          {
+            "label": "GPT-5.3-Codex-Spark 5h",
+            "used": "12",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-03T12:36:38Z"
+          },
+          {
+            "label": "GPT-5.3-Codex-Spark 1w",
+            "used": "3",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-10T07:36:38Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "oauth"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"codex\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"codex\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "copilot",
+      "strategy": "api",
+      "fallback": [
+        "api"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "copilot_plan": "individual",
+        "login": "octocat",
+        "quota_reset_date": "2026-10-01",
+        "quota_reset_date_utc": "2026-10-01T00:00:00.000Z",
+        "quota_snapshots": {
+          "chat": {
+            "entitlement": 0,
+            "has_quota": true,
+            "percent_remaining": 100,
+            "quota_id": "chat",
+            "remaining": 0,
+            "unlimited": true
+          },
+          "completions": {
+            "entitlement": 0,
+            "has_quota": true,
+            "percent_remaining": 100,
+            "quota_id": "completions",
+            "remaining": 0,
+            "unlimited": true
+          },
+          "premium_interactions": {
+            "entitlement": 300,
+            "has_quota": true,
+            "percent_remaining": 85,
+            "quota_id": "premium_interactions",
+            "remaining": 255,
+            "unlimited": false
+          }
+        },
+        "token_based_billing": true
+      },
+      "snapshot": {
+        "provider_id": "copilot",
+        "meters": [
+          {
+            "label": "Premium requests",
+            "used": "45",
+            "limit": "300",
+            "unit": "requests",
+            "resets_at": "2026-10-01T00:00:00Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"copilot\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"copilot\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "cursor",
+      "strategy": "web",
+      "fallback": [
+        "web"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://cursor.com/api/usage-summary",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "billingCycleEnd": "2026-09-01T00:00:00Z",
+        "billingCycleStart": "2026-08-01T00:00:00Z",
+        "individualUsage": {
+          "onDemand": {
+            "enabled": true,
+            "limit": 10000,
+            "remaining": 9266,
+            "used": 734
+          },
+          "overall": {
+            "enabled": false
+          },
+          "plan": {
+            "apiPercentUsed": 0.15,
+            "autoPercentUsed": 0.85,
+            "breakdown": {
+              "bonus": 0,
+              "included": 2000,
+              "total": 2000
+            },
+            "enabled": true,
+            "limit": 2000,
+            "remaining": 0,
+            "totalPercentUsed": 0.95,
+            "used": 2000
+          }
+        },
+        "isUnlimited": false,
+        "limitType": "soft",
+        "membershipType": "Pro"
+      },
+      "snapshot": {
+        "provider_id": "cursor",
+        "meters": [
+          {
+            "label": "Plan usage",
+            "used": "95",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "Auto usage",
+            "used": "85",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "API usage",
+            "used": "15",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "On-demand usage",
+            "used": "734",
+            "limit": "10000",
+            "unit": "USD",
+            "resets_at": "2026-09-01T00:00:00Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "web"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: Cursor session is invalid or expired. Re-import the cursor.com cookie or sign in to Cursor.app."
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"cursor\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"cursor\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "kimi",
+      "strategy": "api",
+      "fallback": [
+        "api"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "limits": [
+          {
+            "detail": {
+              "limit": "200",
+              "remaining": "61",
+              "resetTime": "2026-01-06T13:33:02.717479433Z",
+              "used": "139"
+            },
+            "window": {
+              "duration": 300,
+              "timeUnit": "TIME_UNIT_MINUTE"
+            }
+          }
+        ],
+        "usage": {
+          "limit": "2048",
+          "remaining": "1834",
+          "resetTime": "2026-01-09T15:23:13.716839300Z",
+          "used": "214"
+        }
+      },
+      "snapshot": {
+        "provider_id": "kimi",
+        "meters": [
+          {
+            "label": "Weekly quota",
+            "used": "214",
+            "limit": "2048",
+            "unit": "requests",
+            "resets_at": "2026-01-09T15:23:13.7168393Z"
+          },
+          {
+            "label": "5h window",
+            "used": "139",
+            "limit": "200",
+            "unit": "requests",
+            "resets_at": "2026-08-01T01:00:00Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"kimi\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"kimi\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "moonshot",
+      "strategy": "api",
+      "fallback": [
+        "api"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://api.moonshot.ai/v1/users/me/balance",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "available_balance": "42.50",
+        "cash_balance": "32.50",
+        "voucher_balance": "10.00"
+      },
+      "snapshot": {
+        "provider_id": "moonshot",
+        "meters": [
+          {
+            "label": "Cash balance",
+            "used": "32.5",
+            "unit": "USD"
+          },
+          {
+            "label": "Voucher balance",
+            "used": "10",
+            "unit": "USD"
+          }
+        ],
+        "balance": "42.5",
+        "currency": "USD",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is not configured"
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"moonshot\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "nous",
+      "strategy": "api",
+      "fallback": [
+        "api"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://portal.nousresearch.com/api/oauth/account",
+        "headers": {
+          "Accept": "application/json"
+        }
+      },
+      "response": {
+        "organisation": {
+          "id": "org_1",
+          "name": "Example Org",
+          "slug": "example"
+        },
+        "paid_service_access": {
+          "active_subscription_is_paid": true,
+          "allowed": true,
+          "has_active_subscription": true,
+          "organisation_id": "org_1",
+          "paid_access": true,
+          "purchased_credits_remaining": 15,
+          "subscription_credits_remaining": 42.5,
+          "subscription_monthly_charge": 20,
+          "subscription_tier": 3,
+          "total_usable_credits": 57.5
+        },
+        "subscription": {
+          "credits_remaining": 42.5,
+          "current_period_end": "2026-09-01T00:00:00Z",
+          "monthly_charge": 20,
+          "monthly_credits": 100,
+          "plan": "pro",
+          "rollover_credits": 7.5,
+          "tier": 3
+        },
+        "user": {
+          "email": "dev@example.com",
+          "privy_did": "did:privy:abc123"
+        }
+      },
+      "snapshot": {
+        "provider_id": "nous",
+        "meters": [
+          {
+            "label": "Subscription credits",
+            "used": "42.5",
+            "unit": "credits"
+          },
+          {
+            "label": "Purchased credits",
+            "used": "15",
+            "unit": "credits"
+          },
+          {
+            "label": "Plan credits remaining",
+            "used": "42.5",
+            "limit": "100",
+            "unit": "credits",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "Rollover credits",
+            "used": "7.5",
+            "unit": "credits"
+          }
+        ],
+        "balance": "57.5",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"nous\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"nous\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "opencode",
+      "strategy": "web",
+      "fallback": [
+        "web"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://opencode.ai/_server?args=%5B%22wrk_fixture%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+        "headers": {
+          "Accept": "text/javascript, application/json;q=0.9, */*;q=0.8",
+          "X-Server-Id": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+        }
+      },
+      "response": {
+        "rollingUsage": {
+          "resetInSec": 3600,
+          "usagePercent": 12.34
+        },
+        "weeklyUsage": {
+          "resetInSec": 86400,
+          "usagePercent": 45.6
+        }
+      },
+      "snapshot": {
+        "provider_id": "opencode",
+        "meters": [
+          {
+            "label": "5h window",
+            "used": "12.34",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-01T01:00:00Z"
+          },
+          {
+            "label": "This week",
+            "used": "45.6",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-02T00:00:00Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "web"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: OpenCode API error: HTTP 429"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+        }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "strategy": "api",
+      "fallback": [
+        "api"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "GET",
+        "url": "https://openrouter.ai/api/v1/auth/key",
+        "headers": {
+          "Accept": "application/json",
+          "X-Title": "symbrain"
+        }
+      },
+      "response": {
+        "data": {
+          "is_free_tier": false,
+          "label": "test-key",
+          "limit": 50,
+          "rate_limit": {
+            "interval": "10s",
+            "requests": 500
+          },
+          "total_credits": 50,
+          "usage": 7.25,
+          "usage_period": {
+            "end_time": "2026-09-01T00:00:00Z",
+            "start_time": "2026-08-01T00:00:00Z"
+          }
+        }
+      },
+      "snapshot": {
+        "provider_id": "openrouter",
+        "meters": [
+          {
+            "label": "Key limit",
+            "used": "7.25",
+            "limit": "50",
+            "unit": "USD",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "Requests",
+            "limit": "500",
+            "unit": "requests"
+          }
+        ],
+        "balance": "42.75",
+        "currency": "USD",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is not configured"
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is rate limited; retry in 17s"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: AI usage provider \"openrouter\" returned malformed usage data: response contained no usable usage fields"
+        }
+      ]
+    },
+    {
+      "id": "antigravity",
+      "strategy": "local",
+      "fallback": [
+        "local"
+      ],
+      "auth": {
+        "configured": true,
+        "source": "fixture",
+        "status": "available"
+      },
+      "request": {
+        "method": "POST",
+        "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "body": "{}"
+      },
+      "response": {
+        "code": 0,
+        "message": "",
+        "response": {
+          "description": "Quota summary",
+          "groups": [
+            {
+              "buckets": [
+                {
+                  "bucketId": "gemini-weekly",
+                  "disabled": false,
+                  "displayName": "Weekly limit",
+                  "remainingFraction": 0.42,
+                  "resetTime": "2026-08-10T00:00:00Z"
+                },
+                {
+                  "bucketId": "gemini-5h",
+                  "disabled": false,
+                  "displayName": "5-hour limit",
+                  "remainingFraction": 0.85,
+                  "resetTime": "2026-08-05T23:00:00Z"
+                }
+              ],
+              "description": "Weekly and five-hour limits",
+              "displayName": "Gemini Models"
+            },
+            {
+              "buckets": [
+                {
+                  "bucketId": "claude-weekly",
+                  "disabled": false,
+                  "displayName": "Weekly limit",
+                  "remainingFraction": 0.1,
+                  "resetTime": "2026-08-10T00:00:00Z"
+                }
+              ],
+              "displayName": "Claude and GPT models"
+            }
+          ]
+        }
+      },
+      "snapshot": {
+        "provider_id": "antigravity",
+        "meters": [
+          {
+            "label": "Gemini Models — Weekly limit",
+            "used": "58",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-10T00:00:00Z"
+          },
+          {
+            "label": "Gemini Models — 5-hour limit",
+            "used": "15",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-05T23:00:00Z"
+          },
+          {
+            "label": "Claude and GPT models — Weekly limit",
+            "used": "90",
+            "limit": "100",
+            "unit": "%",
+            "resets_at": "2026-08-10T00:00:00Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "local"
+      },
+      "errors": [
+        {
+          "status": 401,
+          "kind": "auth",
+          "text": "all AI usage fallbacks failed: Antigravity probe failed: connect probe failed on port 43123"
+        },
+        {
+          "status": 429,
+          "kind": "rate_limited",
+          "text": "all AI usage fallbacks failed: Antigravity probe failed: connect probe failed on port 43123"
+        },
+        {
+          "kind": "parse",
+          "text": "all AI usage fallbacks failed: Antigravity returned an unreadable response: GetCommandModelConfigs returned unreadable data"
+        }
+      ]
+    }
+  ]
+}

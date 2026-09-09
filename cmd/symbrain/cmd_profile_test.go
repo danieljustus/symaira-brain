@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -579,6 +580,39 @@ name = "forced"`)
 	path := filepath.Join(home, ".config", "symbrain", "profiles", "forced.toml")
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Errorf("expected %s to be removed with --force, stat err = %v", path, err)
+	}
+}
+
+// ---- remove: symlinked profile root ----
+
+func TestCmdProfileRemove_SymlinkedProfilesRootRefuses(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlinked profile roots are covered by the Unix capability implementation")
+	}
+	home := sandboxHome(t)
+	configRoot := filepath.Join(home, ".config", "symbrain")
+	outside := t.TempDir()
+	victim := filepath.Join(outside, "victim.toml")
+	if err := os.WriteFile(victim, []byte("outside\n"), 0o600); err != nil {
+		t.Fatalf("WriteFile(victim): %v", err)
+	}
+	if err := os.MkdirAll(configRoot, 0o755); err != nil {
+		t.Fatalf("MkdirAll(configRoot): %v", err)
+	}
+	if err := os.Symlink(outside, filepath.Join(configRoot, "profiles")); err != nil {
+		t.Fatalf("Symlink(profiles): %v", err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := cmdProfile([]string{"remove", "victim", "--force"}, &stdout, &stderr)
+	if code != exitcodes.ExitGeneric {
+		t.Fatalf("profile remove victim = %d, want %d (stderr: %s)", code, exitcodes.ExitGeneric, stderr.String())
+	}
+	if got, err := os.ReadFile(victim); err != nil || string(got) != "outside\n" {
+		t.Fatalf("victim changed: bytes=%q err=%v", got, err)
+	}
+	if !strings.Contains(stderr.String(), `open profile directory component "profiles"`) {
+		t.Errorf("stderr = %q, want profile-root refusal", stderr.String())
 	}
 }
 
