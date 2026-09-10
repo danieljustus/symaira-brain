@@ -82,10 +82,10 @@ public struct VaultClient: Sendable {
 
     /// Run `symvault version`. The command has no JSON mode, so the raw first
     /// line is returned.
-    public func version() async throws -> String {
+    public func version(profile: String? = nil) async throws -> String {
         let result = try await runner.runAllowingFailure(
             try executable(),
-            arguments: arguments(profile: nil, command: ["version"]),
+            arguments: arguments(profile: profile, command: ["version"]),
             timeout: 10
         )
         return result.stdoutText

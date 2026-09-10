@@ -273,8 +273,25 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
 // MARK: - Vault
 
 @MainActor
+public protocol VaultClientProtocol: Sendable {
+    var isInstalled: Bool { get }
+    func availability(profile: String?) async -> VaultAvailability
+    func version(profile: String?) async throws -> String
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws
+    func lock(profile: String?) async throws
+    func list(profile: String?) async throws -> [VaultEntrySummary]
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail
+}
+
+extension VaultClient: VaultClientProtocol {}
+
 public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
-    @Published public var availability: VaultAvailability = .checking
+    @Published public var availability: VaultAvailability = .checking {
+        didSet {
+            if availability != .ready { invalidatePendingDetail() }
+        }
+    }
     @Published public var versionLine: String?
     @Published public var entries: [VaultEntrySummary] = []
     @Published public var selectedPath: String?
@@ -293,11 +310,24 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var isBinaryNotFound = false
     @Published public var statusMessage: String?
 
-    private let client: VaultClient
+    private let client: any VaultClientProtocol
     private let auditReader = AuditLogReader()
+    private let sleep: @Sendable (Duration) async throws -> Void
+    private let clipboardWriter: @MainActor (String, Bool) -> Void
+    private var generation = 0
+    private var revealTask: Task<Void, Never>?
+    private var detailExpiryTask: Task<Void, Never>?
 
-    public init(client: VaultClient = VaultClient()) {
+    public init(
+        client: any VaultClientProtocol = VaultClient(),
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) },
+        clipboardWriter: (@MainActor (String, Bool) -> Void)? = nil
+    ) {
         self.client = client
+        self.sleep = sleep
+        self.clipboardWriter = clipboardWriter ?? { value, concealed in
+            writeToPasteboard(value, concealed: concealed)
+        }
     }
 
     public var isInstalled: Bool { client.isInstalled }
@@ -314,16 +344,18 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public func refresh() async {
+        invalidatePendingDetail()
         isLoading = true
         clearError()
         defer { isLoading = false }
 
-        availability = await client.availability()
+        availability = await client.availability(profile: nil)
         await loadActivity()
 
         switch availability {
         case .ready:
-            versionLine = try? await client.version()
+            versionLine = try? await client.version(profile: nil)
+            guard availability == .ready else { return }
             await loadEntries()
         case .missing, .locked, .checking, .failed:
             entries = []
@@ -337,8 +369,8 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         do {
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             entries = query.isEmpty
-                ? try await client.list()
-                : try await client.find(query: query)
+                ? try await client.list(profile: nil)
+                : try await client.find(query: query, profile: nil)
             if let selectedPath, !entries.contains(where: { $0.path == selectedPath }) {
                 self.selectedPath = nil
                 detail = nil
@@ -362,21 +394,21 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         clearError()
         defer { isUnlocking = false }
 
+        defer { passphrase = "" }
         do {
-            try await client.unlock(passphrase: passphrase, ttl: sessionTTL)
-            passphrase = ""
+            try await client.unlock(passphrase: passphrase, ttl: sessionTTL, profile: nil)
             statusMessage = "Vault unlocked for \(sessionTTL)."
             await refresh()
         } catch {
-            passphrase = ""
             report(error)
         }
     }
 
     public func lock() async {
+        invalidatePendingDetail()
         clearError()
         do {
-            try await client.lock()
+            try await client.lock(profile: nil)
             entries = []
             detail = nil
             selectedPath = nil
@@ -388,16 +420,63 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
+    /// Selects an entry using the metadata-only list result. Secret fields are
+    /// not fetched until the user explicitly chooses to reveal this entry.
     public func select(path: String) async {
+        invalidatePendingDetail()
         selectedPath = path
         detail = nil
         revealedFields = []
         clearError()
-        do {
-            detail = try await client.entry(path: path)
-        } catch {
-            report(error)
+    }
+
+    /// Explicit human action that crosses the plaintext boundary for the
+    /// selected entry. The vault remains the storage and authorization owner.
+    public func revealSelectedEntry() async {
+        guard let selectedPath, availability == .ready else { return }
+        invalidateDetailExpiry()
+        let requestGeneration = generation
+        clearError()
+        revealTask?.cancel()
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let fetched = try await self.client.entry(path: selectedPath, profile: nil)
+                guard !Task.isCancelled, self.generation == requestGeneration,
+                      self.selectedPath == selectedPath, self.availability == .ready else { return }
+                self.detail = fetched
+                self.detailExpiryTask = Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    do { try await self.sleep(.seconds(30)) } catch { return }
+                    guard !Task.isCancelled, self.generation == requestGeneration,
+                          self.selectedPath == selectedPath else { return }
+                    self.detail = nil
+                    self.revealedFields = []
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                guard self.generation == requestGeneration, self.selectedPath == selectedPath else { return }
+                self.detail = nil
+                self.report(error)
+            }
         }
+        revealTask = task
+        await task.value
+    }
+
+    private func invalidatePendingDetail() {
+        generation &+= 1
+        revealTask?.cancel()
+        revealTask = nil
+        invalidateDetailExpiry()
+        detail = nil
+        revealedFields = []
+    }
+
+    private func invalidateDetailExpiry() {
+        detailExpiryTask?.cancel()
+        detailExpiryTask = nil
     }
 
     public func toggleReveal(field: String) {
@@ -412,11 +491,38 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         revealedFields.contains(field)
     }
 
-    /// Copies a field value. Sensitive fields are marked concealed so
-    /// clipboard managers do not archive the secret.
-    public func copyToPasteboard(_ value: String, label: String, concealed: Bool = false) {
-        writeToPasteboard(value, concealed: concealed)
+    private func copyToPasteboard(
+        _ value: String,
+        label: String,
+        intent: VaultCopyIntent = .ordinary
+    ) {
+        clipboardWriter(value, intent == .revealedSensitive)
         statusMessage = "\(label) copied to clipboard."
+    }
+
+    public func copyInstallCommand() {
+        copyToPasteboard(homebrewCommand, label: "Install command")
+    }
+
+    public func copyTOTP() {
+        guard availability == .ready,
+              let selectedPath,
+              let detail,
+              detail.path == selectedPath,
+              let totp = detail.totp else { return }
+        copyToPasteboard(totp.code, label: "TOTP code", intent: .revealedSensitive)
+    }
+
+    public func copyField(_ field: String) {
+        guard availability == .ready,
+              let selectedPath,
+              let detail,
+              detail.path == selectedPath,
+              let value = detail.fields[field]?.displayString,
+              !value.isEmpty else { return }
+        let sensitive = VaultFieldSecurity.isSensitive(field)
+        guard !sensitive || revealedFields.contains(field) else { return }
+        copyToPasteboard(value, label: field, intent: sensitive ? .revealedSensitive : .ordinary)
     }
 
     // clearError() and report(_:) are provided by ModuleViewModelProtocol.
@@ -602,17 +708,75 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
 
 // MARK: - Pasteboard
 
-/// Writes a value to the general pasteboard.
-///
-/// Concealed values are additionally marked with the `org.nspasteboard`
-/// convention so clipboard managers skip recording them — vault secrets must
-/// not end up in a clipboard history.
-func writeToPasteboard(_ value: String, concealed: Bool = false) {
+/// Small seam for testing clipboard expiry without touching the user's
+/// pasteboard. `changeCount` is the ownership token: value equality alone is
+/// unsafe because another app may replace the value with the same string.
+@MainActor
+protocol ClipboardPasteboard: AnyObject {
+    var changeCount: Int { get }
+    func clearContents()
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType)
+    func setData(_ data: Data, forType type: NSPasteboard.PasteboardType)
+}
+
+@MainActor
+private final class SystemClipboardPasteboard: ClipboardPasteboard {
     let pasteboard = NSPasteboard.general
-    pasteboard.clearContents()
-    pasteboard.setString(value, forType: .string)
-    if concealed {
-        pasteboard.setData(Data(), forType: .init("org.nspasteboard.ConcealedType"))
+    var changeCount: Int { pasteboard.changeCount }
+    func clearContents() { pasteboard.clearContents() }
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType) {
+        pasteboard.setString(string, forType: type)
     }
+    func setData(_ data: Data, forType type: NSPasteboard.PasteboardType) {
+        pasteboard.setData(data, forType: type)
+    }
+}
+
+@MainActor
+final class ClipboardLifetimeController {
+    private let pasteboard: ClipboardPasteboard
+    private let sleep: @Sendable (Duration) async throws -> Void
+    private var expiryTask: Task<Void, Never>?
+
+    init(
+        pasteboard: ClipboardPasteboard,
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) {
+        self.pasteboard = pasteboard
+        self.sleep = sleep
+    }
+
+    deinit { expiryTask?.cancel() }
+
+    func write(_ value: String, concealed: Bool, lifetime: Duration = .seconds(30)) {
+        expiryTask?.cancel()
+        pasteboard.clearContents()
+        pasteboard.setString(value, forType: .string)
+        if concealed {
+            pasteboard.setData(Data(), forType: .init("org.nspasteboard.ConcealedType"))
+        }
+        guard concealed else { return }
+        let expectedChangeCount = pasteboard.changeCount
+        let pasteboard = self.pasteboard
+        let sleep = self.sleep
+        // Deliberately capture only the pasteboard, sleeper, and ownership token.
+        // The plaintext value is never retained by the sleeping task.
+        expiryTask = Task { @MainActor [pasteboard, expectedChangeCount, sleep] in
+            do { try await sleep(lifetime) } catch { return }
+            guard !Task.isCancelled, pasteboard.changeCount == expectedChangeCount else { return }
+            pasteboard.clearContents()
+        }
+    }
+}
+
+@MainActor private let systemClipboardLifetime = ClipboardLifetimeController(
+    pasteboard: SystemClipboardPasteboard()
+)
+
+/// Writes a value and bounds its clipboard lifetime. The expiry clears only
+/// contents still owned by this write.
+@MainActor
+func writeToPasteboard(_ value: String, concealed: Bool = false) {
+    systemClipboardLifetime.write(value, concealed: concealed)
 }
 #endif

@@ -137,3 +137,155 @@ struct ModuleViewModelSkeletonTests {
         #expect(vm.isBinaryNotFound == false)
     }
 }
+
+#if os(macOS)
+private struct StubVaultClient: VaultClientProtocol {
+    let result: VaultEntryDetail
+    var isInstalled: Bool { true }
+    func availability(profile: String?) async -> VaultAvailability { .ready }
+    func version(profile: String?) async throws -> String { "test" }
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws {}
+    func lock(profile: String?) async throws {}
+    func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail { result }
+}
+
+@MainActor
+private final class ControlledVaultClient: VaultClientProtocol {
+    var isInstalled = true
+    var pending: [(path: String, continuation: CheckedContinuation<VaultEntryDetail, Never>)] = []
+
+    func availability(profile: String?) async -> VaultAvailability { .ready }
+    func version(profile: String?) async throws -> String { "test" }
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws {}
+    func lock(profile: String?) async throws {}
+    func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
+
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail {
+        await withCheckedContinuation { continuation in
+            pending.append((path, continuation))
+        }
+    }
+
+    func resolve(path: String, detail: VaultEntryDetail) {
+        guard let index = pending.firstIndex(where: { $0.path == path }) else { return }
+        pending.remove(at: index).continuation.resume(returning: detail)
+    }
+}
+
+private actor ManualSleeper {
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func sleep(_ duration: Duration) async throws {
+        await withCheckedContinuation { continuation in
+            waiters.append(continuation)
+        }
+    }
+
+    func resumeNext() {
+        guard !waiters.isEmpty else { return }
+        waiters.removeFirst().resume()
+    }
+}
+
+@MainActor
+extension ModuleViewModelSkeletonTests {
+    @Test func staleRevealAfterSelectionCannotPublishPlaintext() async {
+        let client = ControlledVaultClient()
+        let first = VaultEntryDetail(path: "work/first", modified: nil, fields: ["password": .string("first-secret")])
+        let vm = VaultViewModel(client: client)
+        vm.availability = .ready
+        await vm.select(path: first.path)
+
+        let reveal = Task { await vm.revealSelectedEntry() }
+        await Task.yield()
+        #expect(client.pending.map(\.path) == [first.path])
+
+        await vm.select(path: "work/second")
+        client.resolve(path: first.path, detail: first)
+        await reveal.value
+
+        #expect(vm.selectedPath == "work/second")
+        #expect(vm.detail == nil)
+    }
+
+    @Test func staleRevealAfterRelockCannotPublishPlaintext() async {
+        let client = ControlledVaultClient()
+        let first = VaultEntryDetail(path: "work/first", modified: nil, fields: ["password": .string("first-secret")])
+        let vm = VaultViewModel(client: client)
+        vm.availability = .ready
+        await vm.select(path: first.path)
+
+        let reveal = Task { await vm.revealSelectedEntry() }
+        await Task.yield()
+        vm.availability = .locked
+        client.resolve(path: first.path, detail: first)
+        await reveal.value
+
+        #expect(vm.detail == nil)
+        #expect(vm.revealedFields.isEmpty)
+    }
+
+    @Test func revealExpiresWhenControllableClockAdvances() async {
+        let sleeper = ManualSleeper()
+        let detail = VaultEntryDetail(path: "work/test", modified: nil, fields: ["password": .string("secret")])
+        let vm = VaultViewModel(
+            client: StubVaultClient(result: detail),
+            sleep: { duration in try await sleeper.sleep(duration) }
+        )
+        vm.availability = .ready
+        await vm.select(path: detail.path)
+        await vm.revealSelectedEntry()
+        await Task.yield()
+        #expect(vm.detail == detail)
+
+        await sleeper.resumeNext()
+        await Task.yield()
+        #expect(vm.detail == nil)
+        #expect(vm.revealedFields.isEmpty)
+    }
+
+    @Test func copyAPIGuardsMaskedStaleAndMissingDetails() async {
+        let detail = VaultEntryDetail(
+            path: "work/test",
+            modified: nil,
+            fields: ["password": .string("secret"), "username": .string("daniel")],
+            totp: VaultTOTP(code: "123456", period: 30, remaining: 20)
+        )
+        var copies: [(value: String, concealed: Bool)] = []
+        let vm = VaultViewModel(
+            client: StubVaultClient(result: detail),
+            clipboardWriter: { value, concealed in copies.append((value, concealed)) }
+        )
+        vm.availability = .ready
+
+        await vm.select(path: detail.path)
+        vm.copyField("password")
+        vm.copyTOTP()
+        #expect(copies.isEmpty)
+
+        await vm.revealSelectedEntry()
+        vm.copyField("password")
+        vm.copyTOTP()
+        #expect(copies.map(\.concealed) == [true])
+        #expect(copies.map(\.value) == ["123456"])
+
+        vm.toggleReveal(field: "password")
+        vm.copyField("password")
+        vm.copyField("username")
+        vm.copyTOTP()
+        #expect(copies.map(\.concealed) == [true, true, false, true])
+        #expect(copies.map(\.value) == ["123456", "secret", "daniel", "123456"])
+
+        await vm.select(path: "work/other")
+        vm.copyField("password")
+        vm.copyTOTP()
+        #expect(copies.count == 4)
+
+        vm.copyInstallCommand()
+        #expect(copies.last?.concealed == false)
+    }
+}
+#endif
