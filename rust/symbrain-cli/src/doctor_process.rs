@@ -112,30 +112,25 @@ fn join_reader(
 mod tests {
     use super::run_process;
     use std::fs;
-    use std::os::unix::fs::PermissionsExt;
+    use std::path::Path;
+    use std::process::{Command, Stdio};
     use std::time::{Duration, Instant};
 
-    fn script(contents: &str) -> tempfile::TempDir {
+    fn shell_fixture(contents: &str) -> (&'static Path, tempfile::TempDir, String) {
+        // Execute fixture text through the stable system shell. The fixture
+        // pathname is never execve'd, so Linux cannot race a writer against
+        // execve with ETXTBSY while tests run in parallel.
         let dir = tempfile::tempdir().expect("tempdir");
-        // Publish the executable with an atomic rename. Linux rejects execve
-        // with ETXTBSY while the target is still open for writing; writing the
-        // final pathname directly made this fixture race cargo's parallel
-        // test execution on the hosted runner.
-        let path = dir.path().join("probe");
-        let staging = dir.path().join("probe.staging");
-        fs::write(&staging, contents).expect("write probe");
-        fs::set_permissions(&staging, fs::Permissions::from_mode(0o700)).expect("chmod probe");
-        fs::rename(&staging, &path).expect("publish probe");
-        dir
+        (Path::new("/bin/sh"), dir, contents.to_string())
     }
 
     #[test]
     fn drains_large_stdout_and_stderr_without_deadlock() {
-        let dir = script(
+        let (shell, _dir, script) = shell_fixture(
             "#!/bin/sh\ni=0\nwhile [ \"$i\" -lt 5000 ]; do\n  printf '0123456789abcdef0123456789abcdef\\n'\n  printf 'fedcba9876543210fedcba9876543210\\n' >&2\n  i=$((i + 1))\ndone\n",
         );
         let (status, stdout, stderr) =
-            run_process(&dir.path().join("probe"), &[], Duration::from_secs(5)).expect("probe");
+            run_process(shell, &["-c", &script], Duration::from_secs(5)).expect("probe");
         assert!(status.success());
         assert!(stdout.len() > 64 * 1024);
         assert!(stderr.len() > 64 * 1024);
@@ -143,21 +138,49 @@ mod tests {
 
     #[test]
     fn terminates_timed_out_probe() {
-        let dir = script("#!/bin/sh\nsleep 30\n");
+        let (shell, _dir, script) = shell_fixture("#!/bin/sh\nsleep 30\n");
         let started = Instant::now();
-        let error = run_process(&dir.path().join("probe"), &[], Duration::from_millis(25))
-            .expect_err("timeout");
+        let error =
+            run_process(shell, &["-c", &script], Duration::from_millis(25)).expect_err("timeout");
         assert_eq!(error, "probe timed out");
         assert!(started.elapsed() < Duration::from_secs(2));
     }
 
     #[test]
     fn retained_descendant_pipes_cannot_extend_timeout() {
-        let dir = script("#!/bin/sh\nsleep 30 &\nexit 0\n");
+        let dir = tempfile::tempdir().expect("tempdir");
+        let pid_file = dir.path().join("descendant.pid");
+        let script = format!(
+            "sleep 30 & printf '%s' \\\"$!\\\" > '{}' ; exit 0\\n",
+            pid_file.display()
+        );
         let started = Instant::now();
-        let error = run_process(&dir.path().join("probe"), &[], Duration::from_millis(25))
-            .expect_err("retained pipe timeout");
+        let error = run_process(
+            Path::new("/bin/sh"),
+            &["-c", &script],
+            Duration::from_millis(25),
+        )
+        .expect_err("retained pipe timeout");
+        let elapsed = started.elapsed();
         assert_eq!(error, "probe timed out");
-        assert!(started.elapsed() < Duration::from_secs(2));
+        assert!(
+            elapsed >= Duration::from_millis(25),
+            "deadline not reached: {elapsed:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(2),
+            "cleanup exceeded bound: {elapsed:?}"
+        );
+        let pid = fs::read_to_string(&pid_file).expect("descendant launched");
+        let status = Command::new("/bin/kill")
+            .args(["-0", pid.trim()])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .expect("probe descendant status");
+        assert!(
+            !status.success(),
+            "descendant retained after timeout cleanup"
+        );
     }
 }

@@ -21,7 +21,11 @@ struct VersionPayload {
 }
 
 pub(super) fn probe_version(path: &Path) -> Result<String, String> {
-    let (status, stdout, _stderr) = run_process(path, &["version", "--json"], PROBE_TIMEOUT)?;
+    probe_version_with_args(path, &["version", "--json"])
+}
+
+pub(super) fn probe_version_with_args(path: &Path, args: &[&str]) -> Result<String, String> {
+    let (status, stdout, _stderr) = run_process(path, args, PROBE_TIMEOUT)?;
     if !status.success() {
         let detail = status
             .code()
