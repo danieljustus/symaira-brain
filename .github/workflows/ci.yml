@@ -287,19 +287,24 @@ jobs:
           import subprocess
           import sys
 
-          requests = [
-              {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}},
-              {"jsonrpc": "2.0", "method": "notifications/initialized"},
-              {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
-          ]
-          payload = b"\\n".join(json.dumps(request, separators=(',', ':')).encode() for request in requests) + b"\\n"
-          completed = subprocess.run([sys.argv[1], "serve"], input=payload, capture_output=True, check=True)
-          assert not completed.stderr, completed.stderr.decode()
-          responses = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
-          initialize = next(item for item in responses if item.get("id") == 1)
+          proc = subprocess.Popen([sys.argv[1], "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+          assert proc.stdin and proc.stdout and proc.stderr
+          initialize_request = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}}
+          proc.stdin.write(json.dumps(initialize_request, separators=(',', ':')).encode() + b"\\n")
+          proc.stdin.flush()
+          initialize = json.loads(proc.stdout.readline())
+          proc.stdin.write(b'{"jsonrpc":"2.0","method":"notifications/initialized"}\\n')
+          proc.stdin.write(b'{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}\\n')
+          proc.stdin.flush()
+          tools_response = json.loads(proc.stdout.readline())
+          proc.stdin.close()
+          proc.wait(timeout=15)
+          assert proc.returncode == 0, proc.returncode
+          stderr = proc.stderr.read()
+          assert not stderr, stderr.decode()
           assert initialize["result"]["serverInfo"]["name"] == "symscope"
           assert initialize["result"]["serverInfo"]["version"]
-          tools = next(item for item in responses if item.get("id") == 2)["result"]["tools"]
+          tools = tools_response["result"]["tools"]
           names = [tool["name"] for tool in tools]
           assert names == ["scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list"], names
           print("MCP initialize OK; tools/list OK: " + ", ".join(names))
