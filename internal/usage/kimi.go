@@ -4,14 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -51,14 +48,11 @@ type KimiProvider struct {
 // KIMI_AUTH_TOKEN from the environment.
 func NewKimiProvider(client *http.Client) *KimiProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	cliHome := kimiCLIHome()
 	store := kimiCLICredentialStore{home: cliHome}
-	baseURL := os.Getenv("KIMI_CODE_BASE_URL")
-	if baseURL == "" {
-		baseURL = kimiDefaultAPIBase
-	}
+	baseURL := validatedUsageBase(os.Getenv("KIMI_CODE_BASE_URL"), kimiDefaultAPIBase)
 	apiKey, apiSource, apiErr := resolveEnv("KIMI_CODE_API_KEY")
 	authToken, authSource, authErr := resolveEnv("KIMI_AUTH_TOKEN")
 	return &KimiProvider{
@@ -144,7 +138,7 @@ func (p *KimiProvider) AuthStatus() AuthStatus {
 type kimiCLICredentialStore struct{ home string }
 
 func (s kimiCLICredentialStore) readAccessToken() string {
-	data, err := os.ReadFile(filepath.Join(s.home, "credentials", "kimi-code.json"))
+	data, err := readCredentialFile(filepath.Join(s.home, "credentials", "kimi-code.json"))
 	if err != nil {
 		return ""
 	}
@@ -158,7 +152,7 @@ func (s kimiCLICredentialStore) readAccessToken() string {
 }
 
 func (s kimiCLICredentialStore) readDeviceID() string {
-	data, err := os.ReadFile(filepath.Join(s.home, "device_id"))
+	data, err := readCredentialFile(filepath.Join(s.home, "device_id"))
 	if err != nil {
 		return ""
 	}
@@ -244,11 +238,14 @@ func kimiPerformGET(ctx context.Context, baseURL, token string, identityHeaders 
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := doUsageRequest(ctx, client, req, false)
 	if err != nil {
 		return nil, &kimiError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := kimiReadAll(resp)
+	if err != nil {
+		return nil, err
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -256,11 +253,11 @@ func kimiPerformGET(ctx context.Context, baseURL, token string, identityHeaders 
 		}
 		return nil, &kimiError{kind: "status", status: resp.StatusCode}
 	}
-	return kimiReadAll(resp)
+	return data, nil
 }
 
 func kimiReadAll(resp *http.Response) ([]byte, error) {
-	data, err := io.ReadAll(resp.Body)
+	data, err := readUsageBodyAndClose(resp.Body)
 	if err != nil {
 		return nil, &kimiError{kind: "network", detail: err.Error()}
 	}
@@ -320,11 +317,14 @@ func (s *kimiWebStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
 	req.Header.Set("Authorization", "Bearer "+s.authToken)
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := s.client.Do(req)
+	resp, err := doUsageRequest(ctx, s.client, req, false)
 	if err != nil {
 		return nil, &kimiError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := kimiReadAll(resp)
+	if err != nil {
+		return nil, err
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -332,133 +332,7 @@ func (s *kimiWebStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
 		}
 		return nil, &kimiError{kind: "status", status: resp.StatusCode}
 	}
-	data, err := kimiReadAll(resp)
-	if err != nil {
-		return nil, err
-	}
 	return kimiSnapshotFromWebResponse(data, s.Source())
 }
 
 // MARK: - Parsing
-
-func kimiSnapshotFromUsageResponse(data []byte, source string) (*UsageSnapshot, error) {
-	var payload kimiUsageResponse
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil, &kimiError{kind: "unparseable"}
-	}
-	meters := kimiMeters(payload.Usage, "Weekly quota")
-	for _, limit := range payload.Limits {
-		meters = append(meters, kimiMeters(limit.Detail, kimiWindowLabel(limit.Window))...)
-	}
-	return &UsageSnapshot{ProviderID: kimiProviderID, Meters: meters, FetchedAt: time.Now().UTC(), Source: source}, nil
-}
-
-func kimiSnapshotFromWebResponse(data []byte, source string) (*UsageSnapshot, error) {
-	var payload kimiWebUsagesResponse
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil, &kimiError{kind: "unparseable"}
-	}
-	var meters []UsageMeter
-	var coding *kimiWebUsage
-	for i := range payload.Usages {
-		if payload.Usages[i].Scope == "FEATURE_CODING" {
-			coding = &payload.Usages[i]
-			break
-		}
-	}
-	if coding == nil && len(payload.Usages) > 0 {
-		coding = &payload.Usages[0]
-	}
-	if coding != nil {
-		meters = append(meters, kimiMeters(coding.Detail, "Weekly quota")...)
-		for _, limit := range coding.Limits {
-			meters = append(meters, kimiMeters(limit.Detail, kimiWindowLabel(limit.Window))...)
-		}
-	}
-	return &UsageSnapshot{ProviderID: kimiProviderID, Meters: meters, FetchedAt: time.Now().UTC(), Source: source}, nil
-}
-
-// kimiMeters produces one meter per usage detail (used/limit/reset), or
-// none when the payload carries no usable numbers.
-func kimiMeters(detail *kimiUsageDetail, label string) []UsageMeter {
-	if detail == nil {
-		return nil
-	}
-	used, usedOK := parseOptionalFloat(detail.Used)
-	limit, limitOK := parseOptionalFloat(detail.Limit)
-	if !usedOK || !limitOK || limit <= 0 {
-		return nil
-	}
-	var resetsAt *time.Time
-	if detail.ResetTime != nil {
-		resetsAt = kimiParseResetTime(*detail.ResetTime)
-	}
-	return []UsageMeter{{
-		Label:    label,
-		Used:     strPtr(formatAmount(used)),
-		Limit:    strPtr(formatAmount(limit)),
-		Unit:     "requests",
-		ResetsAt: resetsAt,
-	}}
-}
-
-// kimiWindowLabel produces a human label for a rate-limit window, e.g. "5h
-// window" for the 300-minute window; falls back to a generic label.
-func kimiWindowLabel(window *kimiWindow) string {
-	if window == nil || window.Duration == nil || *window.Duration <= 0 {
-		return "Rate limit window"
-	}
-	duration := *window.Duration
-	if duration%60 == 0 {
-		return strconv.Itoa(duration/60) + "h window"
-	}
-	return strconv.Itoa(duration) + "min window"
-}
-
-// kimiParseResetTime parses Kimi reset timestamps: ISO8601 with optional
-// nanosecond fractional seconds, falling back to plain ISO8601.
-func kimiParseResetTime(value string) *time.Time {
-	if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-		return &t
-	}
-	if t, err := time.Parse(time.RFC3339, value); err == nil {
-		return &t
-	}
-	return nil
-}
-
-// Kimi returns quota numbers as decimal strings ("2048") and reset times
-// with nanosecond fractional seconds.
-type kimiUsageDetail struct {
-	Limit     *string `json:"limit"`
-	Used      *string `json:"used"`
-	Remaining *string `json:"remaining"`
-	ResetTime *string `json:"resetTime"`
-}
-
-type kimiWindow struct {
-	Duration *int    `json:"duration"`
-	TimeUnit *string `json:"timeUnit"`
-}
-
-type kimiLimit struct {
-	Window *kimiWindow      `json:"window"`
-	Detail *kimiUsageDetail `json:"detail"`
-}
-
-// kimiUsageResponse — Kimi Code API response (GET /coding/v1/usages).
-type kimiUsageResponse struct {
-	Usage  *kimiUsageDetail `json:"usage"`
-	Limits []kimiLimit      `json:"limits"`
-}
-
-// kimiWebUsagesResponse — web billing response (GetUsages).
-type kimiWebUsagesResponse struct {
-	Usages []kimiWebUsage `json:"usages"`
-}
-
-type kimiWebUsage struct {
-	Scope  string           `json:"scope"`
-	Detail *kimiUsageDetail `json:"detail"`
-	Limits []kimiLimit      `json:"limits"`
-}

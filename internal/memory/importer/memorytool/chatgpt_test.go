@@ -63,8 +63,12 @@ func TestChatGPTDiscoverExports_DirectoryWalk(t *testing.T) {
 	}
 	p1 := filepath.Join(tmpDir, "conversations.json")
 	p2 := filepath.Join(subDir, "conversations.json")
-	os.WriteFile(p1, []byte("[]"), 0o644)
-	os.WriteFile(p2, []byte("[]"), 0o644)
+	if err := os.WriteFile(p1, []byte("[]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(p2, []byte("[]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	imp := NewChatGPTImporter()
 	refs, err := imp.DiscoverExports(tmpDir)
@@ -77,15 +81,89 @@ func TestChatGPTDiscoverExports_DirectoryWalk(t *testing.T) {
 }
 
 func TestChatGPTDiscoverExports_EmptyPathDefaults(t *testing.T) {
-	// With empty path, DiscoverExports defaults to ~/Downloads.
-	// We can't easily test the default path resolution, but we can verify
-	// the function at least handles it without panicking and returns an error
-	// if the default path doesn't exist (expected in CI/test env).
+	home := t.TempDir()
+	downloads := filepath.Join(home, "Downloads")
+	safeDir := filepath.Join(downloads, "safe")
+	if err := os.MkdirAll(safeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	expected := filepath.Join(safeDir, "conversations.json")
+	if err := os.WriteFile(expected, []byte("[]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// A FIFO with the export name used to be enough to make discovery hang.
+	fifo := filepath.Join(downloads, "conversations.json")
+	if chatGPTFIFOAvailable {
+		if err := makeChatGPTFIFO(fifo); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// os.UserHomeDir reads HOME on Unix; isolate the default path from the
+	// developer's real Downloads directory.
+	t.Setenv("HOME", home)
 	imp := NewChatGPTImporter()
-	_, err := imp.DiscoverExports("")
-	if err == nil {
-		// Might succeed if ~/Downloads/conversations.json actually exists
-		t.Log("empty path default resolved without error (expected in dev env)")
+	type result struct {
+		refs []ExportRef
+		err  error
+	}
+	finished := make(chan result, 1)
+	go func() {
+		refs, err := imp.DiscoverExports("")
+		finished <- result{refs: refs, err: err}
+	}()
+
+	select {
+	case got := <-finished:
+		if got.err != nil {
+			t.Fatalf("DiscoverExports failed: %v", got.err)
+		}
+		if len(got.refs) != 1 {
+			t.Fatalf("expected 1 regular export, got %d", len(got.refs))
+		}
+		if got.refs[0].Path != expected {
+			t.Errorf("Path = %q, want %q", got.refs[0].Path, expected)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("DiscoverExports did not complete within 2 seconds")
+	}
+}
+
+func TestChatGPTDiscoverExports_SkipsSymlinkEscapesAndSpecialFiles(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	outsideExport := filepath.Join(outside, "conversations.json")
+	if err := os.WriteFile(outsideExport, []byte("[]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(root, "escaped")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	safeDir := filepath.Join(root, "safe")
+	if err := os.MkdirAll(safeDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	expected := filepath.Join(safeDir, "conversations.json")
+	if err := os.WriteFile(expected, []byte("[]"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	fifo := filepath.Join(root, "conversations.json")
+	if chatGPTFIFOAvailable {
+		if err := makeChatGPTFIFO(fifo); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	refs, err := NewChatGPTImporter().DiscoverExports(root)
+	if err != nil {
+		t.Fatalf("DiscoverExports failed: %v", err)
+	}
+	if len(refs) != 1 {
+		t.Fatalf("expected only the regular in-tree export, got %d refs", len(refs))
+	}
+	if refs[0].Path != expected {
+		t.Errorf("Path = %q, want %q", refs[0].Path, expected)
 	}
 }
 

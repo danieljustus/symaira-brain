@@ -33,12 +33,9 @@ type OpenRouterProvider struct {
 // base-URL override from the environment.
 func NewOpenRouterProvider(client *http.Client) *OpenRouterProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
-	baseURL := os.Getenv("OPENROUTER_API_URL")
-	if baseURL == "" {
-		baseURL = openRouterDefaultBase
-	}
+	baseURL := validatedUsageBase(os.Getenv("OPENROUTER_API_URL"), openRouterDefaultBase)
 	apiKey, credSource, credErr := resolveEnv("OPENROUTER_API_KEY")
 	return &OpenRouterProvider{
 		apiKey:     apiKey,

@@ -137,7 +137,7 @@ func TestGoldenRender(t *testing.T) {
 			// Write rendered output to a temp directory so we can compare
 			// the full filesystem tree (SKILL.md, support files, metadata).
 			outDir := t.TempDir()
-			if err := writeRendered(bundle.Root, outDir, rendered, c.target, sourceTreeHash(bundle.Root)); err != nil {
+			if err := writeRendered(bundle, outDir, rendered, c.target, sourceTreeHash(bundle)); err != nil {
 				t.Fatalf("writeRendered(%s): %v", c.target, err)
 			}
 

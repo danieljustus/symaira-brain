@@ -3,45 +3,44 @@ package usage
 import "context"
 
 // Provider is a usage provider: the contract every AI-provider client
-// implements against. Mirrors symaira-cockpit's AIUsageProvider protocol
-// (tune/Sources/SymTuneCore/AIUsage.swift:121-140), minus the UI-facing
-// credentialDescriptor (a live closure, not something a CLI/MCP report
-// needs) — AuthStatus is the static snapshot equivalent.
+// implements against.
 type Provider interface {
 	ID() string
 	DisplayName() string
-	// IsConfigured reports whether the provider has a usable credential.
-	// Unconfigured providers must be reported as "not set up", never as an
-	// error.
 	IsConfigured() bool
-	// Strategies returns the ordered fallback strategies; empty when the
-	// provider is not configured.
 	Strategies() []Strategy
-	// AuthStatus describes how (or whether) the provider's credential
-	// resolved, for a caller that wants to show why without understanding
-	// any provider's auth flow.
 	AuthStatus() AuthStatus
 }
 
-// Strategy is one ordered fallback strategy of a provider. Strategies run
-// in order and the first success wins; failures are collected, not
-// swallowed. Mirrors AIUsageStrategy (AIUsage.swift:114-118).
+// Strategy is one ordered fallback strategy of a provider. Strategies are
+// intentionally run serially: a provider has at most one in-flight request.
 type Strategy interface {
-	// Source is the human-readable source tag (oauth, cli, web, api, local).
 	Source() string
 	Fetch(ctx context.Context) (*UsageSnapshot, error)
 }
 
-// RunStrategyChain runs strategies in order and returns the first success,
-// tagged with the winning strategy's source. When every strategy fails, it
-// returns a ChainFailedError carrying every partial error. Mirrors
-// AIUsageStrategyChain.run (AIUsage.swift:222-238).
+// RunStrategyChain runs strategies in order and returns the first successful,
+// usable snapshot. A 2xx response with no meters and no balance is malformed,
+// not a successful zero-usage result.
 func RunStrategyChain(ctx context.Context, strategies []Strategy) (*UsageSnapshot, error) {
 	var failures []string
-	for _, s := range strategies {
-		snap, err := s.Fetch(ctx)
+	for _, strategy := range strategies {
+		if err := ctx.Err(); err != nil {
+			failures = append(failures, err.Error())
+			break
+		}
+		snap, err := strategy.Fetch(ctx)
 		if err == nil {
-			snap.Source = s.Source()
+			if snap == nil {
+				err = &PayloadError{Detail: "empty snapshot"}
+			} else {
+				snap.Source = strategy.Source()
+				if len(snap.Meters) == 0 && snap.Balance == nil {
+					err = &PayloadError{ProviderID: snap.ProviderID, Detail: "response contained no usable usage fields"}
+				}
+			}
+		}
+		if err == nil {
 			return snap, nil
 		}
 		failures = append(failures, err.Error())

@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "rollback_baseline": "4b6be3b0e55212af630bb5cc57637a2ea6e31e62",
+  "go_toolchain": "go1.26.7",
+  "generator_sha256": "7e63e7505d465de70e9be89ca120226994faf7835ea069857bd5c008ceec306e",
+  "provenance": [
+    {
+      "path": "internal/adapter/adapter.go",
+      "sha256": "697f75f5846bc7ee2319ac6158f07fd21e196d6c7401c9722bdcf83e543de8c8",
+      "rollback_sha256": "c75569566442adf3e57d7b6a6670e9d985fe7f86a9fddd86e4d06e85da4dd35c",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/adapter/agents.go",
+      "sha256": "8181066b3748f7dd209dba2c676e68248dfbfe827d9b90f404aa4d596e0a8118",
+      "rollback_sha256": "b00f320b7442010ce0f466c6397b4b077b9611c9fdd6a89f62cef1cc54dd8a72",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/adapter/antigravity.go",
+      "sha256": "90e1d706715ae422c63ca552653ac00145cb21cb88e53fa749a772dda3729e10",
+      "rollback_sha256": "7f3ec25ec4883193f937d21e8c7f47ed16e113b9b2c62bf1efb091a85fc6625c",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/adapter/claude.go",
+      "sha256": "52ba5ee8fe2b7dd60b303cef9e23f412081820b3360c1fc141276ba47a86894d",
+      "rollback_sha256": "b33c0af6e0d2e3e1265c10bc3df1a11124a556561acf5b082d576aa9280d0e49",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/adapter/cursor.go",
+      "sha256": "dd6288c736c85a8ea4285045cca6f0b4691738450cbce5404b1024c60473ea52",
+      "rollback_sha256": "9294ef701d10253961fbb73d43856fc34b6761c0f23322ef86ab55ed2f08672f",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/harness/registry.go",
+      "sha256": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+      "rollback_sha256": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+      "rollback_present": true
+    },
+    {
+      "path": "internal/instructions/block.go",
+      "sha256": "18c0a314b4b99f2f84a667b11fd56fa7ef50d75ac322c1fd121fbd4d748e102d",
+      "rollback_sha256": "a806b883a17aaa9561c65f8787e2c8b61551ae2b834b94c2d31215555dc4b1ab",
+      "rollback_present": true
+    }
+  ],
+  "cases": [
+    {
+      "id": "claude_fresh",
+      "harness": "claude",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/CLAUDE.md",
+      "content": "bWFuYWdlZCBpbnN0cnVjdGlvbnMK",
+      "expected": "PCEtLSBzeW1icmFpbjptYW5hZ2VkLXBvaW50ZXIgLS0+ClRoaXMgZmlsZSBpcyBtYW5hZ2VkIGJ5IGBzeW1icmFpbiBzeW5jYC4gQ2Fub25pY2FsIGluc3RydWN0aW9ucyBsaXZlIGluIEFHRU5UUy5tZC4KRWRpdCBBR0VOVFMubWQgZm9yIGdsb2JhbCBjaGFuZ2VzOyB1c2UgdGhlIG1hbmFnZWQgYmxvY2sgYmVsb3cgZm9yIHByb2plY3Qtc3BlY2lmaWMgYWRkaXRpb25zLgoKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KbWFuYWdlZCBpbnN0cnVjdGlvbnMKPCEtLSBzeW1icmFpbjplbmQgLS0+Cgo="
+    },
+    {
+      "id": "claude_existing_without_markers",
+      "harness": "claude",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/CLAUDE.md",
+      "existing": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo=",
+      "content": "YXBwZW5kZWQgbWFuYWdlZAo=",
+      "expected": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgphcHBlbmRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgo="
+    },
+    {
+      "id": "claude_existing_user_prefix_suffix",
+      "harness": "claude",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/CLAUDE.md",
+      "existing": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo=",
+      "content": "dXBkYXRlZCBtYW5hZ2VkCg==",
+      "expected": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KdXBkYXRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo="
+    },
+    {
+      "id": "claude_malformed_non_utf8_marker_content",
+      "harness": "claude",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/CLAUDE.md",
+      "existing": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCg==",
+      "content": "Ym9kef4KPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4gYW5kIDwhLS0gc3ltYnJhaW46ZW5kIC0tPgo=",
+      "expected": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KYm9kef4KPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+YiBhbmQgPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+ZAo8IS0tIHN5bWJyYWluOmVuZCAtLT4K"
+    },
+    {
+      "id": "claude_crlf",
+      "harness": "claude",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/CLAUDE.md",
+      "existing": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPg0Kb2xkDQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K",
+      "content": "Y29udGVudA0K",
+      "expected": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgpjb250ZW50DQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K"
+    },
+    {
+      "id": "skip_claude-desktop",
+      "harness": "claude-desktop",
+      "operation": "skip",
+      "skipped": true
+    },
+    {
+      "id": "cursor_fresh",
+      "harness": "cursor",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/.cursor/rules/symbrain.mdc",
+      "content": "bWFuYWdlZCBpbnN0cnVjdGlvbnMK",
+      "expected": "LS0tCmRlc2NyaXB0aW9uOiBTeW1haXJhIGJyYWluIG1hbmFnZWQgaW5zdHJ1Y3Rpb25zCmdsb2JzOiAqKi8qCmFsd2F5c0FwcGx5OiB0cnVlCi0tLQoKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KbWFuYWdlZCBpbnN0cnVjdGlvbnMKPCEtLSBzeW1icmFpbjplbmQgLS0+Cg=="
+    },
+    {
+      "id": "cursor_existing_without_markers",
+      "harness": "cursor",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/.cursor/rules/symbrain.mdc",
+      "existing": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo=",
+      "content": "YXBwZW5kZWQgbWFuYWdlZAo=",
+      "expected": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgphcHBlbmRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgo="
+    },
+    {
+      "id": "cursor_existing_user_prefix_suffix",
+      "harness": "cursor",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/.cursor/rules/symbrain.mdc",
+      "existing": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo=",
+      "content": "dXBkYXRlZCBtYW5hZ2VkCg==",
+      "expected": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KdXBkYXRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo="
+    },
+    {
+      "id": "cursor_malformed_non_utf8_marker_content",
+      "harness": "cursor",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/.cursor/rules/symbrain.mdc",
+      "existing": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCg==",
+      "content": "Ym9kef4KPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4gYW5kIDwhLS0gc3ltYnJhaW46ZW5kIC0tPgo=",
+      "expected": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KYm9kef4KPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+YiBhbmQgPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+ZAo8IS0tIHN5bWJyYWluOmVuZCAtLT4K"
+    },
+    {
+      "id": "cursor_crlf",
+      "harness": "cursor",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/.cursor/rules/symbrain.mdc",
+      "existing": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPg0Kb2xkDQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K",
+      "content": "Y29udGVudA0K",
+      "expected": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgpjb250ZW50DQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K"
+    },
+    {
+      "id": "skip_opencode",
+      "harness": "opencode",
+      "operation": "skip",
+      "skipped": true
+    },
+    {
+      "id": "skip_codex",
+      "harness": "codex",
+      "operation": "skip",
+      "skipped": true
+    },
+    {
+      "id": "antigravity_fresh",
+      "harness": "antigravity",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/GEMINI.md",
+      "content": "bWFuYWdlZCBpbnN0cnVjdGlvbnMK",
+      "expected": "PCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KbWFuYWdlZCBpbnN0cnVjdGlvbnMKPCEtLSBzeW1icmFpbjplbmQgLS0+Cg=="
+    },
+    {
+      "id": "antigravity_existing_without_markers",
+      "harness": "antigravity",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/GEMINI.md",
+      "existing": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo=",
+      "content": "YXBwZW5kZWQgbWFuYWdlZAo=",
+      "expected": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgphcHBlbmRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgo="
+    },
+    {
+      "id": "antigravity_existing_user_prefix_suffix",
+      "harness": "antigravity",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/GEMINI.md",
+      "existing": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo=",
+      "content": "dXBkYXRlZCBtYW5hZ2VkCg==",
+      "expected": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KdXBkYXRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo="
+    },
+    {
+      "id": "antigravity_malformed_non_utf8_marker_content",
+      "harness": "antigravity",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/GEMINI.md",
+      "existing": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCg==",
+      "content": "Ym9kef4KPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4gYW5kIDwhLS0gc3ltYnJhaW46ZW5kIC0tPgo=",
+      "expected": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KYm9kef4KPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+YiBhbmQgPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+ZAo8IS0tIHN5bWJyYWluOmVuZCAtLT4K"
+    },
+    {
+      "id": "antigravity_crlf",
+      "harness": "antigravity",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/GEMINI.md",
+      "existing": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPg0Kb2xkDQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K",
+      "content": "Y29udGVudA0K",
+      "expected": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgpjb250ZW50DQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K"
+    },
+    {
+      "id": "agents_fresh",
+      "harness": "agents",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/AGENTS.md",
+      "content": "bWFuYWdlZCBpbnN0cnVjdGlvbnMK",
+      "expected": "PCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KbWFuYWdlZCBpbnN0cnVjdGlvbnMKPCEtLSBzeW1icmFpbjplbmQgLS0+Cg=="
+    },
+    {
+      "id": "agents_existing_without_markers",
+      "harness": "agents",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/AGENTS.md",
+      "existing": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo=",
+      "content": "YXBwZW5kZWQgbWFuYWdlZAo=",
+      "expected": "ZXhpc3RpbmcgcHJlZml4CmV4aXN0aW5nIHN1ZmZpeAo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgphcHBlbmRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgo="
+    },
+    {
+      "id": "agents_existing_user_prefix_suffix",
+      "harness": "agents",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/AGENTS.md",
+      "existing": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo=",
+      "content": "dXBkYXRlZCBtYW5hZ2VkCg==",
+      "expected": "dXNlciBwcmVmaXgKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KdXBkYXRlZCBtYW5hZ2VkCjwhLS0gc3ltYnJhaW46ZW5kIC0tPgp1c2VyIHN1ZmZpeAo="
+    },
+    {
+      "id": "agents_malformed_non_utf8_marker_content",
+      "harness": "agents",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/AGENTS.md",
+      "existing": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4Kb2xkCg==",
+      "content": "Ym9kef4KPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4gYW5kIDwhLS0gc3ltYnJhaW46ZW5kIC0tPgo=",
+      "expected": "cHJlZml4/wAKPCEtLSBzeW1icmFpbjpiZWdpbiAtLT4KYm9kef4KPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+YiBhbmQgPCEtLSBzeW1icmFpbjplc2NhcGUgLS0+ZAo8IS0tIHN5bWJyYWluOmVuZCAtLT4K"
+    },
+    {
+      "id": "agents_crlf",
+      "harness": "agents",
+      "operation": "render",
+      "project_dir": "/oracle-project",
+      "target_path": "/oracle-project/AGENTS.md",
+      "existing": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPg0Kb2xkDQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K",
+      "content": "Y29udGVudA0K",
+      "expected": "aGVhZGVyDQo8IS0tIHN5bWJyYWluOmJlZ2luIC0tPgpjb250ZW50DQo8IS0tIHN5bWJyYWluOmVuZCAtLT4NCmZvb3Rlcg0K"
+    },
+    {
+      "id": "skip_hermes",
+      "harness": "hermes",
+      "operation": "skip",
+      "skipped": true
+    },
+    {
+      "id": "skip_openclaw",
+      "harness": "openclaw",
+      "operation": "skip",
+      "skipped": true
+    }
+  ]
+}

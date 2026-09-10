@@ -87,13 +87,11 @@ func TestBackup_PreservesFileMode(t *testing.T) {
 }
 
 func TestBackup_RepeatedCallsSucceed(t *testing.T) {
-	// Two backups issued within the same second share a timestamp (the
-	// format has second granularity) and so intentionally land on the same
-	// backup path — that's a harmless overwrite, not an error, since each
-	// call always copies from the still-untouched original.
+	// Two backups issued within the same second share a timestamp. They must
+	// use distinct collision suffixes so neither rollback point is overwritten.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.json")
-	if err := os.WriteFile(path, []byte("{}"), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte("first"), 0o600); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
 
@@ -105,11 +103,20 @@ func TestBackup_RepeatedCallsSucceed(t *testing.T) {
 		t.Fatalf("first backup missing: %v", err)
 	}
 
+	if err := os.WriteFile(path, []byte("second"), 0o600); err != nil {
+		t.Fatalf("WriteFile (second): %v", err)
+	}
 	second, err := Backup(path)
 	if err != nil {
 		t.Fatalf("Backup (second): %v", err)
 	}
-	if _, err := os.Stat(second); err != nil {
-		t.Fatalf("second backup missing: %v", err)
+	if first == second {
+		t.Fatalf("collision backups share path %q", first)
+	}
+	if got, err := os.ReadFile(first); err != nil || string(got) != "first" {
+		t.Fatalf("first backup = %q, err=%v; want first", got, err)
+	}
+	if got, err := os.ReadFile(second); err != nil || string(got) != "second" {
+		t.Fatalf("second backup = %q, err=%v; want second", got, err)
 	}
 }

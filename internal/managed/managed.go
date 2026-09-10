@@ -17,10 +17,12 @@ type coreInstaller interface {
 // newInstaller creates the coreInstaller Setup/Fix use. Overridable in tests.
 var newInstaller = func(binDir string) coreInstaller { return NewInstaller(binDir) }
 
-// Setup downloads and installs all pinned core versions into binDir.
+// Setup downloads and installs every active pinned core version into
+// binDir: every non-optional core, plus any optional core named in
+// enabledOptional (see Manifest.ActiveCores — nil selects none).
 // It reports progress via the provided logger and returns an error if
 // any core fails to install.
-func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
+func Setup(ctx context.Context, binDir string, logger *slog.Logger, enabledOptional map[string]bool) error {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -33,7 +35,7 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 	inst := newInstaller(binDir)
 	var failed, attempted int
 
-	for name, core := range manifest.Cores {
+	for name, core := range manifest.ActiveCores(enabledOptional) {
 		if !core.SupportsPlatform(runtime.GOOS) {
 			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
 			continue
@@ -60,11 +62,13 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger) error {
 	return nil
 }
 
-// Fix repairs any missing or version-mismatched managed binaries.
-// It checks each core in the manifest: if the binary is missing or at
-// a different version, it re-installs it. Already-correct binaries are
-// skipped. Returns an error if any repair fails.
-func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
+// Fix repairs any missing or version-mismatched managed binaries among the
+// active cores: every non-optional core, plus any optional core named in
+// enabledOptional (see Manifest.ActiveCores — nil selects none). It checks
+// each active core: if the binary is missing or at a different version, it
+// re-installs it. Already-correct binaries are skipped. Returns an error if
+// any repair fails.
+func Fix(ctx context.Context, binDir string, logger *slog.Logger, enabledOptional map[string]bool) error {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -77,7 +81,7 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 	inst := newInstaller(binDir)
 	var repaired, skipped, failed, attempted int
 
-	for name, core := range manifest.Cores {
+	for name, core := range manifest.ActiveCores(enabledOptional) {
 		if !core.SupportsPlatform(runtime.GOOS) {
 			logger.Info("skipping (platform)", "binary", name, "goos", runtime.GOOS)
 			continue
@@ -92,7 +96,7 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger) error {
 		// Compare versions with the "v" prefix normalized away: binaries
 		// report bare semver ("0.15.3") while the manifest pins the tag
 		// ("v0.15.3") — both must count as "already correct".
-		if normalizeVersion(existing) == normalizeVersion(core.Version) {
+		if VersionsMatch(existing, core.Version) {
 			logger.Info("already correct", "binary", name, "version", existing)
 			skipped++
 			continue

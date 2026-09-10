@@ -36,6 +36,10 @@ type SyncOptions struct {
 	DryRun bool
 	// HomeDir is the user home directory used for lock acquisition.
 	HomeDir string
+	// EventsPath and related fields forward operation logging to installs.
+	EventsPath       string
+	EventToolVersion string
+	EventActor       string
 }
 
 // CollectConflicts returns the install statuses that would cause Sync to
@@ -123,10 +127,13 @@ func Sync(stales []InstallStatus, opts SyncOptions) []SyncResult {
 			continue
 		}
 		installOpts := Options{
-			Scope:           opts.Scope,
-			Mode:            st.Mode,
-			BaseDir:         opts.BaseDir,
-			AllowExecutable: bundle.Manifest.Skill.AllowExecutable,
+			Scope:            opts.Scope,
+			Mode:             st.Mode,
+			BaseDir:          opts.BaseDir,
+			AllowExecutable:  st.AllowExecutable || bundle.Manifest.Skill.AllowExecutable,
+			EventsPath:       opts.EventsPath,
+			EventToolVersion: opts.EventToolVersion,
+			EventActor:       opts.EventActor,
 		}
 		rendered, errs := render.RenderAll(bundle, opts.RenderDir, []render.Target{st.Target})
 		if len(rendered) == 0 {

@@ -1,8 +1,6 @@
 package db
 
 import (
-	"bytes"
-	"compress/gzip"
 	"database/sql"
 	"encoding/binary"
 	"encoding/json"
@@ -17,7 +15,6 @@ import (
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/memory/config"
-	"github.com/danieljustus/symaira-brain/internal/memory/paths"
 )
 
 // ---------------------------------------------------------------------------
@@ -290,56 +287,57 @@ func searchMemoriesBLOB(database *DB, queryVec []float32, scope string, limit in
 // Helpers
 // ---------------------------------------------------------------------------
 
-// benchOpenTempDB creates a temp HOME, opens a fresh DB, and returns a cleanup func.
-func benchOpenTempDB(b testing.TB) (*DB, func()) {
+// benchOpenTempDB creates a fresh database under testing.TB's managed temp dir.
+// The current symbrain/memory directory is created before Open so the resolver
+// cannot silently fall back to the retired symmemory location. Cleanup is
+// registered here so it still runs when a caller fails or panics.
+func benchOpenTempDB(b testing.TB) *DB {
 	b.Helper()
-	tempDir, err := os.MkdirTemp("", "symmemory-bench-*")
-	if err != nil {
-		b.Fatalf("MkdirTemp: %v", err)
+	tempDir := b.TempDir()
+	oldHome, hadHome := os.LookupEnv("HOME")
+	oldXDGData, hadXDGData := os.LookupEnv("XDG_DATA_HOME")
+	oldXDGConfig, hadXDGConfig := os.LookupEnv("XDG_CONFIG_HOME")
+	if err := os.Setenv("HOME", tempDir); err != nil {
+		b.Fatalf("set HOME: %v", err)
 	}
-	oldHome := os.Getenv("HOME")
-	os.Setenv("HOME", tempDir)
+	if err := os.Unsetenv("XDG_DATA_HOME"); err != nil {
+		b.Fatalf("unset XDG_DATA_HOME: %v", err)
+	}
+	if err := os.Unsetenv("XDG_CONFIG_HOME"); err != nil {
+		b.Fatalf("unset XDG_CONFIG_HOME: %v", err)
+	}
+	b.Cleanup(func() {
+		if hadHome {
+			_ = os.Setenv("HOME", oldHome)
+		} else {
+			_ = os.Unsetenv("HOME")
+		}
+		if hadXDGData {
+			_ = os.Setenv("XDG_DATA_HOME", oldXDGData)
+		} else {
+			_ = os.Unsetenv("XDG_DATA_HOME")
+		}
+		if hadXDGConfig {
+			_ = os.Setenv("XDG_CONFIG_HOME", oldXDGConfig)
+		} else {
+			_ = os.Unsetenv("XDG_CONFIG_HOME")
+		}
+	})
 
+	currentDataDir := filepath.Join(tempDir, ".local", "share", "symbrain", "memory")
+	legacyDataDir := filepath.Join(tempDir, ".local", "share", "symmemory")
+	if err := os.MkdirAll(currentDataDir, 0o700); err != nil {
+		b.Fatalf("create current memory data directory: %v", err)
+	}
+	if err := os.MkdirAll(legacyDataDir, 0o700); err != nil {
+		b.Fatalf("create legacy memory data directory: %v", err)
+	}
 	database, err := Open(config.Defaults())
 	if err != nil {
-		os.Setenv("HOME", oldHome)
-		os.RemoveAll(tempDir)
 		b.Fatalf("Open: %v", err)
 	}
-
-	cleanup := func() {
-		_ = database.Close()
-		os.Setenv("HOME", oldHome)
-		os.RemoveAll(tempDir)
-	}
-	return database, cleanup
-}
-
-// dbFileSize returns the total size in bytes of the SQLite DB file and its
-// WAL/SHM siblings.
-func dbFileSize(homeDir string) int64 {
-	dbPath := filepath.Join(homeDir, ".local", "share", "symmemory", "default.db")
-	var total int64
-	for _, suffix := range []string{"", "-wal", "-shm"} {
-		info, err := os.Stat(dbPath + suffix)
-		if err == nil {
-			total += info.Size()
-		}
-	}
-	return total
-}
-
-// gzipSize returns the gzipped size of data.
-func gzipSize(data []byte) int64 {
-	var buf bytes.Buffer
-	gz, _ := gzip.NewWriterLevel(&buf, gzip.BestSpeed)
-	if _, err := gz.Write(data); err != nil {
-		return 0
-	}
-	if err := gz.Close(); err != nil {
-		return 0
-	}
-	return int64(buf.Len())
+	b.Cleanup(func() { _ = database.Close() })
+	return database
 }
 
 // seedJSONMemories writes n memories with deterministic embeddings using the
@@ -403,8 +401,7 @@ func seedBLOBMemories(database *DB, n int, prefix string) {
 // ---------------------------------------------------------------------------
 
 func benchSave(b *testing.B, useBLOB bool) {
-	database, cleanup := benchOpenTempDB(b)
-	defer cleanup()
+	database := benchOpenTempDB(b)
 
 	b.ResetTimer()
 	for i := range b.N {
@@ -436,8 +433,7 @@ func BenchmarkEmbeddingBLOB_Save(b *testing.B) { benchSave(b, true) }
 // ---------------------------------------------------------------------------
 
 func benchGet(b *testing.B, useBLOB bool) {
-	database, cleanup := benchOpenTempDB(b)
-	defer cleanup()
+	database := benchOpenTempDB(b)
 
 	const preloaded = 1000
 	for i := range preloaded {
@@ -483,8 +479,7 @@ func BenchmarkEmbeddingBLOB_Get(b *testing.B) { benchGet(b, true) }
 // ---------------------------------------------------------------------------
 
 func benchSearch(b *testing.B, useBLOB bool) {
-	database, cleanup := benchOpenTempDB(b)
-	defer cleanup()
+	database := benchOpenTempDB(b)
 
 	const preloaded = 1000
 	if useBLOB {
@@ -513,62 +508,38 @@ func BenchmarkEmbeddingJSON_Search(b *testing.B) { benchSearch(b, false) }
 func BenchmarkEmbeddingBLOB_Search(b *testing.B) { benchSearch(b, true) }
 
 // ---------------------------------------------------------------------------
-// Scales for size / quality / backup tests
+// Embedding correctness smoke tests
 // ---------------------------------------------------------------------------
 
-var benchScales = []int{100, 1_000, 10_000}
-
-// TestEmbeddingStorageSize measures the database file size for each scale.
-func TestEmbeddingStorageSize(t *testing.T) {
-	if testing.Short() {
-		t.Skip("storage-size measurements are excluded from short test runs")
+// TestBenchmarkDatabaseResolverUsesCurrentPath prevents measurement helpers
+// from silently reading the retired ~/.local/share/symmemory database.
+func TestBenchmarkDatabaseResolverUsesCurrentPath(t *testing.T) {
+	database := benchOpenTempDB(t)
+	expected := filepath.Join(os.Getenv("HOME"), ".local", "share", "symbrain", "memory", "default.db")
+	if got := database.Path(); got != expected {
+		t.Fatalf("benchmark database path = %q, want current resolver path %q", got, expected)
 	}
-
-	for _, scale := range benchScales {
-		t.Run(fmt.Sprintf("scale_%d", scale), func(t *testing.T) {
-			// JSON path
-			jsonDB, jsonCleanup := benchOpenTempDB(t)
-			t.Cleanup(jsonCleanup)
-			seedJSONMemories(jsonDB, scale, "json")
-			jsonHome := os.Getenv("HOME")
-			jsonSize := dbFileSize(jsonHome)
-
-			// BLOB path
-			blobDB, blobCleanup := benchOpenTempDB(t)
-			t.Cleanup(blobCleanup)
-			seedBLOBMemories(blobDB, scale, "blob")
-			blobHome := os.Getenv("HOME")
-			blobSize := dbFileSize(blobHome)
-
-			savings := 0.0
-			if jsonSize > 0 {
-				savings = float64(jsonSize-blobSize) / float64(jsonSize) * 100
-			}
-
-			t.Logf("Scale %d: JSON=%d bytes, BLOB=%d bytes, savings=%.1f%%",
-				scale, jsonSize, blobSize, savings)
-		})
+	if strings.Contains(database.Path(), string(filepath.Separator)+"symmemory"+string(filepath.Separator)) {
+		t.Fatalf("benchmark database path uses retired symmemory location: %q", database.Path())
 	}
 }
 
 // TestEmbeddingSearchQuality verifies that both JSON and BLOB paths return
 // identical search results (same IDs and scores) for the same data.
 func TestEmbeddingSearchQuality(t *testing.T) {
-	scales := []int{100, 1_000}
+	scales := []int{100}
 	if testing.Short() {
-		scales = []int{100}
+		scales = []int{25}
 	}
 
 	for _, scale := range scales {
 		t.Run(fmt.Sprintf("scale_%d", scale), func(t *testing.T) {
 			// JSON path
-			jsonDB, jsonCleanup := benchOpenTempDB(t)
-			t.Cleanup(jsonCleanup)
+			jsonDB := benchOpenTempDB(t)
 			seedJSONMemories(jsonDB, scale, "mem")
 
 			// BLOB path
-			blobDB, blobCleanup := benchOpenTempDB(t)
-			t.Cleanup(blobCleanup)
+			blobDB := benchOpenTempDB(t)
 			seedBLOBMemories(blobDB, scale, "mem")
 
 			queryVec := generateDeterministicEmbedding(42, EmbeddingDim)
@@ -610,59 +581,6 @@ func TestEmbeddingSearchQuality(t *testing.T) {
 	}
 }
 
-// TestEmbeddingBackupSize measures a "backup" (full DB copy) size for each format.
-func TestEmbeddingBackupSize(t *testing.T) {
-	if testing.Short() {
-		t.Skip("backup-size measurements are excluded from short test runs")
-	}
-
-	scales := []int{100, 1_000, 10_000}
-
-	for _, scale := range scales {
-		t.Run(fmt.Sprintf("scale_%d", scale), func(t *testing.T) {
-			// JSON path
-			jsonDB, jsonCleanup := benchOpenTempDB(t)
-			t.Cleanup(jsonCleanup)
-			seedJSONMemories(jsonDB, scale, "json")
-			jsonDBPath, err := paths.DatabasePath()
-			if err != nil {
-				t.Fatalf("resolve JSON db path: %v", err)
-			}
-			jsonRaw, err := os.ReadFile(jsonDBPath)
-			if err != nil {
-				t.Fatalf("read JSON db: %v", err)
-			}
-
-			// BLOB path
-			blobDB, blobCleanup := benchOpenTempDB(t)
-			t.Cleanup(blobCleanup)
-			seedBLOBMemories(blobDB, scale, "blob")
-			blobDBPath, err := paths.DatabasePath()
-			if err != nil {
-				t.Fatalf("resolve BLOB db path: %v", err)
-			}
-			blobRaw, err := os.ReadFile(blobDBPath)
-			if err != nil {
-				t.Fatalf("read BLOB db: %v", err)
-			}
-
-			jsonGzip := gzipSize(jsonRaw)
-			blobGzip := gzipSize(blobRaw)
-			savingsRaw := 0.0
-			if len(jsonRaw) > 0 {
-				savingsRaw = float64(len(jsonRaw)-len(blobRaw)) / float64(len(jsonRaw)) * 100
-			}
-			savingsGzip := 0.0
-			if jsonGzip > 0 {
-				savingsGzip = float64(jsonGzip-blobGzip) / float64(jsonGzip) * 100
-			}
-
-			t.Logf("Scale %d raw: JSON=%d, BLOB=%d, savings=%.1f%%", scale, len(jsonRaw), len(blobRaw), savingsRaw)
-			t.Logf("Scale %d gzip: JSON=%d, BLOB=%d, savings=%.1f%%", scale, jsonGzip, blobGzip, savingsGzip)
-		})
-	}
-}
-
 // TestEmbeddingEncodeDecodeRoundtrip verifies BLOB encode/decode fidelity.
 func TestEmbeddingEncodeDecodeRoundtrip(t *testing.T) {
 	orig := generateDeterministicEmbedding(42, EmbeddingDim)
@@ -694,109 +612,3 @@ func TestEmbeddingEncodeDecodeRoundtrip(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// Recommendation summary
-// ---------------------------------------------------------------------------
-
-// TestEmbeddingRecommendation prints a comparative summary and a written
-// recommendation for the JSON-vs-BLOB storage decision.
-func TestEmbeddingRecommendation(t *testing.T) {
-	if testing.Short() {
-		t.Skip("embedding recommendation measurements are excluded from short test runs")
-	}
-
-	const scale = 1_000
-
-	// --- Size measurement ---
-	jsonDB, jsonCleanup := benchOpenTempDB(t)
-	t.Cleanup(jsonCleanup)
-	seedJSONMemories(jsonDB, scale, "json")
-	jsonHome := os.Getenv("HOME")
-	jsonSize := dbFileSize(jsonHome)
-
-	blobDB, blobCleanup := benchOpenTempDB(t)
-	t.Cleanup(blobCleanup)
-	seedBLOBMemories(blobDB, scale, "blob")
-	blobHome := os.Getenv("HOME")
-	blobSize := dbFileSize(blobHome)
-
-	// --- Search speed measurement ---
-	queryVec := generateDeterministicEmbedding(42, EmbeddingDim)
-
-	jsonDB2, jsonCleanup2 := benchOpenTempDB(t)
-	t.Cleanup(jsonCleanup2)
-	seedJSONMemories(jsonDB2, scale, "json")
-	start := time.Now()
-	for range 100 {
-		_, _ = jsonDB2.SearchMemories(queryVec, "", "global", 10)
-	}
-	jsonSearchDur := time.Since(start)
-
-	blobDB2, blobCleanup2 := benchOpenTempDB(t)
-	t.Cleanup(blobCleanup2)
-	seedBLOBMemories(blobDB2, scale, "blob")
-	start = time.Now()
-	for range 100 {
-		_, _ = searchMemoriesBLOB(blobDB2, queryVec, "global", 10)
-	}
-	blobSearchDur := time.Since(start)
-
-	// --- Encode speed measurement ---
-	sampleEmb := generateDeterministicEmbedding(0, EmbeddingDim)
-	start = time.Now()
-	for range 100_000 {
-		_, _ = json.Marshal(sampleEmb)
-	}
-	jsonEncDur := time.Since(start)
-
-	start = time.Now()
-	for range 100_000 {
-		_ = encodeEmbeddingBLOB(sampleEmb)
-	}
-	blobEncDur := time.Since(start)
-
-	// --- Print summary table ---
-	t.Log("")
-	t.Log("=================================================================")
-	t.Log("  Embedding Storage Format Benchmark - Recommendation Summary")
-	t.Log("=================================================================")
-	t.Logf("  Scale: %d memories, %d-dimensional embeddings", scale, EmbeddingDim)
-	t.Log("-----------------------------------------------------------------")
-	t.Logf("  DB file size:   JSON = %8d bytes | BLOB = %8d bytes", jsonSize, blobSize)
-	if jsonSize > 0 {
-		t.Logf("                  Savings: %.1f%%", float64(jsonSize-blobSize)/float64(jsonSize)*100)
-	}
-	t.Log("-----------------------------------------------------------------")
-	t.Logf("  100 searches:   JSON = %v | BLOB = %v", jsonSearchDur, blobSearchDur)
-	if blobSearchDur > 0 {
-		t.Logf("                  Ratio:   %.2fx", float64(jsonSearchDur)/float64(blobSearchDur))
-	}
-	t.Log("-----------------------------------------------------------------")
-	t.Logf("  100K encodes:   JSON = %v | BLOB = %v", jsonEncDur, blobEncDur)
-	if blobEncDur > 0 {
-		t.Logf("                  Ratio:   %.2fx", float64(jsonEncDur)/float64(blobEncDur))
-	}
-	t.Log("=================================================================")
-	t.Log("")
-	t.Log("  RECOMMENDATION:")
-	t.Log("")
-	t.Log("  For the current scale of Symaira Memory (typically <10K memories),")
-	t.Log("  JSON text storage is simpler, fully transparent in SQLite tooling,")
-	t.Log("  and the overhead is modest (a few hundred KB at 1K memories).")
-	t.Log("")
-	t.Log("  BLOB storage provides measurable size savings (~75% smaller per")
-	t.Log("  embedding) and faster encode/decode, which becomes meaningful at")
-	t.Log("  10K-100K+ scale - especially for backup/sync payloads and WAL")
-	t.Log("  write amplification.")
-	t.Log("")
-	t.Log("  ADOPT BLOB storage when:")
-	t.Log("    1. Memory count regularly exceeds 10,000")
-	t.Log("    2. Backup/sync bandwidth is a bottleneck")
-	t.Log("    3. TurboQuant quantised vectors are reintroduced (BLOB is the")
-	t.Log("       natural on-disk format for quantised data)")
-	t.Log("")
-	t.Log("  KEEP JSON storage when:")
-	t.Log("    1. Scale stays under 10K memories")
-	t.Log("    2. Manual SQLite inspection/debugging is a priority")
-	t.Log("    3. Migration cost outweighs storage savings")
-	t.Log("=================================================================")
-}

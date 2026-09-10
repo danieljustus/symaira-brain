@@ -203,10 +203,17 @@ func TestStatusConvergedIsInSync(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	markerBytes, err := os.ReadFile(filepath.Join(dest, markerFile))
+	if err != nil {
+		t.Fatal(err)
+	}
 	if err := os.RemoveAll(dest); err != nil {
 		t.Fatal(err)
 	}
 	if err := copyDir(rendered[0].Path, dest); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dest, markerFile), markerBytes, 0o644); err != nil {
 		t.Fatal(err)
 	}
 

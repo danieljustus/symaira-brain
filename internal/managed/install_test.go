@@ -137,12 +137,16 @@ func TestInstall_MultiBinaryArchivePicksNamedBinary(t *testing.T) {
 }
 
 func TestNewInstaller(t *testing.T) {
+	t.Setenv("SYMBRAIN_RELEASE_BASE_URL", "https://fixtures.example")
 	inst := NewInstaller("/tmp/example-bin")
 	if inst.BinDir != "/tmp/example-bin" {
 		t.Errorf("BinDir = %q, want /tmp/example-bin", inst.BinDir)
 	}
 	if inst.TempDir != "" {
 		t.Errorf("TempDir = %q, want empty (system default)", inst.TempDir)
+	}
+	if inst.baseURL != "https://fixtures.example" {
+		t.Errorf("baseURL = %q, want fixture URL from environment", inst.baseURL)
 	}
 }
 
@@ -289,13 +293,11 @@ func TestInstall_ChecksumMismatch(t *testing.T) {
 // serveCore starts an httptest.Server that serves an archive and
 // matching checksums.txt for core, mimicking the GitHub
 // "releases/download/<tag>/<asset>" layout downloadURL constructs.
-// The archive (and sig/pem, when non-nil) are mirrored at both
-// assetName and altName: Install retries with the unversioned
-// AssetNameAlt whenever the first attempt errors — for these tests
-// that "first attempt" deliberately fails downstream of the download
-// (bad checksum, missing signature), and without the mirror that retry
-// would hit an unregistered path and mask the real error behind a
-// generic 404. If sig/pem are non-nil, they are served too (as a real
+// The archive (and sig/pem, when non-nil) is mirrored at both assetName
+// and altName so the helper can also exercise the legacy-name fallback.
+// Install retries that fallback only when the primary asset returns 404;
+// integrity and publisher-verification failures remain fail-closed. If
+// sig/pem are non-nil, they are served too (as a real
 // publisher's release would when HasCosign is set); when nil, cosign's
 // fail-closed path is exercised because the files never exist locally.
 func serveCore(t *testing.T, core *Core, assetName, altName string, archive, sig, pem []byte) *httptest.Server {
@@ -434,12 +436,9 @@ func TestInstall_PinnedChecksum_MismatchFailsIndependentlyOfChecksumsTxt(t *test
 	archive := buildArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	altName := core.AssetNameAlt(goos, goarch)
-	// The manifest pin is deliberately wrong for both the versioned and
-	// fallback asset names, even though checksums.txt (served by
-	// serveCore) correctly matches the archive — Install retries with
-	// AssetNameAlt on any failure, so both must be pinned wrong for this
-	// test to prove the pin (not the retry finding an unpinned name) is
-	// what's enforced.
+	// The manifest pin is deliberately wrong even though checksums.txt
+	// agrees with the archive. Integrity failure must stop before any
+	// legacy-name fallback can weaken the pinned contract.
 	wrong := strings.Repeat("0", 64)
 	core.SHA256 = map[string]string{assetName: wrong, altName: wrong}
 
@@ -690,4 +689,49 @@ func extractAndInstallForTest(t *testing.T, baseURL, binDir string, core *Core, 
 		return nil, fmt.Errorf("atomicInstall: %w", err)
 	}
 	return os.ReadFile(filepath.Join(binDir, core.BinaryName))
+}
+
+func TestInstall_PinnedPrimaryMismatchDoesNotDowngradeToAlternate(t *testing.T) {
+	goos, goarch, err := Platform()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if goos == "windows" {
+		t.Skip("fixture uses tar.gz")
+	}
+	core := &Core{
+		Version:     "v1.0.0",
+		Repo:        "example/example-core",
+		BinaryName:  "example-core",
+		AssetPrefix: "example-core",
+	}
+	archive := buildArchive(t, core.BinaryName, []byte("untrusted replacement"))
+	primary := core.AssetName(goos, goarch)
+	alternate := core.AssetNameAlt(goos, goarch)
+	core.SHA256 = map[string]string{primary: strings.Repeat("0", 64)}
+	checksum := sha256.Sum256(archive)
+
+	mux := http.NewServeMux()
+	prefix := "/" + core.Repo + "/releases/download/v1.0.0/"
+	mux.HandleFunc(prefix+primary, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write(archive)
+	})
+	mux.HandleFunc(prefix+alternate, func(w http.ResponseWriter, _ *http.Request) {
+		t.Error("alternate asset requested after pinned primary checksum failure")
+		_, _ = w.Write(archive)
+	})
+	mux.HandleFunc(prefix+"checksums.txt", func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = fmt.Fprintf(w, "%x  %s\n", checksum, alternate)
+	})
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	binDir := t.TempDir()
+	inst := &Installer{BinDir: binDir, baseURL: server.URL}
+	if err := inst.Install(context.Background(), core); err == nil || !strings.Contains(err.Error(), "pinned checksum") {
+		t.Fatalf("Install() error = %v, want pinned checksum failure", err)
+	}
+	if _, err := os.Stat(filepath.Join(binDir, core.BinaryName)); !os.IsNotExist(err) {
+		t.Fatalf("binary installed after pinned checksum failure: %v", err)
+	}
 }

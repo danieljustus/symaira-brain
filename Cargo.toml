@@ -1,5 +1,24 @@
 [workspace]
-members = ["rust/symbrain-guard-core"]
+members = [
+    "rust/symbrain-activity",
+    "rust/symbrain-memory",
+    "rust/symbrain-audit",
+    "rust/symbrain-broker",
+    "rust/symbrain-catalog",
+    "rust/symbrain-core",
+    "rust/symbrain-mcp",
+    "rust/symbrain-managed",
+    "rust/symbrain-patterns",
+    "rust/symbrain-cli",
+    "rust/symbrain-policy",
+    "rust/symbrain-gateway",
+    "rust/symbrain-harness",
+    "rust/symbrain-instructions",
+    "rust/symbrain-adapter",
+    "rust/symbrain-skills",
+    "rust/symbrain-usage",
+    "rust/symbrain-guard-core",
+]
 resolver = "2"
 
 [workspace.package]
@@ -11,6 +30,33 @@ repository = "https://github.com/danieljustus/symaira-brain"
 
 [workspace.dependencies]
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "serde", "std"] }
+cap-std = "=4.0.3"
+cap-fs-ext = "=4.0.3"
+fs2 = "=0.4.3"
+libc = "0.2.189"
+rustix = { version = "=1.1.4", features = ["fs", "process"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["raw_value"] }
+signal-hook = "=0.3.18"
+serde_yaml_ng = "0.10.0"
 sha2 = "0.10.9"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+regex = "1"
+ureq = { version = "=3.4.1", default-features = false, features = ["rustls"] }
+symbrain-activity = { version = "0.11.0", path = "rust/symbrain-activity" }
+symbrain-memory = { version = "0.11.0", path = "rust/symbrain-memory" }
+symbrain-audit = { version = "0.11.0", path = "rust/symbrain-audit" }
+symbrain-broker = { version = "0.11.0", path = "rust/symbrain-broker" }
+symbrain-catalog = { version = "0.11.0", path = "rust/symbrain-catalog" }
+symbrain-core = { version = "0.11.0", path = "rust/symbrain-core" }
+symbrain-gateway = { version = "0.11.0", path = "rust/symbrain-gateway" }
+symbrain-harness = { version = "0.11.0", path = "rust/symbrain-harness" }
+symbrain-instructions = { version = "0.11.0", path = "rust/symbrain-instructions" }
+symbrain-mcp = { version = "0.11.0", path = "rust/symbrain-mcp" }
+symbrain-managed = { version = "0.11.0", path = "rust/symbrain-managed" }
+symbrain-patterns = { version = "0.11.0", path = "rust/symbrain-patterns" }
+symbrain-policy = { version = "0.11.0", path = "rust/symbrain-policy" }
+symbrain-usage = { version = "0.11.0", path = "rust/symbrain-usage" }
+symbrain-guard-core = { version = "0.11.0", path = "rust/symbrain-guard-core" }
+tempfile = "3.27.0"
+toml_edit = "0.25.13"

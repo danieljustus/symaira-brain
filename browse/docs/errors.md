@@ -1,0 +1,138 @@
+# Fehlercodes (Error Codes)
+
+Alle symbrowse-Ausgaben folgen einem einheitlichen Schema. Mit dem globalen
+`--json` Flag liefert jedes Kommando genau ein Envelope-Dokument:
+
+Erfolg:
+
+```json
+{"success":true,"data":…,"warnings":[…]}
+```
+
+Fehler:
+
+```json
+{"success":false,"error":{"code":"stale_ref","message":…,"hint":…,"details":{…}}}
+```
+
+Nicht wiederholbare Sitzungs-Hard-Stops tragen zusätzlich die gemeinsame
+Fortsetzungssemantik. `retryable` ist dabei explizit `false`; ein Wechsel zurück
+zur Agentensteuerung braucht eine bestätigte menschliche Aktion:
+
+```json
+{"success":false,"error":{"code":"session_user_control","message":"session is controlled by a human","retryable":false,"requires_user_confirmation":true,"resume_hint":"request explicit confirmation before taking control back"}}
+```
+
+`code` ist immer ein Mitglied des unten dokumentierten Enums — niemals ein
+freier String. Der Prozess-Exit-Code folgt weiterhin der `corekit/exitcodes`
+Konvention (`internal/exitcodes`); die Zuordnung `code → exit code` steht in
+`internal/output/codes.go` (`ExitCodeFromCode`).
+
+## Enum
+
+| Code | Bedeutung | Exit | Kind |
+|---|---|---|---|
+| `stale_ref` | Zugriff auf eine Ref, die aus der Seite verschwunden ist (Tombstone) | 6 conflict | conflict |
+| `unknown_ref` | Ref ist nicht in der aktuellen Ref-Map | 5 not_found | not_found |
+| `invalid_args` | Kommando-Argumente fehlen oder sind unbrauchbar | 2 no_input | validation |
+| `invalid_inspection` | Nicht unterstützte Inspection-Art oder -Nutzung | 2 no_input | validation |
+| `malformed_request` | Daemon-Frame konnte nicht dekodiert werden | 2 no_input | validation |
+| `unknown_command` | Daemon kennt das Kommando nicht | 2 no_input | validation |
+| `operation_failed` | Daemon-Handler ohne spezifischeren Code fehlgeschlagen | 1 generic | unavailable |
+| `operation_timeout` | Daemon-Operation überschritt ihr Timeout | 1 generic | unavailable |
+| `peer_denied` | Verbindender Peer wurde abgelehnt | 4 forbidden | permission |
+| `daemon_unavailable` | Daemon nicht erreichbar oder nicht startbar | 1 generic | unavailable |
+| `invalid_session` | Session-Name ungültig oder unbekannt | 2 no_input | validation |
+| `session_not_found` | Session existiert nicht | 5 not_found | not_found |
+| `session_user_control` | Mensch kontrolliert die Session; kein implizites Takeover | 6 conflict | conflict |
+| `session_inactive` | Session ist beendet oder abgelaufen | 5 not_found | not_found |
+| `handoff_timeout` | Übergabe ist abgelaufen und wurde verweigert | 1 generic | unavailable |
+| `not_found` | Angeforderte Ressource existiert nicht | 5 not_found | not_found |
+| `auth` | Authentifizierung fehlgeschlagen | 3 no_auth | auth |
+| `permission` | Operation nicht erlaubt | 4 forbidden | permission |
+| `validation` | Ein Wert besteht die Validierung nicht | 2 no_input | validation |
+| `no_input` | Benötigte Eingabe fehlt | 2 no_input | validation |
+| `flow_failed` | Ein Flow-Schritt oder der gesamte Flow-Lauf ist fehlgeschlagen | 7 software | internal |
+| `config` | Konfiguration ungültig oder nicht lesbar | 9 config | config |
+| `conflict` | Operation kollidiert mit dem aktuellen Zustand | 6 conflict | conflict |
+| `unavailable` | Benötigter Dienst oder Ressource nicht verfügbar | 1 generic | unavailable |
+| `internal` | Unerwarteter interner Fehler (Fallback) | 7 software | internal |
+
+## Fehlerklassen der Fetch-Pipeline
+
+`fetch_url` / `fetch_batch` bilden Pipeline-Fehler auf das Enum ab, statt alles
+als `operation_failed` zu melden — ein Agent muss eine abgelehnte Adresse von
+einem falschen Selektor von einem langsamen Host unterscheiden können, um zu
+entscheiden, ob ein erneuter Versuch überhaupt helfen kann:
+
+| Ursache | Code | `retryable` |
+|---|---|---|
+| Privates/Loopback-Ziel (SSRF-Guard) | `peer_denied` | false |
+| Von `robots.txt` verboten | `peer_denied` | false |
+| HTTP 401/403 | `peer_denied` | false |
+| CSS-Selektor ohne Treffer | `malformed_request` | false |
+| `schema_path` ohne Treffer | `malformed_request` | false |
+| Timeout, HTTP 408/429 | `operation_timeout` | true |
+| HTTP 5xx, Netzwerk-/DNS-Fehler | `operation_failed` | true |
+| HTTP 4xx (z. B. 404) | `operation_failed` | false |
+| Parse-/Render-Fehler | `operation_failed` | false |
+
+Bei 404/410 trägt `details.recovery` die Kandidaten des Recovery-Probes:
+`nearest_ancestor`, `ancestor_status` und `candidates[{url, title, source,
+score}]`. Der Probe läuft **nur** für diese beiden Codes — er kostet echte
+HTTP-Anfragen gegen denselben Host, und bei einer Auth-Ablehnung oder einem
+Rate-Limit wäre eine Ersatz-URL ohnehin nicht die Antwort.
+
+## Fehler am MCP-Rand
+
+Ein fehlgeschlagener Tool-Aufruf ist ein MCP-Tool-Result mit `isError: true`,
+kein JSON-RPC-Fehlerobjekt — das JSON-RPC-Fehlerobjekt gehört
+Protokollfehlern, und ein dorthin verschobener Tool-Fehler wäre für das Modell
+nicht mehr sichtbar.
+
+Der Textblock trägt weiterhin `code: message`. Alle strukturierten Felder
+liegen daneben im `_meta` des Results, unter dem Schlüssel
+`symaira.dev/tool_error`:
+
+```json
+{
+  "content": [{"type": "text", "text": "operation_failed: fetch https://example.com/docs/gone: HTTP 404"}],
+  "isError": true,
+  "_meta": {
+    "symaira.dev/tool_error": {
+      "code": "operation_failed",
+      "message": "operation_failed: fetch https://example.com/docs/gone: HTTP 404",
+      "retryable": false,
+      "requires_confirmation": false,
+      "resume_hint": "check the URL; the response carries candidate replacements when the probe found any",
+      "details": {"recovery": {"nearest_ancestor": "…", "ancestor_status": 200, "candidates": […]}}
+    }
+  }
+}
+```
+
+Damit erreichen `code`, `retryable`, `requires_confirmation`, `resume_hint`,
+`hint` und `details` MCP-Clients als Felder — dieselben Werte wie am
+Daemon-Socket, ohne Umweg über die Meldung. Der Transport liegt in
+`corekit/mcpserver` (`ToolErrorData`, festgeschrieben in dessen
+`contracts/mcp_tool_errors.json`): dort werden optionale Methoden des
+zurückgegebenen Fehlers abgefragt, `internal/mcp.toolError` implementiert sie.
+Ein Fehler ohne diese Methoden erzeugt gar kein `_meta`.
+
+`retryable` und `requires_confirmation` stehen auch dann im Objekt, wenn sie
+`false` sind: „ein zweiter Versuch hilft nicht“ ist die Aussage, auf die ein
+Agent reagieren kann; ein fehlendes Feld hieße nur, dass der Fehler nichts
+dazu gesagt hat.
+
+## Regeln
+
+1. Jeder Fehlerpfad liefert einen Code aus diesem Enum (`output.IsValid`).
+2. Fehler aus dem Daemon-Protokoll und Client-Transportfehler behalten ihren stabilen Code (`daemon.Error`, `daemon.TransportError`).
+3. `internal` ist der dokumentierte Fallback für nicht klassifizierte Fehler —
+   es ist selbst ein Enum-Mitglied, kein freier String.
+4. `details` (optional) trägt maschinenlesbaren Zusatzkontext.
+5. `session_user_control`, `session_inactive` und `handoff_timeout` sind
+   nicht wiederholbare Hard-Stops: `retryable` ist `false`.
+6. `requires_user_confirmation` und `resume_hint` geben ausschließlich den
+   erlaubten nächsten Schritt an; Clients dürfen daraus kein implizites
+   Takeover ableiten.

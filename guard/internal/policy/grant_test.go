@@ -2,6 +2,7 @@ package policy
 
 import (
 	"testing"
+	"time"
 
 	"github.com/danieljustus/symaira-brain/guard/internal/grant"
 	"github.com/danieljustus/symaira-brain/guard/internal/model"
@@ -18,7 +19,11 @@ func (f fakeLookup) ActiveForSubject(subject string) []*grant.Grant {
 
 func grantsFor(subject string) fakeLookup {
 	return fakeLookup{subjects: map[string][]*grant.Grant{
-		subject: {{ID: "g1", Subject: subject, Scope: grant.ScopeSession}},
+		subject: {{
+			ID: "g1", Subject: subject, Scope: grant.ScopeSession,
+			Capability: "read_secret", Purpose: "test-purpose", Resource: "fs/read_file",
+			ScopeCeiling: []string{"session"}, ExpiresAt: time.Now().Add(time.Hour),
+		}},
 	}}
 }
 
@@ -32,7 +37,10 @@ func mustCatalog(t *testing.T, rules ...Rule) *Catalog {
 }
 
 func TestEvaluateWithGrants(t *testing.T) {
-	call := model.ToolCall{Server: "fs", Tool: "read_file", Capability: "read_secret"}
+	call := model.ToolCall{
+		Server: "fs", Tool: "read_file", Capability: "read_secret",
+		Purpose: "test-purpose", Resource: "fs/read_file", Scope: "session",
+	}
 	askRule := Rule{ID: "ask-1", Version: "1.0", Precedence: 10, Decision: model.DecisionAsk,
 		Match: MatchCriteria{Capability: "read_secret"}}
 	denyRule := Rule{ID: "deny-1", Version: "1.0", Precedence: 10, Decision: model.DecisionDeny,
@@ -118,14 +126,18 @@ func TestEvaluateWithGrants_RealStore(t *testing.T) {
 	}
 	if err := st.Add(&grant.Grant{
 		ID: "g1", Scope: grant.ScopeSession, Subject: "agent-1",
-		Origin: grant.Origin{Epoch: 1, Via: "approval"},
+		Origin:     grant.Origin{Epoch: 1, Via: "approval"},
+		Capability: "read_secret", Purpose: "test-purpose", Resource: "fs/read_file",
+		ScopeCeiling: []string{"session"}, ExpiresAt: time.Now().Add(time.Hour),
 	}); err != nil {
 		t.Fatalf("store.Add() error = %v", err)
 	}
 
 	c := mustCatalog(t, Rule{ID: "ask-1", Version: "1.0", Precedence: 10,
 		Decision: model.DecisionAsk, Match: MatchCriteria{Capability: "read_secret"}})
-	call := model.ToolCall{Capability: "read_secret"}
+	call := model.ToolCall{
+		Capability: "read_secret", Purpose: "test-purpose", Resource: "fs/read_file", Scope: "session",
+	}
 
 	got := c.EvaluateWithGrants("agent-1", call, model.DecisionAsk, st)
 	if got.Decision != model.DecisionAllow {

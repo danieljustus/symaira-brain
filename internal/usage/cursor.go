@@ -34,7 +34,7 @@ type CursorProvider struct {
 // NewCursorProvider reads the cookie from CURSOR_COOKIE.
 func NewCursorProvider(client *http.Client) *CursorProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	cookieHeader, credSource, credErr := resolveEnv("CURSOR_COOKIE")
 	return &CursorProvider{cookieHeader: cookieHeader, credErr: credErr, credSource: credSource, client: client}
@@ -99,11 +99,14 @@ func (s *cursorWebStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
 	req.Header.Set("Cookie", s.cookieHeader)
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := s.client.Do(req)
+	resp, err := doUsageRequest(ctx, s.client, req, false)
 	if err != nil {
 		return nil, &cursorError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := readUsageBodyAndClose(resp.Body)
+	if err != nil {
+		return nil, &cursorError{kind: "parse_failed", detail: "usage summary is not JSON"}
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		switch resp.StatusCode {
@@ -117,7 +120,7 @@ func (s *cursorWebStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
 	}
 
 	var summary cursorUsageSummary
-	if err := json.NewDecoder(resp.Body).Decode(&summary); err != nil {
+	if err := json.Unmarshal(data, &summary); err != nil {
 		return nil, &cursorError{kind: "parse_failed", detail: "usage summary is not JSON"}
 	}
 	return cursorSnapshot(summary), nil

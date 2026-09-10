@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,6 +17,21 @@ import (
 
 // defaultBaseURL is the release host used when Installer.baseURL is unset.
 const defaultBaseURL = "https://github.com"
+
+var errAssetNotFound = errors.New("release asset not found")
+
+type downloadStatusError struct {
+	url    string
+	status int
+}
+
+func (e *downloadStatusError) Error() string {
+	return fmt.Sprintf("download: %s: HTTP %d", e.url, e.status)
+}
+
+func (e *downloadStatusError) Is(target error) bool {
+	return target == errAssetNotFound && e.status == http.StatusNotFound
+}
 
 // downloadURL constructs the release asset download URL against base
 // (e.g. "https://github.com" or a test server URL), pinned to the
@@ -46,7 +62,7 @@ func downloadFile(ctx context.Context, url, dest string) (int64, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("download: %s: HTTP %d", url, resp.StatusCode)
+		return 0, &downloadStatusError{url: url, status: resp.StatusCode}
 	}
 
 	f, err := os.Create(dest)

@@ -60,7 +60,7 @@ func TestBuildReportRecordsSuccessfulSnapshot(t *testing.T) {
 	providers := []Provider{
 		&fakeProvider{
 			id: "x", name: "X", configured: true,
-			strategies: []Strategy{&fakeStrategy{source: "api", snap: &UsageSnapshot{ProviderID: "x"}}},
+			strategies: []Strategy{&fakeStrategy{source: "api", snap: &UsageSnapshot{ProviderID: "x", Meters: []UsageMeter{{Label: "test", Unit: "requests"}}}}},
 			authStatus: AuthStatus{Status: "available"},
 		},
 	}
@@ -139,7 +139,7 @@ func TestBuildReportBoundsAStalledProviderWithoutBlockingOthers(t *testing.T) {
 		},
 		&fakeProvider{
 			id: "fast", name: "Fast", configured: true,
-			strategies: []Strategy{&fakeStrategy{source: "api", snap: &UsageSnapshot{ProviderID: "fast"}}},
+			strategies: []Strategy{&fakeStrategy{source: "api", snap: &UsageSnapshot{ProviderID: "fast", Meters: []UsageMeter{{Label: "test", Unit: "requests"}}}}},
 			authStatus: AuthStatus{Status: "available"},
 		},
 	}

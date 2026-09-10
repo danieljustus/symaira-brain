@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"os/exec"
 	"sort"
 	"strings"
@@ -28,7 +29,7 @@ var claudeKeychainTimeout = 20 * time.Second
 // securityCommand builds the `security` invocation; a var so tests can
 // substitute a fake without a keychain.
 var securityCommand = func(ctx context.Context, args ...string) *exec.Cmd {
-	return exec.CommandContext(ctx, "security", args...)
+	return exec.CommandContext(ctx, "/usr/bin/security", args...) // #nosec G204 -- validSecurityArgs admits only the two fixed security subcommands and a validated Claude service name.
 }
 
 // readClaudeKeychainCredential returns the Claude Code OAuth access token
@@ -76,7 +77,7 @@ func suffixedClaudeKeychainServices() []string {
 	var services []string
 	for _, line := range strings.Split(string(out), "\n") {
 		name, ok := keychainServiceName(line)
-		if !ok || seen[name] || !strings.HasPrefix(name, claudeKeychainService+"-") {
+		if !ok || seen[name] || !validClaudeServiceName(name) || !strings.HasPrefix(name, claudeKeychainService+"-") {
 			continue
 		}
 		seen[name] = true
@@ -100,6 +101,29 @@ func keychainServiceName(line string) (string, bool) {
 		return "", false
 	}
 	return rest[:end], true
+}
+
+func validClaudeServiceName(name string) bool {
+	if name == claudeKeychainService {
+		return true
+	}
+	suffix, ok := strings.CutPrefix(name, claudeKeychainService+"-")
+	if !ok || suffix == "" {
+		return false
+	}
+	for _, char := range suffix {
+		if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f') || (char >= 'A' && char <= 'F')) {
+			return false
+		}
+	}
+	return true
+}
+
+func validSecurityArgs(args []string) bool {
+	if len(args) == 1 {
+		return args[0] == "dump-keychain"
+	}
+	return len(args) == 4 && args[0] == "find-generic-password" && args[1] == "-w" && args[2] == "-s" && validClaudeServiceName(args[3])
 }
 
 // parseClaudeKeychainBlob reads the access token out of the stored JSON.
@@ -130,15 +154,36 @@ func parseClaudeKeychainBlob(blob []byte) (string, *time.Time, bool) {
 	return root.ClaudeAIOAuth.AccessToken, expiresAt, true
 }
 
+const maxKeychainOutputBytes = 64 << 10
+
+var errKeychainOutputTooLarge = errors.New("keychain output exceeds limit")
+
+type boundedKeychainOutput struct{ bytes.Buffer }
+
+func (b *boundedKeychainOutput) Write(p []byte) (int, error) {
+	if len(p) > maxKeychainOutputBytes-b.Len() {
+		return 0, errKeychainOutputTooLarge
+	}
+	return b.Buffer.Write(p)
+}
+
 // runSecurity runs one `security` subcommand under the keychain timeout.
-// Only stdout is returned; stderr is dropped, since the only failure that
-// matters here ("item not found", "user denied access") is answered the same
-// way — try the next service, then report "not signed in".
+// Only bounded stdout is returned; stderr is dropped, since the only failure
+// that matters here ("item not found", "user denied access") is answered the
+// same way — try the next service, then report "not signed in".
 func runSecurity(args ...string) ([]byte, error) {
+	if !validSecurityArgs(args) {
+		return nil, errors.New("unsupported keychain command")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), claudeKeychainTimeout)
 	defer cancel()
 
 	cmd := securityCommand(ctx, args...)
 	cmd.Stderr = nil
-	return cmd.Output()
+	var output boundedKeychainOutput
+	cmd.Stdout = &output
+	if err := cmd.Run(); err != nil {
+		return nil, err
+	}
+	return output.Bytes(), nil
 }

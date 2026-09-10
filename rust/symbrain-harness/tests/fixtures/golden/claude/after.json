@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "other-tool": {
+      "args": [
+        "run"
+      ],
+      "command": "other-tool"
+    },
+    "symbrain": {
+      "command": "symbrain",
+      "args": [
+        "mcp",
+        "--profile",
+        "personal"
+      ]
+    }
+  },
+  "userId": "u-123"
+}

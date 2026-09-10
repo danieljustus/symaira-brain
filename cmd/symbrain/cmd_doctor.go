@@ -555,7 +555,13 @@ func runDoctorFix(stdout, stderr io.Writer) exitcodes.ExitCode {
 
 	fmt.Fprintf(stdout, "symbrain doctor --fix\n\n")
 
-	if err := managed.Fix(context.Background(), binDir, nil); err != nil {
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "  ✗  %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
+
+	if err := managed.Fix(context.Background(), binDir, nil, cfg.Modules.EnabledCores()); err != nil {
 		fmt.Fprintf(stderr, "  ✗  repair failed: %v\n", err)
 		return exitcodes.ExitGeneric
 	}

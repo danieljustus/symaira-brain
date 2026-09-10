@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "providers": [
+    {
+      "id": "claude",
+      "display_name": "Claude"
+    },
+    {
+      "id": "codex",
+      "display_name": "Codex"
+    },
+    {
+      "id": "copilot",
+      "display_name": "GitHub Copilot"
+    },
+    {
+      "id": "cursor",
+      "display_name": "Cursor"
+    },
+    {
+      "id": "kimi",
+      "display_name": "Kimi Code"
+    },
+    {
+      "id": "moonshot",
+      "display_name": "Moonshot"
+    },
+    {
+      "id": "nous",
+      "display_name": "Nous Portal"
+    },
+    {
+      "id": "opencode",
+      "display_name": "OpenCode Go"
+    },
+    {
+      "id": "openrouter",
+      "display_name": "OpenRouter"
+    },
+    {
+      "id": "antigravity",
+      "display_name": "Antigravity"
+    }
+  ]
+}

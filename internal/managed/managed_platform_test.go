@@ -36,7 +36,7 @@ func TestSetup_PlatformSkipDoesNotCountAsAttempted(t *testing.T) {
 		t.Skip("platform-skip path is unreachable on darwin in this test layout")
 	}
 
-	if err := Setup(context.Background(), t.TempDir(), nil); err != nil {
+	if err := Setup(context.Background(), t.TempDir(), nil, nil); err != nil {
 		t.Fatalf("Setup with platform-skip: %v", err)
 	}
 	if len(fake.calls) != 1 {
@@ -59,7 +59,7 @@ func TestFix_PlatformSkipDoesNotCountAsAttempted(t *testing.T) {
 	binDir := t.TempDir()
 	fakeVersionBinary(t, binDir, "symvault", "v0.15.3")
 
-	if err := Fix(context.Background(), binDir, nil); err != nil {
+	if err := Fix(context.Background(), binDir, nil, nil); err != nil {
 		t.Fatalf("Fix with platform-skip: %v", err)
 	}
 	if len(fake.calls) != 0 {
@@ -76,7 +76,7 @@ func TestSetup_PlatformSkipExcludedFromFailureFraction(t *testing.T) {
 		t.Skip("platform-skip failure-fraction path is unreachable on darwin in this test layout")
 	}
 
-	err := Setup(context.Background(), t.TempDir(), nil)
+	err := Setup(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Setup with one failure among attempted cores: got nil error, want error")
 	}
@@ -94,7 +94,7 @@ func TestFix_PlatformSkipExcludedFromFailureFraction(t *testing.T) {
 		t.Skip("platform-skip failure-fraction path is unreachable on darwin in this test layout")
 	}
 
-	err := Fix(context.Background(), t.TempDir(), nil)
+	err := Fix(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Fix with one failure among attempted cores: got nil error, want error")
 	}
@@ -114,7 +114,7 @@ func TestSetup_AllSupportedCoresAttempted(t *testing.T) {
   }
 }`))
 
-	if err := Setup(context.Background(), t.TempDir(), nil); err != nil {
+	if err := Setup(context.Background(), t.TempDir(), nil, nil); err != nil {
 		t.Fatalf("Setup: %v", err)
 	}
 	if len(fake.calls) != 2 {
@@ -132,7 +132,7 @@ func TestSetup_SingleFailureReturnsCorrectFraction(t *testing.T) {
   }
 }`))
 
-	err := Setup(context.Background(), t.TempDir(), nil)
+	err := Setup(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Setup with one failing core: got nil error, want error")
 	}
@@ -151,7 +151,7 @@ func TestFix_SingleFailureReturnsCorrectFraction(t *testing.T) {
   }
 }`))
 
-	err := Fix(context.Background(), t.TempDir(), nil)
+	err := Fix(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Fix with one failing core: got nil error, want error")
 	}
@@ -171,7 +171,7 @@ func TestSetup_TwoCoresOneFailureReportsTwoAsDenominator(t *testing.T) {
   }
 }`))
 
-	err := Setup(context.Background(), t.TempDir(), nil)
+	err := Setup(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Setup with one failing core: got nil error, want error")
 	}
@@ -191,7 +191,7 @@ func TestFix_TwoCoresOneFailureReportsTwoAsDenominator(t *testing.T) {
   }
 }`))
 
-	err := Fix(context.Background(), t.TempDir(), nil)
+	err := Fix(context.Background(), t.TempDir(), nil, nil)
 	if err == nil {
 		t.Fatal("Fix with one failing core: got nil error, want error")
 	}

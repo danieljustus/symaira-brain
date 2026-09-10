@@ -6,7 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"runtime"
+	"sort"
 
+	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-brain/internal/managed"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
@@ -54,14 +57,28 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsi
 		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
 	inst.Warn = stderr
 	report := setupReport{BinDir: binDir}
 
-	for name, core := range manifest.Cores {
+	for _, name := range sortedCoreNames(manifest.ActiveCores(cfg.Modules.EnabledCores())) {
+		core := manifest.ActiveCores(cfg.Modules.EnabledCores())[name]
 		result := coreResult{Name: name, Version: core.Version}
+		if !core.SupportsPlatform(runtime.GOOS) {
+			result.Status = "skipped"
+			if !jsonOut {
+				fmt.Fprintf(stdout, "  -  %s %s (unsupported platform)\n", name, core.Version)
+			}
+			report.Results = append(report.Results, result)
+			continue
+		}
 
 		if err := inst.Install(ctx, &core); err != nil {
 			result.Status = "error"
@@ -101,6 +118,11 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup --fix: %v\n", err)
+		return exitcodes.ExitCodeFromError(err)
+	}
 
 	inst := managed.NewInstaller(binDir)
 	inst.AllowUnsigned = allowUnsigned
@@ -108,11 +130,21 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 	report := setupReport{BinDir: binDir}
 	var fixed, skipped int
 
-	for name, core := range manifest.Cores {
+	for _, name := range sortedCoreNames(manifest.ActiveCores(cfg.Modules.EnabledCores())) {
+		core := manifest.ActiveCores(cfg.Modules.EnabledCores())[name]
 		result := coreResult{Name: name, Version: core.Version}
+		if !core.SupportsPlatform(runtime.GOOS) {
+			result.Status = "skipped"
+			skipped++
+			if !jsonOut {
+				fmt.Fprintf(stdout, "  -  %s %s (unsupported platform)\n", name, core.Version)
+			}
+			report.Results = append(report.Results, result)
+			continue
+		}
 
 		existing, _ := managed.InstalledVersion(ctx, binDir, core.BinaryName)
-		if existing == core.Version {
+		if managed.VersionsMatch(existing, core.Version) {
 			result.Status = "skipped"
 			skipped++
 			if !jsonOut {
@@ -150,4 +182,13 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 		return exitcodes.ExitGeneric
 	}
 	return exitcodes.ExitOK
+}
+
+func sortedCoreNames(cores map[string]managed.Core) []string {
+	names := make([]string, 0, len(cores))
+	for name := range cores {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }

@@ -101,7 +101,7 @@ func checkVaultReachable(ctx context.Context) linkCheck {
 	default:
 		return linkCheck{
 			Name: name, Status: linkFail,
-			Detail: "symvault probe failed: " + strings.TrimSpace(stderr.String()),
+			Detail: "symvault probe failed: " + runErr.Error(),
 			Remedy: "run `symvault doctor` to diagnose",
 		}
 	}

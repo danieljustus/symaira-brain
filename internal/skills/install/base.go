@@ -39,10 +39,13 @@ type BaseFileEntry struct {
 // BaseManifest is the manifest.json shape written alongside a base snapshot.
 // Files is keyed by the slash-separated path relative to the snapshot root.
 type BaseManifest struct {
-	SchemaVersion int                      `json:"schema_version"`
-	Target        string                   `json:"target"`
-	Name          string                   `json:"name"`
-	Files         map[string]BaseFileEntry `json:"files"`
+	SchemaVersion int    `json:"schema_version"`
+	Target        string `json:"target"`
+	Name          string `json:"name"`
+	// ProjectID is present for project-scope snapshots. It is optional so
+	// schema-one snapshots at the legacy shared path remain readable.
+	ProjectID string                   `json:"project_id,omitempty"`
+	Files     map[string]BaseFileEntry `json:"files"`
 }
 
 // BasePath returns the base snapshot directory for a skill. The default
@@ -63,9 +66,50 @@ func BasePath(target render.Target, name string, opts Options) (string, error) {
 		base = filepath.Join(home, ".local", "share", "symskills", "base")
 	}
 	if opts.Scope == render.ScopeProject {
-		return filepath.Join(base, string(target), string(opts.Scope), name), nil
+		if opts.ProjectDir == "" {
+			return filepath.Join(base, string(target), string(opts.Scope), name), nil
+		}
+		identity, err := projectIdentity(opts.ProjectDir)
+		if err != nil {
+			return "", err
+		}
+		return filepath.Join(base, string(target), string(opts.Scope), identity, name), nil
 	}
 	return filepath.Join(base, string(target), name), nil
+}
+
+func projectIdentity(project string) (string, error) {
+	absolute, err := filepath.Abs(project)
+	if err != nil {
+		return "", fmt.Errorf("resolve project identity: %w", err)
+	}
+	sum := sha256.Sum256([]byte(filepath.Clean(absolute)))
+	return hex.EncodeToString(sum[:]), nil
+}
+
+// basePathForRead returns the identity-scoped project path and accepts the
+// pre-identity path during migration. New writes always use BasePath.
+func basePathForRead(target render.Target, name string, opts Options) (string, error) {
+	current, err := BasePath(target, name, opts)
+	if err != nil {
+		return "", err
+	}
+	if opts.Scope != render.ScopeProject || opts.ProjectDir == "" {
+		return current, nil
+	}
+	if _, err := os.Stat(filepath.Join(current, manifestFile)); err == nil {
+		return current, nil
+	}
+	legacy := opts
+	legacy.ProjectDir = ""
+	legacyPath, err := BasePath(target, name, legacy)
+	if err != nil {
+		return "", err
+	}
+	if _, err := os.Stat(filepath.Join(legacyPath, manifestFile)); err == nil {
+		return legacyPath, nil
+	}
+	return current, nil
 }
 
 // TombstonePath returns the tombstone marker written when a managed skill is
@@ -104,7 +148,7 @@ func WriteBaseSnapshot(src string, target render.Target, name string, opts Optio
 	}); err != nil {
 		return fmt.Errorf("copying base snapshot: %w", err)
 	}
-	manifest, err := buildBaseManifest(tmp, target, name)
+	manifest, err := buildBaseManifest(tmp, target, name, opts.ProjectDir, opts.Scope == render.ScopeProject)
 	if err != nil {
 		return err
 	}
@@ -127,12 +171,19 @@ func WriteBaseSnapshot(src string, target render.Target, name string, opts Optio
 
 // buildBaseManifest computes the per-file digests and mode bits of the staged
 // snapshot tree.
-func buildBaseManifest(root string, target render.Target, name string) (BaseManifest, error) {
+func buildBaseManifest(root string, target render.Target, name, projectDir string, projectScope bool) (BaseManifest, error) {
 	manifest := BaseManifest{
 		SchemaVersion: BaseSchemaVersion,
 		Target:        string(target),
 		Name:          name,
 		Files:         map[string]BaseFileEntry{},
+	}
+	if projectScope && projectDir != "" {
+		identity, err := projectIdentity(projectDir)
+		if err != nil {
+			return BaseManifest{}, err
+		}
+		manifest.ProjectID = identity
 	}
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -209,14 +260,29 @@ func swapBaseDir(baseDir, tmp string) error {
 }
 
 // RemoveBase deletes the base snapshot for a skill and leaves a tombstone so
-// "deleted" stays distinguishable from "never managed".
+// "deleted" stays distinguishable from "never managed". During the project
+// identity migration it also removes the legacy shared snapshot, if present.
 func RemoveBase(target render.Target, name string, opts Options) error {
 	baseDir, err := BasePath(target, name, opts)
 	if err != nil {
 		return err
 	}
-	if err := os.RemoveAll(baseDir); err != nil {
-		return err
+	paths := []string{baseDir}
+	if opts.Scope == render.ScopeProject && opts.ProjectDir != "" {
+		legacy := opts
+		legacy.ProjectDir = ""
+		legacyPath, lerr := BasePath(target, name, legacy)
+		if lerr != nil {
+			return lerr
+		}
+		if legacyPath != baseDir {
+			paths = append(paths, legacyPath)
+		}
+	}
+	for _, path := range paths {
+		if err := os.RemoveAll(path); err != nil {
+			return err
+		}
 	}
 	t, err := TombstonePath(target, name, opts)
 	if err != nil {
