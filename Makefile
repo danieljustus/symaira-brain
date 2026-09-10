@@ -4,12 +4,12 @@
 BINARY := symbrain
 MODULE := github.com/danieljustus/symaira-brain
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
-# Keep the Go oracle on the module's declared toolchain, even when a newer Go is installed.
-GO_ORACLE_TOOLCHAIN ?= $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
+# Keep fixture checks on the Go toolchain declared by this checkout.
+GO_ORACLE_TOOLCHAIN := $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
 GO_ORACLE_REF ?= HEAD
 LDFLAGS := -X main.version=$(VERSION)
 
-.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
+.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-guard-check rust-audit rust-deny rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -139,6 +139,24 @@ install-oracle-check:
 ## profile-remove-oracle-check: Ensure profile removal expectations match the Go source
 profile-remove-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/profile-remove-oracle -check
+
+## rust-guard-check: Check the existing Guard library against its Go oracles
+rust-guard-check:
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
+	cargo fmt --all --check
+	cargo check --workspace --all-targets --all-features --locked
+	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	cargo test --workspace --all-targets --all-features --locked
+	cargo test --workspace --doc --all-features --locked
+
+## rust-audit: Audit the committed lockfile without resolving or updating it
+rust-audit:
+	cargo audit --file Cargo.lock --deny warnings
+
+## rust-deny: Enforce dependency/license policy without changing Cargo.lock
+rust-deny:
+	cargo deny --locked --all-features check
 
 ## rust-check: Run the complete fast Rust quality gate
 rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
