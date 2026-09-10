@@ -38,7 +38,9 @@ type Config struct {
 // itself add anything to a profile's tool exposure.
 type ModulesConfig struct {
 	// Browse enables symbrowse as a managed, optional web module.
-	Browse bool
+	Browse  bool
+	Operate bool
+	Scope   bool
 }
 
 // EnabledCores maps this config to the managed-core names (as used in
@@ -145,7 +147,9 @@ type filePatternsConfig struct {
 // both correctly resolve to "disabled" (see ServersConfig/Verbose for the
 // same reasoning already established in this file).
 type fileModulesConfig struct {
-	Browse bool `json:"browse"`
+	Browse  bool `json:"browse"`
+	Operate bool `json:"operate"`
+	Scope   bool `json:"scope"`
 }
 
 func fileDefaults() *fileConfig {
@@ -193,7 +197,9 @@ func resolve(fc *fileConfig) *Config {
 			PromotionThreshold: threshold,
 		},
 		Modules: ModulesConfig{
-			Browse: fc.Modules.Browse,
+			Browse:  fc.Modules.Browse,
+			Operate: fc.Modules.Operate,
+			Scope:   fc.Modules.Scope,
 		},
 	}
 }

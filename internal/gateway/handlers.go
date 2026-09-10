@@ -30,7 +30,7 @@ func (s *Server) handleBootstrap(_ context.Context, _ json.RawMessage) (any, err
 		}
 	}
 
-	for _, alias := range []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills} {
+	for _, alias := range []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage, profile.ServerOperate, profile.ServerScope} {
 		cfg := s.profile.Server(alias)
 		tools := perServer[alias]
 		resp.Servers = append(resp.Servers, bootstrapServer{

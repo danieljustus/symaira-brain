@@ -17,10 +17,12 @@ import (
 // Server aliases recognized under [servers.*] tables. Any other alias in a
 // profile file is a validation error.
 const (
-	ServerVault  = "vault"
-	ServerMemory = "memory"
-	ServerSkills = "skills"
-	ServerUsage  = "usage"
+	ServerVault   = "vault"
+	ServerMemory  = "memory"
+	ServerSkills  = "skills"
+	ServerUsage   = "usage"
+	ServerOperate = "operate"
+	ServerScope   = "scope"
 )
 
 // Memory server modes.
@@ -139,10 +141,12 @@ type fileAuditConfig struct {
 }
 
 var knownServerAliases = map[string]bool{
-	ServerVault:  true,
-	ServerMemory: true,
-	ServerSkills: true,
-	ServerUsage:  true,
+	ServerVault:   true,
+	ServerMemory:  true,
+	ServerSkills:  true,
+	ServerUsage:   true,
+	ServerOperate: true,
+	ServerScope:   true,
 }
 
 // validNamePattern restricts profile names to a safe, unambiguous charset.

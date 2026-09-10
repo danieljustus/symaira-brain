@@ -121,6 +121,11 @@ var usageTools = []string{
 
 // activityTools are deliberately not part of the default memory presets.
 // Profiles must explicitly grant these read tools via tools_allow.
+var optionalModuleTools = map[string][]string{
+	profile.ServerOperate: {"version", "permissions_status", "get_policy"},
+	profile.ServerScope:   {"scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list"},
+}
+
 var activityTools = []string{"activity_get", "activity_search", "activity_status"}
 
 // identityParameters is the versioned, explicit mapping of backend aliases to
@@ -175,6 +180,8 @@ func universeFor(alias string) []string {
 		return memoryTools.ReadWrite
 	case profile.ServerUsage:
 		return usageTools
+	case profile.ServerOperate, profile.ServerScope:
+		return optionalModuleTools[alias]
 	default:
 		return nil
 	}
@@ -228,7 +235,7 @@ func PresetTools(alias, mode string) ([]string, error) {
 // preset list is never exposed just because it exists).
 func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Report, error) {
 	switch alias {
-	case profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage:
+	case profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage, profile.ServerOperate, profile.ServerScope:
 	default:
 		return nil, fmt.Errorf("policy: unknown server alias %q", alias)
 	}
@@ -262,6 +269,8 @@ func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Repo
 		} else {
 			base = toSet(usageTools)
 		}
+	case profile.ServerOperate, profile.ServerScope:
+		base = toSet(cfg.ToolsAllow)
 	default:
 		preset, ok := presetForMode(alias, cfg.Mode)
 		if !ok {
@@ -320,7 +329,7 @@ func EvaluatePreset(alias string, cfg profile.ServerConfig) (*Report, error) {
 // universe, so everything not exposed there is Hidden, never Unknown.
 func classify(alias string, liveTools []string, exposed map[string]bool) (hidden, unknown []string) {
 	universe := universeFor(alias)
-	bounded := alias == profile.ServerVault || alias == profile.ServerMemory || alias == profile.ServerUsage
+	bounded := alias == profile.ServerVault || alias == profile.ServerMemory || alias == profile.ServerUsage || alias == profile.ServerOperate || alias == profile.ServerScope
 	known := toSet(universe)
 	if alias == profile.ServerMemory {
 		for _, tool := range activityTools {
