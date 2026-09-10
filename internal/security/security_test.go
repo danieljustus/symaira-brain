@@ -143,20 +143,14 @@ func run() {
 	}
 }
 
-// TestNoVaultPayloadsInLogs verifies that fmt.Errorf, fmt.Sprintf, log.Print,
-// and similar formatting functions never include vault/credential/secret/token
+// TestNoVaultPayloadsInLogs verifies that fmt.Errorf, fmt.Sprintf,
+// and similar fmt functions never include vault/credential/secret/token
 // variables in their output. Vault payloads must never hit logs, audit files,
 // or error strings.
 func TestNoVaultPayloadsInLogs(t *testing.T) {
 	t.Parallel()
 
 	root := findRepoRoot(t)
-
-	// Patterns that indicate sensitive data in format strings.
-	sensitivePatterns := regexp.MustCompile(
-		`fmt\.(Errorf|Sprintf|Fprintf|Printf|Println|Print)\(.*` +
-			`([Vv]ault|[Cc]redential|[Ss]ecret|[Tt]oken|[Pp]assword|[Kk]ey[Aa]ge|` +
-			`[Aa]ge\.|identity|recipient)`)
 
 	err := walkGoFiles(root, func(path string) error {
 		// Absorbed modules (memory, skills, guard) carry their own security
@@ -168,31 +162,12 @@ func TestNoVaultPayloadsInLogs(t *testing.T) {
 			return nil
 		}
 
-		data, err := os.ReadFile(path)
+		violations, err := vaultPayloadLogCalls(path, nil)
 		if err != nil {
 			return err
 		}
-
-		lines := strings.Split(string(data), "\n")
-		for i, line := range lines {
-			// Skip comments.
-			trimmed := strings.TrimSpace(line)
-			if strings.HasPrefix(trimmed, "//") {
-				continue
-			}
-
-			if sensitivePatterns.MatchString(line) {
-				// Exclude false positives: key name in config warnings is safe.
-				if strings.Contains(line, `unknown key`) {
-					continue
-				}
-				// The --allow-insecure-http warning explicitly warns that
-				// bearer tokens travel in the clear; it does not log a token.
-				if strings.Contains(line, `--allow-insecure-http is set`) {
-					continue
-				}
-				t.Errorf("potential vault payload in log/error at %s:%d: %s", path, i+1, trimmed)
-			}
+		for _, pos := range violations {
+			t.Errorf("potential vault payload in log/error at %s", pos)
 		}
 		return nil
 	})
@@ -217,31 +192,13 @@ func logSecret() {
 		t.Fatalf("write planted file: %v", err)
 	}
 
-	sensitivePatterns := regexp.MustCompile(
-		`fmt\.(Errorf|Sprintf|Fprintf|Printf|Println|Print)\(.*` +
-			`([Vv]ault|[Cc]redential|[Ss]ecret|[Tt]oken|[Pp]assword|[Kk]ey[Aa]ge|` +
-			`[Aa]ge\.|identity|recipient)`)
-
-	data, err := os.ReadFile(planted)
+	violations, err := vaultPayloadLogCalls(planted, nil)
 	if err != nil {
-		t.Fatalf("read planted file: %v", err)
+		t.Fatalf("scan planted file: %v", err)
 	}
-
-	var found bool
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "//") {
-			continue
-		}
-		if sensitivePatterns.MatchString(line) {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Error("negative self-test: vault payload matcher did NOT fire on planted violation; " +
-			"TestNoVaultPayloadsInLogs may be silently passing")
+	if len(violations) != 1 {
+		t.Errorf("negative self-test: got %d violations, want 1; "+
+			"TestNoVaultPayloadsInLogs may be silently passing", len(violations))
 	}
 }
 
