@@ -363,6 +363,12 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     }
 }
 
+/// Explicit intent required when copying vault values.
+public enum VaultCopyIntent: Sendable, Equatable {
+    case ordinary
+    case revealedSensitive
+}
+
 /// Classifies vault field names that must stay masked until revealed.
 public enum VaultFieldSecurity {
     public static func isSensitive(_ field: String) -> Bool {

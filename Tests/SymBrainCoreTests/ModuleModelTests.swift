@@ -278,6 +278,17 @@ struct ClipboardLifetimeTests {
         #expect(fake.clearCount == 1)
     }
 
+    @Test func ordinaryClipboardCopyDoesNotExpire() async throws {
+        let fake = FakeClipboardPasteboard()
+        let controller = ClipboardLifetimeController(pasteboard: fake)
+
+        controller.write("ordinary", concealed: false, lifetime: .milliseconds(10))
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(fake.value == "ordinary")
+        #expect(fake.clearCount == 1)
+    }
+
     @Test func cancellationOfExpiryDoesNotClearNewCopy() async throws {
         let fake = FakeClipboardPasteboard()
         let controller = ClipboardLifetimeController(pasteboard: fake)

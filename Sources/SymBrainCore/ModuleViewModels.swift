@@ -273,8 +273,25 @@ public final class MemoryViewModel: ObservableObject, ModuleViewModelProtocol {
 // MARK: - Vault
 
 @MainActor
+public protocol VaultClientProtocol: Sendable {
+    var isInstalled: Bool { get }
+    func availability(profile: String?) async -> VaultAvailability
+    func version(profile: String?) async throws -> String
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws
+    func lock(profile: String?) async throws
+    func list(profile: String?) async throws -> [VaultEntrySummary]
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail
+}
+
+extension VaultClient: VaultClientProtocol {}
+
 public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
-    @Published public var availability: VaultAvailability = .checking
+    @Published public var availability: VaultAvailability = .checking {
+        didSet {
+            if availability != .ready { invalidatePendingDetail() }
+        }
+    }
     @Published public var versionLine: String?
     @Published public var entries: [VaultEntrySummary] = []
     @Published public var selectedPath: String?
@@ -293,11 +310,19 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var isBinaryNotFound = false
     @Published public var statusMessage: String?
 
-    private let client: VaultClient
+    private let client: any VaultClientProtocol
     private let auditReader = AuditLogReader()
+    private let sleep: @Sendable (Duration) async throws -> Void
+    private var generation = 0
+    private var revealTask: Task<Void, Never>?
+    private var detailExpiryTask: Task<Void, Never>?
 
-    public init(client: VaultClient = VaultClient()) {
+    public init(
+        client: any VaultClientProtocol = VaultClient(),
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) {
         self.client = client
+        self.sleep = sleep
     }
 
     public var isInstalled: Bool { client.isInstalled }
@@ -314,16 +339,18 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public func refresh() async {
+        invalidatePendingDetail()
         isLoading = true
         clearError()
         defer { isLoading = false }
 
-        availability = await client.availability()
+        availability = await client.availability(profile: nil)
         await loadActivity()
 
         switch availability {
         case .ready:
-            versionLine = try? await client.version()
+            versionLine = try? await client.version(profile: nil)
+            guard availability == .ready else { return }
             await loadEntries()
         case .missing, .locked, .checking, .failed:
             entries = []
@@ -337,8 +364,8 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         do {
             let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
             entries = query.isEmpty
-                ? try await client.list()
-                : try await client.find(query: query)
+                ? try await client.list(profile: nil)
+                : try await client.find(query: query, profile: nil)
             if let selectedPath, !entries.contains(where: { $0.path == selectedPath }) {
                 self.selectedPath = nil
                 detail = nil
@@ -364,7 +391,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
         defer { passphrase = "" }
         do {
-            try await client.unlock(passphrase: passphrase, ttl: sessionTTL)
+            try await client.unlock(passphrase: passphrase, ttl: sessionTTL, profile: nil)
             statusMessage = "Vault unlocked for \(sessionTTL)."
             await refresh()
         } catch {
@@ -373,9 +400,10 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public func lock() async {
+        invalidatePendingDetail()
         clearError()
         do {
-            try await client.lock()
+            try await client.lock(profile: nil)
             entries = []
             detail = nil
             selectedPath = nil
@@ -390,6 +418,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     /// Selects an entry using the metadata-only list result. Secret fields are
     /// not fetched until the user explicitly chooses to reveal this entry.
     public func select(path: String) async {
+        invalidatePendingDetail()
         selectedPath = path
         detail = nil
         revealedFields = []
@@ -399,14 +428,50 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     /// Explicit human action that crosses the plaintext boundary for the
     /// selected entry. The vault remains the storage and authorization owner.
     public func revealSelectedEntry() async {
-        guard let selectedPath else { return }
+        guard let selectedPath, availability == .ready else { return }
+        invalidateDetailExpiry()
+        let requestGeneration = generation
         clearError()
-        do {
-            detail = try await client.entry(path: selectedPath)
-        } catch {
-            detail = nil
-            report(error)
+        revealTask?.cancel()
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let fetched = try await self.client.entry(path: selectedPath, profile: nil)
+                guard !Task.isCancelled, self.generation == requestGeneration,
+                      self.selectedPath == selectedPath, self.availability == .ready else { return }
+                self.detail = fetched
+                self.detailExpiryTask = Task { @MainActor [weak self] in
+                    guard let self else { return }
+                    do { try await self.sleep(.seconds(30)) } catch { return }
+                    guard !Task.isCancelled, self.generation == requestGeneration,
+                          self.selectedPath == selectedPath else { return }
+                    self.detail = nil
+                    self.revealedFields = []
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                guard self.generation == requestGeneration, self.selectedPath == selectedPath else { return }
+                self.detail = nil
+                self.report(error)
+            }
         }
+        revealTask = task
+        await task.value
+    }
+
+    private func invalidatePendingDetail() {
+        generation &+= 1
+        revealTask?.cancel()
+        revealTask = nil
+        invalidateDetailExpiry()
+        detail = nil
+        revealedFields = []
+    }
+
+    private func invalidateDetailExpiry() {
+        detailExpiryTask?.cancel()
+        detailExpiryTask = nil
     }
 
     public func toggleReveal(field: String) {
@@ -423,9 +488,23 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
     /// Copies a field value. Sensitive fields are marked concealed so
     /// clipboard managers do not archive the secret.
-    public func copyToPasteboard(_ value: String, label: String, concealed: Bool = false) {
-        writeToPasteboard(value, concealed: concealed)
+    public func copyToPasteboard(
+        _ value: String,
+        label: String,
+        intent: VaultCopyIntent = .ordinary
+    ) {
+        if case .revealedSensitive = intent {
+            writeToPasteboard(value, concealed: true)
+        } else {
+            writeToPasteboard(value)
+        }
         statusMessage = "\(label) copied to clipboard."
+    }
+
+    public func copyField(_ field: String, value: String, revealed: Bool) {
+        let sensitive = VaultFieldSecurity.isSensitive(field)
+        guard !sensitive || revealed else { return }
+        copyToPasteboard(value, label: field, intent: sensitive ? .revealedSensitive : .ordinary)
     }
 
     // clearError() and report(_:) are provided by ModuleViewModelProtocol.
@@ -653,6 +732,7 @@ final class ClipboardLifetimeController {
         if concealed {
             pasteboard.setData(Data(), forType: .init("org.nspasteboard.ConcealedType"))
         }
+        guard concealed else { return }
         let expectedChangeCount = pasteboard.changeCount
         let pasteboard = self.pasteboard
         // Deliberately capture only the pasteboard and ownership token. The

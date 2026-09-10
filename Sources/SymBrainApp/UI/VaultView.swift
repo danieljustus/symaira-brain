@@ -297,7 +297,7 @@ struct VaultView: View {
                                     .foregroundStyle(SymairaTheme.textMuted)
                             }
                             Button("Copy") {
-                                vm.copyToPasteboard(totp.code, label: "TOTP code", concealed: true)
+                                vm.copyToPasteboard(totp.code, label: "TOTP code", intent: .revealedSensitive)
                             }
                             .symairaButtonStyle(.secondary)
                         }
@@ -311,23 +311,8 @@ struct VaultView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(minWidth: 340)
-        } else if vm.selectedPath != nil {
-            VStack(spacing: SymairaSpacing.medium) {
-                SymairaNotice(
-                    title: "Entry metadata loaded",
-                    message: "Secret values are not fetched until you explicitly reveal this entry.",
-                    tone: .informative
-                )
-                Button {
-                    Task { await vm.revealSelectedEntry() }
-                } label: {
-                    Label("Reveal Entry Values", systemImage: "eye")
-                }
-                .symairaButtonStyle(.secondary)
-                .accessibilityLabel("Reveal Entry Values")
-            }
-            .padding(SymairaSpacing.large)
-            .frame(minWidth: 340)
+        } else if let summary = vm.entries.first(where: { $0.path == vm.selectedPath }) {
+            selectedSummary(summary)
         } else {
             SymairaEmptyState(
                 systemImage: "sidebar.right",
@@ -335,6 +320,46 @@ struct VaultView: View {
                 message: "Select an entry to view its fields. Secrets stay masked until revealed."
             )
             .frame(minWidth: 340)
+        }
+    }
+
+    private func selectedSummary(_ summary: VaultEntrySummary) -> some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            Text(summary.path)
+                .font(.title3.bold())
+                .foregroundStyle(SymairaTheme.textPrimary)
+                .textSelection(.enabled)
+            SymairaNotice(
+                title: "Entry selected",
+                message: "Reveal the entry to load its fields. Secrets remain masked until then.",
+                tone: .informative
+            )
+            if let type = summary.type, !type.isEmpty { metadataRow("Type", type) }
+            if let usageHint = summary.usageHint, !usageHint.isEmpty { metadataRow("Usage", usageHint) }
+            if let fieldCount = summary.fieldCount { metadataRow("Fields", String(fieldCount)) }
+            if let hasValue = summary.hasValue { metadataRow("Has value", hasValue ? "Yes" : "No") }
+            if let autoRotate = summary.autoRotate { metadataRow("Auto-rotate", autoRotate ? "Enabled" : "Disabled") }
+            Button { Task { await vm.revealSelectedEntry() } } label: {
+                Label("Reveal Entry", systemImage: "eye")
+            }
+            .symairaButtonStyle(.primary)
+            .disabled(!vm.isReady)
+        }
+        .padding(SymairaSpacing.large)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(minWidth: 340)
+    }
+
+    private func metadataRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SymairaTheme.textSecondary)
+                .frame(width: 120, alignment: .leading)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(SymairaTheme.textPrimary)
+                .textSelection(.enabled)
         }
     }
 
@@ -373,16 +398,13 @@ struct VaultView: View {
             }
 
             Button {
-                vm.copyToPasteboard(
-                    field.value,
-                    label: field.key,
-                    concealed: field.isSensitive
-                )
+                vm.copyField(field.key, value: field.value, revealed: revealed)
             } label: {
                 Image(systemName: "doc.on.doc")
             }
             .buttonStyle(.plain)
-            .help("Copy value")
+            .disabled(field.isSensitive && !revealed)
+            .help(field.isSensitive && !revealed ? "Reveal value before copying" : "Copy value")
         }
         .padding(.vertical, SymairaSpacing.xSmall)
     }

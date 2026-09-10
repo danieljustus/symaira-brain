@@ -137,3 +137,33 @@ struct ModuleViewModelSkeletonTests {
         #expect(vm.isBinaryNotFound == false)
     }
 }
+
+#if os(macOS)
+private struct StubVaultClient: VaultClientProtocol {
+    let result: VaultEntryDetail
+    var isInstalled: Bool { true }
+    func availability(profile: String?) async -> VaultAvailability { .ready }
+    func version(profile: String?) async throws -> String { "test" }
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws {}
+    func lock(profile: String?) async throws {}
+    func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail { result }
+}
+
+@MainActor
+extension ModuleViewModelSkeletonTests {
+    @Test func revealUsesInjectedClientAndExpiresPlaintext() async {
+        let detail = VaultEntryDetail(path: "work/test", modified: nil, fields: ["password": .string("secret")])
+        let vm = VaultViewModel(
+            client: StubVaultClient(result: detail),
+            sleep: { _ in }
+        )
+        vm.availability = .ready
+        await vm.select(path: "work/test")
+        await vm.revealSelectedEntry()
+        await Task.yield()
+        #expect(vm.detail == nil)
+    }
+}
+#endif
