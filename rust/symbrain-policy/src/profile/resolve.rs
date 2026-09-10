@@ -92,7 +92,11 @@ pub fn resolve_servers(
                 servers.insert(alias.to_string(), sc);
             }
             SERVER_OPERATE | SERVER_SCOPE => {
-                servers.insert(alias.to_string(), resolve_optional(fs));
+                // Optional modules are absent unless explicitly declared;
+                // their zero-value lookup remains disabled for gateway use.
+                if raw.contains_key(alias) {
+                    servers.insert(alias.to_string(), resolve_optional(fs));
+                }
             }
             _ => unreachable!(),
         }
