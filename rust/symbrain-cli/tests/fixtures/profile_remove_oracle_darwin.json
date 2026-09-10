@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "go_revision": "c1f1ad99a4d24437a029eaba7f9d60735875cacf",
+  "go_revision": "5f46d8a05ea6117947ac64003ed336ba7ad4b29c",
   "generator_sha256": "cce45fb1abdd173a21731a60e430e8a04baf2e8ddb3c3d3c83f34b540e5f271b",
   "go_sources": {
     "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
     "cmd/symbrain/cmd_profile_add.go": "3883ad6634df715ab3b991ef887e78b0d3ef30138aa3a5260e4181d827d86f03",
-    "cmd/symbrain/cmd_profile_list.go": "1032f9f11e0b7a0415aab00047ee3e5fbdac5d42501b6e71e5c4a2f6ca5fb19f",
+    "cmd/symbrain/cmd_profile_list.go": "4ef279efe698d861e72650c0461aebc7a3b595f7357fd95693e1add6b47ca692",
     "cmd/symbrain/cmd_profile_remove.go": "1f88a65863650c2be74578e327c22d780c5e0e149b0c85288999caf446c2a9ba",
     "cmd/symbrain/cmd_profile_show.go": "83c0faa9a28afd2b7ab00a7e1401347b740f07946c31037f52b6635f9a4578cf",
     "internal/harness/document.go": "4e0d0f75f1c6362057e771b2750dd738b2650c646517208af92122e8faf720ee",
@@ -624,7 +624,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\nRefusing to remove. Use --force to override.\n",
+      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\nRefusing to remove. Use --force to override.\n",
       "files": [
         {
           "path": "config",

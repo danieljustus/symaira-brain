@@ -59,14 +59,18 @@ pub fn evaluate(
                 cfg.tools_allow.iter().cloned().collect()
             }
         }
-        SERVER_OPERATE | SERVER_SCOPE => cfg
-            .tools_allow
-            .iter()
-            .filter(|tool| {
-                universe_for(alias).is_some_and(|universe| universe.contains(&tool.as_str()))
-            })
-            .cloned()
-            .collect(),
+        SERVER_OPERATE | SERVER_SCOPE => {
+            let universe = universe_for(alias).unwrap_or(&[]);
+            if cfg.tools_allow.is_empty() {
+                universe.iter().map(|&s| s.to_string()).collect()
+            } else {
+                cfg.tools_allow
+                    .iter()
+                    .filter(|tool| universe.contains(&tool.as_str()))
+                    .cloned()
+                    .collect()
+            }
+        }
         _ => {
             let preset =
                 preset_for_mode(alias, &cfg.mode).ok_or_else(|| PolicyError::UnknownMode {
