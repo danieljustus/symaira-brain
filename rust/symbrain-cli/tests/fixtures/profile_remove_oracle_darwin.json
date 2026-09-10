@@ -624,7 +624,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\nRefusing to remove. Use --force to override.\n",
+      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\nRefusing to remove. Use --force to override.\n",
       "files": [
         {
           "path": "config",
