@@ -4,9 +4,12 @@
 BINARY := symbrain
 MODULE := github.com/danieljustus/symaira-brain
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+# Keep the Go oracle on the module's declared toolchain, even when a newer Go is installed.
+GO_ORACLE_TOOLCHAIN ?= $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
+GO_ORACLE_REF ?= HEAD
 LDFLAGS := -X main.version=$(VERSION)
 
-.PHONY: build test test-race coverage lint fmt-check fmt vet clean
+.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -61,6 +64,108 @@ coverage:
 build:
 	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/symbrain
 
+## build-rust: Build the incremental Rust entrypoint and its Go fallback
+build-rust:
+	@mkdir -p target/go
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(abspath target/go/symbrain-go)" ./cmd/symbrain
+	SYMBRAIN_VERSION="$(VERSION)" cargo build --workspace --locked
+
+## parity-smoke: Compare migrated Rust CLI slices against the pinned Go oracle
+parity-smoke: rust-go-printable-check
+	@mkdir -p target/go
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath target/go/symbrain-go)" ./cmd/symbrain
+	SYMBRAIN_VERSION=dev cargo build --workspace --locked
+	python3 scripts/rust-differential.py target/go/symbrain-go target/debug/symbrain
+
+## rust-go-printable-check: Ensure the pinned Go IsPrint table is current
+rust-go-printable-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
+
+## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
+usage-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
+
+## policy-oracle-check: Ensure the profile/policy oracle expectations are current
+policy-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/policy-oracle -check
+
+## guard-oracle-check: Ensure Guard model/static-kernel expectations match Go
+guard-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-oracle -check
+## catalog-oracle-check: Ensure the catalog oracle expectations are current
+catalog-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/catalog-oracle -check
+
+## audit-oracle-check: Ensure the audit oracle expectations are current
+audit-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/audit-oracle -check
+
+## patterns-activity-oracle-check: Ensure behavioral context expectations are current
+patterns-activity-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/patterns-activity-oracle -check
+
+## mcp-oracle-check: Ensure JSON-RPC framing expectations are current
+mcp-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/mcp-oracle -check
+
+## gateway-oracle-check: Ensure gateway behavior expectations are current
+gateway-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/gateway-oracle -check
+
+## broker-oracle-check: Ensure child lifecycle expectations are current
+broker-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/broker-oracle -check
+
+## managed-oracle-check: Ensure manifest/archive expectations are current
+managed-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" test ./internal/managed -run TestRustManagedOracleFixture -count=1
+
+## skills-oracle-check: Ensure skill model fixtures match the Go loader
+skills-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-oracle -check
+
+## instructions-oracle-check: Ensure instruction fixtures match the Go implementation
+instructions-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/instructions-oracle -check
+
+## adapters-oracle-check: Ensure instruction adapter fixtures match the Go implementation
+adapters-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/adapters-oracle -check
+
+## install-oracle-check: Ensure install/uninstall expectations match the Go source
+install-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/install-oracle -check
+
+## profile-remove-oracle-check: Ensure profile removal expectations match the Go source
+profile-remove-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/profile-remove-oracle -check
+
+## rust-check: Run the complete fast Rust quality gate
+rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
+	cargo fmt --all --check
+	cargo check --workspace --all-targets --all-features --locked
+	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	cargo test --workspace --all-features --locked
+	cargo test --workspace --doc --all-features --locked
+	cargo audit
+	cargo deny check
+
+## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
+rust-fuzz-build:
+	cargo +nightly fuzz build frame-decoder
+	cargo +nightly fuzz build jsonrpc-envelope
+
+## rust-fuzz-smoke: Exercise both MCP fuzz targets without mutating tracked seeds
+rust-fuzz-smoke: rust-fuzz-build
+	@set -eu; \
+	tmp=$$(mktemp -d); \
+	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
+	mkdir -p "$$tmp/frame" "$$tmp/envelope"; \
+	cp fuzz/corpus/frame_decoder/* "$$tmp/frame/"; \
+	cp fuzz/corpus/jsonrpc_envelope/* "$$tmp/envelope/"; \
+	cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
+	cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
+
 ## test: Run all tests
 test:
 	go test ./...
@@ -68,6 +173,13 @@ test:
 ## test-race: Run all tests with the race detector
 test-race:
 	go test -race ./...
+
+## test-memory-large: Run bounded embedding storage measurements explicitly.
+## Override MEMORY_STORAGE_SCALE up to 10000 only when the disk budget is known.
+MEMORY_STORAGE_SCALE ?= 1000
+MEMORY_LARGE_TEST_TIMEOUT ?= 20m
+test-memory-large:
+	SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) go test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
 
 ## vet: Run go vet static analysis
 vet:
@@ -88,3 +200,4 @@ fmt-check:
 clean:
 	rm -f $(BINARY)
 	go clean -testcache
+	cargo clean

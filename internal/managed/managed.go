@@ -96,7 +96,7 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger, enabledOptiona
 		// Compare versions with the "v" prefix normalized away: binaries
 		// report bare semver ("0.15.3") while the manifest pins the tag
 		// ("v0.15.3") — both must count as "already correct".
-		if normalizeVersion(existing) == normalizeVersion(core.Version) {
+		if VersionsMatch(existing, core.Version) {
 			logger.Info("already correct", "binary", name, "version", existing)
 			skipped++
 			continue

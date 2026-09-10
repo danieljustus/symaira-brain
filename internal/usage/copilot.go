@@ -39,7 +39,7 @@ type CopilotProvider struct {
 // (~/.config/github-copilot/{apps,hosts}.json).
 func NewCopilotProvider(client *http.Client) *CopilotProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	accessToken, credSource, credErr := resolveFileCredential("COPILOT_ACCESS_TOKEN", func() string {
 		return readCopilotToken(copilotConfigDir())
@@ -61,7 +61,7 @@ func copilotConfigDir() string {
 // dir, preferring a github.com entry, falling back to any entry.
 func readCopilotToken(dir string) string {
 	for _, filename := range []string{"apps.json", "hosts.json"} {
-		data, err := os.ReadFile(filepath.Join(dir, filename))
+		data, err := readCredentialFile(filepath.Join(dir, filename))
 		if err != nil {
 			continue
 		}
@@ -171,11 +171,14 @@ func (s *copilotAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 	req.Header.Set("Authorization", "Bearer "+s.accessToken)
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := s.client.Do(req)
+	resp, err := doUsageRequest(ctx, s.client, req, false)
 	if err != nil {
 		return nil, &copilotError{kind: "network", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := readUsageBodyAndClose(resp.Body)
+	if err != nil {
+		return nil, &copilotError{kind: "unparseable"}
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -185,7 +188,7 @@ func (s *copilotAPIStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) 
 	}
 
 	var payload copilotUserResponse
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+	if err := json.Unmarshal(data, &payload); err != nil {
 		return nil, &copilotError{kind: "unparseable"}
 	}
 

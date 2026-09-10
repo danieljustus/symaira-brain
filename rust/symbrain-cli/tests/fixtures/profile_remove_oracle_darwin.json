@@ -1,0 +1,928 @@
+{
+  "schema_version": 1,
+  "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
+  "generator_sha256": "a413cd54ab2d4b3edbbf0d0d39740bd56081f319b505ca389d5ea1ed77e14056",
+  "go_sources": {
+    "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
+    "cmd/symbrain/cmd_profile_add.go": "3883ad6634df715ab3b991ef887e78b0d3ef30138aa3a5260e4181d827d86f03",
+    "cmd/symbrain/cmd_profile_list.go": "1032f9f11e0b7a0415aab00047ee3e5fbdac5d42501b6e71e5c4a2f6ca5fb19f",
+    "cmd/symbrain/cmd_profile_remove.go": "1f88a65863650c2be74578e327c22d780c5e0e149b0c85288999caf446c2a9ba",
+    "cmd/symbrain/cmd_profile_show.go": "83c0faa9a28afd2b7ab00a7e1401347b740f07946c31037f52b6635f9a4578cf",
+    "internal/harness/document.go": "4e0d0f75f1c6362057e771b2750dd738b2650c646517208af92122e8faf720ee",
+    "internal/harness/entry.go": "16e793ed021adff789958ae67869e90f5fbc73ec1124806a1558f90c4e7d6984",
+    "internal/harness/generic_document.go": "dc21e9aac212399b3ca0aa5e4efd1eff91d68ab6f145e61df94c9e5ac51e2646",
+    "internal/harness/inventory.go": "5ae5194aea2ea56bd245d5c6cb1199da2bc1d40d8bf753185d2d20e6dfd8c2f0",
+    "internal/harness/inventory_read_other.go": "856d90d2e5e37a272838ae51a7970cf68228daef1a63362e83ab31a16740b429",
+    "internal/harness/inventory_read_unix.go": "2bfe251a766cf90187cfd9d4e2e9674b2b78dd4d632e4aa8d9550ef610d1687b",
+    "internal/harness/json_document.go": "e60f849e2e0ca9a4ce42c2f144bfb2c0b9d6be3f26d7911c53fccfca79310c75",
+    "internal/harness/ordered_map.go": "287c1c92388352c794efebf36f19fcacfeee8ea62b5ba552a5d6131d743b8042",
+    "internal/harness/registry.go": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+    "internal/harness/toml_document.go": "1710e2552f35ceafac1a06f7844044630e5b4e969b59b0028173bcfb5035eadf",
+    "internal/profile/profile.go": "4d1a751dbca834ed44b448f23c3203546d5e60a35729c272c149ded4ca5f3797",
+    "internal/profile/remove_other.go": "eb4f3455be8dee18d65eb7405c5e0b0d13b4275db4b5b5263d4a68a1fe265ae4",
+    "internal/profile/remove_unix.go": "6c4893ba2d85c092b3c0fc98125d6401156c5b975f1aa7bacfe4aeafefcd2184",
+    "internal/profile/remove_windows.go": "08f773d0ebbac8ffb31e41fe832900c5e2a354020e2ea3f32380b8f6cb77ce50",
+    "internal/safefs/doc.go": "82e39762d3d45bc80f0959fbf5ae6d30f1ea5ad1d55f9cd84ab6f96a75d0a775",
+    "internal/safefs/secure_other.go": "b5580fe9a07a2c0166a757520ccd22bc931d5aa56abac8ebcefdb531acfccbd6",
+    "internal/safefs/secure_windows.go": "7e58d9bb7420462987a237a0076182255ef6e9072c0cb8a7f10c966659b076b0",
+    "internal/xdg/xdg.go": "78df3bb774afa38dba2a667ed25bf3ed0ba0e4920daa42ed6080708383bc6fc5"
+  },
+  "cases": [
+    {
+      "id": "missing",
+      "args": [
+        "profile",
+        "remove",
+        "missing",
+        "--force"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "symbrain profile remove: profile \"missing\" does not exist\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "force_existing",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "prompt_yes",
+      "args": [
+        "profile",
+        "remove",
+        "existing"
+      ],
+      "stdin": "yes\n",
+      "exit": 0,
+      "stdout": "Remove profile \"existing\" (\u003croot\u003e/config/symbrain/profiles/existing.toml)? [y/N]: removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "prompt_no",
+      "args": [
+        "profile",
+        "remove",
+        "existing"
+      ],
+      "stdin": "n\n",
+      "exit": 0,
+      "stdout": "Remove profile \"existing\" (\u003croot\u003e/config/symbrain/profiles/existing.toml)? [y/N]: aborted\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 416,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "prompt_eof",
+      "args": [
+        "profile",
+        "remove",
+        "existing"
+      ],
+      "exit": 0,
+      "stdout": "Remove profile \"existing\" (\u003croot\u003e/config/symbrain/profiles/existing.toml)? [y/N]: aborted\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 416,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "prompt_oversized",
+      "args": [
+        "profile",
+        "remove",
+        "existing"
+      ],
+      "stdin": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "exit": 1,
+      "stdout": "Remove profile \"existing\" (\u003croot\u003e/config/symbrain/profiles/existing.toml)? [y/N]: ",
+      "stderr": "symbrain profile remove: confirmation input exceeds maximum of 1024 bytes\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 416,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "bound_global_refuses",
+      "args": [
+        "profile",
+        "remove",
+        "bound"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: profile \"bound\" is still bound to harnesses:\n  - claude (\u003croot\u003e/home/.claude.json)\nRefusing to remove. Use --force to override.\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/bound.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiYm91bmQiCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJzeW1icmFpbiIsImFyZ3MiOlsibWNwIiwiLS1wcm9maWxlIiwiYm91bmQiXX19fQ=="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "bound_project_refuses",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--project",
+        "PROJECT"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: profile \"existing\" is still bound to harnesses:\n  - claude (\u003croot\u003e/project/.mcp.json)\nRefusing to remove. Use --force to override.\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project/.mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJzeW1icmFpbiIsImFyZ3MiOlsibWNwIiwiLS1wcm9maWxlIiwiZXhpc3RpbmciXX19fQ=="
+        }
+      ]
+    },
+    {
+      "id": "bound_project_relative_refuses",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--project",
+        "."
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: profile \"existing\" is still bound to harnesses:\n  - claude (.mcp.json)\nRefusing to remove. Use --force to override.\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project/.mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJzeW1icmFpbiIsImFyZ3MiOlsibWNwIiwiLS1wcm9maWxlIiwiZXhpc3RpbmciXX19fQ=="
+        }
+      ]
+    },
+    {
+      "id": "bound_project_symlink_refuses",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--project",
+        "project-link"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (project-link/.mcp.json): project root is not a real directory\nRefusing to remove. Use --force to override.\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project/project-link",
+          "type": "symlink",
+          "mode": 493,
+          "bytes": "Li4vcmVhbC1wcm9qZWN0"
+        },
+        {
+          "path": "real-project",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "real-project/.mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJzeW1icmFpbiIsImFyZ3MiOlsibWNwIiwiLS1wcm9maWxlIiwiZXhpc3RpbmciXX19fQ=="
+        }
+      ]
+    },
+    {
+      "id": "bound_force",
+      "args": [
+        "profile",
+        "remove",
+        "bound",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/bound.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJzeW1icmFpbiIsImFyZ3MiOlsibWNwIiwiLS1wcm9maWxlIiwiYm91bmQiXX19fQ=="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "malformed_profile",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "malformed_harness_config",
+      "args": [
+        "profile",
+        "remove",
+        "bound",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/bound.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "e25vdCB2YWxpZCBqc29u"
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "malformed_harness_refuses",
+      "args": [
+        "profile",
+        "remove",
+        "bound"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\nRefusing to remove. Use --force to override.\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/bound.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiYm91bmQiCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "e25vdCB2YWxpZCBqc29u"
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "symlink",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "profile-target.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "dGFyZ2V0Cg=="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "symlink_profiles_root",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "symbrain profile remove: remove \u003croot\u003e/config/symbrain/profiles/existing.toml: open profile directory component \"profiles\": not a directory\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/outside-profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/outside-profiles/existing.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "b3V0c2lkZQo="
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "symlink",
+          "mode": 493,
+          "bytes": "Li4vb3V0c2lkZS1wcm9maWxlcw=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "special_file",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "empty_directory",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--force"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "force_before_name",
+      "args": [
+        "profile",
+        "remove",
+        "--force",
+        "existing"
+      ],
+      "exit": 0,
+      "stdout": "removed \u003croot\u003e/config/symbrain/profiles/existing.toml\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "terminator",
+      "args": [
+        "profile",
+        "remove",
+        "existing",
+        "--",
+        "--force"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "usage: symbrain profile remove \u003cname\u003e [--force] [--project \u003cdir\u003e]\n",
+      "files": [
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/profiles/existing.toml",
+          "type": "file",
+          "mode": 416,
+          "bytes": "W3Byb2ZpbGVdCm5hbWUgPSAiZXhpc3RpbmciCg=="
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    }
+  ]
+}

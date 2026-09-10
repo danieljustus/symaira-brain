@@ -33,7 +33,7 @@ type CodexProvider struct {
 // ~/.codex/auth.json when CODEX_HOME is unset).
 func NewCodexProvider(client *http.Client) *CodexProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	home := codexHomeDir()
 	accessToken, credSource, credErr := resolveFileCredential("CODEX_ACCESS_TOKEN", func() string {
@@ -60,7 +60,7 @@ func codexHomeDir() string {
 // OAuth access token (prefers the top-level access_token, falls back to
 // tokens.access_token), or "" when absent.
 func readCodexAccessToken(home string) string {
-	data, err := os.ReadFile(filepath.Join(home, "auth.json"))
+	data, err := readCredentialFile(filepath.Join(home, "auth.json"))
 	if err != nil {
 		return ""
 	}

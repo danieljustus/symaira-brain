@@ -1,0 +1,238 @@
+{
+  "cases": [
+    {
+      "id": "mixed-routing-metadata",
+      "servers": [
+        {
+          "server": "vault",
+          "tools": [
+            {
+              "name": "health",
+              "description": "health check"
+            },
+            {
+              "name": "get_entry",
+              "description": "fetch",
+              "inputSchema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            {
+              "name": "future_tool",
+              "description": "unknown"
+            }
+          ],
+          "report": {
+            "server": "vault",
+            "enabled": true,
+            "mode": "request_only",
+            "exposed": [
+              "health"
+            ],
+            "hidden": [
+              "get_entry"
+            ],
+            "unknown": [
+              "future_tool"
+            ]
+          }
+        },
+        {
+          "server": "zotero",
+          "tools": [
+            {
+              "name": "search",
+              "description": "search library",
+              "annotations": {
+                "title": "Search",
+                "readOnlyHint": true,
+                "destructiveHint": false
+              }
+            }
+          ],
+          "report": {
+            "server": "zotero",
+            "enabled": true,
+            "exposed": [
+              "search"
+            ],
+            "hidden": [],
+            "unknown": [],
+            "exposures": {
+              "search": {
+                "class": "read",
+                "source": "read_only_hint"
+              }
+            }
+          }
+        }
+      ],
+      "success": true,
+      "entries": [
+        {
+          "name": "search",
+          "description": "search library",
+          "annotations": {
+            "title": "Search",
+            "readOnlyHint": true,
+            "destructiveHint": false
+          },
+          "server": "zotero",
+          "original_name": "search",
+          "verdict": "exposed",
+          "access_class": "read",
+          "access_source": "read_only_hint"
+        },
+        {
+          "name": "vault_future_tool",
+          "description": "unknown",
+          "server": "vault",
+          "original_name": "future_tool",
+          "verdict": "unknown"
+        },
+        {
+          "name": "vault_get_entry",
+          "description": "fetch",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          "server": "vault",
+          "original_name": "get_entry",
+          "verdict": "hidden"
+        },
+        {
+          "name": "vault_health",
+          "description": "health check",
+          "server": "vault",
+          "original_name": "health",
+          "verdict": "exposed"
+        }
+      ],
+      "names": [
+        "search",
+        "vault_health"
+      ]
+    },
+    {
+      "id": "already-prefixed-and-exact-prefix-edge",
+      "servers": [
+        {
+          "server": "vault",
+          "tools": [
+            {
+              "name": "memory_search"
+            },
+            {
+              "name": "entity_list"
+            },
+            {
+              "name": "graph_neighbors"
+            },
+            {
+              "name": "vault_"
+            }
+          ],
+          "report": {
+            "server": "vault",
+            "enabled": true,
+            "mode": "full",
+            "exposed": [
+              "memory_search",
+              "entity_list",
+              "graph_neighbors",
+              "vault_"
+            ],
+            "hidden": [],
+            "unknown": []
+          }
+        }
+      ],
+      "success": true,
+      "entries": [
+        {
+          "name": "entity_list",
+          "server": "vault",
+          "original_name": "entity_list",
+          "verdict": "exposed"
+        },
+        {
+          "name": "graph_neighbors",
+          "server": "vault",
+          "original_name": "graph_neighbors",
+          "verdict": "exposed"
+        },
+        {
+          "name": "memory_search",
+          "server": "vault",
+          "original_name": "memory_search",
+          "verdict": "exposed"
+        },
+        {
+          "name": "vault_vault_",
+          "server": "vault",
+          "original_name": "vault_",
+          "verdict": "exposed"
+        }
+      ],
+      "names": [
+        "entity_list",
+        "graph_neighbors",
+        "memory_search",
+        "vault_vault_"
+      ]
+    },
+    {
+      "id": "post-namespace-collision",
+      "servers": [
+        {
+          "server": "vault",
+          "tools": [
+            {
+              "name": "vault_shared_tool"
+            }
+          ],
+          "report": {
+            "server": "vault",
+            "enabled": true,
+            "mode": "full",
+            "exposed": [
+              "vault_shared_tool"
+            ],
+            "hidden": [],
+            "unknown": []
+          }
+        },
+        {
+          "server": "memory",
+          "tools": [
+            {
+              "name": "vault_shared_tool"
+            }
+          ],
+          "report": {
+            "server": "memory",
+            "enabled": true,
+            "mode": "read_write",
+            "exposed": [
+              "vault_shared_tool"
+            ],
+            "hidden": [],
+            "unknown": []
+          }
+        }
+      ],
+      "success": false,
+      "error": "catalog: tool name \"vault_shared_tool\" collision: already registered by server \"vault\", cannot add from \"memory\""
+    }
+  ]
+}

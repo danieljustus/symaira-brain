@@ -6,10 +6,12 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	archivepath "path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -43,7 +45,10 @@ type Installer struct {
 
 // NewInstaller creates an Installer targeting the given binary directory.
 func NewInstaller(binDir string) *Installer {
-	return &Installer{BinDir: binDir}
+	return &Installer{
+		BinDir:  binDir,
+		baseURL: os.Getenv("SYMBRAIN_RELEASE_BASE_URL"),
+	}
 }
 
 // releaseBaseURL returns the configured base URL, or defaultBaseURL when unset.
@@ -117,7 +122,7 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 
 	// Try downloading the versioned asset first
 	archivePath, err := inst.downloadAndVerify(ctx, core, assetName, goos, goarch, checksumsPath, dlDir)
-	if err != nil && assetName != altName {
+	if err != nil && assetName != altName && errors.Is(err, errAssetNotFound) {
 		// Versioned asset not found; try unversioned
 		archivePath, err = inst.downloadAndVerify(ctx, core, altName, goos, goarch, checksumsPath, dlDir)
 	}
@@ -217,6 +222,8 @@ func extractBinaryTarGz(archivePath string, core *Core, goos, goarch string) ([]
 
 	tr := tar.NewReader(gz)
 	targetName := core.BinaryPathInArchive(goos, goarch)
+	var exact, fallback []byte
+	var fallbackName string
 
 	for {
 		header, err := tr.Next()
@@ -227,16 +234,43 @@ func extractBinaryTarGz(archivePath string, core *Core, goos, goarch string) ([]
 			return nil, fmt.Errorf("tar: %w", err)
 		}
 
-		name := header.Name
-		if name == targetName || filepath.Base(name) == core.BinaryName {
+		name, err := safeArchivePath(header.Name)
+		if err != nil {
+			return nil, fmt.Errorf("unsafe tar entry %q: %w", header.Name, err)
+		}
+		if header.Typeflag == tar.TypeSymlink || header.Typeflag == tar.TypeLink {
+			return nil, fmt.Errorf("unsafe tar link entry %q", header.Name)
+		}
+		isExact := name == targetName
+		isFallback := archivepath.Base(name) == core.BinaryName
+		if isExact || isFallback {
+			if header.Typeflag != tar.TypeReg && header.Typeflag != tar.TypeRegA {
+				return nil, fmt.Errorf("binary entry %q is not a regular file", header.Name)
+			}
 			data, err := io.ReadAll(tr)
 			if err != nil {
 				return nil, fmt.Errorf("read binary from archive: %w", err)
 			}
-			return data, nil
+			if isExact {
+				if exact != nil {
+					return nil, fmt.Errorf("duplicate binary entry %q", targetName)
+				}
+				exact = data
+			} else {
+				if fallback != nil {
+					return nil, fmt.Errorf("ambiguous binary entries %q and %q", fallbackName, name)
+				}
+				fallback, fallbackName = data, name
+			}
 		}
 	}
 
+	if exact != nil {
+		return exact, nil
+	}
+	if fallback != nil {
+		return fallback, nil
+	}
 	return nil, fmt.Errorf("binary %q not found in archive", core.BinaryName)
 }
 
@@ -250,10 +284,23 @@ func extractBinaryZip(archivePath string, core *Core, goos, goarch string) ([]by
 	defer zr.Close()
 
 	targetName := core.BinaryPathInArchive(goos, goarch)
+	var exact, fallback []byte
+	var fallbackName string
 
 	for _, file := range zr.File {
-		name := file.Name
-		if name == targetName || filepath.Base(name) == core.BinaryName {
+		name, err := safeArchivePath(file.Name)
+		if err != nil {
+			return nil, fmt.Errorf("unsafe zip entry %q: %w", file.Name, err)
+		}
+		if file.Mode()&os.ModeSymlink != 0 {
+			return nil, fmt.Errorf("unsafe zip symlink entry %q", file.Name)
+		}
+		isExact := name == targetName
+		isFallback := archivepath.Base(name) == core.BinaryName
+		if isExact || isFallback {
+			if file.FileInfo().IsDir() || !file.Mode().IsRegular() {
+				return nil, fmt.Errorf("binary entry %q is not a regular file", file.Name)
+			}
 			rc, err := file.Open()
 			if err != nil {
 				return nil, fmt.Errorf("open %s in zip: %w", name, err)
@@ -263,11 +310,48 @@ func extractBinaryZip(archivePath string, core *Core, goos, goarch string) ([]by
 			if err != nil {
 				return nil, fmt.Errorf("read binary from archive: %w", err)
 			}
-			return data, nil
+			if isExact {
+				if exact != nil {
+					return nil, fmt.Errorf("duplicate binary entry %q", targetName)
+				}
+				exact = data
+			} else {
+				if fallback != nil {
+					return nil, fmt.Errorf("ambiguous binary entries %q and %q", fallbackName, name)
+				}
+				fallback, fallbackName = data, name
+			}
 		}
 	}
 
+	if exact != nil {
+		return exact, nil
+	}
+	if fallback != nil {
+		return fallback, nil
+	}
 	return nil, fmt.Errorf("binary %q not found in archive", core.BinaryName)
+}
+
+func safeArchivePath(name string) (string, error) {
+	name = strings.ReplaceAll(name, "\\", "/")
+	if name == "" || strings.ContainsRune(name, '\x00') || archivepath.IsAbs(name) {
+		return "", fmt.Errorf("path must be non-empty and relative")
+	}
+	parts := strings.Split(name, "/")
+	if strings.Contains(parts[0], ":") {
+		return "", fmt.Errorf("volume-qualified path is not allowed")
+	}
+	for _, part := range parts {
+		if part == ".." {
+			return "", fmt.Errorf("parent traversal is not allowed")
+		}
+	}
+	clean := archivepath.Clean(name)
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, "../") {
+		return "", fmt.Errorf("invalid archive path")
+	}
+	return strings.TrimPrefix(clean, "./"), nil
 }
 
 // atomicInstall writes binaryData to a temporary file, sets it

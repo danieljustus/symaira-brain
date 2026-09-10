@@ -1,0 +1,25 @@
+[package]
+name = "symbrain-managed"
+description = "Managed Symaira release manifest, verification, and secure extraction"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+flate2 = "=1.1.10"
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10.9"
+tar = { version = "=0.4.46", default-features = false }
+tempfile.workspace = true
+ureq.workspace = true
+zip = { version = "=8.6.0", default-features = false, features = ["deflate-flate2"] }
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

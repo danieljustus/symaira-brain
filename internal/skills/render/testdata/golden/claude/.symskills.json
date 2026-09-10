@@ -1,3 +1,27 @@
 {
-  "source_hash": "676a7a36dd74502951ed4dd408f9aedbcbe2c3cc0760a253aa8f9d47ddc66aba"
+  "output_digest": "60c09004a783e4ef9c91e2032216deb2001c1c63a55f66acb8941ecc0ab17058",
+  "output_manifest": [
+    {
+      "path": "SKILL.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 518,
+      "sha256": "8a831a8221727931d56f0f814ee0a03466e1c387d03d99672f5566bf71630054"
+    },
+    {
+      "path": "scripts",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "scripts/helper.sh",
+      "kind": "file",
+      "mode": "0644",
+      "size": 92,
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    }
+  ],
+  "source_hash": "a0f4fa2292ed5e686d4c192ee782bae52ad66cc816d3c687b72c916afe06e887"
 }

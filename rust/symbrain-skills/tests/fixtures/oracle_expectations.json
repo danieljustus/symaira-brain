@@ -1,0 +1,395 @@
+{
+  "cases": [
+    {
+      "id": "source",
+      "name": "golden-fixture",
+      "description": "A canonical fixture skill for per-target golden render tests",
+      "category": "",
+      "version": "",
+      "body": "# Golden Fixture\n\nThis fixture skill is used by per-target golden tests to assert that\nrendered skill bundles match each harness contract.\n\nIt exercises:\n- Frontmatter rendering with target-specific aliases\n- Support file copying (scripts directory)\n- Overlay application (opencode prepend)\n- Codex metadata generation (agents/openai.yaml)\n",
+      "resources": [
+        {
+          "path": "overlays/opencode/prepend.md",
+          "size": 137,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "scripts/helper.sh",
+          "size": 92,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "symskills.toml",
+          "size": 244,
+          "mode": "0644",
+          "executable": false
+        }
+      ],
+      "markdown_paths": [],
+      "override_paths": {},
+      "manifest_terms": {},
+      "target_names": [
+        "claude",
+        "codex",
+        "hermes",
+        "opencode"
+      ]
+    },
+    {
+      "id": "variant-source",
+      "name": "variant-fixture",
+      "description": "A canonical fixture skill exercising harness variants per target",
+      "category": "",
+      "version": "",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\n\u003c!-- symskills:block worker-execution --\u003e\nRun each group in its own worktree and verify it before integration.\n\u003c!-- /symskills:block --\u003e\n\n## Reporting\n\nPersist the run report under {{term:report_dir}}/variant-fixture/.\n\n\u003c!-- symskills:only hermes --\u003e\nProvider-backed children are allowed; provider CLIs are not.\n\u003c!-- /symskills:only --\u003e\n\n\u003c!-- symskills:except hermes --\u003e\nUse whatever isolation mechanism this harness provides.\n\u003c!-- /symskills:except --\u003e\n",
+      "resources": [
+        {
+          "path": "overlays/claude/blocks/dispatch.md",
+          "size": 68,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "overlays/claude/blocks/worker-execution.md",
+          "size": 133,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "overlays/hermes/blocks/dispatch.md",
+          "size": 71,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "references/execution-contract.md",
+          "size": 185,
+          "mode": "0644",
+          "executable": false
+        },
+        {
+          "path": "symskills.toml",
+          "size": 145,
+          "mode": "0644",
+          "executable": false
+        }
+      ],
+      "markdown_paths": [
+        "references/execution-contract.md"
+      ],
+      "override_paths": {
+        "claude": [
+          "dispatch",
+          "worker-execution"
+        ],
+        "hermes": [
+          "dispatch"
+        ]
+      },
+      "manifest_terms": {
+        "report_dir": {
+          "default": "~/.local/state/symskills/reports",
+          "hermes": "~/.hermes/reports"
+        }
+      },
+      "target_names": []
+    },
+    {
+      "id": "oracle-edge",
+      "name": "123",
+      "description": "true",
+      "category": "",
+      "version": "7",
+      "body": "Edge fixture body.\n",
+      "resources": [
+        {
+          "path": "symskills.toml",
+          "size": 175,
+          "mode": "0644",
+          "executable": false
+        }
+      ],
+      "markdown_paths": [],
+      "override_paths": {},
+      "manifest_terms": {
+        "report_dir": {
+          "default": "reports"
+        }
+      },
+      "target_names": [
+        "hermes"
+      ]
+    }
+  ],
+  "variant_cases": [
+    {
+      "id": "antigravity",
+      "target": "antigravity",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nRun each group in its own worktree and verify it before integration.\n\n## Reporting\n\nPersist the run report under ~/.local/state/symskills/reports/variant-fixture/.\n\n\nUse whatever isolation mechanism this harness provides.\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nDispatch each unit of work through this harness's own mechanism.\n\nReports land in ~/.local/state/symskills/reports.\n"
+      },
+      "issues": []
+    },
+    {
+      "id": "claude",
+      "target": "claude",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nDispatch each group with the Agent tool, one subagent per group, each in its\nown git worktree under `\u003crepo\u003e/.worktrees/\u003ctask-slug\u003e`.\n\n## Reporting\n\nPersist the run report under ~/.local/state/symskills/reports/variant-fixture/.\n\n\nUse whatever isolation mechanism this harness provides.\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nSpawn one Agent subagent per unit of work and wait for all of them.\n\nReports land in ~/.local/state/symskills/reports.\n"
+      },
+      "issues": []
+    },
+    {
+      "id": "codex",
+      "target": "codex",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nRun each group in its own worktree and verify it before integration.\n\n## Reporting\n\nPersist the run report under ~/.local/state/symskills/reports/variant-fixture/.\n\n\nUse whatever isolation mechanism this harness provides.\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nDispatch each unit of work through this harness's own mechanism.\n\nReports land in ~/.local/state/symskills/reports.\n"
+      },
+      "issues": []
+    },
+    {
+      "id": "hermes",
+      "target": "hermes",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nRun each group in its own worktree and verify it before integration.\n\n## Reporting\n\nPersist the run report under ~/.hermes/reports/variant-fixture/.\n\nProvider-backed children are allowed; provider CLIs are not.\n\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nUse normal `delegate_task` children with the configured `strong` tier.\n\nReports land in ~/.hermes/reports.\n"
+      },
+      "issues": []
+    },
+    {
+      "id": "openclaw",
+      "target": "openclaw",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nRun each group in its own worktree and verify it before integration.\n\n## Reporting\n\nPersist the run report under ~/.local/state/symskills/reports/variant-fixture/.\n\n\nUse whatever isolation mechanism this harness provides.\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nDispatch each unit of work through this harness's own mechanism.\n\nReports land in ~/.local/state/symskills/reports.\n"
+      },
+      "issues": []
+    },
+    {
+      "id": "opencode",
+      "target": "opencode",
+      "body": "# Variant Fixture\n\nThis fixture exercises the harness-variant constructs so each target's\nresolved output is reviewable as a committed file.\n\n## Worker execution\n\nRun each group in its own worktree and verify it before integration.\n\n## Reporting\n\nPersist the run report under ~/.local/state/symskills/reports/variant-fixture/.\n\n\nUse whatever isolation mechanism this harness provides.\n",
+      "files": {
+        "references/execution-contract.md": "# Execution contract\n\nDispatch each unit of work through this harness's own mechanism.\n\nReports land in ~/.local/state/symskills/reports.\n"
+      },
+      "issues": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "id": "unknown_region_target",
+      "problems": [
+        {
+          "code": "block_target_unknown",
+          "severity": "warning",
+          "message": "only region names unknown target \"hermez\"; the region is kept or dropped as if that target never renders",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "id": "unknown_override",
+      "problems": [
+        {
+          "code": "block_override_unknown",
+          "severity": "error",
+          "message": "overlay claude/blocks/invented.md overrides block \"invented\", which no SKILL.md or markdown reference in this skill defines",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "term_without_default",
+      "problems": [
+        {
+          "code": "term_default_required",
+          "severity": "error",
+          "message": "term \"report_dir\" needs a \"default\" value; it is the harness-neutral text the canonical source states",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "term_unknown_target",
+      "problems": [
+        {
+          "code": "block_target_unknown",
+          "severity": "warning",
+          "message": "term \"report_dir\" defines a value for unknown target \"hermez\"; it will never be used",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "invalid_term_reference",
+      "problems": [
+        {
+          "code": "term_name_invalid",
+          "severity": "error",
+          "message": "term reference \"{{term:Bad Name}}\" must be lowercase alphanumeric segments joined by single dashes or underscores",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "unknown_term_reference",
+      "problems": [
+        {
+          "code": "term_unknown",
+          "severity": "error",
+          "message": "term \"missing\" is referenced but not defined in [terms]",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "missing_term_default",
+      "problems": [
+        {
+          "code": "term_default_required",
+          "severity": "error",
+          "message": "term \"no_default\" needs a \"default\" value; it is the harness-neutral text the canonical source states",
+          "line": 0
+        }
+      ]
+    }
+  ],
+  "render_cases": [
+    {
+      "id": "source/opencode",
+      "target": "opencode",
+      "name": "golden-fixture-open",
+      "compatibility": "opencode",
+      "skill_md": "LS0tCm5hbWU6IGdvbGRlbi1maXh0dXJlLW9wZW4KZGVzY3JpcHRpb246IEEgY2Fub25pY2FsIGZpeHR1cmUgc2tpbGwgZm9yIHBlci10YXJnZXQgZ29sZGVuIHJlbmRlciB0ZXN0cwpsaWNlbnNlOiBBcGFjaGUtMi4wCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCm1ldGFkYXRhOgogICAgc291cmNlOiBjYW5vbmljYWwKLS0tCgo+IFRoaXMgb3ZlcmxheSBwcmVwZW5kIGZyYWdtZW50IGFwcGxpZXMgZXhjbHVzaXZlbHkgdG8gdGhlICoqb3BlbmNvZGUqKiBoYXJuZXNzLgo+IEl0IGlzIGluc2VydGVkIGJlZm9yZSB0aGUgbWFpbiBib2R5IGR1cmluZyByZW5kZXJpbmcuCgojIEdvbGRlbiBGaXh0dXJlCgpUaGlzIGZpeHR1cmUgc2tpbGwgaXMgdXNlZCBieSBwZXItdGFyZ2V0IGdvbGRlbiB0ZXN0cyB0byBhc3NlcnQgdGhhdApyZW5kZXJlZCBza2lsbCBidW5kbGVzIG1hdGNoIGVhY2ggaGFybmVzcyBjb250cmFjdC4KCkl0IGV4ZXJjaXNlczoKLSBGcm9udG1hdHRlciByZW5kZXJpbmcgd2l0aCB0YXJnZXQtc3BlY2lmaWMgYWxpYXNlcwotIFN1cHBvcnQgZmlsZSBjb3B5aW5nIChzY3JpcHRzIGRpcmVjdG9yeSkKLSBPdmVybGF5IGFwcGxpY2F0aW9uIChvcGVuY29kZSBwcmVwZW5kKQotIENvZGV4IG1ldGFkYXRhIGdlbmVyYXRpb24gKGFnZW50cy9vcGVuYWkueWFtbCkK",
+      "files": [
+        {
+          "path": ".symskills.json",
+          "mode": "0644",
+          "bytes": "ewogICJvdXRwdXRfZGlnZXN0IjogIjliOWVhNzRlMWYxNGMxM2NkODZkMmIyZjc0NzVkMGE3ZmViNzdhMWJhOTQ4ZmVjMTJiMzMxNDU5YmNhZDlhZDMiLAogICJvdXRwdXRfbWFuaWZlc3QiOiBbCiAgICB7CiAgICAgICJwYXRoIjogIlNLSUxMLm1kIiwKICAgICAgImtpbmQiOiAiZmlsZSIsCiAgICAgICJtb2RlIjogIjA2NDQiLAogICAgICAic2l6ZSI6IDY2MywKICAgICAgInNoYTI1NiI6ICJiMWIzMDExNmU1YWU2ZmI1MzgxYzUzNDQwZDhhNWMwM2U4YjY2OTgwYjYxMDkyMTk3YjNlYWMwNjQ1NzZhYjgxIgogICAgfSwKICAgIHsKICAgICAgInBhdGgiOiAic2NyaXB0cyIsCiAgICAgICJraW5kIjogImRpciIsCiAgICAgICJtb2RlIjogIjA3NTUiLAogICAgICAic2l6ZSI6IDAsCiAgICAgICJzaGEyNTYiOiAiIgogICAgfSwKICAgIHsKICAgICAgInBhdGgiOiAic2NyaXB0cy9oZWxwZXIuc2giLAogICAgICAia2luZCI6ICJmaWxlIiwKICAgICAgIm1vZGUiOiAiMDY0NCIsCiAgICAgICJzaXplIjogOTIsCiAgICAgICJzaGEyNTYiOiAiZGMwZTQwYjUzYzc5NjNmYmE0YTFhYWY5YjI3MmVmNTc5NDJhZDEwZWQ3Y2I3YjBhMjg0ZmI5ZGQ2MzI4ODYyYSIKICAgIH0KICBdLAogICJzb3VyY2VfaGFzaCI6ICJkNzdhMjI0ZjA0MjA5Y2QyYzExY2JiZjU4MGUwY2UyNTAyMmZjNjMyYmIzYTk3MzU3NTIyZTNlZGQyZDRhMDE3Igp9Cg=="
+        },
+        {
+          "path": "SKILL.md",
+          "mode": "0644",
+          "bytes": "LS0tCm5hbWU6IGdvbGRlbi1maXh0dXJlLW9wZW4KZGVzY3JpcHRpb246IEEgY2Fub25pY2FsIGZpeHR1cmUgc2tpbGwgZm9yIHBlci10YXJnZXQgZ29sZGVuIHJlbmRlciB0ZXN0cwpsaWNlbnNlOiBBcGFjaGUtMi4wCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCm1ldGFkYXRhOgogICAgc291cmNlOiBjYW5vbmljYWwKLS0tCgo+IFRoaXMgb3ZlcmxheSBwcmVwZW5kIGZyYWdtZW50IGFwcGxpZXMgZXhjbHVzaXZlbHkgdG8gdGhlICoqb3BlbmNvZGUqKiBoYXJuZXNzLgo+IEl0IGlzIGluc2VydGVkIGJlZm9yZSB0aGUgbWFpbiBib2R5IGR1cmluZyByZW5kZXJpbmcuCgojIEdvbGRlbiBGaXh0dXJlCgpUaGlzIGZpeHR1cmUgc2tpbGwgaXMgdXNlZCBieSBwZXItdGFyZ2V0IGdvbGRlbiB0ZXN0cyB0byBhc3NlcnQgdGhhdApyZW5kZXJlZCBza2lsbCBidW5kbGVzIG1hdGNoIGVhY2ggaGFybmVzcyBjb250cmFjdC4KCkl0IGV4ZXJjaXNlczoKLSBGcm9udG1hdHRlciByZW5kZXJpbmcgd2l0aCB0YXJnZXQtc3BlY2lmaWMgYWxpYXNlcwotIFN1cHBvcnQgZmlsZSBjb3B5aW5nIChzY3JpcHRzIGRpcmVjdG9yeSkKLSBPdmVybGF5IGFwcGxpY2F0aW9uIChvcGVuY29kZSBwcmVwZW5kKQotIENvZGV4IG1ldGFkYXRhIGdlbmVyYXRpb24gKGFnZW50cy9vcGVuYWkueWFtbCkK"
+        },
+        {
+          "path": "scripts/helper.sh",
+          "mode": "0644",
+          "bytes": "IyEvYmluL3NoCiMgaGVscGVyLnNoIOKAlCBzdXBwb3J0IGZpbGUgZm9yIGdvbGRlbiBmaXh0dXJlIHRlc3QKZWNobyAiZ29sZGVuLWZpeHR1cmUgaGVscGVyIgo="
+        }
+      ],
+      "warnings": null,
+      "unmet_requirements": null,
+      "source_hash": "d77a224f04209cd2c11cbbf580e0ce25022fc632bb3a97357522e3edd2d4a017"
+    },
+    {
+      "id": "variant-source/opencode",
+      "target": "opencode",
+      "name": "variant-fixture",
+      "compatibility": "opencode",
+      "skill_md": "LS0tCm5hbWU6IHZhcmlhbnQtZml4dHVyZQpkZXNjcmlwdGlvbjogQSBjYW5vbmljYWwgZml4dHVyZSBza2lsbCBleGVyY2lzaW5nIGhhcm5lc3MgdmFyaWFudHMgcGVyIHRhcmdldApsaWNlbnNlOiBBcGFjaGUtMi4wCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCm1ldGFkYXRhOgogICAgc291cmNlOiBjYW5vbmljYWwKLS0tCgojIFZhcmlhbnQgRml4dHVyZQoKVGhpcyBmaXh0dXJlIGV4ZXJjaXNlcyB0aGUgaGFybmVzcy12YXJpYW50IGNvbnN0cnVjdHMgc28gZWFjaCB0YXJnZXQncwpyZXNvbHZlZCBvdXRwdXQgaXMgcmV2aWV3YWJsZSBhcyBhIGNvbW1pdHRlZCBmaWxlLgoKIyMgV29ya2VyIGV4ZWN1dGlvbgoKUnVuIGVhY2ggZ3JvdXAgaW4gaXRzIG93biB3b3JrdHJlZSBhbmQgdmVyaWZ5IGl0IGJlZm9yZSBpbnRlZ3JhdGlvbi4KCiMjIFJlcG9ydGluZwoKUGVyc2lzdCB0aGUgcnVuIHJlcG9ydCB1bmRlciB+Ly5sb2NhbC9zdGF0ZS9zeW1za2lsbHMvcmVwb3J0cy92YXJpYW50LWZpeHR1cmUvLgoKClVzZSB3aGF0ZXZlciBpc29sYXRpb24gbWVjaGFuaXNtIHRoaXMgaGFybmVzcyBwcm92aWRlcy4K",
+      "files": [
+        {
+          "path": ".symskills.json",
+          "mode": "0644",
+          "bytes": "ewogICJvdXRwdXRfZGlnZXN0IjogIjI1Yzg3NjQ5NDcxNDIxNDcwYzcxZjZiM2E2NDI0ZDliNDFjYWViZGIxY2M2N2FkMDMwMmI1YzY4NzkxNmZkNjgiLAogICJvdXRwdXRfbWFuaWZlc3QiOiBbCiAgICB7CiAgICAgICJwYXRoIjogIlNLSUxMLm1kIiwKICAgICAgImtpbmQiOiAiZmlsZSIsCiAgICAgICJtb2RlIjogIjA2NDQiLAogICAgICAic2l6ZSI6IDU3MCwKICAgICAgInNoYTI1NiI6ICIwY2FiNmQ2MWUzZmEyMmY4Y2E1ZDdlYjdlMDkzMjIzZjdhYzc2MjkwYjg0Yzg3ZWVmNDBlOGZhZTE0ZjVjZWI5IgogICAgfSwKICAgIHsKICAgICAgInBhdGgiOiAicmVmZXJlbmNlcyIsCiAgICAgICJraW5kIjogImRpciIsCiAgICAgICJtb2RlIjogIjA3NTUiLAogICAgICAic2l6ZSI6IDAsCiAgICAgICJzaGEyNTYiOiAiIgogICAgfSwKICAgIHsKICAgICAgInBhdGgiOiAicmVmZXJlbmNlcy9leGVjdXRpb24tY29udHJhY3QubWQiLAogICAgICAia2luZCI6ICJmaWxlIiwKICAgICAgIm1vZGUiOiAiMDY0NCIsCiAgICAgICJzaXplIjogMTM4LAogICAgICAic2hhMjU2IjogIjM2NWZlZThlYTNkOTNmZDk2YzQ2MWJlMmI1YzM0ZDY5Nzg2YzBjYzEyNmRiNDI3NjViMDliYWNjYTI1OWUyZWEiCiAgICB9CiAgXSwKICAic291cmNlX2hhc2giOiAiMGZkZGExN2Q2N2JkNzI1ZGU4ZWZkNTI3MDdjNzJlYTJjNGIwYmQyZGE0MjMxOWRkYWQxZTI1MzAyYjIzYzk4ZSIKfQo="
+        },
+        {
+          "path": "SKILL.md",
+          "mode": "0644",
+          "bytes": "LS0tCm5hbWU6IHZhcmlhbnQtZml4dHVyZQpkZXNjcmlwdGlvbjogQSBjYW5vbmljYWwgZml4dHVyZSBza2lsbCBleGVyY2lzaW5nIGhhcm5lc3MgdmFyaWFudHMgcGVyIHRhcmdldApsaWNlbnNlOiBBcGFjaGUtMi4wCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCm1ldGFkYXRhOgogICAgc291cmNlOiBjYW5vbmljYWwKLS0tCgojIFZhcmlhbnQgRml4dHVyZQoKVGhpcyBmaXh0dXJlIGV4ZXJjaXNlcyB0aGUgaGFybmVzcy12YXJpYW50IGNvbnN0cnVjdHMgc28gZWFjaCB0YXJnZXQncwpyZXNvbHZlZCBvdXRwdXQgaXMgcmV2aWV3YWJsZSBhcyBhIGNvbW1pdHRlZCBmaWxlLgoKIyMgV29ya2VyIGV4ZWN1dGlvbgoKUnVuIGVhY2ggZ3JvdXAgaW4gaXRzIG93biB3b3JrdHJlZSBhbmQgdmVyaWZ5IGl0IGJlZm9yZSBpbnRlZ3JhdGlvbi4KCiMjIFJlcG9ydGluZwoKUGVyc2lzdCB0aGUgcnVuIHJlcG9ydCB1bmRlciB+Ly5sb2NhbC9zdGF0ZS9zeW1za2lsbHMvcmVwb3J0cy92YXJpYW50LWZpeHR1cmUvLgoKClVzZSB3aGF0ZXZlciBpc29sYXRpb24gbWVjaGFuaXNtIHRoaXMgaGFybmVzcyBwcm92aWRlcy4K"
+        },
+        {
+          "path": "references/execution-contract.md",
+          "mode": "0644",
+          "bytes": "IyBFeGVjdXRpb24gY29udHJhY3QKCkRpc3BhdGNoIGVhY2ggdW5pdCBvZiB3b3JrIHRocm91Z2ggdGhpcyBoYXJuZXNzJ3Mgb3duIG1lY2hhbmlzbS4KClJlcG9ydHMgbGFuZCBpbiB+Ly5sb2NhbC9zdGF0ZS9zeW1za2lsbHMvcmVwb3J0cy4K"
+        }
+      ],
+      "warnings": null,
+      "unmet_requirements": null,
+      "source_hash": "0fdda17d67bd725de8efd52707c72ea2c4b0bd2da42319ddad1e25302b23c98e"
+    },
+    {
+      "id": "oracle-edge/opencode",
+      "target": "opencode",
+      "name": "edge",
+      "compatibility": "opencode",
+      "skill_md": "LS0tCm5hbWU6IGVkZ2UKZGVzY3JpcHRpb246ICJ0cnVlIgp2ZXJzaW9uOiAiNyIKYXV0aG9yOiBBLCAyCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCnBsYXRmb3JtczoKICAgIC0gIjEiCiAgICAtICJ0cnVlIgpyZXF1aXJlZF9lbnZpcm9ubWVudF92YXJpYWJsZXM6CiAgICAtIEhPTUUKICAgIC0gIjkiCi0tLQoKRWRnZSBmaXh0dXJlIGJvZHkuCg==",
+      "files": [
+        {
+          "path": ".symskills.json",
+          "mode": "0644",
+          "bytes": "ewogICJvdXRwdXRfZGlnZXN0IjogIjJiYjVhZWUxYmI1YmU4Yjg5ZWZmMDk1MjU1M2Q0ZGY1ZmUzMDc2YWEyNmM4OWEwOGE0ZmZmYjA0YjBmOWZhNDIiLAogICJvdXRwdXRfbWFuaWZlc3QiOiBbCiAgICB7CiAgICAgICJwYXRoIjogIlNLSUxMLm1kIiwKICAgICAgImtpbmQiOiAiZmlsZSIsCiAgICAgICJtb2RlIjogIjA2NDQiLAogICAgICAic2l6ZSI6IDE5NiwKICAgICAgInNoYTI1NiI6ICIxNWY3ZmRhYjBiMzJmMDU5M2UwMmM4MDU0MWU0Y2M0M2RjZDFmYzk3YjliNzNkZmM1MmYyNWViYmJhZjRmM2UzIgogICAgfQogIF0sCiAgInNvdXJjZV9oYXNoIjogImE2NmMyMTUzNDQ3Mjg2NGU3MzgxNjVkZjAxNjlhNTkyNTk4MzE4NGRiNTU0NDMwMjkxNzU5ZGY0ZTQ0MzYwYmYiCn0K"
+        },
+        {
+          "path": "SKILL.md",
+          "mode": "0644",
+          "bytes": "LS0tCm5hbWU6IGVkZ2UKZGVzY3JpcHRpb246ICJ0cnVlIgp2ZXJzaW9uOiAiNyIKYXV0aG9yOiBBLCAyCmNvbXBhdGliaWxpdHk6IG9wZW5jb2RlCnBsYXRmb3JtczoKICAgIC0gIjEiCiAgICAtICJ0cnVlIgpyZXF1aXJlZF9lbnZpcm9ubWVudF92YXJpYWJsZXM6CiAgICAtIEhPTUUKICAgIC0gIjkiCi0tLQoKRWRnZSBmaXh0dXJlIGJvZHkuCg=="
+        }
+      ],
+      "warnings": [
+        "target opencode has not declared capability \"subagents\" required by this skill; rendering anyway — record what your harness supports under [capabilities.opencode] in config.toml"
+      ],
+      "unmet_requirements": null,
+      "source_hash": "a66c21534472864e738165df0169a5925983184db554430291759df4e44360bf"
+    }
+  ],
+  "security_cases": [
+    {
+      "id": "missing_configured_overlay",
+      "rejected": true,
+      "error": "validation error: overlay reference \"missing.md\": read missing.md: openat missing.md: no such file or directory"
+    },
+    {
+      "id": "orphan_override",
+      "rejected": true,
+      "error": "validation error: overlay opencode/blocks/invented.md overrides block \"invented\", which no SKILL.md or markdown reference in this skill defines"
+    },
+    {
+      "id": "duplicate_block_id_across_files",
+      "rejected": true,
+      "error": "validation error: block id \"shared\" is already defined in SKILL.md; ids address a block across the whole skill and must be unique"
+    },
+    {
+      "id": "unknown_target",
+      "rejected": true,
+      "error": "unknown target \"not-a-target\""
+    },
+    {
+      "id": "absolute_overlay",
+      "rejected": true,
+      "error": "validation error: overlay reference \"/etc/passwd\" must be relative"
+    },
+    {
+      "id": "parent_overlay",
+      "rejected": true,
+      "error": "validation error: overlay reference \"../escape.md\" escapes skill root"
+    },
+    {
+      "id": "resolved_name_traversal",
+      "rejected": true,
+      "error": "invalid resolved name for target opencode: skill name \"../escape\" must be a single lowercase alphanumeric-dash segment without consecutive, leading, or trailing hyphens"
+    },
+    {
+      "id": "destination_parent_symlink",
+      "rejected": true,
+      "error": "target opencode: destination path \"opencode\": openat opencode: path escapes from parent"
+    },
+    {
+      "id": "destination_final_symlink",
+      "rejected": true,
+      "error": "target opencode: destination path \"opencode/security-skill\" is a symlink"
+    }
+  ],
+  "hash_case": {
+    "initial": "444afe33aa8b0b1bce0ba26c59ec442817648493a812857b5c6d339ae10f60e1",
+    "after_content": "e2aff1dbcdbd0c5ff70fe9a63e6be43224787a55ad57b3cee429236b9b178bdf",
+    "after_mode": "311a2bda77868aa3d6871a6eada3315b927f0d885055630cd606a73317f418ed",
+    "content_changed": true,
+    "mode_changed": true
+  }
+}

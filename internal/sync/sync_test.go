@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -214,5 +215,48 @@ func TestFormatSummaryJSON(t *testing.T) {
 	}
 	if !strings.Contains(out, `"status":"created"`) {
 		t.Errorf("JSON missing status:created\n%s", out)
+	}
+}
+
+func TestRun_ReturnsErrorAfterCollectingAllTargetStatuses(t *testing.T) {
+	project := t.TempDir()
+	t.Setenv("HOME", t.TempDir())
+
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err := os.WriteFile(outside, []byte("outside\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(project, "CLAUDE.md")); err != nil {
+		if runtime.GOOS == "windows" {
+			t.Skipf("symlink unavailable: %v", err)
+		}
+		t.Fatal(err)
+	}
+
+	var stderr bytes.Buffer
+	statuses, skills, err := Run(project, []string{"claude", "agents"}, false, &stderr)
+	if err == nil {
+		t.Fatal("Run() error = nil, want target failure")
+	}
+	if len(statuses) != 2 {
+		t.Fatalf("Run() returned %d statuses, want 2", len(statuses))
+	}
+	if statuses[0].Status != "error" {
+		t.Fatalf("claude status = %q, want error", statuses[0].Status)
+	}
+	if statuses[1].Status != "created" {
+		t.Fatalf("agents status = %q, want created", statuses[1].Status)
+	}
+	if len(skills) != 2 {
+		t.Fatalf("Run() returned %d skill results, want 2", len(skills))
+	}
+}
+
+func TestTargetsFailed(t *testing.T) {
+	if !TargetsFailed([]TargetStatus{{Name: "claude", Status: "error"}}) {
+		t.Fatal("TargetsFailed() = false for an error status")
+	}
+	if TargetsFailed([]TargetStatus{{Name: "claude", Status: "updated"}}) {
+		t.Fatal("TargetsFailed() = true without an error status")
 	}
 }

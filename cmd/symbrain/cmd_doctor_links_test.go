@@ -76,7 +76,7 @@ func TestCheckVaultReachable_UnexpectedErrorIsFail(t *testing.T) {
 		t.Skip("fake shell binary not supported on windows")
 	}
 	dir := t.TempDir()
-	script := "#!/bin/sh\necho 'Error: vault directory is corrupt' >&2\nexit 1\n"
+	script := "#!/bin/sh\necho 'credential=SENTINEL_SECRET' >&2\nexit 1\n"
 	if err := os.WriteFile(filepath.Join(dir, "symvault"), []byte(script), 0o755); err != nil {
 		t.Fatalf("write fake symvault: %v", err)
 	}
@@ -85,6 +85,12 @@ func TestCheckVaultReachable_UnexpectedErrorIsFail(t *testing.T) {
 	got := checkVaultReachable(context.Background())
 	if got.Status != linkFail {
 		t.Errorf("Status = %q, want %q", got.Status, linkFail)
+	}
+	if strings.Contains(got.Detail, "SENTINEL_SECRET") {
+		t.Errorf("Detail leaked child stderr: %q", got.Detail)
+	}
+	if got.Detail != "symvault probe failed: exit status 1" {
+		t.Errorf("Detail = %q, want generic exit status", got.Detail)
 	}
 }
 

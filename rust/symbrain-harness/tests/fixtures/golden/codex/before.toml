@@ -1,0 +1,6 @@
+model = "o3"
+
+[mcp_servers]
+  [mcp_servers.other-tool]
+    args = ["run"]
+    command = "other-tool"

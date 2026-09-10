@@ -59,7 +59,7 @@ type MoonshotProvider struct {
 func NewMoonshotProvider(client *http.Client) *MoonshotProvider {
 	apiKey, credSource, credErr := resolveEnv("MOONSHOT_API_KEY")
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
 	region := MoonshotRegionInternational
 	if MoonshotRegion(os.Getenv("MOONSHOT_REGION")) == MoonshotRegionChina {

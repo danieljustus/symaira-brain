@@ -38,12 +38,9 @@ type NousPortalProvider struct {
 // store and the HERMES_PORTAL_BASE_URL override from the environment.
 func NewNousPortalProvider(client *http.Client) *NousPortalProvider {
 	if client == nil {
-		client = http.DefaultClient
+		client = newProviderHTTPClient()
 	}
-	baseURL := os.Getenv("HERMES_PORTAL_BASE_URL")
-	if baseURL == "" {
-		baseURL = nousDefaultPortalURL
-	}
+	baseURL := validatedUsageBase(os.Getenv("HERMES_PORTAL_BASE_URL"), nousDefaultPortalURL)
 	accessToken, credSource, credErr := resolveFileCredential("NOUS_PORTAL_ACCESS_TOKEN", func() string {
 		return readNousAccessToken(nousAuthStorePath())
 	})
@@ -93,7 +90,7 @@ func nousAuthStorePath() string {
 //
 // Shape: {"version": 1, "providers": [{"id": "nous", ...state...}]}.
 func readNousAccessToken(path string) string {
-	data, err := os.ReadFile(path)
+	data, err := readCredentialFile(path)
 	if err != nil {
 		return ""
 	}

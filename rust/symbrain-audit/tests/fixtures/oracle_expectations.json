@@ -1,0 +1,87 @@
+{
+  "entry_json": "{\"timestamp\":\"2026-01-01T00:00:00Z\",\"session_id\":\"s1\",\"profile\":\"personal\",\"server\":\"memory\",\"tool\":\"memory_search\",\"duration_ms\":42,\"status\":\"error\",\"category\":\"timeout\",\"retryable\":true,\"arg_keys\":\"query\",\"arg_values\":\"query=term\",\"access_class\":\"read\",\"access_source\":\"read_only_hint\"}",
+  "hashes": {
+    "hello_genesis": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+    "world_after_hello": "fb2986551ccf01ed7692d3e255cba382ca4dc8ce07c1cd768d780fc1ce971d91"
+  },
+  "redactions": [
+    {
+      "id": "vault",
+      "server": "vault",
+      "tool": "get_entry",
+      "args": "{\"password\":\"secret\"}",
+      "verbose": true,
+      "arg_keys": "",
+      "arg_values": ""
+    },
+    {
+      "id": "keys",
+      "server": "memory",
+      "tool": "memory_search",
+      "args": "{\"query\":\"term\"}",
+      "verbose": false,
+      "arg_keys": "query",
+      "arg_values": ""
+    },
+    {
+      "id": "verbose",
+      "server": "memory",
+      "tool": "memory_set",
+      "args": "{\"content\":\"private\"}",
+      "verbose": true,
+      "arg_keys": "content",
+      "arg_values": "content=[redacted]"
+    }
+  ],
+  "tail": {
+    "files": {
+      "alpha.jsonl": "{\"timestamp\":\"2026-01-01T00:00:00Z\",\"session_id\":\"old\",\"profile\":\"ignored\",\"server\":\"vault\",\"tool\":\"old\",\"duration_ms\":0,\"status\":\"ok\",\"retryable\":false}\nNOT JSON\n{\"timestamp\":\"2026-01-01T00:01:00Z\",\"session_id\":\"new\",\"profile\":\"ignored\",\"server\":\"memory\",\"tool\":\"first\",\"duration_ms\":0,\"status\":\"ok\",\"retryable\":false}\n{\"timestamp\":\"2026-01-01T00:02:00Z\",\"session_id\":\"new\",\"profile\":\"ignored\",\"server\":\"memory\",\"tool\":\"second\",\"duration_ms\":0,\"status\":\"degraded\",\"retryable\":false,\"reason\":\"missing\",\"level\":\"warning\"}\n"
+    },
+    "profile": "alpha",
+    "limit": 2,
+    "entries": [
+      {
+        "timestamp": "2026-01-01T00:01:00Z",
+        "session_id": "new",
+        "profile": "alpha",
+        "server": "memory",
+        "tool": "first",
+        "duration_ms": 0,
+        "status": "ok",
+        "retryable": false
+      },
+      {
+        "timestamp": "2026-01-01T00:02:00Z",
+        "session_id": "new",
+        "profile": "alpha",
+        "server": "memory",
+        "tool": "second",
+        "duration_ms": 0,
+        "status": "degraded",
+        "retryable": false,
+        "reason": "missing",
+        "level": "warning"
+      }
+    ],
+    "degradations": [
+      {
+        "session_id": "new",
+        "profile": "ignored",
+        "server": "memory",
+        "reason": "missing",
+        "level": "warning"
+      }
+    ]
+  },
+  "chained_tail_entries": [
+    {
+      "timestamp": "",
+      "profile": "chain",
+      "server": "",
+      "tool": "",
+      "duration_ms": 0,
+      "status": "",
+      "retryable": false
+    }
+  ]
+}

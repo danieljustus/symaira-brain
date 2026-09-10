@@ -1,0 +1,824 @@
+{
+  "schema_version": 1,
+  "go_revision": "working-tree",
+  "generator_sha256": "1291c2fd4a988f494f128dcb9eb01972e4f9b38498f76a626bd7a9ad63cd35dc",
+  "go_sources": {
+    "internal/skills/install/base.go": "60aca8b91fac8bc47f6535f7348797c6ca683b72e99e0457d25bb129b5e9d91e",
+    "internal/skills/install/classify.go": "ffe58b7332aab3ba1a3bee872a02ce9ce13c7fe71222fe75eba2e70a14c51bcf",
+    "internal/skills/install/install.go": "205bcd074fb41000716b65b577c1c2efd1378cf88b18364d36dcada52596efca",
+    "internal/skills/install/status.go": "a8c1ae600d79dc86fe8f001416886b64d21ec92aef48c464262f9066fdaabb33",
+    "internal/skills/render/render_target.go": "0037a54d73f3cc4f0fa045ea2f5e458e937489fb9670e8369579fe37ca441b72"
+  },
+  "cases": [
+    {
+      "id": "fresh_copy_custom_base",
+      "body": "body-v1\n",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "in-sync",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "dry_run",
+      "body": "body-v1\n",
+      "expected": {
+        "action": "planned",
+        "mode": "copy",
+        "statuses": [],
+        "artifacts": []
+      }
+    },
+    {
+      "id": "unmanaged_entry",
+      "body": "body-v1\n",
+      "mutation": "unmanaged",
+      "expected": {
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "stale",
+            "error": "reading marker \u003croot\u003e/home/.config/opencode/skills/oracle-skill: invalid character 'o' looking for beginning of value"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "b3JhY2xl"
+          }
+        ]
+      }
+    },
+    {
+      "id": "malformed_marker",
+      "body": "body-v1\n",
+      "mutation": "malformed",
+      "expected": {
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "stale",
+            "error": "reading marker \u003croot\u003e/home/.config/opencode/skills/oracle-skill: invalid character 'b' looking for beginning of object key string"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "e2JhZA=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "invalid_marker_identity",
+      "body": "body-v1\n",
+      "mutation": "identity",
+      "expected": {
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "unmanaged",
+            "mode": "copy"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJtYW5hZ2VkX2J5IjogIm90aGVyIiwKICAibW9kZSI6ICJjb3B5IiwKICAibmFtZSI6ICJvcmFjbGUtc2tpbGwiLAogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIKfQo="
+          }
+        ]
+      }
+    },
+    {
+      "id": "orphaned",
+      "body": "body-v1\n",
+      "mutation": "orphaned",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "orphaned",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale_library_changed",
+      "body": "body-v1\n",
+      "mutation": "stale",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "stale",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "harness_changed",
+      "body": "body-v1\n",
+      "mutation": "harness",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "harness-changed",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4",
+            "drift": [
+              {
+                "path": "SKILL.md",
+                "kind": "harness-changed",
+                "base": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945",
+                "left": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945",
+                "right": "2230d1a9031b32c86f0902e24aef2cb79ed85563737b8fae7497fc86b27adc30"
+              },
+              {
+                "path": "reference.txt",
+                "kind": "unchanged",
+                "base": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a",
+                "left": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a",
+                "right": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a"
+              }
+            ]
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCmhhcm5lc3MtZWRpdAo="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "conflict",
+      "body": "body-v1\n",
+      "mutation": "conflict",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "conflict",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4",
+            "error": "conflict in: SKILL.md",
+            "drift": [
+              {
+                "path": "SKILL.md",
+                "kind": "conflict",
+                "base": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945",
+                "left": "3e316c624ae057756fb58021381adcb59960a96d37a418e1ffe0d95999bba2cf",
+                "right": "2230d1a9031b32c86f0902e24aef2cb79ed85563737b8fae7497fc86b27adc30"
+              },
+              {
+                "path": "reference.txt",
+                "kind": "unchanged",
+                "base": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a",
+                "left": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a",
+                "right": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a"
+              }
+            ]
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCmhhcm5lc3MtZWRpdAo="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "converged_is_in_sync",
+      "body": "body-v1\n",
+      "mutation": "converged",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "in-sync",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4"
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYyCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 493,
+            "bytes": "cmVmZXJlbmNlCg=="
+          }
+        ]
+      }
+    },
+    {
+      "id": "added_and_deleted_drift",
+      "body": "body-v1\n",
+      "mutation": "added-deleted",
+      "expected": {
+        "action": "installed",
+        "mode": "copy",
+        "statuses": [
+          {
+            "target": "opencode",
+            "name": "oracle-skill",
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "status": "harness-changed",
+            "mode": "copy",
+            "installed_at": "\u003ctimestamp\u003e",
+            "source_hash": "7332ae6547abd9ca6e0ca4a0f2f14f5bd80df3b9e79eb12cd7a6f4d76ff4a3e4",
+            "drift": [
+              {
+                "path": "SKILL.md",
+                "kind": "unchanged",
+                "base": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945",
+                "left": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945",
+                "right": "31cde1e6f871bbe96582abdecce33776405b6bde5aaaad36cd671583c407b945"
+              },
+              {
+                "path": "harness.txt",
+                "kind": "harness-changed",
+                "right": "c7eacb8ccadb7a650ad4eac69aca2d8bbb57d759d785ee07de32526d7a69c93f"
+              },
+              {
+                "path": "reference.txt",
+                "kind": "harness-changed",
+                "base": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a",
+                "left": "4151674fad2310eaff3e54db63b6ee84a6c96a68dd46c0f8df5df620d57f899a"
+              }
+            ]
+          }
+        ],
+        "artifacts": [
+          {
+            "path": "\u003croot\u003e/custom-base/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/manifest.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgInRhcmdldCI6ICJvcGVuY29kZSIsCiAgIm5hbWUiOiAib3JhY2xlLXNraWxsIiwKICAiZmlsZXMiOiB7CiAgICAiU0tJTEwubWQiOiB7CiAgICAgICJzaGEyNTYiOiAiMzFjZGUxZTZmODcxYmJlOTY1ODJhYmRlY2NlMzM3NzY0MDViNmJkZTVhYWFhZDM2Y2Q2NzE1ODNjNDA3Yjk0NSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9LAogICAgInJlZmVyZW5jZS50eHQiOiB7CiAgICAgICJzaGEyNTYiOiAiNDE1MTY3NGZhZDIzMTBlYWZmM2U1NGRiNjNiNmVlODRhNmM5NmE2OGRkNDZjMGY4ZGY1ZGY2MjBkNTdmODk5YSIsCiAgICAgICJtb2RlIjogIjA2NDQiCiAgICB9CiAgfQp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/custom-base/opencode/oracle-skill/reference.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "cmVmZXJlbmNlCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill",
+            "type": "dir",
+            "mode": 493
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/.symskills.json",
+            "type": "file",
+            "mode": 420,
+            "bytes": "ewogICJpbnN0YWxsZWQiOiAiXHUwMDNjdGltZXN0YW1wXHUwMDNlIiwKICAibWFuYWdlZF9ieSI6ICJzeW1za2lsbHMiLAogICJtb2RlIjogImNvcHkiLAogICJuYW1lIjogIm9yYWNsZS1za2lsbCIsCiAgInJlbmRlcmVkX2F0IjogIlx1MDAzY3JlbmRlcmVkXHUwMDNlIiwKICAic2NoZW1hX3ZlcnNpb24iOiAxLAogICJzb3VyY2VfaGFzaCI6ICI3MzMyYWU2NTQ3YWJkOWNhNmUwY2E0YTBmMmYxNGY1YmQ4MGRmM2I5ZTc5ZWIxMmNkN2E2ZjRkNzZmZjRhM2U0IiwKICAidGFyZ2V0IjogIm9wZW5jb2RlIgp9Cg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/SKILL.md",
+            "type": "file",
+            "mode": 420,
+            "bytes": "LS0tCm5hbWU6IG9yYWNsZS1za2lsbApkZXNjcmlwdGlvbjogb3JhY2xlIGZpeHR1cmUKY29tcGF0aWJpbGl0eTogb3BlbmNvZGUKLS0tCgpib2R5LXYxCg=="
+          },
+          {
+            "path": "\u003croot\u003e/home/.config/opencode/skills/oracle-skill/harness.txt",
+            "type": "file",
+            "mode": 420,
+            "bytes": "aGFybmVzcwo="
+          }
+        ]
+      }
+    }
+  ]
+}

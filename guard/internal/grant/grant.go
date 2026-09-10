@@ -83,12 +83,19 @@ type Origin struct {
 
 // Grant is one standing permission.
 type Grant struct {
-	ID        string    `json:"id"`
-	Scope     Scope     `json:"scope"`
-	Origin    Origin    `json:"origin"`
-	GrantedAt time.Time `json:"granted_at"`
-	Subject   string    `json:"subject"`
-	Revoked   bool      `json:"revoked,omitempty"`
+	ID         string    `json:"id"`
+	Scope      Scope     `json:"scope"`
+	Origin     Origin    `json:"origin"`
+	GrantedAt  time.Time `json:"granted_at"`
+	Subject    string    `json:"subject"`
+	Capability string    `json:"capability,omitempty"` // exact capability authorized
+	Purpose    string    `json:"purpose,omitempty"`    // exact job/session purpose
+	Resource   string    `json:"resource,omitempty"`   // exact resource authorized
+	// ScopeCeiling optionally narrows the call's resource scope. An empty
+	// ceiling is invalid for authorization; "*" is an explicit ceiling.
+	ScopeCeiling []string  `json:"scope_ceiling,omitempty"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	Revoked      bool      `json:"revoked,omitempty"`
 
 	// revoke is attached by the store so Revoke() reaches the registry;
 	// it is never serialized.
@@ -122,6 +129,39 @@ func NewID() string {
 		return fmt.Sprintf("gnt_%d", time.Now().UnixNano())
 	}
 	return fmt.Sprintf("gnt_%d_%s", time.Now().UnixNano(), hex.EncodeToString(b[:]))
+}
+
+// Authorizes reports whether this active grant is specific enough to authorize
+// call. Missing bindings fail closed; a subject-only grant can never upgrade
+// an ask. Expiry is checked at evaluation time so stale grants do not linger.
+func (g *Grant) Authorizes(capability, purpose, resource, scope string, now time.Time) bool {
+	if g == nil || g.Revoked || !g.Scope.Valid() || !g.bindingValid() || !now.Before(g.ExpiresAt) {
+		return false
+	}
+	if g.Capability != capability || g.Purpose != purpose || g.Resource != resource {
+		return false
+	}
+	if scope == "" {
+		return false
+	}
+	for _, ceiling := range g.ScopeCeiling {
+		if ceiling == "*" || ceiling == scope {
+			return true
+		}
+	}
+	return false
+}
+
+func (g *Grant) bindingValid() bool {
+	if g == nil || g.Capability == "" || g.Purpose == "" || g.Resource == "" || g.ExpiresAt.IsZero() || len(g.ScopeCeiling) == 0 {
+		return false
+	}
+	for _, ceiling := range g.ScopeCeiling {
+		if ceiling == "" {
+			return false
+		}
+	}
+	return true
 }
 
 // DefaultDir returns the XDG data directory for symguard:

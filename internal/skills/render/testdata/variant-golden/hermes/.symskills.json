@@ -1,3 +1,27 @@
 {
-  "source_hash": "175eae61cf548837b60ee3d6e86e8a0e32738359a41085b4169b5066be812bb0"
+  "output_digest": "d196b556525d83398b0380f2922483368fce22ec6d982ff61b595437d29b2d45",
+  "output_manifest": [
+    {
+      "path": "SKILL.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 606,
+      "sha256": "d40469251a036ea2d9de1051fbb328ac0f792d80624f6fba0c7dd13e82e66f17"
+    },
+    {
+      "path": "references",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "references/execution-contract.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 129,
+      "sha256": "f3d06f0ed50f0e6707dafd3a1cbeeecd13268b23b93dfff4be1549c599a16fe7"
+    }
+  ],
+  "source_hash": "5fdff77ace02efb2dc90d606a111b53aaf99dd9e8917609e6c386fa41dfdcfa8"
 }

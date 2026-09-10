@@ -563,12 +563,16 @@ public issue — see [SECURITY.md](.github/SECURITY.md) for how to report it.
 | Purpose | Path | Overridable via |
 |---|---|---|
 | Config (`config.toml`, profiles) | `~/.config/symbrain/` | — |
+| Instructions (global source) | `~/.config/symbrain/instructions.md` | `$XDG_CONFIG_HOME` (absolute values) |
 | Data (audit log) | `~/.local/share/symbrain/` | `$XDG_DATA_HOME` |
 | Cache | `~/.cache/symbrain/` | `$XDG_CACHE_HOME` |
 
-Config resolution intentionally does not consult `$XDG_CONFIG_HOME` (it
-reuses `corekit/configkit`'s fixed path resolution), so a profile written by
-`symbrain init` is always the exact file later commands read back.
+Config resolution for `config.toml` intentionally does not consult
+`$XDG_CONFIG_HOME` (it reuses `corekit/configkit`'s fixed path resolution),
+so a profile written by `symbrain init` is always the exact file later
+commands read back. The canonical global instruction source does consult an
+absolute `$XDG_CONFIG_HOME`, falling back to `~/.config`; project-local
+instructions remain at `<project>/.symbrain/instructions.md`.
 
 ## Building
 

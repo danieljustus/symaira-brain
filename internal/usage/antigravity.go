@@ -3,14 +3,12 @@ package usage
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
+	"os"
 	"os/exec"
-	"regexp"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -67,26 +65,55 @@ type antigravityProcessProbe interface {
 	isAntigravityRunning() bool
 }
 
-// shellProcessProbe is the production probe, backed by ps and lsof on
-// PATH (portable lookup, unlike the Swift original's hardcoded macOS
-// paths — symbrain also targets linux; on a platform without these tools
-// the probe simply reports nothing, degrading to "not running").
+type contextProcessProbe interface {
+	processListContext(context.Context) (string, bool)
+	listeningPortsContext(context.Context, int) (string, bool)
+}
+
+const maxProcessProbeBytes = 64 << 10
+
+// shellProcessProbe is the production probe, backed by bounded, cancellable
+// ps and lsof commands on PATH. Output is redirected to a temporary file so a
+// child or descendant cannot hold a pipe reader open after cancellation.
 type shellProcessProbe struct{}
 
 func (shellProcessProbe) processList() (string, bool) {
-	out, err := exec.Command("ps", "-ax", "-o", "pid=,command=").Output()
-	if err != nil {
-		return "", false
-	}
-	return string(out), true
+	return shellProcessProbe{}.processListContext(context.Background())
 }
 
 func (shellProcessProbe) listeningPorts(pid int) (string, bool) {
-	out, err := exec.Command("lsof", "-nP", "-iTCP", "-sTCP:LISTEN", "-a", "-p", strconv.Itoa(pid)).Output()
-	if err != nil {
+	return shellProcessProbe{}.listeningPortsContext(context.Background(), pid)
+}
+
+func (shellProcessProbe) processListContext(ctx context.Context) (string, bool) {
+	path, ok := resolveProbeTool("ps")
+	if !ok {
 		return "", false
 	}
-	return string(out), true
+	return boundedCommandOutput(ctx, func(ctx context.Context) *exec.Cmd {
+		return exec.CommandContext(ctx, path, "-ax", "-o", "pid=,command=") // #nosec G204 -- path is an absolute LookPath result for the fixed basename ps; arguments are fixed and no shell is used.
+	})
+}
+
+func (shellProcessProbe) listeningPortsContext(ctx context.Context, pid int) (string, bool) {
+	if pid <= 0 || pid > 1<<31-1 {
+		return "", false
+	}
+	path, ok := resolveProbeTool("lsof")
+	if !ok {
+		return "", false
+	}
+	return boundedCommandOutput(ctx, func(ctx context.Context) *exec.Cmd {
+		return exec.CommandContext(ctx, path, "-nP", "-iTCP", "-sTCP:LISTEN", "-a", "-p", strconv.Itoa(pid)) // #nosec G204 -- path is an absolute LookPath result for fixed basename lsof; pid is a bounded integer argv element and no shell is used.
+	})
+}
+
+func resolveProbeTool(name string) (string, bool) {
+	path, err := exec.LookPath(name)
+	if err != nil || !filepath.IsAbs(path) || filepath.Base(path) != name {
+		return "", false
+	}
+	return filepath.Clean(path), true
 }
 
 func (s shellProcessProbe) isAntigravityRunning() bool {
@@ -97,36 +124,96 @@ func (s shellProcessProbe) isAntigravityRunning() bool {
 	return strings.Contains(list, "agy") || strings.Contains(list, "Antigravity")
 }
 
+func boundedCommandOutput(parent context.Context, command func(context.Context) *exec.Cmd) (string, bool) {
+	const commandTimeout = 2 * time.Second
+	ctx, cancel := context.WithTimeout(parent, commandTimeout)
+	defer cancel()
+	file, err := os.CreateTemp("", "symbrain-usage-probe-*")
+	if err != nil {
+		return "", false
+	}
+	path := file.Name()
+	defer os.Remove(path)
+	cmd := command(ctx)
+	configureProbeProcess(cmd)
+	cmd.Stdout = file
+	cmd.Stderr = io.Discard
+	if err := cmd.Start(); err != nil {
+		if closeErr := file.Close(); closeErr != nil {
+			return "", false
+		}
+		return "", false
+	}
+	wait := make(chan error, 1)
+	go func() { wait <- cmd.Wait() }()
+	ticker := time.NewTicker(10 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case err = <-wait:
+			if err != nil {
+				closeErr := file.Close()
+				if closeErr != nil {
+					return "", false
+				}
+				return "", false
+			}
+			if _, err = file.Seek(0, io.SeekStart); err != nil {
+				if closeErr := file.Close(); closeErr != nil {
+					return "", false
+				}
+				return "", false
+			}
+			data, readErr := io.ReadAll(io.LimitReader(file, maxProcessProbeBytes+1))
+			closeErr := file.Close()
+			if readErr != nil || closeErr != nil || len(data) > maxProcessProbeBytes {
+				return "", false
+			}
+			return string(data), true
+		case <-ctx.Done():
+			killProbeProcess(cmd)
+			waitErr := <-wait
+			closeErr := file.Close()
+			if waitErr != nil || closeErr != nil {
+				return "", false
+			}
+			return "", false
+		case <-ticker.C:
+			info, statErr := file.Stat()
+			if statErr != nil || info.Size() > maxProcessProbeBytes {
+				killProbeProcess(cmd)
+				waitErr := <-wait
+				closeErr := file.Close()
+				if waitErr != nil || closeErr != nil {
+					return "", false
+				}
+				return "", false
+			}
+		}
+	}
+}
+
+func antigravityProcessList(ctx context.Context, probe antigravityProcessProbe) (string, bool) {
+	if contextProbe, ok := probe.(contextProcessProbe); ok {
+		return contextProbe.processListContext(ctx)
+	}
+	return probe.processList()
+}
+
+func antigravityListeningPorts(ctx context.Context, probe antigravityProcessProbe, pid int) (string, bool) {
+	if contextProbe, ok := probe.(contextProcessProbe); ok {
+		return contextProbe.listeningPortsContext(ctx, pid)
+	}
+	return probe.listeningPorts(pid)
+}
+
 // MARK: - Local transport
 
-// antigravityLoopbackTransport trusts self-signed certificates only for
-// loopback hosts (the Antigravity local language server serves one) —
-// mirrors the Swift original's LoopbackTrustDelegate scoping.
-type antigravityLoopbackTransport struct {
-	insecure *http.Transport
-	safe     *http.Transport
-}
-
-func newAntigravityLoopbackTransport() *antigravityLoopbackTransport {
-	return &antigravityLoopbackTransport{
-		insecure: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}, //nolint:gosec // scoped to loopback hosts only, see RoundTrip
-		safe:     &http.Transport{},
-	}
-}
-
-func (t *antigravityLoopbackTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if antigravityIsLoopbackHost(req.URL.Hostname()) {
-		return t.insecure.RoundTrip(req)
-	}
-	return t.safe.RoundTrip(req)
-}
-
-func antigravityIsLoopbackHost(host string) bool {
-	return host == "127.0.0.1" || host == "localhost" || host == "::1"
-}
-
+// Antigravity uses the same verified TLS stack as remote providers. The local
+// endpoint is explicitly allowed by doUsageRequest, but certificate
+// verification is never disabled and redirects are never followed.
 func newAntigravityHTTPClient() *http.Client {
-	return &http.Client{Transport: newAntigravityLoopbackTransport(), Timeout: 6 * time.Second}
+	return newProviderHTTPClient()
 }
 
 // MARK: - Errors
@@ -172,7 +259,7 @@ func (s *antigravityLocalProbeStrategy) httpClient() *http.Client {
 }
 
 func (s *antigravityLocalProbeStrategy) Fetch(ctx context.Context) (*UsageSnapshot, error) {
-	list, _ := s.probe.processList()
+	list, _ := antigravityProcessList(ctx, s.probe)
 	candidates := antigravityParseCandidates(list)
 	if len(candidates) == 0 {
 		return nil, &antigravityError{kind: "not_running"}
@@ -181,7 +268,7 @@ func (s *antigravityLocalProbeStrategy) Fetch(ctx context.Context) (*UsageSnapsh
 	var lastErr error = &antigravityError{kind: "not_running"}
 	client := s.httpClient()
 	for _, candidate := range candidates {
-		portList, _ := s.probe.listeningPorts(candidate.pid)
+		portList, _ := antigravityListeningPorts(ctx, s.probe, candidate.pid)
 		for _, port := range antigravityParsePorts(portList) {
 			snap, err := antigravityFetchFromPort(ctx, client, port, candidate.csrfToken)
 			if err == nil {
@@ -191,80 +278,6 @@ func (s *antigravityLocalProbeStrategy) Fetch(ctx context.Context) (*UsageSnapsh
 		}
 	}
 	return nil, lastErr
-}
-
-// antigravityServerCandidate is one discovered language-server process.
-type antigravityServerCandidate struct {
-	pid       int
-	csrfToken string
-}
-
-// antigravityParseCandidates extracts Antigravity language-server
-// processes from ps output. Recognizes the app/IDE language_server*
-// binaries (scoped to Antigravity by --app_data_dir antigravity or an
-// antigravity path) and the agy CLI binary (which needs no CSRF token).
-func antigravityParseCandidates(processList string) []antigravityServerCandidate {
-	var candidates []antigravityServerCandidate
-	for _, line := range strings.Split(processList, "\n") {
-		trimmed := strings.TrimLeft(line, " ")
-		idx := strings.IndexByte(trimmed, ' ')
-		if idx < 0 {
-			continue
-		}
-		pidStr := trimmed[:idx]
-		pid, err := strconv.Atoi(pidStr)
-		if err != nil {
-			continue
-		}
-		command := strings.TrimLeft(trimmed[idx:], " ")
-		lower := strings.ToLower(command)
-
-		isAppOrIDEServer := (strings.Contains(lower, "language_server") || strings.Contains(lower, "language-server")) &&
-			(strings.Contains(lower, "antigravity") ||
-				(strings.Contains(lower, "--app_data_dir") && strings.Contains(command, "antigravity")))
-		isCLI := strings.Contains(lower, "/agy") || strings.Contains(lower, "antigravity-cli") || strings.Contains(lower, "antigravity_cli")
-		if !isAppOrIDEServer && !isCLI {
-			continue
-		}
-
-		var csrfToken string
-		if tokenIdx := strings.Index(command, "--csrf_token"); tokenIdx >= 0 {
-			after := strings.TrimLeft(command[tokenIdx+len("--csrf_token"):], " ")
-			fields := strings.SplitN(after, " ", 2)
-			if len(fields) > 0 && fields[0] != "" {
-				csrfToken = fields[0]
-			}
-		}
-		candidates = append(candidates, antigravityServerCandidate{pid: pid, csrfToken: csrfToken})
-	}
-	return candidates
-}
-
-var antigravityPortPattern = regexp.MustCompile(`:([0-9]{1,5})(?:\s|$)`)
-
-// antigravityParsePorts extracts listening TCP ports from
-// lsof -iTCP -sTCP:LISTEN output. The NAME column
-// (TCP 127.0.0.1:34567 (LISTEN)) contains spaces, so the whole line is
-// scanned for :port tokens.
-func antigravityParsePorts(portList string) []int {
-	var ports []int
-	seen := map[int]bool{}
-	for _, line := range strings.Split(portList, "\n") {
-		if !strings.Contains(line, "(LISTEN)") {
-			continue
-		}
-		match := antigravityPortPattern.FindStringSubmatch(line)
-		if len(match) < 2 {
-			continue
-		}
-		port, err := strconv.Atoi(match[1])
-		if err != nil || seen[port] {
-			continue
-		}
-		seen[port] = true
-		ports = append(ports, port)
-	}
-	return ports
 }
 
 func antigravityFetchFromPort(ctx context.Context, client *http.Client, port int, csrfToken string) (*UsageSnapshot, error) {
@@ -279,11 +292,13 @@ func antigravityFetchFromPort(ctx context.Context, client *http.Client, port int
 	}
 	connectReq.Header.Set("Connect-Protocol-Version", "1")
 
-	connectResp, err := client.Do(connectReq)
+	connectResp, err := doUsageRequest(ctx, client, connectReq, true)
 	if err != nil {
 		return nil, &antigravityError{kind: "probe_failed", detail: fmt.Sprintf("connect probe failed on port %d", port)}
 	}
-	connectResp.Body.Close()
+	if err := connectResp.Body.Close(); err != nil {
+		return nil, &antigravityError{kind: "probe_failed", detail: fmt.Sprintf("connect probe failed on port %d", port)}
+	}
 	if connectResp.StatusCode < 200 || connectResp.StatusCode >= 300 {
 		return nil, &antigravityError{kind: "probe_failed", detail: fmt.Sprintf("connect probe failed on port %d", port)}
 	}
@@ -318,11 +333,14 @@ func antigravityPostJSON(ctx context.Context, client *http.Client, base, method,
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := doUsageRequest(ctx, client, req, true)
 	if err != nil {
 		return nil, &antigravityError{kind: "probe_failed", detail: err.Error()}
 	}
-	defer resp.Body.Close()
+	data, err := readUsageBodyAndClose(resp.Body)
+	if err != nil {
+		return nil, &antigravityError{kind: "probe_failed", detail: err.Error()}
+	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		if resp.StatusCode == 429 {
@@ -330,272 +348,5 @@ func antigravityPostJSON(ctx context.Context, client *http.Client, base, method,
 		}
 		return nil, &antigravityError{kind: "http_status", status: resp.StatusCode}
 	}
-	return io.ReadAll(resp.Body)
-}
-
-// MARK: - Response parsing
-
-// antigravitySnapshot dispatches by endpoint name (used by the strategy's
-// fallback chain).
-func antigravitySnapshot(method string, data []byte, providerID, source string) (*UsageSnapshot, error) {
-	switch method {
-	case "RetrieveUserQuotaSummary":
-		return antigravityQuotaSummarySnapshot(data, providerID, source)
-	case "GetUserStatus":
-		return antigravityUserStatusSnapshot(data, providerID, source)
-	default:
-		return antigravityModelConfigsSnapshot(data, providerID, source)
-	}
-}
-
-// antigravityQuotaSummarySnapshot parses RetrieveUserQuotaSummary: quota
-// groups with named buckets (e.g. "Gemini Models" / "Claude and GPT
-// models", each with weekly and five-hour buckets). Each bucket's
-// remainingFraction maps to a percent meter.
-func antigravityQuotaSummarySnapshot(data []byte, providerID, source string) (*UsageSnapshot, error) {
-	var payload antigravityQuotaSummaryEnvelope
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil, &antigravityError{kind: "parse_failed", detail: "quota summary is not JSON"}
-	}
-	if !payload.Code.isOK() {
-		return nil, &antigravityError{kind: "parse_failed", detail: "quota summary rejected"}
-	}
-	summary := payload.Response
-	if summary == nil {
-		summary = payload.Summary
-	}
-	if summary == nil && len(payload.Groups) > 0 {
-		summary = &antigravityQuotaSummaryPayload{Groups: payload.Groups}
-	}
-	if summary == nil || len(summary.Groups) == 0 {
-		return nil, &antigravityError{kind: "parse_failed", detail: "missing quota groups"}
-	}
-
-	var meters []UsageMeter
-	for _, group := range summary.Groups {
-		for _, bucket := range group.Buckets {
-			if bucket.RemainingFraction == nil || *bucket.RemainingFraction < 0 || *bucket.RemainingFraction > 1 {
-				continue
-			}
-			label := strings.TrimSpace(bucket.displayLabel())
-			if label == "" {
-				label = group.DisplayName
-			}
-			var resetsAt *time.Time
-			if bucket.ResetTime != nil {
-				resetsAt = antigravityParseResetTime(*bucket.ResetTime)
-			}
-			meters = append(meters, UsageMeter{
-				Label:    group.DisplayName + " — " + label,
-				Used:     strPtr(formatAmount(antigravityRoundPercent(1 - *bucket.RemainingFraction))),
-				Limit:    strPtr("100"),
-				Unit:     "%",
-				ResetsAt: resetsAt,
-			})
-		}
-	}
-	if len(meters) == 0 {
-		return nil, &antigravityError{kind: "parse_failed", detail: "quota summary has no usable buckets"}
-	}
-	return &UsageSnapshot{ProviderID: providerID, Meters: meters, FetchedAt: time.Now().UTC(), Source: source}, nil
-}
-
-// antigravityUserStatusSnapshot parses GetUserStatus: plan plus per-model
-// quotaInfo buckets.
-func antigravityUserStatusSnapshot(data []byte, providerID, source string) (*UsageSnapshot, error) {
-	var payload antigravityUserStatusResponse
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil, &antigravityError{kind: "parse_failed", detail: "user status is not JSON"}
-	}
-	if !payload.Code.isOK() {
-		return nil, &antigravityError{kind: "parse_failed", detail: "user status rejected"}
-	}
-	var configs []antigravityModelConfig
-	if payload.UserStatus != nil && payload.UserStatus.CascadeModelConfigData != nil {
-		configs = payload.UserStatus.CascadeModelConfigData.ClientModelConfigs
-	}
-	meters := antigravityModelConfigMeters(configs)
-	if len(meters) == 0 {
-		return nil, &antigravityError{kind: "parse_failed", detail: "user status has no quota buckets"}
-	}
-	return &UsageSnapshot{ProviderID: providerID, Meters: meters, FetchedAt: time.Now().UTC(), Source: source}, nil
-}
-
-// antigravityModelConfigsSnapshot parses GetCommandModelConfigs: per-model
-// quotaInfo buckets.
-func antigravityModelConfigsSnapshot(data []byte, providerID, source string) (*UsageSnapshot, error) {
-	var payload antigravityModelConfigResponse
-	if err := json.Unmarshal(data, &payload); err != nil {
-		return nil, &antigravityError{kind: "parse_failed", detail: "model configs are not JSON"}
-	}
-	if !payload.Code.isOK() {
-		return nil, &antigravityError{kind: "parse_failed", detail: "model configs rejected"}
-	}
-	meters := antigravityModelConfigMeters(payload.ClientModelConfigs)
-	if len(meters) == 0 {
-		return nil, &antigravityError{kind: "parse_failed", detail: "model configs have no quota buckets"}
-	}
-	return &UsageSnapshot{ProviderID: providerID, Meters: meters, FetchedAt: time.Now().UTC(), Source: source}, nil
-}
-
-func antigravityModelConfigMeters(configs []antigravityModelConfig) []UsageMeter {
-	var meters []UsageMeter
-	for _, config := range configs {
-		if config.QuotaInfo == nil || config.QuotaInfo.RemainingFraction == nil {
-			continue
-		}
-		remaining := *config.QuotaInfo.RemainingFraction
-		if remaining < 0 || remaining > 1 {
-			continue
-		}
-		label := strings.TrimSpace(config.displayLabel())
-		if label == "" {
-			label = config.ModelOrAlias.Model
-		}
-		var resetsAt *time.Time
-		if config.QuotaInfo.ResetTime != nil {
-			resetsAt = antigravityParseResetTime(*config.QuotaInfo.ResetTime)
-		}
-		meters = append(meters, UsageMeter{
-			Label:    label,
-			Used:     strPtr(formatAmount(antigravityRoundPercent(1 - remaining))),
-			Limit:    strPtr("100"),
-			Unit:     "%",
-			ResetsAt: resetsAt,
-		})
-	}
-	return meters
-}
-
-// antigravityRoundPercent converts a 0..1 "used fraction" to a whole
-// percent — the raw fraction math carries binary floating-point noise
-// (58.000...1), matching the Swift original's explicit .rounded().
-func antigravityRoundPercent(usedFraction float64) float64 {
-	return math.Round(usedFraction * 100)
-}
-
-// antigravityParseResetTime parses Antigravity reset timestamps: ISO8601
-// with optional fractional seconds, falling back to plain ISO8601.
-func antigravityParseResetTime(value string) *time.Time {
-	if t, err := time.Parse(time.RFC3339Nano, value); err == nil {
-		return &t
-	}
-	if t, err := time.Parse(time.RFC3339, value); err == nil {
-		return &t
-	}
-	return nil
-}
-
-// MARK: - Response models
-
-// antigravityCode arrives either as an integer (0 = ok) or a string
-// ("ok").
-type antigravityCode struct {
-	intValue    *int
-	stringValue *string
-}
-
-func (c *antigravityCode) UnmarshalJSON(data []byte) error {
-	var i int
-	if err := json.Unmarshal(data, &i); err == nil {
-		c.intValue = &i
-		return nil
-	}
-	var s string
-	if err := json.Unmarshal(data, &s); err == nil {
-		c.stringValue = &s
-		return nil
-	}
-	empty := ""
-	c.stringValue = &empty
-	return nil
-}
-
-func (c antigravityCode) isOK() bool {
-	if c.intValue != nil {
-		return *c.intValue == 0
-	}
-	if c.stringValue != nil {
-		lower := strings.ToLower(*c.stringValue)
-		return lower == "ok" || lower == "success" || *c.stringValue == "0"
-	}
-	return false
-}
-
-type antigravityQuotaSummaryEnvelope struct {
-	Code     antigravityCode                 `json:"code"`
-	Message  *string                         `json:"message"`
-	Response *antigravityQuotaSummaryPayload `json:"response"`
-	Summary  *antigravityQuotaSummaryPayload `json:"summary"`
-	Groups   []antigravityQuotaGroup         `json:"groups"`
-}
-
-type antigravityQuotaSummaryPayload struct {
-	Description *string                 `json:"description"`
-	Groups      []antigravityQuotaGroup `json:"groups"`
-}
-
-type antigravityQuotaGroup struct {
-	DisplayName string                   `json:"displayName"`
-	Description *string                  `json:"description"`
-	Buckets     []antigravityQuotaBucket `json:"buckets"`
-}
-
-type antigravityQuotaBucket struct {
-	BucketID          string   `json:"bucketId"`
-	DisplayName       *string  `json:"displayName"`
-	RemainingFraction *float64 `json:"remainingFraction"`
-	ResetTime         *string  `json:"resetTime"`
-	Description       *string  `json:"description"`
-	Disabled          *bool    `json:"disabled"`
-}
-
-func (b antigravityQuotaBucket) displayLabel() string {
-	if b.DisplayName == nil {
-		return ""
-	}
-	return *b.DisplayName
-}
-
-type antigravityUserStatusResponse struct {
-	Code       antigravityCode        `json:"code"`
-	Message    *string                `json:"message"`
-	UserStatus *antigravityUserStatus `json:"userStatus"`
-}
-
-type antigravityUserStatus struct {
-	Email                  *string                     `json:"email"`
-	CascadeModelConfigData *antigravityModelConfigData `json:"cascadeModelConfigData"`
-}
-
-type antigravityModelConfigData struct {
-	ClientModelConfigs []antigravityModelConfig `json:"clientModelConfigs"`
-}
-
-type antigravityModelConfigResponse struct {
-	Code               antigravityCode          `json:"code"`
-	Message            *string                  `json:"message"`
-	ClientModelConfigs []antigravityModelConfig `json:"clientModelConfigs"`
-}
-
-type antigravityModelConfig struct {
-	Label        *string               `json:"label"`
-	ModelOrAlias antigravityModelAlias `json:"modelOrAlias"`
-	QuotaInfo    *antigravityQuotaInfo `json:"quotaInfo"`
-}
-
-func (c antigravityModelConfig) displayLabel() string {
-	if c.Label == nil {
-		return ""
-	}
-	return *c.Label
-}
-
-type antigravityModelAlias struct {
-	Model string `json:"model"`
-}
-
-type antigravityQuotaInfo struct {
-	RemainingFraction *float64 `json:"remainingFraction"`
-	ResetTime         *string  `json:"resetTime"`
+	return data, nil
 }

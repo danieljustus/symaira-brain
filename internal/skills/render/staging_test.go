@@ -208,3 +208,46 @@ func TestCachedStagingRenderReusesUnchangedBundle(t *testing.T) {
 		t.Fatalf("cached render directory was rewritten: first=%v second=%v", info.ModTime(), secondInfo.ModTime())
 	}
 }
+
+func TestCachedStagingRenderRebuildsPoisonedCacheSidecarAndTree(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "SKILL.md"), "---\nname: cached-poison\ndescription: Cached render test.\n---\n\nBody.\n")
+	writeFile(t, filepath.Join(root, "references", "guide.md"), "trusted\n")
+	bundle, err := skill.LoadBundle(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cacheRoot := t.TempDir()
+	first, cleanup, err := CachedStagingRender(bundle, []Target{TargetOpenCode}, cacheRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cleanup()
+	if len(first) != 1 {
+		t.Fatalf("first render count: got %d", len(first))
+	}
+	cachePath := first[0].Path
+	writeFile(t, filepath.Join(cachePath, "references", "guide.md"), "poisoned\n")
+	writeFile(t, filepath.Join(cachePath, "extra.txt"), "unexpected\n")
+	matches := filepath.Join(cacheRoot, "status-render", "*.json")
+	meta, err := filepath.Glob(matches)
+	if err != nil || len(meta) != 1 {
+		t.Fatalf("cache sidecar discovery: matches=%v err=%v", meta, err)
+	}
+	writeFile(t, meta[0], "{\"fingerprint\":\"poisoned\",\"target\":\"opencode\",\"name\":\"wrong\"}\n")
+
+	second, cleanup, err := CachedStagingRender(bundle, []Target{TargetOpenCode}, cacheRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cleanup()
+	if len(second) != 1 {
+		t.Fatalf("rebuilt render count: got %d", len(second))
+	}
+	if got := readFile(t, filepath.Join(cachePath, "references", "guide.md")); got != "trusted\n" {
+		t.Fatalf("poisoned cache tree was reused: %q", got)
+	}
+	if _, err := os.Stat(filepath.Join(cachePath, "extra.txt")); !os.IsNotExist(err) {
+		t.Fatalf("poisoned cache extra file survived: %v", err)
+	}
+}

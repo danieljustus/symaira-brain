@@ -26,15 +26,21 @@ func TestEvaluate(t *testing.T) {
 		{"medium with warnings confirms", request{Command: "fetch", RiskClass: "medium", Warnings: []string{"redirect"}}, confirm, "medium risk class with warnings: redirect"},
 		{"high no warnings confirms", request{Command: "shell", RiskClass: "high"}, confirm, "high risk class requires confirmation"},
 		{"high with warnings denies", request{Command: "shell", RiskClass: "high", Warnings: []string{"sudo"}}, deny, "high risk class with warnings: sudo"},
-		{"critical loopback no warnings allows", request{Command: "curl localhost", RiskClass: "critical", Domain: "localhost"}, allow, `allowlisted domain "localhost"`},
 		{"critical ipv4 loopback allows", request{Command: "curl", RiskClass: "critical", Domain: "127.0.0.1"}, allow, "allowlisted domain"},
+		{"critical ipv4 loopback range allows", request{Command: "curl", RiskClass: "critical", Domain: "127.0.0.2"}, allow, "allowlisted domain"},
+		{"critical ipv6 loopback allows", request{Command: "curl", RiskClass: "critical", Domain: "::1"}, allow, "allowlisted domain"},
+		{"critical hostname denies", request{Command: "curl", RiskClass: "critical", Domain: "localhost"}, deny, "critical risk class: requires allowlisted domain"},
+		{"critical wildcard denies", request{Command: "curl", RiskClass: "critical", Domain: "0.0.0.0"}, deny, "critical risk class: requires allowlisted domain"},
+		{"critical ipv6 wildcard denies", request{Command: "curl", RiskClass: "critical", Domain: "::"}, deny, "critical risk class: requires allowlisted domain"},
+		{"critical private ipv4 denies", request{Command: "curl", RiskClass: "critical", Domain: "10.0.0.1"}, deny, "critical risk class: requires allowlisted domain"},
+		{"critical private ipv6 denies", request{Command: "curl", RiskClass: "critical", Domain: "fc00::1"}, deny, "critical risk class: requires allowlisted domain"},
 		{"critical remote domain denies", request{Command: "curl", RiskClass: "critical", Domain: "github.com"}, deny, "critical risk class: requires allowlisted domain"},
-		{"critical with warnings denies even loopback", request{Command: "curl", RiskClass: "critical", Domain: "localhost", Warnings: []string{"tls"}}, deny, "critical risk class: requires allowlisted domain"},
+		{"critical with warnings denies even loopback", request{Command: "curl", RiskClass: "critical", Domain: "127.0.0.1", Warnings: []string{"tls"}}, deny, "critical risk class: requires allowlisted domain"},
 		{"critical empty domain denies", request{Command: "curl", RiskClass: "critical"}, deny, "critical risk class: requires allowlisted domain"},
 		{"unknown risk class denies", request{Command: "x", RiskClass: "bogus"}, deny, `unknown risk class "bogus"`},
 		{"empty risk class denies", request{Command: "x"}, deny, `unknown risk class ""`},
 		{"risk class is case-insensitive", request{Command: "shell", RiskClass: "HIGH"}, confirm, "high risk class requires confirmation"},
-		{"domain is case-insensitive", request{Command: "curl", RiskClass: "critical", Domain: "LOCALHOST"}, allow, "allowlisted domain"},
+		{"literal loopback is accepted", request{Command: "curl", RiskClass: "critical", Domain: "127.0.0.1"}, allow, "allowlisted domain"},
 		{"whitespace-only warnings dropped", request{Command: "open", RiskClass: "low", Warnings: []string{"", "  "}}, allow, "low risk class, no warnings"},
 		{"mixed warnings keep order", request{Command: "fetch", RiskClass: "medium", Warnings: []string{" a ", "", "b"}}, confirm, "medium risk class with warnings: a; b"},
 		{"trailing space in risk class tolerated", request{Command: "x", RiskClass: "high "}, confirm, "high risk class requires confirmation"},
@@ -61,7 +67,7 @@ func TestDecideRequest(t *testing.T) {
 		wantRegex string
 	}{
 		{"valid request allows", `{"command":"open","risk_class":"low","domain":"x.com"}`, allow, "low risk class"},
-		{"valid critical request", `{"command":"curl","risk_class":"critical","domain":"localhost"}`, allow, "allowlisted domain"},
+		{"valid critical request", `{"command":"curl","risk_class":"critical","domain":"127.0.0.1"}`, allow, "allowlisted domain"},
 		{"unknown fields ignored", `{"command":"open","risk_class":"low","extra":42}`, allow, "low risk class"},
 		{"malformed json denies", `{"command":`, deny, "decide: parse request"},
 		{"empty input denies", ``, deny, "decide: empty request"},
@@ -85,6 +91,17 @@ func TestDecideRequest(t *testing.T) {
 			}
 			_ = req
 		})
+	}
+}
+
+func TestDecideRequestRejectsOversizedInput(t *testing.T) {
+	input := strings.Repeat("x", maxRequestBytes+1)
+	_, got, reason := decideRequest(strings.NewReader(input), time.Now())
+	if got != deny {
+		t.Fatalf("decideRequest() decision = %q, want deny", got)
+	}
+	if !strings.Contains(reason, "maximum size") {
+		t.Fatalf("decideRequest() reason = %q, want maximum size", reason)
 	}
 }
 

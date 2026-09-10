@@ -11,6 +11,10 @@
 //	           "domain": "...", "warnings": ["..."]}
 //	response: {"decision": "allow|confirm|deny", "reason": "..."}
 //
+// The request body is capped at 64 KiB before JSON decoding. Oversized input
+// is a fail-closed deny, so a caller cannot make the one-shot helper buffer an
+// unbounded stdin stream.
+//
 // decision is one of allow (proceed), confirm (ask the human), or deny
 // (block); reason is a deterministic, human-readable justification that
 // is always present. The optional request field "deadline" (RFC 3339)
@@ -49,11 +53,11 @@
 //	critical      otherwise     otherwise         deny
 //	anything else (empty, unknown risk class)      deny
 //
-// "loopback" is an exact, case-insensitive match against localhost,
-// 127.0.0.1, ::1, or 0.0.0.0. Warnings are trimmed; empty warnings are
-// dropped before evaluation. A missing command denies. A Phase 3
-// enhancement may route the risk class through the config rule catalog
-// (internal/policy) when one is configured; the built-in table above
+// "loopback" accepts only IP addresses parsed by
+// netip.ParseAddr().IsLoopback(); hostnames and wildcard addresses are never accepted.
+// Warnings are trimmed; empty warnings are dropped before evaluation. A
+// missing command denies. A Phase 3 enhancement may route the risk class
+// through the config rule catalog (internal/policy) when one is configured; the built-in table above
 // remains the no-config default.
 //
 // # Audit record
@@ -73,6 +77,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -105,15 +110,19 @@ const (
 	allow   outcome = "allow"
 	confirm outcome = "confirm"
 	deny    outcome = "deny"
+
+	// maxRequestBytes bounds the JSON request before decoding, keeping the
+	// one-shot decision helper safe when its stdin is an untrusted pipe.
+	maxRequestBytes = 64 * 1024
 )
 
-// loopbackDomains is the allowlist for the critical risk class.
-// Exact, case-insensitive match; an empty domain is never allowlisted.
-var loopbackDomains = map[string]bool{
-	"localhost": true,
-	"127.0.0.1": true,
-	"::1":       true,
-	"0.0.0.0":   true,
+// isLoopbackDomain accepts only literal IP loopback addresses. Hostnames are
+// deliberately not resolved here: DNS resolution would turn a textual policy
+// check into a network-dependent trust decision, and wildcard bind addresses
+// must never pass as loopback.
+func isLoopbackDomain(domain string) bool {
+	addr, err := netip.ParseAddr(domain)
+	return err == nil && addr.IsLoopback()
 }
 
 // Sink receives the audit record for each produced decision.
@@ -152,9 +161,13 @@ func Run(args []string, in io.Reader, out io.Writer, sink Sink) int {
 // failure path returns the fail-closed deny outcome produced by
 // model.NewNoDecision; the returned reason is the diagnostic.
 func decideRequest(in io.Reader, now time.Time) (request, outcome, string) {
-	data, err := io.ReadAll(in)
+	data, err := io.ReadAll(io.LimitReader(in, maxRequestBytes+1))
 	if err != nil {
 		nd := model.NewNoDecision(model.FailureModeDeny, fmt.Sprintf("decide: read request: %v", err))
+		return request{}, deny, nd.Diagnostic
+	}
+	if len(data) > maxRequestBytes {
+		nd := model.NewNoDecision(model.FailureModeDeny, fmt.Sprintf("decide: request exceeds maximum size of %d bytes", maxRequestBytes))
 		return request{}, deny, nd.Diagnostic
 	}
 	if len(bytes.TrimSpace(data)) == 0 {
@@ -197,7 +210,7 @@ func evaluate(req request) (outcome, string) {
 		}
 		return deny, fmt.Sprintf("high risk class with warnings: %s", strings.Join(warnings, "; "))
 	case "critical":
-		if len(warnings) == 0 && loopbackDomains[domain] {
+		if len(warnings) == 0 && isLoopbackDomain(domain) {
 			return allow, fmt.Sprintf("critical risk class on allowlisted domain %q, no warnings", req.Domain)
 		}
 		return deny, "critical risk class: requires allowlisted domain and no warnings"
