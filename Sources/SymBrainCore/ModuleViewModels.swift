@@ -362,13 +362,12 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         clearError()
         defer { isUnlocking = false }
 
+        defer { passphrase = "" }
         do {
             try await client.unlock(passphrase: passphrase, ttl: sessionTTL)
-            passphrase = ""
             statusMessage = "Vault unlocked for \(sessionTTL)."
             await refresh()
         } catch {
-            passphrase = ""
             report(error)
         }
     }
@@ -388,14 +387,24 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
+    /// Selects an entry using the metadata-only list result. Secret fields are
+    /// not fetched until the user explicitly chooses to reveal this entry.
     public func select(path: String) async {
         selectedPath = path
         detail = nil
         revealedFields = []
         clearError()
+    }
+
+    /// Explicit human action that crosses the plaintext boundary for the
+    /// selected entry. The vault remains the storage and authorization owner.
+    public func revealSelectedEntry() async {
+        guard let selectedPath else { return }
+        clearError()
         do {
-            detail = try await client.entry(path: path)
+            detail = try await client.entry(path: selectedPath)
         } catch {
+            detail = nil
             report(error)
         }
     }
@@ -602,17 +611,68 @@ public final class SkillsViewModel: ObservableObject, ModuleViewModelProtocol {
 
 // MARK: - Pasteboard
 
-/// Writes a value to the general pasteboard.
-///
-/// Concealed values are additionally marked with the `org.nspasteboard`
-/// convention so clipboard managers skip recording them — vault secrets must
-/// not end up in a clipboard history.
-func writeToPasteboard(_ value: String, concealed: Bool = false) {
+/// Small seam for testing clipboard expiry without touching the user's
+/// pasteboard. `changeCount` is the ownership token: value equality alone is
+/// unsafe because another app may replace the value with the same string.
+@MainActor
+protocol ClipboardPasteboard: AnyObject {
+    var changeCount: Int { get }
+    func clearContents()
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType)
+    func setData(_ data: Data, forType type: NSPasteboard.PasteboardType)
+}
+
+@MainActor
+private final class SystemClipboardPasteboard: ClipboardPasteboard {
     let pasteboard = NSPasteboard.general
-    pasteboard.clearContents()
-    pasteboard.setString(value, forType: .string)
-    if concealed {
-        pasteboard.setData(Data(), forType: .init("org.nspasteboard.ConcealedType"))
+    var changeCount: Int { pasteboard.changeCount }
+    func clearContents() { pasteboard.clearContents() }
+    func setString(_ string: String, forType type: NSPasteboard.PasteboardType) {
+        pasteboard.setString(string, forType: type)
     }
+    func setData(_ data: Data, forType type: NSPasteboard.PasteboardType) {
+        pasteboard.setData(data, forType: type)
+    }
+}
+
+@MainActor
+final class ClipboardLifetimeController {
+    private let pasteboard: ClipboardPasteboard
+    private var expiryTask: Task<Void, Never>?
+
+    init(pasteboard: ClipboardPasteboard) {
+        self.pasteboard = pasteboard
+    }
+
+    deinit { expiryTask?.cancel() }
+
+    func write(_ value: String, concealed: Bool, lifetime: Duration = .seconds(30)) {
+        expiryTask?.cancel()
+        pasteboard.clearContents()
+        pasteboard.setString(value, forType: .string)
+        if concealed {
+            pasteboard.setData(Data(), forType: .init("org.nspasteboard.ConcealedType"))
+        }
+        let expectedChangeCount = pasteboard.changeCount
+        let pasteboard = self.pasteboard
+        // Deliberately capture only the pasteboard and ownership token. The
+        // plaintext value is never retained by the sleeping task.
+        expiryTask = Task { @MainActor [pasteboard, expectedChangeCount] in
+            do { try await Task.sleep(for: lifetime) } catch { return }
+            guard !Task.isCancelled, pasteboard.changeCount == expectedChangeCount else { return }
+            pasteboard.clearContents()
+        }
+    }
+}
+
+@MainActor private let systemClipboardLifetime = ClipboardLifetimeController(
+    pasteboard: SystemClipboardPasteboard()
+)
+
+/// Writes a value and bounds its clipboard lifetime. The expiry clears only
+/// contents still owned by this write.
+@MainActor
+func writeToPasteboard(_ value: String, concealed: Bool = false) {
+    systemClipboardLifetime.write(value, concealed: concealed)
 }
 #endif

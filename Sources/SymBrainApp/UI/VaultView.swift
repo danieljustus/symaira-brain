@@ -312,8 +312,22 @@ struct VaultView: View {
             }
             .frame(minWidth: 340)
         } else if vm.selectedPath != nil {
-            SymairaLoadingState("Loading entry…")
-                .frame(minWidth: 340)
+            VStack(spacing: SymairaSpacing.medium) {
+                SymairaNotice(
+                    title: "Entry metadata loaded",
+                    message: "Secret values are not fetched until you explicitly reveal this entry.",
+                    tone: .informative
+                )
+                Button {
+                    Task { await vm.revealSelectedEntry() }
+                } label: {
+                    Label("Reveal Entry Values", systemImage: "eye")
+                }
+                .symairaButtonStyle(.secondary)
+                .accessibilityLabel("Reveal Entry Values")
+            }
+            .padding(SymairaSpacing.large)
+            .frame(minWidth: 340)
         } else {
             SymairaEmptyState(
                 systemImage: "sidebar.right",

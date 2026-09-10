@@ -225,3 +225,69 @@ struct AuditEntryIdentityTests {
         #expect(entry.id.contains("memory_search"))
     }
 }
+
+
+#if os(macOS)
+import AppKit
+
+@MainActor
+private final class FakeClipboardPasteboard: ClipboardPasteboard {
+    var changeCount = 0
+    var value: String?
+    var clearCount = 0
+
+    func clearContents() {
+        clearCount += 1
+        value = nil
+        changeCount += 1
+    }
+
+    func setString(_ string: String, forType: NSPasteboard.PasteboardType) {
+        value = string
+        changeCount += 1
+    }
+
+    func setData(_ data: Data, forType: NSPasteboard.PasteboardType) {
+        changeCount += 1
+    }
+}
+
+@MainActor
+struct ClipboardLifetimeTests {
+    @Test func clearsOwnedClipboardAfterLifetime() async throws {
+        let fake = FakeClipboardPasteboard()
+        let controller = ClipboardLifetimeController(pasteboard: fake)
+
+        controller.write("test-secret", concealed: true, lifetime: .milliseconds(10))
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(fake.value == nil)
+        #expect(fake.clearCount == 2)
+    }
+
+    @Test func doesNotClearReplacementWithSameValue() async throws {
+        let fake = FakeClipboardPasteboard()
+        let controller = ClipboardLifetimeController(pasteboard: fake)
+
+        controller.write("same", concealed: true, lifetime: .milliseconds(20))
+        // Simulate another owner replacing it with the same text.
+        fake.setString("same", forType: .string)
+        try await Task.sleep(for: .milliseconds(60))
+
+        #expect(fake.value == "same")
+        #expect(fake.clearCount == 1)
+    }
+
+    @Test func cancellationOfExpiryDoesNotClearNewCopy() async throws {
+        let fake = FakeClipboardPasteboard()
+        let controller = ClipboardLifetimeController(pasteboard: fake)
+
+        controller.write("first", concealed: true, lifetime: .milliseconds(20))
+        controller.write("second", concealed: true, lifetime: .milliseconds(80))
+        try await Task.sleep(for: .milliseconds(40))
+
+        #expect(fake.value == "second")
+        #expect(fake.clearCount == 2)
+    }
+}
+#endif
