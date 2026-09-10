@@ -204,6 +204,7 @@ jobs:
   # scheduled/full-main and manually dispatched suites.
   scope-native-swiftpm:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    timeout-minutes: 15
     runs-on: macos-26
     permissions:
       contents: read
@@ -282,32 +283,9 @@ jobs:
         run: |
           set -euo pipefail
           bin="$(swift build --scratch-path "$RUNNER_TEMP/scope-package-build" --show-bin-path)/symscope"
-          python3 - "$bin" <<'PY'
-          import json
-          import subprocess
-          import sys
-
-          def run_request(request):
-              completed = subprocess.run(
-                  [sys.argv[1], "serve"],
-                  input=json.dumps(request, separators=(',', ':')).encode() + b"\\n",
-                  capture_output=True,
-                  check=True,
-              )
-              assert not completed.stderr, completed.stderr.decode()
-              responses = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
-              assert responses, completed.stdout
-              return responses[-1]
-
-          initialize = run_request({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}})
-          tools_response = run_request({"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}})
-          assert initialize["result"]["serverInfo"]["name"] == "symscope"
-          assert initialize["result"]["serverInfo"]["version"]
-          tools = tools_response["result"]["tools"]
-          names = [tool["name"] for tool in tools]
-          assert names == ["scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list"], names
-          print("MCP initialize OK; tools/list OK: " + ", ".join(names))
-          PY
+          test -x "$bin"
+          python3 ../scripts/scope-mcp-smoke.py "$bin" --timeout 10
+          python3 ../scripts/scope-mcp-smoke.py --self-test
 
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only

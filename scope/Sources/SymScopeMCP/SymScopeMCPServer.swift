@@ -80,7 +80,7 @@ public final class SymScopeMCPServer: @unchecked Sendable {
     private static func initializeResult() -> [String: Any] {
         [
             "protocolVersion": SymairaMCP.MCPServer.supportedProtocolVersion,
-            "capabilities": ["tools": [:]],
+            "capabilities": ["tools": ["listChanged": false]],
             "serverInfo": ["name": "symscope", "version": Version.version],
         ]
     }

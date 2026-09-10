@@ -24,7 +24,7 @@ final class SymScopeMCPTests: XCTestCase {
         )
         let capabilities = result["capabilities"] as? [String: Any]
         XCTAssertNotNil(capabilities)
-        XCTAssertNotNil(capabilities?["tools"] as? [String: Any])
+        XCTAssertEqual((capabilities?["tools"] as? [String: Any])?["listChanged"] as? Bool, false)
     }
 
     func testPing() async throws {
