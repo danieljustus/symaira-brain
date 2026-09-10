@@ -369,7 +369,7 @@ fn optional_module_enabled(alias: &str) -> bool {
         SERVER_SCOPE => "scope",
         _ => return false,
     };
-    if let Some(value) = std::env::var_os(&format!("SYMBRAIN_MODULES_{}", key.to_uppercase())) {
+    if let Some(value) = std::env::var_os(format!("SYMBRAIN_MODULES_{}", key.to_uppercase())) {
         return matches!(
             value.to_string_lossy().as_ref(),
             "1" | "t" | "T" | "TRUE" | "True" | "true"
