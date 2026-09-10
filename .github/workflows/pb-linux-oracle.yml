@@ -1,6 +1,7 @@
 name: PB Linux oracle artifact
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
