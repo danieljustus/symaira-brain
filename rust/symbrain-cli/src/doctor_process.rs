@@ -150,14 +150,12 @@ mod tests {
     fn retained_descendant_pipes_cannot_extend_timeout() {
         let dir = tempfile::tempdir().expect("tempdir");
         let pid_file = dir.path().join("descendant.pid");
-        let script = format!(
-            "sleep 30 & printf '%s' \\\"$!\\\" > '{}' ; exit 0\\n",
-            pid_file.display()
-        );
+        let script = "sleep 30 & printf '%s' \"$!\" > \"$1\"; exit 0";
+        let pid_path = pid_file.to_str().expect("UTF-8 pid path");
         let started = Instant::now();
         let error = run_process(
             Path::new("/bin/sh"),
-            &["-c", &script],
+            &["-c", script, "probe", pid_path],
             Duration::from_millis(25),
         )
         .expect_err("retained pipe timeout");
@@ -171,9 +169,10 @@ mod tests {
             elapsed < Duration::from_secs(2),
             "cleanup exceeded bound: {elapsed:?}"
         );
-        let pid = fs::read_to_string(&pid_file).expect("descendant launched");
+        let raw_pid = fs::read_to_string(&pid_file).expect("descendant launched");
+        let pid = parse_positive_pid(&raw_pid).expect("descendant pid must be positive integer");
         let status = Command::new("/bin/kill")
-            .args(["-0", pid.trim()])
+            .args(["-0", &pid.to_string()])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status()
@@ -182,5 +181,44 @@ mod tests {
             !status.success(),
             "descendant retained after timeout cleanup"
         );
+    }
+
+    #[test]
+    fn rejects_malformed_pid_before_kill_check() {
+        assert!(parse_positive_pid(r#"  "83995" "#).is_err());
+        assert!(parse_positive_pid("0").is_err());
+        assert_eq!(parse_positive_pid(" 83995\n"), Ok(83995));
+    }
+
+    #[test]
+    fn pid_checker_detects_live_child_before_dead() {
+        let mut child = Command::new("/bin/sleep")
+            .arg("30")
+            .spawn()
+            .expect("spawn lifecycle child");
+        let pid = child.id();
+        assert!(process_alive(pid), "checker missed live child");
+        child.kill().expect("kill lifecycle child");
+        child.wait().expect("reap lifecycle child");
+        assert!(!process_alive(pid), "checker reported dead child alive");
+    }
+
+    fn parse_positive_pid(raw: &str) -> Result<u32, String> {
+        let pid = raw
+            .trim()
+            .parse::<u32>()
+            .map_err(|error| format!("invalid pid: {error}"))?;
+        (pid > 0)
+            .then_some(pid)
+            .ok_or_else(|| "pid must be positive".to_string())
+    }
+
+    fn process_alive(pid: u32) -> bool {
+        Command::new("/bin/kill")
+            .args(["-0", &pid.to_string()])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .is_ok_and(|status| status.success())
     }
 }
