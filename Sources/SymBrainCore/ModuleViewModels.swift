@@ -491,24 +491,37 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         revealedFields.contains(field)
     }
 
-    /// Copies a field value. Sensitive fields are marked concealed so
-    /// clipboard managers do not archive the secret.
-    public func copyToPasteboard(
+    private func copyToPasteboard(
         _ value: String,
         label: String,
         intent: VaultCopyIntent = .ordinary
     ) {
-        if case .revealedSensitive = intent {
-            clipboardWriter(value, true)
-        } else {
-            clipboardWriter(value, false)
-        }
+        clipboardWriter(value, intent == .revealedSensitive)
         statusMessage = "\(label) copied to clipboard."
     }
 
-    public func copyField(_ field: String, value: String, revealed: Bool) {
+    public func copyInstallCommand() {
+        copyToPasteboard(homebrewCommand, label: "Install command")
+    }
+
+    public func copyTOTP() {
+        guard availability == .ready,
+              let selectedPath,
+              let detail,
+              detail.path == selectedPath,
+              let totp = detail.totp else { return }
+        copyToPasteboard(totp.code, label: "TOTP code", intent: .revealedSensitive)
+    }
+
+    public func copyField(_ field: String) {
+        guard availability == .ready,
+              let selectedPath,
+              let detail,
+              detail.path == selectedPath,
+              let value = detail.fields[field]?.displayString,
+              !value.isEmpty else { return }
         let sensitive = VaultFieldSecurity.isSensitive(field)
-        guard !sensitive || revealed else { return }
+        guard !sensitive || revealedFields.contains(field) else { return }
         copyToPasteboard(value, label: field, intent: sensitive ? .revealedSensitive : .ordinary)
     }
 

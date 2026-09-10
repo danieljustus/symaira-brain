@@ -134,7 +134,7 @@ struct VaultView: View {
                         .foregroundStyle(SymairaTheme.goldPrimary)
                         .textSelection(.enabled)
                     Button {
-                        vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
+                        vm.copyInstallCommand()
                     } label: {
                         Image(systemName: "doc.on.doc")
                     }
@@ -297,7 +297,7 @@ struct VaultView: View {
                                     .foregroundStyle(SymairaTheme.textMuted)
                             }
                             Button("Copy") {
-                                vm.copyToPasteboard(totp.code, label: "TOTP code", intent: .revealedSensitive)
+                                vm.copyTOTP()
                             }
                             .symairaButtonStyle(.secondary)
                         }
@@ -398,7 +398,7 @@ struct VaultView: View {
             }
 
             Button {
-                vm.copyField(field.key, value: field.value, revealed: revealed)
+                vm.copyField(field.key)
             } label: {
                 Image(systemName: "doc.on.doc")
             }

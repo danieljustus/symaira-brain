@@ -247,21 +247,44 @@ extension ModuleViewModelSkeletonTests {
         #expect(vm.revealedFields.isEmpty)
     }
 
-    @Test func copyFieldRequiresRevealAndMarksSecretIntent() async {
-        let detail = VaultEntryDetail(path: "work/test", modified: nil, fields: [:])
+    @Test func copyAPIGuardsMaskedStaleAndMissingDetails() async {
+        let detail = VaultEntryDetail(
+            path: "work/test",
+            modified: nil,
+            fields: ["password": .string("secret"), "username": .string("daniel")],
+            totp: VaultTOTP(code: "123456", period: 30, remaining: 20)
+        )
         var copies: [(value: String, concealed: Bool)] = []
         let vm = VaultViewModel(
             client: StubVaultClient(result: detail),
             clipboardWriter: { value, concealed in copies.append((value, concealed)) }
         )
+        vm.availability = .ready
 
-        vm.copyField("password", value: "secret", revealed: false)
+        await vm.select(path: detail.path)
+        vm.copyField("password")
+        vm.copyTOTP()
         #expect(copies.isEmpty)
-        vm.copyField("password", value: "secret", revealed: true)
-        vm.copyField("username", value: "daniel", revealed: false)
 
-        #expect(copies.map(\.concealed) == [true, false])
-        #expect(copies.map(\.value) == ["secret", "daniel"])
+        await vm.revealSelectedEntry()
+        vm.copyField("password")
+        vm.copyTOTP()
+        #expect(copies.isEmpty)
+
+        vm.toggleReveal(field: "password")
+        vm.copyField("password")
+        vm.copyField("username")
+        vm.copyTOTP()
+        #expect(copies.map(\.concealed) == [true, false, true])
+        #expect(copies.map(\.value) == ["secret", "daniel", "123456"])
+
+        await vm.select(path: "work/other")
+        vm.copyField("password")
+        vm.copyTOTP()
+        #expect(copies.count == 3)
+
+        vm.copyInstallCommand()
+        #expect(copies.last?.concealed == false)
     }
 }
 #endif
