@@ -152,6 +152,12 @@ private struct StubVaultClient: VaultClientProtocol {
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
     }
+    func set(path: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
+        VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
+    }
 }
 
 @MainActor
@@ -174,6 +180,12 @@ private final class ControlledVaultClient: VaultClientProtocol {
 
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func set(path: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
+        VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
     }
 
     func resolve(path: String, detail: VaultEntryDetail) {
@@ -305,5 +317,24 @@ extension ModuleViewModelSkeletonTests {
         vm.copyInstallCommand()
         #expect(copies.last?.concealed == false)
     }
+    @Test func setEntryClearsPlaintextAndPublishesConfirmation() async {
+        let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "work/edit", modified: nil, fields: ["password": .string("hidden")])))
+        vm.availability = .ready
+        vm.selectedPath = "work/edit"
+        vm.editValue = "secret-never-retained"
+        await vm.setSelectedEntry()
+        #expect(vm.editValue.isEmpty)
+        #expect(vm.editConfirmation?.confirmedPath == "work/edit")
+    }
+
+    @Test func deleteEntryClearsSelectionAfterConfirmedAbsence() async {
+        let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "work/delete", modified: nil, fields: [:])))
+        vm.availability = .ready
+        vm.selectedPath = "work/delete"
+        await vm.deleteEntry(path: "work/delete")
+        #expect(vm.selectedPath == nil)
+        #expect(vm.deleteConfirmation?.confirmedAbsent == true)
+    }
+
 }
 #endif

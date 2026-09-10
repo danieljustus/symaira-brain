@@ -180,6 +180,26 @@ public struct VaultClient: Sendable {
         )
     }
 
+    /// Update an entry using symvault's stdin-only value flag, then re-read metadata.
+    public func set(path: String, value: String, profile: String? = nil) async throws -> VaultSetConfirmation {
+        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        _ = try await runner.runChecked(
+            try executable(), arguments: arguments(profile: profile, command: ["set", path, "--stdin-value"]),
+            stdin: Data((value + "\n").utf8), timeout: 60
+        )
+        let confirmed = try await entry(path: path, profile: profile)
+        return VaultSetConfirmation(submittedPath: path, confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
+            confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
+    }
+
+    /// Delete an entry with symvault's explicit non-interactive confirmation flag, then verify absence.
+    public func delete(path: String, profile: String? = nil) async throws -> VaultDeleteConfirmation {
+        _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["delete", path, "--yes"]), timeout: 60)
+        let reread = try await runner.runAllowingFailure(try executable(), arguments: arguments(profile: profile, command: ["get", path, "--output", "json"]), timeout: 30)
+        guard reread.exitCode != 0 else { throw CLIRunnerError.invalidJSON(description: "deleted entry is still present") }
+        return VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
+    }
+
     /// Run `symvault get <path> --output json`.
     ///
     /// The result contains the entry's secrets — keep it out of logs and off

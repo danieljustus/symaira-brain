@@ -11,6 +11,7 @@ import SymBrainCore
 struct VaultView: View {
     @StateObject private var vm = VaultViewModel()
     @State private var tab: Tab = .entries
+    @State private var deletePath: String?
 
     enum Tab: String, CaseIterable, Identifiable {
         case entries = "Entries"
@@ -59,6 +60,12 @@ struct VaultView: View {
         .padding(SymairaSpacing.xLarge)
         .task {
             await vm.refresh()
+        }
+        .confirmationDialog("Delete credential?", isPresented: Binding(get: { deletePath != nil }, set: { if !$0 { deletePath = nil } }), presenting: deletePath) { path in
+            Button("Delete \(path)", role: .destructive) { Task { await vm.deleteEntry(path: path); deletePath = nil } }
+            Button("Cancel", role: .cancel) { deletePath = nil }
+        } message: { path in
+            Text("This permanently removes the credential from the vault service.")
         }
     }
 
@@ -222,6 +229,25 @@ struct VaultView: View {
                     Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
                         .font(.caption)
                         .foregroundStyle(SymairaTheme.textSecondary)
+                }
+                if let path = vm.selectedPath {
+                    HStack(spacing: SymairaSpacing.medium) {
+                        SecureField("New secret value", text: $vm.editValue)
+                            .textFieldStyle(.roundedBorder)
+                        Button(action: { Task { await vm.setSelectedEntry() } }) {
+                            Label("Update Selected", systemImage: "pencil")
+                        }
+                        .symairaButtonStyle(.secondary)
+                        .disabled(vm.isEditing || vm.editValue.isEmpty)
+                        Button(role: .destructive) { deletePath = path } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .disabled(vm.isDeleting)
+                    }
+                    if let confirmation = vm.editConfirmation {
+                        Text("Updated: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
+                            .font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    }
                 }
             }
 

@@ -380,6 +380,22 @@ public struct VaultCreateConfirmation: Sendable, Equatable {
     }
 }
 
+/// Sanitized result of a human-initiated set operation.
+public typealias VaultSetConfirmation = VaultCreateConfirmation
+
+/// Sanitized result of a human-initiated delete operation.
+public struct VaultDeleteConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let confirmedPath: String
+    public let confirmedAbsent: Bool
+
+    public init(submittedPath: String, confirmedPath: String, confirmedAbsent: Bool) {
+        self.submittedPath = submittedPath
+        self.confirmedPath = confirmedPath
+        self.confirmedAbsent = confirmedAbsent
+    }
+}
+
 /// Explicit intent required when copying vault values.
 public enum VaultCopyIntent: Sendable, Equatable {
     case ordinary
