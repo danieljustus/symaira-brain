@@ -149,6 +149,9 @@ private struct StubVaultClient: VaultClientProtocol {
     func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail { result }
+    func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
+        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
 }
 
 @MainActor
@@ -167,6 +170,10 @@ private final class ControlledVaultClient: VaultClientProtocol {
         await withCheckedContinuation { continuation in
             pending.append((path, continuation))
         }
+    }
+
+    func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
+        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
     }
 
     func resolve(path: String, detail: VaultEntryDetail) {
@@ -192,6 +199,17 @@ private actor ManualSleeper {
 
 @MainActor
 extension ModuleViewModelSkeletonTests {
+    @Test func createEntryClearsValueAndPublishesSanitizedConfirmation() async {
+        let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "x", modified: nil, fields: [:])))
+        vm.availability = .ready
+        vm.createPath = "work/new"
+        vm.createValue = "do-not-retain"
+        await vm.createEntry()
+        #expect(vm.createValue.isEmpty)
+        #expect(vm.createConfirmation?.submittedPath == "work/new")
+        #expect(vm.createConfirmation?.confirmedHasValue == true)
+    }
+
     @Test func staleRevealAfterSelectionCannotPublishPlaintext() async {
         let client = ControlledVaultClient()
         let first = VaultEntryDetail(path: "work/first", modified: nil, fields: ["password": .string("first-secret")])

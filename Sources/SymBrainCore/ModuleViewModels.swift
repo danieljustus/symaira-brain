@@ -282,6 +282,7 @@ public protocol VaultClientProtocol: Sendable {
     func list(profile: String?) async throws -> [VaultEntrySummary]
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail
+    func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation
 }
 
 extension VaultClient: VaultClientProtocol {}
@@ -302,6 +303,10 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var searchText = ""
     @Published public var passphrase = ""
     @Published public var sessionTTL = "15m"
+    @Published public var createPath = ""
+    @Published public var createValue = ""
+    @Published public var createConfirmation: VaultCreateConfirmation?
+    @Published public var isCreating = false
 
     @Published public var isLoading = false
     @Published public var isUnlocking = false
@@ -361,6 +366,26 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
             entries = []
             detail = nil
             selectedPath = nil
+        }
+    }
+
+    public func createEntry() async {
+        let path = createPath.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !path.isEmpty, !createValue.isEmpty else {
+            errorMessage = "Enter an entry path and secret value."
+            return
+        }
+        isCreating = true
+        clearError()
+        defer { isCreating = false; createValue = "" }
+        do {
+            let confirmation = try await client.create(path: path, value: createValue, profile: nil)
+            createConfirmation = confirmation
+            createPath = ""
+            statusMessage = "Secret created and confirmed by the vault service."
+            await loadEntries()
+        } catch {
+            report(error)
         }
     }
 

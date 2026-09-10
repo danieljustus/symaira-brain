@@ -203,6 +203,28 @@ struct VaultView: View {
 
     private var entriesSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                Text("Create secret")
+                    .font(.headline)
+                HStack(spacing: SymairaSpacing.medium) {
+                    TextField("Entry path", text: $vm.createPath)
+                        .textFieldStyle(.roundedBorder)
+                    SecureField("Secret value", text: $vm.createValue)
+                        .textFieldStyle(.roundedBorder)
+                    Button(action: { Task { await vm.createEntry() } }) {
+                        Label("Create", systemImage: "plus")
+                    }
+                    .symairaButtonStyle(.primary)
+                    .accessibilityLabel("Create secret")
+                    .disabled(vm.isCreating || vm.createPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.createValue.isEmpty)
+                }
+                if let confirmation = vm.createConfirmation {
+                    Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
+                        .font(.caption)
+                        .foregroundStyle(SymairaTheme.textSecondary)
+                }
+            }
+
             HStack(spacing: SymairaSpacing.medium) {
                 TextField("Search entries…", text: $vm.searchText)
                     .textFieldStyle(.roundedBorder)

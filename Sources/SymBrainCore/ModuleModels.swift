@@ -363,6 +363,23 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     }
 }
 
+/// Sanitized result of a human-initiated create operation.
+/// Submitted and service-confirmed metadata remain distinguishable; no secret
+/// value is retained or returned.
+public struct VaultCreateConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let confirmedPath: String
+    public let confirmedFieldCount: Int
+    public let confirmedHasValue: Bool
+
+    public init(submittedPath: String, confirmedPath: String, confirmedFieldCount: Int, confirmedHasValue: Bool) {
+        self.submittedPath = submittedPath
+        self.confirmedPath = confirmedPath
+        self.confirmedFieldCount = confirmedFieldCount
+        self.confirmedHasValue = confirmedHasValue
+    }
+}
+
 /// Explicit intent required when copying vault values.
 public enum VaultCopyIntent: Sendable, Equatable {
     case ordinary
