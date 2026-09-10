@@ -97,6 +97,8 @@ jobs:
 
   # Keep the incremental Rust entrypoint green while Go remains the oracle.
   rust-migration:
+    # Migration parity is advisory; retain it on main, weekly, and manual suites.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -133,6 +135,8 @@ jobs:
   # Windows remains explicitly tracked in the contract matrix until the
   # portable Go-oracle launcher and native runner coverage are available.
   rust-migration-macos:
+    # macOS migration parity is advisory and stays off the PR critical path.
+    if: github.event_name != 'pull_request'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
