@@ -18,7 +18,7 @@ use symbrain_audit::{Config as AuditConfig, Logger};
 use symbrain_broker::{Config as BrokerConfig, ManagedServer};
 use symbrain_core::exit;
 use symbrain_gateway::{Gateway, GatewayBackend};
-use symbrain_policy::{Profile, VAULT_MODE_OFF, load, load_file};
+use symbrain_policy::{Profile, SERVER_OPERATE, SERVER_SCOPE, VAULT_MODE_OFF, load, load_file};
 use toml_edit::{DocumentMut, Item, Value};
 
 const VAULT_BINARY: &str = "symvault";
@@ -311,6 +311,27 @@ fn build_backends(
         if !config.enabled {
             continue;
         }
+        // Optional Cockpit modules are independently gated by global config
+        // and profile opt-in. They are never treated as foreign commands,
+        // and their public stdio entrypoints are the unified dispatcher
+        // subcommands verified in symaira-cockpit's source.
+        if alias == SERVER_OPERATE || alias == SERVER_SCOPE {
+            if !optional_module_enabled(&alias) {
+                continue;
+            }
+            let args = if alias == SERVER_OPERATE {
+                vec!["operate".to_string(), "serve".to_string()]
+            } else {
+                vec!["scope".to_string(), "serve".to_string()]
+            };
+            match symbrain_broker::discover("symcockpit", "") {
+                Ok(path) => insert_managed(&alias, path, args, managed, backends),
+                Err(error) => {
+                    let _ = writeln!(stderr, "symbrain mcp: {alias}: {error}");
+                }
+            }
+            continue;
+        }
         if !config.url.is_empty() && config.command.is_empty() {
             let _ = writeln!(
                 stderr,
@@ -340,6 +361,32 @@ fn build_backends(
             }
         }
     }
+}
+
+fn optional_module_enabled(alias: &str) -> bool {
+    let key = match alias {
+        SERVER_OPERATE => "operate",
+        SERVER_SCOPE => "scope",
+        _ => return false,
+    };
+    if let Some(value) = std::env::var_os(format!("SYMBRAIN_MODULES_{}", key.to_uppercase())) {
+        return matches!(
+            value.to_string_lossy().as_ref(),
+            "1" | "t" | "T" | "TRUE" | "True" | "true"
+        );
+    }
+    let path = symbrain_core::xdg::config_path();
+    let Ok(contents) = std::fs::read_to_string(path) else {
+        return false;
+    };
+    let Ok(document) = contents.parse::<DocumentMut>() else {
+        return false;
+    };
+    document
+        .get("modules")
+        .and_then(|item| item.get(key))
+        .and_then(Item::as_bool)
+        .unwrap_or(false)
 }
 
 fn insert_managed(

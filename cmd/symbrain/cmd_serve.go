@@ -108,6 +108,12 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 	defs := []serverDef{
 		{"vault", "symvault", cfg.Servers.Vault.BinaryPath, vaultArgs},
 	}
+	if cfg.Modules.Operate && p.Server(profile.ServerOperate).Enabled {
+		defs = append(defs, serverDef{profile.ServerOperate, "symcockpit", "", []string{"operate", "serve"}})
+	}
+	if cfg.Modules.Scope && p.Server(profile.ServerScope).Enabled {
+		defs = append(defs, serverDef{profile.ServerScope, "symcockpit", "", []string{"scope", "serve"}})
+	}
 
 	for _, d := range defs {
 		serverCfg := p.Server(d.alias)
