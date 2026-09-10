@@ -158,12 +158,73 @@ func sensitiveName(name string) bool {
 		!safeSensitiveIdentifier[name] && !strings.HasPrefix(name, "VaultMode")
 }
 
-func sensitiveDiagnostic(format string) bool {
+func diagnosticKind(format string) string {
 	format = strings.ToLower(format)
-	return strings.Contains(format, "token budget") ||
-		strings.Contains(format, "peer credentials") ||
-		strings.Contains(format, "never pass it on the command line") ||
-		strings.Contains(format, "relay-passphrase")
+	switch {
+	case strings.Contains(format, "token budget"):
+		return "token budget"
+	case strings.Contains(format, "peer credentials"):
+		return "peer credentials"
+	case strings.Contains(format, "never pass it on the command line"):
+		return "safe command-line diagnostic"
+	case strings.Contains(format, "relay-passphrase"):
+		return "relay-passphrase diagnostic"
+	default:
+		return ""
+	}
+}
+
+// formatVerbs returns formatting verbs that consume arguments. %% is a literal
+// percent and does not consume an argument. Unknown or malformed directives
+// are retained so sensitive diagnostics fail closed.
+func formatVerbs(format string) []byte {
+	var verbs []byte
+	for i := 0; i < len(format); i++ {
+		if format[i] != '%' {
+			continue
+		}
+		i++
+		if i == len(format) {
+			verbs = append(verbs, 0)
+			break
+		}
+		if format[i] == '%' {
+			continue
+		}
+		for i < len(format) && strings.ContainsRune("[+- #0]0123456789.*", rune(format[i])) {
+			i++
+		}
+		if i == len(format) {
+			verbs = append(verbs, 0)
+			break
+		}
+		verbs = append(verbs, format[i])
+	}
+	return verbs
+}
+
+// sensitiveDiagnostic permits only narrow, semantically safe diagnostic
+// arguments: error wrapping, or a declared environment-variable name constant.
+// Direct sensitive identifiers, literals, and generic values are never exempted.
+func sensitiveDiagnostic(format string, args []ast.Expr) bool {
+	if diagnosticKind(format) == "" {
+		return false
+	}
+	verbs := formatVerbs(strings.ToLower(format))
+	if len(verbs) != len(args) {
+		return len(verbs) != 0 || len(args) != 0
+	}
+	for i, verb := range verbs {
+		ident, ok := args[i].(*ast.Ident)
+		if !ok {
+			return true
+		}
+		if verb == 'w' && !sensitiveName(ident.Name) && (ident.Name == "err" || ident.Name == "error" || strings.HasSuffix(strings.ToLower(ident.Name), "err")) {
+			continue
+		}
+		return true
+	}
+	return false
 }
 
 func literalString(expr ast.Expr) (string, bool) {
@@ -208,8 +269,11 @@ func vaultPayloadCall(call *ast.CallExpr) bool {
 	if formatIndex >= 0 {
 		var ok bool
 		format, ok = literalString(args[formatIndex])
-		if !ok || !strings.Contains(format, "%") || sensitiveDiagnostic(format) {
+		if !ok || !strings.Contains(format, "%") {
 			return false
+		}
+		if sensitiveDiagnostic(format, args[formatIndex+1:]) {
+			return true
 		}
 	}
 	for i, arg := range args {
@@ -238,7 +302,7 @@ func vaultPayloadCall(call *ast.CallExpr) bool {
 			return true
 		}
 	}
-	if formatIndex >= 0 && sensitiveFormatLabel.MatchString(strings.Trim(format, "\"`")) {
+	if formatIndex >= 0 && diagnosticKind(format) == "" && sensitiveFormatLabel.MatchString(strings.Trim(format, "\"`")) {
 		return true
 	}
 	return false
@@ -258,7 +322,14 @@ func TestVaultPayloadCallCases(t *testing.T) {
 		{"interpolated generic variable", `package p; import "fmt"; func f(value string) { fmt.Printf("password: %s", value) }`, 1, false},
 		{"interpolated literal", `package p; import "fmt"; func f() { fmt.Printf("secret: %s", "hunter2") }`, 1, false},
 		{"token budget diagnostic", `package p; import "fmt"; func f(err error) { fmt.Errorf("token budget exceeded: %w", err) }`, 0, false},
+		{"token budget sensitive identifier bypass", `package p; import "fmt"; func f(secret string) { fmt.Errorf("token budget exceeded: %s", secret) }`, 1, false},
+		{"token budget sensitive literal", `package p; import "fmt"; func f() { fmt.Errorf("token budget exceeded: %s", "secret") }`, 1, false},
+		{"token budget generic payload", `package p; import "fmt"; func f(value string) { fmt.Errorf("token budget exceeded: %s", value) }`, 1, false},
 		{"peer credentials diagnostic", `package p; import "fmt"; func f() { fmt.Errorf("peer credentials require a Unix connection") }`, 0, false},
+		{"peer credentials wrapped error", `package p; import "fmt"; func f(err error) { fmt.Errorf("peer credentials: %w", err) }`, 0, false},
+		{"peer credentials sensitive identifier bypass", `package p; import "fmt"; func f(password string) { fmt.Fprintf(w, "peer credentials: %s", password) }`, 1, false},
+		{"peer credentials sensitive literal", `package p; import "fmt"; func f() { fmt.Errorf("peer credentials: %s", "secret") }`, 1, false},
+		{"peer credentials generic payload", `package p; import "fmt"; func f(value string) { fmt.Errorf("peer credentials: %s", value) }`, 1, false},
 		{"multiline", `package p
 import "fmt"
 func f(
