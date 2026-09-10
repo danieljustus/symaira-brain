@@ -286,22 +286,26 @@ jobs:
           import json
           import subprocess
           import sys
+          import time
 
           proc = subprocess.Popen([sys.argv[1], "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
           assert proc.stdin and proc.stdout and proc.stderr
-          initialize_request = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}}
-          proc.stdin.write(json.dumps(initialize_request, separators=(',', ':')).encode() + b"\\n")
+          requests = [
+              {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}},
+              {"jsonrpc": "2.0", "method": "notifications/initialized"},
+              {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+          ]
+          proc.stdin.write(b"\\n".join(json.dumps(request, separators=(',', ':')).encode() for request in requests) + b"\\n")
           proc.stdin.flush()
-          initialize = json.loads(proc.stdout.readline())
-          proc.stdin.write(b'{"jsonrpc":"2.0","method":"notifications/initialized"}\\n')
-          proc.stdin.write(b'{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}\\n')
-          proc.stdin.flush()
-          tools_response = json.loads(proc.stdout.readline())
+          time.sleep(1)
           proc.stdin.close()
-          proc.wait(timeout=15)
+          proc.wait(timeout=30)
           assert proc.returncode == 0, proc.returncode
           stderr = proc.stderr.read()
           assert not stderr, stderr.decode()
+          responses = [json.loads(line) for line in proc.stdout.read().splitlines() if line.strip()]
+          initialize = next(item for item in responses if item.get("id") == 1)
+          tools_response = next(item for item in responses if item.get("id") == 2)
           assert initialize["result"]["serverInfo"]["name"] == "symscope"
           assert initialize["result"]["serverInfo"]["version"]
           tools = tools_response["result"]["tools"]
