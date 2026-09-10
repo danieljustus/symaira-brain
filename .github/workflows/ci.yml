@@ -119,8 +119,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/*.rs') }}
           restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-
             ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
 
 
@@ -166,8 +167,9 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/*.rs') }}
           restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-
             ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
 
 
@@ -223,9 +225,9 @@ jobs:
   # from the GUI job: it builds and tests both packages and exercises the
   # checked-in executable over its real MCP stdio transport. It runs for real
   # Scope/history changes on PRs and main pushes, and unconditionally on the
-  # scheduled/full-main and manually dispatched suites. It is advisory, so
-  # keep macOS acceptance off the required pull-request critical path.
+  # scheduled/full-main and manually dispatched suites.
   scope-native-swiftpm:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -320,6 +322,7 @@ jobs:
   # source/API-surface errors without executing anything) and exercises the
   # MCP transport with initialize/tools-list only, never tools/call.
   operate-native-swiftpm:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -399,6 +402,7 @@ jobs:
   # driving a real browser — version output and initialize/tools-list only,
   # never tools/call.
   browse-native:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
