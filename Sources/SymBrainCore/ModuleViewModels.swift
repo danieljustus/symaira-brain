@@ -321,13 +321,13 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     public init(
         client: any VaultClientProtocol = VaultClient(),
         sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) },
-        clipboardWriter: @escaping @MainActor (String, Bool) -> Void = { value, concealed in
-            writeToPasteboard(value, concealed: concealed)
-        }
+        clipboardWriter: (@MainActor (String, Bool) -> Void)? = nil
     ) {
         self.client = client
         self.sleep = sleep
-        self.clipboardWriter = clipboardWriter
+        self.clipboardWriter = clipboardWriter ?? { value, concealed in
+            writeToPasteboard(value, concealed: concealed)
+        }
     }
 
     public var isInstalled: Bool { client.isInstalled }
