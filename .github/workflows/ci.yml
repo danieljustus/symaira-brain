@@ -11,6 +11,9 @@ on:
     paths-ignore:
       - 'LICENSE'
       - '.github/ISSUE_TEMPLATE/**'
+  schedule:
+    - cron: '30 5 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -194,7 +197,114 @@ jobs:
           repo-checkout: false
           go-package: ./...
 
-  # PR-time gate for the Swift GUI targets (Sources/, Tests/): the Go-only
+  # Native package acceptance for the optional Scope intake. This is separate
+  # from the GUI job: it builds and tests both packages and exercises the
+  # checked-in executable over its real MCP stdio transport. It runs for real
+  # Scope/history changes on PRs and main pushes, and unconditionally on the
+  # scheduled/full-main and manually dispatched suites.
+  scope-native-swiftpm:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect Scope package changes
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = schedule ] || [ "$EVENT_NAME" = workflow_dispatch ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ -z "${BASE_SHA:-}" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -Eq '^(scope/|history/)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve installed Xcode and Swift toolchain
+        if: steps.scope.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift --version
+
+      - name: Build history package
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: history
+        run: swift build --scratch-path "$RUNNER_TEMP/scope-history-build"
+
+      - name: Test history package
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: history
+        run: swift test --scratch-path "$RUNNER_TEMP/scope-history-build"
+
+      - name: Build Scope package and executable
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: scope
+        run: swift build --scratch-path "$RUNNER_TEMP/scope-package-build"
+
+      - name: Test Scope package
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: scope
+        run: swift test --scratch-path "$RUNNER_TEMP/scope-package-build"
+
+      - name: Verify CLI version output and stderr hygiene
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: scope
+        run: |
+          set -euo pipefail
+          bin="$RUNNER_TEMP/scope-package-build/debug/symscope"
+          test -x "$bin"
+          "$bin" version --json >"$RUNNER_TEMP/symscope-version.json" 2>"$RUNNER_TEMP/symscope-version.stderr"
+          test ! -s "$RUNNER_TEMP/symscope-version.stderr"
+          python3 - "$RUNNER_TEMP/symscope-version.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+          value = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert value["tool"] == "symscope"
+          assert value["version"]
+          assert value["schema_version"] == 1
+          PY
+
+      - name: Verify native MCP initialize and seven-tool catalog
+        if: steps.scope.outputs.changed == 'true'
+        working-directory: scope
+        run: |
+          set -euo pipefail
+          bin="$RUNNER_TEMP/scope-package-build/debug/symscope"
+          python3 - "$bin" <<'PY'
+          import json
+          import subprocess
+          import sys
+
+          requests = [
+              {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "ci", "version": "1"}}},
+              {"jsonrpc": "2.0", "method": "notifications/initialized"},
+              {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}},
+          ]
+          payload = b"\\n".join(json.dumps(request, separators=(',', ':')).encode() for request in requests) + b"\\n"
+          completed = subprocess.run([sys.argv[1], "serve"], input=payload, capture_output=True, check=True)
+          assert not completed.stderr, completed.stderr.decode()
+          responses = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
+          initialize = next(item for item in responses if item.get("id") == 1)
+          assert initialize["result"]["serverInfo"]["name"] == "symscope"
+          assert initialize["result"]["serverInfo"]["version"]
+          tools = next(item for item in responses if item.get("id") == 2)["result"]["tools"]
+          names = [tool["name"] for tool in tools]
+          assert names == ["scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list"], names
+          print("MCP initialize OK; tools/list OK: " + ", ".join(names))
+          PY
+
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only
   # at release time (precedent: v0.5.1 GUI release-asset failure, #212,
