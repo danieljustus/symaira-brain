@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import selectors
 import signal
 import subprocess
 import sys
@@ -13,6 +14,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from typing import BinaryIO, cast
 
 PROTOCOL_VERSION = "2025-06-18"
 EXPECTED_TOOLS = [
@@ -24,14 +26,80 @@ EXPECTED_TOOLS = [
     "mcp_health",
     "daemons_list",
 ]
+OUTPUT_LIMIT = 1 << 20
+CLEANUP_TIMEOUT = 1.0
+READ_CHUNK = 64 * 1024
 
 
 class SmokeError(AssertionError):
     pass
 
 
+def _kill_group(process: subprocess.Popen[bytes]) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+
+def _close_selector(selector: selectors.BaseSelector) -> None:
+    for key in list(selector.get_map().values()):
+        pipe = cast(BinaryIO, key.fileobj)
+        try:
+            selector.unregister(pipe)
+        except (KeyError, ValueError):
+            pass
+        try:
+            pipe.close()
+        except OSError:
+            pass
+    selector.close()
+
+
+def _bounded_cleanup(
+    process: subprocess.Popen[bytes],
+    selector: selectors.BaseSelector,
+    deadline: float,
+    buffers: dict[str, bytearray],
+) -> None:
+    """Drain only until deadline, then close inherited pipes and reap child."""
+    while time.monotonic() < deadline:
+        remaining = deadline - time.monotonic()
+        if process.poll() is not None and not selector.get_map():
+            break
+        for key, _ in selector.select(max(0.0, min(remaining, 0.05))):
+            pipe = cast(BinaryIO, key.fileobj)
+            stream = key.data
+            try:
+                chunk = pipe.read(READ_CHUNK)
+            except (BlockingIOError, OSError):
+                continue
+            if not chunk:
+                try:
+                    selector.unregister(pipe)
+                except (KeyError, ValueError):
+                    pass
+                pipe.close()
+                continue
+            buffers[stream].extend(chunk[: max(0, OUTPUT_LIMIT - len(buffers[stream]))])
+    _close_selector(selector)
+    # Popen.wait() can block on a direct child, so reap with non-blocking polls
+    # after the pipe deadline instead of joining a potentially leaked reader.
+    while process.poll() is None and time.monotonic() < deadline:
+        time.sleep(0.001)
+    if process.poll() is None:
+        try:
+            process.kill()
+        except ProcessLookupError:
+            pass
+        while process.poll() is None and time.monotonic() < deadline + 0.05:
+            time.sleep(0.001)
+
+
 def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
-    """Run a stdio child, killing its whole process group on deadline."""
+    """Run a stdio child with bounded nonblocking capture and hard deadlines."""
+    if timeout <= 0:
+        raise ValueError("timeout must be positive")
     process = subprocess.Popen(
         argv,
         stdin=subprocess.PIPE,
@@ -39,19 +107,58 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
         stderr=subprocess.PIPE,
         start_new_session=True,
     )
+    assert process.stdin is not None
+    assert process.stdout is not None
+    assert process.stderr is not None
+    selector = selectors.DefaultSelector()
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    for stream, pipe in (("stdout", process.stdout), ("stderr", process.stderr)):
+        os.set_blocking(pipe.fileno(), False)
+        selector.register(pipe, selectors.EVENT_READ, stream)
     try:
-        stdout, stderr = process.communicate(payload, timeout=timeout)
-    except subprocess.TimeoutExpired as exc:
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        # communicate() both drains pipes and reaps the direct child after the
-        # group kill; never leave an inherited pipe or zombie behind.
-        process.communicate()
-        raise SmokeError(f"MCP subprocess exceeded {timeout:.1f}s timeout") from exc
-    if process.returncode != 0:
-        raise SmokeError(f"MCP subprocess exited {process.returncode}")
+        process.stdin.write(payload)
+        process.stdin.close()
+        execution_deadline = time.monotonic() + timeout
+        failure: str | None = None
+        while selector.get_map() or process.poll() is None:
+            remaining = execution_deadline - time.monotonic()
+            if remaining <= 0:
+                failure = f"MCP subprocess exceeded {timeout:.1f}s timeout"
+                break
+            for key, _ in selector.select(remaining):
+                pipe = cast(BinaryIO, key.fileobj)
+                stream = key.data
+                try:
+                    chunk = pipe.read(READ_CHUNK)
+                except (BlockingIOError, OSError):
+                    continue
+                if not chunk:
+                    selector.unregister(pipe)
+                    pipe.close()
+                    continue
+                buffers[stream].extend(chunk)
+                if len(buffers[stream]) > OUTPUT_LIMIT:
+                    failure = f"MCP subprocess {stream} exceeded {OUTPUT_LIMIT} byte output limit"
+                    break
+            if failure:
+                break
+        if failure:
+            _kill_group(process)
+            _bounded_cleanup(process, selector, time.monotonic() + CLEANUP_TIMEOUT, buffers)
+            raise SmokeError(failure)
+        returncode = process.wait()
+        _close_selector(selector)
+    except (BrokenPipeError, OSError) as exc:
+        _kill_group(process)
+        _bounded_cleanup(process, selector, time.monotonic() + CLEANUP_TIMEOUT, buffers)
+        raise SmokeError(f"MCP subprocess I/O failed: {exc}") from exc
+    finally:
+        if selector.get_map():
+            _close_selector(selector)
+    if returncode != 0:
+        raise SmokeError(f"MCP subprocess exited {returncode}")
+    stderr = bytes(buffers["stderr"])
+    stdout = bytes(buffers["stdout"])
     if stderr:
         raise SmokeError(f"MCP subprocess wrote stderr: {stderr.decode(errors='replace')}")
     responses = []
@@ -127,20 +234,42 @@ class SmokeValidatorTests(unittest.TestCase):
             with self.assertRaises(SmokeError):
                 run_bounded([sys.executable, str(tool)], b"x\n", 1.0)
 
-    def test_timeout_kills_group_and_reaps_child(self) -> None:
+    def test_rejects_output_overflow(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            marker = Path(directory) / "descendant-alive"
-            tool = Path(directory) / "hang.py"
+            tool = Path(directory) / "flood.py"
+            tool.write_text("import sys; sys.stdout.write('x' * (2**20 + 1)); sys.stdout.flush()\n")
+            started = time.monotonic()
+            with self.assertRaisesRegex(SmokeError, "output limit"):
+                run_bounded([sys.executable, str(tool)], b"", 5.0)
+            self.assertLess(time.monotonic() - started, 2.0)
+
+    def test_timeout_escapes_group_and_cleans_owned_descendant(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / "descendant.pid"
+            tool = Path(directory) / "escape.py"
             tool.write_text(
-                "import pathlib, subprocess, sys, time\n"
-                "marker = pathlib.Path(sys.argv[1])\n"
-                "subprocess.Popen([sys.executable, '-c', 'import pathlib,time; time.sleep(3); pathlib.Path(\"' + str(marker) + '\").write_text(\"alive\")'])\n"
+                "import os, pathlib, sys, time\n"
+                "pid_file = pathlib.Path(sys.argv[1])\n"
+                "if os.fork() == 0:\n"
+                "    os.setsid()\n"
+                "    pid_file.write_text(str(os.getpid()))\n"
+                "    while True: os.write(1, b'x' * 65536)\n"
                 "while True: time.sleep(1)\n"
             )
-            with self.assertRaises(SmokeError):
-                run_bounded([sys.executable, str(tool), str(marker)], b"", 0.1)
-            time.sleep(0.2)
-            self.assertFalse(marker.exists())
+            started = time.monotonic()
+            try:
+                with self.assertRaisesRegex(SmokeError, "timeout|output limit"):
+                    run_bounded([sys.executable, str(tool), str(pid_file)], b"", 0.2)
+                self.assertLess(time.monotonic() - started, 2.0)
+            finally:
+                if pid_file.exists():
+                    pid = int(pid_file.read_text())
+                    self.assertGreater(pid, 0)
+                    self.assertNotEqual(pid, os.getpid())
+                    try:
+                        os.kill(pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
 
 
 def main() -> int:

@@ -1,8 +1,18 @@
 # Scope target-stage source provenance
 
 This directory is the Brain receiving copy for PB-2026-09-09 package 3a.
-It is intentionally kept byte-for-byte compatible with the current Cockpit
-source until a separately approved and verified cutover.
+It preserves Cockpit source behavior and tracked-file inventory, with exactly
+these two intentional, reviewed deviations from the source commit:
+
+1. `scope/Sources/SymScopeMCP/SymScopeMCPServer.swift` explicitly advertises
+   `capabilities.tools.listChanged` as `false` in the MCP initialize response.
+2. `scope/Tests/SymScopeMCPTests/SymScopeMCPTests.swift` tests that explicit
+   MCP capability metadata and the receiving copy's seven-tool contract.
+
+These two files are not byte-identical to Cockpit; all other imported tracked
+files are expected to match the source commit. The source commit and imported
+file counts below are the comparison/hash provenance convention for this
+intake.
 
 - **Source repository:** `symaira-cockpit`
 - **Source commit:** `c22a4366a051274ae1651b431ffaf06ae23aa37d`
