@@ -262,7 +262,7 @@ jobs:
         working-directory: scope
         run: |
           set -euo pipefail
-          bin="$RUNNER_TEMP/scope-package-build/debug/symscope"
+          bin="$(swift build --scratch-path "$RUNNER_TEMP/scope-package-build" --show-bin-path)/symscope"
           test -x "$bin"
           "$bin" version --json >"$RUNNER_TEMP/symscope-version.json" 2>"$RUNNER_TEMP/symscope-version.stderr"
           test ! -s "$RUNNER_TEMP/symscope-version.stderr"
@@ -281,7 +281,7 @@ jobs:
         working-directory: scope
         run: |
           set -euo pipefail
-          bin="$RUNNER_TEMP/scope-package-build/debug/symscope"
+          bin="$(swift build --scratch-path "$RUNNER_TEMP/scope-package-build" --show-bin-path)/symscope"
           python3 - "$bin" <<'PY'
           import json
           import subprocess
