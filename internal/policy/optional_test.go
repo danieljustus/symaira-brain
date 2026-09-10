@@ -47,3 +47,17 @@ func equalStrings(got, want []string) bool {
 	}
 	return true
 }
+
+func TestOptionalModulesEnabledWithoutAllowlistDefaultDeny(t *testing.T) {
+	for _, alias := range []string{profile.ServerOperate, profile.ServerScope} {
+		t.Run(alias, func(t *testing.T) {
+			report, err := Evaluate(alias, profile.ServerConfig{Enabled: true}, []string{"version", "scan"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(report.Exposed) != 0 {
+				t.Fatalf("Exposed = %v, want default deny", report.Exposed)
+			}
+		})
+	}
+}

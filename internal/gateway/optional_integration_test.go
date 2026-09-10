@@ -13,8 +13,12 @@ import (
 
 func TestServeIO_OptionalModulesListAndCallOnlyBoundTools(t *testing.T) {
 	p := testProfile()
-	p.Servers[profile.ServerOperate] = profile.ServerConfig{Enabled: true}
-	p.Servers[profile.ServerScope] = profile.ServerConfig{Enabled: true}
+	p.Servers[profile.ServerOperate] = profile.ServerConfig{
+		Enabled: true, ToolsAllow: []string{"version", "permissions_status"},
+	}
+	p.Servers[profile.ServerScope] = profile.ServerConfig{
+		Enabled: true, ToolsAllow: []string{"scan", "ports_list"},
+	}
 	operate := newManagedFake(t, profile.ServerOperate, `[{"name":"version"},{"name":"permissions_status"},{"name":"not_allowlisted"}]`)
 	scope := newManagedFake(t, profile.ServerScope, `[{"name":"scan"},{"name":"ports_list"},{"name":"scope_not_allowlisted"}]`)
 	s := New(p, map[string]*broker.ManagedServer{
@@ -82,6 +86,23 @@ func TestServeIO_OptionalModulesListAndCallOnlyBoundTools(t *testing.T) {
 	denied := readJSONResponse(t, cr)
 	if denied.Error == nil || denied.Error.Code != -32601 {
 		t.Fatalf("out-of-universe call error = %+v, want JSON-RPC -32601", denied.Error)
+	}
+}
+
+func TestServeIO_OptionalModulesEnabledWithoutAllowlistRemainPrivate(t *testing.T) {
+	p := testProfile()
+	p.Servers[profile.ServerOperate] = profile.ServerConfig{Enabled: true}
+	operate := newManagedFake(t, profile.ServerOperate, `[{"name":"version"}]`)
+	s := New(p, map[string]*broker.ManagedServer{profile.ServerOperate: operate}, slog.Default(), nil, "dev")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := s.buildCatalog(ctx); err != nil {
+		t.Fatalf("buildCatalog: %v", err)
+	}
+	for _, entry := range s.cat.Exposed() {
+		if entry.Server == profile.ServerOperate {
+			t.Fatalf("enabled optional module exposed tool without tools_allow: %q", entry.Name)
+		}
 	}
 }
 

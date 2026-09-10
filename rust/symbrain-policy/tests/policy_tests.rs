@@ -425,3 +425,19 @@ fn test_report_verdict_lookup() {
     assert_eq!(report.verdict("totally_new"), Verdict::Unknown);
     assert_eq!(report.verdict("never_seen"), Verdict::Unknown);
 }
+
+#[test]
+fn test_optional_modules_enabled_without_allowlist_default_deny() {
+    for alias in [SERVER_OPERATE, SERVER_SCOPE] {
+        let cfg = ServerConfig {
+            enabled: true,
+            ..ServerConfig::default()
+        };
+        let live = vec!["version".to_string(), "scan".to_string()];
+        let report = evaluate(alias, &cfg, &live).expect("optional policy");
+        assert!(
+            report.exposed.is_empty(),
+            "{alias} exposed without tools_allow"
+        );
+    }
+}

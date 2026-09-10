@@ -60,16 +60,14 @@ pub fn evaluate(
             }
         }
         SERVER_OPERATE | SERVER_SCOPE => {
+            // Optional modules are opt-in twice: enabling the module does not
+            // grant tools; each exposed tool must be explicitly allowlisted.
             let universe = universe_for(alias).unwrap_or(&[]);
-            if cfg.tools_allow.is_empty() {
-                universe.iter().map(|&s| s.to_string()).collect()
-            } else {
-                cfg.tools_allow
-                    .iter()
-                    .filter(|tool| universe.contains(&tool.as_str()))
-                    .cloned()
-                    .collect()
-            }
+            cfg.tools_allow
+                .iter()
+                .filter(|tool| universe.contains(&tool.as_str()))
+                .cloned()
+                .collect()
         }
         _ => {
             let preset =

@@ -270,13 +270,10 @@ func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Repo
 			base = toSet(usageTools)
 		}
 	case profile.ServerOperate, profile.ServerScope:
-		// Optional modules have a hard, conservative maximum universe. An
-		// explicit allowlist may narrow that universe but never widen it.
-		if len(cfg.ToolsAllow) == 0 {
-			base = toSet(optionalModuleTools[alias])
-		} else {
-			base = intersectSet(cfg.ToolsAllow, optionalModuleTools[alias])
-		}
+		// Optional modules are opt-in twice: the module must be enabled and
+		// each exposed tool must be explicitly allowlisted. The maintained
+		// universe is a hard maximum, never a default grant.
+		base = intersectSet(cfg.ToolsAllow, optionalModuleTools[alias])
 	default:
 		preset, ok := presetForMode(alias, cfg.Mode)
 		if !ok {
