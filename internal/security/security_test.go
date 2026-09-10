@@ -162,9 +162,15 @@ func TestNoVaultPayloadsInLogs(t *testing.T) {
 		// Absorbed modules (memory, skills, guard) carry their own security
 		// audit suites. Brain's repo-wide scan is scoped to its own code only
 		// (repo consolidation steps 4 & 7 — see docs/brain-merge-design.md).
+		// browse/ is a source-intake receiving copy (see
+		// browse/SOURCE_PROVENANCE.md), not consolidated Brain code: it has
+		// its own upstream security regression coverage (e.g.
+		// internal/state/security_*_test.go) and its own independent Go
+		// module, so it belongs in this exemption for the same reason.
 		if strings.Contains(path, "/internal/memory/") ||
 			strings.Contains(path, "/internal/skills/") ||
-			strings.Contains(path, "/guard/") {
+			strings.Contains(path, "/guard/") ||
+			strings.Contains(path, "/browse/") {
 			return nil
 		}
 
