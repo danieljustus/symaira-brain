@@ -1,15 +1,12 @@
 # Browse target-stage source provenance
 
+Resynced on 2026-09-10 from symaira-browse `main` at the pinned commit above.
+
 This directory is the Brain receiving copy for PB-2026-09-09's eventual
 optional Browse package. It preserves the symaira-browse source tree, with
-exactly these two intentional, reviewed deviations from the source commit:
+exactly one intentional, reviewed deviation from the source commit:
 
-1. `browse/internal/policy/policy_test.go` was reformatted with
-   `gofmt -w -s` after the copy. The file fails `gofmt -l` in the source
-   repository today (confirmed at the pinned commit below); this receiving
-   copy corrects it so the fix does not have to wait on a separate upstream
-   PR to symaira-browse.
-2. `browse/go.mod` pins `github.com/danieljustus/symaira-corekit` at
+1. `browse/go.mod` pins `github.com/danieljustus/symaira-corekit` at
    `v0.17.0`, while this repository's (symaira-brain's) root `go.mod` pins
    `v0.16.2`. `browse/go.mod` declares its own Go module
    (`module github.com/danieljustus/symaira-browse`), so this is a fact
@@ -24,12 +21,10 @@ All other imported tracked files are expected to match the source commit
 byte-for-byte.
 
 - **Source repository:** `github.com/danieljustus/symaira-browse`
-- **Source commit:** `fdadcdd7d08a76ed18ca092415281dcd45fddff2` (`fix: verify
-  Rust handover and bounded Windows daemon lifecycle (#426)`) — this was the
-  current `main` HEAD of symaira-browse at intake time. The task brief
-  anticipated pinning to this same SHA; it had not moved by the time of the
-  copy, so no adjustment was needed beyond confirming it directly with
-  `git log -1 main --format=%H` in the source repository.
+- **Source commit:** `1a383d8651e1461712a4da43cdf0683884e46a3a` (`ci: avoid
+  unsupported Windows pinned Go Unix-socket parity (#435)`) — this was the
+  current `main` HEAD of symaira-browse at resync time; verified with `git rev-parse origin/main` in the source
+  repository and by a clean-checkout `diff -rq` verification.
 - **Source path:** repository root
 - **Receiving path:** `symaira-brain/browse/`
 - **Support source:** none. Unlike Operate and Scope, which both depend on
@@ -37,7 +32,7 @@ byte-for-byte.
   `symaira-brain/history/` by the Scope intake, #551), Browse is
   self-contained — it has no equivalent shared-library dependency carried
   in this repository.
-- **Imported tracked files:** 585 under `browse/` — `cmd/` (76), `crates/`
+- **Imported tracked files:** 584 under `browse/` — `cmd/` (76), `crates/`
   (122, the full 11-member Rust workspace: `symbrowse-cli`,
   `symbrowse-compat`, `symbrowse-core`, `symbrowse-daemon`,
   `symbrowse-engine`, `symbrowse-engine-chrome`, `symbrowse-engine-safari`,
@@ -84,7 +79,7 @@ byte-for-byte.
     commit, which only emits tracked, committed content. The local
     `symbrowse` binary is gitignored and was confirmed absent from `git
     ls-files` in the source repository before the copy; it was not carried.
-- **Manifest pins:** see deviation 2 above (`symaira-corekit` `v0.17.0` in
+- **Manifest pins:** see deviation 1 above (`symaira-corekit` `v0.17.0` in
   `browse/go.mod` vs. `v0.16.2` in this repository's root `go.mod` — an
   independent-module fact, not a conflict).
 - **Upstream state not pulled in:** a separate, unmerged branch in
