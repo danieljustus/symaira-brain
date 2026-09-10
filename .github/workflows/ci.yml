@@ -287,6 +287,89 @@ jobs:
           python3 ../scripts/scope-mcp-smoke.py "$bin" --timeout 10
           python3 ../scripts/scope-mcp-smoke.py --self-test
 
+  # Native package acceptance for the optional Operate intake (PB-2026-09-09
+  # package 3, source-intake stage only — see operate/SOURCE_PROVENANCE.md).
+  # Deliberately narrower than scope-native-swiftpm: Operate's own test
+  # targets (SymOperateCoreTests, SymOperateSmokeTests) exercise real
+  # ScreenCaptureKit/Accessibility APIs even with permission-denied fallbacks
+  # written in, and the operator brief for this package requires "controlled
+  # fixture apps only; no live desktop automation as a migration smoke test."
+  # So this job only compiles the package and its test targets (catching
+  # source/API-surface errors without executing anything) and exercises the
+  # MCP transport with initialize/tools-list only, never tools/call.
+  operate-native-swiftpm:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    timeout-minutes: 15
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Detect Operate package changes
+        id: operate
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = schedule ] || [ "$EVENT_NAME" = workflow_dispatch ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ -z "${BASE_SHA:-}" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -Eq '^(operate/|history/)'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve installed Xcode and Swift toolchain
+        if: steps.operate.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          swift --version
+
+      - name: Build history package
+        if: steps.operate.outputs.changed == 'true'
+        working-directory: history
+        run: swift build --scratch-path "$RUNNER_TEMP/operate-history-build"
+
+      - name: Build Operate package, executable and test targets
+        if: steps.operate.outputs.changed == 'true'
+        working-directory: operate
+        run: swift build --build-tests --scratch-path "$RUNNER_TEMP/operate-package-build"
+
+      - name: Verify CLI version output and stderr hygiene
+        if: steps.operate.outputs.changed == 'true'
+        working-directory: operate
+        run: |
+          set -euo pipefail
+          bin="$(swift build --scratch-path "$RUNNER_TEMP/operate-package-build" --show-bin-path)/symoperate"
+          test -x "$bin"
+          "$bin" version --json >"$RUNNER_TEMP/symoperate-version.json" 2>"$RUNNER_TEMP/symoperate-version.stderr"
+          test ! -s "$RUNNER_TEMP/symoperate-version.stderr"
+          python3 - "$RUNNER_TEMP/symoperate-version.json" <<'PY'
+          import json
+          import pathlib
+          import sys
+          value = json.loads(pathlib.Path(sys.argv[1]).read_text())
+          assert value["version"]
+          PY
+
+      - name: Verify native MCP initialize and twenty-tool catalog (no tools/call)
+        if: steps.operate.outputs.changed == 'true'
+        working-directory: operate
+        run: |
+          set -euo pipefail
+          bin="$(swift build --scratch-path "$RUNNER_TEMP/operate-package-build" --show-bin-path)/symoperate"
+          test -x "$bin"
+          python3 ../scripts/operate-mcp-smoke.py "$bin" --timeout 10
+          python3 ../scripts/operate-mcp-smoke.py --self-test
+
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only
   # at release time (precedent: v0.5.1 GUI release-asset failure, #212,

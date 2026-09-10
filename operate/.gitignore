@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# Xcode / Swift
+.build/
+DerivedData/
+*.xcodeproj
+!project.yml
+xcuserdata/
+*.xcuserstate
+.swiftpm/
+Package.resolved
+
+# Build artifacts
+build/
+dist/
+*.dSYM
+*.profraw
+*.profdata
+
+# Secrets / local config
+.env
+*.local.json
+
+# Orchestration / agent scratch
+.sisyphus/
+.github/audit/
+.github/review/
+.omo/
+.playwright-mcp/
+.worktrees/
+
+# Local agent reports / session state
+.github/coverage/
+.github/prerelease/
+.omo/run-continuation/
+.omo/notepads/
+coverage.html
