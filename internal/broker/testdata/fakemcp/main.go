@@ -201,6 +201,12 @@ func handleToolsCall(w io.Writer, byName map[string]toolDef, req rpcRequest) {
 		writeError(w, *req.ID, -32601, "Unknown tool: "+params.Name)
 		return
 	}
+	if marker := os.Getenv("FAKEMCP_CALL_MARKER"); marker != "" {
+		if f, err := os.OpenFile(marker, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600); err == nil {
+			_, _ = fmt.Fprintf(f, "%s\n", params.Name)
+			_ = f.Close()
+		}
+	}
 
 	switch d.Behavior {
 	case "crash":
