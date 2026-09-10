@@ -62,7 +62,7 @@ impl Gateway {
                 .or_default()
                 .push(entry.tool.name.clone());
         }
-        let servers = ["vault", "memory", "skills"]
+        let servers = ["vault", "memory", "skills", "usage", "operate", "scope"]
             .into_iter()
             .map(|alias| {
                 let config = self.profile.server(alias);
