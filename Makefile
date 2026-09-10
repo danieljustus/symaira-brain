@@ -188,13 +188,21 @@ vet:
 ## lint: Deterministic lint gate (go vet + gofmt check, matches CI)
 lint: vet fmt-check
 
+# gofmt walks the raw filesystem and does not respect Go module boundaries
+# the way `go build ./...`/`go vet ./...` do, so a bare `gofmt .` would
+# sweep into any nested Go module (its own go.mod) that lives in this repo.
+# browse/ is one such nested module (source-intake receiving copy, see
+# browse/SOURCE_PROVENANCE.md); add further -not -path exclusions here if
+# another nested go.mod directory is introduced later.
+GOFMT_FILES := $(shell find . -name '*.go' -not -path './browse/*' -not -path './.git/*')
+
 ## fmt: Format all Go source files
 fmt:
-	gofmt -w -s .
+	gofmt -w -s $(GOFMT_FILES)
 
 ## fmt-check: Fail if gofmt would change any file
 fmt-check:
-	@test -z "$$(gofmt -l .)" || (echo "gofmt needed on:"; gofmt -l .; exit 1)
+	@test -z "$$(gofmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; gofmt -l $(GOFMT_FILES); exit 1)
 
 ## clean: Remove build artifacts and test cache
 clean:
