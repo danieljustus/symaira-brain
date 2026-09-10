@@ -35,11 +35,11 @@ func serverSummaries(p *profile.Profile) []serverSummary {
 }
 
 // sortedServerAliases returns the profile's server aliases in deterministic
-// order: the four core aliases in their canonical order (vault, memory,
-// skills, usage), then any foreign servers alphabetically.
+// order: the four state-core aliases followed by optional Brain modules
+// (operate, scope), then any foreign servers alphabetically.
 func sortedServerAliases(servers profile.Servers) []string {
 	aliases := make([]string, 0, len(servers))
-	coreOrder := []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage}
+	coreOrder := []string{profile.ServerVault, profile.ServerMemory, profile.ServerSkills, profile.ServerUsage, profile.ServerOperate, profile.ServerScope}
 	for _, alias := range coreOrder {
 		if _, ok := servers[alias]; ok {
 			aliases = append(aliases, alias)
