@@ -97,8 +97,6 @@ jobs:
 
   # Keep the incremental Rust entrypoint green while Go remains the oracle.
   rust-migration:
-    # Migration parity is advisory; retain it on main, weekly, and manual suites.
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -114,6 +112,17 @@ jobs:
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+      - name: Cache Cargo dependencies and build output
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
+
 
       - name: Install pinned Rust audit tools
         run: |
@@ -135,8 +144,6 @@ jobs:
   # Windows remains explicitly tracked in the contract matrix until the
   # portable Go-oracle launcher and native runner coverage are available.
   rust-migration-macos:
-    # macOS migration parity is advisory and stays off the PR critical path.
-    if: github.event_name != 'pull_request'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -152,6 +159,17 @@ jobs:
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+      - name: Cache Cargo dependencies and build output
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
+
 
       - name: Install pinned Rust audit tools
         run: |
@@ -208,7 +226,6 @@ jobs:
   # scheduled/full-main and manually dispatched suites. It is advisory, so
   # keep macOS acceptance off the required pull-request critical path.
   scope-native-swiftpm:
-    if: github.event_name != 'pull_request'
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -303,8 +320,6 @@ jobs:
   # source/API-surface errors without executing anything) and exercises the
   # MCP transport with initialize/tools-list only, never tools/call.
   operate-native-swiftpm:
-    # Advisory native acceptance runs on main, weekly, and manual suites.
-    if: github.event_name != 'pull_request'
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -384,8 +399,6 @@ jobs:
   # driving a real browser — version output and initialize/tools-list only,
   # never tools/call.
   browse-native:
-    # Advisory browser/protocol acceptance runs on main, weekly, and manual suites.
-    if: github.event_name != 'pull_request'
     timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
@@ -604,9 +617,6 @@ jobs:
           args: release --snapshot --clean --skip=sign
 
   coverage:
-    # build-test already supplies the required PR coverage of the code path.
-    # Generate the publication artifacts only for comprehensive suites.
-    if: github.event_name != 'pull_request'
     needs: build-test
     runs-on: ubuntu-latest
     steps:
