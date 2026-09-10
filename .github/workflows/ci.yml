@@ -201,9 +201,10 @@ jobs:
   # from the GUI job: it builds and tests both packages and exercises the
   # checked-in executable over its real MCP stdio transport. It runs for real
   # Scope/history changes on PRs and main pushes, and unconditionally on the
-  # scheduled/full-main and manually dispatched suites.
+  # scheduled/full-main and manually dispatched suites. It is advisory, so
+  # keep macOS acceptance off the required pull-request critical path.
   scope-native-swiftpm:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name != 'pull_request'
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -298,7 +299,8 @@ jobs:
   # source/API-surface errors without executing anything) and exercises the
   # MCP transport with initialize/tools-list only, never tools/call.
   operate-native-swiftpm:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # Advisory native acceptance runs on main, weekly, and manual suites.
+    if: github.event_name != 'pull_request'
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -378,7 +380,8 @@ jobs:
   # driving a real browser — version output and initialize/tools-list only,
   # never tools/call.
   browse-native:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # Advisory browser/protocol acceptance runs on main, weekly, and manual suites.
+    if: github.event_name != 'pull_request'
     timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
@@ -572,6 +575,8 @@ jobs:
   # needs the tag-triggered release workflow's ambient OIDC token, which a
   # plain push/PR run does not have.
   goreleaser-snapshot:
+    # Release packaging is advisory on PRs; main and weekly runs retain coverage.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -595,6 +600,9 @@ jobs:
           args: release --snapshot --clean --skip=sign
 
   coverage:
+    # build-test already supplies the required PR coverage of the code path.
+    # Generate the publication artifacts only for comprehensive suites.
+    if: github.event_name != 'pull_request'
     needs: build-test
     runs-on: ubuntu-latest
     steps:
