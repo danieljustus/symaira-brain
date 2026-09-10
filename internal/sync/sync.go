@@ -5,6 +5,7 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -21,14 +22,15 @@ import (
 type TargetStatus struct {
 	Name    string `json:"name"`
 	Path    string `json:"path"`
-	Status  string `json:"status"` // created, updated, unchanged, skipped
+	Status  string `json:"status"` // created, updated, unchanged, dry-run, skipped, error
 	Message string `json:"message,omitempty"`
 }
 
-// Run executes the sync operation.  It renders instruction targets for the
+// Run executes the sync operation. It renders instruction targets for the
 // specified harnesses, then renders and installs library skills in-process
-// through internal/skillsrunner (no external symskills binary).  When
-// dryRun is true no files are written.  Returns the per-target summary.
+// through internal/skillsrunner (no external symskills binary). When
+// dryRun is true no files are written. Returns every per-target summary; it
+// returns an error after collection when an instruction target failed.
 func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer) ([]TargetStatus, []skillsrunner.Result, error) {
 	if len(harnessNames) == 0 {
 		for _, h := range harness.All {
@@ -38,6 +40,7 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 
 	// Resolve instruction source.
 	source := instructions.NewSource(projectDir)
+	defer source.Close()
 	content, err := source.Content()
 	if err != nil {
 		return nil, nil, fmt.Errorf("sync: load instructions: %w", err)
@@ -76,33 +79,53 @@ func Run(projectDir string, harnessNames []string, dryRun bool, stderr io.Writer
 	// absorbed internal/skills pipeline runs here, so a released symbrain
 	// works without the archived symskills binary. Per-target failures are
 	// reported as Result entries with Status "error".
-	skillsResults, err := skillsrunner.Run(context.Background(), harnessNames, skillsrunner.DefaultOptions(), dryRun)
-	if err != nil {
-		return statuses, nil, fmt.Errorf("sync: skills: %w", err)
+	skillsResults, skillsErr := skillsrunner.Run(context.Background(), harnessNames, skillsrunner.DefaultOptions(), dryRun)
+	if skillsErr != nil {
+		if TargetsFailed(statuses) {
+			return statuses, skillsResults, errors.Join(
+				fmt.Errorf("sync: one or more instruction targets failed"),
+				fmt.Errorf("sync: skills: %w", skillsErr),
+			)
+		}
+		return statuses, skillsResults, fmt.Errorf("sync: skills: %w", skillsErr)
+	}
+	if TargetsFailed(statuses) {
+		// All target statuses, including successes and skips, are returned so
+		// callers can serialize/report the complete partial-sync result before
+		// acting on this error.
+		return statuses, skillsResults, errors.New("sync: one or more instruction targets failed")
 	}
 
 	return statuses, skillsResults, nil
 }
 
 func syncTarget(t adapter.Target, content, projectDir string, dryRun bool, stderr io.Writer) (TargetStatus, error) {
-	dir := projectDir
+	relativeTarget := t.Filename
 	if t.Dir != "" {
-		dir = filepath.Join(projectDir, t.Dir)
+		relativeTarget = filepath.Join(t.Dir, t.Filename)
 	}
-	path := filepath.Join(dir, t.Filename)
+	path := filepath.Join(projectDir, relativeTarget)
 
-	existed := fileExists(path)
-
-	var existing string
-	if existed {
-		data, err := os.ReadFile(path)
-		if err != nil {
+	file, err := instructions.OpenAtomicFile(projectDir, relativeTarget, false)
+	if err != nil && !os.IsNotExist(err) {
+		return TargetStatus{}, fmt.Errorf("open %s: %w", path, err)
+	}
+	existed := false
+	var existingBytes []byte
+	if err == nil {
+		existingBytes, err = file.ReadBounded()
+		existed = err == nil
+		if err != nil && !os.IsNotExist(err) {
+			_ = file.Close()
 			return TargetStatus{}, fmt.Errorf("read %s: %w", path, err)
 		}
-		existing = string(data)
 	}
+	if file != nil {
+		defer file.Close()
+	}
+	existing := string(existingBytes)
 
-	rendered := t.Render(content, projectDir)
+	rendered := t.Render(existing, content, projectDir)
 	if rendered == existing {
 		return TargetStatus{
 			Name:   t.Name,
@@ -120,10 +143,14 @@ func syncTarget(t adapter.Target, content, projectDir string, dryRun bool, stder
 		}, nil
 	}
 
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return TargetStatus{}, fmt.Errorf("mkdir %s: %w", dir, err)
+	if file == nil {
+		file, err = instructions.OpenAtomicFile(projectDir, relativeTarget, true)
+		if err != nil {
+			return TargetStatus{}, fmt.Errorf("open %s for write: %w", path, err)
+		}
+		defer file.Close()
 	}
-	if err := os.WriteFile(path, []byte(rendered), 0o600); err != nil {
+	if err := file.Write([]byte(rendered)); err != nil {
 		return TargetStatus{}, fmt.Errorf("write %s: %w", path, err)
 	}
 
@@ -137,11 +164,6 @@ func syncTarget(t adapter.Target, content, projectDir string, dryRun bool, stder
 		Path:   path,
 		Status: status,
 	}, nil
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
 }
 
 // FormatSummary prints a human-readable summary of the sync results.
@@ -177,6 +199,18 @@ type Summary struct {
 // renderer. It remains as a compatibility helper for package-local callers.
 func FormatSummaryJSON(w io.Writer, statuses []TargetStatus, skillsResults []skillsrunner.Result) error {
 	return output.Render(w, output.FormatJSON, Summary{Targets: statuses, Skills: skillsResults})
+}
+
+// TargetsFailed reports whether any instruction target failed to render or write.
+// The caller renders all statuses before using this result as the process exit
+// decision, so partial-sync diagnostics remain visible to scripts and users.
+func TargetsFailed(statuses []TargetStatus) bool {
+	for _, status := range statuses {
+		if status.Status == "error" {
+			return true
+		}
+	}
+	return false
 }
 
 // SkillsFailed reports whether any skill result carries a failing status.

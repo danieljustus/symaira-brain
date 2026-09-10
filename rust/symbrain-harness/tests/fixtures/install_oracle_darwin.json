@@ -1,0 +1,1092 @@
+{
+  "schema_version": 1,
+  "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
+  "generator_sha256": "5f545252e852bbf7850905648c3a6e9596a07678fe1f3962690fc71472a9ce90",
+  "go_sources": {
+    "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
+    "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
+    "internal/harness/backup.go": "f5e37b4ae3765abf62c5fcecd054962020e673059b74b92694bcebf52c186b1a",
+    "internal/harness/document.go": "4e0d0f75f1c6362057e771b2750dd738b2650c646517208af92122e8faf720ee",
+    "internal/harness/entry.go": "16e793ed021adff789958ae67869e90f5fbc73ec1124806a1558f90c4e7d6984",
+    "internal/harness/registry.go": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+    "internal/skills/install/base.go": "60aca8b91fac8bc47f6535f7348797c6ca683b72e99e0457d25bb129b5e9d91e",
+    "internal/skills/install/classify.go": "ffe58b7332aab3ba1a3bee872a02ce9ce13c7fe71222fe75eba2e70a14c51bcf",
+    "internal/skills/install/install.go": "205bcd074fb41000716b65b577c1c2efd1378cf88b18364d36dcada52596efca",
+    "internal/skills/install/pull.go": "4b3f5962d1f65fe517f03cce649632659327b81984210eb9eb7203ee312c3db0",
+    "internal/skills/install/pull_lock.go": "d94fc786cf6fdba215c81553acdcf1fdbee213626d0fd78094a02aeeea418de3",
+    "internal/skills/install/status.go": "a8c1ae600d79dc86fe8f001416886b64d21ec92aef48c464262f9066fdaabb33",
+    "internal/skills/install/sync.go": "da07597afaabd0e966fd8d8d8d44cb1900192408e34161479d65c9471ce2c197"
+  },
+  "cases": [
+    {
+      "id": "fresh_entry_bytes_and_modes",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.cursor/mcp.json (harness: cursor, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "fresh_entry_claude",
+      "args": [
+        "install",
+        "--harness",
+        "claude",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.claude.json (harness: claude, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "fresh_entry_claude_desktop",
+      "args": [
+        "install",
+        "--harness",
+        "claude-desktop",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json (harness: claude-desktop, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/Library",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/Library/Application Support",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/Library/Application Support/Claude",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/Library/Application Support/Claude/claude_desktop_config.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "fresh_entry_opencode",
+      "args": [
+        "install",
+        "--harness",
+        "opencode",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/config/opencode/config.json (harness: opencode, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/opencode",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/opencode/config.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "fresh_entry_codex",
+      "args": [
+        "install",
+        "--harness",
+        "codex",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.codex/config.toml (harness: codex, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.codex",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.codex/config.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "W21jcF9zZXJ2ZXJzXQogIFttY3Bfc2VydmVycy5zeW1icmFpbl0KICAgIGFyZ3MgPSBbIm1jcCIsICItLXByb2ZpbGUiLCAicGVyc29uYWwiXQogICAgY29tbWFuZCA9ICJzeW1icmFpbiIK"
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "fresh_entry_antigravity",
+      "args": [
+        "install",
+        "--harness",
+        "antigravity",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.gemini/config/mcp_config.json (harness: antigravity, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.gemini",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.gemini/config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.gemini/config/mcp_config.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "default_profile",
+      "args": [
+        "install",
+        "--harness",
+        "claude"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.claude.json (harness: claude, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/config.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ZGVmYXVsdF9wcm9maWxlID0gInBlcnNvbmFsIgo="
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "default_profile_env_override",
+      "args": [
+        "install",
+        "--harness",
+        "claude"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/home/.claude.json (harness: claude, profile: restricted)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/config.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ZGVmYXVsdF9wcm9maWxlID0gInBlcnNvbmFsIgo="
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJyZXN0cmljdGVkIgogICAgICBdCiAgICB9CiAgfQp9Cg=="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "malformed_global_config",
+      "args": [
+        "install",
+        "--harness",
+        "claude"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "symbrain install: config: failed to load \u003croot\u003e/config/symbrain/config.toml: global config error: failed to parse \u003croot\u003e/config/symbrain/config.toml: toml: line 1 (last key \"invalid\"): expected value but found \"unterminated\" instead\n",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config/symbrain/config.toml",
+          "type": "file",
+          "mode": 384,
+          "bytes": "aW52YWxpZCA9IFsgdW50ZXJtaW5hdGVkIHRvbWwK"
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "missing_profile_no_default",
+      "args": [
+        "install",
+        "--harness",
+        "cursor"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "symbrain install: no --profile given and no default_profile configured in ~/.config/symbrain/config.toml (pass --profile, or run `symbrain init`)\n",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "malformed_refuses_before_backup",
+      "args": [
+        "install",
+        "--harness",
+        "claude",
+        "--profile",
+        "personal"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "symbrain install: \u003croot\u003e/home/.claude.json: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\n",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.claude.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "e25vdCB2YWxpZCBqc29u"
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "superseded_basenames_keep_vault",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "backed up \u003croot\u003e/home/.cursor/mcp.json to \u003croot\u003e/home/.cursor/mcp.json.bak.\u003ctimestamp\u003e\nmigrated superseded core entries: old-memory (superseded symmemory), old-skills (superseded symskills) (roll back by restoring \u003croot\u003e/home/.cursor/mcp.json.bak.\u003ctimestamp\u003e)\ninstalled symbrain into \u003croot\u003e/home/.cursor/mcp.json (harness: cursor, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInZhdWx0IjogewogICAgICAiY29tbWFuZCI6ICJzeW12YXVsdCIKICAgIH0sCiAgICAib3RoZXIiOiB7CiAgICAgICJjb21tYW5kIjogIm90aGVyIgogICAgfSwKICAgICJzeW1icmFpbiI6IHsKICAgICAgImNvbW1hbmQiOiAic3ltYnJhaW4iLAogICAgICAiYXJncyI6IFsKICAgICAgICAibWNwIiwKICAgICAgICAiLS1wcm9maWxlIiwKICAgICAgICAicGVyc29uYWwiCiAgICAgIF0KICAgIH0KICB9Cn0K"
+        },
+        {
+          "path": "home/.cursor/mcp.json.bak.\u003ctimestamp\u003e",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im9sZC1tZW1vcnkiOnsiY29tbWFuZCI6Ii9vcHQvYmluL3N5bW1lbW9yeSJ9LCJvbGQtc2tpbGxzIjp7ImNvbW1hbmQiOiJzeW1za2lsbHMifSwidmF1bHQiOnsiY29tbWFuZCI6InN5bXZhdWx0In0sIm90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "keep_superseded",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal",
+        "--keep-superseded"
+      ],
+      "exit": 0,
+      "stdout": "backed up \u003croot\u003e/home/.cursor/mcp.json to \u003croot\u003e/home/.cursor/mcp.json.bak.\u003ctimestamp\u003e\ninstalled symbrain into \u003croot\u003e/home/.cursor/mcp.json (harness: cursor, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgIm9sZC1tZW1vcnkiOiB7CiAgICAgICJjb21tYW5kIjogIi9vcHQvYmluL3N5bW1lbW9yeSIKICAgIH0sCiAgICAib2xkLXNraWxscyI6IHsKICAgICAgImNvbW1hbmQiOiAic3ltc2tpbGxzIgogICAgfSwKICAgICJ2YXVsdCI6IHsKICAgICAgImNvbW1hbmQiOiAic3ltdmF1bHQiCiAgICB9LAogICAgIm90aGVyIjogewogICAgICAiY29tbWFuZCI6ICJvdGhlciIKICAgIH0sCiAgICAic3ltYnJhaW4iOiB7CiAgICAgICJjb21tYW5kIjogInN5bWJyYWluIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgIm1jcCIsCiAgICAgICAgIi0tcHJvZmlsZSIsCiAgICAgICAgInBlcnNvbmFsIgogICAgICBdCiAgICB9CiAgfQp9Cg=="
+        },
+        {
+          "path": "home/.cursor/mcp.json.bak.\u003ctimestamp\u003e",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im9sZC1tZW1vcnkiOnsiY29tbWFuZCI6Ii9vcHQvYmluL3N5bW1lbW9yeSJ9LCJvbGQtc2tpbGxzIjp7ImNvbW1hbmQiOiJzeW1za2lsbHMifSwidmF1bHQiOnsiY29tbWFuZCI6InN5bXZhdWx0In0sIm90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "claude_project_constraint",
+      "args": [
+        "install",
+        "--harness",
+        "claude",
+        "--profile",
+        "personal",
+        "--project",
+        "PROJECT"
+      ],
+      "exit": 0,
+      "stdout": "installed symbrain into \u003croot\u003e/project/.mcp.json (harness: claude, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project/.mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgInN5bWJyYWluIjogewogICAgICAiY29tbWFuZCI6ICJzeW1icmFpbiIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3AiLAogICAgICAgICItLXByb2ZpbGUiLAogICAgICAgICJwZXJzb25hbCIKICAgICAgXQogICAgfQogIH0KfQo="
+        }
+      ]
+    },
+    {
+      "id": "unsupported_project_constraint",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal",
+        "--project",
+        "PROJECT"
+      ],
+      "exit": 2,
+      "stdout": "",
+      "stderr": "symbrain install: harness \"cursor\" has no project-local config; omit --project\n",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "dry_run",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal",
+        "--dry-run"
+      ],
+      "exit": 0,
+      "stdout": "--- \u003croot\u003e/home/.cursor/mcp.json\n+++ \u003croot\u003e/home/.cursor/mcp.json\n@@ -1,1 +1,15 @@\n-{\"mcpServers\":{\"other\":{\"command\":\"other\"}}}\n+{\n+  \"mcpServers\": {\n+    \"other\": {\n+      \"command\": \"other\"\n+    },\n+    \"symbrain\": {\n+      \"command\": \"symbrain\",\n+      \"args\": [\n+        \"mcp\",\n+        \"--profile\",\n+        \"personal\"\n+      ]\n+    }\n+  }\n+}\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "foreign_named_symbrain_uninstall_noop",
+      "args": [
+        "uninstall",
+        "--harness",
+        "cursor"
+      ],
+      "exit": 0,
+      "stdout": "\u003croot\u003e/home/.cursor/mcp.json: symbrain is not installed, nothing to do\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7InN5bWJyYWluIjp7ImNvbW1hbmQiOiJub3Qtc3ltYnJhaW4iLCJhcmdzIjpbIngiXX19fQ=="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "missing_config_uninstall_noop",
+      "args": [
+        "uninstall",
+        "--harness",
+        "cursor"
+      ],
+      "exit": 0,
+      "stdout": "\u003croot\u003e/home/.cursor/mcp.json: no config file found, nothing to uninstall\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "absent_entry_uninstall_noop",
+      "args": [
+        "uninstall",
+        "--harness",
+        "cursor"
+      ],
+      "exit": 0,
+      "stdout": "\u003croot\u003e/home/.cursor/mcp.json: symbrain is not installed, nothing to do\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "uninstall_removes_symbrain",
+      "args": [
+        "uninstall",
+        "--harness",
+        "cursor"
+      ],
+      "exit": 0,
+      "stdout": "backed up \u003croot\u003e/home/.cursor/mcp.json to \u003croot\u003e/home/.cursor/mcp.json.bak.\u003ctimestamp\u003e\nremoved symbrain from \u003croot\u003e/home/.cursor/mcp.json (harness: cursor)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgIm90aGVyIjogewogICAgICAiY29tbWFuZCI6ICJvdGhlciIKICAgIH0KICB9Cn0K"
+        },
+        {
+          "path": "home/.cursor/mcp.json.bak.\u003ctimestamp\u003e",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9LCJzeW1icmFpbiI6eyJjb21tYW5kIjoic3ltYnJhaW4iLCJhcmdzIjpbIm1jcCIsIi0tcHJvZmlsZSIsInBlcnNvbmFsIl19fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    },
+    {
+      "id": "backup_bytes_mode_timestamp_shape",
+      "args": [
+        "install",
+        "--harness",
+        "cursor",
+        "--profile",
+        "personal"
+      ],
+      "exit": 0,
+      "stdout": "backed up \u003croot\u003e/home/.cursor/mcp.json to \u003croot\u003e/home/.cursor/mcp.json.bak.\u003ctimestamp\u003e\ninstalled symbrain into \u003croot\u003e/home/.cursor/mcp.json (harness: cursor, profile: personal)\n",
+      "stderr": "",
+      "files": [
+        {
+          "path": "cache",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "config",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "data",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor",
+          "type": "dir",
+          "mode": 448
+        },
+        {
+          "path": "home/.cursor/mcp.json",
+          "type": "file",
+          "mode": 384,
+          "bytes": "ewogICJtY3BTZXJ2ZXJzIjogewogICAgIm90aGVyIjogewogICAgICAiY29tbWFuZCI6ICJvdGhlciIKICAgIH0sCiAgICAic3ltYnJhaW4iOiB7CiAgICAgICJjb21tYW5kIjogInN5bWJyYWluIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgIm1jcCIsCiAgICAgICAgIi0tcHJvZmlsZSIsCiAgICAgICAgInBlcnNvbmFsIgogICAgICBdCiAgICB9CiAgfQp9Cg=="
+        },
+        {
+          "path": "home/.cursor/mcp.json.bak.\u003ctimestamp\u003e",
+          "type": "file",
+          "mode": 384,
+          "bytes": "cmVzZXJ2ZWQgcm9sbGJhY2s="
+        },
+        {
+          "path": "home/.cursor/mcp.json.bak.\u003ctimestamp\u003e",
+          "type": "file",
+          "mode": 416,
+          "bytes": "eyJtY3BTZXJ2ZXJzIjp7Im90aGVyIjp7ImNvbW1hbmQiOiJvdGhlciJ9fX0="
+        },
+        {
+          "path": "project",
+          "type": "dir",
+          "mode": 448
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+[package]
+name = "symbrain-cli"
+description = "Rust migration entrypoint for Symaira Brain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "symbrain"
+path = "src/main.rs"
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rusqlite.workspace = true
+signal-hook.workspace = true
+symbrain-audit.workspace = true
+symbrain-broker.workspace = true
+symbrain-core.workspace = true
+symbrain-gateway.workspace = true
+symbrain-harness.workspace = true
+symbrain-managed.workspace = true
+symbrain-mcp.workspace = true
+symbrain-policy.workspace = true
+symbrain-usage.workspace = true
+toml_edit.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

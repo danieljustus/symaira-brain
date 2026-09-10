@@ -1,0 +1,26 @@
+[package]
+name = "symbrain-activity"
+description = "Bounded profile-gated activity read contracts for Symaira Brain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+sha2 = "0.10.9"
+symbrain-policy.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+symbrain-patterns.workspace = true
+tempfile.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }

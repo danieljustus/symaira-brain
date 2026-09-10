@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "profile_toml": "[profile]\nname = \"gateway-fixture\"\ndescription = \"deterministic gateway oracle\"\n\n[servers.vault]\nenabled = true\nmode = \"full\"\ntools_deny = [\"hidden\"]\n\n[audit]\nenabled = false\n",
+  "child_tools": [
+    {
+      "name": "health",
+      "description": "health check",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "probe": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "get_entry",
+      "description": "fetch secret",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "request_credential",
+      "description": "request a credential"
+    },
+    {
+      "name": "hidden",
+      "description": "policy-hidden tool"
+    }
+  ],
+  "cases": [
+    {
+      "id": "initialize-capabilities",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    },
+    {
+      "id": "tools-list-catalog",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list"
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"tools\":[{\"annotations\":{\"title\":\"Bootstrap\",\"readOnlyHint\":true,\"idempotentHint\":true},\"description\":\"Call this first in every session. Returns the active profile's exposure summary (which cores and tool sets are available) and the live tool catalog (names only — vault values are never included).\",\"inputSchema\":{\"properties\":{},\"type\":\"object\"},\"name\":\"bootstrap\"},{\"annotations\":{\"title\":\"Patterns\",\"readOnlyHint\":true,\"idempotentHint\":true},\"description\":\"List promoted patterns for this profile: tool-call sequences that recurred across multiple sessions, with their trigger conditions and provenance. Read-only — patterns are never executed by symbrain.\",\"inputSchema\":{\"properties\":{},\"type\":\"object\"},\"name\":\"patterns\"},{\"annotations\":{\"title\":\"vault_get_entry\"},\"description\":\"fetch secret\",\"inputSchema\":{\"properties\":{\"id\":{\"type\":\"string\"}},\"type\":\"object\"},\"name\":\"vault_get_entry\"},{\"annotations\":{\"title\":\"vault_health\"},\"description\":\"health check\",\"inputSchema\":{\"properties\":{\"probe\":{\"type\":\"string\"}},\"type\":\"object\"},\"name\":\"vault_health\"},{\"annotations\":{\"title\":\"vault_request_credential\"},\"description\":\"request a credential\",\"name\":\"vault_request_credential\"}]}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    },
+    {
+      "id": "tools-call-routing",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "probe": "gateway"
+            },
+            "name": "vault_health"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"text\":\"{\\\"probe\\\":\\\"gateway\\\"}\",\"type\":\"text\"}],\"isError\":false}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    },
+    {
+      "id": "tools-call-tool-error",
+      "child_behavior": {
+        "request_credential": "toolerror"
+      },
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "arguments": {},
+            "name": "vault_request_credential"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"text\":\"tool error: toolerror: intentional failure for request_credential\",\"type\":\"text\"}],\"isError\":true}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0,
+      "error_classifications": [
+        {
+          "request_id": 2,
+          "category": "tool",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "id": "tools-call-hidden",
+      "child_behavior": {
+        "request_credential": "toolerror"
+      },
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "arguments": {},
+            "name": "vault_hidden"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"error\":{\"code\":-32601,\"message\":\"Unknown tool: vault_hidden\"}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0,
+      "error_classifications": [
+        {
+          "request_id": 2,
+          "category": "rpc",
+          "retryable": false
+        }
+      ]
+    },
+    {
+      "id": "tools-call-bootstrap",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "arguments": {},
+            "name": "bootstrap"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"text\":\"{\\\"profile\\\":\\\"gateway-fixture\\\",\\\"profile_description\\\":\\\"deterministic gateway oracle\\\",\\\"generated_at\\\":\\\"\u003cruntime\u003e\\\",\\\"servers\\\":[{\\\"server\\\":\\\"vault\\\",\\\"enabled\\\":true,\\\"mode\\\":\\\"full\\\",\\\"exposed_tools\\\":[\\\"vault_get_entry\\\",\\\"vault_health\\\",\\\"vault_request_credential\\\"],\\\"exposed_count\\\":3},{\\\"server\\\":\\\"memory\\\",\\\"enabled\\\":false,\\\"mode\\\":\\\"read_only\\\",\\\"exposed_tools\\\":null,\\\"exposed_count\\\":0},{\\\"server\\\":\\\"skills\\\",\\\"enabled\\\":false,\\\"exposed_tools\\\":null,\\\"exposed_count\\\":0},{\\\"server\\\":\\\"usage\\\",\\\"enabled\\\":false,\\\"exposed_tools\\\":null,\\\"exposed_count\\\":0},{\\\"server\\\":\\\"operate\\\",\\\"enabled\\\":false,\\\"exposed_tools\\\":null,\\\"exposed_count\\\":0},{\\\"server\\\":\\\"scope\\\",\\\"enabled\\\":false,\\\"exposed_tools\\\":null,\\\"exposed_count\\\":0}],\\\"catalog\\\":[\\\"vault_get_entry\\\",\\\"vault_health\\\",\\\"vault_request_credential\\\"],\\\"vault\\\":{\\\"status\\\":\\\"present\\\",\\\"listing\\\":\\\"unavailable-without-unlock\\\"}}\",\"type\":\"text\"}],\"isError\":false}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    },
+    {
+      "id": "tools-call-patterns",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/call",
+          "params": {
+            "arguments": {},
+            "name": "patterns"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"text\":\"{\\\"profile\\\":\\\"gateway-fixture\\\",\\\"threshold\\\":3,\\\"patterns\\\":null}\",\"type\":\"text\"}],\"isError\":false}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    },
+    {
+      "id": "stdout-hygiene",
+      "requests": [
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "initialize",
+          "params": {
+            "capabilities": {},
+            "clientInfo": {
+              "name": "gateway-fixture",
+              "version": "0"
+            },
+            "protocolVersion": "2024-11-05"
+          }
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 2,
+          "method": "tools/list"
+        },
+        {
+          "jsonrpc": "2.0",
+          "id": 3,
+          "method": "tools/call",
+          "params": {
+            "arguments": {
+              "id": "fixture"
+            },
+            "name": "vault_get_entry"
+          }
+        }
+      ],
+      "stdout": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"tools\":{}},\"instructions\":\"symbrain profile \\\"gateway-fixture\\\"\",\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{\"name\":\"symbrain\",\"version\":\"dev\"}}}\n{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"tools\":[{\"annotations\":{\"title\":\"Bootstrap\",\"readOnlyHint\":true,\"idempotentHint\":true},\"description\":\"Call this first in every session. Returns the active profile's exposure summary (which cores and tool sets are available) and the live tool catalog (names only — vault values are never included).\",\"inputSchema\":{\"properties\":{},\"type\":\"object\"},\"name\":\"bootstrap\"},{\"annotations\":{\"title\":\"Patterns\",\"readOnlyHint\":true,\"idempotentHint\":true},\"description\":\"List promoted patterns for this profile: tool-call sequences that recurred across multiple sessions, with their trigger conditions and provenance. Read-only — patterns are never executed by symbrain.\",\"inputSchema\":{\"properties\":{},\"type\":\"object\"},\"name\":\"patterns\"},{\"annotations\":{\"title\":\"vault_get_entry\"},\"description\":\"fetch secret\",\"inputSchema\":{\"properties\":{\"id\":{\"type\":\"string\"}},\"type\":\"object\"},\"name\":\"vault_get_entry\"},{\"annotations\":{\"title\":\"vault_health\"},\"description\":\"health check\",\"inputSchema\":{\"properties\":{\"probe\":{\"type\":\"string\"}},\"type\":\"object\"},\"name\":\"vault_health\"},{\"annotations\":{\"title\":\"vault_request_credential\"},\"description\":\"request a credential\",\"name\":\"vault_request_credential\"}]}}\n{\"jsonrpc\":\"2.0\",\"id\":3,\"result\":{\"content\":[{\"text\":\"{\\\"id\\\":\\\"fixture\\\"}\",\"type\":\"text\"}],\"isError\":false}}\n",
+      "stdout_only_jsonrpc": true,
+      "stdout_non_protocol_bytes": 0
+    }
+  ]
+}

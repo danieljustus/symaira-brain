@@ -1,5 +1,3 @@
-# Shared with the proposed Rust migration foundation (#534/#544).
-# No target filter: inspect dependencies for every platform in Cargo.lock.
 [graph]
 all-features = true
 

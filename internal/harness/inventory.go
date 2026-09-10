@@ -2,6 +2,8 @@ package harness
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -15,6 +17,8 @@ import (
 // string, so downstream consumers can reach servers without re-parsing
 // harness configs. See README "Harness inventory schema".
 const InventorySchemaVersion = 2
+
+const maxBindingConfigBytes = 8 << 20
 
 // ConfigInventory describes one global or project-local harness config.
 type ConfigInventory struct {
@@ -41,6 +45,29 @@ type Inventory struct {
 	SchemaVersion int                `json:"schema_version"`
 	ProjectDir    string             `json:"project_dir,omitempty"`
 	Harnesses     []HarnessInventory `json:"harnesses"`
+}
+
+// Binding records a single symbrain MCP entry bound to profileName in a
+// harness config file.
+type Binding struct {
+	Harness Name
+	Path    string
+	Profile string
+}
+
+// BindingScanError records a config that could not be safely inspected.
+type BindingScanError struct {
+	Harness Name
+	Path    string
+	Error   string
+}
+
+// BindingScan is the complete result of a profile binding scan. Missing
+// configuration files are normal; present unsafe, unreadable, or malformed
+// files are returned as errors so callers can fail closed.
+type BindingScan struct {
+	Bindings []Binding
+	Errors   []BindingScanError
 }
 
 // List inspects every MCP-installable harness without modifying any config file.
@@ -73,59 +100,81 @@ func List(projectDir string) Inventory {
 	return result
 }
 
-// Binding records a single symbrain MCP entry bound to profileName in a
-// harness config file.
-type Binding struct {
-	Harness Name
-	Path    string
-	Profile string
-}
-
 // ProfileBindings scans every registered harness (global and project-local)
-// and returns the locations where a symbrain entry is bound to profileName.
-// Missing or unparseable configs are silently skipped so a stray harness
-// config outside the user's control does not prevent the scan.
-func ProfileBindings(profileName string, projectDir string) []Binding {
-	var bindings []Binding
+// and returns both discovered bindings and configurations that could not be
+// safely inspected. Missing configs are omitted; all other scan failures are
+// retained so non-forced removal can fail closed.
+func ProfileBindings(profileName string, projectDir string) BindingScan {
+	var scan BindingScan
 	for _, h := range All {
 		if !h.SupportsMCPInstall {
 			continue
 		}
-		globalPath := resolveConfigPath(h.ConfigPath)
-		if b := bindingAt(h, globalPath, profileName); b != nil {
-			bindings = append(bindings, *b)
+		globalPath, err := h.ConfigPath()
+		if err != nil {
+			scan.Errors = append(scan.Errors, BindingScanError{
+				Harness: h.Name,
+				Path:    "<unresolved>",
+				Error:   "resolve config path: " + err.Error(),
+			})
+		} else if b, err := bindingAt(h, globalPath, profileName); err != nil {
+			if !errors.Is(err, os.ErrNotExist) {
+				scan.Errors = append(scan.Errors, BindingScanError{Harness: h.Name, Path: globalPath, Error: err.Error()})
+			}
+		} else if b != nil {
+			scan.Bindings = append(scan.Bindings, *b)
 		}
 		if h.SupportsProject && projectDir != "" {
-			projectPath := h.ProjectConfigPath(filepath.Clean(projectDir))
-			if b := bindingAt(h, projectPath, profileName); b != nil {
-				bindings = append(bindings, *b)
+			projectRoot := filepath.Clean(projectDir)
+			projectPath := h.ProjectConfigPath(projectRoot)
+			if err := rejectSymlinkedProjectRoot(projectRoot); err != nil {
+				scan.Errors = append(scan.Errors, BindingScanError{Harness: h.Name, Path: projectPath, Error: err.Error()})
+			} else if b, err := bindingAt(h, projectPath, profileName); err != nil {
+				if !errors.Is(err, os.ErrNotExist) {
+					scan.Errors = append(scan.Errors, BindingScanError{Harness: h.Name, Path: projectPath, Error: err.Error()})
+				}
+			} else if b != nil {
+				scan.Bindings = append(scan.Bindings, *b)
 			}
 		}
 	}
-	return bindings
+	sort.Slice(scan.Bindings, func(i, j int) bool {
+		if scan.Bindings[i].Harness != scan.Bindings[j].Harness {
+			return scan.Bindings[i].Harness < scan.Bindings[j].Harness
+		}
+		return scan.Bindings[i].Path < scan.Bindings[j].Path
+	})
+	sort.Slice(scan.Errors, func(i, j int) bool {
+		left, right := scan.Errors[i], scan.Errors[j]
+		if left.Harness != right.Harness {
+			return left.Harness < right.Harness
+		}
+		if left.Path != right.Path {
+			return left.Path < right.Path
+		}
+		return left.Error < right.Error
+	})
+	return scan
 }
 
-func bindingAt(h Harness, path, profileName string) *Binding {
-	if path == "" {
-		return nil
-	}
-	data, err := os.ReadFile(path)
+func bindingAt(h Harness, path, profileName string) (*Binding, error) {
+	data, err := readConfigFile(path)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	doc, err := Parse(h, data)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("parse configuration: %w", err)
 	}
 	entry, ok := doc.Server(ServerName)
 	if !ok || !entry.IsSymbrain() {
-		return nil
+		return nil, nil
 	}
 	profile, ok := entry.Profile()
 	if !ok || profile != profileName {
-		return nil
+		return nil, nil
 	}
-	return &Binding{Harness: h.Name, Path: path, Profile: profile}
+	return &Binding{Harness: h.Name, Path: path, Profile: profile}, nil
 }
 
 func resolveConfigPath(resolve func() (string, error)) string {
@@ -146,7 +195,7 @@ func inspectConfig(h Harness, path string) ConfigInventory {
 		return result
 	}
 
-	data, err := os.ReadFile(path)
+	data, err := readConfigFile(path)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			result.Error = err.Error()
@@ -167,6 +216,43 @@ func inspectConfig(h Harness, path string) ConfigInventory {
 		}
 	}
 	return result
+}
+
+func readConfigFile(path string) ([]byte, error) {
+	file, err := openConfigFile(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("stat configuration: %w", err)
+	}
+	if !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("configuration target is not a regular file")
+	}
+	if info.Size() > maxBindingConfigBytes {
+		return nil, fmt.Errorf("configuration target exceeds maximum size of %d bytes", maxBindingConfigBytes)
+	}
+	data, err := io.ReadAll(io.LimitReader(file, maxBindingConfigBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("read configuration: %w", err)
+	}
+	if len(data) > maxBindingConfigBytes {
+		return nil, fmt.Errorf("configuration target exceeds maximum size of %d bytes", maxBindingConfigBytes)
+	}
+	return data, nil
+}
+
+func rejectSymlinkedProjectRoot(path string) error {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return err
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.IsDir() {
+		return fmt.Errorf("project root is not a real directory")
+	}
+	return nil
 }
 
 func ptr[T any](value T) *T {

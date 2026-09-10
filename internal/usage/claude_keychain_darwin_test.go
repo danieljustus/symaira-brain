@@ -1,32 +1,14 @@
 //go:build darwin
 
-//nolint:gosec // G204: the fixed-binary re-exec is the standard helper-process test pattern.
 package usage
 
 import (
 	"context"
-	"os"
 	"os/exec"
 	"reflect"
 	"testing"
 	"time"
 )
-
-// TestHelperSecurity stands in for the `security` binary: it prints what the
-// fake invocation put in SECURITY_HELPER_STDOUT and exits with
-// SECURITY_HELPER_STATUS.
-func TestHelperSecurity(t *testing.T) {
-	if os.Getenv("USAGE_HELPER_PROCESS") != "security" {
-		t.Skip("helper subprocess target")
-	}
-	if _, err := os.Stdout.WriteString(os.Getenv("SECURITY_HELPER_STDOUT")); err != nil {
-		os.Exit(2)
-	}
-	if os.Getenv("SECURITY_HELPER_STATUS") == "fail" {
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
 
 // fakeSecurity replaces the `security` invocation with a helper process that
 // prints the output registered for the subcommand, and records every
@@ -38,15 +20,10 @@ func fakeSecurity(t *testing.T, outputs map[string]string) *[][]string {
 	securityCommand = func(ctx context.Context, args ...string) *exec.Cmd {
 		calls = append(calls, append([]string(nil), args...))
 		out, ok := outputs[args[0]]
-		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=TestHelperSecurity")
-		cmd.Env = append(os.Environ(),
-			"USAGE_HELPER_PROCESS=security",
-			"SECURITY_HELPER_STDOUT="+out,
-		)
 		if !ok {
-			cmd.Env = append(cmd.Env, "SECURITY_HELPER_STATUS=fail")
+			return exec.CommandContext(ctx, "/usr/bin/false")
 		}
-		return cmd
+		return exec.CommandContext(ctx, "/usr/bin/printf", "%s", out)
 	}
 	t.Cleanup(func() { securityCommand = original })
 	return &calls
@@ -80,13 +57,10 @@ func TestClaudeKeychainFindsSuffixedService(t *testing.T) {
 		case reflect.DeepEqual(args, []string{"find-generic-password", "-w", "-s", "Claude Code-credentials-552ffa86"}):
 			out, status = blob, "ok"
 		}
-		cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=TestHelperSecurity")
-		cmd.Env = append(os.Environ(),
-			"USAGE_HELPER_PROCESS=security",
-			"SECURITY_HELPER_STDOUT="+out,
-			"SECURITY_HELPER_STATUS="+status,
-		)
-		return cmd
+		if status != "ok" {
+			return exec.CommandContext(ctx, "/usr/bin/false")
+		}
+		return exec.CommandContext(ctx, "/usr/bin/printf", "%s", out)
 	}
 	t.Cleanup(func() { securityCommand = original })
 

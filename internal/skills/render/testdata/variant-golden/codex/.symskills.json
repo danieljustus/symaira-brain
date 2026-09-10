@@ -1,3 +1,41 @@
 {
-  "source_hash": "1ad42ef1fba011be5d5ddb3a1a0dffe013151c5ae177add0bfab70e93aefd331"
+  "output_digest": "46ce6dcad4c12f20c88984c9c5ba0d226796937094ad4bc44bfdacc0e59b206e",
+  "output_manifest": [
+    {
+      "path": "SKILL.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 567,
+      "sha256": "4b077172eaeb7ed4bdf276b4cdb0c394939e2aedb3b53373096c7b9c0e0e38af"
+    },
+    {
+      "path": "agents",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "agents/openai.yaml",
+      "kind": "file",
+      "mode": "0644",
+      "size": 175,
+      "sha256": "db2e26075aec307f3f34afc1be3c5ea1ece2a9a0e6820a6489d1080427789997"
+    },
+    {
+      "path": "references",
+      "kind": "dir",
+      "mode": "0755",
+      "size": 0,
+      "sha256": ""
+    },
+    {
+      "path": "references/execution-contract.md",
+      "kind": "file",
+      "mode": "0644",
+      "size": 138,
+      "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea"
+    }
+  ],
+  "source_hash": "9bdb112448d6bcdad8a91246c5403f415e11dbdaee2261b36540f9e1a045c88a"
 }

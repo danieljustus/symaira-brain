@@ -326,7 +326,13 @@ func (ms *ManagedServer) CallTool(ctx context.Context, name string, args json.Ra
 	if err != nil {
 		return nil, err
 	}
-	return c.CallTool(ctx, name, args)
+	callCtx := ctx
+	if ms.cfg.CallTimeout > 0 {
+		var cancel context.CancelFunc
+		callCtx, cancel = context.WithTimeout(ctx, ms.cfg.CallTimeout)
+		defer cancel()
+	}
+	return c.CallTool(callCtx, name, args)
 }
 
 // Shutdown gracefully stops the child process. It sends SIGTERM, waits up

@@ -121,13 +121,13 @@ func TestKimiAPIStrategyUsesBearerAndDefaultHost(t *testing.T) {
 
 func TestKimiAPIStrategyHonorsBaseOverride(t *testing.T) {
 	client, transport := fakeClient(200, loadFixture("kimi-api-usages.json"), nil)
-	strategy := &kimiAPIStrategy{apiKey: "kimi-test-key", baseURL: "https://usage.test.local", client: client}
+	strategy := &kimiAPIStrategy{apiKey: "kimi-test-key", baseURL: "https://usage.example.test", client: client}
 
 	if _, err := strategy.Fetch(context.Background()); err != nil {
 		t.Fatalf("Fetch(): %v", err)
 	}
 
-	want := "https://usage.test.local/coding/v1/usages"
+	want := "https://usage.example.test/coding/v1/usages"
 	if got := transport.lastRequest.URL.String(); got != want {
 		t.Errorf("url = %q, want %q", got, want)
 	}

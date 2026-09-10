@@ -1,0 +1,201 @@
+{
+  "manifest": {
+    "schema_version": 1,
+    "cores": {
+      "symbrowse": {
+        "version": "v0.8.0",
+        "repo": "danieljustus/symaira-browse",
+        "binary_name": "symbrowse",
+        "asset_prefix": "symbrowse",
+        "has_cosign": true,
+        "sha256": {
+          "symbrowse_0.8.0_darwin_amd64.tar.gz": "2606f1779ce671b93e64e6d70e2a821aad26f1ec8f48e80f22959466a8efd7da",
+          "symbrowse_0.8.0_darwin_arm64.tar.gz": "ce682ff06e2f9e74c02a5662498f04580065554ab67822a65a786e15b487c36b",
+          "symbrowse_0.8.0_linux_amd64.tar.gz": "580037291caab834738d28db8b803adf3d92b9bebfee937ce9c9055e888e5aa1",
+          "symbrowse_0.8.0_linux_arm64.tar.gz": "725e7d0ee18cc67a715f540ea5cbe25d17d7e0a9351158b8a8ec084d10165c62"
+        },
+        "optional": true
+      },
+      "symcockpit": {
+        "version": "0.5.3",
+        "repo": "danieljustus/symaira-cockpit",
+        "binary_name": "symcockpit",
+        "asset_prefix": "symcockpit",
+        "has_cosign": false,
+        "sha256": {
+          "symcockpit_0.5.3_darwin_universal.tar.gz": "db78af4c948f569a525457b2fd8cb7eacff4246700c783d5af455b315f28c903"
+        },
+        "platforms": [
+          "darwin"
+        ],
+        "asset_arch": "universal"
+      },
+      "symdesk": {
+        "version": "v0.11.1",
+        "repo": "danieljustus/symaira-desktop",
+        "binary_name": "symdesk",
+        "asset_prefix": "symaira-desktop",
+        "has_cosign": false,
+        "sha256": {
+          "symaira-desktop_0.11.1_darwin_amd64.tar.gz": "9f557091a74eecc4c9aeb0fb280130cc32fef1230d73ad5728f8f10f636dcc28",
+          "symaira-desktop_0.11.1_darwin_arm64.tar.gz": "a515e2e8afd11cc3296a29dd7d4c0be18a79a1f52ea4cc7ac388f1f9d6e045db",
+          "symaira-desktop_0.11.1_linux_amd64.tar.gz": "74f9b041d54b0af001aaf708ae47f21442ab0f8255341122e59ac9fe8046d209",
+          "symaira-desktop_0.11.1_linux_arm64.tar.gz": "5d0a639896d6e47c16b31f7cff26e3c658bb5b80aad0e9c38a0d8cf10904ed66",
+          "symaira-desktop_0.11.1_windows_amd64.zip": "ddeccd1b8abea9ac68d853344dc53fa39ed8707fd413426b06e6f860eac433ee",
+          "symaira-desktop_0.11.1_windows_arm64.zip": "07c78a9f1de264496172c7b5d311f7a39baefeda020f014b825efc178a866caa"
+        }
+      },
+      "symvault": {
+        "version": "v0.21.1",
+        "repo": "danieljustus/symaira-vault",
+        "binary_name": "symvault",
+        "asset_prefix": "symaira-vault",
+        "has_cosign": true,
+        "sha256": {
+          "symaira-vault_0.21.1_darwin_amd64.tar.gz": "ab0e8ecdd6983e782ce02d7318b0b35238d8c494b22176cd707edf4ffdba2be2",
+          "symaira-vault_0.21.1_darwin_arm64.tar.gz": "97268174a82a62573be3ad2f31806264a0fdd4bb7a80a9933a0a00122a4b444f",
+          "symaira-vault_0.21.1_linux_amd64.tar.gz": "0491bf44251b7e2014375b9bf527efc147095dbb22a25df82982df5dd661e63c",
+          "symaira-vault_0.21.1_linux_arm64.tar.gz": "4e041fe81c2ae5b66900b7a8bd5ae25877afee93592b696d73d4c73653d6947d"
+        }
+      }
+    }
+  },
+  "core_cases": [
+    {
+      "id": "normal-linux",
+      "core": {
+        "version": "v1.2.3",
+        "repo": "example/tool",
+        "binary_name": "symtool",
+        "asset_prefix": "symaira-tool",
+        "has_cosign": false,
+        "sha256": {}
+      },
+      "goos": "linux",
+      "goarch": "amd64",
+      "asset_name": "symaira-tool_1.2.3_linux_amd64.tar.gz",
+      "asset_name_alt": "symtool_linux_amd64.tar.gz",
+      "checksum_asset_name": "symaira-tool_1.2.3_checksums.txt",
+      "tag": "v1.2.3",
+      "certificate_identity": "https://github.com/example/tool/.github/workflows/release.yml@refs/tags/v1.2.3",
+      "binary_path": "symtool",
+      "supports_platform": true
+    },
+    {
+      "id": "vault-darwin",
+      "core": {
+        "version": "v0.21.1",
+        "repo": "danieljustus/symaira-vault",
+        "binary_name": "symvault",
+        "asset_prefix": "symaira-vault",
+        "has_cosign": true,
+        "sha256": {}
+      },
+      "goos": "darwin",
+      "goarch": "arm64",
+      "asset_name": "symaira-vault_0.21.1_darwin_arm64.tar.gz",
+      "asset_name_alt": "symvault_darwin_arm64.tar.gz",
+      "checksum_asset_name": "symaira-vault_0.21.1_checksums.txt",
+      "tag": "v0.21.1",
+      "certificate_identity": "https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.21.1",
+      "binary_path": "symaira-vault_0.21.1_darwin_arm64/symvault",
+      "supports_platform": true
+    },
+    {
+      "id": "cockpit-universal",
+      "core": {
+        "version": "0.5.3",
+        "repo": "danieljustus/symaira-cockpit",
+        "binary_name": "symcockpit",
+        "asset_prefix": "symcockpit",
+        "has_cosign": false,
+        "sha256": {},
+        "platforms": [
+          "darwin"
+        ],
+        "asset_arch": "universal"
+      },
+      "goos": "darwin",
+      "goarch": "amd64",
+      "asset_name": "symcockpit_0.5.3_darwin_universal.tar.gz",
+      "asset_name_alt": "symcockpit_darwin_universal.tar.gz",
+      "checksum_asset_name": "symcockpit_0.5.3_checksums.txt",
+      "tag": "v0.5.3",
+      "certificate_identity": "https://github.com/danieljustus/symaira-cockpit/.github/workflows/release.yml@refs/tags/v0.5.3",
+      "binary_path": "symcockpit",
+      "supports_platform": true
+    },
+    {
+      "id": "cockpit-unsupported",
+      "core": {
+        "version": "0.5.3",
+        "repo": "danieljustus/symaira-cockpit",
+        "binary_name": "symcockpit",
+        "asset_prefix": "symcockpit",
+        "has_cosign": false,
+        "sha256": {},
+        "platforms": [
+          "darwin"
+        ],
+        "asset_arch": "universal"
+      },
+      "goos": "linux",
+      "goarch": "amd64",
+      "asset_name": "symcockpit_0.5.3_linux_universal.tar.gz",
+      "asset_name_alt": "symcockpit_linux_universal.tar.gz",
+      "checksum_asset_name": "symcockpit_0.5.3_checksums.txt",
+      "tag": "v0.5.3",
+      "certificate_identity": "https://github.com/danieljustus/symaira-cockpit/.github/workflows/release.yml@refs/tags/v0.5.3",
+      "binary_path": "symcockpit",
+      "supports_platform": false
+    }
+  ],
+  "checksum_data": "hello world\n",
+  "checksum": "a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447",
+  "checksum_text": "# release\na948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447  symtool.tar.gz\n",
+  "checksum_asset": "symtool.tar.gz",
+  "archive_cases": [
+    {
+      "id": "tar-valid",
+      "format": "tar.gz",
+      "archive_hex": "1f8b08000000000000ffca4b2d2e494dd12faecc2dc9cfcf61a009303030303037356530800074dac0c010890d1237343234346250308019404b505a5c9258c46040b15d70c7436998f82007698939394989c9d930fe28185980a6199fd8fc6f608a96ff0dcc8c4d46f33f3df27f6a456272098c330a46c1281805a360c400c0001333ab25000c0000",
+      "expected_hex": "6578616374"
+    },
+    {
+      "id": "tar-traversal",
+      "format": "tar.gz",
+      "archive_hex": "1f8b08000000000000ffd2d3d32faecc2dc9cfcf61a019303030303037356530800074dac0c0c018896dc0606068686062caa06000338096a0b4b824b188c18062bbe08e87d230f1410e92125360cc51300a46c128180523080006006dd0cd4b00080000",
+      "error_contains": "unsafe"
+    },
+    {
+      "id": "tar-symlink",
+      "format": "tar.gz",
+      "archive_hex": "1f8b08000000000000ff2aaecc2dc9cfcf61a0253030303030373565308000741a936d6864686acea060a45f925ba09f949802338816a0b4b824b188c1c000c62717c01d0fa561e2a360148c825130480160003152a45c00060000",
+      "error_contains": "unsafe"
+    },
+    {
+      "id": "tar-ambiguous",
+      "format": "tar.gz",
+      "archive_hex": "1f8b08000000000000ffcacf4bd52faecc2dc9cfcf61a015303030303037356530800074dac0c0c018896dc0606068686268cca06000338096a0b4b824b188c18062bbe08e87d230f1410ef2f35261cc513002414979fea0ccff26a3f99f2ef9bfa43c1fc61c05a360148c82513082006000edd4e23e000c0000",
+      "error_contains": "ambiguous"
+    },
+    {
+      "id": "zip-valid",
+      "format": "zip",
+      "archive_hex": "504b0304140008000000000000000000000000000000000000000e0000006e65737465642f73796d746f6f6c66616c6c6261636b504b0708427a19310800000008000000504b0304140008000000000000000000000000000000000000000700000073796d746f6f6c6578616374504b070805abd6690500000005000000504b0102140314000800000000000000427a193108000000080000000e0000000000000000000000ed81000000006e65737465642f73796d746f6f6c504b010214031400080000000000000005abd6690500000005000000070000000000000000000000ed814400000073796d746f6f6c504b05060000000002000200710000007e0000000000",
+      "expected_hex": "6578616374"
+    },
+    {
+      "id": "zip-traversal",
+      "format": "zip",
+      "archive_hex": "504b0304140008080000000000000000000000000000000000000e0000006469725c2e2e5c73796d746f6f6c626164504b0708fb392b820300000003000000504b0102140314000808000000000000fb392b8203000000030000000e0000000000000000000000ed81000000006469725c2e2e5c73796d746f6f6c504b050600000000010001003c0000003f0000000000",
+      "error_contains": "unsafe"
+    },
+    {
+      "id": "zip-symlink",
+      "format": "zip",
+      "archive_hex": "504b0304140008000000000000000000000000000000000000000700000073796d746f6f6c746172676574504b0708fc2f6f460600000006000000504b0102140314000800000000000000fc2f6f460600000006000000070000000000000000000000ffa10000000073796d746f6f6c504b05060000000001000100350000003b0000000000",
+      "error_contains": "unsafe"
+    }
+  ]
+}

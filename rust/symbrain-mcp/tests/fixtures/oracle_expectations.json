@@ -1,0 +1,110 @@
+{
+  "cases": [
+    {
+      "id": "line_ping",
+      "input": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}\n",
+      "output": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}\n"
+    },
+    {
+      "id": "line_ping_eof",
+      "input": "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}",
+      "output": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}\n"
+    },
+    {
+      "id": "line_blank_prefix",
+      "input": "\r\n \n{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}\n",
+      "output": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}\n"
+    },
+    {
+      "id": "line_null_id",
+      "input": "{\"jsonrpc\":\"2.0\",\"id\":null,\"method\":\"ping\"}\n",
+      "output": "{\"jsonrpc\":\"2.0\",\"id\":null,\"result\":{}}\n"
+    },
+    {
+      "id": "line_notification",
+      "input": "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}\n"
+    },
+    {
+      "id": "line_cancellation",
+      "input": "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/cancelled\",\"params\":{\"requestId\":7,\"reason\":\"stop\"}}\n"
+    },
+    {
+      "id": "framed_ping",
+      "input": "Content-Length: 40\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}",
+      "output": "Content-Length: 36\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}"
+    },
+    {
+      "id": "framed_extra_header",
+      "input": "Content-Type: application/json\r\nContent-Length: 40\r\nX-Test: yes\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}",
+      "output": "Content-Length: 36\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}"
+    },
+    {
+      "id": "framed_last_length_wins",
+      "input": "Content-Length: -1\r\nContent-Length: 40\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"ping\"}",
+      "output": "Content-Length: 36\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}"
+    },
+    {
+      "id": "framed_notification",
+      "input": "Content-Length: 54\r\n\r\n{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}"
+    },
+    {
+      "id": "malformed_line",
+      "input": "{bad}\n",
+      "output": "{\"jsonrpc\":\"2.0\",\"id\":null,\"error\":{\"code\":-32700,\"message\":\"Parse error: invalid character 'b' looking for beginning of object key string\"}}\n",
+      "error_kind": "parse"
+    },
+    {
+      "id": "malformed_framed",
+      "input": "Content-Length: 5\r\n\r\n{bad}",
+      "output": "Content-Length: 141\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":null,\"error\":{\"code\":-32700,\"message\":\"Parse error: invalid character 'b' looking for beginning of object key string\"}}",
+      "error_kind": "parse"
+    },
+    {
+      "id": "invalid_length_text",
+      "input": "Content-Length: nope\r\n\r\n",
+      "error_kind": "read",
+      "error": "invalid Content-Length: \"nope\""
+    },
+    {
+      "id": "invalid_length_zero",
+      "input": "Content-Length: 0\r\n\r\n",
+      "error_kind": "read",
+      "error": "invalid Content-Length: 0"
+    },
+    {
+      "id": "invalid_length_negative",
+      "input": "Content-Length: -1\r\n\r\n",
+      "error_kind": "read",
+      "error": "invalid Content-Length: -1"
+    },
+    {
+      "id": "invalid_length_large",
+      "input": "Content-Length: 1048577\r\n\r\n",
+      "error_kind": "read",
+      "error": "invalid Content-Length: 1048577"
+    },
+    {
+      "id": "missing_length",
+      "input": "Content-Type: application/json\r\n\r\n",
+      "error_kind": "read",
+      "error": "missing Content-Length header"
+    },
+    {
+      "id": "partial_body",
+      "input": "Content-Length: 10\r\n\r\n{}",
+      "error_kind": "read",
+      "error": "read body: unexpected EOF"
+    },
+    {
+      "id": "oversized_line",
+      "generator": "oversized_line",
+      "error_kind": "read",
+      "error": "line exceeds 1048576 bytes"
+    },
+    {
+      "id": "max_framed",
+      "generator": "max_framed",
+      "output": "Content-Length: 36\r\n\r\n{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}"
+    }
+  ]
+}
