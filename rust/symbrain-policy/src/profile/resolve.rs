@@ -2,8 +2,8 @@
 
 use crate::constants::{
     FOREIGN_ACCESS_READ, FOREIGN_ACCESS_WRITE, MEMORY_MODE_READ_ONLY, MEMORY_MODE_READ_WRITE,
-    SERVER_MEMORY, SERVER_SKILLS, SERVER_USAGE, SERVER_VAULT, VAULT_MODE_FULL, VAULT_MODE_OFF,
-    VAULT_MODE_REQUEST_ONLY, is_core_alias,
+    SERVER_MEMORY, SERVER_OPERATE, SERVER_SCOPE, SERVER_SKILLS, SERVER_USAGE, SERVER_VAULT,
+    VAULT_MODE_FULL, VAULT_MODE_OFF, VAULT_MODE_REQUEST_ONLY, is_core_alias,
 };
 use crate::error::ProfileError;
 use crate::profile::{ServerConfig, Servers};
@@ -90,6 +90,9 @@ pub fn resolve_servers(
                 let (sc, uw) = resolve_usage(fs);
                 warnings.extend(uw);
                 servers.insert(alias.to_string(), sc);
+            }
+            SERVER_OPERATE | SERVER_SCOPE => {
+                servers.insert(alias.to_string(), resolve_optional(fs));
             }
             _ => unreachable!(),
         }
@@ -195,6 +198,15 @@ fn resolve_usage(fs: &RawServer) -> (ServerConfig, Vec<String>) {
         },
         warnings,
     )
+}
+
+fn resolve_optional(fs: &RawServer) -> ServerConfig {
+    ServerConfig {
+        enabled: fs.enabled.unwrap_or(false),
+        tools_allow: fs.tools_allow.clone(),
+        tools_deny: fs.tools_deny.clone(),
+        ..ServerConfig::default()
+    }
 }
 
 fn resolve_foreign(
