@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use symbrain_usage::{Provider, Response, Service, Transport};
@@ -379,4 +380,126 @@ fn assert_fixture_errors(id: &str, case: &serde_json::Value) {
             error_case["kind"],
         );
     }
+}
+
+struct LifecycleTransport {
+    active: Arc<AtomicUsize>,
+    max_active: Arc<AtomicUsize>,
+}
+
+impl LifecycleTransport {
+    fn enter(&self) {
+        let active = self.active.fetch_add(1, Ordering::AcqRel) + 1;
+        self.max_active.fetch_max(active, Ordering::AcqRel);
+    }
+
+    fn leave(&self) {
+        self.active.fetch_sub(1, Ordering::AcqRel);
+    }
+}
+
+impl Transport for LifecycleTransport {
+    fn request(&self, _request: symbrain_usage::Request) -> Result<Response, String> {
+        Ok(Response {
+            status: 200,
+            body: b"{}".to_vec(),
+            headers: BTreeMap::new(),
+        })
+    }
+
+    fn request_with_cancel(
+        &self,
+        _request: symbrain_usage::Request,
+        cancel: &symbrain_usage::Cancellation,
+    ) -> Result<Response, String> {
+        self.enter();
+        struct ActiveGuard<'a>(&'a LifecycleTransport);
+        impl Drop for ActiveGuard<'_> {
+            fn drop(&mut self) {
+                self.0.leave();
+            }
+        }
+        let _guard = ActiveGuard(self);
+        let deadline = Instant::now() + Duration::from_millis(3);
+        while Instant::now() < deadline {
+            if cancel.is_cancelled() {
+                return Err("request cancelled".into());
+            }
+            std::thread::yield_now();
+        }
+        Ok(Response {
+            status: 200,
+            body: b"{}".to_vec(),
+            headers: BTreeMap::new(),
+        })
+    }
+}
+
+#[test]
+fn reports_join_cooperative_workers_and_bound_batches_across_repeated_calls() {
+    let active = Arc::new(AtomicUsize::new(0));
+    let max_active = Arc::new(AtomicUsize::new(0));
+    let transport = Arc::new(LifecycleTransport {
+        active: Arc::clone(&active),
+        max_active: Arc::clone(&max_active),
+    });
+    let providers = (0..7)
+        .map(|index| Provider::fixture(&format!("provider-{index}"), "fixture"))
+        .collect();
+    let service = Service::with_transport(providers, transport)
+        .with_max_concurrency(2)
+        .with_provider_timeout(Duration::from_millis(20));
+
+    for _ in 0..8 {
+        let _ = service.report();
+        assert_eq!(
+            active.load(Ordering::Acquire),
+            0,
+            "workers leaked after report"
+        );
+    }
+    assert!(max_active.load(Ordering::Acquire) <= 2);
+}
+
+struct FiniteNonCooperativeTransport {
+    active: Arc<AtomicUsize>,
+}
+
+impl Transport for FiniteNonCooperativeTransport {
+    fn request(&self, _request: symbrain_usage::Request) -> Result<Response, String> {
+        Ok(Response {
+            status: 200,
+            body: b"{}".to_vec(),
+            headers: BTreeMap::new(),
+        })
+    }
+
+    fn request_with_cancel(
+        &self,
+        _request: symbrain_usage::Request,
+        _cancel: &symbrain_usage::Cancellation,
+    ) -> Result<Response, String> {
+        self.active.fetch_add(1, Ordering::AcqRel);
+        std::thread::sleep(Duration::from_millis(20));
+        self.active.fetch_sub(1, Ordering::AcqRel);
+        Err("finite non-cooperative failure".into())
+    }
+}
+
+#[test]
+fn report_join_does_not_return_while_finite_noncooperative_worker_is_active() {
+    let active = Arc::new(AtomicUsize::new(0));
+    let service = Service::with_transport(
+        vec![Provider::fixture("finite", "Finite")],
+        Arc::new(FiniteNonCooperativeTransport {
+            active: Arc::clone(&active),
+        }),
+    )
+    .with_provider_timeout(Duration::from_millis(5));
+
+    let started = Instant::now();
+    let report = service.report();
+    assert!(started.elapsed() >= Duration::from_millis(15));
+    assert_eq!(active.load(Ordering::Acquire), 0);
+    assert!(report.providers[0].error.is_some());
 }

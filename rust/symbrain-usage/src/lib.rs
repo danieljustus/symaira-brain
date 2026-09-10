@@ -63,11 +63,9 @@ impl Service {
         self.report_with_cancel(|| false)
     }
 
-    /// Runs bounded worker batches. Workers are detached deliberately: a
-    /// transport implementation may not honor cooperative cancellation, and
-    /// joining such a worker would let it extend the report deadline. The
-    /// worker owns only its cloned transport/cancellation state and can no
-    /// longer mutate the returned report after the receiver is dropped.
+    /// Runs bounded worker batches. `thread::scope` guarantees every worker is
+    /// joined before return; cancellation is propagated before the join so a
+    /// cooperative transport never survives a report call.
     #[must_use]
     pub fn report_with_cancel(&self, cancelled: impl Fn() -> bool) -> Report {
         let mut report = Report::new();
@@ -89,56 +87,36 @@ impl Service {
                 .map(|_| Cancellation::with_timeout(self.provider_timeout))
                 .collect();
             let transport = Arc::clone(&self.transport);
-            for (slot, index) in batch.iter().copied().enumerate() {
-                let provider = self.providers[index].clone();
-                let transport = Arc::clone(&transport);
-                let cancel = cancels[slot].clone();
-                let sender = sender.clone();
-                std::thread::spawn(move || {
-                    let result = provider.fetch(&transport, &cancel);
-                    let _ = sender.send((index, result));
-                });
-            }
-            drop(sender);
-            let mut pending: BTreeSet<usize> = batch.iter().copied().collect();
-            let deadline = Instant::now() + self.provider_timeout;
-            while !pending.is_empty() {
-                if cancelled() {
-                    for (slot, index) in batch.iter().copied().enumerate() {
-                        if pending.contains(&index) {
-                            cancels[slot].cancel();
-                            report.providers[index].error = Some(format!(
-                                "AI usage provider {:?} cancelled",
-                                self.providers[index].id
-                            ));
-                        }
-                    }
-                    break;
+            std::thread::scope(|scope| {
+                let mut handles = Vec::new();
+                for (slot, index) in batch.iter().copied().enumerate() {
+                    let provider = self.providers[index].clone();
+                    let transport = Arc::clone(&transport);
+                    let cancel = cancels[slot].clone();
+                    let sender = sender.clone();
+                    handles.push(scope.spawn(move || {
+                        let result = provider.fetch(&transport, &cancel);
+                        let _ = sender.send((index, result));
+                    }));
                 }
-                let remaining = deadline.saturating_duration_since(Instant::now());
-                if remaining.is_zero() {
-                    for (slot, index) in batch.iter().copied().enumerate() {
-                        if pending.contains(&index) {
-                            cancels[slot].cancel();
-                            report.providers[index].error = Some(format!(
-                                "AI usage provider {:?} timed out after {:?}",
-                                self.providers[index].id, self.provider_timeout
-                            ));
-                        }
-                    }
-                    break;
-                }
-                match receiver.recv_timeout(remaining) {
-                    Ok((index, result)) => {
-                        pending.remove(&index);
-                        match result {
-                            Ok(snapshot) => report.providers[index].snapshot = Some(snapshot),
-                            Err(error) => {
-                                report.providers[index].error = Some(error.to_string());
+                drop(sender);
+                let mut pending: BTreeSet<usize> = batch.iter().copied().collect();
+                let deadline = Instant::now() + self.provider_timeout;
+                while !pending.is_empty() {
+                    if cancelled() {
+                        for (slot, index) in batch.iter().copied().enumerate() {
+                            if pending.contains(&index) {
+                                cancels[slot].cancel();
+                                report.providers[index].error = Some(format!(
+                                    "AI usage provider {:?} cancelled",
+                                    self.providers[index].id
+                                ));
                             }
                         }
+                        break;
                     }
-                    Err(mpsc::RecvTimeoutError::Timeout) => {
+                    let remaining = deadline.saturating_duration_since(Instant::now());
+                    if remaining.is_zero() {
                         for (slot, index) in batch.iter().copied().enumerate() {
                             if pending.contains(&index) {
                                 cancels[slot].cancel();
@@ -150,9 +128,35 @@ impl Service {
                         }
                         break;
                     }
-                    Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    match receiver.recv_timeout(remaining) {
+                        Ok((index, result)) => {
+                            pending.remove(&index);
+                            match result {
+                                Ok(snapshot) => report.providers[index].snapshot = Some(snapshot),
+                                Err(error) => {
+                                    report.providers[index].error = Some(error.to_string());
+                                }
+                            }
+                        }
+                        Err(mpsc::RecvTimeoutError::Timeout) => {
+                            for (slot, index) in batch.iter().copied().enumerate() {
+                                if pending.contains(&index) {
+                                    cancels[slot].cancel();
+                                    report.providers[index].error = Some(format!(
+                                        "AI usage provider {:?} timed out after {:?}",
+                                        self.providers[index].id, self.provider_timeout
+                                    ));
+                                }
+                            }
+                            break;
+                        }
+                        Err(mpsc::RecvTimeoutError::Disconnected) => break,
+                    }
                 }
-            }
+                for handle in handles {
+                    let _ = handle.join();
+                }
+            });
         }
         report
     }
