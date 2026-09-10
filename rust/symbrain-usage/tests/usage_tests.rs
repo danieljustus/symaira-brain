@@ -387,6 +387,14 @@ struct LifecycleTransport {
     max_active: Arc<AtomicUsize>,
 }
 
+struct ActiveGuard<'a>(&'a LifecycleTransport);
+
+impl Drop for ActiveGuard<'_> {
+    fn drop(&mut self) {
+        self.0.leave();
+    }
+}
+
 impl LifecycleTransport {
     fn enter(&self) {
         let active = self.active.fetch_add(1, Ordering::AcqRel) + 1;
@@ -413,12 +421,6 @@ impl Transport for LifecycleTransport {
         cancel: &symbrain_usage::Cancellation,
     ) -> Result<Response, String> {
         self.enter();
-        struct ActiveGuard<'a>(&'a LifecycleTransport);
-        impl Drop for ActiveGuard<'_> {
-            fn drop(&mut self) {
-                self.0.leave();
-            }
-        }
         let _guard = ActiveGuard(self);
         let deadline = Instant::now() + Duration::from_millis(3);
         while Instant::now() < deadline {
