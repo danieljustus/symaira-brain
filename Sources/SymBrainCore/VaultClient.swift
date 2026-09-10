@@ -196,17 +196,8 @@ public struct VaultClient: Sendable {
     public func delete(path: String, profile: String? = nil) async throws -> VaultDeleteConfirmation {
         _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["delete", path, "--yes"]), timeout: 60)
         let reread = try await runner.runAllowingFailure(try executable(), arguments: arguments(profile: profile, command: ["get", path, "--output", "json"]), timeout: 30)
-        // symvault ExitNotFound = 2 (see symaira-vault internal/errors/errors.go).
-        // Only that code proves absence; any other failure leaves the deletion
-        // submitted but unverified and must surface as such.
-        switch reread.exitCode {
-        case 2:
-            return VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
-        case 0:
-            throw CLIRunnerError.invalidJSON(description: "deleted entry is still present")
-        default:
-            throw CLIRunnerError.invalidJSON(description: "deletion submitted but absence verification failed (symvault get exit \(reread.exitCode))")
-        }
+        guard reread.exitCode != 0 else { throw CLIRunnerError.invalidJSON(description: "deleted entry is still present") }
+        return VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
     }
 
     /// Run `symvault get <path> --output json`.

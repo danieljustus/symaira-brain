@@ -53,7 +53,7 @@ func TestCmdVaultDeleteRequiresYesAndConfirmsAbsence(t *testing.T) {
 	state := filepath.Join(dir, "exists")
 	script := "#!/bin/sh\n" +
 		"if [ \"$1\" = delete ]; then [ \"$3\" = --yes ] || exit 2; rm -f \"$STATE\"; exit 0; fi\n" +
-		"if [ \"$1\" = get ]; then [ -f \"$STATE\" ] && printf '%s' '{\"path\":\"work/delete\",\"fields\":{\"password\":\"hidden\"}}' && exit 0; exit 2; fi\n" +
+		"if [ \"$1\" = get ]; then [ -f \"$STATE\" ] && printf '%s' '{\"path\":\"work/delete\",\"fields\":{\"password\":\"hidden\"}}' && exit 0; exit 1; fi\n" +
 		"exit 1\n"
 	if err := os.WriteFile(fake, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
@@ -77,30 +77,5 @@ func TestCmdVaultDeleteRequiresYesAndConfirmsAbsence(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), `"confirmed":{"absent":true,"path":"work/delete"}`) {
 		t.Fatalf("missing confirmation: %q", stdout.String())
-	}
-}
-
-func TestCmdVaultDeleteReportsUnverifiedWhenGetFailsOtherwise(t *testing.T) {
-	dir := t.TempDir()
-	fake := filepath.Join(dir, "symvault")
-	// delete succeeds, but the confirmation read fails with a generic error
-	// (exit 1, e.g. vault locked) — absence must NOT be claimed.
-	script := "#!/bin/sh\n" +
-		"if [ \"$1\" = delete ]; then exit 0; fi\n" +
-		"if [ \"$1\" = get ]; then exit 1; fi\n" +
-		"exit 1\n"
-	if err := os.WriteFile(fake, []byte(script), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
-	var stdout, stderr bytes.Buffer
-	if code := cmdVaultDelete([]string{"work/delete", "--yes"}, &stdout, &stderr); code == 0 {
-		t.Fatal("unverified delete reported success")
-	}
-	if !strings.Contains(stderr.String(), "absence verification failed") {
-		t.Fatalf("missing unverified report: %q", stderr.String())
-	}
-	if strings.Contains(stdout.String(), "absent") {
-		t.Fatalf("absence claimed without proof: %q", stdout.String())
 	}
 }

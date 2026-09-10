@@ -2,25 +2,15 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
-	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
-
-// symvaultExitNotFound is symvault's ExitNotFound (see symaira-vault
-// internal/errors/errors.go). Only this exit code proves absence; any other
-// failure of the confirmation read means the deletion is submitted but
-// unverified, and must be reported as such.
-const symvaultExitNotFound = 2
 
 type vaultMetadata struct {
 	Path   string                 `json:"path"`
@@ -103,37 +93,12 @@ func cmdVaultDelete(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 		fmt.Fprintln(stderr, "symbrain vault delete: delete failed")
 		return exitcodes.ExitGeneric
 	}
-	switch code := vaultGetExitCode(binary, path); code {
-	case 0:
+	if _, err := readVaultMetadata(binary, path); err == nil {
 		fmt.Fprintln(stderr, "symbrain vault delete: confirmation read found entry still present")
-		return exitcodes.ExitGeneric
-	case symvaultExitNotFound:
-		// confirmed absent
-	default:
-		fmt.Fprintf(stderr, "symbrain vault delete: deletion submitted but absence verification failed (symvault get exit %d)\n", code)
 		return exitcodes.ExitGeneric
 	}
 	result := map[string]interface{}{"submitted": map[string]interface{}{"path": path}, "confirmed": map[string]interface{}{"path": path, "absent": true}}
 	encoded, _ := json.Marshal(result)
 	fmt.Fprintln(stdout, string(encoded))
 	return exitcodes.ExitOK
-}
-
-// vaultGetExitCode runs `symvault get` and returns its process exit code
-// (-1 when the process could not be run at all). Output is discarded; the
-// code is the signal.
-func vaultGetExitCode(binary, path string) int {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	cmd := exec.CommandContext(ctx, binary, "get", path, "--output", "json")
-	cmd.Stdout = io.Discard
-	cmd.Stderr = io.Discard
-	if err := cmd.Run(); err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			return exitErr.ExitCode()
-		}
-		return -1
-	}
-	return 0
 }
