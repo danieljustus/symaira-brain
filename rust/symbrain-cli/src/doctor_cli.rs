@@ -103,7 +103,9 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
 
 #[cfg(test)]
 mod tests {
-    use super::doctor_core::{parse_server_map, probe_version, profile_arg, sorted_server_names};
+    use super::doctor_core::{
+        parse_server_map, probe_version_with_args, profile_arg, sorted_server_names,
+    };
     use super::doctor_links::{classify_vault_failure, is_secret_reference};
     use super::doctor_types::HARNESSES;
     use super::*;
@@ -181,18 +183,11 @@ args = ["mcp", "--profile", "default"]
     #[cfg(unix)]
     #[test]
     fn nonzero_version_probe_cannot_be_accepted() {
-        use std::fs;
-        use std::os::unix::fs::PermissionsExt;
-
-        let dir = tempfile::tempdir().expect("tempdir");
-        let probe = dir.path().join("symvault");
-        fs::write(
-            &probe,
-            "#!/bin/sh\nprintf '{\"version\":\"9.9.9\"}'\nexit 42\n",
+        let error = probe_version_with_args(
+            Path::new("/bin/sh"),
+            &["-c", "printf '{\"version\":\"9.9.9\"}'; exit 42", "probe"],
         )
-        .expect("write probe");
-        fs::set_permissions(&probe, fs::Permissions::from_mode(0o700)).expect("chmod probe");
-        let error = probe_version(&probe).expect_err("nonzero probe");
+        .expect_err("nonzero probe");
         assert!(error.contains("exit status 42"));
     }
 
