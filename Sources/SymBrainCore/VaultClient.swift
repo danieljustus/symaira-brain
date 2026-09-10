@@ -162,6 +162,24 @@ public struct VaultClient: Sendable {
         )
     }
 
+    /// Create an entry using symvault's stdin-only value flag, then re-read
+    /// it from the service and return metadata only.
+    public func create(path: String, value: String, profile: String? = nil) async throws -> VaultCreateConfirmation {
+        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        _ = try await runner.runChecked(
+            try executable(),
+            arguments: arguments(profile: profile, command: ["add", path, "--stdin-value"]),
+            stdin: Data((value + "\n").utf8),
+            timeout: 60
+        )
+        let confirmed = try await entry(path: path, profile: profile)
+        let hasValue = confirmed.fields.values.contains { !$0.isEmpty }
+        return VaultCreateConfirmation(
+            submittedPath: path, confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
+            confirmedFieldCount: confirmed.fields.count, confirmedHasValue: hasValue
+        )
+    }
+
     /// Run `symvault get <path> --output json`.
     ///
     /// The result contains the entry's secrets — keep it out of logs and off
