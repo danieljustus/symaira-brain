@@ -234,11 +234,13 @@ import AppKit
 private final class FakeClipboardPasteboard: ClipboardPasteboard {
     var changeCount = 0
     var value: String?
+    var concealed = false
     var clearCount = 0
 
     func clearContents() {
         clearCount += 1
         value = nil
+        concealed = false
         changeCount += 1
     }
 
@@ -248,54 +250,94 @@ private final class FakeClipboardPasteboard: ClipboardPasteboard {
     }
 
     func setData(_ data: Data, forType: NSPasteboard.PasteboardType) {
+        concealed = true
         changeCount += 1
+    }
+}
+
+private actor ClipboardManualSleeper {
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func sleep(_ duration: Duration) async throws {
+        await withCheckedContinuation { continuation in
+            waiters.append(continuation)
+        }
+    }
+
+    func resumeNext() {
+        guard !waiters.isEmpty else { return }
+        waiters.removeFirst().resume()
     }
 }
 
 @MainActor
 struct ClipboardLifetimeTests {
-    @Test func clearsOwnedClipboardAfterLifetime() async throws {
+    @Test func clearsOwnedSecretAfterControllableExpiry() async {
         let fake = FakeClipboardPasteboard()
-        let controller = ClipboardLifetimeController(pasteboard: fake)
+        let clock = ClipboardManualSleeper()
+        let controller = ClipboardLifetimeController(
+            pasteboard: fake,
+            sleep: { duration in try await clock.sleep(duration) }
+        )
 
-        controller.write("test-secret", concealed: true, lifetime: .milliseconds(10))
-        try await Task.sleep(for: .milliseconds(50))
+        controller.write("test-secret", concealed: true)
+        await Task.yield()
+        #expect(fake.value == "test-secret")
+        #expect(fake.concealed)
 
+        await clock.resumeNext()
+        await Task.yield()
         #expect(fake.value == nil)
         #expect(fake.clearCount == 2)
     }
 
-    @Test func doesNotClearReplacementWithSameValue() async throws {
+    @Test func ownershipTokenKeepsReplacementWithSameValue() async {
         let fake = FakeClipboardPasteboard()
-        let controller = ClipboardLifetimeController(pasteboard: fake)
+        let clock = ClipboardManualSleeper()
+        let controller = ClipboardLifetimeController(
+            pasteboard: fake,
+            sleep: { duration in try await clock.sleep(duration) }
+        )
 
-        controller.write("same", concealed: true, lifetime: .milliseconds(20))
-        // Simulate another owner replacing it with the same text.
+        controller.write("same", concealed: true)
         fake.setString("same", forType: .string)
-        try await Task.sleep(for: .milliseconds(60))
+        await clock.resumeNext()
+        await Task.yield()
 
         #expect(fake.value == "same")
         #expect(fake.clearCount == 1)
     }
 
-    @Test func ordinaryClipboardCopyDoesNotExpire() async throws {
+    @Test func ordinaryClipboardCopyIsRetained() async {
         let fake = FakeClipboardPasteboard()
-        let controller = ClipboardLifetimeController(pasteboard: fake)
+        let clock = ClipboardManualSleeper()
+        let controller = ClipboardLifetimeController(
+            pasteboard: fake,
+            sleep: { duration in try await clock.sleep(duration) }
+        )
 
-        controller.write("ordinary", concealed: false, lifetime: .milliseconds(10))
-        try await Task.sleep(for: .milliseconds(50))
+        controller.write("ordinary", concealed: false)
+        await Task.yield()
 
         #expect(fake.value == "ordinary")
+        #expect(fake.concealed == false)
         #expect(fake.clearCount == 1)
     }
 
-    @Test func cancellationOfExpiryDoesNotClearNewCopy() async throws {
+    @Test func replacingSecretCancelsOldExpiry() async {
         let fake = FakeClipboardPasteboard()
-        let controller = ClipboardLifetimeController(pasteboard: fake)
+        let clock = ClipboardManualSleeper()
+        let controller = ClipboardLifetimeController(
+            pasteboard: fake,
+            sleep: { duration in try await clock.sleep(duration) }
+        )
 
-        controller.write("first", concealed: true, lifetime: .milliseconds(20))
-        controller.write("second", concealed: true, lifetime: .milliseconds(80))
-        try await Task.sleep(for: .milliseconds(40))
+        controller.write("first", concealed: true)
+        await Task.yield()
+        controller.write("second", concealed: true)
+        await Task.yield()
+        await clock.resumeNext()
+        await Task.yield()
 
         #expect(fake.value == "second")
         #expect(fake.clearCount == 2)

@@ -313,16 +313,21 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     private let client: any VaultClientProtocol
     private let auditReader = AuditLogReader()
     private let sleep: @Sendable (Duration) async throws -> Void
+    private let clipboardWriter: @MainActor (String, Bool) -> Void
     private var generation = 0
     private var revealTask: Task<Void, Never>?
     private var detailExpiryTask: Task<Void, Never>?
 
     public init(
         client: any VaultClientProtocol = VaultClient(),
-        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) },
+        clipboardWriter: @escaping @MainActor (String, Bool) -> Void = { value, concealed in
+            writeToPasteboard(value, concealed: concealed)
+        }
     ) {
         self.client = client
         self.sleep = sleep
+        self.clipboardWriter = clipboardWriter
     }
 
     public var isInstalled: Bool { client.isInstalled }
@@ -494,9 +499,9 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         intent: VaultCopyIntent = .ordinary
     ) {
         if case .revealedSensitive = intent {
-            writeToPasteboard(value, concealed: true)
+            clipboardWriter(value, true)
         } else {
-            writeToPasteboard(value)
+            clipboardWriter(value, false)
         }
         statusMessage = "\(label) copied to clipboard."
     }
@@ -717,10 +722,15 @@ private final class SystemClipboardPasteboard: ClipboardPasteboard {
 @MainActor
 final class ClipboardLifetimeController {
     private let pasteboard: ClipboardPasteboard
+    private let sleep: @Sendable (Duration) async throws -> Void
     private var expiryTask: Task<Void, Never>?
 
-    init(pasteboard: ClipboardPasteboard) {
+    init(
+        pasteboard: ClipboardPasteboard,
+        sleep: @escaping @Sendable (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
+    ) {
         self.pasteboard = pasteboard
+        self.sleep = sleep
     }
 
     deinit { expiryTask?.cancel() }
@@ -735,10 +745,11 @@ final class ClipboardLifetimeController {
         guard concealed else { return }
         let expectedChangeCount = pasteboard.changeCount
         let pasteboard = self.pasteboard
-        // Deliberately capture only the pasteboard and ownership token. The
-        // plaintext value is never retained by the sleeping task.
-        expiryTask = Task { @MainActor [pasteboard, expectedChangeCount] in
-            do { try await Task.sleep(for: lifetime) } catch { return }
+        let sleep = self.sleep
+        // Deliberately capture only the pasteboard, sleeper, and ownership token.
+        // The plaintext value is never retained by the sleeping task.
+        expiryTask = Task { @MainActor [pasteboard, expectedChangeCount, sleep] in
+            do { try await sleep(lifetime) } catch { return }
             guard !Task.isCancelled, pasteboard.changeCount == expectedChangeCount else { return }
             pasteboard.clearContents()
         }

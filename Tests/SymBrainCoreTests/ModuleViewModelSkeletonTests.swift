@@ -152,18 +152,116 @@ private struct StubVaultClient: VaultClientProtocol {
 }
 
 @MainActor
+private final class ControlledVaultClient: VaultClientProtocol {
+    var isInstalled = true
+    var pending: [(path: String, continuation: CheckedContinuation<VaultEntryDetail, Never>)] = []
+
+    func availability(profile: String?) async -> VaultAvailability { .ready }
+    func version(profile: String?) async throws -> String { "test" }
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws {}
+    func lock(profile: String?) async throws {}
+    func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
+
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail {
+        await withCheckedContinuation { continuation in
+            pending.append((path, continuation))
+        }
+    }
+
+    func resolve(path: String, detail: VaultEntryDetail) {
+        guard let index = pending.firstIndex(where: { $0.path == path }) else { return }
+        pending.remove(at: index).continuation.resume(returning: detail)
+    }
+}
+
+private actor ManualSleeper {
+    private var waiters: [CheckedContinuation<Void, Never>] = []
+
+    func sleep(_ duration: Duration) async throws {
+        await withCheckedContinuation { continuation in
+            waiters.append(continuation)
+        }
+    }
+
+    func resumeNext() {
+        guard !waiters.isEmpty else { return }
+        waiters.removeFirst().resume()
+    }
+}
+
+@MainActor
 extension ModuleViewModelSkeletonTests {
-    @Test func revealUsesInjectedClientAndExpiresPlaintext() async {
+    @Test func staleRevealAfterSelectionCannotPublishPlaintext() async {
+        let client = ControlledVaultClient()
+        let first = VaultEntryDetail(path: "work/first", modified: nil, fields: ["password": .string("first-secret")])
+        let vm = VaultViewModel(client: client)
+        vm.availability = .ready
+        await vm.select(path: first.path)
+
+        let reveal = Task { await vm.revealSelectedEntry() }
+        await Task.yield()
+        #expect(client.pending.map(\.path) == [first.path])
+
+        await vm.select(path: "work/second")
+        client.resolve(path: first.path, detail: first)
+        await reveal.value
+
+        #expect(vm.selectedPath == "work/second")
+        #expect(vm.detail == nil)
+    }
+
+    @Test func staleRevealAfterRelockCannotPublishPlaintext() async {
+        let client = ControlledVaultClient()
+        let first = VaultEntryDetail(path: "work/first", modified: nil, fields: ["password": .string("first-secret")])
+        let vm = VaultViewModel(client: client)
+        vm.availability = .ready
+        await vm.select(path: first.path)
+
+        let reveal = Task { await vm.revealSelectedEntry() }
+        await Task.yield()
+        vm.availability = .locked
+        client.resolve(path: first.path, detail: first)
+        await reveal.value
+
+        #expect(vm.detail == nil)
+        #expect(vm.revealedFields.isEmpty)
+    }
+
+    @Test func revealExpiresWhenControllableClockAdvances() async {
+        let sleeper = ManualSleeper()
         let detail = VaultEntryDetail(path: "work/test", modified: nil, fields: ["password": .string("secret")])
         let vm = VaultViewModel(
             client: StubVaultClient(result: detail),
-            sleep: { _ in }
+            sleep: { duration in try await sleeper.sleep(duration) }
         )
         vm.availability = .ready
-        await vm.select(path: "work/test")
+        await vm.select(path: detail.path)
         await vm.revealSelectedEntry()
         await Task.yield()
+        #expect(vm.detail == detail)
+
+        await sleeper.resumeNext()
+        await Task.yield()
         #expect(vm.detail == nil)
+        #expect(vm.revealedFields.isEmpty)
+    }
+
+    @Test func copyFieldRequiresRevealAndMarksSecretIntent() async {
+        let detail = VaultEntryDetail(path: "work/test", modified: nil, fields: [:])
+        var copies: [(value: String, concealed: Bool)] = []
+        let vm = VaultViewModel(
+            client: StubVaultClient(result: detail),
+            clipboardWriter: { value, concealed in copies.append((value, concealed)) }
+        )
+
+        vm.copyField("password", value: "secret", revealed: false)
+        #expect(copies.isEmpty)
+        vm.copyField("password", value: "secret", revealed: true)
+        vm.copyField("username", value: "daniel", revealed: false)
+
+        #expect(copies.map(\.concealed) == [true, false])
+        #expect(copies.map(\.value) == ["secret", "daniel"])
     }
 }
 #endif
