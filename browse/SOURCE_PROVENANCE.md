@@ -21,8 +21,8 @@ All other imported tracked files are expected to match the source commit
 byte-for-byte.
 
 - **Source repository:** `github.com/danieljustus/symaira-browse`
-- **Source commit:** `1a383d8651e1461712a4da43cdf0683884e46a3a` (`fix: verify
-  Rust handover and bounded Windows daemon lifecycle (#426)`) — this was the
+- **Source commit:** `1a383d8651e1461712a4da43cdf0683884e46a3a` (`ci: avoid
+  unsupported Windows pinned Go Unix-socket parity (#435)`) — this was the
   current `main` HEAD of symaira-browse at resync time; verified with `git rev-parse origin/main` in the source
   repository and by a clean-checkout `diff -rq` verification.
 - **Source path:** repository root
