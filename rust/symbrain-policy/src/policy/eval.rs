@@ -59,7 +59,14 @@ pub fn evaluate(
                 cfg.tools_allow.iter().cloned().collect()
             }
         }
-        SERVER_OPERATE | SERVER_SCOPE => cfg.tools_allow.iter().cloned().collect(),
+        SERVER_OPERATE | SERVER_SCOPE => cfg
+            .tools_allow
+            .iter()
+            .filter(|tool| {
+                universe_for(alias).is_some_and(|universe| universe.contains(&tool.as_str()))
+            })
+            .cloned()
+            .collect(),
         _ => {
             let preset =
                 preset_for_mode(alias, &cfg.mode).ok_or_else(|| PolicyError::UnknownMode {

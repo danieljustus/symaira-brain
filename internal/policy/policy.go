@@ -270,7 +270,9 @@ func Evaluate(alias string, cfg profile.ServerConfig, liveTools []string) (*Repo
 			base = toSet(usageTools)
 		}
 	case profile.ServerOperate, profile.ServerScope:
-		base = toSet(cfg.ToolsAllow)
+		// Optional modules have a hard, conservative maximum universe. An
+		// explicit allowlist may narrow that universe but never widen it.
+		base = intersectSet(cfg.ToolsAllow, optionalModuleTools[alias])
 	default:
 		preset, ok := presetForMode(alias, cfg.Mode)
 		if !ok {
@@ -356,6 +358,17 @@ func toSet(items []string) map[string]bool {
 	set := make(map[string]bool, len(items))
 	for _, it := range items {
 		set[it] = true
+	}
+	return set
+}
+
+func intersectSet(items, universe []string) map[string]bool {
+	allowed := toSet(universe)
+	set := make(map[string]bool, len(items))
+	for _, it := range items {
+		if allowed[it] {
+			set[it] = true
+		}
 	}
 	return set
 }

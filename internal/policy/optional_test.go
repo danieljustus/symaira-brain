@@ -6,32 +6,44 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/profile"
 )
 
-func TestOptionalModules_DefaultDeniedAndExplicitAllowIsBounded(t *testing.T) {
-	cases := []struct {
-		alias string
-		live  []string
+func TestOptionalModules_HardMaximumAndExplicitAllowNarrowing(t *testing.T) {
+	tests := []struct {
+		name, alias string
+		live        []string
+		allow       []string
+		want        []string
+		wantUnknown []string
 	}{
-		{profile.ServerOperate, []string{"version", "permissions_status", "get_policy", "click"}},
-		{profile.ServerScope, []string{"scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list", "write_host"}},
+		{name: "operate click only", alias: profile.ServerOperate, live: []string{"click"}, allow: []string{"click"}, want: []string{}, wantUnknown: []string{"click"}},
+		{name: "operate version and click", alias: profile.ServerOperate, live: []string{"version", "click"}, allow: []string{"version", "click"}, want: []string{"version"}, wantUnknown: []string{"click"}},
+		{name: "scope write host only", alias: profile.ServerScope, live: []string{"write_host"}, allow: []string{"write_host"}, want: []string{}, wantUnknown: []string{"write_host"}},
+		{name: "live unknown without explicit allow", alias: profile.ServerOperate, live: []string{"unknown_upstream_tool"}, want: []string{}, wantUnknown: []string{"unknown_upstream_tool"}},
 	}
-	for _, tc := range cases {
-		t.Run(tc.alias, func(t *testing.T) {
-			got, err := Evaluate(tc.alias, profile.ServerConfig{Enabled: true}, tc.live)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := profile.ServerConfig{Enabled: true, ToolsAllow: tc.allow}
+			got, err := Evaluate(tc.alias, cfg, tc.live)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if len(got.Exposed) != 0 {
-				t.Fatalf("denied profile exposed %v", got.Exposed)
+			if !equalStrings(got.Exposed, tc.want) {
+				t.Fatalf("Exposed = %v, want %v", got.Exposed, tc.want)
 			}
-			got, err = Evaluate(tc.alias, profile.ServerConfig{Enabled: true, ToolsAllow: KnownTools(tc.alias), ToolsDeny: []string{"ports_suggest"}}, tc.live)
-			if err != nil {
-				t.Fatal(err)
-			}
-			for _, name := range got.Exposed {
-				if name == "click" || name == "write_host" || name == "ports_suggest" {
-					t.Fatalf("unsupported/denied tool exposed: %s", name)
-				}
+			if !equalStrings(got.Unknown, tc.wantUnknown) {
+				t.Fatalf("Unknown = %v, want %v", got.Unknown, tc.wantUnknown)
 			}
 		})
 	}
+}
+
+func equalStrings(got, want []string) bool {
+	if len(got) != len(want) {
+		return false
+	}
+	for i := range got {
+		if got[i] != want[i] {
+			return false
+		}
+	}
+	return true
 }

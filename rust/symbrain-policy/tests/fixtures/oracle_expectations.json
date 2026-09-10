@@ -1216,6 +1216,65 @@
       ]
     },
     {
+      "id": "pol_operate_allow_cannot_widen",
+      "input_server": "operate",
+      "input_config": {
+        "enabled": true,
+        "tools_allow": [
+          "version",
+          "click"
+        ]
+      },
+      "input_live_tools": [
+        "version",
+        "click"
+      ],
+      "success": true,
+      "server": "operate",
+      "enabled": true,
+      "exposed": [
+        "version"
+      ],
+      "unknown": [
+        "click"
+      ]
+    },
+    {
+      "id": "pol_scope_write_host_rejected",
+      "input_server": "scope",
+      "input_config": {
+        "enabled": true,
+        "tools_allow": [
+          "write_host"
+        ]
+      },
+      "input_live_tools": [
+        "write_host"
+      ],
+      "success": true,
+      "server": "scope",
+      "enabled": true,
+      "unknown": [
+        "write_host"
+      ]
+    },
+    {
+      "id": "pol_operate_unknown_without_allow",
+      "input_server": "operate",
+      "input_config": {
+        "enabled": true
+      },
+      "input_live_tools": [
+        "unknown_upstream_tool"
+      ],
+      "success": true,
+      "server": "operate",
+      "enabled": true,
+      "unknown": [
+        "unknown_upstream_tool"
+      ]
+    },
+    {
       "id": "pol_preset_eval_vault",
       "input_server": "vault",
       "input_config": {
