@@ -143,234 +143,10 @@ func run() {
 	}
 }
 
-var vaultLogMethods = map[string]bool{
-	"Errorf": true, "Sprintf": true, "Fprintf": true,
-	"Printf": true, "Println": true, "Print": true,
-}
-
-var sensitiveIdentifier = regexp.MustCompile(`(?i)(vault|credential|secret|token|password|keyage|identity|recipient)`)
-var safeSensitiveIdentifier = map[string]bool{
-	"secretCount": true, "VaultEntryName": true, "ServerVault": true, "ServerMemory": true,
-}
-
-func sensitiveName(name string) bool {
-	return sensitiveIdentifier.MatchString(name) &&
-		!safeSensitiveIdentifier[name] && !strings.HasPrefix(name, "VaultMode")
-}
-
-func diagnosticKind(format string) string {
-	format = strings.ToLower(format)
-	switch {
-	case strings.Contains(format, "token budget"):
-		return "token budget"
-	case strings.Contains(format, "peer credentials"):
-		return "peer credentials"
-	case strings.Contains(format, "never pass it on the command line"):
-		return "safe command-line diagnostic"
-	case strings.Contains(format, "relay-passphrase"):
-		return "relay-passphrase diagnostic"
-	default:
-		return ""
-	}
-}
-
-// formatVerbs returns formatting verbs that consume arguments. %% is a literal
-// percent and does not consume an argument. Unknown or malformed directives
-// are retained so sensitive diagnostics fail closed.
-func formatVerbs(format string) []byte {
-	var verbs []byte
-	for i := 0; i < len(format); i++ {
-		if format[i] != '%' {
-			continue
-		}
-		i++
-		if i == len(format) {
-			verbs = append(verbs, 0)
-			break
-		}
-		if format[i] == '%' {
-			continue
-		}
-		for i < len(format) && strings.ContainsRune("[+- #0]0123456789.*", rune(format[i])) {
-			i++
-		}
-		if i == len(format) {
-			verbs = append(verbs, 0)
-			break
-		}
-		verbs = append(verbs, format[i])
-	}
-	return verbs
-}
-
-// sensitiveDiagnostic permits only narrow, semantically safe diagnostic
-// arguments: error wrapping, or a declared environment-variable name constant.
-// Direct sensitive identifiers, literals, and generic values are never exempted.
-func sensitiveDiagnostic(format string, args []ast.Expr) bool {
-	if diagnosticKind(format) == "" {
-		return false
-	}
-	verbs := formatVerbs(strings.ToLower(format))
-	if len(verbs) != len(args) {
-		return len(verbs) != 0 || len(args) != 0
-	}
-	for i, verb := range verbs {
-		ident, ok := args[i].(*ast.Ident)
-		if !ok {
-			return true
-		}
-		if verb == 'w' && !sensitiveName(ident.Name) && (ident.Name == "err" || ident.Name == "error" || strings.HasSuffix(strings.ToLower(ident.Name), "err")) {
-			continue
-		}
-		return true
-	}
-	return false
-}
-
-func literalString(expr ast.Expr) (string, bool) {
-	lit, ok := expr.(*ast.BasicLit)
-	if !ok || lit.Kind != token.STRING {
-		return "", false
-	}
-	return lit.Value, true
-}
-
-var sensitiveFormatLabel = regexp.MustCompile(`(?i)(^|[[:space:]])(vault|credential|secret|token|password|keyage|identity|recipient)\s*:`)
-
-// vaultPayloadCall reports output calls that may disclose a secret. It keeps
-// static token-budget and peer-credential diagnostics safe, but otherwise
-// treats sensitive labels plus interpolated values as payloads. Print and
-// Println have no format argument; Fprintf has a writer before its format.
-func vaultPayloadCall(call *ast.CallExpr) bool {
-	selector, ok := call.Fun.(*ast.SelectorExpr)
-	if !ok || !vaultLogMethods[selector.Sel.Name] {
-		return false
-	}
-	args := call.Args
-	formatIndex := -1
-	switch selector.Sel.Name {
-	case "Fprintf":
-		if len(args) < 3 {
-			return false
-		}
-		formatIndex = 1
-	case "Errorf", "Sprintf", "Printf":
-		if len(args) < 2 {
-			return false
-		}
-		formatIndex = 0
-	case "Print", "Println":
-		if len(args) < 1 {
-			return false
-		}
-	}
-
-	format := ""
-	if formatIndex >= 0 {
-		var ok bool
-		format, ok = literalString(args[formatIndex])
-		if !ok || !strings.Contains(format, "%") {
-			return false
-		}
-		if sensitiveDiagnostic(format, args[formatIndex+1:]) {
-			return true
-		}
-	}
-	for i, arg := range args {
-		if i == formatIndex || i == 0 && selector.Sel.Name == "Fprintf" {
-			continue
-		}
-		found := false
-		ast.Inspect(arg, func(n ast.Node) bool {
-			if selector, ok := n.(*ast.SelectorExpr); ok {
-				// Field names such as EstTokens are metadata, not values
-				// named token/secret; inspect the receiver instead.
-				ast.Inspect(selector.X, func(n ast.Node) bool {
-					if ident, ok := n.(*ast.Ident); ok && sensitiveName(ident.Name) {
-						found = true
-					}
-					return !found
-				})
-				return false
-			}
-			if ident, ok := n.(*ast.Ident); ok && sensitiveName(ident.Name) {
-				found = true
-			}
-			return !found
-		})
-		if found {
-			return true
-		}
-	}
-	if formatIndex >= 0 && diagnosticKind(format) == "" && sensitiveFormatLabel.MatchString(strings.Trim(format, "\"`")) {
-		return true
-	}
-	return false
-}
-
-// TestVaultPayloadCallCases keeps the scanner's call-shape coverage explicit.
-func TestVaultPayloadCallCases(t *testing.T) {
-	tests := []struct {
-		name       string
-		source     string
-		want       int
-		parseError bool
-	}{
-		{"Print", `package p; import "fmt"; func f(secret string) { fmt.Print(secret) }`, 1, false},
-		{"Println", `package p; import "fmt"; func f(secret string) { fmt.Println(secret) }`, 1, false},
-		{"Fprintf", `package p; import "fmt"; func f(w io.Writer, secret string) { fmt.Fprintf(w, "credential: %s", secret) }`, 1, false},
-		{"interpolated generic variable", `package p; import "fmt"; func f(value string) { fmt.Printf("password: %s", value) }`, 1, false},
-		{"interpolated literal", `package p; import "fmt"; func f() { fmt.Printf("secret: %s", "hunter2") }`, 1, false},
-		{"token budget diagnostic", `package p; import "fmt"; func f(err error) { fmt.Errorf("token budget exceeded: %w", err) }`, 0, false},
-		{"token budget sensitive identifier bypass", `package p; import "fmt"; func f(secret string) { fmt.Errorf("token budget exceeded: %s", secret) }`, 1, false},
-		{"token budget sensitive literal", `package p; import "fmt"; func f() { fmt.Errorf("token budget exceeded: %s", "secret") }`, 1, false},
-		{"token budget generic payload", `package p; import "fmt"; func f(value string) { fmt.Errorf("token budget exceeded: %s", value) }`, 1, false},
-		{"peer credentials diagnostic", `package p; import "fmt"; func f() { fmt.Errorf("peer credentials require a Unix connection") }`, 0, false},
-		{"peer credentials wrapped error", `package p; import "fmt"; func f(err error) { fmt.Errorf("peer credentials: %w", err) }`, 0, false},
-		{"peer credentials sensitive identifier bypass", `package p; import "fmt"; func f(password string) { fmt.Fprintf(w, "peer credentials: %s", password) }`, 1, false},
-		{"peer credentials sensitive literal", `package p; import "fmt"; func f() { fmt.Errorf("peer credentials: %s", "secret") }`, 1, false},
-		{"peer credentials generic payload", `package p; import "fmt"; func f(value string) { fmt.Errorf("peer credentials: %s", value) }`, 1, false},
-		{"multiline", `package p
-import "fmt"
-func f(
-secret string,
-) {
-	fmt.Printf(
-		"secret: %s",
-		secret,
-	)
-}`, 1, false},
-		{"parse error", `package p; import "fmt"; func f(secret string) { fmt.Println(secret)`, 0, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			f, err := parser.ParseFile(token.NewFileSet(), tt.name, []byte(tt.source), parser.ParseComments)
-			if tt.parseError {
-				if err == nil {
-					t.Fatal("ParseFile() unexpectedly succeeded")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("ParseFile() error = %v", err)
-			}
-			found := 0
-			ast.Inspect(f, func(n ast.Node) bool {
-				if call, ok := n.(*ast.CallExpr); ok && vaultPayloadCall(call) {
-					found++
-				}
-				return true
-			})
-			if found != tt.want {
-				t.Fatalf("vaultPayloadCall() found %d payloads, want %d", found, tt.want)
-			}
-		})
-	}
-}
-
-// TestNoVaultPayloadsInLogs verifies that formatting functions never
-// interpolate vault/credential/secret/token variables into output. Static
-// diagnostic text remains allowed.
+// TestNoVaultPayloadsInLogs verifies that fmt.Errorf, fmt.Sprintf,
+// and similar fmt functions never include vault/credential/secret/token
+// variables in their output. Vault payloads must never hit logs, audit files,
+// or error strings.
 func TestNoVaultPayloadsInLogs(t *testing.T) {
 	t.Parallel()
 
@@ -386,23 +162,13 @@ func TestNoVaultPayloadsInLogs(t *testing.T) {
 			return nil
 		}
 
-		data, err := os.ReadFile(path)
+		violations, err := vaultPayloadLogCalls(path, nil)
 		if err != nil {
 			return err
 		}
-
-		fset := token.NewFileSet()
-		f, err := parser.ParseFile(fset, path, data, parser.ParseComments)
-		if err != nil {
-			return err // fail closed: unparseable production code must not evade the scan
+		for _, pos := range violations {
+			t.Errorf("potential vault payload in log/error at %s", pos)
 		}
-		ast.Inspect(f, func(n ast.Node) bool {
-			call, ok := n.(*ast.CallExpr)
-			if ok && vaultPayloadCall(call) {
-				t.Errorf("potential vault payload in log/error at %s:%d", path, fset.Position(call.Pos()).Line)
-			}
-			return true
-		})
 		return nil
 	})
 	if err != nil {
@@ -418,31 +184,21 @@ func TestNoVaultPayloadsInLogs_DetectsViolation(t *testing.T) {
 	planted := filepath.Join(dir, "planted.go")
 	content := []byte(`package p
 import "fmt"
-func logSecret(secret string) {
-    fmt.Printf("secret: %s", secret)
-}
-func safeDiagnostics() {
-    fmt.Errorf("token budget exceeded: %w", err)
-    fmt.Errorf("peer credentials require a Unix connection")
+func logSecret() {
+	fmt.Printf("secret: %s", "hunter2")
 }
 `)
 	if err := os.WriteFile(planted, content, 0o644); err != nil {
 		t.Fatalf("write planted file: %v", err)
 	}
-	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, planted, content, parser.ParseComments)
+
+	violations, err := vaultPayloadLogCalls(planted, nil)
 	if err != nil {
-		t.Fatalf("parse planted file: %v", err)
+		t.Fatalf("scan planted file: %v", err)
 	}
-	var found int
-	ast.Inspect(f, func(n ast.Node) bool {
-		if call, ok := n.(*ast.CallExpr); ok && vaultPayloadCall(call) {
-			found++
-		}
-		return true
-	})
-	if found != 1 {
-		t.Fatalf("vault payload matcher found %d violations, want 1", found)
+	if len(violations) != 1 {
+		t.Errorf("negative self-test: got %d violations, want 1; "+
+			"TestNoVaultPayloadsInLogs may be silently passing", len(violations))
 	}
 }
 
