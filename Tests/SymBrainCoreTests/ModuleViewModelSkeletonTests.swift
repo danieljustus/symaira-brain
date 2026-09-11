@@ -158,6 +158,11 @@ private struct StubVaultClient: VaultClientProtocol {
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
         VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
     }
+    func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String { "generated-fixture" }
+    func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: nil, results: []) }
+    func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: "fixture", results: []) }
+    func intakeReviewBatches(profile: String?) async throws -> [String] { ["fixture"] }
+    func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws {}
 }
 
 @MainActor
@@ -187,6 +192,11 @@ private final class ControlledVaultClient: VaultClientProtocol {
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
         VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
     }
+    func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String { "generated-fixture" }
+    func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: nil, results: []) }
+    func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: "fixture", results: []) }
+    func intakeReviewBatches(profile: String?) async throws -> [String] { ["fixture"] }
+    func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws {}
 
     func resolve(path: String, detail: VaultEntryDetail) {
         guard let index = pending.firstIndex(where: { $0.path == path }) else { return }
@@ -463,4 +473,72 @@ extension ModuleViewModelSkeletonTests {
     }
 
 }
+
+#endif
+
+#if os(macOS)
+
+@Test func vaultClientGenerationAndIntakeUseExactCLIContracts() async throws {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let argsFile = dir.appendingPathComponent("args")
+    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"\(argsFile.path)\"\ncase \"$3\" in generate) printf 'fixture-password\\n';; intake) printf '%s' '{\"results\":[]}' ;; esac\n"
+    let binary = dir.appendingPathComponent("symvault")
+    try Data(script.utf8).write(to: binary)
+    try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+    let client = VaultClient(userOverride: binary)
+
+    let generated = try await client.generatePassword(length: 32, symbols: true)
+    #expect(generated == "fixture-password")
+    let generationArgs = try String(contentsOf: argsFile).split(separator: "\n").map(String.init)
+    #expect(generationArgs == ["--color", "never", "generate", "--length", "32", "--symbols"])
+
+    _ = try await client.intakePreview(files: [URL(fileURLWithPath: "/tmp/credentials.env")])
+    let intakeArgs = try String(contentsOf: argsFile).split(separator: "\n").map(String.init)
+    #expect(intakeArgs == ["--color", "never", "intake", "/tmp/credentials.env", "--dry-run", "--json"])
+}
+
+@MainActor
+@Test func generatedPasswordIsClearedAfterViewModelOperation() async {
+    let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "x", modified: nil, fields: [:])))
+    await vm.generatePassword(length: 24, symbols: true)
+    #expect(vm.generatedPassword.isEmpty)
+    #expect(vm.createValue == "generated-fixture")
+}
+
+@Test func vaultClientRejectsPasswordLengthAboveServiceMaximumBeforeDispatch() async {
+    let client = VaultClient(userOverride: URL(fileURLWithPath: "/tmp/not-a-real-symvault"))
+    do {
+        _ = try await client.generatePassword(length: 1025, symbols: false)
+        Issue.record("accepted password length above symvault MaxPasswordLength")
+    } catch let error as CLIRunnerError {
+        guard case .invalidJSON(let description) = error else {
+            Issue.record("wrong error for over-limit generation: \(error)")
+            return
+        }
+        #expect(description == "password length must be between 1 and 1024")
+    } catch {
+        Issue.record("wrong error type for over-limit generation: \(error)")
+    }
+}
+
+@Test func vaultClientRejectsMultipleOCRInputsBeforeDispatch() async {
+    let client = VaultClient(userOverride: URL(fileURLWithPath: "/tmp/not-a-real-symvault"))
+    let first = URL(fileURLWithPath: "/tmp/ocr-one.txt")
+    let second = URL(fileURLWithPath: "/tmp/ocr-two.txt")
+    do {
+        _ = try await client.intakeStage(files: [URL(fileURLWithPath: "/tmp/source.png")], ocrTexts: [first: first, second: second])
+        Issue.record("accepted multiple OCR inputs")
+    } catch let error as CLIRunnerError {
+        guard case .invalidJSON(let description) = error else {
+            Issue.record("wrong error for multiple OCR inputs: \(error)")
+            return
+        }
+        #expect(description == "symvault intake accepts one --ocr-text file per invocation")
+    } catch {
+        Issue.record("wrong error type for multiple OCR inputs: \(error)")
+    }
+}
+
 #endif

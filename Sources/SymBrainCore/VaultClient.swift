@@ -204,6 +204,19 @@ public struct VaultClient: Sendable {
             confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
     }
 
+    /// Generate a password through the Vault service with explicit options.
+    public func generatePassword(length: Int, symbols: Bool, profile: String? = nil) async throws -> String {
+        guard (1...1024).contains(length) else {
+            throw CLIRunnerError.invalidJSON(description: "password length must be between 1 and 1024")
+        }
+        var command = ["generate", "--length", String(length)]
+        if symbols { command.append("--symbols") }
+        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: command), timeout: 10)
+        let password = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !password.isEmpty else { throw CLIRunnerError.invalidJSON(description: "symvault returned an empty generated password") }
+        return password
+    }
+
     /// Delete an entry with symvault's explicit non-interactive confirmation flag, then verify absence.
     public func delete(path: String, profile: String? = nil) async throws -> VaultDeleteConfirmation {
         _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["delete", path, "--yes"]), timeout: 60)
@@ -260,18 +273,15 @@ public struct VaultClient: Sendable {
     }
 
     private static func validPath(_ path: String) -> Bool {
-        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/") else { return false }
+        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/"),
+              !path.unicodeScalars.contains(where: { $0.value < 0x20 || $0.value == 0x7F }) else { return false }
         return path.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
-            !$0.isEmpty && $0.allSatisfy(validTokenCharacter)
+            !$0.isEmpty && $0 != "." && $0 != ".."
         }
     }
 
     private static func validField(_ field: String) -> Bool {
-        !field.isEmpty && field.allSatisfy(validTokenCharacter)
-    }
-
-    private static func validTokenCharacter(_ character: Character) -> Bool {
-        character.isLetter || character.isNumber || character == "_" || character == "-"
+        !field.isEmpty && !field.unicodeScalars.contains(where: { $0.value < 0x20 || $0.value == 0x7F })
     }
 
     private func decodeList<E: Decodable>(
@@ -292,6 +302,50 @@ public struct VaultClient: Sendable {
         } catch {
             throw CLIRunnerError.invalidJSON(description: String(describing: error))
         }
+    }
+
+
+    /// Preview file parsing without mutating the Vault.
+    public func intakePreview(files: [URL], profile: String? = nil) async throws -> VaultIntakeResponse {
+        try await decodeIntake(arguments: arguments(profile: profile, command: ["intake"] + files.map(\.path) + ["--dry-run", "--json"]), timeout: 30)
+    }
+
+    /// Stage files into Vault quarantine for human review.
+    public func intakeStage(files: [URL], ocrTexts: [URL: URL] = [:], moveToTrash: Bool = false, profile: String? = nil) async throws -> VaultIntakeResponse {
+        var command = ["intake"] + files.map(\.path) + ["--json"]
+        if moveToTrash { command.append("--move-to-trash") }
+        guard ocrTexts.count <= 1 else {
+            throw CLIRunnerError.invalidJSON(description: "symvault intake accepts one --ocr-text file per invocation")
+        }
+        if let ocr = ocrTexts.values.first {
+            command += ["--ocr-text", ocr.path]
+        }
+        return try await decodeIntake(arguments: arguments(profile: profile, command: command), timeout: 120)
+    }
+
+    public func intakeReviewBatches(profile: String? = nil) async throws -> [String] {
+        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["import", "review", "list"]), timeout: 15)
+        let text = String(data: data, encoding: .utf8) ?? ""
+        return text.split(separator: "\n").compactMap { line in
+            let id = line.split(separator: " ").first.map(String.init) ?? ""
+            return id.isEmpty ? nil : id
+        }
+    }
+
+    /// Promotion is intentionally separate and requires an explicit import id from review.
+    public func intakePromote(importID: String, overwrite: Bool = false, profile: String? = nil) async throws {
+        guard !importID.isEmpty, !importID.contains(where: { $0.isWhitespace || $0 == "/" }) else {
+            throw CLIRunnerError.invalidJSON(description: "invalid intake import id")
+        }
+        var command = ["import", "review", "promote", importID]
+        if overwrite { command.append("--overwrite") }
+        _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: command), timeout: 60)
+    }
+
+    private func decodeIntake(arguments: [String], timeout: Double) async throws -> VaultIntakeResponse {
+        let data = try await runner.runChecked(try executable(), arguments: arguments, timeout: timeout)
+        do { return try JSONDecoder().decode(VaultIntakeResponse.self, from: data) }
+        catch { throw CLIRunnerError.invalidJSON(description: String(describing: error)) }
     }
 }
 #endif

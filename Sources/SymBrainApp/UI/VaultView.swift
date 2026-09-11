@@ -12,6 +12,9 @@ struct VaultView: View {
     @StateObject private var vm = VaultViewModel()
     @State private var tab: Tab = .entries
     @State private var deletePath: String?
+    @State private var intakePath = ""
+    @State private var passwordLength = 24
+    @State private var passwordSymbols = true
 
     enum Tab: String, CaseIterable, Identifiable {
         case entries = "Entries"
@@ -218,6 +221,17 @@ struct VaultView: View {
                         .textFieldStyle(.roundedBorder)
                     SecureField("Secret value", text: $vm.createValue)
                         .textFieldStyle(.roundedBorder)
+                    Stepper("\(passwordLength)", value: $passwordLength, in: 12...128, step: 4)
+                        .frame(width: 90)
+                    Toggle("Symbols", isOn: $passwordSymbols)
+                        .toggleStyle(.checkbox)
+                    Button {
+                        Task { await vm.generatePassword(length: passwordLength, symbols: passwordSymbols) }
+                    } label: {
+                        Label("Generate", systemImage: "wand.and.stars")
+                    }
+                    .symairaButtonStyle(.secondary)
+                    .disabled(vm.isGenerating)
                     Button(action: { Task { await vm.createEntry() } }) {
                         Label("Create", systemImage: "plus")
                     }
@@ -250,6 +264,8 @@ struct VaultView: View {
                     }
                 }
             }
+
+            intakeSection
 
             HStack(spacing: SymairaSpacing.medium) {
                 TextField("Search entries…", text: $vm.searchText)
@@ -455,6 +471,40 @@ struct VaultView: View {
             .help(field.isSensitive && !revealed ? "Reveal value before copying" : "Copy value")
         }
         .padding(.vertical, SymairaSpacing.xSmall)
+    }
+
+    private var intakeSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+            Text("Import for review").font(.headline)
+            HStack {
+                TextField("File path", text: $intakePath).textFieldStyle(.roundedBorder)
+                Button("Add") {
+                    let path = intakePath.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !path.isEmpty { vm.setIntakeFiles(vm.intakeFiles + [URL(fileURLWithPath: path)]); intakePath = "" }
+                }
+                Button("Preview") { Task { await vm.previewIntake() } }.disabled(vm.intakeFiles.isEmpty || vm.isLoading)
+                Button("Stage") { Task { await vm.stageIntake() } }.disabled(vm.intakeFiles.isEmpty || vm.isLoading)
+            }
+            if !vm.intakeFiles.isEmpty {
+                Text(vm.intakeFiles.map(\.path).joined(separator: ", ")).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+            }
+            if !vm.intakeDrafts.isEmpty {
+                ForEach(vm.intakeDrafts) { draft in
+                    HStack {
+                        Text(draft.sourceName)
+                        Text("→ \(draft.targetPath)").foregroundStyle(SymairaTheme.textSecondary)
+                        Text(draft.fields.keys.sorted().joined(separator: ", ")).font(.caption)
+                    }
+                }
+                Button(vm.intakeReviewComplete ? "Reviewed" : "Mark reviewed") { vm.markIntakeReviewed() }
+                    .disabled(vm.intakeReviewComplete)
+                Button("Promote reviewed batch") { Task { await vm.promoteIntake() } }
+                    .disabled(!vm.intakeReviewComplete || vm.intakeImportID == nil || vm.isLoading)
+            }
+            if case .failed(let message) = vm.intakePhase {
+                SymairaNotice(title: "Import failed", message: message, tone: .critical)
+            }
+        }
     }
 
     // MARK: - Broker activity
