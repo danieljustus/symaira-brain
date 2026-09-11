@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"sync/atomic"
 
@@ -38,8 +39,11 @@ const clientVersion = "dev"
 // gracefully degraded server, per AGENTS.md.
 func Discover(binaryName, override string) (string, error) {
 	if override != "" {
-		if _, err := os.Stat(override); err != nil {
-			return "", fmt.Errorf("broker: configured binary_path %q for %q: %w", override, binaryName, err)
+		if !usableExecutable(override) {
+			if _, err := os.Stat(override); err != nil {
+				return "", fmt.Errorf("broker: configured binary_path %q for %q: %w", override, binaryName, err)
+			}
+			return "", fmt.Errorf("broker: configured binary_path %q for %q is not an executable regular file", override, binaryName)
 		}
 		return override, nil
 	}
@@ -47,10 +51,14 @@ func Discover(binaryName, override string) (string, error) {
 	// Check managed directory before PATH
 	if managedDir, err := xdg.ManagedBinDir(); err == nil {
 		managedPath := filepath.Join(managedDir, binaryName)
-		if info, err := os.Stat(managedPath); err == nil && info.Mode().IsRegular() {
-			// Verify it's executable
-			if info.Mode().Perm()&0111 != 0 {
-				return managedPath, nil
+		if usableExecutable(managedPath) {
+			return managedPath, nil
+		}
+		// On Windows, resolve the managed path using os/exec's documented
+		// PATHEXT handling (for example, symvault -> symvault.exe).
+		if runtime.GOOS == "windows" {
+			if resolved, err := exec.LookPath(managedPath); err == nil && usableExecutable(resolved) {
+				return resolved, nil
 			}
 		}
 	}
@@ -60,6 +68,17 @@ func Discover(binaryName, override string) (string, error) {
 		return "", fmt.Errorf("broker: %q not found on PATH or in managed directory: %w", binaryName, err)
 	}
 	return path, nil
+}
+
+// usableExecutable applies the broker's cross-platform file contract. Unix
+// requires a regular file with an execute bit; Windows relies on the
+// operating system's executable resolution and only requires a regular file.
+func usableExecutable(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil || !info.Mode().IsRegular() {
+		return false
+	}
+	return runtime.GOOS == "windows" || info.Mode().Perm()&0111 != 0
 }
 
 // Options configures Spawn.

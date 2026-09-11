@@ -7,6 +7,8 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -448,4 +450,86 @@ func TestDiscover_PathLookup(t *testing.T) {
 	if err == nil {
 		t.Fatal("Discover() error = nil, want error for a binary absent from PATH")
 	}
+}
+
+func TestDiscover_OverrideRequiresExecutableRegularFile(t *testing.T) {
+	dir := t.TempDir()
+	directory := filepath.Join(dir, "directory")
+	if err := os.Mkdir(directory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	nonExecutable := filepath.Join(dir, "not-executable")
+	if err := os.WriteFile(nonExecutable, []byte("#!/bin/sh\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Discover("symcockpit", directory); err == nil {
+		t.Errorf("Discover(%q) error = nil, want invalid override error", directory)
+	}
+	if runtime.GOOS != "windows" {
+		if _, err := Discover("symcockpit", nonExecutable); err == nil {
+			t.Errorf("Discover(%q) error = nil, want invalid override error", nonExecutable)
+		}
+	}
+}
+
+func TestDiscover_ManagedDirectorySelection(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("PATH", "")
+	binDir := filepath.Join(home, ".symaira", "bin")
+	if err := os.MkdirAll(binDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	name := "symvault"
+	if runtime.GOOS == "windows" {
+		name += ".exe"
+	}
+	managed := filepath.Join(binDir, name)
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := copyFile(self, managed); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(managed, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Discover("symvault", "")
+	if err != nil {
+		t.Fatalf("Discover() managed binary error = %v", err)
+	}
+	if got != managed {
+		t.Fatalf("Discover() = %q, want managed path %q", got, managed)
+	}
+}
+
+func TestDiscover_RegularFilePlatformContract(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "fixture.exe")
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := copyFile(self, path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(path, 0o666); err != nil {
+		t.Fatal(err)
+	}
+	_, err = Discover("fixture", path)
+	if runtime.GOOS == "windows" {
+		if err != nil {
+			t.Fatalf("Windows .exe regular file rejected: %v", err)
+		}
+	} else if err == nil {
+		t.Fatal("Unix non-executable regular file accepted")
+	}
+}
+
+func copyFile(src, dst string) error {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(dst, data, 0o755)
 }

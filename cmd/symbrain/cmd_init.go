@@ -49,6 +49,12 @@ enabled = true
 #
 # [servers.usage]
 # binary_path = ""
+#
+# [servers.operate]
+# binary_path = "/opt/symoperate/symoperate"
+#
+# [servers.scope]
+# binary_path = "/opt/symscope/symscope"
 
 # Optional capability modules (PB-2026-09-09). Every module defaults to
 # disabled: enabling one only changes what 'symbrain setup'/'symbrain
