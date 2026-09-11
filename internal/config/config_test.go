@@ -203,3 +203,33 @@ func TestLoad_InvalidTOMLReturnsExitNoInput(t *testing.T) {
 		t.Error("FormatCLIError(err) is empty, want a clear message")
 	}
 }
+
+func TestLoad_OptionalModuleBinaryOverrides(t *testing.T) {
+	home := withHome(t)
+	writeConfig(t, home, `
+[modules]
+operate = true
+scope = true
+
+[servers.operate]
+binary_path = "/opt/symoperate"
+
+[servers.scope]
+binary_path = "/opt/symscope"
+`)
+	t.Setenv("SYMBRAIN_SERVERS_SCOPE_BINARY_PATH", "/env/symscope")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if !cfg.Modules.Operate || !cfg.Modules.Scope {
+		t.Fatalf("Modules = %+v, want operate and scope enabled", cfg.Modules)
+	}
+	if cfg.Servers.Operate.BinaryPath != "/opt/symoperate" {
+		t.Errorf("Servers.Operate.BinaryPath = %q, want /opt/symoperate", cfg.Servers.Operate.BinaryPath)
+	}
+	if cfg.Servers.Scope.BinaryPath != "/env/symscope" {
+		t.Errorf("Servers.Scope.BinaryPath = %q, want /env/symscope", cfg.Servers.Scope.BinaryPath)
+	}
+}

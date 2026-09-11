@@ -93,13 +93,6 @@ func resolveServeProfile(name, file string) (*profile.Profile, error) {
 func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaultAgent string) map[string]*broker.ManagedServer {
 	servers := make(map[string]*broker.ManagedServer)
 
-	type serverDef struct {
-		alias      string
-		binaryName string
-		override   string
-		args       []string
-	}
-
 	vaultArgs := []string{"serve", "--allow-locked"}
 	if vaultAgent != "" {
 		vaultArgs = []string{"serve", "--stdio", "--agent", vaultAgent, "--allow-locked"}
@@ -109,10 +102,18 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 		{"vault", "symvault", cfg.Servers.Vault.BinaryPath, vaultArgs},
 	}
 	if cfg.Modules.Operate && p.Server(profile.ServerOperate).Enabled {
-		defs = append(defs, serverDef{profile.ServerOperate, "symcockpit", "", []string{"operate", "serve"}})
+		if def, err := optionalServerDef(profile.ServerOperate, "symoperate", "operate", cfg.Servers.Operate.BinaryPath); err == nil {
+			defs = append(defs, def)
+		} else {
+			fmt.Fprintf(stderr, "symbrain mcp: %s: %v\n", profile.ServerOperate, err)
+		}
 	}
 	if cfg.Modules.Scope && p.Server(profile.ServerScope).Enabled {
-		defs = append(defs, serverDef{profile.ServerScope, "symcockpit", "", []string{"scope", "serve"}})
+		if def, err := optionalServerDef(profile.ServerScope, "symscope", "scope", cfg.Servers.Scope.BinaryPath); err == nil {
+			defs = append(defs, def)
+		} else {
+			fmt.Fprintf(stderr, "symbrain mcp: %s: %v\n", profile.ServerScope, err)
+		}
 	}
 
 	for _, d := range defs {
@@ -173,6 +174,33 @@ func buildServers(p *profile.Profile, cfg *config.Config, stderr io.Writer, vaul
 	}
 
 	return servers
+}
+
+// optionalServerDef prefers the consolidated direct binary when no explicit
+// override is configured. If the direct binary is unavailable, it falls back
+// to the legacy symcockpit subcommand. An explicit override is authoritative:
+// an invalid override degrades the module and never falls back.
+type serverDef struct {
+	alias      string
+	binaryName string
+	override   string
+	args       []string
+}
+
+func optionalServerDef(alias, directBinary, cockpitCommand, override string) (serverDef, error) {
+	if override != "" {
+		if _, err := broker.Discover(directBinary, override); err != nil {
+			return serverDef{}, fmt.Errorf("invalid explicit binary override: %w", err)
+		}
+		return serverDef{alias, directBinary, override, []string{"serve"}}, nil
+	}
+	if path, err := broker.Discover(directBinary, ""); err == nil {
+		return serverDef{alias, directBinary, path, []string{"serve"}}, nil
+	}
+	if path, err := broker.Discover("symcockpit", ""); err == nil {
+		return serverDef{alias, "symcockpit", path, []string{cockpitCommand, "serve"}}, nil
+	}
+	return serverDef{}, fmt.Errorf("neither %s nor symcockpit was found", directBinary)
 }
 
 // buildMemoryServer opens the embedded memory runtime (config + SQLite DB
