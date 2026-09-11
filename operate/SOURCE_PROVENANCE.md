@@ -7,13 +7,16 @@ unlike the Scope intake (`scope/SOURCE_PROVENANCE.md`), which had two
 intentional, reviewed changes. This copy makes none.
 
 - **Source repository:** `symaira-cockpit`
-- **Source commit:** `c22a4366a051274ae1651b431ffaf06ae23aa37d`
+- **Source commit:** `528985cc21efbd5318e781954c29aec0680a3874`
+- **Source subject:** `test(operate): make permission probes injectable (#265)`
+- **Resync:** 2026-09-11; native permission probes remain the production
+  default, while injected fixtures allow device-free denial tests.
 - **Source path:** `operate/`
 - **Receiving path:** `symaira-brain/operate/`
 - **Support source:** `history/` at the same source commit, already received
   at `symaira-brain/history/` by the Scope intake (#551) — Operate depends on
   the same `SymCockpitHistory` product, no second copy.
-- **Imported tracked files:** 79 under `operate/` (`Package.swift`, `.gitignore`,
+- **Imported tracked files:** 80 under `operate/` (`Package.swift`, `.gitignore`,
   `README.md`, `Sources/`, `Tests/`, and three of the four `docs/*.md` files —
   `docs/assets/social-preview.png` and the repo-root boilerplate
   `CHANGELOG.md`/`LICENSE`/`NOTICE`/`Makefile`/`AGENTS.md`/`.swiftlint.yml`/
@@ -44,9 +47,11 @@ live desktop automation as a migration smoke test." `Tests/SymOperateCoreTests`
 and `Tests/SymOperateSmokeTests` exercise real ScreenCaptureKit/Accessibility
 APIs (with graceful `permissionDenied`/`unavailable` fallbacks written for a
 sandboxed CI runner with no TCC grants, but still real device I/O attempts).
-The `operate-native-swiftpm` CI job therefore only does `swift build
---build-tests` (compiles the package and every test target, catching source
-and API-surface errors, without executing any test) plus protocol-level
+The `operate-native-swiftpm` CI job compiles the package and every test
+target with `swift build --build-tests`, then executes only
+`PermissionServiceTests`. These tests inject every TCC/prompt/Settings
+operation, including the MCP `permissions_status` route; no native
+permission request or desktop capture/input runs. CI also performs protocol-level
 checks that touch no device state: CLI `--version --json` output and stderr
 hygiene, and native MCP `initialize`/`tools/list` over stdio. Running the full
 live-automation test suite is left to a later, explicitly authorized
