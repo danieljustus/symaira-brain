@@ -11,7 +11,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
@@ -109,19 +108,25 @@ func validVaultPath(path string) bool {
 	if path == "" || strings.HasPrefix(path, "/") || strings.HasSuffix(path, "/") {
 		return false
 	}
+	for _, r := range path {
+		if r == 0 || r < 0x20 {
+			return false
+		}
+	}
 	for _, part := range strings.Split(path, "/") {
-		if part == "" || !validVaultToken(part) {
+		if part == "" || part == ".." {
 			return false
 		}
 	}
 	return true
 }
 
-func validVaultField(field string) bool { return field != "" && validVaultToken(field) }
-
-func validVaultToken(value string) bool {
-	for _, r := range value {
-		if !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' || r == '-') {
+func validVaultField(field string) bool {
+	if field == "" {
+		return false
+	}
+	for _, r := range field {
+		if r == 0 || r < 0x20 {
 			return false
 		}
 	}

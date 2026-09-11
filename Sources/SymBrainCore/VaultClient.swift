@@ -254,7 +254,7 @@ public struct VaultClient: Sendable {
 
     private static func validateSingleLine(_ value: String) throws {
         guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
-        guard !value.contains(where: { $0 == "\n" || $0 == "\r" }) else {
+        guard !value.unicodeScalars.contains(where: { $0.value == 0x0A || $0.value == 0x0D }) else {
             throw CLIRunnerError.invalidJSON(description: "multiline secret values are not supported")
         }
     }

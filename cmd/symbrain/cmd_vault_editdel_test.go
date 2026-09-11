@@ -150,10 +150,19 @@ func TestCmdVaultSetRejectsInvalidTargetBeforeReadingStdin(t *testing.T) {
 	os.Stdin = reader
 	t.Cleanup(func() { os.Stdin = old; reader.Close(); writer.Close() })
 	var out, stderr bytes.Buffer
-	if code := cmdVaultSet([]string{"work/item.not.valid"}, &out, &stderr); code == 0 {
+	if code := cmdVaultSet([]string{"work/item."}, &out, &stderr); code == 0 {
 		t.Fatal("invalid target accepted")
 	}
 	if !strings.Contains(stderr.String(), "<path.field>") {
 		t.Fatalf("wrong usage: %q", stderr.String())
+	}
+}
+
+func TestParseVaultFieldTargetPreservesLegitimatePathCharacters(t *testing.T) {
+	for _, query := range []string{"work/github.com/My Login.password", "work/example.co.uk/api-key"} {
+		path, field, ok := parseVaultFieldTarget(query)
+		if !ok || path == "" || field == "" {
+			t.Fatalf("parseVaultFieldTarget(%q) rejected legitimate target", query)
+		}
 	}
 }

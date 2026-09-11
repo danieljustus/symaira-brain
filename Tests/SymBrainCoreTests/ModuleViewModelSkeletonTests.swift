@@ -381,13 +381,26 @@ extension ModuleViewModelSkeletonTests {
         #expect(!FileManager.default.fileExists(atPath: marker.path))
     }
 
+    @Test func vaultClientRejectsCRLFCRAndLFBeforeDispatchForCreateAndSet() async throws {
+        let missingBinary = URL(fileURLWithPath: "/definitely-missing-symvault-\(UUID().uuidString)")
+        let client = VaultClient(userOverride: missingBinary)
+        for value in ["line-one\r\nline-two", "line-one\rline-two", "line-one\nline-two"] {
+            await #expect(throws: CLIRunnerError.self) {
+                _ = try await client.create(path: "work/item", value: value)
+            }
+            await #expect(throws: CLIRunnerError.self) {
+                _ = try await client.set(path: "work/item", field: "password", value: value)
+            }
+        }
+    }
+
     @Test func vaultClientSubprocessValidatesAllFiveFieldsAndReadback() async throws {
         let cases = [("password", "pw"), ("api_key", "api"), ("token", "tok"), ("private_key", "key"), ("database_url", "db")]
         for (field, value) in cases {
             let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             defer { try? FileManager.default.removeItem(at: dir) }
-            let script = "#!/bin/sh\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nif [ \"$3\" = get ]; then printf '%s' '{\"path\":\"work/item\",\"fields\":{\"\(field)\":\"\(value)\"}}'; exit 0; fi\nexit 1\n"
+            let script = "#!/bin/sh\nif [ \"$3\" = set ]; then [ \"$4\" = \"work/item.\(field)\" ] || exit 3; tmp=\"$TMPDIR/symvault-input.$$\"; cat >\"$tmp\"; printf '%s\n' \"\(value)\" | cmp -s - \"$tmp\" || exit 4; rm -f \"$tmp\"; exit 0; fi\nif [ \"$3\" = get ]; then [ \"$4\" = work/item ] || exit 5; printf '%s' '{\"path\":\"work/item\",\"fields\":{\"\(field)\":\"\(value)\"}}'; exit 0; fi\nexit 1\n"
             let binary = dir.appendingPathComponent("symvault")
             try script.data(using: .utf8)!.write(to: binary)
             try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
