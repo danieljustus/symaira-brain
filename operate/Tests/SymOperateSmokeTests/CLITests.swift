@@ -94,4 +94,58 @@ final class CLITests: XCTestCase {
         XCTAssertNotNil(json, "permissions grant should emit valid JSON to stdout")
         XCTAssertNotNil(json?["prompted"], "JSON should contain 'prompted' key")
     }
+
+    // MARK: - serve stdio hygiene
+
+    /// `serve` is the MCP entry point: stdout is the JSON-RPC transport and
+    /// stderr is the host's diagnostic channel, so nothing unsolicited may
+    /// land on either during a normal session — MCP hosts, and the smoke
+    /// check that guards symoperate as vendored into symaira-brain, both
+    /// treat a stray stderr byte here as a protocol violation. Regression
+    /// coverage for the background update-check nag that used to violate
+    /// this on every `serve` launch.
+    func testServeWritesNoStderrDuringMCPInitialize() throws {
+        let process = Process()
+        process.executableURL = binary
+        process.arguments = ["serve"]
+
+        let inPipe = Pipe()
+        let outPipe = Pipe()
+        let errPipe = Pipe()
+        process.standardInput = inPipe
+        process.standardOutput = outPipe
+        process.standardError = errPipe
+
+        try process.run()
+
+        // Safety net only: `run` doc-comments "serves MCP over stdio until
+        // stdin closes", so closing stdin below is expected to end the
+        // process on its own well before this fires.
+        DispatchQueue.global().asyncAfter(deadline: .now() + 8) {
+            if process.isRunning {
+                process.terminate()
+            }
+        }
+
+        let request = #"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"cli-test","version":"1"}}}"# + "\n"
+        inPipe.fileHandleForWriting.write(Data(request.utf8))
+
+        // Keep stdin open past `initialize` so a still-running background
+        // update check (a real, asynchronous GitHub API round trip, not
+        // gated on the request/response exchange) has time to land before
+        // the transport shuts down. Closing stdin immediately after writing
+        // would let the process exit and race right past a regression here.
+        Thread.sleep(forTimeInterval: 2.0)
+        try? inPipe.fileHandleForWriting.close()
+
+        let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+        let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+
+        let stderrText = String(data: errData, encoding: .utf8) ?? ""
+        XCTAssertTrue(stderrText.isEmpty, "serve must write nothing to stderr while handling MCP initialize, got: \(stderrText)")
+
+        let stdoutText = String(data: outData, encoding: .utf8) ?? ""
+        XCTAssertTrue(stdoutText.contains("\"id\":1"), "expected a JSON-RPC response to the initialize request on stdout")
+    }
 }
