@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -447,5 +448,22 @@ func TestDiscover_PathLookup(t *testing.T) {
 	_, err := Discover("definitely-not-a-real-symaira-binary-xyz", "")
 	if err == nil {
 		t.Fatal("Discover() error = nil, want error for a binary absent from PATH")
+	}
+}
+
+func TestDiscover_OverrideRequiresExecutableRegularFile(t *testing.T) {
+	dir := t.TempDir()
+	directory := filepath.Join(dir, "directory")
+	if err := os.Mkdir(directory, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	nonExecutable := filepath.Join(dir, "not-executable")
+	if err := os.WriteFile(nonExecutable, []byte("#!/bin/sh\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{directory, nonExecutable} {
+		if _, err := Discover("symcockpit", path); err == nil {
+			t.Errorf("Discover(%q) error = nil, want invalid override error", path)
+		}
 	}
 }

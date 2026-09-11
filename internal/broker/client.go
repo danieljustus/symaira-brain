@@ -38,8 +38,12 @@ const clientVersion = "dev"
 // gracefully degraded server, per AGENTS.md.
 func Discover(binaryName, override string) (string, error) {
 	if override != "" {
-		if _, err := os.Stat(override); err != nil {
+		info, err := os.Stat(override)
+		if err != nil {
 			return "", fmt.Errorf("broker: configured binary_path %q for %q: %w", override, binaryName, err)
+		}
+		if !info.Mode().IsRegular() || info.Mode().Perm()&0111 == 0 {
+			return "", fmt.Errorf("broker: configured binary_path %q for %q is not an executable regular file", override, binaryName)
 		}
 		return override, nil
 	}
