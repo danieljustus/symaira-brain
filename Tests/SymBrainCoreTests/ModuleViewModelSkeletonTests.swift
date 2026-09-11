@@ -252,7 +252,15 @@ extension ModuleViewModelSkeletonTests {
         await vm.select(path: first.path)
 
         let reveal = Task { await vm.revealSelectedEntry() }
-        await Task.yield()
+        for _ in 0..<100 {
+            if client.pending.map(\.path) == [first.path] { break }
+            await Task.yield()
+        }
+        #expect(client.pending.map(\.path) == [first.path])
+        guard client.pending.map(\.path) == [first.path] else {
+            reveal.cancel()
+            return
+        }
         vm.availability = .locked
         client.resolve(path: first.path, detail: first)
         await reveal.value
@@ -354,6 +362,54 @@ extension ModuleViewModelSkeletonTests {
         #expect(vm.editConfirmation?.confirmedField == "api_key")
         #expect(vm.editConfirmation?.confirmedValueMatches == true)
         #expect(vm.editValue.isEmpty)
+    }
+
+
+    @Test func vaultClientSubprocessRejectsMultilineBeforeDispatch() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let marker = dir.appendingPathComponent("invoked")
+        let script = "#!/bin/sh\ntouch \"\(marker.path)\"\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+        await #expect(throws: CLIRunnerError.self) {
+            _ = try await client.set(path: "work/item", field: "private_key", value: "line-one\nline-two")
+        }
+        #expect(!FileManager.default.fileExists(atPath: marker.path))
+    }
+
+    @Test func vaultClientSubprocessValidatesAllFiveFieldsAndReadback() async throws {
+        let cases = [("password", "pw"), ("api_key", "api"), ("token", "tok"), ("private_key", "key"), ("database_url", "db")]
+        for (field, value) in cases {
+            let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let script = "#!/bin/sh\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nif [ \"$3\" = get ]; then printf '%s' '{\"path\":\"work/item\",\"fields\":{\"\(field)\":\"\(value)\"}}'; exit 0; fi\nexit 1\n"
+            let binary = dir.appendingPathComponent("symvault")
+            try script.data(using: .utf8)!.write(to: binary)
+            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+            let client = VaultClient(userOverride: binary)
+            let confirmation = try await client.set(path: "work/item", field: field, value: value)
+            #expect(confirmation.confirmedField == field)
+            #expect(confirmation.confirmedValueMatches)
+        }
+    }
+
+    @Test func vaultClientSubprocessRejectsMismatchedReadback() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let script = "#!/bin/sh\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nprintf '%s' '{\"path\":\"work/item\",\"fields\":{\"password\":\"different\"}}'\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+        await #expect(throws: CLIRunnerError.self) {
+            _ = try await client.set(path: "work/item", field: "password", value: "requested")
+        }
     }
 
 }

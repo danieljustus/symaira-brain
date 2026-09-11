@@ -174,7 +174,7 @@ Commands:
   skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)
   activity    Read bounded activity summaries with explicit profile access
   audit       Inspect the audit log
-  vault       Human credential management (create/set read secrets from stdin; delete requires --yes)
+  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)
   guard       Absorbed symguard commands (decide, scan, doctor, grants, version)
 
   version     Print version information

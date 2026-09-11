@@ -165,7 +165,8 @@ public struct VaultClient: Sendable {
     /// Create an entry using symvault's stdin-only value flag, then re-read
     /// it from the service and return metadata only.
     public func create(path: String, value: String, profile: String? = nil) async throws -> VaultCreateConfirmation {
-        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        guard Self.validPath(path) else { throw CLIRunnerError.invalidJSON(description: "invalid vault entry path") }
+        try Self.validateSingleLine(value)
         _ = try await runner.runChecked(
             try executable(),
             arguments: arguments(profile: profile, command: ["add", path, "--stdin-value"]),
@@ -182,7 +183,10 @@ public struct VaultClient: Sendable {
 
     /// Update an entry using symvault's stdin-only value flag, then re-read metadata.
     public func set(path: String, field: String, value: String, profile: String? = nil) async throws -> VaultSetConfirmation {
-        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        guard Self.validPath(path), Self.validField(field) else {
+            throw CLIRunnerError.invalidJSON(description: "invalid vault entry path or field")
+        }
+        try Self.validateSingleLine(value)
         let target = path + "." + field
         _ = try await runner.runChecked(
             try executable(), arguments: arguments(profile: profile, command: ["set", target, "--stdin-value"]),
@@ -247,6 +251,28 @@ public struct VaultClient: Sendable {
     }
 
     // MARK: - Private
+
+    private static func validateSingleLine(_ value: String) throws {
+        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        guard !value.contains(where: { $0 == "\n" || $0 == "\r" }) else {
+            throw CLIRunnerError.invalidJSON(description: "multiline secret values are not supported")
+        }
+    }
+
+    private static func validPath(_ path: String) -> Bool {
+        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/") else { return false }
+        return path.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
+            !$0.isEmpty && $0.allSatisfy(validTokenCharacter)
+        }
+    }
+
+    private static func validField(_ field: String) -> Bool {
+        !field.isEmpty && field.allSatisfy(validTokenCharacter)
+    }
+
+    private static func validTokenCharacter(_ character: Character) -> Bool {
+        character.isLetter || character.isNumber || character == "_" || character == "-"
+    }
 
     private func decodeList<E: Decodable>(
         _ element: E.Type,

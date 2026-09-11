@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
 	"github.com/danieljustus/symaira-brain/internal/config"
@@ -55,30 +56,25 @@ func readVaultMetadata(binary, path string) (vaultMetadata, error) {
 
 func cmdVaultSet(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	if len(args) != 1 {
-		fmt.Fprintln(stderr, "symbrain vault set: usage: symbrain vault set <path> < secret.txt")
+		fmt.Fprintln(stderr, "symbrain vault set: usage: symbrain vault set <path.field> < secret.txt")
 		return exitcodes.ExitNoInput
 	}
-	value, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Fprintf(stderr, "symbrain vault set: read secret from stdin: %v\n", err)
-		return exitcodes.ExitGeneric
+	path, field, ok := parseVaultFieldTarget(args[0])
+	if !ok {
+		fmt.Fprintln(stderr, "symbrain vault set: usage: symbrain vault set <path.field> < secret.txt")
+		return exitcodes.ExitNoInput
 	}
-	if len(bytes.TrimSpace(value)) == 0 {
-		fmt.Fprintln(stderr, "symbrain vault set: secret value from stdin is empty")
+	value, err := readVaultSecretStdin()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain vault set: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
 	binary, code := vaultBinary(stderr, "set")
 	if code != exitcodes.ExitOK {
 		return code
 	}
-	query := args[0]
-	idx := strings.LastIndex(query, ".")
-	if idx <= 0 || idx == len(query)-1 {
-		fmt.Fprintln(stderr, "symbrain vault set: usage: symbrain vault set <path.field> < secret.txt")
-		return exitcodes.ExitNoInput
-	}
-	path, field := query[:idx], query[idx+1:]
-	if err := runVaultCommand(binary, []string{"set", query, "--stdin-value"}, value, nil); err != nil {
+	query := path + "." + field
+	if err := runVaultCommand(binary, []string{"set", query, "--stdin-value"}, append(value, '\n'), nil); err != nil {
 		fmt.Fprintln(stderr, "symbrain vault set: set failed")
 		return exitcodes.ExitGeneric
 	}
@@ -90,9 +86,8 @@ func cmdVaultSet(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	if detail.Path == "" {
 		detail.Path = path
 	}
-	requested := strings.TrimRight(string(value), "\r\n")
 	confirmed, ok := detail.Fields[field].(string)
-	if !ok || confirmed != requested {
+	if !ok || confirmed != string(value) {
 		fmt.Fprintln(stderr, "symbrain vault set: updated field confirmation did not match requested value")
 		return exitcodes.ExitGeneric
 	}
@@ -100,6 +95,56 @@ func cmdVaultSet(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	encoded, _ := json.Marshal(result)
 	fmt.Fprintln(stdout, string(encoded))
 	return exitcodes.ExitOK
+}
+
+func parseVaultFieldTarget(query string) (string, string, bool) {
+	idx := strings.LastIndexByte(query, '.')
+	if idx <= 0 || idx == len(query)-1 || !validVaultPath(query[:idx]) || !validVaultField(query[idx+1:]) {
+		return "", "", false
+	}
+	return query[:idx], query[idx+1:], true
+}
+
+func validVaultPath(path string) bool {
+	if path == "" || strings.HasPrefix(path, "/") || strings.HasSuffix(path, "/") {
+		return false
+	}
+	for _, part := range strings.Split(path, "/") {
+		if part == "" || !validVaultToken(part) {
+			return false
+		}
+	}
+	return true
+}
+
+func validVaultField(field string) bool { return field != "" && validVaultToken(field) }
+
+func validVaultToken(value string) bool {
+	for _, r := range value {
+		if !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' || r == '-') {
+			return false
+		}
+	}
+	return true
+}
+
+func readVaultSecretStdin() ([]byte, error) {
+	value, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return nil, fmt.Errorf("read secret from stdin: %w", err)
+	}
+	if bytes.HasSuffix(value, []byte("\r\n")) {
+		value = value[:len(value)-2]
+	} else if bytes.HasSuffix(value, []byte("\n")) {
+		value = value[:len(value)-1]
+	}
+	if bytes.IndexByte(value, '\n') >= 0 || bytes.IndexByte(value, '\r') >= 0 {
+		return nil, fmt.Errorf("multiline secret values are not supported")
+	}
+	if len(bytes.TrimSpace(value)) == 0 {
+		return nil, fmt.Errorf("secret value from stdin is empty")
+	}
+	return value, nil
 }
 
 func cmdVaultDelete(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {

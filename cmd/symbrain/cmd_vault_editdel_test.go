@@ -104,3 +104,56 @@ func TestCmdVaultDeleteReportsUnverifiedWhenGetFailsOtherwise(t *testing.T) {
 		t.Fatalf("absence claimed without proof: %q", stdout.String())
 	}
 }
+
+func TestCmdVaultSetRejectsMultilineBeforeDiscovery(t *testing.T) {
+	dir := t.TempDir()
+	marker := filepath.Join(dir, "invoked")
+	fake := filepath.Join(dir, "symvault")
+	if err := os.WriteFile(fake, []byte("#!/bin/sh\ntouch \"$MARKER\"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("MARKER", marker)
+	old := os.Stdin
+	input, err := os.Open(filepath.Join(dir, "input"))
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatal(err)
+	}
+	if input != nil {
+		input.Close()
+	}
+	inputPath := filepath.Join(dir, "input")
+	if err := os.WriteFile(inputPath, []byte("first\nsecond\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	input, err = os.Open(inputPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdin = input
+	t.Cleanup(func() { os.Stdin = old; input.Close() })
+	var out, stderr bytes.Buffer
+	if code := cmdVaultSet([]string{"work/item.private_key"}, &out, &stderr); code == 0 {
+		t.Fatal("multiline secret accepted")
+	}
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatalf("binary dispatched: %v", err)
+	}
+}
+
+func TestCmdVaultSetRejectsInvalidTargetBeforeReadingStdin(t *testing.T) {
+	old := os.Stdin
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdin = reader
+	t.Cleanup(func() { os.Stdin = old; reader.Close(); writer.Close() })
+	var out, stderr bytes.Buffer
+	if code := cmdVaultSet([]string{"work/item.not.valid"}, &out, &stderr); code == 0 {
+		t.Fatal("invalid target accepted")
+	}
+	if !strings.Contains(stderr.String(), "<path.field>") {
+		t.Fatalf("wrong usage: %q", stderr.String())
+	}
+}
