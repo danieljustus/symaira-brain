@@ -507,4 +507,38 @@ extension ModuleViewModelSkeletonTests {
     #expect(vm.createValue == "generated-fixture")
 }
 
+@Test func vaultClientRejectsPasswordLengthAboveServiceMaximumBeforeDispatch() async {
+    let client = VaultClient(userOverride: URL(fileURLWithPath: "/tmp/not-a-real-symvault"))
+    do {
+        _ = try await client.generatePassword(length: 1025, symbols: false)
+        Issue.record("accepted password length above symvault MaxPasswordLength")
+    } catch let error as CLIRunnerError {
+        guard case .invalidJSON(let description) = error else {
+            Issue.record("wrong error for over-limit generation: \(error)")
+            return
+        }
+        #expect(description == "password length must be between 1 and 1024")
+    } catch {
+        Issue.record("wrong error type for over-limit generation: \(error)")
+    }
+}
+
+@Test func vaultClientRejectsMultipleOCRInputsBeforeDispatch() async {
+    let client = VaultClient(userOverride: URL(fileURLWithPath: "/tmp/not-a-real-symvault"))
+    let first = URL(fileURLWithPath: "/tmp/ocr-one.txt")
+    let second = URL(fileURLWithPath: "/tmp/ocr-two.txt")
+    do {
+        _ = try await client.intakeStage(files: [URL(fileURLWithPath: "/tmp/source.png")], ocrTexts: [first: first, second: second])
+        Issue.record("accepted multiple OCR inputs")
+    } catch let error as CLIRunnerError {
+        guard case .invalidJSON(let description) = error else {
+            Issue.record("wrong error for multiple OCR inputs: \(error)")
+            return
+        }
+        #expect(description == "symvault intake accepts one --ocr-text file per invocation")
+    } catch {
+        Issue.record("wrong error type for multiple OCR inputs: \(error)")
+    }
+}
+
 #endif

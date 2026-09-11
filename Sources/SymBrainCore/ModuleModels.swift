@@ -495,3 +495,30 @@ public struct VaultIntakeReviewDraft: Sendable, Equatable, Identifiable {
     }
     public static func stem(from name: String) -> String { let base = (name as NSString).deletingPathExtension; return base.isEmpty ? "entry" : base }
 }
+
+public struct VaultIntakeReviewSnapshot: Sendable, Equatable {
+    public let importID: String
+    public let sourceFiles: [VaultIntakeSourceSnapshot]
+    public let drafts: [VaultIntakeReviewDraft]
+
+    public init(importID: String, sourceFiles: [VaultIntakeSourceSnapshot], drafts: [VaultIntakeReviewDraft]) {
+        self.importID = importID
+        self.sourceFiles = sourceFiles
+        self.drafts = drafts
+    }
+}
+
+public struct VaultIntakeSourceSnapshot: Sendable, Equatable, Identifiable {
+    public let path: String
+    public let size: Int64
+    public let modified: Date?
+    public let sha256: String
+    public var id: String { path }
+
+    public init(path: String, size: Int64, modified: Date?, sha256: String) {
+        self.path = path
+        self.size = size
+        self.modified = modified
+        self.sha256 = sha256
+    }
+}

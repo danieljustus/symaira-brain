@@ -206,8 +206,8 @@ public struct VaultClient: Sendable {
 
     /// Generate a password through the Vault service with explicit options.
     public func generatePassword(length: Int, symbols: Bool, profile: String? = nil) async throws -> String {
-        guard (1...4096).contains(length) else {
-            throw CLIRunnerError.invalidJSON(description: "password length must be between 1 and 4096")
+        guard (1...1024).contains(length) else {
+            throw CLIRunnerError.invalidJSON(description: "password length must be between 1 and 1024")
         }
         var command = ["generate", "--length", String(length)]
         if symbols { command.append("--symbols") }
@@ -273,18 +273,15 @@ public struct VaultClient: Sendable {
     }
 
     private static func validPath(_ path: String) -> Bool {
-        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/") else { return false }
+        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/"),
+              !path.unicodeScalars.contains(where: { $0.value < 0x20 || $0.value == 0x7F }) else { return false }
         return path.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
-            !$0.isEmpty && $0.allSatisfy(validTokenCharacter)
+            !$0.isEmpty && $0 != "." && $0 != ".."
         }
     }
 
     private static func validField(_ field: String) -> Bool {
-        !field.isEmpty && field.allSatisfy(validTokenCharacter)
-    }
-
-    private static func validTokenCharacter(_ character: Character) -> Bool {
-        character.isLetter || character.isNumber || character == "_" || character == "-"
+        !field.isEmpty && !field.unicodeScalars.contains(where: { $0.value < 0x20 || $0.value == 0x7F })
     }
 
     private func decodeList<E: Decodable>(
@@ -317,7 +314,12 @@ public struct VaultClient: Sendable {
     public func intakeStage(files: [URL], ocrTexts: [URL: URL] = [:], moveToTrash: Bool = false, profile: String? = nil) async throws -> VaultIntakeResponse {
         var command = ["intake"] + files.map(\.path) + ["--json"]
         if moveToTrash { command.append("--move-to-trash") }
-        for (source, ocr) in ocrTexts { command += ["--ocr-text", ocr.path, source.path] }
+        guard ocrTexts.count <= 1 else {
+            throw CLIRunnerError.invalidJSON(description: "symvault intake accepts one --ocr-text file per invocation")
+        }
+        if let ocr = ocrTexts.values.first {
+            command += ["--ocr-text", ocr.path]
+        }
         return try await decodeIntake(arguments: arguments(profile: profile, command: command), timeout: 120)
     }
 
