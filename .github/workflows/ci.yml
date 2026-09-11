@@ -112,6 +112,18 @@ jobs:
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+      - name: Cache Cargo dependencies and build output
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
+
 
       - name: Install pinned Rust audit tools
         run: |
@@ -148,6 +160,18 @@ jobs:
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+      - name: Cache Cargo dependencies and build output
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-${{ hashFiles('**/*.rs') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-${{ hashFiles('**/Cargo.lock') }}-
+            ${{ runner.os }}-${{ runner.arch }}-${{ github.job }}-rust-1.98.0-
+
 
       - name: Install pinned Rust audit tools
         run: |
@@ -578,6 +602,8 @@ jobs:
   # needs the tag-triggered release workflow's ambient OIDC token, which a
   # plain push/PR run does not have.
   goreleaser-snapshot:
+    # Release packaging is advisory on PRs; main and weekly runs retain coverage.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
