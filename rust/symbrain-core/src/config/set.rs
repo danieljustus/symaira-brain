@@ -46,25 +46,56 @@ pub fn run_config_set(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dy
 }
 
 /// Executes `symbrain config set` using an explicit configuration file path.
+#[allow(clippy::too_many_lines)]
 pub fn run_config_set_with_path(
     path: &Path,
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
-    if args.len() != 2 {
+    let mut preview = false;
+    let mut no_backup = false;
+    let mut positionals = Vec::with_capacity(args.len());
+    for arg in args {
+        match os_bytes(arg).as_ref() {
+            b"--preview" | b"-preview" => preview = true,
+            b"--no-backup" | b"-no-backup" => no_backup = true,
+            bytes if bytes.starts_with(b"-") => {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain config set: unexpected argument {:?}",
+                    arg.to_string_lossy()
+                );
+                return crate::exit::USAGE;
+            }
+            _ => positionals.push(arg),
+        }
+    }
+    if positionals.len() != 2 {
         let _ = writeln!(stderr, "symbrain config set: want exactly <key> <value>");
         return crate::exit::USAGE;
     }
 
-    let key_bytes = os_bytes(&args[0]);
+    let key_bytes = os_bytes(positionals[0]);
     if key_bytes.is_empty() {
         let _ = writeln!(stderr, "symbrain config set: key must not be empty");
         return crate::exit::USAGE;
     }
 
-    let val_bytes = os_bytes(&args[1]);
+    let val_bytes = os_bytes(positionals[1]);
     let value = infer_value(&val_bytes);
+    let original = match fs::read(path) {
+        Ok(raw) => raw,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Vec::new(),
+        Err(err) => {
+            let _ = writeln!(
+                stderr,
+                "symbrain config set: read {}: {err}",
+                path.display()
+            );
+            return crate::exit::GENERIC;
+        }
+    };
 
     let mut table = match fs::read(path) {
         Ok(raw) => {
@@ -99,6 +130,26 @@ pub fn run_config_set_with_path(
     }
 
     let encoded = encode_document(&table);
+    if preview {
+        let state = if original == encoded {
+            "unchanged"
+        } else {
+            "changed"
+        };
+        let backup = if no_backup {
+            "disabled".to_string()
+        } else {
+            format!("{}.bak", path.display())
+        };
+        let _ = writeln!(
+            stdout,
+            "preview config set {}: {}; backup: {}",
+            String::from_utf8_lossy(&key_bytes),
+            state,
+            backup
+        );
+        return crate::exit::OK;
+    }
 
     let parent = path
         .parent()
@@ -113,6 +164,18 @@ pub fn run_config_set_with_path(
         return crate::exit::GENERIC;
     }
 
+    if !no_backup && !original.is_empty() {
+        let mut backup_path = path.to_path_buf();
+        backup_path.as_mut_os_string().push(".bak");
+        if let Err(err) = atomic_write(&backup_path, &original) {
+            let _ = writeln!(
+                stderr,
+                "symbrain config set: backup {}: {err}",
+                backup_path.display()
+            );
+            return crate::exit::GENERIC;
+        }
+    }
     if let Err(err) = atomic_write(path, &encoded) {
         let _ = writeln!(
             stderr,
@@ -136,6 +199,10 @@ pub fn run_config_set_with_path(
 #[cfg(test)]
 #[path = "set_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "set_flag_alias_tests.rs"]
+mod flag_alias_tests;
 
 #[cfg(test)]
 #[path = "set_fixtures_tests.rs"]

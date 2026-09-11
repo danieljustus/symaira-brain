@@ -57,6 +57,9 @@ Usage:
                                        (no key: print the whole file)
   symbrain config set <key> <value>    Set a dotted key; values are typed as
                                        bool, integer, or string
+  symbrain config set --preview ...    Show the change without writing
+                                       (writes <config>.bak before mutation)
+  symbrain config set --no-backup ...  Explicitly opt out of the backup
 
 Keys live under ~/.config/symbrain/config.toml, e.g. default_profile,
 audit.enabled, audit.verbose, gateway.identity_injection,
@@ -120,17 +123,38 @@ func configGet(stdout, stderr io.Writer, args []string) exitcodes.ExitCode {
 }
 
 func configSet(stdout, stderr io.Writer, args []string) exitcodes.ExitCode {
-	if len(args) != 2 {
+	preview, noBackup := false, false
+	positionals := make([]string, 0, len(args))
+	for _, arg := range args {
+		switch arg {
+		case "--preview", "-preview":
+			preview = true
+		case "--no-backup", "-no-backup":
+			noBackup = true
+		default:
+			if strings.HasPrefix(arg, "-") {
+				fmt.Fprintf(stderr, "symbrain config set: unexpected argument %q\n", arg)
+				return exitcodes.ExitNoInput
+			}
+			positionals = append(positionals, arg)
+		}
+	}
+	if len(positionals) != 2 {
 		fmt.Fprintln(stderr, "symbrain config set: want exactly <key> <value>")
 		return exitcodes.ExitNoInput
 	}
-	key, value := args[0], args[1]
+	key, value := positionals[0], positionals[1]
 	if key == "" {
 		fmt.Fprintln(stderr, "symbrain config set: key must not be empty")
 		return exitcodes.ExitNoInput
 	}
 
 	path := configkit.DefaultPath(config.AppName)
+	original, readErr := os.ReadFile(path)
+	if readErr != nil && !os.IsNotExist(readErr) {
+		fmt.Fprintf(stderr, "symbrain config set: read %s: %v\n", path, readErr)
+		return exitcodes.ExitGeneric
+	}
 	root, err := readConfigMap(path)
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain config set: %v\n", err)
@@ -146,9 +170,27 @@ func configSet(stdout, stderr io.Writer, args []string) exitcodes.ExitCode {
 		fmt.Fprintf(stderr, "symbrain config set: encode %s: %v\n", path, err)
 		return exitcodes.ExitGeneric
 	}
+	if preview {
+		state := "changed"
+		if bytes.Equal(original, buf.Bytes()) {
+			state = "unchanged"
+		}
+		backup := "disabled"
+		if !noBackup {
+			backup = path + ".bak"
+		}
+		fmt.Fprintf(stdout, "preview config set %s: %s; backup: %s\n", key, state, backup)
+		return exitcodes.ExitOK
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		fmt.Fprintf(stderr, "symbrain config set: create %s: %v\n", filepath.Dir(path), err)
 		return exitcodes.ExitGeneric
+	}
+	if !noBackup && len(original) > 0 {
+		if err := fsutil.AtomicWriteFile(path+".bak", original, 0o600); err != nil {
+			fmt.Fprintf(stderr, "symbrain config set: backup %s: %v\n", path+".bak", err)
+			return exitcodes.ExitGeneric
+		}
 	}
 	if err := fsutil.AtomicWriteFile(path, buf.Bytes(), 0o600); err != nil {
 		fmt.Fprintf(stderr, "symbrain config set: write %s: %v\n", path, err)

@@ -226,3 +226,53 @@ func typeName(v any) string {
 		return "string"
 	}
 }
+
+func TestConfigSet_PreviewDoesNotMutateOrRevealValue(t *testing.T) {
+	home := withConfigHome(t)
+	path := writeConfigTOML(t, home, "default_profile = \"personal\"\n")
+	before, _ := os.ReadFile(path)
+	var stdout, stderr bytes.Buffer
+	code := cmdConfig([]string{"set", "--preview", "default_profile", "secret-value"}, &stdout, &stderr)
+	if code != exitcodes.ExitOK || stderr.Len() != 0 {
+		t.Fatalf("code=%d stderr=%q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "preview config set default_profile: changed") || strings.Contains(stdout.String(), "secret-value") {
+		t.Fatalf("stdout=%q", stdout.String())
+	}
+	after, _ := os.ReadFile(path)
+	if !bytes.Equal(before, after) {
+		t.Fatalf("preview mutated config: %q", after)
+	}
+}
+
+func TestConfigSet_BackupAndSafeFailure(t *testing.T) {
+	home := withConfigHome(t)
+	path := writeConfigTOML(t, home, "default_profile = \"personal\"\n")
+	var stdout, stderr bytes.Buffer
+	if code := cmdConfig([]string{"set", "default_profile", "restricted"}, &stdout, &stderr); code != exitcodes.ExitOK {
+		t.Fatalf("code=%d stderr=%q", code, stderr.String())
+	}
+	backup, err := os.ReadFile(path + ".bak")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(backup) != "default_profile = \"personal\"\n" {
+		t.Fatalf("backup=%q", backup)
+	}
+	if err := os.Remove(path + ".bak"); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(path+".bak", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := os.ReadFile(path)
+	stdout.Reset()
+	stderr.Reset()
+	if code := cmdConfig([]string{"set", "default_profile", "blocked"}, &stdout, &stderr); code != exitcodes.ExitGeneric {
+		t.Fatalf("code=%d stderr=%q", code, stderr.String())
+	}
+	after, _ := os.ReadFile(path)
+	if !bytes.Equal(before, after) {
+		t.Fatalf("failed backup changed config: %q", after)
+	}
+}
