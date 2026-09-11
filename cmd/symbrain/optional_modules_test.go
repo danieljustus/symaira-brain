@@ -98,6 +98,48 @@ func TestBuildServers_MissingDirectFallsBackToCockpitSubcommand(t *testing.T) {
 	}
 }
 
+// TestBuildServers_AbsentModuleDegradesGracefullyWithoutBreakingOtherServers
+// extends TestBuildServers_OptionalModulesRequireBothToggleAndProfile's
+// neither-binary-found coverage (cmd_coverage_test.go) with the one thing it
+// cannot assert: a profile with no other server configured can't show
+// whether an absent optional module's failure stays contained. Here vault is
+// a second, real, present server alongside the absent one — contract
+// PB-2026-09-09 requires a missing optional module to degrade visibly
+// without breaking the rest of the gateway, and this is that claim checked
+// against an actual managed subprocess, not just an empty map assertion.
+func TestBuildServers_AbsentModuleDegradesGracefullyWithoutBreakingOtherServers(t *testing.T) {
+	dir := t.TempDir()
+	fakeMCP := buildFakemcpOnce(t)
+	writeFakeWrapper(t, dir, "symvault", `[{"name":"health","description":"health","behavior":"echo"}]`, fakeMCP)
+	// Deliberately no symoperate, symscope, or symcockpit anywhere on PATH.
+	t.Setenv("PATH", dir)
+
+	p := &profile.Profile{Name: "optional-absent", Servers: profile.Servers{
+		profile.ServerVault:   {Enabled: true, Mode: "full"},
+		profile.ServerOperate: {Enabled: true, ToolsAllow: []string{"version"}},
+	}}
+	cfg := &config.Config{Modules: config.ModulesConfig{Operate: true}}
+
+	var stderr strings.Builder
+	servers := buildServers(p, cfg, &stderr, "")
+
+	if ms := servers[profile.ServerOperate]; ms != nil {
+		t.Fatalf("expected operate absent when neither symoperate nor symcockpit exist, got a managed server")
+	}
+	if !strings.Contains(stderr.String(), "neither symoperate nor symcockpit was found") {
+		t.Fatalf("stderr = %q, want the neither-found diagnostic", stderr.String())
+	}
+
+	vault := servers[profile.ServerVault]
+	if vault == nil {
+		t.Fatalf("expected vault server to still be built despite operate's absence: stderr=%q", stderr.String())
+	}
+	defer vault.Shutdown()
+	if _, err := vault.ListTools(context.Background()); err != nil {
+		t.Fatalf("vault tools/list should work despite operate's absence: %v", err)
+	}
+}
+
 func TestBuildServers_InvalidExplicitOverrideDoesNotFallback(t *testing.T) {
 	dir := t.TempDir()
 	marker := filepath.Join(dir, "argv")
