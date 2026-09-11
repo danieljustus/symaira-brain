@@ -1226,12 +1226,12 @@ def main() -> int:
                     )
                 if case.normalize_os_error:
                     go_stderr = re.sub(
-                        rb"(symbrain config (?:get|set): (?:read|parse|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
+                        rb"(symbrain config (?:get|set): (?:read|parse|backup|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
                         rb"\1<permission denied>\n",
                         go_stderr,
                     )
                     rust_stderr = re.sub(
-                        rb"(symbrain config (?:get|set): (?:read|parse|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
+                        rb"(symbrain config (?:get|set): (?:read|parse|backup|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
                         rb"\1<permission denied>\n",
                         rust_stderr,
                     )
