@@ -283,6 +283,8 @@ public protocol VaultClientProtocol: Sendable {
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation
 }
 
 extension VaultClient: VaultClientProtocol {}
@@ -307,6 +309,11 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var createValue = ""
     @Published public var createConfirmation: VaultCreateConfirmation?
     @Published public var isCreating = false
+    @Published public var editValue = ""
+    @Published public var editConfirmation: VaultSetConfirmation?
+    @Published public var isEditing = false
+    @Published public var isDeleting = false
+    @Published public var deleteConfirmation: VaultDeleteConfirmation?
 
     @Published public var isLoading = false
     @Published public var isUnlocking = false
@@ -387,6 +394,27 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         } catch {
             report(error)
         }
+    }
+
+    public func setSelectedEntry() async {
+        guard let path = selectedPath, let field = detail?.primarySecret?.field, detail?.path == path, !editValue.isEmpty else { errorMessage = "Reveal an entry and enter a new secret value."; return }
+        isEditing = true; clearError()
+        defer { isEditing = false; editValue = "" }
+        do {
+            editConfirmation = try await client.set(path: path, field: field, value: editValue, profile: nil)
+            statusMessage = "Secret updated and confirmed by the vault service."
+            await loadEntries()
+        } catch { report(error) }
+    }
+
+    public func deleteEntry(path: String) async {
+        isDeleting = true; clearError(); invalidatePendingDetail()
+        defer { isDeleting = false }
+        do {
+            deleteConfirmation = try await client.delete(path: path, profile: nil)
+            entries.removeAll { $0.path == path }; selectedPath = nil; detail = nil
+            statusMessage = "Secret deleted and absence confirmed by the vault service."
+        } catch { report(error) }
     }
 
     public func loadEntries() async {

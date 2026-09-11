@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"time"
 
@@ -23,13 +22,13 @@ func cmdVaultCreate(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 		return exitcodes.ExitNoInput
 	}
 	path := args[0]
-	value, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Fprintf(stderr, "symbrain vault create: read secret from stdin: %v\n", err)
-		return exitcodes.ExitGeneric
+	if !validVaultPath(path) {
+		fmt.Fprintln(stderr, "symbrain vault create: usage: symbrain vault create <path> < secret.txt")
+		return exitcodes.ExitNoInput
 	}
-	if len(bytes.TrimSpace(value)) == 0 {
-		fmt.Fprintln(stderr, "symbrain vault create: secret value from stdin is empty")
+	value, err := readVaultSecretStdin()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain vault create: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
 
@@ -43,7 +42,7 @@ func cmdVaultCreate(args []string, stdout, stderr io.Writer) exitcodes.ExitCode 
 		return exitcodes.ExitGeneric
 	}
 
-	if err := runVaultCommand(binary, []string{"add", path, "--stdin-value"}, value, nil); err != nil {
+	if err := runVaultCommand(binary, []string{"add", path, "--stdin-value"}, append(value, '\n'), nil); err != nil {
 		fmt.Fprintf(stderr, "symbrain vault create: create failed\n")
 		return exitcodes.ExitGeneric
 	}

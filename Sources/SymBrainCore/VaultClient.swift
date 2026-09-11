@@ -165,7 +165,8 @@ public struct VaultClient: Sendable {
     /// Create an entry using symvault's stdin-only value flag, then re-read
     /// it from the service and return metadata only.
     public func create(path: String, value: String, profile: String? = nil) async throws -> VaultCreateConfirmation {
-        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        guard Self.validPath(path) else { throw CLIRunnerError.invalidJSON(description: "invalid vault entry path") }
+        try Self.validateSingleLine(value)
         _ = try await runner.runChecked(
             try executable(),
             arguments: arguments(profile: profile, command: ["add", path, "--stdin-value"]),
@@ -178,6 +179,46 @@ public struct VaultClient: Sendable {
             submittedPath: path, confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
             confirmedFieldCount: confirmed.fields.count, confirmedHasValue: hasValue
         )
+    }
+
+    /// Update an entry using symvault's stdin-only value flag, then re-read metadata.
+    public func set(path: String, field: String, value: String, profile: String? = nil) async throws -> VaultSetConfirmation {
+        guard Self.validPath(path), Self.validField(field) else {
+            throw CLIRunnerError.invalidJSON(description: "invalid vault entry path or field")
+        }
+        try Self.validateSingleLine(value)
+        let target = path + "." + field
+        _ = try await runner.runChecked(
+            try executable(), arguments: arguments(profile: profile, command: ["set", target, "--stdin-value"]),
+            stdin: Data((value + "\n").utf8), timeout: 60
+        )
+        let confirmed = try await entry(path: path, profile: profile)
+        let confirmedValue = confirmed.fields[field]?.displayString
+        guard confirmedValue == value else {
+            throw CLIRunnerError.invalidJSON(description: "updated field confirmation did not match requested value")
+        }
+        return VaultSetConfirmation(submittedPath: path, submittedField: field,
+            confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
+            confirmedField: confirmed.fields[field] == nil ? nil : field,
+            confirmedValueMatches: true, confirmedFieldCount: confirmed.fields.count,
+            confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
+    }
+
+    /// Delete an entry with symvault's explicit non-interactive confirmation flag, then verify absence.
+    public func delete(path: String, profile: String? = nil) async throws -> VaultDeleteConfirmation {
+        _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["delete", path, "--yes"]), timeout: 60)
+        let reread = try await runner.runAllowingFailure(try executable(), arguments: arguments(profile: profile, command: ["get", path, "--output", "json"]), timeout: 30)
+        // symvault ExitNotFound = 2 (see symaira-vault internal/errors/errors.go).
+        // Only that code proves absence; any other failure leaves the deletion
+        // submitted but unverified and must surface as such.
+        switch reread.exitCode {
+        case 2:
+            return VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
+        case 0:
+            throw CLIRunnerError.invalidJSON(description: "deleted entry is still present")
+        default:
+            throw CLIRunnerError.invalidJSON(description: "deletion submitted but absence verification failed (symvault get exit \(reread.exitCode))")
+        }
     }
 
     /// Run `symvault get <path> --output json`.
@@ -210,6 +251,28 @@ public struct VaultClient: Sendable {
     }
 
     // MARK: - Private
+
+    private static func validateSingleLine(_ value: String) throws {
+        guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        guard !value.unicodeScalars.contains(where: { $0.value == 0x0A || $0.value == 0x0D }) else {
+            throw CLIRunnerError.invalidJSON(description: "multiline secret values are not supported")
+        }
+    }
+
+    private static func validPath(_ path: String) -> Bool {
+        guard !path.isEmpty, !path.hasPrefix("/"), !path.hasSuffix("/") else { return false }
+        return path.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
+            !$0.isEmpty && $0.allSatisfy(validTokenCharacter)
+        }
+    }
+
+    private static func validField(_ field: String) -> Bool {
+        !field.isEmpty && field.allSatisfy(validTokenCharacter)
+    }
+
+    private static func validTokenCharacter(_ character: Character) -> Bool {
+        character.isLetter || character.isNumber || character == "_" || character == "-"
+    }
 
     private func decodeList<E: Decodable>(
         _ element: E.Type,

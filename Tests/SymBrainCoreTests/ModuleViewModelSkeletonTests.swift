@@ -152,6 +152,12 @@ private struct StubVaultClient: VaultClientProtocol {
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
     }
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultSetConfirmation(submittedPath: path, submittedField: field, confirmedPath: path, confirmedField: field, confirmedValueMatches: true, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
+        VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
+    }
 }
 
 @MainActor
@@ -174,6 +180,12 @@ private final class ControlledVaultClient: VaultClientProtocol {
 
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultSetConfirmation(submittedPath: path, submittedField: field, confirmedPath: path, confirmedField: field, confirmedValueMatches: true, confirmedFieldCount: 1, confirmedHasValue: true)
+    }
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
+        VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
     }
 
     func resolve(path: String, detail: VaultEntryDetail) {
@@ -218,7 +230,10 @@ extension ModuleViewModelSkeletonTests {
         await vm.select(path: first.path)
 
         let reveal = Task { await vm.revealSelectedEntry() }
-        await Task.yield()
+        for _ in 0..<100 {
+            if client.pending.map(\.path) == [first.path] { break }
+            await Task.yield()
+        }
         #expect(client.pending.map(\.path) == [first.path])
 
         await vm.select(path: "work/second")
@@ -237,7 +252,15 @@ extension ModuleViewModelSkeletonTests {
         await vm.select(path: first.path)
 
         let reveal = Task { await vm.revealSelectedEntry() }
-        await Task.yield()
+        for _ in 0..<100 {
+            if client.pending.map(\.path) == [first.path] { break }
+            await Task.yield()
+        }
+        #expect(client.pending.map(\.path) == [first.path])
+        guard client.pending.map(\.path) == [first.path] else {
+            reveal.cancel()
+            return
+        }
         vm.availability = .locked
         client.resolve(path: first.path, detail: first)
         await reveal.value
@@ -305,5 +328,139 @@ extension ModuleViewModelSkeletonTests {
         vm.copyInstallCommand()
         #expect(copies.last?.concealed == false)
     }
+    @Test func setEntryClearsPlaintextAndPublishesConfirmation() async {
+        let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "work/edit", modified: nil, fields: ["password": .string("hidden")])))
+        vm.availability = .ready
+        vm.selectedPath = "work/edit"
+        vm.detail = VaultEntryDetail(path: "work/edit", modified: nil, fields: ["password": .string("hidden")])
+        vm.editValue = "secret-never-retained"
+        await vm.setSelectedEntry()
+        #expect(vm.editValue.isEmpty)
+        #expect(vm.editConfirmation?.confirmedPath == "work/edit")
+    }
+
+    @Test func deleteEntryClearsSelectionAfterConfirmedAbsence() async {
+        let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "work/delete", modified: nil, fields: [:])))
+        vm.availability = .ready
+        vm.selectedPath = "work/delete"
+        await vm.deleteEntry(path: "work/delete")
+        #expect(vm.selectedPath == nil)
+        #expect(vm.deleteConfirmation?.confirmedAbsent == true)
+    }
+
+    @Test func setSelectedEntryPreservesNonPasswordPrimaryField() async {
+        let detail = VaultEntryDetail(path: "work/api", modified: nil, fields: [
+            "api_key": .string("old-key"), "username": .string("daniel")
+        ])
+        let vm = VaultViewModel(client: StubVaultClient(result: detail))
+        vm.availability = .ready
+        vm.selectedPath = detail.path
+        vm.detail = detail
+        vm.editValue = "new-key"
+        await vm.setSelectedEntry()
+        #expect(vm.editConfirmation?.submittedField == "api_key")
+        #expect(vm.editConfirmation?.confirmedField == "api_key")
+        #expect(vm.editConfirmation?.confirmedValueMatches == true)
+        #expect(vm.editValue.isEmpty)
+    }
+
+
+    @Test func vaultClientSubprocessRejectsMultilineBeforeDispatch() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let marker = dir.appendingPathComponent("invoked")
+        let script = "#!/bin/sh\ntouch \"\(marker.path)\"\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+        await #expect(throws: CLIRunnerError.self) {
+            _ = try await client.set(path: "work/item", field: "private_key", value: "line-one\nline-two")
+        }
+        #expect(!FileManager.default.fileExists(atPath: marker.path))
+    }
+
+    @Test func vaultClientRejectsCRLFCRAndLFBeforeDispatchForCreateAndSet() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let marker = dir.appendingPathComponent("invoked")
+        let script = "#!/bin/sh\ntouch \"\(marker.path)\"\ncase \"$3\" in add|set) cat >/dev/null; exit 0;; get) printf '%s' '{\"path\":\"work/item\",\"fields\":{\"password\":\"control\"}}'; exit 0;; esac\nexit 1\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+
+        // Mutation-negative control: this fixture reliably marks a dispatched command.
+        _ = try await client.create(path: "work/item", value: "control")
+        #expect(FileManager.default.fileExists(atPath: marker.path))
+        try FileManager.default.removeItem(at: marker)
+        _ = try await client.set(path: "work/item", field: "password", value: "control")
+        #expect(FileManager.default.fileExists(atPath: marker.path))
+        try FileManager.default.removeItem(at: marker)
+
+        for value in ["line-one\r\nline-two", "line-one\rline-two", "line-one\nline-two"] {
+            do {
+                _ = try await client.create(path: "work/item", value: value)
+                Issue.record("create accepted a multiline secret")
+            } catch let error as CLIRunnerError {
+                if case .invalidJSON(let description) = error {
+                    #expect(description == "multiline secret values are not supported")
+                } else {
+                    Issue.record("create returned the wrong CLIRunnerError: \(error)")
+                }
+            } catch {
+                Issue.record("create returned a non-CLI error: \(error)")
+            }
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
+
+            do {
+                _ = try await client.set(path: "work/item", field: "password", value: value)
+                Issue.record("set accepted a multiline secret")
+            } catch let error as CLIRunnerError {
+                if case .invalidJSON(let description) = error {
+                    #expect(description == "multiline secret values are not supported")
+                } else {
+                    Issue.record("set returned the wrong CLIRunnerError: \(error)")
+                }
+            } catch {
+                Issue.record("set returned a non-CLI error: \(error)")
+            }
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
+        }
+    }
+
+    @Test func vaultClientSubprocessValidatesAllFiveFieldsAndReadback() async throws {
+        let cases = [("password", "pw"), ("api_key", "api"), ("token", "tok"), ("private_key", "key"), ("database_url", "db")]
+        for (field, value) in cases {
+            let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let script = "#!/bin/sh\nif [ \"$3\" = set ]; then [ \"$4\" = \"work/item.\(field)\" ] || exit 3; tmp=\"$TMPDIR/symvault-input.$$\"; cat >\"$tmp\"; printf '%s\n' \"\(value)\" | cmp -s - \"$tmp\" || exit 4; rm -f \"$tmp\"; exit 0; fi\nif [ \"$3\" = get ]; then [ \"$4\" = work/item ] || exit 5; printf '%s' '{\"path\":\"work/item\",\"fields\":{\"\(field)\":\"\(value)\"}}'; exit 0; fi\nexit 1\n"
+            let binary = dir.appendingPathComponent("symvault")
+            try script.data(using: .utf8)!.write(to: binary)
+            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+            let client = VaultClient(userOverride: binary)
+            let confirmation = try await client.set(path: "work/item", field: field, value: value)
+            #expect(confirmation.confirmedField == field)
+            #expect(confirmation.confirmedValueMatches)
+        }
+    }
+
+    @Test func vaultClientSubprocessRejectsMismatchedReadback() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let script = "#!/bin/sh\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nprintf '%s' '{\"path\":\"work/item\",\"fields\":{\"password\":\"different\"}}'\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+        await #expect(throws: CLIRunnerError.self) {
+            _ = try await client.set(path: "work/item", field: "password", value: "requested")
+        }
+    }
+
 }
 #endif

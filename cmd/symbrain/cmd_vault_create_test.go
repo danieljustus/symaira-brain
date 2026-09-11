@@ -56,3 +56,32 @@ func TestCmdVaultCreateReadsValueFromStdinAndSanitizesConfirmation(t *testing.T)
 		t.Fatalf("stdin not forwarded: %q %v", got, err)
 	}
 }
+
+func TestCmdVaultCreateRejectsMultilineBeforeDiscovery(t *testing.T) {
+	dir := t.TempDir()
+	marker := filepath.Join(dir, "invoked")
+	fake := filepath.Join(dir, "symvault")
+	if err := os.WriteFile(fake, []byte("#!/bin/sh\ntouch \"$MARKER\"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	t.Setenv("MARKER", marker)
+	old := os.Stdin
+	inputPath := filepath.Join(dir, "input")
+	if err := os.WriteFile(inputPath, []byte("first\nsecond\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	input, err := os.Open(inputPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdin = input
+	t.Cleanup(func() { os.Stdin = old; input.Close() })
+	var out, stderr bytes.Buffer
+	if code := cmdVaultCreate([]string{"work/item"}, &out, &stderr); code == 0 {
+		t.Fatal("multiline secret accepted")
+	}
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatalf("binary dispatched: %v", err)
+	}
+}
