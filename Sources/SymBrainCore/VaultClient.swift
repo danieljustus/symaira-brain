@@ -339,7 +339,7 @@ public struct VaultClient: Sendable {
     }
 
     private static func validType(_ type: String) -> Bool {
-        ["api_key", "bearer_token", "basic_auth", "ssh_key", "password", "certificate", "database_url", "totp_seed", "payment", "custom"].contains(type)
+        ["api_key", "bearer_token", "basic_auth", "ssh_key", "password", "certificate", "database_url", "totp_seed", "custom"].contains(type)
     }
 
     private static func validateMetadata(_ draft: VaultCredentialDraft) throws {

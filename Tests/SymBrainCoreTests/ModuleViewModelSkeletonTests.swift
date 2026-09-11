@@ -564,4 +564,42 @@ extension ModuleViewModelSkeletonTests {
     }
 }
 
+
+@Test func vaultClientCreateUsesBasicAuthMappingAndRejectsPaymentCreation() async throws {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let argsFile = dir.appendingPathComponent("args")
+    let stdinFile = dir.appendingPathComponent("stdin")
+    let marker = dir.appendingPathComponent("payment-invoked")
+    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"\(argsFile.path)\"\nif [ \"$3\" = add ]; then cat > \"\(stdinFile.path)\"; exit 0; fi\nif [ \"$3\" = get ]; then printf '%s' '{\"path\":\"work/basic\",\"type\":\"basic_auth\",\"fields\":{\"basic_auth\":\"secret\",\"username\":\"alice\"}}'; exit 0; fi\ntouch \"\(marker.path)\"; exit 1\n"
+    let binary = dir.appendingPathComponent("symvault")
+    try Data(script.utf8).write(to: binary)
+    try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+    let client = VaultClient(userOverride: binary)
+
+    let confirmation = try await client.create(draft: VaultCredentialDraft(
+        path: "work/basic", type: "basic_auth", secret: "secret", username: "alice"))
+    #expect(confirmation.confirmedPath == "work/basic")
+    #expect(try String(contentsOf: stdinFile) == "secret\n")
+    let recordedArgs = try String(contentsOf: argsFile).split(separator: "\n").map(String.init)
+    #expect(Array(recordedArgs.prefix(9)) == [
+        "--color", "never", "add", "work/basic", "--stdin-value", "--type", "basic_auth", "--username", "alice"
+    ])
+
+    do {
+        _ = try await client.create(draft: VaultCredentialDraft(path: "work/payment", type: "payment", secret: "card"))
+        Issue.record("payment creation was accepted")
+    } catch let error as CLIRunnerError {
+        guard case .invalidJSON(let description) = error else {
+            Issue.record("payment creation returned the wrong error: \(error)")
+            return
+        }
+        #expect(description == "invalid credential path or type")
+    } catch {
+        Issue.record("payment creation returned a non-CLI error: \(error)")
+    }
+    #expect(!FileManager.default.fileExists(atPath: marker.path))
+}
+
 #endif

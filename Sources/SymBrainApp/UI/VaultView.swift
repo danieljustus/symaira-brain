@@ -220,7 +220,7 @@ struct VaultView: View {
                     TextField("Entry path", text: $vm.createPath)
                         .textFieldStyle(.roundedBorder)
                     Picker("Type", selection: $vm.createType) {
-                        ForEach(["password", "api_key", "bearer_token", "basic_auth", "ssh_key", "certificate", "database_url", "totp_seed", "payment", "custom"], id: \.self) { Text($0).tag($0) }
+                        ForEach(["password", "api_key", "bearer_token", "basic_auth", "ssh_key", "certificate", "database_url", "totp_seed", "custom"], id: \.self) { Text($0).tag($0) }
                     }
                     .frame(width: 150)
                     SecureField("Secret value", text: $vm.createValue)

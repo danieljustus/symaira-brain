@@ -356,7 +356,7 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
             switch type?.lowercased() {
             case "api_key": return "api_key"
             case "bearer_token": return "token"
-            case "basic_auth": return "password"
+            case "basic_auth": return "basic_auth"
             case "ssh_key": return "private_key"
             case "certificate": return "cert_pem"
             case "database_url": return "connection_string"
@@ -369,6 +369,9 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
         if let mappedField, let value = fields[mappedField]?.displayString, !value.isEmpty {
             return (mappedField, value)
         }
+        // A typed basic-auth entry must use its dedicated primary field;
+        // falling back to `password` would select the wrong field on readback.
+        if type?.lowercased() == "basic_auth" { return nil }
         // Older symvault versions omitted `type`; retain compatibility with
         // their documented conventional field names without treating metadata
         // such as username or URL as secret material.

@@ -368,7 +368,7 @@ struct VaultCredentialMetadataTests {
     @Test func primarySecretUsesVaultTypeMappingsAndMasksAllSupportedTypes() throws {
         let cases: [(String, String)] = [
             ("password", "password"), ("api_key", "api_key"), ("bearer_token", "token"),
-            ("basic_auth", "password"), ("ssh_key", "private_key"), ("certificate", "cert_pem"),
+            ("basic_auth", "basic_auth"), ("ssh_key", "private_key"), ("certificate", "cert_pem"),
             ("database_url", "connection_string"), ("totp_seed", "seed"), ("payment", "card_number"), ("custom", "password")
         ]
         for (type, field) in cases {
@@ -388,13 +388,17 @@ struct VaultCredentialMetadataTests {
 
     @Test func basicAuthKeepsUsernameMetadataVisible() {
         let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [
-            "password": .string("secret"), "username": .string("alice")
+            "basic_auth": .string("secret"), "username": .string("alice")
         ], type: "basic_auth")
-        #expect(detail.primarySecret?.field == "password")
-        #expect(detail.sortedFields.first?.key == "password")
+        #expect(detail.primarySecret?.field == "basic_auth")
+        #expect(detail.sortedFields.first?.key == "basic_auth")
         #expect(detail.sortedFields.first?.isSensitive == true)
         #expect(detail.sortedFields.last?.key == "username")
         #expect(detail.sortedFields.last?.isSensitive == false)
+        let wrongField = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+            "password": .string("wrong"), "username": .string("alice")
+        ], type: "basic_auth")
+        #expect(wrongField.primarySecret == nil)
     }
 
 }
