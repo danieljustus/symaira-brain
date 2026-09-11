@@ -5,8 +5,9 @@ package. It remains a source intake only: the standalone symaira-browse reposito
 its `symbrowse` distribution and supported compatibility routes are unchanged.
 
 - **Source repository:** `github.com/danieljustus/symaira-browse`
-- **Source commit:** `7884cdde9d842c44ae8624b148122fdfa4caa019`
-- **Source subject:** `fix(bench): restore paired static transport measurements (#436)`
+- **Source commit:** `62fca84a83190434fa14b514a5654fc65dc2e396`
+- **Source subject:** `fix(browser): report Safari capabilities and unsupported interactions`
+- **Resync date:** 2026-09-11
 - **Source path:** repository root
 - **Receiving path:** `symaira-brain/browse/`
 - **Support source:** none; Browse is self-contained.
@@ -17,27 +18,35 @@ its `symbrowse` distribution and supported compatibility routes are unchanged.
   and 7 top-level files (`.gitignore`, `README.md`, `go.mod`, `go.sum`,
   `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`).
 
-The resync imports the four files changed or added by Browse PR436:
-`crates/symbrowse-cli/src/main.rs`, `docs/rust-port/rust016-release-gates.md`,
-`port/bench/run.py`, and `scripts/rust-port/test_benchmark_harness.py`. The last
-file is an explicit exception to the standing scripts exclusion because it is
-the PR's added benchmark regression test and is required for regression inclusion.
-All other eligible files are refreshed from the exact source commit as well.
+The resync refreshes the five stale Safari/BiDi receiver files from the exact
+pinned Git tree:
+`crates/symbrowse-daemon/src/runtime.rs`,
+`crates/symbrowse-daemon/src/safari_runtime.rs`,
+`crates/symbrowse-daemon/tests/safari_native.rs`,
+`crates/symbrowse-engine-safari/src/bidi.rs`, and
+`crates/symbrowse-engine-safari/tests/bidi.rs`.
 
 ## Intentional receiver adaptations
 
-These three eligible paths remain receiver-specific and are not byte-identical:
+The receiving copy preserves these receiver conventions:
 
 1. `browse/.gitignore` is adapted for the receiving repository's local layout and
-   build-storage conventions.
-2. `browse/go.mod` pins `github.com/danieljustus/symaira-corekit` at `v0.17.0`,
-   while Brain's root module pins `v0.16.2`. Browse declares its own module, so
-   these are independent module-graph facts, not a root build conflict.
-3. `browse/internal/policy/policy_test.go` was formatted with `gofmt -w -s` after
-   the original intake because the source file was not gofmt-clean.
+   build-storage conventions. It is the only content difference in the current
+   full comparison.
+2. `browse/go.mod` retains the receiver's independently reviewed CoreKit pin
+   (`v0.17.0`); it matches the pinned source tree and remains an independent
+   nested module graph relative to Brain's root `go.mod` (`v0.16.2`).
+3. `browse/internal/policy/policy_test.go` retains the receiver's gofmt-formatted
+   state; it matches the pinned source tree at this resync.
 
-The imported count includes these three adapted paths. Every other imported path's
-content and mode must match the source tree exactly.
+## Full provenance comparison
+
+The 585 eligible target paths were compared programmatically against the pinned
+source tree by complete relative path, file mode, and blob content. Result:
+**585/585 paths present, 0 missing, 0 extra; 585/585 modes equal; 584/585
+content-identical; 1 intentional content adaptation (`.gitignore`); 0
+unexplained differences.** The comparison was performed after the five-file
+resync and includes the preserved receiver adaptations above.
 
 ## Exclusions
 
