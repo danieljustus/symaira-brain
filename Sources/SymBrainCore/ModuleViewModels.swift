@@ -283,7 +283,7 @@ public protocol VaultClientProtocol: Sendable {
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation
-    func set(path: String, value: String, profile: String?) async throws -> VaultSetConfirmation
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation
 }
 
@@ -397,11 +397,11 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public func setSelectedEntry() async {
-        guard let path = selectedPath, !editValue.isEmpty else { errorMessage = "Select an entry and enter a secret value."; return }
+        guard let path = selectedPath, let field = detail?.primarySecret?.field, detail?.path == path, !editValue.isEmpty else { errorMessage = "Reveal an entry and enter a new secret value."; return }
         isEditing = true; clearError()
         defer { isEditing = false; editValue = "" }
         do {
-            editConfirmation = try await client.set(path: path, value: editValue, profile: nil)
+            editConfirmation = try await client.set(path: path, field: field, value: editValue, profile: nil)
             statusMessage = "Secret updated and confirmed by the vault service."
             await loadEntries()
         } catch { report(error) }

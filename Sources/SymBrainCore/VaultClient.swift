@@ -181,15 +181,23 @@ public struct VaultClient: Sendable {
     }
 
     /// Update an entry using symvault's stdin-only value flag, then re-read metadata.
-    public func set(path: String, value: String, profile: String? = nil) async throws -> VaultSetConfirmation {
+    public func set(path: String, field: String, value: String, profile: String? = nil) async throws -> VaultSetConfirmation {
         guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }
+        let target = path + "." + field
         _ = try await runner.runChecked(
-            try executable(), arguments: arguments(profile: profile, command: ["set", path, "--stdin-value"]),
+            try executable(), arguments: arguments(profile: profile, command: ["set", target, "--stdin-value"]),
             stdin: Data((value + "\n").utf8), timeout: 60
         )
         let confirmed = try await entry(path: path, profile: profile)
-        return VaultSetConfirmation(submittedPath: path, confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
-            confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
+        let confirmedValue = confirmed.fields[field]?.displayString
+        guard confirmedValue == value else {
+            throw CLIRunnerError.invalidJSON(description: "updated field confirmation did not match requested value")
+        }
+        return VaultSetConfirmation(submittedPath: path, submittedField: field,
+            confirmedPath: confirmed.path.isEmpty ? path : confirmed.path,
+            confirmedField: confirmed.fields[field] == nil ? nil : field,
+            confirmedValueMatches: true, confirmedFieldCount: confirmed.fields.count,
+            confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
     }
 
     /// Delete an entry with symvault's explicit non-interactive confirmation flag, then verify absence.

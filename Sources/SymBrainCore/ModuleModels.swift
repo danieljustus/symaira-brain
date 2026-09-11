@@ -381,7 +381,27 @@ public struct VaultCreateConfirmation: Sendable, Equatable {
 }
 
 /// Sanitized result of a human-initiated set operation.
-public typealias VaultSetConfirmation = VaultCreateConfirmation
+public struct VaultSetConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let submittedField: String
+    public let confirmedPath: String
+    public let confirmedField: String?
+    public let confirmedValueMatches: Bool
+    public let confirmedFieldCount: Int
+    public let confirmedHasValue: Bool
+
+    public init(submittedPath: String, submittedField: String, confirmedPath: String,
+                confirmedField: String?, confirmedValueMatches: Bool,
+                confirmedFieldCount: Int, confirmedHasValue: Bool) {
+        self.submittedPath = submittedPath
+        self.submittedField = submittedField
+        self.confirmedPath = confirmedPath
+        self.confirmedField = confirmedField
+        self.confirmedValueMatches = confirmedValueMatches
+        self.confirmedFieldCount = confirmedFieldCount
+        self.confirmedHasValue = confirmedHasValue
+    }
+}
 
 /// Sanitized result of a human-initiated delete operation.
 public struct VaultDeleteConfirmation: Sendable, Equatable {

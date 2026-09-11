@@ -12,8 +12,8 @@ func TestCmdVaultSetUsesStdinAndSanitizesConfirmation(t *testing.T) {
 	dir := t.TempDir()
 	fake := filepath.Join(dir, "symvault")
 	script := "#!/bin/sh\n" +
-		"if [ \"$1\" = set ]; then cat > \"$STATE\"; exit 0; fi\n" +
-		"if [ \"$1\" = get ]; then printf '%s' '{\"path\":\"work/edit\",\"fields\":{\"password\":\"hidden\"}}'; exit 0; fi\n" +
+		"if [ \"$1\" = set ]; then [ \"$2\" = work/edit.password ] || exit 3; cat > \"$STATE\"; exit 0; fi\n" +
+		"if [ \"$1\" = get ]; then printf '%s' '{\"path\":\"work/edit\",\"fields\":{\"password\":\"new-secret\"}}'; exit 0; fi\n" +
 		"exit 1\n"
 	if err := os.WriteFile(fake, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestCmdVaultSetUsesStdinAndSanitizesConfirmation(t *testing.T) {
 	os.Stdin = input
 	t.Cleanup(func() { os.Stdin = old; input.Close() })
 	var stdout, stderr bytes.Buffer
-	if code := cmdVaultSet([]string{"work/edit"}, &stdout, &stderr); code != 0 {
+	if code := cmdVaultSet([]string{"work/edit.password"}, &stdout, &stderr); code != 0 {
 		t.Fatalf("code=%v stderr=%q", code, stderr.String())
 	}
 	if strings.Contains(stdout.String(), "hidden") || strings.Contains(stdout.String(), "new-secret") {
@@ -42,7 +42,7 @@ func TestCmdVaultSetUsesStdinAndSanitizesConfirmation(t *testing.T) {
 	if got, err := os.ReadFile(state); err != nil || string(got) != "new-secret\n" {
 		t.Fatalf("stdin not forwarded: %q %v", got, err)
 	}
-	if !strings.Contains(stdout.String(), `"submitted":{"path":"work/edit"}`) {
+	if !strings.Contains(stdout.String(), `"submitted":{"field":"password","path":"work/edit"}`) {
 		t.Fatalf("missing submitted metadata: %q", stdout.String())
 	}
 }
@@ -53,7 +53,7 @@ func TestCmdVaultDeleteRequiresYesAndConfirmsAbsence(t *testing.T) {
 	state := filepath.Join(dir, "exists")
 	script := "#!/bin/sh\n" +
 		"if [ \"$1\" = delete ]; then [ \"$3\" = --yes ] || exit 2; rm -f \"$STATE\"; exit 0; fi\n" +
-		"if [ \"$1\" = get ]; then [ -f \"$STATE\" ] && printf '%s' '{\"path\":\"work/delete\",\"fields\":{\"password\":\"hidden\"}}' && exit 0; exit 2; fi\n" +
+		"if [ \"$1\" = get ]; then [ -f \"$STATE\" ] && printf '%s' '{\"path\":\"work/delete\",\"fields\":{\"password\":\"new-secret\"}}' && exit 0; exit 2; fi\n" +
 		"exit 1\n"
 	if err := os.WriteFile(fake, []byte(script), 0o755); err != nil {
 		t.Fatal(err)

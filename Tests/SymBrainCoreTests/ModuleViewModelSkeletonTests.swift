@@ -152,8 +152,8 @@ private struct StubVaultClient: VaultClientProtocol {
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
     }
-    func set(path: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
-        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultSetConfirmation(submittedPath: path, submittedField: field, confirmedPath: path, confirmedField: field, confirmedValueMatches: true, confirmedFieldCount: 1, confirmedHasValue: true)
     }
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
         VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
@@ -181,8 +181,8 @@ private final class ControlledVaultClient: VaultClientProtocol {
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation {
         VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
     }
-    func set(path: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
-        VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 1, confirmedHasValue: true)
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation {
+        VaultSetConfirmation(submittedPath: path, submittedField: field, confirmedPath: path, confirmedField: field, confirmedValueMatches: true, confirmedFieldCount: 1, confirmedHasValue: true)
     }
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation {
         VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true)
@@ -230,7 +230,10 @@ extension ModuleViewModelSkeletonTests {
         await vm.select(path: first.path)
 
         let reveal = Task { await vm.revealSelectedEntry() }
-        await Task.yield()
+        for _ in 0..<100 {
+            if client.pending.map(\.path) == [first.path] { break }
+            await Task.yield()
+        }
         #expect(client.pending.map(\.path) == [first.path])
 
         await vm.select(path: "work/second")
@@ -321,6 +324,7 @@ extension ModuleViewModelSkeletonTests {
         let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "work/edit", modified: nil, fields: ["password": .string("hidden")])))
         vm.availability = .ready
         vm.selectedPath = "work/edit"
+        vm.detail = VaultEntryDetail(path: "work/edit", modified: nil, fields: ["password": .string("hidden")])
         vm.editValue = "secret-never-retained"
         await vm.setSelectedEntry()
         #expect(vm.editValue.isEmpty)
@@ -334,6 +338,22 @@ extension ModuleViewModelSkeletonTests {
         await vm.deleteEntry(path: "work/delete")
         #expect(vm.selectedPath == nil)
         #expect(vm.deleteConfirmation?.confirmedAbsent == true)
+    }
+
+    @Test func setSelectedEntryPreservesNonPasswordPrimaryField() async {
+        let detail = VaultEntryDetail(path: "work/api", modified: nil, fields: [
+            "api_key": .string("old-key"), "username": .string("daniel")
+        ])
+        let vm = VaultViewModel(client: StubVaultClient(result: detail))
+        vm.availability = .ready
+        vm.selectedPath = detail.path
+        vm.detail = detail
+        vm.editValue = "new-key"
+        await vm.setSelectedEntry()
+        #expect(vm.editConfirmation?.submittedField == "api_key")
+        #expect(vm.editConfirmation?.confirmedField == "api_key")
+        #expect(vm.editConfirmation?.confirmedValueMatches == true)
+        #expect(vm.editValue.isEmpty)
     }
 
 }

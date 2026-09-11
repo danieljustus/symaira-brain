@@ -174,6 +174,15 @@ struct VaultEntryTests {
         #expect(VaultFieldSecurity.isSensitive("username") == false)
         #expect(VaultFieldSecurity.isSensitive("url") == false)
     }
+
+    @Test func choosesEverySupportedPrimarySecretField() {
+        for field in ["password", "api_key", "token", "private_key", "database_url"] {
+            let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+                field: .string("value"), "username": .string("daniel")
+            ])
+            #expect(detail.primarySecret?.field == field)
+        }
+    }
 }
 
 struct MemoryScopeFilterTests {

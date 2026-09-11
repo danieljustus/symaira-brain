@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
@@ -70,8 +71,14 @@ func cmdVaultSet(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	if code != exitcodes.ExitOK {
 		return code
 	}
-	path := args[0]
-	if err := runVaultCommand(binary, []string{"set", path, "--stdin-value"}, value, nil); err != nil {
+	query := args[0]
+	idx := strings.LastIndex(query, ".")
+	if idx <= 0 || idx == len(query)-1 {
+		fmt.Fprintln(stderr, "symbrain vault set: usage: symbrain vault set <path.field> < secret.txt")
+		return exitcodes.ExitNoInput
+	}
+	path, field := query[:idx], query[idx+1:]
+	if err := runVaultCommand(binary, []string{"set", query, "--stdin-value"}, value, nil); err != nil {
 		fmt.Fprintln(stderr, "symbrain vault set: set failed")
 		return exitcodes.ExitGeneric
 	}
@@ -83,7 +90,13 @@ func cmdVaultSet(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	if detail.Path == "" {
 		detail.Path = path
 	}
-	result := map[string]interface{}{"submitted": map[string]interface{}{"path": path}, "confirmed": map[string]interface{}{"path": detail.Path, "field_count": len(detail.Fields), "has_value": len(detail.Fields) > 0}}
+	requested := strings.TrimRight(string(value), "\r\n")
+	confirmed, ok := detail.Fields[field].(string)
+	if !ok || confirmed != requested {
+		fmt.Fprintln(stderr, "symbrain vault set: updated field confirmation did not match requested value")
+		return exitcodes.ExitGeneric
+	}
+	result := map[string]interface{}{"submitted": map[string]interface{}{"path": path, "field": field}, "confirmed": map[string]interface{}{"path": detail.Path, "field": field, "field_count": len(detail.Fields), "has_value": len(detail.Fields) > 0, "value_matches": true}}
 	encoded, _ := json.Marshal(result)
 	fmt.Fprintln(stdout, string(encoded))
 	return exitcodes.ExitOK

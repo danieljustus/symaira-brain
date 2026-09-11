@@ -232,7 +232,7 @@ struct VaultView: View {
                 }
                 if let path = vm.selectedPath {
                     HStack(spacing: SymairaSpacing.medium) {
-                        SecureField("New secret value", text: $vm.editValue)
+                        SecureField("New \(vm.detail?.primarySecret?.field ?? "secret") value", text: $vm.editValue)
                             .textFieldStyle(.roundedBorder)
                         Button(action: { Task { await vm.setSelectedEntry() } }) {
                             Label("Update Selected", systemImage: "pencil")
@@ -245,7 +245,7 @@ struct VaultView: View {
                         .disabled(vm.isDeleting)
                     }
                     if let confirmation = vm.editConfirmation {
-                        Text("Updated: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
+                        Text("Updated \(confirmation.confirmedPath).\(confirmation.submittedField) · readback matches: \(confirmation.confirmedValueMatches ? "yes" : "no")")
                             .font(.caption).foregroundStyle(SymairaTheme.textSecondary)
                     }
                 }
