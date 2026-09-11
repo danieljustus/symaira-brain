@@ -433,3 +433,65 @@ public enum VaultFieldSecurity {
         .contains { key.contains($0) }
     }
 }
+
+// MARK: - Vault intake review
+
+public struct VaultIntakeResponse: Decodable, Sendable, Equatable {
+    public let importID: String?
+    public let results: [VaultIntakeFileResult]
+    public init(importID: String?, results: [VaultIntakeFileResult]) { self.importID = importID; self.results = results }
+    enum CodingKeys: String, CodingKey { case importID = "import_id"; case results }
+}
+
+public struct VaultIntakeFileResult: Decodable, Sendable, Equatable, Identifiable {
+    public let file: String
+    public let status: String
+    public let reason: String?
+    public let provenance: VaultIntakeProvenance?
+    public let suggestions: [VaultIntakeSuggestion]
+    public let duplicates: [String]
+    public var id: String { file }
+    public var isOK: Bool { status == "ok" }
+    public init(file: String, status: String, reason: String?, provenance: VaultIntakeProvenance?, suggestions: [VaultIntakeSuggestion], duplicates: [String]) { self.file = file; self.status = status; self.reason = reason; self.provenance = provenance; self.suggestions = suggestions; self.duplicates = duplicates }
+}
+
+public struct VaultIntakeProvenance: Decodable, Sendable, Equatable {
+    public let sourcePath: String
+    public let sourceName: String
+    public let sourceType: String
+    public let size: Int64
+    public let sha256: String
+    enum CodingKeys: String, CodingKey { case sourcePath = "source_path"; case sourceName = "source_name"; case sourceType = "source_type"; case size; case sha256 }
+}
+
+public struct VaultIntakeSuggestion: Decodable, Sendable, Equatable, Identifiable {
+    public let path: String
+    public let field: String
+    public let confidence: Double
+    public let warning: String?
+    public let attachment: Bool
+    public var id: String { "\(path)/\(field)" }
+    enum CodingKeys: String, CodingKey { case path, field, confidence, warning, attachment }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        path = try c.decode(String.self, forKey: .path); field = try c.decode(String.self, forKey: .field)
+        confidence = try c.decodeIfPresent(Double.self, forKey: .confidence) ?? 0
+        warning = try c.decodeIfPresent(String.self, forKey: .warning)
+        attachment = try c.decodeIfPresent(Bool.self, forKey: .attachment) ?? false
+    }
+}
+
+public struct VaultIntakeReviewDraft: Sendable, Equatable, Identifiable {
+    public let file: String; public let sourceName: String; public let sourceType: String; public let sha256: String; public let size: Int64
+    public var targetPath: String; public var fields: [String: String]; public var keepAttachment: Bool; public let warnings: [String]
+    public var id: String { file }
+    public init(result: VaultIntakeFileResult) {
+        file = result.file; sourceName = result.provenance?.sourceName ?? URL(fileURLWithPath: result.file).lastPathComponent
+        sourceType = result.provenance?.sourceType ?? "unknown"; sha256 = result.provenance?.sha256 ?? ""; size = result.provenance?.size ?? 0
+        targetPath = result.suggestions.first(where: { !$0.attachment })?.path ?? result.suggestions.first?.path ?? Self.stem(from: sourceName)
+        var values: [String: String] = [:]; var warningValues: [String] = []
+        for suggestion in result.suggestions where !suggestion.attachment { if values[suggestion.field] == nil { values[suggestion.field] = "" }; if let warning = suggestion.warning, !warning.isEmpty { warningValues.append(warning) } }
+        fields = values; keepAttachment = result.suggestions.contains(where: { $0.attachment }); warnings = warningValues
+    }
+    public static func stem(from name: String) -> String { let base = (name as NSString).deletingPathExtension; return base.isEmpty ? "entry" : base }
+}
