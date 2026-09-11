@@ -37,15 +37,12 @@ public enum OperateMain {
 
             switch first {
     case Command.serve.rawValue:
-        // Non-blocking update check on launch — prints to stderr, never blocks.
-        Task { @Sendable in
-            let checker = UpdateChecker()
-            let info = await checker.checkForUpdate()
-            if info.updateAvailable, let latest = info.latestVersion, let url = info.releaseURL {
-                FileHandle.standardError.write(Data("\n⚠️  Update available: v\(latest) → \(url)\n".utf8))
-                FileHandle.standardError.write(Data("   Use `symoperate updates skip \(latest)` to dismiss this version.\n\n".utf8))
-            }
-        }
+        // No update check here: stdout carries the JSON-RPC transport and
+        // stderr is the MCP host's diagnostic channel, so nothing may write
+        // unsolicited output on this path — hosts and the CI smoke check
+        // both treat any stderr byte during serve as a protocol violation.
+        // `symoperate version`/`updates check` remain the way to learn
+        // about a new release.
         let server = MCPServer(controller: controller)
         Task { @Sendable in
             do {
