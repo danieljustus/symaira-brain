@@ -17,13 +17,13 @@
         "optional": true
       },
       "symcockpit": {
-        "version": "0.5.3",
+        "version": "0.6.2",
         "repo": "danieljustus/symaira-cockpit",
         "binary_name": "symcockpit",
         "asset_prefix": "symcockpit",
         "has_cosign": false,
         "sha256": {
-          "symcockpit_0.5.3_darwin_universal.tar.gz": "db78af4c948f569a525457b2fd8cb7eacff4246700c783d5af455b315f28c903"
+          "symcockpit_0.6.2_darwin_universal.tar.gz": "da58e74be5a249d82193eacae814c8ee5aeae121d85c7596828c5fc8a4f75344"
         },
         "platforms": [
           "darwin"
@@ -31,31 +31,31 @@
         "asset_arch": "universal"
       },
       "symdesk": {
-        "version": "v0.11.1",
+        "version": "v0.12.2",
         "repo": "danieljustus/symaira-desktop",
         "binary_name": "symdesk",
         "asset_prefix": "symaira-desktop",
-        "has_cosign": false,
+        "has_cosign": true,
         "sha256": {
-          "symaira-desktop_0.11.1_darwin_amd64.tar.gz": "9f557091a74eecc4c9aeb0fb280130cc32fef1230d73ad5728f8f10f636dcc28",
-          "symaira-desktop_0.11.1_darwin_arm64.tar.gz": "a515e2e8afd11cc3296a29dd7d4c0be18a79a1f52ea4cc7ac388f1f9d6e045db",
-          "symaira-desktop_0.11.1_linux_amd64.tar.gz": "74f9b041d54b0af001aaf708ae47f21442ab0f8255341122e59ac9fe8046d209",
-          "symaira-desktop_0.11.1_linux_arm64.tar.gz": "5d0a639896d6e47c16b31f7cff26e3c658bb5b80aad0e9c38a0d8cf10904ed66",
-          "symaira-desktop_0.11.1_windows_amd64.zip": "ddeccd1b8abea9ac68d853344dc53fa39ed8707fd413426b06e6f860eac433ee",
-          "symaira-desktop_0.11.1_windows_arm64.zip": "07c78a9f1de264496172c7b5d311f7a39baefeda020f014b825efc178a866caa"
+          "symaira-desktop_0.12.2_darwin_amd64.tar.gz": "4897e8a4de91b09a699650338860c3485940d6c1d875e4ed580291722d7df02f",
+          "symaira-desktop_0.12.2_darwin_arm64.tar.gz": "00d9bab214e3e54f0578821622578ce489498cd6dabce810c6257bcf79d0fcc2",
+          "symaira-desktop_0.12.2_linux_amd64.tar.gz": "2655779e3846f19a22e6a8258f699b6af6d1e2721026cf871a9f6b6e1431b1fe",
+          "symaira-desktop_0.12.2_linux_arm64.tar.gz": "cc7d1dc37e22182b7dc7fbe72d9aa0c9adff490882b2121133e6f12fa35bb359",
+          "symaira-desktop_0.12.2_windows_amd64.zip": "1252192f3d82bf860b049d1a9c04fac082687155e24b0e39f074bcbead8807aa",
+          "symaira-desktop_0.12.2_windows_arm64.zip": "e2bedd1d58bfbbdc3eba4be590852f40c39489919c24786547fd8a56baa57485"
         }
       },
       "symvault": {
-        "version": "v0.21.1",
+        "version": "v0.22.1",
         "repo": "danieljustus/symaira-vault",
         "binary_name": "symvault",
         "asset_prefix": "symaira-vault",
         "has_cosign": true,
         "sha256": {
-          "symaira-vault_0.21.1_darwin_amd64.tar.gz": "ab0e8ecdd6983e782ce02d7318b0b35238d8c494b22176cd707edf4ffdba2be2",
-          "symaira-vault_0.21.1_darwin_arm64.tar.gz": "97268174a82a62573be3ad2f31806264a0fdd4bb7a80a9933a0a00122a4b444f",
-          "symaira-vault_0.21.1_linux_amd64.tar.gz": "0491bf44251b7e2014375b9bf527efc147095dbb22a25df82982df5dd661e63c",
-          "symaira-vault_0.21.1_linux_arm64.tar.gz": "4e041fe81c2ae5b66900b7a8bd5ae25877afee93592b696d73d4c73653d6947d"
+          "symaira-vault_0.22.1_darwin_amd64.tar.gz": "df1db62da2f3a0b4e6cf130f466e2f21d3616e64ab9bab77578323afa11d4d77",
+          "symaira-vault_0.22.1_darwin_arm64.tar.gz": "9cddbf1ad159cfc9b432ee8b30992b9795be6e15915509bf08597379d44a4b77",
+          "symaira-vault_0.22.1_linux_amd64.tar.gz": "fa54a4c16ac13389614475f91c71d7e6bd6f91de0f30e320bf0dd25727c17d46",
+          "symaira-vault_0.22.1_linux_arm64.tar.gz": "49165bcb129bcfbc6535aed8e75ddf8e6c51c6670e29ee6e5b1381bc193c6aa3"
         }
       }
     }
