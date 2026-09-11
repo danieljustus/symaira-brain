@@ -832,8 +832,10 @@ mod tests {
 
     #[test]
     fn discover_uses_actual_path_selection() {
-        let fallback = discover("sh", "").expect("sh on PATH");
-        assert!(fallback.ends_with("/sh"));
+        let executable = std::env::current_exe().expect("test executable");
+        let fallback = discover("fixture", executable.to_str().expect("executable path"))
+            .expect("explicit test executable");
+        assert_eq!(std::path::Path::new(&fallback), executable);
 
         let missing = std::env::temp_dir().join("symbrain-broker-missing-explicit");
         let error = discover("sh", missing.to_str().expect("temp path"))
