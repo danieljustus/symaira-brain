@@ -58,8 +58,8 @@ pub fn run_config_set_with_path(
     let mut positionals = Vec::with_capacity(args.len());
     for arg in args {
         match os_bytes(arg).as_ref() {
-            b"--preview" => preview = true,
-            b"--no-backup" => no_backup = true,
+            b"--preview" | b"-preview" => preview = true,
+            b"--no-backup" | b"-no-backup" => no_backup = true,
             bytes if bytes.starts_with(b"-") => {
                 let _ = writeln!(
                     stderr,
@@ -199,6 +199,10 @@ pub fn run_config_set_with_path(
 #[cfg(test)]
 #[path = "set_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "set_flag_alias_tests.rs"]
+mod flag_alias_tests;
 
 #[cfg(test)]
 #[path = "set_fixtures_tests.rs"]
