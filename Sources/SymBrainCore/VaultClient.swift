@@ -204,7 +204,50 @@ public struct VaultClient: Sendable {
             confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
     }
 
-    /// Generate a password through the Vault service with explicit options.
+    /// Create an entry with the documented non-secret metadata flags.
+    public func create(draft: VaultCredentialDraft, profile: String? = nil) async throws -> VaultCreateConfirmation {
+        guard Self.validType(draft.type), Self.validPath(draft.path) else {
+            throw CLIRunnerError.invalidJSON(description: "invalid credential path or type")
+        }
+        try Self.validateMetadata(draft)
+        try Self.validateSingleLine(draft.secret)
+        var command = ["add", draft.path, "--stdin-value", "--type", draft.type]
+        Self.append("--username", value: draft.username, to: &command)
+        Self.append("--url", value: draft.url, to: &command)
+        Self.append("--notes", value: draft.notes, to: &command)
+        Self.append("--usage-hint", value: draft.usageHint, to: &command)
+        Self.append("--expires-at", value: draft.expiresAt, to: &command)
+        if draft.autoRotate { command.append("--auto-rotate") }
+        var input = draft.secret + "\n"
+        if !draft.totpSecret.isEmpty {
+            try Self.validateSingleLine(draft.totpSecret)
+            command.append("--stdin-totp-secret")
+            Self.append("--totp-issuer", value: draft.totpIssuer, to: &command)
+            Self.append("--totp-account", value: draft.totpAccount, to: &command)
+            input += draft.totpSecret + "\n"
+        }
+        _ = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: command), stdin: Data(input.utf8), timeout: 60)
+        let confirmed = try await entry(path: draft.path, profile: profile)
+        return VaultCreateConfirmation(submittedPath: draft.path, confirmedPath: confirmed.path.isEmpty ? draft.path : confirmed.path, confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
+    }
+
+    /// Update documented non-secret fields. Type, usage hint, auto-rotate and expiration
+    /// are create-time metadata in the current `symvault set` contract and are not guessed here.
+    public func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String? = nil) async throws -> VaultSetConfirmation {
+        guard Self.validPath(path) else { throw CLIRunnerError.invalidJSON(description: "invalid vault entry path") }
+        let secretField = original.primarySecret?.field ?? "password"
+        let updates = [(secretField, draft.secret), ("username", draft.username), ("url", draft.url), ("notes", draft.notes)]
+        var last: VaultSetConfirmation?
+        for (field, value) in updates where !value.isEmpty && value != original.fields[field]?.displayString {
+            last = try await set(path: path, field: field, value: value, profile: profile)
+        }
+        if last == nil {
+            let confirmed = try await entry(path: path, profile: profile)
+            return VaultSetConfirmation(submittedPath: path, submittedField: "", confirmedPath: confirmed.path.isEmpty ? path : confirmed.path, confirmedField: nil, confirmedValueMatches: true, confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
+        }
+        return last!
+    }
+
     public func generatePassword(length: Int, symbols: Bool, profile: String? = nil) async throws -> String {
         guard (1...1024).contains(length) else {
             throw CLIRunnerError.invalidJSON(description: "password length must be between 1 and 1024")
@@ -278,6 +321,26 @@ public struct VaultClient: Sendable {
         return path.split(separator: "/", omittingEmptySubsequences: false).allSatisfy {
             !$0.isEmpty && $0 != "." && $0 != ".."
         }
+    }
+
+    private static func validType(_ type: String) -> Bool {
+        ["api_key", "bearer_token", "basic_auth", "ssh_key", "password", "certificate", "database_url", "totp_seed", "custom"].contains(type)
+    }
+
+    private static func validateMetadata(_ draft: VaultCredentialDraft) throws {
+        for value in [draft.username, draft.url, draft.notes, draft.usageHint, draft.expiresAt, draft.totpIssuer, draft.totpAccount] {
+            guard !value.unicodeScalars.contains(where: { $0.value < 0x0A || ($0.value > 0x0D && $0.value < 0x20) || $0.value == 0x7F }) else {
+                throw CLIRunnerError.invalidJSON(description: "credential metadata contains a control character")
+            }
+        }
+        if !draft.expiresAt.isEmpty && ISO8601DateFormatter().date(from: draft.expiresAt) == nil {
+            throw CLIRunnerError.invalidJSON(description: "expiration must be an RFC3339 timestamp")
+        }
+    }
+
+    private static func append(_ flag: String, value: String, to command: inout [String]) {
+        guard !value.isEmpty else { return }
+        command += [flag, value]
     }
 
     private static func validField(_ field: String) -> Bool {

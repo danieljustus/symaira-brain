@@ -299,6 +299,10 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     public let modified: String?
     public let fields: [String: JSONValue]
     public let totp: VaultTOTP?
+    public let type: String?
+    public let usageHint: String?
+    public let autoRotate: Bool?
+    public let expiresAt: String?
 
     private struct AnyKey: CodingKey {
         let stringValue: String
@@ -320,18 +324,30 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
         modified = try value(String.self, "modified", "Modified")
         fields = try value([String: JSONValue].self, "fields", "Fields") ?? [:]
         totp = try value(VaultTOTP.self, "totp", "TOTP")
+        type = try value(String.self, "type", "Type")
+        usageHint = try value(String.self, "usage_hint", "UsageHint")
+        autoRotate = try value(Bool.self, "auto_rotate", "AutoRotate")
+        expiresAt = try value(String.self, "expires_at", "ExpiresAt")
     }
 
     public init(
         path: String,
         modified: String?,
         fields: [String: JSONValue],
-        totp: VaultTOTP? = nil
+        totp: VaultTOTP? = nil,
+        type: String? = nil,
+        usageHint: String? = nil,
+        autoRotate: Bool? = nil,
+        expiresAt: String? = nil
     ) {
         self.path = path
         self.modified = modified
         self.fields = fields
         self.totp = totp
+        self.type = type
+        self.usageHint = usageHint
+        self.autoRotate = autoRotate
+        self.expiresAt = expiresAt
     }
 
     /// The entry's primary secret, if one of the known secret fields is set.
@@ -363,7 +379,29 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     }
 }
 
-/// Sanitized result of a human-initiated create operation.
+/// Non-secret fields accepted by the documented `symvault add` and `set` surfaces.
+/// Secret material is kept separate and is never included in confirmations.
+public struct VaultCredentialDraft: Sendable, Equatable {
+    public var path: String
+    public var type: String
+    public var secret: String
+    public var username: String
+    public var url: String
+    public var notes: String
+    public var usageHint: String
+    public var autoRotate: Bool
+    public var expiresAt: String
+    public var totpSecret: String
+    public var totpIssuer: String
+    public var totpAccount: String
+
+    public init(path: String, type: String = "password", secret: String = "", username: String = "", url: String = "", notes: String = "", usageHint: String = "", autoRotate: Bool = false, expiresAt: String = "", totpSecret: String = "", totpIssuer: String = "", totpAccount: String = "") {
+        self.path = path; self.type = type; self.secret = secret; self.username = username; self.url = url
+        self.notes = notes; self.usageHint = usageHint; self.autoRotate = autoRotate; self.expiresAt = expiresAt
+        self.totpSecret = totpSecret; self.totpIssuer = totpIssuer; self.totpAccount = totpAccount
+    }
+}
+
 /// Submitted and service-confirmed metadata remain distinguishable; no secret
 /// value is retained or returned.
 public struct VaultCreateConfirmation: Sendable, Equatable {

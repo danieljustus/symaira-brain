@@ -294,13 +294,25 @@ public protocol VaultClientProtocol: Sendable {
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation
+    func create(draft: VaultCredentialDraft, profile: String?) async throws -> VaultCreateConfirmation
     func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation
+    func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation
     func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String
     func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse
     func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse
     func intakeReviewBatches(profile: String?) async throws -> [String]
     func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws
+}
+
+public extension VaultClientProtocol {
+    func create(draft: VaultCredentialDraft, profile: String?) async throws -> VaultCreateConfirmation {
+        try await create(path: draft.path, value: draft.secret, profile: profile)
+    }
+
+    func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation {
+        try await set(path: path, field: original.primarySecret?.field ?? "password", value: draft.secret, profile: profile)
+    }
 }
 
 extension VaultClient: VaultClientProtocol {}
@@ -323,9 +335,22 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var sessionTTL = "15m"
     @Published public var createPath = ""
     @Published public var createValue = ""
+    @Published public var createType = "password"
+    @Published public var createUsername = ""
+    @Published public var createURL = ""
+    @Published public var createNotes = ""
+    @Published public var createUsageHint = ""
+    @Published public var createAutoRotate = false
+    @Published public var createExpiresAt = ""
+    @Published public var createTOTPSecret = ""
+    @Published public var createTOTPIssuer = ""
+    @Published public var createTOTPAccount = ""
     @Published public var createConfirmation: VaultCreateConfirmation?
     @Published public var isCreating = false
     @Published public var editValue = ""
+    @Published public var editUsername = ""
+    @Published public var editURL = ""
+    @Published public var editNotes = ""
     @Published public var editConfirmation: VaultSetConfirmation?
     @Published public var isEditing = false
     @Published public var isDeleting = false
@@ -550,9 +575,14 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         }
         isCreating = true
         clearError()
-        defer { isCreating = false; createValue = "" }
+        defer {
+            isCreating = false
+            createValue = ""
+            createTOTPSecret = ""
+        }
         do {
-            let confirmation = try await client.create(path: path, value: createValue, profile: nil)
+            let draft = VaultCredentialDraft(path: path, type: createType, secret: createValue, username: createUsername, url: createURL, notes: createNotes, usageHint: createUsageHint, autoRotate: createAutoRotate, expiresAt: createExpiresAt, totpSecret: createTOTPSecret, totpIssuer: createTOTPIssuer, totpAccount: createTOTPAccount)
+            let confirmation = try await client.create(draft: draft, profile: nil)
             createConfirmation = confirmation
             createPath = ""
             statusMessage = "Secret created and confirmed by the vault service."
@@ -567,7 +597,8 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         isEditing = true; clearError()
         defer { isEditing = false; editValue = "" }
         do {
-            editConfirmation = try await client.set(path: path, field: field, value: editValue, profile: nil)
+            let draft = VaultCredentialDraft(path: path, type: detail?.type ?? "password", secret: editValue, username: editUsername, url: editURL, notes: editNotes, usageHint: detail?.usageHint ?? "", autoRotate: detail?.autoRotate ?? false, expiresAt: detail?.expiresAt ?? "")
+            editConfirmation = try await client.update(path: path, original: detail!, draft: draft, profile: nil)
             statusMessage = "Secret updated and confirmed by the vault service."
             await loadEntries()
         } catch { report(error) }
@@ -673,6 +704,9 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
                 guard !Task.isCancelled, self.generation == requestGeneration,
                       self.selectedPath == selectedPath, self.availability == .ready else { return }
                 self.detail = fetched
+                self.editUsername = fetched.fields["username"]?.displayString ?? ""
+                self.editURL = fetched.fields["url"]?.displayString ?? ""
+                self.editNotes = fetched.fields["notes"]?.displayString ?? ""
                 self.detailExpiryTask = Task { @MainActor [weak self] in
                     guard let self else { return }
                     do { try await self.sleep(.seconds(30)) } catch { return }

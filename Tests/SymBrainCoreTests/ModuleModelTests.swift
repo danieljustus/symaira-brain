@@ -352,4 +352,20 @@ struct ClipboardLifetimeTests {
         #expect(fake.clearCount == 2)
     }
 }
+
+struct VaultCredentialMetadataTests {
+    @Test func decodesCredentialMetadataWithoutChangingPrimarySecretSelection() throws {
+        let data = Data(#"{"path":"work/github","type":"api_key","usage_hint":"CI access","auto_rotate":true,"expires_at":"2030-01-02T03:04:05Z","fields":{"api_key":"fixture-secret","username":"alice","url":"https://example.invalid","notes":"build account"}}"#.utf8)
+        let detail = try JSONDecoder().decode(VaultEntryDetail.self, from: data)
+        #expect(detail.type == "api_key")
+        #expect(detail.usageHint == "CI access")
+        #expect(detail.autoRotate == true)
+        #expect(detail.expiresAt == "2030-01-02T03:04:05Z")
+        #expect(detail.primarySecret?.field == "api_key")
+        #expect(detail.primarySecret?.value == "fixture-secret")
+    }
+
+
+
+}
 #endif
