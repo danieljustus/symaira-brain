@@ -61,17 +61,17 @@ struct ModuleViewModelSkeletonTests {
 
     // MARK: - report(_:)
 
-    @Test func reportGenericErrorSetsMessageAndDetail() async {
+    @Test func reportGenericErrorUsesSafeMessageWithoutDetail() async {
         let vm = MemoryViewModel()
         let error = NSError(domain: "test", code: 42, userInfo: [
-            NSLocalizedDescriptionKey: "something broke"
+            NSLocalizedDescriptionKey: "something broke at /Users/daniel/private/token.json"
         ])
 
         vm.report(error)
 
-        #expect(vm.errorMessage != nil)
-        #expect(vm.errorMessage!.contains("something broke")
-                || vm.errorMessage!.contains("42"))
+        #expect(vm.errorMessage == "Something went wrong. Please try again or check the CLI logs for details.")
+        #expect(vm.errorDetail == nil)
+        #expect(!vm.errorMessage!.contains("/Users/"))
         #expect(vm.isBinaryNotFound == false)
     }
 
@@ -110,14 +110,15 @@ struct ModuleViewModelSkeletonTests {
         #expect(vm.errorMessage!.contains("symskills"))
     }
 
-    @Test func reportExecutionFailedSetsMessageAndDetail() async {
+    @Test func reportExecutionFailedSetsSafeMessageWithoutDetail() async {
         let vm = SkillsViewModel()
-        let error = CLIRunnerError.executionFailed(code: 1, fullStderr: "bad input")
+        let error = CLIRunnerError.executionFailed(code: 1, fullStderr: "bad input token=super-secret-token")
 
         vm.report(error)
 
         #expect(vm.errorMessage != nil)
-        #expect(vm.errorDetail != nil)
+        #expect(vm.errorDetail == nil)
+        #expect(!vm.errorMessage!.contains("super-secret-token"))
         #expect(vm.isBinaryNotFound == false)
     }
 

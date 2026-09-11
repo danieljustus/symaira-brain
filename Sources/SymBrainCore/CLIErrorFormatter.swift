@@ -2,37 +2,37 @@
 //
 // Every view that catches a SymBrainClient or CLIRunner error should route
 // through `formatError(_:)` so users see plain language instead of exit codes,
-// absolute paths, and raw stderr.  The original error detail is preserved
-// in `detail` for "Show Details" expansion.
+// absolute paths, and raw stderr.  Diagnostics are intentionally not retained
+// in the view-facing representation because module views render its fields.
 
 #if os(macOS)
 import Foundation
 import SymairaCLIRunner
 
 /// A two-tier error representation: a friendly summary for the user and an
-/// optional raw detail string for troubleshooting.
+/// optional safe detail string for troubleshooting.
 public struct FriendlyCLIError: Sendable {
     /// Plain-language message suitable for a notice or alert.
     public let message: String
-    /// Raw error detail (exit code, stderr, path) for expandable disclosure.
+    /// Safe, non-sensitive detail for display alongside the message.
     public let detail: String?
 }
 
 /// Map any error (typically CLIRunnerError) into a user-friendly message while
-/// preserving raw detail for debugging.
+/// without exposing subprocess diagnostics or arbitrary error descriptions.
 ///
 /// Usage:
 /// ```swift
 /// let friendly = formatError(error)
 /// errorMessage = friendly.message          // shown to the user
-/// errorDetail  = friendly.detail           // hidden behind "Show Details"
+/// errorDetail  = friendly.detail           // safe display-only context
 /// ```
 public func formatError(_ error: Error) -> FriendlyCLIError {
     if let cliError = error as? CLIRunnerError {
         return formatCLIError(cliError)
     }
     return FriendlyCLIError(
-        message: error.localizedDescription,
+        message: "Something went wrong. Please try again or check the CLI logs for details.",
         detail: nil
     )
 }
@@ -48,10 +48,10 @@ private func formatCLIError(_ error: CLIRunnerError) -> FriendlyCLIError {
             detail: nil
         )
 
-    case .executionFailed(let code, let stderr):
+    case .executionFailed(_, let stderr):
         return FriendlyCLIError(
             message: friendlyMessage(from: stderr),
-            detail: "Exit code \(code): \(stderr)"
+            detail: nil
         )
 
     case .timeout(let seconds):
@@ -61,18 +61,18 @@ private func formatCLIError(_ error: CLIRunnerError) -> FriendlyCLIError {
             detail: "Timed out after \(seconds)s"
         )
 
-    case .invalidJSON(let description):
+    case .invalidJSON:
         return FriendlyCLIError(
             message: "Received an unexpected response from the CLI. "
                 + "Try restarting the app or running `brew upgrade`.",
-            detail: description
+            detail: nil
         )
 
     case .schemaMismatch(let expected, let actual):
         return FriendlyCLIError(
             message: "The CLI version is out of date (schema \(actual), expected \(expected)). "
                 + "Run `brew update && brew upgrade` to fix this.",
-            detail: "Schema mismatch: expected \(expected), got \(actual)"
+            detail: "Schema mismatch"
         )
 
     case .outputTruncated(let size):

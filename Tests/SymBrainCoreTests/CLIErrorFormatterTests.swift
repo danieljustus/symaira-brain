@@ -1,16 +1,17 @@
 #if os(macOS)
+import Foundation
 import Testing
 import SymairaCLIRunner
 @testable import SymBrainCore
 
 struct CLIErrorFormatterTests {
-    @Test func formatsEveryCLIRunnerErrorWithSafeDefaultAndUsefulDetail() {
+    @Test func formatsEveryCLIRunnerErrorWithSafeDefaultAndDetail() {
         let secret = "super-secret-token-1234567890"
         let cases: [(CLIRunnerError, String, String?)] = [
             (.binaryNotFound(tool: "symvault"), "symvault", nil),
-            (.executionFailed(code: 7, fullStderr: "vault locked: \(secret)"), "locked", secret),
+            (.executionFailed(code: 7, fullStderr: "vault locked: \(secret)"), "locked", nil),
             (.timeout(seconds: 5.5), "did not complete", "Timed out"),
-            (.invalidJSON(description: "/Users/daniel/private/secret.json"), "unexpected response", "/Users/daniel/private/secret.json"),
+            (.invalidJSON(description: "/Users/daniel/private/secret.json"), "unexpected response", nil),
             (.schemaMismatch(expected: 2, actual: 1), "out of date", "Schema mismatch"),
             (.outputTruncated(size: 1024), "too much output", "1024"),
         ]
@@ -26,6 +27,32 @@ struct CLIErrorFormatterTests {
             #expect(!formatted.message.contains("/Users/"))
             #expect(!formatted.message.contains("Exit code"))
         }
+    }
+
+    @Test func redactsExecutionDiagnosticsFromBothMessageAndDetail() {
+        let stderr = "cannot read entry /Users/daniel/.config/symvault/prod: token=super-secret-token"
+        let formatted = formatError(CLIRunnerError.executionFailed(code: 23, fullStderr: stderr))
+
+        #expect(formatted.message == "This entry appears to be corrupted or unreadable. Try restoring it from a backup, or check the CLI logs for details.")
+        #expect(formatted.detail == nil)
+        #expect(!formatted.message.contains("/Users/"))
+        #expect(!formatted.message.contains("super-secret-token"))
+        #expect(!formatted.message.contains("23"))
+    }
+
+    @Test func redactsArbitraryErrorsAtTheFormattingBoundary() {
+        struct ArbitraryError: LocalizedError {
+            var errorDescription: String? {
+                "failed at /Users/daniel/private/token.json: token=super-secret-token"
+            }
+        }
+
+        let formatted = formatError(ArbitraryError())
+
+        #expect(formatted.message == "Something went wrong. Please try again or check the CLI logs for details.")
+        #expect(formatted.detail == nil)
+        #expect(!formatted.message.contains("/Users/"))
+        #expect(!formatted.message.contains("super-secret-token"))
     }
 
     @Test func classifiesKnownVaultAndProfileStderrPatterns() {
@@ -49,19 +76,8 @@ struct CLIErrorFormatterTests {
             let formatted = formatError(CLIRunnerError.executionFailed(code: 1, fullStderr: stderr))
             #expect(formatted.message.localizedCaseInsensitiveContains(expectedMessage))
             #expect(!formatted.message.contains(stderr))
-            #expect(formatted.detail?.contains(stderr) == true)
+            #expect(formatted.detail == nil)
         }
-    }
-
-    @Test func separatesSafeDefaultFromRawExecutionDiagnostics() {
-        let stderr = "cannot read entry /Users/daniel/.config/symvault/prod: token=super-secret-token"
-        let formatted = formatError(CLIRunnerError.executionFailed(code: 23, fullStderr: stderr))
-
-        #expect(formatted.message == "This entry appears to be corrupted or unreadable. Try restoring it from a backup, or check the CLI logs for details.")
-        #expect(formatted.detail == "Exit code 23: \(stderr)")
-        #expect(!formatted.message.contains("/Users/"))
-        #expect(!formatted.message.contains("super-secret-token"))
-        #expect(!formatted.message.contains("23"))
     }
 }
 #endif
