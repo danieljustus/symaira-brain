@@ -203,16 +203,7 @@ def run_bounded(
     stderr = bytes(buffers["stderr"])
     stdout = bytes(buffers["stdout"])
     if stderr:
-        unexpected = [
-            line for line in stderr.decode(errors="replace").splitlines()
-            if line
-            and not line.startswith("⚠️  Update available:")
-            and not line.startswith("   Use `symoperate updates skip ")
-        ]
-        if unexpected:
-            raise SmokeError(
-                "MCP subprocess wrote unexpected stderr: " + "\n".join(unexpected)
-            )
+        raise SmokeError(f"MCP subprocess wrote stderr: {stderr.decode(errors='replace')}")
     responses = []
     for line in stdout.splitlines():
         if not line.strip():
