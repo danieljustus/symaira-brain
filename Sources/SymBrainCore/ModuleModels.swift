@@ -490,7 +490,7 @@ public enum VaultFieldSecurity {
         return [
             "password", "secret", "token", "api_key", "private_key", "totp",
             "certificate", "cert_pem", "database_url", "connection_string", "seed", "basic_auth",
-            "card_number", "cvc", "iban",
+            "card_number", "cvc", "iban", "key", "passwd", "pwd",
         ]
         .contains { key.contains($0) }
     }

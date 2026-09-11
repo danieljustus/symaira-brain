@@ -222,13 +222,36 @@ private actor ManualSleeper {
 
 @MainActor
 extension ModuleViewModelSkeletonTests {
-    @Test func createEntryClearsValueAndPublishesSanitizedConfirmation() async {
+    @Test func createEntryClearsCompleteDraftAfterSuccessfulCreate() async {
         let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "x", modified: nil, fields: [:])))
         vm.availability = .ready
         vm.createPath = "work/new"
         vm.createValue = "do-not-retain"
+        vm.createType = "basic_auth"
+        vm.createUsername = "alice"
+        vm.createURL = "https://example.invalid"
+        vm.createNotes = "fixture note"
+        vm.createUsageHint = "fixture hint"
+        vm.createAutoRotate = true
+        vm.createExpiresAt = "2030-01-01T00:00:00Z"
+        vm.createTOTPSecret = "totp-fixture"
+        vm.createTOTPIssuer = "Example"
+        vm.createTOTPAccount = "alice@example.invalid"
+
         await vm.createEntry()
+
+        #expect(vm.createPath.isEmpty)
         #expect(vm.createValue.isEmpty)
+        #expect(vm.createType == "password")
+        #expect(vm.createUsername.isEmpty)
+        #expect(vm.createURL.isEmpty)
+        #expect(vm.createNotes.isEmpty)
+        #expect(vm.createUsageHint.isEmpty)
+        #expect(vm.createAutoRotate == false)
+        #expect(vm.createExpiresAt.isEmpty)
+        #expect(vm.createTOTPSecret.isEmpty)
+        #expect(vm.createTOTPIssuer.isEmpty)
+        #expect(vm.createTOTPAccount.isEmpty)
         #expect(vm.createConfirmation?.submittedPath == "work/new")
         #expect(vm.createConfirmation?.confirmedHasValue == true)
     }
@@ -386,10 +409,40 @@ extension ModuleViewModelSkeletonTests {
         try script.data(using: .utf8)!.write(to: binary)
         try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
         let client = VaultClient(userOverride: binary)
-        await #expect(throws: CLIRunnerError.self) {
-            _ = try await client.set(path: "work/item", field: "private_key", value: "line-one\nline-two")
+        for field in ["private_key", "recovery_key", "client_key"] {
+            await #expect(throws: CLIRunnerError.self) {
+                _ = try await client.set(path: "work/item", field: field, value: "line-one\nline-two")
+            }
         }
         #expect(!FileManager.default.fileExists(atPath: marker.path))
+    }
+
+    @Test func vaultClientRejectsEmptyGenericSensitiveKeysBeforeDispatch() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let marker = dir.appendingPathComponent("invoked")
+        let script = "#!/bin/sh\ntouch \"\(marker.path)\"\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try Data(script.utf8).write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+
+        for field in ["recovery_key", "client_key"] {
+            do {
+                _ = try await client.set(path: "work/item", field: field, value: "")
+                Issue.record("accepted an empty generic sensitive field")
+            } catch let error as CLIRunnerError {
+                guard case .invalidJSON(let description) = error else {
+                    Issue.record("empty generic key returned the wrong error: \(error)")
+                    continue
+                }
+                #expect(description == "sensitive field values cannot be empty")
+            } catch {
+                Issue.record("empty generic key returned a non-CLI error: \(error)")
+            }
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
+        }
     }
 
     @Test func vaultClientRejectsCRLFCRAndLFBeforeDispatchForCreateAndSet() async throws {
@@ -565,30 +618,44 @@ extension ModuleViewModelSkeletonTests {
 }
 
 
-@Test func vaultClientCreateUsesBasicAuthMappingAndRejectsPaymentCreation() async throws {
+@Test func vaultClientCreateUsesMetadataAndOrderedTOTPStdinAndRejectsPaymentCreation() async throws {
     let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: dir) }
     let argsFile = dir.appendingPathComponent("args")
     let stdinFile = dir.appendingPathComponent("stdin")
     let marker = dir.appendingPathComponent("payment-invoked")
-    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"\(argsFile.path)\"\nif [ \"$3\" = add ]; then cat > \"\(stdinFile.path)\"; exit 0; fi\nif [ \"$3\" = get ]; then printf '%s' '{\"path\":\"work/basic\",\"type\":\"basic_auth\",\"fields\":{\"basic_auth\":\"secret\",\"username\":\"alice\"}}'; exit 0; fi\ntouch \"\(marker.path)\"; exit 1\n"
+    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"\(argsFile.path)\"\nif [ \"$3\" = add ]; then cat > \"\(stdinFile.path)\"; exit 0; fi\nif [ \"$3\" = get ]; then printf '%s' '{\"path\":\"work/basic\",\"type\":\"basic_auth\",\"fields\":{\"basic_auth\":\"redacted\",\"username\":\"alice\"}}'; exit 0; fi\ntouch \"\(marker.path)\"; exit 1\n"
     let binary = dir.appendingPathComponent("symvault")
     try Data(script.utf8).write(to: binary)
     try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
     let client = VaultClient(userOverride: binary)
+    let secret = String(repeating: "s", count: 19)
+    let totp = String(repeating: "t", count: 16)
 
     let confirmation = try await client.create(draft: VaultCredentialDraft(
-        path: "work/basic", type: "basic_auth", secret: "secret", username: "alice"))
+        path: "work/basic", type: "basic_auth", secret: secret, username: "alice",
+        url: "https://example.invalid", notes: "fixture notes", usageHint: "fixture hint",
+        autoRotate: true, expiresAt: "2030-01-01T00:00:00Z", totpSecret: totp,
+        totpIssuer: "Example", totpAccount: "alice@example.invalid"))
     #expect(confirmation.confirmedPath == "work/basic")
-    #expect(try String(contentsOf: stdinFile) == "secret\n")
-    let recordedArgs = try String(contentsOf: argsFile).split(separator: "\n").map(String.init)
-    #expect(Array(recordedArgs.prefix(9)) == [
-        "--color", "never", "add", "work/basic", "--stdin-value", "--type", "basic_auth", "--username", "alice"
+
+    let args = try String(contentsOf: argsFile).split(separator: "\n").map(String.init)
+    #expect(Array(args.prefix(23)) == [
+        "--color", "never", "add", "work/basic", "--stdin-value", "--type", "basic_auth",
+        "--username", "alice", "--url", "https://example.invalid", "--notes", "fixture notes",
+        "--usage-hint", "fixture hint", "--expires-at", "2030-01-01T00:00:00Z", "--auto-rotate",
+        "--stdin-totp-secret", "--totp-issuer", "Example", "--totp-account", "alice@example.invalid"
     ])
+    let stdin = try Data(contentsOf: stdinFile)
+    let records = stdin.split(separator: 0x0A, omittingEmptySubsequences: false)
+    #expect(records.count == 3)
+    #expect(records[0].count == 19)
+    #expect(records[1].count == 16)
+    #expect(records[2].isEmpty)
 
     do {
-        _ = try await client.create(draft: VaultCredentialDraft(path: "work/payment", type: "payment", secret: "card"))
+        _ = try await client.create(draft: VaultCredentialDraft(path: "work/payment", type: "payment", secret: secret))
         Issue.record("payment creation was accepted")
     } catch let error as CLIRunnerError {
         guard case .invalidJSON(let description) = error else {

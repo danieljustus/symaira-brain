@@ -171,8 +171,13 @@ struct VaultEntryTests {
         #expect(VaultFieldSecurity.isSensitive("password"))
         #expect(VaultFieldSecurity.isSensitive("API_KEY"))
         #expect(VaultFieldSecurity.isSensitive("totp_secret"))
+        #expect(VaultFieldSecurity.isSensitive("recovery_key"))
+        #expect(VaultFieldSecurity.isSensitive("client_key"))
+        #expect(VaultFieldSecurity.isSensitive("PASSWD_backup"))
+        #expect(VaultFieldSecurity.isSensitive("pwd_hint"))
         #expect(VaultFieldSecurity.isSensitive("username") == false)
         #expect(VaultFieldSecurity.isSensitive("url") == false)
+        #expect(VaultFieldSecurity.isSensitive("notes") == false)
     }
 
     @Test func choosesEverySupportedPrimarySecretField() {

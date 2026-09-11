@@ -584,12 +584,27 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
             let draft = VaultCredentialDraft(path: path, type: createType, secret: createValue, username: createUsername, url: createURL, notes: createNotes, usageHint: createUsageHint, autoRotate: createAutoRotate, expiresAt: createExpiresAt, totpSecret: createTOTPSecret, totpIssuer: createTOTPIssuer, totpAccount: createTOTPAccount)
             let confirmation = try await client.create(draft: draft, profile: nil)
             createConfirmation = confirmation
-            createPath = ""
+            resetCreateDraft()
             statusMessage = "Secret created and confirmed by the vault service."
             await loadEntries()
         } catch {
             report(error)
         }
+    }
+
+    private func resetCreateDraft() {
+        createPath = ""
+        createValue = ""
+        createType = "password"
+        createUsername = ""
+        createURL = ""
+        createNotes = ""
+        createUsageHint = ""
+        createAutoRotate = false
+        createExpiresAt = ""
+        createTOTPSecret = ""
+        createTOTPIssuer = ""
+        createTOTPAccount = ""
     }
 
     public func setSelectedEntry() async {
