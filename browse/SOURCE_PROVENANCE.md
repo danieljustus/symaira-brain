@@ -11,12 +11,12 @@ its `symbrowse` distribution and supported compatibility routes are unchanged.
 - **Source path:** repository root
 - **Receiving path:** `symaira-brain/browse/`
 - **Support source:** none; Browse is self-contained.
-- **Imported tracked files:** **585**. The complete eligible inventory is:
+- **Imported tracked files:** **586**. The complete eligible inventory is:
   `cmd/` 76, `crates/` 122 (the full 11-member Rust workspace), `internal/`
   328, `port/` 10, `formflow/` 14, `docs/` 27 (Markdown only, including all
   `docs/rust-port/*.md`), `scripts/rust-port/test_benchmark_harness.py` 1,
-  and 7 top-level files (`.gitignore`, `README.md`, `go.mod`, `go.sum`,
-  `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`).
+  and 8 top-level files (`.gitignore`, `README.md`, `CONTRIBUTING.md`, `go.mod`,
+  `go.sum`, `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`).
 
 The resync refreshes the five stale Safari/BiDi receiver files from the exact
 pinned Git tree:
@@ -31,29 +31,35 @@ pinned Git tree:
 The receiving copy preserves these receiver conventions:
 
 1. `browse/.gitignore` is adapted for the receiving repository's local layout and
-   build-storage conventions. It is the only content difference in the current
-   full comparison.
-2. `browse/go.mod` retains the receiver's independently reviewed CoreKit pin
-   (`v0.17.0`); it matches the pinned source tree and remains an independent
-   nested module graph relative to Brain's root `go.mod` (`v0.16.2`).
-3. `browse/internal/policy/policy_test.go` retains the receiver's gofmt-formatted
-   state; it matches the pinned source tree at this resync.
+   build-storage conventions.
+2. `browse/cmd/symbrowse/readme_commands_test.go` is narrowly adapted to check
+   only the documentation files shipped in the nested module (`README.md` and
+   `CONTRIBUTING.md`); the upstream test's checks for excluded `AGENTS.md` and
+   `.golangci.yml` are not retained. This is a fixture-path test adaptation, not
+   a product behavior change.
+
+`browse/CONTRIBUTING.md` is copied byte-for-byte as an explicit tracked-document
+exception because `browse/README.md` links to it and the nested README/version
+test reads it relative to the Browse module root. Source blob:
+`c84daf7fe07b08a82f72b88e0a51ebc0f79a4720`. No `AGENTS.md`, `SECURITY.md`,
+`LICENSE`, or global policy file is copied or renamed.
 
 ## Full provenance comparison
 
-The 585 eligible target paths were compared programmatically against the pinned
+The 586 eligible target paths were compared programmatically against the pinned
 source tree by complete relative path, file mode, and blob content. Result:
-**585/585 paths present, 0 missing, 0 extra; 585/585 modes equal; 584/585
-content-identical; 1 intentional content adaptation (`.gitignore`); 0
-unexplained differences.** The comparison was performed after the five-file
-resync and includes the preserved receiver adaptations above.
+**586/586 paths present, 0 missing, 0 extra; 586/586 modes equal; 584/586
+content-identical; 2 intentional content adaptations (`.gitignore` and
+`cmd/symbrowse/readme_commands_test.go`); 0 unexplained differences.** The
+comparison was performed after the five-file resync and includes the preserved
+receiver adaptations above.
 
 ## Exclusions
 
-The source commit contains 748 tracked files; 163 are intentionally excluded:
+The source commit contains 748 tracked files; 162 are intentionally excluded:
 
 - Root boilerplate and policy/instruction files: `CHANGELOG.md`, `LICENSE`,
-  `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.golangci.yml`,
+  `CODE_OF_CONDUCT.md`, `SECURITY.md`, `.golangci.yml`,
   `.goreleaser.yml`, `.editorconfig`, `deny.toml`, `Makefile`, `AGENTS.md`,
   `CLAUDE.md`, and `.gitattributes`.
 - `.github/`, `assets/`, `testdata/`, `security/`, `e2e/`, and `fuzz/` trees.

@@ -71,7 +71,7 @@ func TestDocumentedGoVersionMatchesGoMod(t *testing.T) {
 	}
 	expected := goDirective[1]
 	documentedVersion := regexp.MustCompile(`\bGo(?:[ -])([0-9]+\.[0-9]+\.[0-9]+)\b`)
-	for _, name := range []string{"README.md", "CONTRIBUTING.md", "AGENTS.md", ".golangci.yml"} {
+	for _, name := range []string{"README.md", "CONTRIBUTING.md"} {
 		content, err := os.ReadFile(filepath.Join(repoRoot, name))
 		if err != nil {
 			t.Fatal(err)
