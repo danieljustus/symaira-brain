@@ -593,12 +593,15 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     }
 
     public func setSelectedEntry() async {
-        guard let path = selectedPath, let field = detail?.primarySecret?.field, detail?.path == path, !editValue.isEmpty else { errorMessage = "Reveal an entry and enter a new secret value."; return }
+        guard let path = selectedPath, let detail, detail.path == path else {
+            errorMessage = "Reveal an entry before editing it."
+            return
+        }
         isEditing = true; clearError()
         defer { isEditing = false; editValue = "" }
         do {
-            let draft = VaultCredentialDraft(path: path, type: detail?.type ?? "password", secret: editValue, username: editUsername, url: editURL, notes: editNotes, usageHint: detail?.usageHint ?? "", autoRotate: detail?.autoRotate ?? false, expiresAt: detail?.expiresAt ?? "")
-            editConfirmation = try await client.update(path: path, original: detail!, draft: draft, profile: nil)
+            let draft = VaultCredentialDraft(path: path, type: detail.type ?? "password", secret: editValue, username: editUsername, url: editURL, notes: editNotes, usageHint: detail.usageHint ?? "", autoRotate: detail.autoRotate ?? false, expiresAt: detail.expiresAt ?? "")
+            editConfirmation = try await client.update(path: path, original: detail, draft: draft, profile: nil)
             statusMessage = "Secret updated and confirmed by the vault service."
             await loadEntries()
         } catch { report(error) }

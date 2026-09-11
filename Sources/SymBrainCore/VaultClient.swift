@@ -186,7 +186,7 @@ public struct VaultClient: Sendable {
         guard Self.validPath(path), Self.validField(field) else {
             throw CLIRunnerError.invalidJSON(description: "invalid vault entry path or field")
         }
-        try Self.validateSingleLine(value)
+        try Self.validateValue(value, field: field)
         let target = path + "." + field
         _ = try await runner.runChecked(
             try executable(), arguments: arguments(profile: profile, command: ["set", target, "--stdin-value"]),
@@ -235,17 +235,20 @@ public struct VaultClient: Sendable {
     /// are create-time metadata in the current `symvault set` contract and are not guessed here.
     public func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String? = nil) async throws -> VaultSetConfirmation {
         guard Self.validPath(path) else { throw CLIRunnerError.invalidJSON(description: "invalid vault entry path") }
-        let secretField = original.primarySecret?.field ?? "password"
-        let updates = [(secretField, draft.secret), ("username", draft.username), ("url", draft.url), ("notes", draft.notes)]
+        let secretField = original.primarySecret?.field
+        let updates: [(String, String)] = [
+            (secretField ?? "", draft.secret),
+            ("username", draft.username),
+            ("url", draft.url),
+            ("notes", draft.notes)
+        ]
         var last: VaultSetConfirmation?
-        for (field, value) in updates where !value.isEmpty && value != original.fields[field]?.displayString {
+        for (field, value) in updates where !field.isEmpty && ((field == secretField && !value.isEmpty) || field != secretField) && value != original.fields[field]?.displayString {
             last = try await set(path: path, field: field, value: value, profile: profile)
         }
-        if last == nil {
-            let confirmed = try await entry(path: path, profile: profile)
-            return VaultSetConfirmation(submittedPath: path, submittedField: "", confirmedPath: confirmed.path.isEmpty ? path : confirmed.path, confirmedField: nil, confirmedValueMatches: true, confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
-        }
-        return last!
+        if let last { return last }
+        let confirmed = try await entry(path: path, profile: profile)
+        return VaultSetConfirmation(submittedPath: path, submittedField: "", confirmedPath: confirmed.path.isEmpty ? path : confirmed.path, confirmedField: nil, confirmedValueMatches: true, confirmedFieldCount: confirmed.fields.count, confirmedHasValue: confirmed.fields.values.contains { !$0.isEmpty })
     }
 
     public func generatePassword(length: Int, symbols: Bool, profile: String? = nil) async throws -> String {
@@ -307,6 +310,18 @@ public struct VaultClient: Sendable {
     }
 
     // MARK: - Private
+
+    private static func validateValue(_ value: String, field: String) throws {
+        if value.isEmpty {
+            guard !VaultFieldSecurity.isSensitive(field) else {
+                throw CLIRunnerError.invalidJSON(description: "sensitive field values cannot be empty")
+            }
+            return
+        }
+        if VaultFieldSecurity.isSensitive(field) {
+            try validateSingleLine(value)
+        }
+    }
 
     private static func validateSingleLine(_ value: String) throws {
         guard !value.isEmpty else { throw CLIRunnerError.invalidJSON(description: "secret value is empty") }

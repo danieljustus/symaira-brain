@@ -276,7 +276,7 @@ struct VaultView: View {
                             Label("Update Selected", systemImage: "pencil")
                         }
                         .symairaButtonStyle(.secondary)
-                        .disabled(vm.isEditing || vm.editValue.isEmpty)
+                        .disabled(vm.isEditing)
                         Button(role: .destructive) { deletePath = path } label: {
                             Label("Delete", systemImage: "trash")
                         }

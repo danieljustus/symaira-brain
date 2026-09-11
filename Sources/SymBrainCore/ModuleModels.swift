@@ -350,9 +350,28 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
         self.expiresAt = expiresAt
     }
 
-    /// The entry's primary secret, if one of the known secret fields is set.
+    /// The entry's primary secret, using symvault's type-specific field mapping.
     public var primarySecret: (field: String, value: String)? {
-        for key in ["password", "secret", "token", "api_key", "private_key", "database_url"] {
+        let mappedField: String? = {
+            switch type?.lowercased() {
+            case "api_key": return "api_key"
+            case "bearer_token": return "token"
+            case "basic_auth": return "password"
+            case "ssh_key": return "private_key"
+            case "certificate": return "cert_pem"
+            case "database_url": return "connection_string"
+            case "totp_seed": return "seed"
+            case "password", "custom", nil: return "password"
+            default: return nil
+            }
+        }()
+        if let mappedField, let value = fields[mappedField]?.displayString, !value.isEmpty {
+            return (mappedField, value)
+        }
+        // Older symvault versions omitted `type`; retain compatibility with
+        // their documented conventional field names without treating metadata
+        // such as username or URL as secret material.
+        for key in ["password", "secret", "token", "api_key", "private_key", "cert_pem", "connection_string", "database_url", "seed", "basic_auth"] {
             if let value = fields[key]?.displayString, !value.isEmpty {
                 return (key, value)
             }
@@ -466,7 +485,7 @@ public enum VaultFieldSecurity {
         let key = field.lowercased()
         return [
             "password", "secret", "token", "api_key", "private_key", "totp",
-            "certificate", "database_url",
+            "certificate", "cert_pem", "database_url", "connection_string", "seed", "basic_auth",
         ]
         .contains { key.contains($0) }
     }

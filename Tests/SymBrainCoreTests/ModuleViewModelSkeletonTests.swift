@@ -479,6 +479,28 @@ extension ModuleViewModelSkeletonTests {
 
 #if os(macOS)
 
+@Test func vaultClientUpdateCanClearMetadataWithoutTouchingSecret() async throws {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let argsFile = dir.appendingPathComponent("args")
+    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"\(argsFile.path)\"\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nprintf '%s' '{\"path\":\"work/item\",\"type\":\"database_url\",\"fields\":{\"connection_string\":\"db-secret\",\"username\":\"\",\"url\":\"https://example.invalid\",\"notes\":\"new note\"}}'\n"
+    let binary = dir.appendingPathComponent("symvault")
+    try Data(script.utf8).write(to: binary)
+    try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+    let client = VaultClient(userOverride: binary)
+    let original = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+        "connection_string": .string("db-secret"), "username": .string("alice"),
+        "url": .string("https://example.invalid"), "notes": .string("old note")
+    ], type: "database_url", usageHint: "keep", autoRotate: true, expiresAt: "2030-01-01T00:00:00Z")
+    let confirmation = try await client.update(path: original.path, original: original, draft: VaultCredentialDraft(path: original.path, type: "database_url", username: "", url: "https://example.invalid", notes: "new note"))
+    #expect(confirmation.confirmedValueMatches)
+    let args = try String(contentsOf: argsFile)
+    #expect(args.contains("work/item.username"))
+    #expect(args.contains("work/item.notes"))
+    #expect(!args.contains("work/item.connection_string"))
+}
+
 @Test func vaultClientGenerationAndIntakeUseExactCLIContracts() async throws {
     let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

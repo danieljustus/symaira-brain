@@ -365,7 +365,32 @@ struct VaultCredentialMetadataTests {
         #expect(detail.primarySecret?.value == "fixture-secret")
     }
 
+    @Test func primarySecretUsesVaultTypeMappingsAndMasksAllSupportedTypes() throws {
+        let cases: [(String, String)] = [
+            ("password", "password"), ("api_key", "api_key"), ("bearer_token", "token"),
+            ("basic_auth", "password"), ("ssh_key", "private_key"), ("certificate", "cert_pem"),
+            ("database_url", "connection_string"), ("totp_seed", "seed"), ("custom", "password")
+        ]
+        for (type, field) in cases {
+            let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [field: .string("secret")], type: type)
+            #expect(detail.primarySecret?.field == field)
+            #expect(VaultFieldSecurity.isSensitive(field))
+        }
+        #expect(!VaultFieldSecurity.isSensitive("username"))
+        #expect(!VaultFieldSecurity.isSensitive("url"))
+        #expect(!VaultFieldSecurity.isSensitive("notes"))
+    }
 
+    @Test func basicAuthKeepsUsernameMetadataVisible() {
+        let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+            "password": .string("secret"), "username": .string("alice")
+        ], type: "basic_auth")
+        #expect(detail.primarySecret?.field == "password")
+        #expect(detail.sortedFields.first?.key == "password")
+        #expect(detail.sortedFields.first?.isSensitive == true)
+        #expect(detail.sortedFields.last?.key == "username")
+        #expect(detail.sortedFields.last?.isSensitive == false)
+    }
 
 }
 #endif
