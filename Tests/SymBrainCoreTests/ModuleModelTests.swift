@@ -369,7 +369,7 @@ struct VaultCredentialMetadataTests {
         let cases: [(String, String)] = [
             ("password", "password"), ("api_key", "api_key"), ("bearer_token", "token"),
             ("basic_auth", "password"), ("ssh_key", "private_key"), ("certificate", "cert_pem"),
-            ("database_url", "connection_string"), ("totp_seed", "seed"), ("custom", "password")
+            ("database_url", "connection_string"), ("totp_seed", "seed"), ("payment", "card_number"), ("custom", "password")
         ]
         for (type, field) in cases {
             let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [field: .string("secret")], type: type)
@@ -379,6 +379,11 @@ struct VaultCredentialMetadataTests {
         #expect(!VaultFieldSecurity.isSensitive("username"))
         #expect(!VaultFieldSecurity.isSensitive("url"))
         #expect(!VaultFieldSecurity.isSensitive("notes"))
+        let bankPayment = VaultEntryDetail(path: "work/bank", modified: nil, fields: ["iban": .string("DE89370400440532013000")], type: "payment")
+        #expect(bankPayment.primarySecret?.field == "iban")
+        for field in ["card_number", "cvc", "iban"] {
+            #expect(VaultFieldSecurity.isSensitive(field))
+        }
     }
 
     @Test func basicAuthKeepsUsernameMetadataVisible() {

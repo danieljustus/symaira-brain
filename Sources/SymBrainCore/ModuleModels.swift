@@ -361,6 +361,7 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
             case "certificate": return "cert_pem"
             case "database_url": return "connection_string"
             case "totp_seed": return "seed"
+            case "payment": return "card_number"
             case "password", "custom", nil: return "password"
             default: return nil
             }
@@ -371,7 +372,7 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
         // Older symvault versions omitted `type`; retain compatibility with
         // their documented conventional field names without treating metadata
         // such as username or URL as secret material.
-        for key in ["password", "secret", "token", "api_key", "private_key", "cert_pem", "connection_string", "database_url", "seed", "basic_auth"] {
+        for key in ["password", "secret", "token", "api_key", "private_key", "cert_pem", "connection_string", "database_url", "seed", "card_number", "cvc", "iban", "basic_auth"] {
             if let value = fields[key]?.displayString, !value.isEmpty {
                 return (key, value)
             }
@@ -486,6 +487,7 @@ public enum VaultFieldSecurity {
         return [
             "password", "secret", "token", "api_key", "private_key", "totp",
             "certificate", "cert_pem", "database_url", "connection_string", "seed", "basic_auth",
+            "card_number", "cvc", "iban",
         ]
         .contains { key.contains($0) }
     }
