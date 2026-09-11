@@ -99,6 +99,12 @@ private func friendlyMessage(from stderr: String) -> String {
         return "Select a profile before running this action, or configure a default profile in Settings."
     }
 
+    // Keep profile errors ahead of the general "not found" classifier. The
+    // previous literal `profile.*not found` check never matched real output.
+    if lower.contains("profile ") && lower.contains(" not found") {
+        return "The selected profile does not exist or is invalid. Please choose another one."
+    }
+
     if lower.contains("binary not found") || lower.contains("not found") {
         return "A required component could not be found on your system. Please check the installation."
     }
@@ -107,8 +113,34 @@ private func friendlyMessage(from stderr: String) -> String {
         return "This item already exists. Choose a different name or remove the existing one first."
     }
 
-    if lower.contains("invalid profile") || lower.contains("profile.*not found") {
+    if lower.contains("invalid profile") {
         return "The selected profile does not exist or is invalid. Please choose another one."
+    }
+
+    // A single entry's ciphertext or metadata could not be read back — checked
+    // before "decryption failed" below, since a corrupted entry's underlying
+    // cause is often itself a decryption failure, but the "cannot read entry"
+    // wrapping means the vault unlocked fine and only this one entry is bad.
+    if lower.contains("cannot read entry")
+        || lower.contains("corrupt entry")
+        || lower.contains("corrupted entry")
+        || lower.contains("unreadable entry") {
+        return "This entry appears to be corrupted or unreadable. Try restoring it from a backup, "
+            + "or check the CLI logs for details."
+    }
+
+    // Wrong passphrase (or any other failure to decrypt with the vault's
+    // identity) while unlocking the vault itself.
+    if lower.contains("decryption failed") || lower.contains("failed to decrypt") {
+        return "Incorrect passphrase. Please check your passphrase and try again."
+    }
+
+    if lower.contains("vault locked") || lower.contains("vault is locked") {
+        return "The vault is locked. Run `symvault unlock` to unlock it before trying again."
+    }
+
+    if lower.contains("vault not initialized") {
+        return "This vault hasn't been initialized yet. Run `symvault init` to set one up."
     }
 
     // Fallback — still more friendly than a raw exit code line.

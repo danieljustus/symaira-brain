@@ -16,6 +16,7 @@
 		17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F7A7307C5362C46D956DDD /* MemoryView.swift */; };
 		1876D0749F97752B05EED258 /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 22DDC1B7D47B712C3444DF4D /* SymairaCLIRunner */; };
 		20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */; };
+		637B17D0BC17D7B8BC503013 /* CLIErrorFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */; };
 		36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC6F1658F16C48F507A56 /* AuditLog.swift */; };
 		39FF1DA3FAAACE4FF6079632 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 607EFF1004A503E966196E05 /* SymairaUpdateCheck */; };
 		3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDFA6201EBE1C20A656FE31 /* Models.swift */; };
@@ -103,6 +104,7 @@
 		C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModelTests.swift; sourceTree = "<group>"; };
 		C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSymBrainCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleViewModelSkeletonTests.swift; sourceTree = "<group>"; };
+		D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatterTests.swift; sourceTree = "<group>"; };
 		D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModels.swift; sourceTree = "<group>"; };
 		D66DEE385C4CA00E4B3D5438 /* SymBrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SymBrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainApp.swift; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
 				C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */,
 				CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */,
+				D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */,
 				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
 				667740FA032C91976E4E50E0 /* VaultIntakeStateMachineTests.swift */,
@@ -471,6 +474,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B262714CE76A1CEFD79E91FC /* AppVersionInfoTests.swift in Sources */,
+				637B17D0BC17D7B8BC503013 /* CLIErrorFormatterTests.swift in Sources */,
 				F768D624036BD0CF6CF32955 /* MemoryListPagingTests.swift in Sources */,
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
 				4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */,
