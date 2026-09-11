@@ -382,15 +382,52 @@ extension ModuleViewModelSkeletonTests {
     }
 
     @Test func vaultClientRejectsCRLFCRAndLFBeforeDispatchForCreateAndSet() async throws {
-        let missingBinary = URL(fileURLWithPath: "/definitely-missing-symvault-\(UUID().uuidString)")
-        let client = VaultClient(userOverride: missingBinary)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let marker = dir.appendingPathComponent("invoked")
+        let script = "#!/bin/sh\ntouch \"\(marker.path)\"\ncase \"$3\" in add|set) cat >/dev/null; exit 0;; get) printf '%s' '{\"path\":\"work/item\",\"fields\":{\"password\":\"control\"}}'; exit 0;; esac\nexit 1\n"
+        let binary = dir.appendingPathComponent("symvault")
+        try script.data(using: .utf8)!.write(to: binary)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+        let client = VaultClient(userOverride: binary)
+
+        // Mutation-negative control: this fixture reliably marks a dispatched command.
+        _ = try await client.create(path: "work/item", value: "control")
+        #expect(FileManager.default.fileExists(atPath: marker.path))
+        try FileManager.default.removeItem(at: marker)
+        _ = try await client.set(path: "work/item", field: "password", value: "control")
+        #expect(FileManager.default.fileExists(atPath: marker.path))
+        try FileManager.default.removeItem(at: marker)
+
         for value in ["line-one\r\nline-two", "line-one\rline-two", "line-one\nline-two"] {
-            await #expect(throws: CLIRunnerError.self) {
+            do {
                 _ = try await client.create(path: "work/item", value: value)
+                Issue.record("create accepted a multiline secret")
+            } catch let error as CLIRunnerError {
+                if case .invalidJSON(let description) = error {
+                    #expect(description == "multiline secret values are not supported")
+                } else {
+                    Issue.record("create returned the wrong CLIRunnerError: \(error)")
+                }
+            } catch {
+                Issue.record("create returned a non-CLI error: \(error)")
             }
-            await #expect(throws: CLIRunnerError.self) {
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
+
+            do {
                 _ = try await client.set(path: "work/item", field: "password", value: value)
+                Issue.record("set accepted a multiline secret")
+            } catch let error as CLIRunnerError {
+                if case .invalidJSON(let description) = error {
+                    #expect(description == "multiline secret values are not supported")
+                } else {
+                    Issue.record("set returned the wrong CLIRunnerError: \(error)")
+                }
+            } catch {
+                Issue.record("set returned a non-CLI error: \(error)")
             }
+            #expect(!FileManager.default.fileExists(atPath: marker.path))
         }
     }
 
