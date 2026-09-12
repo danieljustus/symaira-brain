@@ -56,8 +56,29 @@ def run_brain(binary: str, profile: str, config: str, requests: list[dict[str, A
     profile_path = home / "profile.toml"
     profile_path.write_text(profile)
     payload = b"".join(json.dumps(item, separators=(",", ":")).encode() + b"\n" for item in requests)
-    helper = load_smoke(Path(__file__).with_name("scope-mcp-smoke.py"))
-    return helper.run_bounded([binary, "mcp", "--profile-file", str(profile_path)], payload, 8.0)
+    # The smoke helper intentionally has no environment injection.  Keep this
+    # probe independent: the isolated HOME/PATH are part of this assertion.
+    process = subprocess.Popen(
+        [binary, "mcp", "--profile-file", str(profile_path)],
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env=env_for(home, path), start_new_session=True,
+    )
+    try:
+        stdout, stderr = process.communicate(payload, timeout=8.0)
+    except subprocess.TimeoutExpired as exc:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait(timeout=2.0)
+        raise AcceptanceError("Brain MCP subprocess exceeded 8.0s timeout") from exc
+    if process.returncode != 0:
+        raise AcceptanceError(f"Brain MCP subprocess exited {process.returncode}: {stderr.decode(errors='replace')}")
+    responses = []
+    for line in stdout.splitlines():
+        if line.strip():
+            value = json.loads(line)
+            if not isinstance(value, dict):
+                raise AcceptanceError("Brain MCP response is not an object")
+            responses.append(value)
+    return responses
 
 
 def assert_responses(responses: list[dict[str, Any]], ids: list[int]) -> None:
@@ -83,6 +104,21 @@ def marker_binary(path: Path, marker: Path) -> None:
     path.chmod(0o755)
 
 
+def path_wrapper(path: Path, marker: Path, label: str, target: str, prefix: str = "") -> None:
+    strip = "shift\n" if prefix else ""
+    path.write_text(f"#!/bin/sh\nprintf '%s\\n' '{label}' >> '{marker}'\n{strip}exec '{target}' \"$@\"\n")
+    path.chmod(0o755)
+
+
+def assert_exact_scope_catalog(response: dict[str, Any]) -> None:
+    listed = tool_names(response)
+    scope_names = [name for name in listed if name in SCOPE_TOOLS]
+    expected = set(SCOPE_TOOLS)
+    if set(scope_names) != expected or len(scope_names) != len(expected):
+        raise AcceptanceError(f"scope-prefixed catalog mismatch: expected exactly {SCOPE_TOOLS!r}, got {listed!r}")
+    print("Brain scope catalog: " + ", ".join(listed))
+
+
 def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None:
     with tempfile.TemporaryDirectory(prefix="pb-runtime-") as raw:
         td = Path(raw)
@@ -91,9 +127,43 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
         scope_probe = td / "scope-probe"
         marker_binary(operate_probe, marker)
         marker_binary(scope_probe, marker)
+        path_bin = td / "path-bin"
+        path_bin.mkdir()
+        path_wrapper(path_bin / "symoperate", marker, "symoperate", operate)
+        path_wrapper(path_bin / "symcockpit", marker, "symcockpit", scope, "scope")
+
+        # Positive controls run before the negative controls. They prove that
+        # the exact executable names are discoverable through the PATH passed
+        # to Brain, including the legacy symcockpit fallback.
+        home = td / "path-operate-home"
+        home.mkdir()
+        operate_profile = '[profile]\nname = "path-operate"\n[servers.operate]\nenabled = true\n'
+        responses = run_brain(brain, operate_profile, '[modules]\noperate = true\n',
+                              [initialize_request(), request("tools/list", 2)], home, str(path_bin))
+        assert_responses(responses, [1, 2])
+        if marker.read_text().splitlines() != ["symoperate"]:
+            raise AcceptanceError(f"PATH direct executable was not invoked first: {marker.read_text()!r}")
+        checks.append("brain-path-direct-positive-control")
+
+        marker.unlink(missing_ok=True)
+        home = td / "path-scope-home"
+        home.mkdir()
+        scope_profile = '[profile]\nname = "scope-only"\n[servers.scope]\nenabled = true\ntools_allow = ["' + '", "'.join(SCOPE_TOOLS) + '"]\n'
+        responses = run_brain(brain, scope_profile, '[modules]\nscope = true\n',
+                              [initialize_request(), request("tools/list", 2), request("tools/list", 3)],
+                              home, str(path_bin))
+        assert_responses(responses, [1, 2, 3])
+        if marker.read_text().splitlines() != ["symcockpit"]:
+            raise AcceptanceError(f"PATH fallback executable was not invoked: {marker.read_text()!r}")
+        # The catalog is checked only after initialize and two live tools/list
+        # responses: bootstrap output alone can never satisfy this acceptance.
+        assert_exact_scope_catalog(responses[2])
+        checks.append("brain-path-fallback-positive-control")
+        checks.append("brain-scope-exact-catalog")
 
         # Global module switches use [modules]. A profile declaration alone
         # must not spawn a disabled module.
+        marker.unlink(missing_ok=True)
         home = td / "disabled-home"
         home.mkdir()
         disabled_profile = '[profile]\nname = "disabled"\n[servers.operate]\nenabled = true\n[servers.scope]\nenabled = true\n'
@@ -106,25 +176,6 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
 
         # The marker executable is an owned positive control: if disabled
         # gating accidentally launches a child, the assertion above observes it.
-
-        # Scope-only must retain the seven explicitly allowed names. The
-        # override key is [servers.scope].binary_path, as defined by config.go.
-        home = td / "scope-home"
-        home.mkdir()
-        scope_profile = '[profile]\nname = "scope-only"\n[servers.scope]\nenabled = true\ntools_allow = ["' + '", "'.join(SCOPE_TOOLS) + '"]\n'
-        scope_config = f'[modules]\nscope = true\noperate = false\n[servers.scope]\nbinary_path = "{scope}"\n'
-        # Ask for the catalog twice. The first request may race a native
-        # child's initial handshake; the second is the asserted stable result.
-        responses = run_brain(brain, scope_profile, scope_config, [initialize_request(), request("tools/list", 2), request("tools/list", 3)], home, "/usr/bin:/bin")
-        assert_responses(responses, [1, 2, 3])
-        listed = tool_names(responses[2])
-        # Brain's catalog also contains its always-on bootstrap tools; the
-        # native Scope smoke below asserts the exact seven Scope names.
-        if any(name in SCOPE_TOOLS for name in listed):
-            raise AcceptanceError(f"scope-only Brain catalog unexpectedly exposed Scope tools before child readiness: {listed!r}")
-        if any("operate" in name for name in listed):
-            raise AcceptanceError(f"operate leaked into scope-only catalog: {listed!r}")
-        checks.append("brain-scope-only-seven-tools")
 
         # An invalid explicit override is authoritative and must not fall back
         # to PATH. The positive-control marker catches an accidental spawn.
@@ -148,12 +199,13 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
         checks.append("brain-unknown-tool-fail-closed")
 
 
-def held_lifecycle(binary: str, label: str, checks: list[str]) -> None:
+def held_lifecycle(binary: str, label: str, checks: list[str], args: list[str] | None = None) -> None:
+    command = [binary] + (args or ["serve"])
     with tempfile.TemporaryDirectory(prefix=f"pb-{label}-home-") as raw:
         home = Path(raw)
         payload = b"".join(json.dumps(item, separators=(",", ":")).encode() + b"\n" for item in [initialize_request(), request("tools/list", 2)])
         for cycle in range(2):
-            process = subprocess.Popen([binary, "serve"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                         env=env_for(home, "/usr/bin:/bin"), start_new_session=True)
             assert process.stdin and process.stdout and process.stderr
             selector = selectors.DefaultSelector()

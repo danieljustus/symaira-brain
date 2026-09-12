@@ -348,10 +348,9 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 	return servers, warnings, nil
 }
 
-// resolveForeign validates and resolves a server outside the four cores. A
-// foreign server has no mode preset — its exposure is read/write classified
-// per profile (issue #335) — and must declare a transport: command (with
-// optional args) or url.
+// resolveOptional resolves an optional module declaration. Unlike the
+// state-core presets, absent fields default to disabled and there is no
+// mode-derived exposure policy.
 func resolveOptional(fs fileServer) ServerConfig {
 	return ServerConfig{
 		Enabled:    derefBool(fs.Enabled, false),
@@ -360,6 +359,10 @@ func resolveOptional(fs fileServer) ServerConfig {
 	}
 }
 
+// resolveForeign validates and resolves a server outside the six known cores.
+// A foreign server has no mode preset — its exposure is read/write classified
+// per profile (issue #335) — and must declare a transport: command (with
+// optional args) or url.
 func resolveForeign(alias string, fs fileServer) (ServerConfig, []string, error) {
 	if fs.Command == "" && fs.URL == "" {
 		return ServerConfig{}, nil, fmt.Errorf(
