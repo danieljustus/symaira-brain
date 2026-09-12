@@ -372,6 +372,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public private(set) var approvalSnapshot: VaultApprovalSnapshot?
     @Published public var approvalOutcome: VaultApprovalOutcome?
     @Published public var isLoadingApprovals = false
+    @Published public private(set) var isDecidingApproval = false
 
     @Published public var generatedPassword = ""
     @Published public var isGenerating = false
@@ -396,6 +397,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     private let sleep: @Sendable (Duration) async throws -> Void
     private let clipboardWriter: @MainActor (String, Bool) -> Void
     private var generation = 0
+    private var approvalGeneration = 0
     private var generationTask: Task<Void, Never>?
     private var generationWorkTask: Task<String, Error>?
     private var intakeGeneration = 0
@@ -429,6 +431,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
     public func refresh() async {
         invalidatePendingDetail()
+        invalidateApprovalReview()
         isLoading = true
         clearError()
         defer { isLoading = false }
@@ -667,13 +670,20 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
     /// Loads the server-owned approval queue; Brain stores only a sanitized snapshot.
     public func loadApprovals() async {
+        approvalGeneration &+= 1
+        approvalSnapshot = nil
+        approvalOutcome = nil
+        let requestGeneration = approvalGeneration
         isLoadingApprovals = true
-        defer { isLoadingApprovals = false }
+        defer { if approvalGeneration == requestGeneration { isLoadingApprovals = false } }
         do {
-            approvalRequests = try await client.approvalList(profile: nil)
+            let requests = try await client.approvalList(profile: nil)
+            guard !Task.isCancelled, approvalGeneration == requestGeneration else { return }
+            approvalRequests = requests
             approvalSnapshot = nil
             approvalOutcome = nil
         } catch {
+            guard approvalGeneration == requestGeneration else { return }
             approvalRequests = []
             approvalSnapshot = nil
             approvalOutcome = nil
@@ -688,36 +698,62 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
             approvalSnapshot = nil
             return
         }
-        approvalSnapshot = VaultApprovalSnapshot(request: request)
+        if approvalSnapshot?.request.id != request.id {
+            approvalGeneration &+= 1
+        }
         approvalOutcome = nil
+        approvalSnapshot = VaultApprovalSnapshot(request: request, generation: approvalGeneration)
     }
 
     public func decideReviewedApproval(approve: Bool) async {
+        guard !isDecidingApproval else { return }
         guard let snapshot = approvalSnapshot else { errorMessage = "Review an approval request before deciding."; return }
-        guard approvalRequests.contains(snapshot.request), snapshot.request.isPending, !snapshot.request.isExpired else {
+        guard snapshot.generation == approvalGeneration,
+              approvalRequests.contains(snapshot.request), snapshot.request.isPending, !snapshot.request.isExpired else {
             errorMessage = "That approval request is stale or expired."
             approvalSnapshot = nil
             return
         }
+        // Re-read immediately before the mutating call; the UI list is only a
+        // rendering cache and may have become stale while the human reviewed it.
+        isDecidingApproval = true
+        defer { isDecidingApproval = false }
         do {
-            let outcome = try await client.approvalDecide(id: snapshot.request.id, approve: approve, profile: nil)
-            guard outcome.id == snapshot.request.id, outcome.status == (approve ? "approved" : "denied") else {
-                errorMessage = "Approval outcome could not be confirmed."
+            let fresh = try await client.approvalList(profile: nil)
+            guard !Task.isCancelled, snapshot.generation == approvalGeneration,
+                  fresh.contains(snapshot.request), !snapshot.request.isExpired else {
+                if snapshot.generation == approvalGeneration { approvalSnapshot = nil; errorMessage = "That approval request is stale or expired." }
                 return
             }
+            let outcome = try await client.approvalDecide(id: snapshot.request.id, approve: approve, profile: nil)
+            // Cancellation here cannot undo a request already sent to Vault;
+            // it only prevents an unbound/late result from being shown.
+            guard !Task.isCancelled, snapshot.generation == approvalGeneration,
+                  outcome.id == snapshot.request.id,
+                  outcome.status == (approve ? "approved" : "denied") else { return }
             approvalOutcome = outcome
             approvalSnapshot = nil
             approvalRequests.removeAll { $0.id == outcome.id }
             statusMessage = approve ? "Approval granted by the vault service." : "Approval denied by the vault service."
+        } catch is CancellationError {
+            return
         } catch {
+            guard snapshot.generation == approvalGeneration else { return }
             errorMessage = "Approval decision could not be confirmed."
             errorDetail = nil
         }
     }
 
     public func cancelApprovalReview() {
+        invalidateApprovalReview()
+    }
+
+    private func invalidateApprovalReview(clearRequests: Bool = false) {
+        approvalGeneration &+= 1
         approvalSnapshot = nil
         approvalOutcome = nil
+        isLoadingApprovals = false
+        if clearRequests { approvalRequests = [] }
     }
 
     /// Reads the symbrain broker audit log and keeps the vault server's calls.
@@ -755,9 +791,11 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         createValue = ""
         invalidateIntake()
         invalidatePendingDetail()
+        invalidateApprovalReview()
         clearError()
         do {
             try await client.lock(profile: nil)
+            approvalRequests = []
             entries = []
             detail = nil
             selectedPath = nil
@@ -773,6 +811,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     /// not fetched until the user explicitly chooses to reveal this entry.
     public func select(path: String) async {
         invalidatePendingDetail()
+        invalidateApprovalReview()
         selectedPath = path
         detail = nil
         revealedFields = []

@@ -686,4 +686,156 @@ extension ModuleViewModelSkeletonTests {
     #expect(vm.errorMessage == "That approval request is stale or expired.")
 }
 
+@MainActor
+private final class DelayedApprovalClient: VaultClientProtocol {
+    var isInstalled = true
+    var requests: [VaultApprovalRequest] = []
+    var listCallCount = 0
+    var decideCallCount = 0
+    var listWaiter: CheckedContinuation<[VaultApprovalRequest], Never>?
+    var blockList = false
+    var immediateDecision: VaultApprovalOutcome?
+    var blockDecision = false
+    var decisionWaiter: CheckedContinuation<VaultApprovalOutcome, Never>?
+
+    func availability(profile: String?) async -> VaultAvailability { .ready }
+    func version(profile: String?) async throws -> String { "test" }
+    func unlock(passphrase: String, ttl: String, profile: String?) async throws {}
+    func lock(profile: String?) async throws {}
+    func list(profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func find(query: String, profile: String?) async throws -> [VaultEntrySummary] { [] }
+    func entry(path: String, profile: String?) async throws -> VaultEntryDetail { VaultEntryDetail(path: path, modified: nil, fields: [:]) }
+    func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation { VaultCreateConfirmation(submittedPath: path, confirmedPath: path, confirmedFieldCount: 0, confirmedHasValue: false) }
+    func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation { VaultSetConfirmation(submittedPath: path, submittedField: field, confirmedPath: path, confirmedField: field, confirmedValueMatches: true, confirmedFieldCount: 0, confirmedHasValue: false) }
+    func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation { try await set(path: path, field: "password", value: draft.secret, profile: profile) }
+    func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation { VaultDeleteConfirmation(submittedPath: path, confirmedPath: path, confirmedAbsent: true) }
+    func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String { "generated" }
+    func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: nil, results: []) }
+    func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse { VaultIntakeResponse(importID: nil, results: []) }
+    func intakeReviewBatches(profile: String?) async throws -> [String] { [] }
+    func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws {}
+    func approvalList(profile: String?) async throws -> [VaultApprovalRequest] {
+        listCallCount += 1
+        if blockList { return await withCheckedContinuation { listWaiter = $0 } }
+        return requests
+    }
+    func approvalDecide(id: String, approve: Bool, profile: String?) async throws -> VaultApprovalOutcome {
+        decideCallCount += 1
+        if blockDecision {
+            return await withCheckedContinuation { decisionWaiter = $0 }
+        }
+        return immediateDecision ?? VaultApprovalOutcome(id: id, status: approve ? "approved" : "denied", decidedAt: nil)
+    }
+    func releaseList() {
+        listWaiter?.resume(returning: requests); listWaiter = nil
+    }
+    func releaseDecision(id: String, approve: Bool) {
+        decisionWaiter?.resume(returning: immediateDecision ?? VaultApprovalOutcome(id: id, status: approve ? "approved" : "denied", decidedAt: nil)); decisionWaiter = nil
+    }
+}
+
+@MainActor
+@Test func approvalDecisionCannotPublishAfterCancelAndUsesFreshList() async {
+    let request = VaultApprovalRequest(id: "apr-0123456789ab", agentName: "agent", path: "work/file", write: false, reason: "read", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let client = DelayedApprovalClient(); client.requests = [request]; client.blockList = true
+    let vm = VaultViewModel(client: client); vm.approvalRequests = [request]; vm.reviewApproval(request)
+    let task = Task { await vm.decideReviewedApproval(approve: true) }
+    await Task.yield()
+    vm.cancelApprovalReview()
+    client.releaseList()
+    await task.value
+    #expect(client.listCallCount == 1)
+    #expect(client.decideCallCount == 0)
+    #expect(vm.approvalOutcome == nil)
+}
+
+@MainActor
+@Test func approvalDecisionPublishesOnlyMatchingCurrentOutcome() async {
+    let request = VaultApprovalRequest(id: "apr-0123456789ab", agentName: "agent", path: "work/file", write: true, reason: "write", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let client = DelayedApprovalClient(); client.requests = [request]
+    client.immediateDecision = VaultApprovalOutcome(id: request.id, status: "approved", decidedAt: "2099-01-01T00:00:00Z")
+    let vm = VaultViewModel(client: client); vm.approvalRequests = [request]; vm.reviewApproval(request)
+    await vm.decideReviewedApproval(approve: true)
+    #expect(client.listCallCount == 1)
+    #expect(client.decideCallCount == 1)
+    #expect(vm.approvalOutcome?.id == request.id)
+    #expect(vm.approvalRequests.isEmpty)
+}
+
+@Test func approvalDecisionPassesJSONFlagToTextByDefaultService() async throws {
+    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+    defer { try? FileManager.default.removeItem(at: dir) }
+    let argsFile = dir.appendingPathComponent("args")
+    let script = "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"\(argsFile.path)\"\ncase \"$*\" in *'--output json'*) printf '%s' '{\"outcome\":{\"id\":\"apr-0123456789ab\",\"status\":\"approved\"}}' ;; *) printf 'Approval request apr-0123456789ab approved.' ;; esac\n"
+    let binary = dir.appendingPathComponent("symvault")
+    try Data(script.utf8).write(to: binary)
+    try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: binary.path)
+    let client = VaultClient(userOverride: binary)
+    let outcome = try await client.approvalDecide(id: "apr-0123456789ab", approve: true)
+    #expect(outcome.id == "apr-0123456789ab")
+    #expect(outcome.status == "approved")
+    let args = try String(contentsOf: argsFile)
+    #expect(args.contains("--output\njson"))
+}
+
+
+@MainActor
+@Test func approvalDecisionCannotPublishAfterSelectingDifferentRequest() async {
+    let first = VaultApprovalRequest(id: "apr-0123456789ab", agentName: "agent", path: "work/one", write: true, reason: "write", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let second = VaultApprovalRequest(id: "apr-fedcba987654", agentName: "agent", path: "work/two", write: false, reason: "read", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let client = DelayedApprovalClient(); client.requests = [first, second]; client.blockDecision = true
+    let vm = VaultViewModel(client: client); vm.approvalRequests = [first, second]; vm.reviewApproval(first)
+    let task = Task { await vm.decideReviewedApproval(approve: true) }
+    for _ in 0..<100 { if client.decideCallCount == 1 { break }; await Task.yield() }
+    vm.reviewApproval(second)
+    client.releaseDecision(id: first.id, approve: true)
+    await task.value
+    #expect(vm.approvalSnapshot?.request.id == second.id)
+    #expect(vm.approvalOutcome == nil)
+}
+
+@MainActor
+@Test func approvalDecisionCannotPublishAfterRelock() async {
+    let request = VaultApprovalRequest(id: "apr-0123456789ab", agentName: "agent", path: "work/one", write: true, reason: "write", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let client = DelayedApprovalClient(); client.requests = [request]; client.blockDecision = true
+    let vm = VaultViewModel(client: client); vm.availability = .ready; vm.approvalRequests = [request]; vm.reviewApproval(request)
+    let task = Task { await vm.decideReviewedApproval(approve: true) }
+    for _ in 0..<100 { if client.decideCallCount == 1 { break }; await Task.yield() }
+    await vm.lock()
+    client.releaseDecision(id: request.id, approve: true)
+    await task.value
+    #expect(vm.approvalOutcome == nil)
+    #expect(vm.approvalSnapshot == nil)
+    #expect(vm.approvalRequests.isEmpty)
+}
+
+@MainActor
+@Test func relockClearsApprovalLoadingSpinnerEvenWhenListIsCancelled() async {
+    let client = DelayedApprovalClient(); client.blockList = true
+    let vm = VaultViewModel(client: client); vm.availability = .ready
+    let load = Task { await vm.loadApprovals() }
+    for _ in 0..<100 { if vm.isLoadingApprovals { break }; await Task.yield() }
+    #expect(vm.isLoadingApprovals)
+    await vm.lock()
+    #expect(vm.isLoadingApprovals == false)
+    client.releaseList()
+    await load.value
+    #expect(vm.isLoadingApprovals == false)
+}
+
+@MainActor
+@Test func approvalCancelDoesNotShortenActiveSecretExpiry() async {
+    let sleeper = ManualSleeper()
+    let detail = VaultEntryDetail(path: "work/secret", modified: nil, fields: ["password": .string("secret")])
+    let request = VaultApprovalRequest(id: "apr-0123456789ab", agentName: "agent", path: "work/one", write: true, reason: "write", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    let vm = VaultViewModel(client: StubVaultClient(result: detail), sleep: { duration in try await sleeper.sleep(duration) })
+    vm.availability = .ready
+    await vm.select(path: detail.path); await vm.revealSelectedEntry()
+    vm.approvalRequests = [request]; vm.reviewApproval(request); vm.cancelApprovalReview()
+    #expect(vm.detail == detail)
+    await sleeper.resumeNext(); await Task.yield()
+    #expect(vm.detail == nil)
+}
+
 #endif

@@ -552,15 +552,19 @@ struct VaultView: View {
                 ForEach(vm.approvalRequests) { request in
                     VStack(alignment: .leading, spacing: SymairaSpacing.small) {
                         HStack {
-                            Text(request.id).font(.caption.monospaced()).textSelection(.enabled)
-                            Text(request.status).font(.caption)
+                            Text(verbatim: request.id).font(.caption.monospaced()).textSelection(.enabled)
+                            Text(verbatim: request.status).font(.caption)
                             Spacer()
                             Button("Review") { vm.reviewApproval(request) }
                                 .disabled(!request.isPending || request.isExpired)
                         }
-                        Text("Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
-                        Text(request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
-                        Text("Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                        Text(verbatim: "Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
+                        HStack(spacing: 4) {
+                            Text("Access:").font(.caption)
+                            Text(request.write ? "write" : "read").font(.caption).bold()
+                        }
+                        Text(verbatim: request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text(verbatim: "Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
                     }
                     .padding(SymairaSpacing.small)
                     .background(SymairaTheme.bgCardHover)
@@ -569,19 +573,26 @@ struct VaultView: View {
             if let snapshot = vm.approvalSnapshot {
                 VStack(alignment: .leading, spacing: SymairaSpacing.small) {
                     Text("Explicit review").font(.headline)
-                    Text("Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
-                    Text(snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    Text(verbatim: "Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
+                    HStack(spacing: 4) {
+                        Text("Access:").font(.caption)
+                        Text(snapshot.request.write ? "write" : "read").font(.caption).bold()
+                    }
+                    Text(verbatim: snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
                     HStack {
                         Button("Approve") { Task { await vm.decideReviewedApproval(approve: true) } }
                             .symairaButtonStyle(.primary)
+                            .disabled(vm.isDecidingApproval)
                         Button("Deny", role: .destructive) { Task { await vm.decideReviewedApproval(approve: false) } }
+                            .disabled(vm.isDecidingApproval)
                         Button("Cancel", role: .cancel) { vm.cancelApprovalReview() }
+                            .disabled(vm.isDecidingApproval)
                     }
                 }
                 .padding(SymairaSpacing.medium)
             }
             if let outcome = vm.approvalOutcome {
-                Text("Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                Text(verbatim: "Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
             }
         }
         .task { await vm.loadApprovals() }

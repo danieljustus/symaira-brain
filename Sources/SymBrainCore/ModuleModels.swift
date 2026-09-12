@@ -522,7 +522,13 @@ public struct VaultApprovalOutcome: Decodable, Sendable, Equatable {
 
 public struct VaultApprovalSnapshot: Sendable, Equatable {
     public let request: VaultApprovalRequest
-    public init(request: VaultApprovalRequest) { self.request = request }
+    /// Approval generation at review time; prevents late results from being
+    /// published after selection, cancellation, or relock changed the pending state.
+    public let generation: Int
+    public init(request: VaultApprovalRequest, generation: Int = 0) {
+        self.request = request
+        self.generation = generation
+    }
 }
 
 // MARK: - Vault intake review

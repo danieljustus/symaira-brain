@@ -308,8 +308,8 @@ public struct VaultClient: Sendable {
 
     /// Decide exactly one request and validate the server outcome.
     public func approvalDecide(id: String, approve: Bool, profile: String? = nil) async throws -> VaultApprovalOutcome {
-        guard !id.isEmpty, !id.contains(where: { $0.isWhitespace || $0 == "/" }) else { throw CLIRunnerError.invalidJSON(description: "invalid approval request id") }
-        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["approval", "decide", id, approve ? "--approve" : "--deny"]), timeout: 30)
+        guard Self.validApprovalID(id) else { throw CLIRunnerError.invalidJSON(description: "invalid approval request id: expected apr- followed by 12 lowercase hexadecimal characters") }
+        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["approval", "decide", id, approve ? "--approve" : "--deny", "--output", "json"]), timeout: 30)
         do {
             struct Response: Decodable { let outcome: VaultApprovalOutcome }
             let outcome = try JSONDecoder().decode(Response.self, from: data).outcome
@@ -332,6 +332,13 @@ public struct VaultClient: Sendable {
     }
 
     // MARK: - Private
+
+    private static func validApprovalID(_ id: String) -> Bool {
+        guard id.count == 16, id.hasPrefix("apr-") else { return false }
+        return id.dropFirst(4).unicodeScalars.allSatisfy {
+            ("0"..."9").contains($0) || ("a"..."f").contains($0)
+        }
+    }
 
     private static func validateValue(_ value: String, field: String) throws {
         if value.unicodeScalars.contains(where: { $0.value == 0x0A || $0.value == 0x0D }) {
