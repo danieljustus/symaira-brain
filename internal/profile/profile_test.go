@@ -746,3 +746,60 @@ func TestLoadFile_Errors(t *testing.T) {
 		}
 	})
 }
+
+func TestLoadFile_OptionalAliasesMatrix(t *testing.T) {
+	cases := []struct {
+		name        string
+		block       string
+		wantPresent bool
+		wantEnabled bool
+		wantAllow   []string
+		wantDeny    []string
+	}{
+		{name: "absent"},
+		{name: "disabled", block: "[servers.operate]\nenabled = false\ntools_allow = [\"operate_status\"]\ntools_deny = [\"operate_status\"]\n", wantPresent: true, wantAllow: []string{"operate_status"}, wantDeny: []string{"operate_status"}},
+		{name: "enabled", block: "[servers.scope]\nenabled = true\ntools_allow = [\"scan\", \"ports_list\"]\ntools_deny = [\"ports_list\"]\n", wantPresent: true, wantEnabled: true, wantAllow: []string{"scan", "ports_list"}, wantDeny: []string{"ports_list"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "arbitrary-name.toml")
+			contents := "[profile]\nname = \"optional-" + tc.name + "\"\n" + tc.block
+			if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+				t.Fatalf("WriteFile: %v", err)
+			}
+			p, err := LoadFile(path)
+			if err != nil {
+				t.Fatalf("LoadFile() error = %v", err)
+			}
+			for _, alias := range []string{ServerOperate, ServerScope} {
+				sc, present := p.Servers[alias]
+				if alias == ServerOperate && tc.name == "enabled" || alias == ServerScope && tc.name == "disabled" {
+					if present {
+						t.Errorf("%s unexpectedly present: %+v", alias, sc)
+					}
+					continue
+				}
+				if tc.wantPresent && !present {
+					t.Fatalf("%s absent after LoadFile", alias)
+				}
+				if !tc.wantPresent && present {
+					t.Errorf("%s present for absent optional config", alias)
+				}
+				if present && sc.Enabled != tc.wantEnabled {
+					t.Errorf("%s enabled = %v, want %v", alias, sc.Enabled, tc.wantEnabled)
+				}
+				if present && strings.Join(sc.ToolsAllow, ",") != strings.Join(tc.wantAllow, ",") {
+					t.Errorf("%s allow = %v, want %v", alias, sc.ToolsAllow, tc.wantAllow)
+				}
+				if present && strings.Join(sc.ToolsDeny, ",") != strings.Join(tc.wantDeny, ",") {
+					t.Errorf("%s deny = %v, want %v", alias, sc.ToolsDeny, tc.wantDeny)
+				}
+			}
+			for _, alias := range []string{ServerVault, ServerMemory, ServerSkills, ServerUsage} {
+				if p.Server(alias).Enabled {
+					t.Errorf("%s unexpectedly enabled by optional profile", alias)
+				}
+			}
+		})
+	}
+}

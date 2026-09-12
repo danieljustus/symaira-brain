@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import selectors
+import shutil
 import signal
 import subprocess
 import sys
@@ -113,11 +114,22 @@ def run_bounded(
     """Run a stdio child with bounded nonblocking capture and hard deadlines."""
     if timeout <= 0:
         raise ValueError("timeout must be positive")
+    isolated_home = tempfile.mkdtemp(prefix="pb-scope-smoke-home-")
+    isolated_path = Path(isolated_home) / "bin"
+    isolated_path.mkdir()
+    isolated_env = {
+        "HOME": isolated_home,
+        "PATH": str(isolated_path),
+        "XDG_CONFIG_HOME": str(Path(isolated_home) / ".config"),
+        "XDG_DATA_HOME": str(Path(isolated_home) / ".local" / "share"),
+        "XDG_CACHE_HOME": str(Path(isolated_home) / ".cache"),
+    }
     process = subprocess.Popen(
         argv,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=isolated_env,
         start_new_session=True,
     )
     assert process.stdin is not None
@@ -180,6 +192,7 @@ def run_bounded(
     finally:
         if selector.get_map():
             _close_selector(selector)
+        shutil.rmtree(isolated_home, ignore_errors=True)
     if returncode != 0 and not (terminated_for_smoke and returncode == -signal.SIGKILL):
         raise SmokeError(f"MCP subprocess exited {returncode}")
     stderr = bytes(buffers["stderr"])
