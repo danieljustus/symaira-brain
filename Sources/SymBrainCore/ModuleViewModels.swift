@@ -4,6 +4,7 @@
 import AppKit
 import CryptoKit
 import Foundation
+import SymairaCLIRunner
 
 // MARK: - Runtime availability (Memory / Skills)
 
@@ -300,6 +301,8 @@ public protocol VaultClientProtocol: Sendable {
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation
     func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String
     func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse
+    func approvalList(profile: String?) async throws -> [VaultApprovalRequest]
+    func approvalDecide(id: String, approve: Bool, profile: String?) async throws -> VaultApprovalOutcome
     func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse
     func intakeReviewBatches(profile: String?) async throws -> [String]
     func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws
@@ -312,6 +315,16 @@ public extension VaultClientProtocol {
 
     func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation {
         try await set(path: path, field: original.primarySecret?.field ?? "password", value: draft.secret, profile: profile)
+    }
+}
+
+public extension VaultClientProtocol {
+    func approvalList(profile: String?) async throws -> [VaultApprovalRequest] {
+        throw CLIRunnerError.invalidJSON(description: "approval service unavailable")
+    }
+
+    func approvalDecide(id: String, approve: Bool, profile: String?) async throws -> VaultApprovalOutcome {
+        throw CLIRunnerError.invalidJSON(description: "approval service unavailable")
     }
 }
 
@@ -355,6 +368,10 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var isEditing = false
     @Published public var isDeleting = false
     @Published public var deleteConfirmation: VaultDeleteConfirmation?
+    @Published public var approvalRequests: [VaultApprovalRequest] = []
+    @Published public private(set) var approvalSnapshot: VaultApprovalSnapshot?
+    @Published public var approvalOutcome: VaultApprovalOutcome?
+    @Published public var isLoadingApprovals = false
 
     @Published public var generatedPassword = ""
     @Published public var isGenerating = false
@@ -646,6 +663,61 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         } catch {
             report(error)
         }
+    }
+
+    /// Loads the server-owned approval queue; Brain stores only a sanitized snapshot.
+    public func loadApprovals() async {
+        isLoadingApprovals = true
+        defer { isLoadingApprovals = false }
+        do {
+            approvalRequests = try await client.approvalList(profile: nil)
+            approvalSnapshot = nil
+            approvalOutcome = nil
+        } catch {
+            approvalRequests = []
+            approvalSnapshot = nil
+            approvalOutcome = nil
+            errorMessage = "Unable to load approval requests."
+            errorDetail = nil
+        }
+    }
+
+    public func reviewApproval(_ request: VaultApprovalRequest) {
+        guard approvalRequests.contains(request), request.isPending, !request.isExpired else {
+            errorMessage = "That approval request is stale or expired."
+            approvalSnapshot = nil
+            return
+        }
+        approvalSnapshot = VaultApprovalSnapshot(request: request)
+        approvalOutcome = nil
+    }
+
+    public func decideReviewedApproval(approve: Bool) async {
+        guard let snapshot = approvalSnapshot else { errorMessage = "Review an approval request before deciding."; return }
+        guard approvalRequests.contains(snapshot.request), snapshot.request.isPending, !snapshot.request.isExpired else {
+            errorMessage = "That approval request is stale or expired."
+            approvalSnapshot = nil
+            return
+        }
+        do {
+            let outcome = try await client.approvalDecide(id: snapshot.request.id, approve: approve, profile: nil)
+            guard outcome.id == snapshot.request.id, outcome.status == (approve ? "approved" : "denied") else {
+                errorMessage = "Approval outcome could not be confirmed."
+                return
+            }
+            approvalOutcome = outcome
+            approvalSnapshot = nil
+            approvalRequests.removeAll { $0.id == outcome.id }
+            statusMessage = approve ? "Approval granted by the vault service." : "Approval denied by the vault service."
+        } catch {
+            errorMessage = "Approval decision could not be confirmed."
+            errorDetail = nil
+        }
+    }
+
+    public func cancelApprovalReview() {
+        approvalSnapshot = nil
+        approvalOutcome = nil
     }
 
     /// Reads the symbrain broker audit log and keeps the vault server's calls.

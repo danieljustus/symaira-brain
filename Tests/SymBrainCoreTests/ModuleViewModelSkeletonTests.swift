@@ -669,4 +669,21 @@ extension ModuleViewModelSkeletonTests {
     #expect(!FileManager.default.fileExists(atPath: marker.path))
 }
 
+@MainActor
+@Test func approvalReviewBindsSnapshotAndRejectsStaleOrCancelledSelection() async {
+    let vm = VaultViewModel(client: StubVaultClient(result: VaultEntryDetail(path: "x", modified: nil, fields: [:])))
+    vm.availability = .ready
+    let request = VaultApprovalRequest(id: "apr-1", agentName: "agent", path: "work/file", write: true, reason: "needs approval", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2099-01-01T00:00:00Z", status: "pending")
+    vm.approvalRequests = [request]
+    vm.reviewApproval(request)
+    #expect(vm.approvalSnapshot?.request.id == "apr-1")
+    vm.cancelApprovalReview()
+    #expect(vm.approvalSnapshot == nil)
+    let expired = VaultApprovalRequest(id: "apr-2", agentName: "agent", path: "work/expired", write: true, reason: "expired", createdAt: "2030-01-01T00:00:00Z", expiresAt: "2000-01-01T00:00:00Z", status: "pending")
+    vm.approvalRequests = [expired]
+    vm.reviewApproval(expired)
+    #expect(vm.approvalSnapshot == nil)
+    #expect(vm.errorMessage == "That approval request is stale or expired.")
+}
+
 #endif

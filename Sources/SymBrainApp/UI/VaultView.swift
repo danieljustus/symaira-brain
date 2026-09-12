@@ -18,6 +18,7 @@ struct VaultView: View {
 
     enum Tab: String, CaseIterable, Identifiable {
         case entries = "Entries"
+        case approvals = "Approvals"
         case activity = "Broker Activity"
 
         var id: String { rawValue }
@@ -56,6 +57,7 @@ struct VaultView: View {
 
                 switch tab {
                 case .entries: entriesSection
+                case .approvals: approvalsSection
                 case .activity: activitySection
                 }
             }
@@ -529,6 +531,60 @@ struct VaultView: View {
                 SymairaNotice(title: "Import failed", message: message, tone: .critical)
             }
         }
+    }
+
+    private var approvalsSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            HStack {
+                Text("Pending approval requests").font(.headline)
+                Spacer()
+                Button { Task { await vm.loadApprovals() } } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.secondary)
+                .disabled(vm.isLoadingApprovals)
+            }
+            if vm.isLoadingApprovals {
+                SymairaLoadingState("Loading approval requests…")
+            } else if vm.approvalRequests.isEmpty {
+                SymairaEmptyState(systemImage: "checkmark.shield", title: "No pending approvals", message: "The vault service has no pending human approval requests.")
+            } else {
+                ForEach(vm.approvalRequests) { request in
+                    VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                        HStack {
+                            Text(request.id).font(.caption.monospaced()).textSelection(.enabled)
+                            Text(request.status).font(.caption)
+                            Spacer()
+                            Button("Review") { vm.reviewApproval(request) }
+                                .disabled(!request.isPending || request.isExpired)
+                        }
+                        Text("Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
+                        Text(request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text("Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                    }
+                    .padding(SymairaSpacing.small)
+                    .background(SymairaTheme.bgCardHover)
+                }
+            }
+            if let snapshot = vm.approvalSnapshot {
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    Text("Explicit review").font(.headline)
+                    Text("Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
+                    Text(snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    HStack {
+                        Button("Approve") { Task { await vm.decideReviewedApproval(approve: true) } }
+                            .symairaButtonStyle(.primary)
+                        Button("Deny", role: .destructive) { Task { await vm.decideReviewedApproval(approve: false) } }
+                        Button("Cancel", role: .cancel) { vm.cancelApprovalReview() }
+                    }
+                }
+                .padding(SymairaSpacing.medium)
+            }
+            if let outcome = vm.approvalOutcome {
+                Text("Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+            }
+        }
+        .task { await vm.loadApprovals() }
     }
 
     // MARK: - Broker activity

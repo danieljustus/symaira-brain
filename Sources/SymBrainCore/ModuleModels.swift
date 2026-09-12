@@ -496,6 +496,35 @@ public enum VaultFieldSecurity {
     }
 }
 
+// MARK: - Vault approval review
+
+/// Sanitized pending approval request returned by `symvault approval list`.
+public struct VaultApprovalRequest: Decodable, Sendable, Equatable, Identifiable {
+    public let id: String
+    public let agentName: String
+    public let path: String
+    public let write: Bool
+    public let reason: String
+    public let createdAt: String
+    public let expiresAt: String
+    public let status: String
+    enum CodingKeys: String, CodingKey { case id; case agentName = "agent_name"; case path, write, reason; case createdAt = "created_at"; case expiresAt = "expires_at"; case status }
+    public var isPending: Bool { status == "pending" }
+    public var isExpired: Bool { parseModuleTimestamp(expiresAt).map { $0 <= Date() } ?? true }
+}
+
+public struct VaultApprovalOutcome: Decodable, Sendable, Equatable {
+    public let id: String
+    public let status: String
+    public let decidedAt: String?
+    enum CodingKeys: String, CodingKey { case id, status; case decidedAt = "decided_at" }
+}
+
+public struct VaultApprovalSnapshot: Sendable, Equatable {
+    public let request: VaultApprovalRequest
+    public init(request: VaultApprovalRequest) { self.request = request }
+}
+
 // MARK: - Vault intake review
 
 public struct VaultIntakeResponse: Decodable, Sendable, Equatable {

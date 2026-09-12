@@ -297,6 +297,28 @@ public struct VaultClient: Sendable {
         }
     }
 
+    /// List pending requests through the Vault service.
+    public func approvalList(profile: String? = nil) async throws -> [VaultApprovalRequest] {
+        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["approval", "list", "--output", "json"]), timeout: 15)
+        do {
+            struct Response: Decodable { let requests: [VaultApprovalRequest] }
+            return try JSONDecoder().decode(Response.self, from: data).requests
+        } catch { throw CLIRunnerError.invalidJSON(description: "invalid approval list response") }
+    }
+
+    /// Decide exactly one request and validate the server outcome.
+    public func approvalDecide(id: String, approve: Bool, profile: String? = nil) async throws -> VaultApprovalOutcome {
+        guard !id.isEmpty, !id.contains(where: { $0.isWhitespace || $0 == "/" }) else { throw CLIRunnerError.invalidJSON(description: "invalid approval request id") }
+        let data = try await runner.runChecked(try executable(), arguments: arguments(profile: profile, command: ["approval", "decide", id, approve ? "--approve" : "--deny"]), timeout: 30)
+        do {
+            struct Response: Decodable { let outcome: VaultApprovalOutcome }
+            let outcome = try JSONDecoder().decode(Response.self, from: data).outcome
+            guard outcome.id == id, outcome.status == (approve ? "approved" : "denied") else { throw CLIRunnerError.invalidJSON(description: "approval outcome did not match requested request") }
+            return outcome
+        } catch let error as CLIRunnerError { throw error }
+        catch { throw CLIRunnerError.invalidJSON(description: "invalid approval decision response") }
+    }
+
     // MARK: - doctor
 
     /// Run `symvault doctor` and return its report as text (no JSON mode).
@@ -312,6 +334,11 @@ public struct VaultClient: Sendable {
     // MARK: - Private
 
     private static func validateValue(_ value: String, field: String) throws {
+        if value.unicodeScalars.contains(where: { $0.value == 0x0A || $0.value == 0x0D }) {
+            // `set --stdin-value` is line-framed by symvault; reject before
+            // dispatch for every field, including non-sensitive metadata.
+            throw CLIRunnerError.invalidJSON(description: VaultFieldSecurity.isSensitive(field) ? "multiline secret values are not supported" : "multiline values are not supported")
+        }
         if value.isEmpty {
             guard !VaultFieldSecurity.isSensitive(field) else {
                 throw CLIRunnerError.invalidJSON(description: "sensitive field values cannot be empty")
