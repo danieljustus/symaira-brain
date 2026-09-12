@@ -275,7 +275,7 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 	var warnings []string
 
 	// A core alias redefined as a foreign server (command/args/url set) is
-	// a collision: the four cores are reserved and always resolved as such.
+	// a collision: all known core and optional aliases are resolved as such.
 	// Access/tools_read/tools_write are foreign-only; a core setting them is
 	// ignored with a warning (the mode preset governs core exposure).
 	for alias, fs := range raw {
@@ -292,9 +292,11 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 		}
 	}
 
-	// The four core aliases are always present, resolved with their mode
+	// The four state-core aliases are always present, resolved with their mode
 	// presets and default-deny behavior (absent from the file = disabled).
-	coreOrder := []string{ServerVault, ServerMemory, ServerSkills, ServerUsage}
+	// Optional aliases are retained only when explicitly declared; silently
+	// dropping them here would make a valid LoadFile profile ineffective.
+	coreOrder := []string{ServerVault, ServerMemory, ServerSkills, ServerUsage, ServerOperate, ServerScope}
 	for _, alias := range coreOrder {
 		fs := raw[alias]
 		switch alias {
@@ -318,6 +320,10 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 			sc, uw := resolveUsage(fs)
 			warnings = append(warnings, uw...)
 			servers[alias] = sc
+		case ServerOperate, ServerScope:
+			if _, declared := raw[alias]; declared {
+				servers[alias] = resolveOptional(fs)
+			}
 		}
 	}
 
@@ -346,6 +352,14 @@ func resolveServers(raw map[string]fileServer) (Servers, []string, error) {
 // foreign server has no mode preset — its exposure is read/write classified
 // per profile (issue #335) — and must declare a transport: command (with
 // optional args) or url.
+func resolveOptional(fs fileServer) ServerConfig {
+	return ServerConfig{
+		Enabled:    derefBool(fs.Enabled, false),
+		ToolsAllow: fs.ToolsAllow,
+		ToolsDeny:  fs.ToolsDeny,
+	}
+}
+
 func resolveForeign(alias string, fs fileServer) (ServerConfig, []string, error) {
 	if fs.Command == "" && fs.URL == "" {
 		return ServerConfig{}, nil, fmt.Errorf(
