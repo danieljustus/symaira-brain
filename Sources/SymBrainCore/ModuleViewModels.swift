@@ -4,6 +4,7 @@
 import AppKit
 import CryptoKit
 import Foundation
+import SymairaCLIRunner
 
 // MARK: - Runtime availability (Memory / Skills)
 
@@ -294,13 +295,37 @@ public protocol VaultClientProtocol: Sendable {
     func find(query: String, profile: String?) async throws -> [VaultEntrySummary]
     func entry(path: String, profile: String?) async throws -> VaultEntryDetail
     func create(path: String, value: String, profile: String?) async throws -> VaultCreateConfirmation
+    func create(draft: VaultCredentialDraft, profile: String?) async throws -> VaultCreateConfirmation
     func set(path: String, field: String, value: String, profile: String?) async throws -> VaultSetConfirmation
+    func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation
     func delete(path: String, profile: String?) async throws -> VaultDeleteConfirmation
     func generatePassword(length: Int, symbols: Bool, profile: String?) async throws -> String
     func intakePreview(files: [URL], profile: String?) async throws -> VaultIntakeResponse
+    func approvalList(profile: String?) async throws -> [VaultApprovalRequest]
+    func approvalDecide(id: String, approve: Bool, profile: String?) async throws -> VaultApprovalOutcome
     func intakeStage(files: [URL], ocrTexts: [URL: URL], moveToTrash: Bool, profile: String?) async throws -> VaultIntakeResponse
     func intakeReviewBatches(profile: String?) async throws -> [String]
     func intakePromote(importID: String, overwrite: Bool, profile: String?) async throws
+}
+
+public extension VaultClientProtocol {
+    func create(draft: VaultCredentialDraft, profile: String?) async throws -> VaultCreateConfirmation {
+        try await create(path: draft.path, value: draft.secret, profile: profile)
+    }
+
+    func update(path: String, original: VaultEntryDetail, draft: VaultCredentialDraft, profile: String?) async throws -> VaultSetConfirmation {
+        try await set(path: path, field: original.primarySecret?.field ?? "password", value: draft.secret, profile: profile)
+    }
+}
+
+public extension VaultClientProtocol {
+    func approvalList(profile: String?) async throws -> [VaultApprovalRequest] {
+        throw CLIRunnerError.invalidJSON(description: "approval service unavailable")
+    }
+
+    func approvalDecide(id: String, approve: Bool, profile: String?) async throws -> VaultApprovalOutcome {
+        throw CLIRunnerError.invalidJSON(description: "approval service unavailable")
+    }
 }
 
 extension VaultClient: VaultClientProtocol {}
@@ -323,13 +348,31 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     @Published public var sessionTTL = "15m"
     @Published public var createPath = ""
     @Published public var createValue = ""
+    @Published public var createType = "password"
+    @Published public var createUsername = ""
+    @Published public var createURL = ""
+    @Published public var createNotes = ""
+    @Published public var createUsageHint = ""
+    @Published public var createAutoRotate = false
+    @Published public var createExpiresAt = ""
+    @Published public var createTOTPSecret = ""
+    @Published public var createTOTPIssuer = ""
+    @Published public var createTOTPAccount = ""
     @Published public var createConfirmation: VaultCreateConfirmation?
     @Published public var isCreating = false
     @Published public var editValue = ""
+    @Published public var editUsername = ""
+    @Published public var editURL = ""
+    @Published public var editNotes = ""
     @Published public var editConfirmation: VaultSetConfirmation?
     @Published public var isEditing = false
     @Published public var isDeleting = false
     @Published public var deleteConfirmation: VaultDeleteConfirmation?
+    @Published public var approvalRequests: [VaultApprovalRequest] = []
+    @Published public private(set) var approvalSnapshot: VaultApprovalSnapshot?
+    @Published public var approvalOutcome: VaultApprovalOutcome?
+    @Published public var isLoadingApprovals = false
+    @Published public private(set) var isDecidingApproval = false
 
     @Published public var generatedPassword = ""
     @Published public var isGenerating = false
@@ -354,6 +397,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     private let sleep: @Sendable (Duration) async throws -> Void
     private let clipboardWriter: @MainActor (String, Bool) -> Void
     private var generation = 0
+    private var approvalGeneration = 0
     private var generationTask: Task<Void, Never>?
     private var generationWorkTask: Task<String, Error>?
     private var intakeGeneration = 0
@@ -387,6 +431,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
 
     public func refresh() async {
         invalidatePendingDetail()
+        invalidateApprovalReview()
         isLoading = true
         clearError()
         defer { isLoading = false }
@@ -550,11 +595,16 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         }
         isCreating = true
         clearError()
-        defer { isCreating = false; createValue = "" }
+        defer {
+            isCreating = false
+            createValue = ""
+            createTOTPSecret = ""
+        }
         do {
-            let confirmation = try await client.create(path: path, value: createValue, profile: nil)
+            let draft = VaultCredentialDraft(path: path, type: createType, secret: createValue, username: createUsername, url: createURL, notes: createNotes, usageHint: createUsageHint, autoRotate: createAutoRotate, expiresAt: createExpiresAt, totpSecret: createTOTPSecret, totpIssuer: createTOTPIssuer, totpAccount: createTOTPAccount)
+            let confirmation = try await client.create(draft: draft, profile: nil)
             createConfirmation = confirmation
-            createPath = ""
+            resetCreateDraft()
             statusMessage = "Secret created and confirmed by the vault service."
             await loadEntries()
         } catch {
@@ -562,12 +612,31 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
+    private func resetCreateDraft() {
+        createPath = ""
+        createValue = ""
+        createType = "password"
+        createUsername = ""
+        createURL = ""
+        createNotes = ""
+        createUsageHint = ""
+        createAutoRotate = false
+        createExpiresAt = ""
+        createTOTPSecret = ""
+        createTOTPIssuer = ""
+        createTOTPAccount = ""
+    }
+
     public func setSelectedEntry() async {
-        guard let path = selectedPath, let field = detail?.primarySecret?.field, detail?.path == path, !editValue.isEmpty else { errorMessage = "Reveal an entry and enter a new secret value."; return }
+        guard let path = selectedPath, let detail, detail.path == path else {
+            errorMessage = "Reveal an entry before editing it."
+            return
+        }
         isEditing = true; clearError()
         defer { isEditing = false; editValue = "" }
         do {
-            editConfirmation = try await client.set(path: path, field: field, value: editValue, profile: nil)
+            let draft = VaultCredentialDraft(path: path, type: detail.type ?? "password", secret: editValue, username: editUsername, url: editURL, notes: editNotes, usageHint: detail.usageHint ?? "", autoRotate: detail.autoRotate ?? false, expiresAt: detail.expiresAt ?? "")
+            editConfirmation = try await client.update(path: path, original: detail, draft: draft, profile: nil)
             statusMessage = "Secret updated and confirmed by the vault service."
             await loadEntries()
         } catch { report(error) }
@@ -597,6 +666,94 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         } catch {
             report(error)
         }
+    }
+
+    /// Loads the server-owned approval queue; Brain stores only a sanitized snapshot.
+    public func loadApprovals() async {
+        approvalGeneration &+= 1
+        approvalSnapshot = nil
+        approvalOutcome = nil
+        let requestGeneration = approvalGeneration
+        isLoadingApprovals = true
+        defer { if approvalGeneration == requestGeneration { isLoadingApprovals = false } }
+        do {
+            let requests = try await client.approvalList(profile: nil)
+            guard !Task.isCancelled, approvalGeneration == requestGeneration else { return }
+            approvalRequests = requests
+            approvalSnapshot = nil
+            approvalOutcome = nil
+        } catch {
+            guard approvalGeneration == requestGeneration else { return }
+            approvalRequests = []
+            approvalSnapshot = nil
+            approvalOutcome = nil
+            errorMessage = "Unable to load approval requests."
+            errorDetail = nil
+        }
+    }
+
+    public func reviewApproval(_ request: VaultApprovalRequest) {
+        guard approvalRequests.contains(request), request.isPending, !request.isExpired else {
+            errorMessage = "That approval request is stale or expired."
+            approvalSnapshot = nil
+            return
+        }
+        if approvalSnapshot?.request.id != request.id {
+            approvalGeneration &+= 1
+        }
+        approvalOutcome = nil
+        approvalSnapshot = VaultApprovalSnapshot(request: request, generation: approvalGeneration)
+    }
+
+    public func decideReviewedApproval(approve: Bool) async {
+        guard !isDecidingApproval else { return }
+        guard let snapshot = approvalSnapshot else { errorMessage = "Review an approval request before deciding."; return }
+        guard snapshot.generation == approvalGeneration,
+              approvalRequests.contains(snapshot.request), snapshot.request.isPending, !snapshot.request.isExpired else {
+            errorMessage = "That approval request is stale or expired."
+            approvalSnapshot = nil
+            return
+        }
+        // Re-read immediately before the mutating call; the UI list is only a
+        // rendering cache and may have become stale while the human reviewed it.
+        isDecidingApproval = true
+        defer { isDecidingApproval = false }
+        do {
+            let fresh = try await client.approvalList(profile: nil)
+            guard !Task.isCancelled, snapshot.generation == approvalGeneration,
+                  fresh.contains(snapshot.request), !snapshot.request.isExpired else {
+                if snapshot.generation == approvalGeneration { approvalSnapshot = nil; errorMessage = "That approval request is stale or expired." }
+                return
+            }
+            let outcome = try await client.approvalDecide(id: snapshot.request.id, approve: approve, profile: nil)
+            // Cancellation here cannot undo a request already sent to Vault;
+            // it only prevents an unbound/late result from being shown.
+            guard !Task.isCancelled, snapshot.generation == approvalGeneration,
+                  outcome.id == snapshot.request.id,
+                  outcome.status == (approve ? "approved" : "denied") else { return }
+            approvalOutcome = outcome
+            approvalSnapshot = nil
+            approvalRequests.removeAll { $0.id == outcome.id }
+            statusMessage = approve ? "Approval granted by the vault service." : "Approval denied by the vault service."
+        } catch is CancellationError {
+            return
+        } catch {
+            guard snapshot.generation == approvalGeneration else { return }
+            errorMessage = "Approval decision could not be confirmed."
+            errorDetail = nil
+        }
+    }
+
+    public func cancelApprovalReview() {
+        invalidateApprovalReview()
+    }
+
+    private func invalidateApprovalReview(clearRequests: Bool = false) {
+        approvalGeneration &+= 1
+        approvalSnapshot = nil
+        approvalOutcome = nil
+        isLoadingApprovals = false
+        if clearRequests { approvalRequests = [] }
     }
 
     /// Reads the symbrain broker audit log and keeps the vault server's calls.
@@ -634,9 +791,11 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
         createValue = ""
         invalidateIntake()
         invalidatePendingDetail()
+        invalidateApprovalReview()
         clearError()
         do {
             try await client.lock(profile: nil)
+            approvalRequests = []
             entries = []
             detail = nil
             selectedPath = nil
@@ -652,6 +811,7 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
     /// not fetched until the user explicitly chooses to reveal this entry.
     public func select(path: String) async {
         invalidatePendingDetail()
+        invalidateApprovalReview()
         selectedPath = path
         detail = nil
         revealedFields = []
@@ -673,6 +833,9 @@ public final class VaultViewModel: ObservableObject, ModuleViewModelProtocol {
                 guard !Task.isCancelled, self.generation == requestGeneration,
                       self.selectedPath == selectedPath, self.availability == .ready else { return }
                 self.detail = fetched
+                self.editUsername = fetched.fields["username"]?.displayString ?? ""
+                self.editURL = fetched.fields["url"]?.displayString ?? ""
+                self.editNotes = fetched.fields["notes"]?.displayString ?? ""
                 self.detailExpiryTask = Task { @MainActor [weak self] in
                     guard let self else { return }
                     do { try await self.sleep(.seconds(30)) } catch { return }
