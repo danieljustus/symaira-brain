@@ -168,7 +168,7 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
         home.mkdir()
         disabled_profile = '[profile]\nname = "disabled"\n[servers.operate]\nenabled = true\n[servers.scope]\nenabled = true\n'
         disabled_config = f'[modules]\noperate = false\nscope = false\n[servers.operate]\nbinary_path = "{operate_probe}"\n[servers.scope]\nbinary_path = "{scope_probe}"\n'
-        responses = run_brain(brain, disabled_profile, disabled_config, [initialize_request(), request("tools/list", 2)], home, str(td))
+        responses = run_brain(brain, disabled_profile, disabled_config, [initialize_request(), request("tools/list", 2)], home, str(path_bin))
         assert_responses(responses, [1, 2])
         if marker.exists():
             raise AcceptanceError("disabled module spawned a child")
@@ -184,7 +184,7 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
         home.mkdir()
         invalid_profile = '[profile]\nname = "invalid-override"\n[servers.operate]\nenabled = true\n'
         invalid_config = f'[modules]\noperate = true\n[servers.operate]\nbinary_path = "{td / "missing"}"\n'
-        responses = run_brain(brain, invalid_profile, invalid_config, [initialize_request(), request("tools/list", 2)], home, "/usr/bin:/bin")
+        responses = run_brain(brain, invalid_profile, invalid_config, [initialize_request(), request("tools/list", 2)], home, str(path_bin))
         assert_responses(responses, [1, 2])
         if marker.exists():
             raise AcceptanceError("invalid explicit override fell back or spawned a child")
@@ -192,7 +192,7 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
 
         home = td / "fail-closed-home"
         home.mkdir()
-        responses = run_brain(brain, '[profile]\nname = "fail-closed"\n', '[modules]\n', [initialize_request(), request("tools/call", 2, {"name": "unknown_tool", "arguments": {}})], home, "/usr/bin:/bin")
+        responses = run_brain(brain, '[profile]\nname = "fail-closed"\n', '[modules]\n', [initialize_request(), request("tools/call", 2, {"name": "unknown_tool", "arguments": {}})], home, str(path_bin))
         assert_responses(responses, [1, 2])
         if responses[1].get("error", {}).get("code") != -32601:
             raise AcceptanceError(f"unknown tool was not rejected: {responses[1]!r}")
