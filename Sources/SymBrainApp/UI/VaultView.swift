@@ -219,6 +219,10 @@ struct VaultView: View {
                 HStack(spacing: SymairaSpacing.medium) {
                     TextField("Entry path", text: $vm.createPath)
                         .textFieldStyle(.roundedBorder)
+                    Picker("Type", selection: $vm.createType) {
+                        ForEach(["password", "api_key", "bearer_token", "basic_auth", "ssh_key", "certificate", "database_url", "totp_seed", "custom"], id: \.self) { Text($0).tag($0) }
+                    }
+                    .frame(width: 150)
                     SecureField("Secret value", text: $vm.createValue)
                         .textFieldStyle(.roundedBorder)
                     Stepper("\(passwordLength)", value: $passwordLength, in: 12...128, step: 4)
@@ -239,6 +243,23 @@ struct VaultView: View {
                     .accessibilityLabel("Create secret")
                     .disabled(vm.isCreating || vm.createPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.createValue.isEmpty)
                 }
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    HStack {
+                        TextField("Username", text: $vm.createUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.createURL).textFieldStyle(.roundedBorder)
+                        TextField("Usage hint", text: $vm.createUsageHint).textFieldStyle(.roundedBorder)
+                    }
+                    HStack {
+                        TextField("Notes", text: $vm.createNotes).textFieldStyle(.roundedBorder)
+                        TextField("Expires at (RFC3339)", text: $vm.createExpiresAt).textFieldStyle(.roundedBorder)
+                        Toggle("Auto-rotate", isOn: $vm.createAutoRotate).toggleStyle(.checkbox)
+                    }
+                    HStack {
+                        SecureField("TOTP secret (optional)", text: $vm.createTOTPSecret).textFieldStyle(.roundedBorder)
+                        TextField("TOTP issuer", text: $vm.createTOTPIssuer).textFieldStyle(.roundedBorder)
+                        TextField("TOTP account", text: $vm.createTOTPAccount).textFieldStyle(.roundedBorder)
+                    }
+                }
                 if let confirmation = vm.createConfirmation {
                     Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
                         .font(.caption)
@@ -248,11 +269,14 @@ struct VaultView: View {
                     HStack(spacing: SymairaSpacing.medium) {
                         SecureField("New \(vm.detail?.primarySecret?.field ?? "secret") value", text: $vm.editValue)
                             .textFieldStyle(.roundedBorder)
+                        TextField("Username", text: $vm.editUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.editURL).textFieldStyle(.roundedBorder)
+                        TextField("Notes", text: $vm.editNotes).textFieldStyle(.roundedBorder)
                         Button(action: { Task { await vm.setSelectedEntry() } }) {
                             Label("Update Selected", systemImage: "pencil")
                         }
                         .symairaButtonStyle(.secondary)
-                        .disabled(vm.isEditing || vm.editValue.isEmpty)
+                        .disabled(vm.isEditing)
                         Button(role: .destructive) { deletePath = path } label: {
                             Label("Delete", systemImage: "trash")
                         }

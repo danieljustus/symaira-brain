@@ -171,8 +171,13 @@ struct VaultEntryTests {
         #expect(VaultFieldSecurity.isSensitive("password"))
         #expect(VaultFieldSecurity.isSensitive("API_KEY"))
         #expect(VaultFieldSecurity.isSensitive("totp_secret"))
+        #expect(VaultFieldSecurity.isSensitive("recovery_key"))
+        #expect(VaultFieldSecurity.isSensitive("client_key"))
+        #expect(VaultFieldSecurity.isSensitive("PASSWD_backup"))
+        #expect(VaultFieldSecurity.isSensitive("pwd_hint"))
         #expect(VaultFieldSecurity.isSensitive("username") == false)
         #expect(VaultFieldSecurity.isSensitive("url") == false)
+        #expect(VaultFieldSecurity.isSensitive("notes") == false)
     }
 
     @Test func choosesEverySupportedPrimarySecretField() {
@@ -351,5 +356,55 @@ struct ClipboardLifetimeTests {
         #expect(fake.value == "second")
         #expect(fake.clearCount == 2)
     }
+}
+
+struct VaultCredentialMetadataTests {
+    @Test func decodesCredentialMetadataWithoutChangingPrimarySecretSelection() throws {
+        let data = Data(#"{"path":"work/github","type":"api_key","usage_hint":"CI access","auto_rotate":true,"expires_at":"2030-01-02T03:04:05Z","fields":{"api_key":"fixture-secret","username":"alice","url":"https://example.invalid","notes":"build account"}}"#.utf8)
+        let detail = try JSONDecoder().decode(VaultEntryDetail.self, from: data)
+        #expect(detail.type == "api_key")
+        #expect(detail.usageHint == "CI access")
+        #expect(detail.autoRotate == true)
+        #expect(detail.expiresAt == "2030-01-02T03:04:05Z")
+        #expect(detail.primarySecret?.field == "api_key")
+        #expect(detail.primarySecret?.value == "fixture-secret")
+    }
+
+    @Test func primarySecretUsesVaultTypeMappingsAndMasksAllSupportedTypes() throws {
+        let cases: [(String, String)] = [
+            ("password", "password"), ("api_key", "api_key"), ("bearer_token", "token"),
+            ("basic_auth", "basic_auth"), ("ssh_key", "private_key"), ("certificate", "cert_pem"),
+            ("database_url", "connection_string"), ("totp_seed", "seed"), ("payment", "card_number"), ("custom", "password")
+        ]
+        for (type, field) in cases {
+            let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [field: .string("secret")], type: type)
+            #expect(detail.primarySecret?.field == field)
+            #expect(VaultFieldSecurity.isSensitive(field))
+        }
+        #expect(!VaultFieldSecurity.isSensitive("username"))
+        #expect(!VaultFieldSecurity.isSensitive("url"))
+        #expect(!VaultFieldSecurity.isSensitive("notes"))
+        let bankPayment = VaultEntryDetail(path: "work/bank", modified: nil, fields: ["iban": .string("DE89370400440532013000")], type: "payment")
+        #expect(bankPayment.primarySecret?.field == "iban")
+        for field in ["card_number", "cvc", "iban"] {
+            #expect(VaultFieldSecurity.isSensitive(field))
+        }
+    }
+
+    @Test func basicAuthKeepsUsernameMetadataVisible() {
+        let detail = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+            "basic_auth": .string("secret"), "username": .string("alice")
+        ], type: "basic_auth")
+        #expect(detail.primarySecret?.field == "basic_auth")
+        #expect(detail.sortedFields.first?.key == "basic_auth")
+        #expect(detail.sortedFields.first?.isSensitive == true)
+        #expect(detail.sortedFields.last?.key == "username")
+        #expect(detail.sortedFields.last?.isSensitive == false)
+        let wrongField = VaultEntryDetail(path: "work/item", modified: nil, fields: [
+            "password": .string("wrong"), "username": .string("alice")
+        ], type: "basic_auth")
+        #expect(wrongField.primarySecret == nil)
+    }
+
 }
 #endif
