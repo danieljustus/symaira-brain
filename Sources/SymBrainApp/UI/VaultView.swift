@@ -18,6 +18,7 @@ struct VaultView: View {
 
     enum Tab: String, CaseIterable, Identifiable {
         case entries = "Entries"
+        case approvals = "Approvals"
         case activity = "Broker Activity"
 
         var id: String { rawValue }
@@ -56,6 +57,7 @@ struct VaultView: View {
 
                 switch tab {
                 case .entries: entriesSection
+                case .approvals: approvalsSection
                 case .activity: activitySection
                 }
             }
@@ -219,6 +221,10 @@ struct VaultView: View {
                 HStack(spacing: SymairaSpacing.medium) {
                     TextField("Entry path", text: $vm.createPath)
                         .textFieldStyle(.roundedBorder)
+                    Picker("Type", selection: $vm.createType) {
+                        ForEach(["password", "api_key", "bearer_token", "basic_auth", "ssh_key", "certificate", "database_url", "totp_seed", "custom"], id: \.self) { Text($0).tag($0) }
+                    }
+                    .frame(width: 150)
                     SecureField("Secret value", text: $vm.createValue)
                         .textFieldStyle(.roundedBorder)
                     Stepper("\(passwordLength)", value: $passwordLength, in: 12...128, step: 4)
@@ -239,6 +245,23 @@ struct VaultView: View {
                     .accessibilityLabel("Create secret")
                     .disabled(vm.isCreating || vm.createPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.createValue.isEmpty)
                 }
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    HStack {
+                        TextField("Username", text: $vm.createUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.createURL).textFieldStyle(.roundedBorder)
+                        TextField("Usage hint", text: $vm.createUsageHint).textFieldStyle(.roundedBorder)
+                    }
+                    HStack {
+                        TextField("Notes", text: $vm.createNotes).textFieldStyle(.roundedBorder)
+                        TextField("Expires at (RFC3339)", text: $vm.createExpiresAt).textFieldStyle(.roundedBorder)
+                        Toggle("Auto-rotate", isOn: $vm.createAutoRotate).toggleStyle(.checkbox)
+                    }
+                    HStack {
+                        SecureField("TOTP secret (optional)", text: $vm.createTOTPSecret).textFieldStyle(.roundedBorder)
+                        TextField("TOTP issuer", text: $vm.createTOTPIssuer).textFieldStyle(.roundedBorder)
+                        TextField("TOTP account", text: $vm.createTOTPAccount).textFieldStyle(.roundedBorder)
+                    }
+                }
                 if let confirmation = vm.createConfirmation {
                     Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
                         .font(.caption)
@@ -248,11 +271,14 @@ struct VaultView: View {
                     HStack(spacing: SymairaSpacing.medium) {
                         SecureField("New \(vm.detail?.primarySecret?.field ?? "secret") value", text: $vm.editValue)
                             .textFieldStyle(.roundedBorder)
+                        TextField("Username", text: $vm.editUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.editURL).textFieldStyle(.roundedBorder)
+                        TextField("Notes", text: $vm.editNotes).textFieldStyle(.roundedBorder)
                         Button(action: { Task { await vm.setSelectedEntry() } }) {
                             Label("Update Selected", systemImage: "pencil")
                         }
                         .symairaButtonStyle(.secondary)
-                        .disabled(vm.isEditing || vm.editValue.isEmpty)
+                        .disabled(vm.isEditing)
                         Button(role: .destructive) { deletePath = path } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -505,6 +531,71 @@ struct VaultView: View {
                 SymairaNotice(title: "Import failed", message: message, tone: .critical)
             }
         }
+    }
+
+    private var approvalsSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            HStack {
+                Text("Pending approval requests").font(.headline)
+                Spacer()
+                Button { Task { await vm.loadApprovals() } } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.secondary)
+                .disabled(vm.isLoadingApprovals)
+            }
+            if vm.isLoadingApprovals {
+                SymairaLoadingState("Loading approval requests…")
+            } else if vm.approvalRequests.isEmpty {
+                SymairaEmptyState(systemImage: "checkmark.shield", title: "No pending approvals", message: "The vault service has no pending human approval requests.")
+            } else {
+                ForEach(vm.approvalRequests) { request in
+                    VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                        HStack {
+                            Text(verbatim: request.id).font(.caption.monospaced()).textSelection(.enabled)
+                            Text(verbatim: request.status).font(.caption)
+                            Spacer()
+                            Button("Review") { vm.reviewApproval(request) }
+                                .disabled(!request.isPending || request.isExpired)
+                        }
+                        Text(verbatim: "Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
+                        HStack(spacing: 4) {
+                            Text("Access:").font(.caption)
+                            Text(request.write ? "write" : "read").font(.caption).bold()
+                        }
+                        Text(verbatim: request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text(verbatim: "Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                    }
+                    .padding(SymairaSpacing.small)
+                    .background(SymairaTheme.bgCardHover)
+                }
+            }
+            if let snapshot = vm.approvalSnapshot {
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    Text("Explicit review").font(.headline)
+                    Text(verbatim: "Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
+                    HStack(spacing: 4) {
+                        Text("Access:").font(.caption)
+                        Text(snapshot.request.write ? "write" : "read").font(.caption).bold()
+                    }
+                    Text(verbatim: snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    HStack {
+                        Button("Approve") { Task { await vm.decideReviewedApproval(approve: true) } }
+                            .symairaButtonStyle(.primary)
+                            .disabled(vm.isDecidingApproval)
+                        Button("Deny", role: .destructive) { Task { await vm.decideReviewedApproval(approve: false) } }
+                            .disabled(vm.isDecidingApproval)
+                        Button("Cancel", role: .cancel) { vm.cancelApprovalReview() }
+                            .disabled(vm.isDecidingApproval)
+                    }
+                }
+                .padding(SymairaSpacing.medium)
+            }
+            if let outcome = vm.approvalOutcome {
+                Text(verbatim: "Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+            }
+        }
+        .task { await vm.loadApprovals() }
     }
 
     // MARK: - Broker activity
