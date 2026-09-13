@@ -22,6 +22,15 @@ func TestFix_SkipsBrainSourceMismatch(t *testing.T) {
 		if !core.SupportsPlatform(runtime.GOOS) {
 			continue
 		}
+		// Optional cores (e.g. symbrowse) are never repaired by Fix
+		// unless explicitly enabled (Manifest.ActiveCores); these tests
+		// call Fix/FixWithOptions with nil enabledOptional, so an
+		// optional core can never be the mismatched one. Map iteration
+		// order is random — without this filter the test flakes
+		// whenever it picks the optional core.
+		if core.Optional {
+			continue
+		}
 		if mismatched == "" {
 			mismatched = name
 			fakeVersionBinary(t, binDir, core.BinaryName, "0.0.0-local")
@@ -65,6 +74,9 @@ func TestFix_ForceReleaseRepairsBrainSource(t *testing.T) {
 	mismatched := ""
 	for name, core := range mustManifest(t).Cores {
 		if !core.SupportsPlatform(runtime.GOOS) {
+			continue
+		}
+		if core.Optional { // see TestFix_SkipsBrainSourceMismatch
 			continue
 		}
 		if mismatched == "" {
@@ -111,6 +123,9 @@ func TestFix_MismatchWithoutProvenanceRepairs(t *testing.T) {
 	mismatched := ""
 	for name, core := range mustManifest(t).Cores {
 		if !core.SupportsPlatform(runtime.GOOS) {
+			continue
+		}
+		if core.Optional { // see TestFix_SkipsBrainSourceMismatch
 			continue
 		}
 		if mismatched == "" {
