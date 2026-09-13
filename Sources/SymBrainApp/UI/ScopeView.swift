@@ -126,11 +126,30 @@ struct ScopeView: View {
                 if vm.isBuilding {
                     SymairaLoadingState("Building symscope from source\u{2026} this can take a few minutes.")
                 } else {
-                    Button(action: { Task { await vm.buildAndInstall() } }) {
-                        Label("Build & Install Now", systemImage: "hammer")
+                    if let sourceRoot = vm.sourceRoot {
+                        selectedSourceRoot(sourceRoot)
+                    } else {
+                        Text("Choose a local Symaira Brain checkout before building. The selection is not saved.")
+                            .font(.caption)
+                            .foregroundStyle(SymairaTheme.textMuted)
                     }
-                    .symairaButtonStyle(.primary)
-                    .accessibilityLabel("Build and Install Now")
+
+                    Button(action: chooseSourceCheckout) {
+                        Label(
+                            vm.sourceRoot == nil ? "Choose Brain Source Checkout…" : "Change Brain Source Checkout…",
+                            systemImage: "folder"
+                        )
+                    }
+                    .symairaButtonStyle(.secondary)
+                    .accessibilityLabel("Choose Brain Source Checkout")
+
+                    if let sourceRoot = vm.sourceRoot {
+                        Button(action: { Task { await vm.buildAndInstall(sourceRoot: sourceRoot) } }) {
+                            Label("Build & Install Now", systemImage: "hammer")
+                        }
+                        .symairaButtonStyle(.primary)
+                        .accessibilityLabel("Build and Install Now")
+                    }
                 }
 
                 Button(action: { Task { await vm.refresh() } }) {
@@ -140,6 +159,33 @@ struct ScopeView: View {
                 .accessibilityLabel("Check Again")
             }
         }
+    }
+
+    private func selectedSourceRoot(_ sourceRoot: URL) -> some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
+            Text("Selected Brain checkout (not saved)")
+                .font(.caption)
+                .foregroundStyle(SymairaTheme.textSecondary)
+            Text(sourceRoot.path)
+                .font(.caption.monospaced())
+                .foregroundStyle(SymairaTheme.textPrimary)
+                .textSelection(.enabled)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func chooseSourceCheckout() {
+        let panel = NSOpenPanel()
+        panel.title = "Choose Symaira Brain Source Checkout"
+        panel.message = "Select the Brain checkout root containing the module source packages."
+        panel.prompt = "Use Checkout"
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = false
+        panel.allowsMultipleSelection = false
+
+        guard panel.runModal() == .OK, let sourceRoot = panel.url else { return }
+        vm.selectSourceRoot(sourceRoot)
     }
 
     private func copyableCommand(_ command: String) -> some View {

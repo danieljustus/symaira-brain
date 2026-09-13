@@ -182,12 +182,13 @@ enum ManagedModuleSupport {
         }
     }
 
-    /// Runs `symbrain setup --from-source --modules <module> --json`, which
-    /// builds the module from the in-repo receiving copy (browse/operate/
-    /// scope) and installs it into the managed directory with a provenance
-    /// sidecar. Building a Swift package can take a couple of minutes.
+    /// Runs `symbrain setup --from-source <source-root> --modules <module>
+    /// --json`, using a checkout explicitly selected by the user. It installs
+    /// the module into the managed directory with a provenance sidecar.
+    /// Building a Swift package can take a couple of minutes.
     static func setupFromSource(
         module: String,
+        sourceRoot: URL,
         symbrain: SymBrainClient,
         timeout: Double = 300
     ) async throws -> SetupSourceReport {
@@ -196,7 +197,7 @@ enum ManagedModuleSupport {
         }
         let result = try await symbrain.runner.runAllowingFailure(
             binary,
-            arguments: ["setup", "--from-source", "--modules", module, "--json"],
+            arguments: ModuleSourceBuild.setupArguments(module: module, sourceRoot: sourceRoot),
             timeout: timeout
         )
         return try decodePlain(SetupSourceReport.self, stdout: result.stdoutText, stderr: result.stderrText)
@@ -323,6 +324,8 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
 
     @Published var isBuilding = false
     @Published var buildResult: SetupSourceResult?
+    /// Selected only for this view-model session. Never inferred or persisted.
+    @Published private(set) var sourceRoot: URL?
 
     private let client: OperateClient
     private let symbrain: SymBrainClient
@@ -333,9 +336,11 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
         self.client = client
     }
 
-    /// The command shown (and runnable) when the module has no managed
-    /// binary yet.
-    var setupCommand: String { "symbrain setup --from-source --modules operate" }
+    /// The copyable command shown when the module has no managed binary yet.
+    /// It remains selection-required until the user chooses a checkout.
+    var setupCommand: String {
+        ModuleSourceBuild.copyableSetupCommand(module: "operate", sourceRoot: sourceRoot)
+    }
 
     /// The command shown when the module is disabled in config.
     var enableCommand: String { "symbrain config set modules.operate true" }
@@ -374,6 +379,25 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
         brokerActivity = await auditReader.read(profile: nil, server: "operate", limit: 500)
     }
 
+    /// Stores a canonical, structurally valid checkout only for this session.
+    /// The UI supplies this from an explicit open panel; no source root is
+    /// inferred from the app bundle, current directory, PATH, or source file.
+    func selectSourceRoot(_ selectedURL: URL) {
+        do {
+            sourceRoot = try ModuleSourceBuild.canonicalSourceRoot(validating: selectedURL)
+            errorMessage = nil
+            errorDetail = nil
+        } catch let error as ModuleSourceBuild.ValidationError {
+            sourceRoot = nil
+            errorMessage = error.localizedDescription
+            errorDetail = Self.sourceCheckoutGuidance
+        } catch {
+            sourceRoot = nil
+            errorMessage = "Could not validate the selected source checkout."
+            errorDetail = Self.sourceCheckoutGuidance
+        }
+    }
+
     /// Runs `symoperate version` — contacts GitHub to check for an update.
     func checkVersion() async {
         isCheckingVersion = true
@@ -397,26 +421,38 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
-    /// Builds symoperate from the in-repo receiving copy and installs it,
-    /// then reloads status. Requires the module to already be enabled in
-    /// config — bypassing that here would defeat the "no exposure from
-    /// installation alone" contract (PB-2026-09-09 §7) even though the CLI's
-    /// own `--modules` flag does not itself enforce it.
-    func buildAndInstall() async {
+    /// Builds symoperate from an explicitly selected in-repo source checkout
+    /// and installs it, then reloads status. Requires the module to already
+    /// be enabled in config — bypassing that here would defeat the "no
+    /// exposure from installation alone" contract (PB-2026-09-09 §7) even
+    /// though the CLI's own `--modules` flag does not itself enforce it.
+    func buildAndInstall(sourceRoot: URL) async {
         guard moduleEnabled else { return }
         isBuilding = true
         clearError()
         defer { isBuilding = false }
         do {
-            let outcome = try await ManagedModuleSupport.setupFromSource(module: "operate", symbrain: symbrain)
+            let canonicalSourceRoot = try ModuleSourceBuild.canonicalSourceRoot(validating: sourceRoot)
+            self.sourceRoot = canonicalSourceRoot
+            let outcome = try await ManagedModuleSupport.setupFromSource(
+                module: "operate",
+                sourceRoot: canonicalSourceRoot,
+                symbrain: symbrain
+            )
             buildResult = outcome.firstResult
             if let failure = outcome.firstResult, failure.status == "error" {
                 errorMessage = failure.error ?? "Build failed."
             }
             await refresh()
+        } catch let error as ModuleSourceBuild.ValidationError {
+            self.sourceRoot = nil
+            errorMessage = error.localizedDescription
+            errorDetail = Self.sourceCheckoutGuidance
         } catch {
             report(error)
         }
     }
+
+    private static let sourceCheckoutGuidance = "Choose the Symaira Brain checkout root containing go.mod, browse/, operate/Package.swift, scope/Package.swift, and history/Package.swift."
 }
 #endif
