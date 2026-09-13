@@ -11,7 +11,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 
 	"github.com/danieljustus/symaira-brain/internal/broker"
@@ -24,9 +23,9 @@ var passthroughMap = map[string]string{
 	"vault": "symvault",
 }
 
-// cmdPassthrough resolves the named core binary and exec's it with the
-// given args. It never returns on success — the process replaces itself.
-func cmdPassthrough(subcmd string, args []string, stderr io.Writer) exitcodes.ExitCode {
+// cmdPassthrough resolves the named core binary, runs it with the given args,
+// and preserves the supplied stdio streams and child exit code.
+func cmdPassthrough(subcmd string, args []string, stdin io.Reader, stdout, stderr io.Writer) exitcodes.ExitCode {
 	binaryName, ok := passthroughMap[subcmd]
 	if !ok {
 		fmt.Fprintf(stderr, "symbrain: unknown passthrough %q\n", subcmd)
@@ -48,9 +47,9 @@ func cmdPassthrough(subcmd string, args []string, stderr io.Writer) exitcodes.Ex
 
 	// Build the exec command: binary + all remaining args.
 	cmd := exec.Command(binPath, args...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdin = stdin
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 
 	// Run and propagate the child's exit code.
 	if err := cmd.Run(); err != nil {
