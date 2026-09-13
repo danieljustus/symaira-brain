@@ -1,25 +1,24 @@
-# scope — die `symcockpit scope`-Familie
+# Symaira Brain Scope module
 
-> **Beschlossenes Ziel, Umsetzung ausstehend:** [PB-2026-09-09](../docs/product-boundaries.md) überführt Scope als eigenständig optionales Modul nach Brain. Die Befehle und Quellpfade unten beschreiben den aktuellen Übergangsstand. Brain ohne Scope startet keine Probes/Watcher; Scope erfordert weder Operate noch Browse oder Memory/Agent-Profil. Plattformadapter, redigierte Prozessdaten und getrennte Lese-/Schreibrechte sind Pflicht. Cockpit behält ausschließlich Hardware-/System-Tuning unter dem Namen Symaira Cockpit. Vor Entfernen der alten CLI/MCP-/GUI-Einstiege Kompatibilität und Rollback nachweisen.
+> **Current ownership — source/consumer cutover completed 2026-09-13:** Scope is an independently optional Brain module at `symaira-brain/scope/`. Brain builds and manages the `symscope` binary; the `symcockpit scope` source route was removed when Cockpit became tune-only. No signed Brain-built module release or package-manager replacement has shipped. Scope-disabled Brain starts no probes or watchers; Scope requires neither Operate nor Browse nor a Memory/agent profile.
 
-Port-Inventar & MCP-Discovery. Swift-Port des Go-Originals `symaira-scope`
-(repo-konsolidierung.md §6, Schritt 8 — eine Sprache im
-`symaira-cockpit`-Repo); das Ursprungs-Repo ist archiviert und die
-`symscope`-Formula deprecated.
+Port inventory and MCP discovery: **ports** (lsof), **containers** (Docker CLI), **background services** (launchd/Homebrew) and **MCP servers** (AI-client configurations), exposed via CLI and a stdio MCP server.
 
-> Inventar der Maschine: **Ports** (lsof), **Container** (docker CLI),
-> **Hintergrunddienste** (launchd/Homebrew), **MCP-Server** (AI-Client-Configs) — als CLI und MCP-Server.
-
-## Build & Test
+## Managed install
 
 ```bash
-swift build                # all targets
-swift test                 # unit tests
-swift run -q symscope doctor
+symbrain setup --from-source /absolute/path/to/symaira-brain --modules scope --json
+~/.symaira/bin/symscope doctor
 ```
 
-Lokale Toolchain: `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer`
-(wie tune/operate, CommandLineTools haben kein XCTest).
+The source package remains independently buildable for development:
+
+```bash
+swift build --package-path scope
+swift test --package-path scope
+```
+
+The local managed binary gets a provenance sidecar. Existing historical release artifacts are not overwritten; signed release/package-manager migration remains a separate gate.
 
 ## CLI
 
@@ -30,9 +29,9 @@ symscope ports list            # lauschende TCP/UDP-Ports mit Prozess
 symscope ports suggest [n]     # n freie TCP-Ports vorschlagen (Default 3)
 symscope mcp list              # MCP-Server über AI-Client-Configs
 symscope mcp health            # Health-Probe aller konfigurierten Server
-symscope daemons list           # launchd Agents/Daemons und Homebrew-Services
-symscope daemons list --all     # inklusive com.apple.* launchd-Services
-symscope daemons health         # Zustands-/Exit-Status-Zusammenfassung
+symscope daemons list          # launchd Agents/Daemons und Homebrew-Services
+symscope daemons list --all    # inklusive com.apple.* launchd-Services
+symscope daemons health        # Zustands-/Exit-Status-Zusammenfassung
 symscope containers            # laufende Docker-Container (docker ps)
 symscope conflicts             # Ports, die von mehreren Prozessen gehalten werden
 symscope watch --interval 5    # Änderungen beobachten (NDJSON-Events: port_bound, …)
@@ -42,33 +41,23 @@ symscope explain server <name> # welcher Client/Config gehört zum MCP-Server
 symscope serve                 # stdio MCP-Server (JSON-RPC)
 ```
 
-## Module Layout
+## Module layout
 
 ```
 symscope (executable) → SymScopeMCP → SymScopeCore
 ```
 
-- `SymScopeCore` — PortService (lsof), MCPDiscovery (symbrain's harness
-  inventory when installed, own JSONC config parse as standalone fallback),
-  ContainerService (docker), DaemonService (launchctl/plists/Homebrew),
-  MCPHealthService, ConflictDetector, SnapshotService, Models. Keine externen Dependencies (Foundation + Darwin
-  only).
-- `SymScopeMCP` — stdio JSON-RPC/MCP über `SymairaMCP` (appkit, exact-pinned).
-  7 Tools: `scan`, `ports_list`, `ports_suggest`, `mcp_list`, `conflicts`,
-  `mcp_health`, `daemons_list`.
-- `symscope` — dünne CLI, Argument-Routing von Hand (kein Cobra-Äquivalent
-  nötig).
+- `SymScopeCore` — PortService (lsof), MCPDiscovery, ContainerService (docker), DaemonService (launchctl/plists/Homebrew), MCPHealthService, ConflictDetector, SnapshotService and models. No external dependency beyond Foundation and Darwin.
+- `SymScopeMCP` — stdio JSON-RPC/MCP via exact-pinned Symaira AppKit; seven tools: `scan`, `ports_list`, `ports_suggest`, `mcp_list`, `conflicts`, `mcp_health`, `daemons_list`.
+- `symscope` — the thin CLI/stdio-MCP entrypoint.
 
-## Konventionen
+## Conventions
 
-- JSON snake_case (`.convertToSnakeCase`), Struktur-äquivalent zum Go-Original.
-- Zero-Stdio-Pollution in `serve`: stdout = JSON-RPC frames only.
-- Exit-Codes: 0 ok · 1 Fehler · 2 Usage.
-- Read-only & lokal für Discovery; keine Netzwerk-Calls außer `mcp health`.
-- Binär: `symscope`. Config/Env wie Go-Original (`~/.config/symscope/`,
-  `SYMSCOPE_*`) — noch nicht implementiert (Folge).
+- JSON uses `snake_case`; `serve` writes structured JSON-RPC frames only to stdout.
+- Exit codes: `0` success, `1` runtime error, `2` CLI usage error.
+- Discovery is local and read-only. The only network interaction is an explicitly requested `mcp health` probe.
+- The binary is `symscope`; its source stays module-owned in Brain. See the Brain root README for optional-module configuration and managed consumer discovery.
 
-## Design
+## License
 
-Siehe `docs/scope-port.md` für Meilensteine und Abweichungen vom Go-Original
-(gopsutil → lsof, cobra → Hand-Router, corekit/mcpserver → SymairaMCP).
+Apache-2.0 © 2026 Daniel Justus.

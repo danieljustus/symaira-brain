@@ -13,9 +13,9 @@ This directory is the Brain receiving copy for PB-2026-09-09 package 3a (Scope).
 - **Support source:** `history/` at the same source commit, received once at `symaira-brain/history/` (14 files); Scope uses that shared package and no second copy.
 - **Manifest pins:** `symaira-appkit` exact `0.14.2`; `history` remains a local package dependency.
 
-All other imported Scope files match source paths, modes, and blob hashes. This is source intake and an independently runnable target package, not Brain consumer cutover or release. The original Cockpit source, dispatchers, legacy names, binaries, configuration, permissions, TCC identities, and data remain supported and untouched. Brain does not automatically start this package; the existing compatibility route remains unchanged.
+All other imported Scope files match source paths, modes, and blob hashes. The source/consumer cutover completed on 2026-09-13: Brain owns and managed-builds `symscope` from this tree; the Cockpit `scope/` source package and `symcockpit scope` source route were removed in Cockpit's tune-only cutover. Scope remains explicitly opt-in and starts no probes/watchers while disabled. No signed Brain-side release or package-manager replacement is implied.
 
-**Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash, with only the two listed reviewed adaptations excluded from byte equality.
+**Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash, with only the two listed reviewed adaptations excluded from byte equality. The historical source comparison is provenance evidence, not a supported Cockpit ownership route.
 
 ## Resync history
 

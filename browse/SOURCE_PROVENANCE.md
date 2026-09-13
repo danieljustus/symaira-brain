@@ -1,8 +1,6 @@
 # Browse target-stage source provenance
 
-This directory is the Brain receiving copy for PB-2026-09-09's optional Browse
-package. It remains a source intake only: the standalone symaira-browse repository,
-its `symbrowse` distribution and supported compatibility routes are unchanged.
+This directory is the Brain-owned Browse source for PB-2026-09-09's optional Browse package. The source/consumer cutover completed on 2026-09-13: `symaira-browse` is archived and Brain builds/manages `symbrowse` from this receiving tree. No signed Brain-side release or package-manager replacement is implied.
 
 - **Source repository:** `github.com/danieljustus/symaira-browse`
 - **Source commit:** `e86c1db46ad758d89372640473a5311525e3edf1`

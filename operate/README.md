@@ -1,35 +1,34 @@
-# operate — the `symcockpit operate` family
+# Symaira Brain Operate module
 
-> **Accepted ownership transition, not removal:** [PB-2026-09-09](../docs/product-boundaries.md) retains Operate as an optional Brain module. The existing Cockpit entrypoint remains supported until verified migration. No Cua or Hermes replacement is mandated.
+> **Current ownership — source/consumer cutover completed 2026-09-13:** Operate is an optional Brain module at `symaira-brain/operate/`. Brain builds and manages the `symoperate` binary; the `symcockpit operate` source route was removed when Cockpit became tune-only. No signed Brain-built module release or package-manager replacement has shipped.
 
 > Let an AI agent see and drive your Mac — locally, over MCP.
 
-[![CI](https://github.com/danieljustus/symaira-cockpit/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-cockpit/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/danieljustus/symaira-cockpit?sort=semver)](https://github.com/danieljustus/symaira-cockpit/releases/latest)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
-
-![Symaira Operate social preview](docs/assets/social-preview.png)
-
-> This package was the standalone `symaira-operate` repository until
-> 2026-08-23. It now ships as the `operate` family of
-> [`symcockpit`](../README.md); the repo is archived and the `symoperate`
-> cask is deprecated.
-
 `symoperate` is a native macOS desktop-automation **MCP server**. It exposes
 screenshots, the Accessibility tree, mouse/keyboard input, and app/window control
-over stdio, so an agent (Claude Desktop, OpenCode, Cursor, …) can operate the
-GUI: open an app, find a button, click it, type, save. It is a supervised, local
-tool — not a remote-control daemon.
+over stdio, so an agent can operate the GUI: open an app, find a button, click it,
+type, save. It is a supervised, local tool — not a remote-control daemon.
 
-Part of the [Symaira](../README.md) family, and the sibling family of
-[`tune`](../tune) (hardware tuning): **operate = GUI actions, tune =
-thermals/brightness/power.**
+## Managed install
 
-> **Status: shipping** (`symcockpit version` reports this build's component
-> versions). Working native implementation (rebranded from the author's
-> `mac-operator` prototype), covered by unit tests across every target
-> (`swift test`).
+From a verified Brain checkout, install the selected optional module:
+
+```bash
+symbrain setup --from-source /absolute/path/to/symaira-brain --modules operate --json
+~/.symaira/bin/symoperate doctor
+```
+
+This creates a provenance sidecar beside the managed binary. Existing historical
+Homebrew/Cockpit artifacts are not overwritten. The source package stays
+independently buildable for development:
+
+```bash
+swift build --package-path operate
+swift test --package-path operate
+```
+
+For user-facing module selection and profile exposure, use the Brain README.
+The remaining release/signing and package-manager migration is a separate gate.
 
 ## Why symoperate?
 
@@ -44,39 +43,11 @@ thermals/brightness/power.**
 - **Native macOS.** Built with AppKit, Accessibility, and ScreenCaptureKit for
   reliable performance on macOS 26+.
 
-## Install
-
-**Homebrew (recommended):**
-
-```bash
-brew install danieljustus/tap/symcockpit
-```
-
-**Direct download:** grab the latest `symoperate.dmg` from the
-[Releases page](https://github.com/danieljustus/symaira-cockpit/releases/latest),
-open it, and move `symoperate` to `/usr/local/bin/` (or any directory on your
-`PATH`).
-
-Then grant permissions and verify the install:
-
-```bash
-symoperate permissions grant accessibility
-symoperate permissions grant screen
-symoperate doctor
-```
-
 ## Requirements
 
 - macOS 26+
-- `Accessibility` and `Screen Recording` permissions for the host process
-
-## Build
-
-```bash
-swift build            # binary at .build/debug/symoperate
-swift test             # run the test suite
-swift run -q symoperate doctor
-```
+- `Accessibility` and `Screen Recording` permissions for the host process.
+- A deliberate configuration/policy decision before exposing side-effecting MCP tools. The managed installation command above installs no automatic profile exposure and grants no permissions.
 
 ## CLI
 
@@ -177,15 +148,17 @@ coordinates → 4. one action → 5. re-snapshot before the next step.
 
 ## Safety
 
-Supervised, local, stdio-only. Destructive controls (Delete/Trash/Uninstall/
-Allow/Authorize/Unlock/Quit/…) and secure text fields are refused for
-element-based actions. Don't automate passwords, payments, or permission dialogs
-without explicit user confirmation. See [AGENTS.md](AGENTS.md), [SAFETY_AUDIT.md](SAFETY_AUDIT.md), and `NOTICE`.
+Supervised, local, stdio-only. Destructive controls and secure text fields are
+refused for element-based actions. Do not automate passwords, payments or
+permission dialogs without explicit user confirmation. Configure any exposure
+through the Brain profile/tool allowlist; the source package itself is not an
+authority grant.
 
 ## Documentation
 
-- [docs/architecture.md](docs/architecture.md) — components & tool contract
-- [docs/roadmap.md](docs/roadmap.md) — built vs planned
+- Brain root `README.md` — optional-module configuration, managed installation and profile exposure.
+- `SOURCE_PROVENANCE.md` — source receipt and the completed ownership cutover.
+- `docs/macos-agent-guide.md` — direct macOS registration, permission and safety guidance.
 
 ## License
 
