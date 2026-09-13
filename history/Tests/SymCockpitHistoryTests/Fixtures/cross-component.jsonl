@@ -1,0 +1,2 @@
+{"action":"brightness.set","payload":{"action":"brightness.set","applied_value":0.8,"clamped_value":0.8,"requested_value":0.9,"result":"success","timestamp":"2026-08-28T10:00:00Z"},"schema_version":1,"source":"tune","timestamp":"2026-08-28T10:00:00Z"}
+{"action":"click","payload":{"action":"click","message":"Click event posted.","success":true,"targets":{"button":"left"},"timestamp":"2026-08-28T10:00:01Z"},"schema_version":1,"source":"operate","timestamp":"2026-08-28T10:00:01Z"}

@@ -40,7 +40,7 @@ impl Profile {
     }
 
     /// Returns server aliases in canonical order:
-    /// the four cores (`vault`, `memory`, `skills`, `usage`) followed by foreign servers alphabetically.
+    /// the four cores, explicitly declared optional modules, then foreign servers alphabetically.
     #[must_use]
     pub fn server_aliases(&self) -> Vec<String> {
         let mut aliases = Vec::with_capacity(self.servers.len());

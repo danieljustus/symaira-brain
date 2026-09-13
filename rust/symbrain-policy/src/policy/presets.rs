@@ -1,8 +1,8 @@
 //! In-repo maintained tool universes and mode presets.
 
 use crate::constants::{
-    MEMORY_MODE_READ_ONLY, MEMORY_MODE_READ_WRITE, SERVER_MEMORY, SERVER_USAGE, SERVER_VAULT,
-    VAULT_MODE_FULL, VAULT_MODE_OFF, VAULT_MODE_REQUEST_ONLY,
+    MEMORY_MODE_READ_ONLY, MEMORY_MODE_READ_WRITE, SERVER_MEMORY, SERVER_OPERATE, SERVER_SCOPE,
+    SERVER_USAGE, SERVER_VAULT, VAULT_MODE_FULL, VAULT_MODE_OFF, VAULT_MODE_REQUEST_ONLY,
 };
 use crate::error::PolicyError;
 
@@ -50,6 +50,17 @@ pub const MEMORY_TOOLS_READ_WRITE: &[&str] = &[
 pub const USAGE_TOOLS: &[&str] = &["get_ai_usage"];
 
 /// Activity tools that require explicit profile allowlists (not part of default presets).
+pub const OPERATE_TOOLS: &[&str] = &["version", "permissions_status", "get_policy"];
+pub const SCOPE_TOOLS: &[&str] = &[
+    "scan",
+    "ports_list",
+    "ports_suggest",
+    "mcp_list",
+    "mcp_health",
+    "daemons_list",
+    "conflicts",
+];
+
 pub const ACTIVITY_TOOLS: &[&str] = &["activity_get", "activity_search", "activity_status"];
 
 /// Returns the maximal versioned tool universe this crate knows for `alias`.
@@ -59,6 +70,8 @@ pub fn universe_for(alias: &str) -> Option<&'static [&'static str]> {
         SERVER_VAULT => Some(VAULT_TOOLS_FULL),
         SERVER_MEMORY => Some(MEMORY_TOOLS_READ_WRITE),
         SERVER_USAGE => Some(USAGE_TOOLS),
+        SERVER_OPERATE => Some(OPERATE_TOOLS),
+        SERVER_SCOPE => Some(SCOPE_TOOLS),
         _ => None,
     }
 }

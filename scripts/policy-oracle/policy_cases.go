@@ -127,6 +127,24 @@ func getPolicyTestCases() []PolicyTestCase {
 			LiveTools: []string{"get_ai_usage", "unknown_usage_tool"},
 		},
 		{
+			ID:        "pol_operate_allow_cannot_widen",
+			Server:    "operate",
+			Config:    ExpectedServer{Enabled: true, ToolsAllow: []string{"version", "click"}},
+			LiveTools: []string{"version", "click"},
+		},
+		{
+			ID:        "pol_scope_write_host_rejected",
+			Server:    "scope",
+			Config:    ExpectedServer{Enabled: true, ToolsAllow: []string{"write_host"}},
+			LiveTools: []string{"write_host"},
+		},
+		{
+			ID:        "pol_operate_unknown_without_allow",
+			Server:    "operate",
+			Config:    ExpectedServer{Enabled: true},
+			LiveTools: []string{"unknown_upstream_tool"},
+		},
+		{
 			ID:         "pol_preset_eval_vault",
 			Server:     "vault",
 			Config:     ExpectedServer{Enabled: true, Mode: "request_only"},

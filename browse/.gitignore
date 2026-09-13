@@ -1,0 +1,58 @@
+# Build outputs
+# Adapted from symaira-browse's .gitignore for this receiving copy: entries
+# for directories not carried over by the source intake (fuzz/, dist/ via
+# .goreleaser.yml, testdata/) are dropped; entries for what was carried are
+# kept. See browse/SOURCE_PROVENANCE.md.
+/symbrowse
+/target/
+/port/results/
+**/__pycache__/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Go
+*.test
+*.out
+vendor/
+
+# Config / secrets
+.env
+*.local
+
+# Cache
+.cache/
+
+# Local audit reports
+.github/audit/
+
+# Documentation builds / local notes (published docs/*.md stay tracked)
+docs/_build/
+docs/.vitepress/cache/
+docs/adopt/
+
+# Local agent reports / session state
+.github/coverage/
+.github/prerelease/
+.github/review/
+.omo/
+.omo/run-continuation/
+.omo/notepads/
+coverage.html
+
+# Local agent worktrees
+.worktrees/
+
+# --- Symaira internal working artifacts (never published; see root AGENTS.md) ---
+.github/app-test/
+.github/admin/
+.github/branch-protection/
+**/docs/adopt/
+**/docs/teardown/
+**/docs/planned/
+**/docs/intern/
+**/docs/roadmap.md
+PLANUNG.md
+ARCHITEKTUR.md
+.claude/

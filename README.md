@@ -302,7 +302,7 @@ typically exposes nothing.
 
 ### Browse (optional module)
 
-[PB-2026-09-09](docs/product-boundaries.md) makes Browse an optional Brain
+[PB-2026-09-09](docs/adr/0002-product-boundaries.md) makes Browse an optional Brain
 module — Symaira's own MCP server, not a third-party foreign one, but wired
 through the same foreign-server mechanism above (`browse` is not one of the
 four reserved core aliases). Nothing installs or activates it by default:

@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"sort"
 	"strings"
@@ -66,8 +67,8 @@ func main() {
 	}
 	data = append(data, '\n')
 	if *check {
-		existing, err := os.ReadFile(*output)
-		if err != nil || !bytes.Equal(existing, data) {
+		existing, _ := os.ReadFile(*output)
+		if !fixtureMatches(existing, generated) {
 			fatalf("%s is out of date; run go run ./scripts/profile-remove-oracle", *output)
 		}
 		fmt.Printf("PASS: profile remove oracle deterministic check passed (%d cases)\n", len(generated.Cases))
@@ -80,6 +81,19 @@ func main() {
 		fatalf("write %s: %v", *output, err)
 	}
 	fmt.Printf("Wrote %s (%d cases)\n", *output, len(generated.Cases))
+}
+
+// fixtureMatches ignores only the historical Git revision. Source hashes,
+// generator identity, platform-selected cases, and exact behavior remain strict.
+func fixtureMatches(existing []byte, generated oracle) bool {
+	var expected oracle
+	if err := json.Unmarshal(existing, &expected); err != nil {
+		return false
+	}
+	return expected.SchemaVersion == generated.SchemaVersion &&
+		expected.GeneratorSHA256 == generated.GeneratorSHA256 &&
+		reflect.DeepEqual(expected.GoSources, generated.GoSources) &&
+		reflect.DeepEqual(expected.Cases, generated.Cases)
 }
 
 func generate(root string) oracle {

@@ -3,8 +3,9 @@
 use std::collections::BTreeSet;
 
 use symbrain_policy::constants::{
-    MEMORY_MODE_READ_ONLY, MEMORY_MODE_READ_WRITE, SERVER_MEMORY, SERVER_SKILLS, SERVER_USAGE,
-    SERVER_VAULT, VAULT_MODE_FULL, VAULT_MODE_OFF, VAULT_MODE_REQUEST_ONLY,
+    MEMORY_MODE_READ_ONLY, MEMORY_MODE_READ_WRITE, SERVER_MEMORY, SERVER_OPERATE, SERVER_SCOPE,
+    SERVER_SKILLS, SERVER_USAGE, SERVER_VAULT, VAULT_MODE_FULL, VAULT_MODE_OFF,
+    VAULT_MODE_REQUEST_ONLY,
 };
 use symbrain_policy::policy::eval::{evaluate, evaluate_preset};
 use symbrain_policy::policy::identity::identity_parameter;
@@ -171,6 +172,63 @@ fn test_evaluate_unknown_upstream_tool_never_exposed_under_preset() {
         assert!(
             report.unknown.contains(&unknown),
             "unknown tool missing from Unknown bucket"
+        );
+    }
+}
+
+#[test]
+fn test_optional_modules_allowlist_cannot_widen_hard_maximum() {
+    let cases = [
+        (
+            SERVER_OPERATE,
+            vec!["click"],
+            vec!["click"],
+            Vec::<&str>::new(),
+            vec!["click"],
+        ),
+        (
+            SERVER_OPERATE,
+            vec!["version", "click"],
+            vec!["version", "click"],
+            vec!["version"],
+            vec!["click"],
+        ),
+        (
+            SERVER_SCOPE,
+            vec!["write_host"],
+            vec!["write_host"],
+            Vec::<&str>::new(),
+            vec!["write_host"],
+        ),
+        (
+            SERVER_OPERATE,
+            vec!["unknown_upstream_tool"],
+            Vec::<&str>::new(),
+            Vec::<&str>::new(),
+            vec!["unknown_upstream_tool"],
+        ),
+    ];
+    for (alias, live_names, allow_names, want_exposed, want_unknown) in cases {
+        let live: Vec<String> = live_names.into_iter().map(String::from).collect();
+        let cfg = ServerConfig {
+            enabled: true,
+            tools_allow: allow_names.into_iter().map(String::from).collect(),
+            ..ServerConfig::default()
+        };
+        let report = evaluate(alias, &cfg, &live).expect("optional policy should evaluate");
+        assert_eq!(
+            report.exposed,
+            want_exposed
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(
+            report.unknown,
+            want_unknown
+                .into_iter()
+                .map(String::from)
+                .collect::<Vec<_>>()
         );
     }
 }
@@ -366,4 +424,20 @@ fn test_report_verdict_lookup() {
     assert_eq!(report.verdict("memory_set"), Verdict::Hidden);
     assert_eq!(report.verdict("totally_new"), Verdict::Unknown);
     assert_eq!(report.verdict("never_seen"), Verdict::Unknown);
+}
+
+#[test]
+fn test_optional_modules_enabled_without_allowlist_default_deny() {
+    for alias in [SERVER_OPERATE, SERVER_SCOPE] {
+        let cfg = ServerConfig {
+            enabled: true,
+            ..ServerConfig::default()
+        };
+        let live = vec!["version".to_string(), "scan".to_string()];
+        let report = evaluate(alias, &cfg, &live).expect("optional policy");
+        assert!(
+            report.exposed.is_empty(),
+            "{alias} exposed without tools_allow"
+        );
+    }
 }

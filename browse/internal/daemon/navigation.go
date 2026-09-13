@@ -1,0 +1,720 @@
+package daemon
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/url"
+	"os"
+	"os/exec"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/danieljustus/symaira-browse/internal/engine"
+	"github.com/danieljustus/symaira-browse/internal/engine/chrome"
+	"github.com/danieljustus/symaira-browse/internal/engine/doctor"
+	"github.com/danieljustus/symaira-browse/internal/engine/safari"
+	"github.com/danieljustus/symaira-browse/internal/engine/safaribidi"
+	"github.com/danieljustus/symaira-browse/internal/engine/static"
+	"github.com/danieljustus/symaira-browse/internal/policy"
+	"github.com/danieljustus/symaira-browse/internal/profiles"
+	"github.com/danieljustus/symaira-browse/internal/state"
+)
+
+// resolveBrowserExecutable is the discovery fallback used when
+// SYMBROWSE_EXECUTABLE_PATH is unset; a variable so tests can stub it.
+var resolveBrowserExecutable = doctor.ResolveExecutable
+
+// navigationGuard is the daemon-owned URL admission policy. Engines may keep
+// their own checks for defense in depth, but no engine is touched before this
+// guard accepts a user-supplied navigation target.
+type navigationGuard struct {
+	allowlist *policy.Allowlist
+	ssrf      *policy.SSRFGuard
+	err       error
+}
+
+func (g navigationGuard) check(target string) error {
+	parsed, err := url.Parse(strings.TrimSpace(target))
+	if err != nil {
+		return fmt.Errorf("navigation URL policy: invalid URL %q: %w", target, err)
+	}
+	scheme := strings.ToLower(parsed.Scheme)
+	if (scheme != "http" && scheme != "https") || parsed.Hostname() == "" {
+		return fmt.Errorf("navigation URL policy: unsupported target %q (http/https URL required)", target)
+	}
+	if g.err != nil {
+		return fmt.Errorf("navigation URL policy is invalid: %w", g.err)
+	}
+	if g.allowlist != nil && !g.allowlist.AllowsURL(parsed) {
+		return fmt.Errorf("navigation URL policy: target %q is blocked by the domain allowlist", target)
+	}
+	if g.ssrf != nil {
+		if err := g.ssrf.AllowsURL(parsed); err != nil {
+			return fmt.Errorf("navigation URL policy: target %q is blocked by the SSRF guard: %w", target, err)
+		}
+	}
+	return nil
+}
+
+func (r *NavigationRuntime) guardTarget(target string) error {
+	return r.urlGuard.check(target)
+}
+
+func (r *NavigationRuntime) guardFrameTarget(frame Frame) error {
+	var request struct {
+		URL string `json:"url"`
+	}
+	switch frame.Cmd {
+	case "open", "goto", "tab.new":
+		if err := decodeArgs(frame, &request); err != nil {
+			return err
+		}
+		if frame.Cmd == "tab.new" && strings.TrimSpace(request.URL) == "" {
+			return nil // tab.new defaults to the browser's internal about:blank.
+		}
+		return r.guardTarget(request.URL)
+	case "window.new":
+		return nil // the internal about:blank target is not user supplied.
+	default:
+		return nil
+	}
+}
+
+// NavigationRuntime lazily owns one protocol-neutral navigation service and
+// Chrome engine per session. CDP details remain confined to engine/chrome.
+type NavigationRuntime struct {
+	mu              sync.Mutex
+	registry        *SessionRegistry
+	executable      string
+	profile         string
+	allowedDomains  []string
+	ssrfEnabled     bool
+	allowPrivate    bool
+	headless        bool
+	engines         map[string]engine.Engine
+	browserContexts map[string]engine.Context
+	launches        map[string]*sessionLaunch
+	engineKind      string
+	cdpEndpoint     string
+	mode            policy.Mode
+	tabs            map[string][]*sessionTab
+	activeTab       map[string]int
+	autosave        *AutosaveConfig
+	stateStore      *state.Store
+	lastAutosave    map[string]time.Time
+	restoreOnStart  map[string]string // session -> state name to restore
+	uploadDirs      []string          // allowed upload roots (issue #63)
+	screenshotDirs  []string          // allowed screenshot roots (issue #16)
+	requestTimeout  time.Duration     // per-command CDP budget (0 = engine default)
+	recorders       map[string]*recorderState
+	staticGuard     static.GuardOptions // fetch-hardening for the static engine (step 5)
+	urlGuard        navigationGuard
+	engineFactory   func(string, navigationGuard) engine.Engine
+	injectionMu     sync.Mutex
+	injectionCache  map[string][]Warning
+}
+
+// sessionTab is one tab of a session. Every tab owns its own navigation
+// service (and therefore its own ref table), so refs stay valid per tab and
+// survive tab switches.
+type sessionTab struct {
+	Label   string
+	Service *engine.NavigationService
+	Page    engine.Page
+}
+
+type sessionLaunch struct {
+	done chan struct{}
+}
+
+// NavigationRuntimeOptions configures the browser engines created per session.
+type NavigationRuntimeOptions struct {
+	// Autosave enables automatic state persistence (issue B-36).
+	Autosave *AutosaveConfig
+	// StateStore is the store used by autosave and restore-on-start.
+	StateStore *state.Store
+	// RestoreOnStart maps a session name to the state to restore when the
+	// session's browser is first launched.
+	RestoreOnStart map[string]string
+	// Profile is an existing Chrome profile directory to reuse instead of a
+	// private session profile (issue B-38). The daemon emits a warning when
+	// set, because a running Chrome locks the profile and the domain
+	// allowlist cannot be enforced for a human-owned profile.
+	Profile string
+	// AllowedDomains activates the domain allowlist network policy for every
+	// session engine (see chrome.Options.AllowedDomains).
+	AllowedDomains []string
+	// SSRFEnabled activates the SSRF guard for every session engine (see
+	// chrome.Options.SSRFEnabled). It is the MCP-mode default.
+	SSRFEnabled bool
+	// AllowPrivate relaxes the SSRF guard (--allow-private).
+	AllowPrivate bool
+	// Headless launches Chrome headless (no GUI session); used in CI and
+	// agent contexts.
+	Headless bool
+	// UploadDirs are the allowed roots for file uploads (issue #63);
+	// paths outside are rejected by the path guard.
+	UploadDirs []string
+	// ScreenshotDirs are the allowed roots for screenshot files (issue #16);
+	// without an explicit directory the first root (cache out dir) is used.
+	ScreenshotDirs []string
+	// Engine selects the engine implementation: "chrome" (default), "static"
+	// (JS-free HTML reader, issue #64), or "safari-attach" (live Safari session
+	// via Apple Events, issue #297).
+	Engine string
+	// Mode is the runtime mode (TTY or MCP). The safari-attach engine only
+	// enables its interaction path in TTY mode; in MCP mode it is read-only
+	// because no network layer means the SSRF guard cannot be enforced.
+	Mode policy.Mode
+	// CDPEndpoint attaches session engines to an existing DevTools endpoint
+	// instead of launching Chrome (issue #296; flag, SYMBROWSE_CDP_ENDPOINT,
+	// or config.toml). Attached engines do not own the browser lifetime.
+	CDPEndpoint string
+	// RequestTimeout is the per-command CDP budget for session engines
+	// (chrome.Options.RequestTimeout; default 10s). E2E tests use a
+	// generous budget because Chrome round-trips can stall for seconds on
+	// loaded machines right after a sibling tab is created.
+	RequestTimeout time.Duration
+	// StaticGuard provides explicit guard options for the static engine.
+	// When nil, hardened defaults (SSRFEnabled: true, RobotsEnabled: true)
+	// with AllowPrivate propagated from options are used.
+	StaticGuard *static.GuardOptions
+}
+
+// NewNavigationRuntime creates a runtime. Chrome is not started until the
+// first navigation or wait operation for a session.
+func NewNavigationRuntime(registry *SessionRegistry, executable string, options NavigationRuntimeOptions) *NavigationRuntime {
+	if executable == "" {
+		executable = os.Getenv("SYMBROWSE_EXECUTABLE_PATH")
+	}
+	var guard static.GuardOptions
+	if options.StaticGuard != nil {
+		guard = *options.StaticGuard
+	} else {
+		guard = static.GuardOptions{
+			SSRFEnabled:   true,
+			AllowPrivate:  options.AllowPrivate,
+			RobotsEnabled: true,
+		}
+	}
+	allowlist, allowlistErr := policy.ParseAllowlist(options.AllowedDomains)
+	var ssrfGuard *policy.SSRFGuard
+	if options.SSRFEnabled {
+		ssrfGuard = policy.NewSSRFGuard(options.AllowPrivate)
+	}
+	return &NavigationRuntime{
+		registry:        registry,
+		executable:      executable,
+		profile:         options.Profile,
+		allowedDomains:  options.AllowedDomains,
+		engineKind:      options.Engine,
+		cdpEndpoint:     options.CDPEndpoint,
+		mode:            options.Mode,
+		ssrfEnabled:     options.SSRFEnabled,
+		allowPrivate:    options.AllowPrivate,
+		headless:        options.Headless,
+		engines:         make(map[string]engine.Engine),
+		browserContexts: make(map[string]engine.Context),
+		launches:        make(map[string]*sessionLaunch),
+		tabs:            make(map[string][]*sessionTab),
+		activeTab:       make(map[string]int),
+		uploadDirs:      options.UploadDirs,
+		screenshotDirs:  options.ScreenshotDirs,
+		requestTimeout:  options.RequestTimeout,
+		autosave:        options.Autosave,
+		stateStore:      options.StateStore,
+		lastAutosave:    make(map[string]time.Time),
+		restoreOnStart:  options.RestoreOnStart,
+		staticGuard:     guard,
+		urlGuard:        navigationGuard{allowlist: allowlist, ssrf: ssrfGuard, err: allowlistErr},
+		injectionCache:  make(map[string][]Warning),
+	}
+}
+
+// SetAutosave updates the autosave configuration at runtime (used by
+// `symbrowse daemon --restore` wiring and tests).
+func (r *NavigationRuntime) SetAutosave(config *AutosaveConfig, store *state.Store) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.autosave = config
+	r.stateStore = store
+}
+
+// AutosaveConfig returns the active autosave configuration.
+func (r *NavigationRuntime) AutosaveConfig() *AutosaveConfig {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.autosave
+}
+
+// Handle executes one navigation frame and returns JSON-serializable data
+// together with network-policy warnings collected from the session engine.
+// When autosave is active and the frame changed session state, a save is
+// scheduled asynchronously so interactive commands never pay for I/O.
+func (r *NavigationRuntime) Handle(ctx context.Context, frame Frame) (any, []Warning, error) {
+	if strings.HasPrefix(frame.Cmd, "flow.record.") {
+		data, err := r.handleRecordFrame(ctx, frame)
+		return data, nil, err
+	}
+	if strings.HasPrefix(frame.Cmd, "tab.") || frame.Cmd == "window.new" {
+		if err := r.guardFrameTarget(frame); err != nil {
+			return nil, nil, err
+		}
+		data, err := r.handleTabFrame(ctx, frame)
+		return data, nil, err
+	}
+	if strings.HasPrefix(frame.Cmd, "frame.") {
+		data, err := r.handleFrameFrame(ctx, frame)
+		return data, nil, err
+	}
+	if strings.HasPrefix(frame.Cmd, "dialog.") {
+		data, err := r.handleDialogFrame(ctx, frame)
+		return data, nil, err
+	}
+	data, warnings, err := r.dispatch(ctx, frame)
+	if err != nil {
+		return nil, nil, err
+	}
+	r.maybeAutosave(ctx, frame)
+	r.recordFrame(ctx, frame.Session, frame)
+	return data, append(r.policyWarnings(frame.Session), warnings...), nil
+}
+
+// dispatch runs one frame against the session service. It is a thin router:
+// every command family is delegated to a per-domain handler (see *_frames.go).
+func (r *NavigationRuntime) dispatch(ctx context.Context, frame Frame) (any, []Warning, error) {
+	if err := r.guardFrameTarget(frame); err != nil {
+		return nil, nil, err
+	}
+	switch frame.Cmd {
+	case "console.list", "console.clear", "errors.list", "errors.clear":
+		data, err := r.handleRuntimeEventsFrame(ctx, frame)
+		return data, nil, err
+	case "eval":
+		data, err := r.handleEvalFrame(ctx, frame)
+		return data, nil, err
+	case "network.requests", "network.request":
+		data, err := r.handleNetworkReadFrame(ctx, frame)
+		return data, nil, err
+	case "network.route", "network.unroute", "network.har":
+		data, err := r.handleNetworkControlFrame(ctx, frame)
+		return data, nil, err
+	case "upload":
+		data, err := r.handleUploadFrame(ctx, frame)
+		return data, nil, err
+	case "downloads.list", "download.setdir":
+		data, err := r.handleDownloadFrame(ctx, frame)
+		return data, nil, err
+	case "open", "goto", "back", "forward", "reload", "wait":
+		data, err := r.handleNavigationFrame(ctx, frame)
+		return data, nil, err
+	case "snapshot", "a11y", "screenshot":
+		return r.handleCaptureFrame(ctx, frame)
+	case string(engine.ActionClick), string(engine.ActionDoubleClick), string(engine.ActionFill), string(engine.ActionType), string(engine.ActionPress), string(engine.ActionHover), string(engine.ActionFocus), string(engine.ActionSelect), string(engine.ActionCheck), string(engine.ActionUncheck), string(engine.ActionScroll), string(engine.ActionScrollIntoView):
+		data, err := r.handleInteractionFrame(ctx, frame)
+		return data, nil, err
+	case "get.text", "get.html", "get.value", "get.attr", "get.title", "get.url", "get.count", "get.box", "get.styles", "is.visible", "is.enabled", "is.checked":
+		data, err := r.handleInspectFrame(ctx, frame)
+		return data, nil, err
+	case "read", "find":
+		data, err := r.handleInspectFrame(ctx, frame)
+		return data, nil, err
+	case "cookies.list", "cookies.set", "cookies.clear":
+		data, err := r.handleCookiesFrame(ctx, frame)
+		return data, nil, err
+	case "engine.info":
+		data, err := r.handleEngineInfoFrame(frame)
+		return data, nil, err
+	case "storage.list", "storage.set", "storage.clear":
+		data, err := r.handleStorageFrame(ctx, frame)
+		return data, nil, err
+	case "set.viewport", "set.device", "set.geo", "set.offline", "set.headers", "set.media", "set.user-agent":
+		data, err := r.handleEmulationFrame(ctx, frame)
+		return data, nil, err
+	default:
+		return nil, nil, fmt.Errorf("unknown navigation command %q", frame.Cmd)
+	}
+}
+
+// decodeOptionalArgs decodes args when present, leaving target zero-valued for
+// commands with fully optional payloads.
+func decodeOptionalArgs(frame Frame, target any) error {
+	if len(frame.Args) == 0 || string(frame.Args) == "null" {
+		return nil
+	}
+	if err := json.Unmarshal(frame.Args, target); err != nil {
+		return fmt.Errorf("decode %s arguments: %w", frame.Cmd, err)
+	}
+	return nil
+}
+
+// serviceIfReady returns the active tab's session service without launching a
+// browser. It reports an error when the session has no live browser yet.
+func (r *NavigationRuntime) serviceIfReady(session string) (*engine.NavigationService, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	tabs := r.tabs[session]
+	if len(tabs) == 0 {
+		return nil, errors.New("session has no live browser")
+	}
+	index := r.activeTab[session]
+	if index < 0 || index >= len(tabs) {
+		index = 0
+	}
+	return tabs[index].Service, nil
+}
+
+// policyWarnings converts the session engine's network-policy state into the
+// protocol warnings[] payload: denied requests are counted per URL, known
+// enforcement limitations are reported once per response.
+func (r *NavigationRuntime) policyWarnings(session string) []Warning {
+	r.mu.Lock()
+	browser := r.engines[session]
+	r.mu.Unlock()
+	reporter, ok := browser.(engine.NetworkPolicyReporter)
+	if !ok {
+		return nil
+	}
+	return networkPolicyWarnings(reporter)
+}
+
+const maxBlockedURLWarnings = 10
+
+func networkPolicyWarnings(reporter engine.NetworkPolicyReporter) []Warning {
+	var warnings []Warning
+	blocked := reporter.BlockedRequests()
+	if len(blocked) > 0 {
+		total := 0
+		for _, entry := range blocked {
+			total += entry.Count
+		}
+		warnings = append(warnings, Warning{Kind: "network_policy", Severity: "warning", Message: fmt.Sprintf("domain allowlist blocked %d request(s)", total)})
+		for _, entry := range blocked {
+			if len(warnings) >= maxBlockedURLWarnings+1 {
+				warnings = append(warnings, Warning{Kind: "network_policy.blocked", Severity: "warning", Message: fmt.Sprintf("and %d more blocked URL(s)", len(blocked)-maxBlockedURLWarnings)})
+				break
+			}
+			warnings = append(warnings, Warning{Kind: "network_policy.blocked", Severity: "warning", Message: fmt.Sprintf("blocked %s %s (%d requests)", entry.ResourceType, entry.URL, entry.Count)})
+		}
+	}
+	for _, limitation := range reporter.Limitations() {
+		warnings = append(warnings, Warning{Kind: "network_policy.limitation", Severity: "warning", Message: limitation})
+	}
+	return warnings
+}
+
+// handleEngineInfoFrame reports the active session engine's capability
+// descriptor (issue #295). Before the session browser is launched it reports
+// the planned engine with its planned launch mode, so an agent can adapt
+// without guessing.
+func (r *NavigationRuntime) handleEngineInfoFrame(frame Frame) (any, error) {
+	r.mu.Lock()
+	browser := r.engines[frame.Session]
+	r.mu.Unlock()
+	if browser != nil {
+		if reporter, ok := browser.(engine.CapabilityReporter); ok {
+			return reporter.Capabilities(), nil
+		}
+	}
+	// Not launched yet: report the planned engine from the runtime options.
+	if r.engineKind == "static" {
+		return static.NewWithGuard(r.staticGuard).Capabilities(), nil
+	}
+	if r.engineKind == "safari-bidi" {
+		return newSafariBidiEngine(r.urlGuard).Capabilities(), nil
+	}
+	if r.engineKind == "safari-attach" {
+		s := safari.New()
+		s.Allowlist = r.urlGuard.allowlist
+		s.SSRFGuard = r.urlGuard.ssrf
+		s.PolicyError = r.urlGuard.err
+		s.OptInInteractions = r.mode != policy.ModeMCP
+		return s.Capabilities(), nil
+	}
+	options := r.chromeOptions("")
+	if r.cdpEndpoint != "" {
+		options.CDPEndpoint = r.cdpEndpoint
+	}
+	return chrome.New(options).Capabilities(), nil
+}
+
+// newEngine builds the engine implementation selected by the runtime options:
+// "static" (JS-free HTML reader, issue #64), "safari-attach" (live Safari via
+// Apple Events, issue #297), or the default Chrome engine. The URL guard is
+// required explicitly so every engine construction receives the daemon policy.
+func (r *NavigationRuntime) newEngine(userDataDir string, guard navigationGuard) engine.Engine {
+	if r.engineFactory != nil {
+		return r.engineFactory(userDataDir, guard)
+	}
+	switch r.engineKind {
+	case "static":
+		return static.NewWithGuard(r.staticGuard)
+	case "safari-bidi":
+		return newSafariBidiEngine(guard)
+	case "safari-attach":
+		s := safari.New()
+		s.Allowlist = guard.allowlist
+		s.SSRFGuard = guard.ssrf
+		s.PolicyError = guard.err
+		// The interaction path is enabled only in TTY mode. In MCP mode the
+		// engine stays read-only (issue #297).
+		s.OptInInteractions = r.mode != policy.ModeMCP
+		return s
+	}
+	return chrome.New(r.chromeOptions(userDataDir))
+}
+
+// chromeOptions assembles the Chrome engine options from the runtime options.
+func (r *NavigationRuntime) chromeOptions(userDataDir string) chrome.Options {
+	return chrome.Options{
+		ExecutablePath: r.executable,
+		CDPEndpoint:    r.cdpEndpoint,
+		UserDataDir:    userDataDir,
+		// Without --profile the data directory is the managed session
+		// directory, so a profile-reuse limitation must not tell the user to
+		// switch to a private profile (issue #372).
+		ManagedProfile: r.profile == "",
+		AllowedDomains: r.allowedDomains,
+		SSRFEnabled:    r.ssrfEnabled,
+		AllowPrivate:   r.allowPrivate,
+		Headless:       r.headless,
+		RequestTimeout: r.requestTimeout,
+	}
+}
+
+func (r *NavigationRuntime) service(ctx context.Context, session string) (*engine.NavigationService, error) {
+	for {
+		r.mu.Lock()
+		if tabs := r.tabs[session]; len(tabs) > 0 {
+			index := r.activeTab[session]
+			if index < 0 || index >= len(tabs) {
+				index = 0
+			}
+			service := tabs[index].Service
+			r.mu.Unlock()
+			return service, nil
+		}
+		if launch := r.launches[session]; launch != nil {
+			done := launch.done
+			r.mu.Unlock()
+			select {
+			case <-done:
+				continue
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			}
+		}
+		if r.registry == nil {
+			r.mu.Unlock()
+			return nil, errors.New("session registry is required")
+		}
+		info, err := r.registry.Get(session)
+		if err != nil {
+			r.mu.Unlock()
+			return nil, err
+		}
+		if r.executable == "" && r.engineKind != "static" && r.engineKind != "safari-attach" && r.engineKind != "safari-bidi" {
+			// Fall back to the same platform discovery doctor reports on, so a
+			// standard Chrome install works without SYMBROWSE_EXECUTABLE_PATH.
+			path, err := resolveBrowserExecutable(os.Getenv, exec.LookPath)
+			if err != nil {
+				r.mu.Unlock()
+				return nil, fmt.Errorf("browser executable is not configured: %w; set SYMBROWSE_EXECUTABLE_PATH to override discovery", err)
+			}
+			r.executable = path
+		}
+		userDataDir := info.UserDataDir
+		if r.profile != "" {
+			userDataDir = r.profile
+			slog.Warn("chrome profile reuse", "session", session, "profile", r.profile, "warning", profiles.Warning)
+		}
+		restoreOnStart := r.restoreOnStart[session]
+		stateStore := r.stateStore
+		if r.launches == nil {
+			r.launches = make(map[string]*sessionLaunch)
+		}
+		launch := &sessionLaunch{done: make(chan struct{})}
+		r.launches[session] = launch
+		guard := r.urlGuard
+		r.mu.Unlock()
+
+		browser := r.newEngine(userDataDir, guard)
+		if err := browser.Launch(ctx); err != nil {
+			_ = browser.Close()
+			r.mu.Lock()
+			r.finishLaunchLocked(session, launch)
+			r.mu.Unlock()
+			return nil, err
+		}
+		if reporter, ok := any(browser).(engine.NetworkPolicyReporter); ok {
+			for _, limitation := range reporter.Limitations() {
+				slog.Warn("network policy limitation", "session", session, "message", limitation)
+			}
+		}
+		browserContext, err := browser.NewContext(ctx)
+		if err != nil {
+			_ = browser.Close()
+			r.mu.Lock()
+			r.finishLaunchLocked(session, launch)
+			r.mu.Unlock()
+			return nil, err
+		}
+		page, err := browser.NewPage(ctx, browserContext, "about:blank")
+		if err != nil {
+			_ = browser.Close()
+			r.mu.Lock()
+			r.finishLaunchLocked(session, launch)
+			r.mu.Unlock()
+			return nil, err
+		}
+		service := engine.NewNavigationService(browser, page, engine.NavigationOptions{ProbeContext: browserContext})
+		r.mu.Lock()
+		if tabs := r.tabs[session]; len(tabs) > 0 {
+			index := r.activeTab[session]
+			if index < 0 || index >= len(tabs) {
+				index = 0
+			}
+			existing := tabs[index].Service
+			r.finishLaunchLocked(session, launch)
+			r.mu.Unlock()
+			_ = browser.Close()
+			return existing, nil
+		}
+		r.engines[session] = browser
+		r.browserContexts[session] = browserContext
+		r.tabs[session] = []*sessionTab{{Label: "t1", Service: service, Page: page}}
+		r.activeTab[session] = 0
+		r.finishLaunchLocked(session, launch)
+		r.mu.Unlock()
+		_ = r.registry.SetActiveTabs(session, 1)
+		// Restore a named state into the fresh browser when the daemon was
+		// started with --restore for this session. The restore runs with its own
+		// context so a slow browser start can never time out the first request.
+		if restoreOnStart != "" && stateStore != nil {
+			go func() {
+				restoreCtx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+				defer cancel()
+				stateRuntime := NewStateRuntime(stateStore, r)
+				if _, _, err := stateRuntime.Load(restoreCtx, session, restoreOnStart); err != nil {
+					slog.Warn("restore state on start failed", "session", session, "state", restoreOnStart, "error", err)
+				} else {
+					slog.Info("restored state on start", "session", session, "state", restoreOnStart)
+				}
+			}()
+		}
+		return service, nil
+	}
+}
+
+func (r *NavigationRuntime) finishLaunchLocked(session string, launch *sessionLaunch) {
+	if r.launches[session] != launch {
+		return
+	}
+	delete(r.launches, session)
+	close(launch.done)
+}
+
+// maybeAutosave persists session state after state-changing frames when an
+// autosave policy is active. The save runs asynchronously so interactive
+// commands never pay for storage I/O, and the minimum interval throttles
+// rapid command sequences (issue B-36: "no measurable latency").
+func (r *NavigationRuntime) maybeAutosave(ctx context.Context, frame Frame) {
+	r.mu.Lock()
+	config := r.autosave
+	store := r.stateStore
+	r.mu.Unlock()
+	if config == nil || store == nil || config.Key == "" || config.Policy == AutosaveNever {
+		return
+	}
+	if !isStateChangingFrame(frame.Cmd) {
+		return
+	}
+	r.mu.Lock()
+	last := r.lastAutosave[frame.Session]
+	now := time.Now()
+	if config.Policy == AutosaveAuto && !last.IsZero() && now.Sub(last) < config.Interval {
+		r.mu.Unlock()
+		return
+	}
+	r.lastAutosave[frame.Session] = now
+	r.mu.Unlock()
+
+	go func() {
+		saveCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		stateRuntime := NewStateRuntime(store, r)
+		if _, err := stateRuntime.Save(saveCtx, frame.Session, config.Key); err != nil {
+			slog.Warn("autosave failed", "session", frame.Session, "state", config.Key, "error", err)
+		}
+	}()
+}
+
+// isStateChangingFrame reports whether a frame can mutate cookies or storage.
+func isStateChangingFrame(command string) bool {
+	switch command {
+	case "open", "goto", "back", "forward", "reload", "click", "dblclick", "fill", "type", "press", "hover", "focus", "select", "check", "uncheck", "scroll", "scrollintoview", "cookies.set", "cookies.clear", "storage.set", "storage.clear":
+		return true
+	default:
+		return false
+	}
+}
+
+// Close releases all per-session browser engines.
+func (r *NavigationRuntime) Close() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var first error
+	for session, browser := range r.engines {
+		if err := browser.Close(); err != nil && first == nil {
+			first = fmt.Errorf("close session %q: %w", session, err)
+		}
+	}
+	r.engines = make(map[string]engine.Engine)
+	r.tabs = make(map[string][]*sessionTab)
+	r.activeTab = make(map[string]int)
+	r.browserContexts = make(map[string]engine.Context)
+	return first
+}
+
+// tabHandle returns the current tab's page handle (for tab/frame/dialog
+// engine operations).
+func (r *NavigationRuntime) tabHandle(session string) (engine.Page, bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	tabs := r.tabs[session]
+	if len(tabs) == 0 {
+		return engine.Page{}, false
+	}
+	index := r.activeTab[session]
+	if index < 0 || index >= len(tabs) {
+		index = 0
+	}
+	return tabs[index].Page, true
+}
+
+func decodeArgs(frame Frame, target any) error {
+	if len(frame.Args) == 0 || string(frame.Args) == "null" {
+		return errors.New("command arguments are required")
+	}
+	if err := json.Unmarshal(frame.Args, target); err != nil {
+		return fmt.Errorf("decode %s arguments: %w", frame.Cmd, err)
+	}
+	return nil
+}
+
+// newSafariBidiEngine builds the safari-bidi engine with the daemon's URL
+// policies (issue #355). The session is isolated and carries none of the
+// human's logins, so unlike safari-attach it needs no interaction opt-in; the
+// policies still gate navigation targets, which is as far as they reach
+// because Safari implements no BiDi network module.
+func newSafariBidiEngine(guard navigationGuard) *safaribidi.Engine {
+	engine := safaribidi.New()
+	engine.Allowlist = guard.allowlist
+	engine.SSRFGuard = guard.ssrf
+	engine.PolicyError = guard.err
+	return engine
+}

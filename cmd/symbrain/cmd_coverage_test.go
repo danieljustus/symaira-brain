@@ -261,6 +261,22 @@ func TestBuildServers_VaultAgentAddsStdioArgs(t *testing.T) {
 	}
 }
 
+func TestBuildServers_OptionalModulesRequireBothToggleAndProfile(t *testing.T) {
+	p := &profile.Profile{Name: "optional", Servers: profile.Servers{
+		profile.ServerOperate: {Enabled: true}, profile.ServerScope: {Enabled: true},
+	}}
+	var stderr bytes.Buffer
+	servers := buildServers(p, &config.Config{}, &stderr, "")
+	if len(servers) != 0 || stderr.Len() != 0 {
+		t.Fatalf("disabled modules probed: %v %q", servers, stderr.String())
+	}
+	t.Setenv("PATH", t.TempDir())
+	servers = buildServers(p, &config.Config{Modules: config.ModulesConfig{Operate: true, Scope: true}}, &stderr, "")
+	if len(servers) != 0 || !strings.Contains(stderr.String(), "operate") || !strings.Contains(stderr.String(), "scope") {
+		t.Fatalf("enabled missing modules not reported independently: %v %q", servers, stderr.String())
+	}
+}
+
 func TestBuildServers_ForeignServerURLOnlyWarnsAndSkips(t *testing.T) {
 	p := &profile.Profile{
 		Name: "url-only",

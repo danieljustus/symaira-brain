@@ -132,22 +132,18 @@ fn in_flight_child_call_observes_connection_cancellation() {
 #[test]
 fn client_drop_kills_process_group_descendants() {
     use std::fs;
-    use std::os::unix::fs::PermissionsExt;
 
     let dir = tempfile::tempdir().expect("tempdir");
-    let script = dir.path().join("child");
     let pid_file = dir.path().join("descendant.pid");
-    fs::write(
-        &script,
-        "#!/bin/sh\nsleep 30 &\nprintf '%s' \"$!\" > \"$1\"\nsleep 30\n",
-    )
-    .expect("write child");
-    fs::set_permissions(&script, fs::Permissions::from_mode(0o700)).expect("chmod child");
-
     let client = Client::spawn(
-        script.to_str().expect("UTF-8 path"),
+        "/bin/sh",
         Options {
-            args: vec![pid_file.display().to_string()],
+            args: vec![
+                "-c".to_string(),
+                "sleep 30 & printf '%s' \"$!\" > \"$1\"; sleep 30".to_string(),
+                "probe".to_string(),
+                pid_file.display().to_string(),
+            ],
             ..Options::default()
         },
     )

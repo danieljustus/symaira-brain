@@ -1,0 +1,206 @@
+package policy
+
+import (
+	"context"
+	"fmt"
+	"net"
+	"net/url"
+	"strings"
+	"time"
+)
+
+// BlockedPrivateError is returned when a request targets a private, loopback,
+// link-local, or otherwise non-public address and the SSRF guard is active.
+type BlockedPrivateError struct {
+	URL string
+}
+
+func (e *BlockedPrivateError) Error() string {
+	return fmt.Sprintf("blocked_private: %s targets a private or loopback address", e.URL)
+}
+
+// ssrfResolver mirrors symfetch's resolver: the configured DNS resolver may
+// legitimately live on a private or loopback address (local VPN, router
+// resolver), so SSRF protection applies to resolved request targets, not to
+// the system resolver used to look them up.
+var ssrfResolver = &net.Resolver{
+	PreferGo: true,
+	Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+		return (&net.Dialer{}).DialContext(ctx, network, address)
+	},
+}
+
+// LookupFunc resolves a hostname to IP addresses. Callers can provide one to
+// make SSRF decisions deterministic without touching the network.
+type LookupFunc func(ctx context.Context, host string) ([]string, error)
+
+// ssrfLookupFunc is retained as a package-local alias for focused tests.
+type ssrfLookupFunc = LookupFunc
+
+func defaultSSRFLookup(ctx context.Context, host string) ([]string, error) {
+	return ssrfResolver.LookupHost(ctx, host)
+}
+
+// SSRFGuard blocks requests to private network ranges. It is deny-by-default
+// while enabled: RFC1918, loopback, link-local, .local mDNS names, IPv6
+// unique-local, and unspecified addresses (0.0.0.0/8, ::/128) are rejected.
+// Matching symfetch's semantics, the hostname is resolved at decision time
+// and every resolved address is checked, so a rebinding hostname that
+// answers with a private address is blocked before the browser connects.
+type SSRFGuard struct {
+	enabled      bool
+	allowPrivate bool
+	lookup       LookupFunc
+}
+
+// NewSSRFGuard builds a guard. allowPrivate relaxes the policy so that
+// private targets are permitted (the --allow-private opt-in).
+func NewSSRFGuard(allowPrivate bool) *SSRFGuard {
+	return NewSSRFGuardWithLookup(allowPrivate, nil)
+}
+
+// NewSSRFGuardWithLookup builds a guard with an injectable hostname resolver.
+// A nil lookup uses the canonical system resolver used by NewSSRFGuard.
+func NewSSRFGuardWithLookup(allowPrivate bool, lookup LookupFunc) *SSRFGuard {
+	if lookup == nil {
+		lookup = defaultSSRFLookup
+	}
+	return &SSRFGuard{
+		enabled:      true,
+		allowPrivate: allowPrivate,
+		lookup:       lookup,
+	}
+}
+
+// CheckSSRF returns an error if rawURL targets a blocked private/loopback
+// address. It is the raw-URL entry point for the canonical SSRF policy.
+func CheckSSRF(rawURL string) error {
+	return CheckSSRFWithLookup(rawURL, nil)
+}
+
+// CheckSSRFWithLookup is CheckSSRF with an injectable hostname lookup for
+// deterministic callers and tests. A nil lookup uses policy's default resolver.
+func CheckSSRFWithLookup(rawURL string, lookup LookupFunc) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return fmt.Errorf("invalid URL: %w", err)
+	}
+	return NewSSRFGuardWithLookup(false, lookup).AllowsURL(u)
+}
+
+// Enabled reports whether the guard is active. A nil guard is inactive.
+func (g *SSRFGuard) Enabled() bool {
+	return g != nil && g.enabled
+}
+
+// AllowsURL reports whether a request to u may proceed. Unparsable targets
+// and non-http(s) schemes are denied: the guard must fail closed.
+func (g *SSRFGuard) AllowsURL(u *url.URL) error {
+	if !g.Enabled() || g.allowPrivate {
+		return nil
+	}
+	if u == nil {
+		return &BlockedPrivateError{URL: ""}
+	}
+	raw := u.String()
+	scheme := strings.ToLower(u.Scheme)
+	if scheme != "http" && scheme != "https" {
+		return &BlockedPrivateError{URL: raw}
+	}
+	host := u.Hostname()
+	if host == "" {
+		return &BlockedPrivateError{URL: raw}
+	}
+	return g.AllowsHost(host, raw)
+}
+
+// AllowsHost checks one hostname. The raw form is used for error reporting.
+func (g *SSRFGuard) AllowsHost(hostname, raw string) error {
+	if !g.Enabled() || g.allowPrivate {
+		return nil
+	}
+	host := strings.ToLower(strings.TrimSuffix(hostname, "."))
+	if host == "" {
+		return &BlockedPrivateError{URL: raw}
+	}
+	// .local is the mDNS namespace: it resolves through link-local
+	// multicast and almost always lands on private addresses. It is blocked
+	// by suffix so a resolution failure cannot be used to slip past the guard.
+	if strings.HasSuffix(host, ".local") || host == "localhost" {
+		return &BlockedPrivateError{URL: raw}
+	}
+	// Resolve at decision time and validate every address. DNS failure
+	// fails closed: a rebinding host or NXDOMAIN bypass must not proceed.
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	lookup := g.lookup
+	if lookup == nil {
+		lookup = defaultSSRFLookup
+	}
+	ips, err := lookup(ctx, host)
+	if err != nil {
+		return fmt.Errorf("DNS resolution failed for %s: %w", host, err)
+	}
+	for _, ipStr := range ips {
+		ip := net.ParseIP(ipStr)
+		if ip == nil {
+			continue
+		}
+		if IsPrivateIP(ip) {
+			return &BlockedPrivateError{URL: raw}
+		}
+	}
+	return nil
+}
+
+// ipv4MappedNet covers the ::ffff:0:0/96 range used to detect IPv4-mapped
+// IPv6 addresses. It is checked separately because the /96 prefix matches all
+// IPv4 addresses when applied to 4-byte IPs.
+var ipv4MappedNet = func() *net.IPNet {
+	_, n, _ := net.ParseCIDR("::ffff:0:0/96")
+	return n
+}()
+
+// privateRanges are the networks blocked by the guard: RFC1918 private
+// space, loopback, link-local, carrier-grade NAT, IPv6 unique-local,
+// and the unspecified address ranges (0.0.0.0/8 and ::/128).
+// All SSRF entry points use this single classification set via IsPrivateIP.
+var privateRanges = func() []*net.IPNet {
+	cidrs := []string{
+		"0.0.0.0/8",
+		"127.0.0.0/8",
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+		"169.254.0.0/16",
+		"100.64.0.0/10",
+		"::/128",
+		"::1/128",
+		"fc00::/7",
+		"fe80::/10",
+	}
+	var nets []*net.IPNet
+	for _, cidr := range cidrs {
+		_, n, _ := net.ParseCIDR(cidr)
+		if n != nil {
+			nets = append(nets, n)
+		}
+	}
+	return nets
+}()
+
+// IsPrivateIP reports whether ip falls into any blocked network.
+func IsPrivateIP(ip net.IP) bool {
+	if v4 := ip.To4(); v4 != nil {
+		ip = v4
+	}
+	for _, n := range privateRanges {
+		if n.Contains(ip) {
+			return true
+		}
+	}
+	if len(ip) == net.IPv6len && ipv4MappedNet.Contains(ip) {
+		return IsPrivateIP(ip[12:16])
+	}
+	return false
+}

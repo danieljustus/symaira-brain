@@ -70,8 +70,8 @@ func main() {
 	}
 	data = append(data, '\n')
 	if *check {
-		existing, err := os.ReadFile(*output)
-		if err != nil || !bytes.Equal(existing, data) {
+		existing, _ := os.ReadFile(*output)
+		if !fixtureMatches(existing, generated) {
 			diagnoseMismatch(existing, generated)
 			fatalf("%s is out of date; run go run ./scripts/install-oracle", *output)
 		}
@@ -85,6 +85,20 @@ func main() {
 		fatalf("write %s: %v", *output, err)
 	}
 	fmt.Printf("Wrote %s (%d cases)\n", *output, len(generated.Cases))
+}
+
+// fixtureMatches treats GoRevision as historical metadata. Squashing or
+// rewriting history changes that value without changing the oracle contract.
+// The generator, platform-specific cases, and every source byte remain strict.
+func fixtureMatches(existing []byte, generated oracle) bool {
+	var expected oracle
+	if err := json.Unmarshal(existing, &expected); err != nil {
+		return false
+	}
+	return expected.SchemaVersion == generated.SchemaVersion &&
+		expected.GeneratorSHA256 == generated.GeneratorSHA256 &&
+		reflect.DeepEqual(expected.GoSources, generated.GoSources) &&
+		reflect.DeepEqual(expected.Cases, generated.Cases)
 }
 
 func diagnoseMismatch(existing []byte, generated oracle) {

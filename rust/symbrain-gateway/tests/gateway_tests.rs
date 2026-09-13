@@ -349,3 +349,134 @@ fn writer_loop_preserves_framed_gateway_responses() {
     assert_eq!(value["jsonrpc"], "2.0");
     assert_eq!(value["id"], 1);
 }
+
+#[test]
+fn optional_modules_public_handlers_bound_tools_and_deny_unknown_calls() {
+    let profile = parse(
+        "optional",
+        "[profile]\nname=\"optional\"\n\n[servers.operate]\nenabled=true\ntools_allow=[\"version\"]\n\n[servers.scope]\nenabled=true\ntools_allow=[\"scan\"]\n",
+    )
+    .expect("profile");
+    let operate = Arc::new(FixtureBackend {
+        tools: vec![
+            Tool {
+                name: "version".to_string(),
+                description: String::new(),
+                input_schema: None,
+                annotations: None,
+            },
+            Tool {
+                name: "not_allowlisted".to_string(),
+                description: String::new(),
+                input_schema: None,
+                annotations: None,
+            },
+        ],
+        behavior: BTreeMap::new(),
+        calls: Mutex::new(Vec::new()),
+    });
+    let scope = Arc::new(FixtureBackend {
+        tools: vec![
+            Tool {
+                name: "scan".to_string(),
+                description: String::new(),
+                input_schema: None,
+                annotations: None,
+            },
+            Tool {
+                name: "scope_not_allowlisted".to_string(),
+                description: String::new(),
+                input_schema: None,
+                annotations: None,
+            },
+        ],
+        behavior: BTreeMap::new(),
+        calls: Mutex::new(Vec::new()),
+    });
+    let gateway = Gateway::new(
+        profile,
+        BTreeMap::from([
+            ("operate".to_string(), operate as Arc<dyn GatewayBackend>),
+            ("scope".to_string(), scope as Arc<dyn GatewayBackend>),
+        ]),
+        "dev",
+    )
+    .expect("gateway");
+    let names = gateway
+        .tools()
+        .into_iter()
+        .map(|tool| tool.name)
+        .collect::<Vec<_>>();
+    assert!(names.iter().any(|name| name == "version"));
+    assert!(names.iter().any(|name| name == "scan"));
+    assert!(!names.iter().any(|name| name == "not_allowlisted"));
+    assert!(!names.iter().any(|name| name == "scope_not_allowlisted"));
+
+    for (id, name) in [(1, "version"), (2, "scan")] {
+        let request: Request = serde_json::from_value(json!({
+            "jsonrpc":"2.0", "id":id, "method":"tools/call",
+            "params":{"name":name,"arguments":{}}
+        }))
+        .expect("request");
+        let response = gateway.handle(&request).expect("call").expect("response");
+        let value = serde_json::to_value(response).expect("response json");
+        assert_eq!(value["result"]["isError"], false, "{name}: {value}");
+    }
+
+    let request: Request = serde_json::from_value(json!({
+        "jsonrpc":"2.0", "id":3, "method":"tools/call",
+        "params":{"name":"not_allowlisted","arguments":{}}
+    }))
+    .expect("request");
+    let response = gateway.handle(&request).expect("call").expect("response");
+    let value = serde_json::to_value(response).expect("response json");
+    assert_eq!(value["error"]["code"], -32601);
+}
+
+#[test]
+fn optional_modules_enabled_without_allowlist_remain_private() {
+    let profile = parse(
+        "default",
+        "[profile]\nname=\"default\"\n\n[servers.operate]\nenabled=true\n",
+    )
+    .expect("profile");
+    let operate = Arc::new(FixtureBackend {
+        tools: vec![Tool {
+            name: "version".to_string(),
+            description: String::new(),
+            input_schema: None,
+            annotations: None,
+        }],
+        behavior: BTreeMap::new(),
+        calls: Mutex::new(Vec::new()),
+    });
+    let gateway = Gateway::new(
+        profile,
+        BTreeMap::from([("operate".to_string(), operate as Arc<dyn GatewayBackend>)]),
+        "dev",
+    )
+    .expect("gateway");
+    assert!(!gateway.tools().iter().any(|tool| tool.name == "version"));
+}
+
+#[test]
+fn optional_modules_default_disabled_without_public_registration() {
+    let profile = parse("default", "[profile]\nname=\"default\"\n").expect("profile");
+    let operate = Arc::new(FixtureBackend {
+        tools: vec![Tool {
+            name: "version".to_string(),
+            description: String::new(),
+            input_schema: None,
+            annotations: None,
+        }],
+        behavior: BTreeMap::new(),
+        calls: Mutex::new(Vec::new()),
+    });
+    let gateway = Gateway::new(
+        profile,
+        BTreeMap::from([("operate".to_string(), operate as Arc<dyn GatewayBackend>)]),
+        "dev",
+    )
+    .expect("gateway");
+    assert!(!gateway.tools().iter().any(|tool| tool.name == "version"));
+}

@@ -1,0 +1,233 @@
+package daemon
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"path/filepath"
+	"time"
+
+	"github.com/danieljustus/symaira-browse/internal/engine"
+	"github.com/danieljustus/symaira-browse/internal/journal"
+	"github.com/danieljustus/symaira-browse/internal/policy"
+	"github.com/danieljustus/symaira-browse/internal/trace"
+)
+
+// JournalRuntime wraps the navigation runtime and appends one journal entry
+// per action frame (issue B-41). Entry payloads are redacted by the journal
+// itself before hitting the disk.
+type JournalRuntime struct {
+	journal *journal.Journal
+	nav     *NavigationRuntime
+}
+
+// NewJournalRuntime creates a journaling wrapper. When journal is nil the
+// wrapper passes through without logging (tests, disabled config).
+func NewJournalRuntime(j *journal.Journal, nav *NavigationRuntime) *JournalRuntime {
+	return &JournalRuntime{journal: j, nav: nav}
+}
+
+// Handle runs the frame and journals it. The journal entry is written after
+// the action completes so the result is accurate; a failed frame still gets
+// an entry with result "error:<kind>".
+func (r *JournalRuntime) Handle(ctx context.Context, frame Frame) (any, []Warning, error) {
+	return r.HandleWithDecider(ctx, frame, "policy")
+}
+
+// HandleWithDecider is Handle with an explicit decider for the journal entry
+// ("policy", "guard" or "human" — issue #52).
+func (r *JournalRuntime) HandleWithDecider(ctx context.Context, frame Frame, decider string) (any, []Warning, error) {
+	return r.HandleFuncWithDecider(ctx, frame, decider, r.nav.Handle)
+}
+
+// HandleFuncWithDecider journals a frame handled by a runtime other than the
+// navigation runtime, such as the plain-HTTP fetch runtime.
+func (r *JournalRuntime) HandleFuncWithDecider(ctx context.Context, frame Frame, decider string, handler Handler) (any, []Warning, error) {
+	if handler == nil {
+		return nil, nil, errors.New("journal handler is nil")
+	}
+	if r.journal == nil {
+		return handler(ctx, frame)
+	}
+	started := time.Now()
+	urlBefore := r.currentURL(ctx, frame.Session)
+	if urlBefore == "" {
+		urlBefore = frameJournalURL(frame)
+	}
+	data, warnings, err := handler(ctx, frame)
+	duration := time.Since(started).Milliseconds()
+
+	entry := journal.Entry{
+		Session:    frame.Session,
+		Command:    frame.Cmd,
+		Args:       frame.Args,
+		URLBefore:  urlBefore,
+		RiskClass:  string(policy.ClassForCommand(frame.Cmd)),
+		Decider:    decider,
+		DurationMS: duration,
+	}
+	if err != nil {
+		entry.Result = "error:" + errorKind(err)
+	} else {
+		entry.Result = "ok"
+	}
+	urlAfter := r.currentURL(ctx, frame.Session)
+	if urlAfter == "" {
+		urlAfter = frameJournalURL(frame)
+	}
+	if urlAfter != "" {
+		entry.URLAfter = urlAfter
+	}
+	if _, appendErr := r.journal.Append(entry); appendErr != nil {
+		// Journaling must never break the action itself; surface as a warning.
+		warnings = append(warnings, Warning{Kind: "journal", Severity: "warning", Message: fmt.Sprintf("journal append failed: %v", appendErr)})
+	}
+	return data, warnings, err
+}
+
+func frameJournalURL(frame Frame) string {
+	var request struct {
+		URL  string   `json:"url"`
+		URLs []string `json:"urls"`
+	}
+	if err := json.Unmarshal(frame.Args, &request); err != nil {
+		return ""
+	}
+	if request.URL != "" {
+		return request.URL
+	}
+	if len(request.URLs) > 0 {
+		return request.URLs[0]
+	}
+	return ""
+}
+
+// currentURL reads the page origin without starting a browser session.
+func (r *JournalRuntime) currentURL(ctx context.Context, session string) string {
+	r.nav.mu.Lock()
+	tabs := r.nav.tabs[session]
+	var service *engine.NavigationService
+	if len(tabs) > 0 {
+		index := r.nav.activeTab[session]
+		if index < 0 || index >= len(tabs) {
+			index = 0
+		}
+		service = tabs[index].Service
+	}
+	r.nav.mu.Unlock()
+	if service == nil {
+		return ""
+	}
+	origin, err := service.Origin(ctx)
+	if err != nil {
+		return ""
+	}
+	return origin
+}
+
+func errorKind(err error) string {
+	var protocolErr *Error
+	if errors.As(err, &protocolErr) && protocolErr.Code != "" {
+		return protocolErr.Code
+	}
+	return "failed"
+}
+
+// HandleOOB runs an OOB frame through the given handler and journals it, so
+// granted/denied approvals and handoffs land in the journal with their scope
+// and outcome (issue B-46).
+func (r *JournalRuntime) HandleOOB(ctx context.Context, frame Frame, handler func(context.Context, Frame) (any, []Warning, error)) (any, []Warning, error) {
+	if r.journal == nil {
+		return handler(ctx, frame)
+	}
+	started := time.Now()
+	data, warnings, err := handler(ctx, frame)
+	entry := journal.Entry{
+		Session:    frame.Session,
+		Command:    frame.Cmd,
+		Args:       frame.Args,
+		RiskClass:  string(policy.ClassForCommand(frame.Cmd)),
+		Decider:    "human",
+		DurationMS: time.Since(started).Milliseconds(),
+	}
+	if err != nil {
+		entry.Result = "error:" + errorKind(err)
+	} else {
+		entry.Result = "ok"
+	}
+	if _, appendErr := r.journal.Append(entry); appendErr != nil {
+		warnings = append(warnings, Warning{Kind: "journal", Severity: "warning", Message: fmt.Sprintf("journal append failed: %v", appendErr)})
+	}
+	return data, warnings, err
+}
+
+// HandleJournal executes journal inspection frames: tail and show.
+func (r *JournalRuntime) HandleJournal(ctx context.Context, frame Frame) (any, []Warning, error) {
+	if r.journal == nil {
+		return nil, nil, errors.New("journal is not enabled")
+	}
+	switch frame.Cmd {
+	case "journal.tail":
+		var request struct {
+			Session string `json:"session,omitempty"`
+			Lines   int    `json:"lines,omitempty"`
+		}
+		_ = decodeOptionalArgs(frame, &request)
+		j := r.journal
+		if request.Session != "" && request.Session != j.Session() {
+			reopened, err := journal.New(journal.Options{Dir: journalDir(j), Session: request.Session})
+			if err != nil {
+				return nil, nil, err
+			}
+			j = reopened
+		}
+		entries, err := j.Tail(request.Lines)
+		if err != nil {
+			return nil, nil, err
+		}
+		return map[string]any{"schema_version": journal.SchemaVersion, "session": j.Session(), "entries": entries}, nil, nil
+	case "journal.show":
+		var request struct {
+			Session string `json:"session,omitempty"`
+		}
+		_ = decodeOptionalArgs(frame, &request)
+		j := r.journal
+		if request.Session != "" && request.Session != j.Session() {
+			reopened, err := journal.New(journal.Options{Dir: journalDir(j), Session: request.Session})
+			if err != nil {
+				return nil, nil, err
+			}
+			j = reopened
+		}
+		entries, err := j.Read()
+		if err != nil {
+			return nil, nil, err
+		}
+		return map[string]any{"schema_version": journal.SchemaVersion, "session": j.Session(), "entries": entries}, nil, nil
+	case "trace.replay":
+		var request struct {
+			Steps []trace.Step `json:"steps"`
+		}
+		if err := decodeArgs(frame, &request); err != nil {
+			return nil, nil, err
+		}
+		if len(request.Steps) == 0 {
+			return nil, nil, errors.New("trace contains no replayable steps")
+		}
+		service, err := r.nav.service(ctx, frame.Session)
+		if err != nil {
+			return nil, nil, err
+		}
+		file := &trace.File{SchemaVersion: trace.SchemaVersion, Session: frame.Session, Steps: request.Steps}
+		result := trace.Replay(ctx, service, file)
+		return result, nil, nil
+	default:
+		return nil, nil, errors.New("unknown journal command")
+	}
+}
+
+// journalDir extracts the directory of a journal for reopening other sessions.
+func journalDir(j *journal.Journal) string {
+	return filepath.Dir(j.Path())
+}

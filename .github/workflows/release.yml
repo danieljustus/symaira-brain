@@ -41,7 +41,12 @@ jobs:
 
       - name: Format check
         run: |
-          fmt_out="$(gofmt -l .)"
+          # gofmt walks the raw filesystem and is not module-boundary-aware
+          # like go build/go vet, so it must be pointed away from nested Go
+          # modules explicitly (currently only browse/, the Browse source
+          # intake receiving copy — see browse/SOURCE_PROVENANCE.md; add
+          # more -not -path exclusions if another nested go.mod is added).
+          fmt_out="$(gofmt -l $(find . -name '*.go' -not -path './browse/*' -not -path './.git/*'))"
           if [ -n "$fmt_out" ]; then
             echo "gofmt needs to be run on:"
             echo "$fmt_out"

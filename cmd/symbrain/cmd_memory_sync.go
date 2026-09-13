@@ -72,7 +72,7 @@ func cmdMemorySyncWithFormat(args []string, stdout, stderr io.Writer, format out
 			passForCheck = os.Getenv(memorySyncPassphraseEnv)
 		}
 		if passForCheck == "" {
-			fmt.Fprintf(stderr, "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or $%s)\n", memorySyncPassphraseEnv)
+			fmt.Fprint(stderr, "symbrain memory sync: --encrypted-relay requires --relay-passphrase (or $"+memorySyncPassphraseEnv+")\n")
 			return exitcodes.ExitNoInput
 		}
 	}
@@ -167,7 +167,7 @@ func printMemorySyncTable(w io.Writer, r *syncclient.Result) {
 }
 
 func printMemorySyncUsage(w io.Writer) {
-	fmt.Fprintf(w, `symbrain memory sync — synchronize the embedded memory store with a remote
+	fmt.Fprint(w, `symbrain memory sync — synchronize the embedded memory store with a remote
 
 Usage:
   symbrain memory sync --remote <url> [flags]
@@ -180,13 +180,13 @@ Flags:
   --push                  Only push local changes to the remote server.
                           (With neither flag, both directions run.)
   --token <token>         Bearer token for the remote API. May come from
-                          $%s instead; never pass it on the command line in
+                          $`+memorySyncTokenEnv+` instead; never pass it on the command line in
                           shared shells.
   --encrypted-relay       Exchange client-side AES-256-GCM encrypted blobs
                           through the remote /api/sync/relay endpoint, so the
                           relay never sees plaintext memory content.
   --relay-passphrase <p>  Passphrase for --encrypted-relay. May come from
-                          $%s instead. Both peers must share it.
+                          $`+memorySyncPassphraseEnv+` instead. Both peers must share it.
   --allow-insecure-http   Override the https requirement for non-loopback
                           remotes. Bearer tokens will be sent in the clear;
                           a WARNING is printed. Use only for testing.
@@ -196,5 +196,5 @@ Flags:
 
 The local database and its per-remote sync cursors are reused in place;
 no export or import step is needed.
-`, memorySyncTokenEnv, memorySyncPassphraseEnv)
+`)
 }

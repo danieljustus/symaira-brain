@@ -2,7 +2,10 @@
 
 use std::collections::BTreeSet;
 
-use crate::constants::{SERVER_MEMORY, SERVER_SKILLS, SERVER_USAGE, SERVER_VAULT, VAULT_MODE_OFF};
+use crate::constants::{
+    SERVER_MEMORY, SERVER_OPERATE, SERVER_SCOPE, SERVER_SKILLS, SERVER_USAGE, SERVER_VAULT,
+    VAULT_MODE_OFF,
+};
 use crate::error::PolicyError;
 use crate::policy::Report;
 use crate::policy::presets::{
@@ -22,7 +25,8 @@ pub fn evaluate(
     live_tools: &[String],
 ) -> Result<Report, PolicyError> {
     match alias {
-        SERVER_VAULT | SERVER_MEMORY | SERVER_SKILLS | SERVER_USAGE => {}
+        SERVER_VAULT | SERVER_MEMORY | SERVER_SKILLS | SERVER_USAGE | SERVER_OPERATE
+        | SERVER_SCOPE => {}
         _ => return Err(PolicyError::UnknownServerAlias(alias.to_string())),
     }
 
@@ -54,6 +58,16 @@ pub fn evaluate(
             } else {
                 cfg.tools_allow.iter().cloned().collect()
             }
+        }
+        SERVER_OPERATE | SERVER_SCOPE => {
+            // Optional modules are opt-in twice: enabling the module does not
+            // grant tools; each exposed tool must be explicitly allowlisted.
+            let universe = universe_for(alias).unwrap_or(&[]);
+            cfg.tools_allow
+                .iter()
+                .filter(|tool| universe.contains(&tool.as_str()))
+                .cloned()
+                .collect()
         }
         _ => {
             let preset =
@@ -121,7 +135,11 @@ fn classify(
     exposed: &BTreeSet<String>,
 ) -> (Vec<String>, Vec<String>) {
     let universe = universe_for(alias);
-    let bounded = alias == SERVER_VAULT || alias == SERVER_MEMORY || alias == SERVER_USAGE;
+    let bounded = alias == SERVER_VAULT
+        || alias == SERVER_MEMORY
+        || alias == SERVER_USAGE
+        || alias == SERVER_OPERATE
+        || alias == SERVER_SCOPE;
 
     let mut known: BTreeSet<&str> =
         universe.map_or_else(BTreeSet::new, |tools| tools.iter().copied().collect());
