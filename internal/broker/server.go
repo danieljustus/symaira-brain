@@ -161,6 +161,9 @@ func (ms *ManagedServer) Args() []string {
 // ensureReady spawns and initializes the child if needed, or restarts it
 // after a crash. Returns an error if the server is degraded or stopped.
 func (ms *ManagedServer) ensureReady(ctx context.Context) (*Client, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if c := ms.client.Load(); c != nil {
 		return c, nil
 	}

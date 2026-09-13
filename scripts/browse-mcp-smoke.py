@@ -19,9 +19,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 # Matches the protocolVersion symbrowse's own test suite exercises
 # (internal/mcp/server_test.go, TestZeroStdoutPollution).
@@ -36,17 +39,30 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
     """Run a stdio child, write payload, close stdin, and wait with a hard deadline."""
     if timeout <= 0:
         raise ValueError("timeout must be positive")
+    isolated_home = tempfile.mkdtemp(prefix="pb-browse-smoke-home-")
+    isolated_path = Path(isolated_home) / "bin"
+    isolated_path.mkdir()
+    isolated_env = {
+        "HOME": isolated_home,
+        "PATH": str(isolated_path),
+        "XDG_CONFIG_HOME": str(Path(isolated_home) / ".config"),
+        "XDG_DATA_HOME": str(Path(isolated_home) / ".local" / "share"),
+        "XDG_CACHE_HOME": str(Path(isolated_home) / ".cache"),
+    }
     try:
         completed = subprocess.run(
             argv,
             input=payload,
             capture_output=True,
             timeout=timeout,
+            env=isolated_env,
         )
     except subprocess.TimeoutExpired as exc:
         raise SmokeError(f"MCP subprocess exceeded {timeout:.1f}s timeout") from exc
     except OSError as exc:
         raise SmokeError(f"MCP subprocess failed to start: {exc}") from exc
+    finally:
+        shutil.rmtree(isolated_home, ignore_errors=True)
     if completed.returncode != 0:
         raise SmokeError(
             f"MCP subprocess exited {completed.returncode}; stderr: "

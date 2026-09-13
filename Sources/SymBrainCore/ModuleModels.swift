@@ -299,6 +299,10 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     public let modified: String?
     public let fields: [String: JSONValue]
     public let totp: VaultTOTP?
+    public let type: String?
+    public let usageHint: String?
+    public let autoRotate: Bool?
+    public let expiresAt: String?
 
     private struct AnyKey: CodingKey {
         let stringValue: String
@@ -320,23 +324,58 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
         modified = try value(String.self, "modified", "Modified")
         fields = try value([String: JSONValue].self, "fields", "Fields") ?? [:]
         totp = try value(VaultTOTP.self, "totp", "TOTP")
+        type = try value(String.self, "type", "Type")
+        usageHint = try value(String.self, "usage_hint", "UsageHint")
+        autoRotate = try value(Bool.self, "auto_rotate", "AutoRotate")
+        expiresAt = try value(String.self, "expires_at", "ExpiresAt")
     }
 
     public init(
         path: String,
         modified: String?,
         fields: [String: JSONValue],
-        totp: VaultTOTP? = nil
+        totp: VaultTOTP? = nil,
+        type: String? = nil,
+        usageHint: String? = nil,
+        autoRotate: Bool? = nil,
+        expiresAt: String? = nil
     ) {
         self.path = path
         self.modified = modified
         self.fields = fields
         self.totp = totp
+        self.type = type
+        self.usageHint = usageHint
+        self.autoRotate = autoRotate
+        self.expiresAt = expiresAt
     }
 
-    /// The entry's primary secret, if one of the known secret fields is set.
+    /// The entry's primary secret, using symvault's type-specific field mapping.
     public var primarySecret: (field: String, value: String)? {
-        for key in ["password", "secret", "token", "api_key", "private_key", "database_url"] {
+        let mappedField: String? = {
+            switch type?.lowercased() {
+            case "api_key": return "api_key"
+            case "bearer_token": return "token"
+            case "basic_auth": return "basic_auth"
+            case "ssh_key": return "private_key"
+            case "certificate": return "cert_pem"
+            case "database_url": return "connection_string"
+            case "totp_seed": return "seed"
+            case "payment": return "card_number"
+            case "password", "custom", nil: return "password"
+            default: return nil
+            }
+        }()
+        if let mappedField, let value = fields[mappedField]?.displayString, !value.isEmpty {
+            return (mappedField, value)
+        }
+        // A typed basic-auth entry must use its dedicated primary field;
+        // falling back to `password` would select the wrong field on readback.
+        if type?.lowercased() == "basic_auth" { return nil }
+        // Older symvault versions omitted `type`; retain compatibility with
+        // their documented conventional field names without treating metadata
+        // such as username or URL as secret material.
+        for key in ["password", "secret", "token", "api_key", "private_key", "cert_pem", "connection_string", "database_url", "seed", "card_number", "cvc", "iban", "basic_auth"] {
             if let value = fields[key]?.displayString, !value.isEmpty {
                 return (key, value)
             }
@@ -363,14 +402,220 @@ public struct VaultEntryDetail: Decodable, Sendable, Equatable {
     }
 }
 
+/// Non-secret fields accepted by the documented `symvault add` and `set` surfaces.
+/// Secret material is kept separate and is never included in confirmations.
+public struct VaultCredentialDraft: Sendable, Equatable {
+    public var path: String
+    public var type: String
+    public var secret: String
+    public var username: String
+    public var url: String
+    public var notes: String
+    public var usageHint: String
+    public var autoRotate: Bool
+    public var expiresAt: String
+    public var totpSecret: String
+    public var totpIssuer: String
+    public var totpAccount: String
+
+    public init(path: String, type: String = "password", secret: String = "", username: String = "", url: String = "", notes: String = "", usageHint: String = "", autoRotate: Bool = false, expiresAt: String = "", totpSecret: String = "", totpIssuer: String = "", totpAccount: String = "") {
+        self.path = path; self.type = type; self.secret = secret; self.username = username; self.url = url
+        self.notes = notes; self.usageHint = usageHint; self.autoRotate = autoRotate; self.expiresAt = expiresAt
+        self.totpSecret = totpSecret; self.totpIssuer = totpIssuer; self.totpAccount = totpAccount
+    }
+}
+
+/// Submitted and service-confirmed metadata remain distinguishable; no secret
+/// value is retained or returned.
+public struct VaultCreateConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let confirmedPath: String
+    public let confirmedFieldCount: Int
+    public let confirmedHasValue: Bool
+
+    public init(submittedPath: String, confirmedPath: String, confirmedFieldCount: Int, confirmedHasValue: Bool) {
+        self.submittedPath = submittedPath
+        self.confirmedPath = confirmedPath
+        self.confirmedFieldCount = confirmedFieldCount
+        self.confirmedHasValue = confirmedHasValue
+    }
+}
+
+/// Sanitized result of a human-initiated set operation.
+public struct VaultSetConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let submittedField: String
+    public let confirmedPath: String
+    public let confirmedField: String?
+    public let confirmedValueMatches: Bool
+    public let confirmedFieldCount: Int
+    public let confirmedHasValue: Bool
+
+    public init(submittedPath: String, submittedField: String, confirmedPath: String,
+                confirmedField: String?, confirmedValueMatches: Bool,
+                confirmedFieldCount: Int, confirmedHasValue: Bool) {
+        self.submittedPath = submittedPath
+        self.submittedField = submittedField
+        self.confirmedPath = confirmedPath
+        self.confirmedField = confirmedField
+        self.confirmedValueMatches = confirmedValueMatches
+        self.confirmedFieldCount = confirmedFieldCount
+        self.confirmedHasValue = confirmedHasValue
+    }
+}
+
+/// Sanitized result of a human-initiated delete operation.
+public struct VaultDeleteConfirmation: Sendable, Equatable {
+    public let submittedPath: String
+    public let confirmedPath: String
+    public let confirmedAbsent: Bool
+
+    public init(submittedPath: String, confirmedPath: String, confirmedAbsent: Bool) {
+        self.submittedPath = submittedPath
+        self.confirmedPath = confirmedPath
+        self.confirmedAbsent = confirmedAbsent
+    }
+}
+
+/// Explicit intent required when copying vault values.
+public enum VaultCopyIntent: Sendable, Equatable {
+    case ordinary
+    case revealedSensitive
+}
+
 /// Classifies vault field names that must stay masked until revealed.
 public enum VaultFieldSecurity {
     public static func isSensitive(_ field: String) -> Bool {
         let key = field.lowercased()
         return [
             "password", "secret", "token", "api_key", "private_key", "totp",
-            "certificate", "database_url",
+            "certificate", "cert_pem", "database_url", "connection_string", "seed", "basic_auth",
+            "card_number", "cvc", "iban", "key", "passwd", "pwd",
         ]
         .contains { key.contains($0) }
+    }
+}
+
+// MARK: - Vault approval review
+
+/// Sanitized pending approval request returned by `symvault approval list`.
+public struct VaultApprovalRequest: Decodable, Sendable, Equatable, Identifiable {
+    public let id: String
+    public let agentName: String
+    public let path: String
+    public let write: Bool
+    public let reason: String
+    public let createdAt: String
+    public let expiresAt: String
+    public let status: String
+    enum CodingKeys: String, CodingKey { case id; case agentName = "agent_name"; case path, write, reason; case createdAt = "created_at"; case expiresAt = "expires_at"; case status }
+    public var isPending: Bool { status == "pending" }
+    public var isExpired: Bool { parseModuleTimestamp(expiresAt).map { $0 <= Date() } ?? true }
+}
+
+public struct VaultApprovalOutcome: Decodable, Sendable, Equatable {
+    public let id: String
+    public let status: String
+    public let decidedAt: String?
+    enum CodingKeys: String, CodingKey { case id, status; case decidedAt = "decided_at" }
+}
+
+public struct VaultApprovalSnapshot: Sendable, Equatable {
+    public let request: VaultApprovalRequest
+    /// Approval generation at review time; prevents late results from being
+    /// published after selection, cancellation, or relock changed the pending state.
+    public let generation: Int
+    public init(request: VaultApprovalRequest, generation: Int = 0) {
+        self.request = request
+        self.generation = generation
+    }
+}
+
+// MARK: - Vault intake review
+
+public struct VaultIntakeResponse: Decodable, Sendable, Equatable {
+    public let importID: String?
+    public let results: [VaultIntakeFileResult]
+    public init(importID: String?, results: [VaultIntakeFileResult]) { self.importID = importID; self.results = results }
+    enum CodingKeys: String, CodingKey { case importID = "import_id"; case results }
+}
+
+public struct VaultIntakeFileResult: Decodable, Sendable, Equatable, Identifiable {
+    public let file: String
+    public let status: String
+    public let reason: String?
+    public let provenance: VaultIntakeProvenance?
+    public let suggestions: [VaultIntakeSuggestion]
+    public let duplicates: [String]
+    public var id: String { file }
+    public var isOK: Bool { status == "ok" }
+    public init(file: String, status: String, reason: String?, provenance: VaultIntakeProvenance?, suggestions: [VaultIntakeSuggestion], duplicates: [String]) { self.file = file; self.status = status; self.reason = reason; self.provenance = provenance; self.suggestions = suggestions; self.duplicates = duplicates }
+}
+
+public struct VaultIntakeProvenance: Decodable, Sendable, Equatable {
+    public let sourcePath: String
+    public let sourceName: String
+    public let sourceType: String
+    public let size: Int64
+    public let sha256: String
+    enum CodingKeys: String, CodingKey { case sourcePath = "source_path"; case sourceName = "source_name"; case sourceType = "source_type"; case size; case sha256 }
+}
+
+public struct VaultIntakeSuggestion: Decodable, Sendable, Equatable, Identifiable {
+    public let path: String
+    public let field: String
+    public let confidence: Double
+    public let warning: String?
+    public let attachment: Bool
+    public var id: String { "\(path)/\(field)" }
+    enum CodingKeys: String, CodingKey { case path, field, confidence, warning, attachment }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        path = try c.decode(String.self, forKey: .path); field = try c.decode(String.self, forKey: .field)
+        confidence = try c.decodeIfPresent(Double.self, forKey: .confidence) ?? 0
+        warning = try c.decodeIfPresent(String.self, forKey: .warning)
+        attachment = try c.decodeIfPresent(Bool.self, forKey: .attachment) ?? false
+    }
+}
+
+public struct VaultIntakeReviewDraft: Sendable, Equatable, Identifiable {
+    public let file: String; public let sourceName: String; public let sourceType: String; public let sha256: String; public let size: Int64
+    public var targetPath: String; public var fields: [String: String]; public var keepAttachment: Bool; public let warnings: [String]
+    public var id: String { file }
+    public init(result: VaultIntakeFileResult) {
+        file = result.file; sourceName = result.provenance?.sourceName ?? URL(fileURLWithPath: result.file).lastPathComponent
+        sourceType = result.provenance?.sourceType ?? "unknown"; sha256 = result.provenance?.sha256 ?? ""; size = result.provenance?.size ?? 0
+        targetPath = result.suggestions.first(where: { !$0.attachment })?.path ?? result.suggestions.first?.path ?? Self.stem(from: sourceName)
+        var values: [String: String] = [:]; var warningValues: [String] = []
+        for suggestion in result.suggestions where !suggestion.attachment { if values[suggestion.field] == nil { values[suggestion.field] = "" }; if let warning = suggestion.warning, !warning.isEmpty { warningValues.append(warning) } }
+        fields = values; keepAttachment = result.suggestions.contains(where: { $0.attachment }); warnings = warningValues
+    }
+    public static func stem(from name: String) -> String { let base = (name as NSString).deletingPathExtension; return base.isEmpty ? "entry" : base }
+}
+
+public struct VaultIntakeReviewSnapshot: Sendable, Equatable {
+    public let importID: String
+    public let sourceFiles: [VaultIntakeSourceSnapshot]
+    public let drafts: [VaultIntakeReviewDraft]
+
+    public init(importID: String, sourceFiles: [VaultIntakeSourceSnapshot], drafts: [VaultIntakeReviewDraft]) {
+        self.importID = importID
+        self.sourceFiles = sourceFiles
+        self.drafts = drafts
+    }
+}
+
+public struct VaultIntakeSourceSnapshot: Sendable, Equatable, Identifiable {
+    public let path: String
+    public let size: Int64
+    public let modified: Date?
+    public let sha256: String
+    public var id: String { path }
+
+    public init(path: String, size: Int64, modified: Date?, sha256: String) {
+        self.path = path
+        self.size = size
+        self.modified = modified
+        self.sha256 = sha256
     }
 }
