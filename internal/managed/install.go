@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // Installer handles downloading, verifying, and atomically installing
@@ -142,7 +143,57 @@ func (inst *Installer) Install(ctx context.Context, core *Core) error {
 	}
 
 	// Atomic install: write to a temp file, then rename
-	return atomicInstall(inst.BinDir, core.BinaryName, binaryData)
+	if err := atomicInstall(inst.BinDir, core.BinaryName, binaryData); err != nil {
+		return err
+	}
+
+	// Record release provenance. A previous brain-source sidecar for the
+	// same binary is replaced: the installed payload now originates from
+	// the pinned release, and a stale brain-source record would misreport
+	// the binary's origin in doctor/acceptance output.
+	prov := &Provenance{
+		Binary:       core.BinaryName,
+		Source:       SourceRelease,
+		Version:      core.Version,
+		Repo:         core.Repo,
+		BuiltAt:      time.Now().UTC(),
+		BinarySHA256: HashBinary(binaryData),
+	}
+	if err := WriteProvenance(inst.BinDir, prov); err != nil {
+		return fmt.Errorf("managed: record provenance for %s: %w", core.BinaryName, err)
+	}
+	return nil
+}
+
+// InstallLocal installs an already-built binary payload into the managed
+// directory and records its provenance. It is used by
+// `symbrain setup --from-source` to place module binaries built from the
+// in-repo sources (browse/, operate/, scope/). The caller must supply a
+// provenance record with Source set; InstallLocal stamps BuiltAt and the
+// payload hash itself so callers cannot forget them.
+func (inst *Installer) InstallLocal(binaryName string, binaryData []byte, prov *Provenance) error {
+	if binaryName == "" {
+		return fmt.Errorf("managed: install local: empty binary name")
+	}
+	if prov == nil {
+		return fmt.Errorf("managed: install local %s: provenance is required", binaryName)
+	}
+	if prov.Source == "" {
+		return fmt.Errorf("managed: install local %s: provenance source is required", binaryName)
+	}
+	if err := os.MkdirAll(inst.BinDir, 0o755); err != nil {
+		return fmt.Errorf("managed: mkdir %s: %w", inst.BinDir, err)
+	}
+	if err := atomicInstall(inst.BinDir, binaryName, binaryData); err != nil {
+		return err
+	}
+	prov.Binary = binaryName
+	prov.BuiltAt = time.Now().UTC()
+	prov.BinarySHA256 = HashBinary(binaryData)
+	if err := WriteProvenance(inst.BinDir, prov); err != nil {
+		return fmt.Errorf("managed: record provenance for %s: %w", binaryName, err)
+	}
+	return nil
 }
 
 // downloadAndVerify downloads an asset, checks its checksum, and

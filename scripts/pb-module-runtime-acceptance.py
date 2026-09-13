@@ -119,7 +119,48 @@ def assert_exact_scope_catalog(response: dict[str, Any]) -> None:
     print("Brain scope catalog: " + ", ".join(listed))
 
 
-def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None:
+def poison_wrapper(path: Path, marker: Path, label: str) -> None:
+    """A PATH entry that records its invocation and fails. If Brain ever
+    resolves a module through PATH instead of the managed directory, the
+    marker proves it and the non-zero exit breaks the tools/list."""
+    path.write_text(f"#!/bin/sh\nprintf '%s\\n' '{label}' >> '{marker}'\nexit 1\n")
+    path.chmod(0o755)
+
+
+def install_managed(home: Path, name: str, source_binary: str, receiver_commit: str) -> Path:
+    """Place a Brain-built module binary into the managed directory with a
+    provenance sidecar, mirroring what `symbrain setup --from-source`
+    installs. Returns the managed binary path."""
+    managed_bin = home / ".symaira" / "bin"
+    managed_bin.mkdir(parents=True, exist_ok=True)
+    target = managed_bin / name
+    target.write_bytes(Path(source_binary).read_bytes())
+    target.chmod(0o755)
+    provenance = {
+        "binary": name,
+        "source": "brain-source",
+        "receiver_commit": receiver_commit,
+        "module_dir": {"symbrowse": "browse", "symoperate": "operate", "symscope": "scope"}[name],
+        "binary_sha256": __import__("hashlib").sha256(target.read_bytes()).hexdigest(),
+    }
+    (managed_bin / f"{name}.provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
+    return target
+
+
+def assert_provenance_sidecar(home: Path, name: str) -> None:
+    """The managed install must carry a parseable brain-source provenance
+    sidecar — the binary-origin proof required by the module acceptance."""
+    sidecar = home / ".symaira" / "bin" / f"{name}.provenance.json"
+    if not sidecar.exists():
+        raise AcceptanceError(f"missing provenance sidecar for {name}")
+    data = json.loads(sidecar.read_text())
+    if data.get("binary") != name or data.get("source") != "brain-source":
+        raise AcceptanceError(f"provenance sidecar for {name} malformed: {data!r}")
+    if not data.get("receiver_commit") or not data.get("binary_sha256"):
+        raise AcceptanceError(f"provenance sidecar for {name} incomplete: {data!r}")
+
+
+def brain_cases(brain: str, operate: str, scope: str, browse: str | None, checks: list[str]) -> None:
     with tempfile.TemporaryDirectory(prefix="pb-runtime-") as raw:
         td = Path(raw)
         marker = td / "spawned"
@@ -198,6 +239,82 @@ def brain_cases(brain: str, operate: str, scope: str, checks: list[str]) -> None
             raise AcceptanceError(f"unknown tool was not rejected: {responses[1]!r}")
         checks.append("brain-unknown-tool-fail-closed")
 
+        # Managed-replacement cases: the Brain-built module binaries sit in
+        # the managed directory (with provenance sidecars), while PATH only
+        # carries poison wrappers for both the direct binary name AND the
+        # legacy symcockpit fallback. A passing tools/list with an untouched
+        # poison marker proves the managed Brain-built binary served the
+        # catalog and no PATH/legacy fallback fired (M2 positive replacement
+        # test).
+        poison = td / "poison-bin"
+        poison.mkdir()
+        poison_marker = td / "poisoned"
+        for label in ("symoperate", "symscope", "symcockpit", "symbrowse"):
+            poison_wrapper(poison / label, poison_marker, label)
+
+        home = td / "managed-operate-home"
+        home.mkdir()
+        install_managed(home, "symoperate", operate, "acceptance-run")
+        assert_provenance_sidecar(home, "symoperate")
+        operate_profile = '[profile]\nname = "managed-operate"\n[servers.operate]\nenabled = true\n'
+        responses = run_brain(brain, operate_profile, '[modules]\noperate = true\n',
+                              [initialize_request(), request("tools/list", 2)], home, str(poison))
+        assert_responses(responses, [1, 2])
+        if poison_marker.exists():
+            raise AcceptanceError(f"managed operate fell back to PATH/legacy: {poison_marker.read_text()!r}")
+        listed = tool_names(responses[1])
+        if not listed:
+            raise AcceptanceError("managed operate tools/list is empty — managed binary did not serve")
+        checks.append("brain-managed-operate-selected-no-path-fallback")
+        checks.append("brain-managed-operate-provenance-sidecar")
+
+        home = td / "managed-scope-home"
+        home.mkdir()
+        install_managed(home, "symscope", scope, "acceptance-run")
+        assert_provenance_sidecar(home, "symscope")
+        scope_profile = '[profile]\nname = "managed-scope"\n[servers.scope]\nenabled = true\ntools_allow = ["' + '", "'.join(SCOPE_TOOLS) + '"]\n'
+        responses = run_brain(brain, scope_profile, '[modules]\nscope = true\n',
+                              [initialize_request(), request("tools/list", 2)], home, str(poison))
+        assert_responses(responses, [1, 2])
+        if poison_marker.exists():
+            raise AcceptanceError(f"managed scope fell back to PATH/legacy: {poison_marker.read_text()!r}")
+        assert_exact_scope_catalog(responses[1])
+        checks.append("brain-managed-scope-selected-no-path-fallback")
+        checks.append("brain-managed-scope-provenance-sidecar")
+
+        if browse:
+            # Browse enabled: managed symbrowse must serve the catalog with
+            # a poisoned PATH; the profile names the bare binary, resolved
+            # through the managed directory (Discover order).
+            home = td / "managed-browse-home"
+            home.mkdir()
+            install_managed(home, "symbrowse", browse, "acceptance-run")
+            assert_provenance_sidecar(home, "symbrowse")
+            browse_profile = '[profile]\nname = "managed-browse"\n[servers.browse]\nenabled = true\ncommand = "symbrowse"\nargs = ["mcp"]\n'
+            responses = run_brain(brain, browse_profile, '[modules]\nbrowse = true\n',
+                                  [initialize_request(), request("tools/list", 2)], home, str(poison))
+            assert_responses(responses, [1, 2])
+            if poison_marker.exists():
+                raise AcceptanceError(f"managed browse fell back to PATH: {poison_marker.read_text()!r}")
+            if not tool_names(responses[1]):
+                raise AcceptanceError("managed browse tools/list is empty — managed binary did not serve")
+            checks.append("brain-managed-browse-selected-no-path-fallback")
+            checks.append("brain-managed-browse-provenance-sidecar")
+
+            # Browse exposure disabled at the profile level: no worker may
+            # start even with a managed binary installed and modules.browse
+            # on. The poison marker catches an accidental spawn.
+            home = td / "browse-disabled-home"
+            home.mkdir()
+            install_managed(home, "symbrowse", browse, "acceptance-run")
+            disabled_browse = '[profile]\nname = "browse-off"\n[servers.browse]\nenabled = false\ncommand = "symbrowse"\nargs = ["mcp"]\n'
+            responses = run_brain(brain, disabled_browse, '[modules]\nbrowse = true\n',
+                                  [initialize_request(), request("tools/list", 2)], home, str(poison))
+            assert_responses(responses, [1, 2])
+            if poison_marker.exists():
+                raise AcceptanceError("profile-disabled browse spawned a child")
+            checks.append("brain-browse-profile-disabled-no-spawn")
+
 
 def held_lifecycle(binary: str, label: str, checks: list[str], args: list[str] | None = None) -> None:
     command = [binary] + (args or ["serve"])
@@ -255,7 +372,7 @@ def main() -> int:
     start = time.monotonic()
     checks: list[str] = []
     try:
-        brain_cases(args.brain, args.operate, args.scope, checks)
+        brain_cases(args.brain, args.operate, args.scope, args.browse, checks)
         scope_smoke = load_smoke(Path(__file__).with_name("scope-mcp-smoke.py"))
         operate_smoke = load_smoke(Path(__file__).with_name("operate-mcp-smoke.py"))
         scope_smoke.validate(args.scope, 10.0)
