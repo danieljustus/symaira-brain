@@ -1,6 +1,6 @@
 # ADR 0001: Brain wird der MCP-Kontrollpunkt; das `symguard`-Binary entfällt
 
-> **Scope clarification by [PB-2026-09-09](0002-product-boundaries.md):** Controlled foreign MCP forwarding and the exposure/guard layer separation remain accepted. Brain additionally owns optional Browse and Operate modules and the target human credential-management UI; the credential service remains separate and independently usable. Historical state-core examples below are not a prohibition on those modules. The new module/UI cutovers remain pending; this dated ADR's reasoning is preserved.
+> **Scope clarification by [PB-2026-09-09](0002-product-boundaries.md):** Controlled foreign MCP forwarding and the exposure/guard layer separation remain accepted. Brain owns the completed optional Browse, Operate and Scope source/consumer cutover; the credential service remains separate and independently usable, while its human management UI remains a future gate. Historical state-core examples below are not a prohibition on those modules.
 
 > **Status**: **Angenommen** — D1 und D6 von Daniel bestätigt am 2026-08-27; die
 > übrigen Entscheidungen folgen ihnen. Die drei offenen Fragen bleiben offen und

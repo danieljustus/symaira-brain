@@ -1,18 +1,19 @@
-# Symaira Browse
+# Symaira Brain Browse module
 
-> **Accepted product direction — implementation pending:** Browse remains actively developed. Its accepted target is an optional Brain web module with isolated sessions/workers and direct access for non-agent clients such as Desktop. This repository and symbrowse CLI/MCP remain operational until a tested source/release transition; no replacement command is implied by this note. See [PB-2026-09-09](docs/product-boundaries.md).
-
-[![CI](https://github.com/danieljustus/symaira-browse/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-browse/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/danieljustus/symaira-browse)](https://github.com/danieljustus/symaira-browse/releases/latest)
-[![Coverage](https://img.shields.io/badge/coverage-gated-blue)](https://github.com/danieljustus/symaira-browse/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/danieljustus/symaira-browse)](LICENSE)
-[![Go](https://img.shields.io/badge/Go-1.26-blue)](https://go.dev/)
-
-![Symaira Browse](docs/assets/social-preview.svg)
+> **Current ownership — source/consumer cutover completed 2026-09-13:** Browse remains actively developed as the optional Brain module in this directory. Its source owns isolated sessions/workers and direct non-agent access such as Desktop web clipping. The former `symaira-browse` repository is archived; no signed Brain-built module release or package-manager replacement has shipped.
 
 > The browser an agent can operate while a person can take over at any time — without losing the session.
 
-**Status:** pre-1.0 — the command surface is stabilizing under [SemVer](https://semver.org/); see [CHANGELOG.md](CHANGELOG.md) for curated highlights and [GitHub Releases](https://github.com/danieljustus/symaira-browse/releases) for the complete release history.
+**Status:** Brain-owned source and managed local consumption are verified. Install from a verified Brain checkout; historical Browse releases and the deprecated `symbrowse` formula are migration inputs only.
+
+## Local managed install
+
+```bash
+symbrain setup --from-source /absolute/path/to/symaira-brain --modules browse --json
+~/.symaira/bin/symbrowse version
+```
+
+The managed binary receives a provenance sidecar. The nested source remains independently buildable for development with `go build ./cmd/symbrowse` from this directory. The command reference below describes the direct `symbrowse` interface; it does not imply a new published release channel.
 
 ## Why symbrowse
 
@@ -20,30 +21,19 @@
 - **Plain-HTTP fetch through MCP** — the absorbed `symfetch` static engine exposes `fetch_url`, `fetch_batch` and `wayback_snapshots` as MCP-only Tier 0 tools. There is no CLI `fetch` command; CLI users can use `read` with a daemon started as `--engine static`, while `batch` remains a generic command batcher.
 - **Stable element references** — deterministic `@ref`s across navigation and re-renders, so an agent's plan doesn't break when the DOM reflows.
 - **Out-of-band handoff** — hand control to a human for 2FA, CAPTCHA, or approval mid-session, then resume agent control without losing state.
-- **Standalone-first** — runs on its own with no compile-time dependency on other Symaira tools; integrations are optional, runtime-only fallbacks.
+- **Direct-consumer friendly** — `symbrowse` remains a direct CLI/MCP worker interface and does not require Brain memory, a gateway or an agent profile; Brain only owns its source and managed-install path.
 - **Consumable form automation** — the public `formflow` package exposes typed, evidence-capturing web-form automation (navigate → fill → submit, CAPTCHA/bot-wall detection, confirmation links, per-host pacing) as an in-process Go API; see [docs/form-automation-contract.md](docs/form-automation-contract.md).
 
-## Install
+## Development build
 
-**Homebrew:**
-
-```sh
-brew tap danieljustus/tap
-brew install symbrowse
-```
-
-**Go:**
+The supported user-facing installation is the managed Brain route above. For source development in this nested module (requires **Go 1.26.6**):
 
 ```sh
-go install github.com/danieljustus/symaira-browse/cmd/symbrowse@latest
-```
-
-**From source** (requires Go 1.26.6, POSIX shell, GNU Make; CGO-free):
-
-```sh
-make build
+go build ./cmd/symbrowse
 ./symbrowse version
 ```
+
+Do not add a `go install` or Homebrew recipe for this Brain-owned source tree before the separate signed-release and package-manager migration gate is approved.
 
 ## Quick start
 

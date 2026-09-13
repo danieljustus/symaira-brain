@@ -14,9 +14,9 @@ This directory is the Brain receiving copy for PB-2026-09-09 package 3 (Operate)
 - **Support source:** `history/` at the same source commit, received once at `symaira-brain/history/` (14 files); Operate uses that shared `SymCockpitHistory` package.
 - **Manifest pins:** `symaira-appkit` exact `0.14.2`; `history` remains a local package dependency.
 
-This is source intake and an independently runnable target package, not Brain consumer cutover or release. The original Cockpit source, dispatchers, legacy names, binaries, configuration, permissions, TCC identities, and data remain supported and untouched. Brain does not automatically start this package; the existing conservative read-only compatibility route remains unchanged.
+The source/consumer cutover completed on 2026-09-13. Brain owns and managed-builds `symoperate` from this tree; the Cockpit `operate/` source package and `symcockpit operate` source route were removed in Cockpit's tune-only cutover. The standalone macOS permission/TCC identity and data boundaries remain unchanged. Brain starts the module only when explicitly enabled; signed release/package-manager migration remains a separate gate.
 
-**Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash. The source tree and receiving copy are expected to remain independently distributed; no retirement or routing change is implied.
+**Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash. The historical source comparison is provenance evidence; it does not make the retired Cockpit package a supported ownership route.
 
 ## Resync history
 
