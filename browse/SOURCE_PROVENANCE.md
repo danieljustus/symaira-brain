@@ -5,9 +5,9 @@ package. It remains a source intake only: the standalone symaira-browse reposito
 its `symbrowse` distribution and supported compatibility routes are unchanged.
 
 - **Source repository:** `github.com/danieljustus/symaira-browse`
-- **Source commit:** `62fca84a83190434fa14b514a5654fc65dc2e396`
-- **Source subject:** `fix(browser): report Safari capabilities and unsupported interactions`
-- **Resync date:** 2026-09-11
+- **Source commit:** `e86c1db46ad758d89372640473a5311525e3edf1`
+- **Source subject:** `fix(safari): wait for the Go oracle navigation target (#440)`
+- **Resync date:** 2026-09-13
 - **Source path:** repository root
 - **Receiving path:** `symaira-brain/browse/`
 - **Support source:** none; Browse is self-contained.
@@ -18,13 +18,15 @@ its `symbrowse` distribution and supported compatibility routes are unchanged.
   and 8 top-level files (`.gitignore`, `README.md`, `CONTRIBUTING.md`, `go.mod`,
   `go.sum`, `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`).
 
-The resync refreshes the five stale Safari/BiDi receiver files from the exact
-pinned Git tree:
-`crates/symbrowse-daemon/src/runtime.rs`,
-`crates/symbrowse-daemon/src/safari_runtime.rs`,
-`crates/symbrowse-daemon/tests/safari_native.rs`,
-`crates/symbrowse-engine-safari/src/bidi.rs`, and
-`crates/symbrowse-engine-safari/tests/bidi.rs`.
+The resync applies exactly the four eligible files changed between the old pin
+`62fca84a83190434fa14b514a5654fc65dc2e396` and the new pin, read from Git
+objects only (the source working tree is dirty):
+`crates/symbrowse-engine-safari/src/attach.rs`,
+`crates/symbrowse-engine-safari/tests/attach.rs`,
+`crates/symbrowse-engine-safari/tests/contract_fixture.rs`, and
+`internal/engine/safari/rust_contract_fixture_test.go`. The two changed
+`testdata/` files are intentionally excluded by the intake policy and were not
+imported.
 
 ## Intentional receiver adaptations
 
