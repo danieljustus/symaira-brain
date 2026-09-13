@@ -62,6 +62,15 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger, enabledOptio
 	return nil
 }
 
+// FixOptions controls repair behavior beyond the defaults.
+type FixOptions struct {
+	// ForceRelease allows repair to replace a brain-source build
+	// (installed via `symbrain setup --from-source`) with the pinned
+	// release download. Off by default: a source build is intentional
+	// replacement state and must not be silently overwritten.
+	ForceRelease bool
+}
+
 // Fix repairs any missing or version-mismatched managed binaries among the
 // active cores: every non-optional core, plus any optional core named in
 // enabledOptional (see Manifest.ActiveCores — nil selects none). It checks
@@ -69,6 +78,11 @@ func Setup(ctx context.Context, binDir string, logger *slog.Logger, enabledOptio
 // re-installs it. Already-correct binaries are skipped. Returns an error if
 // any repair fails.
 func Fix(ctx context.Context, binDir string, logger *slog.Logger, enabledOptional map[string]bool) error {
+	return FixWithOptions(ctx, binDir, logger, enabledOptional, FixOptions{})
+}
+
+// FixWithOptions is Fix with explicit repair options.
+func FixWithOptions(ctx context.Context, binDir string, logger *slog.Logger, enabledOptional map[string]bool, opts FixOptions) error {
 	if logger == nil {
 		logger = slog.Default()
 	}
@@ -100,6 +114,29 @@ func Fix(ctx context.Context, binDir string, logger *slog.Logger, enabledOptiona
 			logger.Info("already correct", "binary", name, "version", existing)
 			skipped++
 			continue
+		}
+
+		// A binary installed from the in-repo module sources
+		// (setup --from-source) is intentional state: it was placed to
+		// replace the release route, so a version mismatch against the
+		// release manifest must not silently overwrite it with a
+		// download. Replacing it requires an explicit re-run of
+		// `symbrain setup --from-source` or `symbrain setup --fix
+		// --force-release`.
+		if !opts.ForceRelease {
+			prov, provErr := ReadProvenance(binDir, core.BinaryName)
+			if provErr != nil {
+				logger.Warn("cannot read provenance; leaving binary untouched", "binary", name, "error", provErr)
+				skipped++
+				continue
+			}
+			if prov != nil && prov.Source == SourceBrain {
+				logger.Info("brain-source build installed; not overwriting with release (use --force-release to replace)",
+					"binary", name, "installed", existing, "wanted", core.Version,
+					"receiver_commit", prov.ReceiverCommit)
+				skipped++
+				continue
+			}
 		}
 
 		if existing != "" {

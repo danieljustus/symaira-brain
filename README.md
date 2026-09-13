@@ -386,6 +386,65 @@ this** — on a machine where Operate's TCC permissions are already granted
 thing standing between a profile and the input/screen tools. Widening it
 is a security decision, not a config tweak.
 
+### Building module binaries from Brain sources
+
+The receiving copies under `browse/`, `operate/`, and `scope/` (see their
+`SOURCE_PROVENANCE.md` files) are buildable module sources. To run Brain
+against binaries built from *these* sources instead of release downloads:
+
+```bash
+# Build the enabled modules (or pass --modules browse,operate,scope) from
+# this repository and install them into the managed directory.
+symbrain setup --from-source /path/to/symaira-brain
+```
+
+What this does, per module:
+
+- builds the binary from the in-repo module sources (`go build` for
+  `browse/`, `swift build` for `operate/` and `scope/` — the Swift modules
+  are macOS-only and skip cleanly elsewhere),
+- installs it atomically into the managed directory (`~/.symaira/bin`),
+  which binary resolution checks **before** PATH, and
+- writes a `<binary>.provenance.json` sidecar recording `brain-source`
+  origin, the exact symaira-brain commit, the module directory, the build
+  toolchain and the payload SHA-256.
+
+The runtime then uses these binaries through the normal managed-directory
+selection — no second registry, no PATH edits. `symbrain setup --fix` /
+`symbrain doctor --fix` treat a brain-source install as intentional state:
+a version mismatch against the release manifest is reported and skipped,
+never silently overwritten with a download. Replacing it requires an
+explicit `symbrain setup --from-source` re-run or `doctor --fix
+--force-release`.
+
+Repeatable local replacement packages (archive + SHA-256 + provenance
+manifest per module) come from:
+
+```bash
+scripts/build-module-packages.sh            # writes dist/modules/
+```
+
+**Migration from an existing installation.** If `symbrowse` or
+`symcockpit` were previously installed via Homebrew or the old release
+repositories, `setup --from-source` does not touch them: the managed
+directory simply takes precedence in Brain's binary resolution. The legacy
+entrypoints (`symcockpit operate …`, `symcockpit scope …`, a Homebrew
+`symbrowse`) remain supported compatibility surfaces for direct,
+non-Brain callers.
+
+**Rollback.** Remove the managed binary and its sidecar
+(`rm ~/.symaira/bin/symbrowse{,.provenance.json}` etc.) or run
+`symbrain doctor --fix --force-release` to reinstall the pinned release
+build. Profiles need no change in either direction; no browser profiles,
+TCC grants, or data are deleted.
+
+**Signature note.** Local source builds are unsigned by definition: their
+origin guarantee is the provenance sidecar plus the pinned, verified
+receiving sources, not cosign. Release downloads keep pinned-checksum and
+cosign publisher verification (where published). Signed, published
+Brain-built module artifacts are a separate release gate and are not part
+of this local path.
+
 ## Command reference
 
 Implemented today:

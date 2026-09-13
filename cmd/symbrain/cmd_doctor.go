@@ -202,6 +202,7 @@ func cmdDoctorWithFormat(args []string, stdout, stderr io.Writer, format output.
 	fs := flag.NewFlagSet("doctor", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fix := fs.Bool("fix", false, "repair missing or version-mismatched managed binaries")
+	forceRelease := fs.Bool("force-release", false, "with --fix: allow replacing a brain-source build with the pinned release download")
 	vaultAgent := fs.String("vault-agent", "claude-code", "vault agent name for MCP handshake probe")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
@@ -209,7 +210,7 @@ func cmdDoctorWithFormat(args []string, stdout, stderr io.Writer, format output.
 	}
 
 	if *fix {
-		return runDoctorFix(stdout, stderr)
+		return runDoctorFix(stdout, stderr, *forceRelease)
 	}
 
 	report := runDoctorChecks(context.Background(), *vaultAgent)
@@ -546,7 +547,7 @@ func profileFileExists(name string) bool {
 }
 
 // runDoctorFix repairs missing or version-mismatched managed binaries.
-func runDoctorFix(stdout, stderr io.Writer) exitcodes.ExitCode {
+func runDoctorFix(stdout, stderr io.Writer, forceRelease bool) exitcodes.ExitCode {
 	binDir, err := xdg.ManagedBinDir()
 	if err != nil {
 		fmt.Fprintf(stderr, "symbrain doctor --fix: %v\n", err)
@@ -561,7 +562,7 @@ func runDoctorFix(stdout, stderr io.Writer) exitcodes.ExitCode {
 		return exitcodes.ExitCodeFromError(err)
 	}
 
-	if err := managed.Fix(context.Background(), binDir, nil, cfg.Modules.EnabledCores()); err != nil {
+	if err := managed.FixWithOptions(context.Background(), binDir, nil, cfg.Modules.EnabledCores(), managed.FixOptions{ForceRelease: forceRelease}); err != nil {
 		fmt.Fprintf(stderr, "  ✗  repair failed: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
