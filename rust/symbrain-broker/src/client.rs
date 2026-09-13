@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ffi::OsString;
 use std::fmt;
 use std::io;
 use std::io::{BufRead, BufReader, Read, Write};
@@ -69,23 +70,25 @@ impl From<io::Error> for BrokerError {
 pub fn discover(binary_name: &str, override_path: &str) -> Result<String, BrokerError> {
     if !override_path.is_empty() {
         let path = std::path::Path::new(override_path);
-        if path.exists() {
+        if is_usable_executable(path) {
             return Ok(override_path.to_string());
         }
+        let kind = if path.exists() {
+            io::ErrorKind::PermissionDenied
+        } else {
+            io::ErrorKind::NotFound
+        };
         return Err(BrokerError::Io(io::Error::new(
-            io::ErrorKind::NotFound,
+            kind,
             format!(
-                "broker: configured binary_path {override_path:?} for {binary_name:?} not found"
+                "broker: configured binary_path {override_path:?} for {binary_name:?} is not an executable regular file"
             ),
         )));
     }
 
     if let Ok(home) = std::env::var("HOME") {
-        let managed = std::path::PathBuf::from(home)
-            .join(".symaira")
-            .join("bin")
-            .join(binary_name);
-        if managed.is_file() && is_executable(&managed) {
+        let managed_dir = std::path::PathBuf::from(home).join(".symaira").join("bin");
+        if let Some(managed) = find_in_dir(&managed_dir, binary_name) {
             return Ok(managed.to_string_lossy().to_string());
         }
     }
@@ -98,23 +101,56 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
     })
 }
 
-#[cfg(unix)]
-fn is_executable(path: &std::path::Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    path.metadata()
-        .is_ok_and(|m| m.permissions().mode() & 0o111 != 0)
+fn is_usable_executable(path: &std::path::Path) -> bool {
+    let Ok(metadata) = path.metadata() else {
+        return false;
+    };
+    if !metadata.is_file() {
+        return false;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        metadata.permissions().mode() & 0o111 != 0
+    }
+    #[cfg(not(unix))]
+    {
+        true
+    }
 }
 
-#[cfg(not(unix))]
-fn is_executable(path: &std::path::Path) -> bool {
-    path.is_file()
+fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::PathBuf> {
+    executable_names(binary)
+        .into_iter()
+        .map(|name| directory.join(name))
+        .find(|candidate| is_usable_executable(candidate))
+}
+
+fn executable_names(binary: &str) -> Vec<OsString> {
+    #[cfg(windows)]
+    {
+        let extensions =
+            std::env::var_os("PATHEXT").unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
+        let mut names = vec![OsString::from(binary)];
+        names.extend(
+            extensions
+                .to_string_lossy()
+                .split(';')
+                .filter(|ext| !ext.is_empty())
+                .map(|ext| OsString::from(format!("{binary}{ext}"))),
+        );
+        names
+    }
+    #[cfg(not(windows))]
+    {
+        vec![OsString::from(binary)]
+    }
 }
 
 fn which(binary: &str) -> Option<String> {
     std::env::var_os("PATH").and_then(|paths| {
         std::env::split_paths(&paths)
-            .map(|dir| dir.join(binary))
-            .find(|candidate| candidate.is_file() && is_executable(candidate))
+            .find_map(|dir| find_in_dir(&dir, binary))
             .map(|path| path.to_string_lossy().to_string())
     })
 }
@@ -792,5 +828,44 @@ mod tests {
         let error = read_limited_line(&mut reader).expect_err("oversized line");
         assert_eq!(error.kind(), io::ErrorKind::InvalidData);
         assert!(error.to_string().contains("line exceeds"));
+    }
+
+    #[test]
+    fn discover_uses_actual_path_selection() {
+        let executable = std::env::current_exe().expect("test executable");
+        let fallback = discover("fixture", executable.to_str().expect("executable path"))
+            .expect("explicit test executable");
+        assert_eq!(std::path::Path::new(&fallback), executable);
+
+        let missing = std::env::temp_dir().join("symbrain-broker-missing-explicit");
+        let error = discover("sh", missing.to_str().expect("temp path"))
+            .expect_err("invalid explicit path must not fall back to PATH");
+        assert!(error.to_string().contains("configured binary_path"));
+    }
+
+    #[test]
+    fn discover_rejects_directory_and_accepts_unix_executable() {
+        let directory = tempfile::tempdir().expect("temp directory");
+        let dir_path = directory.path().join("directory");
+        std::fs::create_dir(&dir_path).expect("nested directory");
+        assert!(discover("sh", dir_path.to_str().expect("directory path")).is_err());
+
+        let fixture = directory.path().join("fixture");
+        std::fs::copy(std::env::current_exe().expect("test executable"), &fixture)
+            .expect("copy executable");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut permissions = std::fs::metadata(&fixture)
+                .expect("fixture metadata")
+                .permissions();
+            permissions.set_mode(0o755);
+            std::fs::set_permissions(&fixture, permissions).expect("set executable mode");
+        }
+        assert_eq!(
+            discover("fixture", fixture.to_str().expect("fixture path"))
+                .expect("executable fixture"),
+            fixture.to_string_lossy()
+        );
     }
 }

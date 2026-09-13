@@ -4,8 +4,53 @@ import CoreGraphics
 import Darwin
 import Foundation
 
+/// The bounded native probes used by `PermissionService`.
+///
+/// Keeping the OS calls behind this adapter lets tests exercise the real
+/// permission/request flow without prompting for TCC permissions or opening
+/// System Settings. The production default remains the native macOS adapter.
+public protocol PermissionProbeAdapter {
+    func accessibilityTrusted(prompt: Bool) -> Bool
+    func screenCapturePreflight() -> Bool
+    func requestScreenCapture() -> Bool
+    func openPrivacyPane(_ path: String) -> Bool
+}
+
+private struct NativePermissionProbeAdapter: PermissionProbeAdapter {
+    func accessibilityTrusted(prompt: Bool) -> Bool {
+        if prompt {
+            let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
+            return AXIsProcessTrustedWithOptions(options)
+        }
+        return AXIsProcessTrusted()
+    }
+
+    func screenCapturePreflight() -> Bool {
+        CGPreflightScreenCaptureAccess()
+    }
+
+    func requestScreenCapture() -> Bool {
+        CGRequestScreenCaptureAccess()
+    }
+
+    func openPrivacyPane(_ path: String) -> Bool {
+        let url = URL(string: "x-apple.systempreferences:\(path)")
+        if let url, NSWorkspace.shared.open(url) { return true }
+        // Pane-specific deep links can be rejected by newer macOS builds; the
+        // generic Privacy pane always opens.
+        if let fallback = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy") {
+            return NSWorkspace.shared.open(fallback)
+        }
+        return false
+    }
+}
+
 public struct PermissionService: PermissionServiceProtocol {
-    public init() {}
+    private let probe: any PermissionProbeAdapter
+
+    public init(probe: (any PermissionProbeAdapter)? = nil) {
+        self.probe = probe ?? NativePermissionProbeAdapter()
+    }
 
     public func status() -> PermissionSnapshot {
         let pid = getpid()
@@ -14,8 +59,8 @@ public struct PermissionService: PermissionServiceProtocol {
         let parentName = processName(for: ppid)
 
         return PermissionSnapshot(
-            accessibilityGranted: AXIsProcessTrusted(),
-            screenRecordingGranted: CGPreflightScreenCaptureAccess(),
+            accessibilityGranted: probe.accessibilityTrusted(prompt: false),
+            screenRecordingGranted: probe.screenCapturePreflight(),
             source: PermissionSource(
                 pid: pid,
                 ppid: ppid,
@@ -26,33 +71,20 @@ public struct PermissionService: PermissionServiceProtocol {
         )
     }
 
-    /// Opens System Settings on a given privacy pane as an observable fallback
-    /// when the OS prompt has already fired once (macOS shows it only one time).
-    private func openSystemSettingsPrivacyPane(_ path: String) {
-        let url = URL(string: "x-apple.systempreferences:\(path)")
-        if let url, NSWorkspace.shared.open(url) { return }
-        // Pane-specific deep links can be rejected by newer macOS builds; the
-        // generic Privacy pane always opens.
-        if let fallback = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy") {
-            NSWorkspace.shared.open(fallback)
-        }
-    }
-
     @discardableResult
     public func requestAccessibilityPermission() -> Bool {
-        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-        if AXIsProcessTrustedWithOptions(options) { return true }
+        if probe.accessibilityTrusted(prompt: true) { return true }
         // The prompt fires only once per app identity; afterwards this call is
         // silent and the user needs to reach the pane themselves.
-        openSystemSettingsPrivacyPane("com.apple.preference.security?Privacy_Accessibility")
-        return AXIsProcessTrusted()
+        _ = probe.openPrivacyPane("com.apple.preference.security?Privacy_Accessibility")
+        return probe.accessibilityTrusted(prompt: false)
     }
 
     @discardableResult
     public func requestScreenRecordingPermission() -> Bool {
-        if CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() { return true }
-        openSystemSettingsPrivacyPane("com.apple.preference.security?Privacy_ScreenCapture")
-        return CGPreflightScreenCaptureAccess()
+        if probe.screenCapturePreflight() || probe.requestScreenCapture() { return true }
+        _ = probe.openPrivacyPane("com.apple.preference.security?Privacy_ScreenCapture")
+        return probe.screenCapturePreflight()
     }
 
     // MARK: - Process info helpers

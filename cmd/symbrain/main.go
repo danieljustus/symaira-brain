@@ -82,6 +82,16 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	case "version":
 		return cmdVersionWithFormat(rest, stdout, stderr, format)
 	case "vault":
+		if len(rest) > 0 {
+			switch rest[0] {
+			case "create":
+				return cmdVaultCreate(rest[1:], stdout, stderr)
+			case "set":
+				return cmdVaultSet(rest[1:], stdout, stderr)
+			case "delete":
+				return cmdVaultDelete(rest[1:], stdout, stderr)
+			}
+		}
 		return cmdPassthrough(cmd, rest, stderr)
 	case "guard":
 		return cmdGuard(rest, stdout, stderr)
@@ -164,7 +174,7 @@ Commands:
   skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)
   activity    Read bounded activity summaries with explicit profile access
   audit       Inspect the audit log
-  vault       Passthrough to symvault
+  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)
   guard       Absorbed symguard commands (decide, scan, doctor, grants, version)
 
   version     Print version information

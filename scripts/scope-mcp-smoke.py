@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import selectors
+import shutil
 import signal
 import subprocess
 import sys
@@ -40,6 +41,13 @@ def _kill_group(process: subprocess.Popen[bytes]) -> None:
         os.killpg(process.pid, signal.SIGKILL)
     except ProcessLookupError:
         pass
+    except PermissionError:
+        # Some native launchers change their process-group ownership. The
+        # direct child is still ours, so kill it without touching other groups.
+        try:
+            process.kill()
+        except ProcessLookupError:
+            pass
 
 
 def _close_selector(selector: selectors.BaseSelector) -> None:
@@ -96,15 +104,32 @@ def _bounded_cleanup(
             time.sleep(0.001)
 
 
-def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
+def run_bounded(
+    argv: list[str],
+    payload: bytes,
+    timeout: float,
+    *,
+    stop_after_responses: int | None = None,
+) -> list[dict]:
     """Run a stdio child with bounded nonblocking capture and hard deadlines."""
     if timeout <= 0:
         raise ValueError("timeout must be positive")
+    isolated_home = tempfile.mkdtemp(prefix="pb-scope-smoke-home-")
+    isolated_path = Path(isolated_home) / "bin"
+    isolated_path.mkdir()
+    isolated_env = {
+        "HOME": isolated_home,
+        "PATH": str(isolated_path),
+        "XDG_CONFIG_HOME": str(Path(isolated_home) / ".config"),
+        "XDG_DATA_HOME": str(Path(isolated_home) / ".local" / "share"),
+        "XDG_CACHE_HOME": str(Path(isolated_home) / ".cache"),
+    }
     process = subprocess.Popen(
         argv,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=isolated_env,
         start_new_session=True,
     )
     assert process.stdin is not None
@@ -120,6 +145,7 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
         process.stdin.close()
         execution_deadline = time.monotonic() + timeout
         failure: str | None = None
+        terminated_for_smoke = False
         while selector.get_map() or process.poll() is None:
             remaining = execution_deadline - time.monotonic()
             if remaining <= 0:
@@ -137,6 +163,17 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
                     pipe.close()
                     continue
                 buffers[stream].extend(chunk)
+                if (
+                    stream == "stdout"
+                    and stop_after_responses is not None
+                    and buffers["stdout"].count(b"\n") >= stop_after_responses
+                    and process.poll() is None
+                ):
+                    # MCP serve is a long-lived worker and does not exit on
+                    # stdin EOF. Once the bounded catalog exchange is
+                    # complete, stop only this owned process group.
+                    _kill_group(process)
+                    terminated_for_smoke = True
                 if len(buffers[stream]) > OUTPUT_LIMIT:
                     failure = f"MCP subprocess {stream} exceeded {OUTPUT_LIMIT} byte output limit"
                     break
@@ -155,7 +192,8 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
     finally:
         if selector.get_map():
             _close_selector(selector)
-    if returncode != 0:
+        shutil.rmtree(isolated_home, ignore_errors=True)
+    if returncode != 0 and not (terminated_for_smoke and returncode == -signal.SIGKILL):
         raise SmokeError(f"MCP subprocess exited {returncode}")
     stderr = bytes(buffers["stderr"])
     stdout = bytes(buffers["stdout"])
@@ -188,6 +226,7 @@ def validate(binary: str, timeout: float) -> None:
         [binary, "serve"],
         b"".join(json.dumps(request, separators=(",", ":")).encode() + b"\n" for request in requests),
         timeout,
+        stop_after_responses=2,
     )
     if len(responses) != 2:
         raise SmokeError(f"expected 2 responses, got {len(responses)}")

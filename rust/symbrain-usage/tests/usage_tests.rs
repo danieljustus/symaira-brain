@@ -151,18 +151,15 @@ impl Transport for SlowTransport {
         _request: symbrain_usage::Request,
         cancel: &symbrain_usage::Cancellation,
     ) -> Result<Response, String> {
-        let deadline = Instant::now() + Duration::from_millis(100);
-        while Instant::now() < deadline {
-            if cancel.is_cancelled() {
-                return Err("request cancelled".into());
-            }
+        // No self-imposed deadline: only the service-level timeout may end
+        // this request. A broken timeout therefore hangs the test loudly
+        // instead of letting a fixed transport sleep mask it, and the
+        // wall-clock assertion below no longer depends on a loaded CI
+        // runner scheduling the worker threads within 80ms.
+        while !cancel.is_cancelled() {
             std::thread::sleep(Duration::from_millis(1));
         }
-        Ok(Response {
-            status: 200,
-            body: b"{}".to_vec(),
-            headers: BTreeMap::new(),
-        })
+        Err("request cancelled".into())
     }
 }
 
@@ -178,7 +175,10 @@ fn provider_queries_are_bounded_and_timeout_all_pending_slots() {
     .with_provider_timeout(Duration::from_millis(10));
     let started = Instant::now();
     let report = service.report();
-    assert!(started.elapsed() < Duration::from_millis(80));
+    // Generous sanity bound only: the real assertions are the per-provider
+    // "timed out" errors. The transport never completes on its own, so a
+    // functioning timeout is the only way this test finishes at all.
+    assert!(started.elapsed() < Duration::from_secs(5));
     assert!(report.providers.iter().all(|provider| {
         provider
             .error

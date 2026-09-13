@@ -23,6 +23,10 @@ use toml_edit::{DocumentMut, Item, Value};
 
 const VAULT_BINARY: &str = "symvault";
 const VAULT_BINARY_ENV: &str = "SYMBRAIN_SERVERS_VAULT_BINARY_PATH";
+const OPERATE_BINARY: &str = "symoperate";
+const OPERATE_BINARY_ENV: &str = "SYMBRAIN_SERVERS_OPERATE_BINARY_PATH";
+const SCOPE_BINARY: &str = "symscope";
+const SCOPE_BINARY_ENV: &str = "SYMBRAIN_SERVERS_SCOPE_BINARY_PATH";
 const MCP_USAGE: &str = "Usage of mcp:\n  -profile string\n    profile name to serve (required unless --profile-file is given)\n  -profile-file string\n    load the profile from this TOML file instead of the profiles directory\n  -vault-agent string\n    vault agent name for --stdio mode\n";
 
 #[derive(Debug, Default)]
@@ -319,13 +323,33 @@ fn build_backends(
             if !optional_module_enabled(&alias) {
                 continue;
             }
-            let args = if alias == SERVER_OPERATE {
-                vec!["operate".to_string(), "serve".to_string()]
+            let (binary, binary_env, command) = if alias == SERVER_OPERATE {
+                (OPERATE_BINARY, OPERATE_BINARY_ENV, "operate")
             } else {
-                vec!["scope".to_string(), "serve".to_string()]
+                (SCOPE_BINARY, SCOPE_BINARY_ENV, "scope")
             };
-            match symbrain_broker::discover("symcockpit", "") {
-                Ok(path) => insert_managed(&alias, path, args, managed, backends),
+            let override_path = env::var(binary_env)
+                .ok()
+                .filter(|value| !value.is_empty())
+                .or_else(|| configured_module_path(&alias));
+            let discovered = if let Some(path) = override_path.as_deref() {
+                symbrain_broker::discover(binary, path).map(|path| (path, false))
+            } else {
+                symbrain_broker::discover(binary, "")
+                    .map(|path| (path, false))
+                    .or_else(|_| {
+                        symbrain_broker::discover("symcockpit", "").map(|path| (path, true))
+                    })
+            };
+            match discovered {
+                Ok((path, legacy)) => {
+                    let args = if legacy {
+                        vec![command.to_string(), "serve".to_string()]
+                    } else {
+                        vec!["serve".to_string()]
+                    };
+                    insert_managed(&alias, path, args, managed, backends);
+                }
                 Err(error) => {
                     let _ = writeln!(stderr, "symbrain mcp: {alias}: {error}");
                 }
@@ -434,6 +458,23 @@ fn configured_vault_path() -> Option<String> {
     }
 }
 
+fn configured_module_path(alias: &str) -> Option<String> {
+    let contents = std::fs::read_to_string(symbrain_core::xdg::config_path()).ok()?;
+    let document: DocumentMut = contents.parse().ok()?;
+    configured_module_path_from(&document, alias)
+}
+
+fn configured_module_path_from(document: &DocumentMut, alias: &str) -> Option<String> {
+    let servers = document.get("servers")?.as_table_like()?;
+    let server = servers.get(alias)?.as_table_like()?;
+    match server.get("binary_path")? {
+        Item::Value(Value::String(value)) if !value.value().is_empty() => {
+            Some(value.value().clone())
+        }
+        _ => None,
+    }
+}
+
 fn install_signal_flag() -> io::Result<Arc<AtomicBool>> {
     let cancelled = Arc::new(AtomicBool::new(false));
     signal_hook::flag::register(signal_hook::consts::SIGINT, Arc::clone(&cancelled))?;
@@ -460,5 +501,20 @@ mod tests {
             inline_value("-profile-file=room.toml", "profile-file"),
             Some("room.toml".to_string())
         );
+    }
+
+    #[test]
+    fn configured_module_path_reads_server_override() {
+        let document: DocumentMut = "[servers.operate]\nbinary_path = \"/opt/symoperate\"\n"
+            .parse()
+            .expect("valid config");
+        assert_eq!(
+            configured_module_path_from(&document, SERVER_OPERATE),
+            Some("/opt/symoperate".to_string())
+        );
+        let empty: DocumentMut = "[servers.operate]\nbinary_path = \"\"\n"
+            .parse()
+            .expect("valid config");
+        assert_eq!(configured_module_path_from(&empty, SERVER_OPERATE), None);
     }
 }
