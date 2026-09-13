@@ -15,6 +15,8 @@ struct ContentView: View {
         case audit = "Audit"
         case memory = "Memory"
         case vault = "Vault"
+        case operate = "Operate"
+        case scope = "Scope"
         case skills = "Skills"
         case settings = "Settings"
 
@@ -27,19 +29,23 @@ struct ContentView: View {
             case .audit: "doc.text.magnifyingglass"
             case .memory: "brain"
             case .vault: "lock.square.stack"
+            case .operate: "hand.tap"
+            case .scope: "network"
             case .skills: "square.stack.3d.up"
             case .settings: "gearshape"
             }
         }
 
         /// Sidebar grouping: the broker screens SymBrain owns itself, the
-        /// state cores that run inside this binary, and the one core that
-        /// stays a separate process on purpose (the vault).
+        /// state cores that run inside this binary, and the state cores that
+        /// run as their own managed process — the vault always, and the
+        /// optional Operate/Scope modules (contract PB-2026-09-09 §2) when
+        /// their managed binary is installed.
         static let brokerModes: [DisplayMode] = [
             .dashboard, .profiles, .harnesses, .sync, .audit,
         ]
         static let coreModes: [DisplayMode] = [.memory, .skills]
-        static let externalModes: [DisplayMode] = [.vault]
+        static let externalModes: [DisplayMode] = [.vault, .operate, .scope]
         static let systemModes: [DisplayMode] = [.settings]
     }
 
@@ -81,6 +87,10 @@ struct ContentView: View {
                     MemoryView(client: client)
                 case .vault:
                     VaultView()
+                case .operate:
+                    OperateView(client: client)
+                case .scope:
+                    ScopeView(client: client)
                 case .skills:
                     SkillsView(client: client)
                 case .settings:
