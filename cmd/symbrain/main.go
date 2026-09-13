@@ -92,7 +92,7 @@ func run(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 				return cmdVaultDelete(rest[1:], stdout, stderr)
 			}
 		}
-		return cmdPassthrough(cmd, rest, stderr)
+		return cmdPassthrough(cmd, rest, os.Stdin, stdout, stderr)
 	case "guard":
 		return cmdGuard(rest, stdout, stderr)
 	case "help", "--help", "-h":
@@ -179,6 +179,10 @@ Commands:
 
   version     Print version information
   help        Show this help message
+
+Vault approval passthrough:
+  symbrain vault approval list [--output json]
+  symbrain vault approval decide <request-id> --approve|--deny
 
 Run 'symbrain <command> --help' for details on a specific command.
 `)
