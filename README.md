@@ -454,6 +454,7 @@ Implemented today:
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit, symdesk), profiles, harness registrations, cross-core link health (vault reachability/lock state, secret reference resolution, profile-to-harness registration), foreign-server `access = "read"` risk (missing `tools_read`), and recent gateway degradations (state-core crashes/restarts, empty foreign-server exposure; `degradations` in `--json` output) |
 | `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
+| `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries from the in-repo Brain sources at `DIR` and install them into the managed directory with a provenance sidecar (see "Building module binaries from Brain sources" above) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
