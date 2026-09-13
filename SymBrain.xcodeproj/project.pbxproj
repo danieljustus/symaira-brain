@@ -37,6 +37,7 @@
 		76E8895721D92EA46A646520 /* ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB797B558BCC85838B09E52D /* ViewModels.swift */; };
 		83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD3F0F9378282E7AC6067E /* ModelTests.swift */; };
 		8CF4C06F57A2883FFFF98B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E451D0841FDC285609A50119 /* Assets.xcassets */; };
+		9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */; };
 		95F6922DD5837620CDB02E29 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		99A982ED21A300028A6C94EE /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9480D05289AD3EDD804ECC1C /* SymairaDaemonKit */; };
 		9F5F140B4DADBA5040FEE109 /* ModuleViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */; };
@@ -52,6 +53,7 @@
 		BE1D7E2E6AA817FD48DB1BD5 /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 634705A978FF032B20A7563A /* SymairaDaemonKit */; };
 		CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */; };
 		CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2959FD69F38959DDA732319 /* ProfilesView.swift */; };
+		D147D323A0B2486C0E7F495A /* ModuleSourceBuild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */; };
 		D36BFE7884BAE466229D9BC6 /* SymairaToolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 99409AC8BA33F24A6846CF9D /* SymairaToolKit */; };
 		D7828295D3B4E54D593ADB26 /* ModuleViewModelSkeletonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */; };
 		DBAE902DB6B8A6F4D0097667 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96FDE0A3CE49598C93AA0D40 /* Assets.xcassets */; };
@@ -84,6 +86,7 @@
 
 /* Begin PBXFileReference section */
 		00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultClient.swift; sourceTree = "<group>"; };
+		08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleSourceBuild.swift; sourceTree = "<group>"; };
 		0FBD3F0F9378282E7AC6067E /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		15AAC2C6738F79F00ED9913B /* SymBrainCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SymBrainCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		28479037F269EE676E6DA1C6 /* ScopeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScopeView.swift; sourceTree = "<group>"; };
@@ -128,6 +131,7 @@
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfoTests.swift; sourceTree = "<group>"; };
 		F4F7A7307C5362C46D956DDD /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
+		F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleSourceBuildTests.swift; sourceTree = "<group>"; };
 		F95B7A2A47E870E937155970 /* OperateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperateView.swift; sourceTree = "<group>"; };
 		FB25C751770FF552A574E5CE /* MemoryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryClient.swift; sourceTree = "<group>"; };
 		FB797B558BCC85838B09E52D /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
@@ -200,6 +204,7 @@
 				541AE8E66F5F6EEF650CBF12 /* MemoryListPagingTests.swift */,
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
 				C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */,
+				F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */,
 				CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */,
 				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
@@ -274,6 +279,7 @@
 				FB25C751770FF552A574E5CE /* MemoryClient.swift */,
 				2DDFA6201EBE1C20A656FE31 /* Models.swift */,
 				D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */,
+				08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */,
 				4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */,
 				9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */,
 				596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */,
@@ -509,6 +515,7 @@
 				F768D624036BD0CF6CF32955 /* MemoryListPagingTests.swift in Sources */,
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
 				4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */,
+				9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */,
 				D7828295D3B4E54D593ADB26 /* ModuleViewModelSkeletonTests.swift in Sources */,
 				040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */,
 				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
@@ -526,6 +533,7 @@
 				A08CEC3AE0AC46C2E5DD39DE /* MemoryClient.swift in Sources */,
 				3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */,
 				AB49BA080F2FF71CBE24000E /* ModuleModels.swift in Sources */,
+				D147D323A0B2486C0E7F495A /* ModuleSourceBuild.swift in Sources */,
 				9F5F140B4DADBA5040FEE109 /* ModuleViewModelBase.swift in Sources */,
 				F8905C81AAA96F712931839E /* ModuleViewModels.swift in Sources */,
 				B118AE290BABA60839E4033E /* SkillsClient.swift in Sources */,

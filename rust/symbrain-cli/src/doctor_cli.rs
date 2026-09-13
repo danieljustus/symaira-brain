@@ -3,7 +3,7 @@ use std::io::Write;
 
 use symbrain_core::{exit, output::OutputFormat};
 
-const DOCTOR_USAGE: &str = "Usage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n";
+const DOCTOR_USAGE: &str = "Usage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n";
 
 #[path = "doctor_render.rs"]
 mod doctor_render;
@@ -20,6 +20,21 @@ mod doctor_links;
 mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
+
+/// Whether this invocation requires the Go implementation's module lifecycle semantics.
+///
+/// The Rust doctor implementation intentionally does not manage source-build
+/// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
+/// managed installer owns that behavior.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    crate::has_go_owned_flag(
+        args,
+        &["json", "fix", "force-release", "vault-agent", "h", "help"],
+        &["vault-agent"],
+        &["force-release"],
+        &["fix"],
+    )
+}
 
 pub fn run(
     args: &[OsString],
@@ -201,5 +216,21 @@ args = ["mcp", "--profile", "default"]
         let parsed = parse_args(&args, &mut Vec::new()).expect("valid flags");
         assert!(!parsed.fix);
         assert_eq!(parsed.vault_agent, "agent");
+    }
+
+    #[test]
+    fn help_lists_the_go_owned_force_release_flag() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = run(
+            &[OsString::from("--help")],
+            &mut stdout,
+            &mut stderr,
+            OutputFormat::Table,
+        );
+
+        assert_eq!(code, exit::USAGE);
+        assert!(stdout.is_empty());
+        assert_eq!(stderr, DOCTOR_USAGE.as_bytes());
     }
 }

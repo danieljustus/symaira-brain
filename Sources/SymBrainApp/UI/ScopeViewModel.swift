@@ -128,6 +128,8 @@ final class ScopeViewModel: ObservableObject, ModuleViewModelProtocol {
 
     @Published var isBuilding = false
     @Published var buildResult: SetupSourceResult?
+    /// Selected only for this view-model session. Never inferred or persisted.
+    @Published private(set) var sourceRoot: URL?
 
     private let client: ScopeClient
     private let symbrain: SymBrainClient
@@ -138,7 +140,9 @@ final class ScopeViewModel: ObservableObject, ModuleViewModelProtocol {
         self.client = client
     }
 
-    var setupCommand: String { "symbrain setup --from-source --modules scope" }
+    var setupCommand: String {
+        ModuleSourceBuild.copyableSetupCommand(module: "scope", sourceRoot: sourceRoot)
+    }
     var enableCommand: String { "symbrain config set modules.scope true" }
 
     /// Loads everything the Scope screen shows on its own, without running
@@ -175,6 +179,25 @@ final class ScopeViewModel: ObservableObject, ModuleViewModelProtocol {
         brokerActivity = await auditReader.read(profile: nil, server: "scope", limit: 500)
     }
 
+    /// Stores a canonical, structurally valid checkout only for this session.
+    /// The UI supplies this from an explicit open panel; no source root is
+    /// inferred from the app bundle, current directory, PATH, or source file.
+    func selectSourceRoot(_ selectedURL: URL) {
+        do {
+            sourceRoot = try ModuleSourceBuild.canonicalSourceRoot(validating: selectedURL)
+            errorMessage = nil
+            errorDetail = nil
+        } catch let error as ModuleSourceBuild.ValidationError {
+            sourceRoot = nil
+            errorMessage = error.localizedDescription
+            errorDetail = Self.sourceCheckoutGuidance
+        } catch {
+            sourceRoot = nil
+            errorMessage = "Could not validate the selected source checkout."
+            errorDetail = Self.sourceCheckoutGuidance
+        }
+    }
+
     func checkVersion() async {
         isCheckingVersion = true
         defer { isCheckingVersion = false }
@@ -198,24 +221,37 @@ final class ScopeViewModel: ObservableObject, ModuleViewModelProtocol {
         }
     }
 
-    /// Builds symscope from the in-repo receiving copy and installs it, then
-    /// reloads status. See OperateViewModel.buildAndInstall for why this
-    /// still requires the module to be enabled in config.
-    func buildAndInstall() async {
+    /// Builds symscope from an explicitly selected in-repo source checkout
+    /// and installs it, then reloads status. See OperateViewModel
+    /// buildAndInstall for why this still requires the module to be enabled
+    /// in config.
+    func buildAndInstall(sourceRoot: URL) async {
         guard moduleEnabled else { return }
         isBuilding = true
         clearError()
         defer { isBuilding = false }
         do {
-            let outcome = try await ManagedModuleSupport.setupFromSource(module: "scope", symbrain: symbrain)
+            let canonicalSourceRoot = try ModuleSourceBuild.canonicalSourceRoot(validating: sourceRoot)
+            self.sourceRoot = canonicalSourceRoot
+            let outcome = try await ManagedModuleSupport.setupFromSource(
+                module: "scope",
+                sourceRoot: canonicalSourceRoot,
+                symbrain: symbrain
+            )
             buildResult = outcome.firstResult
             if let failure = outcome.firstResult, failure.status == "error" {
                 errorMessage = failure.error ?? "Build failed."
             }
             await refresh()
+        } catch let error as ModuleSourceBuild.ValidationError {
+            self.sourceRoot = nil
+            errorMessage = error.localizedDescription
+            errorDetail = Self.sourceCheckoutGuidance
         } catch {
             report(error)
         }
     }
+
+    private static let sourceCheckoutGuidance = "Choose the Symaira Brain checkout root containing go.mod, browse/, operate/Package.swift, scope/Package.swift, and history/Package.swift."
 }
 #endif
