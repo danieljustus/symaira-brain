@@ -269,6 +269,71 @@ fn fallback_executor_receives_unmigrated_commands_only() {
 }
 
 #[test]
+fn module_lifecycle_flags_are_forwarded_to_the_go_fallback() {
+    let executor = MockFallbackExecutor {
+        calls: std::sync::Mutex::new(Vec::new()),
+    };
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let cases = [
+        vec!["doctor", "--fix"],
+        vec!["doctor", "--fix=FALSE"],
+        vec!["doctor", "--force-release"],
+        vec!["setup", "--fix"],
+        vec!["setup", "--force-release"],
+        vec!["setup", "--from-source", "/receiver"],
+        vec!["setup", "--modules", "browse,operate"],
+    ];
+
+    for case in &cases {
+        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+        assert_eq!(
+            run_with_executor(&args, &mut stdout, &mut stderr, &executor),
+            42,
+            "{case:?} should use the Go fallback"
+        );
+    }
+
+    let calls = executor.calls.lock().unwrap();
+    assert_eq!(calls.len(), cases.len());
+    for (actual, expected) in calls.iter().zip(cases) {
+        assert_eq!(
+            actual,
+            &expected.into_iter().map(OsString::from).collect::<Vec<_>>()
+        );
+    }
+}
+
+#[test]
+fn unrelated_native_doctor_and_setup_invocations_do_not_fallback() {
+    let executor = MockFallbackExecutor {
+        calls: std::sync::Mutex::new(Vec::new()),
+    };
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let cases = [
+        vec!["doctor", "--fix=false", "--help"],
+        vec!["doctor", "--help", "--", "--force-release"],
+        vec!["doctor", "--vault-agent", "--force-release", "--help"],
+        vec!["doctor", "--unknown", "--force-release"],
+        vec!["setup", "--fix=false", "--help"],
+        vec!["setup", "--help", "--", "--from-source", "/receiver"],
+        vec!["setup", "--help", "--from-source", "/receiver"],
+    ];
+
+    for case in cases {
+        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+        assert_eq!(
+            run_with_executor(&args, &mut stdout, &mut stderr, &executor),
+            exit::USAGE,
+            "{case:?} should stay native"
+        );
+    }
+
+    assert!(executor.calls.lock().unwrap().is_empty());
+}
+
+#[test]
 fn run_in_process_returns_none_for_unmigrated_commands() {
     let mut stdout = Vec::new();
     let mut stderr = Vec::new();
