@@ -74,13 +74,32 @@ fn write_profile(root: &TempDir, fake: &std::path::Path) -> std::path::PathBuf {
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
+    command.env_clear();
+    #[cfg(windows)]
+    {
+        for key in [
+            "SystemRoot",
+            "SYSTEMROOT",
+            "windir",
+            "WINDIR",
+            "PATHEXT",
+            "ComSpec",
+            "COMSPEC",
+            "TEMP",
+            "TMP",
+            "SystemDrive",
+        ] {
+            if let Some(val) = std::env::var_os(key) {
+                command.env(key, val);
+            }
+        }
+    }
     command
         .args(args)
         .env("HOME", root.path().join("home"))
+        .env("USERPROFILE", root.path().join("home"))
         .env("XDG_CONFIG_HOME", root.path().join("config"))
         .env("PATH", root.path().join("empty-path"))
-        .env_remove("SYMBRAIN_GO_BINARY")
-        .env_remove("SYMBRAIN_SERVERS_VAULT_BINARY_PATH")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -405,5 +424,70 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
                 .is_some_and(|data| data["server"] == "usage" && data["tool"] == "get_ai_usage")
         }),
         "audit records: {records:?}"
+    );
+}
+
+#[test]
+fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys() {
+    let current_exe = std::env::current_exe().expect("current test executable path");
+    let outer_data_dir = TempDir::new().unwrap();
+    let outer_audit_dir = outer_data_dir.path().join("symbrain").join("audit");
+
+    let mut child = Command::new(current_exe)
+        .args([
+            "--exact",
+            "native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution",
+            "--nocapture",
+        ])
+        .env("XDG_DATA_HOME", outer_data_dir.path())
+        .env("ANTHROPIC_API_KEY", "inert-sentinel-test-token")
+        .env("OPENAI_API_KEY", "inert-sentinel-test-token")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("failed to spawn child test runner");
+
+    let start = Instant::now();
+    let timeout = Duration::from_secs(30);
+    let mut timed_out = false;
+
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => break,
+            Ok(None) => {
+                if start.elapsed() >= timeout {
+                    timed_out = true;
+                    let _ = child.kill();
+                    break;
+                }
+                thread::sleep(Duration::from_millis(20));
+            }
+            Err(err) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                panic!("failed to wait on child process: {err}");
+            }
+        }
+    }
+
+    let output = child
+        .wait_with_output()
+        .expect("failed to collect child output");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+
+    assert!(
+        !timed_out,
+        "child test runner timed out after {timeout:?}.\nstdout:\n{stdout}\nstderr:\n{stderr}"
+    );
+    assert!(
+        output.status.success(),
+        "child test runner failed with status {:?}.\nstdout:\n{stdout}\nstderr:\n{stderr}",
+        output.status
+    );
+    assert!(
+        !outer_audit_dir.exists(),
+        "outer audit directory was created in outer XDG_DATA_HOME, proving environment leaked into child command"
     );
 }
