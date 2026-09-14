@@ -903,6 +903,8 @@ dependencies = [
 name = "symbrain-audit"
 version = "0.11.0"
 dependencies = [
+ "cap-fs-ext",
+ "cap-std",
  "chrono",
  "serde",
  "serde_json",
@@ -943,6 +945,7 @@ dependencies = [
  "symbrain-broker",
  "symbrain-core",
  "symbrain-gateway",
+ "symbrain-guard-core",
  "symbrain-harness",
  "symbrain-managed",
  "symbrain-mcp",
@@ -994,6 +997,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "symbrain-core",
 ]
 
 [[package]]

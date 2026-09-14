@@ -8,6 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+symbrain-core = { path = "../symbrain-core" }
 base64 = "=0.22.1"
 hkdf = "=0.12.4"
 hmac = "=0.12.1"

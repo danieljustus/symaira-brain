@@ -16,6 +16,7 @@ func hermeticEnv(t *testing.T) {
 	t.Helper()
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	t.Setenv("SYMGUARD_CONFIG", filepath.Join(t.TempDir(), "missing.toml"))
 }
 
@@ -58,6 +59,7 @@ func TestRun_EmptyAllowlistNoServers(t *testing.T) {
 }
 
 func TestRun_DiscoveredServersDenied(t *testing.T) {
+	hermeticEnv(t)
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -130,6 +132,7 @@ func TestRun_ConfigError(t *testing.T) {
 }
 
 func TestRun_ConfigPresent(t *testing.T) {
+	hermeticEnv(t)
 	// A valid config file must flip the config line to ok and the policy
 	// line to the real rule count instead of the old hardcoded stubs.
 	dir := t.TempDir()
@@ -231,6 +234,7 @@ func TestRun_AuditLogCorruptAnchor(t *testing.T) {
 }
 
 func TestRun_AuditLogStatError(t *testing.T) {
+	hermeticEnv(t)
 	// Trigger the non-IsNotExist stat error branch: the audit log path
 	// resolves inside a 0000 directory so os.Stat returns permission
 	// denied, which is a distinct error from IsNotExist.

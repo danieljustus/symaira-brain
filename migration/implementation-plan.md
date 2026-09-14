@@ -1,5 +1,81 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Latest integration update — guard CLI
+
+The previously test-only Unix `guard decide` adapter is now wired into this
+local Rust integration candidate. Installed applications are unchanged. Other
+guard verbs still use the Go fallback. Worker `sa-0-43ac72fd` has finished;
+the coordinator owns this integration worktree and no Brain writer is active.
+This update supersedes the earlier decoder checkpoint's pending-CLI statements.
+
+Exact five-file delta, source-before/after hashes and reversible patch:
+`/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/brain-cli-integration-20260914T074809.707828Z/integration.json`.
+The sibling `integrated-parity.json` records the rebuilt integration binary's
+23/23 actual Go comparisons (response, exit, stderr, audit). Build, strict CLI
+Clippy and workspace formatting passed after integration. Earlier worker tests
+remain worker-source evidence until repeated on this candidate.
+
+Independent review `deleg_5239fba0` approved the bounded Unix adapter and closed
+GCLI-F01/F02 (help and ignored arguments). GCLI-BUILD-01 was resolved by rebuilding
+both the reviewed worker binary and the integrated candidate. GCLI-F03 (trailing
+JSON diagnostic) and GCLI-PLAT-01 (non-Unix audit unsupported) remain open; this is
+not full guard/Brain parity or native/value/cutover acceptance.
+
+Next concrete action: reproduce `{"command":"open"}x` against the pinned Go and
+integrated Rust binaries, add it to the executable differential corpus, repair
+the trailing-JSON diagnostic and repeat the affected candidate gates. Retain all
+existing WIP, historical Go source and failed evidence. No PR or release.
+
+## Resume checkpoint — 2026-09-14, guard decoder review
+
+- Owner: migration coordinator. `sa-0-d06ca694` stopped without edits: runtime
+  auto-isolated it in Vault, not Brain. Replacement `sa-0-43ac72fd`
+  (`deleg_686b0cd6`) was dispatched after explicitly setting Brain cwd, with
+  instructions to verify its own repository and restore the verified source
+  overlay only into its clean private child worktree. Successful isolation and
+  implementation remain unverified until the handoff; do not repeat the earlier
+  claim that CLI integration is already underway. The integration worktree,
+  lockfile, decoder and this register remain coordinator-owned. Worker lifetime
+  is session-local, not durable after termination. Integration worktree:
+  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/rust-integration-20260913`,
+  branch `migration/rust-integration-20260913`; integration/Go oracle
+  `0b585d52915a824664e1377d0a995dff3f5405cd` plus preserved WIP.
+- Recovery manifest (main/origin SHAs, full owned file list, byte-verified overlay,
+  staged/unstaged binary patches):
+  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/20260914T072304.925477Z/brain/snapshot.json`.
+  This retains the earlier Go audit/test changes, Raw-JSONL implementation,
+  test-only adapter, fixture generators and this run's decoder changes. Do not
+  reset, overwrite or reimplement that WIP.
+- Current scope remains **partial**, not a completed vertical slice. The decoder
+  now preserves duplicate null scalar/time fields and Go warning-slice reuse,
+  folded JSON names, zero times and IPv6 zones. Audit serialization now follows
+  the real Go command's `omitempty`; a former mirror-only test expectation was
+  corrected against actual pinned-command output. Quoting reuses the existing
+  `symbrain-core` implementation rather than a second formatter.
+- Verified evidence:
+  `/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/rust-resume-evidence/brain-review-gate-20260914T072140.355630Z/report.json`.
+  It binds source-before/after hashes, Rust/Cargo 1.98.0, native host, argv,
+  cwd, individual exit codes and logs. Guard-core tests, strict Clippy and
+  formatting passed. The new corpus compares 18 actual Go responses and audit
+  records; the mutation test uses the real capture validator. Earlier failing
+  run directories are retained, not relabeled as successes.
+- Reproduce the retained-source Go capture without replacing it:
+  `python3 guard/scripts/guard-decide-oracle/review_cases.py --check --output rust/symbrain-guard-core/tests/fixtures/external_decision_review.json`.
+  The generator verifies the historical binary hash and full Git-source identity;
+  its retained build lives in `target/migration-run/guard-decide-provenancefix`.
+- Next executable gate:
+  `python3 /Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/docs/intern/brain-review-gate.py`.
+  Then promote the existing test-only adapter into the local Rust CLI candidate
+  and compare the actual binary against the pinned Go command. `guard` dispatch
+  still returns `None` (Go fallback); installed applications are unchanged.
+- Still open within Phase 5/guard-decide: full malformed JSON/time diagnostics
+  (the time diagnostic helper is only lexically covered, not complete Go time
+  parser parity), true binary dispatch, audit error/path/race and cancellation
+  differential gates, independent delta review, native foreign-platform gates,
+  remaining Brain/Browse/Guard contracts and final value/integration acceptance.
+  No PR, merge, release or product cutover is authorized by this checkpoint.
+
+
 > **For Hermes:** Execute this plan task-by-task with one implementation writer at a time and two-stage review (contract compliance, then code quality). Never remove the Go oracle before Phase 10.
 
 **Goal:** Replace the Go implementation of `symbrain` with safe, idiomatic Rust while preserving CLI, MCP, SQLite, filesystem, Swift-client, security, and release contracts.
