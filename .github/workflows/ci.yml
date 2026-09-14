@@ -160,6 +160,26 @@ jobs:
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
+  # Windows native audit capability and guard decide adapter test gate.
+  # Exercises handle-relative directory capability, reparse-point rejection,
+  # and guard decide adapter on native Windows runners.
+  # Full migration acceptance remains open pending runtime evidence for all subsystems.
+  rust-windows-audit-guard:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Test symbrain-audit crate on native Windows
+        run: cargo test -p symbrain-audit --locked
+
+      - name: Test guard decide adapter on native Windows
+        run: cargo test -p symbrain-cli --test guard_decide_adapter --locked
+
   # Stdio hygiene gate: `symbrain mcp` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
   # shutdown (fake children). A dedicated job so a transport-breaking

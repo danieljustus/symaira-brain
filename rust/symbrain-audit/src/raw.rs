@@ -1,14 +1,14 @@
 //! Safe append-only writer for the legacy raw JSONL audit format.
 
 #[cfg(unix)]
-use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt, OpenOptionsSyncExt};
-#[cfg(unix)]
-use cap_std::fs::{Dir, DirBuilder, DirBuilderExt, OpenOptions, OpenOptionsExt};
+#[path = "raw_unix.rs"]
+mod raw_unix;
+
+#[cfg(windows)]
+#[path = "raw_windows.rs"]
+mod raw_windows;
+
 use std::io;
-#[cfg(unix)]
-use std::io::Write;
-#[cfg(unix)]
-use std::path::Component;
 use std::path::{Path, PathBuf};
 
 /// Appends already-serialized JSON records as raw JSONL.
@@ -24,6 +24,15 @@ impl RawJsonlAppender {
         Self { path: path.into() }
     }
 
+    /// Returns the configured target path.
+    #[must_use]
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+}
+
+#[cfg(unix)]
+impl RawJsonlAppender {
     /// Appends one raw JSONL record, preserving every input byte.
     ///
     /// The parent is opened component-by-component and retained as a
@@ -35,7 +44,6 @@ impl RawJsonlAppender {
     /// # Errors
     /// Returns an error when the record contains a line ending, a path
     /// component is unsafe, a parent cannot be created, or the write is short.
-    #[cfg(unix)]
     pub fn append(&self, record: &[u8]) -> io::Result<()> {
         if record.contains(&b'\n') || record.contains(&b'\r') {
             return Err(io::Error::new(
@@ -43,17 +51,42 @@ impl RawJsonlAppender {
                 "audit: raw record must be a single line",
             ));
         }
-        let (parent_path, name) = split_target(&self.path)?;
-        let parent = open_parent(&parent_path, true)?;
-        append_to_parent(&parent, &name, record)
+        let (parent_path, name) = raw_unix::split_target(&self.path)?;
+        let parent = raw_unix::open_parent(&parent_path, true)?;
+        raw_unix::append_to_parent(&parent, &name, record)
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
 impl RawJsonlAppender {
-    /// Fails closed because the safe append implementation is Unix-only.
+    /// Appends one raw JSONL record on Windows, preserving every input byte.
     ///
-    /// This returns before inspecting the record or touching the filesystem.
+    /// The parent is opened component-by-component with handle-relative
+    /// nofollow traversal and retained as a directory capability. The target
+    /// is opened relative to that retained directory with symlink following
+    /// disabled. Device namespaces, alternate data streams (ADS), reserved DOS
+    /// device names, and reparse points are rejected fail-closed.
+    ///
+    /// # Errors
+    /// Returns an error when the record contains a line ending, a path
+    /// component is unsafe, a parent cannot be created, the target is not
+    /// a regular file, or the write is short.
+    pub fn append(&self, record: &[u8]) -> io::Result<()> {
+        if record.contains(&b'\n') || record.contains(&b'\r') {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "audit: raw record must be a single line",
+            ));
+        }
+        let (parent_path, name) = raw_windows::split_target(&self.path)?;
+        let parent = raw_windows::open_parent(&parent_path, true)?;
+        raw_windows::append_to_parent(&parent, &name, record)
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
+impl RawJsonlAppender {
+    /// Fails closed on platforms without safe directory capability append support.
     ///
     /// # Errors
     /// Always returns [`io::ErrorKind::Unsupported`].
@@ -65,118 +98,7 @@ impl RawJsonlAppender {
     }
 }
 
-impl RawJsonlAppender {
-    /// Returns the configured target path.
-    #[must_use]
-    pub fn path(&self) -> &Path {
-        &self.path
-    }
-}
-
-#[cfg(unix)]
-fn append_to_parent(parent: &Dir, name: &Path, record: &[u8]) -> io::Result<()> {
-    let mut data = Vec::with_capacity(record.len() + 1);
-    data.extend_from_slice(record);
-    data.push(b'\n');
-    let mut options = OpenOptions::new();
-    options.create(true).append(true).write(true);
-    options.follow(FollowSymlinks::No);
-    #[cfg(unix)]
-    options.mode(0o600);
-    options.nonblock(true);
-    let mut file = parent.open_with(name, &options)?;
-    if !file.metadata()?.file_type().is_file() {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "audit: target must be a regular file",
-        ));
-    }
-    let written = file.write(&data)?;
-    if written != data.len() {
-        return Err(io::Error::new(
-            io::ErrorKind::WriteZero,
-            format!("audit: short append write: {written}/{} bytes", data.len()),
-        ));
-    }
-    Ok(())
-}
-
-#[cfg(unix)]
-fn split_target(path: &Path) -> io::Result<(PathBuf, PathBuf)> {
-    let name = path.file_name().ok_or_else(|| {
-        io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "audit: target path must name a file",
-        )
-    })?;
-    if matches!(name.to_str(), Some("." | "..")) {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "audit: target path must name a file",
-        ));
-    }
-    let parent = path.parent().unwrap_or_else(|| Path::new("."));
-    Ok((parent.to_path_buf(), PathBuf::from(name)))
-}
-
-#[cfg(unix)]
-#[allow(clippy::collapsible_if)]
-fn open_parent(path: &Path, create: bool) -> io::Result<Dir> {
-    let path = physical_path(path);
-    let mut current = if path.is_absolute() {
-        Dir::open_ambient_dir(Path::new("/"), cap_std::ambient_authority())?
-    } else {
-        Dir::open_ambient_dir(Path::new("."), cap_std::ambient_authority())?
-    };
-    for component in path.components() {
-        let name = match component {
-            Component::RootDir | Component::CurDir => continue,
-            Component::Normal(name) => name,
-            Component::ParentDir | Component::Prefix(_) => {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidInput,
-                    "audit: path contains an unsafe component",
-                ));
-            }
-        };
-        if create {
-            let mut builder = DirBuilder::new();
-            builder.mode(0o700);
-            match current.create_dir_with(name, &builder) {
-                Ok(()) => {}
-                Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
-                Err(error) => return Err(error),
-            }
-        }
-        if let Ok(metadata) = current.symlink_metadata(name) {
-            if metadata.file_type().is_symlink() {
-                return Err(io::Error::new(
-                    io::ErrorKind::PermissionDenied,
-                    format!("audit: symlink path component: {}", name.display()),
-                ));
-            }
-        }
-        let next = current.open_dir_nofollow(name)?;
-        current = next;
-    }
-    Ok(current)
-}
-
-#[cfg(all(unix, target_os = "macos"))]
-fn physical_path(path: &Path) -> PathBuf {
-    if path == Path::new("/var") || path.starts_with("/var/") {
-        PathBuf::from("/private").join(path.strip_prefix("/").unwrap_or(path))
-    } else {
-        path.to_path_buf()
-    }
-}
-
-#[cfg(all(unix, not(target_os = "macos")))]
-fn physical_path(path: &Path) -> PathBuf {
-    path.to_path_buf()
-}
-
-#[cfg(all(test, unix))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use std::fs;
@@ -184,6 +106,7 @@ mod tests {
     use std::thread;
     use tempfile::tempdir;
 
+    #[cfg(any(unix, windows))]
     #[test]
     fn appends_exact_bytes_without_rewriting_fields() {
         let dir = tempdir().expect("tempdir");
@@ -265,6 +188,7 @@ mod tests {
         assert!(!outside.path().join("audit.log").exists());
     }
 
+    #[cfg(any(unix, windows))]
     #[test]
     fn bare_relative_path_uses_process_working_directory() {
         if std::env::var_os("SYMBRAIN_RAW_RELATIVE_CHILD").is_some() {
@@ -290,12 +214,18 @@ mod tests {
         );
     }
 
+    #[cfg(any(unix, windows))]
     #[test]
     fn rejects_line_breaks_and_unsafe_paths() {
         let dir = tempdir().expect("tempdir");
         assert!(
             RawJsonlAppender::new(dir.path().join("audit.log"))
                 .append(b"{}\n{}")
+                .is_err()
+        );
+        assert!(
+            RawJsonlAppender::new(dir.path().join("audit.log"))
+                .append(b"{}\r{}")
                 .is_err()
         );
         assert!(
@@ -333,6 +263,7 @@ mod tests {
         assert!(socket_result.is_err());
     }
 
+    #[cfg(any(unix, windows))]
     #[test]
     fn concurrent_appends_are_complete_jsonl_records() {
         let dir = tempdir().expect("tempdir");
@@ -358,19 +289,5 @@ mod tests {
         for line in data.lines() {
             serde_json::from_str::<serde_json::Value>(line).expect("json");
         }
-    }
-}
-
-#[cfg(all(test, not(unix)))]
-mod non_unix_tests {
-    use super::RawJsonlAppender;
-    use std::io::ErrorKind;
-
-    #[test]
-    fn append_fails_closed_before_filesystem_access() {
-        let error = RawJsonlAppender::new("definitely/not/created/audit.log")
-            .append(b"invalid\nrecord")
-            .expect_err("non-Unix append must be unsupported");
-        assert_eq!(error.kind(), ErrorKind::Unsupported);
     }
 }

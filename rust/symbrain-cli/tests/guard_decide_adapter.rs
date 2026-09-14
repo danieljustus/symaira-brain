@@ -73,7 +73,6 @@ fn production_route_reader_failure_is_one_audited_deny() {
     assert_eq!(audit.lines().count(), 1);
 }
 
-#[cfg(unix)]
 #[test]
 fn production_route_audit_failure_denies_and_output_failure_returns_one() {
     let data = tempfile::tempdir().expect("tempdir");
