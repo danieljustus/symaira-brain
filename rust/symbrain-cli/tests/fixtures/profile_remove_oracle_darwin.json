@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "go_revision": "5f46d8a05ea6117947ac64003ed336ba7ad4b29c",
+  "go_revision": "67585b5453bb81f51025c1adbac4e6625bb8d0f1",
   "generator_sha256": "cce45fb1abdd173a21731a60e430e8a04baf2e8ddb3c3d3c83f34b540e5f271b",
   "go_sources": {
     "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
@@ -18,7 +18,7 @@
     "internal/harness/ordered_map.go": "287c1c92388352c794efebf36f19fcacfeee8ea62b5ba552a5d6131d743b8042",
     "internal/harness/registry.go": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
     "internal/harness/toml_document.go": "1710e2552f35ceafac1a06f7844044630e5b4e969b59b0028173bcfb5035eadf",
-    "internal/profile/profile.go": "4812e4e3f7116b5bd0b330b67277112cc068f0c523751b202b66b742b017c26b",
+    "internal/profile/profile.go": "04f4ce69003c7f2bb8a654f4f8c0585c8a38b945556aef8d7049088c1316dfd4",
     "internal/profile/remove_other.go": "eb4f3455be8dee18d65eb7405c5e0b0d13b4275db4b5b5263d4a68a1fe265ae4",
     "internal/profile/remove_unix.go": "6c4893ba2d85c092b3c0fc98125d6401156c5b975f1aa7bacfe4aeafefcd2184",
     "internal/profile/remove_windows.go": "08f773d0ebbac8ffb31e41fe832900c5e2a354020e2ea3f32380b8f6cb77ce50",

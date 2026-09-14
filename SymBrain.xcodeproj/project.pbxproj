@@ -14,15 +14,21 @@
 		17388265342DF0FED40D14C6 /* VaultClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */; };
 		17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F7A7307C5362C46D956DDD /* MemoryView.swift */; };
 		1876D0749F97752B05EED258 /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 22DDC1B7D47B712C3444DF4D /* SymairaCLIRunner */; };
+		1E3FC87576B320300FA2BF08 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 73556BC022BF7D1CC002C5CE /* AppIcon.icon */; };
 		20755EC59EE97EA408B9FE55 /* CLIErrorFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2300D8B9F828C93EDB7D76 /* CLIErrorFormatter.swift */; };
+		263C4CD15FA59655855FD872 /* VaultIntakeStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BA4B3D6BA95C2B0343233E7 /* VaultIntakeStateMachineTests.swift */; };
+		2A8862B84BD73F2BE5BEAD83 /* OperateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F95B7A2A47E870E937155970 /* OperateView.swift */; };
 		36D239277D7C1BA96C6EFB01 /* AuditLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0DC6F1658F16C48F507A56 /* AuditLog.swift */; };
 		39FF1DA3FAAACE4FF6079632 /* SymairaUpdateCheck in Frameworks */ = {isa = PBXBuildFile; productRef = 607EFF1004A503E966196E05 /* SymairaUpdateCheck */; };
 		3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDFA6201EBE1C20A656FE31 /* Models.swift */; };
 		433E92DB0B45482A00A4FA09 /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B91F2C82B9EF019B92AA1 /* VaultView.swift */; };
 		44924707DC196AD3AF99D83E /* MobileRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */; };
+		4E1B89482D62D0D3D192C245 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 73556BC022BF7D1CC002C5CE /* AppIcon.icon */; };
 		4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */; };
 		521F6345DEFC9D796B9EAA2C /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 0054585A78E372D2085F559E /* SymairaCLIRunner */; };
+		624EE2196B11AA8A02AA7CE0 /* ScopeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28479037F269EE676E6DA1C6 /* ScopeView.swift */; };
 		636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D52B395108AFAD4ACBF29E /* SettingsView.swift */; };
+		637B17D0BC17D7B8BC503013 /* CLIErrorFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */; };
 		677BD9064DAD4C7D78ADC4E0 /* AppVersionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF3A8EC9DD9103D13D5D3B2 /* AppVersionInfo.swift */; };
 		6964252A12F124217D3EB430 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		6BA42FABEA0041023B5B2A63 /* SkillsModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C42924D7035EF242B3DFE19 /* SkillsModels.swift */; };
@@ -31,6 +37,7 @@
 		76E8895721D92EA46A646520 /* ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB797B558BCC85838B09E52D /* ViewModels.swift */; };
 		83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD3F0F9378282E7AC6067E /* ModelTests.swift */; };
 		8CF4C06F57A2883FFFF98B3C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E451D0841FDC285609A50119 /* Assets.xcassets */; };
+		9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */; };
 		95F6922DD5837620CDB02E29 /* libSymBrainCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */; };
 		99A982ED21A300028A6C94EE /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9480D05289AD3EDD804ECC1C /* SymairaDaemonKit */; };
 		9F5F140B4DADBA5040FEE109 /* ModuleViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */; };
@@ -46,15 +53,18 @@
 		BE1D7E2E6AA817FD48DB1BD5 /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 634705A978FF032B20A7563A /* SymairaDaemonKit */; };
 		CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */; };
 		CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2959FD69F38959DDA732319 /* ProfilesView.swift */; };
+		D147D323A0B2486C0E7F495A /* ModuleSourceBuild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */; };
 		D36BFE7884BAE466229D9BC6 /* SymairaToolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 99409AC8BA33F24A6846CF9D /* SymairaToolKit */; };
 		D7828295D3B4E54D593ADB26 /* ModuleViewModelSkeletonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */; };
 		DBAE902DB6B8A6F4D0097667 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96FDE0A3CE49598C93AA0D40 /* Assets.xcassets */; };
 		E326279CD59DE06D180EB126 /* SymairaToolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 9DA891F8B1B3498B6A3C122D /* SymairaToolKit */; };
 		E8C7A8584EB099EA03D99F73 /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 0EFDD552CB42AFE785E795E8 /* SymairaTheme */; };
+		EDD030ECA0D394CD1F9AE631 /* ScopeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888F1EBC3F75995F924E837F /* ScopeViewModel.swift */; };
 		F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */; };
 		F2F5EB32E528F74CA1CB2601 /* SyncView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */; };
 		F768D624036BD0CF6CF32955 /* MemoryListPagingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541AE8E66F5F6EEF650CBF12 /* MemoryListPagingTests.swift */; };
 		F8905C81AAA96F712931839E /* ModuleViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */; };
+		FC68CDD4587BD69B69079C07 /* OperateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 557830EEEA48C7E1C6DBCE50 /* OperateViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,8 +86,10 @@
 
 /* Begin PBXFileReference section */
 		00315C0CA03EEE1EE29ABD08 /* VaultClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultClient.swift; sourceTree = "<group>"; };
+		08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleSourceBuild.swift; sourceTree = "<group>"; };
 		0FBD3F0F9378282E7AC6067E /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		15AAC2C6738F79F00ED9913B /* SymBrainCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SymBrainCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		28479037F269EE676E6DA1C6 /* ScopeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScopeView.swift; sourceTree = "<group>"; };
 		2D24A10D6F4152E6F4337007 /* SkillsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsView.swift; sourceTree = "<group>"; };
 		2DDFA6201EBE1C20A656FE31 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainClient.swift; sourceTree = "<group>"; };
@@ -85,11 +97,15 @@
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
 		4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleViewModelBase.swift; sourceTree = "<group>"; };
 		541AE8E66F5F6EEF650CBF12 /* MemoryListPagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryListPagingTests.swift; sourceTree = "<group>"; };
+		557830EEEA48C7E1C6DBCE50 /* OperateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperateViewModel.swift; sourceTree = "<group>"; };
 		596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsClient.swift; sourceTree = "<group>"; };
 		5AF3A8EC9DD9103D13D5D3B2 /* AppVersionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfo.swift; sourceTree = "<group>"; };
 		5B95AD46A086ED97FDDB17CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6BA4B3D6BA95C2B0343233E7 /* VaultIntakeStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VaultIntakeStateMachineTests.swift; sourceTree = "<group>"; };
 		6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarnessesView.swift; sourceTree = "<group>"; };
+		73556BC022BF7D1CC002C5CE /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsModelTests.swift; sourceTree = "<group>"; };
+		888F1EBC3F75995F924E837F /* ScopeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScopeViewModel.swift; sourceTree = "<group>"; };
 		8ADE8620519C362CBAF76358 /* SymBrainMobileApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainMobileApp.swift; sourceTree = "<group>"; };
 		8B0DC6F1658F16C48F507A56 /* AuditLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLog.swift; sourceTree = "<group>"; };
 		96FDE0A3CE49598C93AA0D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -101,6 +117,7 @@
 		C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModelTests.swift; sourceTree = "<group>"; };
 		C4F6AD66B2E1974D890C256E /* libSymBrainCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSymBrainCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleViewModelSkeletonTests.swift; sourceTree = "<group>"; };
+		D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIErrorFormatterTests.swift; sourceTree = "<group>"; };
 		D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleModels.swift; sourceTree = "<group>"; };
 		D66DEE385C4CA00E4B3D5438 /* SymBrain.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SymBrain.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D73778742BF7F8F6CCBAFD35 /* SymBrainApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainApp.swift; sourceTree = "<group>"; };
@@ -114,6 +131,8 @@
 		F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SymBrainMobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppVersionInfoTests.swift; sourceTree = "<group>"; };
 		F4F7A7307C5362C46D956DDD /* MemoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryView.swift; sourceTree = "<group>"; };
+		F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleSourceBuildTests.swift; sourceTree = "<group>"; };
+		F95B7A2A47E870E937155970 /* OperateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperateView.swift; sourceTree = "<group>"; };
 		FB25C751770FF552A574E5CE /* MemoryClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryClient.swift; sourceTree = "<group>"; };
 		FB797B558BCC85838B09E52D /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -156,9 +175,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		28844DE2D420179DE3E10F7B /* app-icon */ = {
+			isa = PBXGroup;
+			children = (
+				73556BC022BF7D1CC002C5CE /* AppIcon.icon */,
+			);
+			name = "app-icon";
+			path = "assets/app-icon";
+			sourceTree = "<group>";
+		};
 		53110CFA69863692BA21C600 = {
 			isa = PBXGroup;
 			children = (
+				28844DE2D420179DE3E10F7B /* app-icon */,
 				B01A11F4CE698CE75076CDBA /* SymBrainApp */,
 				BE7F03B320601C0EBC16C78A /* SymBrainCore */,
 				80643F0FB10D70E98B759F51 /* SymBrainCoreTests */,
@@ -171,12 +200,15 @@
 			isa = PBXGroup;
 			children = (
 				F39B2415BE8190493F52847B /* AppVersionInfoTests.swift */,
+				D3F95704B5E65C06E71D0C1A /* CLIErrorFormatterTests.swift */,
 				541AE8E66F5F6EEF650CBF12 /* MemoryListPagingTests.swift */,
 				0FBD3F0F9378282E7AC6067E /* ModelTests.swift */,
 				C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */,
+				F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */,
 				CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */,
 				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
+				6BA4B3D6BA95C2B0343233E7 /* VaultIntakeStateMachineTests.swift */,
 			);
 			name = SymBrainCoreTests;
 			path = Tests/SymBrainCoreTests;
@@ -200,7 +232,11 @@
 				D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */,
 				6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */,
 				F4F7A7307C5362C46D956DDD /* MemoryView.swift */,
+				F95B7A2A47E870E937155970 /* OperateView.swift */,
+				557830EEEA48C7E1C6DBCE50 /* OperateViewModel.swift */,
 				A2959FD69F38959DDA732319 /* ProfilesView.swift */,
+				28479037F269EE676E6DA1C6 /* ScopeView.swift */,
+				888F1EBC3F75995F924E837F /* ScopeViewModel.swift */,
 				37D52B395108AFAD4ACBF29E /* SettingsView.swift */,
 				2D24A10D6F4152E6F4337007 /* SkillsView.swift */,
 				EB6D4C9F0F22A569A49ECA18 /* SyncView.swift */,
@@ -243,6 +279,7 @@
 				FB25C751770FF552A574E5CE /* MemoryClient.swift */,
 				2DDFA6201EBE1C20A656FE31 /* Models.swift */,
 				D4054F15733F2A69C54DB1D5 /* ModuleModels.swift */,
+				08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */,
 				4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */,
 				9AE89E35C2BD9CADD9971FE7 /* ModuleViewModels.swift */,
 				596B2A7E3F76EA853698BAE6 /* SkillsClient.swift */,
@@ -362,7 +399,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					0B0CB50405A895D139BBF784 = {
 						ProvisioningStyle = Automatic;
@@ -402,6 +439,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E1B89482D62D0D3D192C245 /* AppIcon.icon in Resources */,
 				DBAE902DB6B8A6F4D0097667 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -410,6 +448,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E3FC87576B320300FA2BF08 /* AppIcon.icon in Resources */,
 				8CF4C06F57A2883FFFF98B3C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -454,7 +493,11 @@
 				BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */,
 				CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */,
 				17BCC15730FB760984D4EA7D /* MemoryView.swift in Sources */,
+				2A8862B84BD73F2BE5BEAD83 /* OperateView.swift in Sources */,
+				FC68CDD4587BD69B69079C07 /* OperateViewModel.swift in Sources */,
 				CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */,
+				624EE2196B11AA8A02AA7CE0 /* ScopeView.swift in Sources */,
+				EDD030ECA0D394CD1F9AE631 /* ScopeViewModel.swift in Sources */,
 				636366E7334C627DC1D0A8DA /* SettingsView.swift in Sources */,
 				0D9C664B7AA28DB4D716B319 /* SkillsView.swift in Sources */,
 				B872D82DD78AD55CAE76D798 /* SymBrainApp.swift in Sources */,
@@ -468,12 +511,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B262714CE76A1CEFD79E91FC /* AppVersionInfoTests.swift in Sources */,
+				637B17D0BC17D7B8BC503013 /* CLIErrorFormatterTests.swift in Sources */,
 				F768D624036BD0CF6CF32955 /* MemoryListPagingTests.swift in Sources */,
 				83714B3CC1282A0765E58F4A /* ModelTests.swift in Sources */,
 				4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */,
+				9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */,
 				D7828295D3B4E54D593ADB26 /* ModuleViewModelSkeletonTests.swift in Sources */,
 				040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */,
 				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
+				263C4CD15FA59655855FD872 /* VaultIntakeStateMachineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,6 +533,7 @@
 				A08CEC3AE0AC46C2E5DD39DE /* MemoryClient.swift in Sources */,
 				3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */,
 				AB49BA080F2FF71CBE24000E /* ModuleModels.swift in Sources */,
+				D147D323A0B2486C0E7F495A /* ModuleSourceBuild.swift in Sources */,
 				9F5F140B4DADBA5040FEE109 /* ModuleViewModelBase.swift in Sources */,
 				F8905C81AAA96F712931839E /* ModuleViewModels.swift in Sources */,
 				B118AE290BABA60839E4033E /* SkillsClient.swift in Sources */,
@@ -720,7 +767,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.10.0;
+				MARKETING_VERSION = 0.11.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -768,7 +815,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.10.0;
+				MARKETING_VERSION = 0.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = "Symaira Brain";
@@ -792,7 +839,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.10.0;
+				MARKETING_VERSION = 0.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.symaira.brain.mobile;
 				PRODUCT_MODULE_NAME = SymBrainMobile;
 				PRODUCT_NAME = "Symaira Brain";
@@ -817,7 +864,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.10.0;
+				MARKETING_VERSION = 0.11.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

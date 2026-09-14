@@ -294,8 +294,9 @@ jobs:
   # ScreenCaptureKit/Accessibility APIs even with permission-denied fallbacks
   # written in, and the operator brief for this package requires "controlled
   # fixture apps only; no live desktop automation as a migration smoke test."
-  # So this job only compiles the package and its test targets (catching
-  # source/API-surface errors without executing anything) and exercises the
+  # Compile every test target, but execute only PermissionServiceTests,
+  # whose injected probes never invoke native TCC or open System Settings.
+  # Also exercise the
   # MCP transport with initialize/tools-list only, never tools/call.
   operate-native-swiftpm:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
@@ -320,7 +321,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           elif [ -z "${BASE_SHA:-}" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-          elif git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -Eq '^(operate/|history/)'; then
+          elif git diff --name-only "$BASE_SHA...$HEAD_SHA" | grep -Eq '^(operate/|history/|scripts/operate-mcp-smoke\.py$|\.github/workflows/ci\.yml$)'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -341,7 +342,12 @@ jobs:
       - name: Build Operate package, executable and test targets
         if: steps.operate.outputs.changed == 'true'
         working-directory: operate
-        run: swift build --build-tests --scratch-path "$RUNNER_TEMP/operate-package-build"
+        run: swift build --manifest-cache local --build-tests --scratch-path "$RUNNER_TEMP/operate-package-build"
+
+      - name: Test injected permission denial without native device access
+        if: steps.operate.outputs.changed == 'true'
+        working-directory: operate
+        run: swift test --manifest-cache local --scratch-path "$RUNNER_TEMP/operate-package-build" --filter PermissionServiceTests
 
       - name: Verify CLI version output and stderr hygiene
         if: steps.operate.outputs.changed == 'true'

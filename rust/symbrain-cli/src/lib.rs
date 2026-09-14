@@ -22,7 +22,7 @@ mod profile_render;
 mod setup_cli;
 mod usage_cli;
 
-const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Passthrough to symvault\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
+const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
 
 /// Execution strategy for commands delegated to the Go oracle or child processes.
 pub trait FallbackExecutor {
@@ -87,6 +87,49 @@ pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
     out
 }
 
+/// Returns whether an invocation reaches a Go-owned flag before its native
+/// parser would stop. This follows the relevant `flag.FlagSet` boundaries so
+/// unrelated invalid invocations do not accidentally require the fallback.
+fn has_go_owned_flag(
+    args: &[OsString],
+    known_flags: &[&str],
+    value_flags: &[&str],
+    go_owned_flags: &[&str],
+    go_owned_bool_flags: &[&str],
+) -> bool {
+    let normalized = normalize_flags(args);
+    let mut index = 0;
+    while index < normalized.len() {
+        let argument = normalized[index].to_string_lossy();
+        if argument == "--" || argument == "-" || !argument.starts_with('-') {
+            break;
+        }
+        let flag = argument.trim_start_matches('-');
+        let (name, value) = flag
+            .split_once('=')
+            .map_or((flag, None), |(name, value)| (name, Some(value)));
+        if !known_flags.contains(&name) {
+            return false;
+        }
+        if matches!(name, "h" | "help") {
+            return false;
+        }
+        if go_owned_flags.contains(&name)
+            || (go_owned_bool_flags.contains(&name) && value != Some("false"))
+        {
+            return true;
+        }
+        if value.is_none() && value_flags.contains(&name) {
+            index += 1;
+            if index == normalized.len() {
+                return false;
+            }
+        }
+        index += 1;
+    }
+    false
+}
+
 /// Runs `symbrain` with the production inherited-process fallback executor.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     if args.first().is_some_and(|arg| arg == "vault") {
@@ -148,7 +191,9 @@ pub fn run_in_process(
         "config" => run_config(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
+        "setup" if setup_cli::requires_go_fallback(rest) => None,
         "setup" => Some(setup_cli::run(rest, stdout, stderr)),
+        "doctor" if doctor_cli::requires_go_fallback(rest) => None,
         "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),
         "install" => Some(install_cli::run_install(rest, stdout, stderr)),
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),

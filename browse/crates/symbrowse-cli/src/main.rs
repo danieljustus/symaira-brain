@@ -483,6 +483,7 @@ fn run_mcp(
             allow_private,
             engine: Some(engine),
             daemon_log_path: Some(daemon_log_path),
+            endpoint: None,
         },
     ) {
         Ok(()) => ExitCode::SUCCESS,
@@ -589,7 +590,16 @@ fn run_daemon(
     } else {
         mode
     };
-    if let Err(error) = symbrowse_core::config::resolve_selection(Some(&mode), Some(&engine)) {
+    // Static and compat transports do not accept a browser engine. Keep the
+    // browser default only for browser mode; an inherited engine must not
+    // poison an explicit transport selection.
+    let engine = if mode != "browser" {
+        "static".to_owned()
+    } else {
+        engine
+    };
+    let selection_engine = (mode == "browser").then_some(engine.as_str());
+    if let Err(error) = symbrowse_core::config::resolve_selection(Some(&mode), selection_engine) {
         let _ = writeln!(
             io::stderr(),
             "invalid transport selection: {}",

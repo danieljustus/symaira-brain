@@ -32,7 +32,10 @@ func cmdSetup(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	fs := flag.NewFlagSet("setup", flag.ContinueOnError)
 	jsonOut := fs.Bool("json", false, "emit machine-readable JSON")
 	fix := fs.Bool("fix", false, "repair missing or version-mismatched binaries (alias for doctor --fix)")
+	forceRelease := fs.Bool("force-release", false, "with --fix: allow replacing a brain-source build with the pinned release download")
 	allowUnsigned := fs.Bool("allow-unsigned", false, "install even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)")
+	fromSource := fs.String("from-source", "", "build optional module binaries from the in-repo sources at this repository root and install them into the managed directory (instead of downloading releases)")
+	modulesFlag := fs.String("modules", "", "with --from-source: comma-separated module selection (browse,operate,scope); default: modules enabled in config")
 	fs.SetOutput(stderr)
 	if err := fs.Parse(normalizeFlags(args)); err != nil {
 		return exitcodes.ExitNoInput
@@ -44,8 +47,20 @@ func cmdSetup(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		return exitcodes.ExitGeneric
 	}
 
+	if *fromSource != "" {
+		if *fix || *allowUnsigned {
+			fmt.Fprintf(stderr, "symbrain setup: --from-source cannot be combined with --fix or --allow-unsigned\n")
+			return exitcodes.ExitNoInput
+		}
+		return runSetupFromSource(context.Background(), stdout, stderr, binDir, *fromSource, *modulesFlag, *jsonOut)
+	}
+	if *modulesFlag != "" {
+		fmt.Fprintf(stderr, "symbrain setup: --modules requires --from-source\n")
+		return exitcodes.ExitNoInput
+	}
+
 	if *fix {
-		return runSetupFix(stdout, stderr, binDir, *jsonOut, *allowUnsigned)
+		return runSetupFix(stdout, stderr, binDir, *jsonOut, *allowUnsigned, *forceRelease)
 	}
 	return runSetupInstall(stdout, stderr, binDir, *jsonOut, *allowUnsigned)
 }
@@ -111,7 +126,7 @@ func runSetupInstall(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsi
 	return exitcodes.ExitOK
 }
 
-func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned bool) exitcodes.ExitCode {
+func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned, forceRelease bool) exitcodes.ExitCode {
 	ctx := context.Background()
 	manifest, err := managed.LoadManifest()
 	if err != nil {
@@ -149,6 +164,15 @@ func runSetupFix(stdout, stderr io.Writer, binDir string, jsonOut, allowUnsigned
 			skipped++
 			if !jsonOut {
 				fmt.Fprintf(stdout, "  ✓  %s %s (already installed)\n", name, existing)
+			}
+		} else if !forceRelease && isBrainSourceInstall(binDir, core.BinaryName) {
+			// A binary built from the in-repo module sources is
+			// intentional replacement state; release repair must not
+			// silently overwrite it (see managed.FixWithOptions).
+			result.Status = "skipped"
+			skipped++
+			if !jsonOut {
+				fmt.Fprintf(stdout, "  -  %s %s (brain-source build; use --force-release to replace)\n", name, existing)
 			}
 		} else {
 			if err := inst.Install(ctx, &core); err != nil {

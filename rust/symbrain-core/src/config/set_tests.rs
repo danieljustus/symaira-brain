@@ -182,3 +182,66 @@ fn set_handles_relative_path_without_parent() {
     let _ = fs::remove_file(path);
     assert_eq!(code, crate::exit::OK);
 }
+
+#[test]
+fn set_preview_is_non_mutating_and_does_not_reveal_value() {
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("config.toml");
+    fs::write(&path, "default_profile = \"personal\"\n").unwrap();
+    let before = fs::read(&path).unwrap();
+    let mut out = Vec::new();
+    let mut err = Vec::new();
+    assert_eq!(
+        run_config_set_with_path(
+            &path,
+            &[
+                "--preview".into(),
+                "default_profile".into(),
+                "secret-value".into()
+            ],
+            &mut out,
+            &mut err
+        ),
+        crate::exit::OK
+    );
+    assert!(String::from_utf8_lossy(&out).contains("preview config set default_profile: changed"));
+    assert!(!String::from_utf8_lossy(&out).contains("secret-value"));
+    assert_eq!(fs::read(&path).unwrap(), before);
+}
+
+#[test]
+fn set_writes_backup_and_preserves_original_when_backup_fails() {
+    let dir = tempdir().unwrap();
+    let path = dir.path().join("config.toml");
+    fs::write(&path, "default_profile = \"personal\"\n").unwrap();
+    let mut out = Vec::new();
+    let mut err = Vec::new();
+    assert_eq!(
+        run_config_set_with_path(
+            &path,
+            &["default_profile".into(), "restricted".into()],
+            &mut out,
+            &mut err
+        ),
+        crate::exit::OK
+    );
+    assert_eq!(
+        fs::read(path.with_file_name("config.toml.bak")).unwrap(),
+        b"default_profile = \"personal\"\n"
+    );
+    fs::remove_file(path.with_file_name("config.toml.bak")).unwrap();
+    fs::create_dir(path.with_file_name("config.toml.bak")).unwrap();
+    let before = fs::read(&path).unwrap();
+    out.clear();
+    err.clear();
+    assert_eq!(
+        run_config_set_with_path(
+            &path,
+            &["default_profile".into(), "blocked".into()],
+            &mut out,
+            &mut err
+        ),
+        crate::exit::GENERIC
+    );
+    assert_eq!(fs::read(path).unwrap(), before);
+}

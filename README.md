@@ -1,6 +1,6 @@
 # Symaira Brain
 
-> **Accepted product direction — implementation pending:** Brain is the primary agent-context/control product. The accepted target adds optional Browse and Operate modules and integrates credential management in Brain GUI/CLI while keeping the separate, independently usable symvault service. Browse remains actively developed and Operate is retained. These module/UI cutovers are not yet shipped; the current commands below remain authoritative for existing installations. See [PB-2026-09-09](docs/adr/0002-product-boundaries.md).
+> **Current product state — source/consumer cutover completed 2026-09-13:** Brain is the primary agent-context/control product and owns the optional Browse, Operate and Scope modules. Their sources are in this repository, direct managed binaries are verified, `symaira-browse` is archived, and Cockpit is tune-only. The separate `symvault` service remains independently usable and its management-UI replacement is still a separate gate. No signed Brain-built module release or package-manager replacement has shipped. See [PB-2026-09-09](docs/adr/0002-product-boundaries.md).
 
 [![CI](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/danieljustus/symaira-brain/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/danieljustus/symaira-brain?label=Release)](https://github.com/danieljustus/symaira-brain/releases/latest)
@@ -331,16 +331,13 @@ only stops `setup`/`doctor --fix` from reinstalling it.
 
 ### Scope (optional module)
 
-Scope (ports, containers, background daemons, local MCP-server health) is
-`symcockpit scope`, part of the `symcockpit` binary Brain already installs
-as a mandatory core — there is no separate `modules.scope` toggle to flip,
-just a profile entry:
+Scope (ports, containers, background daemons, local MCP-server health) is the optional Brain-managed `symscope` binary. Enable the Scope module explicitly, then configure the profile entry:
 
 ```toml
 [servers.scope]
 enabled = true
-command = "symcockpit"
-args    = ["scope", "serve"]
+command = "symscope"
+args    = ["serve"]
 access  = "write"   # none of its 7 tools declare readOnlyHint; "read" hides all of them
 ```
 
@@ -358,19 +355,19 @@ Operate is a materially different risk profile from Browse and Scope: its
 `menu_action`), and screen/window content reads (`snapshot`, `query_ui`,
 `query_ui_ocr`, `find_ui`, `list_apps`, `list_windows`, `list_displays`).
 None declare `readOnlyHint`. **This README does not recommend a profile
-that exposes any of those 17** — that needs its own deliberate review,
-tracked in symaira-cockpit#259.
+that exposes any of those 17** — that needs its own deliberate, documented
+security review.
 
 Only 3 tools are metadata-only with no live screen/window content and no
-side effects, verified against the real binary (not just read from source):
-`version`, `permissions_status`, `get_policy`. A profile that wants Operate
-available at all today should narrow to exactly those:
+side effects, verified against the Brain-managed binary (not just read from
+source): `version`, `permissions_status`, `get_policy`. A profile that wants
+Operate available at all today should narrow to exactly those:
 
 ```toml
 [servers.operate]
 enabled     = true
-command     = "symcockpit"
-args        = ["operate", "serve"]
+command     = "symoperate"
+args        = ["serve"]
 access      = "read"
 tools_read  = ["version", "permissions_status", "get_policy"]
 tools_allow = ["version", "permissions_status", "get_policy"]
@@ -382,9 +379,68 @@ never registers a tool outside it, confirmed by attempting `list_apps`
 against this exact profile and getting `Unknown tool`, not partial data)
 are required. **Operate's own policy layer does not independently gate
 this** — on a machine where Operate's TCC permissions are already granted
-(check with `symcockpit operate doctor`), `tools_allow` above is the *only*
+(check with `symoperate doctor`), `tools_allow` above is the *only*
 thing standing between a profile and the input/screen tools. Widening it
 is a security decision, not a config tweak.
+
+### Building module binaries from Brain sources
+
+The receiving copies under `browse/`, `operate/`, and `scope/` (see their
+`SOURCE_PROVENANCE.md` files) are buildable module sources. To run Brain
+against binaries built from *these* sources instead of release downloads:
+
+```bash
+# Build the enabled modules (or pass --modules browse,operate,scope) from
+# this repository and install them into the managed directory.
+symbrain setup --from-source /path/to/symaira-brain
+```
+
+What this does, per module:
+
+- builds the binary from the in-repo module sources (`go build` for
+  `browse/`, `swift build` for `operate/` and `scope/` — the Swift modules
+  are macOS-only and skip cleanly elsewhere),
+- installs it atomically into the managed directory (`~/.symaira/bin`),
+  which binary resolution checks **before** PATH, and
+- writes a `<binary>.provenance.json` sidecar recording `brain-source`
+  origin, the exact symaira-brain commit, the module directory, the build
+  toolchain and the payload SHA-256.
+
+The runtime then uses these binaries through the normal managed-directory
+selection — no second registry, no PATH edits. `symbrain setup --fix` /
+`symbrain doctor --fix` treat a brain-source install as intentional state:
+a version mismatch against the release manifest is reported and skipped,
+never silently overwritten with a download. Replacing it requires an
+explicit `symbrain setup --from-source` re-run or `doctor --fix
+--force-release`.
+
+Repeatable local replacement packages (archive + SHA-256 + provenance
+manifest per module) come from:
+
+```bash
+scripts/build-module-packages.sh            # writes dist/modules/
+```
+
+**Migration from an existing installation.** `setup --from-source` does not
+overwrite Homebrew-managed or historical release binaries; the managed directory
+simply takes precedence in Brain's own binary resolution. Direct callers migrate
+to the Brain-managed `symbrowse`, `symoperate` and `symscope` binaries (normally
+`~/.symaira/bin/…`). Cockpit source aliases for Operate and Scope were removed in
+the tune-only cutover. The deprecated historical Homebrew `symbrowse` artifact
+remains an explicit migration input only until a signed Brain-side release exists.
+
+**Rollback.** Remove the managed binary and its sidecar
+(`rm ~/.symaira/bin/symbrowse{,.provenance.json}` etc.) or run
+`symbrain doctor --fix --force-release` to reinstall the pinned release
+build. Profiles need no change in either direction; no browser profiles,
+TCC grants, or data are deleted.
+
+**Signature note.** Local source builds are unsigned by definition: their
+origin guarantee is the provenance sidecar plus the pinned, verified
+receiving sources, not cosign. Release downloads keep pinned-checksum and
+cosign publisher verification (where published). Signed, published
+Brain-built module artifacts are a separate release gate and are not part
+of this local path.
 
 ## Command reference
 
@@ -395,6 +451,7 @@ Implemented today:
 | `symbrain init` | Create XDG directories, default `config.toml`, and example profiles |
 | `symbrain doctor [--json]` | Check environment, config, state-core binaries, managed runtime cores (symvault, symcockpit, symdesk), profiles, harness registrations, cross-core link health (vault reachability/lock state, secret reference resolution, profile-to-harness registration), foreign-server `access = "read"` risk (missing `tools_read`), and recent gateway degradations (state-core crashes/restarts, empty foreign-server exposure; `degradations` in `--json` output) |
 | `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
+| `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries from the in-repo Brain sources at `DIR` and install them into the managed directory with a provenance sidecar (see "Building module binaries from Brain sources" above) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |

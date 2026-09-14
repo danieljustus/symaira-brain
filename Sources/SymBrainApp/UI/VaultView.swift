@@ -11,9 +11,14 @@ import SymBrainCore
 struct VaultView: View {
     @StateObject private var vm = VaultViewModel()
     @State private var tab: Tab = .entries
+    @State private var deletePath: String?
+    @State private var intakePath = ""
+    @State private var passwordLength = 24
+    @State private var passwordSymbols = true
 
     enum Tab: String, CaseIterable, Identifiable {
         case entries = "Entries"
+        case approvals = "Approvals"
         case activity = "Broker Activity"
 
         var id: String { rawValue }
@@ -52,6 +57,7 @@ struct VaultView: View {
 
                 switch tab {
                 case .entries: entriesSection
+                case .approvals: approvalsSection
                 case .activity: activitySection
                 }
             }
@@ -59,6 +65,12 @@ struct VaultView: View {
         .padding(SymairaSpacing.xLarge)
         .task {
             await vm.refresh()
+        }
+        .confirmationDialog("Delete credential?", isPresented: Binding(get: { deletePath != nil }, set: { if !$0 { deletePath = nil } }), presenting: deletePath) { path in
+            Button("Delete \(path)", role: .destructive) { Task { await vm.deleteEntry(path: path); deletePath = nil } }
+            Button("Cancel", role: .cancel) { deletePath = nil }
+        } message: { path in
+            Text("This permanently removes the credential from the vault service.")
         }
     }
 
@@ -134,7 +146,7 @@ struct VaultView: View {
                         .foregroundStyle(SymairaTheme.goldPrimary)
                         .textSelection(.enabled)
                     Button {
-                        vm.copyToPasteboard(vm.homebrewCommand, label: "Install command")
+                        vm.copyInstallCommand()
                     } label: {
                         Image(systemName: "doc.on.doc")
                     }
@@ -203,6 +215,84 @@ struct VaultView: View {
 
     private var entriesSection: some View {
         VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                Text("Create secret")
+                    .font(.headline)
+                HStack(spacing: SymairaSpacing.medium) {
+                    TextField("Entry path", text: $vm.createPath)
+                        .textFieldStyle(.roundedBorder)
+                    Picker("Type", selection: $vm.createType) {
+                        ForEach(["password", "api_key", "bearer_token", "basic_auth", "ssh_key", "certificate", "database_url", "totp_seed", "custom"], id: \.self) { Text($0).tag($0) }
+                    }
+                    .frame(width: 150)
+                    SecureField("Secret value", text: $vm.createValue)
+                        .textFieldStyle(.roundedBorder)
+                    Stepper("\(passwordLength)", value: $passwordLength, in: 12...128, step: 4)
+                        .frame(width: 90)
+                    Toggle("Symbols", isOn: $passwordSymbols)
+                        .toggleStyle(.checkbox)
+                    Button {
+                        Task { await vm.generatePassword(length: passwordLength, symbols: passwordSymbols) }
+                    } label: {
+                        Label("Generate", systemImage: "wand.and.stars")
+                    }
+                    .symairaButtonStyle(.secondary)
+                    .disabled(vm.isGenerating)
+                    Button(action: { Task { await vm.createEntry() } }) {
+                        Label("Create", systemImage: "plus")
+                    }
+                    .symairaButtonStyle(.primary)
+                    .accessibilityLabel("Create secret")
+                    .disabled(vm.isCreating || vm.createPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || vm.createValue.isEmpty)
+                }
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    HStack {
+                        TextField("Username", text: $vm.createUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.createURL).textFieldStyle(.roundedBorder)
+                        TextField("Usage hint", text: $vm.createUsageHint).textFieldStyle(.roundedBorder)
+                    }
+                    HStack {
+                        TextField("Notes", text: $vm.createNotes).textFieldStyle(.roundedBorder)
+                        TextField("Expires at (RFC3339)", text: $vm.createExpiresAt).textFieldStyle(.roundedBorder)
+                        Toggle("Auto-rotate", isOn: $vm.createAutoRotate).toggleStyle(.checkbox)
+                    }
+                    HStack {
+                        SecureField("TOTP secret (optional)", text: $vm.createTOTPSecret).textFieldStyle(.roundedBorder)
+                        TextField("TOTP issuer", text: $vm.createTOTPIssuer).textFieldStyle(.roundedBorder)
+                        TextField("TOTP account", text: $vm.createTOTPAccount).textFieldStyle(.roundedBorder)
+                    }
+                }
+                if let confirmation = vm.createConfirmation {
+                    Text("Submitted: \(confirmation.submittedPath) · Confirmed: \(confirmation.confirmedPath) · \(confirmation.confirmedFieldCount) field(s), value present: \(confirmation.confirmedHasValue ? "yes" : "no")")
+                        .font(.caption)
+                        .foregroundStyle(SymairaTheme.textSecondary)
+                }
+                if let path = vm.selectedPath {
+                    HStack(spacing: SymairaSpacing.medium) {
+                        SecureField("New \(vm.detail?.primarySecret?.field ?? "secret") value", text: $vm.editValue)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Username", text: $vm.editUsername).textFieldStyle(.roundedBorder)
+                        TextField("URL", text: $vm.editURL).textFieldStyle(.roundedBorder)
+                        TextField("Notes", text: $vm.editNotes).textFieldStyle(.roundedBorder)
+                        Button(action: { Task { await vm.setSelectedEntry() } }) {
+                            Label("Update Selected", systemImage: "pencil")
+                        }
+                        .symairaButtonStyle(.secondary)
+                        .disabled(vm.isEditing)
+                        Button(role: .destructive) { deletePath = path } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .disabled(vm.isDeleting)
+                    }
+                    if let confirmation = vm.editConfirmation {
+                        Text("Updated \(confirmation.confirmedPath).\(confirmation.submittedField) · readback matches: \(confirmation.confirmedValueMatches ? "yes" : "no")")
+                            .font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    }
+                }
+            }
+
+            intakeSection
+
             HStack(spacing: SymairaSpacing.medium) {
                 TextField("Search entries…", text: $vm.searchText)
                     .textFieldStyle(.roundedBorder)
@@ -297,7 +387,7 @@ struct VaultView: View {
                                     .foregroundStyle(SymairaTheme.textMuted)
                             }
                             Button("Copy") {
-                                vm.copyToPasteboard(totp.code, label: "TOTP code", concealed: true)
+                                vm.copyTOTP()
                             }
                             .symairaButtonStyle(.secondary)
                         }
@@ -311,9 +401,8 @@ struct VaultView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(minWidth: 340)
-        } else if vm.selectedPath != nil {
-            SymairaLoadingState("Loading entry…")
-                .frame(minWidth: 340)
+        } else if let summary = vm.entries.first(where: { $0.path == vm.selectedPath }) {
+            selectedSummary(summary)
         } else {
             SymairaEmptyState(
                 systemImage: "sidebar.right",
@@ -321,6 +410,46 @@ struct VaultView: View {
                 message: "Select an entry to view its fields. Secrets stay masked until revealed."
             )
             .frame(minWidth: 340)
+        }
+    }
+
+    private func selectedSummary(_ summary: VaultEntrySummary) -> some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            Text(summary.path)
+                .font(.title3.bold())
+                .foregroundStyle(SymairaTheme.textPrimary)
+                .textSelection(.enabled)
+            SymairaNotice(
+                title: "Entry selected",
+                message: "Reveal the entry to load its fields. Secrets remain masked until then.",
+                tone: .informative
+            )
+            if let type = summary.type, !type.isEmpty { metadataRow("Type", type) }
+            if let usageHint = summary.usageHint, !usageHint.isEmpty { metadataRow("Usage", usageHint) }
+            if let fieldCount = summary.fieldCount { metadataRow("Fields", String(fieldCount)) }
+            if let hasValue = summary.hasValue { metadataRow("Has value", hasValue ? "Yes" : "No") }
+            if let autoRotate = summary.autoRotate { metadataRow("Auto-rotate", autoRotate ? "Enabled" : "Disabled") }
+            Button { Task { await vm.revealSelectedEntry() } } label: {
+                Label("Reveal Entry", systemImage: "eye")
+            }
+            .symairaButtonStyle(.primary)
+            .disabled(!vm.isReady)
+        }
+        .padding(SymairaSpacing.large)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(minWidth: 340)
+    }
+
+    private func metadataRow(_ label: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(SymairaTheme.textSecondary)
+                .frame(width: 120, alignment: .leading)
+            Text(value)
+                .font(.caption)
+                .foregroundStyle(SymairaTheme.textPrimary)
+                .textSelection(.enabled)
         }
     }
 
@@ -359,18 +488,114 @@ struct VaultView: View {
             }
 
             Button {
-                vm.copyToPasteboard(
-                    field.value,
-                    label: field.key,
-                    concealed: field.isSensitive
-                )
+                vm.copyField(field.key)
             } label: {
                 Image(systemName: "doc.on.doc")
             }
             .buttonStyle(.plain)
-            .help("Copy value")
+            .disabled(field.isSensitive && !revealed)
+            .help(field.isSensitive && !revealed ? "Reveal value before copying" : "Copy value")
         }
         .padding(.vertical, SymairaSpacing.xSmall)
+    }
+
+    private var intakeSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+            Text("Import for review").font(.headline)
+            HStack {
+                TextField("File path", text: $intakePath).textFieldStyle(.roundedBorder)
+                Button("Add") {
+                    let path = intakePath.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !path.isEmpty { vm.setIntakeFiles(vm.intakeFiles + [URL(fileURLWithPath: path)]); intakePath = "" }
+                }
+                Button("Preview") { Task { await vm.previewIntake() } }.disabled(vm.intakeFiles.isEmpty || vm.isLoading)
+                Button("Stage") { Task { await vm.stageIntake() } }.disabled(vm.intakeFiles.isEmpty || vm.isLoading)
+            }
+            if !vm.intakeFiles.isEmpty {
+                Text(vm.intakeFiles.map(\.path).joined(separator: ", ")).font(.caption).foregroundStyle(SymairaTheme.textMuted)
+            }
+            if !vm.intakeDrafts.isEmpty {
+                ForEach(vm.intakeDrafts) { draft in
+                    HStack {
+                        Text(draft.sourceName)
+                        Text("→ \(draft.targetPath)").foregroundStyle(SymairaTheme.textSecondary)
+                        Text(draft.fields.keys.sorted().joined(separator: ", ")).font(.caption)
+                    }
+                }
+                Button(vm.intakeReviewComplete ? "Reviewed" : "Mark reviewed") { vm.markIntakeReviewed() }
+                    .disabled(vm.intakeReviewComplete)
+                Button("Promote reviewed batch") { Task { await vm.promoteIntake() } }
+                    .disabled(!vm.intakeReviewComplete || vm.intakeImportID == nil || vm.isLoading)
+            }
+            if case .failed(let message) = vm.intakePhase {
+                SymairaNotice(title: "Import failed", message: message, tone: .critical)
+            }
+        }
+    }
+
+    private var approvalsSection: some View {
+        VStack(alignment: .leading, spacing: SymairaSpacing.medium) {
+            HStack {
+                Text("Pending approval requests").font(.headline)
+                Spacer()
+                Button { Task { await vm.loadApprovals() } } label: {
+                    Label("Refresh", systemImage: "arrow.clockwise")
+                }
+                .symairaButtonStyle(.secondary)
+                .disabled(vm.isLoadingApprovals)
+            }
+            if vm.isLoadingApprovals {
+                SymairaLoadingState("Loading approval requests…")
+            } else if vm.approvalRequests.isEmpty {
+                SymairaEmptyState(systemImage: "checkmark.shield", title: "No pending approvals", message: "The vault service has no pending human approval requests.")
+            } else {
+                ForEach(vm.approvalRequests) { request in
+                    VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                        HStack {
+                            Text(verbatim: request.id).font(.caption.monospaced()).textSelection(.enabled)
+                            Text(verbatim: request.status).font(.caption)
+                            Spacer()
+                            Button("Review") { vm.reviewApproval(request) }
+                                .disabled(!request.isPending || request.isExpired)
+                        }
+                        Text(verbatim: "Agent: \(request.agentName) · Path: \(request.path)").font(.callout)
+                        HStack(spacing: 4) {
+                            Text("Access:").font(.caption)
+                            Text(request.write ? "write" : "read").font(.caption).bold()
+                        }
+                        Text(verbatim: request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                        Text(verbatim: "Expires: \(request.expiresAt)").font(.caption).foregroundStyle(SymairaTheme.textMuted)
+                    }
+                    .padding(SymairaSpacing.small)
+                    .background(SymairaTheme.bgCardHover)
+                }
+            }
+            if let snapshot = vm.approvalSnapshot {
+                VStack(alignment: .leading, spacing: SymairaSpacing.small) {
+                    Text("Explicit review").font(.headline)
+                    Text(verbatim: "Request \(snapshot.request.id) for \(snapshot.request.path)").font(.callout)
+                    HStack(spacing: 4) {
+                        Text("Access:").font(.caption)
+                        Text(snapshot.request.write ? "write" : "read").font(.caption).bold()
+                    }
+                    Text(verbatim: snapshot.request.reason).font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+                    HStack {
+                        Button("Approve") { Task { await vm.decideReviewedApproval(approve: true) } }
+                            .symairaButtonStyle(.primary)
+                            .disabled(vm.isDecidingApproval)
+                        Button("Deny", role: .destructive) { Task { await vm.decideReviewedApproval(approve: false) } }
+                            .disabled(vm.isDecidingApproval)
+                        Button("Cancel", role: .cancel) { vm.cancelApprovalReview() }
+                            .disabled(vm.isDecidingApproval)
+                    }
+                }
+                .padding(SymairaSpacing.medium)
+            }
+            if let outcome = vm.approvalOutcome {
+                Text(verbatim: "Confirmed \(outcome.id): \(outcome.status)").font(.caption).foregroundStyle(SymairaTheme.textSecondary)
+            }
+        }
+        .task { await vm.loadApprovals() }
     }
 
     // MARK: - Broker activity

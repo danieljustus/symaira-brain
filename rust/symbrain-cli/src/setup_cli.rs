@@ -8,13 +8,37 @@ use symbrain_managed::{
     InstallOutcome, Installer, Manifest, Platform, installed_version, versions_match,
 };
 
-const USAGE: &str = "Usage of setup:\n  -allow-unsigned\n    \tinstall even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)\n  -fix\n    \trepair missing or version-mismatched binaries (alias for doctor --fix)\n  -json\n    \temit machine-readable JSON\n";
+const USAGE: &str = "Usage of setup:\n  -allow-unsigned\n    \tinstall even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)\n  -fix\n    \trepair missing or version-mismatched binaries (alias for doctor --fix)\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -from-source string\n    \tbuild optional module binaries from the in-repo sources at this repository root and install them into the managed directory (instead of downloading releases)\n  -json\n    \temit machine-readable JSON\n  -modules string\n    \twith --from-source: comma-separated module selection (browse,operate,scope); default: modules enabled in config\n";
 
 #[derive(Debug, Default)]
 struct SetupArgs {
     json: bool,
     fix: bool,
     allow_unsigned: bool,
+}
+
+/// Whether this invocation requires the Go implementation's module lifecycle semantics.
+///
+/// Source builds and their provenance are deliberately still implemented by
+/// Go. Delegating source-related flags and enabled `--fix` keeps the native
+/// Rust installer focused on managed release downloads.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    crate::has_go_owned_flag(
+        args,
+        &[
+            "json",
+            "fix",
+            "allow-unsigned",
+            "force-release",
+            "from-source",
+            "modules",
+            "h",
+            "help",
+        ],
+        &[],
+        &["force-release", "from-source", "modules"],
+        &["fix"],
+    )
 }
 
 #[derive(Serialize)]
@@ -493,5 +517,14 @@ mod tests {
         assert_eq!(result.unwrap_err(), exit::USAGE);
         let text = String::from_utf8(stderr).unwrap();
         assert!(text.starts_with("flag provided but not defined: -unknown\nUsage of setup:\n"));
+    }
+
+    #[test]
+    fn help_lists_the_go_owned_module_lifecycle_flags() {
+        let mut stderr = Vec::new();
+        let result = parse_args(&["--help".into()], &mut stderr);
+
+        assert_eq!(result.unwrap_err(), exit::USAGE);
+        assert_eq!(stderr, USAGE.as_bytes());
     }
 }

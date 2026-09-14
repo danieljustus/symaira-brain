@@ -2,52 +2,23 @@
 
 This directory is the Brain receiving copy for PB-2026-09-09 package 3 (Operate).
 
-Every imported file is byte-identical to the source commit — zero deviations,
-unlike the Scope intake (`scope/SOURCE_PROVENANCE.md`), which had two
-intentional, reviewed changes. This copy makes none.
-
 - **Source repository:** `symaira-cockpit`
-- **Source commit:** `c22a4366a051274ae1651b431ffaf06ae23aa37d`
+- **Source commit:** `08077447eb88f9c06ab16b2cee14c4eba2ba60b0`
+- **Source subject:** `fix(operate): remove stderr update nag from MCP serve entry point (#266)`
+- **Resync date:** 2026-09-11 (second pass, superseding the `528985c` pin below)
 - **Source path:** `operate/`
 - **Receiving path:** `symaira-brain/operate/`
-- **Support source:** `history/` at the same source commit, already received
-  at `symaira-brain/history/` by the Scope intake (#551) — Operate depends on
-  the same `SymCockpitHistory` product, no second copy.
-- **Imported tracked files:** 79 under `operate/` (`Package.swift`, `.gitignore`,
-  `README.md`, `Sources/`, `Tests/`, and three of the four `docs/*.md` files —
-  `docs/assets/social-preview.png` and the repo-root boilerplate
-  `CHANGELOG.md`/`LICENSE`/`NOTICE`/`Makefile`/`AGENTS.md`/`.swiftlint.yml`/
-  `SAFETY_AUDIT.md`/`Package.resolved` were not carried over, matching the
-  curation the Scope intake already established).
-- **Manifest pins:** `symaira-appkit` exact `0.14.2` (identical pin to
-  `scope/Package.swift`, no divergent-exact-version conflict); `history`
-  remains a local package dependency as in the source package.
+- **Imported tracked files:** 80 (89 source tracked files minus 9 explicit exclusions) — unchanged from the prior pin; this resync only refreshes file content, no paths added or removed.
+- **Source exclusions:** `.swiftlint.yml`, `AGENTS.md`, `CHANGELOG.md`, `LICENSE`, `Makefile`, `NOTICE`, `SAFETY_AUDIT.md`, `assets/branding/product-logo.png`, `docs/assets/social-preview.png`
+- **Intentional adaptations:** none; all 80 imported files match source paths, modes, and blobs.
+- **Support source:** `history/` at the same source commit, received once at `symaira-brain/history/` (14 files); Operate uses that shared `SymCockpitHistory` package.
+- **Manifest pins:** `symaira-appkit` exact `0.14.2`; `history` remains a local package dependency.
 
-The original `symaira-cockpit/operate/` source, `symcockpit operate`
-dispatcher, native permission/signing identity, TargetIdentity binding, safe
-fields, cancellation, redacted opt-in history, submitted-versus-confirmed
-effect semantics, legacy CLI/MCP names, installed binaries, configuration,
-permissions, TCC identities and data remain supported and untouched. This is
-source intake and an independently runnable target package, not a consumer
-cutover or release.
+The source/consumer cutover completed on 2026-09-13. Brain owns and managed-builds `symoperate` from this tree; the Cockpit `operate/` source package and `symcockpit operate` source route were removed in Cockpit's tune-only cutover. The standalone macOS permission/TCC identity and data boundaries remain unchanged. Brain starts the module only when explicitly enabled; signed release/package-manager migration remains a separate gate.
 
-The target package keeps Operate optional: no Brain startup path imports or
-starts it automatically. Brain's existing `symcockpit operate` foreign-server
-route (currently exposing only the three read-only tools `version`,
-`permissions_status`, `get_policy`, per the operator brief's explicit
-restriction) remains the compatibility fallback until the package 3 cutover
-gates are separately verified — this intake does not change that exposure.
+**Verification contract:** the receiving tree was compared against `symaira-cockpit` `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` programmatically by tracked path, file mode, and blob hash. The historical source comparison is provenance evidence; it does not make the retired Cockpit package a supported ownership route.
 
-**CI verification scope, deliberately narrower than Scope's:** the operator
-brief's acceptance criteria for Operate say "controlled fixture apps only; no
-live desktop automation as a migration smoke test." `Tests/SymOperateCoreTests`
-and `Tests/SymOperateSmokeTests` exercise real ScreenCaptureKit/Accessibility
-APIs (with graceful `permissionDenied`/`unavailable` fallbacks written for a
-sandboxed CI runner with no TCC grants, but still real device I/O attempts).
-The `operate-native-swiftpm` CI job therefore only does `swift build
---build-tests` (compiles the package and every test target, catching source
-and API-surface errors, without executing any test) plus protocol-level
-checks that touch no device state: CLI `--version --json` output and stderr
-hygiene, and native MCP `initialize`/`tools/list` over stdio. Running the full
-live-automation test suite is left to a later, explicitly authorized
-Operate cutover verification pass with controlled fixtures, per the brief.
+## Resync history
+
+- **2026-09-11, first pass:** pinned `528985cc21efbd5318e781954c29aec0680a3874` (`test(operate): make permission probes injectable (#265)`); 80 files, none adapted.
+- **2026-09-11, second pass:** pinned `08077447eb88f9c06ab16b2cee14c4eba2ba60b0` (`fix(operate): remove stderr update nag from MCP serve entry point (#266)`). This is a fix, not an intake sweep: `symaira-brain`'s own `operate-native-swiftpm` CI job (`scripts/operate-mcp-smoke.py`, a strict stdio smoke check) was failing deterministically because `serve` could write an "Update available" notice to stderr after a background, non-blocking update check landed independently of the JSON-RPC handshake — see PR573 postmerge run `34608846617`, job `operate-native-swiftpm`. Upstream cockpit#266 removed the nag from `serve` (leaving `symoperate version`/`updates check` as the explicit ways to learn about a release) and added regression coverage. Only two files changed and were refreshed byte-for-byte from the pinned tree: `Sources/SymOperateCLI/SymOperateRun.swift` and `Tests/SymOperateSmokeTests/CLITests.swift`. Verified locally in this receiving copy: `swift build --package-path operate` clean; `swift test --package-path operate` passes (311 `SymOperateCoreTests` + 14 `SymOperateSmokeTests`, 0 failures); `python3 scripts/operate-mcp-smoke.py <built symoperate> --timeout 10` now exits 0 (previously reproduced the exact CI failure text against the pre-fix binary).

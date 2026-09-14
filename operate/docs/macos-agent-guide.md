@@ -1,112 +1,58 @@
-# Symaira macOS Agent Guide
+# Symaira Brain macOS agent guide
 
-> Combined setup for the `operate` (GUI actions) and `tune` (hardware tuning)
-> families of `symcockpit`.
+> **Current source/consumer ownership (2026-09-13):** Operate and Scope are optional Brain modules. Hardware/system tuning remains the separate Symaira Cockpit product. Do not treat historical `symcockpit operate`/`scope` instructions as a current route: Cockpit is tune-only.
 
-## Overview
+## Managed module installation
 
-Symaira provides two complementary MCP servers for full Mac control:
+Build and install only the modules a selected Brain checkout needs:
 
-| Server | Purpose | Capabilities |
-|--------|---------|-------------|
-| `symoperate` | GUI automation | Screenshots, accessibility tree, mouse/keyboard, app/window control |
-| `symaira-tune` | Hardware tuning | Thermals, brightness, power management, fan control |
+```bash
+symbrain setup --from-source /absolute/path/to/symaira-brain --modules operate,scope --json
+```
 
-## Individual Registration
+This writes `symoperate` and `symscope` plus provenance sidecars to
+`~/.symaira/bin/`. It does not modify Homebrew or historical release binaries,
+does not grant macOS permissions, and does not expose any tool to an agent.
 
-### symoperate
+## MCP registration
+
+Register the Brain-managed binaries directly when a non-Brain MCP host needs
+them. This requires no Brain memory, gateway or profile:
 
 ```json
 {
   "mcpServers": {
     "symoperate": {
-      "command": "/path/to/symoperate",
-      "args": ["serve"]
-    }
-  }
-}
-```
-
-### symaira-tune
-
-```json
-{
-  "mcpServers": {
-    "symaira-tune": {
-      "command": "/path/to/symaira-tune",
-      "args": ["serve"]
-    }
-  }
-}
-```
-
-## Combined Registration
-
-For agents that need both GUI automation and hardware tuning:
-
-```json
-{
-  "mcpServers": {
-    "symoperate": {
-      "command": "/path/to/symoperate",
+      "command": "/Users/you/.symaira/bin/symoperate",
       "args": ["serve"]
     },
-    "symaira-tune": {
-      "command": "/path/to/symaira-tune",
+    "symscope": {
+      "command": "/Users/you/.symaira/bin/symscope",
       "args": ["serve"]
     }
   }
 }
 ```
 
-## Recommended Agent Loop
+Use real absolute paths. A profile-based Brain gateway integration additionally
+requires explicit module enablement and an allowlisted tool surface; see the
+Brain root README.
 
-1. **Discover** — use `symaira-scope` or `list_displays`/`list_windows` to understand the environment
-2. **Query** — use `query_ui` or `find_ui` to locate targets
-3. **Act** — use `click`, `type_text`, `press_keys` to interact
-4. **Monitor** — use `wait_for` to observe state changes
-5. **Tune** — use `symaira-tune` tools for thermal/power adjustments as needed
+## Permissions and safety
 
-## Installation
+- `symoperate` requires macOS Accessibility and Screen Recording permission for
+  the process that actually launches it. Inspect first with `symoperate doctor`.
+- `symscope` is local, read-only diagnostics. It starts no probe or watcher
+  until an explicit tool invocation.
+- Operate tools can inject input and read screen/window data. Start with the
+  metadata-only allowlist (`version`, `permissions_status`, `get_policy`) and
+  grant wider access only after a documented review.
+- Never automate passwords, payments, destructive actions or permission dialogs
+  without explicit human confirmation.
 
-### Homebrew (recommended)
+## Tune is separate
 
-```bash
-brew install danieljustus/tap/symcockpit
-```
-
-One formula covers all three families — `operate`, `tune` and `scope` are
-subcommands of the same binary.
-
-### Build from source
-
-```bash
-# symoperate
-git clone https://github.com/danieljustus/symaira-operate.git
-cd symaira-operate && swift build -c release
-cp .build/release/symoperate /usr/local/bin/
-
-# symaira-tune
-git clone https://github.com/danieljustus/symaira-tune.git
-cd symaira-tune && swift build -c release
-cp .build/release/symaira-tune /usr/local/bin/
-```
-
-## Permissions
-
-Both servers require macOS permissions:
-
-- **symoperate**: Accessibility + Screen Recording
-- **symaira-tune**: Accessibility (for system-level queries)
-
-Grant via:
-```bash
-symoperate permissions grant accessibility
-symoperate permissions grant screen
-```
-
-## Safety
-
-- Both servers are local-only, stdio-based, no remote transport
-- `symoperate` blocks destructive UI actions by default (configurable via `set_policy`)
-- Never automate passwords, payments, or permission dialogs without user confirmation
+Symaira Cockpit remains responsible for hardware/system tuning. Its current and
+historical release paths are not a substitute for the Brain-owned Operate/Scope
+modules. This documentation does not publish a new Cockpit or Brain release;
+signed artifact and package-manager migration remain separate gates.

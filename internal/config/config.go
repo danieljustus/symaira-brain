@@ -95,7 +95,9 @@ type PatternsConfig struct {
 // processes. Memory and skills are embedded in symbrain and have no child
 // binary to override.
 type ServersConfig struct {
-	Vault ServerOverride `json:"vault"`
+	Vault   ServerOverride `json:"vault"`
+	Operate ServerOverride `json:"operate"`
+	Scope   ServerOverride `json:"scope"`
 }
 
 // ServerOverride pins a child server's binary path, bypassing PATH lookup.
