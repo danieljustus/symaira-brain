@@ -180,6 +180,44 @@ jobs:
       - name: Test guard decide adapter on native Windows
         run: cargo test -p symbrain-cli --test guard_decide_adapter --locked
 
+  # Init is a production Rust path; run the genuine Go comparison on each OS.
+  rust-init-native:
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Check native init and execute Go differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --all --check
+          cargo clippy -p symbrain-cli --all-targets --all-features --locked -- -D warnings
+          cargo test -p symbrain-cli --test init_cli_tests --locked
+          cargo build -p symbrain-cli --locked
+          python3 scripts/init-oracle/test_compare.py
+          python3 scripts/init-oracle/compare.py --rust-binary "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}" --output target/init-oracle/report.json
+      - name: Retain native init observations
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: init-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            target/init-oracle/report.json
+            target/init-oracle/go-bin/*-stderr.log
+            target/init-oracle/go-bin/*-stdout.log
+          retention-days: 14
+          if-no-files-found: warn
+
   # Stdio hygiene gate: `symbrain mcp` must emit nothing but JSON-RPC
   # frames on stdout across startup, tools/list, a failing tools/call and
   # shutdown (fake children). A dedicated job so a transport-breaking

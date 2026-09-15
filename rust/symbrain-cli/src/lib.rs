@@ -13,6 +13,7 @@ use symbrain_core::xdg;
 mod audit_cli;
 mod doctor_cli;
 pub mod guard_cli;
+mod init_cli;
 mod install_cli;
 mod mcp_cli;
 mod passthrough;
@@ -201,7 +202,8 @@ pub fn run_in_process(
         "mcp" => Some(mcp_cli::run(rest, stderr)),
         "serve" => Some(mcp_cli::run_serve(rest, stderr)),
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
-        "init" | "harness" | "sync" | "memory" | "skills" | "activity" | "vault" => None,
+        "init" => Some(init_cli::run(rest, stdout, stderr)),
+        "harness" | "sync" | "memory" | "skills" | "activity" | "vault" => None,
         "guard" => guard_cli::run(rest, stdout, stderr),
         _ => {
             let _ = writeln!(stderr, "symbrain: unknown command {cmd:?}\n");

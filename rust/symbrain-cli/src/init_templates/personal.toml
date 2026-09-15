@@ -1,0 +1,21 @@
+# Example profile: full access for trusted personal use.
+[profile]
+name        = "personal"
+description = "Full access for trusted personal use"
+
+[servers.vault]
+enabled = true
+mode    = "full"
+
+[servers.memory]
+enabled = true
+mode    = "read_write"
+
+[servers.skills]
+enabled = true
+
+[servers.usage]
+enabled = true
+
+[audit]
+enabled = true

@@ -1,0 +1,51 @@
+# symbrain global configuration.
+#
+# All keys are optional; the values below are the defaults. Environment
+# variables SYMBRAIN_<SECTION>_<FIELD> override this file (e.g.
+# SYMBRAIN_AUDIT_ENABLED=false).
+
+# Profile used when a command needs one but none was given explicitly.
+default_profile = ""
+
+[audit]
+# JSONL audit log under ~/.local/share/symbrain/audit/<profile>.jsonl.
+enabled = true
+# Additionally log non-vault tool argument values (never vault arguments
+# or results, regardless of this setting).
+verbose = false
+
+[gateway]
+# Override mapped backend identity parameters with the active profile name.
+identity_injection = true
+
+[updatecheck]
+# Check GitHub releases for newer symbrain versions.
+enabled = true
+
+# Optional per-server binary path overrides; uncomment to bypass PATH
+# lookup for a specific child server.
+# [servers.vault]
+# binary_path = "/opt/symvault/symvault"
+#
+# [servers.memory]
+# binary_path = ""
+#
+# [servers.skills]
+# binary_path = ""
+#
+# [servers.usage]
+# binary_path = ""
+#
+# [servers.operate]
+# binary_path = "/opt/symoperate/symoperate"
+#
+# [servers.scope]
+# binary_path = "/opt/symscope/symscope"
+
+# Optional capability modules (PB-2026-09-09). Every module defaults to
+# disabled: enabling one only changes what 'symbrain setup'/'symbrain
+# doctor --fix' install, never a profile's tool exposure by itself — a
+# module still needs its own [servers.<alias>] entry in a profile (see
+# "Foreign servers" in README.md) to actually appear as tools.
+# [modules]
+# browse = false
