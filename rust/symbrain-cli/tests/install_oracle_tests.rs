@@ -148,6 +148,8 @@ fn write(path: &Path, bytes: &[u8], mode: u32) {
     fs::write(path, bytes).unwrap();
     #[cfg(unix)]
     fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
+    #[cfg(not(unix))]
+    let _ = mode;
 }
 
 fn normalize(value: &[u8], root: &Path) -> String {
@@ -239,6 +241,7 @@ fn permissions_mode(metadata: &fs::Metadata) -> u32 {
     }
     #[cfg(not(unix))]
     {
+        let _ = metadata;
         0
     }
 }
@@ -262,6 +265,7 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
     for dir in ["home", "config", "data", "cache", "project"] {
         let path = root.join(dir);
         fs::create_dir(&path).unwrap();
+        #[cfg(unix)]
         fs::set_permissions(&path, fs::Permissions::from_mode(0o700)).unwrap();
     }
     setup(&case.id, &root);
