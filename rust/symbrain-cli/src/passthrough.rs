@@ -262,9 +262,9 @@ fn go_error(error: &std::io::Error) -> String {
     #[cfg(windows)]
     {
         let rendered = error.to_string();
-        return rendered
+        rendered
             .rsplit_once(" (os error ")
-            .map_or(rendered.clone(), |(message, _)| message.to_string());
+            .map_or(rendered.clone(), |(message, _)| message.to_string())
     }
     #[cfg(not(windows))]
     match error.kind() {

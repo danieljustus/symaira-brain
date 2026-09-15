@@ -60,7 +60,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         audit_dir,
         cache_dir,
     ]
-    .map(native_path);
+    .map(|p| native_path(&p));
     for dir in &dirs {
         if let Err(err) = mkdir_all(dir) {
             let _ = writeln!(stderr, "symbrain init: create {}: {err}", dir.display());
@@ -85,7 +85,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     ];
 
     for (path, contents) in files {
-        let path = native_path(path);
+        let path = native_path(&path);
         match write_if_missing(&path, contents.as_bytes()) {
             Ok(true) => {
                 let _ = writeln!(stdout, "created {}", path.display());
@@ -105,14 +105,14 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
 
 // PathBuf::join retains separators inside an XDG value, unlike Go's
 // filepath.Join. Rebuild Windows components without resolving symlinks.
-fn native_path(path: PathBuf) -> PathBuf {
+fn native_path(path: &Path) -> PathBuf {
     #[cfg(windows)]
     {
         path.components().collect()
     }
     #[cfg(not(windows))]
     {
-        path
+        path.to_path_buf()
     }
 }
 
