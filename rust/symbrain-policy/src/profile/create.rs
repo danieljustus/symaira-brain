@@ -119,20 +119,22 @@ fn create_dirs_secure(dir: &Path) -> io::Result<()> {
     }
     fs::create_dir_all(dir)?;
     for path in missing {
+        #[cfg(unix)]
         set_dir_mode(path, 0o700)?;
+        #[cfg(not(unix))]
+        set_dir_mode(path, 0o700);
     }
     Ok(())
 }
 
+#[cfg(unix)]
 fn set_dir_mode(path: &Path, mode: u32) -> io::Result<()> {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(path, fs::Permissions::from_mode(mode))?;
-    }
-    let _ = (path, mode);
-    Ok(())
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(path, fs::Permissions::from_mode(mode))
 }
+
+#[cfg(not(unix))]
+fn set_dir_mode(_path: &Path, _mode: u32) {}
 
 fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
@@ -165,7 +167,10 @@ fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
         )
     })?;
     let mut file = temp_file.expect("temporary path and file are created together");
+    #[cfg(unix)]
     set_mode(&file, 0o600)?;
+    #[cfg(not(unix))]
+    set_mode(&file, 0o600);
     file.write_all(contents)?;
     file.sync_all()?;
     drop(file);
@@ -183,6 +188,68 @@ fn set_mode(file: &std::fs::File, mode: u32) -> io::Result<()> {
 }
 
 #[cfg(not(unix))]
-fn set_mode(_file: &std::fs::File, _mode: u32) -> io::Result<()> {
-    Ok(())
+fn set_mode(_file: &std::fs::File, _mode: u32) {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[cfg(unix)]
+    #[test]
+    fn unix_set_dir_mode_sets_0700() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp_dir = tempfile::tempdir().expect("tempdir");
+        let dir_path = temp_dir.path().join("subdir");
+        fs::create_dir(&dir_path).expect("create_dir");
+
+        set_dir_mode(&dir_path, 0o700).expect("set_dir_mode");
+
+        let metadata = fs::metadata(&dir_path).expect("metadata");
+        assert_eq!(metadata.permissions().mode() & 0o777, 0o700);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn unix_set_mode_sets_0600() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp_dir = tempfile::tempdir().expect("tempdir");
+        let file_path = temp_dir.path().join("file.txt");
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&file_path)
+            .expect("open");
+
+        set_mode(&file, 0o600).expect("set_mode");
+
+        let metadata = fs::metadata(&file_path).expect("metadata");
+        assert_eq!(metadata.permissions().mode() & 0o777, 0o600);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn unix_set_dir_mode_propagates_error() {
+        let temp_dir = tempfile::tempdir().expect("tempdir");
+        let non_existent = temp_dir.path().join("does_not_exist");
+
+        let err = set_dir_mode(&non_existent, 0o700).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::NotFound);
+    }
+
+    #[cfg(not(unix))]
+    #[test]
+    fn non_unix_mode_helpers_are_noops() {
+        let temp_dir = tempfile::tempdir().expect("tempdir");
+        let dir_path = temp_dir.path().join("subdir");
+        fs::create_dir(&dir_path).expect("create_dir");
+        let file_path = temp_dir.path().join("file.txt");
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&file_path)
+            .expect("open");
+
+        set_dir_mode(&dir_path, 0o700);
+        set_mode(&file, 0o600);
+    }
 }

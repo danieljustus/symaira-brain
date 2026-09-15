@@ -126,7 +126,14 @@ def run_bounded(
                     except ProcessLookupError:
                         pass
                 else:
-                    p.terminate()
+                    # A .cmd helper owns a Python descendant which inherits our
+                    # capture files. Kill the tree before reaping its leader.
+                    taskkill = Path(os.environ["SystemRoot"]) / "System32" / "taskkill.exe"
+                    subprocess.run(
+                        [str(taskkill), "/PID", str(p.pid), "/T", "/F"],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        timeout=5.0, check=True,
+                    )
                 try:
                     p.wait(timeout=1.0)
                 except subprocess.TimeoutExpired:

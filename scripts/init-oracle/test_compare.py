@@ -446,6 +446,35 @@ class TestInitOracle(unittest.TestCase):
 
 
 class BuildFailureEvidence(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "native Windows process-tree contract")
+    def test_windows_timeout_reaps_cmd_python_descendant(self):
+        import csv
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            marker = root / "child.pid"
+            helper = create_test_script(
+                root / "child",
+                "import os, time\nfrom pathlib import Path\n"
+                f"Path({str(marker)!r}).write_text(str(os.getpid()))\n"
+                "time.sleep(60)\n",
+            )
+            result = run_bounded([str(helper)], cwd=root, env=dict(os.environ), timeout=5)
+            self.assertTrue(result.timed_out)
+            self.assertIsNotNone(result.returncode)
+            child_pid = int(marker.read_text())
+            self.assertGreater(child_pid, 0)
+            tasklist = Path(os.environ["SystemRoot"]) / "System32" / "tasklist.exe"
+            listing = subprocess.check_output(
+                [str(tasklist), "/FI", f"PID eq {child_pid}", "/FO", "CSV", "/NH"],
+                text=True, timeout=5,
+            )
+            self.assertFalse(any(len(row) > 1 and row[1] == str(child_pid)
+                                 for row in csv.reader(io.StringIO(listing))))
+            # The original direct-parent kill left this directory and the
+            # capture files locked; cleanup must succeed without retries.
+            marker.unlink()
+
     def test_failed_and_timed_out_builds_retain_raw_streams(self):
         for timed_out in (False, True):
             with self.subTest(timed_out=timed_out), tempfile.TemporaryDirectory() as temp:
