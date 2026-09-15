@@ -43,6 +43,9 @@ fn atomic_rename(temp_path: &Path, dest_path: &Path) -> std::io::Result<()> {
 }
 
 /// Recursively creates parent directories with 0700 permissions on Unix.
+///
+/// # Errors
+/// Returns the filesystem error when a directory cannot be created.
 pub fn create_dir_all(parent: &Path) -> std::io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
@@ -56,6 +59,10 @@ pub fn create_dir_all(parent: &Path) -> std::io::Result<()> {
 
 /// Writes `data` atomically to `path` with 0600 permissions on Unix.
 /// On Windows, performs sharing-violation retries matching corekit (10 attempts, 10ms backoff).
+///
+/// # Errors
+/// Returns errors from temporary-file creation, permissions, writing, syncing,
+/// or the final atomic rename. A failed write does not replace the destination.
 pub fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
     let parent = path
         .parent()

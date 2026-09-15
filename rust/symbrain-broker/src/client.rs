@@ -227,6 +227,7 @@ pub struct Options {
 struct Inner {
     next_id: AtomicI64,
     pending: Mutex<HashMap<i64, Sender<Result<serde_json::Value, BrokerError>>>>,
+    #[cfg(unix)]
     pid: u32,
     done: Mutex<Option<String>>,
 }
@@ -280,6 +281,7 @@ impl Client {
         let inner = Arc::new(Inner {
             next_id: AtomicI64::new(0),
             pending: Mutex::new(HashMap::new()),
+            #[cfg(unix)]
             pid,
             done: Mutex::new(None),
         });

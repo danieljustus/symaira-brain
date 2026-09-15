@@ -152,6 +152,7 @@ pub fn load_or_create_key(path: impl AsRef<Path>) -> Result<Vec<u8>, KeyError> {
     }
     let key = generate_key()?;
     write_key(path, &key)?;
+    #[cfg(unix)]
     set_owner_only_permissions(path)?;
     Ok(key)
 }
@@ -172,18 +173,14 @@ fn write_key(path: &Path, key: &[u8]) -> Result<(), KeyError> {
     Ok(())
 }
 
+#[cfg(unix)]
 fn set_owner_only_permissions(path: &Path) -> Result<(), KeyError> {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let mut permissions = fs::metadata(path)
-            .map_err(|error| io_error("stat", path, error))?
-            .permissions();
-        permissions.set_mode(0o600);
-        fs::set_permissions(path, permissions).map_err(|error| io_error("chmod", path, error))?;
-    }
-    #[cfg(not(unix))]
-    let _ = path;
+    use std::os::unix::fs::PermissionsExt;
+    let mut permissions = fs::metadata(path)
+        .map_err(|error| io_error("stat", path, error))?
+        .permissions();
+    permissions.set_mode(0o600);
+    fs::set_permissions(path, permissions).map_err(|error| io_error("chmod", path, error))?;
     Ok(())
 }
 

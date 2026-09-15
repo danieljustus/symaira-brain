@@ -4,12 +4,14 @@
 
 mod logger;
 mod model;
+mod raw;
 mod redact;
 mod sink;
 mod tail;
 
 pub use logger::Logger;
 pub use model::{Classification, Config, Degradation, Entry, Exposure};
+pub use raw::RawJsonlAppender;
 pub use redact::redact_args;
 pub use sink::{Sink, hash_entry};
 pub use tail::{audit_log_paths, latest_degradations_in, tail_entries_bounded, tail_entries_in};

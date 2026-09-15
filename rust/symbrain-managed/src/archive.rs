@@ -1,6 +1,8 @@
 //! Managed release integrity checks, secure archive selection, and atomic install.
 
-use std::fs::{self, File};
+#[cfg(unix)]
+use std::fs;
+use std::fs::File;
 use std::io::{Read, Write};
 use std::path::{Component, Path, PathBuf};
 

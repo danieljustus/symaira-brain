@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "source_files": [
+    "guard/cmd/symguard/decide/command.go",
+    "cmd/symbrain/cmd_guard.go",
+    "cmd/symbrain/main.go"
+  ],
+  "cases": [
+    {"id":"low-no-warnings","request":{"command":"open","risk_class":"low","domain":"example.test","warnings":[]},"decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"low-with-warning","request":{"command":"open","risk_class":"low","domain":"example.test","warnings":[" popup "]},"decision":"confirm","reason_contains":"low risk class with warnings: popup"},
+    {"id":"medium-no-warnings","request":{"command":"fetch","risk_class":"medium","domain":"example.test","warnings":[]},"decision":"allow","reason_contains":"medium risk class, no warnings"},
+    {"id":"medium-with-warning","request":{"command":"fetch","risk_class":"medium","domain":"example.test","warnings":["redirect"]},"decision":"confirm","reason_contains":"medium risk class with warnings: redirect"},
+    {"id":"high-no-warnings","request":{"command":"shell","risk_class":"high","domain":"example.test","warnings":[]},"decision":"confirm","reason_contains":"high risk class requires confirmation"},
+    {"id":"high-with-warning","request":{"command":"shell","risk_class":"high","domain":"example.test","warnings":["sudo"]},"decision":"deny","reason_contains":"high risk class with warnings: sudo"},
+    {"id":"critical-loopback","request":{"command":"curl","risk_class":"critical","domain":"127.0.0.2","warnings":[]},"decision":"allow","reason_contains":"allowlisted domain"},
+    {"id":"critical-ipv6-loopback","request":{"command":"curl","risk_class":"critical","domain":"::1","warnings":[]},"decision":"allow","reason_contains":"allowlisted domain"},
+    {"id":"critical-remote","request":{"command":"curl","risk_class":"critical","domain":"203.0.113.9","warnings":[]},"decision":"deny","reason_contains":"requires allowlisted domain"},
+    {"id":"critical-warning","request":{"command":"curl","risk_class":"critical","domain":"127.0.0.1","warnings":["tls"]},"decision":"deny","reason_contains":"requires allowlisted domain"},
+    {"id":"unknown-risk","request":{"command":"run","risk_class":"unknown","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"unknown risk class"},
+    {"id":"missing-risk","request":{"command":"run","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"unknown risk class"},
+    {"id":"missing-command","request":{"risk_class":"low","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"missing command"},
+    {"id":"malformed-json","raw":"{\"command\":","decision":"deny","reason_contains":"parse request"},
+    {"id":"empty-input","raw":"","decision":"deny","reason_contains":"empty request"},
+    {"id":"oversized-input","raw_prefix":"{\"command\":\"open\",\"risk_class\":\"low\",\"padding\":\"","raw_suffix":"\"}","raw_repeat":"x","raw_repeat_count":65500,"decision":"deny","reason_contains":"maximum size"},
+    {"id":"deadline-expired","request":{"command":"open","risk_class":"low","deadline":"2000-01-01T00:00:00Z"},"decision":"deny","reason_contains":"deadline expired"},
+    {"id":"deadline-future","request":{"command":"open","risk_class":"low","deadline":"2999-01-01T00:00:00Z"},"decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"deadline-equality-at-launch","request":{"command":"open","risk_class":"low","deadline":"__LAUNCH_RFC3339__"},"decision":"deny","reason_contains":"deadline expired","boundary_note":"The command samples time after this timestamp is serialized; source Expired uses !now.Before(deadline), so equality is expired."},
+    {"id":"audit-failure","request":{"command":"open","risk_class":"low","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"audit: write decision record"},
+    {"id":"output-failure","request":{"command":"open","risk_class":"low","domain":"example.test","warnings":[]},"expect_process_failure":true},
+    {"id":"duplicate-command-last","raw":"{\"command\":\"old\",\"command\":\"open\",\"risk_class\":\"low\"}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-command-null-keeps-old","raw":"{\"command\":\"open\",\"command\":null,\"risk_class\":\"low\"}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-command-type-error","raw":"{\"command\":\"open\",\"command\":7,\"risk_class\":\"low\"}","decision":"deny","reason_contains":"parse request"},
+    {"id":"duplicate-risk-last","raw":"{\"command\":\"open\",\"risk_class\":\"high\",\"risk_class\":\"low\"}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-risk-null-keeps-old","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"risk_class\":null}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-risk-type-error","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"risk_class\":7}","decision":"deny","reason_contains":"parse request"},
+    {"id":"duplicate-warnings-last","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"warnings\":[\"old\"],\"warnings\":[]}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-warnings-null-clears","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"warnings\":[\"old\"],\"warnings\":null}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-warnings-type-error","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"warnings\":[],\"warnings\":7}","decision":"deny","reason_contains":"parse request"},
+    {"id":"duplicate-deadline-last","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"deadline\":\"2000-01-01T00:00:00Z\",\"deadline\":\"2999-01-01T00:00:00Z\"}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-deadline-null-keeps-old","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"deadline\":\"2999-01-01T00:00:00Z\",\"deadline\":null}","decision":"allow","reason_contains":"low risk class, no warnings"},
+    {"id":"duplicate-deadline-type-error","raw":"{\"command\":\"open\",\"risk_class\":\"low\",\"deadline\":\"2999-01-01T00:00:00Z\",\"deadline\":7}","decision":"deny","reason_contains":"parse request"}
+  ]
+}

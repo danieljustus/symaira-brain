@@ -417,6 +417,8 @@ fn replace_path(from: &Path, to: &Path) -> io::Result<()> {
     }
 }
 
+// Directory sync is a no-op on Windows while preserving the fallible interface for Unix platforms without inventing directory durability.
+#[cfg_attr(windows, allow(clippy::unnecessary_wraps))]
 fn sync_directory(path: Option<&Path>) -> io::Result<()> {
     let Some(path) = path else {
         return Ok(());
@@ -475,6 +477,7 @@ fn open_private_append(path: &Path) -> io::Result<File> {
 }
 
 fn create_private_dir(path: &Path) -> io::Result<()> {
+    #[cfg(unix)]
     let existed = path.exists();
     fs::create_dir_all(path)?;
     #[cfg(unix)]

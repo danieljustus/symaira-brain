@@ -160,7 +160,7 @@ fn hex_quad(bytes: &[u8]) -> Option<u16> {
 // encoding/json replaces each invalid UTF-8 byte and unpaired UTF-16 surrogate
 // inside strings with U+FFFD. Preserve escapes and valid surrogate pairs so the
 // normal JSON parser still rejects malformed syntax and field types.
-fn repair_json_strings(raw: &[u8]) -> String {
+pub(crate) fn repair_json_strings(raw: &[u8]) -> String {
     let mut utf8 = String::new();
     let mut remaining = raw;
     while !remaining.is_empty() {

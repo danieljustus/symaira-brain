@@ -21,6 +21,7 @@ symbrain-audit.workspace = true
 symbrain-broker.workspace = true
 symbrain-core.workspace = true
 symbrain-gateway.workspace = true
+symbrain-guard-core.workspace = true
 symbrain-harness.workspace = true
 symbrain-managed.workspace = true
 symbrain-mcp.workspace = true

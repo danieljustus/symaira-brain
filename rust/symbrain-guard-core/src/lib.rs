@@ -6,6 +6,9 @@
 
 #![deny(unsafe_code)]
 
+pub mod external_decision;
+pub mod go_json;
+
 pub mod capability;
 mod capability_wire;
 pub mod key_storage;

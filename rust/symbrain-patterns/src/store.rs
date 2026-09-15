@@ -11,6 +11,7 @@ const MIN_EPISODE_LINE_BYTES: u64 = 64;
 /// Concurrent JSONL episode store with bounded newest-first retention.
 pub struct Store {
     path: PathBuf,
+    #[cfg(unix)]
     private_dir: bool,
     lock: Mutex<()>,
 }
@@ -20,6 +21,7 @@ impl Store {
     pub fn new(path: impl Into<PathBuf>) -> Self {
         Self {
             path: path.into(),
+            #[cfg(unix)]
             private_dir: false,
             lock: Mutex::new(()),
         }
@@ -29,6 +31,7 @@ impl Store {
     pub fn new_private(path: impl Into<PathBuf>) -> Self {
         Self {
             path: path.into(),
+            #[cfg(unix)]
             private_dir: true,
             lock: Mutex::new(()),
         }
@@ -44,6 +47,7 @@ impl Store {
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         let parent = self.path.parent().unwrap_or_else(|| Path::new("."));
+        #[cfg(unix)]
         let existed = parent.exists();
         fs::create_dir_all(parent)?;
         #[cfg(unix)]
@@ -140,6 +144,8 @@ fn set_private_mode(options: &mut OpenOptions) {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
     }
+    #[cfg(not(unix))]
+    let _ = options;
 }
 
 #[cfg(test)]

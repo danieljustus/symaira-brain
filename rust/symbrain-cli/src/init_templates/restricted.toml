@@ -1,0 +1,21 @@
+# Example profile: least-privilege for untrusted or shared harnesses.
+[profile]
+name        = "restricted"
+description = "Least-privilege profile for untrusted or shared harnesses"
+
+[servers.vault]
+enabled = true
+mode    = "request_only"
+
+[servers.memory]
+enabled = true
+mode    = "read_only"
+
+[servers.skills]
+enabled = true
+
+[servers.usage]
+enabled = true
+
+[audit]
+enabled = true

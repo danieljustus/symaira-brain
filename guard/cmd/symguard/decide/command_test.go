@@ -298,3 +298,41 @@ func TestRecord(t *testing.T) {
 		t.Errorf("DecidedAt %q is not RFC 3339: %v", rec.DecidedAt, err)
 	}
 }
+
+func TestExternalDecisionJSONMatchesPinnedGoEscapingAndTimestampBytes(t *testing.T) {
+	record := audit.ExternalDecision{
+		ID:        "evt_1_decide_1",
+		Command:   "<&>\u2028\u2029",
+		RiskClass: "low",
+		Domain:    "example.test",
+		Warnings:  []string{"<&>\u2028\u2029"},
+		Decision:  "allow",
+		Reason:    "<&>\u2028\u2029",
+		DecidedAt: time.Date(2026, 9, 14, 12, 0, 0, 123456789, time.FixedZone("plus2", 2*60*60)).UTC().Format(time.RFC3339),
+	}
+	got, err := json.Marshal(record)
+	if err != nil {
+		t.Fatalf("marshal external decision: %v", err)
+	}
+	want := `{"id":"evt_1_decide_1","command":"\u003c\u0026\u003e\u2028\u2029","risk_class":"low","domain":"example.test","warnings":["\u003c\u0026\u003e\u2028\u2029"],"decision":"allow","reason":"\u003c\u0026\u003e\u2028\u2029","decided_at":"2026-09-14T10:00:00Z"}`
+	if string(got) != want {
+		t.Fatalf("external decision JSON = %s, want %s", got, want)
+	}
+}
+
+func TestExternalDecisionJSONOmitsEmptyOptionalFields(t *testing.T) {
+	record := audit.ExternalDecision{
+		ID:        "evt_1_decide_1",
+		Command:   "open",
+		Decision:  "deny",
+		DecidedAt: "2026-09-14T12:00:00Z",
+	}
+	got, err := json.Marshal(record)
+	if err != nil {
+		t.Fatalf("marshal external decision: %v", err)
+	}
+	want := `{"id":"evt_1_decide_1","command":"open","decision":"deny","decided_at":"2026-09-14T12:00:00Z"}`
+	if string(got) != want {
+		t.Fatalf("external decision JSON = %s, want %s", got, want)
+	}
+}

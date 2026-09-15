@@ -266,6 +266,16 @@ fn fallback_executor_receives_unmigrated_commands_only() {
     assert!(executor.calls.lock().unwrap().is_empty());
     assert!(stdout.is_empty());
     assert!(String::from_utf8_lossy(&stderr).contains("symbrain usage"));
+
+    // Init is native and must not call the Go fallback.
+    stdout.clear();
+    stderr.clear();
+    let init_args = [OsString::from("init"), OsString::from("--help")];
+    let init_code = run_with_executor(&init_args, &mut stdout, &mut stderr, &executor);
+    assert_eq!(init_code, exit::NO_INPUT);
+    assert!(executor.calls.lock().unwrap().is_empty());
+    assert!(stdout.is_empty());
+    assert_eq!(stderr, b"Usage of init:\n");
 }
 
 #[test]
@@ -339,7 +349,15 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
     let mut stderr = Vec::new();
 
     assert_eq!(
-        run_in_process(&[OsString::from("init")], &mut stdout, &mut stderr),
+        run_in_process(
+            &[OsString::from("init"), OsString::from("--help")],
+            &mut stdout,
+            &mut stderr
+        ),
+        Some(exit::NO_INPUT)
+    );
+    assert_eq!(
+        run_in_process(&[OsString::from("harness")], &mut stdout, &mut stderr),
         None
     );
     assert_eq!(

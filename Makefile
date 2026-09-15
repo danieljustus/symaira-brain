@@ -140,6 +140,13 @@ install-oracle-check:
 profile-remove-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/profile-remove-oracle -check
 
+.PHONY: init-differential
+INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
+init-differential:
+	cargo build -p symbrain-cli --locked
+	python3 scripts/init-oracle/test_compare.py
+	python3 scripts/init-oracle/compare.py --rust-binary "$(INIT_RUST_BINARY)" --output target/init-oracle/report.json
+
 ## rust-guard-check: Check the existing Guard library against its Go oracles
 rust-guard-check:
 	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
@@ -157,6 +164,7 @@ rust-audit:
 ## rust-deny: Enforce dependency/license policy without changing Cargo.lock
 rust-deny:
 	cargo deny --locked --all-features check
+
 
 ## rust-check: Run the complete fast Rust quality gate
 rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check

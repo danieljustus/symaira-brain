@@ -118,10 +118,12 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
 
 #[cfg(test)]
 mod tests {
-    use super::doctor_core::{
-        parse_server_map, probe_version_with_args, profile_arg, sorted_server_names,
-    };
-    use super::doctor_links::{classify_vault_failure, is_secret_reference};
+    #[cfg(unix)]
+    use super::doctor_core::probe_version_with_args;
+    use super::doctor_core::{parse_server_map, profile_arg, sorted_server_names};
+    #[cfg(unix)]
+    use super::doctor_links::classify_vault_failure;
+    use super::doctor_links::is_secret_reference;
     use super::doctor_types::HARNESSES;
     use super::*;
     use std::path::Path;
