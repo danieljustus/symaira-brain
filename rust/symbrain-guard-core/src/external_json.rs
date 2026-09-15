@@ -22,6 +22,27 @@ struct Scanner<'a> {
     pos: usize,
 }
 impl Scanner<'_> {
+    fn value(&mut self, stack: &mut Vec<State>, depth: &mut usize) -> Result<(), String> {
+        match self.peek() {
+            Some(byte @ (b'{' | b'[')) => {
+                *depth += 1;
+                stack.push(if byte == b'{' {
+                    State::Key(true)
+                } else {
+                    State::ArrayStart
+                });
+                self.pos += 1;
+            }
+            Some(b'"') => self.string()?,
+            Some(b'n') => self.literal(b"null")?,
+            Some(b't') => self.literal(b"true")?,
+            Some(b'f') => self.literal(b"false")?,
+            Some(b'-' | b'0'..=b'9') => self.number()?,
+            _ => return Err(self.error("looking for beginning of value")),
+        }
+        Ok(())
+    }
+
     fn peek(&self) -> Option<u8> {
         self.bytes.get(self.pos).copied()
     }
@@ -117,40 +138,42 @@ impl Scanner<'_> {
 }
 
 pub(super) fn validate(input: &[u8]) -> Result<(), String> {
+    fields(input).map(|_| ())
+}
+
+type RawFields<'a> = Vec<(&'a [u8], &'a [u8])>;
+
+pub(super) fn fields(input: &[u8]) -> Result<RawFields<'_>, String> {
     let mut s = Scanner {
         bytes: input,
         pos: 0,
     };
     let mut stack = vec![State::End, State::Value];
     let mut depth = 0;
+    let mut fields = Vec::new();
+    let mut key = (0, 0);
+    let mut value_start = 0;
     while let Some(state) = stack.pop() {
         s.space();
+        if depth == 1 && matches!(state, State::Value) {
+            value_start = s.pos;
+        }
+        if depth == 1 && matches!(state, State::ObjectEnd) {
+            fields.push((&input[key.0..key.1], &input[value_start..s.pos]));
+        }
         match state {
-            State::Value => match s.peek() {
-                Some(b'{') => {
-                    depth += 1;
-                    stack.push(State::Key(true));
-                    s.pos += 1;
-                }
-                Some(b'[') => {
-                    depth += 1;
-                    stack.push(State::ArrayStart);
-                    s.pos += 1;
-                }
-                Some(b'"') => s.string()?,
-                Some(b'n') => s.literal(b"null")?,
-                Some(b't') => s.literal(b"true")?,
-                Some(b'f') => s.literal(b"false")?,
-                Some(b'-' | b'0'..=b'9') => s.number()?,
-                _ => return Err(s.error("looking for beginning of value")),
-            },
+            State::Value => s.value(&mut stack, &mut depth)?,
             State::Key(first) => match s.peek() {
                 Some(b'}') if first => {
                     s.pos += 1;
                     depth -= 1;
                 }
                 Some(b'"') => {
+                    let key_start = s.pos;
                     s.string()?;
+                    if depth == 1 {
+                        key = (key_start, s.pos);
+                    }
                     stack.push(State::ObjectEnd);
                     stack.push(State::Value);
                     stack.push(State::Colon);
@@ -208,5 +231,5 @@ pub(super) fn validate(input: &[u8]) -> Result<(), String> {
             ));
         }
     }
-    Ok(())
+    Ok(fields)
 }

@@ -1,6 +1,7 @@
 {
   "oracle_commit": "0b585d52915a824664e1377d0a995dff3f5405cd",
   "go_binary_sha256": "cbd5d91e3a74c4e92f38d2e9a8f5d24802c39b3b98944a8dbfcab3a518d45aa5",
+  "generator_sha256": "04a5a24147860811be050726451c223120fa8bc1d55668742adf6886e688b1b7",
   "cases": [
     {
       "id": "normal",
@@ -2090,6 +2091,71 @@
         "command": "",
         "decision": "deny",
         "reason": "decide: parse request: invalid character '[' exceeded max depth"
+      }
+    },
+    {
+      "id": "deadline-zone-double-overflow",
+      "input_hex": "7b22636f6d6d616e64223a226f70656e222c227269736b5f636c617373223a226c6f77222c22646561646c696e65223a22323039392d30312d30315430303a30303a30302b39393a3939227d",
+      "response": {
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00+99:99\": time zone offset minute out of range"
+      },
+      "audit": {
+        "command": "",
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00+99:99\": time zone offset minute out of range"
+      }
+    },
+    {
+      "id": "deadline-unicode-0",
+      "input_hex": "7b22636f6d6d616e64223a226f70656e222c227269736b5f636c617373223a226c6f77222c22646561646c696e65223a22ff227d",
+      "response": {
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"\\xff\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\\xff\" as \"2006\""
+      },
+      "audit": {
+        "command": "",
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"\\xff\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\\xff\" as \"2006\""
+      }
+    },
+    {
+      "id": "deadline-unicode-1",
+      "input_hex": "7b22636f6d6d616e64223a226f70656e222c227269736b5f636c617373223a226c6f77222c22646561646c696e65223a225c7564383030227d",
+      "response": {
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"\\\\ud800\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\\\\ud800\" as \"2006\""
+      },
+      "audit": {
+        "command": "",
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"\\\\ud800\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\\\\ud800\" as \"2006\""
+      }
+    },
+    {
+      "id": "deadline-unicode-2",
+      "input_hex": "7b22636f6d6d616e64223a226f70656e222c227269736b5f636c617373223a226c6f77222c22646561646c696e65223a22323039392d30312d30315430303a30303a30305a5c7564383030227d",
+      "response": {
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00Z\\\\ud800\": extra text: \"\\\\ud800\""
+      },
+      "audit": {
+        "command": "",
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00Z\\\\ud800\": extra text: \"\\\\ud800\""
+      }
+    },
+    {
+      "id": "deadline-unicode-3",
+      "input_hex": "7b22636f6d6d616e64223a226f70656e222c227269736b5f636c617373223a226c6f77222c22646561646c696e65223a22323039392d30312d30315430303a30303a30305aff227d",
+      "response": {
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00Z\\xff\": extra text: \"\\xff\""
+      },
+      "audit": {
+        "command": "",
+        "decision": "deny",
+        "reason": "decide: parse request: parsing time \"2099-01-01T00:00:00Z\\xff\": extra text: \"\\xff\""
       }
     }
   ]

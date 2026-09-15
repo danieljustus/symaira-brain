@@ -7,13 +7,35 @@ use chrono::{DateTime, FixedOffset, NaiveDate, TimeDelta};
 
 const LAYOUT: &str = "2006-01-02T15:04:05Z07:00";
 
-fn quote(value: &str) -> String {
-    symbrain_core::config::format_go_quoted(value.as_ref())
+fn quote(mut value: &[u8]) -> String {
+    use std::fmt::Write;
+    let mut out = String::from("\"");
+    loop {
+        let (text, invalid) = match std::str::from_utf8(value) {
+            Ok(text) => (text, None),
+            Err(error) => {
+                let valid = error.valid_up_to();
+                (
+                    std::str::from_utf8(&value[..valid]).expect("valid prefix"),
+                    Some(valid),
+                )
+            }
+        };
+        let quoted = symbrain_core::config::format_go_quoted(text.as_ref());
+        out.push_str(&quoted[1..quoted.len() - 1]);
+        let Some(index) = invalid else {
+            break;
+        };
+        write!(&mut out, "\\x{:02x}", value[index]).expect("String write");
+        value = &value[index + 1..];
+    }
+    out.push('"');
+    out
 }
 
 struct Parser<'a> {
-    value: &'a str,
-    rest: &'a str,
+    value: &'a [u8],
+    rest: &'a [u8],
 }
 
 impl Parser<'_> {
@@ -21,9 +43,9 @@ impl Parser<'_> {
         format!(
             "parsing time {} as {}: cannot parse {} as {}",
             quote(self.value),
-            quote(LAYOUT),
+            quote(LAYOUT.as_bytes()),
             quote(self.rest),
-            quote(layout)
+            quote(layout.as_bytes())
         )
     }
 
@@ -34,7 +56,7 @@ impl Parser<'_> {
     fn literal(&mut self, text: &str) -> Result<(), String> {
         self.rest = self
             .rest
-            .strip_prefix(text)
+            .strip_prefix(text.as_bytes())
             .ok_or_else(|| self.mismatch(text))?;
         Ok(())
     }
@@ -42,7 +64,8 @@ impl Parser<'_> {
     fn number(&mut self, layout: &str, min: usize, max: usize) -> Result<u32, String> {
         let width = self
             .rest
-            .bytes()
+            .iter()
+            .copied()
             .take(max)
             .take_while(u8::is_ascii_digit)
             .count();
@@ -50,14 +73,14 @@ impl Parser<'_> {
             return Err(self.mismatch(layout));
         }
         let value = self.rest[..width]
-            .parse()
-            .map_err(|_| self.mismatch(layout))?;
+            .iter()
+            .fold(0, |value, byte| value * 10 + u32::from(byte - b'0'));
         self.rest = &self.rest[width..];
         Ok(value)
     }
 }
 
-pub(super) fn parse(value: &str) -> Result<DateTime<FixedOffset>, String> {
+pub(super) fn parse(value: &[u8]) -> Result<DateTime<FixedOffset>, String> {
     let mut p = Parser { value, rest: value };
     let year = p.number("2006", 4, 4)?;
     p.literal("-")?;
@@ -83,22 +106,26 @@ pub(super) fn parse(value: &str) -> Result<DateTime<FixedOffset>, String> {
         return Err(p.range("second"));
     }
     let mut nanos = 0;
-    if matches!(p.rest.as_bytes().first(), Some(b'.' | b','))
-        && p.rest.as_bytes().get(1).is_some_and(u8::is_ascii_digit)
+    if matches!(p.rest.first(), Some(b'.' | b',')) && p.rest.get(1).is_some_and(u8::is_ascii_digit)
     {
         p.rest = &p.rest[1..];
-        let width = p.rest.bytes().take_while(u8::is_ascii_digit).count();
-        for (i, digit) in p.rest.bytes().take(9).take(width).enumerate() {
+        let width = p
+            .rest
+            .iter()
+            .copied()
+            .take_while(u8::is_ascii_digit)
+            .count();
+        for (i, digit) in p.rest.iter().copied().take(9).take(width).enumerate() {
             nanos +=
                 u32::from(digit - b'0') * 10_u32.pow(8 - u32::try_from(i).expect("nine digits"));
         }
         p.rest = &p.rest[width..];
     }
-    let offset = if p.rest.starts_with('Z') {
+    let offset = if p.rest.starts_with(b"Z") {
         p.rest = &p.rest[1..];
         0
     } else {
-        let zone = p.rest.as_bytes();
+        let zone = p.rest;
         if zone.len() < 6
             || !matches!(zone[0], b'+' | b'-')
             || zone[3] != b':'
@@ -110,11 +137,11 @@ pub(super) fn parse(value: &str) -> Result<DateTime<FixedOffset>, String> {
         }
         let hours = i64::from(zone[1] - b'0') * 10 + i64::from(zone[2] - b'0');
         let minutes = i64::from(zone[4] - b'0') * 10 + i64::from(zone[5] - b'0');
-        if hours > 24 {
-            return Err(p.range("time zone offset hour"));
-        }
         if minutes > 60 {
             return Err(p.range("time zone offset minute"));
+        }
+        if hours > 24 {
+            return Err(p.range("time zone offset hour"));
         }
         let seconds = (hours * 60 + minutes) * 60 * if zone[0] == b'-' { -1 } else { 1 };
         p.rest = &p.rest[6..];

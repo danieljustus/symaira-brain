@@ -1,5 +1,6 @@
 //! Replays observations captured from the immutable production Go binary.
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
 
 #[test]
@@ -11,7 +12,13 @@ fn replay_f01_f05_production_go_observations() {
         "0b585d52915a824664e1377d0a995dff3f5405cd"
     );
     let cases = fixture["cases"].as_array().unwrap();
-    assert_eq!(cases.len(), 145);
+    assert_eq!(cases.len(), 150);
+    let generator = include_str!("../../../guard/scripts/guard-decide-oracle/repair_parity.py")
+        .replace("\r\n", "\n");
+    assert_eq!(
+        fixture["generator_sha256"],
+        format!("{:x}", Sha256::digest(generator.as_bytes()))
+    );
     let now = "2026-09-15T00:00:00Z".parse().unwrap();
     for case in cases {
         let hex = case["input_hex"].as_str().unwrap();

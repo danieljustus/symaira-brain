@@ -6,6 +6,7 @@ codes, stderr, audit keys/types/values and selected audit locations must match.
 The optional fixture is captured from Go, never authored expected output.
 """
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -48,6 +49,9 @@ def cases():
     for i, value in enumerate(invalid): raw(f'json-{i}', value)
     for i, text in enumerate([b'\xed\xa0\x80', b'\xf0\x80', b'\\ud800', b'\\udc00', b'\\ud800\\udc00', b'\\\\ud800']): raw(f'unicode-{i}', b'{"command":"'+text+b'","risk_class":"low"}')
     for depth in [127,128,1000,9999,10000]: raw(f'depth-{depth}', b'{"command":"open","risk_class":"low","extra":'+b'['*depth+b'0'+b']'*depth+b'}')
+    request('deadline-zone-double-overflow', deadline='2099-01-01T00:00:00+99:99')
+    for i, text in enumerate([b'\xff', b'\\ud800', b'2099-01-01T00:00:00Z\\ud800', b'2099-01-01T00:00:00Z\xff']):
+        raw(f'deadline-unicode-{i}', b'{"command":"open","risk_class":"low","deadline":"'+text+b'"}')
     assert len(out) == len({name for name, _ in out})
     return out
 
@@ -75,25 +79,41 @@ def run(binary, payload, root, mode='xdg'):
     return dict(exit=result.returncode, stdout_hex=result.stdout.hex(), stderr_hex=result.stderr.hex(), audit=audit, locations=logs)
 
 
+def same(left, right):
+    # JSON type identity matters: Python otherwise equates true with 1.
+    return json.dumps(left, sort_keys=True) == json.dumps(right, sort_keys=True)
+
+
 def main():
-    p=argparse.ArgumentParser(); p.add_argument('--go', type=Path, required=True); p.add_argument('--rust', type=Path, required=True); p.add_argument('--report', type=Path, required=True); p.add_argument('--fixture', type=Path); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--go', type=Path, required=True); p.add_argument('--rust', type=Path, required=True); p.add_argument('--report', type=Path, required=True); p.add_argument('--fixture', type=Path); p.add_argument('--oracle-manifest', type=Path); a=p.parse_args()
     a.go=a.go.resolve(); a.rust=a.rust.resolve()
     hashes={k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in [('go',a.go),('rust',a.rust)]}
     assert hashes['go'] != hashes['rust'], 'same binary is not differential evidence'
+    if a.fixture:
+        assert a.oracle_manifest, 'fixture capture requires validated historical provenance'
+        import oracle
+        oracle.EVIDENCE = a.oracle_manifest.resolve().parent
+        manifest = oracle.validate_manifest(a.oracle_manifest)
+        assert manifest['binary']['sha256'] == hashes['go']
     rows=[]; fixtures=[]
     with tempfile.TemporaryDirectory(prefix='guard-repair-') as temp:
         for index,(name,payload) in enumerate(cases()):
             row={'id':name, 'input_hex':payload.hex()}
             for kind,binary in [('go',a.go),('rust',a.rust)]: row[kind]=run(binary,payload,Path(temp)/str(index)/kind)
-            row['pass']=row['go']==row['rust']; rows.append(row)
+            row['pass']=same(row['go'],row['rust']); rows.append(row)
             fixtures.append({'id':name,'input_hex':payload.hex(),'response':json.loads(bytes.fromhex(row['go']['stdout_hex'])),'audit':row['go']['audit']})
         for mode in ['xdg','both','no-home','no-profile','no-both']:
-            row={'id':'resolver-'+mode}
+            row: dict = {'id':'resolver-'+mode}
             for kind,binary in [('go',a.go),('rust',a.rust)]: row[kind]=run(binary,b'{"command":"open","risk_class":"low"}',Path(temp)/mode/kind,mode)
-            row['pass']=row['go']==row['rust']; rows.append(row)
+            row['pass']=same(row['go'],row['rust']); rows.append(row)
+    original=rows[0]['go']
+    for key, value in [('exit',99),('stdout_hex','00'),('stderr_hex','00'),('locations',[])]:
+        altered=copy.deepcopy(original); altered[key]=value; assert not same(original,altered)
+    for key, value in [('decision','deny'),('command',1),('risk_class',None),('warnings',[])]:
+        altered=copy.deepcopy(original); altered['audit'][key]=value; assert not same(original,altered)
     report={'platform':platform.platform(),'binary_sha256':hashes,'cases':rows,'count':len(rows),'passed':sum(row['pass'] for row in rows)}
     a.report.parent.mkdir(parents=True,exist_ok=True); a.report.write_text(json.dumps(report,indent=2)+'\n')
-    if a.fixture: a.fixture.write_text(json.dumps({'oracle_commit':'0b585d52915a824664e1377d0a995dff3f5405cd','go_binary_sha256':hashes['go'],'cases':fixtures},indent=2)+'\n')
+    if a.fixture: a.fixture.write_text(json.dumps({'oracle_commit':'0b585d52915a824664e1377d0a995dff3f5405cd','go_binary_sha256':hashes['go'],'generator_sha256':hashlib.sha256(Path(__file__).read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'cases':fixtures},indent=2)+'\n')
     print(json.dumps({k:v for k,v in report.items() if k!='cases'}))
     for row in rows:
         if not row['pass']: print(json.dumps(row))
