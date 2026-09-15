@@ -1,0 +1,75 @@
+name: Rust guard parity and dependencies
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+# This workspace currently contains only guard-core. These checks do not
+# establish native MCP process/stdio evidence or cross-platform runtime parity.
+jobs:
+  guard-parity:
+    name: Rust guard and pinned Go oracle
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The capability oracle verifies source at its pinned Git revision.
+          fetch-depth: 0
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Workflow structural tests
+        run: go test ./.github/tests -count=1
+
+      - name: Guard quality and oracle parity
+        run: make rust-guard-check
+
+  # Independent jobs ensure both tools run even when one reports a problem.
+  cargo-audit:
+    name: Rust lockfile advisories
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Install pinned cargo-audit
+        run: cargo install cargo-audit --version 0.22.2 --locked
+
+      - name: Audit Cargo.lock
+        run: make rust-audit
+
+  cargo-deny:
+    name: Rust dependency and license policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Install pinned cargo-deny
+        run: cargo install cargo-deny --version 0.20.2 --locked
+
+      - name: Check dependency policy against Cargo.lock
+        run: make rust-deny
