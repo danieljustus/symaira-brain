@@ -1,0 +1,46 @@
+name: Guard review repair native evidence
+
+on:
+  push:
+    branches: [fix/checkpoint-guard-review-repair]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guard-review-repair-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-guard-repair:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
+      - name: Resolve repository-pinned Rust
+        run: rustup show active-toolchain
+      - name: Execute historical Go versus native Rust and audit resolver
+        env:
+          GUARD_REPAIR_OUTPUT: ${{ runner.temp }}/guard-repair
+        run: python guard/scripts/guard-decide-oracle/native_repair.py
+      - name: Retain exact-head evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-repair-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/guard-repair/*.json
+            ${{ runner.temp }}/guard-repair/*.log
+          if-no-files-found: error
+          retention-days: 14

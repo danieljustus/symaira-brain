@@ -40,7 +40,6 @@ impl Scanner<'_> {
         self.pos += 1;
         loop {
             match self.peek() {
-                None => return Err(self.error("in string literal")),
                 Some(b'"') => {
                     self.pos += 1;
                     return Ok(());
@@ -49,7 +48,7 @@ impl Scanner<'_> {
                     self.pos += 1;
                     match self.peek() {
                         Some(b'"' | b'\\' | b'/' | b'b' | b'f' | b'n' | b'r' | b't') => {
-                            self.pos += 1
+                            self.pos += 1;
                         }
                         Some(b'u') => {
                             self.pos += 1;
@@ -63,7 +62,7 @@ impl Scanner<'_> {
                         _ => return Err(self.error("in string escape code")),
                     }
                 }
-                Some(0..=31) => return Err(self.error("in string literal")),
+                None | Some(0..=31) => return Err(self.error("in string literal")),
                 Some(_) => self.pos += 1,
             }
         }
