@@ -196,12 +196,18 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
-      - name: Check native init and execute Go differential
+      - name: Check native init formatting and lint
         shell: bash
         run: |
           set -euo pipefail
           cargo fmt --all --check
           cargo clippy -p symbrain-cli --all-targets --all-features --locked -- -D warnings
+      # Keep lint failures fatal, but collect independent runtime diagnostics.
+      - name: Execute native init tests and Go differential
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
           cargo test -p symbrain-cli --test init_cli_tests --locked
           cargo build -p symbrain-cli --locked
           python3 scripts/init-oracle/test_compare.py
