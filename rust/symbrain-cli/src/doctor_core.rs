@@ -77,6 +77,7 @@ pub(super) fn check_memory_db() -> MemoryDbCheck {
     }
     #[cfg(not(unix))]
     {
+        let _ = metadata;
         check.mode = "0600".to_string();
         check.mode_ok = true;
     }
