@@ -39,9 +39,9 @@ bounded cleanup of the comparator's Windows command-wrapper descendants.
 The authorized policy mode helpers retain fallible Unix 0700/0600 operations
 and use infallible non-Unix no-ops, without suppressing lint warnings.
 
-Remaining blocker: `rust/symbrain-broker/src/client.rs:230`, `Inner.pid`, is unused
-on Windows and fails `-D warnings`; its only read is Unix-only. Broker source is
-outside this slice's authorized writes and remains unchanged. Required lint
+At that historical checkpoint, `rust/symbrain-broker/src/client.rs:230`, `Inner.pid`,
+was unused on Windows and failed `-D warnings`; its only read is Unix-only.
+Subsequent authorized cfg-only repairs are recorded below. Required lint
 remains fatal even though the separately observed runtime passes. Tracking:
 [issue 601](https://github.com/danieljustus/symaira-brain/issues/601).
 
@@ -57,5 +57,33 @@ Raw native reports/logs and source-bound local command manifests are retained in
 the central `docs/intern/rust-resume-evidence/consumers-slice-brain-init-*` evidence
 lane. A later documentation-only commit is not itself the tested source SHA;
 its exact-head workflow outcome must be recorded separately in the task handoff.
-CLI-006A remains acceptance-blocked until required native lint is green.
+## Bounded implementation acceptance; Windows deferred
+
+Source `9620d92903384fbf7d3738e92541108f2a9e2bb2` was exercised in
+[CI run 34945784897](https://github.com/danieljustus/symaira-brain/actions/runs/34945784897).
+Linux and macOS native init jobs passed formatting, strict Clippy, focused tests,
+14 comparator controls and all 20 exact Go-to-Rust cases. Native Windows built
+the actual CLI and passed all 20 differential cases, but strict Clippy failed:
+
+- `init_cli.rs:108`: `native_path` triggers `needless_pass_by_value` on Windows.
+- `passthrough.rs:265`: Windows-only `return` triggers `needless_return`.
+
+These remain unresolved; passing runtime is not full Windows acceptance.
+The operator deferred Windows full acceptance and Windows Clippy until after
+functional consumer migration. The bounded implementation milestone can close
+with `windows_acceptance=deferred`; the integrator owns the final native Windows
+phase before overall completion, release or cutover. No lint threshold, workflow
+failure behavior, comparator assertion or required case was weakened.
+
+The completed dependency repairs only scope Unix-only fields/imports/helpers and
+discard unused non-Unix bindings. Broker process behavior, pattern storage,
+archive integrity, doctor diagnostics and Guard key-file error propagation remain
+unchanged. Local `make rust-check parity-smoke` passed against the final source
+manifest, including Unix lifecycle/security tests and 299 CLI parity cases.
+The exact unchanged init source retains the genuine mutant/restoration evidence
+above. Go sources are unchanged; the preceding source-bound Go lint/build/race
+evidence remains applicable. Raw failures and native reports remain retained.
+
+A documentation-only successor must record its exact-head workflow separately in
+the task handoff; this section identifies the tested implementation source.
 CLI-006, CFG-001, value and full-product rollback acceptance remain open.
