@@ -1,12 +1,12 @@
 use std::ffi::OsString;
 use std::fs;
 use std::io::{self, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use symbrain_core::exit;
 use symbrain_core::xdg;
 
 #[cfg(windows)]
-const MISSING_HOME_ERR: &str = "%USERPROFILE% is not defined";
+const MISSING_HOME_ERR: &str = "%userprofile% is not defined";
 #[cfg(not(windows))]
 const MISSING_HOME_ERR: &str = "$HOME is not defined";
 
@@ -59,7 +59,8 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         data_dir,
         audit_dir,
         cache_dir,
-    ];
+    ]
+    .map(native_path);
     for dir in &dirs {
         if let Err(err) = mkdir_all(dir) {
             let _ = writeln!(stderr, "symbrain init: create {}: {err}", dir.display());
@@ -83,8 +84,9 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         ),
     ];
 
-    for (path, contents) in &files {
-        match write_if_missing(path, contents.as_bytes()) {
+    for (path, contents) in files {
+        let path = native_path(path);
+        match write_if_missing(&path, contents.as_bytes()) {
             Ok(true) => {
                 let _ = writeln!(stdout, "created {}", path.display());
             }
@@ -101,6 +103,19 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     exit::OK
 }
 
+// PathBuf::join retains separators inside an XDG value, unlike Go's
+// filepath.Join. Rebuild Windows components without resolving symlinks.
+fn native_path(path: PathBuf) -> PathBuf {
+    #[cfg(windows)]
+    {
+        path.components().collect()
+    }
+    #[cfg(not(windows))]
+    {
+        path
+    }
+}
+
 /// Atomically writes `contents` to `path` unless a file/directory/symlink-target already
 /// exists there. Matches Go's `writeIfMissing`.
 fn write_if_missing(path: &Path, contents: &[u8]) -> Result<bool, String> {
@@ -110,7 +125,19 @@ fn write_if_missing(path: &Path, contents: &[u8]) -> Result<bool, String> {
             symbrain_core::config::atomic_write(path, contents).map_err(|err| go_io_error(&err))?;
             Ok(true)
         }
-        Err(err) => Err(format!("stat {}: {}", path.display(), go_io_error(&err))),
+        Err(err) => {
+            // Go's Windows stat fallback opens reparse points with CreateFile.
+            let operation = if cfg!(windows) && err.raw_os_error() == Some(1921) {
+                "CreateFile"
+            } else {
+                "stat"
+            };
+            Err(format!(
+                "{operation} {}: {}",
+                path.display(),
+                go_io_error(&err)
+            ))
+        }
     }
 }
 
@@ -121,18 +148,25 @@ fn mkdir_all(path: &Path) -> Result<(), String> {
         return if metadata.is_dir() {
             Ok(())
         } else {
-            Err(format!("mkdir {}: not a directory", path.display()))
+            let reason = if cfg!(windows) {
+                go_io_error(&io::Error::from_raw_os_error(3))
+            } else {
+                "not a directory".to_owned()
+            };
+            Err(format!("mkdir {}: {reason}", path.display()))
         };
     }
     if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         mkdir_all(parent)?;
     }
-    let mut builder = fs::DirBuilder::new();
+    let builder = fs::DirBuilder::new();
     #[cfg(unix)]
-    {
+    let builder = {
         use std::os::unix::fs::DirBuilderExt;
+        let mut builder = builder;
         builder.mode(0o700);
-    }
+        builder
+    };
     builder
         .create(path)
         .or_else(|error| {
@@ -189,9 +223,14 @@ mod tests {
         let root = tempfile::tempdir().unwrap();
         let collision = root.path().join("file");
         fs::write(&collision, b"preserve").unwrap();
+        let reason = if cfg!(windows) {
+            "The system cannot find the path specified."
+        } else {
+            "not a directory"
+        };
         assert_eq!(
             mkdir_all(&collision.join("nested/leaf")),
-            Err(format!("mkdir {}: not a directory", collision.display()))
+            Err(format!("mkdir {}: {reason}", collision.display()))
         );
         assert_eq!(fs::read(collision).unwrap(), b"preserve");
     }

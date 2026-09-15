@@ -209,6 +209,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo test -p symbrain-policy profile::create::tests --locked
+          cargo test -p symbrain-cli --lib init_cli::tests --locked
           cargo test -p symbrain-cli --test init_cli_tests --locked
           cargo build -p symbrain-cli --locked
           python3 scripts/init-oracle/test_compare.py

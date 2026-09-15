@@ -251,7 +251,7 @@ fn missing_home_fails_with_expected_error() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     #[cfg(windows)]
-    assert!(stderr.contains("symbrain init: %USERPROFILE% is not defined"));
+    assert_eq!(stderr, "symbrain init: %userprofile% is not defined\n");
     #[cfg(not(windows))]
     assert!(stderr.contains("symbrain init: $HOME is not defined"));
 }
@@ -307,7 +307,10 @@ fn custom_xdg_environment_variables_honored() {
     let custom_cache = root.path().join("custom_cache");
 
     let output = init_command(&root, &["init"])
-        .env("XDG_CONFIG_HOME", &custom_config)
+        .env(
+            "XDG_CONFIG_HOME",
+            custom_config.to_string_lossy().replace('\\', "/"),
+        )
         .env("XDG_DATA_HOME", &custom_data)
         .env("XDG_CACHE_HOME", &custom_cache)
         .output()
@@ -325,6 +328,11 @@ fn custom_xdg_environment_variables_honored() {
     let audit_dir = data_dir.join("audit");
     let cache_dir = custom_cache.join("symbrain");
 
+    assert!(
+        String::from_utf8(output.stdout)
+            .unwrap()
+            .contains(&format!("created {}\n", config_file.display()))
+    );
     assert!(config_file.is_file());
     assert!(personal_file.is_file());
     assert!(data_dir.is_dir());
