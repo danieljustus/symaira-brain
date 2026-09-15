@@ -10,6 +10,11 @@ use chrono::{DateTime, FixedOffset};
 use serde::de::{Deserializer, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
 
+#[path = "external_deadline.rs"]
+mod deadline_parser;
+#[path = "external_json.rs"]
+mod json_syntax;
+
 /// Maximum request size accepted by the external decision contract.
 pub const MAX_REQUEST_BYTES: usize = 64 * 1024;
 
@@ -56,6 +61,7 @@ pub struct ExternalDecisionAudit {
     #[serde(skip_serializing_if = "warnings_empty")]
     pub warnings: Option<Vec<String>>,
     pub decision: ExternalDecision,
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub reason: String,
     pub decided_at: String,
 }
@@ -138,6 +144,9 @@ fn evaluate_without_audit(
         return fail_closed("decide: empty request");
     }
 
+    if let Err(error) = json_syntax::validate(input) {
+        return fail_closed(&format!("decide: parse request: {error}"));
+    }
     let decoded = match decode_request(input) {
         Ok(decoded) => decoded,
         Err(error) => {
@@ -271,7 +280,17 @@ impl<'de> Visitor<'de> for RequestVisitor {
         let mut warning_slots = Vec::<String>::new();
         while let Some(key) = map.next_key::<String>()? {
             let key = fold_json_key(&key);
-            let value = map.next_value::<serde_json::Value>()?;
+            let raw = map.next_value::<Box<serde_json::value::RawValue>>()?;
+            if !matches!(
+                key.as_str(),
+                "command" | "risk_class" | "domain" | "warnings" | "deadline"
+            ) {
+                continue;
+            }
+            // RawValue validates syntax without rounding or overflowing ignored
+            // numbers. Known fields need only their type, strings, or array slots.
+            let value =
+                field_value(raw.get(), key == "warnings").map_err(serde::de::Error::custom)?;
             let error = |field: &str, ty: &str| {
                 format!(
                     "json: cannot unmarshal {} into Go struct field request.{} of type {}",
@@ -322,7 +341,28 @@ impl<'de> Visitor<'de> for RequestVisitor {
                     }
                 }
                 "deadline" => {
+                    // Go time.Time.UnmarshalJSON parses the quoted bytes, not
+                    // a JSON-unescaped string, and its error stops field decoding.
+                    let value = if raw.get().starts_with('"') {
+                        serde_json::Value::String(raw.get()[1..raw.get().len() - 1].to_owned())
+                    } else {
+                        value
+                    };
                     decode_deadline(&value, &mut request, &mut type_error);
+                    if !value.is_null()
+                        && (request.deadline.is_none()
+                            || type_error.as_deref().is_some_and(|e| {
+                                e.starts_with("parsing time") || e.starts_with("Time.UnmarshalJSON")
+                            }))
+                    {
+                        // Consume remaining object members without changing the
+                        // first time error; syntax was checked before this visitor.
+                        while map
+                            .next_entry::<serde::de::IgnoredAny, serde::de::IgnoredAny>()?
+                            .is_some()
+                        {}
+                        break;
+                    }
                 }
                 _ => {}
             }
@@ -345,10 +385,10 @@ impl<'de> Visitor<'de> for RequestVisitor {
 }
 
 fn decode_request(input: &[u8]) -> Result<DecodedRequest, serde_json::Error> {
-    if let Ok(value) = serde_json::from_slice::<serde_json::Value>(input)
-        && !value.is_object()
-        && !value.is_null()
-    {
+    let text = crate::capability_wire::repair_json_strings(input);
+    let raw: Box<serde_json::value::RawValue> = serde_json::from_str(&text)?;
+    if !raw.get().starts_with('{') && raw.get() != "null" {
+        let value = field_value(raw.get(), false)?;
         return Ok(DecodedRequest {
             request: empty_request(),
             type_error: Some(format!(
@@ -357,10 +397,29 @@ fn decode_request(input: &[u8]) -> Result<DecodedRequest, serde_json::Error> {
             )),
         });
     }
-    let mut deserializer = serde_json::Deserializer::from_slice(input);
+    let mut deserializer = serde_json::Deserializer::from_str(&text);
     let result = deserializer.deserialize_any(RequestVisitor)?;
     deserializer.end()?;
     Ok(result)
+}
+
+fn field_value(raw: &str, array: bool) -> Result<serde_json::Value, serde_json::Error> {
+    use serde_json::Value;
+    Ok(match raw.as_bytes()[0] {
+        b'"' | b'n' | b't' | b'f' => serde_json::from_str(raw)?,
+        b'{' => Value::Object(serde_json::Map::new()),
+        b'[' if array => {
+            let slots: Vec<Box<serde_json::value::RawValue>> = serde_json::from_str(raw)?;
+            Value::Array(
+                slots
+                    .iter()
+                    .map(|s| field_value(s.get(), false))
+                    .collect::<Result<_, _>>()?,
+            )
+        }
+        b'[' => Value::Array(Vec::new()),
+        _ => Value::Number(0.into()),
+    })
 }
 
 #[allow(
@@ -378,55 +437,16 @@ fn decode_deadline(
 ) {
     match value {
         serde_json::Value::Null => {}
-        serde_json::Value::String(value) => match DateTime::parse_from_rfc3339(value) {
+        serde_json::Value::String(value) => match deadline_parser::parse(value) {
             Ok(deadline) => request.deadline = Some(deadline),
             Err(error) => {
-                type_error.get_or_insert_with(|| time_parse_error(value, error));
+                *type_error = Some(error);
             }
         },
         _ => {
-            type_error
-                .get_or_insert_with(|| "Time.UnmarshalJSON: input is not a JSON string".to_owned());
+            *type_error = Some("Time.UnmarshalJSON: input is not a JSON string".to_owned());
         }
     }
-}
-
-fn time_parse_error(value: &str, fallback: chrono::ParseError) -> String {
-    let quote = |text: &str| symbrain_core::config::format_go_quoted(std::ffi::OsStr::new(text));
-    let mut rest = value;
-    for (layout, width) in [
-        ("2006", 4),
-        ("-", 0),
-        ("01", 2),
-        ("-", 0),
-        ("02", 2),
-        ("T", 0),
-        ("15", 2),
-        (":", 0),
-        ("04", 2),
-        (":", 0),
-        ("05", 2),
-    ] {
-        let count = if width == 0 { layout.len() } else { width };
-        let matched = if width == 0 {
-            rest.starts_with(layout)
-        } else {
-            rest.as_bytes()
-                .get(..count)
-                .is_some_and(|part| part.iter().all(u8::is_ascii_digit))
-        };
-        if !matched {
-            return format!(
-                "parsing time {} as {}: cannot parse {} as {}",
-                quote(value),
-                quote("2006-01-02T15:04:05Z07:00"),
-                quote(rest),
-                quote(layout)
-            );
-        }
-        rest = &rest[count..];
-    }
-    fallback.to_string()
 }
 
 fn value_type(value: &serde_json::Value) -> &'static str {
@@ -478,11 +498,16 @@ fn is_loopback(domain: &str) -> bool {
         return !zone.is_empty()
             && address
                 .parse::<std::net::Ipv6Addr>()
-                .is_ok_and(|address| address.is_loopback());
+                .is_ok_and(ipv6_loopback);
     }
-    domain
-        .parse::<IpAddr>()
-        .is_ok_and(|address| address.is_loopback())
+    domain.parse::<IpAddr>().is_ok_and(|address| match address {
+        IpAddr::V4(address) => address.is_loopback(),
+        IpAddr::V6(address) => ipv6_loopback(address),
+    })
+}
+
+fn ipv6_loopback(address: std::net::Ipv6Addr) -> bool {
+    address.is_loopback() || address.to_ipv4_mapped().is_some_and(|ip| ip.is_loopback())
 }
 
 fn audit_record(

@@ -320,7 +320,7 @@ func TestExternalDecisionJSONMatchesPinnedGoEscapingAndTimestampBytes(t *testing
 	}
 }
 
-func TestExternalDecisionJSONIncludesEmptyOptionalFields(t *testing.T) {
+func TestExternalDecisionJSONOmitsEmptyOptionalFields(t *testing.T) {
 	record := audit.ExternalDecision{
 		ID:        "evt_1_decide_1",
 		Command:   "open",
@@ -331,7 +331,7 @@ func TestExternalDecisionJSONIncludesEmptyOptionalFields(t *testing.T) {
 	if err != nil {
 		t.Fatalf("marshal external decision: %v", err)
 	}
-	want := `{"id":"evt_1_decide_1","command":"open","risk_class":"","domain":"","warnings":null,"decision":"deny","reason":"","decided_at":"2026-09-14T12:00:00Z"}`
+	want := `{"id":"evt_1_decide_1","command":"open","decision":"deny","decided_at":"2026-09-14T12:00:00Z"}`
 	if string(got) != want {
 		t.Fatalf("external decision JSON = %s, want %s", got, want)
 	}

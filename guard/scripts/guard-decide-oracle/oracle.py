@@ -22,8 +22,8 @@ from datetime import datetime, timezone
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
 CASE_FILE = HERE / "cases.json"
-EVIDENCE = ROOT / "target" / "migration-run" / "guard-decide-provenancefix"
-GO = Path(os.environ.get("GUARD_DECIDE_GO", "/Users/daniel/sdk/go1.26.6/bin/go")).resolve()
+EVIDENCE = Path(os.environ.get("GUARD_DECIDE_EVIDENCE", ROOT / "target" / "migration-run" / "guard-decide-provenancefix")).resolve()
+GO = Path(os.environ.get("GUARD_DECIDE_GO", shutil.which("go") or "go")).resolve()
 PINNED_COMMIT_SHA = "0b585d52915a824664e1377d0a995dff3f5405cd"
 SELECTED_TOOLCHAIN = "go1.26.7"
 MAX_REQUEST = 64 * 1024
@@ -232,10 +232,13 @@ def validate_manifest(path: Path, *, cases_path: Path = CASE_FILE, expected_dige
     listed = {item["path"]: item["sha256"] for item in source["tracked_files"]}
     if trusted_paths != list(listed): raise AssertionError("trusted historical tree inventory mismatch")
     if listed != trusted_hashes or source["source_before"] != trusted_hashes or source["source_after"] != trusted_hashes: raise AssertionError("historical source hash mismatch")
-    for item in source["tracked_files"]:
+    sizes = subprocess.check_output(
+        ["git", "cat-file", "--batch-check=%(objectsize)"],
+        input="".join(f"{expected_commit_sha}:{p}\n" for p in trusted_paths),
+        cwd=ROOT, text=True).splitlines()
+    for item, size in zip(source["tracked_files"], sizes, strict=True):
         if type(item.get("bytes")) is not int: raise AssertionError("historical source byte metadata mismatch")
-        actual = subprocess.check_output(["git", "show", f"{expected_commit_sha}:{item['path']}"], cwd=ROOT)
-        if len(actual) != item["bytes"]: raise AssertionError("historical source byte count mismatch")
+        if int(size) != item["bytes"]: raise AssertionError("historical source byte count mismatch")
     binary = evidence_path(EVIDENCE, manifest["binary"]["path"], "binary path")
     binary_bytes = binary.read_bytes() if binary.is_file() else b""
     if not binary.is_file() or binary.stat().st_size != manifest["binary"]["bytes"] or len(binary_bytes) != manifest["binary"]["bytes"] or digest(binary_bytes) != manifest["binary"]["sha256"]: raise AssertionError("binary hash/size mismatch")
@@ -281,6 +284,8 @@ def main() -> int:
     identity = provenance(extracted, expected_commit_sha=PINNED_COMMIT_SHA)
     build_dir = EVIDENCE / "build"; build_dir.mkdir(exist_ok=True); binary = build_dir / "symbrain-go"
     build_env = {"PATH": "/usr/bin:/bin", "HOME": str(EVIDENCE / "build-home"), "GOTOOLCHAIN": "go1.26.7", "CGO_ENABLED": "0", "TMPDIR": str(EVIDENCE / "build-tmp")}
+    for key in ("GOMODCACHE", "GOCACHE"):
+        if os.environ.get(key): build_env[key] = os.environ[key]
     Path(build_env["HOME"]).mkdir(exist_ok=True); Path(build_env["TMPDIR"]).mkdir(exist_ok=True)
     build = run_bounded([str(GO), "build", "-o", str(binary), "./cmd/symbrain"], cwd=extracted, env=build_env, stdin=None, timeout=BUILD_TIMEOUT)
     (EVIDENCE / "build.stdout").write_bytes(build.stdout); (EVIDENCE / "build.stderr").write_bytes(build.stderr)

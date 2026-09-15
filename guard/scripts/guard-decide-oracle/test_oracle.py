@@ -19,9 +19,10 @@ class OracleHarnessTests(unittest.TestCase):
     def setUpClass(cls):
         cls.manifest_path = oracle.EVIDENCE / "manifest.json"
         if not cls.manifest_path.is_file():
-            raise unittest.SkipTest("run oracle.py before mutation tests")
+            raise FileNotFoundError("run oracle.py before mutation tests; missing evidence is not PASS")
         cls.original = json.loads(cls.manifest_path.read_text())
         cls.expected_digest = oracle.digest(cls.manifest_path.read_bytes())
+        oracle.validate_manifest(cls.manifest_path, expected_digest=cls.expected_digest)
 
     def assert_manifest_rejected(self, mutate):
         altered = copy.deepcopy(self.original)

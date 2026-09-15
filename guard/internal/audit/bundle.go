@@ -80,11 +80,11 @@ type ProposalApplied struct {
 type ExternalDecision struct {
 	ID        string   `json:"id"`
 	Command   string   `json:"command"`
-	RiskClass string   `json:"risk_class"`
-	Domain    string   `json:"domain"`
-	Warnings  []string `json:"warnings"`
+	RiskClass string   `json:"risk_class,omitempty"`
+	Domain    string   `json:"domain,omitempty"`
+	Warnings  []string `json:"warnings,omitempty"`
 	Decision  string   `json:"decision"` // allow|confirm|deny
-	Reason    string   `json:"reason"`
+	Reason    string   `json:"reason,omitempty"`
 	DecidedAt string   `json:"decided_at"` // RFC 3339
 }
 

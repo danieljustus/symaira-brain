@@ -22,7 +22,7 @@ fn audit_serialization_omits_optional_empty_fields_like_go() {
         got,
         // The real pinned command capture in external_decision_review.json
         // verifies omitempty; the earlier mirror-only expectation did not.
-        br#"{"id":"evt_1_decide_1","command":"open","decision":"deny","reason":"","decided_at":"2026-09-14T12:00:00Z"}"#
+        br#"{"id":"evt_1_decide_1","command":"open","decision":"deny","decided_at":"2026-09-14T12:00:00Z"}"#
     );
 }
 
