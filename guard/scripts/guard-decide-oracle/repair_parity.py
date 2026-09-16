@@ -16,11 +16,86 @@ import subprocess
 import tempfile
 
 
+HERE = Path(__file__).resolve().parent
+SOURCE_FILES = (
+    "cmd/symbrain/cmd_guard.go",
+    "cmd/symbrain/main.go",
+    "guard/cmd/symguard/decide/command.go",
+)
+FIXTURE_VALIDATION_BASIS = {
+    "producer": "immutable Go binary",
+    "argv": ["guard", "decide"],
+    "compared": ["response", "audit"],
+    "volatile_audit_fields": ["id", "decided_at"],
+}
+
+
+def digest(value):
+    return hashlib.sha256(value).hexdigest()
+
+
+def source_file_hashes(source_root):
+    root = Path(source_root).resolve()
+    if not root.is_dir():
+        raise AssertionError(f"source root is not a directory: {root}")
+    hashes = {}
+    for relative in SOURCE_FILES:
+        path = root / relative
+        if not path.is_file():
+            raise AssertionError(f"immutable source file is missing: {relative}")
+        hashes[relative] = digest(path.read_bytes())
+    return hashes
+
+
+def fixture_payload(
+    fixtures,
+    *,
+    source_root,
+    validation_script,
+    oracle_commit,
+    go_toolchain,
+    generator_sha256,
+    validation_basis_sha256,
+):
+    validation_script = Path(validation_script).resolve()
+    if not validation_script.is_file():
+        raise AssertionError(f"validation basis is missing: {validation_script}")
+    case_ids = [case["id"] for case in fixtures]
+    if len(case_ids) != len(set(case_ids)):
+        raise AssertionError("fixture case ids are not unique")
+    document = {
+        "schema_version": 2,
+        "oracle_commit": oracle_commit,
+        "source_files": source_file_hashes(source_root),
+        "go_toolchain": go_toolchain,
+        "generator_sha256": generator_sha256,
+        "validation_basis": FIXTURE_VALIDATION_BASIS,
+        "validation_basis_sha256": validation_basis_sha256,
+        "case_count": len(fixtures),
+        "case_ids": case_ids,
+        "cases": fixtures,
+    }
+    return (json.dumps(document, indent=2) + "\n").encode()
+
+
+def check_fixture(path, generated):
+    path = Path(path).resolve()
+    if not path.is_file():
+        raise AssertionError(f"checked-in raw-byte fixture is missing: {path}")
+    if path.read_bytes() != generated:
+        raise AssertionError(f"checked-in raw-byte fixture drift: {path}")
+
+
 def cases():
     out = []
     def raw(name, value): out.append((name, value))
     def request(name, **kw): raw(name, json.dumps(dict(command='open', risk_class='low') | kw, separators=(',', ':')).encode())
     request('normal')
+    # These are deliberately raw bytes outside JSON strings. The frozen Go
+    # 1.26.7 checkpoint quotes the byte as a Unicode escape in both diagnostic
+    # locations; keep both minimal controls in the production corpus.
+    raw('raw-byte-top-level-80', b'\x80')
+    raw('raw-byte-trailing-80', b'{"command":"open","risk_class":"low"}\x80')
     for name, value in [('invalid-json', b'{]'), ('invalid-utf8', b'{"command":"\xff","risk_class":"low"}'), ('unknown-large-number', b'{"command":"open","risk_class":"low","extra":1e999}')]: raw(name, value)
     dates = ['2099-01-01t00:00:00z','2099-01-01 00:00:00Z','2099-01-01T00:00:60Z','2099-01-01T00:00:00Z', '2099-01-01T00:00:00z', '2099-01-01T24:00:00Z','2099-01-01T00:60:00Z','2099-13-01T00:00:00Z','2099-02-30T00:00:00Z','2099-01-00T00:00:00Z','2099-01-01T0:00:00Z','2099-01-01T00:00:00,123Z','2099-01-01T00:00:00.123456789012Z','2099-01-01T00:00:00+24:00','2099-01-01T00:00:00+00:60','2099-01-01T00:00:00+25:00','2099-01-01T00:00:00+00:61','2099-01-01T00:00:00Zextra','0001-01-01T00:00:00Z','0001-01-01T01:00:00+01:00','0001-01-01T00:00:00.000000001Z','2000-01-01T00:00:00Z', '', 'bad']
     for i, value in enumerate(dates): request(f'deadline-{i}', deadline=value)
@@ -85,38 +160,66 @@ def same(left, right):
 
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument('--go', type=Path, required=True); p.add_argument('--rust', type=Path, required=True); p.add_argument('--report', type=Path, required=True); p.add_argument('--fixture', type=Path); p.add_argument('--oracle-manifest', type=Path); a=p.parse_args()
-    a.go=a.go.resolve(); a.rust=a.rust.resolve()
-    hashes={k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in [('go',a.go),('rust',a.rust)]}
+    p = argparse.ArgumentParser()
+    p.add_argument('--go', type=Path, required=True)
+    p.add_argument('--rust', type=Path, required=True)
+    p.add_argument('--report', type=Path, required=True)
+    p.add_argument('--fixture', type=Path)
+    p.add_argument('--check-fixture', action='store_true')
+    p.add_argument('--source-root', type=Path)
+    p.add_argument('--validation-script', type=Path)
+    p.add_argument('--oracle-commit', '--source-commit', dest='oracle_commit',
+                   required=True)
+    p.add_argument('--go-toolchain', required=True)
+    p.add_argument('--generator-sha256', required=True)
+    p.add_argument('--validation-basis-sha256', required=True)
+    a = p.parse_args()
+    if a.check_fixture and not a.fixture:
+        p.error('--check-fixture requires --fixture')
+    if a.fixture and (not a.source_root or not a.validation_script):
+        p.error('--fixture requires --source-root and --validation-script')
+    a.go = a.go.resolve(); a.rust = a.rust.resolve()
+    if not a.go.is_file() or not a.rust.is_file():
+        raise AssertionError('both Go and Rust binaries are required')
+    hashes = {k: hashlib.sha256(v.read_bytes()).hexdigest() for k, v in [('go', a.go), ('rust', a.rust)]}
     assert hashes['go'] != hashes['rust'], 'same binary is not differential evidence'
-    if a.fixture:
-        assert a.oracle_manifest, 'fixture capture requires validated historical provenance'
-        import oracle
-        oracle.EVIDENCE = a.oracle_manifest.resolve().parent
-        manifest = oracle.validate_manifest(a.oracle_manifest)
-        assert manifest['binary']['sha256'] == hashes['go']
-    rows=[]; fixtures=[]
+    rows = []; fixtures = []
     with tempfile.TemporaryDirectory(prefix='guard-repair-') as temp:
-        for index,(name,payload) in enumerate(cases()):
-            row={'id':name, 'input_hex':payload.hex()}
-            for kind,binary in [('go',a.go),('rust',a.rust)]: row[kind]=run(binary,payload,Path(temp)/str(index)/kind)
-            row['pass']=same(row['go'],row['rust']); rows.append(row)
-            fixtures.append({'id':name,'input_hex':payload.hex(),'response':json.loads(bytes.fromhex(row['go']['stdout_hex'])),'audit':row['go']['audit']})
-        for mode in ['xdg','both','no-home','no-profile','no-both']:
-            row: dict = {'id':'resolver-'+mode}
-            for kind,binary in [('go',a.go),('rust',a.rust)]: row[kind]=run(binary,b'{"command":"open","risk_class":"low"}',Path(temp)/mode/kind,mode)
-            row['pass']=same(row['go'],row['rust']); rows.append(row)
-    original=rows[0]['go']
-    for key, value in [('exit',99),('stdout_hex','00'),('stderr_hex','00'),('locations',[])]:
-        altered=copy.deepcopy(original); altered[key]=value; assert not same(original,altered)
-    for key, value in [('decision','deny'),('command',1),('risk_class',None),('warnings',[])]:
-        altered=copy.deepcopy(original); altered['audit'][key]=value; assert not same(original,altered)
-    report={'platform':platform.platform(),'binary_sha256':hashes,'cases':rows,'count':len(rows),'passed':sum(row['pass'] for row in rows)}
-    a.report.parent.mkdir(parents=True,exist_ok=True); a.report.write_text(json.dumps(report,indent=2)+'\n')
-    if a.fixture: a.fixture.write_text(json.dumps({'oracle_commit':'0b585d52915a824664e1377d0a995dff3f5405cd','go_binary_sha256':hashes['go'],'generator_sha256':hashlib.sha256(Path(__file__).read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'cases':fixtures},indent=2)+'\n')
-    print(json.dumps({k:v for k,v in report.items() if k!='cases'}))
+        for index, (name, payload) in enumerate(cases()):
+            row = {'id': name, 'input_hex': payload.hex()}
+            for kind, binary in [('go', a.go), ('rust', a.rust)]: row[kind] = run(binary, payload, Path(temp)/str(index)/kind)
+            row['pass'] = same(row['go'], row['rust']); rows.append(row)
+            fixtures.append({'id': name, 'input_hex': payload.hex(), 'response': json.loads(bytes.fromhex(row['go']['stdout_hex'])), 'audit': row['go']['audit']})
+        for mode in ['xdg', 'both', 'no-home', 'no-profile', 'no-both']:
+            row: dict = {'id': 'resolver-'+mode}
+            for kind, binary in [('go', a.go), ('rust', a.rust)]: row[kind] = run(binary, b'{"command":"open","risk_class":"low"}', Path(temp)/mode/kind, mode)
+            row['pass'] = same(row['go'], row['rust']); rows.append(row)
+    original = rows[0]['go']
+    for key, value in [('exit', 99), ('stdout_hex', '00'), ('stderr_hex', '00'), ('locations', [])]:
+        altered = copy.deepcopy(original); altered[key] = value; assert not same(original, altered)
+    for key, value in [('decision', 'deny'), ('command', 1), ('risk_class', None), ('warnings', [])]:
+        altered = copy.deepcopy(original); altered['audit'][key] = value; assert not same(original, altered)
+    report = {'platform': platform.platform(), 'binary_sha256': hashes, 'oracle_commit': a.oracle_commit, 'go_toolchain': a.go_toolchain, 'cases': rows, 'count': len(rows), 'passed': sum(row['pass'] for row in rows)}
+    a.report.parent.mkdir(parents=True, exist_ok=True); a.report.write_text(json.dumps(report, indent=2)+'\n')
+    if a.fixture:
+        payload = fixture_payload(
+            fixtures,
+            source_root=a.source_root,
+            validation_script=a.validation_script,
+            oracle_commit=a.oracle_commit,
+            go_toolchain=a.go_toolchain,
+            generator_sha256=a.generator_sha256,
+            validation_basis_sha256=a.validation_basis_sha256,
+        )
+        if a.check_fixture:
+            check_fixture(a.fixture, payload)
+        else:
+            a.fixture.parent.mkdir(parents=True, exist_ok=True)
+            a.fixture.write_bytes(payload)
+    print(json.dumps({k: v for k, v in report.items() if k != 'cases'}))
     for row in rows:
         if not row['pass']: print(json.dumps(row))
-    return 0 if report['count']==report['passed'] else 1
+    return 0 if report['count'] == report['passed'] else 1
 
-if __name__=='__main__': raise SystemExit(main())
+
+if __name__ == '__main__': raise SystemExit(main())
