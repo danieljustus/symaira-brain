@@ -249,7 +249,10 @@ fn quote_go_char(byte: u8) -> String {
         b'\r' => "\\r".to_owned(),
         b'\t' => "\\t".to_owned(),
         0x0b => "\\v".to_owned(),
-        0x20..=0x7e | 0xa0..=0xff => char::from(byte).to_string(),
+        // Go's quoteChar calls strconv.Quote(string(c)); IsPrint excludes
+        // Latin-1 spacing U+00A0 and soft hyphen U+00AD.
+        0x20..=0x7e | 0xa1..=0xac | 0xae..=0xff => char::from(byte).to_string(),
+        0x80..=0xa0 | 0xad => format!("\\u{byte:04x}"),
         _ => format!("\\x{byte:02x}"),
     };
     format!("'{escaped}'")
@@ -355,5 +358,20 @@ impl fmt::Display for ExternalDecision {
             Self::Confirm => "confirm",
             Self::Deny => "deny",
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::quote_go_char;
+
+    #[test]
+    fn quote_go_char_preserves_frozen_latin1_printability() {
+        for byte in 0x80..=0xa0 {
+            assert_eq!(quote_go_char(byte), format!("'\\u{byte:04x}'"));
+        }
+        assert_eq!(quote_go_char(0xa1), "'¡'");
+        assert_eq!(quote_go_char(0xad), "'\\u00ad'");
+        assert_eq!(quote_go_char(0xae), "'®'");
     }
 }
