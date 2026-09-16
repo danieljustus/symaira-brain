@@ -220,15 +220,28 @@ lint: vet fmt-check
 # browse/ is one such nested module (source-intake receiving copy, see
 # browse/SOURCE_PROVENANCE.md); add further -not -path exclusions here if
 # another nested go.mod directory is introduced later.
-GOFMT_FILES := $(shell find . -name '*.go' -not -path './browse/*' -not -path './.git/*')
+# Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
+# below the platform's exec limit instead of expanding every path in make.
+GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -exec
 
 ## fmt: Format all Go source files
 fmt:
-	gofmt -w -s $(GOFMT_FILES)
+	$(GOFMT_FIND) gofmt -w -s {} +
 
 ## fmt-check: Fail if gofmt would change any file
 fmt-check:
-	@test -z "$$(gofmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; gofmt -l $(GOFMT_FILES); exit 1)
+	@set -eu; \
+	tmp_dir="$$(mktemp -d)"; \
+	trap 'rm -rf "$$tmp_dir"' EXIT; \
+	if ! $(GOFMT_FIND) gofmt -l {} + >"$$tmp_dir/unformatted"; then \
+		echo "gofmt failed" >&2; \
+		exit 1; \
+	fi; \
+	if [ -s "$$tmp_dir/unformatted" ]; then \
+		echo "gofmt needed on:"; \
+		cat "$$tmp_dir/unformatted"; \
+		exit 1; \
+	fi
 
 ## clean: Remove build artifacts and test cache
 clean:
