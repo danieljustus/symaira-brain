@@ -146,8 +146,15 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
 fn has_skill_log() -> bool {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let current = home.join(".local/share/symskills/events.jsonl");
-    fs::symlink_metadata(&current).is_ok()
-        || fs::symlink_metadata(current.with_file_name("events.1.jsonl")).is_ok()
+    log_path_requires_go(&current)
+        || log_path_requires_go(&current.with_file_name("events.1.jsonl"))
+}
+
+fn log_path_requires_go(path: &std::path::Path) -> bool {
+    !matches!(
+        fs::symlink_metadata(path),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound
+    )
 }
 
 fn has_dynamic_config() -> bool {

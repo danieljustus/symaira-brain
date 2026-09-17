@@ -103,6 +103,20 @@ fn existing_current_or_rotated_log_uses_go_before_stdout() {
 }
 
 #[test]
+fn unavailable_log_path_uses_go_before_stdout() {
+    let root = TempDir::new().unwrap();
+    let share_dir = root.path().join("home/.local/share");
+    fs::create_dir_all(&share_dir).unwrap();
+    fs::write(share_dir.join("symskills"), b"not a directory").unwrap();
+
+    let output = command(&root, &["skills", "log"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
+}
+
+#[test]
 fn log_flags_filters_and_invalid_args_use_go_before_stdout() {
     for args in [
         &["skills", "log", "--skill", "demo"][..],
