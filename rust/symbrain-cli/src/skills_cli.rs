@@ -143,7 +143,6 @@ fn has_dynamic_config() -> bool {
     }
     let config_root = std::env::var_os("XDG_CONFIG_HOME")
         .map(PathBuf::from)
-        .filter(|path| path.is_absolute())
         .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
         .unwrap_or_else(|| PathBuf::from(".config"));
     config_root.join("symskills/config.toml").is_file()
