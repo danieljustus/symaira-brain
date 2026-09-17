@@ -63,9 +63,19 @@ struct SkillStatusReport {
 #[derive(Debug, Serialize)]
 struct SkillTargetsEntry {
     target: String,
+    display_name: String,
     installed: bool,
-    managed_count: usize,
-    skill_root: String,
+    evidence: String,
+    effective_skill_root: String,
+    skill_root_exists: bool,
+    skill_root_readable: bool,
+    managed_skills_count: usize,
+    unmanaged_skills_count: usize,
+    install_state: String,
+    capabilities: Vec<&'static str>,
+    runtime_capabilities: BTreeMap<String, &'static str>,
+    setup_hint: String,
+    verification_status: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -110,18 +120,26 @@ fn current_project_dir() -> PathBuf {
     std::env::current_dir().unwrap_or_default()
 }
 
-/// Keeps the native slice limited to the frozen `OpenCode` user-scope contract.
+/// Keeps the native targets slice limited to an empty user-scope inventory.
 ///
-/// Other targets, project scope, custom config, and dynamic target cases stay
+/// Project scope, custom config, and every existing/dynamic target state stay
 /// on the Go implementation until their byte contract is independently frozen.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    if args.first().map(|arg| arg.to_string_lossy()) != Some("status".into()) {
-        return false;
+    match args.first().map(|arg| arg.to_string_lossy()) {
+        Some(verb) if verb == "status" => {
+            let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
+                return true;
+            };
+            target.as_deref() != Some("opencode") || scope != "user" || has_dynamic_config()
+        }
+        // The native targets slice is deliberately only the no-argument,
+        // user-scope/default-config contract. Keep every parsed or dynamic
+        // variant on Go until its bytes are frozen independently.
+        Some(verb) if verb == "targets" => {
+            args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
+        }
+        _ => false,
     }
-    let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
-        return true;
-    };
-    target.as_deref() != Some("opencode") || scope != "user" || has_dynamic_config()
 }
 
 fn has_dynamic_config() -> bool {
@@ -147,6 +165,20 @@ fn has_dynamic_config() -> bool {
         .unwrap_or_else(|| PathBuf::from(".config"));
     config_root.join("symskills/config.toml").is_file()
         || current_project_dir().join(".symskills.toml").is_file()
+}
+
+fn has_dynamic_target_state() -> bool {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    symbrain_harness::all()
+        .iter()
+        .filter_map(|harness| harness.skill_target.as_str())
+        .any(|target| {
+            let skill_root = skill_root_for(target, &home);
+            let config_dir = config_dir_for(target, &home);
+            fs::symlink_metadata(skill_root).is_ok()
+                || fs::metadata(config_dir).is_ok()
+                || binary_path_exists(target)
+        })
 }
 
 fn parse_status_flags(args: &[OsString]) -> Result<(Option<String>, String), &'static str> {
@@ -421,41 +453,138 @@ fn run_targets(
     _stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let mut targets = Vec::new();
-    for h in symbrain_harness::all() {
-        let Some(skill_target) = h.skill_target.as_str() else {
-            continue;
-        };
-        targets.push(SkillTargetsEntry {
-            target: h.name.as_str().to_string(),
-            installed: true,
-            managed_count: 0,
-            skill_root: skill_target.to_string(),
-        });
-    }
-
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let targets = symbrain_harness::all()
+        .iter()
+        .filter_map(|harness| harness.skill_target.as_str())
+        .map(|target| static_target_status(target, &home))
+        .collect::<Vec<_>>();
     let report = SkillTargetsReport { targets };
+
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&report).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&report));
         }
         OutputFormat::Table => {
-            let _ = writeln!(stdout, "TARGET\tINSTALLED\tMANAGED\tSKILL ROOT");
-            for t in &report.targets {
+            let _ = writeln!(stdout, "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT");
+            for target in &report.targets {
                 let _ = writeln!(
                     stdout,
-                    "{}\t{}\t{}\t{}",
-                    t.target, t.installed, t.managed_count, t.skill_root
+                    "{}\t{}\t{}\t{}\t{}",
+                    target.target,
+                    target.installed,
+                    target.managed_skills_count,
+                    target.unmanaged_skills_count,
+                    target.effective_skill_root
                 );
             }
         }
     }
 
     exit::OK
+}
+
+const CAPABILITIES: [&str; 4] = ["render", "install", "symlink", "copy"];
+const RUNTIME_CAPABILITIES: [&str; 6] = [
+    "background_tasks",
+    "hooks",
+    "mcp",
+    "scheduled_tasks",
+    "slash_commands",
+    "subagents",
+];
+
+fn static_target_status(target: &str, home: &std::path::Path) -> SkillTargetsEntry {
+    let skill_root = skill_root_for(target, home);
+    let display_name = match target {
+        "opencode" => "OpenCode",
+        "claude" => "Claude Code",
+        "codex" => "Codex",
+        "hermes" => "Hermes",
+        "antigravity" => "Antigravity",
+        "openclaw" => "OpenClaw",
+        _ => target,
+    };
+    let mut runtime_capabilities = BTreeMap::new();
+    for capability in RUNTIME_CAPABILITIES {
+        let state = if capability == "subagents" && matches!(target, "claude" | "hermes") {
+            "supported"
+        } else {
+            "unknown"
+        };
+        runtime_capabilities.insert(capability.to_owned(), state);
+    }
+
+    SkillTargetsEntry {
+        target: target.to_owned(),
+        display_name: display_name.to_owned(),
+        installed: false,
+        evidence: "none".to_owned(),
+        effective_skill_root: skill_root.display().to_string(),
+        skill_root_exists: false,
+        skill_root_readable: false,
+        managed_skills_count: 0,
+        unmanaged_skills_count: 0,
+        install_state: "missing".to_owned(),
+        capabilities: CAPABILITIES.to_vec(),
+        runtime_capabilities,
+        setup_hint: format!(
+            "Create skill directory {} or run 'symskills install --target {target} <skill>'",
+            skill_root.display()
+        ),
+        verification_status: "not_verified".to_owned(),
+    }
+}
+
+fn skill_root_for(target: &str, home: &std::path::Path) -> PathBuf {
+    match target {
+        "claude" => home.join(".claude/skills"),
+        "opencode" => home.join(".config/opencode/skills"),
+        "codex" => home.join(".agents/skills"),
+        "antigravity" => home.join(".gemini/config/skills"),
+        "hermes" => home.join(".hermes/skills/symaira"),
+        "openclaw" => home.join(".openclaw/skills"),
+        _ => home.join(".local/share/symskills/skills"),
+    }
+}
+
+fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {
+    match target {
+        "claude" => home.join(".claude"),
+        "opencode" => home.join(".config/opencode"),
+        "codex" => home.join(".codex"),
+        "antigravity" => home.join(".gemini/config"),
+        "hermes" => home.join(".hermes"),
+        "openclaw" => home.join(".openclaw"),
+        _ => home.to_path_buf(),
+    }
+}
+
+fn binary_path_exists(target: &str) -> bool {
+    let name = if target == "antigravity" {
+        "agy"
+    } else {
+        target
+    };
+    let Some(path) = std::env::var_os("PATH") else {
+        return false;
+    };
+    std::env::split_paths(&path).any(|directory| {
+        let candidate = directory.join(name);
+        candidate.is_file()
+            || (cfg!(windows)
+                && [".exe", ".cmd", ".bat"]
+                    .iter()
+                    .any(|suffix| directory.join(format!("{name}{suffix}")).is_file()))
+    })
+}
+
+fn go_json<T: Serialize>(value: &T) -> String {
+    serde_json::to_string(value)
+        .unwrap_or_default()
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
 }
 
 fn run_log(
