@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # build-module-packages.sh — build the optional Brain module binaries
 # (symbrowse, symoperate, symscope) from the in-repo receiving sources and
 # package them as local replacement archives with checksums and a
@@ -28,10 +28,10 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 
-# Local builds inherit the repository-wide NVMe cache and temp paths. CI keeps
-# the existing workspace-local behavior through the same wrapper.
-if [ -z "${SYMAIRA_EXTERNAL_ENV_READY:-}" ]; then
-    export SYMAIRA_EXTERNAL_ENV_READY=1
+# Local builds inherit the repository-wide NVMe cache and temp paths. A stale
+# sentinel alone is insufficient: validate the actual paths before proceeding.
+source "$ROOT/scripts/run-external-env.sh"
+if ! external_env_ready; then
     exec bash "$ROOT/scripts/run-external-env.sh" "$ROOT/scripts/build-module-packages.sh" "$@"
 fi
 

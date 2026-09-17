@@ -34,6 +34,29 @@ validate_external_path() {
   fi
 }
 
+external_env_ready() {
+  if [[ -n ${CI:-} ]] || [[ $(uname -s) != Darwin ]]; then
+    return 0
+  fi
+  if [[ ${SYMAIRA_EXTERNAL_ENV_READY:-} != 1 ]]; then
+    return 1
+  fi
+
+  local mounted name candidate
+  mounted=$(df -P "$SYMAIRA_NVME_ROOT" 2>/dev/null | awk 'NR == 2 {print $NF}')
+  if [[ $mounted != "$SYMAIRA_NVME_ROOT" ]]; then
+    return 1
+  fi
+  for name in TMPDIR TMP TEMP GOTMPDIR GOPATH GOTELEMETRYDIR GOCACHE GOMODCACHE \
+    CARGO_HOME CARGO_TARGET_DIR PYTHONPYCACHEPREFIX SYMAIRA_EXTERNAL_RUNTIME_ROOT \
+    GUARD_DECIDE_EVIDENCE GUARD_REPAIR_OUTPUT; do
+    candidate=${!name:-}
+    if [[ -z $candidate ]] || ! validate_external_path "$name" "$candidate" >/dev/null 2>&1; then
+      return 1
+    fi
+  done
+}
+
 external_env() {
   if [[ -n ${CI:-} ]]; then
     return 0

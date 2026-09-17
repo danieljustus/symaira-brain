@@ -2,8 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ "${SYMAIRA_EXTERNAL_ENV_READY:-}" != "1" ]; then
-  export SYMAIRA_EXTERNAL_ENV_READY=1
+source "$SCRIPT_DIR/run-external-env.sh"
+if ! external_env_ready; then
   exec bash "$SCRIPT_DIR/run-external-env.sh" "$0" "$@"
 fi
 
