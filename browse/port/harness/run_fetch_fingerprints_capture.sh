@@ -25,6 +25,7 @@ mkdir -p "$HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" \
   "$XDG_STATE_HOME" "$XDG_RUNTIME_DIR" "$TMPDIR" "$GOTMPDIR" "$GOPATH"
 export CGO_ENABLED=0 GOTOOLCHAIN=local GOMAXPROCS=2 GOWORK=off GOPROXY=off
 export GOFLAGS="-mod=readonly"
+export PATH="$(dirname "$FETCH_GO_BINARY"):$PATH"
 cd "$BROWSE_DIR"
 "$FETCH_GO_BINARY" list -deps -test -json ./internal/fetch/fetch > "$EXEC_DIR/go-list.json"
 snapshot_inputs() {
