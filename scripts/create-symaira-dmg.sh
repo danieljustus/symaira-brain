@@ -39,7 +39,7 @@ mkdir -p "$OUTPUT_DIR"
 OUTPUT_DIR="$(cd "$OUTPUT_DIR" && pwd)"
 DMG_PATH="$OUTPUT_DIR/$(basename "$DMG_PATH")"
 
-WORK_DIR="$(mktemp -d)"
+WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/symbrain-dmg.XXXXXX")"
 STAGE_DIR="$WORK_DIR/stage"
 RW_DMG="$WORK_DIR/installer-rw.dmg"
 MOUNT_DIR=""

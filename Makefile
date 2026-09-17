@@ -29,7 +29,7 @@ EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/
 coverage:
 	@set -eu; \
 	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"; \
-	 tmp_dir="$$($(EXTERNAL_RUN) mktemp -d)"; \
+	 tmp_dir="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrain.XXXXXX"')"; \
 	 trap 'rm -rf "$$tmp_dir"' EXIT; \
 	 profile="$${COVERAGE_PROFILE:-$(EXTERNAL_ARTIFACT_ROOT)/coverage.out}"; \
 	 test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
@@ -160,7 +160,7 @@ profile-remove-oracle-check:
 INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
 init-differential:
 	@set -eu; \
-	 root="$$($(EXTERNAL_RUN) mktemp -d)"; source="$$root/source"; \
+	 root="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrain.XXXXXX"')"; source="$$root/source"; \
 	 trap 'git worktree remove --force "$$source" >/dev/null 2>&1 || true; rm -rf "$$root"' EXIT INT TERM; \
 	 git worktree add --quiet --detach "$$source" HEAD; \
 	 $(EXTERNAL_RUN) cargo build -p symbrain-cli --locked; \
@@ -209,7 +209,7 @@ rust-fuzz-build:
 ## rust-fuzz-smoke: Exercise both MCP fuzz targets without mutating tracked seeds
 rust-fuzz-smoke: rust-fuzz-build
 	@set -eu; \
-	tmp=$$($(EXTERNAL_RUN) mktemp -d); \
+	tmp=$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrain.XXXXXX"'); \
 	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
 	mkdir -p "$$tmp/frame" "$$tmp/envelope"; \
 	cp fuzz/corpus/frame_decoder/* "$$tmp/frame/"; \

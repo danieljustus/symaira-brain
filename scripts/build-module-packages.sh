@@ -129,7 +129,7 @@ package_binary() {
     version=$("$bin" version --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')
     case "$version" in v*) ;; *) version="v$version" ;; esac
     base="${name}_${version#v}_${OS}_${ARCH}"
-    stage=$(mktemp -d)
+    stage=$(mktemp -d "${TMPDIR:-/tmp}/symbrain-module.XXXXXX")
     cp "$bin" "$stage/$name"
     chmod 755 "$stage/$name"
     tar -C "$stage" -czf "$OUT/$base.tar.gz" "$name"
