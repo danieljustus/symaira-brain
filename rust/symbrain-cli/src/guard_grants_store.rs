@@ -258,7 +258,12 @@ impl Store {
             let _ = fs::remove_file(&temp_path);
             return Err(format!("grant: write temp file: {error}"));
         }
-        set_mode(&temp_path, 0o600).map_err(|error| format!("grant: write temp file: {error}"))?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&temp_path, fs::Permissions::from_mode(0o600))
+                .map_err(|error| format!("grant: write temp file: {error}"))?;
+        }
         drop(file);
         if let Err(error) = fs::rename(&temp_path, &path) {
             let _ = fs::remove_file(&temp_path);
@@ -286,15 +291,4 @@ fn time_key(value: &str) -> (i64, u32, String) {
             )
         })
         .unwrap_or((i64::MIN, 0, value.to_owned()))
-}
-
-fn set_mode(path: &Path, mode: u32) -> io::Result<()> {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        fs::set_permissions(path, fs::Permissions::from_mode(mode))?;
-    }
-    #[cfg(not(unix))]
-    let _ = (path, mode);
-    Ok(())
 }
