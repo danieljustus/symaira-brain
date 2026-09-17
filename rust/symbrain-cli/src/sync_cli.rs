@@ -11,8 +11,6 @@ use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_harness::{all, lookup};
 use symbrain_instructions::Source;
-use symbrain_skills::install::{self, InstallOptions};
-use symbrain_skills::{load_bundle, render_target};
 
 /// Outcome of syncing one instruction target.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -53,6 +51,37 @@ struct ParsedSyncArgs {
     project_dir: PathBuf,
     dry_run: bool,
     harnesses: Vec<String>,
+}
+
+/// Returns whether `sync` still belongs to the Go oracle.
+///
+/// Native sync currently covers only the explicit `agents` instruction target
+/// with the default project directory. Skill rendering/install, project
+/// overrides, and implicit all-harness selection remain Go-owned until their
+/// side effects are covered by a differential fixture.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    let mut saw_harness = false;
+    let mut i = 0;
+    while i < args.len() {
+        let arg = args[i].to_string_lossy();
+        match arg.as_ref() {
+            "-dry-run" | "--dry-run" => i += 1,
+            "-project" | "--project" => return true,
+            value if value.starts_with("-project=") || value.starts_with("--project=") => {
+                return true;
+            }
+            "--" => return true,
+            value if value.starts_with('-') => return true,
+            value => {
+                if value != "agents" {
+                    return true;
+                }
+                saw_harness = true;
+                i += 1;
+            }
+        }
+    }
+    !saw_harness
 }
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
@@ -236,35 +265,16 @@ pub fn run(
         }
     }
 
-    // Process skills for requested harnesses
-    let mut skill_results = Vec::new();
-    let library_dir = resolve_library_dir();
-
-    for name in &requested_harnesses {
-        let Ok(harness) = lookup(name) else { continue };
-
-        let Some(skill_target_name) = harness.skill_target.as_str() else {
-            skill_results.push(SkillResult {
+    let summary = SyncSummary {
+        targets: target_statuses,
+        skills: requested_harnesses
+            .iter()
+            .map(|name| SkillResult {
                 target: name.clone(),
                 status: "skipped".to_string(),
                 message: Some(format!("no skill target for harness {name:?}")),
-            });
-            continue;
-        };
-
-        let result = sync_skills_for_target(
-            skill_target_name,
-            name,
-            &library_dir,
-            &parsed.project_dir,
-            parsed.dry_run,
-        );
-        skill_results.push(result);
-    }
-
-    let summary = SyncSummary {
-        targets: target_statuses,
-        skills: skill_results,
+            })
+            .collect(),
     };
 
     let has_error = summary.targets.iter().any(|t| t.status == "error")
@@ -272,9 +282,7 @@ pub fn run(
 
     match format {
         OutputFormat::Json => {
-            if let Ok(json_str) = serde_json::to_string_pretty(&summary) {
-                let _ = writeln!(stdout, "{json_str}");
-            }
+            let _ = symbrain_core::output::render_json(&mut *stdout, &summary);
         }
         OutputFormat::Table => {
             let _ = writeln!(stdout, "Instruction targets:");
@@ -313,164 +321,4 @@ pub fn run(
     }
 
     if has_error { exit::GENERIC } else { exit::OK }
-}
-
-fn resolve_library_dir() -> PathBuf {
-    if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
-        return PathBuf::from(path);
-    }
-    if let Some(data) = symbrain_core::xdg::data_dir() {
-        let preferred = data.join("skills").join("library");
-        if preferred.exists() {
-            return preferred;
-        }
-    }
-    if let Some(home) = symbrain_core::xdg::home_dir() {
-        let legacy = home
-            .join(".local")
-            .join("share")
-            .join("symskills")
-            .join("library");
-        if legacy.exists() {
-            return legacy;
-        }
-    }
-    symbrain_core::xdg::data_dir().map_or_else(
-        || PathBuf::from(".skills_library"),
-        |d| d.join("skills").join("library"),
-    )
-}
-
-#[allow(clippy::too_many_lines)]
-fn sync_skills_for_target(
-    skill_target: &'static str,
-    harness_display: &str,
-    library_dir: &Path,
-    project_dir: &Path,
-    dry_run: bool,
-) -> SkillResult {
-    let read_res = fs::read_dir(library_dir);
-    let entries = match read_res {
-        Ok(e) => e,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            return SkillResult {
-                target: harness_display.to_string(),
-                status: "ok".to_string(),
-                message: Some("no skills rendered".to_string()),
-            };
-        }
-        Err(err) => {
-            return SkillResult {
-                target: harness_display.to_string(),
-                status: "error".to_string(),
-                message: Some(format!("read skills library: {err}")),
-            };
-        }
-    };
-
-    let mut skill_dirs = Vec::new();
-    for entry in entries.flatten() {
-        if let Ok(ft) = entry.file_type()
-            && ft.is_dir()
-        {
-            let path = entry.path();
-            if path.join("SKILL.md").exists() {
-                skill_dirs.push(path);
-            }
-        }
-    }
-
-    if skill_dirs.is_empty() {
-        return SkillResult {
-            target: harness_display.to_string(),
-            status: "ok".to_string(),
-            message: Some("no skills rendered".to_string()),
-        };
-    }
-
-    let mut count = 0;
-    let mut failures = Vec::new();
-
-    let home_dir = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-
-    for skill_path in skill_dirs {
-        let bundle = match load_bundle(&skill_path) {
-            Ok(b) => b,
-            Err(err) => {
-                failures.push(format!(
-                    "{}: load: {err}",
-                    skill_path.file_name().unwrap_or_default().to_string_lossy()
-                ));
-                continue;
-            }
-        };
-
-        if let Some(target_cfg) = bundle.manifest.targets.get(skill_target)
-            && !target_cfg.enabled
-        {
-            continue;
-        }
-
-        let rendered = match render_target(
-            &bundle,
-            skill_target,
-            &symbrain_skills::RenderMetadata::default(),
-        ) {
-            Ok(r) => r,
-            Err(err) => {
-                failures.push(format!("{}: render: {err}", bundle.frontmatter.name));
-                continue;
-            }
-        };
-
-        let install_opts = InstallOptions {
-            home_dir: home_dir.clone(),
-            project_dir: Some(project_dir.to_path_buf()),
-            base_dir: None,
-            mode: "copy".to_string(),
-            allow_executable: false,
-            force: false,
-            dry_run,
-            fault: None,
-            events_path: None,
-        };
-
-        if dry_run {
-            count += 1;
-            continue;
-        }
-
-        match install::install_rendered(&bundle, &rendered, &install_opts) {
-            Ok(_) => count += 1,
-            Err(err) => failures.push(format!("{}: install: {err}", bundle.frontmatter.name)),
-        }
-    }
-
-    if !failures.is_empty() {
-        return SkillResult {
-            target: harness_display.to_string(),
-            status: "error".to_string(),
-            message: Some(failures.join("; ")),
-        };
-    }
-
-    if count == 0 {
-        SkillResult {
-            target: harness_display.to_string(),
-            status: "ok".to_string(),
-            message: Some("no skills rendered".to_string()),
-        }
-    } else if dry_run {
-        SkillResult {
-            target: harness_display.to_string(),
-            status: "ok".to_string(),
-            message: Some(format!("{count} skills planned")),
-        }
-    } else {
-        SkillResult {
-            target: harness_display.to_string(),
-            status: "ok".to_string(),
-            message: Some(format!("{count} skills rendered and installed")),
-        }
-    }
 }

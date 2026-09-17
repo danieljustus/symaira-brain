@@ -209,6 +209,7 @@ pub fn run_in_process(
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
         "init" => Some(init_cli::run(rest, stdout, stderr)),
         "harness" => harness_cli::run(rest, stdout, stderr, format),
+        "sync" if sync_cli::requires_go_fallback(rest) => None,
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
         "skills" if skills_cli::requires_go_fallback(rest) => None,
