@@ -138,7 +138,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         Some(verb) if verb == "targets" => {
             args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
         }
-        Some(verb) if verb == "log" => args.len() != 1 || has_skill_log(),
+        Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
         Some(verb) if verb == "doctor" => true,
         _ => false,
     }
@@ -152,10 +152,97 @@ fn has_skill_log() -> bool {
 }
 
 fn log_path_requires_go(path: &std::path::Path) -> bool {
-    !matches!(
-        fs::symlink_metadata(path),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound
-    )
+    let mut current = path;
+    loop {
+        match fs::symlink_metadata(current) {
+            Ok(metadata) => {
+                if metadata.is_symlink() {
+                    return true;
+                }
+                if current == path {
+                    if !metadata.is_file() || fs::File::open(path).is_err() {
+                        return true;
+                    }
+                    #[cfg(unix)]
+                    {
+                        use std::os::unix::fs::PermissionsExt;
+                        if metadata.permissions().mode() & 0o444 == 0 {
+                            return true;
+                        }
+                    }
+                } else if !metadata.is_dir() {
+                    return true;
+                }
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                // The missing segment itself is fine; existing ancestors still
+                // need validation for symlinked or non-directory components.
+            }
+            Err(_) => return true,
+        }
+        let Some(parent) = current.parent() else {
+            return false;
+        };
+        if parent == current {
+            return false;
+        }
+        current = parent;
+    }
+}
+
+#[derive(Debug, Default)]
+struct SkillLogArgs {
+    skill: Option<String>,
+    target: Option<String>,
+    limit: i64,
+}
+
+fn parse_skill_log_args(args: &[OsString]) -> Result<SkillLogArgs, &'static str> {
+    let mut parsed = SkillLogArgs::default();
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-skill" | "--skill" => {
+                let value = inline
+                    .map(str::to_owned)
+                    .or_else(|| {
+                        args.get(index + 1)
+                            .map(|value| value.to_string_lossy().into_owned())
+                    })
+                    .ok_or("missing skill value")?;
+                parsed.skill = Some(value);
+                index += usize::from(inline.is_none()) + 1;
+            }
+            "-target" | "--target" => {
+                let value = inline
+                    .map(str::to_owned)
+                    .or_else(|| {
+                        args.get(index + 1)
+                            .map(|value| value.to_string_lossy().into_owned())
+                    })
+                    .ok_or("missing target value")?;
+                parsed.target = Some(value);
+                index += usize::from(inline.is_none()) + 1;
+            }
+            "-limit" | "--limit" | "-l" => {
+                let value = inline
+                    .map(str::to_owned)
+                    .or_else(|| {
+                        args.get(index + 1)
+                            .map(|value| value.to_string_lossy().into_owned())
+                    })
+                    .ok_or("missing limit value")?;
+                parsed.limit = value.parse().map_err(|_| "invalid limit")?;
+                index += usize::from(inline.is_none()) + 1;
+            }
+            _ => return Err("unsupported log argument"),
+        }
+    }
+    Ok(parsed)
 }
 
 fn has_dynamic_config() -> bool {
@@ -604,21 +691,70 @@ fn go_json<T: Serialize>(value: &T) -> String {
 }
 
 fn run_log(
-    _args: &[OsString],
+    args: &[OsString],
     stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
+    stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let empty_list: Vec<String> = Vec::new();
+    let parsed = match parse_skill_log_args(args) {
+        Ok(parsed) => parsed,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain skills log: {error}");
+            return exit::USAGE;
+        }
+    };
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let path = home.join(".local/share/symskills/events.jsonl");
+    let skill = parsed
+        .skill
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let target = parsed
+        .target
+        .as_deref()
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    let mut records = match install::read_events(&path, skill, target) {
+        Ok(records) => records,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain skills log: read operation log: {error}");
+            return exit::GENERIC;
+        }
+    };
+    records.sort_by(|left, right| right.ts.cmp(&left.ts));
+    if parsed.limit > 0 {
+        records.truncate(usize::try_from(parsed.limit).unwrap_or(usize::MAX));
+    }
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(stdout, "[]");
+            let _ = writeln!(stdout, "{}", go_json(&records));
         }
         OutputFormat::Table => {
-            let _ = writeln!(stdout, "No recorded skill operations.");
+            if records.is_empty() {
+                let _ = writeln!(stdout, "No recorded skill operations.");
+            } else {
+                let _ = writeln!(stdout, "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME");
+                for event in &records {
+                    let skill = if event.skill.is_empty() {
+                        "-"
+                    } else {
+                        &event.skill
+                    };
+                    let target = if event.target.is_empty() {
+                        "-"
+                    } else {
+                        &event.target
+                    };
+                    let _ = writeln!(
+                        stdout,
+                        "{}\t{}\t{}\t{}\t{}",
+                        event.ts, event.event, skill, target, event.outcome
+                    );
+                }
+            }
         }
     }
-    let _ = empty_list;
     exit::OK
 }
 

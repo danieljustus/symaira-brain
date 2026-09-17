@@ -13,7 +13,8 @@ use crate::model::SkillError;
 use fs2::FileExt;
 
 /// One best-effort local skill operation-log record.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct OperationEvent {
     /// RFC3339 UTC timestamp.
     pub ts: String,
@@ -22,15 +23,12 @@ pub struct OperationEvent {
     /// Skill name.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub skill: String,
-    /// Harness target.
-    #[serde(skip_serializing_if = "String::is_empty")]
-    pub target: String,
     /// Source/frontmatter version when known.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub skill_version: String,
-    /// Content hash when known.
+    /// Harness target.
     #[serde(skip_serializing_if = "String::is_empty")]
-    pub source_hash: String,
+    pub target: String,
     /// Installation scope.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub scope: String,
@@ -40,21 +38,63 @@ pub struct OperationEvent {
     /// Affected destination.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub path: String,
+    /// Content hash when known.
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub source_hash: String,
     /// `ok` or `error`.
     pub outcome: String,
     /// Error detail, when applicable.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub error: String,
+    /// Version of the writer that produced the event.
+    #[serde(skip_serializing_if = "String::is_empty")]
+    pub tool_version: String,
     /// Caller identity.
     pub actor: String,
-    /// Version of the writer that produced the event.
-    pub tool_version: String,
 }
 
 /// Maximum size of the current operation-event segment.
 pub const EVENT_MAX_BYTES: u64 = 1 << 20;
 const EVENT_LOCK_WAIT: Duration = Duration::from_millis(500);
 const EVENT_LOCK_POLL: Duration = Duration::from_millis(10);
+
+/// Reads the rotated segment followed by the current segment.
+///
+/// Blank and malformed lines are ignored, matching the Go event reader. File
+/// access errors are returned so the CLI can conservatively use its fallback.
+///
+/// # Errors
+///
+/// Returns an I/O error when an existing segment cannot be read.
+pub fn read_events(
+    path: &Path,
+    skill: Option<&str>,
+    target: Option<&str>,
+) -> std::io::Result<Vec<OperationEvent>> {
+    let mut events = Vec::new();
+    for segment in [rotated_event_path(path), path.to_owned()] {
+        let bytes = match fs::read(&segment) {
+            Ok(bytes) => bytes,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(error) => return Err(error),
+        };
+        for line in bytes.split(|byte| *byte == b'\n') {
+            if line.iter().all(u8::is_ascii_whitespace) {
+                continue;
+            }
+            let Ok(event) = serde_json::from_slice::<OperationEvent>(line) else {
+                continue;
+            };
+            if skill.is_some_and(|value| event.skill != value)
+                || target.is_some_and(|value| event.target != value)
+            {
+                continue;
+            }
+            events.push(event);
+        }
+    }
+    Ok(events)
+}
 
 /// Appends one event using the current UTC timestamp when the event has none.
 pub fn record_event(path: Option<&Path>, event: OperationEvent) {

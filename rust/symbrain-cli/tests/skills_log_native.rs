@@ -83,23 +83,44 @@ fn empty_log_is_native_with_exact_table_and_json_bytes() {
 }
 
 #[test]
-fn existing_current_or_rotated_log_uses_go_before_stdout() {
-    for file_name in ["events.jsonl", "events.1.jsonl"] {
-        let root = TempDir::new().unwrap();
-        let log_dir = root.path().join("home/.local/share/symskills");
-        fs::create_dir_all(&log_dir).unwrap();
-        fs::write(
-            log_dir.join(file_name),
-            br#"{"ts":"2026-09-17T00:00:00Z","event":"install","outcome":"ok","actor":"cli"}
+fn readable_current_and_rotated_logs_are_native_newest_first() {
+    let root = TempDir::new().unwrap();
+    let log_dir = root.path().join("home/.local/share/symskills");
+    fs::create_dir_all(&log_dir).unwrap();
+    fs::write(
+        log_dir.join("events.1.jsonl"),
+        br#"{"ts":"2026-09-17T00:00:00Z","event":"install","skill":"old","target":"claude","outcome":"ok","actor":"cli"}
+corrupt
 "#,
-        )
+    )
+    .unwrap();
+    fs::write(
+        log_dir.join("events.jsonl"),
+        br#"{"ts":"2026-09-17T01:00:00Z","event":"render","skill":"new","target":"opencode","outcome":"ok","actor":"cli"}
+{"ts":"2026-09-17T02:00:00Z","event":"install","skill":"latest<&>","target":"opencode","outcome":"error","actor":"cli"}
+"#,
+    )
+    .unwrap();
+
+    let output = command(&root, &["skills", "log", "--json"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
         .unwrap();
-        let output = command(&root, &["skills", "log"])
-            .env("SYMBRAIN_GO_BINARY", fallback(&root))
-            .output()
-            .unwrap();
-        assert_fake_fallback(&output);
-    }
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let records: Vec<serde_json::Value> = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(records.len(), 3);
+    assert_eq!(records[0]["skill"], "latest<&>");
+    assert_eq!(records[1]["skill"], "new");
+    assert_eq!(records[2]["skill"], "old");
+    assert!(records[0].get("tool_version").is_none());
+    assert!(
+        output
+            .stdout
+            .windows(b"latest\\u003c\\u0026\\u003e".len())
+            .any(|window| window == b"latest\\u003c\\u0026\\u003e"),
+        "JSON must retain Go's HTML escaping: {:?}",
+        output.stdout
+    );
 }
 
 #[test]
@@ -127,18 +148,117 @@ fn doctor_uses_go_before_stdout() {
 }
 
 #[test]
-fn log_flags_filters_and_invalid_args_use_go_before_stdout() {
+fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
     for args in [
         &["skills", "log", "--skill", "demo"][..],
         &["skills", "log", "--target", "claude"][..],
         &["skills", "log", "--limit", "1"][..],
-        &["skills", "log", "--bogus"][..],
     ] {
         let root = TempDir::new().unwrap();
+        let log_dir = root.path().join("home/.local/share/symskills");
+        fs::create_dir_all(&log_dir).unwrap();
+        fs::write(
+            log_dir.join("events.jsonl"),
+            br#"{"ts":"2026-09-17T00:00:00Z","event":"install","skill":"demo","target":"claude","outcome":"ok","actor":"cli"}
+{"ts":"2026-09-17T01:00:00Z","event":"render","skill":"other","target":"opencode","outcome":"ok","actor":"cli"}
+"#,
+        )
+        .unwrap();
         let output = command(&root, args)
             .env("SYMBRAIN_GO_BINARY", fallback(&root))
             .output()
             .unwrap();
-        assert_fake_fallback(&output);
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
     }
+
+    let root = TempDir::new().unwrap();
+    let output = command(&root, &["skills", "log", "--bogus"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
+}
+
+#[test]
+fn log_filters_trim_values_and_ignore_blank_filters() {
+    let root = TempDir::new().unwrap();
+    let log_dir = root.path().join("home/.local/share/symskills");
+    fs::create_dir_all(&log_dir).unwrap();
+    fs::write(
+        log_dir.join("events.jsonl"),
+        br#"{"ts":"2026-09-17T00:00:00Z","event":"install","skill":"demo","target":"claude","outcome":"ok","actor":"cli"}
+{"ts":"2026-09-17T01:00:00Z","event":"render","skill":"other","target":"opencode","outcome":"ok","actor":"cli"}
+"#,
+    )
+    .unwrap();
+
+    for args in [
+        &["skills", "log", "--json", "--skill", " demo "][..],
+        &["skills", "log", "--json", "--skill", "   "][..],
+        &["skills", "log", "--json", "--target", ""][..],
+    ] {
+        let output = command(&root, args)
+            .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        let records: Vec<serde_json::Value> = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(records.len(), if args[4].trim().is_empty() { 2 } else { 1 });
+    }
+}
+
+#[test]
+fn symlinked_log_uses_go_before_stdout() {
+    let root = TempDir::new().unwrap();
+    let log_dir = root.path().join("home/.local/share/symskills");
+    let target = root.path().join("outside-events.jsonl");
+    fs::create_dir_all(&log_dir).unwrap();
+    fs::write(&target, b"{}\n").unwrap();
+    std::os::unix::fs::symlink(&target, log_dir.join("events.jsonl")).unwrap();
+
+    let output = command(&root, &["skills", "log"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
+}
+
+#[test]
+fn symlinked_log_ancestor_uses_go_before_stdout() {
+    let root = TempDir::new().unwrap();
+    let home = root.path().join("home");
+    let real_local = home.join("real-local");
+    let log_dir = real_local.join("share/symskills");
+    fs::create_dir_all(&log_dir).unwrap();
+    std::os::unix::fs::symlink(&real_local, home.join(".local")).unwrap();
+    fs::write(
+        log_dir.join("events.jsonl"),
+        br#"{"ts":"2026-09-17T00:00:00Z","event":"install","outcome":"ok","actor":"cli"}
+"#,
+    )
+    .unwrap();
+
+    let output = command(&root, &["skills", "log"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
+}
+
+#[test]
+fn unreadable_log_uses_go_before_stdout() {
+    let root = TempDir::new().unwrap();
+    let log_dir = root.path().join("home/.local/share/symskills");
+    fs::create_dir_all(&log_dir).unwrap();
+    let path = log_dir.join("events.jsonl");
+    fs::write(&path, b"{}\n").unwrap();
+    let mut permissions = fs::metadata(&path).unwrap().permissions();
+    permissions.set_mode(0o000);
+    fs::set_permissions(&path, permissions).unwrap();
+
+    let output = command(&root, &["skills", "log"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
 }
