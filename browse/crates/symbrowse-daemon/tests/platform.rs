@@ -7,12 +7,29 @@ mod windows {
     #![allow(clippy::result_large_err)]
 
     use std::io::Read;
-    use std::path::Path;
+    use std::{path::Path, thread::JoinHandle};
 
-    use symbrowse_daemon::{ClientOptions, default_socket_path, validate_session};
+    use symbrowse_daemon::{ClientOptions, ServerError, default_socket_path, validate_session};
+
+    fn fail_if_server_threads_stopped(
+        server_threads: &mut Vec<JoinHandle<Result<(), ServerError>>>,
+    ) {
+        if !server_threads.is_empty()
+            && server_threads
+                .iter()
+                .all(std::thread::JoinHandle::is_finished)
+        {
+            let results = server_threads
+                .drain(..)
+                .map(|thread| thread.join())
+                .collect::<Vec<_>>();
+            panic!("Windows daemon stopped before publishing its pipe: {results:?}");
+        }
+    }
 
     fn connect_when_server_ready(
         endpoint: &Path,
+        server_threads: &mut Vec<JoinHandle<Result<(), ServerError>>>,
     ) -> interprocess::os::windows::named_pipe::DuplexPipeStream<
         interprocess::os::windows::named_pipe::pipe_mode::Bytes,
     > {
@@ -26,6 +43,7 @@ mod windows {
         let deadline = Instant::now() + Duration::from_secs(2);
         let mut last_error = None;
         while Instant::now() < deadline {
+            fail_if_server_threads_stopped(server_threads);
             match DuplexPipeStream::<pipe_mode::Bytes>::connect_by_path_with_wait_mode(
                 endpoint.to_string_lossy().as_ref(),
                 interprocess::ConnectWaitMode::Timeout(Duration::from_millis(50)),
@@ -40,6 +58,7 @@ mod windows {
                 Err(error) => panic!("connect to Windows daemon failed: {error}"),
             }
         }
+        fail_if_server_threads_stopped(server_threads);
         panic!("Windows daemon did not publish its pipe: {last_error:?}");
     }
 
@@ -81,9 +100,9 @@ mod windows {
             .expect("construct Windows daemon"),
         );
         let running = server.clone();
-        let server_thread = thread::spawn(move || running.listen_and_serve());
+        let mut server_threads = vec![thread::spawn(move || running.listen_and_serve())];
 
-        let mut stream = connect_when_server_ready(&endpoint);
+        let mut stream = connect_when_server_ready(&endpoint, &mut server_threads);
         eprintln!("phase=client-write-fragment");
         stream
             .write_all(br#"{"cmd":"daemon.ping"}"#)
@@ -106,6 +125,7 @@ mod windows {
         eprintln!("phase=server-stop");
         server.stop();
         eprintln!("phase=server-join");
+        let server_thread = server_threads.pop().expect("Windows daemon thread");
         assert!(server_thread.join().expect("join Windows daemon").is_ok());
     }
 
@@ -126,9 +146,9 @@ mod windows {
             .expect("construct Windows daemon"),
         );
         let running = server.clone();
-        let server_thread = thread::spawn(move || running.listen_and_serve());
+        let mut server_threads = vec![thread::spawn(move || running.listen_and_serve())];
 
-        let mut stream = connect_when_server_ready(&endpoint);
+        let mut stream = connect_when_server_ready(&endpoint, &mut server_threads);
         eprintln!("phase=client-write-fragment");
         stream
             .write_all(br#"{"cmd":"daemon.ping"}"#)
@@ -143,6 +163,7 @@ mod windows {
         eprintln!("phase=server-stop-after-deadline");
         server.stop();
         eprintln!("phase=server-join-after-deadline");
+        let server_thread = server_threads.pop().expect("Windows daemon thread");
         assert!(server_thread.join().expect("join Windows daemon").is_ok());
     }
 
@@ -188,10 +209,10 @@ mod windows {
             .expect("construct shutdown daemon"),
         );
         let running = server.clone();
-        let server_thread = thread::spawn(move || running.listen_and_serve());
+        let mut server_threads = vec![thread::spawn(move || running.listen_and_serve())];
 
-        let blocked = connect_when_server_ready(&endpoint);
-        let mut active = connect_when_server_ready(&endpoint);
+        let blocked = connect_when_server_ready(&endpoint, &mut server_threads);
+        let mut active = connect_when_server_ready(&endpoint, &mut server_threads);
         active
             .write_all(
                 br#"{"cmd":"cancellable"}
@@ -208,7 +229,11 @@ mod windows {
         eprintln!("phase=server-stop-blocked-read");
         server.stop();
         eprintln!("phase=server-join-blocked-read");
-        let result = server_thread.join().expect("join shutdown daemon");
+        let result = server_threads
+            .pop()
+            .expect("shutdown daemon thread")
+            .join()
+            .expect("join shutdown daemon");
         assert!(result.is_ok(), "shutdown result = {result:?}");
         assert!(
             stopped_at.elapsed() < Duration::from_secs(1),
@@ -259,9 +284,9 @@ mod windows {
             .expect("construct backpressure daemon"),
         );
         let running = server.clone();
-        let server_thread = thread::spawn(move || running.listen_and_serve());
+        let mut server_threads = vec![thread::spawn(move || running.listen_and_serve())];
 
-        let mut peer = connect_when_server_ready(&endpoint);
+        let mut peer = connect_when_server_ready(&endpoint, &mut server_threads);
         peer.write_all(
             br#"{"cmd":"large"}
 "#,
@@ -274,6 +299,7 @@ mod windows {
 
         server.stop();
         let (done, result) = std::sync::mpsc::channel();
+        let server_thread = server_threads.pop().expect("backpressure daemon thread");
         thread::spawn(move || {
             let result = server_thread.join().expect("join backpressure daemon");
             let _ = done.send(result);
@@ -352,12 +378,12 @@ mod windows {
                 )
             })
             .collect::<Vec<_>>();
-        let threads = servers
+        let mut threads = servers
             .iter()
             .cloned()
             .map(|server| thread::spawn(move || server.listen_and_serve()))
             .collect::<Vec<_>>();
-        drop(connect_when_server_ready(&endpoint));
+        drop(connect_when_server_ready(&endpoint, &mut threads));
         for server in &servers {
             server.stop();
         }
