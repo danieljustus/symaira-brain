@@ -3,7 +3,7 @@
 use std::os::unix::fs::PermissionsExt;
 use std::process::{Command, Output, Stdio};
 use std::thread::sleep;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use serde_json::json;
 use tempfile::TempDir;
@@ -22,16 +22,20 @@ for line in sys.stdin:
         }}), flush=True)
 "#;
 
-const DELAYED_MCP: &[u8] = br#"#!/usr/bin/python3
+const BARRIER_MCP: &[u8] = br#"#!/usr/bin/python3
 import json
+import os
 import sys
 import time
 
-delay = float(sys.argv[1])
+ready_dir = sys.argv[1]
 for line in sys.stdin:
     request = json.loads(line)
     if request.get("id") is not None and request.get("method") == "initialize":
-        time.sleep(delay)
+        with open(os.path.join(ready_dir, str(os.getpid())), "x"):
+            pass
+        while len(os.listdir(ready_dir)) < 2:
+            time.sleep(0.01)
         print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
             "protocolVersion": "2024-11-05",
             "capabilities": {},
@@ -170,23 +174,19 @@ fn native_health_probes_stdio_and_skips_other_transports() {
 #[test]
 fn multiple_native_probes_run_in_parallel_and_are_sorted() {
     let root = TempDir::new().unwrap();
-    let fake = executable(&root, "delayed-mcp.py", DELAYED_MCP);
+    let ready_dir = root.path().join("ready");
+    std::fs::create_dir(&ready_dir).unwrap();
+    let fake = executable(&root, "barrier-mcp.py", BARRIER_MCP);
     write_servers(
         &root,
         &json!({
-            "zeta": {"command": fake, "args": ["1"]},
-            "alpha": {"command": fake, "args": ["1"]}
+            "zeta": {"command": fake, "args": [ready_dir]},
+            "alpha": {"command": fake, "args": [ready_dir]}
         }),
     );
 
-    let started = Instant::now();
     let output = run(&root, &["harness", "health", "--json"]);
-    let elapsed = started.elapsed();
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
-    assert!(
-        elapsed < Duration::from_secs(2),
-        "probes were serialized: {elapsed:?}"
-    );
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     let servers = report["servers"].as_array().unwrap();
     assert_eq!(servers.len(), 2);
