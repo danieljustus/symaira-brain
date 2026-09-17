@@ -110,6 +110,95 @@ fn current_project_dir() -> PathBuf {
     std::env::current_dir().unwrap_or_default()
 }
 
+/// Keeps the native slice limited to the frozen `OpenCode` user-scope contract.
+///
+/// Other targets, project scope, custom config, and dynamic target cases stay
+/// on the Go implementation until their byte contract is independently frozen.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    if args.first().map(|arg| arg.to_string_lossy()) != Some("status".into()) {
+        return false;
+    }
+    let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
+        return true;
+    };
+    target.as_deref() != Some("opencode") || scope != "user" || has_dynamic_config()
+}
+
+fn has_dynamic_config() -> bool {
+    const CONFIG_OVERRIDES: &[&str] = &[
+        "SYMSKILLS_LIBRARY_DIR",
+        "SYMSKILLS_RENDER_DIR",
+        "SYMSKILLS_CACHE_DIR",
+        "SYMSKILLS_PROFILES_DIR",
+        "SYMSKILLS_BASE_DIR",
+        "SYMSKILLS_VCS_ENABLED",
+        "SYMBRAIN_SKILLS_LIBRARY_DIR",
+        "SYMBRAIN_SKILLS_BASE_DIR",
+    ];
+    if CONFIG_OVERRIDES
+        .iter()
+        .any(|name| std::env::var_os(name).is_some())
+    {
+        return true;
+    }
+    let config_root = std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
+        .unwrap_or_else(|| PathBuf::from(".config"));
+    config_root.join("symskills/config.toml").is_file()
+        || current_project_dir().join(".symskills.toml").is_file()
+}
+
+fn parse_status_flags(args: &[OsString]) -> Result<(Option<String>, String), &'static str> {
+    let mut target = None;
+    let mut scope = "user".to_owned();
+    let mut i = 0;
+    while i < args.len() {
+        let arg = args[i].to_string_lossy();
+        if arg == "-target" || arg == "--target" {
+            let Some(value) = args.get(i + 1) else {
+                return Err("missing target value");
+            };
+            target = Some(value.to_string_lossy().into_owned());
+            i += 2;
+        } else if let Some(value) = arg
+            .strip_prefix("-target=")
+            .or_else(|| arg.strip_prefix("--target="))
+        {
+            target = Some(value.to_owned());
+            i += 1;
+        } else if arg == "-scope" || arg == "--scope" {
+            let Some(value) = args.get(i + 1) else {
+                return Err("missing scope value");
+            };
+            scope = value.to_string_lossy().into_owned();
+            i += 2;
+        } else if let Some(value) = arg
+            .strip_prefix("-scope=")
+            .or_else(|| arg.strip_prefix("--scope="))
+        {
+            value.clone_into(&mut scope);
+            i += 1;
+        } else {
+            return Err("unsupported status argument");
+        }
+    }
+    Ok((target, scope))
+}
+
+fn status_name(status: StatusKind) -> &'static str {
+    match status {
+        StatusKind::InSync => "in-sync",
+        StatusKind::Stale => "stale",
+        StatusKind::HarnessChanged => "harness-changed",
+        StatusKind::Conflict => "conflict",
+        StatusKind::Converged => "converged",
+        StatusKind::Orphaned => "orphaned",
+        StatusKind::Unmanaged => "unmanaged",
+    }
+}
+
 /// Runs `symbrain skills`.
 pub fn run(
     args: &[OsString],
@@ -233,40 +322,27 @@ fn run_status(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let mut target = None;
-    let mut scope = "user".to_string();
-
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if arg == "-target" || arg == "--target" {
-            if i + 1 < args.len() {
-                target = Some(args[i + 1].to_string_lossy().into_owned());
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-target=")
-            .or_else(|| arg.strip_prefix("--target="))
-        {
-            target = Some(v.to_string());
-            i += 1;
-            continue;
-        } else if arg == "-scope" || arg == "--scope" {
-            if i + 1 < args.len() {
-                scope = args[i + 1].to_string_lossy().into_owned();
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-scope=")
-            .or_else(|| arg.strip_prefix("--scope="))
-        {
-            scope = v.to_string();
-            i += 1;
-            continue;
+    let (target, scope) = match parse_status_flags(args) {
+        Ok(values) => values,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain skills status: {error}");
+            return exit::USAGE;
         }
-        i += 1;
+    };
+    if let Some(target_name) = target.as_deref()
+        && !symbrain_skills::default_targets()
+            .iter()
+            .any(|known| known == target_name)
+    {
+        let _ = writeln!(
+            stderr,
+            "symbrain skills status: unknown target {target_name:?}"
+        );
+        return exit::USAGE;
+    }
+    if scope != "user" && scope != "project" {
+        let _ = writeln!(stderr, "symbrain skills status: unknown scope {scope:?}");
+        return exit::USAGE;
     }
 
     let (library_dir, base_dir, home_dir) = resolve_skills_dirs();
@@ -313,22 +389,26 @@ fn run_status(
             let _ = writeln!(
                 stdout,
                 "{}",
-                serde_json::to_string_pretty(&report).unwrap_or_default()
+                serde_json::to_string(&report).unwrap_or_default()
             );
         }
         OutputFormat::Table => {
-            let _ = writeln!(
-                stdout,
-                "SUMMARY: {} in sync, {} stale, {} harness changed, {} conflict, {} orphaned, {} unmanaged",
-                report.summary.in_sync,
-                report.summary.stale,
-                report.summary.harness_changed,
-                report.summary.conflict,
-                report.summary.orphaned,
-                report.summary.unmanaged
-            );
+            if report.installs.is_empty() {
+                let _ = writeln!(stdout, "No installed skills found.");
+                return exit::OK;
+            }
+            let _ = writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH");
             for st in &report.installs {
-                let _ = writeln!(stdout, "{:?}\t{}\t{}", st.status, st.name, st.target);
+                let mode = st.mode.as_deref().unwrap_or("-");
+                let _ = writeln!(
+                    stdout,
+                    "{}\t{}\t{}\t{}\t{}",
+                    st.target,
+                    st.name,
+                    status_name(st.status),
+                    mode,
+                    st.path.display()
+                );
             }
         }
     }

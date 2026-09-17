@@ -211,6 +211,7 @@ pub fn run_in_process(
         "harness" => harness_cli::run(rest, stdout, stderr, format),
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
+        "skills" if skills_cli::requires_go_fallback(rest) => None,
         "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
         "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
         "vault" => None,
