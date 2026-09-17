@@ -349,3 +349,48 @@ fn stable_id(parts: &[&str]) -> String {
     let hex = format!("{:x}", hasher.finalize());
     format!("memory-{}", &hex[..32])
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::Value;
+
+    #[test]
+    fn sync_oplog_tracks_memory_lifecycle_and_excludes_marked_rows() {
+        let store = Store::open_in_memory().expect("open store");
+        let memory = store
+            .set("fact", "global", "note", serde_json::Map::new(), false)
+            .expect("set memory");
+
+        let entries = |store: &Store| {
+            let conn = store.lock().expect("lock store");
+            let mut statement = conn
+                .prepare("SELECT op, memory_id FROM sync_oplog ORDER BY event_id")
+                .expect("prepare oplog query");
+            statement
+                .query_map([], |row| {
+                    Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+                })
+                .expect("query oplog")
+                .collect::<Result<Vec<_>, _>>()
+                .expect("read oplog")
+        };
+
+        assert_eq!(entries(&store), vec![("upsert".into(), memory.id.clone())]);
+        assert!(store.delete(&memory.id).expect("delete memory"));
+        assert_eq!(
+            entries(&store),
+            vec![
+                ("upsert".into(), memory.id.clone()),
+                ("delete".into(), memory.id),
+            ]
+        );
+
+        let mut metadata = serde_json::Map::new();
+        metadata.insert("sync_exclude".into(), Value::String("true".into()));
+        store
+            .set("local activity", "global", "note", metadata, false)
+            .expect("set excluded memory");
+        assert_eq!(entries(&store).len(), 2);
+    }
+}
