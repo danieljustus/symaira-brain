@@ -59,6 +59,9 @@ external_env_ready() {
 
 external_env() {
   if [[ -n ${CI:-} ]]; then
+    local ci_tmp=${RUNNER_TEMP:-/tmp}
+    [[ -d $ci_tmp ]] || ci_tmp=/tmp
+    export TMPDIR="$ci_tmp" TMP="$ci_tmp" TEMP="$ci_tmp"
     return 0
   fi
   if [[ $(uname -s) != Darwin ]]; then
