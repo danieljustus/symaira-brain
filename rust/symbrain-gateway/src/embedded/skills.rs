@@ -12,6 +12,9 @@ use symbrain_skills::{RenderMetadata, load_bundle, render_target, validate};
 use crate::GatewayError;
 use crate::embedded::common::pretty;
 
+#[path = "skills_status.rs"]
+mod skills_status;
+
 pub(crate) fn dispatch(name: &str, value: &Value) -> Result<String, GatewayError> {
     match name {
         "skills_list" => list(value),
@@ -19,12 +22,12 @@ pub(crate) fn dispatch(name: &str, value: &Value) -> Result<String, GatewayError
         "skills_validate" => validate_tool(value),
         "skills_render_plan" => render_plan(value),
         "skills_install" => install_tool(value),
-        "skills_targets_status" => targets_status(value),
+        "skills_targets_status" => skills_status::targets_status(value),
         _ => Err(GatewayError::UnknownTool(name.to_string())),
     }
 }
 
-fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
+pub(super) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let library_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
         PathBuf::from(path)
@@ -171,27 +174,6 @@ fn validate_tool(value: &Value) -> Result<String, GatewayError> {
         "valid": issue_messages.is_empty(),
         "issues": issue_messages,
     });
-    pretty(&res)
-}
-
-fn targets_status(value: &Value) -> Result<String, GatewayError> {
-    let _scope = value.get("scope").and_then(Value::as_str).unwrap_or("user");
-    let mut targets = Vec::new();
-
-    for h in symbrain_harness::all() {
-        let Some(skill_target) = h.skill_target.as_str() else {
-            continue;
-        };
-        targets.push(json!({
-            "target": h.name.as_str(),
-            "installed": true,
-            "managed_count": 0,
-            "unmanaged_count": 0,
-            "skill_root": skill_target,
-        }));
-    }
-
-    let res = json!({ "targets": targets });
     pretty(&res)
 }
 
