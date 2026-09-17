@@ -387,6 +387,15 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             with self.assertRaisesRegex(validate_mod.CaptureError, "rerun with --runtime-root"):
                 validate_mod._validate_socket_path(long_socket)
 
+    def test_runtime_root_rejects_unmounted_external_volume(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="fetch002-volume-", dir=validate_mod.EXTERNAL_RUNTIME_ROOT) as directory:
+            unmounted = Path(directory) / "unmounted-volume"
+            child = unmounted / "runtime"
+            with patch.object(validate_mod, "EXTERNAL_RUNTIME_ROOT", unmounted):
+                with self.assertRaisesRegex(validate_mod.CaptureError, "mounted filesystem"):
+                    validate_mod._runtime_home(ROOT / "deep/home", child)
+            self.assertFalse(child.exists())
+
     def test_rejects_unpinned_oracle_copy(self) -> None:
         source = ROOT / validate_mod.HISTORICAL_ORACLE_REL_PATH
         with tempfile.TemporaryDirectory(

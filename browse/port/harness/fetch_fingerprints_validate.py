@@ -920,8 +920,15 @@ def _compat_socket_path(home: Path, session: str) -> Path:
 def _runtime_home(default: Path, runtime_root: Path | None) -> Path:
     if runtime_root is None:
         return default
+    external_root = EXTERNAL_RUNTIME_ROOT
+    try:
+        mounted = external_root.is_dir() and external_root.is_mount()
+    except OSError as error:
+        _fail(f"cannot verify mounted runtime volume {external_root}: {error}")
+    if not mounted:
+        _fail(f"runtime volume {external_root} must be a mounted filesystem")
     root = runtime_root.expanduser().resolve()
-    external_root = EXTERNAL_RUNTIME_ROOT.resolve()
+    external_root = external_root.resolve()
     if not root.is_relative_to(external_root):
         _fail(
             f"--runtime-root must be under {external_root}; "
