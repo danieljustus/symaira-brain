@@ -21,9 +21,6 @@ EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target
 endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
-GO := $(EXTERNAL_RUN) go
-CARGO := $(EXTERNAL_RUN) cargo
-PYTHON := $(EXTERNAL_RUN) python3
 
 .PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-guard-check rust-audit rust-deny rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
@@ -35,11 +32,11 @@ coverage:
 	 trap 'rm -rf "$$tmp_dir"' EXIT; \
 	 profile="$${COVERAGE_PROFILE:-$(EXTERNAL_ARTIFACT_ROOT)/coverage.out}"; \
 	 test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
-	 $(GO) list ./... > "$$tmp_dir/packages"; \
+	 $(EXTERNAL_RUN) go list ./... > "$$tmp_dir/packages"; \
 	 if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
-		 $(GO) test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
+		 $(EXTERNAL_RUN) go test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
 	 fi; \
-	 total="$$($(GO) tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
+	 total="$$($(EXTERNAL_RUN) go tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
 	total="$${total:-0.0}"; \
 	commit_sha="$$(git rev-parse HEAD)"; \
 	{ \
@@ -80,20 +77,20 @@ coverage:
 ## build: Compile the symbrain binary
 build:
 	$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"
-	CGO_ENABLED=0 $(GO) build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)" ./cmd/symbrain
+	$(EXTERNAL_RUN) env CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)" ./cmd/symbrain
 
 ## build-rust: Build the incremental Rust entrypoint and its Go fallback
 build-rust:
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
-	SYMBRAIN_VERSION="$(VERSION)" CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" $(CARGO) build --workspace --locked
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION="$(VERSION)" CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
 
 ## parity-smoke: Compare migrated Rust CLI slices against the pinned Go oracle
 parity-smoke: rust-go-printable-check
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
-	SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" $(CARGO) build --workspace --locked
-	$(PYTHON) scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
+	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
+	$(EXTERNAL_RUN) python3 scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
 ## rust-go-printable-check: Ensure the pinned Go IsPrint table is current
 rust-go-printable-check:
@@ -165,44 +162,44 @@ init-differential:
 	 root="$$($(EXTERNAL_RUN) mktemp -d)"; source="$$root/source"; \
 	 trap 'git worktree remove --force "$$source" >/dev/null 2>&1 || true; rm -rf "$$root"' EXIT INT TERM; \
 	 git worktree add --quiet --detach "$$source" HEAD; \
-	 $(CARGO) build -p symbrain-cli --locked; \
-	 $(PYTHON) "$$source/scripts/init-oracle/test_compare.py"; \
+	 $(EXTERNAL_RUN) cargo build -p symbrain-cli --locked; \
+	 $(EXTERNAL_RUN) python3 "$$source/scripts/init-oracle/test_compare.py"; \
 	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle"; \
-	 $(PYTHON) "$$source/scripts/init-oracle/compare.py" --repo-root "$$source" --rust-binary "$(if $(CI),$(INIT_RUST_BINARY),$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,))" --output "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle/report.json"
+	 $(EXTERNAL_RUN) python3 "$$source/scripts/init-oracle/compare.py" --repo-root "$$source" --rust-binary "$(if $(CI),$(INIT_RUST_BINARY),$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,))" --output "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle/report.json"
 
 ## rust-guard-check: Check the existing Guard library against its Go oracles
 rust-guard-check:
-	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) $(GO) run ./guard/scripts/guard-oracle -check
-	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) $(GO) test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
-	$(CARGO) fmt --all --check
-	$(CARGO) check --workspace --all-targets --all-features --locked
-	$(CARGO) clippy --workspace --all-targets --all-features --locked -- -D warnings
-	$(CARGO) test --workspace --all-targets --all-features --locked
-	$(CARGO) test --workspace --doc --all-features --locked
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
+	$(EXTERNAL_RUN) cargo fmt --all --check
+	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
+	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	$(EXTERNAL_RUN) cargo test --workspace --all-targets --all-features --locked
+	$(EXTERNAL_RUN) cargo test --workspace --doc --all-features --locked
 
 ## rust-audit: Audit the committed lockfile without resolving or updating it
 rust-audit:
-	$(CARGO) audit --file Cargo.lock --deny warnings
+	$(EXTERNAL_RUN) cargo audit --file Cargo.lock --deny warnings
 
 ## rust-deny: Enforce dependency/license policy without changing Cargo.lock
 rust-deny:
-	$(CARGO) deny --locked --all-features check
+	$(EXTERNAL_RUN) cargo deny --locked --all-features check
 
 
 ## rust-check: Run the complete fast Rust quality gate
 rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
-	$(CARGO) fmt --all --check
-	$(CARGO) check --workspace --all-targets --all-features --locked
-	$(CARGO) clippy --workspace --all-targets --all-features --locked -- -D warnings
-	$(CARGO) test --workspace --all-features --locked
-	$(CARGO) test --workspace --doc --all-features --locked
-	$(CARGO) audit
-	$(CARGO) deny check
+	$(EXTERNAL_RUN) cargo fmt --all --check
+	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
+	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+	$(EXTERNAL_RUN) cargo test --workspace --all-features --locked
+	$(EXTERNAL_RUN) cargo test --workspace --doc --all-features --locked
+	$(EXTERNAL_RUN) cargo audit
+	$(EXTERNAL_RUN) cargo deny check
 
 ## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
 rust-fuzz-build:
-	$(CARGO) +nightly fuzz build frame-decoder
-	$(CARGO) +nightly fuzz build jsonrpc-envelope
+	$(EXTERNAL_RUN) cargo +nightly fuzz build frame-decoder
+	$(EXTERNAL_RUN) cargo +nightly fuzz build jsonrpc-envelope
 
 ## rust-fuzz-smoke: Exercise both MCP fuzz targets without mutating tracked seeds
 rust-fuzz-smoke: rust-fuzz-build
@@ -212,27 +209,27 @@ rust-fuzz-smoke: rust-fuzz-build
 	mkdir -p "$$tmp/frame" "$$tmp/envelope"; \
 	cp fuzz/corpus/frame_decoder/* "$$tmp/frame/"; \
 	cp fuzz/corpus/jsonrpc_envelope/* "$$tmp/envelope/"; \
-	$(CARGO) +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
-	$(CARGO) +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
+	$(EXTERNAL_RUN) cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
+	$(EXTERNAL_RUN) cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
 
 ## test: Run all tests
 test:
-	$(GO) test ./...
+	$(EXTERNAL_RUN) go test ./...
 
 ## test-race: Run all tests with the race detector
 test-race:
-	$(GO) test -race ./...
+	$(EXTERNAL_RUN) go test -race ./...
 
 ## test-memory-large: Run bounded embedding storage measurements explicitly.
 ## Override MEMORY_STORAGE_SCALE up to 10000 only when the disk budget is known.
 MEMORY_STORAGE_SCALE ?= 1000
 MEMORY_LARGE_TEST_TIMEOUT ?= 20m
 test-memory-large:
-	SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) $(GO) test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
+	$(EXTERNAL_RUN) env SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) go test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
 
 ## vet: Run go vet static analysis
 vet:
-	$(GO) vet ./...
+	$(EXTERNAL_RUN) go vet ./...
 
 ## lint: Deterministic lint gate (go vet + gofmt check, matches CI)
 lint: vet fmt-check
@@ -247,14 +244,14 @@ GOFMT_FILES := $(shell find . -name '*.go' -not -path './browse/*' -not -path '.
 
 ## fmt: Format all Go source files
 fmt:
-	$(GO)fmt -w -s $(GOFMT_FILES)
+	$(EXTERNAL_RUN) gofmt -w -s $(GOFMT_FILES)
 
 ## fmt-check: Fail if gofmt would change any file
 fmt-check:
-	@test -z "$$($(GO)fmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; $(GO)fmt -l $(GOFMT_FILES); exit 1)
+	@test -z "$$($(EXTERNAL_RUN) gofmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; $(EXTERNAL_RUN) gofmt -l $(GOFMT_FILES); exit 1)
 
 ## clean: Remove build artifacts and test cache
 clean:
 	$(EXTERNAL_RUN) rm -f "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)"
-	$(GO) clean -testcache
-	$(CARGO) clean
+	$(EXTERNAL_RUN) go clean -testcache
+	$(EXTERNAL_RUN) cargo clean
