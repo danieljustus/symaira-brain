@@ -1,4 +1,4 @@
-//! Native `symbrain skills log` empty-state and Go-fallback byte contracts.
+//! Native `symbrain skills` empty-log and Go-fallback byte contracts.
 
 #![cfg(unix)]
 #![deny(unsafe_code)]
@@ -110,6 +110,16 @@ fn unavailable_log_path_uses_go_before_stdout() {
     fs::write(share_dir.join("symskills"), b"not a directory").unwrap();
 
     let output = command(&root, &["skills", "log"])
+        .env("SYMBRAIN_GO_BINARY", fallback(&root))
+        .output()
+        .unwrap();
+    assert_fake_fallback(&output);
+}
+
+#[test]
+fn doctor_uses_go_before_stdout() {
+    let root = TempDir::new().unwrap();
+    let output = command(&root, &["skills", "doctor", "--json"])
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();

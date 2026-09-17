@@ -139,6 +139,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
         }
         Some(verb) if verb == "log" => args.len() != 1 || has_skill_log(),
+        Some(verb) if verb == "doctor" => true,
         _ => false,
     }
 }
