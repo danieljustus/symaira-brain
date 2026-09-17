@@ -138,8 +138,16 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         Some(verb) if verb == "targets" => {
             args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
         }
+        Some(verb) if verb == "log" => args.len() != 1 || has_skill_log(),
         _ => false,
     }
+}
+
+fn has_skill_log() -> bool {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let current = home.join(".local/share/symskills/events.jsonl");
+    fs::symlink_metadata(&current).is_ok()
+        || fs::symlink_metadata(current.with_file_name("events.1.jsonl")).is_ok()
 }
 
 fn has_dynamic_config() -> bool {
