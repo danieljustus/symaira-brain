@@ -72,6 +72,13 @@ fn table_matches_go_layout_for_populated_and_missing_configs() {
     let stdout = String::from_utf8(output.stdout).unwrap();
     let home = root.path().join("home");
     let config = root.path().join("config");
+    let claude_desktop_config = if cfg!(target_os = "macos") {
+        home.join("Library/Application Support/Claude/claude_desktop_config.json")
+    } else if cfg!(target_os = "windows") {
+        home.join("AppData/Roaming/Claude/claude_desktop_config.json")
+    } else {
+        config.join("Claude/claude_desktop_config.json")
+    };
     let expected = format!(
         "claude\tClaude Code\n  global\t{}\tparsed\tservers=alpha[http],zeta[stdio]\n\n\
 claude-desktop\tClaude Desktop\n  global\t{}\tmissing\tservers=(none)\n\n\
@@ -80,8 +87,7 @@ opencode\tOpenCode\n  global\t{}\tmissing\tservers=(none)\n\n\
 codex\tCodex CLI\n  global\t{}\tmissing\tservers=(none)\n\n\
 antigravity\tAntigravity\n  global\t{}\tmissing\tservers=(none)\n\n",
         home.join(".claude.json").display(),
-        home.join("Library/Application Support/Claude/claude_desktop_config.json")
-            .display(),
+        claude_desktop_config.display(),
         home.join(".cursor/mcp.json").display(),
         config.join("opencode/config.json").display(),
         home.join(".codex/config.toml").display(),
