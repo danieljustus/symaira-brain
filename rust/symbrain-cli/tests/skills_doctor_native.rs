@@ -59,11 +59,11 @@ fn assert_fake_fallback(output: &Output) {
 fn default_doctor_matches_go_schema_and_formats() {
     let root = TempDir::new().unwrap();
     let home = root.path().join("home");
-    let project = root.path().join("project");
     let output = command(&root, &["skills", "doctor", "--json"])
         .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
+    let project = root.path().join("project").canonicalize().unwrap();
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
