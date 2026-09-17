@@ -220,6 +220,22 @@ fn run_health(
         return None;
     }
 
+    let probe_count = inventory
+        .harnesses
+        .iter()
+        .filter(|harness| {
+            harness_name
+                .as_deref()
+                .is_none_or(|name| harness.name.as_str() == name)
+        })
+        .flat_map(|harness| std::iter::once(&harness.global).chain(harness.project.as_ref()))
+        .flat_map(|config| config.servers.iter())
+        .filter(|server| server.transport == "stdio" && !server.command.is_empty())
+        .count();
+    if probe_count > 1 {
+        return None;
+    }
+
     let mut entries = Vec::new();
 
     for h in &inventory.harnesses {

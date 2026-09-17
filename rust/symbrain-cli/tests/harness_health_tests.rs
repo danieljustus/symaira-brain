@@ -148,6 +148,32 @@ fn probe_failure_falls_back_without_native_output() {
 }
 
 #[test]
+fn multiple_stdio_probes_fall_back_without_native_output() {
+    let root = TempDir::new().unwrap();
+    write_servers(
+        &root,
+        &json!({
+            "first": {"command": "missing-first"},
+            "second": {"command": "missing-second"}
+        }),
+    );
+    let fallback = executable(
+        &root,
+        "go-fallback",
+        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
+    );
+
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    let output = command
+        .env("SYMBRAIN_GO_BINARY", fallback)
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(23));
+    assert_eq!(output.stdout, b"fallback-stdout\n");
+    assert_eq!(output.stderr, b"fallback-stderr\n");
+}
+
+#[test]
 fn malformed_config_falls_back_without_native_output() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("home")).unwrap();
