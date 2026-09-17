@@ -918,11 +918,9 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
         .parent()
         .map_or_else(|| PathBuf::from("profiles"), |path| path.join("profiles"));
     let data_root = symbrain_core::paths::skills_data_dir()
-        .map(|location| location.dir)
-        .unwrap_or_else(|| PathBuf::from("."));
+        .map_or_else(|| PathBuf::from("."), |location| location.dir);
     let cache_root = symbrain_core::paths::skills_cache_dir()
-        .map(|location| location.dir)
-        .unwrap_or_else(|| PathBuf::from("."));
+        .map_or_else(|| PathBuf::from("."), |location| location.dir);
     let library_dir = data_root.join("library");
     let render_dir = data_root.join("rendered");
     let base_dir = data_root.join("base");
