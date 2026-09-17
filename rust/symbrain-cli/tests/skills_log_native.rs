@@ -11,12 +11,13 @@ use std::process::{Command, Output};
 use tempfile::TempDir;
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
-    let home = root.path().join("home");
-    let config = root.path().join("config");
-    let data = root.path().join("data");
-    let cache = root.path().join("cache");
-    let project = root.path().join("project");
-    let empty_path = root.path().join("empty-path");
+    let root = root.path().canonicalize().unwrap();
+    let home = root.join("home");
+    let config = root.join("config");
+    let data = root.join("data");
+    let cache = root.join("cache");
+    let project = root.join("project");
+    let empty_path = root.join("empty-path");
     for path in [&home, &config, &data, &cache, &project, &empty_path] {
         fs::create_dir_all(path).unwrap();
     }
