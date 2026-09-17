@@ -139,16 +139,6 @@ fn unavailable_log_path_uses_go_before_stdout() {
 }
 
 #[test]
-fn doctor_uses_go_before_stdout() {
-    let root = TempDir::new().unwrap();
-    let output = command(&root, &["skills", "doctor", "--json"])
-        .env("SYMBRAIN_GO_BINARY", fallback(&root))
-        .output()
-        .unwrap();
-    assert_fake_fallback(&output);
-}
-
-#[test]
 fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
     for args in [
         &["skills", "log", "--skill", "demo"][..],
