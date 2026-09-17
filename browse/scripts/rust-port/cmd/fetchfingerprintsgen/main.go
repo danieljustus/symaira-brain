@@ -597,7 +597,7 @@ type goListPackage struct {
 }
 
 func compilerInputClosure(root string) ([]sourceFile, error) {
-	cmd := exec.Command("go", "list", "-deps", "-json", "./scripts/rust-port/fetch_fingerprints_gen.go")
+	cmd := exec.Command("go", "list", "-deps", "-json", "./scripts/rust-port/cmd/fetchfingerprintsgen")
 	cmd.Dir = filepath.Join(root, "browse")
 	out, err := cmd.Output()
 	if err != nil {
