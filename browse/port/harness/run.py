@@ -331,6 +331,8 @@ def run_all_suites(root: Path, env: dict[str, str], args: argparse.Namespace) ->
                 command.extend(["--historical-oracle", str(args.historical_oracle.resolve())])
             if args.report:
                 command.extend(["--report", str(args.report.resolve())])
+            if args.runtime_root:
+                command.extend(["--runtime-root", str(args.runtime_root.resolve())])
             command.extend(["--go", args.go, "--repo-root", str(root.parent.resolve())])
         if args.comparison != "bytes" and suite == "fetch-render":
             command.extend(["--comparison", args.comparison])
@@ -358,6 +360,11 @@ def main() -> int:
     parser.add_argument("--rust", type=Path, help="retained Rust candidate binary for FETCH-002")
     parser.add_argument("--compat", type=Path, help="retained Go compat-sidecar binary for FETCH-002")
     parser.add_argument("--report", type=Path, help="FETCH-002 comparison report path")
+    parser.add_argument(
+        "--runtime-root",
+        type=Path,
+        help="short encrypted-NVMe directory for the daemon runtime socket",
+    )
     parser.add_argument("--go", default="go")
     parser.add_argument("--native", choices=("macos",), default=None)
     parser.add_argument(
@@ -430,6 +437,8 @@ def main() -> int:
              "--go", args.go]
         if rust_binary is not None and compat_binary is not None:
             command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
+        if args.runtime_root:
+            command.extend(["--runtime-root", str(args.runtime_root.resolve())])
         run(command, root, env)
         print("FETCH-002 diagnostics completed; acceptance remains blocked")
         return 0

@@ -114,6 +114,7 @@ ORACLE_COMPARISON_FIELDS = (
     ("header_names", "header_names"),
 )
 FETCH_PROFILES = ("chrome", "edge", "firefox", "ios", "opera", "safari")
+EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
 ACCEPTANCE_BLOCKERS = (
     "historical oracle verdict is INVALIDATED; matching fields are diagnostic only",
     "raw-wire comparison is diagnostic only; it does not establish native Rust parity",
@@ -916,6 +917,37 @@ def _compat_socket_path(home: Path, session: str) -> Path:
     return home / ".local" / "run" / "symbrowse" / f"{session}.sock"
 
 
+def _runtime_home(default: Path, runtime_root: Path | None) -> Path:
+    if runtime_root is None:
+        return default
+    root = runtime_root.expanduser().resolve()
+    external_root = EXTERNAL_RUNTIME_ROOT.resolve()
+    if not root.is_relative_to(external_root):
+        _fail(
+            f"--runtime-root must be under {external_root}; "
+            "choose a short directory on the encrypted NVMe volume"
+        )
+    try:
+        root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    except OSError as error:
+        _fail(f"cannot create --runtime-root {root}: {error}")
+    if not root.is_dir():
+        _fail(f"--runtime-root is not a directory: {root}")
+    return root
+
+
+def _validate_socket_path(socket_path: Path) -> None:
+    if os.name == "nt":
+        return
+    limit = 104 if sys.platform == "darwin" else 108
+    length = len(os.fsencode(socket_path))
+    if length >= limit:
+        _fail(
+            f"daemon socket path is {length} bytes, must be shorter than {limit}: {socket_path}; "
+            "rerun with --runtime-root pointing to a short directory on the encrypted NVMe volume"
+        )
+
+
 def _terminate_process(process: subprocess.Popen[bytes]) -> None:
     """Terminate the owned process group, including descendants."""
     try:
@@ -971,6 +1003,7 @@ def run_rust_compat_comparison(
     *,
     repo_root: Path,
     go: str,
+    runtime_root: Path | None = None,
 ) -> dict[str, object]:
     """Exercise Rust CompatClient and capture the Go sidecar's raw wire."""
     binaries = []
@@ -994,6 +1027,9 @@ def run_rust_compat_comparison(
     home, config, state, cache, tmp = (base / name for name in ("home", "config", "state", "cache", "tmp"))
     for path in (home, config, state, cache, tmp):
         path.mkdir(mode=0o700)
+    runtime_home = _runtime_home(home, runtime_root)
+    socket_path = _compat_socket_path(runtime_home, session)
+    _validate_socket_path(socket_path)
     sidecar_binary = Path(str(capture["executable_path"])).resolve()
     sidecar_sha256 = sha256_of_file(sidecar_binary)
     if sidecar_sha256 != capture["executable_sha256"]:
@@ -1029,7 +1065,7 @@ def run_rust_compat_comparison(
     (base / "provenance-before.json").write_text(json.dumps(provenance_before, indent=2, sort_keys=True) + "\n")
     env = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"), "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "TZ": "UTC",
-        "HOME": str(home), "TMPDIR": str(tmp), "SYMBROWSE_CONFIG_DIR": str(config),
+        "HOME": str(runtime_home), "TMPDIR": str(tmp), "SYMBROWSE_CONFIG_DIR": str(config),
         "SYMBROWSE_STATE_DIR": str(state), "SYMBROWSE_CACHE_DIR": str(cache),
         "SYMBROWSE_DAEMON_LOG": str(base / "daemon.log"),
         "SYMBROWSE_COMPAT_BINARY": str(sidecar_binary),
@@ -1046,7 +1082,6 @@ def run_rust_compat_comparison(
             cwd=repo_root / "browse", env=env, stdin=subprocess.DEVNULL,
             stdout=stdout_file, stderr=stderr_file, start_new_session=(os.name == "posix"),
         )
-        socket_path = _compat_socket_path(home, session)
         results = []
         try:
             if os.name == "nt":
@@ -1151,6 +1186,11 @@ def main() -> int:
                         help="pinned historical FETCH-002 oracle (defaults to the tracked overlay)")
     parser.add_argument("--rust", type=Path, help="retained Rust symbrowse binary for the compat call")
     parser.add_argument("--compat", type=Path, help="retained Go symbrowse-compat binary")
+    parser.add_argument(
+        "--runtime-root",
+        type=Path,
+        help="short encrypted-NVMe directory for the daemon runtime socket",
+    )
     parser.add_argument("--report", type=Path, help="optional path for the machine-readable comparison report")
     parser.add_argument(
         "--repo-root",
@@ -1178,7 +1218,14 @@ def main() -> int:
         historical = load_historical_oracle(historical_path, repo_root=args.repo_root)
         oracle_comparison = compare_capture_to_historical_oracle(capture, historical)
         compat_comparison = (
-            run_rust_compat_comparison(args.rust, args.compat, capture, repo_root=args.repo_root, go=args.go)
+            run_rust_compat_comparison(
+                args.rust,
+                args.compat,
+                capture,
+                repo_root=args.repo_root,
+                go=args.go,
+                runtime_root=args.runtime_root,
+            )
             if args.rust is not None and args.compat is not None
             else rust_compat_diagnostic(args.rust, args.compat)
         )

@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import os
 import struct
 import subprocess
 import sys
@@ -369,6 +370,22 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
         with patch.object(validate_mod.subprocess, "Popen") as launch:
             validate_mod.rust_compat_diagnostic(None, None)
         launch.assert_not_called()
+
+    def test_runtime_root_shortens_socket_and_long_paths_fail_fast(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="fetch002-runtime-", dir=validate_mod.EXTERNAL_RUNTIME_ROOT) as directory:
+            runtime_root = Path(directory)
+            selected = validate_mod._runtime_home(ROOT / "deep/home", runtime_root)
+            socket_path = validate_mod._compat_socket_path(selected, "fetch002-123")
+            self.assertEqual(selected, runtime_root.resolve())
+            self.assertLess(len(os.fsencode(socket_path)), 104)
+
+        with self.assertRaisesRegex(validate_mod.CaptureError, "--runtime-root must be under"):
+            validate_mod._runtime_home(ROOT / "deep/home", Path("/tmp/fetch002-runtime"))
+
+        long_socket = Path("/" + ("x" * 120) + ".sock")
+        with patch.object(validate_mod.sys, "platform", "darwin"):
+            with self.assertRaisesRegex(validate_mod.CaptureError, "rerun with --runtime-root"):
+                validate_mod._validate_socket_path(long_socket)
 
     def test_rejects_unpinned_oracle_copy(self) -> None:
         source = ROOT / validate_mod.HISTORICAL_ORACLE_REL_PATH
