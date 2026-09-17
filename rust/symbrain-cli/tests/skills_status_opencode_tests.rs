@@ -75,6 +75,27 @@ fn opencode_user_status_empty_json_matches_go_bytes() {
 }
 
 #[test]
+fn default_user_status_empty_table_matches_go_bytes() {
+    let root = TempDir::new().unwrap();
+    let output = run(&root, &["skills", "status"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert_eq!(output.stdout, b"No installed skills found.\n");
+}
+
+#[test]
+fn default_user_status_empty_json_matches_go_bytes() {
+    let root = TempDir::new().unwrap();
+    let output = run(&root, &["skills", "status", "--json"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        output.stdout,
+        b"{\"installs\":[],\"summary\":{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n"
+    );
+}
+
+#[test]
 fn unsupported_status_target_keeps_go_fallback() {
     let root = TempDir::new().unwrap();
     let output = run(&root, &["skills", "status", "--target", "claude"]);
@@ -93,6 +114,16 @@ fn configured_status_keeps_go_fallback() {
     )
     .unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+}
+
+#[test]
+fn default_status_with_dynamic_target_state_keeps_go_fallback() {
+    let root = TempDir::new().unwrap();
+    std::fs::create_dir_all(root.path().join("home/.config/opencode/skills")).unwrap();
+    let output = run(&root, &["skills", "status"]);
     assert_eq!(output.status.code(), Some(1));
     assert!(output.stdout.is_empty());
     assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));

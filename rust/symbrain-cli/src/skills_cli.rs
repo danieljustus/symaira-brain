@@ -120,7 +120,7 @@ fn current_project_dir() -> PathBuf {
     std::env::current_dir().unwrap_or_default()
 }
 
-/// Keeps the native targets slice limited to an empty user-scope inventory.
+/// Keeps the native status slice limited to an empty user-scope inventory.
 ///
 /// Project scope, custom config, and every existing/dynamic target state stay
 /// on the Go implementation until their byte contract is independently frozen.
@@ -130,7 +130,14 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
                 return true;
             };
-            target.as_deref() != Some("opencode") || scope != "user" || has_dynamic_config()
+            if scope != "user" || has_dynamic_config() {
+                return true;
+            }
+            match target.as_deref() {
+                Some("opencode") => false,
+                None => has_dynamic_target_state(),
+                Some(_) => true,
+            }
         }
         // The native targets slice is deliberately only the no-argument,
         // user-scope/default-config contract. Keep every parsed or dynamic
