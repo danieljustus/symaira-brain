@@ -9,20 +9,37 @@ GO_ORACLE_TOOLCHAIN := $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod
 GO_ORACLE_REF ?= HEAD
 LDFLAGS := -X main.version=$(VERSION)
 
+EXTERNAL_ARTIFACT_ROOT := .
+EXTERNAL_GO_ARTIFACT_ROOT := target/go
+EXTERNAL_CARGO_TARGET_DIR := target
+ifeq ($(strip $(CI)),)
+ifeq ($(shell uname -s),Darwin)
+SYMAIRA_EXTERNAL_BASE := $(or $(SYMAIRA_EXTERNAL_BASE),/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain)
+EXTERNAL_ARTIFACT_ROOT := $(SYMAIRA_EXTERNAL_BASE)/artifacts
+EXTERNAL_GO_ARTIFACT_ROOT := $(EXTERNAL_ARTIFACT_ROOT)/go
+EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target
+endif
+endif
+EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
+GO := $(EXTERNAL_RUN) go
+CARGO := $(EXTERNAL_RUN) cargo
+PYTHON := $(EXTERNAL_RUN) python3
+
 .PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-guard-check rust-audit rust-deny rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
 	@set -eu; \
-	tmp_dir="$$(mktemp -d)"; \
-	trap 'rm -rf "$$tmp_dir"' EXIT; \
-	profile="$${COVERAGE_PROFILE:-$$tmp_dir/coverage.out}"; \
-	test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
-	go list ./... > "$$tmp_dir/packages"; \
-	if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
-		go test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
-	fi; \
-	total="$$(go tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
+	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"; \
+	 tmp_dir="$$($(EXTERNAL_RUN) mktemp -d)"; \
+	 trap 'rm -rf "$$tmp_dir"' EXIT; \
+	 profile="$${COVERAGE_PROFILE:-$(EXTERNAL_ARTIFACT_ROOT)/coverage.out}"; \
+	 test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
+	 $(GO) list ./... > "$$tmp_dir/packages"; \
+	 if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
+		 $(GO) test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
+	 fi; \
+	 total="$$($(GO) tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
 	total="$${total:-0.0}"; \
 	commit_sha="$$(git rev-parse HEAD)"; \
 	{ \
@@ -36,8 +53,8 @@ coverage:
 			printf '    "%s": %s' "$$package" "$$coverage"; \
 		done < "$$tmp_dir/packages"; \
 		printf '\n  }\n}\n'; \
-	} > coverage.json; \
-	printf '{\n  "schemaVersion": 1,\n  "label": "coverage",\n  "message": "%s%%",\n  "color": "blue"\n}\n' "$$total" > badge.json; \
+	} > "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json"; \
+	 printf '{\n  "schemaVersion": 1,\n  "label": "coverage",\n  "message": "%s%%",\n  "color": "blue"\n}\n' "$$total" > "$(EXTERNAL_ARTIFACT_ROOT)/badge.json"; \
 	printf '%s\n' \
 		'<?xml version="1.0" encoding="UTF-8"?>' \
 		'<svg xmlns="http://www.w3.org/2000/svg" width="108" height="20" role="img" aria-label="coverage: '"$$total"'%">' \
@@ -58,24 +75,25 @@ coverage:
 		'    <text x="83" y="15" fill="#010101" fill-opacity=".3">'"$$total"'%</text>' \
 		'    <text x="83" y="14">'"$$total"'%</text>' \
 		'  </g>' \
-		'</svg>' > badge.svg
+		'</svg>' > "$(EXTERNAL_ARTIFACT_ROOT)/badge.svg"
 
 ## build: Compile the symbrain binary
 build:
-	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/symbrain
+	$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"
+	CGO_ENABLED=0 $(GO) build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)" ./cmd/symbrain
 
 ## build-rust: Build the incremental Rust entrypoint and its Go fallback
 build-rust:
-	@mkdir -p target/go
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(abspath target/go/symbrain-go)" ./cmd/symbrain
-	SYMBRAIN_VERSION="$(VERSION)" cargo build --workspace --locked
+	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
+	SYMBRAIN_VERSION="$(VERSION)" CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" $(CARGO) build --workspace --locked
 
 ## parity-smoke: Compare migrated Rust CLI slices against the pinned Go oracle
 parity-smoke: rust-go-printable-check
-	@mkdir -p target/go
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath target/go/symbrain-go)" ./cmd/symbrain
-	SYMBRAIN_VERSION=dev cargo build --workspace --locked
-	python3 scripts/rust-differential.py target/go/symbrain-go target/debug/symbrain
+	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
+	SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" $(CARGO) build --workspace --locked
+	$(PYTHON) scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
 ## rust-go-printable-check: Ensure the pinned Go IsPrint table is current
 rust-go-printable-check:
@@ -143,73 +161,78 @@ profile-remove-oracle-check:
 .PHONY: init-differential
 INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
 init-differential:
-	cargo build -p symbrain-cli --locked
-	python3 scripts/init-oracle/test_compare.py
-	python3 scripts/init-oracle/compare.py --rust-binary "$(INIT_RUST_BINARY)" --output target/init-oracle/report.json
+	@set -eu; \
+	 root="$$($(EXTERNAL_RUN) mktemp -d)"; source="$$root/source"; \
+	 trap 'git worktree remove --force "$$source" >/dev/null 2>&1 || true; rm -rf "$$root"' EXIT INT TERM; \
+	 git worktree add --quiet --detach "$$source" HEAD; \
+	 $(CARGO) build -p symbrain-cli --locked; \
+	 $(PYTHON) "$$source/scripts/init-oracle/test_compare.py"; \
+	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle"; \
+	 $(PYTHON) "$$source/scripts/init-oracle/compare.py" --repo-root "$$source" --rust-binary "$(if $(CI),$(INIT_RUST_BINARY),$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,))" --output "$(EXTERNAL_ARTIFACT_ROOT)/init-oracle/report.json"
 
 ## rust-guard-check: Check the existing Guard library against its Go oracles
 rust-guard-check:
-	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go run ./guard/scripts/guard-oracle -check
-	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) go test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
-	cargo fmt --all --check
-	cargo check --workspace --all-targets --all-features --locked
-	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-	cargo test --workspace --all-targets --all-features --locked
-	cargo test --workspace --doc --all-features --locked
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) $(GO) run ./guard/scripts/guard-oracle -check
+	GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) $(GO) test ./guard/internal/capability -run '^TestCapabilityOracle(Fixture|RejectsDrift)$$' -count=1 -v
+	$(CARGO) fmt --all --check
+	$(CARGO) check --workspace --all-targets --all-features --locked
+	$(CARGO) clippy --workspace --all-targets --all-features --locked -- -D warnings
+	$(CARGO) test --workspace --all-targets --all-features --locked
+	$(CARGO) test --workspace --doc --all-features --locked
 
 ## rust-audit: Audit the committed lockfile without resolving or updating it
 rust-audit:
-	cargo audit --file Cargo.lock --deny warnings
+	$(CARGO) audit --file Cargo.lock --deny warnings
 
 ## rust-deny: Enforce dependency/license policy without changing Cargo.lock
 rust-deny:
-	cargo deny --locked --all-features check
+	$(CARGO) deny --locked --all-features check
 
 
 ## rust-check: Run the complete fast Rust quality gate
 rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
-	cargo fmt --all --check
-	cargo check --workspace --all-targets --all-features --locked
-	cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-	cargo test --workspace --all-features --locked
-	cargo test --workspace --doc --all-features --locked
-	cargo audit
-	cargo deny check
+	$(CARGO) fmt --all --check
+	$(CARGO) check --workspace --all-targets --all-features --locked
+	$(CARGO) clippy --workspace --all-targets --all-features --locked -- -D warnings
+	$(CARGO) test --workspace --all-features --locked
+	$(CARGO) test --workspace --doc --all-features --locked
+	$(CARGO) audit
+	$(CARGO) deny check
 
 ## rust-fuzz-build: Compile every MCP fuzz target with nightly libFuzzer
 rust-fuzz-build:
-	cargo +nightly fuzz build frame-decoder
-	cargo +nightly fuzz build jsonrpc-envelope
+	$(CARGO) +nightly fuzz build frame-decoder
+	$(CARGO) +nightly fuzz build jsonrpc-envelope
 
 ## rust-fuzz-smoke: Exercise both MCP fuzz targets without mutating tracked seeds
 rust-fuzz-smoke: rust-fuzz-build
 	@set -eu; \
-	tmp=$$(mktemp -d); \
+	tmp=$$($(EXTERNAL_RUN) mktemp -d); \
 	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
 	mkdir -p "$$tmp/frame" "$$tmp/envelope"; \
 	cp fuzz/corpus/frame_decoder/* "$$tmp/frame/"; \
 	cp fuzz/corpus/jsonrpc_envelope/* "$$tmp/envelope/"; \
-	cargo +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
-	cargo +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
+	$(CARGO) +nightly fuzz run frame-decoder "$$tmp/frame" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048; \
+	$(CARGO) +nightly fuzz run jsonrpc-envelope "$$tmp/envelope" -- -runs=10000 -max_len=1048577 -rss_limit_mb=2048
 
 ## test: Run all tests
 test:
-	go test ./...
+	$(GO) test ./...
 
 ## test-race: Run all tests with the race detector
 test-race:
-	go test -race ./...
+	$(GO) test -race ./...
 
 ## test-memory-large: Run bounded embedding storage measurements explicitly.
 ## Override MEMORY_STORAGE_SCALE up to 10000 only when the disk budget is known.
 MEMORY_STORAGE_SCALE ?= 1000
 MEMORY_LARGE_TEST_TIMEOUT ?= 20m
 test-memory-large:
-	SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) go test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
+	SYMBRAIN_MEMORY_STORAGE_SCALE=$(MEMORY_STORAGE_SCALE) $(GO) test -tags memory_large -timeout $(MEMORY_LARGE_TEST_TIMEOUT) -run 'TestEmbedding(StorageSize|BackupSize|Recommendation)$$' -count=1 ./internal/memory/db
 
 ## vet: Run go vet static analysis
 vet:
-	go vet ./...
+	$(GO) vet ./...
 
 ## lint: Deterministic lint gate (go vet + gofmt check, matches CI)
 lint: vet fmt-check
@@ -224,14 +247,14 @@ GOFMT_FILES := $(shell find . -name '*.go' -not -path './browse/*' -not -path '.
 
 ## fmt: Format all Go source files
 fmt:
-	gofmt -w -s $(GOFMT_FILES)
+	$(GO)fmt -w -s $(GOFMT_FILES)
 
 ## fmt-check: Fail if gofmt would change any file
 fmt-check:
-	@test -z "$$(gofmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; gofmt -l $(GOFMT_FILES); exit 1)
+	@test -z "$$($(GO)fmt -l $(GOFMT_FILES))" || (echo "gofmt needed on:"; $(GO)fmt -l $(GOFMT_FILES); exit 1)
 
 ## clean: Remove build artifacts and test cache
 clean:
-	rm -f $(BINARY)
-	go clean -testcache
-	cargo clean
+	$(EXTERNAL_RUN) rm -f "$(EXTERNAL_ARTIFACT_ROOT)/$(BINARY)"
+	$(GO) clean -testcache
+	$(CARGO) clean

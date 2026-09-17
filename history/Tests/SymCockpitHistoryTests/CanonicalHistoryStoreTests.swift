@@ -3,16 +3,19 @@ import XCTest
 @testable import SymCockpitHistory
 
 final class CanonicalHistoryStoreTests: XCTestCase {
+    private var temporaryDirectory: URL!
     private var fileURL: URL!
 
-    override func setUp() {
-        super.setUp()
-        fileURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("symcockpit-history-\(UUID().uuidString).jsonl")
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        temporaryDirectory = try SymairaTestTemporary.directory("symcockpit-history")
+        fileURL = temporaryDirectory
+            .appendingPathComponent("history.jsonl")
     }
 
     override func tearDown() {
         try? FileManager.default.removeItem(at: fileURL)
+        try? FileManager.default.removeItem(at: temporaryDirectory)
         super.tearDown()
     }
 

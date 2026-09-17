@@ -15,6 +15,80 @@ import time
 from pathlib import Path
 
 MAX_FRAME_BYTES = 1 << 20
+EXTERNAL_BASE_ENV = "SYMAIRA_EXTERNAL_BASE"
+EXTERNAL_RUNTIME_ENV = "SYMAIRA_EXTERNAL_RUNTIME_ROOT"
+EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
+DEFAULT_EXTERNAL_BASE = EXTERNAL_RUNTIME_ROOT / "Dev" / "Symaira_Dev" / "builds" / "symaira-brain"
+
+
+def _external_path(value: str | Path, mounted_root: Path, *, name: str, create: bool = False) -> Path:
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        raise RuntimeError(f"{name} must be an absolute path under {mounted_root}: {path}")
+    try:
+        resolved = path.resolve(strict=not create)
+    except OSError as error:
+        raise RuntimeError(f"{name} is invalid: {path}: {error}") from error
+    if not resolved.is_relative_to(mounted_root):
+        raise RuntimeError(f"{name} must be under mounted NVMe volume {mounted_root}: {resolved}")
+    if create:
+        path.mkdir(parents=True, exist_ok=True)
+        resolved = path.resolve(strict=True)
+    if not resolved.is_dir() or not os.access(resolved, os.W_OK | os.X_OK):
+        raise RuntimeError(f"{name} must name a writable directory: {resolved}")
+    return resolved
+
+
+def external_environment(env: dict[str, str]) -> dict[str, str]:
+    """Keep direct macOS build, temp, and evidence paths on the encrypted NVMe."""
+    if sys.platform != "darwin" or env.get("CI"):
+        return env
+    try:
+        mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+    except OSError as error:
+        raise RuntimeError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}") from error
+    if not mounted_root.is_dir() or not mounted_root.is_mount():
+        raise RuntimeError(f"required NVMe runtime volume is not mounted: {mounted_root}")
+    base = _external_path(
+        env.get(EXTERNAL_BASE_ENV, str(DEFAULT_EXTERNAL_BASE)),
+        mounted_root,
+        name=EXTERNAL_BASE_ENV,
+        create=True,
+    )
+    runtime = _external_path(
+        env.get(EXTERNAL_RUNTIME_ENV, str(EXTERNAL_RUNTIME_ROOT / "tmp")),
+        mounted_root,
+        name=EXTERNAL_RUNTIME_ENV,
+        create=True,
+    )
+    paths = {
+        "TMPDIR": base / "tmp",
+        "TMP": base / "tmp",
+        "TEMP": base / "tmp",
+        "GOTMPDIR": base / "go-tmp",
+        "GOPATH": base / "gopath",
+        "GOCACHE": base / "go-cache",
+        "GOMODCACHE": base / "go-mod-cache",
+        "FETCH_GO_CACHE": base / "go-cache",
+        "FETCH_GO_MODCACHE": base / "go-mod-cache",
+        "GOTELEMETRYDIR": base / "go-telemetry",
+        "CARGO_HOME": base / "cargo-home",
+        "CARGO_TARGET_DIR": base / "cargo-target",
+        "PYTHONPYCACHEPREFIX": base / "python-cache",
+        EXTERNAL_BASE_ENV: base,
+        EXTERNAL_RUNTIME_ENV: runtime,
+    }
+    for name, path in paths.items():
+        paths[name] = _external_path(path, mounted_root, name=name, create=True)
+        env[name] = str(paths[name])
+    return env
+
+
+def temporary_parent(env: dict[str, str] | None = None) -> str | None:
+    selected = os.environ if env is None else env
+    if sys.platform != "darwin" or selected.get("CI"):
+        return None
+    return external_environment(selected)[EXTERNAL_RUNTIME_ENV]
 
 
 def run(command: list[str], root: Path, env: dict[str, str], *, timeout: int = 600) -> None:
@@ -137,6 +211,35 @@ def assert_clean_process(process: subprocess.Popen[bytes], *, timeout: float = 5
         raise AssertionError("daemon stderr leaked a secret-like value")
 
 
+def cargo_target_root(root: Path, env: dict[str, str]) -> Path:
+    value = env.get("CARGO_TARGET_DIR", "").strip()
+    if not value:
+        if sys.platform == "darwin" and not env.get("CI"):
+            return Path(external_environment(env)["CARGO_TARGET_DIR"])
+        return root / "target"
+    target = Path(value)
+    if sys.platform == "darwin" and not env.get("CI") and not target.is_absolute():
+        raise RuntimeError("CARGO_TARGET_DIR must be an absolute NVMe path on direct macOS runs")
+    return target if target.is_absolute() else root / target
+
+
+def external_output(root: Path, env: dict[str, str], relative: str) -> Path:
+    if sys.platform == "darwin" and not env.get("CI"):
+        return Path(env[EXTERNAL_BASE_ENV]) / relative
+    return root / relative
+
+
+def external_file(path: Path, env: dict[str, str], *, name: str) -> Path:
+    """Reject direct macOS evidence paths that escape the external volume."""
+    if sys.platform != "darwin" or env.get("CI"):
+        return path
+    mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+    resolved = path.expanduser().resolve(strict=False)
+    if not resolved.is_relative_to(mounted_root):
+        raise RuntimeError(f"{name} must be under mounted NVMe volume {mounted_root}: {resolved}")
+    return resolved
+
+
 def lifecycle_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str) -> None:
     session = f"contract-{suffix}"
     socket_path = daemon_socket_path(runtime, session)
@@ -249,12 +352,12 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
             raise AssertionError(f"installed Rust daemon binary does not exist: {binary}")
     else:
         run(["cargo", "build", "-p", "symbrowse-cli", "--locked"], root, env)
-        binary = root / "target" / "debug" / ("symbrowse.exe" if os.name == "nt" else "symbrowse")
-    # macOS limits Unix-domain socket paths to 104 bytes. GitHub's TMPDIR is
-    # nested under /var/folders/... and leaves too little room for the socket.
-    with tempfile.TemporaryDirectory(
-        prefix="sb-", dir="/tmp" if sys.platform == "darwin" else None
-    ) as directory:
+        binary = cargo_target_root(root, env) / "debug" / (
+            "symbrowse.exe" if os.name == "nt" else "symbrowse"
+        )
+    # macOS limits Unix-domain socket paths to 104 bytes. Keep this root short
+    # without silently putting runner state on the local system volume.
+    with tempfile.TemporaryDirectory(prefix="sb-", dir=temporary_parent(env)) as directory:
         base = Path(directory)
         data = base / "data"
         home = base / "home"
@@ -381,6 +484,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[2]
     env = os.environ.copy()
     env.update({"CGO_ENABLED": "0", "GOTOOLCHAIN": "go1.26.6"})
+    external_environment(env)
     if args.suite == "all":
         if not args.capture or not args.trusted_sha256:
             parser.error("--suite all needs FETCH-002 --capture and --trusted-sha256 artifacts")
@@ -427,7 +531,11 @@ def main() -> int:
         if (rust_binary is None) != (compat_binary is None):
             parser.error("fetch-fingerprints needs Rust and Go compat artifacts together when supplied")
         oracle = args.historical_oracle or (root / "docs/rust-port/rust009-tls-results.json")
-        report = args.report or (root / "target/fetch002-next/fetch002-e2e.json")
+        report = external_file(
+            args.report or external_output(root, env, "target/fetch002-next/fetch002-e2e.json"),
+            env,
+            name="--report",
+        )
         command = [sys.executable, "port/harness/fetch_fingerprints_validate.py",
              "--capture", str(args.capture.resolve()),
              "--trusted-sha256", args.trusted_sha256,
@@ -437,8 +545,11 @@ def main() -> int:
              "--go", args.go]
         if rust_binary is not None and compat_binary is not None:
             command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
-        if args.runtime_root:
-            command.extend(["--runtime-root", str(args.runtime_root.resolve())])
+        runtime_root = args.runtime_root or (
+            Path(env[EXTERNAL_RUNTIME_ENV]) if sys.platform == "darwin" and not env.get("CI") else None
+        )
+        if runtime_root:
+            command.extend(["--runtime-root", str(runtime_root.resolve())])
         run(command, root, env)
         print("FETCH-002 diagnostics completed; acceptance remains blocked")
         return 0
@@ -446,7 +557,7 @@ def main() -> int:
         fixture = json.loads((root / "port/harness/cases/compat-sidecar.json").read_text())
         assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
         commands = [
-            ["go", "build", "-trimpath", "-o", str(root / "dist/symbrowse-compat"), "./cmd/symbrowse"],
+            ["go", "build", "-trimpath", "-o", str(external_output(root, env, "dist/symbrowse-compat")), "./cmd/symbrowse"],
             ["cargo", "test", "-p", "symbrowse-compat", "-p", "symbrowse-daemon", "--locked"],
         ]
     elif args.suite == "workflows":

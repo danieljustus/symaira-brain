@@ -77,6 +77,140 @@ var (
 	}
 )
 
+var sourceExternalVolume = "/Volumes/1TB_NVMe_SN850X"
+
+// sourceBuildLayout keeps local macOS build state off the internal disk. CI
+// and non-macOS callers intentionally get an empty layout and the historical
+// command environment.
+type sourceBuildLayout struct {
+	base, temp, goTemp, goPath, goTelemetry, goCache, goModCache string
+	cargoHome, cargoTarget, pythonCache, swiftCache, runtimeRoot string
+}
+
+var (
+	sourceBuildGOOS          = runtime.GOOS
+	sourceBuildCI            = func() bool { return os.Getenv("CI") != "" }
+	sourceBuildVolumeMounted = func(volume string) bool {
+		output, err := exec.Command("df", "-P", volume).Output()
+		if err != nil {
+			return false
+		}
+		lines := strings.Split(strings.TrimSpace(string(output)), "\n")
+		if len(lines) < 2 {
+			return false
+		}
+		fields := strings.Fields(lines[len(lines)-1])
+		return len(fields) > 0 && filepath.Clean(fields[len(fields)-1]) == filepath.Clean(volume)
+	}
+)
+
+func prepareSourceBuildLayout() (sourceBuildLayout, error) {
+	if sourceBuildGOOS != "darwin" || sourceBuildCI() {
+		return sourceBuildLayout{}, nil
+	}
+
+	volume, err := filepath.EvalSymlinks(sourceExternalVolume)
+	if err != nil {
+		return sourceBuildLayout{}, fmt.Errorf("required external build volume %s is unavailable: %w", sourceExternalVolume, err)
+	}
+	if info, err := os.Stat(volume); err != nil || !info.IsDir() {
+		if err == nil {
+			err = fmt.Errorf("not a directory")
+		}
+		return sourceBuildLayout{}, fmt.Errorf("required external build volume %s is unavailable: %w", sourceExternalVolume, err)
+	}
+	if !sourceBuildVolumeMounted(volume) {
+		return sourceBuildLayout{}, fmt.Errorf("required external build volume %s is not mounted", sourceExternalVolume)
+	}
+
+	base := os.Getenv("SYMAIRA_EXTERNAL_BASE")
+	if base == "" {
+		base = filepath.Join(sourceExternalVolume, "Dev", "Symaira_Dev", "builds", "symaira-brain")
+	}
+	runtimeRoot := os.Getenv("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+	if runtimeRoot == "" {
+		runtimeRoot = filepath.Join(sourceExternalVolume, "tmp")
+	}
+	for _, externalPath := range []struct {
+		name, path string
+	}{
+		{name: "SYMAIRA_EXTERNAL_BASE", path: base},
+		{name: "SYMAIRA_EXTERNAL_RUNTIME_ROOT", path: runtimeRoot},
+	} {
+		if err := validateSourceExternalPath(volume, externalPath.path); err != nil {
+			return sourceBuildLayout{}, fmt.Errorf("%s: %w", externalPath.name, err)
+		}
+	}
+
+	layout := sourceBuildLayout{
+		base:        base,
+		temp:        filepath.Join(base, "tmp"),
+		goTemp:      filepath.Join(base, "go-tmp"),
+		goPath:      filepath.Join(base, "gopath"),
+		goTelemetry: filepath.Join(base, "go-telemetry"),
+		goCache:     filepath.Join(base, "go-cache"),
+		goModCache:  filepath.Join(base, "go-mod-cache"),
+		cargoHome:   filepath.Join(base, "cargo-home"),
+		cargoTarget: filepath.Join(base, "cargo-target"),
+		pythonCache: filepath.Join(base, "python-cache"),
+		swiftCache:  filepath.Join(base, "swift-cache"),
+		runtimeRoot: runtimeRoot,
+	}
+	for _, path := range []string{
+		layout.temp, layout.goTemp, layout.goPath, layout.goTelemetry,
+		layout.goCache, layout.goModCache, layout.cargoHome, layout.cargoTarget,
+		layout.pythonCache, layout.swiftCache, layout.runtimeRoot,
+	} {
+		if err := os.MkdirAll(path, 0o700); err != nil {
+			return sourceBuildLayout{}, fmt.Errorf("create external build path %s: %w", path, err)
+		}
+		if err := validateSourceExternalPath(volume, path); err != nil {
+			return sourceBuildLayout{}, fmt.Errorf("external build path %s: %w", path, err)
+		}
+	}
+	return layout, nil
+}
+
+func validateSourceExternalPath(volume, candidate string) error {
+	if !filepath.IsAbs(candidate) {
+		return fmt.Errorf("must be absolute and under %s", volume)
+	}
+	clean := filepath.Clean(candidate)
+	parent := clean
+	for {
+		if _, err := os.Stat(parent); err == nil {
+			resolved, resolveErr := filepath.EvalSymlinks(parent)
+			if resolveErr != nil {
+				return resolveErr
+			}
+			rel, relErr := filepath.Rel(volume, resolved)
+			if relErr != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+				return fmt.Errorf("resolves outside %s", volume)
+			}
+			return nil
+		}
+		next := filepath.Dir(parent)
+		if next == parent {
+			return fmt.Errorf("cannot resolve path")
+		}
+		parent = next
+	}
+}
+
+func sourceBuildEnv(layout sourceBuildLayout) []string {
+	if layout.base == "" {
+		return os.Environ()
+	}
+	return append(os.Environ(),
+		"TMPDIR="+layout.temp, "TMP="+layout.temp, "TEMP="+layout.temp,
+		"GOTMPDIR="+layout.goTemp, "GOPATH="+layout.goPath,
+		"GOTELEMETRYDIR="+layout.goTelemetry, "GOCACHE="+layout.goCache,
+		"GOMODCACHE="+layout.goModCache, "CARGO_HOME="+layout.cargoHome,
+		"CARGO_TARGET_DIR="+layout.cargoTarget, "PYTHONPYCACHEPREFIX="+layout.pythonCache,
+		"SYMAIRA_EXTERNAL_RUNTIME_ROOT="+layout.runtimeRoot, "RUSTUP_NO_UPDATE_CHECK=1",
+	)
+}
+
 // buildModuleBinary is the production builder: Go for browse/, SwiftPM
 // for operate/ and scope/.
 func buildModuleBinary(ctx context.Context, root string, spec sourceModuleSpec, destDir string) (string, string, error) {
@@ -101,7 +235,11 @@ func buildBrowseBinary(ctx context.Context, root, destDir string) (string, strin
 	target := filepath.Join(destDir, "symbrowse")
 	cmd := exec.CommandContext(ctx, "go", "build", "-trimpath", "-o", target, "./cmd/symbrowse")
 	cmd.Dir = filepath.Join(root, "browse")
-	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
+	layout, err := prepareSourceBuildLayout()
+	if err != nil {
+		return "", "", err
+	}
+	cmd.Env = append(sourceBuildEnv(layout), "CGO_ENABLED=0")
 	if combined, err := cmd.CombinedOutput(); err != nil {
 		return "", "", fmt.Errorf("go build ./cmd/symbrowse: %w\n%s", err, combined)
 	}
@@ -117,12 +255,31 @@ func buildSwiftModuleBinary(ctx context.Context, root string, spec sourceModuleS
 		return "", "", fmt.Errorf("swift --version: %w", err)
 	}
 	builder := strings.SplitN(strings.TrimSpace(string(out)), "\n", 2)[0]
+	layout, err := prepareSourceBuildLayout()
+	if err != nil {
+		return "", "", err
+	}
 
 	pkgPath := filepath.Join(root, spec.Dir)
-	if buildOut, err := exec.CommandContext(ctx, "swift", "build", "--package-path", pkgPath).CombinedOutput(); err != nil {
+	buildArgs := []string{"build", "--package-path", pkgPath}
+	showBinArgs := []string{"build", "--package-path", pkgPath}
+	if layout.base != "" {
+		scratch := filepath.Join(layout.base, "swift-scratch", spec.Module)
+		if err := os.MkdirAll(scratch, 0o700); err != nil {
+			return "", "", fmt.Errorf("create Swift scratch path: %w", err)
+		}
+		buildArgs = append(buildArgs, "--scratch-path", scratch, "--cache-path", layout.swiftCache)
+		showBinArgs = append(showBinArgs, "--scratch-path", scratch, "--cache-path", layout.swiftCache)
+	}
+	buildCmd := exec.CommandContext(ctx, "swift", buildArgs...)
+	buildCmd.Env = sourceBuildEnv(layout)
+	if buildOut, err := buildCmd.CombinedOutput(); err != nil {
 		return "", "", fmt.Errorf("swift build (%s): %w\n%s", spec.Dir, err, buildOut)
 	}
-	binOut, err := exec.CommandContext(ctx, "swift", "build", "--package-path", pkgPath, "--show-bin-path").Output()
+	showBinArgs = append(showBinArgs, "--show-bin-path")
+	showBinCmd := exec.CommandContext(ctx, "swift", showBinArgs...)
+	showBinCmd.Env = sourceBuildEnv(layout)
+	binOut, err := showBinCmd.Output()
 	if err != nil {
 		return "", "", fmt.Errorf("swift build --show-bin-path (%s): %w", spec.Dir, err)
 	}
@@ -205,6 +362,11 @@ func runSetupFromSource(ctx context.Context, stdout, stderr io.Writer, binDir, r
 		fmt.Fprintf(stderr, "symbrain setup --from-source: %v\n", err)
 		return exitcodes.ExitNoInput
 	}
+	buildLayout, err := prepareSourceBuildLayout()
+	if err != nil {
+		fmt.Fprintf(stderr, "symbrain setup --from-source: %v\n", err)
+		return exitcodes.ExitGeneric
+	}
 
 	commit, err := receiverCommit(absRoot)
 	if err != nil {
@@ -228,7 +390,8 @@ func runSetupFromSource(ctx context.Context, stdout, stderr io.Writer, binDir, r
 			continue
 		}
 
-		tmpDir, err := os.MkdirTemp("", "symbrain-source-build-*")
+		tmpParent := buildLayout.temp
+		tmpDir, err := os.MkdirTemp(tmpParent, "symbrain-source-build-*")
 		if err != nil {
 			result.Status = "error"
 			result.Error = err.Error()

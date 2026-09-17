@@ -24,6 +24,9 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
+EXTERNAL_BASE_ENV = "SYMAIRA_EXTERNAL_BASE"
+EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
+DEFAULT_EXTERNAL_BASE = EXTERNAL_RUNTIME_ROOT / "Dev" / "Symaira_Dev" / "builds" / "symaira-brain"
 TARGETS: dict[str, tuple[str, str, str]] = {
     "darwin-amd64": ("darwin", "amd64", "x86_64-apple-darwin"),
     "darwin-arm64": ("darwin", "arm64", "aarch64-apple-darwin"),
@@ -32,6 +35,64 @@ TARGETS: dict[str, tuple[str, str, str]] = {
     "windows-amd64": ("windows", "amd64", "x86_64-pc-windows-gnu"),
     "windows-arm64": ("windows", "arm64", "aarch64-pc-windows-msvc"),
 }
+
+
+def _external_path(value: str | Path, mounted_root: Path, *, name: str) -> Path:
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        raise RuntimeError(f"{name} must be an absolute path under {mounted_root}: {path}")
+    try:
+        resolved = path.resolve(strict=False)
+    except OSError as error:
+        raise RuntimeError(f"{name} is invalid: {path}: {error}") from error
+    if not resolved.is_relative_to(mounted_root):
+        raise RuntimeError(f"{name} must be under mounted NVMe volume {mounted_root}: {resolved}")
+    path.mkdir(parents=True, exist_ok=True)
+    resolved = path.resolve(strict=True)
+    if not resolved.is_dir() or not os.access(resolved, os.W_OK | os.X_OK):
+        raise RuntimeError(f"{name} must name a writable directory: {resolved}")
+    return resolved
+
+
+def external_environment(env: dict[str, str]) -> dict[str, str]:
+    """Keep direct macOS build, temp, and release paths on the encrypted NVMe."""
+    if sys.platform != "darwin" or env.get("CI"):
+        return env
+    try:
+        mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+    except OSError as error:
+        raise RuntimeError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}") from error
+    if not mounted_root.is_dir() or not mounted_root.is_mount():
+        raise RuntimeError(f"required NVMe runtime volume is not mounted: {mounted_root}")
+    base = _external_path(
+        env.get(EXTERNAL_BASE_ENV, str(DEFAULT_EXTERNAL_BASE)), mounted_root, name=EXTERNAL_BASE_ENV
+    )
+    for name, path in {
+        "TMPDIR": base / "tmp",
+        "TMP": base / "tmp",
+        "TEMP": base / "tmp",
+        "GOTMPDIR": base / "go-tmp",
+        "GOPATH": base / "gopath",
+        "GOCACHE": base / "go-cache",
+        "GOMODCACHE": base / "go-mod-cache",
+        "GOTELEMETRYDIR": base / "go-telemetry",
+        "CARGO_HOME": base / "cargo-home",
+        "CARGO_TARGET_DIR": base / "cargo-target",
+        "PYTHONPYCACHEPREFIX": base / "python-cache",
+    }.items():
+        env[name] = str(_external_path(path, mounted_root, name=name))
+    env[EXTERNAL_BASE_ENV] = str(base)
+    return env
+
+
+def release_output(root: Path, requested: Path, env: dict[str, str]) -> Path:
+    if sys.platform == "darwin" and not env.get("CI"):
+        output = Path(env[EXTERNAL_BASE_ENV]) / requested if not requested.is_absolute() else requested
+        resolved = output.resolve(strict=False)
+        if not resolved.is_relative_to(EXTERNAL_RUNTIME_ROOT.resolve(strict=True)):
+            raise RuntimeError(f"--output must be under mounted NVMe volume {EXTERNAL_RUNTIME_ROOT}: {resolved}")
+        return resolved
+    return (root / requested).resolve() if not requested.is_absolute() else requested.resolve()
 
 
 def sha256(path: Path) -> str:
@@ -84,9 +145,21 @@ def go_binary(root: Path, staging: Path, target: str, version: str, env: dict[st
     return path if try_run(command, cwd=root, env=build_env) and path.is_file() else None
 
 
+def _cargo_target_dir(root: Path, env: dict[str, str]) -> Path:
+    configured = env.get("CARGO_TARGET_DIR")
+    if not configured:
+        if sys.platform == "darwin" and not env.get("CI"):
+            return Path(external_environment(env)["CARGO_TARGET_DIR"])
+        return root / "target"
+    path = Path(configured)
+    if sys.platform == "darwin" and not env.get("CI") and not path.is_absolute():
+        raise RuntimeError("CARGO_TARGET_DIR must be an absolute NVMe path on direct macOS runs")
+    return path if path.is_absolute() else root / path
+
+
 def rust_binary(root: Path, staging: Path, target: str, version: str, env: dict[str, str]) -> Path | None:
     _, _, rust_target = TARGETS[target]
-    path = root / "target" / rust_target / "release" / ("symbrowse.exe" if target.startswith("windows-") else "symbrowse")
+    path = _cargo_target_dir(root, env) / rust_target / "release" / ("symbrowse.exe" if target.startswith("windows-") else "symbrowse")
     target_is_installed = subprocess.run(
         ["rustup", "target", "list", "--installed"], cwd=root, env=env, text=True, capture_output=True, check=False
     )
@@ -238,18 +311,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     version = args.version.removeprefix("v")
     targets = list(TARGETS) if args.all_targets else (args.target or [host_target()])
     root = ROOT
-    output = (root / args.output).resolve() if not args.output.is_absolute() else args.output.resolve()
+    env = dict(os.environ, CGO_ENABLED="0", GOTOOLCHAIN=os.environ.get("GOTOOLCHAIN", "go1.26.6"))
+    external_environment(env)
+    output = release_output(root, args.output, env)
     if output.exists():
         shutil.rmtree(output)
     (output / "dual").mkdir(parents=True)
-    env = dict(os.environ, CGO_ENABLED="0", GOTOOLCHAIN=os.environ.get("GOTOOLCHAIN", "go1.26.6"))
     artifacts: dict[str, list[dict[str, str]]] = {"go": [], "rust": []}
     for implementation in artifacts:
         (output / "dual" / implementation).mkdir(parents=True, exist_ok=True)
     proofs: list[dict[str, Any]] = []
     blocked: list[str] = []
     host = host_target()
-    with tempfile.TemporaryDirectory(prefix="rust016-dual-") as raw:
+    with tempfile.TemporaryDirectory(prefix="rust016-dual-", dir=env.get("TMPDIR")) as raw:
         staging = Path(raw)
         for target in targets:
             binaries: dict[str, Path | None] = {}

@@ -89,7 +89,7 @@ private final class MockOCRServiceForFindUI: OCRServiceProtocol {
 }
 
 private func testHistoryService() -> HistoryService {
-    HistoryService(fileURL: FileManager.default.temporaryDirectory
+    HistoryService(fileURL: operateTestTemporaryDirectory()
         .appendingPathComponent("symoperate-find-ui-\(UUID().uuidString).jsonl"))
 }
 
@@ -272,7 +272,10 @@ final class SymOperateTests: XCTestCase {
     // MARK: - ListDisplays tests
 
     func testListDisplaysReturnsAtLeastOneDisplay() {
-        let service = ScreenService()
+        let directory = operateTestTemporaryDirectory()
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let service = ScreenService(snapshotDirectory: directory)
         let displays = service.listDisplays()
         XCTAssertFalse(displays.isEmpty, "Should enumerate at least one display")
         XCTAssertTrue(displays.contains { $0.isMain }, "Should identify the main display")
@@ -336,7 +339,7 @@ final class SymOperateTests: XCTestCase {
     // MARK: - Snapshot cleanup: 5-minute retention
 
     func testScreenServiceCleanupRemovesOldPNGs() throws {
-        let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("test-cleanup-\(UUID().uuidString)", isDirectory: true)
+        let tmpDir = operateTestTemporaryDirectory().appendingPathComponent("test-cleanup-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tmpDir) }
 
@@ -359,7 +362,7 @@ final class SymOperateTests: XCTestCase {
     }
 
     func testScreenServiceCleanupRetainsPNGsWithinWindow() throws {
-        let tmpDir = FileManager.default.temporaryDirectory.appendingPathComponent("test-cleanup-recent-\(UUID().uuidString)", isDirectory: true)
+        let tmpDir = operateTestTemporaryDirectory().appendingPathComponent("test-cleanup-recent-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: tmpDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tmpDir) }
 

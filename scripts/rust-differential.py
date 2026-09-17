@@ -18,6 +18,8 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
+
+from external_env import ensure_external_environment
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
@@ -1114,7 +1116,7 @@ def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
     (root_path / "data").mkdir(parents=True, exist_ok=True)
     (root_path / "state").mkdir(parents=True, exist_ok=True)
     (root_path / "project").mkdir(parents=True, exist_ok=True)
-    return {
+    env = {
         "HOME": str(root_path / "home"),
         "PATH": os.environ.get("PATH", ""),
         "LANG": "C.UTF-8",
@@ -1127,6 +1129,10 @@ def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
         "PROJECT": str(root_path / "project"),
         "SYMBRAIN_GO_BINARY": str(go_binary),
     }
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        if value := os.environ.get(key):
+            env[key] = value
+    return env
 def get_fs_manifest(root: Path) -> dict[str, tuple[str, int, bytes]]:
     manifest: dict[str, tuple[str, int, bytes]] = {}
     for p in sorted(root.rglob("*")):
@@ -1149,6 +1155,7 @@ def get_fs_manifest(root: Path) -> dict[str, tuple[str, int, bytes]]:
             manifest[rel] = ("file", mode, content)
     return manifest
 def main() -> int:
+    ensure_external_environment(__file__)
     global RELEASE_BASE_URL
     if len(sys.argv) != 3:
         print("usage: differential.py GO_BINARY RUST_BINARY", file=sys.stderr)

@@ -12,7 +12,7 @@
 # Usage: scripts/build-module-packages.sh [--root <repo>] [--out <dir>]
 #        [--modules browse,operate,scope]
 #
-# Output layout (default <repo>/dist/modules/):
+# Output layout (default external NVMe artifact root locally, <repo>/dist/modules/ in CI):
 #   symbrowse_<version>_<os>_<arch>.tar.gz
 #   symoperate_<version>_<os>_<arch>.tar.gz   (macOS only)
 #   symscope_<version>_<os>_<arch>.tar.gz     (macOS only)
@@ -27,8 +27,17 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+
+# Local builds inherit the repository-wide NVMe cache and temp paths. CI keeps
+# the existing workspace-local behavior through the same wrapper.
+if [ -z "${SYMAIRA_EXTERNAL_ENV_READY:-}" ]; then
+    export SYMAIRA_EXTERNAL_ENV_READY=1
+    exec bash "$ROOT/scripts/run-external-env.sh" "$ROOT/scripts/build-module-packages.sh" "$@"
+fi
+
 OUT=""
 MODULES="browse,operate,scope"
+HOST_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -39,8 +48,61 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-OUT=${OUT:-"$ROOT/dist/modules"}
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+SYMAIRA_NVME_ROOT=/Volumes/1TB_NVMe_SN850X
+if [ -n "${CI:-}" ] || [ "$HOST_OS" != "darwin" ]; then
+    DEFAULT_OUT="$ROOT/dist/modules"
+else
+    DEFAULT_OUT="${SYMAIRA_EXTERNAL_BASE:-$SYMAIRA_NVME_ROOT/Dev/Symaira_Dev/builds/symaira-brain}/artifacts/modules"
+fi
+OUT=${OUT:-"$DEFAULT_OUT"}
+
+# Resolve existing path components before creating anything. This prevents an
+# explicit local path or a symlinked output directory from reaching cleanup.
+validate_output_path() {
+    candidate=$1
+    case "$candidate" in
+        "$SYMAIRA_NVME_ROOT"/*) ;;
+        *)
+            echo "--out must be under $SYMAIRA_NVME_ROOT outside CI" >&2
+            exit 2
+            ;;
+    esac
+
+    parent=$(dirname "$candidate")
+    while [ ! -d "$parent" ]; do
+        next=$(dirname "$parent")
+        if [ "$next" = "$parent" ]; then
+            echo "cannot resolve --out parent: $candidate" >&2
+            exit 2
+        fi
+        parent=$next
+    done
+    resolved_parent=$(CDPATH= cd -- "$parent" && pwd -P)
+    case "$resolved_parent" in
+        "$SYMAIRA_NVME_ROOT"|"$SYMAIRA_NVME_ROOT"/*) ;;
+        *)
+            echo "--out resolves outside $SYMAIRA_NVME_ROOT: $candidate" >&2
+            exit 2
+            ;;
+    esac
+
+    if [ -e "$candidate" ]; then
+        resolved=$(CDPATH= cd -- "$candidate" && pwd -P)
+        case "$resolved" in
+            "$SYMAIRA_NVME_ROOT"/*) ;;
+            *)
+                echo "--out resolves outside $SYMAIRA_NVME_ROOT: $candidate" >&2
+                exit 2
+                ;;
+        esac
+    fi
+}
+
+if [ -z "${CI:-}" ] && [ "$HOST_OS" = "darwin" ]; then
+    validate_output_path "$OUT"
+fi
+
+OS=$HOST_OS
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64) ARCH=amd64 ;;
@@ -102,8 +164,8 @@ if [ "$OS" = "darwin" ]; then
                 scope) bin=symscope ;;
             esac
             echo "==> building $bin from $ROOT/$mod (release)"
-            swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" >/dev/null
-            BINPATH=$(swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" --show-bin-path)
+            swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" --cache-path "$OUT/.build/swift-cache" >/dev/null
+            BINPATH=$(swift build --package-path "$ROOT/$mod" -c release --scratch-path "$OUT/.build/$mod-scratch" --cache-path "$OUT/.build/swift-cache" --show-bin-path)
             package_binary "$mod" "$bin" "$(swift --version | head -n 1)" "$BINPATH/$bin"
         fi
     done

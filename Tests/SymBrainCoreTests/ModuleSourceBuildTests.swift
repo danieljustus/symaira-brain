@@ -5,7 +5,7 @@ import Testing
 @Suite("Module source checkout")
 struct ModuleSourceBuildTests {
     @Test func canonicalizesAndValidatesAWorktreeRoot() throws {
-        let workspace = FileManager.default.temporaryDirectory
+        let workspace = symBrainTestTemporaryDirectory()
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: workspace) }
 
@@ -20,7 +20,7 @@ struct ModuleSourceBuildTests {
     }
 
     @Test func rejectsCheckoutMissingRequiredModuleMarker() throws {
-        let workspace = FileManager.default.temporaryDirectory
+        let workspace = symBrainTestTemporaryDirectory()
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         defer { try? FileManager.default.removeItem(at: workspace) }
 

@@ -1,6 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ "${SYMAIRA_EXTERNAL_ENV_READY:-}" != "1" ]; then
+  export SYMAIRA_EXTERNAL_ENV_READY=1
+  exec bash "$SCRIPT_DIR/run-external-env.sh" "$0" "$@"
+fi
+
 usage() {
   echo "Usage: $0 <app-path> <dmg-path> [volume-name] [background-png]" >&2
 }
@@ -13,7 +19,6 @@ fi
 APP_PATH="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 DMG_PATH="$2"
 VOL_NAME="${3:-$(basename "$APP_PATH" .app)}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_BACKGROUND="${SCRIPT_DIR}/../Brand/DMG/symaira-dmg-background.png"
 if [ ! -f "$DEFAULT_BACKGROUND" ]; then
   DEFAULT_BACKGROUND="${SCRIPT_DIR}/../assets/branding/symaira-dmg-background.png"

@@ -23,6 +23,51 @@ SPEC.loader.exec_module(bench_run)
 
 
 class BenchmarkHarnessTests(unittest.TestCase):
+    @unittest.skipUnless(
+        bench_run.EXTERNAL_RUNTIME_ROOT.is_mount(), "local NVMe volume is unavailable"
+    )
+    def test_macos_temp_parent_requires_external_writable_root(self) -> None:
+        with patch.object(bench_run.platform, "system", return_value="Darwin"):
+            with patch.dict(os.environ, {"CI": ""}, clear=False):
+                os.environ.pop(bench_run.EXTERNAL_RUNTIME_ENV, None)
+                with self.assertRaisesRegex(RuntimeError, bench_run.EXTERNAL_RUNTIME_ENV):
+                    bench_run.temporary_parent()
+                with tempfile.TemporaryDirectory(dir=bench_run.EXTERNAL_RUNTIME_ROOT) as tmp:
+                    os.environ[bench_run.EXTERNAL_RUNTIME_ENV] = tmp
+                    self.assertEqual(bench_run.temporary_parent(), str(Path(tmp).resolve()))
+                    os.environ[bench_run.EXTERNAL_RUNTIME_ENV] = "/private/tmp"
+                    with self.assertRaisesRegex(RuntimeError, "under mounted NVMe volume"):
+                        bench_run.temporary_parent()
+                    os.environ[bench_run.EXTERNAL_RUNTIME_ENV] = str(Path(tmp) / "missing")
+                    with self.assertRaisesRegex(RuntimeError, bench_run.EXTERNAL_RUNTIME_ENV):
+                        bench_run.temporary_parent()
+
+    def test_ci_and_non_macos_keep_portable_temp_parent(self) -> None:
+        with patch.object(bench_run.platform, "system", return_value="Darwin"):
+            with patch.dict(os.environ, {"CI": "1"}, clear=False):
+                self.assertIsNone(bench_run.temporary_parent())
+
+    @unittest.skipUnless(
+        bench_run.EXTERNAL_RUNTIME_ROOT.is_mount(), "local NVMe volume is unavailable"
+    )
+    def test_macos_output_must_stay_on_nvme(self) -> None:
+        with patch.object(bench_run.platform, "system", return_value="Darwin"):
+            with tempfile.TemporaryDirectory(dir=bench_run.EXTERNAL_RUNTIME_ROOT) as tmp:
+                with patch.dict(
+                    os.environ,
+                    {"CI": "", bench_run.EXTERNAL_RUNTIME_ENV: tmp},
+                    clear=False,
+                ):
+                    self.assertEqual(
+                        bench_run.external_output(Path(tmp) / "report.json"),
+                        Path(tmp).resolve() / "report.json",
+                    )
+                    with self.assertRaisesRegex(RuntimeError, "--output must be under mounted NVMe volume"):
+                        bench_run.external_output(Path("/private/tmp/report.json"))
+        with patch.object(bench_run.platform, "system", return_value="Linux"):
+            with patch.dict(os.environ, {}, clear=False):
+                self.assertIsNone(bench_run.temporary_parent())
+
     def test_static_daemon_command_matches_each_cli_contract(self) -> None:
         binary = Path(tempfile.gettempdir()) / "symbrowse"
         self.assertEqual(

@@ -83,9 +83,7 @@ final class CacheServiceTests: XCTestCase {
     }
 
     private func makeTemporaryRoot() throws -> URL {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("symscope-cache-tests-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+        let root = try SymairaTestTemporary.directory("symscope-cache-tests")
         roots.append(root)
         return root
     }

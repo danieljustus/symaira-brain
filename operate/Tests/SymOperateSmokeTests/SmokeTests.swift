@@ -3,7 +3,7 @@ import XCTest
 
 final class SmokeTests: XCTestCase {
     private let controller = AutomationController(
-        history: HistoryService(fileURL: FileManager.default.temporaryDirectory
+        history: HistoryService(fileURL: operateSmokeTestTemporaryDirectory()
             .appendingPathComponent("symoperate-smoke-\(UUID().uuidString).jsonl"))
     )
 

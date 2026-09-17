@@ -9,7 +9,7 @@ final class SafetyPolicyTests: XCTestCase {
     private var mockAX: MockAccessibilityService!
 
     private func testHistory() -> HistoryService {
-        HistoryService(fileURL: FileManager.default.temporaryDirectory
+        HistoryService(fileURL: operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-safety-\(UUID().uuidString).jsonl"))
     }
 

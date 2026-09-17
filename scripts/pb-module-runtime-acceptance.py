@@ -19,6 +19,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from external_env import ensure_external_environment
+
 PROTOCOL = "2025-06-18"
 SCOPE_TOOLS = ["scan", "ports_list", "ports_suggest", "mcp_list", "conflicts", "mcp_health", "daemons_list"]
 
@@ -45,8 +47,12 @@ def initialize_request(request_id: int = 1) -> dict[str, Any]:
 
 
 def env_for(home: Path, path: str) -> dict[str, str]:
-    return {"HOME": str(home), "PATH": path, "XDG_CONFIG_HOME": str(home / ".config"),
-            "XDG_DATA_HOME": str(home / ".local" / "share"), "XDG_CACHE_HOME": str(home / ".cache")}
+    env = {"HOME": str(home), "PATH": path, "XDG_CONFIG_HOME": str(home / ".config"),
+           "XDG_DATA_HOME": str(home / ".local" / "share"), "XDG_CACHE_HOME": str(home / ".cache")}
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        if value := os.environ.get(key):
+            env[key] = value
+    return env
 
 
 def run_brain(binary: str, profile: str, config: str, requests: list[dict[str, Any]], home: Path, path: str) -> list[dict[str, Any]]:
@@ -362,6 +368,7 @@ def held_lifecycle(binary: str, label: str, checks: list[str], args: list[str] |
 
 
 def main() -> int:
+    ensure_external_environment(__file__)
     parser = argparse.ArgumentParser()
     parser.add_argument("--brain", required=True)
     parser.add_argument("--operate", required=True)

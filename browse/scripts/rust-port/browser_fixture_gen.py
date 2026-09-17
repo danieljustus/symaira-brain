@@ -15,10 +15,25 @@ import os
 import platform
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
 from typing import Any
+
+
+def _ensure_external_environment() -> None:
+    if os.name != "posix" or sys.platform != "darwin" or os.environ.get("CI") or os.environ.get("SYMAIRA_EXTERNAL_ENV_READY") == "1":
+        return
+    wrapper = Path(__file__).resolve().parents[3] / "scripts" / "run-external-env.sh"
+    if not wrapper.is_file():
+        raise RuntimeError(f"missing external runner: {wrapper}")
+    env = os.environ.copy()
+    env["SYMAIRA_EXTERNAL_ENV_READY"] = "1"
+    os.execve("/bin/bash", ["/bin/bash", str(wrapper), sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]], env)
+
+
+_ensure_external_environment()
 
 ORACLE_COMMIT = "652453d1595fc302bd69c328e7da8a21dbee28b9"
 ROOT = Path(__file__).resolve().parents[2]

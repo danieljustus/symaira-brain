@@ -241,7 +241,39 @@ mod tests {
         use std::os::unix::net::UnixListener;
         use std::time::{Duration, Instant};
 
-        let dir = tempfile::tempdir_in("/tmp").expect("tempdir");
+        let local_macos = cfg!(target_os = "macos")
+            && std::env::var_os("CI").is_none_or(|value| value.is_empty());
+        let dir = match std::env::var_os("SYMAIRA_EXTERNAL_RUNTIME_ROOT") {
+            Some(root) => {
+                let root = PathBuf::from(root);
+                if local_macos {
+                    let volume = PathBuf::from("/Volumes/1TB_NVMe_SN850X");
+                    let volume = fs::canonicalize(&volume).expect("external runtime volume");
+                    let volume_dev = std::os::unix::fs::MetadataExt::dev(
+                        &fs::metadata(&volume).expect("external runtime volume metadata"),
+                    );
+                    let parent_dev = std::os::unix::fs::MetadataExt::dev(
+                        &fs::metadata(volume.parent().expect("external runtime volume parent"))
+                            .expect("external runtime volume parent metadata"),
+                    );
+                    assert_ne!(
+                        volume_dev, parent_dev,
+                        "external runtime volume is not mounted"
+                    );
+                    let root = fs::canonicalize(&root).expect("external runtime root");
+                    assert!(
+                        root.starts_with(volume),
+                        "external runtime root must be on NVMe"
+                    );
+                }
+                tempfile::tempdir_in(root)
+            }
+            None if local_macos => {
+                panic!("SYMAIRA_EXTERNAL_RUNTIME_ROOT is required on local macOS runs")
+            }
+            None => tempfile::tempdir(),
+        }
+        .expect("external runtime root must be an existing writable directory");
         let fifo = dir.path().join("audit.fifo");
         let status = std::process::Command::new("mkfifo")
             .arg(&fifo)

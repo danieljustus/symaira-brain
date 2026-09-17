@@ -18,10 +18,11 @@ final class PortServiceDescriptorTests: XCTestCase {
     /// by that deferred close. The opener validates each descriptor it just
     /// received, so a descriptor killed underneath it is detected.
     func testConcurrentOpensSurviveProbing() throws {
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent("portservice-fd-\(UUID().uuidString).txt")
+        let directory = try SymairaTestTemporary.directory("portservice-fd")
+        let file = directory
+            .appendingPathComponent("fixture.txt")
         try Data("symaira".utf8).write(to: file)
-        defer { try? FileManager.default.removeItem(at: file) }
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let corrupted = Corruption()
         let stop = Flag()
@@ -60,10 +61,11 @@ final class PortServiceDescriptorTests: XCTestCase {
 
     /// A descriptor held across many probes must stay valid and readable.
     func testProbingDoesNotDestroyUnrelatedDescriptors() throws {
-        let file = FileManager.default.temporaryDirectory
-            .appendingPathComponent("portservice-fd-\(UUID().uuidString).txt")
+        let directory = try SymairaTestTemporary.directory("portservice-fd")
+        let file = directory
+            .appendingPathComponent("fixture.txt")
         try Data("symaira".utf8).write(to: file)
-        defer { try? FileManager.default.removeItem(at: file) }
+        defer { try? FileManager.default.removeItem(at: directory) }
 
         let guarded = Darwin.open(file.path, O_RDONLY)
         try XCTSkipIf(guarded < 0, "could not open the fixture file")

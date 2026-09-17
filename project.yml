@@ -129,6 +129,9 @@ schemes:
         SymBrain: all
     run:
       config: Debug
+      environmentVariables:
+        CI: "$(CI)"
+        SYMAIRA_EXTERNAL_RUNTIME_ROOT: "$(SYMAIRA_EXTERNAL_RUNTIME_ROOT)"
     test:
       config: Debug
       targets:
@@ -138,6 +141,11 @@ schemes:
     build:
       targets:
         SymBrainCore: all
+    run:
+      config: Debug
+      environmentVariables:
+        CI: "$(CI)"
+        SYMAIRA_EXTERNAL_RUNTIME_ROOT: "$(SYMAIRA_EXTERNAL_RUNTIME_ROOT)"
     test:
       config: Debug
       targets:

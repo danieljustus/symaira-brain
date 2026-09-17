@@ -19,12 +19,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+from external_env import ensure_external_environment
 
 # Matches the protocolVersion symbrowse's own test suite exercises
 # (internal/mcp/server_test.go, TestZeroStdoutPollution).
@@ -49,6 +52,9 @@ def run_bounded(argv: list[str], payload: bytes, timeout: float) -> list[dict]:
         "XDG_DATA_HOME": str(Path(isolated_home) / ".local" / "share"),
         "XDG_CACHE_HOME": str(Path(isolated_home) / ".cache"),
     }
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        if value := os.environ.get(key):
+            isolated_env[key] = value
     try:
         completed = subprocess.run(
             argv,
@@ -171,6 +177,7 @@ class SmokeValidatorTests(unittest.TestCase):
 
 
 def main() -> int:
+    ensure_external_environment(__file__)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary", nargs="?", help="path to the symbrowse binary")
     parser.add_argument("--timeout", type=float, default=10.0)
