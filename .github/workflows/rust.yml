@@ -35,6 +35,14 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      - name: Cache Rust guard dependencies
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: rust-guard-parity-v1-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}
+
       - name: Workflow structural tests
         run: go test ./.github/tests -count=1
 

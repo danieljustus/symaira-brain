@@ -245,10 +245,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
+
+      - name: Cache Rust test dependencies
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: rust-audit-guard-v1-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}
 
       - name: Test symbrain-audit crate on native Windows
         run: cargo test -p symbrain-audit --locked
@@ -621,11 +629,19 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Resolve pinned Rust toolchain
         working-directory: browse
         run: rustup show active-toolchain
+
+      - name: Cache Browse Rust test dependencies
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: browse-daemon-v1-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('browse/rust-toolchain.toml') }}-lock-${{ hashFiles('browse/Cargo.lock') }}
 
       - name: Test Browse daemon platform support
         working-directory: browse
@@ -820,7 +836,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Download coverage artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
