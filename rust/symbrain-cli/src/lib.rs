@@ -208,7 +208,7 @@ pub fn run_in_process(
         "serve" => Some(mcp_cli::run_serve(rest, stderr)),
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
         "init" => Some(init_cli::run(rest, stdout, stderr)),
-        "harness" => Some(harness_cli::run(rest, stdout, stderr, format)),
+        "harness" => harness_cli::run(rest, stdout, stderr, format),
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
         "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),

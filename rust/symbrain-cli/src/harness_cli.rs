@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use symbrain_core::exit;
-use symbrain_core::output::OutputFormat;
+use symbrain_core::output::{self, OutputFormat};
 use symbrain_harness::list;
 
 const HARNESS_USAGE: &str = "symbrain harness — inspect configured AI harnesses
@@ -40,10 +40,10 @@ pub fn run(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> u8 {
+) -> Option<u8> {
     if args.is_empty() {
         let _ = write!(stderr, "{HARNESS_USAGE}");
-        return exit::USAGE;
+        return Some(exit::USAGE);
     }
 
     let verb = args[0].to_string_lossy();
@@ -52,13 +52,13 @@ pub fn run(
     match verb.as_ref() {
         "-h" | "--help" | "help" => {
             let _ = write!(stdout, "{HARNESS_USAGE}");
-            exit::OK
+            Some(exit::OK)
         }
         "list" => run_list(rest, stdout, stderr, format),
-        "health" => run_health(rest, stdout, stderr, format),
+        "health" => Some(run_health(rest, stdout, stderr, format)),
         _ => {
             let _ = write!(stderr, "{HARNESS_USAGE}");
-            exit::USAGE
+            Some(exit::USAGE)
         }
     }
 }
@@ -68,7 +68,7 @@ fn run_list(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> u8 {
+) -> Option<u8> {
     let mut project_dir: Option<PathBuf> = None;
     let mut i = 0;
     while i < args.len() {
@@ -88,45 +88,87 @@ fn run_list(
             continue;
         } else {
             let _ = writeln!(stderr, "symbrain harness list: unexpected argument {arg:?}");
-            return exit::USAGE;
+            return Some(exit::USAGE);
         }
         i += 1;
     }
 
     let inventory = list(project_dir.as_deref());
-
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&inventory).unwrap_or_default()
-            );
-        }
-        OutputFormat::Table => {
-            for h in &inventory.harnesses {
-                let _ = writeln!(stdout, "{}\t{}", h.name.as_str(), h.display_name);
-                let _ = writeln!(
-                    stdout,
-                    "  global: {} (exists: {}, servers: {})",
-                    h.global.path,
-                    h.global.exists,
-                    h.global.servers.len()
-                );
-                if let Some(p) = &h.project {
-                    let _ = writeln!(
-                        stdout,
-                        "  project: {} (exists: {}, servers: {})",
-                        p.path,
-                        p.exists,
-                        p.servers.len()
-                    );
-                }
-            }
-        }
+    if inventory.harnesses.iter().any(|harness| {
+        harness.global.error.is_some()
+            || harness
+                .project
+                .as_ref()
+                .is_some_and(|project| project.error.is_some())
+    }) {
+        return None;
     }
 
-    exit::OK
+    let result = match format {
+        OutputFormat::Json => output::render_json(&mut *stdout, &inventory),
+        OutputFormat::Table => render_inventory_table(&mut *stdout, &inventory),
+    };
+    if let Err(error) = result {
+        let _ = writeln!(stderr, "symbrain harness list: format output: {error}");
+        return Some(exit::GENERIC);
+    }
+
+    Some(exit::OK)
+}
+
+fn render_inventory_table(
+    stdout: &mut dyn Write,
+    inventory: &symbrain_harness::Inventory,
+) -> std::io::Result<()> {
+    for harness in &inventory.harnesses {
+        writeln!(
+            stdout,
+            "{}\t{}",
+            harness.name.as_str(),
+            harness.display_name
+        )?;
+        render_config_table(stdout, "  global", &harness.global)?;
+        if let Some(project) = &harness.project {
+            render_config_table(stdout, "  project", project)?;
+        }
+        writeln!(stdout)?;
+    }
+    Ok(())
+}
+
+fn render_config_table(
+    stdout: &mut dyn Write,
+    label: &str,
+    config: &symbrain_harness::ConfigInventory,
+) -> std::io::Result<()> {
+    let state = if config.error.is_some() {
+        "invalid"
+    } else if config.parsed {
+        "parsed"
+    } else if config.exists {
+        "unparsed"
+    } else {
+        "missing"
+    };
+    let servers = if config.servers.is_empty() {
+        "(none)".to_owned()
+    } else {
+        config
+            .servers
+            .iter()
+            .map(|server| format!("{}[{}]", server.name, server.transport))
+            .collect::<Vec<_>>()
+            .join(",")
+    };
+    writeln!(
+        stdout,
+        "{label}\t{}\t{state}\tservers={servers}",
+        config.path
+    )?;
+    if let Some(error) = &config.error {
+        writeln!(stdout, "    error: {error}")?;
+    }
+    Ok(())
 }
 
 #[allow(clippy::too_many_lines)]
