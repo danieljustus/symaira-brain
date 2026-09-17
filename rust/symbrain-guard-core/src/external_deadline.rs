@@ -80,7 +80,16 @@ impl Parser<'_> {
     }
 }
 
-pub(super) fn parse(value: &[u8]) -> Result<DateTime<FixedOffset>, String> {
+/// Parses one Go `time.Time` JSON string payload.
+///
+/// # Errors
+///
+/// Returns Go-compatible parse diagnostics when `value` is not RFC3339.
+///
+/// # Panics
+///
+/// Panics only if an internal parser invariant is violated.
+pub fn parse(value: &[u8]) -> Result<DateTime<FixedOffset>, String> {
     let mut p = Parser { value, rest: value };
     let year = p.number("2006", 4, 4)?;
     p.literal("-")?;

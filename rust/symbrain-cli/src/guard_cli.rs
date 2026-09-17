@@ -13,8 +13,13 @@ use symbrain_guard_core::external_decision::{
 };
 use symbrain_guard_core::go_json::to_go_json_vec;
 
+#[path = "guard_grants.rs"]
+mod guard_grants;
+#[path = "guard_scan.rs"]
+mod guard_scan;
+
 /// Runs `symbrain guard`.
-pub fn run(args: &[OsString], stdout: &mut dyn Write, _stderr: &mut dyn Write) -> Option<u8> {
+pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
     if args.is_empty() {
         return Some(write_help(stdout));
     }
@@ -49,6 +54,8 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, _stderr: &mut dyn Write) -
                 chrono::Utc::now().fixed_offset(),
             ))
         }
+        "scan" => Some(guard_scan::run(&args[1..], stdout, stderr)),
+        "grants" => Some(guard_grants::run(&args[1..], stdout, stderr)),
         _ => None,
     }
 }
