@@ -5,11 +5,12 @@ use std::process::{Command, Output};
 use tempfile::TempDir;
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
-    let home = root.path().join("home");
-    let config = root.path().join("config");
-    let data = root.path().join("data");
-    let cache = root.path().join("cache");
-    let project = root.path().join("project");
+    let root = root.path().canonicalize().unwrap();
+    let home = root.join("home");
+    let config = root.join("config");
+    let data = root.join("data");
+    let cache = root.join("cache");
+    let project = root.join("project");
     for path in [&home, &config, &data, &cache, &project] {
         std::fs::create_dir_all(path).unwrap();
     }
@@ -70,8 +71,9 @@ fn table_matches_go_layout_for_populated_and_missing_configs() {
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
     let stdout = String::from_utf8(output.stdout).unwrap();
-    let home = root.path().join("home");
-    let config = root.path().join("config");
+    let root = root.path().canonicalize().unwrap();
+    let home = root.join("home");
+    let config = root.join("config");
     let claude_desktop_config = if cfg!(target_os = "macos") {
         home.join("Library/Application Support/Claude/claude_desktop_config.json")
     } else if cfg!(target_os = "windows") {
@@ -110,6 +112,7 @@ fn table_reports_parsed_global_and_project_configs() {
         br#"{"mcpServers":{"local":{"command":"local-cmd"}}}"#,
     )
     .unwrap();
+    let project = project.canonicalize().unwrap();
     let output = run(
         &root,
         &["harness", "list", "--project", project.to_str().unwrap()],
@@ -180,7 +183,12 @@ fn malformed_inventory_falls_back_before_native_output() {
             "list",
             "--json",
             "--project",
-            root.path().join("project").to_str().unwrap(),
+            root.path()
+                .join("project")
+                .canonicalize()
+                .unwrap()
+                .to_str()
+                .unwrap(),
         ],
     );
     project_command.env("SYMBRAIN_GO_BINARY", &fallback);
