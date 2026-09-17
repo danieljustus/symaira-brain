@@ -14,10 +14,11 @@ EXTERNAL_GO_ARTIFACT_ROOT := target/go
 EXTERNAL_CARGO_TARGET_DIR := target
 ifeq ($(strip $(CI)),)
 ifeq ($(shell uname -s),Darwin)
+EXTERNAL_WORKTREE_KEY := $(shell printf '%s' '$(CURDIR)' | shasum -a 256 | cut -c1-16)
 SYMAIRA_EXTERNAL_BASE := $(or $(SYMAIRA_EXTERNAL_BASE),/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain)
 EXTERNAL_ARTIFACT_ROOT := $(SYMAIRA_EXTERNAL_BASE)/artifacts
 EXTERNAL_GO_ARTIFACT_ROOT := $(EXTERNAL_ARTIFACT_ROOT)/go
-EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target
+EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target/$(EXTERNAL_WORKTREE_KEY)
 endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh

@@ -42,7 +42,7 @@ external_env() {
     return 0
   fi
 
-  local base mounted runtime_root evidence repair_output
+  local base mounted runtime_root evidence repair_output worktree_root worktree_key
   base=${SYMAIRA_EXTERNAL_BASE:-$SYMAIRA_NVME_ROOT/Dev/Symaira_Dev/builds/symaira-brain}
   runtime_root=${SYMAIRA_EXTERNAL_RUNTIME_ROOT:-$SYMAIRA_NVME_ROOT/tmp}
   mounted=$(df -P "$SYMAIRA_NVME_ROOT" 2>/dev/null | awk 'NR == 2 {print $NF}')
@@ -60,6 +60,8 @@ external_env() {
     echo "SYMAIRA_EXTERNAL_BASE must resolve under $SYMAIRA_NVME_ROOT" >&2
     return 2
   fi
+  worktree_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)
+  worktree_key=$(printf '%s' "$worktree_root" | shasum -a 256 | cut -c1-16)
   runtime_root=$(cd "$runtime_root" && pwd -P)
   if [[ "$runtime_root" != "$SYMAIRA_NVME_ROOT"/* ]]; then
     echo "SYMAIRA_EXTERNAL_RUNTIME_ROOT must resolve under $SYMAIRA_NVME_ROOT" >&2
@@ -75,7 +77,9 @@ external_env() {
   export GOTMPDIR="$base/go-tmp" GOPATH="$base/gopath"
   export GOTELEMETRYDIR="$base/go-telemetry" GOCACHE="$base/go-cache"
   export GOMODCACHE="$base/go-mod-cache" CARGO_HOME="$base/cargo-home"
-  export CARGO_TARGET_DIR="$base/cargo-target"
+  # Cargo test binaries must not be shared across linked worktrees: the same
+  # package/version can otherwise resolve to another checkout's executable.
+  export CARGO_TARGET_DIR="$base/cargo-target/$worktree_key"
   export RUSTUP_NO_UPDATE_CHECK=1
   export PYTHONPYCACHEPREFIX="$base/python-cache"
   export SYMAIRA_EXTERNAL_RUNTIME_ROOT="$runtime_root"
