@@ -358,7 +358,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
     );
     assert_eq!(
         run_in_process(&[OsString::from("harness")], &mut stdout, &mut stderr),
-        None
+        Some(exit::USAGE)
     );
     assert_eq!(
         run_in_process(

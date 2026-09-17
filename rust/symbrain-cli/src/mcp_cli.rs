@@ -260,20 +260,8 @@ fn resolve_profile(args: &McpArgs) -> Result<Profile, symbrain_policy::ProfileEr
     }
 }
 
-fn check_embedded_handlers(profile: &Profile, stderr: &mut dyn Write) -> bool {
-    let blocked = ["skills"]
-        .into_iter()
-        .filter(|alias| profile.server(alias).enabled)
-        .collect::<Vec<_>>();
-    if blocked.is_empty() {
-        return true;
-    }
-    let names = blocked.join(", ");
-    let _ = writeln!(
-        stderr,
-        "symbrain mcp: blocked profile: native embedded handlers are not ported for {names}; disable these servers until their native handlers land (no Go fallback)"
-    );
-    false
+fn check_embedded_handlers(_profile: &Profile, _stderr: &mut dyn Write) -> bool {
+    true
 }
 
 fn build_backends(

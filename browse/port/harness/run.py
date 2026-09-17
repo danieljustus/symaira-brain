@@ -295,9 +295,11 @@ FETCH_CONTROL_CASE_IDS = (
 ALL_SUITES = (
     "engine-neutral",
     "fetch-control",
+    "fetch-fingerprints",
     "fetch-render",
     "workflows",
     "daemon",
+    "chrome-spike",
     "chrome-full",
     "safari",
     "browser-transport",
@@ -308,6 +310,28 @@ ALL_SUITES = (
 def run_all_suites(root: Path, env: dict[str, str], args: argparse.Namespace) -> None:
     for suite in ALL_SUITES:
         command = [sys.executable, str(Path(__file__).resolve()), "--suite", suite]
+        if suite == "fetch-fingerprints":
+            rust_binary = args.rust or (
+                Path(env["SYMBROWSE_RUST_BINARY"])
+                if env.get("SYMBROWSE_RUST_BINARY")
+                else None
+            )
+            compat_binary = args.compat or (
+                Path(env["SYMBROWSE_COMPAT_BINARY"])
+                if env.get("SYMBROWSE_COMPAT_BINARY")
+                else None
+            )
+            command.extend([
+                "--capture", str(args.capture.resolve()),
+                "--trusted-sha256", args.trusted_sha256,
+            ])
+            if rust_binary is not None and compat_binary is not None:
+                command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
+            if args.historical_oracle:
+                command.extend(["--historical-oracle", str(args.historical_oracle.resolve())])
+            if args.report:
+                command.extend(["--report", str(args.report.resolve())])
+            command.extend(["--go", args.go, "--repo-root", str(root.parent.resolve())])
         if args.comparison != "bytes" and suite == "fetch-render":
             command.extend(["--comparison", args.comparison])
         if args.native_targets and suite in {"chrome-full", "safari"}:
@@ -328,6 +352,13 @@ def main() -> int:
     parser.add_argument("--repeat", type=int, default=50)
     parser.add_argument("--comparison", choices=("bytes", "json-semantic", "filesystem"), default="bytes")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--capture", type=Path)
+    parser.add_argument("--trusted-sha256")
+    parser.add_argument("--historical-oracle", type=Path)
+    parser.add_argument("--rust", type=Path, help="retained Rust candidate binary for FETCH-002")
+    parser.add_argument("--compat", type=Path, help="retained Go compat-sidecar binary for FETCH-002")
+    parser.add_argument("--report", type=Path, help="FETCH-002 comparison report path")
+    parser.add_argument("--go", default="go")
     parser.add_argument("--native", choices=("macos",), default=None)
     parser.add_argument(
         "--native-targets",
@@ -344,6 +375,8 @@ def main() -> int:
     env = os.environ.copy()
     env.update({"CGO_ENABLED": "0", "GOTOOLCHAIN": "go1.26.6"})
     if args.suite == "all":
+        if not args.capture or not args.trusted_sha256:
+            parser.error("--suite all needs FETCH-002 --capture and --trusted-sha256 artifacts")
         run_all_suites(root, env, args)
         print("all harness suites passed")
         return 0
@@ -377,6 +410,29 @@ def main() -> int:
             "browser-missing-engine", "static-engine-conflict", "unknown-mode", "unknown-engine",
         }
         commands = [["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"]]
+    elif args.suite == "fetch-fingerprints":
+        # The capture, historical oracle and both binaries are retained artifacts.
+        # This suite never builds or self-approves any of them.
+        if not args.capture or not args.trusted_sha256:
+            parser.error("fetch-fingerprints needs --capture and an independently reviewed --trusted-sha256")
+        rust_binary = args.rust or (Path(os.environ["SYMBROWSE_RUST_BINARY"]) if os.environ.get("SYMBROWSE_RUST_BINARY") else None)
+        compat_binary = args.compat or (Path(os.environ["SYMBROWSE_COMPAT_BINARY"]) if os.environ.get("SYMBROWSE_COMPAT_BINARY") else None)
+        if (rust_binary is None) != (compat_binary is None):
+            parser.error("fetch-fingerprints needs Rust and Go compat artifacts together when supplied")
+        oracle = args.historical_oracle or (root / "docs/rust-port/rust009-tls-results.json")
+        report = args.report or (root / "target/fetch002-next/fetch002-e2e.json")
+        command = [sys.executable, "port/harness/fetch_fingerprints_validate.py",
+             "--capture", str(args.capture.resolve()),
+             "--trusted-sha256", args.trusted_sha256,
+             "--historical-oracle", str(oracle.resolve()),
+             "--report", str(report.resolve()),
+             "--repo-root", str(root.parent.resolve()),
+             "--go", args.go]
+        if rust_binary is not None and compat_binary is not None:
+            command.extend(["--rust", str(rust_binary.resolve()), "--compat", str(compat_binary.resolve())])
+        run(command, root, env)
+        print("FETCH-002 diagnostics completed; acceptance remains blocked")
+        return 0
     elif args.suite == "compat-sidecar":
         fixture = json.loads((root / "port/harness/cases/compat-sidecar.json").read_text())
         assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
@@ -388,6 +444,10 @@ def main() -> int:
         commands = [
             ["go", "run", "./scripts/rust-port/cmd/workflowgen", "--check"],
             ["cargo", "test", "-p", "symbrowse-core", "--test", "workflows_contract", "--locked"],
+        ]
+    elif args.suite == "chrome-spike":
+        commands = [
+            ["cargo", "test", "-p", "symbrowse-engine-chrome", "--test", "spike", "--locked"],
         ]
     elif args.suite in {"chrome-full", "safari"}:
         suites = (args.suite,)

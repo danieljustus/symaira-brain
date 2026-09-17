@@ -202,6 +202,13 @@ impl Gateway {
                 symbrain_audit::Exposure::default(),
             );
         }
+        if name.starts_with("skills_") {
+            return (
+                "skills".to_string(),
+                name.to_string(),
+                symbrain_audit::Exposure::default(),
+            );
+        }
         (
             "unknown".to_string(),
             name.to_string(),

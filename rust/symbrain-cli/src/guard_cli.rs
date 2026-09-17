@@ -13,26 +13,44 @@ use symbrain_guard_core::external_decision::{
 };
 use symbrain_guard_core::go_json::to_go_json_vec;
 
-/// Runs `symbrain guard` and keeps every verb except `decide` on the Go fallback.
+/// Runs `symbrain guard`.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, _stderr: &mut dyn Write) -> Option<u8> {
-    let verb = args.first().map(|arg| arg.as_os_str().to_string_lossy())?;
-    if verb != "decide" {
-        return None;
-    }
-    let rest = &args[1..];
-    if rest.iter().any(|arg| arg == "--help" || arg == "-h") {
+    if args.is_empty() {
         return Some(write_help(stdout));
     }
-    // The pinned Go Run checks help and otherwise ignores all arguments.
-
-    let stdin = io::stdin();
-    let mut input = stdin.lock();
-    Some(run_at_path(
-        &mut input,
-        stdout,
-        audit_path(),
-        chrono::Utc::now().fixed_offset(),
-    ))
+    let verb = args.first().map(|arg| arg.as_os_str().to_string_lossy())?;
+    match verb.as_ref() {
+        "help" | "--help" | "-h" => Some(write_help(stdout)),
+        "version" => {
+            let info =
+                symbrain_core::version::VersionInfo::new("symguard", env!("CARGO_PKG_VERSION"));
+            if args[1..].iter().any(|arg| arg == "--json") {
+                let _ = writeln!(
+                    stdout,
+                    "{}",
+                    serde_json::to_string_pretty(&info).unwrap_or_default()
+                );
+            } else {
+                let _ = writeln!(stdout, "symguard {}", info.version);
+            }
+            Some(exit::OK)
+        }
+        "decide" => {
+            let rest = &args[1..];
+            if rest.iter().any(|arg| arg == "--help" || arg == "-h") {
+                return Some(write_help(stdout));
+            }
+            let stdin = io::stdin();
+            let mut input = stdin.lock();
+            Some(run_at_path(
+                &mut input,
+                stdout,
+                audit_path(),
+                chrono::Utc::now().fixed_offset(),
+            ))
+        }
+        _ => None,
+    }
 }
 
 /// Executes the production decide boundary with explicit clock and audit path.

@@ -269,6 +269,16 @@ impl Store {
         )? == 1)
     }
 
+    /// Deletes a memory by ID.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when SQLite access fails.
+    pub fn delete(&self, id: &str) -> Result<bool, StoreError> {
+        let conn = self.lock()?;
+        let _ = conn.execute("DELETE FROM memory_entities WHERE memory_id=?", [id]);
+        Ok(conn.execute("DELETE FROM memories WHERE id=?", [id])? > 0)
+    }
+
     /// # Errors
     /// Returns a `StoreError` when validation or the SQLite query fails.
     pub fn activity_search(&self, options: &ActivitySearch) -> Result<ActivityPage, StoreError> {
