@@ -563,6 +563,26 @@ jobs:
           python3 scripts/browse-mcp-smoke.py "$RUNNER_TEMP/symbrowse-brain-check" --timeout 10
           python3 scripts/browse-mcp-smoke.py --self-test
 
+  # Exercise Browse's Windows named-pipe daemon tests on a native runner.
+  browse-windows-daemon:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    timeout-minutes: 20
+    runs-on: windows-2025
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve pinned Rust toolchain
+        working-directory: browse
+        run: rustup show active-toolchain
+
+      - name: Test Browse daemon platform support
+        working-directory: browse
+        run: cargo test -p symbrowse-daemon --test platform --locked
+
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only
   # at release time (precedent: v0.5.1 GUI release-asset failure, #212,
