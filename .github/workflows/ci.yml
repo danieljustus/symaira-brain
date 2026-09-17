@@ -119,9 +119,11 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
             ~/.cargo/bin/cargo-audit
             ~/.cargo/bin/cargo-deny
-          key: rust-quality-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
+          key: rust-quality-install-meta-v2-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
 
       - name: Install pinned Rust audit tools
         run: |
@@ -201,9 +203,11 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
             ~/.cargo/bin/cargo-audit
             ~/.cargo/bin/cargo-deny
-          key: rust-quality-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
+          key: rust-quality-install-meta-v2-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
 
       - name: Install pinned Rust audit tools
         run: |
