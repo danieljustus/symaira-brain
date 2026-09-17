@@ -126,9 +126,17 @@ jobs:
           key: rust-quality-install-meta-v2-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
 
       - name: Install pinned Rust audit tools
+        shell: sh
         run: |
-          cargo install cargo-audit --version 0.22.2 --locked
-          cargo install cargo-deny --version 0.20.2 --locked
+          set -eu
+          audit_version="$(cargo-audit --version 2>/dev/null || true)"
+          if [ "$audit_version" != "cargo-audit 0.22.2" ]; then
+            cargo install cargo-audit --version 0.22.2 --locked
+          fi
+          deny_version="$(cargo-deny --version 2>/dev/null || true)"
+          if [ "$deny_version" != "cargo-deny 0.20.2" ]; then
+            cargo install cargo-deny --version 0.20.2 --locked
+          fi
 
       - name: Rust quality and Go parity gates
         run: make rust-check parity-smoke
@@ -210,9 +218,17 @@ jobs:
           key: rust-quality-install-meta-v2-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
 
       - name: Install pinned Rust audit tools
+        shell: sh
         run: |
-          cargo install cargo-audit --version 0.22.2 --locked
-          cargo install cargo-deny --version 0.20.2 --locked
+          set -eu
+          audit_version="$(cargo-audit --version 2>/dev/null || true)"
+          if [ "$audit_version" != "cargo-audit 0.22.2" ]; then
+            cargo install cargo-audit --version 0.22.2 --locked
+          fi
+          deny_version="$(cargo-deny --version 2>/dev/null || true)"
+          if [ "$deny_version" != "cargo-deny 0.20.2" ]; then
+            cargo install cargo-deny --version 0.20.2 --locked
+          fi
 
       - name: Rust quality and Go parity gates on macOS
         run: make rust-check parity-smoke
