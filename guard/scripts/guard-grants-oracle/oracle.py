@@ -11,10 +11,14 @@ from pathlib import Path
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from external_env import ensure_external_environment as ensure_shared_external_environment
+
 FIXTURE = HERE / "fixture.json"
 PINNED_COMMIT_SHA = "27a5e5398ee46a0edbf05017eb6e2e3f78c2118c"
 GO_SOURCE_PATHS = (
@@ -35,8 +39,9 @@ def sha256(data: bytes) -> str:
 
 
 def ensure_external_environment() -> None:
-    if os.uname().sysname == "Darwin" and os.environ.get("SYMAIRA_EXTERNAL_ENV_READY") != "1":
-        raise RuntimeError("invoke through bash scripts/run-external-env.sh")
+    ensure_shared_external_environment(__file__)
+
+
 def git_show(path: str) -> bytes:
     return subprocess.check_output(["git", "show", f"{PINNED_COMMIT_SHA}:{path}"], cwd=ROOT)
 

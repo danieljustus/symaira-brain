@@ -7,8 +7,12 @@ import base64
 import json
 import os
 from pathlib import Path
-import platform
+import sys
 import tempfile
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts"))
+from external_env import ensure_external_environment
 
 import oracle
 
@@ -82,8 +86,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("binary", type=Path, help="path to the native symbrain binary")
     args = parser.parse_args()
-    if platform.system() == "Darwin" and os.environ.get("SYMAIRA_EXTERNAL_ENV_READY") != "1":
-        raise RuntimeError("invoke through bash scripts/run-external-env.sh")
+    ensure_external_environment(__file__)
     binary = args.binary.expanduser().resolve(strict=True)
     if not binary.is_file() or not os.access(binary, os.X_OK):
         raise RuntimeError(f"native binary is not executable: {binary}")

@@ -12,11 +12,15 @@ import pty
 import select
 import shutil
 import subprocess
+import sys
 import tempfile
 import tty
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from external_env import ensure_external_environment as ensure_shared_external_environment
+
 FIXTURE = HERE / "fixture.json"
 PINNED_COMMIT_SHA = "51af390ad8c320d5b06cab55025a963c0c290e81"
 GO_SOURCE_PATHS = (
@@ -266,8 +270,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=("write", "check"))
     args = parser.parse_args()
-    if os.uname().sysname == "Darwin" and os.environ.get("SYMAIRA_EXTERNAL_ENV_READY") != "1":
-        raise RuntimeError("invoke through bash scripts/run-external-env.sh")
+    ensure_shared_external_environment(__file__)
     if args.action == "check":
         current = json.loads(FIXTURE.read_text(encoding="utf-8"))
         verify_binding(current)
