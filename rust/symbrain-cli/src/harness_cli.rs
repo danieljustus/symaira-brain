@@ -2,9 +2,11 @@
 
 use std::ffi::OsString;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+use std::time::Duration;
 
 use serde::Serialize;
+use symbrain_broker::{Client, Options};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_harness::list;
@@ -31,7 +33,7 @@ pub struct HarnessHealthEntry {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct HarnessHealthReport {
-    pub servers: Vec<HarnessHealthEntry>,
+    pub servers: Option<Vec<HarnessHealthEntry>>,
 }
 
 /// Runs `symbrain harness`.
@@ -55,7 +57,7 @@ pub fn run(
             Some(exit::OK)
         }
         "list" => run_list(rest, stdout, stderr, format),
-        "health" => Some(run_health(rest, stdout, stderr, format)),
+        "health" => run_health(rest, stdout, stderr, format),
         _ => {
             let _ = write!(stderr, "{HARNESS_USAGE}");
             Some(exit::USAGE)
@@ -177,7 +179,7 @@ fn run_health(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> u8 {
+) -> Option<u8> {
     let mut harness_name: Option<String> = None;
     let mut project_dir: Option<PathBuf> = None;
 
@@ -185,42 +187,39 @@ fn run_health(
     while i < args.len() {
         let arg = args[i].to_string_lossy();
         if arg == "-harness" || arg == "--harness" {
-            if i + 1 < args.len() {
-                harness_name = Some(args[i + 1].to_string_lossy().into_owned());
-                i += 2;
-                continue;
-            }
+            let value = args.get(i + 1)?;
+            harness_name = Some(value.to_string_lossy().into_owned());
+            i += 2;
         } else if let Some(val) = arg
             .strip_prefix("-harness=")
             .or_else(|| arg.strip_prefix("--harness="))
         {
             harness_name = Some(val.to_string());
             i += 1;
-            continue;
         } else if arg == "-project" || arg == "--project" {
-            if i + 1 < args.len() {
-                project_dir = Some(PathBuf::from(&args[i + 1]));
-                i += 2;
-                continue;
-            }
-        } else if let Some(val) = arg
-            .strip_prefix("-project=")
-            .or_else(|| arg.strip_prefix("--project="))
-        {
+            let value = args.get(i + 1)?;
+            project_dir = Some(PathBuf::from(value));
+            i += 2;
+        } else {
+            let val = arg
+                .strip_prefix("-project=")
+                .or_else(|| arg.strip_prefix("--project="))?;
             project_dir = Some(PathBuf::from(val));
             i += 1;
-            continue;
-        } else {
-            let _ = writeln!(
-                stderr,
-                "symbrain harness health: unexpected argument {arg:?}"
-            );
-            return exit::USAGE;
         }
-        i += 1;
     }
 
     let inventory = list(project_dir.as_deref());
+    if inventory.harnesses.iter().any(|harness| {
+        harness.global.error.is_some()
+            || harness
+                .project
+                .as_ref()
+                .is_some_and(|project| project.error.is_some())
+    }) {
+        return None;
+    }
+
     let mut entries = Vec::new();
 
     for h in &inventory.harnesses {
@@ -243,52 +242,71 @@ fn run_health(
                         error: format!("not probed: {} transport is not stdio", s.transport),
                     });
                 } else {
-                    let healthy = Path::new(&s.command).exists()
-                        || symbrain_broker::discover(&s.command, "").is_ok();
-                    let err = if healthy {
-                        String::new()
-                    } else {
-                        format!("command not found: {}", s.command)
-                    };
+                    let path = symbrain_broker::discover(&s.command, "").ok()?;
+                    let client = Client::spawn(
+                        &path,
+                        Options {
+                            args: s.args.clone(),
+                            env: None,
+                            capture_stderr: true,
+                        },
+                    )
+                    .ok()?;
+                    client.initialize(Duration::from_secs(5)).ok()?;
                     entries.push(HarnessHealthEntry {
                         harness: h.name.as_str().to_string(),
                         config: cfg.path.clone(),
                         server: s.name.clone(),
                         transport: s.transport.clone(),
-                        healthy,
-                        error: err,
+                        healthy: true,
+                        error: String::new(),
                     });
                 }
             }
         }
     }
 
-    let report = HarnessHealthReport { servers: entries };
+    entries.sort_by(|left, right| {
+        (
+            left.harness.as_str(),
+            left.server.as_str(),
+            left.config.as_str(),
+        )
+            .cmp(&(
+                right.harness.as_str(),
+                right.server.as_str(),
+                right.config.as_str(),
+            ))
+    });
+    let report = HarnessHealthReport {
+        servers: (!entries.is_empty()).then_some(entries),
+    };
 
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&report).unwrap_or_default()
-            );
-        }
-        OutputFormat::Table => {
-            if report.servers.is_empty() {
-                let _ = writeln!(stdout, "No configured MCP servers found.");
+    let result = output::render(&mut *stdout, format, &report, |w| {
+        let Some(servers) = report.servers.as_ref() else {
+            return writeln!(w, "no MCP servers found");
+        };
+        for server in servers {
+            if server.healthy {
+                writeln!(
+                    w,
+                    "  ✓  {:<12} {:<14} {} (stdio)",
+                    server.harness, server.server, server.config
+                )?;
             } else {
-                let _ = writeln!(stdout, "HARNESS\tSERVER\tHEALTHY\tTRANSPORT\tDETAIL");
-                for s in &report.servers {
-                    let detail = if s.error.is_empty() { "-" } else { &s.error };
-                    let _ = writeln!(
-                        stdout,
-                        "{}\t{}\t{}\t{}\t{}",
-                        s.harness, s.server, s.healthy, s.transport, detail
-                    );
-                }
+                writeln!(
+                    w,
+                    "  ✗  {:<12} {:<14} {}: {}",
+                    server.harness, server.server, server.config, server.error
+                )?;
             }
         }
+        Ok(())
+    });
+    if let Err(error) = result {
+        let _ = writeln!(stderr, "symbrain harness health: format output: {error}");
+        return Some(exit::GENERIC);
     }
 
-    exit::OK
+    Some(exit::OK)
 }
