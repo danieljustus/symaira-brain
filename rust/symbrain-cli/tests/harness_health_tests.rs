@@ -1,7 +1,9 @@
 #![cfg(unix)]
 
 use std::os::unix::fs::PermissionsExt;
-use std::process::{Command, Output};
+use std::process::{Command, Output, Stdio};
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 use serde_json::json;
 use tempfile::TempDir;
@@ -20,12 +22,63 @@ for line in sys.stdin:
         }}), flush=True)
 "#;
 
+const DELAYED_MCP: &[u8] = br#"#!/usr/bin/python3
+import json
+import sys
+import time
+
+delay = float(sys.argv[1])
+for line in sys.stdin:
+    request = json.loads(line)
+    if request.get("id") is not None and request.get("method") == "initialize":
+        time.sleep(delay)
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "serverInfo": {"name": "fake", "version": "1"}
+        }}), flush=True)
+"#;
+
+const INVALID_MCP: &[u8] = br#"#!/usr/bin/python3
+import json
+import sys
+
+for line in sys.stdin:
+    request = json.loads(line)
+    if request.get("id") is not None and request.get("method") == "initialize":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
+            "protocolVersion": "wrong-version",
+            "capabilities": {},
+            "serverInfo": {"name": "fake", "version": "1"}
+        }}), flush=True)
+"#;
+
+const PERSISTENT_MCP: &[u8] = br#"#!/usr/bin/python3
+import json
+import os
+import sys
+import time
+
+with open(sys.argv[1], "w") as pid:
+    pid.write(str(os.getpid()))
+for line in sys.stdin:
+    request = json.loads(line)
+    if request.get("id") is not None and request.get("method") == "initialize":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "serverInfo": {"name": "fake", "version": "1"}
+        }}), flush=True)
+        time.sleep(30)
+"#;
+
 fn command(root: &TempDir, args: &[&str]) -> Command {
-    let home = root.path().join("home");
-    let config = root.path().join("config");
-    let data = root.path().join("data");
-    let cache = root.path().join("cache");
-    let project = root.path().join("project");
+    let root = root.path().canonicalize().unwrap();
+    let home = root.join("home");
+    let config = root.join("config");
+    let data = root.join("data");
+    let cache = root.join("cache");
+    let project = root.join("project");
     for path in [&home, &config, &data, &cache, &project] {
         std::fs::create_dir_all(path).unwrap();
     }
@@ -115,6 +168,34 @@ fn native_health_probes_stdio_and_skips_other_transports() {
 }
 
 #[test]
+fn multiple_native_probes_run_in_parallel_and_are_sorted() {
+    let root = TempDir::new().unwrap();
+    let fake = executable(&root, "delayed-mcp.py", DELAYED_MCP);
+    write_servers(
+        &root,
+        &json!({
+            "zeta": {"command": fake, "args": ["1"]},
+            "alpha": {"command": fake, "args": ["1"]}
+        }),
+    );
+
+    let started = Instant::now();
+    let output = run(&root, &["harness", "health", "--json"]);
+    let elapsed = started.elapsed();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(
+        elapsed < Duration::from_secs(2),
+        "probes were serialized: {elapsed:?}"
+    );
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let servers = report["servers"].as_array().unwrap();
+    assert_eq!(servers.len(), 2);
+    assert_eq!(servers[0]["server"], "alpha");
+    assert_eq!(servers[1]["server"], "zeta");
+    assert!(servers.iter().all(|server| server["healthy"] == true));
+}
+
+#[test]
 fn empty_health_matches_go_shapes() {
     let root = TempDir::new().unwrap();
 
@@ -143,6 +224,27 @@ fn probe_failure_falls_back_without_native_output() {
         .output()
         .unwrap();
     assert_eq!(output.status.code(), Some(17));
+    assert_eq!(output.stdout, b"fallback-stdout\n");
+    assert_eq!(output.stderr, b"fallback-stderr\n");
+}
+
+#[test]
+fn protocol_failure_falls_back_without_native_output() {
+    let root = TempDir::new().unwrap();
+    let fake = executable(&root, "invalid-mcp.py", INVALID_MCP);
+    write_servers(&root, &json!({"broken": {"command": fake}}));
+    let fallback = executable(
+        &root,
+        "go-fallback",
+        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 29\n",
+    );
+
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    let output = command
+        .env("SYMBRAIN_GO_BINARY", fallback)
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(29));
     assert_eq!(output.stdout, b"fallback-stdout\n");
     assert_eq!(output.stderr, b"fallback-stderr\n");
 }
@@ -192,4 +294,33 @@ fn malformed_config_falls_back_without_native_output() {
     assert_eq!(output.status.code(), Some(19));
     assert_eq!(output.stdout, b"fallback-stdout\n");
     assert_eq!(output.stderr, b"fallback-stderr\n");
+}
+
+#[test]
+fn successful_probe_reaps_persistent_child() {
+    let root = TempDir::new().unwrap();
+    let pid_path = root.path().join("child.pid");
+    let fake = executable(&root, "persistent-mcp.py", PERSISTENT_MCP);
+    write_servers(
+        &root,
+        &json!({"persistent": {"command": fake, "args": [pid_path]}}),
+    );
+
+    let output = run(&root, &["harness", "health", "--json"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let pid = std::fs::read_to_string(&pid_path).unwrap();
+    let pid = pid.trim();
+    for _ in 0..20 {
+        let status = Command::new("/bin/kill")
+            .args(["-0", pid])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .unwrap();
+        if !status.success() {
+            return;
+        }
+        sleep(Duration::from_millis(50));
+    }
+    panic!("persistent MCP child {pid} was not reaped");
 }

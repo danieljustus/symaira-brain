@@ -220,23 +220,8 @@ fn run_health(
         return None;
     }
 
-    let probe_count = inventory
-        .harnesses
-        .iter()
-        .filter(|harness| {
-            harness_name
-                .as_deref()
-                .is_none_or(|name| harness.name.as_str() == name)
-        })
-        .flat_map(|harness| std::iter::once(&harness.global).chain(harness.project.as_ref()))
-        .flat_map(|config| config.servers.iter())
-        .filter(|server| server.transport == "stdio" && !server.command.is_empty())
-        .count();
-    if probe_count > 1 {
-        return None;
-    }
-
     let mut entries = Vec::new();
+    let mut probes = Vec::new();
 
     for h in &inventory.harnesses {
         if let Some(ref target_name) = harness_name
@@ -258,29 +243,30 @@ fn run_health(
                         error: format!("not probed: {} transport is not stdio", s.transport),
                     });
                 } else {
-                    let path = symbrain_broker::discover(&s.command, "").ok()?;
-                    let client = Client::spawn(
-                        &path,
-                        Options {
-                            args: s.args.clone(),
-                            env: None,
-                            capture_stderr: true,
-                        },
-                    )
-                    .ok()?;
-                    client.initialize(Duration::from_secs(5)).ok()?;
-                    entries.push(HarnessHealthEntry {
+                    probes.push(HealthProbe {
                         harness: h.name.as_str().to_string(),
                         config: cfg.path.clone(),
                         server: s.name.clone(),
                         transport: s.transport.clone(),
-                        healthy: true,
-                        error: String::new(),
+                        command: s.command.clone(),
+                        args: s.args.clone(),
                     });
                 }
             }
         }
     }
+
+    let probe_results = std::thread::scope(|scope| {
+        let handles = probes
+            .into_iter()
+            .map(|probe| scope.spawn(move || probe_health(probe)))
+            .collect::<Vec<_>>();
+        handles
+            .into_iter()
+            .map(|handle| handle.join().ok().and_then(Result::ok))
+            .collect::<Option<Vec<_>>>()
+    });
+    entries.extend(probe_results?);
 
     entries.sort_by(|left, right| {
         (
@@ -325,4 +311,35 @@ fn run_health(
     }
 
     Some(exit::OK)
+}
+
+struct HealthProbe {
+    harness: String,
+    config: String,
+    server: String,
+    transport: String,
+    command: String,
+    args: Vec<String>,
+}
+
+fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
+    let path = symbrain_broker::discover(&probe.command, "").map_err(|_| ())?;
+    let client = Client::spawn(
+        &path,
+        Options {
+            args: probe.args,
+            env: None,
+            capture_stderr: true,
+        },
+    )
+    .map_err(|_| ())?;
+    client.initialize(Duration::from_secs(5)).map_err(|_| ())?;
+    Ok(HarnessHealthEntry {
+        harness: probe.harness,
+        config: probe.config,
+        server: probe.server,
+        transport: probe.transport,
+        healthy: true,
+        error: String::new(),
+    })
 }
