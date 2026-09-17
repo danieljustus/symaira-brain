@@ -36,7 +36,7 @@ def main():
     for name, flags, data in cases:
         row = {'id': name, 'flags': flags, 'input_sha256': oracle.digest(data)}
         for kind, binary in binaries.items():
-            with tempfile.TemporaryDirectory(prefix='gcli-', dir='/private/tmp') as tmp:
+            with tempfile.TemporaryDirectory(prefix='gcli-') as tmp:
                 env = {'PATH': '/usr/bin:/bin', 'HOME': tmp + '/home', 'XDG_DATA_HOME': tmp + '/data',
                        'XDG_CONFIG_HOME': tmp + '/config', 'XDG_CACHE_HOME': tmp + '/cache',
                        'TMPDIR': tmp, 'TZ': 'UTC', 'LANG': 'C', 'LC_ALL': 'C'}

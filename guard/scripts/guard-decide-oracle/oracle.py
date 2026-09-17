@@ -19,6 +19,12 @@ import tarfile
 import time
 from datetime import datetime, timezone
 
+SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+from external_env import ensure_external_environment
+
+ensure_external_environment(__file__)
+
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
 CASE_FILE = HERE / "cases.json"
@@ -187,7 +193,7 @@ def toolchain_metadata(binary: Path, build_env: dict[str, str]) -> dict[str, obj
 
 def run_case(binary: Path, case: dict[str, object], index: int, run_root: Path, launch: str, cwd: Path, base_env: dict[str, str]) -> dict[str, object]:
     case_root = run_root / f"{index:02d}-{case['id']}"; case_root.mkdir()
-    runtime = Path(tempfile.mkdtemp(prefix="symbrain-guard-decide-", dir="/private/tmp"))
+    runtime = Path(tempfile.mkdtemp(prefix="symbrain-guard-decide-"))
     try:
         roots = {name: runtime / name for name in ("home", "data", "config", "cache", "tmp")}
         for p in roots.values(): p.mkdir()

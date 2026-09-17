@@ -7,7 +7,7 @@
     "guard/cmd/symguard/decide/command.go": "22fed158de555e04de72cb66fb63751c8812142e858df65ac0985a7cb450620f"
   },
   "go_toolchain": "go1.26.7",
-  "generator_sha256": "f8593d20a7260a42199ae96df387bb58cc4c2e366de9c33d0a1302b8a4e5c141",
+  "generator_sha256": "7a36a7a447ff1ce8065b4076bde6ed58059dd8d12e12f1452f1a9544e3e59fcb",
   "validation_basis": {
     "producer": "immutable Go binary",
     "argv": [
@@ -23,7 +23,7 @@
       "decided_at"
     ]
   },
-  "validation_basis_sha256": "fdded3c530277b7fa9fce7ec3b594a02ff7f42e6ce0124d805ee8141740dad35",
+  "validation_basis_sha256": "3e74a37c61e418b98b591d46551d311f257cfcf183b10d70e0089a2165716ed8",
   "case_count": 152,
   "case_ids": [
     "normal",

@@ -15,6 +15,14 @@ import platform
 import subprocess
 import tempfile
 
+import sys
+
+SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+from external_env import ensure_external_environment
+
+ensure_external_environment(__file__)
+
 
 HERE = Path(__file__).resolve().parent
 SOURCE_FILES = (

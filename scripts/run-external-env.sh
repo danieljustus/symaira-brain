@@ -42,7 +42,7 @@ external_env() {
     return 0
   fi
 
-  local base mounted runtime_root
+  local base mounted runtime_root evidence repair_output
   base=${SYMAIRA_EXTERNAL_BASE:-$SYMAIRA_NVME_ROOT/Dev/Symaira_Dev/builds/symaira-brain}
   runtime_root=${SYMAIRA_EXTERNAL_RUNTIME_ROOT:-$SYMAIRA_NVME_ROOT/tmp}
   mounted=$(df -P "$SYMAIRA_NVME_ROOT" 2>/dev/null | awk 'NR == 2 {print $NF}')
@@ -66,6 +66,11 @@ external_env() {
     return 2
   fi
 
+  evidence=${GUARD_DECIDE_EVIDENCE:-$base/guard-decide-provenancefix}
+  repair_output=${GUARD_REPAIR_OUTPUT:-$base/guard-decide-raw-byte}
+  validate_external_path "GUARD_DECIDE_EVIDENCE" "$evidence"
+  validate_external_path "GUARD_REPAIR_OUTPUT" "$repair_output"
+
   export TMPDIR="$base/tmp" TMP="$base/tmp" TEMP="$base/tmp"
   export GOTMPDIR="$base/go-tmp" GOPATH="$base/gopath"
   export GOTELEMETRYDIR="$base/go-telemetry" GOCACHE="$base/go-cache"
@@ -74,6 +79,8 @@ external_env() {
   export RUSTUP_NO_UPDATE_CHECK=1
   export PYTHONPYCACHEPREFIX="$base/python-cache"
   export SYMAIRA_EXTERNAL_RUNTIME_ROOT="$runtime_root"
+  export GUARD_DECIDE_EVIDENCE="$evidence"
+  export GUARD_REPAIR_OUTPUT="$repair_output"
   export SYMAIRA_EXTERNAL_ENV_READY=1
   mkdir -p "$TMPDIR" "$GOTMPDIR" "$GOPATH" "$GOTELEMETRYDIR" "$GOCACHE" \
     "$GOMODCACHE" "$CARGO_HOME" "$CARGO_TARGET_DIR" "$PYTHONPYCACHEPREFIX" \

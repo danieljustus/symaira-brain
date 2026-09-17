@@ -5,7 +5,14 @@ from pathlib import Path
 import tempfile
 import unittest
 
+import sys
+
+SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+from external_env import ensure_external_environment
 from trust_anchor import file_sha256, load_anchor
+
+ensure_external_environment(__file__)
 
 
 HERE = Path(__file__).resolve().parent
