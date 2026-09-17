@@ -396,6 +396,18 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
                     validate_mod._runtime_home(ROOT / "deep/home", child)
             self.assertFalse(child.exists())
 
+    def test_waits_for_parseable_sidecar_capture(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="fetch002-sidecar-", dir=validate_mod.EXTERNAL_RUNTIME_ROOT) as directory:
+            path = Path(directory) / "compat-wire.json"
+            writes = iter((b"{", b"{}"))
+
+            def write_next(_: float) -> None:
+                path.write_bytes(next(writes))
+
+            with patch.object(validate_mod.time, "monotonic", side_effect=(0.0, 0.0, 0.1, 0.2)), \
+                 patch.object(validate_mod.time, "sleep", side_effect=write_next):
+                validate_mod.wait_for_sidecar_capture(path, timeout=1.0)
+
     def test_rejects_unpinned_oracle_copy(self) -> None:
         source = ROOT / validate_mod.HISTORICAL_ORACLE_REL_PATH
         with tempfile.TemporaryDirectory(

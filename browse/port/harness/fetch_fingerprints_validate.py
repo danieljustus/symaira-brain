@@ -49,6 +49,8 @@ from pathlib import Path
 from typing import NoReturn
 
 MAX_FRAME_BYTES = 1 << 20
+# The sidecar computes go list input hashes after the sixth response.
+SIDECAR_CAPTURE_TIMEOUT = 30.0
 
 SIX_PROFILES = frozenset({"chrome", "firefox", "opera", "safari", "edge", "ios"})
 JA3_RE = re.compile(r"[0-9a-f]{32}")
@@ -686,6 +688,19 @@ def wait_for_path(path: Path, timeout: float = 5.0) -> None:
     raise CaptureError(f"timed out waiting for {path}")
 
 
+def wait_for_sidecar_capture(path: Path, timeout: float = SIDECAR_CAPTURE_TIMEOUT) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            if path.is_file():
+                json.loads(path.read_bytes())
+                return
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            pass
+        time.sleep(0.02)
+    raise CaptureError(f"timed out waiting for parseable Go sidecar capture at {path}")
+
+
 def request(socket_path: Path, frame: dict[str, object], *, timeout: float = 3.0) -> dict[str, object]:
     payload = json.dumps(frame, separators=(",", ":")).encode() + b"\n"
     if len(payload) >= MAX_FRAME_BYTES:
@@ -1109,6 +1124,7 @@ def run_rust_compat_comparison(
                 if not isinstance(transport, dict) or transport.get("mode") != "compat" or transport.get("tls_profile") != "azuretls-legacy":
                     _fail(f"Rust response for {profile} did not prove compat transport selection: {data}")
                 results.append({"profile": profile, "status_code": data["status_code"], "transport": transport})
+            wait_for_sidecar_capture(sidecar_capture)
             stop = request(socket_path, {"cmd": "daemon.stop", "session": session}, timeout=5.0)
             if not stop.get("success"):
                 _fail(f"Rust compat daemon stop failed: {stop}")
