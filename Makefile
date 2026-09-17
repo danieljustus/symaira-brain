@@ -23,7 +23,7 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
 
-.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
+.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -91,6 +91,7 @@ parity-smoke: rust-go-printable-check
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
 	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
+	./guard/scripts/guard-scan-oracle/run.sh parity "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 	$(EXTERNAL_RUN) python3 scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
 ## rust-go-printable-check: Ensure the pinned Go IsPrint table is current
@@ -108,6 +109,15 @@ policy-oracle-check:
 ## guard-oracle-check: Ensure Guard model/static-kernel expectations match Go
 guard-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-oracle -check
+
+## guard-scan-oracle-check: Ensure Guard scan fixtures and source bindings are current
+guard-scan-oracle-check:
+	./guard/scripts/guard-scan-oracle/run.sh check
+
+## guard-scan-oracle-test: Run Guard scan oracle fixture tests
+guard-scan-oracle-test:
+	./guard/scripts/guard-scan-oracle/run.sh test
+
 ## catalog-oracle-check: Ensure the catalog oracle expectations are current
 catalog-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/catalog-oracle -check
@@ -192,7 +202,7 @@ rust-fast:
 	$(EXTERNAL_RUN) cargo test -p symbrain-cli -p symbrain-skills -p symbrain-guard-core --locked
 
 ## rust-check: Run the complete fast Rust quality gate
-rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
