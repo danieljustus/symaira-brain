@@ -82,13 +82,13 @@ build:
 ## build-rust: Build the incremental Rust entrypoint and its Go fallback
 build-rust:
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "$(LDFLAGS)" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
 	$(EXTERNAL_RUN) env SYMBRAIN_VERSION="$(VERSION)" CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
 
 ## parity-smoke: Compare migrated Rust CLI slices against the pinned Go oracle
 parity-smoke: rust-go-printable-check
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
-	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" ./cmd/symbrain
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
 	$(EXTERNAL_RUN) env SYMBRAIN_VERSION=dev CARGO_TARGET_DIR="$(EXTERNAL_CARGO_TARGET_DIR)" cargo build --workspace --locked
 	$(EXTERNAL_RUN) python3 scripts/rust-differential.py "$(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go" "$(EXTERNAL_CARGO_TARGET_DIR)/debug/symbrain"
 
