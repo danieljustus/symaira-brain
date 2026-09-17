@@ -6,6 +6,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::process::{Command, Output};
 
+use serde_json::json;
 use tempfile::TempDir;
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
@@ -50,6 +51,64 @@ fn assert_fake_fallback(output: &Output) {
     assert_eq!(output.status.code(), Some(23));
     assert_eq!(output.stdout, b"fallback-stdout\n");
     assert_eq!(output.stderr, b"fallback-stderr\n");
+}
+
+#[test]
+fn doctor_json_reports_static_config_and_registered_harness_natively() {
+    let root = TempDir::new().unwrap();
+    let config_dir = root.path().join("config/symbrain");
+    let profiles_dir = config_dir.join("profiles");
+    fs::create_dir_all(root.path().join("home")).unwrap();
+    fs::create_dir_all(&profiles_dir).unwrap();
+    fs::write(
+        config_dir.join("config.toml"),
+        "default_profile = \"personal\"\n",
+    )
+    .unwrap();
+    fs::write(
+        profiles_dir.join("personal.toml"),
+        "[profile]\nname = \"personal\"\n\n[servers.vault]\nenabled = false\n",
+    )
+    .unwrap();
+    fs::write(
+        root.path().join("home/.claude.json"),
+        r#"{"mcpServers":{"symbrain":{"command":"symbrain","args":["mcp","--profile","personal"]}}}"#,
+    )
+    .unwrap();
+
+    let output = command(&root, &["doctor", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["config"]["exists"], json!(true));
+    assert_eq!(report["config"]["parsed"], json!(true));
+    assert_eq!(report["builtins"], json!(["memory", "skills", "usage"]));
+    assert_eq!(report["profiles"], json!(["personal"]));
+
+    let claude = report["harnesses"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|harness| harness["name"] == "claude")
+        .unwrap();
+    assert_eq!(claude["config_found"], json!(true));
+    assert_eq!(claude["config_parsed"], json!(true));
+    assert_eq!(claude["installed"], json!(true));
+    assert_eq!(claude["profile"], json!("personal"));
+    assert_eq!(claude["profile_exists"], json!(true));
+    assert_eq!(claude["profile_missing"], json!(false));
+
+    let registered = report["links"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|link| link["name"] == "profile \"personal\": registered")
+        .unwrap();
+    assert_eq!(registered["status"], json!("pass"));
 }
 
 #[test]
