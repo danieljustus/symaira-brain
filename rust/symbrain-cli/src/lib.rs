@@ -8,10 +8,10 @@ use std::process::{Command, Stdio};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_core::version::{self, VersionInfo};
-use symbrain_core::xdg;
 
 mod activity_cli;
 mod audit_cli;
+mod config_cli;
 mod doctor_cli;
 pub mod guard_cli;
 mod harness_cli;
@@ -195,7 +195,7 @@ pub fn run_in_process(
     match cmd.as_ref() {
         "help" | "--help" | "-h" => Some(write_usage(stdout)),
         "version" => Some(run_version(rest, stdout, stderr, format)),
-        "config" => run_config(rest, stdout, stderr),
+        "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
         "setup" if setup_cli::requires_go_fallback(rest) => None,
@@ -262,55 +262,6 @@ fn peek_command(args: &[OsString]) -> std::borrow::Cow<'_, str> {
 
 fn write_usage(stdout: &mut dyn Write) -> u8 {
     if write!(stdout, "{USAGE}").is_ok() {
-        exit::OK
-    } else {
-        exit::GENERIC
-    }
-}
-
-fn run_config(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
-    let normalized = normalize_flags(args);
-    let (subcommand, sub_args) = if normalized.first().is_some_and(|a| a == "--") {
-        let sub = normalized.get(1).map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 2 {
-            &normalized[2..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
-    } else {
-        let sub = normalized.first().map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 1 {
-            &normalized[1..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
-    };
-
-    match subcommand.as_deref() {
-        Some("path") => Some(run_config_path(sub_args, stdout)),
-        Some("get") => Some(symbrain_core::config::run_config_get(
-            sub_args, stdout, stderr,
-        )),
-        Some("set") => Some(symbrain_core::config::run_config_set(
-            sub_args, stdout, stderr,
-        )),
-        _ => None,
-    }
-}
-
-fn run_config_path(args: &[OsString], stdout: &mut dyn Write) -> u8 {
-    if let Some(unexpected) = args.first() {
-        let _ = writeln!(
-            stdout,
-            "symbrain config path: unexpected argument {:?}",
-            unexpected.to_string_lossy()
-        );
-        return exit::USAGE;
-    }
-    let path = xdg::config_path();
-    if writeln!(stdout, "{}", path.display()).is_ok() {
         exit::OK
     } else {
         exit::GENERIC

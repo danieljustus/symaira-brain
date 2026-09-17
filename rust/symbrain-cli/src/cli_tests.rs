@@ -370,7 +370,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
     );
     assert_eq!(
         run_in_process(&[OsString::from("config")], &mut stdout, &mut stderr),
-        None
+        Some(exit::NO_INPUT)
     );
     assert_eq!(
         run_in_process(
@@ -378,7 +378,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
             &mut stdout,
             &mut stderr
         ),
-        None
+        Some(exit::NO_INPUT)
     );
     assert_eq!(
         run_in_process(&[OsString::from("help")], &mut stdout, &mut stderr),
