@@ -161,4 +161,22 @@ mod tests {
             PathBuf::from("/tmp/adapter-temp/symguard/audit.log")
         );
     }
+
+    #[test]
+    fn decide_preserves_go_trailing_json_diagnostic() {
+        let data = tempfile::tempdir().expect("tempdir");
+        let mut output = Vec::new();
+        let code = run_at_path(
+            br#"{"command":"open"}x"#.as_slice(),
+            &mut output,
+            data.path().join("symguard/audit.log"),
+            "2026-09-14T12:00:00Z".parse().expect("fixed time"),
+        );
+        assert_eq!(code, exit::OK);
+        assert_eq!(
+            output,
+            br#"{"decision":"deny","reason":"decide: parse request: invalid character 'x' after top-level value"}
+"#
+        );
+    }
 }
