@@ -53,15 +53,7 @@ fn instruction_only_target_is_native_and_matches_sync_schema() {
     );
     assert_eq!(value["targets"][0]["name"], "agents");
     assert_eq!(value["targets"][0]["status"], "created");
-    let expected_path = root
-        .path()
-        .join("project/AGENTS.md")
-        .to_string_lossy()
-        .into_owned();
-    assert_eq!(
-        value["targets"][0]["path"].as_str(),
-        Some(expected_path.as_str())
-    );
+    assert_eq!(value["targets"][0]["path"].as_str(), Some("AGENTS.md"));
 
     let target = std::fs::read(root.path().join("project/AGENTS.md")).unwrap();
     let target = String::from_utf8(target).unwrap();

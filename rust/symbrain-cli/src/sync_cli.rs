@@ -208,6 +208,12 @@ pub fn run(
                 continue;
             }
         };
+        // Go's filepath.Join(".", target) removes the leading "./".
+        let display_path = target_path
+            .strip_prefix(".")
+            .unwrap_or(&target_path)
+            .to_string_lossy()
+            .into_owned();
 
         let existing_bytes = fs::read(&target_path).unwrap_or_default();
         let rendered =
@@ -216,7 +222,7 @@ pub fn run(
                 Err(err) => {
                     target_statuses.push(TargetStatus {
                         name: name.clone(),
-                        path: target_path.to_string_lossy().into_owned(),
+                        path: display_path.clone(),
                         status: "error".to_string(),
                         message: Some(err.to_string()),
                     });
@@ -227,14 +233,14 @@ pub fn run(
         if rendered.output == existing_bytes {
             target_statuses.push(TargetStatus {
                 name: name.clone(),
-                path: target_path.to_string_lossy().into_owned(),
+                path: display_path.clone(),
                 status: "unchanged".to_string(),
                 message: None,
             });
         } else if parsed.dry_run {
             target_statuses.push(TargetStatus {
                 name: name.clone(),
-                path: target_path.to_string_lossy().into_owned(),
+                path: display_path.clone(),
                 status: "dry-run".to_string(),
                 message: Some("would update".to_string()),
             });
@@ -248,7 +254,7 @@ pub fn run(
                 Ok(()) => {
                     target_statuses.push(TargetStatus {
                         name: name.clone(),
-                        path: target_path.to_string_lossy().into_owned(),
+                        path: display_path.clone(),
                         status: if existed { "updated" } else { "created" }.to_string(),
                         message: None,
                     });
@@ -256,7 +262,7 @@ pub fn run(
                 Err(err) => {
                     target_statuses.push(TargetStatus {
                         name: name.clone(),
-                        path: target_path.to_string_lossy().into_owned(),
+                        path: display_path,
                         status: "error".to_string(),
                         message: Some(err.to_string()),
                     });
