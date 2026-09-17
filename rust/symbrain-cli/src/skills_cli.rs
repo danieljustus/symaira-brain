@@ -139,9 +139,43 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
-        Some(verb) if verb == "doctor" => true,
+        Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),
         _ => false,
     }
+}
+
+#[derive(Debug, Serialize)]
+struct SkillsDoctorVcs {
+    enabled: bool,
+}
+
+#[derive(Debug, Serialize)]
+struct SkillsDoctorConfig {
+    library_dir: String,
+    render_dir: String,
+    cache_dir: String,
+    profiles_dir: String,
+    base_dir: String,
+    #[serde(rename = "Targets")]
+    targets: Option<()>,
+    vcs: SkillsDoctorVcs,
+}
+
+#[derive(Debug, Serialize)]
+struct SkillsDoctorTarget {
+    target: String,
+    user: String,
+    project: String,
+}
+
+#[derive(Debug, Serialize)]
+struct SkillsDoctorReport {
+    config: SkillsDoctorConfig,
+    config_path: String,
+    log_path: String,
+    profiles_dir: String,
+    project_dir: String,
+    targets: Vec<SkillsDoctorTarget>,
 }
 
 fn has_skill_log() -> bool {
@@ -860,39 +894,101 @@ fn run_doctor(
     _stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let (library_dir, base_dir, _) = resolve_skills_dirs();
-    let doc_info = serde_json::json!({
-        "library_dir": library_dir.display().to_string(),
-        "base_dir": base_dir.display().to_string(),
-        "library_exists": library_dir.exists(),
-        "base_exists": base_dir.exists(),
-    });
+    let (report, pairs) = skills_doctor_report();
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&doc_info).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&report));
         }
         OutputFormat::Table => {
-            let _ = writeln!(
-                stdout,
-                "Skills Library: {} (exists: {})",
-                library_dir.display(),
-                library_dir.exists()
-            );
-            let _ = writeln!(
-                stdout,
-                "Base Snapshots: {} (exists: {})",
-                base_dir.display(),
-                base_dir.exists()
-            );
+            for (name, value) in pairs {
+                let _ = writeln!(stdout, "{name:<11} {value}");
+            }
         }
     }
 
     exit::OK
+}
+
+fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let project_dir = current_project_dir();
+    let config_path = skills_config_path();
+    let profiles_dir = config_path
+        .parent()
+        .map_or_else(|| PathBuf::from("profiles"), |path| path.join("profiles"));
+    let data_root = symbrain_core::paths::skills_data_dir()
+        .map(|location| location.dir)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let cache_root = symbrain_core::paths::skills_cache_dir()
+        .map(|location| location.dir)
+        .unwrap_or_else(|| PathBuf::from("."));
+    let library_dir = data_root.join("library");
+    let render_dir = data_root.join("rendered");
+    let base_dir = data_root.join("base");
+    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let config = SkillsDoctorConfig {
+        library_dir: library_dir.display().to_string(),
+        render_dir: render_dir.display().to_string(),
+        cache_dir: cache_root.display().to_string(),
+        profiles_dir: profiles_dir.display().to_string(),
+        base_dir: base_dir.display().to_string(),
+        targets: None,
+        vcs: SkillsDoctorVcs { enabled: true },
+    };
+    let targets = symbrain_skills::default_targets()
+        .into_iter()
+        .filter_map(|target| {
+            let user = skill_root_for(&target, &home);
+            let project = doctor_project_skill_root(&target, &project_dir)?;
+            Some(SkillsDoctorTarget {
+                target,
+                user: user.display().to_string(),
+                project: project.display().to_string(),
+            })
+        })
+        .collect();
+    let report = SkillsDoctorReport {
+        config,
+        config_path: config_path.display().to_string(),
+        log_path: log_path.display().to_string(),
+        profiles_dir: profiles_dir.display().to_string(),
+        project_dir: project_dir.display().to_string(),
+        targets,
+    };
+    let pairs = [
+        ("config", report.config_path.clone()),
+        ("library", report.config.library_dir.clone()),
+        ("rendered", report.config.render_dir.clone()),
+        ("cache", report.config.cache_dir.clone()),
+        ("base", report.config.base_dir.clone()),
+        ("profiles", report.profiles_dir.clone()),
+        ("log", report.log_path.clone()),
+        ("project", report.project_dir.clone()),
+        ("versioning", report.config.vcs.enabled.to_string()),
+    ];
+    (report, pairs)
+}
+
+fn skills_config_path() -> PathBuf {
+    let root = std::env::var_os("XDG_CONFIG_HOME")
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
+        .unwrap_or_else(|| PathBuf::from(".config"));
+    root.join("symskills/config.toml")
+}
+
+fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<PathBuf> {
+    let root = match target {
+        "claude" => project.join(".claude/skills"),
+        "opencode" => project.join(".opencode/skills"),
+        "codex" | "antigravity" | "openclaw" => project.join(".agents/skills"),
+        "hermes" => project.join(".hermes/skills"),
+        _ => return None,
+    };
+    Some(root)
 }
 
 #[cfg(test)]
