@@ -209,16 +209,16 @@ fn binary_for(target: &str) -> Option<PathBuf> {
 #[cfg(windows)]
 fn binary_names(name: &str) -> Vec<OsString> {
     let mut names = vec![OsString::from(name)];
-    if Path::new(name).extension().is_none() {
-        if let Some(extensions) = std::env::var_os("PATHEXT") {
-            names.extend(
-                extensions
-                    .to_string_lossy()
-                    .split(';')
-                    .filter(|extension| !extension.is_empty())
-                    .map(|extension| OsString::from(format!("{name}{extension}"))),
-            );
-        }
+    if Path::new(name).extension().is_none()
+        && let Some(extensions) = std::env::var_os("PATHEXT")
+    {
+        names.extend(
+            extensions
+                .to_string_lossy()
+                .split(';')
+                .filter(|extension| !extension.is_empty())
+                .map(|extension| OsString::from(format!("{name}{extension}"))),
+        );
     }
     names
 }
