@@ -106,6 +106,10 @@ fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
     (library_dir, base_dir, home)
 }
 
+fn current_project_dir() -> PathBuf {
+    std::env::current_dir().unwrap_or_default()
+}
+
 /// Runs `symbrain skills`.
 pub fn run(
     args: &[OsString],
@@ -266,11 +270,12 @@ fn run_status(
     }
 
     let (library_dir, base_dir, home_dir) = resolve_skills_dirs();
+    let project_dir = current_project_dir();
     let targets = target.into_iter().collect();
 
     let opts = StatusOptions {
         home_dir,
-        project_dir: Some(PathBuf::from(".")),
+        project_dir: Some(project_dir),
         scope,
         targets,
         library_dir,
@@ -442,12 +447,13 @@ fn run_sync(
     let sync_opts = SyncOptions {
         library_dir,
         home_dir,
-        project_dir: Some(PathBuf::from(".")),
+        project_dir: Some(current_project_dir()),
         scope,
         targets,
         skills: Vec::new(),
         base_dir: Some(base_dir),
-        mode: "copy".to_string(),
+        // An empty mode preserves the marker's original copy/symlink mode.
+        mode: String::new(),
         force: false,
         dry_run,
         conflict_policy: install::ConflictPolicy::Abort,
@@ -527,4 +533,14 @@ fn run_doctor(
     }
 
     exit::OK
+}
+
+#[cfg(test)]
+mod tests {
+    use super::current_project_dir;
+
+    #[test]
+    fn sync_project_dir_matches_absolute_working_directory() {
+        assert!(current_project_dir().is_absolute());
+    }
 }

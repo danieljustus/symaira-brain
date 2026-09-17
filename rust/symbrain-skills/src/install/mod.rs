@@ -15,6 +15,7 @@ mod replace_io;
 mod status;
 mod status_compare;
 mod sync;
+mod sync_lock;
 mod transaction;
 mod uninstall;
 
