@@ -13,6 +13,21 @@ use symbrain_guard_core::external_decision::{
 };
 use symbrain_guard_core::go_json::to_go_json_vec;
 
+const GUARD_USAGE: &str = r"symguard — local-first security gateway (absorbed into symbrain)
+
+Usage:
+  symbrain guard <command> [flags]
+
+Commands:
+  version   Print version and build info
+  doctor    Check system health and configuration
+  decide    Read a JSON decision request from stdin, write the decision to stdout
+  grants    List and revoke standing grants
+  scan      Discover MCP servers across supported AI clients
+  help      Show this help message
+
+Run 'symbrain guard <command> --help' for details on a specific command.";
+
 #[path = "guard_grants.rs"]
 mod guard_grants;
 #[path = "guard_scan.rs"]
@@ -21,11 +36,11 @@ mod guard_scan;
 /// Runs `symbrain guard`.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
     if args.is_empty() {
-        return Some(write_help(stdout));
+        return Some(write_guard_usage(stdout, exit::USAGE));
     }
     let verb = args.first().map(|arg| arg.as_os_str().to_string_lossy())?;
     match verb.as_ref() {
-        "help" | "--help" | "-h" => Some(write_help(stdout)),
+        "help" | "--help" | "-h" => Some(write_guard_usage(stdout, exit::OK)),
         "version" => {
             let info =
                 symbrain_core::version::VersionInfo::new("symguard", env!("CARGO_PKG_VERSION"));
@@ -56,8 +71,18 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         }
         "scan" => Some(guard_scan::run(&args[1..], stdout, stderr)),
         "grants" => Some(guard_grants::run(&args[1..], stdout, stderr)),
-        _ => None,
+        "doctor" => None,
+        _ => {
+            let _ = writeln!(stderr, "symbrain guard: unknown command {verb:?}\n");
+            let _ = writeln!(stderr, "{GUARD_USAGE}");
+            Some(exit::USAGE)
+        }
     }
+}
+
+fn write_guard_usage(stdout: &mut dyn Write, code: u8) -> u8 {
+    let _ = writeln!(stdout, "{GUARD_USAGE}");
+    code
 }
 
 /// Executes the production decide boundary with explicit clock and audit path.
@@ -177,6 +202,48 @@ mod tests {
             output,
             br#"{"decision":"deny","reason":"decide: parse request: invalid character 'x' after top-level value"}
 "#
+        );
+    }
+
+    #[test]
+    fn unknown_verb_matches_go_dispatch() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let code = run(&[OsString::from("frobnicate")], &mut stdout, &mut stderr);
+        assert_eq!(code, Some(exit::USAGE));
+        assert!(stdout.is_empty());
+        assert_eq!(
+            String::from_utf8(stderr).expect("utf8"),
+            "symbrain guard: unknown command \"frobnicate\"\n\nsymguard — local-first security gateway (absorbed into symbrain)\n\nUsage:\n  symbrain guard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symbrain guard <command> --help' for details on a specific command.\n"
+        );
+    }
+
+    #[test]
+    fn top_level_guard_routes_match_go() {
+        for (args, expected_code) in [
+            (Vec::new(), exit::USAGE),
+            (vec![OsString::from("help")], exit::OK),
+            (vec![OsString::from("--help")], exit::OK),
+            (vec![OsString::from("-h")], exit::OK),
+        ] {
+            let mut stdout = Vec::new();
+            let mut stderr = Vec::new();
+            assert_eq!(run(&args, &mut stdout, &mut stderr), Some(expected_code));
+            assert_eq!(
+                String::from_utf8(stdout).expect("utf8"),
+                format!("{GUARD_USAGE}\n")
+            );
+            assert!(stderr.is_empty());
+        }
+    }
+
+    #[test]
+    fn doctor_remains_on_go_fallback() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        assert_eq!(
+            run(&[OsString::from("doctor")], &mut stdout, &mut stderr),
+            None
         );
     }
 }
