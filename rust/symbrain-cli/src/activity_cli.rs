@@ -6,7 +6,9 @@ use std::path::PathBuf;
 
 use crate::go_json;
 use chrono::{DateTime, Utc};
-use symbrain_activity::{fence_summary, profile_allows_activity};
+use symbrain_activity::{
+    SearchOptions, fence_summary, profile_allows_activity, validate_search_options,
+};
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_memory::ActivitySearch;
@@ -73,13 +75,69 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         // The shipped flag set stops at the first bare argument, so a flag
         // after the identifier is a usage error there; only the documented
         // `get <flags> <id>` order is reproducible natively.
-        "get" => !get_argument_order_is_shipped(&args[1..]),
+        "get" => !flags_before_positional(&args[1..]),
+        // `search` runs natively only for a fully valid request: every
+        // validation failure carries the shipped (or the Go time parser's)
+        // error text and stays on Go.
+        "search" => !flags_before_positional(&args[1..]) || !search_request_is_valid(&args[1..]),
         _ => true,
     }
 }
 
-/// Reports whether `get` receives its flags before the single identifier.
-fn get_argument_order_is_shipped(args: &[OsString]) -> bool {
+/// Reports whether a `search` invocation is a valid request whose result the
+/// native path reproduces.
+fn search_request_is_valid(args: &[OsString]) -> bool {
+    let flags = [
+        "--profile",
+        "-profile",
+        "--from",
+        "-from",
+        "--to",
+        "-to",
+        "--limit",
+        "-limit",
+        "--max-tokens",
+        "-max-tokens",
+        "--db",
+        "-db",
+    ];
+    let Some(query) = positional_argument(args, &flags) else {
+        return false;
+    };
+    let (Some(from), Some(to)) = (
+        flag_value(args, &["--from", "-from"])
+            .and_then(|value| value.parse::<DateTime<Utc>>().ok()),
+        flag_value(args, &["--to", "-to"]).and_then(|value| value.parse::<DateTime<Utc>>().ok()),
+    ) else {
+        return false;
+    };
+    let Some(limit) =
+        flag_value(args, &["--limit", "-limit"]).and_then(|value| value.parse::<usize>().ok())
+    else {
+        return false;
+    };
+    let Some(max_tokens) = flag_value(args, &["--max-tokens", "-max-tokens"])
+        .and_then(|value| value.parse::<usize>().ok())
+    else {
+        return false;
+    };
+    let options = SearchOptions {
+        query,
+        source: String::new(),
+        from,
+        to,
+        limit,
+        max_tokens,
+        include_episodes: false,
+    };
+    validate_search_options(&options).is_ok()
+}
+
+/// Reports whether every flag precedes the single bare argument.
+///
+/// The shipped flag set stops parsing at the first bare argument, so a flag
+/// after it is a usage error there and the native path must not accept it.
+fn flags_before_positional(args: &[OsString]) -> bool {
     let mut positionals = 0;
     let mut seen_positional = false;
     let mut index = 0;
@@ -257,35 +315,43 @@ fn run_search(
     };
 
     let page = match store.activity_search(&mem_search) {
-        Ok(p) => p,
+        Ok(page) => page,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain activity search: {err}");
+            let _ = writeln!(stderr, "symbrain activity search: search: {err}");
             return exit::GENERIC;
         }
     };
 
+    // The shipped command fences every summary, reports its token count and
+    // sums the used budget.
+    let mut page = page;
+    let mut used = 0;
+    for item in &mut page.results {
+        let summary = fence_summary(&item.summary, max_tokens);
+        item.tokens = if summary.is_empty() {
+            0
+        } else {
+            summary.chars().count() / 4 + 1
+        };
+        used += item.tokens;
+        item.summary = summary;
+    }
+    page.used_tokens = used;
+    page.max_tokens = max_tokens;
+
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&page).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&page));
         }
         OutputFormat::Table => {
-            if page.results.is_empty() {
-                let _ = writeln!(stdout, "No activity matching query.");
-            } else {
-                for item in &page.results {
-                    let fenced = fence_summary(&item.summary, max_tokens);
-                    let _ = writeln!(
-                        stdout,
-                        "{}\t{}\n{}\n",
-                        item.id,
-                        item.started_at.format("%Y-%m-%d %H:%M"),
-                        fenced
-                    );
-                }
+            for item in &page.results {
+                let _ = writeln!(
+                    stdout,
+                    "{}\t{}\t{}",
+                    item.started_at.format("%Y-%m-%dT%H:%M:%SZ"),
+                    item.kind,
+                    item.summary
+                );
             }
         }
     }
