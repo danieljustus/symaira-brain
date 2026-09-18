@@ -65,6 +65,32 @@ CREATE INDEX IF NOT EXISTS idx_activity_segments_window ON activity_segments(sta
 CREATE INDEX IF NOT EXISTS idx_activity_episodes_window ON activity_episodes(started_at, ended_at);
 ";
 
+/// Columns the shipped schema owns that an older native database may lack.
+///
+/// The shipped implementation adds them through numbered migrations; the
+/// native schema applies one idempotent `CREATE TABLE IF NOT EXISTS`, which
+/// cannot add columns to a table that already exists. Without this step a
+/// native database is missing five `memories` and three `rules` columns, and
+/// the shipped binary rejects it (`no such column: consolidated_into_id`).
+pub(crate) const COLUMN_PARITY: &[(&str, &str, &str)] = &[
+    ("memories", "embedding_dim", "INTEGER NOT NULL DEFAULT 0"),
+    ("memories", "lsh_hash", "INTEGER NOT NULL DEFAULT 0"),
+    (
+        "memories",
+        "consolidated_into_id",
+        "TEXT REFERENCES memories(id) ON DELETE SET NULL",
+    ),
+    ("memories", "embedding_binary", "BLOB"),
+    (
+        "memories",
+        "embedding_quantization",
+        "TEXT NOT NULL DEFAULT ''",
+    ),
+    ("rules", "updated_at", "DATETIME"),
+    ("rules", "created_by", "TEXT NOT NULL DEFAULT ''"),
+    ("rules", "updated_by", "TEXT NOT NULL DEFAULT ''"),
+];
+
 pub(crate) const MIGRATIONS: &[&str] = &[
     "001_init",
     "002_vector_index",

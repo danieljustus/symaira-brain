@@ -2,7 +2,9 @@
 #![deny(unsafe_code)]
 
 mod activity;
+mod embedding;
 mod entity;
+mod gotime;
 mod model;
 mod rows;
 mod schema;

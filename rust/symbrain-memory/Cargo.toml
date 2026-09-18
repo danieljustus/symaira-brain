@@ -14,6 +14,9 @@ serde.workspace = true
 serde_json.workspace = true
 regex.workspace = true
 sha2.workspace = true
+# Same pinned crate the guard workspace already uses; needed to generate
+# UUID-shaped memory ids like the shipped store.
+getrandom = "=0.3.3"
 symbrain-activity.workspace = true
 
 [lints.rust]

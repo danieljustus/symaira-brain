@@ -60,6 +60,9 @@ fn is_zero(value: &f64) -> bool {
 
 #[derive(Default)]
 pub struct SetOptions {
+    /// Actor recorded as `created_by`/`updated_by`; the shipped CLI writes
+    /// `cli:symbrain`, the MCP server `mcp`.
+    pub actor: String,
     pub session_id: String,
     pub entities: Vec<String>,
     pub working: bool,

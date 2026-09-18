@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::fs;
 use std::path::Path;
 use std::time::Duration;
@@ -43,6 +44,7 @@ impl Store {
             "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;",
         )?;
         conn.execute_batch(SCHEMA)?;
+        apply_column_parity(&conn)?;
         let transaction = conn.unchecked_transaction()?;
         for version in MIGRATIONS {
             transaction.execute(
@@ -126,11 +128,11 @@ impl Store {
             .map(|name| redact_text(name.trim()))
             .filter(|name| !name.is_empty())
             .collect::<Vec<_>>();
-        let id = stable_id(&["memory", &content, scope, &now.to_rfc3339()]);
+        let id = new_uuid();
         let review = if options.staged { "staged" } else { "approved" };
         let metadata_text = serde_json::to_string(&metadata)
             .map_err(|error| StoreError::Invalid(format!("metadata: {error}")))?;
-        let now_text = now.to_rfc3339();
+        let now_text = crate::gotime::format(now);
         let tier = if options.working {
             "working"
         } else {
@@ -138,11 +140,46 @@ impl Store {
         };
         let expires_at = options
             .working
-            .then(|| (now + chrono::Duration::hours(24)).to_rfc3339());
+            .then(|| crate::gotime::format(now + chrono::Duration::hours(24)));
+        let actor = if options.actor.is_empty() {
+            "mcp".to_owned()
+        } else {
+            options.actor.clone()
+        };
         let conn = self.lock()?;
+        // Column set and deterministic values mirror the shipped insert, so a
+        // row written here is indistinguishable from a shipped one.
         conn.execute(
-            "INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at,created_by,updated_by,created_session,updated_session,review_status,kind,tier,expires_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            params![id, content, scope, metadata_text, "", now_text, now_text, "mcp", "mcp", session_id, session_id, review, kind, tier, expires_at],
+            "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) \
+             VALUES(?,?,?,?,?,NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL,?,?,NULL,NULL,?,?,?,NULL,NULL,?,?,?,NULL)",
+            params![
+                id,
+                content,
+                scope,
+                metadata_text,
+                embedding_text(&content),
+                i64::try_from(crate::embedding::DIMENSIONS).unwrap_or(768),
+                "hash-fallback",
+                "",
+                "",
+                content_hash(&content),
+                0_i64,
+                now_text,
+                now_text,
+                actor,
+                actor,
+                session_id,
+                session_id,
+                "raw",
+                0.0_f64,
+                now_text,
+                tier,
+                expires_at,
+                1_i64,
+                review,
+                kind,
+                1.0_f64
+            ],
         )?;
         for entity in &entities {
             let entity_id = stable_id(&["entity", &entity.to_lowercase()]);
@@ -177,7 +214,7 @@ impl Store {
     /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
     pub fn list(&self, scope: &str, limit: usize) -> Result<Vec<Memory>, StoreError> {
         let limit = limit_i64(limit.min(MAX_LIST_RESULTS));
-        let now = Utc::now().to_rfc3339();
+        let now = crate::gotime::format(Utc::now());
         let conn = self.lock()?;
         let sql = if scope.is_empty() {
             "SELECT id,content,scope,metadata,created_at,updated_at,created_by,created_session,consolidation_status,kind,importance,COALESCE((SELECT json_group_array(e.name) FROM memory_entities me JOIN entities e ON e.id=me.entity_id WHERE me.memory_id=memories.id),'[]') FROM memories WHERE review_status != 'staged' AND (expires_at IS NULL OR expires_at > ?) ORDER BY created_at DESC,id DESC LIMIT ?"
@@ -204,7 +241,7 @@ impl Store {
         limit: usize,
     ) -> Result<Vec<(Memory, f32)>, StoreError> {
         let pattern = format!("%{}%", query.to_lowercase());
-        let now = Utc::now().to_rfc3339();
+        let now = crate::gotime::format(Utc::now());
         let conn = self.lock()?;
         let sql = if scope.is_empty() {
             "SELECT id,content,scope,metadata,created_at,updated_at,created_by,created_session,consolidation_status,kind,importance,COALESCE((SELECT json_group_array(e.name) FROM memory_entities me JOIN entities e ON e.id=me.entity_id WHERE me.memory_id=memories.id),'[]') FROM memories WHERE review_status != 'staged' AND (expires_at IS NULL OR expires_at > ?) AND lower(content) LIKE ? ORDER BY updated_at DESC,id DESC LIMIT ?"
@@ -232,7 +269,7 @@ impl Store {
     /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
     pub fn candidates(&self, limit: usize) -> Result<Vec<Memory>, StoreError> {
         let conn = self.lock()?;
-        let now = Utc::now().to_rfc3339();
+        let now = crate::gotime::format(Utc::now());
         let mut statement = conn.prepare(
             "SELECT id,content,scope,metadata,created_at,updated_at,created_by,created_session,consolidation_status,kind,importance,COALESCE((SELECT json_group_array(e.name) FROM memory_entities me JOIN entities e ON e.id=me.entity_id WHERE me.memory_id=memories.id),'[]') FROM memories WHERE review_status='staged' AND (expires_at IS NULL OR expires_at > ?) ORDER BY created_at ASC,id ASC LIMIT ?",
         )?;
@@ -253,7 +290,7 @@ impl Store {
         let conn = self.lock()?;
         Ok(conn.execute(
             "UPDATE memories SET review_status='approved',updated_at=? WHERE id=? AND review_status='staged'",
-            params![Utc::now().to_rfc3339(), id],
+            params![crate::gotime::format(Utc::now()), id],
         )? == 1)
     }
 
@@ -338,6 +375,75 @@ fn redact_value(value: &mut Value) {
 
 fn limit_i64(limit: usize) -> i64 {
     i64::try_from(limit).unwrap_or(i64::MAX)
+}
+
+/// Adds any shipped column an existing native database is missing.
+fn apply_column_parity(conn: &Connection) -> Result<(), StoreError> {
+    for (table, column, definition) in crate::schema::COLUMN_PARITY {
+        let mut statement = conn.prepare(&format!("PRAGMA table_info({table})"))?;
+        let present = statement
+            .query_map([], |row| row.get::<_, String>(1))?
+            .collect::<Result<Vec<_>, _>>()?
+            .iter()
+            .any(|name| name == column);
+        drop(statement);
+        if !present {
+            conn.execute_batch(&format!(
+                "ALTER TABLE {table} ADD COLUMN {column} {definition}"
+            ))?;
+        }
+    }
+    Ok(())
+}
+
+/// Generates a UUID v4 string, the identifier shape the shipped store uses.
+fn new_uuid() -> String {
+    let mut bytes = [0_u8; 16];
+    if getrandom::fill(&mut bytes).is_err() {
+        // Fall back to the deterministic form rather than failing a write.
+        return stable_id(&["memory", "fallback"]);
+    }
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    let mut hex = String::with_capacity(32);
+    for byte in bytes {
+        let _ = write!(hex, "{byte:02x}");
+    }
+    format!(
+        "{}-{}-{}-{}-{}",
+        &hex[0..8],
+        &hex[8..12],
+        &hex[12..16],
+        &hex[16..20],
+        &hex[20..32]
+    )
+}
+
+/// SHA-256 hex digest of the content, as the shipped store records it.
+fn content_hash(content: &str) -> String {
+    use sha2::{Digest, Sha256};
+
+    let mut hasher = Sha256::new();
+    hasher.update(content.as_bytes());
+    let digest = hasher.finalize();
+    let mut hash = String::with_capacity(64);
+    for byte in digest {
+        let _ = write!(hash, "{byte:02x}");
+    }
+    hash
+}
+
+/// The embedding column as the shipped store writes it.
+///
+/// The shipped encoder renders a `float32` with its shortest round-trip form
+/// and without a forced fraction (`0`, not `0.0`), which `serde_json` would
+/// not produce, so the array is rendered by hand.
+fn embedding_text(content: &str) -> String {
+    let values = crate::embedding::local_hash_vector(content)
+        .iter()
+        .map(|value| format!("{value}"))
+        .collect::<Vec<_>>();
+    format!("[{}]", values.join(","))
 }
 
 fn stable_id(parts: &[&str]) -> String {

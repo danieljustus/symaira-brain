@@ -159,7 +159,7 @@ impl Store {
             ));
         }
         let conn = self.lock()?;
-        let now = chrono::Utc::now().to_rfc3339();
+        let now = crate::gotime::format(chrono::Utc::now());
         let entity_id = |name: &str| stable_id(&["entity", &name.to_lowercase()]);
         let from_id = entity_id(from.trim());
         let to_id = entity_id(to.trim());

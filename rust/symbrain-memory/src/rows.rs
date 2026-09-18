@@ -26,13 +26,14 @@ pub(crate) fn row_memory_score(row: &Row<'_>) -> rusqlite::Result<(Memory, f32)>
 }
 
 fn parse_time(raw: &str) -> rusqlite::Result<DateTime<Utc>> {
-    DateTime::parse_from_rfc3339(raw)
-        .map(|value| value.with_timezone(&Utc))
-        .map_err(|error| {
-            rusqlite::Error::FromSqlConversionFailure(
-                raw.len(),
-                rusqlite::types::Type::Text,
-                Box::new(error),
-            )
-        })
+    crate::gotime::parse(raw).ok_or_else(|| {
+        rusqlite::Error::FromSqlConversionFailure(
+            4,
+            rusqlite::types::Type::Text,
+            Box::new(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("unrecognized timestamp: {raw}"),
+            )),
+        )
+    })
 }

@@ -388,7 +388,14 @@ fn run_set(
         Err(code) => return code,
     };
 
-    match store.set(&content, &scope, &kind, serde_json::Map::new(), staged) {
+    // The shipped CLI records `cli:symbrain` as the actor; the MCP surface
+    // records `mcp`.
+    let options = symbrain_memory::SetOptions {
+        actor: "cli:symbrain".to_owned(),
+        staged,
+        ..symbrain_memory::SetOptions::default()
+    };
+    match store.set_with_options(&content, &scope, &kind, serde_json::Map::new(), &options) {
         Ok(mem) => {
             match format {
                 OutputFormat::Json => {

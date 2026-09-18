@@ -112,7 +112,7 @@ impl Store {
     /// Returns an error when the SQLite query or timestamp decoding fails.
     pub fn activity_get(&self, id: &str) -> Result<Option<ActivityItem>, StoreError> {
         let conn = self.activity_conn()?;
-        let now = Utc::now().to_rfc3339();
+        let now = crate::gotime::format(Utc::now());
         let segment=conn.query_row("SELECT id,source,granularity,started_at,ended_at,applications,redacted_summary,raw_ref,prior_segment_ids,superseded_by FROM activity_segments WHERE id=? AND expires_at > ?",params![id,now],|r|{Ok(ActivityItem{id:r.get(0)?,kind:"segment".into(),source:r.get(1)?,granularity:r.get(2)?,started_at:parse_time(r.get(3)?)?,ended_at:parse_time(r.get(4)?)?,applications:serde_json::from_str(&r.get::<_,String>(5)?).unwrap_or_default(),summary:r.get(6)?,title:String::new(),scope:String::new(),confidence:0.0,provenance:Provenance{source:r.get(1)?,reference:r.get(7)?,prior_segment_ids:serde_json::from_str(&r.get::<_,String>(8)?).unwrap_or_default(),derived_from:nonempty(r.get(9)?),citations:Vec::new()},tokens:0})}).optional()?;
         if segment.is_some() {
             return Ok(segment);
@@ -125,7 +125,7 @@ impl Store {
     /// Returns an error when the SQLite query or timestamp decoding fails.
     pub fn activity_status(&self) -> Result<ActivityStatus, StoreError> {
         let conn = self.activity_conn()?;
-        let now = Utc::now().to_rfc3339();
+        let now = crate::gotime::format(Utc::now());
         let segments: i64 = conn.query_row(
             "SELECT COUNT(*) FROM activity_segments WHERE expires_at > ?",
             [&now],

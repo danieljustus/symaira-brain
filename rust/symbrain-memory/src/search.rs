@@ -10,7 +10,7 @@ use crate::{Store, StoreError};
 pub(crate) fn search(store: &Store, opts: &ActivitySearch) -> Result<ActivityPage, StoreError> {
     validate(opts)?;
     let conn = store.activity_conn()?;
-    let now = Utc::now().to_rfc3339();
+    let now = crate::gotime::format(Utc::now());
     let query = opts.query.to_lowercase();
     let mut items = query_segments(&conn, opts, &now, &query)?;
     if opts.include_episodes {
@@ -60,8 +60,8 @@ fn query_segments(
     let mut stmt = conn.prepare("SELECT id,source,granularity,started_at,ended_at,applications,redacted_summary,raw_ref,prior_segment_ids,superseded_by FROM activity_segments WHERE ended_at > ? AND started_at < ? AND expires_at > ? AND (granularity != '10min' OR superseded_by = '') AND (? = '' OR source = ?) ORDER BY started_at ASC,id ASC")?;
     let rows = stmt.query_map(
         params![
-            opts.from.to_rfc3339(),
-            opts.to.to_rfc3339(),
+            crate::gotime::format(opts.from),
+            crate::gotime::format(opts.to),
             now,
             opts.source.as_str(),
             opts.source.as_str(),
@@ -115,7 +115,11 @@ fn query_episodes(
 ) -> Result<Vec<ActivityItem>, StoreError> {
     let mut stmt = conn.prepare("SELECT id,title,scope,started_at,ended_at,confidence,sources,citations FROM activity_episodes WHERE ended_at > ? AND started_at < ? AND expires_at > ? ORDER BY started_at ASC,id ASC")?;
     let rows = stmt.query_map(
-        params![opts.from.to_rfc3339(), opts.to.to_rfc3339(), now],
+        params![
+            crate::gotime::format(opts.from),
+            crate::gotime::format(opts.to),
+            now
+        ],
         |row| {
             let title: String = row.get(1)?;
             let scope: String = row.get(2)?;
