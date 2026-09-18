@@ -1977,6 +1977,38 @@ CASES = (
         setup=setup_memory_seeded,
     ),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
+    # `harness list`/`harness health` were native from the start but never
+    # oracle-pinned; these cases hold them to the shipped bytes.
+    Case("harness_list_empty", ("harness", "list")),
+    Case("harness_list_empty_json", ("harness", "list", "--json")),
+    Case(
+        "harness_list_installed",
+        ("harness", "list"),
+        setup=setup_install_installed,
+    ),
+    Case(
+        "harness_list_installed_json",
+        ("harness", "list", "--json"),
+        setup=setup_install_installed,
+    ),
+    Case(
+        "harness_list_foreign_json",
+        ("harness", "list", "--json"),
+        setup=setup_install_foreign,
+    ),
+    Case(
+        "harness_list_malformed_json",
+        ("harness", "list", "--json"),
+        setup=setup_install_malformed,
+    ),
+    Case("harness_list_unknown_flag", ("harness", "list", "--bogus")),
+    Case("harness_unknown_subcommand", ("harness", "frobnicate")),
+    Case("harness_health_empty_json", ("harness", "health", "--json")),
+    Case(
+        "harness_health_filter_json",
+        ("harness", "health", "--harness", "cursor", "--json"),
+    ),
+    Case("harness_health_unknown_harness", ("harness", "health", "--harness", "nope")),
     # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.
     Case("skills_list_empty_library", ("skills", "list")),
     Case("skills_list_empty_library_json", ("skills", "list", "--json")),

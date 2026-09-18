@@ -36,6 +36,12 @@ pub struct HarnessHealthReport {
     pub servers: Option<Vec<HarnessHealthEntry>>,
 }
 
+/// The shipped `harness list` flag set as the Go flag package prints it.
+const HARNESS_LIST_FLAGS: &str = "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
+
+/// The shipped `harness health` flag set as the Go flag package prints it.
+const HARNESS_HEALTH_FLAGS: &str = "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
+
 /// Runs `symbrain harness`.
 pub fn run(
     args: &[OsString],
@@ -81,6 +87,11 @@ fn run_list(
                 i += 2;
                 continue;
             }
+            // The shipped command parses with the Go flag package, which
+            // reports a missing value and prints the flag-set usage.
+            let _ = writeln!(stderr, "flag needs an argument: -project");
+            let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
+            return Some(exit::USAGE);
         } else if let Some(val) = arg
             .strip_prefix("-project=")
             .or_else(|| arg.strip_prefix("--project="))
@@ -88,7 +99,14 @@ fn run_list(
             project_dir = Some(PathBuf::from(val));
             i += 1;
             continue;
+        } else if arg.starts_with('-') {
+            let name = arg.trim_start_matches('-');
+            let name = name.split_once('=').map_or(name, |(name, _)| name);
+            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+            let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
+            return Some(exit::USAGE);
         } else {
+            // A bare argument is the shipped command's own diagnostic.
             let _ = writeln!(stderr, "symbrain harness list: unexpected argument {arg:?}");
             return Some(exit::USAGE);
         }
