@@ -1,10 +1,13 @@
 //! Native `symbrain memory` CLI implementation.
 
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::io::Write;
 use std::path::PathBuf;
 
+use crate::go_json;
 use chrono::{DateTime, FixedOffset, NaiveDateTime, SecondsFormat, TimeZone, Utc};
+use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_memory::{Memory, Store};
@@ -21,6 +24,27 @@ Usage:
 
 The global --output table|json flag (or --json) selects the output format.
 ";
+
+/// Reports whether `symbrain memory` has to stay on the Go implementation.
+///
+/// The native memory command tree is not store-compatible with the shipped
+/// implementation yet, and the divergences are silent rather than loud:
+///
+/// - it resolves its own default database (`<data>/memory/memory.db` instead
+///   of the shipped `<data>/memory/default.db`), so a real user's memories are
+///   invisible and new writes land in a second, parallel store;
+/// - it ignores the `--db` override that every Go memory subcommand honours;
+/// - it stores and prints `memory-<hex>` ids where Go stores a UUID;
+/// - it pretty-prints `memory set --json` where Go emits compact JSON;
+/// - its schema migrations cannot be read back by the Go binary
+///   (`no such column: consolidated_into_id`), so the two stores are not
+///   interoperable in either direction.
+///
+/// Until those are ported and pinned byte for byte, every memory subcommand
+/// stays on Go. A silent second store is worse than a fallback.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    true
+}
 
 fn resolve_db_path() -> PathBuf {
     if let Some(path) = std::env::var_os("SYMBRAIN_MEMORY_DB_PATH") {
@@ -263,7 +287,7 @@ fn run_search(
         }
         OutputFormat::Table => {
             if results.is_empty() {
-                let _ = writeln!(stdout, "No matching memories found.");
+                let _ = writeln!(stdout, "No relevant memories found.");
             } else {
                 let _ = writeln!(stdout, "SCORE\tID\tSCOPE\tCONTENT");
                 for (m, score) in &results {
@@ -598,14 +622,83 @@ fn parse_query_log_args(args: &[OsString], stderr: &mut dyn Write) -> Result<Que
     })
 }
 
+/// Go-shaped query-log row. Field order and `omitempty` follow
+/// `internal/memory/db.QueryLogEntry` so the JSON bytes match.
+#[derive(Debug, Serialize)]
+struct QueryLogRow {
+    id: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    actor: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    scope: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    session: String,
+    tool: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    query_text: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    params: String,
+    duration_ms: i64,
+    created_at: String,
+}
+
+/// Go-shaped summary. `tool_breakdown` and `actor_breakdown` are Go maps, so
+/// their keys are sorted; `pruned_count` is omitted when zero.
+#[derive(Debug, Serialize)]
+struct QueryLogReport {
+    total_queries: i64,
+    tool_breakdown: BTreeMap<String, i64>,
+    actor_breakdown: BTreeMap<String, i64>,
+    recent_entries: Vec<QueryLogRow>,
+    /// Go omits this field when it is zero (`omitempty`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pruned_count: Option<i64>,
+}
+
+/// Rebuilds the store's summary as the Go struct, in Go field order.
+fn go_query_log_report(summary: &serde_json::Value) -> QueryLogReport {
+    let counts = |key: &str| {
+        summary[key]
+            .as_object()
+            .map(|values| {
+                values
+                    .iter()
+                    .map(|(key, value)| (key.clone(), value.as_i64().unwrap_or_default()))
+                    .collect::<BTreeMap<_, _>>()
+            })
+            .unwrap_or_default()
+    };
+    let entries = summary["recent_entries"]
+        .as_array()
+        .map(|rows| {
+            rows.iter()
+                .map(|row| QueryLogRow {
+                    id: row["id"].as_str().unwrap_or_default().to_owned(),
+                    actor: row["actor"].as_str().unwrap_or_default().to_owned(),
+                    scope: row["scope"].as_str().unwrap_or_default().to_owned(),
+                    session: row["session"].as_str().unwrap_or_default().to_owned(),
+                    tool: row["tool"].as_str().unwrap_or_default().to_owned(),
+                    query_text: row["query_text"].as_str().unwrap_or_default().to_owned(),
+                    params: row["params"].as_str().unwrap_or_default().to_owned(),
+                    duration_ms: row["duration_ms"].as_i64().unwrap_or_default(),
+                    created_at: row["created_at"].as_str().unwrap_or_default().to_owned(),
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    QueryLogReport {
+        total_queries: summary["total_queries"].as_i64().unwrap_or_default(),
+        tool_breakdown: counts("tool_breakdown"),
+        actor_breakdown: counts("actor_breakdown"),
+        recent_entries: entries,
+        pruned_count: summary["pruned_count"].as_i64().filter(|count| *count != 0),
+    }
+}
+
 fn render_query_log(summary: &serde_json::Value, stdout: &mut dyn Write, format: OutputFormat) {
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&summary).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&go_query_log_report(summary)));
         }
         OutputFormat::Table => {
             let total = summary["total_queries"].as_i64().unwrap_or_default();

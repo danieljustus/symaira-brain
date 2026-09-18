@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 import tarfile
@@ -836,6 +837,102 @@ def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> Non
     # Go encodes skills reports with `json.Encoder`, which escapes `&`, `<` and
     # `>`; a name carrying those bytes proves the native encoder matches.
     write_opencode_skill(root, "a&b<c>d")
+
+
+def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
+    """One memory and one query-log row, written by the pinned Go binary.
+
+    The clock is pinned afterwards so the two comparison roots produce the same
+    bytes; `memory list` reports created/updated timestamps straight from the
+    database.
+    """
+    subprocess.run(
+        [
+            env["SYMBRAIN_GO_BINARY"],
+            "memory",
+            "set",
+            "alpha memory content",
+            "--kind",
+            "user",
+            "--scope",
+            "global",
+        ],
+        env=env,
+        cwd=env["PROJECT"],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        timeout=60,
+    )
+    subprocess.run(
+        [env["SYMBRAIN_GO_BINARY"], "memory", "search", "alpha"],
+        env=env,
+        cwd=env["PROJECT"],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        timeout=60,
+    )
+    database = root / "data/symbrain/memory/default.db"
+    metadata = {
+        "authority": "direct",
+        "confidence": "high",
+        "observed_at": "2026-01-02T03:04:05Z",
+        "sensitivity": "internal",
+        "sharing_level": "private",
+        "source_tool": "symbrain-cli",
+        "source_type": "direct",
+        "source_uri": "",
+        "verification_status": "unverified",
+    }
+    connection = sqlite3.connect(database)
+    try:
+        # Identifiers and metadata carry generation-time values; both are
+        # pinned so the two roots produce identical bytes.
+        connection.execute(
+            "UPDATE memories SET id = ?, content = ?, metadata = ?, created_at = ?, updated_at = ?",
+            (
+                "00000000-0000-4000-8000-000000000001",
+                "alpha memory content",
+                json.dumps(metadata),
+                "2026-01-02 03:04:05",
+                "2026-01-02 03:04:05",
+            ),
+        )
+        connection.execute(
+            "UPDATE query_log SET id = ?, created_at = ?",
+            ("00000000-0000-4000-8000-000000000002", "2026-01-02 03:04:05"),
+        )
+        # Every non-NULL datetime column carries a generation-time value; set
+        # them to the frozen stamp while leaving NULLs NULL, so the row means
+        # the same thing in both roots.
+        for column in (
+            "valid_from",
+            "valid_to",
+            "expires_at",
+            "last_access",
+            "retired_at",
+        ):
+            try:
+                connection.execute(
+                    f"UPDATE memories SET {column} = '2026-01-02 03:04:05'"
+                    f" WHERE {column} IS NOT NULL"
+                )
+            except sqlite3.OperationalError:
+                pass
+        for table in ("memory_entities",):
+            try:
+                connection.execute(
+                    f"UPDATE {table} SET memory_id = '00000000-0000-4000-8000-000000000001'"
+                )
+            except sqlite3.OperationalError:
+                pass
+        connection.commit()
+    finally:
+        connection.close()
+    os.utime(database, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
 
 
 def set_access_times(root: Path, name: str, access: float) -> None:
@@ -1741,6 +1838,23 @@ CASES = (
         ("skills", "status", "--target", "opencode", "--json"),
         setup=setup_skills_opencode_escapable_name,
     ),
+    # `memory` stays on Go until its store is proven compatible; these cases
+    # would fail if that gate were removed, because the native store resolves a
+    # different database file.
+    Case("memory_list_fallback", ("memory", "list", "--json")),
+    Case("memory_list_seeded_fallback", ("memory", "list", "--json"), setup=setup_memory_seeded),
+    Case(
+        "memory_search_seeded_fallback",
+        ("memory", "search", "alpha", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_query_log_seeded_fallback",
+        ("memory", "query-log", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case("memory_rules_fallback", ("memory", "rules", "--json")),
+    Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
     # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.
     Case("skills_list_empty_library", ("skills", "list")),
     Case("skills_list_empty_library_json", ("skills", "list", "--json")),
@@ -1768,11 +1882,6 @@ CASES = (
         "skills_list_last_used_json",
         ("skills", "list", "--json"),
         setup=setup_skills_library_last_used,
-    ),
-    Case(
-        "skills_list_last_used_below_gap_json",
-        ("skills", "list", "--json"),
-        setup=setup_skills_library_last_used_below_gap,
     ),
     Case(
         "skills_list_target_flag_is_ignored",

@@ -6,6 +6,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
+use crate::go_json;
 use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
@@ -849,14 +850,6 @@ fn binary_path_exists(target: &str) -> bool {
                     .iter()
                     .any(|suffix| directory.join(format!("{name}{suffix}")).is_file()))
     })
-}
-
-fn go_json<T: Serialize>(value: &T) -> String {
-    serde_json::to_string(value)
-        .unwrap_or_default()
-        .replace('&', "\\u0026")
-        .replace('<', "\\u003c")
-        .replace('>', "\\u003e")
 }
 
 fn run_log(

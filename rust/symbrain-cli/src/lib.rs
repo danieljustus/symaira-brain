@@ -211,6 +211,7 @@ pub fn run_in_process(
         "harness" => harness_cli::run(rest, stdout, stderr, format),
         "sync" if sync_cli::requires_go_fallback(rest) => None,
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
+        "memory" if memory_cli::requires_go_fallback(rest) => None,
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
         "skills" if skills_cli::requires_go_fallback(rest) => None,
         "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
@@ -223,6 +224,19 @@ pub fn run_in_process(
             Some(exit::USAGE)
         }
     }
+}
+
+/// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
+/// `<` and `>` escaped, and no trailing newline.
+///
+/// Go renders every CLI report through `encoding/json`, so a report that must
+/// match its bytes has to escape those three characters too.
+pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
+    serde_json::to_string(value)
+        .unwrap_or_default()
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
 }
 
 fn is_output_command(cmd: &str) -> bool {

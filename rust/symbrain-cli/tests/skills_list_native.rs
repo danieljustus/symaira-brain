@@ -146,6 +146,44 @@ fn marker_install_and_access_time_fill_the_record() {
     }
 }
 
+#[cfg(unix)]
+#[test]
+fn access_time_inside_the_install_gap_is_not_usage() {
+    // A read within a minute of the install is symskills' own bookkeeping, not
+    // harness usage; Go reports no evidence there and so does this path.
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "demo", "");
+    let installed = root.path().join("home/.config/opencode/skills/demo");
+    std::fs::create_dir_all(&installed).unwrap();
+    std::fs::write(installed.join("SKILL.md"), b"# demo\n").unwrap();
+    std::fs::write(
+        installed.join(".symskills.json"),
+        br#"{"schema_version":1,"managed_by":"symskills","target":"opencode","name":"demo","mode":"copy","installed":"2026-01-02T03:04:05Z","source_hash":"abc123"}"#,
+    )
+    .unwrap();
+    use std::time::{Duration, SystemTime};
+    let written = SystemTime::UNIX_EPOCH + Duration::from_secs(1_767_323_045);
+    let times = std::fs::FileTimes::new()
+        .set_accessed(written + Duration::from_secs(30))
+        .set_modified(written);
+    std::fs::File::options()
+        .write(true)
+        .open(installed.join("SKILL.md"))
+        .unwrap()
+        .set_times(times)
+        .unwrap();
+
+    let value = list_json(&root);
+    let entry = &value["skills"][0];
+    assert_eq!(entry["installs"].as_array().unwrap().len(), 1);
+    assert!(
+        entry["last_used"].is_null(),
+        "last_used: {}",
+        entry["last_used"]
+    );
+    assert!(entry["last_used_source"].is_null());
+}
+
 #[test]
 fn unloadable_library_entry_keeps_go_fallback() {
     // Go reports these with cap-std error text that the native path does not
