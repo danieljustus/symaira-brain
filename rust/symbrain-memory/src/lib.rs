@@ -13,5 +13,5 @@ mod schema;
 mod store;
 
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
-pub use list_rows::MemoryListRow;
+pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};

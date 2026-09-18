@@ -233,6 +233,15 @@ impl Store {
         crate::list_rows::list_lite(&conn, scope, limit).map_err(Into::into)
     }
 
+    /// Reads `memory rules` rows in the shipped shape.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when the scan fails.
+    pub fn list_rules(&self, scope: &str) -> Result<Vec<crate::list_rows::RuleRow>, StoreError> {
+        let conn = self.lock()?;
+        crate::list_rows::list_rules(&conn, scope).map_err(Into::into)
+    }
+
     /// Executes a bounded store operation.
     ///
     /// # Errors

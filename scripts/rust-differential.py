@@ -839,6 +839,31 @@ def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> Non
     write_opencode_skill(root, "a&b<c>d")
 
 
+def setup_memory_rules(root: Path, env: dict[str, str]) -> None:
+    """One rule row, inserted with the shipped column set and frozen values."""
+    setup_memory_seeded(root, env)
+    database = root / "data/symbrain/memory/default.db"
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute(
+            "INSERT INTO rules(id, content, scope, metadata, created_at, updated_at, created_by, updated_by) "
+            "VALUES(?,?,?,?,?,?,?,?)",
+            (
+                "00000000-0000-4000-8000-000000000003",
+                "always verify before publishing",
+                "global",
+                json.dumps({"source": "fixture"}),
+                "2026-01-02 03:04:05 +0000 UTC",
+                "2026-01-02 03:04:05 +0000 UTC",
+                "cli:symbrain",
+                "cli:symbrain",
+            ),
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+
 def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
     """One memory and one query-log row, written by the pinned Go binary.
 
@@ -1850,7 +1875,7 @@ CASES = (
         setup=setup_memory_seeded,
     ),
     Case(
-        "memory_query_log_seeded_fallback",
+        "memory_query_log_seeded",
         ("memory", "query-log", "--json"),
         setup=setup_memory_seeded,
     ),
@@ -1895,7 +1920,28 @@ CASES = (
         ("memory", "delete", "missing-id"),
     ),
     Case("memory_help_fallback", ("memory",)),
-    Case("memory_rules_fallback", ("memory", "rules", "--json")),
+    Case("memory_rules_empty", ("memory", "rules", "--json")),
+    Case("memory_rules_empty_table", ("memory", "rules")),
+    Case(
+        "memory_rules_seeded",
+        ("memory", "rules", "--json"),
+        setup=setup_memory_rules,
+    ),
+    Case(
+        "memory_rules_seeded_table",
+        ("memory", "rules"),
+        setup=setup_memory_rules,
+    ),
+    Case(
+        "memory_rules_seeded_scope",
+        ("memory", "rules", "-s", "global", "--json"),
+        setup=setup_memory_rules,
+    ),
+    Case(
+        "memory_query_log_seeded_table",
+        ("memory", "query-log"),
+        setup=setup_memory_seeded,
+    ),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
     # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.
     Case("skills_list_empty_library", ("skills", "list")),

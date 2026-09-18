@@ -130,6 +130,79 @@ fn render_map(map: &serde_json::Map<String, serde_json::Value>) -> String {
     members.finish()
 }
 
+/// One row of `memory rules`.
+#[derive(Debug, Clone)]
+pub struct RuleRow {
+    /// Identifier.
+    pub id: String,
+    /// Rule content.
+    pub content: String,
+    /// Scope.
+    pub scope: String,
+    /// Metadata object, as stored.
+    pub metadata: serde_json::Map<String, serde_json::Value>,
+    /// Creation timestamp.
+    pub created_at: Option<DateTime<Utc>>,
+    /// Update timestamp.
+    pub updated_at: Option<DateTime<Utc>>,
+    /// Actor that created the rule.
+    pub created_by: String,
+    /// Actor that last updated it.
+    pub updated_by: String,
+}
+
+impl RuleRow {
+    /// Renders the rule the way the shipped encoder does.
+    #[must_use]
+    pub fn to_go_json(&self) -> String {
+        let mut members = Members::default();
+        members.string("id", &self.id);
+        members.string("content", &self.content);
+        members.string("scope", &self.scope);
+        members.raw("metadata", &render_map(&self.metadata));
+        members.time("created_at", self.created_at);
+        members.time("updated_at", self.updated_at);
+        members.string_if_present("created_by", &self.created_by);
+        members.string_if_present("updated_by", &self.updated_by);
+        members.finish()
+    }
+}
+
+/// Reads the rows a `memory rules` invocation reports.
+///
+/// # Errors
+/// Returns a SQLite error when the scan fails.
+pub(crate) fn list_rules(conn: &Connection, scope: &str) -> rusqlite::Result<Vec<RuleRow>> {
+    let sql = if scope.is_empty() {
+        "SELECT id, content, scope, metadata, created_at, updated_at, created_by, updated_by \
+         FROM rules ORDER BY created_at DESC"
+    } else {
+        "SELECT id, content, scope, metadata, created_at, updated_at, created_by, updated_by \
+         FROM rules WHERE scope = ? ORDER BY created_at DESC"
+    };
+    let mut statement = conn.prepare(sql)?;
+    let mut rows = if scope.is_empty() {
+        statement.query([])?
+    } else {
+        statement.query([scope])?
+    };
+    let mut result = Vec::new();
+    while let Some(row) = rows.next()? {
+        let metadata_text: String = row.get(3)?;
+        result.push(RuleRow {
+            id: row.get(0)?,
+            content: row.get(1)?,
+            scope: row.get(2)?,
+            metadata: serde_json::from_str(&metadata_text).unwrap_or_default(),
+            created_at: time(row, 4)?,
+            updated_at: time(row, 5)?,
+            created_by: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
+            updated_by: row.get::<_, Option<String>>(7)?.unwrap_or_default(),
+        });
+    }
+    Ok(result)
+}
+
 /// Reads the rows a `memory list` invocation reports.
 ///
 /// # Errors

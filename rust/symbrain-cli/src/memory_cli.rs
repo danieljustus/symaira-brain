@@ -33,8 +33,7 @@ The global --output table|json flag (or --json) selects the output format.
 /// bytes are pinned, everything else stays on Go:
 ///
 /// - `search` reads through a different retrieval path (the shipped one ranks
-///   embedding candidates), `set`/`delete`/`serve`/`sync` write or serve, and
-///   `rules`/`query-log` are not pinned yet;
+///   embedding candidates) and `set`/`delete`/`serve`/`sync` write or serve;
 /// - a dynamic memory configuration (a `symmemory` config file or
 ///   `SYMMEMORY_*` in the environment) changes the database and retrieval
 ///   settings, so it goes to Go;
@@ -44,10 +43,10 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
         return true;
     };
-    if verb != "list" {
+    if !matches!(verb.as_str(), "list" | "rules" | "query-log") {
         return true;
     }
-    memory_config_is_dynamic() || !list_arguments_are_allowed(&args[1..])
+    memory_config_is_dynamic() || !read_arguments_are_allowed(&args[1..])
 }
 
 /// Reads the shipped memory configuration lookups that change the database or
@@ -64,11 +63,13 @@ fn memory_config_is_dynamic() -> bool {
         || std::env::current_dir().is_ok_and(|dir| dir.join(".symmemory.toml").is_file())
 }
 
-/// Accepts exactly the flag shapes the shipped `memory list` defines:
-/// `--scope`/`-s`, `--limit`/`-l` and `--db`, each with a value.
-fn list_arguments_are_allowed(args: &[OsString]) -> bool {
+/// Accepts exactly the flag shapes the shipped read commands define:
+/// `--scope`/`-s`, `--limit`/`-l` and `--db`, each with a value. A bare
+/// argument is rejected, because the shipped flag sets report positionals as
+/// unexpected.
+fn read_arguments_are_allowed(args: &[OsString]) -> bool {
     let allowed = [
-        "-scope", "--scope", "-s", "-limit", "--limit", "-l", "-db", "--db",
+        "-scope", "--scope", "-s", "-limit", "--limit", "-l", "-actor", "--actor", "-db", "--db",
     ];
     let mut index = 0;
     while index < args.len() {
@@ -532,40 +533,75 @@ fn run_rules(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    let scope = flag_value(args, &["-scope", "--scope", "-s"]);
     let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
 
-    let memories = match store.list("rules", 100) {
-        Ok(m) => m,
+    let rules = match store.list_rules(scope.as_deref().unwrap_or("")) {
+        Ok(rules) => rules,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain memory rules: {err}");
+            let _ = writeln!(stderr, "symbrain memory rules: list rules: {err}");
             return exit::GENERIC;
         }
     };
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&memories).unwrap_or_default()
-            );
+            let rendered = rules
+                .iter()
+                .map(symbrain_memory::RuleRow::to_go_json)
+                .collect::<Vec<_>>()
+                .join(",");
+            let _ = writeln!(stdout, "[{rendered}]");
         }
         OutputFormat::Table => {
-            if memories.is_empty() {
+            if rules.is_empty() {
                 let _ = writeln!(stdout, "No rules found.");
             } else {
-                let _ = writeln!(stdout, "ID\tRULE");
-                for m in &memories {
-                    let _ = writeln!(stdout, "{}\t{}", m.id, m.content);
+                let _ = writeln!(stdout, "ID\tSCOPE\tCREATED\tCONTENT");
+                for rule in &rules {
+                    let created = rule
+                        .created_at
+                        .map(|time| time.format("%Y-%m-%dT%H:%M:%SZ").to_string())
+                        .unwrap_or_default();
+                    let _ = writeln!(
+                        stdout,
+                        "{}\t{}\t{}\t{}",
+                        rule.id,
+                        rule.scope,
+                        created,
+                        table_content(&rule.content)
+                    );
                 }
             }
         }
     }
 
     exit::OK
+}
+
+/// Reads the value of the first matching flag, in `--flag value` or
+/// `--flag=value` form.
+fn flag_value(args: &[OsString], names: &[&str]) -> Option<String> {
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if names.contains(&name) {
+            if let Some(value) = inline {
+                return Some(value.to_owned());
+            }
+            return args
+                .get(index + 1)
+                .map(|value| value.to_string_lossy().into_owned());
+        }
+        index += 1;
+    }
+    None
 }
 
 const QUERY_LOG_USAGE: &str = "symbrain memory query-log — inspect the memory retrieval log
