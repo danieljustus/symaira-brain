@@ -39,9 +39,6 @@ pub struct HarnessHealthReport {
 /// The shipped `harness list` flag set as the Go flag package prints it.
 const HARNESS_LIST_FLAGS: &str = "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
 
-/// The shipped `harness health` flag set as the Go flag package prints it.
-const HARNESS_HEALTH_FLAGS: &str = "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
-
 /// Runs `symbrain harness`.
 pub fn run(
     args: &[OsString],
@@ -81,34 +78,37 @@ fn run_list(
     let mut i = 0;
     while i < args.len() {
         let arg = args[i].to_string_lossy();
-        if arg == "-project" || arg == "--project" {
-            if i + 1 < args.len() {
-                project_dir = Some(PathBuf::from(&args[i + 1]));
-                i += 2;
-                continue;
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-project" | "--project" => {
+                let value = if let Some(value) = inline {
+                    value.to_owned()
+                } else {
+                    // The shipped command parses with the Go flag package,
+                    // which reports a missing value and prints the flag-set
+                    // usage.
+                    let Some(value) = args.get(i + 1) else {
+                        let _ = writeln!(stderr, "flag needs an argument: -project");
+                        let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
+                        return Some(exit::USAGE);
+                    };
+                    i += 1;
+                    value.to_string_lossy().into_owned()
+                };
+                project_dir = Some(PathBuf::from(value));
             }
-            // The shipped command parses with the Go flag package, which
-            // reports a missing value and prints the flag-set usage.
-            let _ = writeln!(stderr, "flag needs an argument: -project");
-            let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
-            return Some(exit::USAGE);
-        } else if let Some(val) = arg
-            .strip_prefix("-project=")
-            .or_else(|| arg.strip_prefix("--project="))
-        {
-            project_dir = Some(PathBuf::from(val));
-            i += 1;
-            continue;
-        } else if arg.starts_with('-') {
-            let name = arg.trim_start_matches('-');
-            let name = name.split_once('=').map_or(name, |(name, _)| name);
-            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-            let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
-            return Some(exit::USAGE);
-        } else {
-            // A bare argument is the shipped command's own diagnostic.
-            let _ = writeln!(stderr, "symbrain harness list: unexpected argument {arg:?}");
-            return Some(exit::USAGE);
+            _ if name.starts_with('-') => {
+                let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+                let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
+                return Some(exit::USAGE);
+            }
+            _ => {
+                // A bare argument is the shipped command's own diagnostic.
+                let _ = writeln!(stderr, "symbrain harness list: unexpected argument {arg:?}");
+                return Some(exit::USAGE);
+            }
         }
         i += 1;
     }
