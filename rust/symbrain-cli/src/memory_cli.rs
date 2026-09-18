@@ -46,30 +46,48 @@ pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
     true
 }
 
-fn resolve_db_path() -> PathBuf {
+/// Resolves the memory database the native commands open.
+///
+/// Mirrors the shipped implementation: the configured/`--db` override wins,
+/// then the current `<data>/memory/default.db`, then a legacy
+/// `~/.local/share/symmemory` installation. `SYMBRAIN_MEMORY_DB_PATH` is a
+/// Rust-side test hook and has no counterpart in the shipped CLI.
+fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
+    if let Some(path) = override_path.filter(|path| !path.is_empty()) {
+        return PathBuf::from(path);
+    }
     if let Some(path) = std::env::var_os("SYMBRAIN_MEMORY_DB_PATH") {
         return PathBuf::from(path);
     }
-    if let Some(data) = symbrain_core::xdg::data_dir() {
-        let preferred = data.join("memory").join("memory.db");
-        if preferred.exists() {
-            return preferred;
+    let current = symbrain_core::xdg::data_dir().map(|dir| dir.join("memory"));
+    let legacy = symbrain_core::xdg::home_dir().map(|home| home.join(".local/share/symmemory"));
+    let directory = match (&current, &legacy) {
+        (Some(current), Some(legacy)) if !current.exists() && legacy.exists() => legacy.clone(),
+        (Some(current), _) => current.clone(),
+        (None, Some(legacy)) => legacy.clone(),
+        (None, None) => PathBuf::from(".memory"),
+    };
+    directory.join("default.db")
+}
+
+/// Reads the `--db` override shared by every memory subcommand.
+fn extract_db_override(args: &[OsString]) -> Option<String> {
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        if arg == "-db" || arg == "--db" {
+            return args
+                .get(index + 1)
+                .map(|value| value.to_string_lossy().into_owned());
         }
-    }
-    if let Some(home) = symbrain_core::xdg::home_dir() {
-        let legacy = home
-            .join(".local")
-            .join("share")
-            .join("symmemory")
-            .join("memory.db");
-        if legacy.exists() {
-            return legacy;
+        for prefix in ["-db=", "--db="] {
+            if let Some(value) = arg.strip_prefix(prefix) {
+                return Some(value.to_owned());
+            }
         }
+        index += 1;
     }
-    symbrain_core::xdg::data_dir().map_or_else(
-        || PathBuf::from(".memory.db"),
-        |d| d.join("memory").join("memory.db"),
-    )
+    None
 }
 
 /// Runs `symbrain memory`.
@@ -106,8 +124,8 @@ pub fn run(
     }
 }
 
-fn open_store(stderr: &mut dyn Write) -> Result<Store, u8> {
-    let db_path = resolve_db_path();
+fn open_store(stderr: &mut dyn Write, override_path: Option<&str>) -> Result<Store, u8> {
+    let db_path = resolve_db_path(override_path);
     Store::open(&db_path).map_err(|err| {
         let _ = writeln!(stderr, "symbrain memory: open database: {err}");
         exit::GENERIC
@@ -160,7 +178,7 @@ fn run_list(
         i += 1;
     }
 
-    let store = match open_store(stderr) {
+    let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -263,7 +281,7 @@ fn run_search(
         return exit::USAGE;
     }
 
-    let store = match open_store(stderr) {
+    let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -365,7 +383,7 @@ fn run_set(
         return exit::USAGE;
     }
 
-    let store = match open_store(stderr) {
+    let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -413,7 +431,7 @@ fn run_delete(
         }
     };
 
-    let store = match open_store(stderr) {
+    let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -450,12 +468,12 @@ fn run_delete(
 }
 
 fn run_rules(
-    _args: &[OsString],
+    args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let store = match open_store(stderr) {
+    let store = match open_store(stderr, extract_db_override(args).as_deref()) {
         Ok(s) => s,
         Err(code) => return code,
     };
@@ -533,7 +551,7 @@ fn run_query_log(
             }
         }
     } else {
-        match open_store(stderr) {
+        match open_store(stderr, None) {
             Ok(store) => store,
             Err(code) => return code,
         }

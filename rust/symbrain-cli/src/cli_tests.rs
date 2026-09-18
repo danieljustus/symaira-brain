@@ -257,15 +257,20 @@ fn fallback_executor_receives_unmigrated_commands_only() {
     assert_eq!(doctor_code, exit::USAGE);
     assert!(executor.calls.lock().unwrap().is_empty());
 
-    // Usage is native and must not call the Go fallback.
+    // `usage` is gated to Go until its per-provider auth details match the
+    // shipped texts (issue #617), so it must reach the fallback executor.
     stdout.clear();
     stderr.clear();
     let usage_args = [OsString::from("usage"), OsString::from("--help")];
     let usage_code = run_with_executor(&usage_args, &mut stdout, &mut stderr, &executor);
-    assert_eq!(usage_code, exit::USAGE);
-    assert!(executor.calls.lock().unwrap().is_empty());
+    assert_eq!(usage_code, 42);
+    assert_eq!(executor.calls.lock().unwrap().len(), 1);
+    assert_eq!(
+        executor.calls.lock().unwrap()[0],
+        usage_args.map(OsString::from).to_vec()
+    );
     assert!(stdout.is_empty());
-    assert!(String::from_utf8_lossy(&stderr).contains("symbrain usage"));
+    executor.calls.lock().unwrap().clear();
 
     // Init is native and must not call the Go fallback.
     stdout.clear();
