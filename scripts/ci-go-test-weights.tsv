@@ -2,7 +2,8 @@
 # Generated from the shard test logs of a green CI run; used only to balance
 # the shards of the `go-test-shard` job. Unknown packages fall back to the
 # median weight, so a stale table degrades balance, never coverage.
-# Regenerate: gh run download <run> -n coverage-input-<sha>-<shard> --pattern ... and
+# Observed after the first rebalanced run: 4:02/4:02/5:57/5:44 per shard, so this
+# table still understates the per-package compile overhead of the larger shards.
 # merge the per-package `ok  <pkg>  <seconds>s` lines of every shard log.
 github.com/danieljustus/symaira-brain/cmd/symbrain	134
 github.com/danieljustus/symaira-brain/guard/cmd/symguard/decide	1
