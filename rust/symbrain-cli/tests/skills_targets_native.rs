@@ -80,23 +80,51 @@ fn user_targets_json_is_compact_and_has_go_schema() {
     assert_eq!(targets[0]["runtime_capabilities"]["subagents"], "supported");
 }
 
+fn opencode_row(output: &Output) -> serde_json::Value {
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    value["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|row| row["target"] == "opencode")
+        .unwrap()
+        .clone()
+}
+
 #[test]
-fn managed_and_unmanaged_skill_roots_keep_go_fallback_before_output() {
+fn managed_and_unmanaged_skill_roots_are_classified_natively() {
     let root = TempDir::new().unwrap();
     let opencode = root.path().join("home/.config/opencode/skills");
     std::fs::create_dir_all(opencode.join("managed")).unwrap();
     std::fs::write(opencode.join("managed/.symskills.json"), b"{}").unwrap();
     std::fs::create_dir_all(opencode.join("handwritten")).unwrap();
 
-    let output = run(&root, &["skills", "targets"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let output = run(&root, &["skills", "targets", "--json"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let row = opencode_row(&output);
+    assert_eq!(row["skill_root_exists"], true);
+    assert_eq!(row["skill_root_readable"], true);
+    assert_eq!(row["managed_skills_count"], 1);
+    assert_eq!(row["unmanaged_skills_count"], 1);
+    assert_eq!(row["install_state"], "mixed");
+    assert_eq!(
+        row["setup_hint"],
+        "Harness contains 1 managed and 1 unmanaged skill(s)"
+    );
+    // Creating the skill root also creates the harness config directory, which
+    // is evidence in its own right.
+    assert_eq!(row["installed"], true);
+    assert!(
+        row["evidence"].as_str().unwrap().starts_with("config_dir:"),
+        "evidence: {}",
+        row["evidence"]
+    );
 }
 
 #[cfg(unix)]
 #[test]
-fn symlinked_skill_root_keeps_go_fallback_before_output() {
+fn symlinked_skill_root_is_inventoried_natively() {
     use std::os::unix::fs::symlink;
 
     let root = TempDir::new().unwrap();
@@ -107,62 +135,71 @@ fn symlinked_skill_root_keeps_go_fallback_before_output() {
     symlink(&real_root, &opencode).unwrap();
 
     let output = run(&root, &["skills", "targets", "--json"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let row = opencode_row(&output);
+    // Go reports the link itself as the skill root and follows it for counts.
+    assert_eq!(row["skill_root_exists"], true);
+    assert_eq!(row["skill_root_readable"], true);
+    assert_eq!(row["managed_skills_count"], 0);
+    assert_eq!(row["unmanaged_skills_count"], 1);
+    assert_eq!(row["install_state"], "unmanaged");
 }
 
 #[test]
-fn target_binary_keeps_go_fallback_before_output() {
+fn target_binary_is_reported_as_evidence_natively() {
     let root = TempDir::new().unwrap();
     let bin_dir = root.path().join("bin");
     std::fs::create_dir_all(&bin_dir).unwrap();
-    std::fs::write(bin_dir.join("opencode"), b"placeholder").unwrap();
+    let binary = bin_dir.join("opencode");
+    std::fs::write(&binary, b"placeholder").unwrap();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&binary, std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
 
-    let mut command = command(&root, &["skills", "targets"]);
-    command.env("PATH", bin_dir);
+    let mut command = command(&root, &["skills", "targets", "--json"]);
+    command.env("PATH", &bin_dir);
     let output = command.output().unwrap();
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let row = opencode_row(&output);
+    assert_eq!(row["installed"], true);
+    assert_eq!(row["verification_status"], "verified");
+    assert_eq!(row["evidence"], format!("binary:{}", binary.display()));
+    assert_eq!(row["install_state"], "missing");
 }
 
 #[test]
-fn parsed_and_dynamic_targets_variants_keep_go_fallback_before_output() {
-    for (name, args, env_name, env_value) in [
-        (
-            "scope",
-            &["skills", "targets", "--scope", "user"][..],
-            None,
-            None,
-        ),
-        (
-            "project",
-            &["skills", "targets", "--scope", "project"][..],
-            None,
-            None,
-        ),
-        (
-            "config",
-            &["skills", "targets"][..],
-            Some("SYMSKILLS_LIBRARY_DIR"),
-            Some("/different/library"),
-        ),
-    ] {
-        let root = TempDir::new().unwrap();
-        let mut command = command(&root, args);
-        if let Some(name) = env_name {
-            command.env(name, env_value.unwrap());
-        }
-        let output = command.output().unwrap();
-        assert_eq!(output.status.code(), Some(1), "{name}: {output:?}");
-        assert!(output.stdout.is_empty(), "{name}: {:?}", output.stdout);
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}: {:?}",
-            output.stderr
-        );
-    }
+fn scope_flag_is_native_but_config_stays_on_go() {
+    // `--scope user` is the default scan, `--scope project` resolves the
+    // workspace roots; only a dynamic symskills config still needs Go.
+    let root = TempDir::new().unwrap();
+    let user = run(&root, &["skills", "targets", "--json"]).stdout;
+    let explicit = run(&root, &["skills", "targets", "--scope", "user", "--json"]);
+    assert!(explicit.status.success(), "stderr: {:?}", explicit.stderr);
+    assert_eq!(explicit.stdout, user);
+
+    let project = run(
+        &root,
+        &["skills", "targets", "--scope", "project", "--json"],
+    );
+    assert!(project.status.success(), "stderr: {:?}", project.stderr);
+    let row = opencode_row(&project);
+    assert_eq!(
+        row["effective_skill_root"],
+        root.path()
+            .join("project/.opencode/skills")
+            .display()
+            .to_string()
+    );
+
+    let mut command = command(&root, &["skills", "targets"]);
+    let configured = command
+        .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
+        .output()
+        .unwrap();
+    assert_eq!(configured.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&configured.stderr).contains("no Go fallback was found"));
 }
 
 #[test]

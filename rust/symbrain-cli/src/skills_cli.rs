@@ -14,6 +14,9 @@ use symbrain_skills::install::{
     parse_marker,
 };
 use symbrain_skills::load_bundle;
+use symbrain_skills::targets_status::{
+    StatusOptions as TargetStatusOptions, TargetStatus, list_status,
+};
 
 const SKILLS_USAGE: &str = "symbrain skills — operate the embedded skill library
 
@@ -62,26 +65,8 @@ struct SkillStatusReport {
 }
 
 #[derive(Debug, Serialize)]
-struct SkillTargetsEntry {
-    target: String,
-    display_name: String,
-    installed: bool,
-    evidence: String,
-    effective_skill_root: String,
-    skill_root_exists: bool,
-    skill_root_readable: bool,
-    managed_skills_count: usize,
-    unmanaged_skills_count: usize,
-    install_state: String,
-    capabilities: Vec<&'static str>,
-    runtime_capabilities: BTreeMap<String, &'static str>,
-    setup_hint: String,
-    verification_status: String,
-}
-
-#[derive(Debug, Serialize)]
 struct SkillTargetsReport {
-    targets: Vec<SkillTargetsEntry>,
+    targets: Vec<TargetStatus>,
 }
 
 #[derive(Debug, Serialize)]
@@ -150,8 +135,12 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         // The native targets slice is deliberately only the no-argument,
         // user-scope/default-config contract. Keep every parsed or dynamic
         // variant on Go until its bytes are frozen independently.
+        // The native targets inventory observes the harness roots itself, so
+        // dynamic target state no longer forces Go. A custom symskills config
+        // can still register additional targets, and malformed flags belong to
+        // the Go flag package.
         Some(verb) if verb == "targets" => {
-            args.len() != 1 || has_dynamic_config() || has_dynamic_target_state()
+            parse_scope_flag(&args[1..]).is_err() || has_dynamic_config()
         }
         Some(verb) if verb == "log" => parse_skill_log_args(&args[1..]).is_err() || has_skill_log(),
         Some(verb) if verb == "doctor" => args.len() != 1 || has_dynamic_config(),
@@ -666,18 +655,29 @@ fn run_status(
 }
 
 fn run_targets(
-    _args: &[OsString],
+    args: &[OsString],
     stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
+    stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    // Invalid arguments and unknown scope values stay on Go: the flag package
+    // and `resolveScope` own those bytes.
+    let scope = match parse_scope_flag(args) {
+        Ok(scope) => scope,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain skills targets: {error}");
+            return exit::USAGE;
+        }
+    };
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let targets = symbrain_harness::all()
-        .iter()
-        .filter_map(|harness| harness.skill_target.as_str())
-        .map(|target| static_target_status(target, &home))
-        .collect::<Vec<_>>();
-    let report = SkillTargetsReport { targets };
+    let options = TargetStatusOptions {
+        home_dir: home,
+        project_dir: Some(current_project_dir()),
+        scope,
+    };
+    let report = SkillTargetsReport {
+        targets: list_status(&options),
+    };
 
     match format {
         OutputFormat::Json => {
@@ -702,55 +702,35 @@ fn run_targets(
     exit::OK
 }
 
-const CAPABILITIES: [&str; 4] = ["render", "install", "symlink", "copy"];
-const RUNTIME_CAPABILITIES: [&str; 6] = [
-    "background_tasks",
-    "hooks",
-    "mcp",
-    "scheduled_tasks",
-    "slash_commands",
-    "subagents",
-];
-
-fn static_target_status(target: &str, home: &std::path::Path) -> SkillTargetsEntry {
-    let skill_root = skill_root_for(target, home);
-    let display_name = match target {
-        "opencode" => "OpenCode",
-        "claude" => "Claude Code",
-        "codex" => "Codex",
-        "hermes" => "Hermes",
-        "antigravity" => "Antigravity",
-        "openclaw" => "OpenClaw",
-        _ => target,
-    };
-    let mut runtime_capabilities = BTreeMap::new();
-    for capability in RUNTIME_CAPABILITIES {
-        let state = if capability == "subagents" && matches!(target, "claude" | "hermes") {
-            "supported"
-        } else {
-            "unknown"
-        };
-        runtime_capabilities.insert(capability.to_owned(), state);
+/// Parses the `--scope` flag of `skills targets`, accepting `user` and
+/// `project` (empty means `user`). Anything else is left to Go.
+fn parse_scope_flag(args: &[OsString]) -> Result<String, String> {
+    let mut scope = String::new();
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-scope" | "--scope" => {
+                let value = inline
+                    .map(str::to_owned)
+                    .or_else(|| {
+                        args.get(index + 1)
+                            .map(|value| value.to_string_lossy().into_owned())
+                    })
+                    .ok_or("flag needs an argument: -scope")?;
+                value.trim().clone_into(&mut scope);
+                index += usize::from(inline.is_none()) + 1;
+            }
+            _ => return Err(format!("flag provided but not defined: {name}")),
+        }
     }
-
-    SkillTargetsEntry {
-        target: target.to_owned(),
-        display_name: display_name.to_owned(),
-        installed: false,
-        evidence: "none".to_owned(),
-        effective_skill_root: skill_root.display().to_string(),
-        skill_root_exists: false,
-        skill_root_readable: false,
-        managed_skills_count: 0,
-        unmanaged_skills_count: 0,
-        install_state: "missing".to_owned(),
-        capabilities: CAPABILITIES.to_vec(),
-        runtime_capabilities,
-        setup_hint: format!(
-            "Create skill directory {} or run 'symskills install --target {target} <skill>'",
-            skill_root.display()
-        ),
-        verification_status: "not_verified".to_owned(),
+    match scope.as_str() {
+        "" | "user" => Ok("user".to_owned()),
+        "project" => Ok("project".to_owned()),
+        other => Err(format!("unknown scope {other:?} (known: user, project)")),
     }
 }
 

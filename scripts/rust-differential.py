@@ -768,6 +768,41 @@ def write_symskills_config(root: Path, body: str) -> None:
     config.write_text(body, encoding="utf-8")
 
 
+def setup_skills_targets_mixed(root: Path, env: dict[str, str]) -> None:
+    write_opencode_skill(root, "handwritten")
+    directory = write_opencode_skill(root, "managed")
+    write_skills_marker(directory)
+    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+
+
+def setup_skills_targets_empty_root(root: Path, env: dict[str, str]) -> None:
+    opencode_skills_root(root)
+
+
+def setup_skills_targets_managed_only(root: Path, env: dict[str, str]) -> None:
+    write_skills_marker(write_opencode_skill(root, "managed"))
+
+
+def setup_skills_targets_config_dir_evidence(root: Path, env: dict[str, str]) -> None:
+    # A present harness config directory is evidence even without a binary.
+    (root / "home/.claude").mkdir(parents=True, exist_ok=True)
+
+
+def setup_skills_targets_project_scope(root: Path, env: dict[str, str]) -> None:
+    skills = root / "project/.opencode/skills"
+    directory = skills / "managed"
+    directory.mkdir(parents=True)
+    write_skills_marker(directory)
+
+
+def setup_skills_targets_symlink_entry(root: Path, env: dict[str, str]) -> None:
+    skills = opencode_skills_root(root)
+    target = root / "home/.config/opencode/outside"
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    os.symlink(target, skills / "linked")
+
+
 def setup_skills_dynamic_config(root: Path, env: dict[str, str]) -> None:
     write_library_skill(root, "demo")
     write_symskills_config(root, 'library_dir = "/nonexistent/library"\n')
@@ -1642,9 +1677,55 @@ CASES = (
         setup=setup_skills_dynamic_config,
     ),
     Case(
-        "skills_targets_dynamic_root_fallback",
+        "skills_targets_dynamic_root_native",
         ("skills", "targets", "--json"),
         setup=setup_skills_opencode_unmanaged_skill,
+    ),
+    Case(
+        "skills_targets_mixed_json",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_targets_mixed,
+    ),
+    Case(
+        "skills_targets_mixed_table",
+        ("skills", "targets"),
+        setup=setup_skills_targets_mixed,
+    ),
+    Case(
+        "skills_targets_empty_root_json",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_targets_empty_root,
+    ),
+    Case(
+        "skills_targets_managed_only_json",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_targets_managed_only,
+    ),
+    Case(
+        "skills_targets_config_dir_evidence_json",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_targets_config_dir_evidence,
+    ),
+    Case(
+        "skills_targets_project_scope_json",
+        ("skills", "targets", "--scope", "project", "--json"),
+        setup=setup_skills_targets_project_scope,
+    ),
+    Case(
+        "skills_targets_symlink_entry_json",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_targets_symlink_entry,
+        posix_only=True,
+    ),
+    Case(
+        "skills_targets_unknown_scope_fallback",
+        ("skills", "targets", "--scope", "team"),
+        setup=setup_skills_targets_mixed,
+    ),
+    Case(
+        "skills_targets_unknown_flag_fallback",
+        ("skills", "targets", "--bogus"),
+        setup=setup_skills_targets_mixed,
     ),
     Case(
         "skills_log_populated_fallback",
