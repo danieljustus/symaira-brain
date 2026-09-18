@@ -816,9 +816,12 @@ def convert_managed_install_to_copy(root: Path, env: dict[str, str]) -> Path:
     is rewritten — no content is invented.
     """
     installed = generate_managed_install(root, env)
-    rendered = root / "data/symbrain/skills/rendered/opencode/demo"
-    installed.unlink()
-    shutil.copytree(rendered, installed)
+    if installed.is_symlink():
+        rendered = root / "data/symbrain/skills/rendered/opencode/demo"
+        installed.unlink()
+        shutil.copytree(rendered, installed)
+    # Without symlink privileges (Windows) the pinned Go binary already
+    # delivers a copy; only the marker's mode is normalized either way.
     write_skills_marker(installed, mode="copy")
     return installed
 
