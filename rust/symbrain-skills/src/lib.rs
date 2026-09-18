@@ -5,8 +5,10 @@
 
 mod encode;
 pub mod install;
+pub mod library;
 mod load;
 pub mod materialize;
+pub mod metadata;
 pub mod model;
 pub mod render;
 mod render_variants;

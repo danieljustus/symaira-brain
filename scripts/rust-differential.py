@@ -838,14 +838,102 @@ def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> Non
     write_opencode_skill(root, "a&b<c>d")
 
 
+def set_access_times(root: Path, name: str, access: float) -> None:
+    """Give an installed skill's SKILL.md an explicit access time.
+
+    `last_used` needs a read that happened after the file's own mtime, so the
+    fixture sets atime and mtime explicitly instead of relying on the mount's
+    relatime behaviour. Symlink-mode installs point at the render cache, so
+    both locations are pinned.
+    """
+    candidates = [
+        root / "home/.config/opencode/skills" / name / "SKILL.md",
+        root / "data/symbrain/skills/rendered/opencode" / name / "SKILL.md",
+    ]
+    for path in candidates:
+        if path.is_file():
+            os.utime(path, (access, SKILLS_LIBRARY_STAMP))
+
+
+def setup_skills_library_categories(root: Path, env: dict[str, str]) -> None:
+    """Case variants and stray whitespace must collapse to one spelling."""
+    for name, category in (("alpha", "Guides"), ("beta", "  guides  "), ("gamma", "GUIDES")):
+        directory = write_library_skill(root, name)
+        (directory / "SKILL.md").write_text(
+            f"---\nname: {name}\ndescription: {name} skill\nlicense: Apache-2.0\ncategory: \"{category}\"\n---\n\n# {name}\n",
+            encoding="utf-8",
+        )
+        os.utime(directory / "SKILL.md", (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
+        os.utime(directory, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
+
+
+def setup_skills_library_managed(root: Path, env: dict[str, str]) -> None:
+    """A library skill with a real install: installs and last_rendered_at."""
+    write_library_skill(root, "demo")
+    directory = root / "data/symbrain/skills/library/demo"
+    (directory / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    subprocess.run(
+        [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
+        env=env,
+        cwd=env["PROJECT"],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        timeout=60,
+    )
+    freeze_managed_clocks(root)
+
+
+def setup_skills_library_last_used(root: Path, env: dict[str, str]) -> None:
+    setup_skills_library_managed(root, env)
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 3600.5)
+
+
+def setup_skills_library_last_used_below_gap(root: Path, env: dict[str, str]) -> None:
+    """atime newer than mtime but inside the install gap: still no evidence."""
+    setup_skills_library_managed(root, env)
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 30)
+
+
+def setup_skills_library_broken_skill(root: Path, env: dict[str, str]) -> None:
+    write_library_skill(root, "good")
+    directory = root / "data/symbrain/skills/library/broken"
+    directory.mkdir(parents=True)
+    (directory / "SKILL.md").write_text("no frontmatter here\n", encoding="utf-8")
+
+
+def setup_skills_library_missing_skill_md(root: Path, env: dict[str, str]) -> None:
+    write_library_skill(root, "good")
+    (root / "data/symbrain/skills/library/empty-dir").mkdir(parents=True)
+
+
 def freeze_managed_clocks(root: Path) -> None:
-    """Pin the install clock the pinned Go binary wrote, so both comparison
-    roots produce the same bytes instead of differing by a wall-clock second."""
+    """Pin the clocks the pinned Go binary wrote, so both comparison roots
+    produce the same bytes instead of differing by a wall-clock second.
+
+    The install marker, the operation log and every library file are frozen:
+    `skills list --json` reports marker timestamps, `last_rendered_at` comes
+    from the log, and `created_at`/`modified_at` come from the filesystem.
+    """
     for marker_file in sorted(root.rglob(".symskills.json")):
         data = json.loads(marker_file.read_text(encoding="utf-8"))
         if "installed" in data:
             data["installed"] = "2026-01-02T03:04:05Z"
             marker_file.write_text(json.dumps(data), encoding="utf-8")
+    log = root / "home/.local/share/symskills/events.jsonl"
+    if log.is_file():
+        lines = []
+        for line in log.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            record = json.loads(line)
+            record["ts"] = "2026-01-02T03:04:05Z"
+            lines.append(json.dumps(record))
+        log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for path in sorted(root.rglob("SKILL.md")):
+        os.utime(path, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
+        os.utime(path.parent, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
 
 
 def generate_managed_install(root: Path, env: dict[str, str]) -> Path:
@@ -1657,14 +1745,49 @@ CASES = (
     Case("skills_list_empty_library", ("skills", "list")),
     Case("skills_list_empty_library_json", ("skills", "list", "--json")),
     Case(
-        "skills_list_populated_library_fallback",
+        "skills_list_populated_library",
         ("skills", "list"),
         setup=setup_skills_library_fixture,
     ),
     Case(
-        "skills_list_populated_library_fallback_json",
+        "skills_list_populated_library_json",
         ("skills", "list", "--json"),
         setup=setup_skills_library_fixture,
+    ),
+    Case(
+        "skills_list_categories_json",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_categories,
+    ),
+    Case(
+        "skills_list_managed_installs_json",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_managed,
+    ),
+    Case(
+        "skills_list_last_used_json",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_last_used,
+    ),
+    Case(
+        "skills_list_last_used_below_gap_json",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_last_used_below_gap,
+    ),
+    Case(
+        "skills_list_target_flag_is_ignored",
+        ("skills", "list", "--target", "opencode", "--json"),
+        setup=setup_skills_library_managed,
+    ),
+    Case(
+        "skills_list_broken_skill_fallback",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_broken_skill,
+    ),
+    Case(
+        "skills_list_missing_skill_md_fallback",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_missing_skill_md,
     ),
     Case(
         "skills_list_unknown_flag_fallback",

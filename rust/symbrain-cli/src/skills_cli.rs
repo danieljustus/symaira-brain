@@ -13,7 +13,9 @@ use symbrain_skills::install::{
     self, InstallStatus, MarkerState, StatusKind, StatusOptions, SyncOptions, SyncResult,
     parse_marker,
 };
-use symbrain_skills::load_bundle;
+use symbrain_skills::library::list_library;
+use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_events_log};
+use symbrain_skills::parse_skill_md;
 use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
@@ -39,13 +41,15 @@ struct SkillListEntry {
     #[serde(skip_serializing_if = "String::is_empty")]
     category: String,
     path: String,
+    #[serde(flatten)]
+    record: Record,
 }
 
 #[derive(Debug, Serialize)]
 struct SkillListReport {
     skills: Vec<SkillListEntry>,
     category_counts: BTreeMap<String, usize>,
-    issues: Vec<String>,
+    issues: Vec<symbrain_skills::Issue>,
 }
 
 #[derive(Debug, Default, Serialize)]
@@ -130,7 +134,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         // metadata contract (created/modified times, per-target installs,
         // last-used and the four-column table), so it stays on Go.
         Some(verb) if verb == "list" => {
-            args.len() != 1 || has_dynamic_config() || library_has_entries()
+            parse_list_flags(&args[1..]).is_err() || has_dynamic_config() || library_needs_go()
         }
         // The native targets slice is deliberately only the no-argument,
         // user-scope/default-config contract. Keep every parsed or dynamic
@@ -308,14 +312,55 @@ fn has_dynamic_config() -> bool {
         || current_project_dir().join(".symskills.toml").is_file()
 }
 
-/// Reports whether the skills library holds anything at all.
+/// Reports whether the native `skills list` scan has to stay on Go for this
+/// library.
 ///
-/// An absent or empty library is the only `skills list` state the native slice
-/// reproduces; every entry (skill directory, stray file, broken bundle) changes
-/// the Go report through metadata the native path does not compute yet.
-fn library_has_entries() -> bool {
+/// Go reports an unreadable library and every unloadable skill directory as an
+/// `issues[]` entry carrying cap-std error text that is not reproducible here,
+/// so any such library is reported by Go instead. A library whose entries all
+/// load cleanly — including an absent or empty one — stays native.
+fn library_needs_go() -> bool {
     let (library_dir, _, _) = resolve_skills_dirs();
-    fs::read_dir(&library_dir).is_ok_and(|mut entries| entries.next().is_some())
+    let entries = match fs::read_dir(&library_dir) {
+        Ok(entries) => entries,
+        Err(error) => return error.kind() != std::io::ErrorKind::NotFound,
+    };
+    entries.flatten().any(|entry| {
+        let path = entry.path();
+        if !path.is_dir() {
+            return false;
+        }
+        match fs::read(path.join("SKILL.md")) {
+            Ok(bytes) => parse_skill_md(&bytes).is_err(),
+            Err(_) => true,
+        }
+    })
+}
+
+/// Accepts the flags `skills list` tolerates. Go parses `--target` and
+/// `--scope` for this subcommand and then ignores them; every other flag is
+/// the flag package's business, so it stays on Go.
+fn parse_list_flags(args: &[OsString]) -> Result<(), String> {
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-target" | "--target" | "-scope" | "--scope" => {
+                if inline.is_none() {
+                    if args.len() <= index + 1 {
+                        return Err(format!("flag needs an argument: {name}"));
+                    }
+                    index += 1;
+                }
+                index += 1;
+            }
+            _ => return Err(format!("flag provided but not defined: {name}")),
+        }
+    }
+    Ok(())
 }
 
 fn has_dynamic_target_state() -> bool {
@@ -484,50 +529,42 @@ fn run_list(
     format: OutputFormat,
 ) -> u8 {
     let (library_dir, _, _) = resolve_skills_dirs();
-    let mut entries = Vec::new();
-    let mut category_counts = BTreeMap::new();
-    let mut issues = Vec::new();
+    let (entries, issues) = list_library(&library_dir);
 
-    if let Ok(dir_entries) = fs::read_dir(&library_dir) {
-        let mut paths: Vec<_> = dir_entries.flatten().map(|e| e.path()).collect();
-        paths.sort();
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let log_path = home.join(".local/share/symskills/events.jsonl");
+    let metadata_options = MetadataOptions {
+        events: read_events_log(&log_path),
+        log_path,
+        home_dir: home,
+        // Go's list scan carries no project directory; user scope ignores it
+        // anyway, and the marker fallback must resolve the same roots.
+        project_dir: None,
+        scope: "user".to_owned(),
+    };
 
-        for path in paths {
-            if !path.is_dir() {
-                continue;
-            }
-            if path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .is_some_and(|s| s.starts_with('.'))
-            {
-                continue;
-            }
-            if !path.join("SKILL.md").exists() {
-                continue;
-            }
-            match load_bundle(&path) {
-                Ok(bundle) => {
-                    let cat = bundle.frontmatter.category.clone();
-                    if !cat.is_empty() {
-                        *category_counts.entry(cat.clone()).or_insert(0) += 1;
-                    }
-                    entries.push(SkillListEntry {
-                        name: bundle.frontmatter.name.clone(),
-                        description: bundle.frontmatter.description.clone(),
-                        category: cat,
-                        path: path.to_string_lossy().into_owned(),
-                    });
-                }
-                Err(err) => {
-                    issues.push(format!("{}: {err}", path.display()));
-                }
-            }
+    let mut category_counts: BTreeMap<String, usize> = BTreeMap::new();
+    let mut skills = Vec::with_capacity(entries.len());
+    for entry in entries {
+        if !entry.category.is_empty() {
+            *category_counts.entry(entry.category.clone()).or_insert(0) += 1;
         }
+        let record = metadata::collect(
+            std::path::Path::new(&entry.path),
+            &entry.name,
+            &metadata_options,
+        );
+        skills.push(SkillListEntry {
+            name: entry.name,
+            description: entry.description,
+            category: entry.category,
+            path: entry.path,
+            record,
+        });
     }
 
     let report = SkillListReport {
-        skills: entries,
+        skills,
         category_counts,
         issues,
     };
@@ -540,20 +577,44 @@ fn run_list(
             if report.skills.is_empty() {
                 let _ = writeln!(stdout, "No skills in the library.");
             } else {
-                let _ = writeln!(stdout, "NAME\tCATEGORY\tDESCRIPTION");
-                for s in &report.skills {
-                    let cat = if s.category.is_empty() {
-                        "-"
+                let _ = writeln!(stdout, "NAME\tCATEGORY\tINSTALLS\tDESCRIPTION");
+                for skill in &report.skills {
+                    let category = or_dash(&skill.category);
+                    let mut targets = skill
+                        .record
+                        .installs
+                        .iter()
+                        .map(|install| install.target.as_str())
+                        .collect::<Vec<_>>();
+                    targets.sort_unstable();
+                    let installed = if targets.is_empty() {
+                        "-".to_owned()
                     } else {
-                        &s.category
+                        targets.join(",")
                     };
-                    let _ = writeln!(stdout, "{}\t{}\t{}", s.name, cat, s.description);
+                    let _ = writeln!(
+                        stdout,
+                        "{}\t{}\t{}\t{}",
+                        skill.name,
+                        category,
+                        installed,
+                        table_content(&skill.description)
+                    );
                 }
             }
         }
     }
 
     exit::OK
+}
+
+fn or_dash(value: &str) -> &str {
+    if value.trim().is_empty() { "-" } else { value }
+}
+
+/// Collapses tab, carriage return and newline so one skill stays on one row.
+fn table_content(value: &str) -> String {
+    value.replace(['\t', '\r', '\n'], " ")
 }
 
 fn run_status(
