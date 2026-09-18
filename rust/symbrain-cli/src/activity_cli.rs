@@ -40,6 +40,24 @@ fn resolve_db_path() -> PathBuf {
     )
 }
 
+/// Reports whether `symbrain activity` has to stay on the Go implementation.
+///
+/// The native slice is incomplete in ways that would be visible to a user:
+///
+/// - `activity get` is not implemented (the shipped command documents and
+///   serves `search|get|status`), so it falls through to "unknown subcommand";
+/// - the usage text differs from the shipped text;
+/// - an unloadable profile reports the raw load error where the shipped
+///   implementation reports the policy message ("--profile is required and
+///   must explicitly expose activity read tools");
+/// - it reads the native memory store, which is not compatible with the
+///   shipped database yet (see the `memory` fallback and issue #615).
+///
+/// Until those are ported and pinned, the command stays on Go.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    true
+}
+
 /// Runs `symbrain activity`.
 pub fn run(
     args: &[OsString],

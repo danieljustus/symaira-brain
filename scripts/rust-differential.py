@@ -1853,6 +1853,21 @@ CASES = (
         ("memory", "query-log", "--json"),
         setup=setup_memory_seeded,
     ),
+    # `usage` and `activity` are gated back to Go: their native auth details,
+    # usage text, profile error path and subcommand set diverge from the
+    # shipped implementation (see the fallback predicates in the CLI).
+    Case("usage_fallback", ("usage",)),
+    Case("usage_fallback_json", ("usage", "--json")),
+    Case("activity_usage_fallback", ("activity",)),
+    Case("activity_help_fallback", ("activity", "--help")),
+    Case("activity_missing_profile_fallback", ("activity", "status", "--profile", "absent")),
+    Case(
+        "activity_get_fallback",
+        ("activity", "get", "--profile", "absent", "entry-1"),
+    ),
+    # `audit tail` mirrors the shipped `os.PathError` text for a missing dir.
+    Case("audit_tail_missing_directory", ("audit", "tail")),
+    Case("audit_tail_missing_directory_json", ("audit", "tail", "--json")),
     Case("memory_rules_fallback", ("memory", "rules", "--json")),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
     # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.

@@ -7,6 +7,20 @@ use symbrain_usage::{Report, Service, UsageMeter};
 
 const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credentials are read-only and their\nvalues are never included in output, errors, or audit records.\n";
 
+/// Reports whether `symbrain usage` has to stay on the Go implementation.
+///
+/// The native provider table reports generic auth details ("No Claude
+/// credentials found", "Signed in via Claude"), while the shipped
+/// implementation resolves credentials per provider and per source and reports
+/// the matching text ("No Claude credentials found — add an admin key or sign
+/// in with the Claude CLI", "Signed in via Claude Code OAuth token", …). Nine
+/// of ten providers differ, in both the missing and the signed-in state, so
+/// the whole command stays on Go until that state machine and its texts are
+/// ported and pinned.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    true
+}
+
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
