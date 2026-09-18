@@ -100,7 +100,12 @@ fn run_list(
                 project_dir = Some(PathBuf::from(value));
             }
             _ if name.starts_with('-') => {
-                let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+                // The flag package prints the name without its dashes.
+                let _ = writeln!(
+                    stderr,
+                    "flag provided but not defined: -{}",
+                    name.trim_start_matches('-')
+                );
                 let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
                 return Some(exit::USAGE);
             }
