@@ -151,6 +151,8 @@ fn marker_install_and_access_time_fill_the_record() {
 fn access_time_inside_the_install_gap_is_not_usage() {
     // A read within a minute of the install is symskills' own bookkeeping, not
     // harness usage; Go reports no evidence there and so does this path.
+    use std::time::{Duration, SystemTime};
+
     let root = TempDir::new().unwrap();
     write_library_skill(&root, "demo", "");
     let installed = root.path().join("home/.config/opencode/skills/demo");
@@ -161,7 +163,6 @@ fn access_time_inside_the_install_gap_is_not_usage() {
         br#"{"schema_version":1,"managed_by":"symskills","target":"opencode","name":"demo","mode":"copy","installed":"2026-01-02T03:04:05Z","source_hash":"abc123"}"#,
     )
     .unwrap();
-    use std::time::{Duration, SystemTime};
     let written = SystemTime::UNIX_EPOCH + Duration::from_secs(1_767_323_045);
     let times = std::fs::FileTimes::new()
         .set_accessed(written + Duration::from_secs(30))
