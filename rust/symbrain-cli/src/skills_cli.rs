@@ -140,6 +140,13 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 Some(_) => true,
             }
         }
+        // The native list slice is only the empty-library report, which is the
+        // one shape whose bytes are frozen. A populated library needs the Go
+        // metadata contract (created/modified times, per-target installs,
+        // last-used and the four-column table), so it stays on Go.
+        Some(verb) if verb == "list" => {
+            args.len() != 1 || has_dynamic_config() || library_has_entries()
+        }
         // The native targets slice is deliberately only the no-argument,
         // user-scope/default-config contract. Keep every parsed or dynamic
         // variant on Go until its bytes are frozen independently.
@@ -310,6 +317,16 @@ fn has_dynamic_config() -> bool {
         .unwrap_or_else(|| PathBuf::from(".config"));
     config_root.join("symskills/config.toml").is_file()
         || current_project_dir().join(".symskills.toml").is_file()
+}
+
+/// Reports whether the skills library holds anything at all.
+///
+/// An absent or empty library is the only `skills list` state the native slice
+/// reproduces; every entry (skill directory, stray file, broken bundle) changes
+/// the Go report through metadata the native path does not compute yet.
+fn library_has_entries() -> bool {
+    let (library_dir, _, _) = resolve_skills_dirs();
+    fs::read_dir(&library_dir).is_ok_and(|mut entries| entries.next().is_some())
 }
 
 fn has_dynamic_target_state() -> bool {
@@ -528,11 +545,7 @@ fn run_list(
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&report).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&report));
         }
         OutputFormat::Table => {
             if report.skills.is_empty() {
@@ -624,11 +637,9 @@ fn run_status(
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string(&report).unwrap_or_default()
-            );
+            // Go encodes every skills report with `json.Encoder`, so the
+            // native output needs the same compact shape and HTML escaping.
+            let _ = writeln!(stdout, "{}", go_json(&report));
         }
         OutputFormat::Table => {
             if report.installs.is_empty() {
@@ -949,11 +960,7 @@ fn run_sync(
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&report).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&report));
         }
         OutputFormat::Table => {
             if report.results.is_empty() {

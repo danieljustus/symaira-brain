@@ -742,6 +742,37 @@ def setup_skills_opencode_project_isolated_from_user_root(root: Path, env: dict[
     (projects_skill / "SKILL.md").write_text("only-here\n", encoding="utf-8")
 
 
+SKILLS_LIBRARY_STAMP = 1767323045  # 2026-01-02T03:04:05Z
+
+
+def write_library_skill(root: Path, name: str) -> Path:
+    """Write one library skill with a frozen timestamp.
+
+    `skills list --json` reports created/modified times straight from the
+    filesystem, so both comparison roots must carry identical mtimes.
+    """
+    directory = root / "data/symbrain/skills/library" / name
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "SKILL.md").write_text(
+        f"---\nname: {name}\ndescription: library fixture\nlicense: Apache-2.0\n---\n\n# {name}\n\nBody.\n",
+        encoding="utf-8",
+    )
+    os.utime(directory / "SKILL.md", (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
+    os.utime(directory, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
+    return directory
+
+
+def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
+    for name in ("demo", "second"):
+        write_library_skill(root, name)
+
+
+def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> None:
+    # Go encodes skills reports with `json.Encoder`, which escapes `&`, `<` and
+    # `>`; a name carrying those bytes proves the native encoder matches.
+    write_opencode_skill(root, "a&b<c>d")
+
+
 def freeze_managed_clocks(root: Path) -> None:
     """Pin the install clock the pinned Go binary wrote, so both comparison
     roots produce the same bytes instead of differing by a wall-clock second."""
@@ -1549,6 +1580,38 @@ CASES = (
         setup=setup_skills_opencode_unmanaged_skill,
     ),
     Case("skills_status_other_target_fallback", ("skills", "status", "--target", "claude")),
+    Case(
+        "skills_status_opencode_escapable_name_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_escapable_name,
+    ),
+    # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.
+    Case("skills_list_empty_library", ("skills", "list")),
+    Case("skills_list_empty_library_json", ("skills", "list", "--json")),
+    Case(
+        "skills_list_populated_library_fallback",
+        ("skills", "list"),
+        setup=setup_skills_library_fixture,
+    ),
+    Case(
+        "skills_list_populated_library_fallback_json",
+        ("skills", "list", "--json"),
+        setup=setup_skills_library_fixture,
+    ),
+    Case(
+        "skills_list_unknown_flag_fallback",
+        ("skills", "list", "--bogus"),
+        setup=setup_skills_library_fixture,
+    ),
+    Case("skills_sync_dry_run_json", ("skills", "sync", "--dry-run", "--json")),
+    Case(
+        "skills_log_empty_json",
+        ("skills", "log", "--json"),
+    ),
+    Case(
+        "skills_targets_default_json",
+        ("skills", "targets", "--json"),
+    ),
     Case("skills_status_unknown_target", ("skills", "status", "--target", "bogus")),
     Case("skills_status_unknown_flag", ("skills", "status", "--bogus")),
 )

@@ -330,3 +330,20 @@ fn opencode_project_status_no_scope_flag_defaults_to_user() {
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert_eq!(output.stdout, b"No installed skills found.\n");
 }
+
+#[test]
+fn opencode_user_status_json_escapes_html_like_go() {
+    let root = TempDir::new().unwrap();
+    let skill = root.path().join("home/.config/opencode/skills/a&b<c>d");
+    std::fs::create_dir_all(&skill).unwrap();
+    std::fs::write(skill.join("SKILL.md"), b"esc\n").unwrap();
+    let output = run(
+        &root,
+        &["skills", "status", "--target", "opencode", "--json"],
+    );
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    // Go encodes with `json.Encoder`, which escapes `&`, `<` and `>`.
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("a\\u0026b\\u003cc\\u003ed"), "{stdout}");
+    assert!(!stdout.contains("a&b<c>d"), "{stdout}");
+}
