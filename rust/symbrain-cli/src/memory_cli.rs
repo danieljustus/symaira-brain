@@ -43,10 +43,23 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
         return true;
     };
-    if !matches!(verb.as_str(), "list" | "rules" | "query-log") {
+    if memory_config_is_dynamic() {
         return true;
     }
-    memory_config_is_dynamic() || !read_arguments_are_allowed(&args[1..])
+    // An unusable database path produces the shipped error chain
+    // ("failed to open sqlite database: failed to create database directory:
+    // mkdir …"), which the native side does not reproduce, so that case keeps
+    // the shipped bytes.
+    if !database_path_is_usable(&resolve_db_path(extract_db_override(&args[1..]).as_deref())) {
+        return true;
+    }
+    match verb.as_str() {
+        "list" | "rules" | "query-log" => !read_arguments_are_allowed(&args[1..]),
+        // `delete` is native for exactly one bare identifier plus `--db`; the
+        // usage and flag errors stay with the Go flag package.
+        "delete" => !delete_arguments_are_allowed(&args[1..]),
+        _ => true,
+    }
 }
 
 /// Reads the shipped memory configuration lookups that change the database or
@@ -61,6 +74,64 @@ fn memory_config_is_dynamic() -> bool {
         .unwrap_or_else(|| PathBuf::from(".config"));
     config_root.join("symmemory/config.toml").is_file()
         || std::env::current_dir().is_ok_and(|dir| dir.join(".symmemory.toml").is_file())
+}
+
+/// Reports whether the resolved database path can be opened.
+///
+/// A missing database is fine as long as its directory (or the nearest
+/// existing ancestor) is writable; otherwise the shipped implementation's
+/// directory-creation error is the contract, and the command stays on Go.
+fn database_path_is_usable(path: &std::path::Path) -> bool {
+    if path.is_file() {
+        return true;
+    }
+    let mut current = path.parent();
+    while let Some(directory) = current {
+        match std::fs::metadata(directory) {
+            Ok(metadata) => return is_writable(&metadata),
+            Err(_) => current = directory.parent(),
+        }
+    }
+    false
+}
+
+#[cfg(unix)]
+fn is_writable(metadata: &std::fs::Metadata) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+
+    metadata.permissions().mode() & 0o200 != 0
+}
+
+#[cfg(not(unix))]
+fn is_writable(metadata: &std::fs::Metadata) -> bool {
+    !metadata.permissions().readonly()
+}
+
+/// Accepts `--db` plus exactly one bare identifier, the shipped `memory
+/// delete` shape.
+fn delete_arguments_are_allowed(args: &[OsString]) -> bool {
+    let mut positionals = 0;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-db" | "--db" => {
+                if inline.is_none() {
+                    if index + 1 >= args.len() {
+                        return false;
+                    }
+                    index += 1;
+                }
+            }
+            _ if !arg.starts_with('-') => positionals += 1,
+            _ => return false,
+        }
+        index += 1;
+    }
+    positionals == 1
 }
 
 /// Accepts exactly the flag shapes the shipped read commands define:
@@ -483,16 +554,33 @@ fn run_delete(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let id = match args.first() {
-        Some(arg) if !arg.to_string_lossy().starts_with('-') => arg.to_string_lossy().into_owned(),
-        _ => {
-            let _ = writeln!(stderr, "symbrain memory delete: id is required");
-            return exit::USAGE;
+    let mut id: Option<String> = None;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if name == "-db" || name == "--db" {
+            if inline.is_none() {
+                index += 1;
+            }
+        } else if !arg.starts_with('-') {
+            id = Some(arg.into_owned());
         }
+        index += 1;
+    }
+    let Some(id) = id else {
+        let _ = writeln!(stderr, "usage: symbrain memory delete <id> [--db <path>]");
+        return exit::USAGE;
     };
+    if id.trim().is_empty() {
+        let _ = writeln!(stderr, "symbrain memory delete: id is required");
+        return exit::USAGE;
+    }
 
     let store = match open_store(stderr, extract_db_override(args).as_deref()) {
-        Ok(s) => s,
+        Ok(store) => store,
         Err(code) => return code,
     };
 
@@ -500,14 +588,11 @@ fn run_delete(
         Ok(true) => {
             match format {
                 OutputFormat::Json => {
-                    let res = serde_json::json!({
-                        "id": id,
-                        "deleted": true,
-                    });
+                    // Shipped shape: compact, `id` before `deleted`.
                     let _ = writeln!(
                         stdout,
-                        "{}",
-                        serde_json::to_string_pretty(&res).unwrap_or_default()
+                        "{{\"id\":{},\"deleted\":true}}",
+                        go_json_string(&id)
                     );
                 }
                 OutputFormat::Table => {
@@ -517,14 +602,19 @@ fn run_delete(
             exit::OK
         }
         Ok(false) => {
-            let _ = writeln!(stderr, "memory {id} not found");
-            exit::NOT_FOUND
+            let _ = writeln!(stderr, "symbrain memory delete: memory not found: {id}");
+            exit::GENERIC
         }
         Err(err) => {
             let _ = writeln!(stderr, "symbrain memory delete: {err}");
             exit::GENERIC
         }
     }
+}
+
+/// Renders a string as the shipped encoder does, including its HTML escaping.
+fn go_json_string(value: &str) -> String {
+    go_json(&value.to_owned())
 }
 
 fn run_rules(

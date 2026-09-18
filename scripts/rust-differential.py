@@ -1916,9 +1916,20 @@ CASES = (
         normalize_uuid=True,
     ),
     Case(
-        "memory_delete_fallback",
+        "memory_delete_missing_row",
         ("memory", "delete", "missing-id"),
     ),
+    Case(
+        "memory_delete_seeded_json",
+        ("memory", "delete", "00000000-0000-4000-8000-000000000001", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_delete_seeded_table",
+        ("memory", "delete", "00000000-0000-4000-8000-000000000001"),
+        setup=setup_memory_seeded,
+    ),
+    Case("memory_delete_no_id_fallback", ("memory", "delete")),
     Case("memory_help_fallback", ("memory",)),
     Case("memory_rules_empty", ("memory", "rules", "--json")),
     Case("memory_rules_empty_table", ("memory", "rules")),
