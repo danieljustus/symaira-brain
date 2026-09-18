@@ -9,6 +9,7 @@ import io
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -529,6 +530,245 @@ class ReleaseFixtureServer:
                 routes[prefix + asset + ".sig"] = b"fixture-signature"
                 routes[prefix + asset + ".pem"] = b"fixture-certificate"
         return routes
+
+# --- skills status: OpenCode user-scope root fixtures ----------------------
+#
+# The native Rust slice covers `skills status --target opencode` in user scope
+# with a purely default configuration. These setups build exactly those root
+# states so the differential run compares Go bytes against Rust bytes for each
+# of them instead of trusting the Rust unit-test expectations.
+OPENCODE_SKILLS_SUBDIR = "home/.config/opencode/skills"
+MANAGED_SKILL_MD = """---
+name: demo
+description: Managed status fixture skill
+license: Apache-2.0
+---
+
+# Demo
+
+Body text.
+"""
+
+
+def opencode_skills_root(root: Path) -> Path:
+    path = root / OPENCODE_SKILLS_SUBDIR
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def write_skills_marker(directory: Path, **overrides: object) -> None:
+    marker: dict[str, object] = {
+        "schema_version": 1,
+        "managed_by": "symskills",
+        "target": "opencode",
+        "name": directory.name,
+        "mode": "copy",
+        "installed": "2026-01-02T03:04:05Z",
+        "source_hash": "abc123",
+        "allow_executable": True,
+    }
+    marker.update(overrides)
+    (directory / ".symskills.json").write_text(json.dumps(marker), encoding="utf-8")
+
+
+def write_opencode_skill(root: Path, name: str) -> Path:
+    directory = opencode_skills_root(root) / name
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "SKILL.md").write_text(f"{name}\n", encoding="utf-8")
+    return directory
+
+
+def setup_skills_opencode_root_empty(root: Path, env: dict[str, str]) -> None:
+    opencode_skills_root(root)
+
+
+def setup_skills_opencode_unmanaged_skill(root: Path, env: dict[str, str]) -> None:
+    write_opencode_skill(root, "handwritten")
+
+
+def setup_skills_opencode_dir_without_skill(root: Path, env: dict[str, str]) -> None:
+    directory = opencode_skills_root(root) / "notaskill"
+    directory.mkdir(parents=True)
+    (directory / "notes.txt").write_text("notes\n", encoding="utf-8")
+
+
+def setup_skills_opencode_regular_file(root: Path, env: dict[str, str]) -> None:
+    (opencode_skills_root(root) / "README.md").write_text("readme\n", encoding="utf-8")
+
+
+def setup_skills_opencode_dangling_symlink(root: Path, env: dict[str, str]) -> None:
+    skills = opencode_skills_root(root)
+    os.symlink(skills / "gone", skills / "dangling")
+
+
+def setup_skills_opencode_symlink_to_dir(root: Path, env: dict[str, str]) -> None:
+    # Go reads the marker through the link; a link onto a real directory with no
+    # marker stays an unmanaged row.
+    skills = opencode_skills_root(root)
+    target = root / "home/.config/opencode/outside-skill"
+    target.mkdir(parents=True, exist_ok=True)
+    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    os.symlink(target, skills / "linked")
+
+
+def setup_skills_opencode_symlink_to_file(root: Path, env: dict[str, str]) -> None:
+    skills = opencode_skills_root(root)
+    target = root / "home/.config/opencode/outside-file.md"
+    target.write_text("outside\n", encoding="utf-8")
+    os.symlink(target, skills / "linkedfile")
+
+
+def setup_skills_opencode_symlink_to_marker_file(root: Path, env: dict[str, str]) -> None:
+    # A link whose target is a marker-shaped regular file: Go reads
+    # `<link>/.symskills.json`, fails, and reports the entry as unmanaged.
+    skills = opencode_skills_root(root)
+    target = root / "home/.config/opencode/marker-file.json"
+    target.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "managed_by": "symskills",
+                "target": "opencode",
+                "name": "markerfile",
+                "mode": "copy",
+                "installed": "2026-01-02T03:04:05Z",
+                "source_hash": "abc123",
+            }
+        ),
+        encoding="utf-8",
+    )
+    os.symlink(target, skills / "markerfile")
+
+
+def setup_skills_opencode_symlink_chain(root: Path, env: dict[str, str]) -> None:
+    # A second link level is the one shape the native scan refuses to follow.
+    real = root / "home/.config/opencode/real-dir"
+    real.mkdir(parents=True, exist_ok=True)
+    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    middle = root / "home/.config/opencode/middle-link"
+    os.symlink(real, middle)
+    os.symlink(middle, opencode_skills_root(root) / "chain")
+
+
+def setup_skills_opencode_orphaned_marker(root: Path, env: dict[str, str]) -> None:
+    write_skills_marker(write_opencode_skill(root, "managed"))
+
+
+def setup_skills_opencode_foreign_marker(root: Path, env: dict[str, str]) -> None:
+    directory = write_opencode_skill(root, "foreign")
+    write_skills_marker(directory, managed_by="someone-else")
+
+
+def setup_skills_opencode_legacy_hash_only_marker(root: Path, env: dict[str, str]) -> None:
+    directory = write_opencode_skill(root, "legacy")
+    (directory / ".symskills.json").write_text(
+        json.dumps({"source_hash": "abc123"}), encoding="utf-8"
+    )
+
+
+def setup_skills_opencode_malformed_marker(root: Path, env: dict[str, str]) -> None:
+    directory = write_opencode_skill(root, "broken")
+    (directory / ".symskills.json").write_text("{not json", encoding="utf-8")
+
+
+def setup_skills_opencode_unsupported_schema_marker(root: Path, env: dict[str, str]) -> None:
+    # Go ignores an unknown schema_version and keeps every marker field; the
+    # native scan hands this entry back to Go instead of reporting it stale.
+    write_skills_marker(write_opencode_skill(root, "schema"), schema_version=99)
+
+
+def setup_skills_opencode_empty_marker(root: Path, env: dict[str, str]) -> None:
+    directory = write_opencode_skill(root, "emptymarker")
+    (directory / ".symskills.json").write_text("", encoding="utf-8")
+
+
+def setup_skills_opencode_wrong_type_marker(root: Path, env: dict[str, str]) -> None:
+    write_skills_marker(write_opencode_skill(root, "wrongtype"), installed=5)
+
+
+def setup_skills_opencode_mixed(root: Path, env: dict[str, str]) -> None:
+    for name in ("zebra", "alpha", "middle"):
+        write_opencode_skill(root, name)
+    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+
+
+def freeze_managed_clocks(root: Path) -> None:
+    """Pin the install clock the pinned Go binary wrote, so both comparison
+    roots produce the same bytes instead of differing by a wall-clock second."""
+    for marker_file in sorted(root.rglob(".symskills.json")):
+        data = json.loads(marker_file.read_text(encoding="utf-8"))
+        if "installed" in data:
+            data["installed"] = "2026-01-02T03:04:05Z"
+            marker_file.write_text(json.dumps(data), encoding="utf-8")
+
+
+def generate_managed_install(root: Path, env: dict[str, str]) -> Path:
+    """Install one library skill with the pinned Go binary.
+
+    The library lives where the packaged defaults point (XDG data home plus
+    `symbrain/skills/library`), so the resulting marker, render cache and base
+    snapshot are genuine artifacts of the reference implementation.
+    """
+    skill_dir = root / "data/symbrain/skills/library/demo"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    subprocess.run(
+        [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
+        env=env,
+        cwd=env["PROJECT"],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        timeout=60,
+    )
+    freeze_managed_clocks(root)
+    return opencode_skills_root(root) / "demo"
+
+
+def convert_managed_install_to_copy(root: Path, env: dict[str, str]) -> Path:
+    """Deliver the generated install as a copy instead of a link.
+
+    `symbrain sync` installs in symlink mode only, but copy mode is a real
+    marker state (`mode = "copy"`) that status must classify. The tree is the
+    Go-generated render, copied verbatim, and only the marker's delivery mode
+    is rewritten — no content is invented.
+    """
+    installed = generate_managed_install(root, env)
+    rendered = root / "data/symbrain/skills/rendered/opencode/demo"
+    installed.unlink()
+    shutil.copytree(rendered, installed)
+    write_skills_marker(installed, mode="copy")
+    return installed
+
+
+def setup_skills_opencode_managed_symlink(root: Path, env: dict[str, str]) -> None:
+    generate_managed_install(root, env)
+
+
+def setup_skills_opencode_managed_copy(root: Path, env: dict[str, str]) -> None:
+    convert_managed_install_to_copy(root, env)
+
+
+def setup_skills_opencode_managed_harness_changed(root: Path, env: dict[str, str]) -> None:
+    installed = convert_managed_install_to_copy(root, env)
+    with (installed / "SKILL.md").open("a", encoding="utf-8") as handle:
+        handle.write("\n# harness edit\n")
+
+
+def setup_skills_opencode_managed_conflict(root: Path, env: dict[str, str]) -> None:
+    installed = convert_managed_install_to_copy(root, env)
+    with (installed / "SKILL.md").open("a", encoding="utf-8") as handle:
+        handle.write("\n# harness edit\n")
+    library = root / "data/symbrain/skills/library/demo/SKILL.md"
+    with library.open("a", encoding="utf-8") as handle:
+        handle.write("\n# library edit\n")
+
+
+def setup_skills_opencode_managed_orphaned(root: Path, env: dict[str, str]) -> None:
+    generate_managed_install(root, env)
+    shutil.rmtree(root / "data/symbrain/skills/library/demo")
+
 
 @dataclass(frozen=True)
 class Case:
@@ -1060,6 +1300,151 @@ CASES = (
         normalize_os_error=True,
         posix_only=True,
     ),
+    # Phase 1 Task 1.4: native `skills status` OpenCode user-scope parity.
+    Case("skills_status_opencode_root_missing", ("skills", "status", "--target", "opencode")),
+    Case(
+        "skills_status_opencode_root_empty",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_root_empty,
+    ),
+    Case(
+        "skills_status_opencode_unmanaged_skill",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_unmanaged_skill,
+    ),
+    Case(
+        "skills_status_opencode_dir_without_skill",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_dir_without_skill,
+    ),
+    Case(
+        "skills_status_opencode_regular_file",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_regular_file,
+    ),
+    Case(
+        "skills_status_opencode_dangling_symlink",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_dangling_symlink,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_symlink_to_dir",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_symlink_to_dir,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_symlink_to_file",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_symlink_to_file,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_symlink_to_marker_file",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_symlink_to_marker_file,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_symlink_chain",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_symlink_chain,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_orphaned_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_orphaned_marker,
+    ),
+    Case(
+        "skills_status_opencode_foreign_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_foreign_marker,
+    ),
+    Case(
+        "skills_status_opencode_legacy_hash_only_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_legacy_hash_only_marker,
+    ),
+    Case(
+        "skills_status_opencode_malformed_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_malformed_marker,
+    ),
+    Case(
+        "skills_status_opencode_unsupported_schema_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_unsupported_schema_marker,
+    ),
+    Case(
+        "skills_status_opencode_empty_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_empty_marker,
+    ),
+    Case(
+        "skills_status_opencode_wrong_type_marker",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_wrong_type_marker,
+    ),
+    Case(
+        "skills_status_opencode_mixed",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_mixed,
+    ),
+    Case(
+        "skills_status_opencode_mixed_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_mixed,
+    ),
+    Case(
+        "skills_status_opencode_managed_symlink",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_managed_symlink,
+    ),
+    Case(
+        "skills_status_opencode_managed_symlink_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_managed_symlink,
+    ),
+    Case(
+        "skills_status_opencode_managed_copy_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_managed_copy,
+    ),
+    Case(
+        "skills_status_opencode_managed_harness_changed_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_managed_harness_changed,
+    ),
+    Case(
+        "skills_status_opencode_managed_conflict_json",
+        ("skills", "status", "--target", "opencode", "--json"),
+        setup=setup_skills_opencode_managed_conflict,
+    ),
+    Case(
+        "skills_status_opencode_managed_conflict",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_managed_conflict,
+    ),
+    Case(
+        "skills_status_opencode_managed_orphaned",
+        ("skills", "status", "--target", "opencode"),
+        setup=setup_skills_opencode_managed_orphaned,
+    ),
+    Case(
+        "skills_status_default_dynamic_target_fallback",
+        ("skills", "status"),
+        setup=setup_skills_opencode_unmanaged_skill,
+    ),
+    Case(
+        "skills_status_project_scope_fallback",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=setup_skills_opencode_unmanaged_skill,
+    ),
+    Case("skills_status_other_target_fallback", ("skills", "status", "--target", "claude")),
+    Case("skills_status_unknown_target", ("skills", "status", "--target", "bogus")),
+    Case("skills_status_unknown_flag", ("skills", "status", "--bogus")),
 )
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:
     return tuple(

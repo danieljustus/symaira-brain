@@ -13,11 +13,12 @@ use std::path::PathBuf;
 use cap_fs_ext::DirExt;
 use serde::Serialize;
 
-use super::destination::{entry_exists, entry_metadata};
+use super::destination::entry_metadata;
 use super::marker::{MarkerState, read_marker_at};
 use super::replace::open_trusted_dir;
 use super::status_compare::{
-    compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link, unmanaged,
+    compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
+    resolves_to_directory, unmanaged,
 };
 use crate::model::SkillError;
 
@@ -160,7 +161,10 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             .map_err(|error| SkillError(format!("stat installed skill {name}: {error}")))?;
         let installed_tree = if file_type.is_symlink() {
             match resolve_link(&path) {
-                Some(resolved) if entry_exists(&resolved)? => resolved,
+                Some(resolved) if resolves_to_directory(&resolved)? => resolved,
+                // Go reads the marker through the link; a link whose target is
+                // missing or not a directory simply carries no marker and stays
+                // unmanaged. Opening it as a directory would abort the scan.
                 _ => {
                     rows.push(unmanaged(target, &name, path));
                     continue;

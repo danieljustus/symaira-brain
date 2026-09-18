@@ -10,7 +10,8 @@ use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_skills::install::{
-    self, InstallStatus, StatusKind, StatusOptions, SyncOptions, SyncResult,
+    self, InstallStatus, MarkerState, StatusKind, StatusOptions, SyncOptions, SyncResult,
+    parse_marker,
 };
 use symbrain_skills::load_bundle;
 
@@ -134,7 +135,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 return true;
             }
             match target.as_deref() {
-                Some("opencode") => false,
+                Some("opencode") => opencode_status_needs_go(),
                 None => has_dynamic_target_state(),
                 Some(_) => true,
             }
@@ -323,6 +324,69 @@ fn has_dynamic_target_state() -> bool {
                 || fs::metadata(config_dir).is_ok()
                 || binary_path_exists(target)
         })
+}
+
+/// Keeps the native `status --target opencode` slice inside the byte contract
+/// Go actually produces for the current `OpenCode` user root.
+///
+/// Go classifies an entry whose marker it cannot fully unmarshal by reusing
+/// `encoding/json` error text and by keeping whatever fields it managed to
+/// fill; a marker carrying an unknown `schema_version` is accepted with all
+/// its fields. Neither is reproducible natively, and the native scan also
+/// refuses to follow a second symlink level, so any such entry keeps the whole
+/// command on Go instead of emitting different bytes. Roots made of real
+/// directories, single-hop links and well-formed schema-version-1 markers stay
+/// native.
+fn opencode_status_needs_go() -> bool {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let root = skill_root_for("opencode", &home);
+    let entries = match fs::read_dir(&root) {
+        Ok(entries) => entries,
+        // A missing root is a normal native case; anything else (for example a
+        // permission failure) reports a Go error message we do not mirror.
+        Err(error) => return error.kind() != std::io::ErrorKind::NotFound,
+    };
+    for entry in entries {
+        let Ok(entry) = entry else {
+            return true;
+        };
+        let path = entry.path();
+        let Ok(file_type) = entry.file_type() else {
+            return true;
+        };
+        let marker_dir = if file_type.is_symlink() {
+            let resolved = match fs::read_link(&path) {
+                Ok(link) if link.is_absolute() => link,
+                Ok(link) => path
+                    .parent()
+                    .map_or_else(|| link.clone(), |parent| parent.join(&link)),
+                Err(_) => return true,
+            };
+            match fs::symlink_metadata(&resolved) {
+                // A second link level is not reproducible natively; Go follows it.
+                Ok(metadata) if metadata.file_type().is_symlink() => return true,
+                // Missing or non-directory targets stay native: both sides
+                // report an unmanaged row for them.
+                Ok(metadata) if metadata.is_dir() => resolved,
+                _ => continue,
+            }
+        } else if file_type.is_dir() {
+            path
+        } else {
+            continue;
+        };
+        let marker = marker_dir.join(".symskills.json");
+        match fs::read(&marker) {
+            Ok(bytes) => {
+                if !matches!(parse_marker(&bytes), Ok(MarkerState::Valid(_))) {
+                    return true;
+                }
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return true,
+        }
+    }
+    false
 }
 
 fn parse_status_flags(args: &[OsString]) -> Result<(Option<String>, String), &'static str> {

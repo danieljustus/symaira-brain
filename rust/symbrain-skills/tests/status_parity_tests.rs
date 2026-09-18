@@ -105,3 +105,59 @@ fn status_unmanaged_identity_preserves_marker_metadata() {
     assert!(rows[0].installed_at.is_some());
     assert!(rows[0].source_hash.is_some());
 }
+
+#[cfg(unix)]
+#[test]
+fn status_reports_link_onto_non_directory_as_unmanaged() {
+    use std::os::unix::fs::symlink;
+
+    let home = tempfile::tempdir().expect("home");
+    let library = tempfile::tempdir().expect("library");
+    let skills = home.path().join(".config/opencode/skills");
+    fs::create_dir_all(&skills).expect("skills root");
+    // A regular file inside the root is skipped, but a link onto one is a root
+    // entry: Go reads `<link>/.symskills.json`, fails, and reports it as
+    // unmanaged. Opening the link as a directory aborted the whole scan before.
+    let target = home.path().join(".config/opencode/plain.md");
+    fs::write(&target, "plain\n").expect("target file");
+    symlink(&target, skills.join("linkedfile")).expect("file symlink");
+
+    let rows = status(&StatusOptions {
+        home_dir: home.path().to_path_buf(),
+        library_dir: library.path().to_path_buf(),
+        targets: vec!["opencode".to_owned()],
+        ..Default::default()
+    })
+    .expect("a non-directory link target must not abort the scan");
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].name, "linkedfile");
+    assert_eq!(rows[0].status, StatusKind::Unmanaged);
+    assert_eq!(rows[0].path, skills.join("linkedfile"));
+}
+
+#[cfg(unix)]
+#[test]
+fn status_reports_dangling_and_directory_links_like_go() {
+    use std::os::unix::fs::symlink;
+
+    let home = tempfile::tempdir().expect("home");
+    let library = tempfile::tempdir().expect("library");
+    let skills = home.path().join(".config/opencode/skills");
+    fs::create_dir_all(&skills).expect("skills root");
+    symlink(skills.join("gone"), skills.join("dangling")).expect("dangling symlink");
+    let linked = home.path().join(".config/opencode/outside");
+    fs::create_dir_all(&linked).expect("linked directory");
+    fs::write(linked.join("SKILL.md"), "outside\n").expect("linked skill");
+    symlink(&linked, skills.join("chain-tail")).expect("directory symlink");
+
+    let rows = status(&StatusOptions {
+        home_dir: home.path().to_path_buf(),
+        library_dir: library.path().to_path_buf(),
+        targets: vec!["opencode".to_owned()],
+        ..Default::default()
+    })
+    .expect("status");
+    let names = rows.iter().map(|row| row.name.as_str()).collect::<Vec<_>>();
+    assert_eq!(names, vec!["chain-tail", "dangling"]);
+    assert!(rows.iter().all(|row| row.status == StatusKind::Unmanaged));
+}
