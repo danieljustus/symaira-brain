@@ -762,6 +762,36 @@ def write_library_skill(root: Path, name: str) -> Path:
     return directory
 
 
+def write_symskills_config(root: Path, body: str) -> None:
+    config = root / "config/symskills/config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    config.write_text(body, encoding="utf-8")
+
+
+def setup_skills_dynamic_config(root: Path, env: dict[str, str]) -> None:
+    write_library_skill(root, "demo")
+    write_symskills_config(root, 'library_dir = "/nonexistent/library"\n')
+
+
+def setup_skills_event_log(root: Path, env: dict[str, str]) -> None:
+    log = root / "home/.local/share/symskills/events.jsonl"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    log.write_text(
+        json.dumps(
+            {
+                "ts": "2026-01-02T03:04:05Z",
+                "event": "install",
+                "skill": "demo",
+                "target": "opencode",
+                "path": "/nonexistent/installed/demo",
+                "outcome": "ok",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
     for name in ("demo", "second"):
         write_library_skill(root, name)
@@ -1605,6 +1635,26 @@ CASES = (
         "skills_list_unknown_flag_fallback",
         ("skills", "list", "--bogus"),
         setup=setup_skills_library_fixture,
+    ),
+    Case(
+        "skills_list_dynamic_config_fallback",
+        ("skills", "list", "--json"),
+        setup=setup_skills_dynamic_config,
+    ),
+    Case(
+        "skills_targets_dynamic_root_fallback",
+        ("skills", "targets", "--json"),
+        setup=setup_skills_opencode_unmanaged_skill,
+    ),
+    Case(
+        "skills_log_populated_fallback",
+        ("skills", "log", "--json"),
+        setup=setup_skills_event_log,
+    ),
+    Case(
+        "skills_sync_dry_run_dynamic_config",
+        ("skills", "sync", "--dry-run", "--json"),
+        setup=setup_skills_dynamic_config,
     ),
     Case("skills_sync_dry_run_json", ("skills", "sync", "--dry-run", "--json")),
     Case(
