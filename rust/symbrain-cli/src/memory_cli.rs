@@ -58,6 +58,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         // `delete` is native for exactly one bare identifier plus `--db`; the
         // usage and flag errors stay with the Go flag package.
         "delete" => !delete_arguments_are_allowed(&args[1..]),
+        "set" => !set_arguments_are_allowed(&args[1..]),
         _ => true,
     }
 }
@@ -105,6 +106,64 @@ fn is_writable(metadata: &std::fs::Metadata) -> bool {
 #[cfg(not(unix))]
 fn is_writable(metadata: &std::fs::Metadata) -> bool {
     !metadata.permissions().readonly()
+}
+
+/// Accepts the shipped `memory set` shape only when every value is one the
+/// native store writes identically: one content argument, a valid `--kind`,
+/// an optional valid `--scope`, plus `--staged` and `--db`. Anything else -
+/// a missing or unknown kind, `--author`/`--metadata`/`--entities`, an empty
+/// content - keeps the shipped error text and stays on Go.
+fn set_arguments_are_allowed(args: &[OsString]) -> bool {
+    const KINDS: [&str; 4] = ["user", "feedback", "project", "reference"];
+    const SCOPES: [&str; 5] = ["global", "project", "agent", "user", "session"];
+    let mut kind = None;
+    let mut scope = None;
+    let mut content = None;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        let mut value = |index: &mut usize| -> Option<String> {
+            match inline {
+                Some(value) => Some(value.to_owned()),
+                None => {
+                    *index += 1;
+                    args.get(*index)
+                        .map(|value| value.to_string_lossy().into_owned())
+                }
+            }
+        };
+        match name {
+            "-kind" | "--kind" | "-k" => kind = value(&mut index),
+            "-scope" | "--scope" | "-s" => scope = value(&mut index),
+            "-db" | "--db" => {
+                if value(&mut index).is_none() {
+                    return false;
+                }
+            }
+            "--staged" => {}
+            _ if !arg.starts_with('-') => {
+                if content.is_some() {
+                    return false;
+                }
+                content = Some(arg.into_owned());
+            }
+            _ => return false,
+        }
+        index += 1;
+    }
+    let Some(kind) = kind else {
+        return false;
+    };
+    if !KINDS.contains(&kind.as_str()) {
+        return false;
+    }
+    if scope.is_some_and(|scope| !SCOPES.contains(&scope.as_str())) {
+        return false;
+    }
+    content.is_some_and(|content| !content.trim().is_empty())
 }
 
 /// Accepts `--db` plus exactly one bare identifier, the shipped `memory
@@ -460,7 +519,7 @@ fn run_set(
 ) -> u8 {
     let mut content = String::new();
     let mut scope = "global".to_string();
-    let mut kind = "user".to_string();
+    let mut kind = String::new();
     let mut staged = false;
 
     let mut i = 0;
@@ -523,20 +582,27 @@ fn run_set(
         Ok(mem) => {
             match format {
                 OutputFormat::Json => {
-                    let res = serde_json::json!({
-                        "id": mem.id,
-                        "scope": mem.scope,
-                        "kind": mem.kind,
-                        "staged": staged,
-                    });
+                    // Shipped shape: compact, `id`, `scope`, `kind`, `staged`.
                     let _ = writeln!(
                         stdout,
-                        "{}",
-                        serde_json::to_string_pretty(&res).unwrap_or_default()
+                        "{{\"id\":{},\"scope\":{},\"kind\":{},\"staged\":{}}}",
+                        go_json_string(&mem.id),
+                        go_json_string(&mem.scope),
+                        go_json_string(&mem.kind),
+                        staged
                     );
                 }
                 OutputFormat::Table => {
-                    let _ = writeln!(stdout, "Stored memory {}.", mem.id);
+                    let state = if staged {
+                        "staged for review"
+                    } else {
+                        "stored"
+                    };
+                    let _ = writeln!(
+                        stdout,
+                        "Memory {} ({}, {}, {}).",
+                        mem.id, mem.scope, mem.kind, state
+                    );
                 }
             }
             exit::OK

@@ -1911,8 +1911,31 @@ CASES = (
     ),
     Case("memory_list_unknown_flag_fallback", ("memory", "list", "--bogus")),
     Case(
-        "memory_set_fallback",
+        "memory_set_native",
         ("memory", "set", "x", "--kind", "user", "--json"),
+        normalize_uuid=True,
+    ),
+    Case(
+        "memory_set_native_table",
+        ("memory", "set", "y", "--kind", "project", "-s", "project"),
+        normalize_uuid=True,
+    ),
+    Case(
+        "memory_set_native_staged",
+        ("memory", "set", "z", "--kind", "feedback", "--staged", "--json"),
+        normalize_uuid=True,
+    ),
+    Case(
+        "memory_set_missing_kind_fallback",
+        ("memory", "set", "x", "--json"),
+    ),
+    Case(
+        "memory_set_invalid_kind_fallback",
+        ("memory", "set", "x", "--kind", "bogus", "--json"),
+    ),
+    Case(
+        "memory_set_author_fallback",
+        ("memory", "set", "x", "--kind", "user", "--author", "someone", "--json"),
         normalize_uuid=True,
     ),
     Case(
