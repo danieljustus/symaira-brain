@@ -116,30 +116,20 @@ fn is_writable(metadata: &std::fs::Metadata) -> bool {
 fn set_arguments_are_allowed(args: &[OsString]) -> bool {
     const KINDS: [&str; 4] = ["user", "feedback", "project", "reference"];
     const SCOPES: [&str; 5] = ["global", "project", "agent", "user", "session"];
-    let mut kind = None;
-    let mut scope = None;
-    let mut content = None;
+    let mut kind: Option<String> = None;
+    let mut scope: Option<String> = None;
+    let mut content: Option<String> = None;
     let mut index = 0;
     while index < args.len() {
         let arg = args[index].to_string_lossy();
         let (name, inline) = arg
             .split_once('=')
             .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        let mut value = |index: &mut usize| -> Option<String> {
-            match inline {
-                Some(value) => Some(value.to_owned()),
-                None => {
-                    *index += 1;
-                    args.get(*index)
-                        .map(|value| value.to_string_lossy().into_owned())
-                }
-            }
-        };
         match name {
-            "-kind" | "--kind" | "-k" => kind = value(&mut index),
-            "-scope" | "--scope" | "-s" => scope = value(&mut index),
+            "-kind" | "--kind" | "-k" => kind = flag_argument(args, &mut index, inline),
+            "-scope" | "--scope" | "-s" => scope = flag_argument(args, &mut index, inline),
             "-db" | "--db" => {
-                if value(&mut index).is_none() {
+                if flag_argument(args, &mut index, inline).is_none() {
                     return false;
                 }
             }
@@ -164,6 +154,16 @@ fn set_arguments_are_allowed(args: &[OsString]) -> bool {
         return false;
     }
     content.is_some_and(|content| !content.trim().is_empty())
+}
+
+/// Reads a flag's value from `--flag=value` or the following argument.
+fn flag_argument(args: &[OsString], index: &mut usize, inline: Option<&str>) -> Option<String> {
+    if let Some(value) = inline {
+        return Some(value.to_owned());
+    }
+    *index += 1;
+    args.get(*index)
+        .map(|value| value.to_string_lossy().into_owned())
 }
 
 /// Accepts `--db` plus exactly one bare identifier, the shipped `memory
