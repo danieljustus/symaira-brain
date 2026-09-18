@@ -45,7 +45,9 @@ jobs:
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
   # dedicated lint job at that point.
-  build-test:
+  # Lint and CGO-free build stay their own job so they can start immediately;
+  # the race suite below runs as parallel shards (see build-test).
+  go-lint-build:
     runs-on: ubuntu-latest
     env:
       # Default-path tests intentionally exercise the HOME fallback; keep
@@ -74,18 +76,76 @@ jobs:
         env:
           CGO_ENABLED: "0"
 
-      # -race requires cgo, so this step deliberately does not set
-      # CGO_ENABLED=0 (unlike the build step above). The coverprofile and
-      # test log are uploaded so the coverage job can build its artifacts
-      # without running the suite a second time.
-      - name: Test (race detector)
+  # The Go race suite serializes package processes (`-p 1`) because several
+  # packages use default XDG paths and would otherwise share one fixture
+  # database. Serialization is a correctness requirement, so the wall clock is
+  # cut by sharding across runners instead of relaxing the flag:
+  # `scripts/ci-go-test-shards.sh` assigns every package exactly once, greedily
+  # balanced by measured duration, and still runs the identical flags. -race
+  # requires cgo, so these steps deliberately do not set CGO_ENABLED=0.
+  go-test-shard:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    env:
+      XDG_CONFIG_HOME: ""
+      XDG_DATA_HOME: ""
+      XDG_CACHE_HOME: ""
+      XDG_STATE_HOME: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Test (race detector, shard ${{ matrix.shard }} of 4)
         shell: bash
         run: |
           set -euo pipefail
-          # Tests use default XDG paths in several packages; serialize package
-          # processes so those test fixtures cannot share one SQLite database.
-          go test -race -shuffle=on -short -p 1 -coverprofile=coverage.out ./... 2>&1 | tee test.log
+          scripts/ci-go-test-shards.sh --run "${{ matrix.shard }}" 4 "${RUNNER_TEMP:-/tmp}/go-shard"
 
+      - name: Upload shard coverage inputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-input-${{ github.sha }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/go-shard/*
+          retention-days: 1
+
+  # Aggregate gate for the Go side: keeps the historical `build-test` check
+  # name and rebuilds the single coverage-input artifact the coverage job
+  # consumes, so sharding stays invisible to every other job and to the
+  # coverage pipeline. Every package still runs exactly once with the same
+  # flags; only the runner changed.
+  build-test:
+    needs: [go-lint-build, go-test-shard]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Download shard coverage inputs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: coverage-input-${{ github.sha }}-*
+          path: ${{ runner.temp }}/go-shards
+          merge-multiple: true
+
+      - name: Merge shard coverage inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci-go-test-shards.sh --merge 4 "${RUNNER_TEMP:-/tmp}/go-shards" .
+
+      # The coverprofile and test log are uploaded so the coverage job can
+      # build its artifacts without running the suite a second time.
       - name: Upload coverage inputs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
