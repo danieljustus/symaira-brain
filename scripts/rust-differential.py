@@ -2125,6 +2125,23 @@ CASES = (
         setup=setup_memory_seeded,
     ),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
+    # `sync` pushes instructions and skills to installed harnesses; it was
+    # native without oracle coverage.
+    Case("sync_dry_run_empty", ("sync", "--dry-run")),
+    Case("sync_dry_run_all", ("sync", "--dry-run", "opencode")),
+    Case(
+        "sync_dry_run_with_library",
+        ("sync", "--dry-run", "opencode"),
+        setup=setup_skills_library_fixture,
+    ),
+    Case(
+        "sync_installs_library_skill",
+        ("sync", "opencode"),
+        setup=setup_skills_library_managed,
+    ),
+    Case("sync_unknown_harness", ("sync", "nope")),
+    Case("sync_help", ("sync", "--help")),
+    Case("sync_unknown_flag", ("sync", "--bogus")),
     # `harness list`/`harness health` were native from the start but never
     # oracle-pinned; these cases hold them to the shipped bytes.
     Case("harness_list_empty", ("harness", "list")),
