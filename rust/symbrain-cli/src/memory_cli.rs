@@ -27,22 +27,66 @@ The global --output table|json flag (or --json) selects the output format.
 
 /// Reports whether `symbrain memory` has to stay on the Go implementation.
 ///
-/// The native memory command tree is not store-compatible with the shipped
-/// implementation yet, and the divergences are silent rather than loud:
+/// The store is compatible with the shipped database (identifiers,
+/// timestamps, embedding column, schema, migrations); what is still narrower
+/// is the command surface. `list` runs natively for the argument shapes whose
+/// bytes are pinned, everything else stays on Go:
 ///
-/// - it resolves its own default database (`<data>/memory/memory.db` instead
-///   of the shipped `<data>/memory/default.db`), so a real user's memories are
-///   invisible and new writes land in a second, parallel store;
-/// - it ignores the `--db` override that every Go memory subcommand honours;
-/// - it stores and prints `memory-<hex>` ids where Go stores a UUID;
-/// - it pretty-prints `memory set --json` where Go emits compact JSON;
-/// - its schema migrations cannot be read back by the Go binary
-///   (`no such column: consolidated_into_id`), so the two stores are not
-///   interoperable in either direction.
-///
-/// Until those are ported and pinned byte for byte, every memory subcommand
-/// stays on Go. A silent second store is worse than a fallback.
-pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+/// - `search` reads through a different retrieval path (the shipped one ranks
+///   embedding candidates), `set`/`delete`/`serve`/`sync` write or serve, and
+///   `rules`/`query-log` are not pinned yet;
+/// - a dynamic memory configuration (a `symmemory` config file or
+///   `SYMMEMORY_*` in the environment) changes the database and retrieval
+///   settings, so it goes to Go;
+/// - any flag outside the whitelist goes to Go, because the Go flag package
+///   owns those error bytes.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
+        return true;
+    };
+    if verb != "list" {
+        return true;
+    }
+    memory_config_is_dynamic() || !list_arguments_are_allowed(&args[1..])
+}
+
+/// Reads the shipped memory configuration lookups that change the database or
+/// the retrieval behaviour.
+fn memory_config_is_dynamic() -> bool {
+    if std::env::vars_os().any(|(name, _)| name.to_string_lossy().starts_with("SYMMEMORY_")) {
+        return true;
+    }
+    let config_root = std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
+        .unwrap_or_else(|| PathBuf::from(".config"));
+    config_root.join("symmemory/config.toml").is_file()
+        || std::env::current_dir().is_ok_and(|dir| dir.join(".symmemory.toml").is_file())
+}
+
+/// Accepts exactly the flag shapes the shipped `memory list` defines:
+/// `--scope`/`-s`, `--limit`/`-l` and `--db`, each with a value.
+fn list_arguments_are_allowed(args: &[OsString]) -> bool {
+    let allowed = [
+        "-scope", "--scope", "-s", "-limit", "--limit", "-l", "-db", "--db",
+    ];
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if !allowed.contains(&name) {
+            return false;
+        }
+        if inline.is_none() {
+            if index + 1 >= args.len() {
+                return false;
+            }
+            index += 1;
+        }
+        index += 1;
+    }
     true
 }
 
@@ -139,12 +183,14 @@ fn run_list(
     format: OutputFormat,
 ) -> u8 {
     let mut scope: Option<String> = None;
-    let mut limit = 50;
+    // The shipped flag defaults: no scope, and a limit of 0 that the scan
+    // turns into 1000 rows.
+    let mut limit = 0;
 
     let mut i = 0;
     while i < args.len() {
         let arg = args[i].to_string_lossy();
-        if arg == "-scope" || arg == "--scope" {
+        if arg == "-scope" || arg == "--scope" || arg == "-s" {
             if i + 1 < args.len() {
                 scope = Some(args[i + 1].to_string_lossy().into_owned());
                 i += 2;
@@ -153,11 +199,12 @@ fn run_list(
         } else if let Some(v) = arg
             .strip_prefix("-scope=")
             .or_else(|| arg.strip_prefix("--scope="))
+            .or_else(|| arg.strip_prefix("-s="))
         {
             scope = Some(v.to_string());
             i += 1;
             continue;
-        } else if arg == "-limit" || arg == "--limit" {
+        } else if arg == "-limit" || arg == "--limit" || arg == "-l" {
             if i + 1 < args.len() {
                 if let Ok(l) = args[i + 1].to_string_lossy().parse() {
                     limit = l;
@@ -168,6 +215,7 @@ fn run_list(
         } else if let Some(v) = arg
             .strip_prefix("-limit=")
             .or_else(|| arg.strip_prefix("--limit="))
+            .or_else(|| arg.strip_prefix("-l="))
         {
             if let Ok(l) = v.parse() {
                 limit = l;
@@ -183,41 +231,40 @@ fn run_list(
         Err(code) => return code,
     };
 
-    let memories = match store.list(scope.as_deref().unwrap_or(""), limit) {
-        Ok(m) => m,
+    let rows = match store.list_lite(scope.as_deref().unwrap_or(""), limit) {
+        Ok(rows) => rows,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain memory list: {err}");
+            let _ = writeln!(stderr, "symbrain memory list: list memories: {err}");
             return exit::GENERIC;
         }
     };
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&memories).unwrap_or_default()
-            );
+            let rendered = rows
+                .iter()
+                .map(symbrain_memory::MemoryListRow::to_go_json)
+                .collect::<Vec<_>>()
+                .join(",");
+            let _ = writeln!(stdout, "[{rendered}]");
         }
         OutputFormat::Table => {
-            if memories.is_empty() {
+            if rows.is_empty() {
                 let _ = writeln!(stdout, "No memories found.");
             } else {
-                let _ = writeln!(stdout, "ID\tSCOPE\tUPDATED\tCONTENT");
-                for m in &memories {
-                    let preview = m.content.lines().next().unwrap_or("");
-                    let short_preview = if preview.len() > 60 {
-                        &preview[..60]
-                    } else {
-                        preview
-                    };
+                let _ = writeln!(stdout, "ID\tSCOPE\tCREATED\tCONTENT");
+                for row in &rows {
+                    let created = row
+                        .created_at
+                        .map(|time| time.format("%Y-%m-%dT%H:%M:%SZ").to_string())
+                        .unwrap_or_default();
                     let _ = writeln!(
                         stdout,
                         "{}\t{}\t{}\t{}",
-                        m.id,
-                        m.scope,
-                        m.updated_at.format("%Y-%m-%d %H:%M"),
-                        short_preview
+                        row.id,
+                        row.scope,
+                        created,
+                        table_content(&row.content)
                     );
                 }
             }
@@ -225,6 +272,11 @@ fn run_list(
     }
 
     exit::OK
+}
+
+/// Collapses tab, carriage return and newline so one memory stays on one row.
+fn table_content(value: &str) -> String {
+    value.replace(['\t', '\r', '\n'], " ")
 }
 
 fn run_search(

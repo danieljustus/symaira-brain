@@ -1113,6 +1113,7 @@ class Case:
     setup: Callable[[Path, dict[str, str]], None] | None = None
     normalize_parse_error: bool = False
     normalize_os_error: bool = False
+    normalize_uuid: bool = False
     mutating: bool = False
     posix_only: bool = False
     stdin: bytes | None = None
@@ -1842,7 +1843,7 @@ CASES = (
     # would fail if that gate were removed, because the native store resolves a
     # different database file.
     Case("memory_list_fallback", ("memory", "list", "--json")),
-    Case("memory_list_seeded_fallback", ("memory", "list", "--json"), setup=setup_memory_seeded),
+    Case("memory_list_seeded", ("memory", "list", "--json"), setup=setup_memory_seeded),
     Case(
         "memory_search_seeded_fallback",
         ("memory", "search", "alpha", "--json"),
@@ -1868,6 +1869,32 @@ CASES = (
     # `audit tail` mirrors the shipped `os.PathError` text for a missing dir.
     Case("audit_tail_missing_directory", ("audit", "tail")),
     Case("audit_tail_missing_directory_json", ("audit", "tail", "--json")),
+    Case(
+        "memory_list_seeded_table",
+        ("memory", "list"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_list_seeded_scope_alias",
+        ("memory", "list", "-s", "global", "-l", "5", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_list_seeded_limit_zero",
+        ("memory", "list", "--limit", "0", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case("memory_list_unknown_flag_fallback", ("memory", "list", "--bogus")),
+    Case(
+        "memory_set_fallback",
+        ("memory", "set", "x", "--kind", "user", "--json"),
+        normalize_uuid=True,
+    ),
+    Case(
+        "memory_delete_fallback",
+        ("memory", "delete", "missing-id"),
+    ),
+    Case("memory_help_fallback", ("memory",)),
     Case("memory_rules_fallback", ("memory", "rules", "--json")),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
     # Phase 1 Task 1.5: `skills list` keeps only the empty-library slice native.
@@ -2166,6 +2193,14 @@ def main() -> int:
                         rb"\1<parse error>\n",
                         rust_stderr,
                     )
+                if case.normalize_uuid:
+                    # Generated identifiers differ by construction; the case
+                    # pins the response shape around them.
+                    uuid_pattern = rb"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                    go_stdout = re.sub(uuid_pattern, b"<uuid>", go_stdout)
+                    rust_stdout = re.sub(uuid_pattern, b"<uuid>", rust_stdout)
+                    go_stderr = re.sub(uuid_pattern, b"<uuid>", go_stderr)
+                    rust_stderr = re.sub(uuid_pattern, b"<uuid>", rust_stderr)
                 if case.normalize_os_error:
                     go_stderr = re.sub(
                         rb"(symbrain config (?:get|set): (?:read|parse|backup|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",

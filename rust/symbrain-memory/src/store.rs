@@ -212,6 +212,31 @@ impl Store {
     ///
     /// # Errors
     /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
+    /// Reads `memory list` rows in the shipped lite projection.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when the scan fails.
+    pub fn list_lite(
+        &self,
+        scope: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::list_rows::MemoryListRow>, StoreError> {
+        // The shipped scan treats a non-positive limit as its default of 1000
+        // rows, which a `memory list` invocation without `--limit` relies on.
+        let limit = if limit == 0 {
+            1000
+        } else {
+            limit.min(MAX_LIST_RESULTS)
+        };
+        let limit = limit_i64(limit);
+        let conn = self.lock()?;
+        crate::list_rows::list_lite(&conn, scope, limit).map_err(Into::into)
+    }
+
+    /// Executes a bounded store operation.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
     pub fn list(&self, scope: &str, limit: usize) -> Result<Vec<Memory>, StoreError> {
         let limit = limit_i64(limit.min(MAX_LIST_RESULTS));
         let now = crate::gotime::format(Utc::now());
