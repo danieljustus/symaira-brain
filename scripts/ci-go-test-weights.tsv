@@ -1,9 +1,10 @@
 # Measured `go test -race -short -p 1` duration per package, in seconds.
-# Generated from the coverage-input test.log of a green CI run; used only to
-# balance the shards of the `build-test` job. Unknown packages fall back to
-# the median weight, so a stale table degrades balance, never coverage.
-# Regenerate: gh run download <run> -n coverage-input-<sha> && awk ... test.log
-github.com/danieljustus/symaira-brain/cmd/symbrain	105
+# Generated from the shard test logs of a green CI run; used only to balance
+# the shards of the `go-test-shard` job. Unknown packages fall back to the
+# median weight, so a stale table degrades balance, never coverage.
+# Regenerate: gh run download <run> -n coverage-input-<sha>-<shard> --pattern ... and
+# merge the per-package `ok  <pkg>  <seconds>s` lines of every shard log.
+github.com/danieljustus/symaira-brain/cmd/symbrain	134
 github.com/danieljustus/symaira-brain/guard/cmd/symguard/decide	1
 github.com/danieljustus/symaira-brain/guard/cmd/symguard/doctor	1
 github.com/danieljustus/symaira-brain/guard/cmd/symguard/grants	1
@@ -25,21 +26,21 @@ github.com/danieljustus/symaira-brain/guard/internal/spawn	1
 github.com/danieljustus/symaira-brain/guard/internal/update	1
 github.com/danieljustus/symaira-brain/internal/adapter	1
 github.com/danieljustus/symaira-brain/internal/audit	1
-github.com/danieljustus/symaira-brain/internal/broker	5
+github.com/danieljustus/symaira-brain/internal/broker	8
 github.com/danieljustus/symaira-brain/internal/catalog	1
 github.com/danieljustus/symaira-brain/internal/config	1
 github.com/danieljustus/symaira-brain/internal/gateway	2
 github.com/danieljustus/symaira-brain/internal/harness	1
 github.com/danieljustus/symaira-brain/internal/instructions	1
 github.com/danieljustus/symaira-brain/internal/managed	1
-github.com/danieljustus/symaira-brain/internal/memory/activity	20
+github.com/danieljustus/symaira-brain/internal/memory/activity	33
 github.com/danieljustus/symaira-brain/internal/memory/aging	2
 github.com/danieljustus/symaira-brain/internal/memory/bench	13
 github.com/danieljustus/symaira-brain/internal/memory/config	1
-github.com/danieljustus/symaira-brain/internal/memory/conflict	12
-github.com/danieljustus/symaira-brain/internal/memory/consolidation	10
-github.com/danieljustus/symaira-brain/internal/memory/contextassembler	3
-github.com/danieljustus/symaira-brain/internal/memory/db	221
+github.com/danieljustus/symaira-brain/internal/memory/conflict	18
+github.com/danieljustus/symaira-brain/internal/memory/consolidation	12
+github.com/danieljustus/symaira-brain/internal/memory/contextassembler	4
+github.com/danieljustus/symaira-brain/internal/memory/db	223
 github.com/danieljustus/symaira-brain/internal/memory/discovery	1
 github.com/danieljustus/symaira-brain/internal/memory/entity	1
 github.com/danieljustus/symaira-brain/internal/memory/extractor	6
@@ -52,28 +53,28 @@ github.com/danieljustus/symaira-brain/internal/memory/importer/codexmemory	1
 github.com/danieljustus/symaira-brain/internal/memory/importer/curatedmemory	1
 github.com/danieljustus/symaira-brain/internal/memory/importer/email	1
 github.com/danieljustus/symaira-brain/internal/memory/importer/git	3
-github.com/danieljustus/symaira-brain/internal/memory/importer/github	1
+github.com/danieljustus/symaira-brain/internal/memory/importer/github	2
 github.com/danieljustus/symaira-brain/internal/memory/importer/hermes	1
 github.com/danieljustus/symaira-brain/internal/memory/importer/memorytool	7
 github.com/danieljustus/symaira-brain/internal/memory/importer/obsidian	1
-github.com/danieljustus/symaira-brain/internal/memory/importer/opencode	1
+github.com/danieljustus/symaira-brain/internal/memory/importer/opencode	2
 github.com/danieljustus/symaira-brain/internal/memory/importer/paperless	1
 github.com/danieljustus/symaira-brain/internal/memory/importer/shellhistory	1
 github.com/danieljustus/symaira-brain/internal/memory/instructions	1
 github.com/danieljustus/symaira-brain/internal/memory/llm	1
-github.com/danieljustus/symaira-brain/internal/memory/mcp	127
-github.com/danieljustus/symaira-brain/internal/memory/memory	15
+github.com/danieljustus/symaira-brain/internal/memory/mcp	212
+github.com/danieljustus/symaira-brain/internal/memory/memory	23
 github.com/danieljustus/symaira-brain/internal/memory/paths	1
 github.com/danieljustus/symaira-brain/internal/memory/secrets	1
 github.com/danieljustus/symaira-brain/internal/memory/security	18
 github.com/danieljustus/symaira-brain/internal/memory/summarizer	1
-github.com/danieljustus/symaira-brain/internal/memory/syncclient	150
+github.com/danieljustus/symaira-brain/internal/memory/syncclient	152
 github.com/danieljustus/symaira-brain/internal/memory/temporal	1
 github.com/danieljustus/symaira-brain/internal/memory/tui	12
 github.com/danieljustus/symaira-brain/internal/memory/working	10
 github.com/danieljustus/symaira-brain/internal/output	1
 github.com/danieljustus/symaira-brain/internal/paths	1
-github.com/danieljustus/symaira-brain/internal/patterns	27
+github.com/danieljustus/symaira-brain/internal/patterns	28
 github.com/danieljustus/symaira-brain/internal/policy	1
 github.com/danieljustus/symaira-brain/internal/profile	1
 github.com/danieljustus/symaira-brain/internal/security	2

@@ -324,21 +324,19 @@ fn lookup_path(name: &str) -> Option<PathBuf> {
     None
 }
 
+#[cfg(unix)]
 fn is_executable_file(path: &Path) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+
     let Ok(metadata) = fs::metadata(path) else {
         return false;
     };
-    if !metadata.is_file() {
-        return false;
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        metadata.permissions().mode() & 0o111 != 0
-    }
-    #[cfg(not(unix))]
-    {
-        drop(metadata);
-        true
-    }
+    metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
+}
+
+/// Windows has no executable bit in the POSIX sense; `PATHEXT` suffixes and an
+/// existing regular file are the whole contract there.
+#[cfg(not(unix))]
+fn is_executable_file(path: &Path) -> bool {
+    fs::metadata(path).is_ok_and(|metadata| metadata.is_file())
 }
