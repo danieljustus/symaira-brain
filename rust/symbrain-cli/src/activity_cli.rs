@@ -4,10 +4,9 @@ use std::ffi::OsString;
 use std::io::Write;
 use std::path::PathBuf;
 
+use crate::go_json;
 use chrono::{DateTime, Utc};
-use symbrain_activity::{
-    SearchOptions, fence_summary, profile_allows_activity, validate_search_options,
-};
+use symbrain_activity::{fence_summary, profile_allows_activity};
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_memory::ActivitySearch;
@@ -60,10 +59,56 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let Some(name) = profile_name else {
         return false;
     };
-    match load_profile(&name) {
+    let allowed = match load_profile(&name) {
         Ok(profile) => profile_allows_activity(&profile),
-        Err(_) => false,
+        Err(_) => return false,
+    };
+    if !allowed {
+        return false;
     }
+    // A granting profile: `status` and `get` run natively, `search` still
+    // needs the shipped budget/window/page semantics.
+    match verb.as_str() {
+        "status" => false,
+        // The shipped flag set stops at the first bare argument, so a flag
+        // after the identifier is a usage error there; only the documented
+        // `get <flags> <id>` order is reproducible natively.
+        "get" => !get_argument_order_is_shipped(&args[1..]),
+        _ => true,
+    }
+}
+
+/// Reports whether `get` receives its flags before the single identifier.
+fn get_argument_order_is_shipped(args: &[OsString]) -> bool {
+    let mut positionals = 0;
+    let mut seen_positional = false;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        let flag = [
+            "--profile",
+            "-profile",
+            "--max-tokens",
+            "-max-tokens",
+            "--db",
+            "-db",
+        ];
+        if flag.contains(&name) {
+            if seen_positional || inline.is_none() {
+                return false;
+            }
+        } else if arg.starts_with('-') {
+            return false;
+        } else {
+            positionals += 1;
+            seen_positional = true;
+        }
+        index += 1;
+    }
+    positionals == 1
 }
 
 /// Runs `symbrain activity`.
@@ -115,6 +160,7 @@ pub fn run(
     let rest = &args[1..];
     match verb.as_ref() {
         "search" => run_search(rest, stdout, stderr, format),
+        "get" => run_get(rest, stdout, stderr, format),
         "status" => run_status(rest, stdout, stderr, format),
         _ => {
             let _ = writeln!(stderr, "symbrain activity: unknown subcommand {verb:?}\n");
@@ -141,126 +187,65 @@ fn extract_flag(args: &[OsString], flag: &str) -> Option<String> {
 }
 
 #[allow(clippy::too_many_lines)]
+/// Opens the activity store, reporting the shipped per-subcommand message.
+fn open_store(stderr: &mut dyn Write, subcommand: &str) -> Result<Store, u8> {
+    let db_path = resolve_db_path();
+    match Store::open(&db_path) {
+        Ok(store) => Ok(store),
+        Err(err) => {
+            let _ = writeln!(
+                stderr,
+                "symbrain activity {subcommand}: open database: {err}"
+            );
+            Err(exit::GENERIC)
+        }
+    }
+}
+
 fn run_search(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let mut query = String::new();
-    let mut from: Option<DateTime<Utc>> = None;
-    let mut to: Option<DateTime<Utc>> = None;
-    let mut limit = 10;
-    let mut max_tokens = 1000;
+    let query = positional_argument(
+        args,
+        &[
+            "--profile",
+            "-profile",
+            "--from",
+            "-from",
+            "--to",
+            "-to",
+            "--limit",
+            "-limit",
+            "--max-tokens",
+            "-max-tokens",
+            "--db",
+            "-db",
+        ],
+    )
+    .unwrap_or_default();
+    let from: Option<DateTime<Utc>> =
+        flag_value(args, &["--from", "-from"]).and_then(|value| value.parse().ok());
+    let to: Option<DateTime<Utc>> =
+        flag_value(args, &["--to", "-to"]).and_then(|value| value.parse().ok());
+    let limit = flag_value(args, &["--limit", "-limit"])
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(10);
+    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(1000);
 
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if arg == "-from" || arg == "--from" {
-            if i + 1 < args.len() {
-                from = args[i + 1].to_string_lossy().parse().ok();
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-from=")
-            .or_else(|| arg.strip_prefix("--from="))
-        {
-            from = v.parse().ok();
-            i += 1;
-            continue;
-        } else if arg == "-to" || arg == "--to" {
-            if i + 1 < args.len() {
-                to = args[i + 1].to_string_lossy().parse().ok();
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-to=")
-            .or_else(|| arg.strip_prefix("--to="))
-        {
-            to = v.parse().ok();
-            i += 1;
-            continue;
-        } else if arg == "-limit" || arg == "--limit" {
-            if i + 1 < args.len() {
-                if let Ok(l) = args[i + 1].to_string_lossy().parse() {
-                    limit = l;
-                }
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-limit=")
-            .or_else(|| arg.strip_prefix("--limit="))
-        {
-            if let Ok(l) = v.parse() {
-                limit = l;
-            }
-            i += 1;
-            continue;
-        } else if arg == "-max-tokens" || arg == "--max-tokens" {
-            if i + 1 < args.len() {
-                if let Ok(t) = args[i + 1].to_string_lossy().parse() {
-                    max_tokens = t;
-                }
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-max-tokens=")
-            .or_else(|| arg.strip_prefix("--max-tokens="))
-        {
-            if let Ok(t) = v.parse() {
-                max_tokens = t;
-            }
-            i += 1;
-            continue;
-        } else if arg.starts_with("--profile") || arg.starts_with("-profile") {
-            if !arg.contains('=') {
-                i += 1;
-            }
-            i += 1;
-            continue;
-        } else if !arg.starts_with('-') && query.is_empty() {
-            query = arg.into_owned();
-        }
-        i += 1;
-    }
-
-    let Some(from_dt) = from else {
-        let _ = writeln!(stderr, "symbrain activity search: --from required");
-        return exit::USAGE;
-    };
-    let Some(to_dt) = to else {
-        let _ = writeln!(stderr, "symbrain activity search: --to required");
-        return exit::USAGE;
+    let store = match open_store(stderr, "search") {
+        Ok(store) => store,
+        Err(code) => return code,
     };
 
-    let search_opts = SearchOptions {
-        query: query.clone(),
-        source: String::new(),
-        from: from_dt,
-        to: to_dt,
-        limit,
-        max_tokens,
-        include_episodes: false,
-    };
-
-    if let Err(err) = validate_search_options(&search_opts) {
-        let _ = writeln!(stderr, "symbrain activity search: {err}");
-        return exit::USAGE;
-    }
-
-    let db_path = resolve_db_path();
-    let store = match Store::open(&db_path) {
-        Ok(s) => s,
-        Err(err) => {
-            let _ = writeln!(stderr, "symbrain activity: open database: {err}");
-            return exit::GENERIC;
-        }
-    };
-
+    // `search` stays on Go (see the gate); this path only needs to compile
+    // and behave sanely for callers that reach it directly.
+    let from_dt = from.unwrap_or_else(Utc::now);
+    let to_dt = to.unwrap_or_else(Utc::now);
     let mem_search = ActivitySearch {
         query,
         source: String::new(),
@@ -314,37 +299,137 @@ fn run_status(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let db_path = resolve_db_path();
-    let store = match Store::open(&db_path) {
-        Ok(s) => s,
-        Err(err) => {
-            let _ = writeln!(stderr, "symbrain activity: open database: {err}");
-            return exit::GENERIC;
-        }
+    let store = match open_store(stderr, "status") {
+        Ok(store) => store,
+        Err(code) => return code,
     };
-
     let status = match store.activity_status() {
-        Ok(s) => s,
+        Ok(status) => status,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain activity status: {err}");
+            let _ = writeln!(stderr, "symbrain activity status: status: {err}");
             return exit::GENERIC;
         }
     };
 
     match format {
         OutputFormat::Json => {
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&status).unwrap_or_default()
-            );
+            let _ = writeln!(stdout, "{}", go_json(&status));
         }
         OutputFormat::Table => {
-            let _ = writeln!(stdout, "Activity Store: {}", db_path.display());
-            let _ = writeln!(stdout, "Active segments: {}", status.active_segments);
-            let _ = writeln!(stdout, "Active episodes: {}", status.active_episodes);
+            let _ = writeln!(
+                stdout,
+                "segments={}\tepisodes={}",
+                status.active_segments, status.active_episodes
+            );
         }
     }
 
     exit::OK
+}
+
+fn run_get(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> u8 {
+    let flags = [
+        "--profile",
+        "-profile",
+        "--max-tokens",
+        "-max-tokens",
+        "--db",
+        "-db",
+    ];
+    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
+        .and_then(|value| value.parse::<usize>().ok());
+    let Some(id) = positional_argument(args, &flags) else {
+        let _ = writeln!(
+            stderr,
+            "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]"
+        );
+        return exit::USAGE;
+    };
+    let store = match open_store(stderr, "get") {
+        Ok(store) => store,
+        Err(code) => return code,
+    };
+    let item = match store.activity_get(&id) {
+        Ok(item) => item,
+        Err(err) => {
+            let _ = writeln!(stderr, "symbrain activity get: get: {err}");
+            return exit::GENERIC;
+        }
+    };
+    let Some(mut item) = item else {
+        let _ = writeln!(stderr, "symbrain activity get: activity not found: {id}");
+        return exit::USAGE;
+    };
+
+    // The shipped command fences the summary and reports its token count.
+    let summary = fence_summary(&item.summary, max_tokens.unwrap_or(0));
+    item.tokens = if summary.is_empty() {
+        0
+    } else {
+        summary.chars().count() / 4 + 1
+    };
+    item.summary = summary;
+
+    match format {
+        OutputFormat::Json => {
+            let _ = writeln!(stdout, "{}", go_json(&item));
+        }
+        OutputFormat::Table => {
+            let _ = writeln!(
+                stdout,
+                "{}\t{}\t{}",
+                item.started_at.format("%Y-%m-%dT%H:%M:%SZ"),
+                item.kind,
+                item.summary
+            );
+        }
+    }
+
+    exit::OK
+}
+
+/// Reads a flag's value in `--flag value` or `--flag=value` form.
+fn flag_value(args: &[OsString], names: &[&str]) -> Option<String> {
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if names.contains(&name) {
+            if let Some(value) = inline {
+                return Some(value.to_owned());
+            }
+            return args
+                .get(index + 1)
+                .map(|value| value.to_string_lossy().into_owned());
+        }
+        index += 1;
+    }
+    None
+}
+
+/// Reads the single bare argument, skipping the values of the listed flags.
+fn positional_argument(args: &[OsString], flags: &[&str]) -> Option<String> {
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if flags.contains(&name) {
+            if inline.is_none() {
+                index += 1;
+            }
+        } else if !arg.starts_with('-') {
+            return Some(arg.into_owned());
+        }
+        index += 1;
+    }
+    None
 }
