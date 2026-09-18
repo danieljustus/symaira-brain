@@ -828,6 +828,17 @@ def setup_skills_event_log(root: Path, env: dict[str, str]) -> None:
     )
 
 
+def setup_activity_profile(root: Path, env: dict[str, str]) -> None:
+    """A profile that explicitly grants the activity read tools."""
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    (profiles / "reader.toml").write_text(
+        '[profile]\nname = "reader"\n'
+        "[servers.memory]\nenabled = true\n"
+        'tools_allow = ["activity_status", "activity_get", "activity_search"]\n'
+    )
+
+
 def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
     for name in ("demo", "second"):
         write_library_skill(root, name)
@@ -1878,6 +1889,47 @@ CASES = (
         "memory_query_log_seeded",
         ("memory", "query-log", "--json"),
         setup=setup_memory_seeded,
+    ),
+    # `activity`: the dispatch text and the policy message are native, the
+    # subcommands themselves stay on Go until their budget and page shapes are
+    # ported.
+    Case("activity_usage", ("activity",)),
+    Case("activity_help", ("activity", "--help")),
+    Case(
+        "activity_missing_profile",
+        ("activity", "status", "--profile", "absent", "--max-tokens", "100"),
+    ),
+    Case(
+        "activity_get_missing_profile",
+        ("activity", "get", "--profile", "absent", "entry-1", "--max-tokens", "100"),
+    ),
+    Case(
+        "activity_search_missing_profile",
+        (
+            "activity",
+            "search",
+            "q",
+            "--profile",
+            "absent",
+            "--from",
+            "2026-01-01T00:00:00Z",
+            "--to",
+            "2026-01-02T00:00:00Z",
+            "--limit",
+            "5",
+            "--max-tokens",
+            "100",
+        ),
+    ),
+    Case(
+        "activity_status_reader_profile",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "100", "--json"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_unknown_subcommand",
+        ("activity", "frobnicate", "--profile", "reader", "--max-tokens", "100"),
+        setup=setup_activity_profile,
     ),
     # `usage` and `activity` are gated back to Go: their native auth details,
     # usage text, profile error path and subcommand set diverge from the

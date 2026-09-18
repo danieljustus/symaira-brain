@@ -14,14 +14,12 @@ use symbrain_memory::ActivitySearch;
 use symbrain_memory::Store;
 use symbrain_policy::load as load_profile;
 
-const ACTIVITY_USAGE: &str = "symbrain activity — read bounded activity summaries
+const ACTIVITY_USAGE: &str = "symbrain activity \u{2014} bounded, profile-gated activity reads
 
 Usage:
-  symbrain activity search --profile PROFILE --from RFC3339 --to RFC3339 --limit N --max-tokens N <query>
-  symbrain activity get --profile PROFILE <id>
-  symbrain activity status --profile PROFILE
+  symbrain activity <search|get|status> [flags]
 
-The global --output table|json flag (or --json) selects the output format.
+Every command requires --profile, an explicit bounded response budget, and (for search) an explicit RFC3339 window and result limit.
 ";
 
 fn resolve_db_path() -> PathBuf {
@@ -42,20 +40,30 @@ fn resolve_db_path() -> PathBuf {
 
 /// Reports whether `symbrain activity` has to stay on the Go implementation.
 ///
-/// The native slice is incomplete in ways that would be visible to a user:
+/// Native today: the usage/dispatch text and the policy message for a profile
+/// that is absent, unloadable or does not expose the activity read tools.
+/// Those bytes are pinned by differential cases.
 ///
-/// - `activity get` is not implemented (the shipped command documents and
-///   serves `search|get|status`), so it falls through to "unknown subcommand";
-/// - the usage text differs from the shipped text;
-/// - an unloadable profile reports the raw load error where the shipped
-///   implementation reports the policy message ("--profile is required and
-///   must explicitly expose activity read tools");
-/// - it reads the native memory store, which is not compatible with the
-///   shipped database yet (see the `memory` fallback and issue #615).
-///
-/// Until those are ported and pinned, the command stays on Go.
-pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
-    true
+/// Still on Go: `search`, `get` and `status` themselves - the shipped
+/// implementations carry a bounded response budget, token-fenced summaries,
+/// TTL fields and a result page the native path does not reproduce yet.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
+        return false;
+    };
+    if matches!(verb.as_str(), "-h" | "--help" | "help") {
+        return false;
+    }
+    // An unusable profile is answered natively; a usable one falls through to
+    // the subcommand, which stays on Go.
+    let profile_name = extract_flag(args, "--profile").or_else(|| extract_flag(args, "-profile"));
+    let Some(name) = profile_name else {
+        return false;
+    };
+    match load_profile(&name) {
+        Ok(profile) => profile_allows_activity(&profile),
+        Err(_) => false,
+    }
 }
 
 /// Runs `symbrain activity`.
@@ -86,12 +94,14 @@ pub fn run(
         return exit::USAGE;
     };
 
-    let profile = match load_profile(&pname) {
-        Ok(p) => p,
-        Err(err) => {
-            let _ = writeln!(stderr, "symbrain activity: load profile {pname:?}: {err}");
-            return exit::USAGE;
-        }
+    // The shipped command answers an unusable profile with its policy
+    // message, never with the loader's diagnostic.
+    let Ok(profile) = load_profile(&pname) else {
+        let _ = writeln!(
+            stderr,
+            "symbrain activity: --profile is required and must explicitly expose activity read tools"
+        );
+        return exit::USAGE;
     };
 
     if !profile_allows_activity(&profile) {
