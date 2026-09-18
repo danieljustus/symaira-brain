@@ -121,21 +121,21 @@ fn current_project_dir() -> PathBuf {
     std::env::current_dir().unwrap_or_default()
 }
 
-/// Keeps the native status slice limited to an empty user-scope inventory.
+/// Keeps the native status slice limited to the `OpenCode` static contract.
 ///
-/// Project scope, custom config, and every existing/dynamic target state stay
-/// on the Go implementation until their byte contract is independently frozen.
+/// Custom config, other targets, and every dynamic target state stay on the Go
+/// implementation until their byte contract is independently frozen.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     match args.first().map(|arg| arg.to_string_lossy()) {
         Some(verb) if verb == "status" => {
             let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
                 return true;
             };
-            if scope != "user" || has_dynamic_config() {
+            if has_dynamic_config() || !matches!(scope.as_str(), "user" | "project") {
                 return true;
             }
             match target.as_deref() {
-                Some("opencode") => opencode_status_needs_go(),
+                Some("opencode") => opencode_status_needs_go(&scope),
                 None => has_dynamic_target_state(),
                 Some(_) => true,
             }
@@ -327,7 +327,7 @@ fn has_dynamic_target_state() -> bool {
 }
 
 /// Keeps the native `status --target opencode` slice inside the byte contract
-/// Go actually produces for the current `OpenCode` user root.
+/// Go actually produces for the current `OpenCode` root of the given scope.
 ///
 /// Go classifies an entry whose marker it cannot fully unmarshal by reusing
 /// `encoding/json` error text and by keeping whatever fields it managed to
@@ -337,9 +337,8 @@ fn has_dynamic_target_state() -> bool {
 /// command on Go instead of emitting different bytes. Roots made of real
 /// directories, single-hop links and well-formed schema-version-1 markers stay
 /// native.
-fn opencode_status_needs_go() -> bool {
-    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let root = skill_root_for("opencode", &home);
+fn opencode_status_needs_go(scope: &str) -> bool {
+    let root = opencode_status_root(scope);
     let entries = match fs::read_dir(&root) {
         Ok(entries) => entries,
         // A missing root is a normal native case; anything else (for example a
@@ -754,6 +753,19 @@ fn skill_root_for(target: &str, home: &std::path::Path) -> PathBuf {
         "openclaw" => home.join(".openclaw/skills"),
         _ => home.join(".local/share/symskills/skills"),
     }
+}
+
+/// Resolves the `OpenCode` skill root the native status slice validates.
+///
+/// The project root mirrors `symbrain skills doctor` (`<project>/.opencode/skills`)
+/// so the fallback decision inspects exactly the directory the native scan will
+/// read.
+fn opencode_status_root(scope: &str) -> PathBuf {
+    if scope == "project" {
+        return current_project_dir().join(".opencode/skills");
+    }
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    skill_root_for("opencode", &home)
 }
 
 fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {

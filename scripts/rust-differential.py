@@ -692,6 +692,56 @@ def setup_skills_opencode_mixed(root: Path, env: dict[str, str]) -> None:
     (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
 
 
+def project_scope_fixture(setup: Callable[[Path, dict[str, str]], None]) -> Callable[[Path, dict[str, str]], None]:
+    """Reuse a user-scope fixture builder against the project-scope root.
+
+    Project scope reads `<project>/.opencode/skills`, while every user-scope
+    builder (and `symbrain sync`) writes under `$HOME`, so the freshly built
+    tree is moved into place. Builders whose symlinks point into the user root
+    are not wrapped: moving the root would dangle those links and silently turn
+    them into a different fixture.
+    """
+
+    def wrapped(root: Path, env: dict[str, str]) -> None:
+        setup(root, env)
+        user = root / OPENCODE_SKILLS_SUBDIR
+        if user.exists():
+            project = root / "project/.opencode/skills"
+            project.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(user), str(project))
+
+    return wrapped
+
+
+def setup_skills_opencode_project_symlink_to_file(root: Path, env: dict[str, str]) -> None:
+    skills = root / "project/.opencode/skills"
+    skills.mkdir(parents=True)
+    target = skills.parent / "outside-file.md"
+    target.write_text("outside\n", encoding="utf-8")
+    os.symlink(target, skills / "linkedfile")
+
+
+def setup_skills_opencode_project_symlink_chain(root: Path, env: dict[str, str]) -> None:
+    skills = root / "project/.opencode/skills"
+    skills.mkdir(parents=True)
+    real = skills.parent / "real-dir"
+    real.mkdir(parents=True)
+    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    middle = skills.parent / "middle-link"
+    os.symlink(real, middle)
+    os.symlink(middle, skills / "chain")
+
+
+def setup_skills_opencode_project_isolated_from_user_root(root: Path, env: dict[str, str]) -> None:
+    # The project scan must ignore whatever the user root contains.
+    write_opencode_skill(root, "user-only")
+    skills = root / "project/.opencode/skills"
+    skills.mkdir(parents=True)
+    projects_skill = skills / "only-here"
+    projects_skill.mkdir()
+    (projects_skill / "SKILL.md").write_text("only-here\n", encoding="utf-8")
+
+
 def freeze_managed_clocks(root: Path) -> None:
     """Pin the install clock the pinned Go binary wrote, so both comparison
     roots produce the same bytes instead of differing by a wall-clock second."""
@@ -1438,8 +1488,64 @@ CASES = (
         setup=setup_skills_opencode_unmanaged_skill,
     ),
     Case(
-        "skills_status_project_scope_fallback",
+        "skills_status_opencode_project_root_missing",
         ("skills", "status", "--target", "opencode", "--scope", "project"),
+    ),
+    Case(
+        "skills_status_opencode_project_unmanaged_skill",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=project_scope_fixture(setup_skills_opencode_unmanaged_skill),
+    ),
+    Case(
+        "skills_status_opencode_project_dir_without_skill",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=project_scope_fixture(setup_skills_opencode_dir_without_skill),
+    ),
+    Case(
+        "skills_status_opencode_project_regular_file",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=project_scope_fixture(setup_skills_opencode_regular_file),
+    ),
+    Case(
+        "skills_status_opencode_project_mixed_json",
+        ("skills", "status", "--target", "opencode", "--scope", "project", "--json"),
+        setup=project_scope_fixture(setup_skills_opencode_mixed),
+    ),
+    Case(
+        "skills_status_opencode_project_orphaned_marker",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=project_scope_fixture(setup_skills_opencode_orphaned_marker),
+    ),
+    Case(
+        "skills_status_opencode_project_unsupported_schema_marker",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=project_scope_fixture(setup_skills_opencode_unsupported_schema_marker),
+    ),
+    Case(
+        "skills_status_opencode_project_malformed_marker_json",
+        ("skills", "status", "--target", "opencode", "--scope", "project", "--json"),
+        setup=project_scope_fixture(setup_skills_opencode_malformed_marker),
+    ),
+    Case(
+        "skills_status_opencode_project_symlink_to_file",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=setup_skills_opencode_project_symlink_to_file,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_project_symlink_chain",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=setup_skills_opencode_project_symlink_chain,
+        posix_only=True,
+    ),
+    Case(
+        "skills_status_opencode_project_isolated_from_user_root",
+        ("skills", "status", "--target", "opencode", "--scope", "project"),
+        setup=setup_skills_opencode_project_isolated_from_user_root,
+    ),
+    Case(
+        "skills_status_unknown_scope_fallback",
+        ("skills", "status", "--target", "opencode", "--scope", "team"),
         setup=setup_skills_opencode_unmanaged_skill,
     ),
     Case("skills_status_other_target_fallback", ("skills", "status", "--target", "claude")),

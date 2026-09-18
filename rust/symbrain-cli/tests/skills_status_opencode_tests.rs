@@ -255,3 +255,78 @@ fn opencode_user_status_managed_marker_row_matches_go_bytes() {
     );
     assert_eq!(output.stdout, expected.as_bytes());
 }
+
+#[test]
+fn opencode_project_status_matches_go_bytes() {
+    let root = TempDir::new().unwrap();
+    let skill = root.path().join("project/.opencode/skills/handwritten");
+    std::fs::create_dir_all(&skill).unwrap();
+    std::fs::write(skill.join("SKILL.md"), b"handwritten\n").unwrap();
+    let output = run(
+        &root,
+        &[
+            "skills", "status", "--target", "opencode", "--scope", "project",
+        ],
+    );
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let expected = format!(
+        "TARGET\tSKILL\tSTATUS\tMODE\tPATH\nopencode\thandwritten\tunmanaged\t-\t{}\n",
+        skill.display()
+    );
+    assert_eq!(output.stdout, expected.as_bytes());
+}
+
+#[test]
+fn opencode_project_status_ignores_the_user_root() {
+    let root = TempDir::new().unwrap();
+    let user_skill = root.path().join("home/.config/opencode/skills/user-only");
+    std::fs::create_dir_all(&user_skill).unwrap();
+    std::fs::write(user_skill.join("SKILL.md"), b"user\n").unwrap();
+    let project_skill = root.path().join("project/.opencode/skills/only-here");
+    std::fs::create_dir_all(&project_skill).unwrap();
+    std::fs::write(project_skill.join("SKILL.md"), b"project\n").unwrap();
+    let output = run(
+        &root,
+        &[
+            "skills", "status", "--target", "opencode", "--scope", "project",
+        ],
+    );
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("user-only"));
+    assert!(String::from_utf8_lossy(&output.stdout).contains("only-here"));
+}
+
+#[cfg(unix)]
+#[test]
+fn opencode_project_status_symlink_chain_keeps_go_fallback() {
+    let root = TempDir::new().unwrap();
+    let skills = root.path().join("project/.opencode/skills");
+    std::fs::create_dir_all(&skills).unwrap();
+    let real = root.path().join("project/.opencode/real");
+    std::fs::create_dir_all(&real).unwrap();
+    std::fs::write(real.join("SKILL.md"), b"real\n").unwrap();
+    let middle = root.path().join("project/.opencode/middle");
+    std::os::unix::fs::symlink(&real, &middle).unwrap();
+    std::os::unix::fs::symlink(&middle, skills.join("chain")).unwrap();
+    let output = run(
+        &root,
+        &[
+            "skills", "status", "--target", "opencode", "--scope", "project",
+        ],
+    );
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+}
+
+#[test]
+fn opencode_project_status_no_scope_flag_defaults_to_user() {
+    let root = TempDir::new().unwrap();
+    let project_skill = root.path().join("project/.opencode/skills/only-here");
+    std::fs::create_dir_all(&project_skill).unwrap();
+    std::fs::write(project_skill.join("SKILL.md"), b"project\n").unwrap();
+    let output = run(&root, &["skills", "status", "--target", "opencode"]);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(output.stdout, b"No installed skills found.\n");
+}
