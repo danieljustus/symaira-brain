@@ -481,6 +481,18 @@ fn parse_search_arguments(args: &[OsString]) -> SearchArguments {
             parsed.scope = value.to_string();
             index += 1;
             continue;
+        } else if arg == "-db" || arg == "--db" {
+            if index + 1 < args.len() {
+                index += 2;
+                continue;
+            }
+        } else if arg
+            .strip_prefix("-db=")
+            .or_else(|| arg.strip_prefix("--db="))
+            .is_some()
+        {
+            index += 1;
+            continue;
         } else if arg == "-limit" || arg == "--limit" || arg == "-l" {
             if index + 1 < args.len() {
                 if let Ok(value) = args[index + 1].to_string_lossy().parse() {
@@ -1416,6 +1428,30 @@ mod tests {
                 .expect("UTF-8 stdout")
                 .starts_with("symbrain memory search — search memories by semantic relevance\n")
         );
+    }
+
+    #[test]
+    fn search_flags_consume_their_values() {
+        let cases = [
+            vec!["search", "alpha", "--db", "/tmp/memory.db"],
+            vec!["search", "alpha", "--limit", "2", "--db", "/tmp/memory.db"],
+            vec![
+                "search",
+                "alpha",
+                "-l",
+                "2",
+                "-s",
+                "global",
+                "--db=/tmp/memory.db",
+            ],
+        ];
+        for case in cases {
+            let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+            assert!(
+                !requires_go_fallback(&args),
+                "{case:?} should stay native so the parser owns the values"
+            );
+        }
     }
 
     #[test]

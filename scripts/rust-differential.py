@@ -1988,6 +1988,27 @@ CASES = (
         ("memory", "search", "alpha memory content", "--limit", "1", "--json"),
         setup=setup_memory_seeded,
     ),
+    # `--db` and `--limit` together are the shape whose values must be consumed
+    # as flag values rather than counted as query arguments.
+    Case(
+        "memory_search_db_override",
+        ("memory", "search", "alpha memory content", "--db", "MEMORY_DB", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_limit_and_db",
+        (
+            "memory",
+            "search",
+            "alpha memory content",
+            "--limit",
+            "1",
+            "--db",
+            "MEMORY_DB",
+            "--json",
+        ),
+        setup=setup_memory_seeded,
+    ),
     Case(
         "memory_search_no_candidate",
         ("memory", "search", "zzz", "--json"),
@@ -2425,8 +2446,12 @@ CASES = (
     Case("skills_status_unknown_flag", ("skills", "status", "--bogus")),
 )
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:
+    replacements = {
+        "PROJECT": root / "project",
+        "MEMORY_DB": root / "data/symbrain/memory/default.db",
+    }
     return tuple(
-        str(root / "project") if isinstance(arg, str) and arg == "PROJECT" else arg
+        str(replacements[arg]) if isinstance(arg, str) and arg in replacements else arg
         for arg in argv
     )
 def run(
