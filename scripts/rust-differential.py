@@ -911,6 +911,27 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
         check=True,
         timeout=60,
     )
+    # A second row shares the first row's embedding below, so ranking has two
+    # candidates to order; its own text never reaches the query.
+    subprocess.run(
+        [
+            env["SYMBRAIN_GO_BINARY"],
+            "memory",
+            "set",
+            "beta memory content",
+            "--kind",
+            "user",
+            "--scope",
+            "global",
+        ],
+        env=env,
+        cwd=env["PROJECT"],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=True,
+        timeout=60,
+    )
     database = root / "data/symbrain/memory/default.db"
     metadata = {
         "authority": "direct",
@@ -928,7 +949,11 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
         # Identifiers and metadata carry generation-time values; both are
         # pinned so the two roots produce identical bytes.
         connection.execute(
-            "UPDATE memories SET id = ?, content = ?, metadata = ?, created_at = ?, updated_at = ?",
+            """
+            UPDATE memories
+               SET id = ?, content = ?, metadata = ?, created_at = ?, updated_at = ?
+             WHERE content = 'alpha memory content'
+            """,
             (
                 "00000000-0000-4000-8000-000000000001",
                 "alpha memory content",
@@ -936,6 +961,41 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
                 "2026-01-02 03:04:05",
                 "2026-01-02 03:04:05",
             ),
+        )
+        # The second memory keeps the first memory's vector, so both rows are
+        # candidates for the same query and only importance separates them.
+        connection.execute(
+            """
+            UPDATE memories SET
+                embedding = (SELECT embedding FROM memories WHERE content = 'alpha memory content'),
+                embedding_dim = (SELECT embedding_dim FROM memories WHERE content = 'alpha memory content'),
+                embedding_source = (SELECT embedding_source FROM memories WHERE content = 'alpha memory content'),
+                embedding_model = (SELECT embedding_model FROM memories WHERE content = 'alpha memory content'),
+                embedding_quantization = (
+                    SELECT embedding_quantization FROM memories WHERE content = 'alpha memory content'
+                ),
+                lsh_hash = (SELECT lsh_hash FROM memories WHERE content = 'alpha memory content'),
+                content = ?,
+                importance = ?,
+                metadata = ?,
+                created_at = ?,
+                updated_at = ?
+            WHERE content = 'beta memory content'
+            """,
+            (
+                "beta memory content",
+                0.9,
+                json.dumps(metadata),
+                "2026-01-02 03:04:05",
+                "2026-01-02 03:04:05",
+            ),
+        )
+        connection.execute(
+            "UPDATE memories SET importance = 0.5 WHERE content = 'alpha memory content'"
+        )
+        connection.execute(
+            "UPDATE memories SET id = ? WHERE content = 'beta memory content'",
+            ("00000000-0000-4000-8000-000000000003",),
         )
         connection.execute(
             "UPDATE query_log SET id = ?, created_at = ?",
@@ -965,6 +1025,8 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
                 )
             except sqlite3.OperationalError:
                 pass
+        # Both rows must look identical apart from what is pinned above.
+        connection.execute("UPDATE memories SET scope = 'global', kind = 'user'")
         connection.commit()
     finally:
         connection.close()
@@ -1875,16 +1937,78 @@ CASES = (
         ("skills", "status", "--target", "opencode", "--json"),
         setup=setup_skills_opencode_escapable_name,
     ),
-    # `memory` stays on Go until its store is proven compatible; these cases
-    # would fail if that gate were removed, because the native store resolves a
-    # different database file.
+    # `memory` is native for the pinned shapes: the fixture pins the seeded
+    # row's clock, the identifier and the query-log row, so both roots produce
+    # the same bytes.
     Case("memory_list_fallback", ("memory", "list", "--json")),
     Case("memory_list_seeded", ("memory", "list", "--json"), setup=setup_memory_seeded),
+    # `memory search` ranks embedding candidates. The query is the seeded row's
+    # own content: the LSH neighbourhood of a different phrase does not contain
+    # it, so a paraphrased query would compare two empty reports. Ranking is
+    # reproducible because the fixture pins the row's clock to a fixed date -
+    # the recency term of a freshly written row would drift between the two
+    # roots.
     Case(
-        "memory_search_seeded_fallback",
-        ("memory", "search", "alpha", "--json"),
+        "memory_search_seeded",
+        ("memory", "search", "alpha memory content", "--json"),
         setup=setup_memory_seeded,
     ),
+    Case(
+        "memory_search_seeded_table",
+        ("memory", "search", "alpha memory content"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_seeded_scope",
+        ("memory", "search", "alpha memory content", "-s", "global", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_seeded_other_scope",
+        ("memory", "search", "alpha memory content", "-s", "project", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_seeded_limit",
+        ("memory", "search", "alpha memory content", "-l", "1", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_seeded_limit_zero",
+        ("memory", "search", "alpha memory content", "--limit", "0", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_two_candidates_limit",
+        ("memory", "search", "alpha memory content", "--limit", "2", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_two_candidates_limit_one",
+        ("memory", "search", "alpha memory content", "--limit", "1", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_no_candidate",
+        ("memory", "search", "zzz", "--json"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_no_candidate_table",
+        ("memory", "search", "zzz"),
+        setup=setup_memory_seeded,
+    ),
+    Case(
+        "memory_search_empty_query",
+        ("memory", "search", ""),
+        setup=setup_memory_seeded,
+    ),
+    Case("memory_search_missing_query_fallback", ("memory", "search")),
+    Case(
+        "memory_search_unknown_flag_fallback",
+        ("memory", "search", "alpha", "--bogus"),
+    ),
+    Case("memory_search_help_fallback", ("memory", "search", "--help")),
     Case(
         "memory_query_log_seeded",
         ("memory", "query-log", "--json"),

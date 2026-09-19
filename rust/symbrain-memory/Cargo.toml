@@ -17,6 +17,7 @@ sha2.workspace = true
 # Same pinned crate the guard workspace already uses; needed to generate
 # UUID-shaped memory ids like the shipped store.
 getrandom = "=0.3.3"
+ureq.workspace = true
 symbrain-activity.workspace = true
 
 [lints.rust]

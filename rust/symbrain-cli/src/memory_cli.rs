@@ -10,7 +10,7 @@ use chrono::{DateTime, FixedOffset, NaiveDateTime, SecondsFormat, TimeZone, Utc}
 use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
-use symbrain_memory::{Memory, Store};
+use symbrain_memory::Store;
 
 const MEMORY_USAGE: &str = "symbrain memory — operate the embedded memory store
 
@@ -55,6 +55,9 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     }
     match verb.as_str() {
         "list" | "rules" | "query-log" => !read_arguments_are_allowed(&args[1..]),
+        // `search` is native for exactly one query argument plus the read
+        // flags; the usage and flag errors stay with the Go flag package.
+        "search" => !search_arguments_are_allowed(&args[1..]),
         // `delete` is native for exactly one bare identifier plus `--db`; the
         // usage and flag errors stay with the Go flag package.
         "delete" => !delete_arguments_are_allowed(&args[1..]),
@@ -219,6 +222,40 @@ fn read_arguments_are_allowed(args: &[OsString]) -> bool {
         index += 1;
     }
     true
+}
+
+/// Accepts exactly the flag shapes the shipped `memory search` defines:
+/// one query argument plus `--scope`/`-s`, `--limit`/`-l` and `--db`, each
+/// with a value. Everything else - a missing query, a second positional, an
+/// unknown flag - keeps the shipped usage or flag error.
+fn search_arguments_are_allowed(args: &[OsString]) -> bool {
+    let allowed = [
+        "-scope", "--scope", "-s", "-limit", "--limit", "-l", "-db", "--db",
+    ];
+    let mut positionals = 0;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if !arg.starts_with('-') {
+            positionals += 1;
+            index += 1;
+            continue;
+        }
+        if !allowed.contains(&name) {
+            return false;
+        }
+        if inline.is_none() {
+            if index + 1 >= args.len() {
+                return false;
+            }
+            index += 1;
+        }
+        index += 1;
+    }
+    positionals == 1
 }
 
 /// Resolves the memory database the native commands open.
@@ -410,98 +447,153 @@ fn table_content(value: &str) -> String {
     value.replace(['\t', '\r', '\n'], " ")
 }
 
+/// The flag surface the shipped `memory search` defines.
+struct SearchArguments {
+    query: Option<String>,
+    scope: String,
+    limit: i64,
+    positionals: usize,
+}
+
+/// Parses `--scope`/`-s`, `--limit`/`-l` and bare positionals exactly the way
+/// the shipped flag set does (values after the flag, or after `=`).
+fn parse_search_arguments(args: &[OsString]) -> SearchArguments {
+    let mut parsed = SearchArguments {
+        query: None,
+        scope: String::new(),
+        limit: 0,
+        positionals: 0,
+    };
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        if arg == "-scope" || arg == "--scope" || arg == "-s" {
+            if index + 1 < args.len() {
+                parsed.scope = args[index + 1].to_string_lossy().into_owned();
+                index += 2;
+                continue;
+            }
+        } else if let Some(value) = arg
+            .strip_prefix("-scope=")
+            .or_else(|| arg.strip_prefix("--scope="))
+            .or_else(|| arg.strip_prefix("-s="))
+        {
+            parsed.scope = value.to_string();
+            index += 1;
+            continue;
+        } else if arg == "-limit" || arg == "--limit" || arg == "-l" {
+            if index + 1 < args.len() {
+                if let Ok(value) = args[index + 1].to_string_lossy().parse() {
+                    parsed.limit = value;
+                }
+                index += 2;
+                continue;
+            }
+        } else if let Some(value) = arg
+            .strip_prefix("-limit=")
+            .or_else(|| arg.strip_prefix("--limit="))
+            .or_else(|| arg.strip_prefix("-l="))
+        {
+            if let Ok(parsed_limit) = value.parse() {
+                parsed.limit = parsed_limit;
+            }
+            index += 1;
+            continue;
+        } else if !arg.starts_with('-') {
+            parsed.positionals += 1;
+            if parsed.query.is_none() {
+                parsed.query = Some(arg.into_owned());
+            }
+            index += 1;
+            continue;
+        }
+        index += 1;
+    }
+    parsed
+}
+
 fn run_search(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let mut query = String::new();
-    let mut scope: Option<String> = None;
-    let mut limit = 20;
-
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if arg == "-scope" || arg == "--scope" {
-            if i + 1 < args.len() {
-                scope = Some(args[i + 1].to_string_lossy().into_owned());
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-scope=")
-            .or_else(|| arg.strip_prefix("--scope="))
-        {
-            scope = Some(v.to_string());
-            i += 1;
-            continue;
-        } else if arg == "-limit" || arg == "--limit" {
-            if i + 1 < args.len() {
-                if let Ok(l) = args[i + 1].to_string_lossy().parse() {
-                    limit = l;
-                }
-                i += 2;
-                continue;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-limit=")
-            .or_else(|| arg.strip_prefix("--limit="))
-        {
-            if let Ok(l) = v.parse() {
-                limit = l;
-            }
-            i += 1;
-            continue;
-        } else if !arg.starts_with('-') && query.is_empty() {
-            query = arg.into_owned();
-        }
-        i += 1;
+    if args.iter().any(|arg| arg == "-h" || arg == "--help") {
+        let _ = write!(stdout, "{MEMORY_SEARCH_USAGE}");
+        return exit::OK;
     }
 
-    if query.is_empty() {
-        let _ = writeln!(stderr, "symbrain memory search: query required");
+    let parsed = parse_search_arguments(args);
+    let mut limit = parsed.limit;
+    let scope = parsed.scope;
+    let positionals = parsed.positionals;
+    let query = parsed.query;
+    if positionals != 1 {
+        let _ = writeln!(
+            stderr,
+            "usage: symbrain memory search <query> [--scope <scope>] [--limit <N>] [--db <path>]"
+        );
         return exit::USAGE;
+    }
+    let query = query.unwrap_or_default();
+    if query.is_empty() {
+        let _ = writeln!(stderr, "symbrain memory search: query is required");
+        return exit::USAGE;
+    }
+    if limit <= 0 {
+        limit = 5;
     }
 
     let store = match open_store(stderr, extract_db_override(args).as_deref()) {
-        Ok(s) => s,
+        Ok(store) => store,
         Err(code) => return code,
     };
 
-    let results = match store.search(&query, scope.as_deref().unwrap_or(""), limit) {
-        Ok(r) => r,
+    // The shipped CLI generates the query vector with the default embedding
+    // configuration (Ollama first, hash fallback) and searches the matching
+    // embedding space.
+    let embedding = symbrain_memory::EmbeddingGenerator::default().generate(&query);
+    let mut hits = match store.search_ranked(
+        &embedding.vector,
+        &embedding.source,
+        scope.as_str(),
+        usize::try_from(limit).unwrap_or(usize::MAX),
+    ) {
+        Ok(hits) => hits,
         Err(err) => {
-            let _ = writeln!(stderr, "symbrain memory search: {err}");
+            let _ = writeln!(stderr, "symbrain memory search: search memories: {err}");
             return exit::GENERIC;
         }
     };
+    // The shipped CLI redacts at the response boundary, on top of the
+    // write-time redaction.
+    for hit in &mut hits {
+        hit.redact();
+    }
 
     match format {
         OutputFormat::Json => {
-            let list: Vec<&Memory> = results.iter().map(|(m, _)| m).collect();
-            let _ = writeln!(
-                stdout,
-                "{}",
-                serde_json::to_string_pretty(&list).unwrap_or_default()
-            );
+            let rendered = hits
+                .iter()
+                .map(symbrain_memory::SearchHit::to_go_json)
+                .collect::<Vec<_>>()
+                .join(",");
+            let _ = writeln!(stdout, "{}", escape_html(&format!("[{rendered}]")));
         }
         OutputFormat::Table => {
-            if results.is_empty() {
+            if hits.is_empty() {
                 let _ = writeln!(stdout, "No relevant memories found.");
             } else {
-                let _ = writeln!(stdout, "SCORE\tID\tSCOPE\tCONTENT");
-                for (m, score) in &results {
-                    let preview = m.content.lines().next().unwrap_or("");
-                    let short_preview = if preview.len() > 60 {
-                        &preview[..60]
-                    } else {
-                        preview
-                    };
+                let _ = writeln!(stdout, "SCORE\tID\tSCOPE\tCREATED\tCONTENT");
+                for hit in &hits {
                     let _ = writeln!(
                         stdout,
-                        "{:.2}\t{}\t{}\t{}",
-                        score, m.id, m.scope, short_preview
+                        "{:.6}\t{}\t{}\t{}\t{}",
+                        f64::from(hit.score),
+                        hit.memory.id,
+                        hit.memory.scope,
+                        hit.memory.created_at_seconds(),
+                        table_content(&hit.memory.content)
                     );
                 }
             }
@@ -509,6 +601,16 @@ fn run_search(
     }
 
     exit::OK
+}
+
+/// Escapes `&`, `<`, `>` and the two JavaScript line separators the way Go's
+/// `json.Encoder` does by default.
+fn escape_html(json: &str) -> String {
+    json.replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
 }
 
 fn run_set(
@@ -759,6 +861,18 @@ fn flag_value(args: &[OsString], names: &[&str]) -> Option<String> {
     }
     None
 }
+
+const MEMORY_SEARCH_USAGE: &str = "symbrain memory search — search memories by semantic relevance
+
+Usage:
+  symbrain memory search <query> [flags]
+
+Flags:
+  --scope, -s <scope>  Filter by scope: global, project, agent, user, or session.
+  --limit, -l <N>      Maximum results to return (default 5).
+  --db <path>          Database path override.
+  --output table|json   Output format (default table; global flag).
+";
 
 const QUERY_LOG_USAGE: &str = "symbrain memory query-log — inspect the memory retrieval log
 
@@ -1244,6 +1358,71 @@ mod tests {
             String::from_utf8(table_output)
                 .expect("UTF-8 table")
                 .contains("2026-03-01T00:03:00Z\tmemory_list")
+        );
+    }
+
+    #[test]
+    fn search_keeps_go_for_shapes_the_native_path_does_not_own() {
+        let allowed = |args: &[&str]| {
+            search_arguments_are_allowed(
+                &args
+                    .iter()
+                    .map(|arg| OsString::from(*arg))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        assert!(allowed(&["alpha"]));
+        assert!(allowed(&["alpha", "--scope", "global"]));
+        assert!(allowed(&["alpha", "-s=project", "--limit", "3"]));
+        assert!(allowed(&["--db", "/tmp/x.db", "alpha"]));
+        assert!(allowed(&["--limit=0", "two words"]));
+        // Missing, doubled or flag-shaped queries, and any unknown flag, keep
+        // the shipped usage or flag error.
+        assert!(!allowed(&[]));
+        assert!(!allowed(&["alpha", "beta"]));
+        assert!(!allowed(&["alpha", "--bogus"]));
+        assert!(!allowed(&["--help"]));
+        assert!(!allowed(&["alpha", "--limit"]));
+        assert!(!allowed(&["alpha", "--scope"]));
+    }
+
+    #[test]
+    fn search_refuses_a_missing_query_with_the_shipped_message() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        assert_eq!(
+            run_search(&[], &mut stdout, &mut stderr, OutputFormat::Table),
+            exit::USAGE
+        );
+        assert!(stdout.is_empty());
+        assert_eq!(
+            String::from_utf8(stderr).expect("UTF-8 stderr"),
+            "usage: symbrain memory search <query> [--scope <scope>] [--limit <N>] [--db <path>]\n"
+        );
+    }
+
+    #[test]
+    fn search_prints_the_shipped_usage_for_help() {
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        let args = [OsString::from("--help")];
+        assert_eq!(
+            run_search(&args, &mut stdout, &mut stderr, OutputFormat::Table),
+            exit::OK
+        );
+        assert!(stderr.is_empty());
+        assert!(
+            String::from_utf8(stdout)
+                .expect("UTF-8 stdout")
+                .starts_with("symbrain memory search — search memories by semantic relevance\n")
+        );
+    }
+
+    #[test]
+    fn json_output_escapes_what_the_shipped_encoder_escapes() {
+        assert_eq!(
+            escape_html("a&b<c>d\u{2028}e\u{2029}"),
+            "a\\u0026b\\u003cc\\u003ed\\u2028e\\u2029"
         );
     }
 }

@@ -146,6 +146,12 @@ impl Store {
         } else {
             options.actor.clone()
         };
+        // The shipped store derives the vector at write time and stores both
+        // the vector and its LSH bucket, so a memory written here is findable
+        // by the shipped retrieval path and vice versa.
+        let vector = crate::embedding::local_hash_vector(&content);
+        let lsh = crate::lsh::compute_lsh(&vector)
+            .map_err(|error| StoreError::Invalid(format!("memory set: {error}")))?;
         let conn = self.lock()?;
         // Column set and deterministic values mirror the shipped insert, so a
         // row written here is indistinguishable from a shipped one.
@@ -157,13 +163,13 @@ impl Store {
                 content,
                 scope,
                 metadata_text,
-                embedding_text(&content),
+                embedding_text(&vector),
                 i64::try_from(crate::embedding::DIMENSIONS).unwrap_or(768),
                 "hash-fallback",
                 "",
                 "",
                 content_hash(&content),
-                0_i64,
+                lsh,
                 now_text,
                 now_text,
                 actor,
@@ -356,6 +362,25 @@ impl Store {
         crate::activity::search(self, options)
     }
 
+    /// Runs the shipped retrieval pipeline for a prepared query vector.
+    ///
+    /// `query_source` names the embedding space of `query_vector`; the shipped
+    /// path only scores rows from the same space.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when the vector does not fit the embedding
+    /// dimension or SQLite access fails.
+    pub fn search_ranked(
+        &self,
+        query_vector: &[f32],
+        query_source: &str,
+        scope: &str,
+        limit: usize,
+    ) -> Result<Vec<crate::search_rows::SearchHit>, StoreError> {
+        let conn = self.lock()?;
+        crate::retrieval::search(&conn, query_vector, query_source, scope, limit)
+    }
+
     pub(crate) fn activity_conn(
         &self,
     ) -> Result<std::sync::MutexGuard<'_, Connection>, StoreError> {
@@ -387,7 +412,7 @@ fn validate_set(content: &str, scope: &str, kind: &str) -> Result<(), StoreError
     Ok(())
 }
 
-fn redact_text(text: &str) -> String {
+pub(crate) fn redact_text(text: &str) -> String {
     static URL: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     static ASSIGNMENT: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
     let url = URL.get_or_init(|| {
@@ -398,7 +423,7 @@ fn redact_text(text: &str) -> String {
     assignment.replace_all(&clean, "$1[REDACTED]").into_owned()
 }
 
-fn redact_value(value: &mut Value) {
+pub(crate) fn redact_value(value: &mut Value) {
     match value {
         Value::String(text) => *text = redact_text(text),
         Value::Array(values) => values.iter_mut().for_each(redact_value),
@@ -472,8 +497,8 @@ fn content_hash(content: &str) -> String {
 /// The shipped encoder renders a `float32` with its shortest round-trip form
 /// and without a forced fraction (`0`, not `0.0`), which `serde_json` would
 /// not produce, so the array is rendered by hand.
-fn embedding_text(content: &str) -> String {
-    let values = crate::embedding::local_hash_vector(content)
+fn embedding_text(vector: &[f32]) -> String {
+    let values = vector
         .iter()
         .map(|value| format!("{value}"))
         .collect::<Vec<_>>();

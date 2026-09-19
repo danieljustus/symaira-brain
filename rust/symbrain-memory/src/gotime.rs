@@ -49,6 +49,13 @@ pub(crate) fn parse(raw: &str) -> Option<DateTime<Utc>> {
     None
 }
 
+/// Parses an optional timestamp column: `NULL` stays absent, an unreadable
+/// value stays absent as well rather than failing the whole row.
+#[must_use]
+pub(crate) fn parse_optional(raw: Option<&String>) -> Option<DateTime<Utc>> {
+    raw.map(String::as_str).and_then(parse)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{format, parse};
