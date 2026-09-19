@@ -231,6 +231,24 @@ func body(req *http.Request) string {
 	return normalize(string(data))
 }
 
+// platformLabel mirrors the shipped provider's Kimi platform label, which maps
+// Go's `darwin` to `macos`. It only exists to normalise the fixture.
+func platformLabel() string {
+	if runtime.GOOS == "darwin" {
+		return "macos"
+	}
+	return runtime.GOOS
+}
+
+// platformDisplayName mirrors the shipped display name used in the Kimi
+// `X-Msh-Device-Model` header.
+func platformDisplayName() string {
+	if runtime.GOOS == "darwin" {
+		return "macOS"
+	}
+	return runtime.GOOS
+}
+
 func sortedHeaderNames(header http.Header) []string {
 	names := make([]string, 0, len(header))
 	for name := range header {
@@ -249,6 +267,11 @@ func normalize(text string) string {
 	}
 	version := strings.TrimPrefix(runtime.Version(), "go")
 	text = strings.ReplaceAll(text, version, "<version>")
+	// The Kimi Code CLI identity headers carry the host platform, which differs
+	// between the machine that regenerates the fixture and the one that checks
+	// it in CI.
+	text = strings.ReplaceAll(text, platformDisplayName(), "<platform-display>")
+	text = strings.ReplaceAll(text, platformLabel(), "<platform>")
 	if home := os.Getenv("HOME"); home != "" {
 		text = strings.ReplaceAll(text, home, "<home>")
 	}

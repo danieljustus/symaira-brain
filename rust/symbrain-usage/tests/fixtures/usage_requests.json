@@ -118,7 +118,7 @@
             },
             {
               "name": "X-Msh-Device-Model",
-              "value": "macOS \u003cversion\u003e"
+              "value": "\u003cplatform-display\u003e \u003cversion\u003e"
             },
             {
               "name": "X-Msh-Device-Name",
@@ -130,7 +130,7 @@
             },
             {
               "name": "X-Msh-Platform",
-              "value": "macos"
+              "value": "\u003cplatform\u003e"
             }
           ]
         }
@@ -230,7 +230,7 @@
             },
             {
               "name": "X-Server-Instance",
-              "value": "server-fn:28e59dd0-e23f-106b-b537-e75f58d82430"
+              "value": "server-fn:186505de-2fd8-2d9a-d32f-a7b78c053708"
             }
           ]
         },
@@ -268,7 +268,7 @@
             },
             {
               "name": "X-Server-Instance",
-              "value": "server-fn:a298c022-8736-9810-0573-571bfa6fd760"
+              "value": "server-fn:9af30785-138f-7777-d21f-a829ba9326b7"
             }
           ],
           "body": "[]"

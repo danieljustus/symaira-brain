@@ -6,7 +6,7 @@
 //! into `tests/fixtures/usage_requests.json` and this test rebuilds the same
 //! fixture state in the port.
 
-use super::super::{hostname, request_for};
+use super::super::{hostname, platform_label, request_for};
 use crate::providers::Provider;
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
@@ -148,6 +148,9 @@ fn provider_for(case: &Case) -> Provider {
 /// same placeholders.
 fn normalize(value: &str) -> String {
     let mut text = value.replace(&hostname(), "<host>");
+    // The Kimi identity headers carry the host platform, which differs between
+    // the machine that regenerated the fixture and the one checking it.
+    text = text.replace(platform_label(), "<platform>");
     for credential in CREDENTIALS {
         text = text.replace(credential, "CREDENTIAL");
     }
