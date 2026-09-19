@@ -36,10 +36,12 @@ const PROVIDER_ENV_VARS: &[&str] = &[
 /// login keychain. Current versions append a per-installation hex suffix that
 /// is not derivable from disk, so the bare name is tried first and every
 /// suffixed variant found afterwards.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 /// Reading an item this binary is not on the ACL of raises an approval panel
 /// that blocks the subprocess until answered; a usage report must not hang on
 /// an unattended machine.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(20);
 /// Bound for the prompt-free process probes (`ps`, `lsof`).
 const PROCESS_PROBE_TIMEOUT: Duration = Duration::from_secs(2);
@@ -513,6 +515,7 @@ fn claude_keychain_dump_names() -> Vec<String> {
 
 /// Pulls the service out of a `dump-keychain` attribute line:
 /// `    "svce"<blob>="Claude Code-credentials-552ffa86"`.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 fn names_from_keychain_dump(dump: &str) -> Vec<String> {
     const MARKER: &str = "\"svce\"<blob>=\"";
     dump.lines()
