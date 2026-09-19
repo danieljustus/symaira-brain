@@ -1,0 +1,87 @@
+# Go math/rand reference values for the Rust port in rust/symbrain-memory/src/gorand.rs
+# Captured with: GOTOOLCHAIN=go1.26.7 go run ./scripts/gorand-dump
+# normals: math.Float64bits of Rand.NormFloat64() from rand.New(rand.NewSource(42)), in draw order
+# row N <hex>: sha256 of the N-th 768-float32 projection row, little-endian float32 bits
+# all <hex>: sha256 of all 16 rows in order
+# (projection rows come from their own rand.New(rand.NewSource(42)), as in internal/memory/db/lsh.go)
+3ff8dbabb76a3042
+3fc0086436460778
+bfdfa3d641342ea4
+3ff3e77c49d7c394
+3fc0e4abc4dc25a0
+3ff34d484fbb787a
+bfe4063d28dc41d2
+3fe425c3d3386264
+3ff90c5ec79e7018
+bfeab241faed9c58
+bff51822bfdf92ed
+3febfb696b1e86a1
+3ff431d045c2e5d0
+3fd61e2365618e70
+bfe4c4e1ce70ec16
+3ffc9e17f0f7f0e8
+bfd80f29e1f5f150
+bff65adde0ae8ae2
+bfcdaf3e9e1e0158
+bfb05706cd36d600
+3fdbd06856e84e04
+3feb8049489f18c0
+3fd7f8c95941b6b0
+3fe453cdbe42f64b
+bfe8495ed84e02c0
+3fc4cc0c9faae83a
+bfc9b4e3dc285e78
+3fdcc7971fe0b34c
+3ff42bde61eed1a6
+3fe75f9b0af68426
+3fe89a46262036fd
+bfe25c0989ccb10e
+bfddc5500af91b26
+bf64f2d188c56280
+3fd1420bbd9828a2
+bfa8d1f307c75780
+bfd2b54285137806
+bfcd71c9a44cfb13
+3fdba734f3ac6770
+bff0ae462fcf95fa
+bfde9f1f95365a1e
+bfecef3ca19cf279
+3fe94384cdcca087
+3fc9d424ee77314c
+c0018e92e5b8b300
+bfe6701c51ed519c
+bfc60b606b928e6d
+bffbc5a0d0a73577
+bfecc95952ec4de2
+bfe75deab2bfd4da
+3fe091ee73d6db50
+3fe718b06cb017af
+bfd1d9e9a0dfd536
+bff54fa91eed6a86
+bff6eb55b1c42ed0
+3fdd69ff20bcb1a6
+3ff0b129ee1052b4
+3ff0774c538847a4
+3fb24cbab1edf440
+3fe92e6ff254641b
+bfc214df4a350770
+bff002d165893863
+3fe73ac53c71b6ed
+bfeb04d5dad88460
+row 0 c376432d4d0dd68135c178550c83c2cabbfdf5f6d47176c58a5f9cbceae4e6b0
+row 1 4e0b18dfac3987ad963f5ea938a5313abd807c4c8f7bcd9db787c088fca44a19
+row 2 1f5a0b92efd20d69f42f59230e5af77933c8f2b56543b58e1620d45e654195c3
+row 3 f0b13af01ad5485883424ba9581f5096fb36f86177a39e8826107e1e5ab4be93
+row 4 d6398fbe24e9725bab4f3c6ebb199f75ca3705783e9e621c858969b7778f0c94
+row 5 8aeb4ba84db577f07ccacd51c1065ccda4fa5e15e54e000433ff5bb6de6ba70c
+row 6 3f94945449eef951602a1b96825957a6bbdad41a7657733a6b67780cb4d2863a
+row 7 d3ac5c71d9567adff9dcccd61171cbcbb5574d2de9c76a4e727d8b2225f1e34f
+row 8 feacf156a658f521f4addafbc1164b0f78f2a04a0f306672b3da485ee6d5997e
+row 9 d9ff9c6943ac8c76841115b6447472b1b5d070d8606e8514d4093f8abec0edbd
+row 10 f40a01de17a9c43d777e25d98caaf31b99992a7f7821f6d4eb3ba84083f7d240
+row 11 75e0324fc17186f29f9e936be6ba25a03722c0b0de2b506f5b0124b8f15920f1
+row 12 25d690c827a5782b67ef1c9ed6e44cde3196b3afc8da6a51aa872555db949bb4
+row 13 4f271ebac79d2a269a23491f0bf2fb27e0b97a0ebe7f86ae5ed03fa8b622d4cb
+row 14 9292ce0c5a4d02b82e8cf6729f63e8253511c06a42001e8542478e3b43ed6f8c
+row 15 00cd09fb9b974e22bef5d4e4f4835559137615b096fd1af96b899321bed59727
+all 67c16e93d7c6b933101d001ebdb3a059e53d779056b45486a25b38adf8c2f3b0

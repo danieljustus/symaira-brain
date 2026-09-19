@@ -10,6 +10,7 @@ import (
 )
 
 func TestBuildServers_OptionalModulesDisabledIndependentlySkipDiscovery(t *testing.T) {
+	sandboxHome(t)
 	t.Setenv("PATH", t.TempDir())
 	cases := []struct {
 		name   string

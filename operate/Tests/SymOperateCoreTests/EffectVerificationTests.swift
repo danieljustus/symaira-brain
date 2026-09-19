@@ -12,7 +12,7 @@ final class EffectVerificationTests: XCTestCase {
             input: MockInputService(),
             ocr: MockOCRService(),
             queryService: MockUIQueryService(),
-            history: HistoryService(fileURL: FileManager.default.temporaryDirectory
+            history: HistoryService(fileURL: operateTestTemporaryDirectory()
                 .appendingPathComponent("symoperate-effect-\(UUID().uuidString).jsonl"))
         )
     }
@@ -29,7 +29,7 @@ final class EffectVerificationTests: XCTestCase {
     }
 
     func testPostedInputIsSubmittedButNotConfirmedAndHistoryCarriesVerification() throws {
-        let historyURL = FileManager.default.temporaryDirectory
+        let historyURL = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-effect-history-\(UUID().uuidString).jsonl")
         let history = HistoryService(fileURL: historyURL)
         let controller = AutomationController(
@@ -135,7 +135,7 @@ final class EffectVerificationTests: XCTestCase {
     }
 
     func testHistoryServiceRoundTripsDiagnosticTrace() throws {
-        let url = FileManager.default.temporaryDirectory
+        let url = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-trace-history-\(UUID().uuidString).jsonl")
         let history = HistoryService(fileURL: url)
         let trace = DiagnosticTraceRecord(

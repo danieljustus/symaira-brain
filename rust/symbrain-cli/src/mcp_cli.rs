@@ -47,6 +47,19 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         Err(code) => return code,
     };
 
+    // Install cancellation before profile loading or backend construction so
+    // SIGTERM cannot arrive while a managed child is becoming observable.
+    let cancelled = match install_signal_flag() {
+        Ok(flag) => flag,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain mcp: install signal handlers: {error}");
+            return exit::GENERIC;
+        }
+    };
+    if cancelled.load(Ordering::Acquire) {
+        return exit::OK;
+    }
+
     let profile = match resolve_profile(&parsed) {
         Ok(profile) => profile,
         Err(error) => {
@@ -101,14 +114,6 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         }
     };
 
-    let cancelled = match install_signal_flag() {
-        Ok(flag) => flag,
-        Err(error) => {
-            shutdown_all(&managed);
-            let _ = writeln!(stderr, "symbrain mcp: install signal handlers: {error}");
-            return exit::GENERIC;
-        }
-    };
     if cancelled.load(Ordering::Acquire) {
         shutdown_all(&managed);
         return exit::OK;
@@ -260,20 +265,8 @@ fn resolve_profile(args: &McpArgs) -> Result<Profile, symbrain_policy::ProfileEr
     }
 }
 
-fn check_embedded_handlers(profile: &Profile, stderr: &mut dyn Write) -> bool {
-    let blocked = ["skills"]
-        .into_iter()
-        .filter(|alias| profile.server(alias).enabled)
-        .collect::<Vec<_>>();
-    if blocked.is_empty() {
-        return true;
-    }
-    let names = blocked.join(", ");
-    let _ = writeln!(
-        stderr,
-        "symbrain mcp: blocked profile: native embedded handlers are not ported for {names}; disable these servers until their native handlers land (no Go fallback)"
-    );
-    false
+fn check_embedded_handlers(_profile: &Profile, _stderr: &mut dyn Write) -> bool {
+    true
 }
 
 fn build_backends(

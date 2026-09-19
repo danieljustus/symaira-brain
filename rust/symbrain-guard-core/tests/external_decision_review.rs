@@ -6,7 +6,7 @@ use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at}
 use symbrain_guard_core::go_json::to_go_json_vec;
 
 const FIXTURE: &[u8] = include_bytes!("fixtures/external_decision_review.json");
-const SHA256: &str = "5db6d86f6a83930f8e14574c4b31d49b2ac422af477138bfb1afdaf1ddcbfac6";
+const SHA256: &str = "73057e5841975dafafd5c7ec40c43d459e766d6ca9567f277823569c76c8b09e";
 const PIN: &str = "0b585d52915a824664e1377d0a995dff3f5405cd";
 
 fn validate(bytes: &[u8]) -> Result<Value, String> {

@@ -38,7 +38,7 @@ struct VaultIntakeStateMachineTests {
     }
 
     @Test func promotionRequiresAnUnchangedReviewedBatch() async throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory = symBrainTestTemporaryDirectory()
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }

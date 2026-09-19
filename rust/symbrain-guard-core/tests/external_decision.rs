@@ -125,7 +125,7 @@ fn validate_fixture_provenance(fixture: &Fixture) -> Result<(), String> {
         .iter()
         .filter(|case| case.boundary_note.is_none())
         .collect::<Vec<_>>();
-    if acceptance.len() != 32 || fixture.cases.len() != acceptance.len() {
+    if acceptance.len() != 33 || fixture.cases.len() != acceptance.len() {
         return Err("fixture/harness cardinality mismatch".into());
     }
     let mut ids = std::collections::BTreeSet::new();

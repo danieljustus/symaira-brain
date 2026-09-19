@@ -29,6 +29,7 @@ func optionalProfile(alias string) *profile.Profile {
 }
 
 func TestBuildServers_DirectModuleUsesDirectBinaryAndServeArg(t *testing.T) {
+	sandboxHome(t)
 	dir := t.TempDir()
 	marker := filepath.Join(dir, "argv")
 	fakeMCP := buildFakemcpOnce(t)
@@ -71,6 +72,7 @@ func TestBuildServers_DirectModuleUsesDirectBinaryAndServeArg(t *testing.T) {
 }
 
 func TestBuildServers_MissingDirectFallsBackToCockpitSubcommand(t *testing.T) {
+	sandboxHome(t)
 	dir := t.TempDir()
 	marker := filepath.Join(dir, "argv")
 	fakeMCP := buildFakemcpOnce(t)
@@ -108,6 +110,7 @@ func TestBuildServers_MissingDirectFallsBackToCockpitSubcommand(t *testing.T) {
 // without breaking the rest of the gateway, and this is that claim checked
 // against an actual managed subprocess, not just an empty map assertion.
 func TestBuildServers_AbsentModuleDegradesGracefullyWithoutBreakingOtherServers(t *testing.T) {
+	sandboxHome(t)
 	dir := t.TempDir()
 	fakeMCP := buildFakemcpOnce(t)
 	writeFakeWrapper(t, dir, "symvault", `[{"name":"health","description":"health","behavior":"echo"}]`, fakeMCP)
@@ -141,6 +144,7 @@ func TestBuildServers_AbsentModuleDegradesGracefullyWithoutBreakingOtherServers(
 }
 
 func TestBuildServers_InvalidExplicitOverrideDoesNotFallback(t *testing.T) {
+	sandboxHome(t)
 	dir := t.TempDir()
 	marker := filepath.Join(dir, "argv")
 	fakeMCP := buildFakemcpOnce(t)

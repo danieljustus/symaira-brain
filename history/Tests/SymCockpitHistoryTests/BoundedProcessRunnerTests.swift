@@ -80,7 +80,7 @@ final class BoundedProcessRunnerTests: XCTestCase {
     /// no Homebrew) still finding a sibling Symaira CLI installed at the
     /// documented managed location, ~/.symaira/bin.
     func testFallsBackToManagedSymairaBinDirectoryWhenPATHOmitsIt() throws {
-        let tempHome = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let tempHome = try SymairaTestTemporary.directory("bounded-runner-home")
         let binDir = tempHome.appendingPathComponent(".symaira/bin")
         try FileManager.default.createDirectory(at: binDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempHome) }

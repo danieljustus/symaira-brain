@@ -8,20 +8,25 @@ use std::process::{Command, Stdio};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_core::version::{self, VersionInfo};
-use symbrain_core::xdg;
 
+mod activity_cli;
 mod audit_cli;
+mod config_cli;
 mod doctor_cli;
 pub mod guard_cli;
+mod harness_cli;
 mod init_cli;
 mod install_cli;
 mod mcp_cli;
+mod memory_cli;
 mod passthrough;
 mod profile_actions;
 mod profile_args;
 mod profile_cli;
 mod profile_render;
 mod setup_cli;
+mod skills_cli;
+mod sync_cli;
 mod usage_cli;
 
 const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
@@ -190,7 +195,7 @@ pub fn run_in_process(
     match cmd.as_ref() {
         "help" | "--help" | "-h" => Some(write_usage(stdout)),
         "version" => Some(run_version(rest, stdout, stderr, format)),
-        "config" => run_config(rest, stdout, stderr),
+        "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
         "setup" if setup_cli::requires_go_fallback(rest) => None,
@@ -201,9 +206,19 @@ pub fn run_in_process(
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),
         "mcp" => Some(mcp_cli::run(rest, stderr)),
         "serve" => Some(mcp_cli::run_serve(rest, stderr)),
+        "usage" if usage_cli::requires_go_fallback(rest) => None,
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
         "init" => Some(init_cli::run(rest, stdout, stderr)),
-        "harness" | "sync" | "memory" | "skills" | "activity" | "vault" => None,
+        "harness" => harness_cli::run(rest, stdout, stderr, format),
+        "sync" if sync_cli::requires_go_fallback(rest) => None,
+        "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
+        "memory" if memory_cli::requires_go_fallback(rest) => None,
+        "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
+        "skills" if skills_cli::requires_go_fallback(rest) => None,
+        "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
+        "activity" if activity_cli::requires_go_fallback(rest) => None,
+        "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
+        "vault" => None,
         "guard" => guard_cli::run(rest, stdout, stderr),
         _ => {
             let _ = writeln!(stderr, "symbrain: unknown command {cmd:?}\n");
@@ -211,6 +226,19 @@ pub fn run_in_process(
             Some(exit::USAGE)
         }
     }
+}
+
+/// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
+/// `<` and `>` escaped, and no trailing newline.
+///
+/// Go renders every CLI report through `encoding/json`, so a report that must
+/// match its bytes has to escape those three characters too.
+pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
+    serde_json::to_string(value)
+        .unwrap_or_default()
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
 }
 
 fn is_output_command(cmd: &str) -> bool {
@@ -252,55 +280,6 @@ fn peek_command(args: &[OsString]) -> std::borrow::Cow<'_, str> {
 
 fn write_usage(stdout: &mut dyn Write) -> u8 {
     if write!(stdout, "{USAGE}").is_ok() {
-        exit::OK
-    } else {
-        exit::GENERIC
-    }
-}
-
-fn run_config(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
-    let normalized = normalize_flags(args);
-    let (subcommand, sub_args) = if normalized.first().is_some_and(|a| a == "--") {
-        let sub = normalized.get(1).map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 2 {
-            &normalized[2..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
-    } else {
-        let sub = normalized.first().map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 1 {
-            &normalized[1..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
-    };
-
-    match subcommand.as_deref() {
-        Some("path") => Some(run_config_path(sub_args, stdout)),
-        Some("get") => Some(symbrain_core::config::run_config_get(
-            sub_args, stdout, stderr,
-        )),
-        Some("set") => Some(symbrain_core::config::run_config_set(
-            sub_args, stdout, stderr,
-        )),
-        _ => None,
-    }
-}
-
-fn run_config_path(args: &[OsString], stdout: &mut dyn Write) -> u8 {
-    if let Some(unexpected) = args.first() {
-        let _ = writeln!(
-            stdout,
-            "symbrain config path: unexpected argument {:?}",
-            unexpected.to_string_lossy()
-        );
-        return exit::USAGE;
-    }
-    let path = xdg::config_path();
-    if writeln!(stdout, "{}", path.display()).is_ok() {
         exit::OK
     } else {
         exit::GENERIC

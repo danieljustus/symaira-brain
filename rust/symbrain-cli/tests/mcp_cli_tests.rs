@@ -274,27 +274,36 @@ fn mcp_profile_errors_and_unknown_flags_do_not_fallback() {
 }
 
 #[test]
-fn enabled_unported_skills_server_fails_closed_without_placeholder_tools() {
+fn enabled_skills_server_exposes_native_tools_without_go_fallback() {
     let root = TempDir::new().unwrap();
-    let profile = root.path().join("blocked.toml");
+    let profile = root.path().join("skills.toml");
     std::fs::write(
         &profile,
-        "[profile]\nname = \"blocked\"\n\n[servers.skills]\nenabled = true\nmode = \"read_only\"\n",
+        "[profile]\nname = \"skills\"\n\n[audit]\nenabled = true\nverbose = true\n\n[servers.skills]\nenabled = true\n",
     )
     .unwrap();
+    let input = concat!(
+        r#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#,
+        "\n",
+        r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"skills_list","arguments":{}}}"#,
+        "\n"
+    );
     let output = run_with_input(
         &root,
         &["mcp", "--profile-file", profile.to_str().unwrap()],
-        b"",
+        input.as_bytes(),
     );
-    assert_eq!(output.status.code(), Some(2));
-    assert!(output.stdout.is_empty());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("native embedded handlers are not ported for skills"),
-        "stderr: {stderr}"
-    );
-    assert!(stderr.contains("no Go fallback"));
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
+    let responses = String::from_utf8(output.stdout)
+        .unwrap()
+        .lines()
+        .map(|line| serde_json::from_str::<serde_json::Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(responses.len(), 2);
+    let tools = responses[0]["result"]["tools"].as_array().unwrap();
+    assert!(tools.iter().any(|t| t["name"] == "skills_list"));
+    assert_eq!(responses[1]["result"]["isError"], false);
 }
 
 #[cfg(unix)]

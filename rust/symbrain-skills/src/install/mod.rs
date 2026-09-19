@@ -15,6 +15,7 @@ mod replace_io;
 mod status;
 mod status_compare;
 mod sync;
+mod sync_lock;
 mod transaction;
 mod uninstall;
 
@@ -28,7 +29,7 @@ pub use core::{
     InstallOptions, InstallResult, install_copy, install_path, install_path_for, install_rendered,
 };
 pub use drift::{DriftKind, DriftSummary, FileDrift, classify_drift, classify_file, summarize};
-pub use event::{EVENT_MAX_BYTES, OperationEvent, record_event, record_event_at};
+pub use event::{EVENT_MAX_BYTES, OperationEvent, read_events, record_event, record_event_at};
 pub use marker::{
     MARKER_FILE, MARKER_SCHEMA_VERSION, Marker, MarkerState, encode_marker, new_marker,
     parse_marker, read_marker,

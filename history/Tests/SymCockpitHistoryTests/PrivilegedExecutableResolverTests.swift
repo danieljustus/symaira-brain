@@ -19,9 +19,7 @@ final class PrivilegedExecutableResolverTests: XCTestCase {
     }
 
     private func makeRoot() throws -> URL {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("privresolve-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let root = try SymairaTestTemporary.directory("privresolve")
         roots.append(root)
         return root
     }

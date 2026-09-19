@@ -36,6 +36,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Mapping, Sequence
 
+SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+from external_env import ensure_external_environment
+
+ensure_external_environment(__file__)
+
 IMPLEMENTATIONS = ("go", "rust")
 TARGETS = (
     ("darwin", "amd64"),
@@ -48,12 +54,25 @@ TARGETS = (
 SPDX_VERSION = "SPDX-2.3"
 PLATFORM_PROOFS_NAME = "platform-proofs.json"
 SIGNATURE_INPUTS_NAME = "signature-inputs.json"
+EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
 ARCHIVE_RE = re.compile(r"^symbrowse_(?P<version>[^_]+)_(?P<os>darwin|linux|windows)_(?P<arch>amd64|arm64)\.(?P<ext>tar\.gz|zip)$")
 SHA256_RE = re.compile(r"^(?P<digest>[0-9a-fA-F]{64})\s+(?P<name>\S+)$")
 
 
 class GateError(RuntimeError):
     """A release gate failed and must not be bypassed by fallback."""
+
+
+def _external_output(path: Path) -> Path:
+    resolved = path.expanduser().resolve()
+    if platform.system() == "Darwin" and not os.environ.get("CI"):
+        try:
+            mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+        except OSError as error:
+            raise GateError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}") from error
+        if not resolved.is_relative_to(mounted_root):
+            raise GateError(f"release output must be under mounted NVMe volume {mounted_root}: {resolved}")
+    return resolved
 
 
 @dataclass(frozen=True)
@@ -431,7 +450,7 @@ def package_dry_run(go_binary: Path, rust_binary: Path, output: Path, version: s
     for implementation, binary in (("go", go_binary), ("rust", rust_binary)):
         if not binary.is_file() or not os.access(binary, os.X_OK):
             raise GateError(f"{implementation} binary is missing or not executable: {binary}")
-    output = output.resolve()
+    output = _external_output(output)
     if output.exists():
         shutil.rmtree(output)
     (output / "dual").mkdir(parents=True)

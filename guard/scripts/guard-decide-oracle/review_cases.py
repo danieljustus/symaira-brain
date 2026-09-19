@@ -62,7 +62,7 @@ def generate(evidence):
     assert binary.stat().st_size == manifest['binary']['bytes']
     cases = []
     for case_id, raw in CASES:
-        with tempfile.TemporaryDirectory(prefix='guard-review-', dir='/private/tmp') as temp:
+        with tempfile.TemporaryDirectory(prefix='guard-review-') as temp:
             runtime = Path(temp)
             env = {'PATH': '/usr/bin:/bin', 'HOME': str(runtime / 'home'), 'XDG_DATA_HOME': str(runtime / 'data'),
                    'XDG_CONFIG_HOME': str(runtime / 'config'), 'XDG_CACHE_HOME': str(runtime / 'cache'),

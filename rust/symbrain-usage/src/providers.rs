@@ -21,7 +21,7 @@ use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
 mod provider_config;
-pub use provider_config::all_providers;
+pub use provider_config::{all_providers, needs_go_fallback};
 
 const MAX_CREDENTIAL_FILE_BYTES: u64 = 64 * 1024;
 

@@ -19,6 +19,8 @@ symbrain-memory.workspace = true
 symbrain-mcp.workspace = true
 symbrain-patterns.workspace = true
 symbrain-policy.workspace = true
+symbrain-skills.workspace = true
+symbrain-harness.workspace = true
 symbrain-activity.workspace = true
 symbrain-usage.workspace = true
 

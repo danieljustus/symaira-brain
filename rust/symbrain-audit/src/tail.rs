@@ -114,6 +114,19 @@ where
     false
 }
 
+/// Renders an I/O failure the way the Go implementation's `os.PathError` does.
+///
+/// Go wraps the raw syscall error, so a missing directory reads
+/// `open <path>: no such file or directory`; `io::Error`'s own `Display`
+/// appends `(os error N)`, which would not match those bytes.
+fn go_reason(error: &io::Error) -> String {
+    match error.kind() {
+        io::ErrorKind::NotFound => "no such file or directory".to_owned(),
+        io::ErrorKind::PermissionDenied => "permission denied".to_owned(),
+        _ => error.to_string(),
+    }
+}
+
 /// Returns the paths selected by Go's profile/all-profile discovery rules.
 ///
 /// # Errors
@@ -122,7 +135,17 @@ pub fn audit_log_paths(dir: &Path, profile: &str) -> io::Result<Vec<PathBuf>> {
     if !profile.is_empty() {
         return Ok(vec![dir.join(format!("{profile}.jsonl"))]);
     }
-    let mut paths = fs::read_dir(dir)?
+    let mut paths = fs::read_dir(dir)
+        .map_err(|error| {
+            io::Error::new(
+                error.kind(),
+                format!(
+                    "audit: read audit dir: open {}: {}",
+                    dir.display(),
+                    go_reason(&error)
+                ),
+            )
+        })?
         .filter_map(Result::ok)
         .filter_map(|entry| {
             let path = entry.path();

@@ -64,7 +64,6 @@ def main():
     verify_trust_anchor()
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     env = dict(os.environ)
-    env["CARGO_HOME"] = os.environ.get("CARGO_HOME", str(Path.home() / ".cargo"))
     env["RUSTUP_HOME"] = os.environ.get("RUSTUP_HOME", str(Path.home() / ".rustup"))
     # Build tools retain installation/toolchain roots; all writable application
     # and Go build caches are isolated. Runtime probes use a narrower allowlist.

@@ -20,6 +20,7 @@
     {"id":"missing-risk","request":{"command":"run","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"unknown risk class"},
     {"id":"missing-command","request":{"risk_class":"low","domain":"example.test","warnings":[]},"decision":"deny","reason_contains":"missing command"},
     {"id":"malformed-json","raw":"{\"command\":","decision":"deny","reason_contains":"parse request"},
+    {"id":"trailing-json","raw":"{\"command\":\"open\"}x","decision":"deny","reason_contains":"invalid character 'x' after top-level value"},
     {"id":"empty-input","raw":"","decision":"deny","reason_contains":"empty request"},
     {"id":"oversized-input","raw_prefix":"{\"command\":\"open\",\"risk_class\":\"low\",\"padding\":\"","raw_suffix":"\"}","raw_repeat":"x","raw_repeat_count":65500,"decision":"deny","reason_contains":"maximum size"},
     {"id":"deadline-expired","request":{"command":"open","risk_class":"low","deadline":"2000-01-01T00:00:00Z"},"decision":"deny","reason_contains":"deadline expired"},

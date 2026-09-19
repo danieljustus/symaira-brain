@@ -100,6 +100,13 @@
     },
     {
       "exit_code": 0,
+      "id": "trailing-json",
+      "input_base64": "eyJjb21tYW5kIjoib3BlbiJ9eA==",
+      "stderr_base64": "",
+      "stdout_base64": "eyJkZWNpc2lvbiI6ImRlbnkiLCJyZWFzb24iOiJkZWNpZGU6IHBhcnNlIHJlcXVlc3Q6IGludmFsaWQgY2hhcmFjdGVyICd4JyBhZnRlciB0b3AtbGV2ZWwgdmFsdWUifQo="
+    },
+    {
+      "exit_code": 0,
       "id": "empty-input",
       "input_base64": "",
       "stderr_base64": "",
@@ -225,8 +232,8 @@
       "stdout_base64": "eyJkZWNpc2lvbiI6ImRlbnkiLCJyZWFzb24iOiJkZWNpZGU6IHBhcnNlIHJlcXVlc3Q6IFRpbWUuVW5tYXJzaGFsSlNPTjogaW5wdXQgaXMgbm90IGEgSlNPTiBzdHJpbmcifQo="
     }
   ],
-  "cases_sha256": "f0bf69c2a12b6e3b09e1e09549c418cc6ea044ba2a51d949a44a0bf6b161cb92",
-  "generator_sha256": "1eae19f95d22f33f3bb8304ed3caef0a08e2c617ce6e2471086f39a08c584609",
+  "cases_sha256": "877026e63c320b572ae2d17887d7c9db78f4a55a5b672f590bebe23c3a9ca83f",
+  "generator_sha256": "185c673f947471d489f115883908831e17c4217196bf224809b59b0913b92854",
   "schema_version": 1,
   "source_commit": "0b585d52915a824664e1377d0a995dff3f5405cd",
   "source_files": {

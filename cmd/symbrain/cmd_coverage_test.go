@@ -262,6 +262,7 @@ func TestBuildServers_VaultAgentAddsStdioArgs(t *testing.T) {
 }
 
 func TestBuildServers_OptionalModulesRequireBothToggleAndProfile(t *testing.T) {
+	sandboxHome(t)
 	p := &profile.Profile{Name: "optional", Servers: profile.Servers{
 		profile.ServerOperate: {Enabled: true}, profile.ServerScope: {Enabled: true},
 	}}

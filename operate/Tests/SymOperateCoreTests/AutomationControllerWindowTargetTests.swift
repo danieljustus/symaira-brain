@@ -59,7 +59,7 @@ final class AutomationControllerWindowTargetTests: XCTestCase {
             input: MockInputService(),
             ocr: MockOCRService(),
             queryService: MockUIQueryService(),
-            history: HistoryService(fileURL: FileManager.default.temporaryDirectory
+            history: HistoryService(fileURL: operateTestTemporaryDirectory()
                 .appendingPathComponent("symoperate-window-target-\(UUID().uuidString).jsonl"))
         )
     }

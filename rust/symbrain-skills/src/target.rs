@@ -14,6 +14,8 @@ pub struct TargetSpec {
     pub name: &'static str,
     /// Human-readable target name.
     pub display_name: &'static str,
+    /// Binary the harness is installed as (`agy` for `Antigravity`).
+    pub binary_name: &'static str,
     /// Capabilities verified for the built-in harness runtime.
     pub capabilities: &'static [(&'static str, bool)],
     /// Optional generated metadata file relative to the rendered skill root.
@@ -24,36 +26,42 @@ const SUBAGENTS: &[(&str, bool)] = &[("subagents", true)];
 const NO_CAPABILITIES: &[(&str, bool)] = &[];
 
 const OPENCODE_SPEC: TargetSpec = TargetSpec {
+    binary_name: "opencode",
     name: OPENCODE,
     display_name: "OpenCode",
     capabilities: NO_CAPABILITIES,
     metadata_file: None,
 };
 const CLAUDE_SPEC: TargetSpec = TargetSpec {
+    binary_name: "claude",
     name: "claude",
     display_name: "Claude Code",
     capabilities: SUBAGENTS,
     metadata_file: None,
 };
 const CODEX_SPEC: TargetSpec = TargetSpec {
+    binary_name: "codex",
     name: "codex",
     display_name: "Codex",
     capabilities: NO_CAPABILITIES,
     metadata_file: Some("agents/openai.yaml"),
 };
 const HERMES_SPEC: TargetSpec = TargetSpec {
+    binary_name: "hermes",
     name: "hermes",
     display_name: "Hermes",
     capabilities: SUBAGENTS,
     metadata_file: None,
 };
 const ANTIGRAVITY_SPEC: TargetSpec = TargetSpec {
+    binary_name: "agy",
     name: "antigravity",
     display_name: "Antigravity",
     capabilities: NO_CAPABILITIES,
     metadata_file: None,
 };
 const OPENCLAW_SPEC: TargetSpec = TargetSpec {
+    binary_name: "openclaw",
     name: "openclaw",
     display_name: "OpenClaw",
     capabilities: NO_CAPABILITIES,
@@ -86,6 +94,36 @@ pub fn skill_root(
         ("hermes", _) => Some(home.join(".hermes/skills/symaira")),
         ("antigravity", _) => Some(home.join(".gemini/config/skills")),
         ("openclaw", _) => Some(home.join(".openclaw/skills")),
+        _ => None,
+    }
+}
+
+/// Resolves the harness configuration directory for a target and scope.
+///
+/// Mirrors the Go registry: project scope uses the workspace directory when a
+/// project path is known, user scope the harness's documented global location.
+/// `Antigravity`, `Codex` and `OpenClaw` deliberately share `<project>/.agents`.
+#[must_use]
+pub fn config_dir(
+    target_name: &str,
+    home: &Path,
+    project: Option<&Path>,
+    scope: &str,
+) -> Option<PathBuf> {
+    let project = project.filter(|path| !path.as_os_str().is_empty());
+    match (target_name, scope) {
+        ("opencode", "project") => project.map(|path| path.join(".opencode")),
+        ("claude", "project") => project.map(|path| path.join(".claude")),
+        ("codex" | "antigravity" | "openclaw", "project") => {
+            project.map(|path| path.join(".agents"))
+        }
+        ("hermes", "project") => project.map(|path| path.join(".hermes")),
+        ("opencode", _) => Some(home.join(".config/opencode")),
+        ("claude", _) => Some(home.join(".claude")),
+        ("codex", _) => Some(home.join(".agents")),
+        ("hermes", _) => Some(home.join(".hermes")),
+        ("antigravity", _) => Some(home.join(".gemini/config")),
+        ("openclaw", _) => Some(home.join(".openclaw")),
         _ => None,
     }
 }

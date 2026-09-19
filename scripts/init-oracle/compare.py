@@ -21,6 +21,11 @@ import tempfile
 import time
 from typing import Any, Callable
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from external_env import ensure_external_environment
+
+ensure_external_environment(__file__)
+
 PINNED_COMMIT_SHA = "d53c3824e7d6771fabefd62a18dd3c5e50c3c37d"
 TIMEOUT_BUILD_SECONDS = 180.0
 TIMEOUT_CASE_SECONDS = 10.0

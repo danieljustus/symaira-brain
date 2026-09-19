@@ -6,7 +6,7 @@ final class HistoryServiceTests: XCTestCase {
     private var tempDir: URL!
 
     override func setUpWithError() throws {
-        tempDir = FileManager.default.temporaryDirectory
+        tempDir = operateTestTemporaryDirectory()
             .appendingPathComponent("HistoryServiceTests-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
     }

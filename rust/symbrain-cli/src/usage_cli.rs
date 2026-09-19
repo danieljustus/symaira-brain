@@ -7,6 +7,18 @@ use symbrain_usage::{Report, Service, UsageMeter};
 
 const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credentials are read-only and their\nvalues are never included in output, errors, or audit records.\n";
 
+/// Reports whether `symbrain usage` has to stay on the Go implementation.
+///
+/// The native port now reproduces the per-provider credential state machine
+/// (sources, missing/expired/available texts, source tags) and is the reference
+/// for reports with no stored credential at all — those reach no endpoint and
+/// are pinned byte-for-byte by the parity suite. A report that *does* find a
+/// credential fetches from a live endpoint, and those fetch paths are not
+/// pinned yet, so those shapes stay on the shipped implementation.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    symbrain_usage::needs_go_fallback()
+}
+
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,

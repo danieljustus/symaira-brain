@@ -74,6 +74,81 @@ func TestSelectSourceModules_UnknownIsError(t *testing.T) {
 	}
 }
 
+func TestPrepareSourceBuildLayout_UsesExternalStorage(t *testing.T) {
+	volume := t.TempDir()
+	originalVolume, originalGOOS, originalCI, originalMounted := sourceExternalVolume, sourceBuildGOOS, sourceBuildCI, sourceBuildVolumeMounted
+	sourceExternalVolume = volume
+	sourceBuildGOOS = "darwin"
+	sourceBuildCI = func() bool { return false }
+	sourceBuildVolumeMounted = func(string) bool { return true }
+	t.Cleanup(func() {
+		sourceExternalVolume, sourceBuildGOOS, sourceBuildCI, sourceBuildVolumeMounted = originalVolume, originalGOOS, originalCI, originalMounted
+	})
+	t.Setenv("SYMAIRA_EXTERNAL_BASE", filepath.Join(volume, "builds"))
+	t.Setenv("SYMAIRA_EXTERNAL_RUNTIME_ROOT", filepath.Join(volume, "runtime"))
+
+	layout, err := prepareSourceBuildLayout()
+	if err != nil {
+		t.Fatalf("prepareSourceBuildLayout: %v", err)
+	}
+	for _, path := range []string{layout.temp, layout.goCache, layout.goModCache, layout.cargoTarget, layout.swiftCache, layout.runtimeRoot} {
+		if !strings.HasPrefix(path, volume+string(filepath.Separator)) {
+			t.Errorf("path %q is outside external volume %q", path, volume)
+		}
+		if info, statErr := os.Stat(path); statErr != nil || !info.IsDir() {
+			t.Errorf("external path %q is not a directory: %v", path, statErr)
+		}
+	}
+}
+
+func TestPrepareSourceBuildLayout_ReportsUnmountedVolume(t *testing.T) {
+	volume := t.TempDir()
+	originalVolume, originalGOOS, originalCI, originalMounted := sourceExternalVolume, sourceBuildGOOS, sourceBuildCI, sourceBuildVolumeMounted
+	sourceExternalVolume = volume
+	sourceBuildGOOS = "darwin"
+	sourceBuildCI = func() bool { return false }
+	sourceBuildVolumeMounted = func(string) bool { return false }
+	t.Cleanup(func() {
+		sourceExternalVolume, sourceBuildGOOS, sourceBuildCI, sourceBuildVolumeMounted = originalVolume, originalGOOS, originalCI, originalMounted
+	})
+
+	if _, err := prepareSourceBuildLayout(); err == nil || !strings.Contains(err.Error(), "not mounted") {
+		t.Fatalf("prepareSourceBuildLayout error = %v, want explicit unmounted-volume error", err)
+	}
+}
+
+func TestPrepareSourceBuildLayout_ReportsUnavailableVolume(t *testing.T) {
+	originalVolume, originalGOOS, originalCI := sourceExternalVolume, sourceBuildGOOS, sourceBuildCI
+	sourceExternalVolume = filepath.Join(t.TempDir(), "missing-volume")
+	sourceBuildGOOS = "darwin"
+	sourceBuildCI = func() bool { return false }
+	t.Cleanup(func() {
+		sourceExternalVolume, sourceBuildGOOS, sourceBuildCI = originalVolume, originalGOOS, originalCI
+	})
+
+	if _, err := prepareSourceBuildLayout(); err == nil || !strings.Contains(err.Error(), "required external build volume") {
+		t.Fatalf("prepareSourceBuildLayout error = %v, want explicit unavailable-volume error", err)
+	}
+}
+
+func TestPrepareSourceBuildLayout_SkipsExternalStorageInCI(t *testing.T) {
+	originalVolume, originalGOOS, originalCI := sourceExternalVolume, sourceBuildGOOS, sourceBuildCI
+	sourceExternalVolume = filepath.Join(t.TempDir(), "missing-volume")
+	sourceBuildGOOS = "darwin"
+	sourceBuildCI = func() bool { return true }
+	t.Cleanup(func() {
+		sourceExternalVolume, sourceBuildGOOS, sourceBuildCI = originalVolume, originalGOOS, originalCI
+	})
+
+	layout, err := prepareSourceBuildLayout()
+	if err != nil {
+		t.Fatalf("prepareSourceBuildLayout in CI: %v", err)
+	}
+	if layout.base != "" {
+		t.Fatalf("CI layout base = %q, want empty", layout.base)
+	}
+}
+
 func TestSetupFromSource_InstallsWithProvenance(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

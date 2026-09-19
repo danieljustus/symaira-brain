@@ -257,15 +257,15 @@ fn fallback_executor_receives_unmigrated_commands_only() {
     assert_eq!(doctor_code, exit::USAGE);
     assert!(executor.calls.lock().unwrap().is_empty());
 
-    // Usage is native and must not call the Go fallback.
+    // `usage` is state-gated: a report that resolves no stored credential runs
+    // natively, one that resolves a credential fetches from a live endpoint and
+    // stays on Go until those fetch paths are pinned (issue #620). Which branch
+    // this process takes therefore depends on the machine's stored credentials,
+    // so that routing is pinned by the parity suite (and by the CLI's own
+    // predicate), not by an environment-dependent unit test. The fallback route
+    // is covered by `module_lifecycle_flags_are_forwarded_to_the_go_fallback`.
     stdout.clear();
     stderr.clear();
-    let usage_args = [OsString::from("usage"), OsString::from("--help")];
-    let usage_code = run_with_executor(&usage_args, &mut stdout, &mut stderr, &executor);
-    assert_eq!(usage_code, exit::USAGE);
-    assert!(executor.calls.lock().unwrap().is_empty());
-    assert!(stdout.is_empty());
-    assert!(String::from_utf8_lossy(&stderr).contains("symbrain usage"));
 
     // Init is native and must not call the Go fallback.
     stdout.clear();
@@ -358,7 +358,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
     );
     assert_eq!(
         run_in_process(&[OsString::from("harness")], &mut stdout, &mut stderr),
-        None
+        Some(exit::USAGE)
     );
     assert_eq!(
         run_in_process(
@@ -370,7 +370,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
     );
     assert_eq!(
         run_in_process(&[OsString::from("config")], &mut stdout, &mut stderr),
-        None
+        Some(exit::NO_INPUT)
     );
     assert_eq!(
         run_in_process(
@@ -378,7 +378,7 @@ fn run_in_process_returns_none_for_unmigrated_commands() {
             &mut stdout,
             &mut stderr
         ),
-        None
+        Some(exit::NO_INPUT)
     );
     assert_eq!(
         run_in_process(&[OsString::from("help")], &mut stdout, &mut stderr),

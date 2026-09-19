@@ -17,6 +17,8 @@ import unittest
 from pathlib import Path
 from typing import BinaryIO, cast
 
+from external_env import ensure_external_environment
+
 PROTOCOL_VERSION = "2025-06-18"
 EXPECTED_TOOLS = [
     "scan",
@@ -124,6 +126,9 @@ def run_bounded(
         "XDG_DATA_HOME": str(Path(isolated_home) / ".local" / "share"),
         "XDG_CACHE_HOME": str(Path(isolated_home) / ".cache"),
     }
+    for key in ("TMPDIR", "TMP", "TEMP"):
+        if value := os.environ.get(key):
+            isolated_env[key] = value
     process = subprocess.Popen(
         argv,
         stdin=subprocess.PIPE,
@@ -312,6 +317,7 @@ class SmokeValidatorTests(unittest.TestCase):
 
 
 def main() -> int:
+    ensure_external_environment(__file__)
     parser = argparse.ArgumentParser()
     parser.add_argument("binary", nargs="?")
     parser.add_argument("--timeout", type=float, default=10.0)

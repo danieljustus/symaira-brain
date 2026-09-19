@@ -3,7 +3,7 @@ import XCTest
 
 final class ScreenServiceTests: XCTestCase {
     func testSnapshotDirectoryAndDebugPNGUsePrivateModes() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-mode-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
 
