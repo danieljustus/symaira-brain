@@ -44,6 +44,9 @@ pub struct Provider {
     base_url: Option<String>,
     region: String,
     fixture: bool,
+    /// Device id the Kimi Code CLI persisted; sent as identity metadata on the
+    /// CLI strategy's requests.
+    device_id: Option<String>,
 }
 
 impl Provider {
@@ -70,6 +73,7 @@ impl Provider {
             base_url: None,
             region: "ai".into(),
             fixture: false,
+            device_id: None,
         }
     }
 

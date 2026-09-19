@@ -189,7 +189,7 @@ pub(super) fn parse_nous(v: &Value, s: &mut UsageSnapshot) {
 }
 pub(super) fn parse_openrouter(v: &Value, s: &mut UsageSnapshot) -> Result<(), UsageError> {
     let data = v.get("data").ok_or_else(|| {
-        UsageError::parse("openrouter", "response contained no usable usage fields")
+        UsageError::payload("openrouter", "response contained no usable usage fields")
     })?;
     let usage = number(data.get("usage"));
     if let Some(limit) = number(data.get("limit")) {

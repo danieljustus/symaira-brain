@@ -16,6 +16,12 @@ pub enum UsageError {
         provider: String,
         detail: String,
     },
+    /// A parseable response that carried no usable usage data (the shipped
+    /// `PayloadError`).
+    Payload {
+        provider: String,
+        detail: String,
+    },
     Chain {
         provider: String,
         failures: Vec<String>,
@@ -36,6 +42,14 @@ impl UsageError {
             detail: detail.into(),
         }
     }
+    /// The shipped `PayloadError`: a 2xx body that parsed but carried no
+    /// usable usage data.
+    pub(crate) fn payload(provider: &str, detail: &str) -> Self {
+        Self::Payload {
+            provider: provider.into(),
+            detail: detail.into(),
+        }
+    }
     pub(crate) fn chain(provider: &str, errors: Vec<Self>) -> Self {
         Self::Chain {
             provider: provider.into(),
@@ -52,22 +66,38 @@ impl UsageError {
 impl std::fmt::Display for UsageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Transport { provider, detail } => {
-                write!(f, "{provider} request failed: {detail}")
+            Self::Transport { detail, .. } => {
+                write!(f, "AI usage request failed: {detail}")
             }
             Self::Status { detail, .. } if !detail.is_empty() => write!(f, "{detail}"),
             Self::Status {
                 provider, status, ..
-            } => {
-                write!(f, "{provider} request failed with HTTP {status}")
-            }
+            } => match error_name(provider) {
+                // OpenCode reports every non-2xx through its own text.
+                Some(_) if provider == "opencode" => {
+                    write!(f, "OpenCode API error: HTTP {status}")
+                }
+                Some(name) => write!(f, "{name} request failed with HTTP {status}"),
+                None => write!(f, "AI usage request failed with HTTP {status}"),
+            },
             Self::Parse { provider, detail } if provider == "antigravity" => {
                 write!(f, "Antigravity returned an unreadable response: {detail}")
             }
             Self::Parse { provider, detail } if provider == "opencode" => {
                 write!(f, "OpenCode returned an unreadable response: {detail}")
             }
-            Self::Parse { provider, detail } => write!(
+            Self::Parse { provider, detail } if provider == "cursor" => {
+                write!(f, "Cursor returned an unreadable response: {detail}")
+            }
+            Self::Parse { provider, .. } if error_name(provider).is_some() => {
+                write!(
+                    f,
+                    "{} returned an unreadable response",
+                    error_name(provider).unwrap_or_default()
+                )
+            }
+            Self::Parse { .. } => write!(f, "AI usage provider returned an unreadable response"),
+            Self::Payload { provider, detail } => write!(
                 f,
                 "AI usage provider \"{provider}\" returned malformed usage data: {detail}"
             ),
@@ -80,6 +110,22 @@ impl std::fmt::Display for UsageError {
             ),
             Self::Exact(text) => f.write_str(text),
         }
+    }
+}
+
+/// The short provider name the shipped error texts use. It is deliberately not
+/// the report's display name: the shipped code writes "Copilot request failed
+/// with HTTP 500" while the display name is "GitHub Copilot". Providers without
+/// an entry use the shared, nameless wording.
+fn error_name(provider: &str) -> Option<&'static str> {
+    match provider {
+        "claude" => Some("Claude"),
+        "copilot" => Some("Copilot"),
+        "cursor" => Some("Cursor"),
+        "kimi" => Some("Kimi"),
+        "opencode" => Some("OpenCode"),
+        "antigravity" => Some("Antigravity"),
+        _ => None,
     }
 }
 impl std::error::Error for UsageError {}
@@ -95,7 +141,13 @@ pub(super) fn status_error(
         .map(|(_, value)| value.clone());
     let retry_text = retry
         .as_deref()
-        .map(|value| format!("; retry in {value}s"))
+        .and_then(|value| value.trim().parse::<f64>().ok())
+        // The shipped text truncates to whole seconds (`int(seconds)`).
+        .map(|seconds| {
+            #[allow(clippy::cast_possible_truncation)]
+            let whole = seconds as i64;
+            format!("; retry in {whole}s")
+        })
         .unwrap_or_default();
     let detail = match (provider, status) {
         ("claude", 401 | 403) => {
@@ -119,7 +171,11 @@ pub(super) fn status_error(
         ("claude" | "codex" | "copilot" | "cursor" | "kimi" | "moonshot" | "nous" | "openrouter", 429) => {
             format!("AI usage provider \"{provider}\" is rate limited{retry_text}")
         }
-        _ => format!("{provider} request failed with HTTP {status}"),
+        _ => match error_name(provider) {
+            Some(_) if provider == "opencode" => format!("OpenCode API error: HTTP {status}"),
+            Some(name) => format!("{name} request failed with HTTP {status}"),
+            None => format!("AI usage request failed with HTTP {status}"),
+        },
     };
     UsageError::Status {
         provider: provider.into(),

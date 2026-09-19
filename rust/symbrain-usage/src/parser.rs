@@ -15,8 +15,14 @@ pub(crate) fn parse_snapshot(
     if body.is_empty() {
         return Err(UsageError::parse(id, "empty response"));
     }
-    let value: Value =
-        serde_json::from_slice(body).map_err(|_| UsageError::parse(id, "response is not JSON"))?;
+    // Cursor's own parser names the payload it could not read; every other
+    // provider surfaces only the shared wording.
+    let not_json = if id == "cursor" {
+        "usage summary is not JSON"
+    } else {
+        "response is not JSON"
+    };
+    let value: Value = serde_json::from_slice(body).map_err(|_| UsageError::parse(id, not_json))?;
     let mut snapshot = UsageSnapshot {
         provider_id: id.to_string(),
         meters: Vec::new(),
@@ -60,7 +66,10 @@ pub(crate) fn parse_snapshot(
         _ => Err(UsageError::parse(id, "unknown provider")),
     }?;
     if snapshot.meters.is_empty() && snapshot.balance.is_none() {
-        return Err(UsageError::parse(
+        // A parseable response without usable fields is the shipped
+        // `PayloadError`, which names the provider by id - unlike the
+        // "unreadable response" wording of an unparseable body.
+        return Err(UsageError::payload(
             id,
             if id == "opencode" {
                 "missing usage fields"

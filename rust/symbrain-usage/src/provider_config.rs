@@ -794,7 +794,7 @@ fn cursor() -> Provider {
 
 fn kimi() -> Provider {
     let cli_home = kimi_cli_home();
-    let (cli_token, _device_id) = kimi_store(&cli_home);
+    let (cli_token, device_id) = kimi_store(&cli_home);
     let api_key = resolve_env("KIMI_CODE_API_KEY");
     let auth_token = resolve_env("KIMI_AUTH_TOKEN");
     let (api_value, api_failure) = match api_key {
@@ -841,6 +841,7 @@ fn kimi() -> Provider {
         |_| "https://api.kimi.com".into(),
         |value| validated_base(&value, "https://api.kimi.com"),
     ));
+    provider.device_id = device_id.filter(|value| !value.is_empty());
     provider
 }
 
