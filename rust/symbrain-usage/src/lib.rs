@@ -7,7 +7,7 @@ mod providers;
 mod transport;
 
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
-pub use providers::{Provider, ProviderSpec, UsageError, all_providers};
+pub use providers::{Provider, ProviderSpec, UsageError, all_providers, needs_go_fallback};
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
 use std::collections::BTreeSet;

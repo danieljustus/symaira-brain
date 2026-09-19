@@ -112,6 +112,12 @@ def setup_xdg_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     (cfg_dir / "config.toml").write_text(SAMPLE_CONFIG_TOML)
+def setup_codex_stale_auth(_root: Path, env: dict[str, str]) -> None:
+    codex_dir = Path(env["HOME"]) / ".codex"
+    codex_dir.mkdir(parents=True, exist_ok=True)
+    # A logged-out Codex CLI leaves an auth file without an access token; the
+    # provider reports "expired" and never reaches the network.
+    (codex_dir / "auth.json").write_text('{"OPENAI_API_KEY":"stale"}\n')
 def setup_home_config(_root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = ""
     cfg_dir = Path(env["HOME"]) / ".config" / "symbrain"
@@ -2172,11 +2178,19 @@ CASES = (
         ("activity", "frobnicate", "--profile", "reader", "--max-tokens", "100"),
         setup=setup_activity_profile,
     ),
-    # `usage` and `activity` are gated back to Go: their native auth details,
-    # usage text, profile error path and subcommand set diverge from the
-    # shipped implementation (see the fallback predicates in the CLI).
-    Case("usage_fallback", ("usage",)),
-    Case("usage_fallback_json", ("usage", "--json")),
+    # `usage` reports the credential state machine natively whenever no
+    # credential is stored: the fixture home is empty, so every provider is in
+    # its missing (or, for the Codex case, its stale-auth-file) state and no
+    # endpoint is reached. Reports that do find a credential fetch from a live
+    # endpoint and stay on the shipped implementation (see the CLI predicate).
+    Case("usage_missing", ("usage",)),
+    Case("usage_missing_json", ("usage", "--json")),
+    Case("usage_codex_stale_auth_file", ("usage",), setup=setup_codex_stale_auth),
+    Case(
+        "usage_codex_stale_auth_file_json",
+        ("usage", "--json"),
+        setup=setup_codex_stale_auth,
+    ),
     Case("activity_usage_fallback", ("activity",)),
     Case("activity_help_fallback", ("activity", "--help")),
     Case("activity_missing_profile_fallback", ("activity", "status", "--profile", "absent")),

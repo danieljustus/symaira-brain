@@ -9,16 +9,14 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
-/// The native provider table reports generic auth details ("No Claude
-/// credentials found", "Signed in via Claude"), while the shipped
-/// implementation resolves credentials per provider and per source and reports
-/// the matching text ("No Claude credentials found — add an admin key or sign
-/// in with the Claude CLI", "Signed in via Claude Code OAuth token", …). Nine
-/// of ten providers differ, in both the missing and the signed-in state, so
-/// the whole command stays on Go until that state machine and its texts are
-/// ported and pinned.
+/// The native port now reproduces the per-provider credential state machine
+/// (sources, missing/expired/available texts, source tags) and is the reference
+/// for reports with no stored credential at all — those reach no endpoint and
+/// are pinned byte-for-byte by the parity suite. A report that *does* find a
+/// credential fetches from a live endpoint, and those fetch paths are not
+/// pinned yet, so those shapes stay on the shipped implementation.
 pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
-    true
+    symbrain_usage::needs_go_fallback()
 }
 
 pub fn run(
