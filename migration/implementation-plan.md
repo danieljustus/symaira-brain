@@ -13,21 +13,45 @@ and that test is red. The row stays `fixture-ready` until it is green.
   `foreign_keys` 1, `secure_delete` 1), the constraint cases (NULL
   `created_at`/`updated_at` rejected, missing table rejected) and the ordering
   cases (ties broken by id DESC, distinct timestamps by `created_at` DESC).
-- **Failing, and this is the remaining `DB-001` work** (three checks, all
-  measured against the fixture, not guessed):
-  1. **16 tables missing** from the native schema: `audit_log`,
+- **Closed** (commit `76a14f3a`, on the integration branch). The port landed
+  with the acceptance test, because the test alone was red and the DDL alone
+  was unmeasured. `DB-001`/`DB-002` are now `green`:
+  1. **16 tables** added to the native schema: `audit_log`,
      `consolidation_runs`, `context_profile_links`, `context_profiles`,
      `entities_aliases`, `import_state`, `jwt_revocations`, `memories_fts`
      (+ its four shadow tables), `memory_associations`, `memory_evidence`,
-     `query_log_results`, `sync_state`. No extra tables.
-  2. **`memories` column facts differ**: same 33 columns, different order and
-     different defaults. The native schema adds `DEFAULT ''` to `scope`,
-     `metadata` and `embedding`, which the shipped schema declares NOT NULL
-     without a default.
-  3. **16 `memories` indexes missing** (kind, tier, review_status, expires_at,
+     `query_log_results`, `sync_state`.
+  2. **`memories` column facts** aligned: the shipped order and the shipped
+     defaults. The native schema had added `DEFAULT ''` to `scope`, `metadata`
+     and `embedding`, which the shipped schema declares NOT NULL without a
+     default.
+  3. **16 `memories` indexes** added (kind, tier, review_status, expires_at,
      content_hash, embedding_source, consolidation, consolidated_into,
      created_by, importance, lsh, scope_lsh, superseded_by, updated_at,
      valid_from, valid_to) plus the unique autoindex the shipped table carries.
+- **Two defects in the worker's port were caught by existing tests, not by the
+  worker's own report** — its summary claimed "all three checks pass" and did
+  not mention them, and clippy/fmt were red:
+  - the 16 new indexes sat inside `SCHEMA`, ahead of the `COLUMN_PARITY`
+    repair, so `Store::open` failed on any database written by an older
+    version (`no such column: tier`) — the indexes now live in `INDEXES` and
+    run after the repair;
+  - `COLUMN_PARITY` covered 5 columns while the shipped index set references
+    26, so an upgraded database would have kept missing columns a fresh one
+    has — it now covers every shipped `memories` column with its shipped
+    definition;
+  - a third gap **no test could see**: `memories_fts` was created without the
+    `memories_ai`/`_ad`/`_au` triggers, so the table existed and never received
+    a row. The oracle now records triggers and views (stored SQL; neither has a
+    PRAGMA), the differential test holds them to it, and a new contract test
+    proves a natively written row reaches the FTS index.
+  - the contract test's raw insert omitted `embedding`, which only worked
+    while the native schema wrongly gave that column a default.
+- **Verification on the integration branch:** `cargo test -p symbrain-memory`
+  21 lib + 7 contract, `clippy --all-targets -D warnings` clean,
+  `cargo fmt --check` clean, `make rust-check` exit 0 (all oracle checks: xdg
+  256, policy 50+30, guard 51, guard-doctor 7, catalog 3, cli 81, db-memory
+  29 tables / 4 negative / 2 ordering), `make parity-smoke` 457/457.
 - **The oracle was repaired first**, because three of its own cases were
   hollow: the ordering seeds omitted `metadata` (NOT NULL without a default),
   so the inserts failed silently and both expectations were captured as
@@ -35,23 +59,21 @@ and that test is red. The row stays `fixture-ready` until it is green.
   the timestamp they name; and the legacy-migration case was dropped because
   the oracle opened the legacy file with the driver name `sqlite3` while the
   production package registers modernc's `sqlite`. Insert and open errors are
-  now fatal.
+  now fatal. Note that `make db-memory-oracle-check` exercises the **committed**
+  oracle (it exports `HEAD`), so an uncommitted oracle change is not covered by
+  it — regenerate and commit the fixture explicitly.
 - **Reachability, verified with a freshly built native binary and an isolated
   `HOME`:** `symbrain memory …` is gated back to the shipped implementation and
   resolves `<data>/memory/default.db` (it does **not** create a store through
   the native code path), but `symbrain mcp` **is** live: the gateway opens
   `symbrain_memory::Store` on the same `<data>/memory/default.db`
-  (`rust/symbrain-gateway/src/lib.rs`). A database first created through the
-  gateway therefore carries the subset schema, and the shipped implementation
-  then fails on that very file — the same class of failure as the
-  `consolidated_into_id` error recorded in #615. An earlier probe of mine that
-  suggested the CLI path was native used a stale binary from 2026-09-17 and was
-  wrong; the corrected measurement is in #626.
-- **Branch state:** the repaired oracle and fixture are on
-  `migration/rust-continue-20260920` (green). The red acceptance test is on
-  `migration/w3-db-schema` in `.worktrees/w3-db` (commit `41dc33f1`) and a
-  worker is porting the shipped DDL there. It must not be integrated until
-  `cargo test -p symbrain-memory` is green.
+  (`rust/symbrain-gateway/src/lib.rs`). An earlier probe of mine that suggested
+  the CLI path was native used a stale binary from 2026-09-17 and was wrong; the
+  corrected measurement is in #626, which the port closes.
+- **Branch state:** everything above is integrated on
+  `migration/rust-continue-20260920` (local, not pushed). The wave-3 worktree
+  `migration/w3-db-schema` has served its purpose and is removed. Nothing about
+  this slice is outstanding.
 
 ## Resume checkpoint — 2026-09-20, wave 2 salvaged
 
