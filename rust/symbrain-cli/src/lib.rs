@@ -417,7 +417,7 @@ fn path_lookup(binary: &OsStr) -> Option<PathBuf> {
     })
 }
 
-fn rustc_version() -> &'static str {
+pub(crate) fn rustc_version() -> &'static str {
     option_env!("RUSTC_VERSION").unwrap_or("rustc")
 }
 
