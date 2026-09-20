@@ -36,11 +36,17 @@ and that test is red. The row stays `fixture-ready` until it is green.
   the oracle opened the legacy file with the driver name `sqlite3` while the
   production package registers modernc's `sqlite`. Insert and open errors are
   now fatal.
-- **Consequence for a Rust-created database:** a store the native code creates
-  today lacks 16 tables and 16 indexes of the shipped schema, so a database
-  written by the native binary would not be readable by the shipped search,
-  entity, audit and sync features. This is a real gap, not a formatting
-  difference.
+- **Reachability, verified with a freshly built native binary and an isolated
+  `HOME`:** `symbrain memory …` is gated back to the shipped implementation and
+  resolves `<data>/memory/default.db` (it does **not** create a store through
+  the native code path), but `symbrain mcp` **is** live: the gateway opens
+  `symbrain_memory::Store` on the same `<data>/memory/default.db`
+  (`rust/symbrain-gateway/src/lib.rs`). A database first created through the
+  gateway therefore carries the subset schema, and the shipped implementation
+  then fails on that very file — the same class of failure as the
+  `consolidated_into_id` error recorded in #615. An earlier probe of mine that
+  suggested the CLI path was native used a stale binary from 2026-09-17 and was
+  wrong; the corrected measurement is in #626.
 - **Branch state:** the repaired oracle and fixture are on
   `migration/rust-continue-20260920` (green). The red acceptance test is on
   `migration/w3-db-schema` in `.worktrees/w3-db` (commit `41dc33f1`) and a
