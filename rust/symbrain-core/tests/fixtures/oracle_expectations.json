@@ -1,0 +1,4868 @@
+{
+  "cases": [
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=unset,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=abs,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=rel,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=unset,xdg-config=empty,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=unset,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=abs,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=rel,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=abs,xdg-config=empty,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "/home/user",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "/home/user/.local/share/symbrain/audit",
+        "cache_dir": "/home/user/.cache/symbrain",
+        "config_dir": "/home/user/.config/symbrain",
+        "config_path": "/home/user/.config/symbrain/config.toml",
+        "data_dir": "/home/user/.local/share/symbrain",
+        "managed_bin_dir": "/home/user/.symaira/bin",
+        "patterns_dir": "/home/user/.local/share/symbrain/recipes",
+        "profiles_dir": "/home/user/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=unset,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=abs,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=rel,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=rel,xdg-config=empty,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "relative/home",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "relative/home/.local/share/symbrain/audit",
+        "cache_dir": "relative/home/.cache/symbrain",
+        "config_dir": "relative/home/.config/symbrain",
+        "config_path": "relative/home/.config/symbrain/config.toml",
+        "data_dir": "relative/home/.local/share/symbrain",
+        "managed_bin_dir": "relative/home/.symaira/bin",
+        "patterns_dir": "relative/home/.local/share/symbrain/recipes",
+        "profiles_dir": "relative/home/.config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=unset,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=abs,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "/abs/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": "/abs/config/symbrain",
+        "config_path": "/abs/config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": "/abs/config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=rel,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "relative/config",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=unset,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=unset,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=unset,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=unset,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=abs,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=abs,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=abs,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=abs,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "/abs/data"
+      },
+      "expect": {
+        "audit_dir": "/abs/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "/abs/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "/abs/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=rel,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=rel,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=rel,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=rel,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": "relative/data"
+      },
+      "expect": {
+        "audit_dir": "relative/data/symbrain/audit",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "relative/data/symbrain",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "relative/data/symbrain/recipes",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=empty,xdg-cache=unset",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=empty,xdg-cache=abs",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "/abs/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "/abs/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=empty,xdg-cache=rel",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "relative/cache",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "relative/cache/symbrain",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    },
+    {
+      "id": "home=empty,xdg-config=empty,xdg-data=empty,xdg-cache=empty",
+      "env": {
+        "HOME": "",
+        "XDG_CACHE_HOME": "",
+        "XDG_CONFIG_HOME": "",
+        "XDG_DATA_HOME": ""
+      },
+      "expect": {
+        "audit_dir": "(error)",
+        "cache_dir": "(error)",
+        "config_dir": ".config/symbrain",
+        "config_path": ".config/symbrain/config.toml",
+        "data_dir": "(error)",
+        "managed_bin_dir": "(error)",
+        "patterns_dir": "(error)",
+        "profiles_dir": ".config/symbrain/profiles"
+      }
+    }
+  ]
+}
