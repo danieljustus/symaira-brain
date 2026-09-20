@@ -443,7 +443,7 @@
     }
   ],
   "schema_version": 1,
-  "source_commit": "27a5e5398ee46a0edbf05017eb6e2e3f78c2118c",
+  "source_commit": "9c0e2b259753901a372ed5a688382bb6d4fadd18",
   "source_files": {
     "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
     "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
