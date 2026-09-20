@@ -44,8 +44,8 @@ CAT-001,catalog,namespacing collisions sorting annotations schemas and routing m
 AUD-001,audit,JSONL schema hash chain redaction bounded tail degradation filters and permissions,scripts/audit-oracle,rust/symbrain-audit/tests,all,bytes-and-semantic,green
 PAT-001,patterns,episode JSONL deterministic names recurrence promotion provenance pruning and permissions,scripts/patterns-activity-oracle,rust/symbrain-activity/tests;rust/symbrain-patterns,all,bytes-and-semantic,green
 ACT-001,activity,validation ordering bounded tokens Unicode fencing profile access and safe read shapes,scripts/patterns-activity-oracle,rust/symbrain-activity/tests,all,bytes-and-semantic,green
-DB-001,SQLite,schema migrations and pragmas,target/go/symbrain-go,pending,all,schema-and-query-snapshot,pending
-DB-002,SQLite,NULL timestamps ordering locks,target/go/symbrain-go,pending,all,semantic,pending
+DB-001,SQLite,"schema migrations and pragmas: 29 tables, every index, the full memories column set (name/type/NOT NULL/default/pk) and the 5 store pragmas (journal_mode, busy_timeout_ms, foreign_keys, secure_delete)",scripts/db-memory-oracle,rust/symbrain-memory/tests/fixtures/db_memory_oracle.json,all,schema-and-query-snapshot,fixture-ready
+DB-002,SQLite,"NULL timestamps, ordering and locks: null_created_at_rejected, null_updated_at_rejected, missing_table_rejected, ordering_ties_by_id_desc, ordering_distinct_by_created_at_desc",scripts/db-memory-oracle,rust/symbrain-memory/tests/fixtures/db_memory_oracle.json,all,semantic,fixture-ready
 SEC-001,security,secret resolution and redaction,target/go/symbrain-go,pending,all,bytes,pending
 SEC-002,security,guard decisions grants audit chain,target/go/symbrain-go,pending,all,bytes-and-files,pending
 SEC-003,security,Guard request/decision models validation fail-closed outputs injected time and IDs,guard/scripts/guard-oracle,rust/symbrain-guard-core/tests/oracle_tests.rs,all,exact-json-and-errors,fixture-ready
