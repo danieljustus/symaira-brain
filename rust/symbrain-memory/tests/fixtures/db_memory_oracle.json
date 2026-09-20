@@ -442,7 +442,34 @@
         "unique": false,
         "sql": ""
       }
-    ]
+    ],
+    "triggers": [
+      {
+        "name": "memories_ad",
+        "sql": "CREATE TRIGGER memories_ad AFTER DELETE ON memories BEGIN\n    INSERT INTO memories_fts(memories_fts, rowid, id, content, scope) VALUES('delete', old.rowid, old.id, old.content, old.scope);\nEND"
+      },
+      {
+        "name": "memories_ai",
+        "sql": "CREATE TRIGGER memories_ai AFTER INSERT ON memories BEGIN\n    INSERT INTO memories_fts(rowid, id, content, scope) VALUES (new.rowid, new.id, new.content, new.scope);\nEND"
+      },
+      {
+        "name": "memories_au",
+        "sql": "CREATE TRIGGER memories_au AFTER UPDATE ON memories BEGIN\n    INSERT INTO memories_fts(memories_fts, rowid, id, content, scope) VALUES('delete', old.rowid, old.id, old.content, old.scope);\n    INSERT INTO memories_fts(rowid, id, content, scope) VALUES (new.rowid, new.id, new.content, new.scope);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_delete",
+        "sql": "CREATE TRIGGER trg_memories_oplog_delete\nAFTER DELETE ON memories\nWHEN COALESCE(json_extract(OLD.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('delete', OLD.id);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_insert",
+        "sql": "CREATE TRIGGER trg_memories_oplog_insert\nAFTER INSERT ON memories\nWHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_update",
+        "sql": "CREATE TRIGGER trg_memories_oplog_update\nAFTER UPDATE ON memories\nWHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);\nEND"
+      }
+    ],
+    "views": []
   },
   "negative_cases": [
     {

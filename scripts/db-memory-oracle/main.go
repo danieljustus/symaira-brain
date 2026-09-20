@@ -33,10 +33,19 @@ type SchemaIndex struct {
 	SQL    string `json:"sql"`
 }
 
+// SchemaTrigger carries a trigger or a view: both live in `sqlite_master` with
+// stored SQL and neither is reachable through a PRAGMA.
+type SchemaTrigger struct {
+	Name string `json:"name"`
+	SQL  string `json:"sql"`
+}
+
 type SchemaSnapshot struct {
-	Tables   []SchemaTable  `json:"tables"`
-	Memories []SchemaColumn `json:"memories_columns"`
-	Indexes  []SchemaIndex  `json:"indexes"`
+	Tables   []SchemaTable   `json:"tables"`
+	Memories []SchemaColumn  `json:"memories_columns"`
+	Indexes  []SchemaIndex   `json:"indexes"`
+	Triggers []SchemaTrigger `json:"triggers"`
+	Views    []SchemaTrigger `json:"views"`
 }
 
 type NegativeCase struct {
@@ -172,6 +181,48 @@ func captureSchema(conn *sql.DB) (SchemaSnapshot, error) {
 	}
 	if err := tableRows.Err(); err != nil {
 		return snapshot, err
+	}
+
+	// Triggers and views have no PRAGMA introspection, so their stored SQL is
+	// the only record of them. They are captured because a table can exist and
+	// still be dead: a `memories_fts` without its `memories_ai`/`_ad`/`_au`
+	// triggers is never populated, and the table list alone cannot show that.
+	for _, kind := range []struct {
+		Type   string
+		Target *[]SchemaTrigger
+	}{{"trigger", &snapshot.Triggers}, {"view", &snapshot.Views}} {
+		rows, err := conn.Query(`
+			SELECT name, sql
+			FROM sqlite_master
+			WHERE type = ? AND sql IS NOT NULL
+			ORDER BY name
+		`, kind.Type)
+		if err != nil {
+			return snapshot, err
+		}
+		for rows.Next() {
+			var trigger SchemaTrigger
+			if err := rows.Scan(&trigger.Name, &trigger.SQL); err != nil {
+				rows.Close()
+				return snapshot, err
+			}
+			*kind.Target = append(*kind.Target, trigger)
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return snapshot, err
+		}
+		rows.Close()
+	}
+
+	// Emit empty arrays rather than null so the fixture states "no views" the
+	// same way it states "these triggers": a nil slice would serialize as null
+	// and read as "not captured" instead of "none".
+	if snapshot.Triggers == nil {
+		snapshot.Triggers = []SchemaTrigger{}
+	}
+	if snapshot.Views == nil {
+		snapshot.Views = []SchemaTrigger{}
 	}
 
 	columnRows, err := conn.Query(`PRAGMA table_info(memories)`)
