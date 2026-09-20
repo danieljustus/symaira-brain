@@ -1,5 +1,40 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-20, wave 1 integrated
+
+Three workers were dispatched in isolated worktrees from `8ca8d2c5`. Two of
+them were cut off before committing and their summaries arrived truncated, so
+their branches were inspected and salvaged by hand instead of being trusted.
+
+- **`CFG-001` is green.** `scripts/xdg-oracle` is a source-bound Go oracle
+  (imports `internal/xdg`, injects HOME/XDG, 256 cases) and
+  `rust/symbrain-core/tests/xdg_paths_tests.rs` compares all eight resolution
+  functions against the frozen fixture. Verified on the integrated tree by the
+  author: `run-go-oracle.sh HEAD run ./scripts/xdg-oracle -check` →
+  "0 drift on 256 cases", and `cargo test -p symbrain-core` →
+  `xdg_paths_match_go_oracle ... ok`. No divergence was found; no Rust change
+  was needed. `make xdg-oracle-check` is wired into `rust-check`.
+- **`#624` (atime flake) is addressed in the harness.** The three
+  atime-derived cases now capture each runtime's own `SKILL.md` atime
+  (`st_atime_ns`, nanosecond-exact) immediately before that runtime runs,
+  require the reported `last_used` to be derived from that value (never older,
+  absent only where the fixture carries no evidence), and normalize the value
+  before the byte comparison. `skills_list_last_used_json` additionally
+  requires the value to be present, so the evidence contract is still checked.
+- **`guard doctor` stays on the Go fallback, with a frozen corpus.** The Go
+  oracle over seven scenarios is committed as `SEC-005` (`fixture-ready`, no
+  Rust consumer). Measurement from this wave: the production output is not
+  byte-stable even Go-to-Go, because it prints the building toolchain
+  (`go1.27.1` locally versus `go1.26.7` under `run-go-oracle.sh`) and absolute
+  temp-root paths. The oracle therefore writes `<root>` and `Go: <go>`
+  placeholders; the toolchain line is an explicit accepted difference. A Rust
+  module that hardcoded those lines was discarded — it is not a port.
+  `make guard-doctor-oracle-check` verifies the fixture against the pinned Go
+  revision and is wired into `rust-check`.
+- **Not authorized by this checkpoint:** Go removal, pushing/publishing,
+  release or product cutover, and any claim that the `fixture-ready` rows are
+  green.
+
 ## Resume checkpoint — 2026-09-20 (session `migration/rust-continue-20260920`)
 
 Base revision: `48568aee` (main, CI green there including the macOS
