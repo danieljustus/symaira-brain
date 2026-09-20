@@ -49,6 +49,15 @@ same normalizations the oracle applied.
   a fresh root per case, which compared the port against a state the recording
   never had. No case changed verdict from the fix — it removes a false negative
   rather than closing a gap.
+- **The wave-4 worktree is folded back and removed** (`84ba434e`): the consumer
+  and its supporting usage-text changes were cherry-picked onto this branch, and
+  `.worktrees/w4-cli` plus `migration/w4-cli` are gone. This branch is now the
+  single reference line for wave 4. The consumer is marked `#[ignore]` with its
+  reason (`59d43468`), because `cargo test --workspace` — and therefore
+  `make rust-check` — picks it up, and it would turn the incremental entrypoint
+  red before the residual above is closed. Run it on demand with
+  `cargo test -p symbrain-cli --test cli_tree_tests -- --ignored`; un-ignore it
+  and wire it into `rust-check` in the change that closes the residual.
 - **The `memory` usage and help shapes are ported** (`ff8bfde9`), the shipped
   `skills` help text is used (`cf0f65e4`), and `guard version` prints the shipped
   four-row block (`3397df22`). All three changes followed the same rule: the text
