@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from external_env import ensure_external_environment as ensure_shared_external_environment
 
 FIXTURE = HERE / "fixture.json"
-PINNED_COMMIT_SHA = "27a5e5398ee46a0edbf05017eb6e2e3f78c2118c"
+PINNED_COMMIT_SHA = "9c0e2b259753901a372ed5a688382bb6d4fadd18"
 GO_SOURCE_PATHS = (
     "cmd/symbrain/cmd_guard.go",
     "cmd/symbrain/main.go",

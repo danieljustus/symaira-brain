@@ -26,7 +26,7 @@ from external_env import ensure_external_environment
 
 ensure_external_environment(__file__)
 
-PINNED_COMMIT_SHA = "d53c3824e7d6771fabefd62a18dd3c5e50c3c37d"
+PINNED_COMMIT_SHA = "9c0e2b259753901a372ed5a688382bb6d4fadd18"
 TIMEOUT_BUILD_SECONDS = 180.0
 TIMEOUT_CASE_SECONDS = 10.0
 

@@ -230,7 +230,7 @@
     ]
   },
   "schema_version": 1,
-  "source_commit": "51af390ad8c320d5b06cab55025a963c0c290e81",
+  "source_commit": "9c0e2b259753901a372ed5a688382bb6d4fadd18",
   "source_files": {
     "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
     "go.mod": "a8ff6518ad9bca1e775958ed4d8c4de2f3511e0f564bcf38ddad6a43a7f9148b",
