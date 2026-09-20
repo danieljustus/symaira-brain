@@ -30,13 +30,25 @@ same normalizations the oracle applied.
        exit 0) when `HOME` has no symlinked ancestor. The consumer's root lives
        under `/var/folders`, and `/var` is a symlink, so the native path
        deliberately hands a log path with symlinked ancestors to Go.
-     - `skills targets` diverges by state and depth, not by shape: the fixture
-       recorded `claude true` and roots at `<root>/home/...`, while the consumer's
-       isolated root reports `false` and a shallower root. The oracle installed
-       skills into its root; the consumer does not reproduce that preparation.
+     - `skills targets` diverges in one column only: the fixture records
+       `claude`, `codex`, `antigravity` and `hermes` as `INSTALLED true`, the
+       consumer's run reports `false` for all six targets. Measured cause: that
+       column follows the **PATH** (harness CLI detection), not the root. With
+       the recorder's PATH and an isolated root the reference binary reproduces
+       the fixture's four `true` values exactly; with an empty PATH it reports
+       `false` for all six, like the native binary. The consumer pins `PATH` to
+       an empty directory, so its `false` is correct there and the case cannot be
+       verified against this recording. The target list itself — six targets,
+       order, skill roots — matches.
      - `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
   4. **One recording is environment-dependent** (1 case): `memory serve` holds a
      port-conflict transcript, so it is not a parity target.
+- **The consumer now replays the tree in one shared root** (`1d6b57ba`), like the
+  oracle: the recording ran every case in a single throwaway root in fixture
+  order, so later cases saw the state earlier ones created. The consumer created
+  a fresh root per case, which compared the port against a state the recording
+  never had. No case changed verdict from the fix — it removes a false negative
+  rather than closing a gap.
 - **The `memory` usage and help shapes are ported** (`ff8bfde9`), the shipped
   `skills` help text is used (`cf0f65e4`), and `guard version` prints the shipped
   four-row block (`3397df22`). All three changes followed the same rule: the text
