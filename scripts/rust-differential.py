@@ -1467,6 +1467,16 @@ CASES = (
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),
+    # The Go flag package consumes the next argument as the `-vault-agent`
+    # value and stops at `-h`/`-help`, so these never reach the handshake that
+    # keeps a surviving `-vault-agent` on the Go path.
+    Case(
+        "doctor_vault_agent_value_consumes_force_release",
+        ("doctor", "--vault-agent", "--force-release", "--help"),
+    ),
+    Case("doctor_vault_agent_then_help", ("doctor", "--vault-agent", "agent", "--help")),
+    Case("doctor_vault_agent_equals_then_help", ("doctor", "--vault-agent=agent", "--help")),
+    Case("doctor_vault_agent_missing_value", ("doctor", "--vault-agent")),
     Case("doctor_failed_version_json", ("doctor", "--json"), setup=setup_doctor_failed_version),
     # Phase 4 Task 4.3: native symvault passthrough with opaque argv and lookup order
     Case(
