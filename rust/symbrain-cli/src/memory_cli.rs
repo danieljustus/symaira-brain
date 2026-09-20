@@ -12,37 +12,118 @@ use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_memory::Store;
 
-const MEMORY_USAGE: &str = "symbrain memory — operate the embedded memory store
+/// The shipped `symbrain memory` help, as printed when no subcommand is given.
+const MEMORY_USAGE: &str = r"symbrain memory — embedded memory store operations
 
 Usage:
-  symbrain memory list [--scope SCOPE] [--limit N]
-  symbrain memory search <query> [--scope SCOPE] [--limit N]
-  symbrain memory set <id> <content> [--scope SCOPE]
-  symbrain memory delete <id>
-  symbrain memory rules
-  symbrain memory query-log [--limit N] [--actor NAME] [--db PATH]
+  symbrain memory <subcommand> [flags]
 
-The global --output table|json flag (or --json) selects the output format.
+Subcommands:
+  list        List stored memories (optionally filtered by scope)
+  search      Search memories by semantic relevance
+  set         Store a memory (requires --kind)
+  delete      Remove a memory by id
+  rules       List procedural rules
+  query-log   Inspect the memory retrieval log
+  sync        Synchronize memories with a remote memory server
+  serve       Run the memory HTTP API as a sync peer for 'memory sync --remote'
+
+Use --output table|json (or --json) for the result format. Read commands
+accept --scope/-s, --limit/-l, and --db; search takes one query argument.
+Run 'symbrain memory <subcommand> --help' for details.
+For remote synchronization, run 'symbrain memory sync --help'.
+To act as the remote peer for another machine's sync, run 'symbrain memory serve --help'.
 ";
 
-/// Reports whether `symbrain memory` has to stay on the Go implementation.
-///
-/// The store is compatible with the shipped database (identifiers,
-/// timestamps, embedding column, schema, migrations); what is still narrower
-/// is the command surface. `list` runs natively for the argument shapes whose
-/// bytes are pinned, everything else stays on Go:
-///
-/// - `search` reads through a different retrieval path (the shipped one ranks
-///   embedding candidates) and `set`/`delete`/`serve`/`sync` write or serve;
-/// - a dynamic memory configuration (a `symmemory` config file or
-///   `SYMMEMORY_*` in the environment) changes the database and retrieval
-///   settings, so it goes to Go;
-/// - any flag outside the whitelist goes to Go, because the Go flag package
-///   owns those error bytes.
+/// The shipped `symbrain memory list` help (`list --help`, also stdout with exit 0).
+const MEMORY_LIST_USAGE: &str = r"symbrain memory list — list stored memories
+
+Usage:
+  symbrain memory list [flags]
+
+Flags:
+  --scope, -s <scope>  Filter by scope: global, project, agent, user, or session.
+  --limit, -l <N>      Maximum memories to return (default 100, max 1000).
+  --db <path>          Database path override.
+  --output table|json   Output format (default table; global flag).
+";
+
+/// The shipped `symbrain memory sync` help. The Go source builds one line of it
+/// by concatenating the token environment-variable constant; this is the
+/// rendered text.
+const MEMORY_SYNC_USAGE: &str = r"symbrain memory sync — synchronize the embedded memory store with a remote
+
+Usage:
+  symbrain memory sync --remote <url> [flags]
+
+Flags:
+  --remote <url>          Base URL of the remote memory server (required).
+                          Must use https, except http://localhost or
+                          127.0.0.1 for local development.
+  --pull                  Only pull remote changes into the local database.
+  --push                  Only push local changes to the remote server.
+                          (With neither flag, both directions run.)
+  --token <token>         Bearer token for the remote API. May come from
+                          $SYMBRAIN_MEMORY_SYNC_TOKEN instead; never pass it on the command line in
+                          shared shells.
+  --encrypted-relay       Exchange client-side AES-256-GCM encrypted blobs
+                          through the remote /api/sync/relay endpoint, so the
+                          relay never sees plaintext memory content.
+  --relay-passphrase <p>  Passphrase for --encrypted-relay. May come from
+                          $SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE instead. Both peers must share it.
+  --allow-insecure-http   Override the https requirement for non-loopback
+                          remotes. Bearer tokens will be sent in the clear;
+                          a WARNING is printed. Use only for testing.
+  --db <path>             Database path override (default: the standard
+                          memory database under the XDG data directory).
+  --timeout <duration>    Per-run HTTP timeout (default 60s).
+
+The local database and its per-remote sync cursors are reused in place;
+no export or import step is needed.
+";
+
+/// The line the shipped `memory sync` prints before its help when `--remote` is
+/// missing.
+const MEMORY_SYNC_REMOTE_REQUIRED: &str = "symbrain memory sync: --remote is required\n";
+
+/// Hand-written usage errors. The shipped implementation prints these itself
+/// rather than through the flag package, so they are portable byte for byte.
+const MEMORY_SEARCH_USAGE_ERROR: &str =
+    "usage: symbrain memory search <query> [--scope <scope>] [--limit <N>] [--db <path>]\n";
+const MEMORY_SET_USAGE_ERROR: &str =
+    "usage: symbrain memory set <content> --kind <kind> [--scope <scope>] [flags]\n";
+const MEMORY_DELETE_USAGE_ERROR: &str = "usage: symbrain memory delete <id> [--db <path>]\n";
+
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    // The usage and help shapes are decided first, because the shipped
+    // implementation writes them itself and exits without touching the store or
+    // the configuration. Deciding them after the preconditions below would make
+    // them depend on a database path that they never open.
     let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
-        return true;
+        // `symbrain memory` with no subcommand prints its own help text and
+        // never opens a store.
+        return false;
     };
+    let rest = args.get(1..).unwrap_or(&[]);
+    match verb.as_str() {
+        "-h" | "--help" | "help" => return false,
+        // `list --help` prints the subcommand help to stdout with exit 0.
+        "list" | "rules" | "query-log"
+            if rest
+                .first()
+                .is_some_and(|arg| matches!(arg.to_string_lossy().as_ref(), "-h" | "--help")) =>
+        {
+            return false;
+        }
+        // With no arguments at all there is nothing for the flag package to
+        // reject, and the shipped implementation prints a hand-written usage
+        // line that the native side reproduces byte for byte.
+        "search" | "set" | "delete" | "sync" if rest.is_empty() => return false,
+        _ => {}
+    }
+
+    // A dynamic memory configuration changes the database and retrieval
+    // settings, so it goes to Go.
     if memory_config_is_dynamic() {
         return true;
     }
@@ -50,18 +131,19 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     // ("failed to open sqlite database: failed to create database directory:
     // mkdir …"), which the native side does not reproduce, so that case keeps
     // the shipped bytes.
-    if !database_path_is_usable(&resolve_db_path(extract_db_override(&args[1..]).as_deref())) {
+    if !database_path_is_usable(&resolve_db_path(extract_db_override(rest).as_deref())) {
         return true;
     }
     match verb.as_str() {
-        "list" | "rules" | "query-log" => !read_arguments_are_allowed(&args[1..]),
-        // `search` is native for exactly one query argument plus the read
-        // flags; the usage and flag errors stay with the Go flag package.
-        "search" => !search_arguments_are_allowed(&args[1..]),
-        // `delete` is native for exactly one bare identifier plus `--db`; the
-        // usage and flag errors stay with the Go flag package.
-        "delete" => !delete_arguments_are_allowed(&args[1..]),
-        "set" => !set_arguments_are_allowed(&args[1..]),
+        "list" | "rules" | "query-log" => !read_arguments_are_allowed(rest),
+        // Native for exactly one query argument plus the read flags; the flag
+        // errors stay with the Go flag package.
+        "search" => !search_arguments_are_allowed(rest),
+        // Native for exactly one bare identifier plus `--db`.
+        "delete" => !delete_arguments_are_allowed(rest),
+        "set" => !set_arguments_are_allowed(rest),
+        // Anything left over names a remote and is real synchronisation work,
+        // so it keeps the shipped implementation.
         _ => true,
     }
 }
@@ -328,6 +410,13 @@ pub fn run(
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
         "query-log" => run_query_log(rest, stdout, stderr, format),
+        // The bare `memory sync` shape. The shipped implementation refuses
+        // without a remote and prints its help; real synchronisation work never
+        // arrives here, because the gate keeps it on Go.
+        "sync" => {
+            let _ = write!(stderr, "{MEMORY_SYNC_REMOTE_REQUIRED}{MEMORY_SYNC_USAGE}");
+            exit::USAGE
+        }
         _ => {
             let _ = writeln!(stderr, "symbrain memory: unknown subcommand {verb:?}\n");
             let _ = write!(stderr, "{MEMORY_USAGE}");
@@ -350,6 +439,15 @@ fn run_list(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    // `memory list --help` prints the subcommand help to stdout with exit 0.
+    if args
+        .first()
+        .is_some_and(|arg| matches!(arg.to_string_lossy().as_ref(), "-h" | "--help"))
+    {
+        let _ = write!(stdout, "{MEMORY_LIST_USAGE}");
+        return exit::OK;
+    }
+
     let mut scope: Option<String> = None;
     // The shipped flag defaults: no scope, and a limit of 0 that the scan
     // turns into 1000 rows.
@@ -541,10 +639,7 @@ fn run_search(
     let positionals = parsed.positionals;
     let query = parsed.query;
     if positionals != 1 {
-        let _ = writeln!(
-            stderr,
-            "usage: symbrain memory search <query> [--scope <scope>] [--limit <N>] [--db <path>]"
-        );
+        let _ = write!(stderr, "{MEMORY_SEARCH_USAGE_ERROR}");
         return exit::USAGE;
     }
     let query = query.unwrap_or_default();
@@ -635,6 +730,7 @@ fn run_set(
     let mut scope = "global".to_string();
     let mut kind = String::new();
     let mut staged = false;
+    let mut positionals = 0usize;
 
     let mut i = 0;
     while i < args.len() {
@@ -669,12 +765,23 @@ fn run_set(
             staged = true;
             i += 1;
             continue;
-        } else if !arg.starts_with('-') && content.is_empty() {
-            content = arg.into_owned();
+        } else if !arg.starts_with('-') {
+            positionals += 1;
+            if content.is_empty() {
+                content = arg.into_owned();
+            }
         }
         i += 1;
     }
 
+    // The shipped implementation requires exactly one positional argument and
+    // checks that before it looks at the content, so a bare `memory set` prints
+    // the usage line rather than "content is required".
+    if positionals != 1 {
+        let _ = write!(stderr, "{MEMORY_SET_USAGE_ERROR}");
+        return exit::USAGE;
+    }
+    let content = content.trim().to_string();
     if content.is_empty() {
         let _ = writeln!(stderr, "symbrain memory set: content is required");
         return exit::USAGE;
@@ -751,7 +858,7 @@ fn run_delete(
         index += 1;
     }
     let Some(id) = id else {
-        let _ = writeln!(stderr, "usage: symbrain memory delete <id> [--db <path>]");
+        let _ = write!(stderr, "{MEMORY_DELETE_USAGE_ERROR}");
         return exit::USAGE;
     };
     if id.trim().is_empty() {
@@ -1460,5 +1567,47 @@ mod tests {
             escape_html("a&b<c>d\u{2028}e\u{2029}"),
             "a\\u0026b\\u003cc\\u003ed\\u2028e\\u2029"
         );
+    }
+
+    /// The shapes the native path owns because the shipped implementation
+    /// writes them itself instead of going through the flag package.
+    #[test]
+    fn hand_written_usage_shapes_stay_native() {
+        let native = [
+            vec![],
+            vec!["-h"],
+            vec!["--help"],
+            vec!["help"],
+            vec!["list", "--help"],
+            vec!["search"],
+            vec!["set"],
+            vec!["delete"],
+            vec!["sync"],
+        ];
+        for case in native {
+            let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+            assert!(
+                !requires_go_fallback(&args),
+                "{case:?} is a hand-written usage or help shape and must stay native"
+            );
+        }
+    }
+
+    /// Real synchronisation work must never run natively: only the bare
+    /// `memory sync` shape is ported, everything that names a remote keeps the
+    /// shipped implementation.
+    #[test]
+    fn memory_sync_with_arguments_stays_on_go() {
+        for case in [
+            vec!["sync", "--remote", "https://example.test"],
+            vec!["sync", "--pull"],
+            vec!["sync", "--remote=https://example.test", "--push"],
+        ] {
+            let args = case.iter().map(OsString::from).collect::<Vec<_>>();
+            assert!(
+                requires_go_fallback(&args),
+                "{case:?} carries synchronisation arguments and must go to Go"
+            );
+        }
     }
 }
