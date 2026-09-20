@@ -400,7 +400,7 @@ extension ModuleViewModelSkeletonTests {
 
 
     @Test func vaultClientSubprocessRejectsMultilineBeforeDispatch() async throws {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let marker = dir.appendingPathComponent("invoked")
@@ -418,7 +418,7 @@ extension ModuleViewModelSkeletonTests {
     }
 
     @Test func vaultClientRejectsEmptyGenericSensitiveKeysBeforeDispatch() async throws {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let marker = dir.appendingPathComponent("invoked")
@@ -446,7 +446,7 @@ extension ModuleViewModelSkeletonTests {
     }
 
     @Test func vaultClientRejectsCRLFCRAndLFBeforeDispatchForCreateAndSet() async throws {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let marker = dir.appendingPathComponent("invoked")
@@ -498,7 +498,7 @@ extension ModuleViewModelSkeletonTests {
     @Test func vaultClientSubprocessValidatesAllFiveFieldsAndReadback() async throws {
         let cases = [("password", "pw"), ("api_key", "api"), ("token", "tok"), ("private_key", "key"), ("database_url", "db")]
         for (field, value) in cases {
-            let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
             try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
             defer { try? FileManager.default.removeItem(at: dir) }
             let script = "#!/bin/sh\nif [ \"$3\" = set ]; then [ \"$4\" = \"work/item.\(field)\" ] || exit 3; tmp=\"$TMPDIR/symvault-input.$$\"; cat >\"$tmp\"; printf '%s\n' \"\(value)\" | cmp -s - \"$tmp\" || exit 4; rm -f \"$tmp\"; exit 0; fi\nif [ \"$3\" = get ]; then [ \"$4\" = work/item ] || exit 5; printf '%s' '{\"path\":\"work/item\",\"fields\":{\"\(field)\":\"\(value)\"}}'; exit 0; fi\nexit 1\n"
@@ -513,7 +513,7 @@ extension ModuleViewModelSkeletonTests {
     }
 
     @Test func vaultClientSubprocessRejectsMismatchedReadback() async throws {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
         let script = "#!/bin/sh\nif [ \"$3\" = set ]; then cat >/dev/null; exit 0; fi\nprintf '%s' '{\"path\":\"work/item\",\"fields\":{\"password\":\"different\"}}'\n"
@@ -533,7 +533,7 @@ extension ModuleViewModelSkeletonTests {
 #if os(macOS)
 
 @Test func vaultClientUpdateCanClearMetadataWithoutTouchingSecret() async throws {
-    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: dir) }
     let argsFile = dir.appendingPathComponent("args")
@@ -555,7 +555,7 @@ extension ModuleViewModelSkeletonTests {
 }
 
 @Test func vaultClientGenerationAndIntakeUseExactCLIContracts() async throws {
-    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: dir) }
     let argsFile = dir.appendingPathComponent("args")
@@ -619,7 +619,7 @@ extension ModuleViewModelSkeletonTests {
 
 
 @Test func vaultClientCreateUsesMetadataAndOrderedTOTPStdinAndRejectsPaymentCreation() async throws {
-    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: dir) }
     let argsFile = dir.appendingPathComponent("args")
@@ -763,7 +763,7 @@ private final class DelayedApprovalClient: VaultClientProtocol {
 }
 
 @Test func approvalDecisionPassesJSONFlagToTextByDefaultService() async throws {
-    let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let dir = symBrainTestTemporaryDirectory().appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     defer { try? FileManager.default.removeItem(at: dir) }
     let argsFile = dir.appendingPathComponent("args")

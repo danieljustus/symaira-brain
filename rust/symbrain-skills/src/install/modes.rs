@@ -31,6 +31,9 @@ fn collect_modes(
     relative: &Path,
     changes: &mut Vec<ModeChange>,
 ) -> Result<(), SkillError> {
+    #[cfg(not(unix))]
+    let _ = changes;
+
     let entries = read_entries(root, current)?;
     for entry in entries {
         let name = entry.file_name();

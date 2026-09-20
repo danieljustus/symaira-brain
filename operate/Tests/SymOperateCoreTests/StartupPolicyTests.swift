@@ -5,7 +5,7 @@ import XCTest
 
 final class StartupPolicyTests: XCTestCase {
     private func temporaryPolicy(_ contents: String) throws -> URL {
-        let url = FileManager.default.temporaryDirectory
+        let url = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-policy-\(UUID().uuidString).json")
         try contents.data(using: .utf8)!.write(to: url)
         addTeardownBlock { try? FileManager.default.removeItem(at: url) }
@@ -13,7 +13,7 @@ final class StartupPolicyTests: XCTestCase {
     }
 
     func testNoStartupSourcesKeepFullGrantCompatibility() throws {
-        let missing = FileManager.default.temporaryDirectory
+        let missing = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-missing-\(UUID().uuidString).json")
         let policy = try StartupPolicy.load(grantNames: nil, policyURL: missing)
         XCTAssertEqual(policy.grantedPermissions, .all)
@@ -49,7 +49,7 @@ final class StartupPolicyTests: XCTestCase {
                 grantedPermissions: [.capture, .policyModify],
                 startupGrantedPermissions: [.capture, .policyModify]
             ),
-            history: HistoryService(fileURL: FileManager.default.temporaryDirectory
+            history: HistoryService(fileURL: operateTestTemporaryDirectory()
                 .appendingPathComponent("symoperate-policy-mcp-\(UUID().uuidString).jsonl"))
         )
         let server = MCPServer(controller: controller)

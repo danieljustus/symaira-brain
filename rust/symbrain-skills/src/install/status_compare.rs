@@ -148,6 +148,16 @@ pub(super) fn resolve_link(path: &Path) -> Option<PathBuf> {
     read_link_at(path).ok()
 }
 
+/// Reports whether an already-resolved symlink target can hold a marker.
+///
+/// Go reads `<resolved>/.symskills.json` through the link, so a target that is
+/// missing or is not a directory carries no marker and the entry stays
+/// unmanaged. The check must not create anything (a status scan is read-only)
+/// and must not follow a second link, which the native scan refuses by design.
+pub(super) fn resolves_to_directory(path: &Path) -> Result<bool, SkillError> {
+    Ok(super::destination::entry_metadata(path)?.is_some_and(|metadata| metadata.is_dir()))
+}
+
 pub(super) fn unmanaged(target: &str, name: &str, path: PathBuf) -> InstallStatus {
     InstallStatus {
         target: target.to_owned(),

@@ -7,7 +7,7 @@
     "guard/cmd/symguard/decide/command.go": "22fed158de555e04de72cb66fb63751c8812142e858df65ac0985a7cb450620f",
     "guard/internal/model/event.go": "766a0e7c00a7312d0f5c69d66adb8fd299a215bfba8b0321892d0f4238224e88"
   },
-  "generator_sha256": "f36ccc1b31824c1f2f094fc023ee9fd38111752da64c600a97aa1e5368d53733",
+  "generator_sha256": "5bcf88d582a64aadc8dc1e408e1c8402edbea82377c080e9003a90c30470997f",
   "binary_sha256": "0a10262e5cf4c08fa653df51736d192a3feb534432f36cd2deb83afbc7a2f547",
   "cases": [
     {

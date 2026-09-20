@@ -14,6 +14,34 @@ CREATE TABLE IF NOT EXISTS memories (
 );
 CREATE INDEX IF NOT EXISTS idx_memories_scope ON memories(scope);
 CREATE INDEX IF NOT EXISTS idx_memories_created ON memories(created_at DESC, id DESC);
+CREATE TABLE IF NOT EXISTS sync_oplog (
+ event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+ op TEXT NOT NULL CHECK (op IN ('upsert', 'delete')),
+ memory_id TEXT NOT NULL,
+ ts DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+CREATE INDEX IF NOT EXISTS idx_sync_oplog_ts ON sync_oplog(ts);
+CREATE INDEX IF NOT EXISTS idx_sync_oplog_memory ON sync_oplog(memory_id, event_id);
+CREATE TABLE IF NOT EXISTS sync_relay (id TEXT PRIMARY KEY, updated_at DATETIME NOT NULL, blob BLOB NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_sync_relay_updated ON sync_relay(updated_at);
+CREATE TRIGGER IF NOT EXISTS trg_memories_oplog_insert
+AFTER INSERT ON memories
+WHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'
+BEGIN
+ INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);
+END;
+CREATE TRIGGER IF NOT EXISTS trg_memories_oplog_update
+AFTER UPDATE ON memories
+WHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'
+BEGIN
+ INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);
+END;
+CREATE TRIGGER IF NOT EXISTS trg_memories_oplog_delete
+AFTER DELETE ON memories
+WHEN COALESCE(json_extract(OLD.metadata, '$.sync_exclude'), '') != 'true'
+BEGIN
+ INSERT INTO sync_oplog (op, memory_id) VALUES ('delete', OLD.id);
+END;
 CREATE TABLE IF NOT EXISTS entities (id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE COLLATE NOCASE, type TEXT NOT NULL DEFAULT 'person', aliases TEXT NOT NULL DEFAULT '[]', description TEXT NOT NULL DEFAULT '', created_by TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL);
 CREATE TABLE IF NOT EXISTS memory_entities (memory_id TEXT NOT NULL, entity_id TEXT NOT NULL, PRIMARY KEY(memory_id, entity_id));
 CREATE TABLE IF NOT EXISTS entity_relations (
@@ -36,6 +64,32 @@ CREATE TABLE IF NOT EXISTS activity_episodes (id TEXT PRIMARY KEY, title TEXT NO
 CREATE INDEX IF NOT EXISTS idx_activity_segments_window ON activity_segments(started_at, ended_at);
 CREATE INDEX IF NOT EXISTS idx_activity_episodes_window ON activity_episodes(started_at, ended_at);
 ";
+
+/// Columns the shipped schema owns that an older native database may lack.
+///
+/// The shipped implementation adds them through numbered migrations; the
+/// native schema applies one idempotent `CREATE TABLE IF NOT EXISTS`, which
+/// cannot add columns to a table that already exists. Without this step a
+/// native database is missing five `memories` and three `rules` columns, and
+/// the shipped binary rejects it (`no such column: consolidated_into_id`).
+pub(crate) const COLUMN_PARITY: &[(&str, &str, &str)] = &[
+    ("memories", "embedding_dim", "INTEGER NOT NULL DEFAULT 0"),
+    ("memories", "lsh_hash", "INTEGER NOT NULL DEFAULT 0"),
+    (
+        "memories",
+        "consolidated_into_id",
+        "TEXT REFERENCES memories(id) ON DELETE SET NULL",
+    ),
+    ("memories", "embedding_binary", "BLOB"),
+    (
+        "memories",
+        "embedding_quantization",
+        "TEXT NOT NULL DEFAULT ''",
+    ),
+    ("rules", "updated_at", "DATETIME"),
+    ("rules", "created_by", "TEXT NOT NULL DEFAULT ''"),
+    ("rules", "updated_by", "TEXT NOT NULL DEFAULT ''"),
+];
 
 pub(crate) const MIGRATIONS: &[&str] = &[
     "001_init",

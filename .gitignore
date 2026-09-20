@@ -11,7 +11,7 @@
 coverage.out
 .worktrees/
 /dist/
-/target/
+/target
 /fuzz/target/
 /fuzz/artifacts/
 __pycache__/

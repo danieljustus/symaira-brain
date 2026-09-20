@@ -36,7 +36,7 @@ pub(super) fn request_for(
         _ => ("GET", "https://127.0.0.1:0/usage".into(), None),
     };
     let mut headers = BTreeMap::new();
-    if !(id == "claude" && source != "api") {
+    if id != "claude" {
         headers.insert("Accept".into(), "application/json".into());
     }
     if !credential.is_empty() {
@@ -47,7 +47,27 @@ pub(super) fn request_for(
         }
     }
     if id == "claude" && source != "api" {
+        // The shipped code sets this through Go's `http.Header.Set`, which
+        // canonicalizes the name on the wire (`Anthropic-Beta`). Header names
+        // are case-insensitive, so the port keeps the source spelling and the
+        // oracle tests compare names case-insensitively.
         headers.insert("anthropic-beta".into(), "oauth-2025-04-20".into());
+    }
+    if id == "kimi" && source != "web" {
+        // Identity metadata the Kimi Code CLI sends with its token. The
+        // shipped implementation also sends `X-Msh-Os-Version` and
+        // `X-Msh-Device-Model`, filled with the *Go runtime version* (see
+        // internal/usage/kimi.go: it reports no OS fact and the endpoint does
+        // not gate on it), so the port omits those two instead of inventing a
+        // value; scripts/usage-oracle records the difference.
+        headers.insert("X-Msh-Platform".into(), platform_label().into());
+        let host = hostname();
+        if !host.is_empty() {
+            headers.insert("X-Msh-Device-Name".into(), host);
+        }
+        if let Some(device) = provider.device_id.as_deref().filter(|v| !v.is_empty()) {
+            headers.insert("X-Msh-Device-Id".into(), device.into());
+        }
     }
     if id == "openrouter" {
         headers.insert("X-Title".into(), "symbrain".into());
@@ -93,6 +113,28 @@ pub(super) fn request_for(
         headers,
         body: body.map(String::into_bytes),
     }
+}
+
+/// The platform label the Kimi Code CLI uses in `X-Msh-Platform`. The shipped
+/// implementation maps Go's `darwin` to `macos`; Rust's OS constant already
+/// reads `macos`, so no mapping is needed.
+fn platform_label() -> &'static str {
+    std::env::consts::OS
+}
+
+/// The machine's host name, for `X-Msh-Device-Name`. Returns an empty string
+/// when the platform cannot report it; the header is then left out.
+#[cfg(unix)]
+fn hostname() -> String {
+    rustix::system::uname()
+        .nodename()
+        .to_string_lossy()
+        .into_owned()
+}
+
+#[cfg(not(unix))]
+fn hostname() -> String {
+    std::env::var("COMPUTERNAME").unwrap_or_default()
 }
 
 fn encode_query_arg(value: &str) -> String {

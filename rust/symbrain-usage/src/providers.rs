@@ -21,7 +21,7 @@ use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
 mod provider_config;
-pub use provider_config::all_providers;
+pub use provider_config::{all_providers, needs_go_fallback};
 
 const MAX_CREDENTIAL_FILE_BYTES: u64 = 64 * 1024;
 
@@ -44,6 +44,9 @@ pub struct Provider {
     base_url: Option<String>,
     region: String,
     fixture: bool,
+    /// Device id the Kimi Code CLI persisted; sent as identity metadata on the
+    /// CLI strategy's requests.
+    device_id: Option<String>,
 }
 
 impl Provider {
@@ -70,6 +73,7 @@ impl Provider {
             base_url: None,
             region: "ai".into(),
             fixture: false,
+            device_id: None,
         }
     }
 

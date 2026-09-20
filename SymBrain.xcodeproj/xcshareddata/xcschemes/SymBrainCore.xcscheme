@@ -73,6 +73,20 @@
             ReferencedContainer = "container:SymBrain.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
+      <CommandLineArguments>
+      </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "CI"
+            value = "$(CI)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "SYMAIRA_EXTERNAL_RUNTIME_ROOT"
+            value = "$(SYMAIRA_EXTERNAL_RUNTIME_ROOT)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

@@ -271,15 +271,23 @@ private final class FakeClipboardPasteboard: ClipboardPasteboard {
 
 private actor ClipboardManualSleeper {
     private var waiters: [CheckedContinuation<Void, Never>] = []
+    private var nextWaiter: CheckedContinuation<Void, Never>?
 
     func sleep(_ duration: Duration) async throws {
         await withCheckedContinuation { continuation in
             waiters.append(continuation)
+            nextWaiter?.resume()
+            nextWaiter = nil
         }
     }
 
-    func resumeNext() {
-        guard !waiters.isEmpty else { return }
+    func waitForNext() async {
+        guard waiters.isEmpty else { return }
+        await withCheckedContinuation { nextWaiter = $0 }
+    }
+
+    func resumeNext() async {
+        await waitForNext()
         waiters.removeFirst().resume()
     }
 }
@@ -295,7 +303,7 @@ struct ClipboardLifetimeTests {
         )
 
         controller.write("test-secret", concealed: true)
-        await Task.yield()
+        await clock.waitForNext()
         #expect(fake.value == "test-secret")
         #expect(fake.concealed)
 
@@ -347,9 +355,8 @@ struct ClipboardLifetimeTests {
         )
 
         controller.write("first", concealed: true)
-        await Task.yield()
+        await clock.waitForNext()
         controller.write("second", concealed: true)
-        await Task.yield()
         await clock.resumeNext()
         await Task.yield()
 

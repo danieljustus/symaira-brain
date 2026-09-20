@@ -1,0 +1,244 @@
+{
+  "case_count": 9,
+  "cases": [
+    {
+      "args": [],
+      "exit_code": 0,
+      "id": "default-pipe-json",
+      "repeat": 2,
+      "stderr": {
+        "base64": "c3ltZ3VhcmQgc2NhbjogMSBmaW5kaW5nKHMpCiAgYXBwcm94aW1hdGUgW29wZW5jb2RlXSAvb3JhY2xlLWhvbWUvLmNvbmZpZy9vcGVuY29kZS9jb25maWcuanNvbjogc2VydmVyICJ1bmtub3duIiBoYXMgdW5rbm93biB0eXBlICJteXN0ZXJ5IiwgdHJlYXRlZCBhcyBsb2NhbAo=",
+        "bytes": 158,
+        "sha256": "49e843684760e44d8818e36f0b587b34201503e0107d4c7aa32c2778ff9fba8b"
+      },
+      "stdout": {
+        "base64": "ewogICJzZXJ2ZXJzIjogWwogICAgewogICAgICAibmFtZSI6ICJjbGF1ZGUtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY2xhdWRlLWRlc2t0b3AiLAogICAgICAiY29tbWFuZCI6ICJkZW5vIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInJ1bi50cyIKICAgICAgXSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInlhbWwtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY3Vyc29yIiwKICAgICAgImNvbW1hbmQiOiAicHl0aG9uIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInNlcnZlci5weSIKICAgICAgXSwKICAgICAgImVudiI6IHsKICAgICAgICAiWUFNTF9UT0tFTiI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogImpzb25jLWNvbW1hbmQiLAogICAgICAiY2xpZW50IjogImhlcm1lcyIsCiAgICAgICJjb21tYW5kIjogIm5vZGUiLAogICAgICAiYXJncyI6IFsKICAgICAgICAic2VydmVyLmpzIgogICAgICBdLAogICAgICAiZW52IjogewogICAgICAgICJUT0tFTiI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogImxvY2FsIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogInV2eCIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3Atc2VydmVyIgogICAgICBdLAogICAgICAiZW52IjogewogICAgICAgICJCQVNFIjogIlJFREFDVEVEIiwKICAgICAgICAiT05MWV9FTlZJUk9OTUVOVCI6ICJSRURBQ1RFRCIsCiAgICAgICAgIlNIQVJFRCI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInJlbW90ZSIsCiAgICAgICJjbGllbnQiOiAib3BlbmNvZGUiLAogICAgICAiY29tbWFuZCI6ICJodHRwczovL2V4YW1wbGUudGVzdC9yZW1vdGUiLAogICAgICAidHJhbnNwb3J0IjogImh0dHAiCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICJ1bmtub3duIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogIm15c3RlcnkiLAogICAgICAidHJhbnNwb3J0IjogInN0ZGlvIgogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidXJsLXNlcnZlciIsCiAgICAgICJjbGllbnQiOiAidnNjb2RlIiwKICAgICAgImNvbW1hbmQiOiAiaHR0cHM6Ly9leGFtcGxlLnRlc3QvbWNwIiwKICAgICAgInRyYW5zcG9ydCI6ICJodHRwIgogICAgfQogIF0KfQo=",
+        "bytes": 1319,
+        "sha256": "2f5e9b445fbb7f40c46fc4ed7e1ab812f46dd1f893a5836445cc2e652032a04b"
+      },
+      "tty": false
+    },
+    {
+      "args": [],
+      "exit_code": 0,
+      "id": "default-tty-table",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c3ltZ3VhcmQgc2NhbjogMSBmaW5kaW5nKHMpCiAgYXBwcm94aW1hdGUgW29wZW5jb2RlXSAvb3JhY2xlLWhvbWUvLmNvbmZpZy9vcGVuY29kZS9jb25maWcuanNvbjogc2VydmVyICJ1bmtub3duIiBoYXMgdW5rbm93biB0eXBlICJteXN0ZXJ5IiwgdHJlYXRlZCBhcyBsb2NhbAo=",
+        "bytes": 158,
+        "sha256": "49e843684760e44d8818e36f0b587b34201503e0107d4c7aa32c2778ff9fba8b"
+      },
+      "stdout": {
+        "base64": "RGlzY292ZXJlZCA3IE1DUCBzZXJ2ZXIocykKICBjbGF1ZGUtY29tbWFuZCAoY2xhdWRlLWRlc2t0b3Avc3RkaW8pIOKGkiBkZW5vIHJ1bi50cwogIHlhbWwtY29tbWFuZCAoY3Vyc29yL3N0ZGlvKSDihpIgcHl0aG9uIHNlcnZlci5weQogIGpzb25jLWNvbW1hbmQgKGhlcm1lcy9zdGRpbykg4oaSIG5vZGUgc2VydmVyLmpzCiAgbG9jYWwgKG9wZW5jb2RlL3N0ZGlvKSDihpIgdXZ4IG1jcC1zZXJ2ZXIKICByZW1vdGUgKG9wZW5jb2RlL2h0dHApIOKGkiBodHRwczovL2V4YW1wbGUudGVzdC9yZW1vdGUKICB1bmtub3duIChvcGVuY29kZS9zdGRpbykg4oaSIG15c3RlcnkKICB1cmwtc2VydmVyICh2c2NvZGUvaHR0cCkg4oaSIGh0dHBzOi8vZXhhbXBsZS50ZXN0L21jcAo=",
+        "bytes": 380,
+        "sha256": "4982772824728c67a41a62e4f33e05bdcfe15af701ec52fd76d62528dfb689cb"
+      },
+      "tty": true
+    },
+    {
+      "args": [
+        "--format",
+        "json"
+      ],
+      "exit_code": 0,
+      "id": "explicit-json",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c3ltZ3VhcmQgc2NhbjogMSBmaW5kaW5nKHMpCiAgYXBwcm94aW1hdGUgW29wZW5jb2RlXSAvb3JhY2xlLWhvbWUvLmNvbmZpZy9vcGVuY29kZS9jb25maWcuanNvbjogc2VydmVyICJ1bmtub3duIiBoYXMgdW5rbm93biB0eXBlICJteXN0ZXJ5IiwgdHJlYXRlZCBhcyBsb2NhbAo=",
+        "bytes": 158,
+        "sha256": "49e843684760e44d8818e36f0b587b34201503e0107d4c7aa32c2778ff9fba8b"
+      },
+      "stdout": {
+        "base64": "ewogICJzZXJ2ZXJzIjogWwogICAgewogICAgICAibmFtZSI6ICJjbGF1ZGUtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY2xhdWRlLWRlc2t0b3AiLAogICAgICAiY29tbWFuZCI6ICJkZW5vIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInJ1bi50cyIKICAgICAgXSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInlhbWwtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY3Vyc29yIiwKICAgICAgImNvbW1hbmQiOiAicHl0aG9uIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInNlcnZlci5weSIKICAgICAgXSwKICAgICAgImVudiI6IHsKICAgICAgICAiWUFNTF9UT0tFTiI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogImpzb25jLWNvbW1hbmQiLAogICAgICAiY2xpZW50IjogImhlcm1lcyIsCiAgICAgICJjb21tYW5kIjogIm5vZGUiLAogICAgICAiYXJncyI6IFsKICAgICAgICAic2VydmVyLmpzIgogICAgICBdLAogICAgICAiZW52IjogewogICAgICAgICJUT0tFTiI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogImxvY2FsIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogInV2eCIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3Atc2VydmVyIgogICAgICBdLAogICAgICAiZW52IjogewogICAgICAgICJCQVNFIjogIlJFREFDVEVEIiwKICAgICAgICAiT05MWV9FTlZJUk9OTUVOVCI6ICJSRURBQ1RFRCIsCiAgICAgICAgIlNIQVJFRCI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInJlbW90ZSIsCiAgICAgICJjbGllbnQiOiAib3BlbmNvZGUiLAogICAgICAiY29tbWFuZCI6ICJodHRwczovL2V4YW1wbGUudGVzdC9yZW1vdGUiLAogICAgICAidHJhbnNwb3J0IjogImh0dHAiCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICJ1bmtub3duIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogIm15c3RlcnkiLAogICAgICAidHJhbnNwb3J0IjogInN0ZGlvIgogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidXJsLXNlcnZlciIsCiAgICAgICJjbGllbnQiOiAidnNjb2RlIiwKICAgICAgImNvbW1hbmQiOiAiaHR0cHM6Ly9leGFtcGxlLnRlc3QvbWNwIiwKICAgICAgInRyYW5zcG9ydCI6ICJodHRwIgogICAgfQogIF0KfQo=",
+        "bytes": 1319,
+        "sha256": "2f5e9b445fbb7f40c46fc4ed7e1ab812f46dd1f893a5836445cc2e652032a04b"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--format",
+        "table"
+      ],
+      "exit_code": 0,
+      "id": "explicit-table",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c3ltZ3VhcmQgc2NhbjogMSBmaW5kaW5nKHMpCiAgYXBwcm94aW1hdGUgW29wZW5jb2RlXSAvb3JhY2xlLWhvbWUvLmNvbmZpZy9vcGVuY29kZS9jb25maWcuanNvbjogc2VydmVyICJ1bmtub3duIiBoYXMgdW5rbm93biB0eXBlICJteXN0ZXJ5IiwgdHJlYXRlZCBhcyBsb2NhbAo=",
+        "bytes": 158,
+        "sha256": "49e843684760e44d8818e36f0b587b34201503e0107d4c7aa32c2778ff9fba8b"
+      },
+      "stdout": {
+        "base64": "RGlzY292ZXJlZCA3IE1DUCBzZXJ2ZXIocykKICBjbGF1ZGUtY29tbWFuZCAoY2xhdWRlLWRlc2t0b3Avc3RkaW8pIOKGkiBkZW5vIHJ1bi50cwogIHlhbWwtY29tbWFuZCAoY3Vyc29yL3N0ZGlvKSDihpIgcHl0aG9uIHNlcnZlci5weQogIGpzb25jLWNvbW1hbmQgKGhlcm1lcy9zdGRpbykg4oaSIG5vZGUgc2VydmVyLmpzCiAgbG9jYWwgKG9wZW5jb2RlL3N0ZGlvKSDihpIgdXZ4IG1jcC1zZXJ2ZXIKICByZW1vdGUgKG9wZW5jb2RlL2h0dHApIOKGkiBodHRwczovL2V4YW1wbGUudGVzdC9yZW1vdGUKICB1bmtub3duIChvcGVuY29kZS9zdGRpbykg4oaSIG15c3RlcnkKICB1cmwtc2VydmVyICh2c2NvZGUvaHR0cCkg4oaSIGh0dHBzOi8vZXhhbXBsZS50ZXN0L21jcAo=",
+        "bytes": 380,
+        "sha256": "4982772824728c67a41a62e4f33e05bdcfe15af701ec52fd76d62528dfb689cb"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--help"
+      ],
+      "exit_code": 0,
+      "id": "help",
+      "repeat": 1,
+      "stderr": {
+        "base64": "",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout": {
+        "base64": "VXNhZ2U6CiAgc3ltZ3VhcmQgc2NhbiBbLS1mb3JtYXQgdGFibGV8anNvbl0KCkRpc2NvdmVycyBNQ1Agc2VydmVycyBhY3Jvc3Mgc3VwcG9ydGVkIEFJIGNsaWVudHMgKGhlcm1lcywgY2xhdWRlLWRlc2t0b3AsCmN1cnNvciwgdnNjb2RlLCBvcGVuY29kZSkuIFRoZSBpbnZlbnRvcnkgaXMgd3JpdHRlbiB0byBzdGRvdXQ7IGZpbmRpbmdzIOKAlApjbGllbnRzIG9yIGVudHJpZXMgdGhhdCBjb3VsZCBub3QgYmUgbWFwcGVkIOKAlCBhcmUgd3JpdHRlbiB0byBzdGRlcnIuCg==",
+        "bytes": 268,
+        "sha256": "831e7ff3fda38ba19bea80731e6f78c81a42dfa795e2d50b6fac7efecc77b535"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--bogus"
+      ],
+      "exit_code": 1,
+      "id": "error-unknown-argument",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c2NhbjogdW5rbm93biBhcmd1bWVudCAiLS1ib2d1cyIKVXNhZ2U6CiAgc3ltZ3VhcmQgc2NhbiBbLS1mb3JtYXQgdGFibGV8anNvbl0KCkRpc2NvdmVycyBNQ1Agc2VydmVycyBhY3Jvc3Mgc3VwcG9ydGVkIEFJIGNsaWVudHMgKGhlcm1lcywgY2xhdWRlLWRlc2t0b3AsCmN1cnNvciwgdnNjb2RlLCBvcGVuY29kZSkuIFRoZSBpbnZlbnRvcnkgaXMgd3JpdHRlbiB0byBzdGRvdXQ7IGZpbmRpbmdzIOKAlApjbGllbnRzIG9yIGVudHJpZXMgdGhhdCBjb3VsZCBub3QgYmUgbWFwcGVkIOKAlCBhcmUgd3JpdHRlbiB0byBzdGRlcnIuCg==",
+        "bytes": 301,
+        "sha256": "4496e9c05ea8107d93251804fd1bf9f859dbe9bbdc9c3e31b6f9a57d9f725465"
+      },
+      "stdout": {
+        "base64": "",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--format"
+      ],
+      "exit_code": 1,
+      "id": "error-format-missing",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c2NhbjogLS1mb3JtYXQgcmVxdWlyZXMgYSB2YWx1ZSAodGFibGUgb3IganNvbikK",
+        "bytes": 48,
+        "sha256": "ca6c93ca5bc59a6b3f92c294c1452c7dccbbd599c1ec13795ba2d4910e8271d7"
+      },
+      "stdout": {
+        "base64": "",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--format",
+        "xml"
+      ],
+      "exit_code": 1,
+      "id": "error-format-unsupported",
+      "repeat": 1,
+      "stderr": {
+        "base64": "c2NhbjogdW5zdXBwb3J0ZWQgZm9ybWF0ICJ4bWwiIChzdXBwb3J0ZWQ6IHRhYmxlLCBqc29uKQo=",
+        "bytes": 56,
+        "sha256": "e319033212ff8d3922edbcdbf84b2fd1ca9e96224f08458e3725bbaebdebf5b9"
+      },
+      "stdout": {
+        "base64": "",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "tty": false
+    },
+    {
+      "args": [
+        "--format",
+        "json"
+      ],
+      "exit_code": 0,
+      "id": "one-finding-missing-hermes",
+      "repeat": 3,
+      "stderr": {
+        "base64": "c3ltZ3VhcmQgc2NhbjogMSBmaW5kaW5nKHMpCiAgdW5zdXBwb3J0ZWQgW2hlcm1lc10gL29yYWNsZS1ob21lLy5jb25maWcvaGVybWVzL2NvbmZpZy5qc29uOiBjb25maWcgZmlsZSBub3QgZm91bmQK",
+        "bytes": 114,
+        "sha256": "26adfaf68108bc443ac209bd918335e1540d1857073ae1153880e6988d083d92"
+      },
+      "stdout": {
+        "base64": "ewogICJzZXJ2ZXJzIjogWwogICAgewogICAgICAibmFtZSI6ICJjbGF1ZGUtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY2xhdWRlLWRlc2t0b3AiLAogICAgICAiY29tbWFuZCI6ICJkZW5vIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInJ1bi50cyIKICAgICAgXSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInlhbWwtY29tbWFuZCIsCiAgICAgICJjbGllbnQiOiAiY3Vyc29yIiwKICAgICAgImNvbW1hbmQiOiAicHl0aG9uIiwKICAgICAgImFyZ3MiOiBbCiAgICAgICAgInNlcnZlci5weSIKICAgICAgXSwKICAgICAgImVudiI6IHsKICAgICAgICAiWUFNTF9UT0tFTiI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogImxvY2FsIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogInV2eCIsCiAgICAgICJhcmdzIjogWwogICAgICAgICJtY3Atc2VydmVyIgogICAgICBdLAogICAgICAiZW52IjogewogICAgICAgICJCQVNFIjogIlJFREFDVEVEIiwKICAgICAgICAiT05MWV9FTlZJUk9OTUVOVCI6ICJSRURBQ1RFRCIsCiAgICAgICAgIlNIQVJFRCI6ICJSRURBQ1RFRCIKICAgICAgfSwKICAgICAgInRyYW5zcG9ydCI6ICJzdGRpbyIKICAgIH0sCiAgICB7CiAgICAgICJuYW1lIjogInJlbW90ZSIsCiAgICAgICJjbGllbnQiOiAib3BlbmNvZGUiLAogICAgICAiY29tbWFuZCI6ICJodHRwczovL2V4YW1wbGUudGVzdC9yZW1vdGUiLAogICAgICAidHJhbnNwb3J0IjogImh0dHAiCiAgICB9LAogICAgewogICAgICAibmFtZSI6ICJ1bmtub3duIiwKICAgICAgImNsaWVudCI6ICJvcGVuY29kZSIsCiAgICAgICJjb21tYW5kIjogIm15c3RlcnkiLAogICAgICAidHJhbnNwb3J0IjogInN0ZGlvIgogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidXJsLXNlcnZlciIsCiAgICAgICJjbGllbnQiOiAidnNjb2RlIiwKICAgICAgImNvbW1hbmQiOiAiaHR0cHM6Ly9leGFtcGxlLnRlc3QvbWNwIiwKICAgICAgInRyYW5zcG9ydCI6ICJodHRwIgogICAgfQogIF0KfQo=",
+        "bytes": 1100,
+        "sha256": "cc8e0a29e19d2209b4f798cdb0d6d05ebfc721ac6cf44111d2e7c18fe811605c"
+      },
+      "tty": false
+    }
+  ],
+  "platform_xdg_sources": {
+    "darwin": [
+      {
+        "Client": "hermes",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.config/hermes/config.json"
+      },
+      {
+        "Client": "cursor",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.cursor/mcp.json"
+      },
+      {
+        "Client": "vscode",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.vscode/mcp.json"
+      },
+      {
+        "Client": "opencode",
+        "Key": "mcp",
+        "Path": "/oracle-home/.config/opencode/config.json"
+      },
+      {
+        "Client": "claude-desktop",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/Library/Application Support/Claude/claude_desktop_config.json"
+      }
+    ],
+    "linux": [
+      {
+        "Client": "hermes",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.config/hermes/config.json"
+      },
+      {
+        "Client": "cursor",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.cursor/mcp.json"
+      },
+      {
+        "Client": "vscode",
+        "Key": "mcpServers",
+        "Path": "/oracle-home/.vscode/mcp.json"
+      },
+      {
+        "Client": "opencode",
+        "Key": "mcp",
+        "Path": "/oracle-home/.config/opencode/config.json"
+      },
+      {
+        "Client": "claude-desktop",
+        "Key": "mcpServers",
+        "Path": "/oracle-config/claude/claude_desktop_config.json"
+      }
+    ]
+  },
+  "schema_version": 1,
+  "source_commit": "51af390ad8c320d5b06cab55025a963c0c290e81",
+  "source_files": {
+    "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
+    "go.mod": "a8ff6518ad9bca1e775958ed4d8c4de2f3511e0f564bcf38ddad6a43a7f9148b",
+    "go.sum": "6b98e31218e5d4a45f4247d6e16ed5938570d6c466872d112c1031b664618ef3",
+    "guard/cmd/symguard/scan/command.go": "3f7d4038bd8b8752734379ca2ed88193702a8c589d3bc86804b6298819c6369d",
+    "guard/internal/discovery/discovery.go": "6a877f0dd0f691a258e3b549cd4520c1e334bab4a16b5fe369c55fcd0544585b",
+    "guard/internal/discovery/result.go": "59a520f114e5b5dcd7fef946c0df09ae173cffb7d7a143eb0e9789f1284ecbcb",
+    "guard/internal/discovery/secrets.go": "bcd8fdc8d2dfd3685dfbe6ba259cb451c6b620f5fdf0f6f9471ae203b2e698c0",
+    "guard/internal/output/reporter.go": "b64bdd857b2cb92d406dcb9d1cbfd0a08a7d24c8d14ee1a6c1da1594eabd63a6"
+  }
+}

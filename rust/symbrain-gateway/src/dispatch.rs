@@ -32,6 +32,7 @@ impl Gateway {
             .and_then(|value| RawValue::from_string(value.to_string()).ok());
         if self.memory_tool_names.iter().any(|tool| tool == name)
             || self.activity_tool_names.iter().any(|tool| tool == name)
+            || self.skills_tool_names.iter().any(|tool| tool == name)
         {
             return self.handle_embedded_call(id, name, &params, context, started);
         }

@@ -5,12 +5,15 @@
 
 mod encode;
 pub mod install;
+pub mod library;
 mod load;
 pub mod materialize;
+pub mod metadata;
 pub mod model;
 pub mod render;
 mod render_variants;
 mod target;
+pub mod targets_status;
 mod validation;
 pub mod variant;
 
@@ -25,4 +28,5 @@ pub use model::{
 pub use render::{
     CapabilityGap, RenderMetadata, Rendered, VariantReport, default_targets, render_target,
 };
+pub use target::{config_dir, lookup, skill_root, target_names};
 pub use validation::{DEFAULT_TARGETS, is_render_blocking, validate, validate_with_targets};

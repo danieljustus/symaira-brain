@@ -1,0 +1,512 @@
+{
+  "requests": [
+    {
+      "provider": "claude",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.anthropic.com/v1/organizations/cost_report?bucket_width=1d\u0026limit=7",
+          "headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "claude",
+      "source": "oauth",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.anthropic.com/api/oauth/usage",
+          "headers": [
+            {
+              "name": "Anthropic-Beta",
+              "value": "oauth-2025-04-20"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "codex",
+      "source": "oauth",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://chatgpt.com/backend-api/wham/usage",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "copilot",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.github.com/copilot_internal/user",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "cursor",
+      "source": "web",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://cursor.com/api/usage-summary",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "kimi",
+      "source": "cli",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.kimi.com/coding/v1/usages",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            },
+            {
+              "name": "X-Msh-Device-Id",
+              "value": "dump-kimi-device-id"
+            },
+            {
+              "name": "X-Msh-Device-Model",
+              "value": "\u003cplatform-display\u003e \u003cversion\u003e"
+            },
+            {
+              "name": "X-Msh-Device-Name",
+              "value": "\u003chost\u003e"
+            },
+            {
+              "name": "X-Msh-Os-Version",
+              "value": "\u003cversion\u003e"
+            },
+            {
+              "name": "X-Msh-Platform",
+              "value": "\u003cplatform\u003e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "kimi",
+      "source": "web",
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "moonshot",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.moonshot.ai/v1/users/me/balance",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "nous",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://portal.nousresearch.com/api/oauth/account",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "opencode",
+      "source": "web",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:186505de-2fd8-2d9a-d32f-a7b78c053708"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:9af30785-138f-7777-d21f-a829ba9326b7"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "error": "OpenCode returned an unreadable response: missing workspace id"
+    },
+    {
+      "provider": "openrouter",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://openrouter.ai/api/v1/auth/key",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            },
+            {
+              "name": "X-Title",
+              "value": "symbrain"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "antigravity",
+      "source": "local",
+      "requests": [],
+      "error": "Antigravity is not running — no local quota server found."
+    }
+  ],
+  "chains": [
+    {
+      "provider": "claude",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source.; Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+    },
+    {
+      "provider": "claude",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"claude\" is rate limited; AI usage provider \"claude\" is rate limited"
+    },
+    {
+      "provider": "claude",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: Claude request failed with HTTP 500; Claude request failed with HTTP 500"
+    },
+    {
+      "provider": "claude",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: Claude returned an unreadable response; Claude returned an unreadable response"
+    },
+    {
+      "provider": "codex",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+    },
+    {
+      "provider": "codex",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"codex\" is rate limited"
+    },
+    {
+      "provider": "codex",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: AI usage request failed with HTTP 500"
+    },
+    {
+      "provider": "codex",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: AI usage provider returned an unreadable response"
+    },
+    {
+      "provider": "copilot",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+    },
+    {
+      "provider": "copilot",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"copilot\" is rate limited"
+    },
+    {
+      "provider": "copilot",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: Copilot request failed with HTTP 500"
+    },
+    {
+      "provider": "copilot",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: Copilot returned an unreadable response"
+    },
+    {
+      "provider": "cursor",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: Cursor session is invalid or expired. Re-import the cursor.com cookie or sign in to Cursor.app."
+    },
+    {
+      "provider": "cursor",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"cursor\" is rate limited"
+    },
+    {
+      "provider": "cursor",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: Cursor request failed with HTTP 500"
+    },
+    {
+      "provider": "cursor",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: Cursor returned an unreadable response: usage summary is not JSON"
+    },
+    {
+      "provider": "kimi",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+    },
+    {
+      "provider": "kimi",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"kimi\" is rate limited; AI usage provider \"kimi\" is rate limited"
+    },
+    {
+      "provider": "kimi",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: Kimi request failed with HTTP 500; Kimi request failed with HTTP 500"
+    },
+    {
+      "provider": "kimi",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: Kimi returned an unreadable response; Kimi returned an unreadable response"
+    },
+    {
+      "provider": "moonshot",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is not configured"
+    },
+    {
+      "provider": "moonshot",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is rate limited"
+    },
+    {
+      "provider": "moonshot",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: AI usage request failed with HTTP 500"
+    },
+    {
+      "provider": "moonshot",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: AI usage provider returned an unreadable response"
+    },
+    {
+      "provider": "nous",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+    },
+    {
+      "provider": "nous",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"nous\" is rate limited"
+    },
+    {
+      "provider": "nous",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: AI usage request failed with HTTP 500"
+    },
+    {
+      "provider": "nous",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: AI usage provider returned an unreadable response"
+    },
+    {
+      "provider": "opencode",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+    },
+    {
+      "provider": "opencode",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: OpenCode API error: HTTP 429"
+    },
+    {
+      "provider": "opencode",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: OpenCode API error: HTTP 500"
+    },
+    {
+      "provider": "opencode",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+    },
+    {
+      "provider": "openrouter",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is not configured"
+    },
+    {
+      "provider": "openrouter",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is rate limited"
+    },
+    {
+      "provider": "openrouter",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: AI usage request failed with HTTP 500"
+    },
+    {
+      "provider": "openrouter",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: AI usage provider returned an unreadable response"
+    },
+    {
+      "provider": "antigravity",
+      "status": "unauthorized",
+      "text": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+    },
+    {
+      "provider": "antigravity",
+      "status": "rate-limited",
+      "text": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+    },
+    {
+      "provider": "antigravity",
+      "status": "server-error",
+      "text": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+    },
+    {
+      "provider": "antigravity",
+      "status": "malformed",
+      "text": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+    }
+  ]
+}

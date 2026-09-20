@@ -15,6 +15,7 @@ import json
 import os
 import platform
 import signal
+import sys
 try:
     import resource
 except ImportError:  # pragma: no cover - resource is not available on native Windows
@@ -30,8 +31,58 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Sequence
 
+scripts_directory = Path(__file__).resolve().parents[3] / "scripts"
+if str(scripts_directory) not in sys.path:
+    sys.path.insert(0, str(scripts_directory))
+from external_env import ensure_external_environment
+
 MAX_OUTPUT = 1 << 20
 WORKLOADS = ("cli", "mcp", "daemon", "fetch")
+EXTERNAL_RUNTIME_ENV = "SYMAIRA_EXTERNAL_RUNTIME_ROOT"
+EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
+
+
+def temporary_parent() -> str | None:
+    if platform.system() != "Darwin" or os.environ.get("CI"):
+        return None
+    try:
+        mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+    except OSError as error:
+        raise RuntimeError(
+            f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}"
+        ) from error
+    if not mounted_root.is_dir() or not mounted_root.is_mount():
+        raise RuntimeError(f"required NVMe runtime volume is not mounted: {mounted_root}")
+    value = os.environ.get(EXTERNAL_RUNTIME_ENV, "").strip()
+    if not value:
+        raise RuntimeError(
+            f"{EXTERNAL_RUNTIME_ENV} must name a writable directory under {mounted_root} on macOS"
+        )
+    parent = Path(value).expanduser()
+    try:
+        parent = parent.resolve(strict=True)
+    except OSError as error:
+        raise RuntimeError(f"{EXTERNAL_RUNTIME_ENV} is invalid: {value!r}: {error}") from error
+    if not parent.is_relative_to(mounted_root):
+        raise RuntimeError(
+            f"{EXTERNAL_RUNTIME_ENV} must be under mounted NVMe volume {mounted_root}: {parent}"
+        )
+    if not parent.is_dir() or not os.access(parent, os.W_OK | os.X_OK):
+        raise RuntimeError(
+            f"{EXTERNAL_RUNTIME_ENV} must name a writable directory: {parent}"
+        )
+    return str(parent)
+
+
+def external_output(path: Path) -> Path:
+    if platform.system() != "Darwin" or os.environ.get("CI"):
+        return path
+    temporary_parent()
+    resolved = path.expanduser().resolve(strict=False)
+    mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+    if not resolved.is_relative_to(mounted_root):
+        raise RuntimeError(f"--output must be under mounted NVMe volume {mounted_root}: {resolved}")
+    return resolved
 
 
 @dataclass(frozen=True)
@@ -507,6 +558,7 @@ def run_binary(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    ensure_external_environment(__file__)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--go", type=Path)
     parser.add_argument("--rust", type=Path)
@@ -518,8 +570,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.runs < 1 or args.runs > 100:
         parser.error("--runs must be between 1 and 100")
     selected = set(args.workload or WORKLOADS)
-    temp_parent = "/tmp" if platform.system() == "Darwin" else None
-    with tempfile.TemporaryDirectory(prefix="rust016-bench-", dir=temp_parent) as raw:
+    output = external_output(args.output)
+    with tempfile.TemporaryDirectory(prefix="rust016-bench-", dir=temporary_parent()) as raw:
         root = Path(raw)
         report: dict[str, Any] = {
             "schema_version": 2,
@@ -579,8 +631,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if not isinstance(binary_result.get(workload), dict) or binary_result[workload].get("status") != "pass":
                     all_pass = False
         report["gate"] = "pass" if all_pass else "blocked"
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(report, indent=2))
         if args.strict and not all_pass:
             return 1

@@ -13,11 +13,12 @@ use std::path::PathBuf;
 use cap_fs_ext::DirExt;
 use serde::Serialize;
 
-use super::destination::{entry_exists, entry_metadata};
+use super::destination::entry_metadata;
 use super::marker::{MarkerState, read_marker_at};
 use super::replace::open_trusted_dir;
 use super::status_compare::{
-    compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link, unmanaged,
+    compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
+    resolves_to_directory, unmanaged,
 };
 use crate::model::SkillError;
 
@@ -104,6 +105,11 @@ pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError>
         one.targets = vec![target.clone()];
         rows.extend(status_target(&one, &target)?);
     }
+    rows.sort_by(|left, right| {
+        left.target
+            .cmp(&right.target)
+            .then_with(|| left.name.cmp(&right.name))
+    });
     Ok(rows)
 }
 
@@ -155,7 +161,10 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             .map_err(|error| SkillError(format!("stat installed skill {name}: {error}")))?;
         let installed_tree = if file_type.is_symlink() {
             match resolve_link(&path) {
-                Some(resolved) if entry_exists(&resolved)? => resolved,
+                Some(resolved) if resolves_to_directory(&resolved)? => resolved,
+                // Go reads the marker through the link; a link whose target is
+                // missing or not a directory simply carries no marker and stays
+                // unmanaged. Opening it as a directory would abort the scan.
                 _ => {
                     rows.push(unmanaged(target, &name, path));
                     continue;
@@ -187,9 +196,9 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             name: name.clone(),
             path: path.clone(),
             status,
-            mode: Some(marker_for_row.mode.clone()),
-            installed_at: Some(marker_for_row.installed.clone()),
-            source_hash: Some(marker_for_row.source_hash.clone()),
+            mode: Some(marker_for_row.mode.clone()).filter(|mode| !mode.is_empty()),
+            installed_at: Some(marker_for_row.installed.clone()).filter(|value| !value.is_empty()),
+            source_hash: Some(marker_for_row.source_hash.clone()).filter(|value| !value.is_empty()),
             allow_executable: marker_for_row.allow_executable.then_some(true),
             error,
             drift,
@@ -205,9 +214,9 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
                 path: path.clone(),
                 status: StatusKind::Unmanaged,
                 mode: Some(marker.mode.clone()).filter(|mode| !mode.is_empty()),
-                installed_at: None,
-                source_hash: None,
-                allow_executable: None,
+                installed_at: Some(marker.installed.clone()).filter(|value| !value.is_empty()),
+                source_hash: Some(marker.source_hash.clone()).filter(|value| !value.is_empty()),
+                allow_executable: marker.allow_executable.then_some(true),
                 error: None,
                 drift: Vec::new(),
             });
@@ -218,7 +227,7 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             rows.push(common(StatusKind::Orphaned, Vec::new(), None));
             continue;
         }
-        rows.push(compare_one(
+        match compare_one(
             &source,
             &installed_tree,
             &name,
@@ -226,8 +235,13 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             marker,
             options,
             common,
-        )?);
+        ) {
+            Ok(row) => rows.push(row),
+            // Go status keeps a broken managed install visible as a stale
+            // row with its comparison diagnostic instead of aborting the
+            // entire scan.
+            Err(error) => rows.push(common(StatusKind::Stale, Vec::new(), Some(error.0))),
+        }
     }
-    rows.sort_by(|left, right| left.name.cmp(&right.name));
     Ok(rows)
 }

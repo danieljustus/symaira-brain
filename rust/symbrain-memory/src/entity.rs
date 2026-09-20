@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use rusqlite::{OptionalExtension, params};
 use serde_json::{Value, json};
 
@@ -46,6 +48,99 @@ impl Store {
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
     }
 
+    /// Returns the query-log summary used by the native CLI.
+    ///
+    /// # Errors
+    /// Returns a `StoreError` when the SQLite query fails.
+    pub fn query_log_summary(&self, limit: usize, actor: &str) -> Result<Value, StoreError> {
+        let limit = i64::try_from(limit.clamp(1, 1_000)).unwrap_or(1_000);
+        let conn = self.lock()?;
+        let where_clause = if actor.is_empty() {
+            ""
+        } else {
+            " WHERE actor = ?"
+        };
+        let count_args: Vec<&dyn rusqlite::ToSql> = if actor.is_empty() {
+            Vec::new()
+        } else {
+            vec![&actor]
+        };
+
+        let total = conn.query_row(
+            &format!("SELECT COUNT(*) FROM query_log{where_clause}"),
+            rusqlite::params_from_iter(count_args.iter()),
+            |row| row.get::<_, i64>(0),
+        )?;
+
+        let mut tool_breakdown = BTreeMap::new();
+        let mut statement = conn.prepare(&format!(
+            "SELECT tool, COUNT(*) FROM query_log{where_clause} GROUP BY tool ORDER BY COUNT(*) DESC"
+        ))?;
+        let rows = statement.query_map(rusqlite::params_from_iter(count_args.iter()), |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, i64>(1)?))
+        })?;
+        for row in rows {
+            let (tool, count) = row?;
+            tool_breakdown.insert(tool, count);
+        }
+
+        let mut actor_breakdown = BTreeMap::new();
+        let mut statement = conn.prepare(&format!(
+            "SELECT actor, COUNT(*) FROM query_log{where_clause} GROUP BY actor ORDER BY COUNT(*) DESC"
+        ))?;
+        let rows = statement.query_map(rusqlite::params_from_iter(count_args.iter()), |row| {
+            Ok((row.get::<_, Option<String>>(0)?, row.get::<_, i64>(1)?))
+        })?;
+        for row in rows {
+            let (value, count) = row?;
+            let key = value
+                .filter(|value| !value.is_empty())
+                .unwrap_or_else(|| "(unknown)".into());
+            *actor_breakdown.entry(key).or_insert(0) += count;
+        }
+
+        let query = format!(
+            "SELECT id,tool,query_text,params,duration_ms,created_at,actor,scope,session FROM query_log{where_clause} ORDER BY created_at DESC LIMIT ?"
+        );
+        let mut statement = conn.prepare(&query)?;
+        let recent_args: Vec<&dyn rusqlite::ToSql> = if actor.is_empty() {
+            vec![&limit]
+        } else {
+            vec![&actor, &limit]
+        };
+        let mut rows = statement.query(rusqlite::params_from_iter(recent_args.iter()))?;
+        let mut recent_entries = Vec::new();
+        while let Some(row) = rows.next()? {
+            let mut entry = serde_json::Map::new();
+            entry.insert("id".into(), row.get::<_, String>(0)?.into());
+            entry.insert("tool".into(), row.get::<_, String>(1)?.into());
+            for (key, index) in [
+                ("query_text", 2),
+                ("params", 3),
+                ("actor", 6),
+                ("scope", 7),
+                ("session", 8),
+            ] {
+                if let Some(value) = row
+                    .get::<_, Option<String>>(index)?
+                    .filter(|value| !value.is_empty())
+                {
+                    entry.insert(key.into(), value.into());
+                }
+            }
+            entry.insert("duration_ms".into(), row.get::<_, i64>(4)?.into());
+            entry.insert("created_at".into(), row.get::<_, String>(5)?.into());
+            recent_entries.push(Value::Object(entry));
+        }
+
+        Ok(serde_json::json!({
+            "total_queries": total,
+            "tool_breakdown": tool_breakdown,
+            "actor_breakdown": actor_breakdown,
+            "recent_entries": recent_entries,
+        }))
+    }
+
     /// Creates or deletes a relation between two named entities.
     ///
     /// # Errors
@@ -64,7 +159,7 @@ impl Store {
             ));
         }
         let conn = self.lock()?;
-        let now = chrono::Utc::now().to_rfc3339();
+        let now = crate::gotime::format(chrono::Utc::now());
         let entity_id = |name: &str| stable_id(&["entity", &name.to_lowercase()]);
         let from_id = entity_id(from.trim());
         let to_id = entity_id(to.trim());

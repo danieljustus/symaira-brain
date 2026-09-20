@@ -20,10 +20,9 @@ struct SetupArgs {
 /// Whether this invocation requires the Go implementation's module lifecycle semantics.
 ///
 /// Source builds and their provenance are deliberately still implemented by
-/// Go. Delegating source-related flags and enabled `--fix` keeps the native
-/// Rust installer focused on managed release downloads.
+/// Go. Repair falls back unless every active binary is already correct.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    crate::has_go_owned_flag(
+    if crate::has_go_owned_flag(
         args,
         &[
             "json",
@@ -37,8 +36,51 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         ],
         &[],
         &["force-release", "from-source", "modules"],
+        &[],
+    ) {
+        return true;
+    }
+
+    crate::has_go_owned_flag(
+        args,
+        &[
+            "json",
+            "fix",
+            "allow-unsigned",
+            "force-release",
+            "from-source",
+            "modules",
+            "h",
+            "help",
+        ],
+        &[],
+        &[],
         &["fix"],
-    )
+    ) && !native_fix_ready()
+}
+
+/// The native repair path is intentionally limited to the no-op repair case.
+/// Any probe/config/platform mismatch keeps the Go implementation as the oracle
+/// for its download, error, and unsupported-platform behavior.
+fn native_fix_ready() -> bool {
+    let Some(bin_dir) = xdg::managed_bin_dir() else {
+        return false;
+    };
+    let Ok(manifest) = Manifest::load_embedded() else {
+        return false;
+    };
+    let Ok(enabled) = enabled_cores() else {
+        return false;
+    };
+    let Ok(platform) = Platform::current() else {
+        return false;
+    };
+
+    manifest.active_cores(&enabled).values().all(|core| {
+        core.supports_platform(platform.os)
+            && installed_version(&bin_dir, &core.binary_name)
+                .is_ok_and(|existing| versions_match(&existing, &core.version))
+    })
 }
 
 #[derive(Serialize)]

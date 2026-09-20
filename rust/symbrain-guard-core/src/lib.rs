@@ -8,6 +8,8 @@
 
 pub mod external_decision;
 pub mod go_json;
+#[path = "external_deadline.rs"]
+pub mod go_time;
 
 pub mod capability;
 mod capability_wire;

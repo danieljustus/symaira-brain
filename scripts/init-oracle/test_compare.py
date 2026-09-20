@@ -19,6 +19,11 @@ from typing import Any
 import unittest
 from unittest.mock import patch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from external_env import ensure_external_environment
+
+ensure_external_environment(__file__)
+
 from compare import (
     MANDATORY_GO_SOURCE_FILES,
     PINNED_COMMIT_SHA,

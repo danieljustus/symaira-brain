@@ -17,6 +17,14 @@ pub(crate) const MEMORY_TOOLS: &[&str] = &[
     "query_log",
 ];
 pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_get", "activity_search", "activity_status"];
+pub(crate) const SKILLS_TOOLS: &[&str] = &[
+    "skills_list",
+    "skills_inspect",
+    "skills_validate",
+    "skills_render_plan",
+    "skills_install",
+    "skills_targets_status",
+];
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
     let text = match name {
@@ -50,6 +58,17 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
         "graph_neighbors" => {
             r#"{"type":"object","properties":{"entity":{"type":"string"},"depth":{"type":"integer"}},"required":["entity"]}"#
         }
+        "skills_list" => r#"{"type":"object","properties":{}}"#,
+        "skills_inspect" | "skills_validate" => {
+            r#"{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"}}}"#
+        }
+        "skills_targets_status" => r#"{"type":"object","properties":{"scope":{"type":"string"}}}"#,
+        "skills_render_plan" => {
+            r#"{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"},"target":{"type":"string"},"profile":{"type":"string"},"dry_run":{"type":"boolean"}}}"#
+        }
+        "skills_install" => {
+            r#"{"type":"object","properties":{"path":{"type":"string"},"name":{"type":"string"},"target":{"type":"string"},"profile":{"type":"string"},"dry_run":{"type":"boolean"},"mode":{"type":"string"}}}"#
+        }
         _ => r#"{"type":"object"}"#,
     };
     serde_json::value::RawValue::from_string(text.to_string()).expect("static schema")
@@ -58,13 +77,21 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 fn listed(name: &str) -> ListedTool {
     let read = !matches!(
         name,
-        "memory_set" | "memory_promote" | "memory_reject" | "entity_relate"
+        "memory_set"
+            | "memory_promote"
+            | "memory_reject"
+            | "entity_relate"
+            | "skills_render_plan"
+            | "skills_install"
     );
     ListedTool {
         annotations: ToolAnnotations {
             title: name.replace('_', " "),
             read_only_hint: read,
-            destructive_hint: matches!(name, "memory_reject" | "entity_relate"),
+            destructive_hint: matches!(
+                name,
+                "memory_reject" | "entity_relate" | "skills_render_plan" | "skills_install"
+            ),
             idempotent_hint: read,
             open_world_hint: false,
         },
@@ -76,14 +103,19 @@ fn listed(name: &str) -> ListedTool {
 
 impl Gateway {
     pub(crate) fn embedded_tools(&self) -> Vec<ListedTool> {
-        if self.memory.is_none() {
-            return Vec::new();
+        let mut tools = Vec::new();
+        if self.memory.is_some() {
+            tools.extend(
+                self.memory_tool_names
+                    .iter()
+                    .chain(self.activity_tool_names.iter())
+                    .map(|name| listed(name)),
+            );
         }
-        self.memory_tool_names
-            .iter()
-            .chain(self.activity_tool_names.iter())
-            .map(|name| listed(name))
-            .collect()
+        if self.skills_allowed {
+            tools.extend(self.skills_tool_names.iter().map(|name| listed(name)));
+        }
+        tools
     }
 }
 
@@ -105,4 +137,12 @@ pub(crate) fn exposed_native(profile: &Profile) -> (Vec<String>, Vec<String>) {
         .cloned()
         .collect();
     (memory, activity)
+}
+
+pub(crate) fn exposed_skills(profile: &Profile) -> Vec<String> {
+    if profile.server("skills").enabled {
+        SKILLS_TOOLS.iter().map(|&s| s.to_string()).collect()
+    } else {
+        Vec::new()
+    }
 }

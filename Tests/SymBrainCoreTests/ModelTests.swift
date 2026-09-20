@@ -241,7 +241,7 @@ struct SyncSummaryTests {
 
 struct BinaryResolutionTests {
     @Test func findsBinaryInExtraDirectoryWhenPathIsEmpty() throws {
-        let directory = FileManager.default.temporaryDirectory
+        let directory = symBrainTestTemporaryDirectory()
             .appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }

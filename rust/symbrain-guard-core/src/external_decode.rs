@@ -1,10 +1,8 @@
 //! Ordered external-request field decoding with Go null/type semantics.
 use super::{ExternalDecisionRequest, empty_request};
+use crate::go_time;
 use serde::de::{Deserializer, MapAccess, Visitor};
 use std::fmt;
-
-#[path = "external_deadline.rs"]
-mod deadline_parser;
 
 pub(super) struct DecodedRequest {
     pub(super) request: ExternalDecisionRequest,
@@ -190,7 +188,7 @@ fn decode_deadline(value: &[u8], request: &mut ExternalDecisionRequest) -> Resul
     let value = value.trim_ascii();
     match value {
         b"null" => {}
-        [b'"', value @ .., b'"'] => request.deadline = Some(deadline_parser::parse(value)?),
+        [b'"', value @ .., b'"'] => request.deadline = Some(go_time::parse(value)?),
         _ => {
             return Err("Time.UnmarshalJSON: input is not a JSON string".to_owned());
         }

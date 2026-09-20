@@ -171,16 +171,7 @@ mod tests {
         );
         let raw_pid = fs::read_to_string(&pid_file).expect("descendant launched");
         let pid = parse_positive_pid(&raw_pid).expect("descendant pid must be positive integer");
-        let status = Command::new("/bin/kill")
-            .args(["-0", &pid.to_string()])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .expect("probe descendant status");
-        assert!(
-            !status.success(),
-            "descendant retained after timeout cleanup"
-        );
+        wait_until_dead(pid);
     }
 
     #[test]
@@ -220,5 +211,16 @@ mod tests {
             .stderr(Stdio::null())
             .status()
             .is_ok_and(|status| status.success())
+    }
+
+    fn wait_until_dead(pid: u32) {
+        let deadline = Instant::now() + Duration::from_secs(1);
+        while process_alive(pid) {
+            assert!(
+                Instant::now() < deadline,
+                "descendant retained after timeout cleanup"
+            );
+            std::thread::sleep(Duration::from_millis(10));
+        }
     }
 }

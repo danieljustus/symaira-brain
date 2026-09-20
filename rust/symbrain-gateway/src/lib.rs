@@ -103,6 +103,8 @@ pub struct Gateway {
     memory: Option<Arc<symbrain_memory::Store>>,
     memory_tool_names: Vec<String>,
     activity_tool_names: Vec<String>,
+    skills_allowed: bool,
+    skills_tool_names: Vec<String>,
     audit_failure_reported: AtomicBool,
 }
 
@@ -158,6 +160,15 @@ impl Gateway {
         } else {
             None
         };
+        let (skills_allowed, skills_tool_names) = {
+            let enabled = profile.server("skills").enabled;
+            let tools = if enabled {
+                embedded::exposed_skills(&profile)
+            } else {
+                Vec::new()
+            };
+            (enabled && !tools.is_empty(), tools)
+        };
         Ok(Self {
             profile,
             servers,
@@ -171,6 +182,8 @@ impl Gateway {
             memory,
             memory_tool_names,
             activity_tool_names,
+            skills_allowed,
+            skills_tool_names,
             audit_failure_reported: AtomicBool::new(false),
         })
     }

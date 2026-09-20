@@ -115,6 +115,22 @@ pub enum SkillTarget {
     OpenClaw,
 }
 
+impl SkillTarget {
+    #[must_use]
+    /// Returns the skill target string identifier, if supported.
+    pub const fn as_str(self) -> Option<&'static str> {
+        match self {
+            Self::None => None,
+            Self::OpenCode => Some("opencode"),
+            Self::Claude => Some("claude"),
+            Self::Codex => Some("codex"),
+            Self::Hermes => Some("hermes"),
+            Self::Antigravity => Some("antigravity"),
+            Self::OpenClaw => Some("openclaw"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum PathKind {
     Home(&'static [&'static str]),

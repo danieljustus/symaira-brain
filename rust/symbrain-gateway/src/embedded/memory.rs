@@ -83,6 +83,7 @@ fn memory_set(store: &Store, value: &Value) -> Result<String, GatewayError> {
         &kind,
         metadata,
         &symbrain_memory::SetOptions {
+            actor: "mcp".to_owned(),
             session_id,
             entities,
             working,

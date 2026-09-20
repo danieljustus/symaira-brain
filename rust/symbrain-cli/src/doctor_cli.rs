@@ -21,19 +21,57 @@ mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
-/// Whether this invocation requires the Go implementation's module lifecycle semantics.
+/// Whether this invocation requires the Go implementation's lifecycle or handshake semantics.
 ///
 /// The Rust doctor implementation intentionally does not manage source-build
 /// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
 /// managed installer owns that behavior.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    crate::has_go_owned_flag(
+    let lifecycle_fallback = crate::has_go_owned_flag(
         args,
         &["json", "fix", "force-release", "vault-agent", "h", "help"],
         &["vault-agent"],
         &["force-release"],
         &["fix"],
-    )
+    );
+    if lifecycle_fallback {
+        return true;
+    }
+
+    // A vault-agent only affects profile handshakes. With no profiles there
+    // is no handshake to customize; unreadable profile state stays on Go.
+    vault_agent_with_profiles_requires_go(args)
+}
+
+fn vault_agent_with_profiles_requires_go(args: &[OsString]) -> bool {
+    let normalized = crate::normalize_flags(args);
+    let mut index = 0;
+    while index < normalized.len() {
+        let argument = normalized[index].to_string_lossy();
+        if argument == "--" || argument == "-" || !argument.starts_with('-') {
+            break;
+        }
+        let flag = argument.trim_start_matches('-');
+        let name = flag.split_once('=').map_or(flag, |(name, _)| name);
+        if !["json", "fix", "force-release", "vault-agent", "h", "help"].contains(&name) {
+            break;
+        }
+        if name == "vault-agent" {
+            return match symbrain_policy::list_names() {
+                Ok(names) => profile_names_require_go(Some(&names)),
+                Err(_) => profile_names_require_go(None),
+            };
+        }
+        index += 1;
+    }
+    false
+}
+
+fn profile_names_require_go(names: Option<&[String]>) -> bool {
+    match names {
+        Some(names) => !names.is_empty(),
+        None => true,
+    }
 }
 
 pub fn run(
@@ -218,6 +256,13 @@ args = ["mcp", "--profile", "default"]
         let parsed = parse_args(&args, &mut Vec::new()).expect("valid flags");
         assert!(!parsed.fix);
         assert_eq!(parsed.vault_agent, "agent");
+    }
+
+    #[test]
+    fn vault_agent_fallback_requires_reliably_listed_profiles() {
+        assert!(!profile_names_require_go(Some(&[])));
+        assert!(profile_names_require_go(Some(&[String::from("default")])));
+        assert!(profile_names_require_go(None));
     }
 
     #[test]

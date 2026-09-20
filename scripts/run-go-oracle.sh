@@ -11,6 +11,8 @@ revision=$1
 shift
 repo_root=$(git rev-parse --show-toplevel)
 commit=$(git -C "$repo_root" rev-parse --verify "${revision}^{commit}")
+source "$repo_root/scripts/run-external-env.sh"
+external_env
 temp_root=$(mktemp -d "${TMPDIR:-/tmp}/symbrain-go-oracle.XXXXXX")
 source_root="$temp_root/source"
 cleanup() {

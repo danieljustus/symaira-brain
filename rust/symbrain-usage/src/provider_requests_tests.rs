@@ -71,3 +71,19 @@ fn invalid_provider_base_urls_fail_closed_to_defaults() {
         "https://api.example.com"
     );
 }
+
+/// The request layer cannot be reached by the differential suite: a real fetch
+/// needs a live endpoint and a working credential. `scripts/usage-request-oracle`
+/// therefore records what the shipped strategies send, and this test pins the
+/// port against that recording.
+///
+/// Two headers are deliberately *not* pinned, because the shipped values carry
+/// no reproducible fact:
+///
+/// - `X-Msh-Os-Version` / `X-Msh-Device-Model`: the shipped code fills them with
+///   the Go runtime version (`internal/usage/kimi.go`), so they cannot be
+///   reproduced from Rust; the port sends neither.
+/// - `X-Server-Instance`: the shipped code generates a random id per request; the
+///   port sends a fixed one. Only the `server-fn:` shape is compared.
+#[path = "request_oracle_tests.rs"]
+mod request_oracle;

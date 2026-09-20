@@ -7,7 +7,7 @@ final class ActivityObserverTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        rootURL = FileManager.default.temporaryDirectory
+        rootURL = operateTestTemporaryDirectory()
             .appendingPathComponent("symcockpit-activity-\(UUID().uuidString)", isDirectory: true)
     }
 

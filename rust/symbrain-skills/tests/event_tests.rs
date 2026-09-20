@@ -5,7 +5,8 @@ use std::time::{Duration, Instant};
 
 use fs2::FileExt;
 use symbrain_skills::install::{
-    EVENT_MAX_BYTES, InstallOptions, OperationEvent, install_copy, record_event_at, uninstall,
+    EVENT_MAX_BYTES, InstallOptions, OperationEvent, install_copy, read_events, record_event_at,
+    uninstall,
 };
 
 const FIXED_TIMESTAMP: &str = "2026-09-07T12:34:56Z";
@@ -92,6 +93,37 @@ fn timestamp_and_tool_version_are_written_deterministically() {
         serde_json::from_slice(&fs::read(&path).expect("event bytes")).expect("event JSON");
     assert_eq!(value["ts"], FIXED_TIMESTAMP);
     assert_eq!(value["tool_version"], "test-tool");
+}
+
+#[test]
+fn read_events_matches_go_rotated_order_filters_and_corrupt_lines() {
+    let dir = tempfile::tempdir().expect("event directory");
+    let path = dir.path().join("events.jsonl");
+    fs::write(
+        dir.path().join("events.1.jsonl"),
+        br#"{"ts":"2026-09-07T12:00:00Z","event":"install","skill":"demo","target":"claude","outcome":"ok","actor":"cli"}
+broken
+"#,
+    )
+    .expect("rotated events");
+    fs::write(
+        &path,
+        br#"{"ts":"2026-09-07T13:00:00Z","event":"render","skill":"demo","target":"opencode","outcome":"ok","actor":"cli"}
+{"ts":"2026-09-07T14:00:00Z","event":"install","skill":"other","target":"opencode","outcome":"ok","actor":"cli"}
+"#,
+    )
+    .expect("current events");
+
+    let records = read_events(&path, Some("demo"), None).expect("read events");
+    assert_eq!(records.len(), 2);
+    assert_eq!(records[0].ts, "2026-09-07T12:00:00Z");
+    assert_eq!(records[1].ts, "2026-09-07T13:00:00Z");
+    assert_eq!(
+        read_events(&path, None, Some("opencode"))
+            .expect("target filter")
+            .len(),
+        2
+    );
 }
 
 #[test]

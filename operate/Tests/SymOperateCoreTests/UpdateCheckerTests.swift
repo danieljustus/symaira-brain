@@ -28,7 +28,7 @@ final class UpdateCheckerTests: XCTestCase {
     private var defaults: UserDefaults!
 
     override func setUpWithError() throws {
-        cacheDir = FileManager.default.temporaryDirectory
+        cacheDir = operateTestTemporaryDirectory()
             .appendingPathComponent("symoperate-updatecheck-\(UUID().uuidString)")
         defaults = UserDefaults(suiteName: "com.symaira.operate.tests.\(UUID().uuidString)")
     }
