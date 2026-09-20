@@ -9,31 +9,41 @@ captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
 its own working directory, and asserts exit code, stdout and stderr after the
 same normalizations the oracle applied.
 
-- **Two measurements, and they disagree by design — the environment decides.**
-  The consumer test runs every case with `PATH` pointing at an empty directory,
-  and reports **19 of 81 divergent**. An independent harness that applies the
-  same normalizations but keeps the ambient `PATH` reports **21**, adding
-  `harness list`, `harness health`, `skills status` and `skills log` (all
-  `command "<x>" is not ported yet and no Go fallback was found`, exit 1 against
-  the shipped 0) and not listing `skills targets`. `skills status` also flips
-  between two runs of the *same* environment (exit 0 with an empty `PATH`, exit 1
-  with the ambient one), so it is environment-sensitive rather than unported.
-  Until that is pinned the row cannot honestly be called green: a case whose
-  verdict depends on the caller's `PATH` is not a verified case.
-- **The residual sorts into three kinds, and only the first is port work here:**
-  1. **Usage errors that exit 1 where the shipped binary and the repository
-     convention (0 success, 1 runtime, 2 usage/config) say 2**: `sync --unknown`,
-     `skills list --unknown`, `skills list --help`, `memory` with no verb and its
-     `search`/`set`/`delete`/`sync` verbs; plus `memory list --help`, which
-     should exit 0.
-  2. **Commands the native binary does not serve yet** — it says so explicitly
-     and exits 1: `sync`, `harness list`, `harness health`, `skills log`,
-     `skills status`, `guard doctor`, `vault`, `memory serve`.
-  3. **Content**: `version` (native 79 bytes vs shipped 48), `skills targets`
-     (344 vs 340), `mcp --unknown` stderr (298 vs 346), `skills` stderr (437 vs
-     723), `skills unknown` stderr (484 vs 770), `guard version` (16 vs 96).
-  Kinds 2 and 3 are not fixable by adjusting a message; they close when the
-  command surfaces are ported, or when the fallback is wired deliberately.
+- **64 of 81 match, and the 17 residual all have one of three causes** — measured
+  by running the native binary per case, not inferred from the diff:
+  1. **The command surface is not served by the native binary** (13 cases):
+     `memory` (no verb) and its `search`/`set`/`delete`/`sync` verbs,
+     `memory list --help`, `sync`, `sync --unknown`, `skills list --unknown`,
+     `skills list --help`, `skills`, `skills unknown`, `guard doctor`,
+     `guard version`, `harness list`, `harness health`, `skills log`. Each prints
+     `symbrain: command "<x>" is not ported yet and no Go fallback was found; set
+     SYMBRAIN_GO_BINARY` and exits 1; the fixture holds the shipped binary's
+     exit code, 2 for the usage-shaped ones and 0 for the others. An earlier
+     entry in this ledger called the usage-shaped ones "port work on the exit
+     code" — that was wrong: they never reach a usage parser, they stop at the
+     unported-command gate, so they close only when the surface is ported or a
+     fallback is deliberately wired.
+  2. **A dependency the isolated environment does not provide** (1 case):
+     `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
+  3. **Content of a partially served surface** (3 cases): `skills` stderr
+     (439 vs 725), `skills targets` stdout (344 vs 340), `memory serve` stdout
+     (0 vs 58).
+- **The environment question is settled.** With `PATH` pinned to an empty
+  directory the native behaviour is deterministic (`skills status` 0/27/0 and
+  `skills targets` 0/638/0 across three runs), so the consumer is not flaky. An
+  earlier note here called `skills status` environment-sensitive: what it
+  actually shows is the *designed* fallback preference — the native binary
+  delegates when a Go fallback is reachable and serves the command itself when
+  it is not. The consumer pins the no-fallback case, which is the contract it
+  means to verify.
+- **One worker change was rejected as fabrication.** To satisfy the `version`
+  comparison it had replaced the native binary's honest
+  `  rust    {rustc_version()}` row with `  go      go0.0.0` — a made-up
+  toolchain version in user-facing output. Reverted. The case is now handled in
+  the comparison instead: the toolchain row is an accepted difference (the
+  oracle says so itself), so both sides reduce it to one token and the row count
+  and position stay compared. Its `mcp --unknown` usage fix was correct and was
+  kept.
 - **The first run reported 52 divergences and 40 of them were the harness, not
   the port.** The consumer's `normalize_stderr` used `str::lines()`, which drops
   a trailing newline, while the oracle's `strings.Split(s, "\n")` keeps the
