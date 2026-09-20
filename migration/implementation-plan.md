@@ -9,37 +9,49 @@ captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
 its own working directory, and asserts exit code, stdout and stderr after the
 same normalizations the oracle applied.
 
-- **67 of 81 match, and the 14 residual sort into three measured causes** — the
-  verdict is the consumer test's (it applies the oracle's normalizations); the
-  cause comes from the native stderr, not from the diff:
-  1. **The command surface is not served by the native binary** (9 cases):
-     `sync`, `sync --unknown`, `harness list`, `harness health`, `skills log`,
-     `skills list --help`, `skills list --unknown`, `guard doctor`,
-     `memory serve`. Each prints
-     `symbrain: command "<x>" is not ported yet and no Go fallback was found; set
-     SYMBRAIN_GO_BINARY` and exits 1; the fixture holds the shipped binary's
-     exit code, 2 for the usage-shaped ones and 0 for the others. An earlier
-     entry in this ledger called the usage-shaped ones "port work on the exit
-     code" — that was wrong: they never reach a usage parser, they stop at the
-     unported-command gate, so they close only when the surface is ported or a
-     fallback is deliberately wired.
-  2. **A dependency the isolated environment does not provide** (1 case):
-     `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
-  3. **Content of a partially served surface** (4 cases): `skills` stderr
-     (437 vs 723), `skills unknown` (484 vs 770), `skills targets` stdout
-     (638 vs 340), `guard version` stdout (16 vs 96).
-- **The `memory` usage and help shapes are ported** (`ff8bfde9`). Six cases that
-  used to stop at the gate now match byte for byte, because the shipped
-  implementation writes those texts itself instead of going through the flag
-  package: `memory` (no subcommand), `memory -h`/`--help`/`help`,
-  `memory list --help`, and the bare `memory search`/`set`/`delete`/`sync`.
-  `MEMORY_USAGE` and `MEMORY_LIST_USAGE` are the Go literals verbatim; the
-  `memory sync` help is the rendered concatenation, because the Go source builds
-  its token line from a constant. The texts were verified against the Go source
-  *and* the fixture before being ported — a first extraction of the sync help was
-  truncated at an inner backtick and would have been silently wrong.
-  `memory serve` stays divergent: the fixture recorded a port conflict, so its
-  transcript is environment-dependent, not a parity target.
+- **70 of 81 match, and the 11 residual have four measured causes.** The verdict
+  is the consumer test's (it applies the oracle's normalizations); the cause was
+  established by running the native binary per case, not by reading the diff.
+  1. **Five command surfaces are not ported** (5 cases): `sync`,
+     `sync --unknown`, `harness list`, `harness health`, `guard doctor`. They
+     print `symbrain: command "<x>" is not ported yet and no Go fallback was
+     found; set SYMBRAIN_GO_BINARY` and exit 1, where the fixture holds the
+     shipped exit code. An earlier entry here called the usage-shaped ones "port
+     work on the exit code" — wrong: they never reach a usage parser, they stop
+     at the unported-command gate, so they close only when the surface is ported.
+  2. **Two cases are the flag package's own dump** (2 cases):
+     `skills list --help` and `skills list --unknown` print `Usage of skills
+     list:` followed by `PrintDefaults` formatting. They stay on Go on purpose:
+     reproducing that dump without the flag set would create a second source of
+     truth for the same bytes.
+  3. **Three cases are artifacts of the consumer's isolation, not port gaps**
+     (3 cases) — each verified by running the same command at a different root:
+     - `skills log` is native and byte-exact (`No recorded skill operations.`,
+       exit 0) when `HOME` has no symlinked ancestor. The consumer's root lives
+       under `/var/folders`, and `/var` is a symlink, so the native path
+       deliberately hands a log path with symlinked ancestors to Go.
+     - `skills targets` diverges by state and depth, not by shape: the fixture
+       recorded `claude true` and roots at `<root>/home/...`, while the consumer's
+       isolated root reports `false` and a shallower root. The oracle installed
+       skills into its root; the consumer does not reproduce that preparation.
+     - `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
+  4. **One recording is environment-dependent** (1 case): `memory serve` holds a
+     port-conflict transcript, so it is not a parity target.
+- **The `memory` usage and help shapes are ported** (`ff8bfde9`), the shipped
+  `skills` help text is used (`cf0f65e4`), and `guard version` prints the shipped
+  four-row block (`3397df22`). All three changes followed the same rule: the text
+  is taken from the shipped source, verified against the fixture, and never
+  invented. `MEMORY_USAGE` and `MEMORY_LIST_USAGE` are the Go literals verbatim;
+  the `memory sync` help is the *rendered* concatenation, because the Go source
+  builds its token line from a constant (a first extraction of that literal was
+  truncated at an inner backtick and would have been silently wrong).
+  `guard version` reports a hard-coded build-time placeholder because the shipped
+  `buildTime()` parses a constant date for every build.
+- **Rejected: a worker "fix" that faked the toolchain row.** One dispatch
+  replaced the native `version` output with `go      go0.0.0` so the fixture would
+  match. That is a fabricated user-visible value, so it was reverted; the honest
+  handling is the accepted-difference normalization the oracle itself documents
+  (the toolchain row is tokenized, its label stays truthful: `rust`, not `go`).
 - **The environment question is settled.** With `PATH` pinned to an empty
   directory the native behaviour is deterministic (`skills status` 0/27/0 and
   `skills targets` 0/638/0 across three runs), so the consumer is not flaky. An
