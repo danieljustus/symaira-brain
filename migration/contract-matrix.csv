@@ -35,7 +35,7 @@ GW-002,gateway,tools/list catalog metadata and stable order,scripts/gateway-orac
 GW-003,gateway,namespaced child tools/call routing hidden-tool behavior and error classification,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,raw-frames-and-semantic,fixture-ready
 GW-004,gateway,stdout contains only JSON-RPC frames,scripts/gateway-oracle,rust/symbrain-gateway/tests/gateway_tests.rs,all,raw-bytes,fixture-ready
 DOC-001,doctor,isolated XDG doctor JSON and human output,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,fixture-ready
-CFG-001,filesystem,XDG and legacy path precedence,target/go/symbrain-go,pending,all,filesystem-manifest,pending
+CFG-001,filesystem,XDG and legacy path precedence (256-case source-bound matrix: HOME/XDG set vs unset vs empty, relative home, legacy fallback, config/profiles/data/audit/patterns/cache/managed-bin relationships, and the 128 no-usable-home error cases),scripts/xdg-oracle,rust/symbrain-core/tests/xdg_paths_tests.rs;rust/symbrain-core/tests/fixtures/oracle_expectations.json,all,filesystem-manifest,green
 CFG-002,filesystem,atomic writes permissions symlinks,target/go/symbrain-go,scripts/rust-differential.py,all,filesystem-manifest,green
 PRF-001,profile,TOML schema defaults and server validation,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
 POL-001,policy,core presets and default-deny matrices,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
@@ -50,6 +50,7 @@ SEC-001,security,secret resolution and redaction,target/go/symbrain-go,pending,a
 SEC-002,security,guard decisions grants audit chain,target/go/symbrain-go,pending,all,bytes-and-files,pending
 SEC-003,security,Guard request/decision models validation fail-closed outputs injected time and IDs,guard/scripts/guard-oracle,rust/symbrain-guard-core/tests/oracle_tests.rs,all,exact-json-and-errors,fixture-ready
 SEC-004,security,Guard static buckets precedence merge scope ceilings marginal capability risk and reasons,guard/scripts/guard-oracle,rust/symbrain-guard-core/tests/oracle_tests.rs,all,exact-json-and-errors,fixture-ready
+SEC-005,security,"guard doctor output frozen from the production command with injected HOME/XDG over 7 scenarios (empty machine, healthy config, invalid TOML, missing/corrupt audit anchor, discovered server denied, discovered server with literal secret); paths and the Go toolchain line are placeholders, so the Go: line is an accepted difference",guard/scripts/guard-doctor-oracle,rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json,all,bytes-with-accepted-toolchain-line,fixture-ready
 DIST-001,distribution,archive and binary names,current release,pending,all,artifact-manifest,pending
 DIST-002,distribution,checksums signatures SBOM Homebrew,current release,pending,all,artifact-manifest,pending
 GUI-001,Swift client,version and command JSON schemas,target/go/symbrain-go,pending,macos-ios,parsed-json,pending
