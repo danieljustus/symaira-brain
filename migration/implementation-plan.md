@@ -1,5 +1,33 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-20, wave 4: the CLI tree has a consumer
+
+`CLI-006` now has a Rust consumer instead of a fixture nobody read:
+`rust/symbrain-cli/tests/cli_tree_tests.rs` runs the native binary once per case
+in `rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json` (81 cases,
+captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
+its own working directory, and asserts exit code, stdout and stderr after the
+same normalizations the oracle applied.
+
+- **62 of 81 match.** The row stays `fixture-ready` until it is green; the 19
+  divergences are grouped and being closed: usage errors that exit 1 where the
+  shipped binary and the repository convention both say 2 (`sync --unknown`,
+  `skills list --unknown`, `skills list --help`, `memory` and its `search`/
+  `set`/`delete`/`sync` verbs, and `memory list --help`, which should exit 0);
+  commands that should succeed but exit 1 (`sync`, `guard doctor`, `vault`);
+  and output content (`version`, `mcp --unknown`, `skills`, `skills targets`,
+  `skills unknown`, `memory serve`, `guard version`, the last two short by 58 and
+  80 bytes, which looks like a stub where the shipped binary prints a real
+  answer).
+- **The first run reported 52 divergences and 40 of them were the harness, not
+  the port.** The consumer's `normalize_stderr` used `str::lines()`, which drops
+  a trailing newline, while the oracle's `strings.Split(s, "\n")` keeps the
+  trailing empty element — so every stderr expectation came out exactly one byte
+  short. Confirmed by running both binaries directly: for `bogus`, `version -h`
+  and `profile show` the native and shipped outputs are byte-identical. Lesson:
+  when a normalizer is ported, port its split semantics too, and when a run
+  reports many one-byte differences, suspect the harness before the code.
+
 ## Resume checkpoint — 2026-09-20, wave 3: DB-001 divergence measured
 
 `DB-001`/`DB-002` moved from "no consumer" to "measured divergence": the native
