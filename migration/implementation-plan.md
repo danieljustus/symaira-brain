@@ -9,16 +9,31 @@ captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
 its own working directory, and asserts exit code, stdout and stderr after the
 same normalizations the oracle applied.
 
-- **62 of 81 match.** The row stays `fixture-ready` until it is green; the 19
-  divergences are grouped and being closed: usage errors that exit 1 where the
-  shipped binary and the repository convention both say 2 (`sync --unknown`,
-  `skills list --unknown`, `skills list --help`, `memory` and its `search`/
-  `set`/`delete`/`sync` verbs, and `memory list --help`, which should exit 0);
-  commands that should succeed but exit 1 (`sync`, `guard doctor`, `vault`);
-  and output content (`version`, `mcp --unknown`, `skills`, `skills targets`,
-  `skills unknown`, `memory serve`, `guard version`, the last two short by 58 and
-  80 bytes, which looks like a stub where the shipped binary prints a real
-  answer).
+- **Two measurements, and they disagree by design — the environment decides.**
+  The consumer test runs every case with `PATH` pointing at an empty directory,
+  and reports **19 of 81 divergent**. An independent harness that applies the
+  same normalizations but keeps the ambient `PATH` reports **21**, adding
+  `harness list`, `harness health`, `skills status` and `skills log` (all
+  `command "<x>" is not ported yet and no Go fallback was found`, exit 1 against
+  the shipped 0) and not listing `skills targets`. `skills status` also flips
+  between two runs of the *same* environment (exit 0 with an empty `PATH`, exit 1
+  with the ambient one), so it is environment-sensitive rather than unported.
+  Until that is pinned the row cannot honestly be called green: a case whose
+  verdict depends on the caller's `PATH` is not a verified case.
+- **The residual sorts into three kinds, and only the first is port work here:**
+  1. **Usage errors that exit 1 where the shipped binary and the repository
+     convention (0 success, 1 runtime, 2 usage/config) say 2**: `sync --unknown`,
+     `skills list --unknown`, `skills list --help`, `memory` with no verb and its
+     `search`/`set`/`delete`/`sync` verbs; plus `memory list --help`, which
+     should exit 0.
+  2. **Commands the native binary does not serve yet** — it says so explicitly
+     and exits 1: `sync`, `harness list`, `harness health`, `skills log`,
+     `skills status`, `guard doctor`, `vault`, `memory serve`.
+  3. **Content**: `version` (native 79 bytes vs shipped 48), `skills targets`
+     (344 vs 340), `mcp --unknown` stderr (298 vs 346), `skills` stderr (437 vs
+     723), `skills unknown` stderr (484 vs 770), `guard version` (16 vs 96).
+  Kinds 2 and 3 are not fixable by adjusting a message; they close when the
+  command surfaces are ported, or when the fallback is wired deliberately.
 - **The first run reported 52 divergences and 40 of them were the harness, not
   the port.** The consumer's `normalize_stderr` used `str::lines()`, which drops
   a trailing newline, while the oracle's `strings.Split(s, "\n")` keeps the
