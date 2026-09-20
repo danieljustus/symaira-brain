@@ -165,7 +165,7 @@ func evaluateGo(env map[string]string) map[string]string {
 	result["config_path"] = xdg.ConfigPath()
 	result["config_dir"] = xdg.ConfigDir()
 	result["profiles_dir"] = xdg.ProfilesDir()
-	
+
 	// Functions that may return errors
 	if d, err := xdg.DataDir(); err != nil {
 		result["data_dir"] = "(error)"
