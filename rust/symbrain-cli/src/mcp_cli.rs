@@ -27,7 +27,7 @@ const OPERATE_BINARY: &str = "symoperate";
 const OPERATE_BINARY_ENV: &str = "SYMBRAIN_SERVERS_OPERATE_BINARY_PATH";
 const SCOPE_BINARY: &str = "symscope";
 const SCOPE_BINARY_ENV: &str = "SYMBRAIN_SERVERS_SCOPE_BINARY_PATH";
-const MCP_USAGE: &str = "Usage of mcp:\n  -profile string\n    profile name to serve (required unless --profile-file is given)\n  -profile-file string\n    load the profile from this TOML file instead of the profiles directory\n  -vault-agent string\n    vault agent name for --stdio mode\n";
+const MCP_USAGE: &str = "Usage of mcp:\n  -profile string\n    \tprofile name to serve (required unless --profile-file is given)\n  -profile-file string\n    \tload the profile from this TOML file instead of the profiles directory\n  -vault-agent string\n    \tvault agent name for --stdio mode (default: harness-detected or 'claude-code')\n";
 
 #[derive(Debug, Default)]
 struct McpArgs {

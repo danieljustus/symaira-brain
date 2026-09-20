@@ -37,6 +37,7 @@ symbrain-usage.workspace = true
 toml_edit.workspace = true
 
 [dev-dependencies]
+regex.workspace = true
 sha2.workspace = true
 tempfile.workspace = true
 
