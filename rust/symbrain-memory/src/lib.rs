@@ -16,6 +16,10 @@ mod schema;
 mod search_rows;
 mod store;
 
+#[cfg(test)]
+#[path = "db_oracle_tests.rs"]
+mod db_oracle_tests;
+
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
