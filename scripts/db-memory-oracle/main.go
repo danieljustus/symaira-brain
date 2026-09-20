@@ -47,6 +47,8 @@ type NegativeCase struct {
 }
 
 type OrderingCase struct {
+	SeedSQL     string   `json:"seed_sql"`
+	QuerySQL    string   `json:"query_sql"`
 	Name        string   `json:"name"`
 	ExpectedIDs []string `json:"expected_ids"`
 }
@@ -132,8 +134,14 @@ func buildSuite() (Suite, error) {
 		return suite, fmt.Errorf("capture schema: %w", err)
 	}
 
-	suite.NegativeCases = buildNegativeCases(conn, tempDir)
-	suite.OrderingCases = buildOrderingCases(conn, tempDir)
+	suite.NegativeCases, err = buildNegativeCases(conn, tempDir)
+	if err != nil {
+		return suite, fmt.Errorf("build negative cases: %w", err)
+	}
+	suite.OrderingCases, err = buildOrderingCases(conn, tempDir)
+	if err != nil {
+		return suite, fmt.Errorf("build ordering cases: %w", err)
+	}
 	suite.Lock, err = captureLock(conn)
 	if err != nil {
 		return suite, fmt.Errorf("capture lock: %w", err)
@@ -223,10 +231,13 @@ func captureSchema(conn *sql.DB) (SchemaSnapshot, error) {
 	return snapshot, nil
 }
 
-func buildNegativeCases(conn *sql.DB, tempDir string) []NegativeCase {
+func buildNegativeCases(conn *sql.DB, tempDir string) ([]NegativeCase, error) {
 	cases := []NegativeCase{
-		{Name: "null_created_at_rejected", SQL: "INSERT INTO memories (id, content, scope, created_at, updated_at) VALUES ('null-ts-1', 'content', 'global', NULL, '2024-01-01 00:00:00')"},
-		{Name: "null_updated_at_rejected", SQL: "INSERT INTO memories (id, content, scope, created_at, updated_at) VALUES ('null-ts-2', 'content', 'global', '2024-01-01 00:00:00', NULL)"},
+		// metadata and embedding are NOT NULL without a default in the shipped
+		// schema, so they must be supplied here: otherwise the insert is
+		// rejected for metadata and the case does not test the timestamp.
+		{Name: "null_created_at_rejected", SQL: "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('null-ts-1', 'content', 'global', '{}', '', NULL, '2024-01-01 00:00:00')"},
+		{Name: "null_updated_at_rejected", SQL: "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('null-ts-2', 'content', 'global', '{}', '', '2024-01-01 00:00:00', NULL)"},
 	}
 
 	for i := range cases {
@@ -251,8 +262,11 @@ func buildNegativeCases(conn *sql.DB, tempDir string) []NegativeCase {
 	// Legacy schema: a database created by an older version missing the
 	// `embedding_dim` column should still be readable after migration parity.
 	legacyPath := filepath.Join(tempDir, "legacy.db")
-	legacyConn, err := sql.Open("sqlite3", legacyPath)
-	if err == nil {
+	legacyConn, err := sql.Open("sqlite", legacyPath)
+	if err != nil {
+		return nil, fmt.Errorf("open legacy store: %w", err)
+	}
+	{
 		_, _ = legacyConn.Exec(`CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL, metadata TEXT NOT NULL, embedding TEXT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL)`)
 		_, _ = legacyConn.Exec(`INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('legacy-1', 'legacy content', 'global', '{}', '[]', '2024-01-01 00:00:00', '2024-01-01 00:00:00')`)
 		legacyConn.Close()
@@ -261,33 +275,48 @@ func buildNegativeCases(conn *sql.DB, tempDir string) []NegativeCase {
 		legacyCfg := config.Defaults()
 		legacyCfg.Database.Path = legacyPath
 		legacyDB, openErr := db.Open(legacyCfg)
-		if openErr == nil {
-			defer legacyDB.Close()
-			_, err := legacyDB.Conn().Query(`SELECT embedding_dim FROM memories WHERE id = 'legacy-1'`)
-			cases = append(cases, NegativeCase{
-				Name:     "legacy_schema_migrated",
-				SQL:      "SELECT embedding_dim FROM memories WHERE id = 'legacy-1'",
-				Rejected: err != nil,
-			})
-			if err != nil {
-				cases[len(cases)-1].Error = err.Error()
-			}
+		if openErr != nil {
+			return nil, fmt.Errorf("reopen legacy store through db.Open: %w", openErr)
+		}
+		defer legacyDB.Close()
+		_, err = legacyDB.Conn().Query(`SELECT embedding_dim FROM memories WHERE id = 'legacy-1'`)
+		cases = append(cases, NegativeCase{
+			Name:     "legacy_schema_migrated",
+			SQL:      "SELECT embedding_dim FROM memories WHERE id = 'legacy-1'",
+			Rejected: err != nil,
+		})
+		if err != nil {
+			cases[len(cases)-1].Error = err.Error()
 		}
 	}
 
-	return cases
+	// A rejected case must carry the production error text, otherwise the
+	// fixture silently loses the contract it claims to freeze.
+	for i := range cases {
+		if cases[i].Rejected && cases[i].Error == "" {
+			return nil, fmt.Errorf("negative case %s was rejected without an error", cases[i].Name)
+		}
+	}
+	return cases, nil
 }
 
-func buildOrderingCases(conn *sql.DB, tempDir string) []OrderingCase {
+func buildOrderingCases(conn *sql.DB, tempDir string) ([]OrderingCase, error) {
 	cases := []OrderingCase{}
 
 	// Insert rows with identical timestamps to exercise tie-breaking by id DESC.
-	_, _ = conn.Exec(`INSERT INTO memories (id, content, scope, created_at, updated_at) VALUES
-		('tie-a', 'content-a', 'global', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),
-		('tie-b', 'content-b', 'global', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),
-		('tie-c', 'content-c', 'global', '2024-06-01 12:00:00', '2024-06-01 12:00:00')`)
+	// `metadata` is NOT NULL without a default in the Go schema, so an insert
+	// that omits it fails — silently, if the error is discarded, which leaves
+	// the expectation below empty. Errors are therefore fatal here.
+	tiesSQL := `INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES
+		('tie-a', 'content-a', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),
+		('tie-b', 'content-b', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),
+		('tie-c', 'content-c', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00')`
+	tiesQuery := `SELECT id FROM memories WHERE id LIKE 'tie-%' ORDER BY created_at DESC, id DESC`
+	if _, err := conn.Exec(tiesSQL); err != nil {
+		return nil, fmt.Errorf("seed tie rows: %w", err)
+	}
 
-	rows, err := conn.Query(`SELECT id FROM memories WHERE id LIKE 'tie-%' ORDER BY created_at DESC, id DESC`)
+	rows, err := conn.Query(tiesQuery)
 	if err == nil {
 		var ids []string
 		for rows.Next() {
@@ -299,15 +328,24 @@ func buildOrderingCases(conn *sql.DB, tempDir string) []OrderingCase {
 			ids = append(ids, id)
 		}
 		rows.Close()
-		cases = append(cases, OrderingCase{Name: "ordering_ties_by_id_desc", ExpectedIDs: ids})
+		cases = append(cases, OrderingCase{
+			Name:        "ordering_ties_by_id_desc",
+			SeedSQL:     tiesSQL,
+			QuerySQL:    tiesQuery,
+			ExpectedIDs: ids,
+		})
 	}
 
 	// Insert rows with distinct timestamps to verify created_at DESC ordering.
-	_, _ = conn.Exec(`INSERT INTO memories (id, content, scope, created_at, updated_at) VALUES
-		('order-old', 'content-old', 'global', '2024-01-01 00:00:00', '2024-01-01 00:00:00'),
-		('order-new', 'content-new', 'global', '2024-12-31 23:59:59', '2024-12-31 23:59:59')`)
+	distinctSQL := `INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES
+		('order-old', 'content-old', 'global', '{}', '', '2024-01-01 00:00:00', '2024-01-01 00:00:00'),
+		('order-new', 'content-new', 'global', '{}', '', '2024-12-31 23:59:59', '2024-12-31 23:59:59')`
+	distinctQuery := `SELECT id FROM memories WHERE id LIKE 'order-%' ORDER BY created_at DESC, id DESC`
+	if _, err := conn.Exec(distinctSQL); err != nil {
+		return nil, fmt.Errorf("seed order rows: %w", err)
+	}
 
-	rows, err = conn.Query(`SELECT id FROM memories WHERE id LIKE 'order-%' ORDER BY created_at DESC, id DESC`)
+	rows, err = conn.Query(distinctQuery)
 	if err == nil {
 		var ids []string
 		for rows.Next() {
@@ -319,10 +357,20 @@ func buildOrderingCases(conn *sql.DB, tempDir string) []OrderingCase {
 			ids = append(ids, id)
 		}
 		rows.Close()
-		cases = append(cases, OrderingCase{Name: "ordering_distinct_by_created_at_desc", ExpectedIDs: ids})
+		cases = append(cases, OrderingCase{
+			Name:        "ordering_distinct_by_created_at_desc",
+			SeedSQL:     distinctSQL,
+			QuerySQL:    distinctQuery,
+			ExpectedIDs: ids,
+		})
 	}
 
-	return cases
+	for _, c := range cases {
+		if len(c.ExpectedIDs) == 0 {
+			return nil, fmt.Errorf("ordering case %s captured no rows", c.Name)
+		}
+	}
+	return cases, nil
 }
 
 func captureLock(conn *sql.DB) (LockCase, error) {
