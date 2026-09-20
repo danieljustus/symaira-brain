@@ -1,5 +1,52 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-20, wave 3: DB-001 divergence measured
+
+`DB-001`/`DB-002` moved from "no consumer" to "measured divergence": the native
+store is now held to the frozen Go facts by an executable differential test,
+and that test is red. The row stays `fixture-ready` until it is green.
+
+- **Acceptance test written** (`rust/symbrain-memory/src/db_oracle_tests.rs`,
+  inside the crate because `busy_timeout` and `foreign_keys` are
+  connection-scoped and can only be read from the store's own connection).
+  Passing today: the lock pragmas (`busy_timeout` 5000, `journal_mode` wal,
+  `foreign_keys` 1, `secure_delete` 1), the constraint cases (NULL
+  `created_at`/`updated_at` rejected, missing table rejected) and the ordering
+  cases (ties broken by id DESC, distinct timestamps by `created_at` DESC).
+- **Failing, and this is the remaining `DB-001` work** (three checks, all
+  measured against the fixture, not guessed):
+  1. **16 tables missing** from the native schema: `audit_log`,
+     `consolidation_runs`, `context_profile_links`, `context_profiles`,
+     `entities_aliases`, `import_state`, `jwt_revocations`, `memories_fts`
+     (+ its four shadow tables), `memory_associations`, `memory_evidence`,
+     `query_log_results`, `sync_state`. No extra tables.
+  2. **`memories` column facts differ**: same 33 columns, different order and
+     different defaults. The native schema adds `DEFAULT ''` to `scope`,
+     `metadata` and `embedding`, which the shipped schema declares NOT NULL
+     without a default.
+  3. **16 `memories` indexes missing** (kind, tier, review_status, expires_at,
+     content_hash, embedding_source, consolidation, consolidated_into,
+     created_by, importance, lsh, scope_lsh, superseded_by, updated_at,
+     valid_from, valid_to) plus the unique autoindex the shipped table carries.
+- **The oracle was repaired first**, because three of its own cases were
+  hollow: the ordering seeds omitted `metadata` (NOT NULL without a default),
+  so the inserts failed silently and both expectations were captured as
+  `null`; the NULL-timestamp cases were rejected for `metadata` rather than for
+  the timestamp they name; and the legacy-migration case was dropped because
+  the oracle opened the legacy file with the driver name `sqlite3` while the
+  production package registers modernc's `sqlite`. Insert and open errors are
+  now fatal.
+- **Consequence for a Rust-created database:** a store the native code creates
+  today lacks 16 tables and 16 indexes of the shipped schema, so a database
+  written by the native binary would not be readable by the shipped search,
+  entity, audit and sync features. This is a real gap, not a formatting
+  difference.
+- **Branch state:** the repaired oracle and fixture are on
+  `migration/rust-continue-20260920` (green). The red acceptance test is on
+  `migration/w3-db-schema` in `.worktrees/w3-db` (commit `41dc33f1`) and a
+  worker is porting the shipped DDL there. It must not be integrated until
+  `cargo test -p symbrain-memory` is green.
+
 ## Resume checkpoint — 2026-09-20, wave 2 salvaged
 
 Both wave-2 workers reported `completed` but neither had committed, and one had
