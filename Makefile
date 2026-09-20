@@ -110,6 +110,12 @@ policy-oracle-check:
 xdg-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/xdg-oracle -check
 
+## cli-oracle-check: Ensure the frozen CLI command-tree expectations match Go
+cli-oracle-check:
+	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" -check
+
 ## db-memory-oracle-check: Ensure the frozen memory SQLite facts match Go
 db-memory-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/db-memory-oracle -check
@@ -214,7 +220,7 @@ rust-fast:
 	$(EXTERNAL_RUN) cargo test -p symbrain-cli -p symbrain-skills -p symbrain-guard-core --locked
 
 ## rust-check: Run the complete fast Rust quality gate
-rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check db-memory-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check cli-oracle-check db-memory-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings

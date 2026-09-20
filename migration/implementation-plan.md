@@ -1,5 +1,47 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-20, wave 2 salvaged
+
+Both wave-2 workers reported `completed` but neither had committed, and one had
+derailed mid-task. Their branches were empty; the artifacts were found in the
+worktrees (one of them in the **shared coordinator checkout**) and were
+verified by hand before anything was kept.
+
+- **`DB-001`/`DB-002` → `fixture-ready`.** `scripts/db-memory-oracle` imports
+  `internal/memory/config` and `internal/memory/db`, creates a real store and
+  reads the schema, pragmas and constraint behaviour back out of SQLite:
+  29 tables, the full `memories` column set, 5 lock pragmas, and the NULL
+  timestamp, ordering and tie-break cases. `make db-memory-oracle-check` →
+  "0 drift on 29 tables, 3 negative cases, 2 ordering cases". No Rust test
+  consumes the fixture yet, so the rows are not green.
+- **`CLI-006` → `fixture-ready`.** `scripts/cli-oracle` freezes 81 cases of
+  command-tree and flag behaviour (measured stdout, stderr, exit codes,
+  including the negative flag cases), with the readable inventory in
+  `migration/cli-tree-inventory.md`. `make cli-oracle-check` → "0 drift on
+  81 cases".
+- **The CLI oracle as the worker left it was unsafe and was rebuilt.** It ran
+  the real binary with the ambient environment, so its own run executed
+  `setup` (downloading and installing managed binaries into the operator's
+  `~/.symaira/bin`), `doctor --fix`, and let `sync` write managed blocks into
+  this repository's `AGENTS.md`. It is now isolated (throwaway `HOME`/`XDG`,
+  scratch working directory), the two side-effecting cases are dropped, and
+  the per-run root, the checkout path, the toolchain line and the host platform
+  are placeholders. The fixture also carried 50 self-contradicting
+  descriptions (a dead `expectedExit` parameter asserting exit 64/100 while the
+  measured code was 2); the dead parameter is gone and the descriptions no
+  longer claim an exit code.
+- **Side effect on the operator's machine, reported:** `symdesk` v0.12.2 and
+  `symvault` v0.22.1 were installed into `~/.symaira/bin` at 14:27 by that
+  `setup` run (`symbrowse`/`symoperate`/`symscope` untouched from Sep 13).
+- **New defect filed: #625.** `symbrain setup` cannot install the pinned
+  `symcockpit` core: `managed: extract symcockpit: unsafe tar entry "./":
+  invalid archive path`. Reproduced with an isolated `HOME` so the operator's
+  binaries were not touched a second time.
+- **Process lesson for the next wave:** a worker's artifact must be inspected
+  and its side effects understood *before* it is run; an oracle that mutates
+  the machine or the checkout is not evidence. Ask workers to commit as soon as
+  the first slice passes, because a cut-off worker leaves nothing on its branch.
+
 ## Resume checkpoint — 2026-09-20, wave 1 integrated
 
 Three workers were dispatched in isolated worktrees from `8ca8d2c5`. Two of
