@@ -1,6 +1,52 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
-## Latest integration update — guard CLI
+## Resume checkpoint — 2026-09-20 (session `migration/rust-continue-20260920`)
+
+Base revision: `48568aee` (main, CI green there including the macOS
+`rust-check parity-smoke` job). Integration branch:
+`migration/rust-continue-20260920`, local only — no push, no PR, no release.
+
+- **Reconciled stale ledger claims.** Section "Latest integration update — guard
+  CLI" below is historical. Its stated next action (reproduce
+  `{"command":"open"}x`, repair the trailing-JSON diagnostic) is **done and
+  verified on this revision**: the pinned Go oracle and the current native
+  binary both emit
+  `{"decision":"deny","reason":"decide: parse request: invalid character 'x' after top-level value"}`.
+  `rust/symbrain-cli/src/guard_cli.rs` already carries the regression test
+  `decide_preserves_go_trailing_json_diagnostic`. GCLI-F03 is closed by evidence,
+  not by re-implementation. GCLI-PLAT-01 (non-Unix audit path) and Phase 8.5/8.6
+  (`guard doctor` still returns `None` → Go fallback) remain open.
+- **Fixed and verified: doctor vault-agent routing (#616).** `make rust-check`
+  previously failed on any machine that has profiles, because
+  `doctor_cli::requires_go_fallback` returned at the first `-vault-agent` and
+  read the real XDG profile directory. The predicate now mirrors Go's
+  `flag.FlagSet` scan (value consumption, `-h`/`-help`, undefined flag, missing
+  value) and the profile precondition is injected
+  (`requires_go_fallback_with`). Evidence: `cargo test -p symbrain-cli --lib`
+  90 passed; `make rust-check parity-smoke` 458/458 twice; contract row
+  `CLI-006B`.
+- **Recorded external/new defect: #624.** Three atime-derived skills parity
+  cases (`skills_list_managed_installs_json`, `skills_list_last_used_json`,
+  `skills_list_target_flag_is_ignored`) flaked once and then passed 458/458 on
+  two consecutive re-runs with no source change. `last_used`
+  (`last_used_source: install_atime`) is the fixture file's atime, which the
+  fixture pins and an ambient reader can bump afterwards, leaving the two
+  runtimes reporting their own read clocks. Not a parity regression; the gate
+  stays flaky until the fixture compares the atime captured per runtime.
+- **Task order after this checkpoint** (dependency order, one writer each):
+  1. `CFG-001` — XDG and legacy path precedence: source-bound Go oracle plus
+     Rust comparison; row is `pending` while `rust/symbrain-core/src/xdg.rs` is
+     already implemented.
+  2. `#624` — make the atime-derived parity cases race-free (harness only).
+  3. Phase 8.5/8.6 — `guard doctor` native port (the last `guard` verb on the Go
+     fallback), then `SEC-001` secret-reference resolution and redaction.
+  4. Phase 10 (`DB-001`, `DB-002`) and Phase 11 (`DIST-001`, `DIST-002`,
+     `GUI-001`) remain untouched and are the largest open blocks.
+- **Not authorized by this checkpoint:** Go removal, pushing/publishing,
+  release or product cutover, and any claim that the `fixture-ready` rows are
+  green.
+
+## Latest integration update — guard CLI (historical, superseded above)
 
 The previously test-only Unix `guard decide` adapter is now wired into this
 local Rust integration candidate. Installed applications are unchanged. Other
