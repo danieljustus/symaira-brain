@@ -35,6 +35,28 @@ their branches were inspected and salvaged by hand instead of being trusted.
   release or product cutover, and any claim that the `fixture-ready` rows are
   green.
 
+**Verified revision: `f2d18e3d`** on `migration/rust-continue-20260920`
+(local only — not pushed, no PR). Five commits on top of `4ca840c2`:
+`9e20d19a` (CFG-001 oracle), `0db1baf7` (guard-doctor fixture), `ca91ffdb`
+(gate wiring + SEC-005 row), `3b4526e1` (#624 harness fix), `f2d18e3d`
+(this checkpoint). The commit that adds this paragraph is docs-only, so the
+verified revision stays `f2d18e3d`.
+
+Verified at that revision: `make rust-check` → exit 0 (workspace fmt, clippy,
+tests, `cargo-deny` advisories/bans/licenses/sources ok, and the oracle checks
+`policy 0/50+30`, `xdg 0/256`, `guard 0/51`, `guard doctor 0/7`, `catalog 0/3`,
+…); `make parity-smoke` → exit 0, 457/457 cases. The wave-1 worker branches
+were cherry-picked, then removed; `.worktrees/` is back to the two wave-2
+worktrees.
+
+**Wave 2 dispatched** (`deleg_0befee8f`, 2 workers, both from `f2d18e3d`):
+`migration/w2-db` in `.worktrees/w2-db` → `DB-001`/`DB-002`; `migration/w2-cli`
+in `.worktrees/w2-cli` → `CLI-006`. Neither worker may touch the Makefile,
+`scripts/rust-differential.py` or this ledger. Coordinator must verify their
+commits and diffs, integrate in dependency order, and only then update rows.
+Still open and untouched: `SEC-001`, `SEC-002`, `GCLI-PLAT-01`, `DIST-001`,
+`DIST-002`, `GUI-001`.
+
 ## Resume checkpoint — 2026-09-20 (session `migration/rust-continue-20260920`)
 
 Base revision: `48568aee` (main, CI green there including the macOS
