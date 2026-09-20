@@ -9,13 +9,13 @@ captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
 its own working directory, and asserts exit code, stdout and stderr after the
 same normalizations the oracle applied.
 
-- **64 of 81 match, and the 17 residual all have one of three causes** — measured
-  by running the native binary per case, not inferred from the diff:
-  1. **The command surface is not served by the native binary** (13 cases):
-     `memory` (no verb) and its `search`/`set`/`delete`/`sync` verbs,
-     `memory list --help`, `sync`, `sync --unknown`, `skills list --unknown`,
-     `skills list --help`, `skills`, `skills unknown`, `guard doctor`,
-     `guard version`, `harness list`, `harness health`, `skills log`. Each prints
+- **67 of 81 match, and the 14 residual sort into three measured causes** — the
+  verdict is the consumer test's (it applies the oracle's normalizations); the
+  cause comes from the native stderr, not from the diff:
+  1. **The command surface is not served by the native binary** (9 cases):
+     `sync`, `sync --unknown`, `harness list`, `harness health`, `skills log`,
+     `skills list --help`, `skills list --unknown`, `guard doctor`,
+     `memory serve`. Each prints
      `symbrain: command "<x>" is not ported yet and no Go fallback was found; set
      SYMBRAIN_GO_BINARY` and exits 1; the fixture holds the shipped binary's
      exit code, 2 for the usage-shaped ones and 0 for the others. An earlier
@@ -25,9 +25,21 @@ same normalizations the oracle applied.
      fallback is deliberately wired.
   2. **A dependency the isolated environment does not provide** (1 case):
      `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
-  3. **Content of a partially served surface** (3 cases): `skills` stderr
-     (439 vs 725), `skills targets` stdout (344 vs 340), `memory serve` stdout
-     (0 vs 58).
+  3. **Content of a partially served surface** (4 cases): `skills` stderr
+     (437 vs 723), `skills unknown` (484 vs 770), `skills targets` stdout
+     (638 vs 340), `guard version` stdout (16 vs 96).
+- **The `memory` usage and help shapes are ported** (`ff8bfde9`). Six cases that
+  used to stop at the gate now match byte for byte, because the shipped
+  implementation writes those texts itself instead of going through the flag
+  package: `memory` (no subcommand), `memory -h`/`--help`/`help`,
+  `memory list --help`, and the bare `memory search`/`set`/`delete`/`sync`.
+  `MEMORY_USAGE` and `MEMORY_LIST_USAGE` are the Go literals verbatim; the
+  `memory sync` help is the rendered concatenation, because the Go source builds
+  its token line from a constant. The texts were verified against the Go source
+  *and* the fixture before being ported — a first extraction of the sync help was
+  truncated at an inner backtick and would have been silently wrong.
+  `memory serve` stays divergent: the fixture recorded a port conflict, so its
+  transcript is environment-dependent, not a parity target.
 - **The environment question is settled.** With `PATH` pinned to an empty
   directory the native behaviour is deterministic (`skills status` 0/27/0 and
   `skills targets` 0/638/0 across three runs), so the consumer is not flaky. An
