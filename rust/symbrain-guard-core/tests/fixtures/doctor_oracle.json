@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "id": "empty_machine",
+      "setup": "no config file, no audit log, no discovered servers",
+      "exit_code": 0,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      none discovered\\n\\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\\n\""
+    },
+    {
+      "id": "healthy_config",
+      "setup": "valid config with 1 rule, 1 allowlist entry",
+      "exit_code": 0,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           ok\\n  policy           ok (1 rule(s))\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  ok (1 entries)\\n  mcp servers      none discovered\\n\\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\\n\""
+    },
+    {
+      "id": "config_error",
+      "setup": "config file exists but contains invalid TOML",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           error: config: parse \\u003croot\\u003e/config_error/home/.config/symguard/config.toml: toml: line 1: expected '.' or '=', but got '[' instead\\n  policy           not loaded (config error)\\n  audit log        not initialized (created on first 'symguard decide')\\n\\n2 issue(s) found. See details above.\\n\""
+    },
+    {
+      "id": "audit_log_without_anchor",
+      "setup": "audit log exists but no anchor file (expected pre-Phase-3 state)",
+      "exit_code": 0,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        ok (JSONL, chain anchor pending Phase 3 sink)\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      none discovered\\n\\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\\n\""
+    },
+    {
+      "id": "audit_log_corrupt_anchor",
+      "setup": "audit log exists with corrupt anchor file",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        error: anchor \\u003croot\\u003e/audit_log_corrupt_anchor/data/symguard/audit.log.anchor: auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      none discovered\\n\\n1 issue(s) found. See details above.\\n\""
+    },
+    {
+      "id": "discovered_server_denied",
+      "setup": "Cursor mcp.json with server not on allowlist",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      1 discovered\\n\\nDiscovered MCP servers (spawn allowlist):\\n  [DENIED]  demo (cursor/stdio) → /usr/bin/true --once (not on spawn allowlist)\\n\\n1 issue(s) found. See details above.\\n\""
+    },
+    {
+      "id": "discovered_server_secret_risk",
+      "setup": "Cursor mcp.json with server carrying a plaintext secret env key",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   darwin/arm64\\n\\n  binary           ok\\n  go runtime       ok\\n  config           not configured (no config file found)\\n  policy           defaults only (no rules — deny by default)\\n  audit log        not initialized (created on first 'symguard decide')\\n  spawn allowlist  not configured (empty — deny by default)\\n  mcp servers      1 discovered\\n\\nDiscovered MCP servers (spawn allowlist):\\n  [DENIED]  server-with-secret (cursor/stdio) → /usr/bin/env (not on spawn allowlist)\\n\\nPlaintext secret risk:\\n  server-with-secret (cursor): env SECRET_KEY stored as plaintext values in the client config\\n  symguard reports this risk but is not a secret store — move these values to symvault and reference them at launch time.\\n\\n1 issue(s) found. See details above.\\n\""
+    }
+  ],
+  "source": "guard/cmd/symguard/doctor/command.go + checks.go"
+}
