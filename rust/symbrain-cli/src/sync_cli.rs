@@ -61,46 +61,16 @@ const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what woul
 /// Native sync covers the explicit `agents` instruction target and the
 /// implicit all-harness default, plus its own flag-package-style rejection
 /// of unknown flags. Project overrides remain Go-owned (no fixture yet).
-/// Skill rendering/install is only proven for the empty-library case
-/// (`skillsrunner.Run` reports "no skills rendered" for any missing or
-/// empty library without touching the render/install pipeline); a non-empty
-/// library still defers to Go because that pipeline is not ported.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    let mut saw_harness = false;
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        match arg.as_ref() {
-            "-dry-run" | "--dry-run" => i += 1,
-            "-project" | "--project" => return true,
-            value if value.starts_with("-project=") || value.starts_with("--project=") => {
-                return true;
-            }
-            "--" => return true,
-            // An unrecognized flag is reported natively as a usage error
-            // below, matching the Go flag package's own rejection.
-            value if value.starts_with('-') => i += 1,
-            value => {
-                if value != "agents" {
-                    return true;
-                }
-                saw_harness = true;
-                i += 1;
-            }
-        }
-    }
-    !saw_harness && skills_library_has_entries()
-}
-
-/// Whether the resolved skills library directory exists and has any entry.
+/// Whether this invocation still has to be handled by the Go binary.
 ///
-/// A missing or empty library is the only case proven against Go
-/// (`skillsrunner.Run` returns "no skills rendered" for it without invoking
-/// the render/install pipeline); any entry at all falls back to Go instead
-/// of guessing what an unported render pass would report.
-fn skills_library_has_entries() -> bool {
-    let (library_dir, _base_dir, _home_dir) = crate::skills_cli::resolve_skills_dirs();
-    fs::read_dir(library_dir).is_ok_and(|mut entries| entries.next().is_some())
+/// `sync` is native for every argument shape now that `skillsrunner.Run` is
+/// ported and differentially proven crate-side (result messages, on-disk
+/// layout and symlink targets are all frozen against real Go behaviour in
+/// `rust/symbrain-skills/tests/`). The single remaining exception is `--`:
+/// flag-parsing for a trailing argument list is not modelled here, so that
+/// shape still defers rather than guessing.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    args.iter().any(|arg| arg.to_string_lossy() == "--")
 }
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
@@ -302,30 +272,7 @@ pub fn run(
 
     let summary = SyncSummary {
         targets: target_statuses,
-        skills: requested_harnesses
-            .iter()
-            .map(|name| {
-                let has_skill_target =
-                    lookup(name).is_ok_and(|h| h.skill_target.as_str().is_some());
-                if has_skill_target {
-                    // Reachable only when the skills library is empty or
-                    // missing (see requires_go_fallback): the shipped
-                    // skillsrunner reports exactly this for that case
-                    // without touching the render/install pipeline.
-                    SkillResult {
-                        target: name.clone(),
-                        status: "ok".to_string(),
-                        message: Some("no skills rendered".to_string()),
-                    }
-                } else {
-                    SkillResult {
-                        target: name.clone(),
-                        status: "skipped".to_string(),
-                        message: Some(format!("no skill target for harness {name:?}")),
-                    }
-                }
-            })
-            .collect(),
+        skills: native_skill_results(&requested_harnesses, parsed.dry_run),
     };
 
     let has_error = summary.targets.iter().any(|t| t.status == "error")
@@ -372,6 +319,46 @@ pub fn run(
     }
 
     if has_error { exit::GENERIC } else { exit::OK }
+}
+
+/// Runs the ported skills runner and maps its results onto the sync payload.
+///
+/// Mirrors `internal/sync/sync.go`: Go calls
+/// `skillsrunner.Run(ctx, harnessNames, DefaultOptions(), dryRun)` with a
+/// background context and turns each result into a summary entry, so a
+/// per-target failure is reported as `status: "error"` and only affects the
+/// exit code through `SkillsFailed`.
+///
+/// The runner resolves the same library, render and base roots the CLI does
+/// (`resolve_skills_dirs`), so a native run installs into the same places Go
+/// would; its defaults are the ones `config.Defaults()` produces.
+fn native_skill_results(harnesses: &[String], dry_run: bool) -> Vec<SkillResult> {
+    let (library_dir, base_dir, home_dir) = crate::skills_cli::resolve_skills_dirs();
+    let opts = symbrain_skills::runner::Options {
+        library_dir: library_dir.to_string_lossy().into_owned(),
+        base_dir: base_dir.to_string_lossy().into_owned(),
+        home_dir: home_dir.to_string_lossy().into_owned(),
+        ..symbrain_skills::runner::Options::default()
+    };
+    // A render root is deliberately not set here: `DefaultOptions().RenderDir`
+    // is derived from the XDG data root by the runner itself, and passing the
+    // CLI's own view would duplicate that resolution.
+    let mut ctx = symbrain_skills::runner::NoopContext;
+    match symbrain_skills::runner::run(&mut ctx, harnesses, opts, dry_run) {
+        Ok(results) => results
+            .into_iter()
+            .map(|result| SkillResult {
+                target: result.target,
+                status: result.status,
+                message: result.message,
+            })
+            .collect(),
+        Err(err) => vec![SkillResult {
+            target: String::new(),
+            status: "error".to_string(),
+            message: Some(format!("sync: skills: {err}")),
+        }],
+    }
 }
 
 #[cfg(test)]
