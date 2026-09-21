@@ -386,8 +386,18 @@ func runCase(binary string, args []string, description string) TestCase {
 // the same directory both as /var/... and as /private/var/..., so both forms
 // have to be rewritten or the fixture drifts between runs.
 var (
-	toolchainLine = regexp.MustCompile(`(?m)^(\s*go\s+)go\d+\.\d+(?:\.\d+)?$`)
-	platformLine  = regexp.MustCompile(`(?m)^(\s*os/arch\s+)\S+$`)
+	toolchainLine     = regexp.MustCompile(`(?m)^(\s*go\s+)go\d+\.\d+(?:\.\d+)?$`)
+	platformLine      = regexp.MustCompile(`(?m)^(\s*os/arch\s+)\S+$`)
+	claudeDesktopPath = regexp.MustCompile(`Library/Application Support/Claude|\.config/[Cc]laude`)
+	// `guard doctor`'s own header block uses a different shape than `version`'s
+	// ("  Go:        go1.26.7" / "  OS/Arch:   darwin/arm64", capitalized
+	// labels with colons) that toolchainLine/platformLine above don't match,
+	// so this case's "Go:" line silently pinned to whatever toolchain built
+	// the reference binary at recording time instead of being a true accepted
+	// difference — caught when a regeneration built with a different local Go
+	// toolchain than the pinned one produced an unrelated-looking diff.
+	doctorToolchainLine = regexp.MustCompile(`(?m)^(\s*Go:\s+)\S+$`)
+	doctorOsArchLine    = regexp.MustCompile(`(?m)^(\s*OS/Arch:\s+)\S+$`)
 )
 
 func normalizeStdout(s, root string) string {
@@ -406,7 +416,17 @@ func normalizeStdout(s, root string) string {
 	// accepted differences rather than verified matches: no fixture can pin
 	// them and stay portable across runners.
 	s = toolchainLine.ReplaceAllString(s, "${1}<go>")
-	return platformLine.ReplaceAllString(s, "${1}<os/arch>")
+	s = platformLine.ReplaceAllString(s, "${1}<os/arch>")
+	s = doctorToolchainLine.ReplaceAllString(s, "${1}<go>")
+	s = doctorOsArchLine.ReplaceAllString(s, "${1}<os/arch>")
+	// Claude Desktop's config directory: internal/harness resolves
+	// "Library/Application Support/Claude" on macOS but a different,
+	// platform-correct XDG fallback on Linux ("~/.config/Claude" for harness
+	// discovery, "~/.config/claude" lowercase for corekit's mcpcfgkit used by
+	// guard scan) — both correct for their package, neither pinnable in a
+	// fixture recorded on one machine. Mirrors the same fix already applied
+	// to the Rust consumer test (cli_tree_tests.rs) for the identical reason.
+	return claudeDesktopPath.ReplaceAllString(s, "<claude-desktop-dir>")
 }
 
 // normalizeStderr removes toolchain identifiers and absolute paths from

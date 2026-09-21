@@ -426,7 +426,7 @@
       "list"
     ],
     "exit_code": 0,
-    "stdout": "claude\tClaude Code\n  global\t\u003croot\u003e/home/.claude.json\tmissing\tservers=(none)\n\nclaude-desktop\tClaude Desktop\n  global\t\u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json\tmissing\tservers=(none)\n\ncursor\tCursor\n  global\t\u003croot\u003e/home/.cursor/mcp.json\tmissing\tservers=(none)\n\nopencode\tOpenCode\n  global\t\u003croot\u003e/home/.config/opencode/config.json\tmissing\tservers=(none)\n\ncodex\tCodex CLI\n  global\t\u003croot\u003e/home/.codex/config.toml\tmissing\tservers=(none)\n\nantigravity\tAntigravity\n  global\t\u003croot\u003e/home/.gemini/config/mcp_config.json\tmissing\tservers=(none)\n\n",
+    "stdout": "claude\tClaude Code\n  global\t\u003croot\u003e/home/.claude.json\tmissing\tservers=(none)\n\nclaude-desktop\tClaude Desktop\n  global\t\u003croot\u003e/home/\u003cclaude-desktop-dir\u003e/claude_desktop_config.json\tmissing\tservers=(none)\n\ncursor\tCursor\n  global\t\u003croot\u003e/home/.cursor/mcp.json\tmissing\tservers=(none)\n\nopencode\tOpenCode\n  global\t\u003croot\u003e/home/.config/opencode/config.json\tmissing\tservers=(none)\n\ncodex\tCodex CLI\n  global\t\u003croot\u003e/home/.codex/config.toml\tmissing\tservers=(none)\n\nantigravity\tAntigravity\n  global\t\u003croot\u003e/home/.gemini/config/mcp_config.json\tmissing\tservers=(none)\n\n",
     "stderr": "",
     "description": "harness list"
   },
@@ -750,7 +750,7 @@
       "doctor"
     ],
     "exit_code": 0,
-    "stdout": "symguard doctor\n\n  Version:   dev\n  Go:        go1.26.7\n  OS/Arch:   darwin/arm64\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+    "stdout": "symguard doctor\n\n  Version:   dev\n  Go:        \u003cgo\u003e\n  OS/Arch:   \u003cos/arch\u003e\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
     "stderr": "",
     "description": "guard doctor, exit 1 (issues found)"
   },
@@ -784,7 +784,7 @@
     ],
     "exit_code": 0,
     "stdout": "{\n  \"servers\": []\n}\n",
-    "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] \u003croot\u003e/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] \u003croot\u003e/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] \u003croot\u003e/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] \u003croot\u003e/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] \u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+    "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] \u003croot\u003e/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] \u003croot\u003e/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] \u003croot\u003e/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] \u003croot\u003e/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] \u003croot\u003e/home/\u003cclaude-desktop-dir\u003e/claude_desktop_config.json: config file not found\n",
     "description": "guard scan"
   },
   {
