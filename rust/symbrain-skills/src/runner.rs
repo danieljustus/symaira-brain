@@ -332,12 +332,13 @@ fn install_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(
     // frozen in the fixture (`failure_visible_and_reported` vs
     // `dry_run_failure_names_target`).
     //
-    // ponytail: the Rust path renders in memory and hands the result to
-    // install_rendered instead of writing the tree through opts.render_dir the
-    // way RenderAll does, so rendered files land in the install cache rather than
-    // under the configured render dir. Result messages and error text match Go;
-    // the render-dir side effect does not, and closing it needs its own oracle
-    // (see migration/implementation-plan.md).
+    // Go renders through render.RenderAll(bundle, opts.RenderDir, [target]),
+    // which writes <RenderDir>/<target>/<name> and installs a symlink pointing
+    // at exactly that path (install_ops.go: os.Symlink(item.Path, tmp)). The
+    // Rust path renders in memory and materializes the tree itself, so it is
+    // handed the render root to keep the resulting layout identical; the
+    // frozen on-disk layout is asserted by
+    // tests/runner_env_tests.rs::installed_symlinks_match_the_frozen_go_layout.
     let rendered = render::render_target(bundle, target_name, &render::RenderMetadata::default())
         .map_err(|err| {
         SkillError(format!(
@@ -357,6 +358,11 @@ fn install_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(
             None
         } else {
             Some(Path::new(&opts.base_dir).to_path_buf())
+        },
+        render_dir: if opts.render_dir.is_empty() {
+            None
+        } else {
+            Some(Path::new(&opts.render_dir).to_path_buf())
         },
         mode: String::new(), // empty = symlink default (matching Go's empty Mode)
         force: false,

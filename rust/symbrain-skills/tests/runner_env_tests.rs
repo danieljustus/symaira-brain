@@ -47,6 +47,106 @@ fn run_child_case(test_name: &str, envs: &[(String, String)]) -> String {
     String::from_utf8_lossy(&output.stdout).into_owned()
 }
 
+/// Runs the real runner over a throwaway root and compares the symlink each
+/// installed skill ends up as against the frozen Go layout.
+///
+/// This is the Slice B gate: Go links `.claude/skills/<name>` at
+/// `<RenderDir>/<target>/<name>` (`install_ops.go` calls
+/// `os.Symlink(item.Path, tmp)` with the path `RenderAll` produced), while the
+/// Rust install layer materializes into a per-user cache and links there. The
+/// fixture records the Go target under `$ROOT`, so the assertion below fails
+/// until the install layer is given the render path.
+#[test]
+fn installed_symlinks_match_the_frozen_go_layout() {
+    let fixture = load_fixture();
+    let disk = fixture
+        .get("disk")
+        .expect("fixture has the on-disk layout")
+        .as_array()
+        .unwrap();
+
+    let expected: Vec<(String, String)> = disk
+        .iter()
+        .filter(|entry| entry.get("type").and_then(Value::as_str) == Some("symlink"))
+        .map(|entry| {
+            (
+                entry
+                    .get("path")
+                    .and_then(Value::as_str)
+                    .expect("symlink path")
+                    .to_owned(),
+                entry
+                    .get("target")
+                    .and_then(Value::as_str)
+                    .expect("symlink target")
+                    .to_owned(),
+            )
+        })
+        .collect();
+    assert_eq!(expected.len(), 4, "one link per installed harness target");
+
+    let tmp = tempfile::tempdir().expect("runner root");
+    let root = tmp.path();
+    let library = root.join("library");
+    let skill_dir = library.join("demo");
+    fs::create_dir_all(&skill_dir).unwrap();
+    fs::write(
+        skill_dir.join("SKILL.md"),
+        "---\nname: demo\ndescription: test\n---\n\n# Demo\nBody.\n",
+    )
+    .unwrap();
+
+    let opts = symbrain_skills::runner::Options {
+        library_dir: library.to_string_lossy().into(),
+        render_dir: root.join("rendered").to_string_lossy().into(),
+        base_dir: root.join("base").to_string_lossy().into(),
+        home_dir: root.to_string_lossy().into(),
+        ..symbrain_skills::runner::Options::default()
+    };
+    let mut ctx = symbrain_skills::runner::NoopContext;
+    symbrain_skills::runner::run(
+        &mut ctx,
+        &[
+            "claude".into(),
+            "codex".into(),
+            "hermes".into(),
+            "opencode".into(),
+        ],
+        opts,
+        false,
+    )
+    .expect("run must succeed over a populated library");
+
+    let root_text = root.to_string_lossy().into_owned();
+    // The generator records paths relative to its temp root and targets with
+    // that root spelled as $ROOT, so resolve both against this run's root.
+    let resolve = |recorded: &str| -> PathBuf {
+        if recorded.contains("$ROOT") {
+            PathBuf::from(recorded.replacen("$ROOT", &root_text, 1))
+        } else {
+            root.join(recorded)
+        }
+    };
+    for (recorded_path, recorded_target) in expected {
+        let path = resolve(&recorded_path);
+        let want_target = resolve(&recorded_target);
+        let metadata = fs::symlink_metadata(&path)
+            .unwrap_or_else(|error| panic!("{} is not installed: {error}", path.display()));
+        assert!(
+            metadata.file_type().is_symlink(),
+            "{} must be a symlink, like Go's install produces",
+            path.display()
+        );
+        let got_target = fs::read_link(&path).expect("symlink must be readable");
+        assert_eq!(
+            got_target,
+            want_target,
+            "{} points at the wrong tree; Go links the render dir",
+            path.display()
+        );
+    }
+}
+
 /// Reads one `key=value` line out of a child's stdout.
 fn field(stdout: &str, key: &str) -> String {
     let prefix = format!("{key}=");

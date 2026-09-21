@@ -226,6 +226,11 @@ fn install_tool(value: &Value) -> Result<String, GatewayError> {
         home_dir,
         project_dir: None,
         base_dir: Some(base_dir),
+        // No render root here: this gateway path renders in memory and installs
+        // directly, so it keeps the per-user cache as the symlink target rather
+        // than the runner's `RenderDir`. Parity for the runner is asserted in
+        // symbrain-skills' runner_env_tests.
+        render_dir: None,
         mode,
         allow_executable: false,
         force: false,

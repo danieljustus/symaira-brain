@@ -29,6 +29,15 @@ pub struct InstallOptions {
     pub project_dir: Option<PathBuf>,
     /// Optional replacement for the default base snapshot root.
     pub base_dir: Option<PathBuf>,
+    /// Render root the installed symlink must point into.
+    ///
+    /// Go's runner renders through `render.RenderAll(bundle, opts.RenderDir,
+    /// [target])` and then installs a symlink at `item.Path`, i.e.
+    /// `<RenderDir>/<target>/<name>` — flat, with no scope or identity segment.
+    /// When set, the stable tree is written there and the symlink points at it;
+    /// when unset the per-user cache is used, which is what direct install
+    /// callers without a runner have always done.
+    pub render_dir: Option<PathBuf>,
     /// `copy` (default) or managed `symlink`.
     pub mode: String,
     /// Adopt an unmanaged destination after moving it to a collision-free backup.
@@ -147,8 +156,18 @@ fn install_rendered_inner(
         // unmanaged collision must not refresh or replace the cache tree.
         preflight_destination(&rendered.target, &rendered.name, options)?;
         let home = effective_home(&options.home_dir)?;
-        let cache = home.join(".local/share/symskills/rendered");
-        let stable = cache_path(&cache, rendered, options)?;
+        // Go links at `<RenderDir>/<target>/<name>`; only a caller that has no
+        // render root (a direct install without the runner) falls back to the
+        // per-user cache.
+        let stable = if let Some(render_dir) = options.render_dir.as_deref() {
+            // Go links at `<RenderDir>/<target>/<name>`: flat, no scope or
+            // identity segment.
+            render_dir.join(&rendered.target).join(&rendered.name)
+        } else {
+            // A direct install with no render root keeps the per-user cache.
+            let cache = home.join(".local/share/symskills/rendered");
+            cache_path(&cache, rendered, options)?
+        };
         let _locks =
             install_locks_for(&rendered.target, &rendered.name, options, &[stable.clone()])?;
         // Keep the previous cache tree until destination and base publication
