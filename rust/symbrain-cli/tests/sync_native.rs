@@ -63,23 +63,54 @@ fn instruction_only_target_is_native_and_matches_sync_schema() {
 }
 
 #[test]
-fn skill_target_remains_on_go_fallback_before_output() {
+fn skill_target_harness_syncs_natively_without_a_go_binary() {
+    // A harness with a skill target no longer defers to Go: the ported runner
+    // handles it, and with an absent library it reports exactly what Go's
+    // skillsrunner does for that case.
     let root = TempDir::new().unwrap();
-    let output = run(&root, &["sync", "claude", "--dry-run"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let output = run(&root, &["sync", "claude", "--dry-run", "--json"]);
+    assert!(
+        output.status.success(),
+        "native sync must succeed, stderr: {:?}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
+        "claude must not fall back any more"
+    );
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(value["skills"][0]["target"], "claude");
+    assert_eq!(value["skills"][0]["status"], "ok");
+    assert_eq!(value["skills"][0]["message"], "no skills rendered");
 }
 
 #[test]
-fn project_override_remains_on_go_fallback_before_output() {
+fn project_override_syncs_natively_without_a_go_binary() {
+    // `--project` used to be a hard fallback trigger. The instruction target
+    // resolves against the given directory and the skills section still runs
+    // natively.
     let root = TempDir::new().unwrap();
     let project = root.path().join("alternate-project");
     let output = run(
         &root,
-        &["sync", "--project", project.to_str().unwrap(), "agents"],
+        &[
+            "sync",
+            "--project",
+            project.to_str().unwrap(),
+            "agents",
+            "--json",
+        ],
     );
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(
+        output.status.success(),
+        "native sync with --project must succeed, stderr: {:?}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        !String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
+        "--project must not fall back any more"
+    );
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(value["skills"][0]["target"], "agents");
+    assert_eq!(value["skills"][0]["status"], "skipped");
 }
