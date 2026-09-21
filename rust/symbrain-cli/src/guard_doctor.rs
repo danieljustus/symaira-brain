@@ -1,54 +1,156 @@
-//! Native implementation of `symbrain guard doctor`'s "empty machine" case.
+//! Native implementation of `symbrain guard doctor`.
 //!
-//! Ported from `guard/cmd/symguard/doctor/command.go`'s `Run`. Only the
-//! all-defaults report is reproduced here: no guard config file
-//! (`guard/internal/config.ConfigPath()`), no audit log
-//! (`filepath.Join(config.DataDir(), "audit.log")`), and none of
-//! `guard/internal/discovery.DiscoverAll()`'s known client config paths
-//! present. Any one of those existing means real, unported Go behavior would
-//! run (TOML parsing, audit-anchor reading, MCP discovery, spawn-allowlist
-//! matching, plaintext-secret detection) — the native path defers to Go
-//! rather than guess at it. See the ledger (`migration/implementation-plan.md`)
-//! for why this is scoped to exactly the one frozen fixture case.
+//! Ported from `guard/cmd/symguard/doctor/{command,checks}.go` and the Go
+//! packages it depends on:
+//!
+//! * `guard/internal/config` — `ConfigPath`, `DataDir`, the TOML schema,
+//!   `Load`'s default-on-missing behavior and `validate`.
+//! * `guard/internal/spawn` — `NewAllowlist`/`Allows`/`Len`.
+//! * `guard/internal/discovery` — `DiscoverAll`, `Server`,
+//!   `PlaintextSecretKeys`, `LooksLikeSecret`.
+//! * `guard/internal/audit` — `DefaultAnchorPath` + `ReadCheckpoint`.
+//!
+//! # Gating
+//!
+//! Every state whose bytes this port cannot reproduce exactly is detected
+//! *before any output is written*, and `run` returns `None` so the caller
+//! falls back to the Go binary. A false "needs Go" is always preferred over
+//! a false clean report, because a wrong answer here hides real
+//! spawn-allowlist and plaintext-secret findings. The gates are:
+//!
+//! * a config file that exists but does not parse/validate — Go prints
+//!   `BurntSushi`'s own parser text (`toml: line 1: expected '.' or '='…`),
+//!   which no Rust TOML crate reproduces;
+//! * an audit anchor that exists but does not parse — Go prints
+//!   `encoding/json`'s own error text;
+//! * any discovery source that exists but fails to read or parse, or an
+//!   entry with neither `command` nor `url` — Go turns those into an
+//!   `mcp servers  error: discovery: …` line carrying the upstream parser's
+//!   message;
+//! * a single server carrying more than one plaintext secret key — Go emits
+//!   those in `EnvKeys` order, which comes from a Go map range and is
+//!   therefore not deterministic even between two Go runs (see the report
+//!   in the migration notes); there is no byte answer to match.
 
+use std::collections::BTreeMap;
 use std::env;
-use std::io::Write;
+use std::fmt::Write as _;
+use std::fs;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
+
+use toml_edit::{DocumentMut, Item, Table, Value};
 
 use symbrain_core::{exit, version};
 
-use super::guard_scan;
+// The MCP client config parser used by `guard scan`, reused rather than
+// duplicated. Go's `guard/internal/discovery` is itself a thin adapter over
+// `corekit/mcpcfgkit` — the very implementation `guard_scan_config` already
+// ports, path list and all (verified directly against the pinned
+// `symaira-corekit v0.17.0` module source) — so a second copy would only be
+// a second place to drift on a security-sensitive list.
+use super::guard_scan::{self, guard_scan_config};
 
-/// Runs `symbrain guard doctor`. Returns `None` when this machine is not in
-/// the "empty machine" state, so the caller falls back to the Go binary.
+/// Runs `symbrain guard doctor`. Returns `None` when any part of this
+/// machine's state cannot be reproduced byte-for-byte, so the caller falls
+/// back to the Go binary.
 pub(crate) fn run(stdout: &mut dyn Write) -> Option<u8> {
-    let config_path = config_path();
-    let audit_log_path = super::audit_path();
-    let any_client_config = guard_scan::SOURCES
-        .iter()
-        .any(|source| guard_scan::source_path(*source).exists());
+    let (report, code) = build_report()?;
+    let _ = stdout.write_all(report.as_bytes());
+    Some(code)
+}
 
-    if requires_go_fallback(&config_path, &audit_log_path, any_client_config) {
-        return None;
+/// Builds the whole report in memory. `None` means "fall back to Go" — no
+/// byte is written in that case, by construction.
+fn build_report() -> Option<(String, u8)> {
+    let config = load_config(&config_path())?;
+    let audit = audit_status(&super::audit_path())?;
+    let servers = discover_all()?;
+
+    let mut out = String::new();
+    let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
+    out.push_str("symguard doctor\n\n");
+    let _ = writeln!(out, "  Version:   {build_version}");
+    // Go's own line here is `runtime.Version()`. A Rust binary has no Go
+    // toolchain and must never print a fabricated one (a prior wave did
+    // exactly that and was reverted): report the real Rust toolchain under
+    // its own label, as `guard version` already does.
+    let _ = writeln!(out, "  Rust:      {}", crate::rustc_version());
+    let _ = writeln!(
+        out,
+        "  OS/Arch:   {}/{}\n",
+        version::current_os(),
+        version::current_arch()
+    );
+
+    let mut row = |name: &str, status: &str| {
+        let _ = writeln!(out, "  {name:<16} {status}");
+    };
+    row("binary", "ok");
+    row("go runtime", "ok");
+    let loaded = match config {
+        ConfigState::Missing => {
+            row("config", "not configured (no config file found)");
+            LoadedConfig::default()
+        }
+        ConfigState::Loaded(loaded) => {
+            row("config", "ok");
+            loaded
+        }
+    };
+    if loaded.rules > 0 {
+        row("policy", &format!("ok ({} rule(s))", loaded.rules));
+    } else {
+        row("policy", "defaults only (no rules — deny by default)");
     }
-    Some(print_empty_machine_report(stdout))
+    row("audit log", audit.as_str());
+
+    let allowlist = loaded.allowlist;
+    if allowlist.is_empty() {
+        row(
+            "spawn allowlist",
+            "not configured (empty — deny by default)",
+        );
+    } else {
+        row(
+            "spawn allowlist",
+            &format!("ok ({} entries)", allowlist.len()),
+        );
+    }
+
+    let mut checks = Vec::new();
+    if servers.is_empty() {
+        row("mcp servers", "none discovered");
+    } else {
+        row("mcp servers", &format!("{} discovered", servers.len()));
+        checks = check_servers(servers, &allowlist)?;
+    }
+
+    let problems = checks
+        .iter()
+        .filter(|c| !c.allowed || !c.secrets.is_empty())
+        .count();
+
+    print_server_checks(&mut out, &checks);
+    print_secret_risks(&mut out, &checks);
+
+    out.push('\n');
+    if problems == 0 {
+        out.push_str(
+            "All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+        );
+        return Some((out, exit::OK));
+    }
+    let _ = writeln!(out, "{problems} issue(s) found. See details above.");
+    Some((out, exit::GENERIC))
 }
 
-/// The conservative empty-machine gate. Native handling is safe only when
-/// none of the three conditions hold — flip to `true` (fall back to Go) the
-/// moment any one of them does. Prefer a false "needs Go" over a false
-/// "none discovered": the latter would hide real spawn-allowlist/secret
-/// findings from a user who actually has one of these present.
-fn requires_go_fallback(
-    config_path: &Path,
-    audit_log_path: &Path,
-    any_client_config: bool,
-) -> bool {
-    config_path.exists() || audit_log_path.exists() || any_client_config
-}
+// ---------------------------------------------------------------------------
+// config (guard/internal/config)
+// ---------------------------------------------------------------------------
 
-/// Mirrors `guard/internal/config.ConfigPath()`/`DefaultPath()`:
-/// `$SYMGUARD_CONFIG`, else `$XDG_CONFIG_HOME/symguard/config.toml`, else
+/// Mirrors `config.ConfigPath()`/`DefaultPath()`: `$SYMGUARD_CONFIG`, else
+/// `$XDG_CONFIG_HOME/symguard/config.toml`, else
 /// `~/.config/symguard/config.toml`.
 fn config_path() -> PathBuf {
     if let Some(env) = env::var_os("SYMGUARD_CONFIG").filter(|v| !v.is_empty()) {
@@ -61,89 +163,602 @@ fn config_path() -> PathBuf {
     home.join(".config").join("symguard").join("config.toml")
 }
 
-fn print_empty_machine_report(stdout: &mut dyn Write) -> u8 {
-    let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
-    let _ = writeln!(stdout, "symguard doctor");
-    let _ = writeln!(stdout);
-    let _ = writeln!(stdout, "  Version:   {build_version}");
-    // Go's own line here is `runtime.Version()` (e.g. "go1.26.7") — a Rust
-    // binary has no Go toolchain and must never print a fabricated one (a
-    // prior wave-4 attempt at exactly that was reverted). Report the real
-    // Rust toolchain honestly under its own label instead, matching the
-    // precedent already shipped in this file's `version` verb; the test's
-    // normalization tokenizes this row the same way it already does there.
-    let _ = writeln!(stdout, "  Rust:      {}", crate::rustc_version());
-    let _ = writeln!(
-        stdout,
-        "  OS/Arch:   {}/{}",
-        version::current_os(),
-        version::current_arch()
-    );
-    let _ = writeln!(stdout);
-    let mut report = |name: &str, status: &str| {
-        let _ = writeln!(stdout, "  {name:<16} {status}");
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SpawnEntry {
+    path: String,
+    argv_prefix: Vec<String>,
+}
+
+#[derive(Debug, Default)]
+struct LoadedConfig {
+    rules: usize,
+    allowlist: Vec<SpawnEntry>,
+}
+
+/// The three outcomes of `config.Load()` that doctor distinguishes. The
+/// error outcome is not represented: Go prints `BurntSushi`'s or its own
+/// `validate` text there, and this port gates instead of guessing.
+enum ConfigState {
+    Missing,
+    Loaded(LoadedConfig),
+}
+
+/// Ports `config.Load()`. `None` means Go would print an error string this
+/// port cannot reproduce — fall back.
+fn load_config(path: &Path) -> Option<ConfigState> {
+    let text = match fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Some(ConfigState::Missing),
+        Err(_) => return None,
     };
-    report("binary", "ok");
-    report("go runtime", "ok");
-    report("config", "not configured (no config file found)");
-    report("policy", "defaults only (no rules — deny by default)");
-    report(
-        "audit log",
-        "not initialized (created on first 'symguard decide')",
-    );
-    report(
-        "spawn allowlist",
-        "not configured (empty — deny by default)",
-    );
-    report("mcp servers", "none discovered");
-    let _ = writeln!(stdout);
-    let _ = writeln!(
-        stdout,
-        "All basic checks passed. Run 'symguard scan' after setup for full diagnostics."
-    );
-    exit::OK
+    parse_and_validate(&text).map(ConfigState::Loaded)
+}
+
+const VALID_DECISIONS: [&str; 6] = ["allow", "ask", "deny", "redact", "readonly", "sandbox"];
+
+/// Decodes and validates the TOML exactly as far as doctor's output depends
+/// on it. Every shape mismatch (a Go decode error) and every `validate()`
+/// rejection returns `None`, because both print library or format text this
+/// port does not reproduce.
+fn parse_and_validate(text: &str) -> Option<LoadedConfig> {
+    let doc = text.parse::<DocumentMut>().ok()?;
+    check_defaults(&doc)?;
+    let rules = count_rules(&doc)?;
+    check_sequence(&doc)?;
+    check_unprinted_sections(&doc)?;
+    let allowlist = read_allowlist(&doc)?;
+    Some(LoadedConfig { rules, allowlist })
+}
+
+fn string_of(item: &Item) -> Option<&str> {
+    item.as_str()
+}
+
+fn string_array(item: &Item) -> Option<Vec<String>> {
+    item.as_array()?
+        .iter()
+        .map(|value| match value {
+            Value::String(text) => Some(text.value().clone()),
+            _ => None,
+        })
+        .collect()
+}
+
+/// `[defaults]` decodes to `map[string]Decision`; `validate()` rejects any
+/// value that is not a known decision.
+fn check_defaults(doc: &DocumentMut) -> Option<()> {
+    let Some(item) = doc.get("defaults") else {
+        return Some(());
+    };
+    let table = item.as_table()?;
+    for (_, value) in table {
+        if !VALID_DECISIONS.contains(&string_of(value)?) {
+            return None;
+        }
+    }
+    Some(())
+}
+
+/// `[[rules]]`: every rule needs a valid decision and at least one match
+/// criterion, else `validate()` rejects the file.
+fn count_rules(doc: &DocumentMut) -> Option<usize> {
+    let Some(item) = doc.get("rules") else {
+        return Some(0);
+    };
+    let tables = item.as_array_of_tables()?;
+    for rule in tables {
+        if !VALID_DECISIONS.contains(&string_of(rule.get("decision")?)?) {
+            return None;
+        }
+        let matcher = rule.get("match")?.as_table()?;
+        let mut criteria = 0usize;
+        for field in ["server", "tool", "capability"] {
+            if let Some(value) = matcher.get(field)
+                && !string_of(value)?.is_empty()
+            {
+                criteria += 1;
+            }
+        }
+        if let Some(value) = matcher.get("command_contains")
+            && !string_array(value)?.is_empty()
+        {
+            criteria += 1;
+        }
+        if criteria == 0 {
+            return None;
+        }
+    }
+    Some(tables.len())
+}
+
+/// `[sequence]`: `DefaultConfig()` seeds `Threshold = 3`, and a TOML decode
+/// only overwrites keys the file actually contains.
+fn check_sequence(doc: &DocumentMut) -> Option<()> {
+    let Some(item) = doc.get("sequence") else {
+        return Some(());
+    };
+    let table = item.as_table()?;
+    let enabled = match table.get("enabled") {
+        None => false,
+        Some(value) => value.as_bool()?,
+    };
+    let threshold = match table.get("threshold") {
+        None => 3,
+        Some(value) => value.as_integer()?,
+    };
+    if enabled && threshold < 2 {
+        return None;
+    }
+    Some(())
+}
+
+/// `[proxy]`, `[audit]` and `[[remote]]` never reach doctor's output, but a
+/// wrong type in any of them is a Go decode error, so their shape still
+/// decides native versus Go.
+fn check_unprinted_sections(doc: &DocumentMut) -> Option<()> {
+    fn strings(table: &Table, fields: &[&str]) -> Option<()> {
+        for field in fields {
+            if let Some(value) = table.get(field) {
+                string_of(value)?;
+            }
+        }
+        Some(())
+    }
+    if let Some(item) = doc.get("proxy") {
+        strings(item.as_table()?, &["upstream"])?;
+    }
+    if let Some(item) = doc.get("audit") {
+        let table = item.as_table()?;
+        strings(table, &["path", "encrypt_age"])?;
+        if let Some(value) = table.get("encrypt") {
+            value.as_bool()?;
+        }
+    }
+    if let Some(item) = doc.get("remote") {
+        for target in item.as_array_of_tables()? {
+            strings(target, &["name", "provider", "host", "trust_level"])?;
+            for field in ["allowed_servers", "labels"] {
+                if let Some(value) = target.get(field) {
+                    string_array(value)?;
+                }
+            }
+        }
+    }
+    Some(())
+}
+
+/// `[[spawn.allowlist]]`: `validate()` requires a non-empty absolute path.
+fn read_allowlist(doc: &DocumentMut) -> Option<Vec<SpawnEntry>> {
+    let mut allowlist = Vec::new();
+    let Some(item) = doc.get("spawn") else {
+        return Some(allowlist);
+    };
+    let Some(entries) = item.as_table()?.get("allowlist") else {
+        return Some(allowlist);
+    };
+    for entry in entries.as_array_of_tables()? {
+        let path = string_of(entry.get("path")?)?.to_owned();
+        if path.is_empty() || !Path::new(&path).is_absolute() {
+            return None;
+        }
+        let argv_prefix = match entry.get("argv_prefix") {
+            None => Vec::new(),
+            Some(value) => string_array(value)?,
+        };
+        allowlist.push(SpawnEntry { path, argv_prefix });
+    }
+    Some(allowlist)
+}
+
+// ---------------------------------------------------------------------------
+// audit log (guard/internal/audit)
+// ---------------------------------------------------------------------------
+
+/// Ports doctor's audit-log branch. `None` gates to Go.
+fn audit_status(log_path: &Path) -> Option<String> {
+    match fs::metadata(log_path) {
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            return Some("not initialized (created on first 'symguard decide')".to_owned());
+        }
+        // Go prints `error: <the os.Stat error>` here; not reproducible.
+        Err(_) => return None,
+        Ok(_) => {}
+    }
+    // audit.DefaultAnchorPath(logPath) == logPath + ".anchor"
+    let mut anchor_path = log_path.as_os_str().to_owned();
+    anchor_path.push(".anchor");
+    let anchor = match fs::read(PathBuf::from(anchor_path)) {
+        Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+        Err(_) => return None,
+        Ok(data) => Some(data),
+    };
+    match anchor {
+        None => Some("ok (JSONL, chain anchor pending Phase 3 sink)".to_owned()),
+        Some(data) => {
+            // auditkit.ReadCheckpoint json.Unmarshal's into ChainAnchor; any
+            // failure carries encoding/json's own message, so gate on it.
+            serde_json::from_slice::<ChainAnchor>(&data).ok()?;
+            Some("ok (hash-chained, anchor present)".to_owned())
+        }
+    }
+}
+
+/// Mirrors `auditkit.ChainAnchor`'s JSON shape closely enough that a
+/// document Go would reject is rejected here too (and therefore gated).
+#[derive(serde::Deserialize)]
+#[allow(dead_code)]
+struct ChainAnchor {
+    #[serde(default)]
+    last_entry_hash: String,
+    #[serde(default)]
+    entry_count: i64,
+    #[serde(default)]
+    schema_version: i32,
+    #[serde(default)]
+    log_size: i64,
+    #[serde(default)]
+    content_hash: String,
+}
+
+// ---------------------------------------------------------------------------
+// discovery (guard/internal/discovery)
+// ---------------------------------------------------------------------------
+
+#[derive(Clone, Debug)]
+struct Discovered {
+    name: String,
+    client: String,
+    command: String,
+    args: Vec<String>,
+    transport: String,
+    env: BTreeMap<String, String>,
+}
+
+/// Ports `discovery.DiscoverAll()`. Missing config files are skipped, as in
+/// Go. Anything Go would surface as a non-missing-file `StatusUnsupported`
+/// finding (and therefore as an `mcp servers  error: discovery: …` line
+/// carrying an upstream parser message) gates instead.
+fn discover_all() -> Option<Vec<Discovered>> {
+    let mut servers = Vec::new();
+    for source in guard_scan::SOURCES {
+        let path = guard_scan::source_path(source);
+        let data = match fs::read(&path) {
+            Ok(data) => data,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
+            Err(_) => return None,
+        };
+        let entries = guard_scan_config::parse_config(&data, source.key).ok()?;
+        for (name, entry) in entries {
+            let command = entry.command_or_url();
+            if command.is_empty() {
+                // Go: StatusUnsupported "server %q is missing both command
+                // and url" → DiscoverAll returns an error.
+                return None;
+            }
+            servers.push(Discovered {
+                name,
+                client: source.client.to_owned(),
+                command,
+                args: entry.args.clone(),
+                transport: entry.transport(),
+                env: entry.merged_env(),
+            });
+        }
+    }
+    Some(servers)
+}
+
+// ---------------------------------------------------------------------------
+// secrets (guard/internal/discovery/secrets.go)
+// ---------------------------------------------------------------------------
+
+const SECRET_KEY_MARKERS: [&str; 8] = [
+    "API_KEY",
+    "TOKEN",
+    "SECRET",
+    "PASSWORD",
+    "PASSWD",
+    "CREDENTIAL",
+    "PRIVATE_KEY",
+    "AUTH",
+];
+
+const SECRET_VALUE_PREFIXES: [&str; 7] = ["sk-", "sk_", "ghp_", "gho_", "AKIA", "xoxb-", "xoxp-"];
+
+/// Ports `discovery.LooksLikeSecret`.
+fn looks_like_secret(key: &str, value: &str) -> bool {
+    if value.is_empty() || is_env_reference(value) {
+        return false;
+    }
+    let upper = key.to_uppercase();
+    if SECRET_KEY_MARKERS
+        .iter()
+        .any(|marker| upper.contains(marker))
+    {
+        return true;
+    }
+    SECRET_VALUE_PREFIXES
+        .iter()
+        .any(|prefix| value.starts_with(prefix))
+}
+
+/// Ports `discovery.isEnvReference`: `$NAME` or `${NAME}`.
+fn is_env_reference(value: &str) -> bool {
+    let Some(rest) = value.strip_prefix('$') else {
+        return false;
+    };
+    if rest.starts_with('{') && rest.ends_with('}') {
+        return true;
+    }
+    if rest.is_empty() {
+        return false;
+    }
+    rest.chars().all(|c| c == '_' || c.is_ascii_alphanumeric())
+}
+
+// ---------------------------------------------------------------------------
+// spawn allowlist (guard/internal/spawn)
+// ---------------------------------------------------------------------------
+
+/// Ports `spawn.Allowlist.Allows`. Non-stdio servers are never spawned and
+/// are always allowed; a stdio server needs an absolute command matching an
+/// entry's cleaned path, with the entry's argv prefix matching.
+fn allows(server: &Discovered, allowlist: &[SpawnEntry]) -> bool {
+    if server.transport != "stdio" {
+        return true;
+    }
+    if !Path::new(&server.command).is_absolute() {
+        return false;
+    }
+    let command = clean_path(&server.command);
+    allowlist.iter().any(|entry| {
+        Path::new(&entry.path).is_absolute()
+            && clean_path(&entry.path) == command
+            && entry.argv_prefix.len() <= server.args.len()
+            && entry.argv_prefix[..] == server.args[..entry.argv_prefix.len()]
+    })
+}
+
+/// Ports Go's `filepath.Clean` for the slash-separated paths the allowlist
+/// requires (entries must be absolute, so there is no relative-path case to
+/// carry).
+fn clean_path(path: &str) -> String {
+    let rooted = path.starts_with('/');
+    let mut out: Vec<&str> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                if out.last().is_some_and(|last| *last != "..") {
+                    out.pop();
+                } else if !rooted {
+                    out.push("..");
+                }
+            }
+            other => out.push(other),
+        }
+    }
+    let joined = out.join("/");
+    if rooted {
+        format!("/{joined}")
+    } else if joined.is_empty() {
+        ".".to_owned()
+    } else {
+        joined
+    }
+}
+
+// ---------------------------------------------------------------------------
+// checks.go
+// ---------------------------------------------------------------------------
+
+struct ServerCheck {
+    name: String,
+    client: String,
+    command: String,
+    args: Vec<String>,
+    transport: String,
+    allowed: bool,
+    secrets: Vec<String>,
+}
+
+/// Ports `checkServers`. `None` gates: Go emits a server's secret keys in
+/// `EnvKeys` order, which is a Go map range and so is not stable even
+/// between two Go runs, leaving no byte answer to match for more than one.
+fn check_servers(servers: Vec<Discovered>, allowlist: &[SpawnEntry]) -> Option<Vec<ServerCheck>> {
+    let mut checks: Vec<ServerCheck> = servers
+        .into_iter()
+        .map(|server| {
+            let allowed = allows(&server, allowlist);
+            let secrets = server
+                .env
+                .iter()
+                .filter(|(key, value)| looks_like_secret(key, value))
+                .map(|(key, _)| key.clone())
+                .collect::<Vec<_>>();
+            ServerCheck {
+                name: server.name,
+                client: server.client,
+                command: server.command,
+                args: server.args,
+                transport: server.transport,
+                allowed,
+                secrets,
+            }
+        })
+        .collect();
+    if checks.iter().any(|check| check.secrets.len() > 1) {
+        return None;
+    }
+    checks.sort_by(|a, b| a.client.cmp(&b.client).then_with(|| a.name.cmp(&b.name)));
+    Some(checks)
+}
+
+/// Ports `printServerChecks`.
+fn print_server_checks(out: &mut String, checks: &[ServerCheck]) {
+    if checks.is_empty() {
+        return;
+    }
+    out.push_str("\nDiscovered MCP servers (spawn allowlist):\n");
+    for check in checks {
+        let verdict = if check.transport == "http" {
+            "[n/a]    "
+        } else if check.allowed {
+            "[allowed]"
+        } else {
+            "[DENIED] "
+        };
+        let mut desc = format!(
+            "{} ({}/{}) → {}",
+            check.name, check.client, check.transport, check.command
+        );
+        if !check.args.is_empty() {
+            desc.push(' ');
+            desc.push_str(&check.args.join(" "));
+        }
+        if !check.allowed && check.transport == "stdio" {
+            desc.push_str(" (not on spawn allowlist)");
+        }
+        let _ = writeln!(out, "  {verdict} {desc}");
+    }
+}
+
+/// Ports `printSecretRisks`. Note it does not depend on `Allowed`: a denied
+/// server carrying a plaintext secret prints both blocks.
+fn print_secret_risks(out: &mut String, checks: &[ServerCheck]) {
+    let mut any = false;
+    for check in checks {
+        if check.secrets.is_empty() {
+            continue;
+        }
+        if !any {
+            any = true;
+            out.push_str("\nPlaintext secret risk:\n");
+        }
+        let _ = writeln!(
+            out,
+            "  {} ({}): env {} stored as plaintext values in the client config",
+            check.name,
+            check.client,
+            check.secrets.join(", ")
+        );
+    }
+    if any {
+        out.push_str("  symguard reports this risk but is not a secret store — move these values to symvault and reference them at launch time.\n");
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs;
 
-    #[test]
-    fn gate_flips_on_any_of_the_three_conditions() {
-        let dir = tempfile::tempdir().expect("tempdir");
-        let missing = dir.path().join("missing");
-        let present = dir.path().join("present");
-        fs::write(&present, b"").expect("write");
-
-        assert!(!requires_go_fallback(&missing, &missing, false));
-        assert!(requires_go_fallback(&present, &missing, false));
-        assert!(requires_go_fallback(&missing, &present, false));
-        assert!(requires_go_fallback(&missing, &missing, true));
-        assert!(requires_go_fallback(&present, &present, true));
+    fn stdio(command: &str, args: &[&str]) -> Discovered {
+        Discovered {
+            name: "s".to_owned(),
+            client: "cursor".to_owned(),
+            command: command.to_owned(),
+            args: args.iter().map(|a| (*a).to_owned()).collect(),
+            transport: "stdio".to_owned(),
+            env: BTreeMap::new(),
+        }
     }
 
     #[test]
-    fn empty_machine_report_matches_frozen_shape() {
-        let mut stdout = Vec::new();
-        print_empty_machine_report(&mut stdout);
-        let text = String::from_utf8(stdout).expect("utf8");
-        assert!(text.starts_with("symguard doctor\n\n  Version:   "));
-        assert!(text.contains("\n  Rust:      "));
-        assert!(text.contains("\n  OS/Arch:   "));
-        assert!(text.contains("  binary           ok\n"));
-        assert!(text.contains("  go runtime       ok\n"));
-        assert!(text.contains("  config           not configured (no config file found)\n"));
-        assert!(text.contains("  policy           defaults only (no rules — deny by default)\n"));
-        assert!(
-            text.contains(
-                "  audit log        not initialized (created on first 'symguard decide')\n"
-            )
-        );
-        assert!(text.contains("  spawn allowlist  not configured (empty — deny by default)\n"));
-        assert!(text.contains("  mcp servers      none discovered\n"));
-        assert!(text.ends_with(
-            "All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n"
+    fn allowlist_is_deny_by_default_and_prefix_matched() {
+        let entry = SpawnEntry {
+            path: "/usr/bin/true".to_owned(),
+            argv_prefix: vec!["--once".to_owned()],
+        };
+        assert!(!allows(&stdio("/usr/bin/true", &["--once"]), &[]));
+        assert!(allows(
+            &stdio("/usr/bin/true", &["--once", "--extra"]),
+            std::slice::from_ref(&entry)
         ));
+        assert!(!allows(
+            &stdio("/usr/bin/true", &["--twice"]),
+            std::slice::from_ref(&entry)
+        ));
+        // Relative commands can never match an absolute entry.
+        assert!(!allows(&stdio("true", &[]), std::slice::from_ref(&entry)));
+        // ..-containing paths clean to the same file, as filepath.Clean does.
+        assert!(allows(
+            &stdio("/usr/lib/../bin/true", &["--once"]),
+            std::slice::from_ref(&entry)
+        ));
+        // HTTP servers are not gated at all.
+        let mut http = stdio("https://example.test/mcp", &[]);
+        http.transport = "http".to_owned();
+        assert!(allows(&http, &[]));
+    }
+
+    #[test]
+    fn secret_heuristic_matches_go() {
+        assert!(looks_like_secret("SECRET_KEY", "literal"));
+        assert!(looks_like_secret("ANYTHING", "sk-abc"));
+        assert!(!looks_like_secret("SECRET_KEY", "${FROM_ENV}"));
+        assert!(!looks_like_secret("SECRET_KEY", "$FROM_ENV"));
+        assert!(looks_like_secret("SECRET_KEY", "$not-a-reference"));
+        assert!(!looks_like_secret("SECRET_KEY", ""));
+        assert!(!looks_like_secret("PLAIN", "value"));
+    }
+
+    #[test]
+    fn config_parses_the_healthy_fixture_and_gates_on_invalid_toml() {
+        let healthy = "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = \"/usr/bin/true\"\n";
+        let loaded = parse_and_validate(healthy).expect("healthy config is native");
+        assert_eq!(loaded.rules, 1);
+        assert_eq!(
+            loaded.allowlist,
+            vec![SpawnEntry {
+                path: "/usr/bin/true".to_owned(),
+                argv_prefix: Vec::new(),
+            }]
+        );
+
+        // The frozen `config_error` fixture: Go prints BurntSushi's text.
+        assert!(parse_and_validate("not [valid = toml").is_none());
+        // validate() rejections gate too.
+        assert!(parse_and_validate("[defaults]\nshell = \"nonsense\"\n").is_none());
+        assert!(
+            parse_and_validate("[spawn]\n[[spawn.allowlist]]\npath = \"relative\"\n").is_none()
+        );
+        assert!(parse_and_validate("[[rules]]\ndecision = \"allow\"\n[rules.match]\n").is_none());
+        assert!(parse_and_validate("[sequence]\nenabled = true\nthreshold = 1\n").is_none());
+        assert!(parse_and_validate("[sequence]\nenabled = true\n").is_some());
+    }
+
+    #[test]
+    fn audit_status_reports_all_three_states() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let log = dir.path().join("audit.log");
+        assert_eq!(
+            audit_status(&log).as_deref(),
+            Some("not initialized (created on first 'symguard decide')")
+        );
+        fs::write(&log, b"{\"entry_id\":\"1\"}\n").expect("write log");
+        assert_eq!(
+            audit_status(&log).as_deref(),
+            Some("ok (JSONL, chain anchor pending Phase 3 sink)")
+        );
+        fs::write(
+            dir.path().join("audit.log.anchor"),
+            br#"{"last_entry_hash":"abc","entry_count":1,"schema_version":2}"#,
+        )
+        .expect("write anchor");
+        assert_eq!(
+            audit_status(&log).as_deref(),
+            Some("ok (hash-chained, anchor present)")
+        );
+        // A corrupt anchor is Go's encoding/json message — gate.
+        fs::write(dir.path().join("audit.log.anchor"), b"not json").expect("write anchor");
+        assert!(audit_status(&log).is_none());
+    }
+
+    #[test]
+    fn multiple_secret_keys_on_one_server_gate_to_go() {
+        let mut server = stdio("/usr/bin/env", &[]);
+        server.env.insert("SECRET_KEY".to_owned(), "a".to_owned());
+        server.env.insert("API_KEY".to_owned(), "b".to_owned());
+        assert!(check_servers(vec![server], &[]).is_none());
     }
 }

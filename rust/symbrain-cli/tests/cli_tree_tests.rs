@@ -9,6 +9,9 @@
 //! No assertions are weakened — divergences are reported with case id, expected
 //! vs actual bytes, and first differing offset.
 
+#[path = "common/doctor_header.rs"]
+mod doctor_header;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
@@ -173,15 +176,9 @@ fn normalize_accepted_differences(s: &str) -> String {
     let row = regex::Regex::new(r"(?m)^[ \t]*(?:go|rust)[ \t]+.*$").unwrap();
     let mut out = row.replace_all(s, "<toolchain>").to_string();
 
-    let doctor_toolchain_row = regex::Regex::new(r"(?m)^[ \t]*(?:Go|Rust):[ \t]+.*$").unwrap();
-    out = doctor_toolchain_row
-        .replace_all(&out, "  <toolchain>:")
-        .to_string();
-
-    let doctor_os_arch_row = regex::Regex::new(r"(?m)^[ \t]*OS/Arch:[ \t]+.*$").unwrap();
-    out = doctor_os_arch_row
-        .replace_all(&out, "  <os-arch>:")
-        .to_string();
+    // `guard doctor`'s own header block, shared with the doctor-oracle test
+    // so there is exactly one normalization for it (see the module's docs).
+    out = doctor_header::normalize(&out);
 
     // Claude Desktop's config directory: this fixture was recorded once on
     // macOS ("Library/Application Support/Claude"), but two independent Go

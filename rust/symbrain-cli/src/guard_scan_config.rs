@@ -5,18 +5,18 @@ use std::collections::BTreeMap;
 use serde_json::Value;
 
 #[derive(Default)]
-pub(super) struct Entry {
-    pub(super) command: String,
-    pub(super) url: String,
-    pub(super) args: Vec<String>,
-    pub(super) kind: String,
-    pub(super) transport_name: String,
-    pub(super) env: BTreeMap<String, String>,
-    pub(super) environment: BTreeMap<String, String>,
+pub(crate) struct Entry {
+    pub(crate) command: String,
+    pub(crate) url: String,
+    pub(crate) args: Vec<String>,
+    pub(crate) kind: String,
+    pub(crate) transport_name: String,
+    pub(crate) env: BTreeMap<String, String>,
+    pub(crate) environment: BTreeMap<String, String>,
 }
 
 impl Entry {
-    pub(super) fn command_or_url(&self) -> String {
+    pub(crate) fn command_or_url(&self) -> String {
         if self.command.is_empty() {
             self.url.clone()
         } else {
@@ -24,7 +24,7 @@ impl Entry {
         }
     }
 
-    pub(super) fn transport(&self) -> String {
+    pub(crate) fn transport(&self) -> String {
         match self.kind.to_ascii_lowercase().as_str() {
             "local" => "stdio".to_owned(),
             "remote" => "http".to_owned(),
@@ -35,14 +35,14 @@ impl Entry {
         }
     }
 
-    pub(super) fn merged_env(&self) -> BTreeMap<String, String> {
+    pub(crate) fn merged_env(&self) -> BTreeMap<String, String> {
         let mut merged = self.environment.clone();
         merged.extend(self.env.clone());
         merged
     }
 }
 
-pub(super) fn parse_config(data: &[u8], key: &str) -> Result<BTreeMap<String, Entry>, String> {
+pub(crate) fn parse_config(data: &[u8], key: &str) -> Result<BTreeMap<String, Entry>, String> {
     let trimmed = String::from_utf8_lossy(data).trim().to_owned();
     if trimmed.starts_with('{') {
         let stripped = strip_jsonc(&trimmed);
