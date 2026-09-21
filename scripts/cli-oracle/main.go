@@ -148,12 +148,25 @@ func setupOracleEnv() error {
 	if err := os.MkdirAll(filepath.Join(root, "cwd"), 0o755); err != nil {
 		return err
 	}
+	// PATH is pinned to an empty directory. The `skills targets` INSTALLED
+	// column follows harness-CLI detection over PATH, so inheriting the
+	// operator's PATH froze the recorder's machine into the fixture: the same
+	// command reported claude/codex/antigravity/hermes as INSTALLED true on a
+	// developer machine and false on a CI runner. An empty PATH makes the
+	// column report false everywhere, which is the machine-independent truth
+	// for an isolated root.
+	emptyPath := filepath.Join(root, "empty-path")
+	if err := os.MkdirAll(emptyPath, 0o755); err != nil {
+		return err
+	}
+
 	oracleEnv = append(os.Environ(),
 		"HOME="+home,
 		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
 		"XDG_DATA_HOME="+filepath.Join(root, "data"),
 		"XDG_CACHE_HOME="+filepath.Join(root, "cache"),
 		"XDG_STATE_HOME="+filepath.Join(root, "state"),
+		"PATH="+emptyPath,
 	)
 	return nil
 }
