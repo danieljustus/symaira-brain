@@ -147,7 +147,7 @@ pub fn run(
             if lookup(name).is_err() {
                 let _ = writeln!(
                     stderr,
-                    "symbrain sync: unknown harness {name:?}; want one of: {}",
+                    "symbrain sync: harness: want one of: {}: unknown harness {name:?}",
                     symbrain_harness::names().join(", ")
                 );
                 return exit::USAGE;
