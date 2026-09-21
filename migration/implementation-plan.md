@@ -1,5 +1,25 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (verified): `GUARD-DOCTOR-FULL` merged as #639 and re-verified on the merged revision
+
+**Reconciliation.** `origin/main` is `5c12f12d` — PR #639 ("feat(rust): port guard doctor — 5 of 7 frozen oracle cases native", merged 2026-09-21T13:11:33Z) squash-merged the slice the next checkpoint dispatched. Branch `migration/guard-doctor-full-20260921` is content-identical to `origin/main` (`git diff --stat origin/main <branch>` empty). Local `main` fast-forwarded `b8665928 → 5c12f12d`; the previous checkpoint's "Dispatched: GUARD-DOCTOR-FULL" row is closed.
+
+**Independently verified by the coordinator (not from the worker's summary)**, worktree `.worktrees/guard-doctor` at `d9c54d56` (the branch plus a merge of `b8665928`):
+- `make guard-doctor-oracle-check` → `PASS … 0 drift on 7 cases` (Go vs frozen fixture); `make cli-oracle-check` → `PASS … 81 cases`.
+- `cargo fmt --all --check` exit 0; `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings` exit 0.
+- `cargo test --workspace --all-features --locked` under `scripts/run-external-env.sh`: **777 passed, 0 failed, 0 ignored** — the previously `#[ignore]`d `cli_tree_fixture_matches_native_binary` is now counted and green (78 of the 81 frozen CLI cases byte-native, 3 accepted divergences: `go skills list --help`, `go skills list --unknown`, `go memory serve`). `cargo test --workspace --doc` exit 0; `cargo audit` and `cargo deny` (advisories/bans/licenses/sources) ok; `make rust-check` reached its final step.
+- **Invocation trap, recorded so it is not re-learned:** running `cargo test` in this repo *without* `scripts/run-external-env.sh` on macOS fails `symbrain-audit`'s `raw::tests::rejects_non_regular_targets_without_blocking` with "SYMAIRA_EXTERNAL_RUNTIME_ROOT is required on local macOS runs". That is a harness requirement, not a defect — use the Makefile targets or `bash scripts/run-external-env.sh cargo test …`.
+- The first `cargo test -p symbrain-cli` on the branch (pre-merge) failed only `skills_status_opencode_tests::opencode_project_status_matches_go_bytes` (`/private/var` vs `/var`). `b8665928` (#638) fixed exactly that, and the failure class is gone after the merge: #480/#622 are closed by #638, not by this slice.
+- `make cli-oracle-check` prints `cli-oracle: 127.0.0.1:8787 already in use; relying on the existing listener` on this host. Investigated, not a defect: `holdServePort` (`scripts/cli-oracle/main.go:52`) binds the port only to reproduce a "port already in use" transcript case, and the holder here is Daniel's own `ssh` forward (`lsof -nP -iTCP:8787 -sTCP:LISTEN` → `ssh` pid 930, `[::1]:8787`). Freed or held, the recorded transcript is the same; CI binds it itself. Do not "fix" this by hardcoding a free port — that would drop the case.
+
+**Claim spot-checked in the source:** `printSecretRisks` (`guard/cmd/symguard/doctor/checks.go:104`) never reads `Allowed`, so the previous checkpoint's correction of the oracle README stands — `discovered_server_secret_risk` was never a blocker.
+
+**Scope boundary kept, not a silent gap:** 5 of the 7 frozen scenarios are native (`empty_machine`, `healthy_config`, `audit_log_without_anchor`, `discovered_server_denied`, `discovered_server_secret_risk`); `config_error` and `audit_log_corrupt_anchor` gate to Go *before any byte is written*, because both print another library's error text verbatim (BurntSushi's TOML parser, `encoding/json`). `rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs` proves nativeness structurally — empty `PATH`, no `SYMBRAIN_GO_BINARY`, and `native == [5 cases]` / `gated == [2 cases]` asserted explicitly.
+
+**Dispatched this session, both off `5c12f12d`:** (a) Phase 7.2/7.3/7.4 — port `internal/skillsrunner.Run` into `rust/symbrain-skills` and wire the populated-library `sync` path natively; (b) issue **#626** — the native memory store's 16 missing tables, 16 indexes and `memories` column facts. The delegation runtime created its own per-child worktrees (`.worktrees/subagent-sa-*`) on base `b8665928`; the pre-created `w-skills-sync`/`w-db-schema` worktrees went unused and are pruned. Integration must therefore take the **children's own branches**, not those names.
+
+**Loaded skills this session:** `go-to-rust-migration`, `parallel-repo-agents`, `go-to-rust-migration/references/worker-dispatch.md`.
+
 ## Resume checkpoint — 2026-09-21 (resumed): `guard doctor` full port dispatched, one stale ledger claim corrected
 
 **Reconciliation at resume.** `main` is `f9a52c30` — PR #636 squash-merged, so
