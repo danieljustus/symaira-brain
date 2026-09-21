@@ -1,5 +1,50 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (resumed): `guard doctor` full port dispatched, one stale ledger claim corrected
+
+**Reconciliation at resume.** `main` is `f9a52c30` — PR #636 squash-merged, so
+every "uncommitted" note in the checkpoints below is historical. The branch
+`migration/rust-sync-guard-doctor-20260921` was content-identical to `main`
+after the squash and has been deleted locally; the remote delete was refused
+and is left for the repository owner. `docs/intern/rust-cut-20260917/brain/STATUS.md`
+(dated 2026-09-18, PR #611) is superseded by this file for anything in the
+brain CLI line and should be read as history only.
+
+**One named blocker turned out not to exist.** Every checkpoint since wave 4
+has carried the full `guard doctor` port forward with "its own oracle-defect
+fix (`discovered_server_secret_risk`, noted in
+`guard/scripts/guard-doctor-oracle/README.md`)" as a prerequisite. The README
+claims that case "currently produces the same `[DENIED]` line as
+`discovered_server_denied`" and that the plaintext-secret warning "appears to
+require a server that is on the spawn allowlist." Both are wrong, measured
+against the frozen fixture itself: `discovered_server_secret_risk` already
+emits the full `Plaintext secret risk:` block, the per-server env line, and
+the symvault advisory. `printSecretRisks` in
+`guard/cmd/symguard/doctor/checks.go` never reads `Allowed`. The corpus is
+sound; the stale README paragraph is being corrected as part of the port
+rather than treated as a gate.
+
+**Dispatched: GUARD-DOCTOR-FULL**, branch `migration/guard-doctor-full-20260921`
+in worktree `.worktrees/guard-doctor`, base `f9a52c30`. Scope: replace the
+empty-machine-only native slice with all seven frozen scenarios, which means
+porting `guard/internal/config` (Load/ConfigPath/DataDir/Rules/Spawn),
+`guard/internal/spawn`, `guard/internal/discovery` (+`result.go`,
+`secrets.go`), and `audit.DefaultAnchorPath`/`ReadCheckpoint`. Two constraints
+carried into the dispatch verbatim, both from earlier waves' scars: doctor
+must NOT reuse `guard_scan.rs`'s corekit `mcpcfgkit` discovery (different
+client list, different path resolution — a false "none discovered" would hide
+real allowlist and secret findings), and the `Go:` line stays a permanent
+accepted difference (a fabricated Go version string was already rejected once
+in wave 4). Any state not byte-reproducible must gate to Go before any output
+is written.
+
+**Still open, not part of this slice:** #480/#622 (macOS `/var` vs
+`/private/var` TempDir flake in `skills_status_opencode_tests`, reproduces
+locally, explicitly scoped as its own task), #626 (native memory store missing
+16 tables/16 indexes), #625 (`setup` cannot install symcockpit), and the
+Phase 8.5/8.6 Browse rows, which are unchanged.
+
+
 ## Resume checkpoint — 2026-09-21 (final): PR #636 merged the whole slice, CI green on every platform
 
 **Committed, pushed, PR opened and CI-green — the "uncommitted" note in every
