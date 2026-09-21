@@ -23,6 +23,12 @@ from external_env import ensure_external_environment as ensure_shared_external_e
 
 FIXTURE = HERE / "fixture.json"
 PINNED_COMMIT_SHA = "9c0e2b259753901a372ed5a688382bb6d4fadd18"
+# The pin covers the Go sources whose scan behaviour this oracle freezes. It
+# deliberately excludes go.mod and go.sum: those change on every dependency
+# update, so binding them made the check fail by construction on routine
+# Dependabot Go-module bumps, which touch nothing else. The subject here is the
+# scan implementation, not the dependency graph — the module files are still
+# pinned by go.sum's own hashes and by the Rust/Go dependency gates.
 GO_SOURCE_PATHS = (
     "cmd/symbrain/cmd_guard.go",
     "guard/cmd/symguard/scan/command.go",
@@ -30,8 +36,6 @@ GO_SOURCE_PATHS = (
     "guard/internal/discovery/result.go",
     "guard/internal/discovery/secrets.go",
     "guard/internal/output/reporter.go",
-    "go.mod",
-    "go.sum",
 )
 GO_TOOLCHAIN = "go1.26.7"
 

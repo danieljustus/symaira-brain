@@ -233,8 +233,6 @@
   "source_commit": "9c0e2b259753901a372ed5a688382bb6d4fadd18",
   "source_files": {
     "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
-    "go.mod": "a8ff6518ad9bca1e775958ed4d8c4de2f3511e0f564bcf38ddad6a43a7f9148b",
-    "go.sum": "6b98e31218e5d4a45f4247d6e16ed5938570d6c466872d112c1031b664618ef3",
     "guard/cmd/symguard/scan/command.go": "3f7d4038bd8b8752734379ca2ed88193702a8c589d3bc86804b6298819c6369d",
     "guard/internal/discovery/discovery.go": "6a877f0dd0f691a258e3b549cd4520c1e334bab4a16b5fe369c55fcd0544585b",
     "guard/internal/discovery/result.go": "59a520f114e5b5dcd7fef946c0df09ae173cffb7d7a143eb0e9789f1284ecbcb",
