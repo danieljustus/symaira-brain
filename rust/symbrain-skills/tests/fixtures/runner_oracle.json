@@ -182,8 +182,172 @@
       "legacy_created": false
     }
   ],
+  "disk": [
+    {
+      "path": ".agents/skills/demo",
+      "type": "symlink",
+      "target": "$ROOT/rendered/codex/demo"
+    },
+    {
+      "path": ".claude/skills/demo",
+      "type": "symlink",
+      "target": "$ROOT/rendered/claude/demo"
+    },
+    {
+      "path": ".config/opencode/skills/demo",
+      "type": "symlink",
+      "target": "$ROOT/rendered/opencode/demo"
+    },
+    {
+      "path": ".hermes/skills/symaira/demo",
+      "type": "symlink",
+      "target": "$ROOT/rendered/hermes/demo"
+    },
+    {
+      "path": "base/claude/demo/SKILL.md",
+      "type": "file",
+      "sha256": "85ab1b228d5ec355e8db28f1d82e675d299d3e98f90f538e5be72ba1a6a42fea"
+    },
+    {
+      "path": "base/claude/demo/manifest.json",
+      "type": "file",
+      "sha256": "11d53476b92e393a1018f8dfcaaaf934458b6ddf3b75c77dd360f1820feae4a4"
+    },
+    {
+      "path": "base/codex/demo/SKILL.md",
+      "type": "file",
+      "sha256": "7dcb19062b080a4117e4729be44fab5f9df97498f640964995d54bd0498671f3"
+    },
+    {
+      "path": "base/codex/demo/agents/openai.yaml",
+      "type": "file",
+      "sha256": "01a0f1320ea1b37f356e518eae0ab8e9ae11539189323ee463263b0fef1f0cea"
+    },
+    {
+      "path": "base/codex/demo/manifest.json",
+      "type": "file",
+      "sha256": "3d356e1482c5111a053a0d2b456677ec18b88cb7c6acb51d529119df0d9b760b"
+    },
+    {
+      "path": "base/hermes/demo/SKILL.md",
+      "type": "file",
+      "sha256": "c76b928571ea22c61784706f22034aa8ad7b6aa41596fc213f96b05b432812a0"
+    },
+    {
+      "path": "base/hermes/demo/manifest.json",
+      "type": "file",
+      "sha256": "d8c05534b7435687f6c741a94a1d26b177d3d67445a5b7c6a1407fa206670e2d"
+    },
+    {
+      "path": "base/opencode/demo/SKILL.md",
+      "type": "file",
+      "sha256": "1314f414bed2c1f7719b8fceecc37f335dad95027c0d9db0d5ead4b3f7a711fe"
+    },
+    {
+      "path": "base/opencode/demo/manifest.json",
+      "type": "file",
+      "sha256": "3ff74b6b82ee397b306178268f3e961aa1fe8950a2c39397365c77bbb6548a26"
+    },
+    {
+      "path": "rendered/claude/.symskills-lock-demo",
+      "type": "file",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rendered/claude/demo/.symskills.json",
+      "type": "file",
+      "marker": {
+        "managed_by": "symskills",
+        "mode": "symlink",
+        "name": "demo",
+        "rendered_at": "$ROOT/rendered/claude/demo",
+        "schema_version": 1,
+        "source_hash": "32ccd505c9fd2c4e08ef6272699f0a7e50f2c19edb2d25d7c3c014aa6a299813",
+        "target": "claude"
+      }
+    },
+    {
+      "path": "rendered/claude/demo/SKILL.md",
+      "type": "file",
+      "sha256": "85ab1b228d5ec355e8db28f1d82e675d299d3e98f90f538e5be72ba1a6a42fea"
+    },
+    {
+      "path": "rendered/codex/.symskills-lock-demo",
+      "type": "file",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rendered/codex/demo/.symskills.json",
+      "type": "file",
+      "marker": {
+        "managed_by": "symskills",
+        "mode": "symlink",
+        "name": "demo",
+        "rendered_at": "$ROOT/rendered/codex/demo",
+        "schema_version": 1,
+        "source_hash": "55eecdd8f3c4c9b5313f05b33a6837bc55239224bbadce57b1f7aa5d49b340ef",
+        "target": "codex"
+      }
+    },
+    {
+      "path": "rendered/codex/demo/SKILL.md",
+      "type": "file",
+      "sha256": "7dcb19062b080a4117e4729be44fab5f9df97498f640964995d54bd0498671f3"
+    },
+    {
+      "path": "rendered/codex/demo/agents/openai.yaml",
+      "type": "file",
+      "sha256": "01a0f1320ea1b37f356e518eae0ab8e9ae11539189323ee463263b0fef1f0cea"
+    },
+    {
+      "path": "rendered/hermes/.symskills-lock-demo",
+      "type": "file",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rendered/hermes/demo/.symskills.json",
+      "type": "file",
+      "marker": {
+        "managed_by": "symskills",
+        "mode": "symlink",
+        "name": "demo",
+        "rendered_at": "$ROOT/rendered/hermes/demo",
+        "schema_version": 1,
+        "source_hash": "616bd6134cd7c85436388c0ab3a22f397e0820595434388f413d4b1371fdddb8",
+        "target": "hermes"
+      }
+    },
+    {
+      "path": "rendered/hermes/demo/SKILL.md",
+      "type": "file",
+      "sha256": "c76b928571ea22c61784706f22034aa8ad7b6aa41596fc213f96b05b432812a0"
+    },
+    {
+      "path": "rendered/opencode/.symskills-lock-demo",
+      "type": "file",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rendered/opencode/demo/.symskills.json",
+      "type": "file",
+      "marker": {
+        "managed_by": "symskills",
+        "mode": "symlink",
+        "name": "demo",
+        "rendered_at": "$ROOT/rendered/opencode/demo",
+        "schema_version": 1,
+        "source_hash": "3c8370e3a2bc2e159c93cc089ebdc9366f73d6863ccf6f663ec748163b2bd20d",
+        "target": "opencode"
+      }
+    },
+    {
+      "path": "rendered/opencode/demo/SKILL.md",
+      "type": "file",
+      "sha256": "1314f414bed2c1f7719b8fceecc37f335dad95027c0d9db0d5ead4b3f7a711fe"
+    }
+  ],
   "provenance": {
-    "go_revision": "3e01d0af49fb3a0a96e2570f85360b475e322c06",
+    "go_revision": "d6f81c99b0565c5e0b72049cc59ad0ffbee5de49",
     "generator_command": "go run ./scripts/skills-runner-oracle",
     "go_toolchain": "go1.26.7",
     "note": "Captured from this working tree. A squash merge destroys the recorded revision, so re-run scripts/run-go-oracle.sh with the merged main revision and regenerate before trusting the pin."

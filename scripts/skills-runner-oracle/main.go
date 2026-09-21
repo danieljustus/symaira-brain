@@ -3,12 +3,17 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -16,18 +21,45 @@ import (
 )
 
 type caseFixture struct {
-	Name        string                      `json:"name"`
-	Harnesses   []string                    `json:"harnesses"`
-	DryRun      bool                        `json:"dry_run"`
-	Timeout     time.Duration               `json:"timeout,omitempty"`
-	Results     []skillsrunner.Result      `json:"results"`
-	RunError    string                      `json:"run_error,omitempty"`
+	Name      string                `json:"name"`
+	Harnesses []string              `json:"harnesses"`
+	DryRun    bool                  `json:"dry_run"`
+	Timeout   time.Duration         `json:"timeout,omitempty"`
+	Results   []skillsrunner.Result `json:"results"`
+	RunError  string                `json:"run_error,omitempty"`
 }
 
 type fixture struct {
 	Cases      []caseFixture  `json:"cases"`
 	Defaults   []defaultsCase `json:"defaults"`
+	Disk       []diskEntry    `json:"disk"`
 	Provenance *provenance    `json:"provenance"`
+}
+
+// diskEntry is one file or symlink a real run left behind, recorded relative to
+// the scenario root ($ROOT). For a symlink the target is the point: it is where
+// the installed skill actually lives, and it is what a mode/`status` check
+// follows. Files carry a content hash so a consumer can tell identical content
+// at a different location from different content.
+type diskEntry struct {
+	Path   string          `json:"path"`
+	Type   string          `json:"type"`
+	Target string          `json:"target,omitempty"`
+	SHA256 string          `json:"sha256,omitempty"`
+	Marker *map[string]any `json:"marker,omitempty"`
+}
+
+// normalizedMarker removes the fields a real install fills with per-run state —
+// the wall-clock `installed` stamp — and rewrites the temp root out of path
+// values, so the remaining fields can be compared across runs and machines.
+func normalizedMarker(marker map[string]any, root string) *map[string]any {
+	delete(marker, "installed")
+	for key, value := range marker {
+		if text, ok := value.(string); ok {
+			marker[key] = replaceRoot(text, root)
+		}
+	}
+	return &marker
 }
 
 // defaultsCase freezes one directory-resolution scenario: the environment Go
@@ -185,7 +217,114 @@ func generate() (fixture, error) {
 
 	os.RemoveAll(home)
 
-	return fixture{Cases: cases, Defaults: generateDefaults(), Provenance: provenanceNow()}, nil
+	disk, err := generateDisk()
+	if err != nil {
+		return fixture{}, err
+	}
+
+	return fixture{Cases: cases, Defaults: generateDefaults(), Disk: disk, Provenance: provenanceNow()}, nil
+}
+
+// generateDisk freezes the filesystem a real run leaves behind: the rendered
+// tree, the harness roots under HOME, and the target each installed symlink
+// actually points at. Directories are not recorded (they are implied by the
+// file paths); the skills library is skipped because the caller created it.
+func generateDisk() ([]diskEntry, error) {
+	root, err := os.MkdirTemp("", "symbrain-runner-disk-")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(root)
+
+	opts := skillsrunner.DefaultOptions()
+	opts.HomeDir = root
+	opts.LibraryDir = filepath.Join(root, "library")
+	opts.RenderDir = filepath.Join(root, "rendered")
+	opts.BaseDir = filepath.Join(root, "base")
+
+	demo := filepath.Join(opts.LibraryDir, "demo")
+	if err := os.MkdirAll(demo, 0755); err != nil {
+		return nil, err
+	}
+	if err := os.WriteFile(
+		filepath.Join(demo, "SKILL.md"),
+		[]byte("---\nname: demo\ndescription: test\n---\n\n# Demo\nBody.\n"),
+		0644,
+	); err != nil {
+		return nil, err
+	}
+
+	if _, err := skillsrunner.Run(
+		context.Background(),
+		[]string{"claude", "codex", "hermes", "opencode"},
+		opts,
+		false,
+	); err != nil {
+		return nil, err
+	}
+
+	return captureDisk(root, opts.LibraryDir)
+}
+
+// captureDisk records every file and symlink under root, relative to it, sorted
+// by path. skipDir (the skills library) is not descended into.
+func captureDisk(root, skipDir string) ([]diskEntry, error) {
+	entries := []diskEntry{}
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if path == skipDir {
+			return fs.SkipDir
+		}
+		if d.IsDir() {
+			return nil
+		}
+		rel, relErr := filepath.Rel(root, path)
+		if relErr != nil {
+			return relErr
+		}
+		entry := diskEntry{Path: replaceRoot(rel, root)}
+		info, infoErr := os.Lstat(path)
+		if infoErr != nil {
+			return infoErr
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			target, linkErr := os.Readlink(path)
+			if linkErr != nil {
+				return linkErr
+			}
+			entry.Type = "symlink"
+			entry.Target = replaceRoot(target, root)
+		} else {
+			entry.Type = "file"
+			data, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			if filepath.Base(path) == ".symskills.json" {
+				// The marker embeds `installed: <RFC3339 now>`, so its bytes are
+				// not reproducible by construction; hashing them would make the
+				// fixture drift on every run. Record the fields that are
+				// deterministic and keep the volatile timestamp out.
+				var marker map[string]any
+				if json.Unmarshal(data, &marker) != nil {
+					return fmt.Errorf("marker %s is not JSON", path)
+				}
+				entry.Marker = normalizedMarker(marker, root)
+			} else {
+				sum := sha256.Sum256(data)
+				entry.SHA256 = hex.EncodeToString(sum[:])
+			}
+		}
+		entries = append(entries, entry)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].Path < entries[j].Path })
+	return entries, nil
 }
 
 // generateDefaults freezes the directory resolution of config.Defaults() as
@@ -377,8 +516,19 @@ func main() {
 }
 
 func equalFixture(a, b fixture) bool {
-	if len(a.Cases) != len(b.Cases) || len(a.Defaults) != len(b.Defaults) {
+	if len(a.Cases) != len(b.Cases) || len(a.Defaults) != len(b.Defaults) || len(a.Disk) != len(b.Disk) {
 		return false
+	}
+	for i := range a.Disk {
+		// Marker is a pointer to a map, so a struct `!=` would compare
+		// addresses and report drift on every run. Compare the payload.
+		if a.Disk[i].Path != b.Disk[i].Path ||
+			a.Disk[i].Type != b.Disk[i].Type ||
+			a.Disk[i].Target != b.Disk[i].Target ||
+			a.Disk[i].SHA256 != b.Disk[i].SHA256 ||
+			!reflect.DeepEqual(a.Disk[i].Marker, b.Disk[i].Marker) {
+			return false
+		}
 	}
 	for i := range a.Cases {
 		ac, bc := a.Cases[i], b.Cases[i]

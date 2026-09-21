@@ -1,5 +1,24 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (install disk): the install divergence is now measured, not assumed
+
+**Branch `migration/install-disk-oracle-20260921` @ `276cd051` (base: main `d6f81c99`).**
+
+The runner's result messages were proven in the previous slice; what a real run leaves **on disk** was not. `scripts/skills-runner-oracle` now also runs the genuine Go `skillsrunner.Run` over a throwaway root and records every file and symlink relative to `$ROOT`, with `-check` comparing them too. 26 entries, measured in this session:
+
+- The four installed symlinks point **straight at the configured render dir**: `.claude/skills/demo → $ROOT/rendered/claude/demo`, `.hermes/skills/symaira/demo → $ROOT/rendered/hermes/demo`, `.agents/skills/demo → $ROOT/rendered/codex/demo`, `.config/opencode/skills/demo → $ROOT/rendered/opencode/demo`. This is `install_ops.go`'s `os.Symlink(item.Path, tmp)` where `item.Path` is what `RenderAll` set to `<RenderDir>/<target>/<name>`.
+- `rendered/<target>/demo/` holds the generated `SKILL.md` (codex additionally `agents/openai.yaml`), plus a `.symskills-lock-<name>` entry per target.
+- `base/<target>/demo/` holds the snapshot the install writes.
+
+**Two oracle defects found and fixed here, both of which would have produced a silently wrong fixture:**
+
+1. `-check` reported drift on identical data because `diskEntry.Marker` is a pointer-to-map, so the struct `!=` compared addresses. Now compared field-by-field with `reflect.DeepEqual`; two consecutive checks pass.
+2. The marker file an install writes embeds `installed: <RFC3339 now>` (`install_ops.go`), so hashing its bytes drifts by construction. The volatile field is dropped and every path value in the marker has the temp root rewritten to `$ROOT`. Two generations now hash identically (`38bc9ff31a9fcce4`).
+
+**Why Slice B is still gated.** The Rust install layer cannot reach the Go symlink target as it stands, and that is structural, not a slip: `InstallOptions` (`rust/symbrain-skills/src/install/core.rs`) carries no render-directory field, `Rendered` (`rust/symbrain-skills/src/render.rs`) carries no `path`, and symlink mode materializes into a hardcoded `home/.local/share/symskills/rendered/...` before linking there. Closing it means giving the install layer the same `Rendered.Path` concept Go has, then re-deriving the symlink target under this oracle. Until then the Go fallback in `sync_cli.rs` stays.
+
+**Gates measured on `276cd051`:** `go run ./scripts/skills-runner-oracle -check` passes twice; generator output hash stable across generations; `gofmt -l` empty; `go vet` clean; `cargo test -p symbrain-skills` 107 passed / 0 failed / 2 ignored; `cargo test -p symbrain-cli` 216 passed / 0 failed.
+
 ## Resume checkpoint — 2026-09-21 (skills-runner): crate-side port proven, five measured gaps closed, Slice B gated
 
 **Branch `migration/skills-runner-delta-20260921` @ `acf4e69e` (base: main `14f9d0ee`).** Every claim below came from a command run in this session, not from a worker report.
