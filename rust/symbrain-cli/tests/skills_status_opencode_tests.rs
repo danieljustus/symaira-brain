@@ -259,7 +259,15 @@ fn opencode_user_status_managed_marker_row_matches_go_bytes() {
 #[test]
 fn opencode_project_status_matches_go_bytes() {
     let root = TempDir::new().unwrap();
-    let skill = root.path().join("project/.opencode/skills/handwritten");
+    // Project scope resolves its root from the process working directory, and
+    // Go's `os.Getwd` with no inherited `PWD` (which `env_clear` guarantees)
+    // returns the symlink-resolved path -- measured: `/private/var/...`, not
+    // the `/var/...` spelling `TempDir` hands out on macOS. The shipped bytes
+    // therefore carry the resolved root, so the expectation has to be built
+    // from it too. Only this case needs it: every other case in this file is
+    // user scope, where the root comes from the environment verbatim.
+    let resolved = root.path().canonicalize().unwrap();
+    let skill = resolved.join("project/.opencode/skills/handwritten");
     std::fs::create_dir_all(&skill).unwrap();
     std::fs::write(skill.join("SKILL.md"), b"handwritten\n").unwrap();
     let output = run(
