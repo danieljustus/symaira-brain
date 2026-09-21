@@ -53,12 +53,18 @@ struct ParsedSyncArgs {
     harnesses: Vec<String>,
 }
 
+/// The shipped `sync` flag set as the Go flag package prints it.
+const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n";
+
 /// Returns whether `sync` still belongs to the Go oracle.
 ///
-/// Native sync currently covers only the explicit `agents` instruction target
-/// with the default project directory. Skill rendering/install, project
-/// overrides, and implicit all-harness selection remain Go-owned until their
-/// side effects are covered by a differential fixture.
+/// Native sync covers the explicit `agents` instruction target and the
+/// implicit all-harness default, plus its own flag-package-style rejection
+/// of unknown flags. Project overrides remain Go-owned (no fixture yet).
+/// Skill rendering/install is only proven for the empty-library case
+/// (`skillsrunner.Run` reports "no skills rendered" for any missing or
+/// empty library without touching the render/install pipeline); a non-empty
+/// library still defers to Go because that pipeline is not ported.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let mut saw_harness = false;
     let mut i = 0;
@@ -71,7 +77,9 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 return true;
             }
             "--" => return true,
-            value if value.starts_with('-') => return true,
+            // An unrecognized flag is reported natively as a usage error
+            // below, matching the Go flag package's own rejection.
+            value if value.starts_with('-') => i += 1,
             value => {
                 if value != "agents" {
                     return true;
@@ -81,7 +89,18 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             }
         }
     }
-    !saw_harness
+    !saw_harness && skills_library_has_entries()
+}
+
+/// Whether the resolved skills library directory exists and has any entry.
+///
+/// A missing or empty library is the only case proven against Go
+/// (`skillsrunner.Run` returns "no skills rendered" for it without invoking
+/// the render/install pipeline); any entry at all falls back to Go instead
+/// of guessing what an unported render pass would report.
+fn skills_library_has_entries() -> bool {
+    let (library_dir, _base_dir, _home_dir) = crate::skills_cli::resolve_skills_dirs();
+    fs::read_dir(library_dir).is_ok_and(|mut entries| entries.next().is_some())
 }
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
@@ -108,8 +127,18 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
         {
             project_dir = PathBuf::from(val);
             i += 1;
+        } else if arg == "-h" || arg == "--h" || arg == "-help" || arg == "--help" {
+            // Go's flag package special-cases an unregistered "-h"/"-help":
+            // it prints the flag set's usage and returns flag.ErrHelp, never
+            // "flag provided but not defined" (that message is reserved for
+            // every other unrecognized flag).
+            let _ = write!(stderr, "{SYNC_FLAGS_USAGE}");
+            return Err(exit::USAGE);
         } else if arg.starts_with('-') {
-            let _ = writeln!(stderr, "symbrain sync: unknown flag: {arg}");
+            let trimmed = arg.trim_start_matches('-');
+            let name = trimmed.split_once('=').map_or(trimmed, |(name, _)| name);
+            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+            let _ = write!(stderr, "{SYNC_FLAGS_USAGE}");
             return Err(exit::USAGE);
         } else {
             harnesses.push(arg.into_owned());
@@ -275,10 +304,26 @@ pub fn run(
         targets: target_statuses,
         skills: requested_harnesses
             .iter()
-            .map(|name| SkillResult {
-                target: name.clone(),
-                status: "skipped".to_string(),
-                message: Some(format!("no skill target for harness {name:?}")),
+            .map(|name| {
+                let has_skill_target =
+                    lookup(name).is_ok_and(|h| h.skill_target.as_str().is_some());
+                if has_skill_target {
+                    // Reachable only when the skills library is empty or
+                    // missing (see requires_go_fallback): the shipped
+                    // skillsrunner reports exactly this for that case
+                    // without touching the render/install pipeline.
+                    SkillResult {
+                        target: name.clone(),
+                        status: "ok".to_string(),
+                        message: Some("no skills rendered".to_string()),
+                    }
+                } else {
+                    SkillResult {
+                        target: name.clone(),
+                        status: "skipped".to_string(),
+                        message: Some(format!("no skill target for harness {name:?}")),
+                    }
+                }
             })
             .collect(),
     };
@@ -327,4 +372,46 @@ pub fn run(
     }
 
     if has_error { exit::GENERIC } else { exit::OK }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Matches the frozen `go sync --unknown` fixture case byte-for-byte
+    /// (see rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json):
+    /// exit 2, and the Go flag package's own rejection text.
+    #[test]
+    fn unknown_flag_matches_go_flag_package_rejection() {
+        let mut stderr = Vec::new();
+        let result = parse_args(&[OsString::from("--unknown")], &mut stderr);
+        assert!(matches!(result, Err(code) if code == exit::USAGE));
+        assert_eq!(
+            String::from_utf8(stderr).unwrap(),
+            "flag provided but not defined: -unknown\nUsage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n"
+        );
+    }
+
+    /// Matches the `sync_help` differential case in `scripts/rust-differential.py`
+    /// byte-for-byte: `-h`/`--help` are Go flag-package special cases (bare
+    /// usage, no "flag provided but not defined" line), not ordinary unknown
+    /// flags. Caught by CI's `make parity-smoke`, not by the 81-case CLI tree
+    /// fixture (which has no help-flag case for `sync`) — that gap is why this
+    /// regressed unnoticed locally.
+    #[test]
+    fn help_flag_prints_bare_usage_not_unknown_flag_rejection() {
+        for flag in ["-h", "--h", "-help", "--help"] {
+            let mut stderr = Vec::new();
+            let result = parse_args(&[OsString::from(flag)], &mut stderr);
+            assert!(
+                matches!(result, Err(code) if code == exit::USAGE),
+                "flag {flag}"
+            );
+            assert_eq!(
+                String::from_utf8(stderr).unwrap(),
+                SYNC_FLAGS_USAGE,
+                "flag {flag}"
+            );
+        }
+    }
 }

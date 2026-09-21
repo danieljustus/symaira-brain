@@ -63,13 +63,18 @@ struct Finding {
     message: String,
 }
 
+/// A client/key pair naming one of `discovery.DiscoverAll()`'s known MCP
+/// client config sources (`guard/internal/discovery/discovery.go`, via
+/// `mcpcfgkit.DefaultSources()`). Exposed crate-wide so `guard_doctor`'s
+/// empty-machine gate can probe the exact same path list scan already uses,
+/// instead of maintaining a second copy of it.
 #[derive(Clone, Copy)]
-struct Source {
+pub(crate) struct Source {
     client: &'static str,
     key: &'static str,
 }
 
-const SOURCES: [Source; 5] = [
+pub(crate) const SOURCES: [Source; 5] = [
     Source {
         client: "hermes",
         key: "mcpServers",
@@ -250,7 +255,7 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
     (servers, findings)
 }
 
-fn source_path(source: Source) -> PathBuf {
+pub(crate) fn source_path(source: Source) -> PathBuf {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     match source.client {
         "hermes" => home.join(".config/hermes/config.json"),

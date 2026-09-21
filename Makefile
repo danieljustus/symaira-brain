@@ -221,22 +221,16 @@ rust-fast:
 
 ## rust-check: Run the complete fast Rust quality gate
 #
-# The dependency list matches main's, which is the set that has actually run on
-# CI. Three oracles added on this branch (cli-oracle, xdg-oracle, guard-doctor)
-# are deliberately NOT gates yet: the branch has never been pushed before, so
-# none of them has ever run on a runner, and their fixtures turned out to be
-# calibrated to the recording machine rather than to a portable environment.
-# Measured failures on CI, each traced to the recording environment and not to
-# the Rust port:
-#   - cli-oracle: PATH and isolation-root shape leak into the fixture
-#     (`skills targets` INSTALLED column, `vault` passthrough, `sync` root form).
-#   - guard-doctor-oracle: frozen doctor output differs on a runner.
-#   - xdg-oracle, db-memory-oracle: pass locally, CI state unverified.
-# They stay runnable explicitly (`make cli-oracle-check`, and so on) so the
-# residual stays visible. Making them portable is tracked separately; wiring
-# them into the gate before that turns the incremental Rust entrypoint red for
-# reasons unrelated to the port.
-rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
+# cli-oracle, xdg-oracle, db-memory-oracle and guard-doctor-oracle were kept
+# out of this list after PR #628's first CI run hung/failed on all four: the
+# fixtures were calibrated to the recording machine, not a portable
+# environment (#627 PATH leak, #630 isolation-root shape, #631 wiring an
+# unverified oracle into the gate). #627 (PATH pinned to an empty directory)
+# and #630 (isolation root resolved past symlinked temp-dir ancestors, both
+# in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
+# all four pass locally; per #631 they are wired back in this same change so
+# CI proves them before merge, rather than being re-added on faith.
+rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
