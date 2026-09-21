@@ -1,0 +1,191 @@
+{
+  "cases": [
+    {
+      "name": "empty_library_not_error",
+      "harnesses": [
+        "claude"
+      ],
+      "dry_run": false,
+      "results": [
+        {
+          "target": "claude",
+          "status": "ok",
+          "message": "no skills rendered"
+        }
+      ]
+    },
+    {
+      "name": "unsupported_harness_skipped",
+      "harnesses": [
+        "cursor",
+        "claude-desktop"
+      ],
+      "dry_run": false,
+      "results": [
+        {
+          "target": "cursor",
+          "status": "skipped",
+          "message": "no skill target for harness \"cursor\""
+        },
+        {
+          "target": "claude-desktop",
+          "status": "skipped",
+          "message": "no skill target for harness \"claude-desktop\""
+        }
+      ]
+    },
+    {
+      "name": "failure_visible_and_reported",
+      "harnesses": [
+        "claude"
+      ],
+      "dry_run": false,
+      "results": [
+        {
+          "target": "claude",
+          "status": "error",
+          "message": "broken: render: target claude: validation error: line 6: unrecognised symskills marker: \u003c!-- symskills:blok typo --\u003e"
+        }
+      ]
+    },
+    {
+      "name": "no_legacy_binary_processes_targets",
+      "harnesses": [
+        "claude",
+        "codex",
+        "hermes",
+        "opencode"
+      ],
+      "dry_run": false,
+      "results": [
+        {
+          "target": "claude",
+          "status": "ok",
+          "message": "1 skills rendered and installed"
+        },
+        {
+          "target": "codex",
+          "status": "ok",
+          "message": "1 skills rendered and installed"
+        },
+        {
+          "target": "hermes",
+          "status": "ok",
+          "message": "1 skills rendered and installed"
+        },
+        {
+          "target": "opencode",
+          "status": "ok",
+          "message": "1 skills rendered and installed"
+        }
+      ]
+    },
+    {
+      "name": "timeout_surfaces_error",
+      "harnesses": [
+        "claude"
+      ],
+      "dry_run": false,
+      "timeout": 1,
+      "results": [
+        {
+          "target": "claude",
+          "status": "error",
+          "message": "sync timed out: context deadline exceeded"
+        }
+      ]
+    },
+    {
+      "name": "binary_presence_changes_nothing",
+      "harnesses": [
+        "claude",
+        "codex"
+      ],
+      "dry_run": true,
+      "results": [
+        {
+          "target": "claude",
+          "status": "ok",
+          "message": "1 skills planned"
+        },
+        {
+          "target": "codex",
+          "status": "ok",
+          "message": "1 skills planned"
+        }
+      ]
+    },
+    {
+      "name": "dry_run_failure_names_target",
+      "harnesses": [
+        "claude"
+      ],
+      "dry_run": true,
+      "results": [
+        {
+          "target": "claude",
+          "status": "error",
+          "message": "broken: render: validation error: line 6: unrecognised symskills marker: \u003c!-- symskills:blok typo --\u003e"
+        }
+      ]
+    }
+  ],
+  "defaults": [
+    {
+      "name": "xdg_absolute_current_exists",
+      "xdg_data_home": "$ROOT/xdg_absolute_current_exists/data",
+      "library_dir": "$ROOT/xdg_absolute_current_exists/data/symbrain/skills/library",
+      "render_dir": "$ROOT/xdg_absolute_current_exists/data/symbrain/skills/rendered",
+      "base_dir": "$ROOT/xdg_absolute_current_exists/data/symbrain/skills/base",
+      "legacy": false,
+      "current_created": true,
+      "legacy_created": false
+    },
+    {
+      "name": "xdg_absolute_legacy_only",
+      "xdg_data_home": "$ROOT/xdg_absolute_legacy_only/data",
+      "library_dir": "$ROOT/xdg_absolute_legacy_only/data/symskills/library",
+      "render_dir": "$ROOT/xdg_absolute_legacy_only/data/symskills/rendered",
+      "base_dir": "$ROOT/xdg_absolute_legacy_only/data/symskills/base",
+      "legacy": true,
+      "current_created": false,
+      "legacy_created": true
+    },
+    {
+      "name": "xdg_absolute_neither_exists",
+      "xdg_data_home": "$ROOT/xdg_absolute_neither_exists/data",
+      "library_dir": "$ROOT/xdg_absolute_neither_exists/data/symbrain/skills/library",
+      "render_dir": "$ROOT/xdg_absolute_neither_exists/data/symbrain/skills/rendered",
+      "base_dir": "$ROOT/xdg_absolute_neither_exists/data/symbrain/skills/base",
+      "legacy": false,
+      "current_created": false,
+      "legacy_created": false
+    },
+    {
+      "name": "xdg_relative_is_ignored",
+      "xdg_data_home": "rel/data",
+      "library_dir": "$ROOT/xdg_relative_is_ignored/home/.local/share/symbrain/skills/library",
+      "render_dir": "$ROOT/xdg_relative_is_ignored/home/.local/share/symbrain/skills/rendered",
+      "base_dir": "$ROOT/xdg_relative_is_ignored/home/.local/share/symbrain/skills/base",
+      "legacy": false,
+      "current_created": true,
+      "legacy_created": false
+    },
+    {
+      "name": "xdg_unset_uses_home",
+      "xdg_data_home": "",
+      "library_dir": "$ROOT/xdg_unset_uses_home/home/.local/share/symbrain/skills/library",
+      "render_dir": "$ROOT/xdg_unset_uses_home/home/.local/share/symbrain/skills/rendered",
+      "base_dir": "$ROOT/xdg_unset_uses_home/home/.local/share/symbrain/skills/base",
+      "legacy": false,
+      "current_created": true,
+      "legacy_created": false
+    }
+  ],
+  "provenance": {
+    "go_revision": "3e01d0af49fb3a0a96e2570f85360b475e322c06",
+    "generator_command": "go run ./scripts/skills-runner-oracle",
+    "go_toolchain": "go1.26.7",
+    "note": "Captured from this working tree. A squash merge destroys the recorded revision, so re-run scripts/run-go-oracle.sh with the merged main revision and regenerate before trusting the pin."
+  }
+}

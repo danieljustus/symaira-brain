@@ -12,6 +12,7 @@ pub mod metadata;
 pub mod model;
 pub mod render;
 mod render_variants;
+pub mod runner;
 mod target;
 pub mod targets_status;
 mod validation;

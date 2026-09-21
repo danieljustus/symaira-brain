@@ -1,5 +1,23 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (skills-runner): crate-side port proven, five measured gaps closed, Slice B gated
+
+**Branch `migration/skills-runner-delta-20260921` @ `acf4e69e` (base: main `14f9d0ee`).** Every claim below came from a command run in this session, not from a worker report.
+
+- `cargo fmt --all --check` clean. `cargo clippy -p symbrain-skills --all-targets` **0 errors** — it was red before: `unnecessary_wraps` in the library plus pedantic lints in the worker's test files (`uninlined_format_args`, `field_reassign_with_default`, `doc_markdown`).
+- `cargo test -p symbrain-skills` green, including the new differential suites: `runner_tests` 6 tests asserting all seven fixture cases, `runner_env_tests` 2 parents plus their child cases, alongside the pre-existing install/render/lock suites.
+- `go run ./scripts/skills-runner-oracle -check` prints "fixture matches Go (check passed)". The fixture now holds seven cases, five default-resolution scenarios and provenance (Go revision, generator command, toolchain).
+- Closed gaps, each traceable to the Go source it was derived from:
+  - **Result wrapper.** Go's `syncTarget` (`internal/skillsrunner/runner.go`) returns only its result, so the Rust port returns `TargetResult` directly.
+  - **Timeout.** Go wraps each target in `context.WithTimeout(ctx, opts.Timeout)` and formats `sync timed out: ` plus `ctx.Err()`; Rust takes the deadline from the option and picks the same two texts. Remaining limit, documented as a `ponytail:` comment: with a single cancellation snapshot a caller that cancels *after* our deadline also reads as "deadline exceeded".
+  - **Render error bytes.** Go's `render/materialize.go` wraps each per-target error as `target %s: %w` **unconditionally** on the RenderAll path, while the dry-run path (`render.RenderTarget`) carries no such prefix. Both shapes are frozen (`failure_visible_and_reported`, `dry_run_failure_names_target`) and asserted byte-for-byte; the earlier "Rust differs from Go" note is gone.
+  - **Defaults.** `internal/paths.resolve`: `$XDG_DATA_HOME` only when absolute, else `$HOME/.local/share`, then `symbrain/skills` unless that directory is absent and legacy `symskills` exists. `config.Defaults()` builds library, render and base from that one data root — `RenderDir` is **not** the cache, contrary to the comment this branch inherited. Five scenarios are frozen with `$ROOT` placeholders and the marker directories each one creates; a Rust test rebuilds exactly that state and compares all three paths.
+  - **Provenance.** The fixture records the Go revision, generator command and toolchain; `-check` still compares cases and defaults only.
+- **Test-environment constraint.** This crate denies `unsafe_code`, so a test may not mutate its own environment. The env-dependent scenarios therefore run in child processes prepared with `Command::env` (`runner_env_tests.rs`), and the two child cases are `#[ignore]`d.
+- **Oracle-scenario pitfall (measured here).** Scenarios that share one temporary root leak state: the first case that creates the "current" directory hides the legacy fallback from every later case. Each scenario needs its own root, and the fixture must record which marker directories it created.
+- **Open divergence — deliberately not fixed, and a precondition for Slice B.** Go's runner renders through `RenderAll(bundle, opts.RenderDir, [target])`, which writes `<RenderDir>/<target>/<name>` and installs a symlink pointing at that path. The Rust path renders in memory and, in symlink mode, keeps a stable tree at a hardcoded `home/.local/share/symskills/rendered/...` (`rust/symbrain-skills/src/install/core.rs`) which the symlink then points at. Result messages and error text match Go; the symlink target and the contents of the configured render dir do not. Do not remove the Go fallback in `sync_cli.rs` (Slice B) before an install-side oracle covers this.
+- **Dispatch note.** Every delegated run for this slice died on provider limits (free-model quota, then a subscription limit) and left either nothing or uncommitted work in a nested worktree. The work above was done in the coordinator's own hands; a child that dies on a provider error says nothing about the slice.
+
 ## Resume checkpoint — 2026-09-21 (gates): MCP/GW rows promoted on fixtures, skills-runner rescued with a real Go oracle
 
 **Verified on `main` @ `804f30ff`, commands and output recorded, not inferred:**
