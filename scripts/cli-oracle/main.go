@@ -18,15 +18,45 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
+
+// caseTimeout bounds every case. Cases like `memory serve` start a listener
+// instead of exiting; without a bound the oracle blocks forever on any machine
+// where the port is free, which is every CI runner. A case that has to be
+// killed is a finding, not a pass: it is recorded with a timeout marker so the
+// fixture cannot silently encode a hang.
+const caseTimeout = 20 * time.Second
+
+// servePort is the port `memory serve` binds. The recorded expectation holds a
+// bind-failure transcript, so the oracle pins the port itself before the case
+// runs. Otherwise the case's outcome would depend on whether something happens
+// to be listening on the machine: free port means the server starts and blocks,
+// occupied port means the recorded error. Pinning makes the case deterministic.
+const servePort = "127.0.0.1:8787"
+
+// holdServePort binds servePort for the duration of the oracle and returns the
+// listener so the caller can close it. A bind failure means something else
+// already holds the port, which produces the same transcript the fixture
+// records, so that is not an error.
+func holdServePort() net.Listener {
+	ln, err := net.Listen("tcp", servePort)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cli-oracle: %s already in use; relying on the existing listener\n", servePort)
+		return nil
+	}
+	return ln
+}
 
 // TestCase captures one input scenario: args, expected stdout/stderr/exit.
 type TestCase struct {
@@ -54,6 +84,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer os.RemoveAll(oracleRoot)
+
+	// Pin the serve port so `memory serve` produces the recorded bind-failure
+	// transcript on every machine, instead of starting a server that runs until
+	// its case bound kills it.
+	if ln := holdServePort(); ln != nil {
+		defer ln.Close()
+	}
 
 	cases := buildCases(*goBinary)
 	data, err := json.MarshalIndent(cases, "", "  ")
@@ -267,17 +304,39 @@ func buildCases(goBinary string) []TestCase {
 }
 
 // runCase invokes the Go binary with args and captures stdout/stderr/exit.
+// The case is bounded by caseTimeout: a command that does not exit on its own
+// is killed and marked, so a hanging case can never stall the oracle.
 func runCase(binary string, args []string, description string) TestCase {
-	cmd := exec.Command(binary, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), caseTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, binary, args...)
 	cmd.Env = oracleEnv
 	// Every case runs in a scratch directory: commands like `sync` write
 	// managed blocks into the project's instruction files, and an oracle must
 	// never mutate the checkout it is measuring.
 	cmd.Dir = filepath.Join(oracleRoot, "cwd")
+	cmd.WaitDelay = 2 * time.Second
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
+
+	// A case killed by the bound is reported as such instead of being folded
+	// into a generic failure: the fixture must not encode "it hung" as an
+	// ordinary exit code.
+	if ctx.Err() == context.DeadlineExceeded {
+		fmt.Fprintf(os.Stderr, "cli-oracle: case %q exceeded %s and was killed\n",
+			strings.Join(args, " "), caseTimeout)
+		return TestCase{
+			ID:          strings.Join(append([]string{"go"}, args...), " "),
+			Args:        args,
+			ExitCode:    -1,
+			Stdout:      stdout.String(),
+			Stderr:      stderr.String() + "\n<timeout: case exceeded " + caseTimeout.String() + ">",
+			Description: description,
+		}
+	}
 
 	exitCode := 0
 	if err != nil {
