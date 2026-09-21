@@ -6,6 +6,7 @@
 mod encode;
 pub mod install;
 pub mod library;
+pub mod runner;
 mod load;
 pub mod materialize;
 pub mod metadata;
