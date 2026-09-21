@@ -142,6 +142,13 @@ func setupOracleEnv() error {
 	if err != nil {
 		return err
 	}
+	// TMPDIR sits under a symlinked ancestor on macOS (/var -> private/var) and
+	// on some Linux setups (/tmp -> ...). A symlinked ancestor changes the
+	// `sync` case's outcome (see #630), so the root is resolved to its real
+	// path before anything is built on top of it.
+	if resolved, err := filepath.EvalSymlinks(root); err == nil {
+		root = resolved
+	}
 	oracleRoot = root
 	oracleCwd, _ = os.Getwd()
 	home := filepath.Join(root, "home")

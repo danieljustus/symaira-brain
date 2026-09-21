@@ -29,6 +29,8 @@ Commands:
 
 Run 'symbrain guard <command> --help' for details on a specific command.";
 
+#[path = "guard_doctor.rs"]
+mod guard_doctor;
 #[path = "guard_grants.rs"]
 mod guard_grants;
 #[path = "guard_scan.rs"]
@@ -87,7 +89,10 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         }
         "scan" => Some(guard_scan::run(&args[1..], stdout, stderr)),
         "grants" => Some(guard_grants::run(&args[1..], stdout, stderr)),
-        "doctor" => None,
+        // Go's dispatcher (cmd/symbrain/cmd_guard.go) calls `doctor.Run(stdout)`
+        // with no arguments at all — anything after `doctor` is ignored there,
+        // so the port ignores it too.
+        "doctor" => guard_doctor::run(stdout),
         _ => {
             let _ = writeln!(stderr, "symbrain guard: unknown command {verb:?}\n");
             let _ = writeln!(stderr, "{GUARD_USAGE}");
@@ -141,7 +146,11 @@ pub fn run_at_path<R: Read, W: Write>(
     }
 }
 
-fn audit_path() -> PathBuf {
+/// The XDG data path for symguard's audit log
+/// (`filepath.Join(config.DataDir(), "audit.log")` in Go). `pub(crate)` so
+/// `guard_doctor`'s empty-machine gate probes the exact same path `decide`
+/// writes to, rather than a second copy of this resolution order.
+pub(crate) fn audit_path() -> PathBuf {
     let data_home = env::var_os("XDG_DATA_HOME").filter(|value| !value.is_empty());
     // Match Go os.UserHomeDir, not the Unix shell's HOME on Windows.
     let home_key = if cfg!(windows) { "USERPROFILE" } else { "HOME" };
@@ -251,15 +260,5 @@ mod tests {
             );
             assert!(stderr.is_empty());
         }
-    }
-
-    #[test]
-    fn doctor_remains_on_go_fallback() {
-        let mut stdout = Vec::new();
-        let mut stderr = Vec::new();
-        assert_eq!(
-            run(&[OsString::from("doctor")], &mut stdout, &mut stderr),
-            None
-        );
     }
 }

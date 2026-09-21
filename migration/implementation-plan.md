@@ -1,5 +1,340 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (later still): `guard doctor` empty-machine ported, 81/81 un-ignored — uncommitted
+
+**Not committed**, same standing rule. `git status` now additionally shows
+`rust/symbrain-cli/src/{guard_cli,guard_scan}.rs` and
+`rust/symbrain-cli/tests/cli_tree_tests.rs` modified and
+`rust/symbrain-cli/src/guard_doctor.rs` untracked (new file); nothing else
+untracked.
+
+**The last residual (`go guard doctor`) is closed, conservatively scoped to
+exactly the "empty machine" fixture case, per this file's own prior
+checkpoint's scoping note.** New module `rust/symbrain-cli/src/guard_doctor.rs`
+(wired into `guard_cli.rs` via `#[path = "guard_doctor.rs"] mod guard_doctor;`,
+same pattern as `guard_scan`/`guard_grants`). `guard_cli.rs`'s `"doctor" =>
+None,` line now reads `"doctor" => guard_doctor::run(stdout),`; Go's own
+dispatcher (`cmd/symbrain/cmd_guard.go`) calls `doctor.Run(stdout)` with no
+arguments at all, so anything after `doctor` is ignored on both sides.
+
+Read in full before porting, per the prior checkpoint's instruction:
+`guard/cmd/symguard/doctor/{command,checks}.go`,
+`guard/internal/config/config.go`, `guard/internal/audit/chain.go`, and
+`guard/internal/discovery/discovery.go`. The highest-risk piece — discovery's
+exact client-path list — turned out to resolve one level deeper than
+`discovery.go` itself: it's a thin adapter over
+`github.com/danieljustus/symaira-corekit@v0.17.0`'s `mcpcfgkit.DefaultSources()`
+(version pinned exactly in this repo's `go.mod`/`go.sum`). Read that function
+directly from the pinned module in the local Go module cache rather than
+trusting the wrapper's doc comment. It is also, byte-for-byte, the same
+five-source list (hermes, cursor, vscode, opencode, claude-desktop with the
+darwin/XDG branch) that `guard_scan.rs`'s own `SOURCES`/`source_path` already
+implement natively — a coincidence worth flagging for a reviewer (see below),
+not an assumption: both were checked independently against the pinned
+`mcpcfgkit` source, and `guard_scan.rs`'s existing `source_path` was reused
+rather than re-implemented a second time (it and its `Source`/`SOURCES` are
+now `pub(crate)` for this reuse; ladder: don't duplicate a list this
+security-sensitive when a verified-identical one already exists in the same
+crate).
+
+**The conservative three-condition gate is exactly what the prior checkpoint
+scoped:** native handling only when (1) `guard/internal/config.ConfigPath()`'s
+file is absent, (2) `filepath.Join(config.DataDir(), "audit.log")` is absent,
+(3) none of the five discovery paths above exist. Any one present falls back
+to Go untouched. The gate itself (`guard_doctor::requires_go_fallback`) takes
+plain `&Path`/`bool` arguments rather than reading the environment itself, so
+it has its own unit test (`gate_flips_on_any_of_the_three_conditions`) with
+real temp-dir paths — no env-mutation trick needed here, unlike `sync_cli`'s
+equivalent case, because this gate doesn't read `$HOME`/XDG vars internally;
+the env-dependent production wiring (`guard_doctor::run`) is covered by the
+subprocess-isolated `cli_tree_tests.rs` instead, same reasoning as before.
+`config_path()` mirrors `config.ConfigPath()`/`DefaultPath()` directly
+(`$SYMGUARD_CONFIG`, else `$XDG_CONFIG_HOME/symguard/config.toml`, else
+`~/.config/symguard/config.toml`); the audit-log path reuses `guard_cli.rs`'s
+existing `audit_path()` (now `pub(crate)`), already unit-tested and already
+matching `config.DataDir()/audit.log` exactly — not a second implementation.
+
+**Never fabricated the Go version.** The frozen fixture's `Go: go1.26.7` line
+is pinned to the recording machine, exactly like `guard version`'s toolchain
+row already was. Same fix as that row: the native line is now labeled
+`Rust:` and prints the real `rustc_version()`; `OS/Arch:` prints the real
+platform. `cli_tree_tests.rs`'s `normalize_accepted_differences` gained two
+new narrowly-scoped patterns for this block's different shape (capitalized
+`Label:` + colon + run of spaces, vs. `guard version`'s lowercase
+`label<space>value` shape) — verified by grep that `OS/Arch:` and `  Go:`
+appear nowhere else across the 81 fixture cases, so this cannot swallow a
+real difference elsewhere. `ACCEPTED_DIVERGENCES` did not list `go guard
+doctor` (checked, per the prior checkpoint's own instruction to verify
+rather than assume).
+
+**`cli_tree_fixture_matches_native_binary`'s `#[ignore]` is removed.**
+Verified: `cargo test -p symbrain-cli --test cli_tree_tests` (no `--ignored`
+flag needed) → 81/81 cases match, 0 diverged. `cargo test -p symbrain-cli
+--lib` → 94 passed (net +1 from before this checkpoint: +2 new tests, the
+gate test and `empty_machine_report_matches_frozen_shape`, -1 for removing
+`guard_cli::tests::doctor_remains_on_go_fallback`, which asserted the
+now-false "doctor always falls back" and read the real ambient
+`$HOME`/XDG env rather than an isolated one — stale by construction once
+`doctor` became conditionally native, so deleted rather than patched), 0
+failed.
+
+**Wiring into the gate needed no Makefile change — verified, not assumed.**
+`make rust-check`'s dependency line (`rust-check: ... $(EXTERNAL_RUN) cargo
+test --workspace --all-features --locked ...`, `Makefile` line 237) already
+runs `cargo test --workspace`, which sweeps up every non-ignored test in
+every crate, `cli_tree_tests` included. Confirmed directly: `cargo test
+--workspace --all-features --locked -- --list` lists
+`cli_tree_fixture_matches_native_binary: test` (unignored). CI's Rust job
+(`.github/workflows/ci.yml`) runs `make rust-check parity-smoke`, so this
+test is now a real CI gate with zero Makefile edits. (A prior checkpoint on
+this same page speculated `rust-check`'s chain "does NOT appear to invoke
+`cargo test --workspace` directly" — that speculation does not hold against
+the Makefile as it exists now; whether it was ever accurate or the Makefile
+changed since is not something this checkpoint can determine, and is not
+worth chasing further.)
+
+**Verified locally, this checkpoint:** `cargo build -p symbrain-cli --bin
+symbrain`; `cargo test -p symbrain-cli --lib` (94/94); `cargo test -p
+symbrain-cli --test cli_tree_tests` (81/81, unignored); `make
+guard-doctor-oracle-check` (7/7, unaffected — the Go side was not touched);
+`cargo clippy -p symbrain-cli --all-targets -- -D warnings` (clean); `cargo
+fmt --all --check` (clean); `git status --short` (no stray untracked
+artifacts). Full `make rust-check` (all oracles) was not run end-to-end this
+session for time; `cargo test --workspace --all-features --locked -- --list`
+was used instead to confirm the specific wiring claim above without paying
+for the full oracle chain.
+
+**Deliberately out of scope, unchanged, matching the prior checkpoint's
+scoping:** the other 6 `guard-doctor-oracle` scenarios (healthy config,
+invalid TOML, audit anchor variants, discovered-server allow/deny, secret
+risk) still have no Rust consumer and stay on Phase 8.5/8.6 — they need
+`guard/internal/config`'s TOML schema, `guard/internal/audit.ReadCheckpoint`,
+`guard/internal/spawn` allowlist matching, and secret-redaction logic, none
+of which exist in `symbrain-guard-core` yet. The oracle's own pre-existing
+`discovered_server_secret_risk` defect (documented in
+`guard/scripts/guard-doctor-oracle/README.md`) is untouched — it only
+matters once that later slice discovers servers, which this slice's gate
+guarantees it never does.
+
+**Open question for a reviewer:** whether `guard_scan.rs`'s discovery path
+list and `discovery.DiscoverAll()`'s (via `mcpcfgkit.DefaultSources()`) are
+guaranteed to stay identical going forward, or whether that's a coincidence
+of the current `symaira-corekit` pin that could silently drift on a future
+`go.mod` bump without a Rust-side signal. Today they were verified to match
+by reading both sources directly, and `guard_doctor` now depends on that
+match via direct reuse (not just similarity) — so a `guard_scan.rs` change
+alone (e.g. adding a client) also changes `guard_doctor`'s gate, which is the
+intended coupling. A `go.mod` bump of `symaira-corekit` that adds or moves a
+client source without a corresponding `guard_scan.rs`/`guard_doctor` update
+is the one drift path this port does not detect automatically.
+
+Everything in this checkpoint is uncommitted — review the diff first
+(`git diff`), then commit/push, since #631 needs an actual CI run to close.
+
+**Not committed.** Everything below is verified in the working tree only; no
+commit/push per the standing rule to leave Git actions to Daniel. `git status`
+at this checkpoint: `Makefile`, `rust/symbrain-cli/src/{skills_cli,sync_cli}.rs`,
+`rust/symbrain-cli/tests/cli_tree_tests.rs`, `scripts/cli-oracle/main.go`
+modified; nothing untracked (a stray `scripts/cli-oracle/cli-oracle` build
+artifact from a local `go build ./...` check was removed).
+
+**#630 (isolation-root symlink shape) is fixed in both places it appears, not
+just the one the issue named.** The issue only measured the Go oracle
+(`scripts/cli-oracle`'s `os.MkdirTemp` root), but the Rust consumer
+(`rust/symbrain-cli/tests/cli_tree_tests.rs`) hits the identical defect
+independently: it builds its own `TempDir` and never resolves it, so on
+macOS (`/var` → `private/var`) the native binary's no-follow capability opens
+fail with `ENOTDIR` for *any* harness/instructions read — not a fixture
+artifact, a real symlink-ancestor bug in the test harness. Both are fixed:
+`scripts/cli-oracle/main.go` now resolves its root with `filepath.EvalSymlinks`
+right after `MkdirTemp`; `cli_tree_tests.rs` gained a `real_root()` helper
+(`root.path().canonicalize()`) used everywhere the old code read `root.path()`
+for env/cwd construction. `normalize_stdout` needed no change — it already
+special-cased the `/private` prefix duality.
+Verified: `make cli-oracle-check` → **81/81, 0 drift** (previously this command
+was never actually run against the fix; the frozen fixture's `go sync`
+expectation turned out to already assume a symlink-free root, so the Go-side
+fix alone made the tracked fixture reproducible, no regeneration needed).
+
+**#629 remainder does not apply.** The issue speculated that
+`db-memory-oracle` and `guard-doctor-oracle` "invoke the binary the same way"
+as `cli-oracle` and might need the same timeout bound. Checked: neither
+imports `os/exec` at all — both call Go packages in-process. #629 is fully
+closed by the fix already on `main` (cli-oracle's 20s `context.WithTimeout` +
+`WaitDelay`); there is no sibling-oracle gap to fix.
+
+**#627 (PATH leak) has nothing left to do either.** Fixed for cli-oracle
+already (`emptyPath`, on `main`); the sibling oracles don't exec anything so
+can't leak PATH. Both #627 and #630 close with this checkpoint's evidence
+once someone reviews and commits it.
+
+**All four previously-excluded oracles pass locally and are wired back into
+`make rust-check`** (`xdg-oracle-check`, `guard-doctor-oracle-check`,
+`db-memory-oracle-check`, `cli-oracle-check` added to the dependency list,
+with the Makefile comment rewritten to explain why). This is the practice
+#631 itself sanctions: "add the gate in the same change that first pushes
+it" — so CI proves them before merge instead of a separate two-step dance.
+Verified locally end-to-end: `make rust-check` exit 0, including
+`cargo-deny` (`advisories ok, bans ok, licenses ok, sources ok`). **Not yet
+proven on a CI runner** — that only happens once this is pushed; #631 stays
+open until then.
+
+**`symbrain sync` is now native for its two previously-unported fixture
+cases** (`rust/symbrain-cli/src/sync_cli.rs`):
+- Bare `sync` (implicit all-harness selection) now runs natively. The
+  instruction-target loop already worked generically over all harnesses; the
+  gap was the `Skills:` section, hardcoded to `skipped` for every harness.
+  Ported from the Go reference (`internal/skillsrunner/runner.go`): a harness
+  with no `SkillTarget` is `skipped`/`"no skill target for harness …"`; a
+  harness with a `SkillTarget` and an empty-or-missing skills library is
+  `ok`/`"no skills rendered"` — which is *all* `skillsrunner.Run` ever does
+  before touching the render/install pipeline (`os.ReadDir` returns
+  `ErrNotExist` or zero entries, short-circuits before any rendering).
+  **Scope boundary, deliberate:** a *non-empty* skills library still forces
+  the Go fallback (`skills_library_has_entries()` gate in
+  `requires_go_fallback`) — actually rendering and installing skills is
+  Phase 7.2/7.3 territory (not ported), and guessing its output instead of
+  falling back would be exactly the "invented behavior" the project's rules
+  forbid. This is conservative by construction: it only ever defers to Go
+  *more* than necessary, never claims a result it can't prove.
+- `sync --unknown` (and any other unrecognized flag) is now rejected natively
+  with the Go flag package's own message shape (`flag provided but not
+  defined: -X` + `Usage of sync:` + the two real flags, alphabetical), exit 2.
+  Previously any unrecognized flag silently went to the Go fallback.
+- Unit test added: `sync_cli::tests::unknown_flag_matches_go_flag_package_rejection`
+  (byte-exact against the frozen fixture text). The env-dependent all-harness
+  path is covered by the existing subprocess-isolated `cli_tree_tests.rs`
+  instead of a new env-mutating unit test (this crate has no established
+  pattern for isolating env vars across parallel `#[test]`s, and one shouldn't
+  be invented for a single case).
+- `rust/symbrain-cli/src/skills_cli.rs::resolve_skills_dirs` made `pub(crate)`
+  so `sync_cli` could reuse the same library-dir resolution instead of a
+  second implementation.
+
+**`cli_tree_fixture_matches_native_binary` residual: 9 → 4 of 81** (still
+`#[ignore]`d — see below for why it isn't wired in yet). Fixed by the above:
+`harness list`, `harness health`, `skills log` (all three were the #630
+symlink bug, not unported surfaces — `harness_cli.rs` was already fully
+implemented), `sync`, `sync --unknown`. Remaining 4, unchanged by this
+checkpoint:
+- `guard doctor` — genuinely unported (`guard_cli.rs:90` hard-codes
+  `"doctor" => None`). Every other guard verb (`version`, `decide`, `scan`,
+  `grants`) is already native, so this is the last one standing.
+  **Scoped and NOT started**: read `guard/cmd/symguard/doctor/{command,checks}.go`
+  in full. It needs its own config load (guard's `internal/config`, TOML
+  rules + spawn allowlist — distinct from `symbrain-harness`'s config, and
+  nothing in `symbrain-guard-core` covers it yet), an audit-log/anchor probe
+  (`guard/internal/audit.ReadCheckpoint`), and MCP discovery + allowlist
+  cross-check + plaintext-secret detection (`guard/internal/discovery`,
+  `guard/internal/spawn` — **not** the same discovery `guard_scan.rs` already
+  has natively in Rust; that one is self-contained with its own client list
+  and doesn't share a module with doctor's Go-side `discovery.DiscoverAll()`).
+  The oracle's own README documents a known pre-existing defect worth reading
+  before porting: the `discovered_server_secret_risk` case currently produces
+  the same `[DENIED]` line as `discovered_server_denied` (the plaintext-secret
+  warning appears to need an *allowlisted* server to show separately) — fix
+  or rename that case as part of this slice, it's a real gap in the acceptance
+  oracle itself, not something to port around.
+  This is real Phase 8.5/8.6 work (last Guard verb before full cutover), not
+  a small fix, and deserves its own dispatched slice with fresh review rather
+  than being rushed onto the end of this one.
+- `memory serve` — accepted, environment-dependent (port-availability
+  transcript), not a parity target. Unchanged, no action needed.
+- `skills list --help`, `skills list --unknown` — accepted, deliberate: these
+  reproduce the Go `flag` package's own `PrintDefaults` dump verbatim, and
+  the project's own prior note says reproducing that without the actual flag
+  set would create a second source of truth for the same bytes. Unchanged,
+  no action needed.
+
+**Un-ignoring `cli_tree_fixture_matches_native_binary` needs one more thing
+beyond closing `guard doctor`:** the 3 "accepted difference" cases above
+still show as raw failures in the test (no `normalize_accepted_differences`-
+style suppression exists for them today). Whoever closes `guard doctor` should
+either extend that normalization to cover exactly these 3 known-permanent
+differences, or special-case them in the test's failure collection, before
+flipping `#[ignore]` off and adding the test to `rust-check`.
+
+**Update, same session: the accepted-difference exclusion is done, residual is
+down to exactly 1.** `cli_tree_tests.rs` gained an `ACCEPTED_DIVERGENCES` list
+(`go skills list --help`, `go skills list --unknown`, `go memory serve`) with
+the same reasoning as above, skipped before the per-case run (not normalized
+after — these are permanent by design, not byte-level noise like the
+toolchain row). Verified: `cargo test -p symbrain-cli --test cli_tree_tests --
+--ignored` → **1 of 81 diverged: `go guard doctor`**, exit 0 expected got 1.
+That is now the *only* thing standing between this test and being un-ignored
+and wired into `rust-check`.
+
+**`guard doctor` scoping refined — it's smaller than the full 7-scenario port
+if scoped to just this consumer.** `cli_tree_expectations.json` has exactly
+one `guard doctor` case, the "empty machine" scenario (no config file, no
+audit log, no discovered MCP servers) — the other 6 scenarios (healthy
+config, invalid TOML, audit anchor variants, discovered-server allow/deny,
+secret risk) only exist in the separate `guard-doctor-oracle` fixture (7
+cases, no Rust consumer yet, SEC-005). Closing *this* residual only needs the
+empty-machine path, gated conservatively exactly like this session's `sync`
+fix: check `guard/internal/config.ConfigPath()` — if the file exists, fall
+back to Go (TOML parsing/policy not ported); check the audit log path — if it
+exists, fall back to Go (anchor-chain reading not ported); check whether any
+of discovery's known MCP-client config paths exist — if any does, fall back
+to Go (full discovery/secret-detection not ported). Only when all three are
+absent does the native path print the fixed "empty machine" report.
+
+**One more thing this scoping surfaced, not yet handled:** `guard doctor`'s
+own output block (`  Version:   dev\n  Go:        go1.26.7\n  OS/Arch:
+darwin/arm64\n`) is a *different* shape than the `guard version` command's
+row format (`  go      <go>` / `  os/arch <arch>`), which is the only shape
+`cli_tree_tests.rs`'s `normalize_stdout`/`normalize_accepted_differences`
+currently recognizes. The frozen `go guard doctor` case in
+`cli_tree_expectations.json` has the *literal* pinned Go toolchain string
+(`go1.26.7`) baked in raw — unlike `guard-doctor-oracle`'s own fixture, which
+the oracle normalizes to a `Go: <go>` placeholder itself. Porting `guard
+doctor` therefore also needs a second accepted-difference pattern added to
+`cli_tree_tests.rs` for this line shape — the native binary must keep
+reporting its own real Rust toolchain (never a fabricated Go version string;
+the ledger already records one such fabrication being rejected during wave
+4), and the test must tokenize the row the same way it already does for
+`guard version`'s.
+
+**Why this session stopped here instead of continuing into the port:** the
+full command also touches `guard/internal/spawn` (allowlist matching) and
+`guard/internal/discovery` (client-config scanning + plaintext-secret
+detection) — none of which exist in `symbrain-guard-core` yet, and
+`guard_scan.rs`'s existing native discovery is a separate, self-contained
+implementation that doesn't share a module with doctor's Go-side
+`discovery.DiscoverAll()`. Even the reduced "empty machine only" scope above
+needs the exact discovery client-path list read correctly from
+`guard/internal/discovery/discovery.go` to avoid a false "none discovered"
+on a machine that actually has one configured — worth its own focused slice
+with its own review rather than being rushed onto the end of this one.
+
+**Next action for a resumed session:** implement the conservative
+"empty machine only" `guard doctor` slice above (config/audit-log/discovery
+existence gates, Go fallback otherwise), add the second accepted-difference
+normalization for its Version/Go/OS-Arch block, verify
+`cli_tree_fixture_matches_native_binary` passes un-ignored, then wire it into
+`rust-check`. The full 7-scenario Guard doctor port (config parsing, spawn
+allowlist, discovery, secret redaction) stays open as later Phase 8.5/8.6
+work with its own oracle-defect fix (the `discovered_server_secret_risk` gap
+noted in `guard/scripts/guard-doctor-oracle/README.md`).
+
+Everything in this checkpoint is uncommitted — review the diff first
+(`git diff`), then commit/push, since #631 needs an actual CI run to close
+and none of this has been pushed yet.
+
+**Unrelated pre-existing flake confirmed while verifying, not touched:**
+`cargo test -p symbrain-cli` (the full integration-test run, not something
+`make rust-check`/`rust-fast` exercises — they never happened to hit it this
+session) deterministically fails
+`skills_status_opencode_tests::opencode_project_status_matches_go_bytes` on
+this machine: expected `/var/folders/...`, got `/private/var/...` — the same
+macOS temp-dir symlink class as #630, tracked separately as **#480**
+("test(skills): remove macOS /var path canonicalization flake", still open).
+Not fixed here: the file has 19 `TempDir::new()` call sites and #480's own
+text cautions the fix must not "hide real path errors," i.e. a blanket
+`canonicalize()` on every one (the mechanical fix that worked for
+`cli_tree_tests.rs`) needs more care than a drive-by — it's a real, separate,
+already-scoped task, not part of this checkpoint's diff.
+
 ## Resume checkpoint — 2026-09-21: the migration line is merged, and the oracles are not portable yet
 
 **Merged.** `migration/rust-continue-20260920` was pushed, opened as PR #628 and

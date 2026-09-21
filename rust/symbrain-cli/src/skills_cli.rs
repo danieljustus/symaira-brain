@@ -86,7 +86,7 @@ struct SkillSyncReport {
     dry_run: bool,
 }
 
-fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
+pub(crate) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let library_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
         PathBuf::from(path)
