@@ -1,5 +1,45 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21: the migration line is merged, and the oracles are not portable yet
+
+**Merged.** `migration/rust-continue-20260920` was pushed, opened as PR #628 and
+squash-merged into `main` as `2f5a5868`. The branch and its `.worktrees/w4-cli`
+worktree are gone; `main` is the single reference line. `make rust-check` and
+`make parity-smoke` (457/457) are green on ubuntu-latest and macos-15. Two
+issues it fixed are closed: #624 (atime-derived `last_used` flake) and #616
+(doctor routing reading the real profile directory).
+
+**The first CI run of this branch exposed a class of defect.** The branch had
+never been pushed, so four oracles it added to `rust-check`
+(`cli-oracle`, `xdg-oracle`, `db-memory-oracle`, `guard-doctor-oracle`) had
+never executed on a runner. Every one of them turned out to be calibrated to the
+recording machine rather than to a portable environment. Three failures were
+diagnosed and fixed before the merge:
+
+| Defect | Cause | Fix |
+|---|---|---|
+| `cli-oracle` hung >2h, twice, at the same CI step | `runCase` used `cmd.Run()` with no bound; the `memory serve` case starts a listener and never exits when `127.0.0.1:8787` is free — which is every runner. It passed locally only because an unrelated SSH tunnel held the port. | `bdcb1e63`: 20s context + `WaitDelay` per case; a killed case is recorded with exit code `-1` and a `<timeout>` marker. The oracle also binds the serve port itself so the recorded bind-failure transcript is deterministic. |
+| Fixture encoded the recorder's harness CLIs | `setupOracleEnv` built the env with `os.Environ()` and never overrode `PATH`; `skills targets` reports `INSTALLED` from harness-CLI detection over `PATH`. | `6a7366d2`: `PATH` pinned to an empty directory. Residual dropped 11 → 9; `vault` and `skills targets` now match. |
+| Gate wired before it had ever run on CI | The four new oracles were added to `rust-check` on an unpushed branch. | `639a00b8`: `rust-check` returned to `main`'s dependency list — the set with real CI history. |
+
+**Still open, tracked as issues.** These are not closed by the merge:
+
+- #627 — `PATH` leak (the class above, kept as the parent report).
+- #629 — `cli-oracle` runs cases without a bound; the sibling oracles
+  (`db-memory-oracle`, `guard-doctor-oracle`) invoke the binary the same way.
+- #630 — `cli-oracle` freezes the recording machine's temp-root shape: with a
+  symlinked ancestor (`/tmp` → `private/tmp`) the `sync` case fails with
+  `secure source parent ...: not a directory`, without one it succeeds.
+- #631 — new oracles must not be wired into `rust-check` before passing once on
+  a runner.
+- #632 — `guard-scan-oracle` includes `go.mod`/`go.sum` in its pinned source set,
+  so every Dependabot Go module bump fails `rust-check` by construction (seen on
+  PR #609).
+
+The four oracles remain runnable explicitly (`make cli-oracle-check`, …) so the
+residual stays visible. Wiring them back into the gate requires making them
+portable first; `cli-oracle-check` currently reports 9 of 81 cases diverging.
+
 ## Resume checkpoint — 2026-09-20, wave 4: the CLI tree has a consumer
 
 `CLI-006` now has a Rust consumer instead of a fixture nobody read:
