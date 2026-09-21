@@ -156,6 +156,10 @@ mcp-oracle-check:
 gateway-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/gateway-oracle -check
 
+## skills-runner-oracle-check: Ensure skills-runner expectations are current
+skills-runner-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/skills-runner-oracle -check
+
 ## broker-oracle-check: Ensure child lifecycle expectations are current
 broker-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/broker-oracle -check

@@ -5,8 +5,8 @@ use crate::load::load_bundle;
 use crate::model::{Bundle, SkillError};
 use crate::render;
 use std::collections::BTreeMap;
-use std::path::Path;
-use std::time::Duration;
+use std::path::{Path, PathBuf};
+use std::time::{Duration, Instant};
 
 /// Default per-target timeout matching the Go implementation.
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(30);
@@ -48,8 +48,10 @@ impl Options {
             opts.base_dir = default_base_dir()?;
         }
         if opts.home_dir.is_empty() {
+            // Go wraps os.UserHomeDir's error verbatim, whose text on Unix is
+            // "$HOME is not defined".
             opts.home_dir = std::env::var("HOME")
-                .map_err(|_| SkillError("cannot determine user home directory".into()))?;
+                .map_err(|_| SkillError("resolve home directory: $HOME is not defined".into()))?;
         }
         if opts.timeout == Duration::ZERO {
             opts.timeout = DEFAULT_TIMEOUT;
@@ -105,7 +107,7 @@ pub fn run(
         };
 
         // Process target (timeout handled per-target inside sync_target, matching Go's WithTimeout)
-        let result = sync_target(ctx, &target_name, &opts, dry_run)?;
+        let result = sync_target(ctx, &target_name, &opts, dry_run);
         results.push(result);
     }
 
@@ -114,62 +116,58 @@ pub fn run(
 
 /// Synchronizes all skills for a single harness target.
 ///
-/// # Errors
-///
-/// Returns a result describing success, timeout, or failure — never panics.
+/// Never panics: success, timeout and per-skill failures all travel through the
+/// returned [`TargetResult`], matching Go's `syncTarget`, which likewise has no
+/// error result of its own.
 #[allow(clippy::too_many_lines)]
 fn sync_target(
     ctx: &mut impl Context,
     target_name: &str,
     opts: &Options,
     dry_run: bool,
-) -> Result<TargetResult, SkillError> {
-    if ctx.is_cancelled() {
-        return Ok(TargetResult {
-            target: target_name.to_string(),
-            status: "error".to_string(),
-            message: Some("sync timed out: context deadline exceeded".to_string()),
-        });
+) -> TargetResult {
+    // Go wraps each target in context.WithTimeout(ctx, opts.Timeout), so the
+    // deadline reported in a timeout message is this target's own budget
+    // rather than the caller's context.
+    let deadline = Instant::now() + opts.timeout;
+    if let Some(result) = timeout_result(target_name, ctx, deadline) {
+        return result;
     }
 
     let library_path = Path::new(&opts.library_dir);
     let entries = match std::fs::read_dir(library_path) {
         Ok(e) => e,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
-            return Ok(TargetResult {
+            return TargetResult {
                 target: target_name.to_string(),
                 status: "ok".to_string(),
                 message: Some("no skills rendered".to_string()),
-            });
+            };
         }
         Err(err) => {
-            return Ok(TargetResult {
+            return TargetResult {
                 target: target_name.to_string(),
                 status: "error".to_string(),
                 message: Some(format!("read skills library: {err}")),
-            });
+            };
         }
     };
 
     let entries: Vec<_> = entries.flatten().collect();
     if entries.is_empty() {
-        return Ok(TargetResult {
+        return TargetResult {
             target: target_name.to_string(),
             status: "ok".to_string(),
             message: Some("no skills rendered".to_string()),
-        });
+        };
     }
 
     let mut done = 0;
     let mut failed = Vec::new();
 
     for entry in entries {
-        if ctx.is_cancelled() {
-            return Ok(TargetResult {
-                target: target_name.to_string(),
-                status: "error".to_string(),
-                message: Some("sync timed out: context deadline exceeded".to_string()),
-            });
+        if let Some(result) = timeout_result(target_name, ctx, deadline) {
+            return result;
         }
 
         let file_name = entry.file_name();
@@ -226,42 +224,71 @@ fn sync_target(
         done += 1;
     }
 
-    if ctx.is_cancelled() {
-        return Ok(TargetResult {
-            target: target_name.to_string(),
-            status: "error".to_string(),
-            message: Some("sync timed out: context deadline exceeded".to_string()),
-        });
+    if let Some(result) = timeout_result(target_name, ctx, deadline) {
+        return result;
     }
 
     if !failed.is_empty() {
-        return Ok(TargetResult {
+        return TargetResult {
             target: target_name.to_string(),
             status: "error".to_string(),
             message: Some(failed.join("; ")),
-        });
+        };
     }
 
     if done == 0 {
-        return Ok(TargetResult {
+        return TargetResult {
             target: target_name.to_string(),
             status: "ok".to_string(),
             message: Some("no skills rendered".to_string()),
-        });
+        };
     }
 
     if dry_run {
-        return Ok(TargetResult {
+        return TargetResult {
             target: target_name.to_string(),
             status: "ok".to_string(),
             message: Some(format!("{done} skills planned")),
-        });
+        };
     }
 
-    Ok(TargetResult {
+    TargetResult {
         target: target_name.to_string(),
         status: "ok".to_string(),
         message: Some(format!("{done} skills rendered and installed")),
+    }
+}
+
+/// Returns Go's timeout result when this target's deadline has elapsed or the
+/// caller's context was cancelled, and None while work may continue.
+///
+/// Go formats the message as `sync timed out: ` followed by `ctx.Err()` on the
+/// per-target context created with `context.WithTimeout`: that child reports
+/// "context deadline exceeded" when its own deadline fired first and
+/// "context canceled" when the parent was cancelled before it, which the
+/// two-branch check below reproduces.
+///
+/// ponytail: a parent cancellation detected only after the deadline has also
+/// elapsed is reported as a deadline, where Go would report the cancellation.
+/// Closing that needs a context that timestamps its own cancellation; the
+/// distinction is unobservable in the frozen fixture.
+fn timeout_result(
+    target_name: &str,
+    ctx: &impl Context,
+    deadline: Instant,
+) -> Option<TargetResult> {
+    if !ctx.is_cancelled() && Instant::now() < deadline {
+        return None;
+    }
+    let reason = if Instant::now() >= deadline {
+        "context deadline exceeded"
+    } else {
+        "context canceled"
+    };
+    Some(TargetResult {
+        target: target_name.to_string(),
+        status: "error".to_string(),
+        message: Some(format!("sync timed out: {reason}")),
     })
 }
 
@@ -298,12 +325,26 @@ fn plan_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(), 
 /// Installs a skill for the target into the harness skill root.
 ///\n\n/// # Errors\n///\n/// Returns an error if rendering fails or the install fails.
 fn install_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(), SkillError> {
-    // Note: Go uses render.RenderAll (writes to render dir) + install.Install.
-    // Rust uses render::render_target (in-memory) + install::install_rendered (materializes + installs).
-    // The behavior should be equivalent for the native skills path.
-    let rendered =
-        render::render_target(bundle, target_name, &render::RenderMetadata::default())
-            .map_err(|err| SkillError(format!("{}: render: {err}", bundle.manifest.skill.name)))?;
+    // Go's installSkill goes through render.RenderAll, and materialize.go wraps
+    // every per-target render error unconditionally as `target <t>: <err>`
+    // before the runner prepends `<skill>: render: `. The dry-run path calls
+    // render.RenderTarget directly and carries no such prefix — both shapes are
+    // frozen in the fixture (`failure_visible_and_reported` vs
+    // `dry_run_failure_names_target`).
+    //
+    // ponytail: the Rust path renders in memory and hands the result to
+    // install_rendered instead of writing the tree through opts.render_dir the
+    // way RenderAll does, so rendered files land in the install cache rather than
+    // under the configured render dir. Result messages and error text match Go;
+    // the render-dir side effect does not, and closing it needs its own oracle
+    // (see migration/implementation-plan.md).
+    let rendered = render::render_target(bundle, target_name, &render::RenderMetadata::default())
+        .map_err(|err| {
+        SkillError(format!(
+            "{}: render: target {target_name}: {err}",
+            bundle.manifest.skill.name
+        ))
+    })?;
 
     let install_opts = install::InstallOptions {
         home_dir: Path::new(&opts.home_dir).to_path_buf(),
@@ -371,33 +412,66 @@ impl Context for NoopContext {
     }
 }
 
-/// Default library directory (XDG-aware, matching Go's config.Defaults).
+/// Resolves the skills data root the way Go's `sharedpaths.SkillsDataDir()`
+/// does through `internal/paths.resolve`: `$XDG_DATA_HOME` when it holds an
+/// absolute path (a relative value is ignored per the XDG spec), else
+/// `$HOME/.local/share`; then `base/symbrain/skills`, unless that directory is
+/// absent while the legacy `base/symskills` exists, in which case the legacy
+/// directory wins.
+fn skills_data_root() -> Result<PathBuf, SkillError> {
+    let base = match std::env::var("XDG_DATA_HOME") {
+        Ok(value) if Path::new(&value).is_absolute() => PathBuf::from(value),
+        _ => home_dir()?.join(".local/share"),
+    };
+    let current = base.join("symbrain").join("skills");
+    if current.is_dir() {
+        return Ok(current);
+    }
+    let legacy = base.join("symskills");
+    if legacy.is_dir() {
+        return Ok(legacy);
+    }
+    Ok(current)
+}
+
+/// Reads `$HOME`, reporting the same error text Go's `os.UserHomeDir` produces.
+fn home_dir() -> Result<PathBuf, SkillError> {
+    std::env::var("HOME")
+        .map(PathBuf::from)
+        .map_err(|_| SkillError("$HOME is not defined".into()))
+}
+
+/// Stringifies a resolved default path.
+fn path_string(path: &Path) -> String {
+    path.to_string_lossy().into_owned()
+}
+
+/// Default library directory: `config.Defaults()` uses `dataRoot/library`.
+///
+/// # Errors
+///
+/// Returns an error when the home directory cannot be resolved.
 fn default_library_dir() -> Result<String, SkillError> {
-    let home = std::env::var("HOME")
-        .map_err(|_| SkillError("cannot determine user home directory".into()))?;
-    // Go config.Defaults() resolves through sharedpaths.SkillsDataDir() which
-    // uses $XDG_DATA_HOME/symbrain/skills (current namespace) or falls back
-    // to $XDG_DATA_HOME/symskills / ~/.local/share/symskills (legacy).
-    // The Rust symbrain-core paths module handles this; since symbrain-skills
-    // does not depend on symbrain-core (no new dependencies permitted),
-    // we reproduce the observable legacy/default behavior here.
-    Ok(format!("{home}/.local/share/symskills/library"))
+    Ok(path_string(&skills_data_root()?.join("library")))
 }
 
-/// Default render directory (XDG-aware, matching Go's config.Defaults).
+/// Default render directory: `config.Defaults()` uses `dataRoot/rendered`.
+///
+/// This is the data root, not `SkillsCacheDir()`: Go's `RenderDir` is the live
+/// artifact a symlink install points at.
+///
+/// # Errors
+///
+/// Returns an error when the home directory cannot be resolved.
 fn default_render_dir() -> Result<String, SkillError> {
-    let home = std::env::var("HOME")
-        .map_err(|_| SkillError("cannot determine user home directory".into()))?;
-    // Go config.Defaults() uses sharedpaths.SkillsCacheDir() which resolves
-    // to $XDG_CACHE_HOME/symbrain/skills (current) or $XDG_CACHE_HOME/symskills / ~/.cache/symskills.
-    // Without symbrain-core dependency, we reproduce the legacy/default path.
-    Ok(format!("{home}/.local/share/symskills/rendered"))
+    Ok(path_string(&skills_data_root()?.join("rendered")))
 }
 
-/// Default base directory (XDG-aware, matching Go's config.Defaults).
+/// Default base directory: `config.Defaults()` uses `dataRoot/base`.
+///
+/// # Errors
+///
+/// Returns an error when the home directory cannot be resolved.
 fn default_base_dir() -> Result<String, SkillError> {
-    let home = std::env::var("HOME")
-        .map_err(|_| SkillError("cannot determine user home directory".into()))?;
-    // Go config.Defaults() uses SkillsDataDir() for BaseDir as well.
-    Ok(format!("{home}/.local/share/symskills/base"))
+    Ok(path_string(&skills_data_root()?.join("base")))
 }

@@ -6,13 +6,13 @@
 mod encode;
 pub mod install;
 pub mod library;
-pub mod runner;
 mod load;
 pub mod materialize;
 pub mod metadata;
 pub mod model;
 pub mod render;
 mod render_variants;
+pub mod runner;
 mod target;
 pub mod targets_status;
 mod validation;

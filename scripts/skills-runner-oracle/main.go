@@ -7,7 +7,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/skillsrunner"
@@ -23,7 +25,39 @@ type caseFixture struct {
 }
 
 type fixture struct {
-	Cases []caseFixture `json:"cases"`
+	Cases      []caseFixture  `json:"cases"`
+	Defaults   []defaultsCase `json:"defaults"`
+	Provenance *provenance    `json:"provenance"`
+}
+
+// defaultsCase freezes one directory-resolution scenario: the environment Go
+// resolved under, and the three option paths config.Defaults() produced. Paths
+// are recorded relative to the scenario root, which is replaced by the literal
+// $ROOT so the fixture stays machine-independent.
+type defaultsCase struct {
+	Name        string `json:"name"`
+	XDGDataHome string `json:"xdg_data_home"`
+	LibraryDir  string `json:"library_dir"`
+	RenderDir   string `json:"render_dir"`
+	BaseDir     string `json:"base_dir"`
+	Legacy      bool   `json:"legacy"`
+	// CurrentCreated and LegacyCreated record which marker directories the
+	// scenario created, so a consumer can rebuild the exact filesystem state.
+	CurrentCreated bool `json:"current_created"`
+	LegacyCreated  bool `json:"legacy_created"`
+}
+
+// provenance records where the fixture came from, so a reader can reproduce it.
+//
+// The recorded revision is the working-tree revision the fixture was captured
+// from, which for an unmerged branch is that branch's commit: a squash merge
+// destroys it, so the canonical check via scripts/run-go-oracle.sh is re-run on
+// the merged main revision afterwards (see the note field).
+type provenance struct {
+	Revision  string `json:"go_revision"`
+	Command   string `json:"generator_command"`
+	Toolchain string `json:"go_toolchain"`
+	Note      string `json:"note"`
 }
 
 func generate() (fixture, error) {
@@ -132,9 +166,159 @@ func generate() (fixture, error) {
 		os.RemoveAll(demo)
 	}
 
+	// 7. Dry-run failure names the target (planSkill path). This pins whether
+	// the `target <t>: ` prefix belongs to the render layer or only to the
+	// install path.
+	{
+		broken := filepath.Join(opts.LibraryDir, "broken")
+		os.MkdirAll(broken, 0755)
+		os.WriteFile(filepath.Join(broken, "SKILL.md"), []byte("---\nname: broken\ndescription: Broken\n---\n\n<!-- symskills:blok typo -->\n# Bad\nBody.\n"), 0644)
+
+		r, err := skillsrunner.Run(context.Background(), []string{"claude"}, opts, true)
+		cases = append(cases, caseFixture{
+			Name: "dry_run_failure_names_target", Harnesses: []string{"claude"}, DryRun: true,
+			Results: r, RunError: errStr(err),
+		})
+
+		os.RemoveAll(broken)
+	}
+
 	os.RemoveAll(home)
 
-	return fixture{Cases: cases}, nil
+	return fixture{Cases: cases, Defaults: generateDefaults(), Provenance: provenanceNow()}, nil
+}
+
+// generateDefaults freezes the directory resolution of config.Defaults() as
+// reached through skillsrunner.DefaultOptions, one scenario per branch of
+// internal/paths.resolve: current $XDG_DATA_HOME/symbrain/skills, the legacy
+// $XDG_DATA_HOME/symskills fallback, neither existing, a relative
+// XDG_DATA_HOME (ignored per the XDG spec) and XDG_DATA_HOME unset.
+func generateDefaults() []defaultsCase {
+	savedHome, hadHome := os.LookupEnv("HOME")
+	savedXDG, hadXDG := os.LookupEnv("XDG_DATA_HOME")
+	defer func() {
+		if hadHome {
+			os.Setenv("HOME", savedHome)
+		} else {
+			os.Unsetenv("HOME")
+		}
+		if hadXDG {
+			os.Setenv("XDG_DATA_HOME", savedXDG)
+		} else {
+			os.Unsetenv("XDG_DATA_HOME")
+		}
+	}()
+
+	var out []defaultsCase
+	root, err := os.MkdirTemp("", "symbrain-runner-defaults-")
+	if err != nil {
+		return out
+	}
+	defer os.RemoveAll(root)
+
+	scenarios := []struct {
+		name      string
+		xdg       string // subpath under root, a literal relative path, or "" for unset
+		absolute  bool
+		mkCurrent bool
+		mkLegacy  bool
+	}{
+		{name: "xdg_absolute_current_exists", xdg: "data", absolute: true, mkCurrent: true},
+		{name: "xdg_absolute_legacy_only", xdg: "data", absolute: true, mkLegacy: true},
+		{name: "xdg_absolute_neither_exists", xdg: "data", absolute: true},
+		{name: "xdg_relative_is_ignored", xdg: "rel/data", mkCurrent: true},
+		{name: "xdg_unset_uses_home", mkCurrent: true},
+	}
+
+	for _, scenario := range scenarios {
+		// Each scenario gets its own root, otherwise the directory the previous
+		// scenario created would make the current branch win and hide the
+		// legacy fallback entirely.
+		scenarioRoot := filepath.Join(root, scenario.name)
+		homeDir := filepath.Join(scenarioRoot, "home")
+		if err := os.MkdirAll(homeDir, 0755); err != nil {
+			continue
+		}
+		os.Setenv("HOME", homeDir)
+
+		dataBase := filepath.Join(homeDir, ".local", "share")
+		switch {
+		case scenario.xdg == "":
+			os.Unsetenv("XDG_DATA_HOME")
+		case scenario.absolute:
+			absolute := filepath.Join(scenarioRoot, scenario.xdg)
+			os.Setenv("XDG_DATA_HOME", absolute)
+			dataBase = absolute
+		default:
+			// A relative value must be ignored, so the environment keeps a
+			// relative path while resolution falls back to HOME.
+			os.Setenv("XDG_DATA_HOME", scenario.xdg)
+		}
+
+		if scenario.mkCurrent {
+			os.MkdirAll(filepath.Join(dataBase, "symbrain", "skills"), 0755)
+		}
+		if scenario.mkLegacy {
+			os.MkdirAll(filepath.Join(dataBase, "symskills"), 0755)
+		}
+
+		opts := skillsrunner.DefaultOptions()
+		out = append(out, defaultsCase{
+			Name:        scenario.name,
+			XDGDataHome: replaceRoot(os.Getenv("XDG_DATA_HOME"), root),
+			LibraryDir:  replaceRoot(opts.LibraryDir, root),
+			RenderDir:   replaceRoot(opts.RenderDir, root),
+			BaseDir:     replaceRoot(opts.BaseDir, root),
+			Legacy:      filepath.Base(filepath.Dir(opts.LibraryDir)) == "symskills",
+
+			CurrentCreated: scenario.mkCurrent,
+			LegacyCreated:  scenario.mkLegacy,
+		})
+	}
+
+	return out
+}
+
+// replaceRoot makes a recorded path machine-independent.
+func replaceRoot(path, root string) string {
+	return strings.ReplaceAll(path, root, "$ROOT")
+}
+
+// provenanceNow records the revision, command and toolchain a fixture was
+// captured from.
+func provenanceNow() *provenance {
+	return &provenance{
+		Revision:  gitOutput("rev-parse", "HEAD"),
+		Command:   "go run ./scripts/skills-runner-oracle",
+		Toolchain: goToolchain(),
+		Note: "Captured from this working tree. A squash merge destroys the " +
+			"recorded revision, so re-run scripts/run-go-oracle.sh with the " +
+			"merged main revision and regenerate before trusting the pin.",
+	}
+}
+
+func gitOutput(args ...string) string {
+	out, err := exec.Command("git", args...).Output()
+	if err != nil {
+		return "unknown"
+	}
+	return strings.TrimSpace(string(out))
+}
+
+// goToolchain reads the toolchain requirement from go.mod, the same way
+// scripts/run-go-oracle.sh does.
+func goToolchain() string {
+	data, err := os.ReadFile("go.mod")
+	if err != nil {
+		return "unknown"
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) == 2 && fields[0] == "go" {
+			return "go" + fields[1]
+		}
+	}
+	return "unknown"
 }
 
 func errStr(err error) string {
@@ -193,7 +377,7 @@ func main() {
 }
 
 func equalFixture(a, b fixture) bool {
-	if len(a.Cases) != len(b.Cases) {
+	if len(a.Cases) != len(b.Cases) || len(a.Defaults) != len(b.Defaults) {
 		return false
 	}
 	for i := range a.Cases {
@@ -206,6 +390,15 @@ func equalFixture(a, b fixture) bool {
 			if ar.Target != br.Target || ar.Status != br.Status || ar.Message != br.Message {
 				return false
 			}
+		}
+	}
+	// Provenance is deliberately not compared: it records the revision a
+	// fixture was captured from, which changes with every commit.
+	for i := range a.Defaults {
+		ad, bd := a.Defaults[i], b.Defaults[i]
+		if ad.Name != bd.Name || ad.LibraryDir != bd.LibraryDir ||
+			ad.RenderDir != bd.RenderDir || ad.BaseDir != bd.BaseDir || ad.Legacy != bd.Legacy {
+			return false
 		}
 	}
 	return true
