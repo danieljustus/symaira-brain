@@ -165,8 +165,8 @@ fn shipped_timestamp_rendering_is_readable() {
         let connection = rusqlite::Connection::open(&path).expect("open");
         connection
             .execute_batch(
-                "INSERT INTO memories(id,content,scope,metadata,created_at,updated_at,kind) \
-                 VALUES('4c7d91e7-f6fb-49a1-8cc4-c64a79d02feb','shipped row','global','{}',\
+                "INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at,kind) \
+                 VALUES('4c7d91e7-f6fb-49a1-8cc4-c64a79d02feb','shipped row','global','{}','',\
                  '2026-09-18 13:19:17.139363 +0000 UTC','2026-09-18 13:19:17.139363 +0000 UTC','user');",
             )
             .expect("insert");
@@ -232,5 +232,20 @@ fn missing_shipped_columns_are_added_to_an_existing_database() {
             "rules.{name}"
         );
     }
+    std::fs::remove_dir_all(&directory).ok();
+}
+
+/// `memories_fts` is only useful with its `memories_ai`/`_au` triggers: the
+/// table can exist and never receive a row. This exercises the trigger chain
+/// end to end, through the shipped query form.
+#[test]
+fn a_native_row_reaches_the_shipped_fts_index() {
+    let (store, path, directory) = contract_store();
+    let _ = store;
+    let hits = column(
+        &path,
+        "SELECT CAST(COUNT(*) AS TEXT) FROM memories_fts WHERE memories_fts MATCH 'contract'",
+    );
+    assert_eq!(hits, "1", "the FTS index never received the native row");
     std::fs::remove_dir_all(&directory).ok();
 }

@@ -27,6 +27,19 @@ mod doctor_types;
 /// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
 /// managed installer owns that behavior.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    requires_go_fallback_with(args, xdg_profiles_require_go)
+}
+
+/// Variant of [`requires_go_fallback`] with the profile precondition injected.
+///
+/// The `--vault-agent` decision depends on the profiles that exist on this
+/// machine, which must not leak into unit tests: the case under test has to
+/// state its own precondition instead of inheriting the developer's home
+/// directory.
+pub(crate) fn requires_go_fallback_with(
+    args: &[OsString],
+    profiles_require_go: impl FnOnce() -> bool,
+) -> bool {
     let lifecycle_fallback = crate::has_go_owned_flag(
         args,
         &["json", "fix", "force-release", "vault-agent", "h", "help"],
@@ -40,38 +53,61 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
 
     // A vault-agent only affects profile handshakes. With no profiles there
     // is no handshake to customize; unreadable profile state stays on Go.
-    vault_agent_with_profiles_requires_go(args)
+    vault_agent_with_profiles_requires_go(args, profiles_require_go)
 }
 
-fn vault_agent_with_profiles_requires_go(args: &[OsString]) -> bool {
+/// Reports whether the XDG profile directory holds at least one profile.
+///
+/// An unreadable directory fails closed onto the Go fallback.
+fn xdg_profiles_require_go() -> bool {
+    match symbrain_policy::list_names() {
+        Ok(names) => !names.is_empty(),
+        Err(_) => true,
+    }
+}
+
+/// Walks the `doctor` flag prefix the way Go's `flag.FlagSet` does and reports
+/// whether a surviving `-vault-agent` still needs the shipped handshake.
+///
+/// Go stops parsing at `-h`/`-help`, at an undefined flag and at a missing flag
+/// value, and all three print usage and exit 2 before any handshake happens. A
+/// value flag consumes the following argument even when that argument looks
+/// like a flag, so `doctor --vault-agent --force-release --help` never reaches
+/// the handshake and must stay native.
+fn vault_agent_with_profiles_requires_go(
+    args: &[OsString],
+    profiles_require_go: impl FnOnce() -> bool,
+) -> bool {
     let normalized = crate::normalize_flags(args);
     let mut index = 0;
+    let mut saw_vault_agent = false;
     while index < normalized.len() {
         let argument = normalized[index].to_string_lossy();
         if argument == "--" || argument == "-" || !argument.starts_with('-') {
             break;
         }
         let flag = argument.trim_start_matches('-');
-        let name = flag.split_once('=').map_or(flag, |(name, _)| name);
+        let (name, value) = flag
+            .split_once('=')
+            .map_or((flag, None), |(name, value)| (name, Some(value)));
         if !["json", "fix", "force-release", "vault-agent", "h", "help"].contains(&name) {
             break;
         }
+        if matches!(name, "h" | "help") {
+            return false;
+        }
         if name == "vault-agent" {
-            return match symbrain_policy::list_names() {
-                Ok(names) => profile_names_require_go(Some(&names)),
-                Err(_) => profile_names_require_go(None),
-            };
+            saw_vault_agent = true;
+            if value.is_none() {
+                index += 1;
+                if index == normalized.len() {
+                    return false;
+                }
+            }
         }
         index += 1;
     }
-    false
-}
-
-fn profile_names_require_go(names: Option<&[String]>) -> bool {
-    match names {
-        Some(names) => !names.is_empty(),
-        None => true,
-    }
+    saw_vault_agent && profiles_require_go()
 }
 
 pub fn run(
@@ -134,7 +170,10 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
                     normalized.get(i).map(|v| v.to_string_lossy().into_owned())
                 });
                 let Some(value) = value else {
+                    // Go's flag package prints the parse error and then the
+                    // whole flag set usage for a missing value argument.
                     let _ = writeln!(stderr, "flag needs an argument: -vault-agent");
+                    let _ = write!(stderr, "{DOCTOR_USAGE}");
                     return Err(exit::USAGE);
                 };
                 parsed.vault_agent = value;
@@ -260,9 +299,53 @@ args = ["mcp", "--profile", "default"]
 
     #[test]
     fn vault_agent_fallback_requires_reliably_listed_profiles() {
-        assert!(!profile_names_require_go(Some(&[])));
-        assert!(profile_names_require_go(Some(&[String::from("default")])));
-        assert!(profile_names_require_go(None));
+        // `requires_go_fallback` receives the arguments after the command
+        // name, so the case does not repeat `doctor`.
+        let args = |rest: &[&str]| -> Vec<OsString> { rest.iter().map(OsString::from).collect() };
+
+        // A surviving `-vault-agent` consults the machine's profiles; the
+        // precondition is injected here so the case never reads the real home.
+        assert!(!requires_go_fallback_with(
+            &args(&["--vault-agent", "agent"]),
+            || false
+        ));
+        assert!(requires_go_fallback_with(
+            &args(&["--vault-agent", "agent"]),
+            || true
+        ));
+        assert!(requires_go_fallback_with(
+            &args(&["--vault-agent=agent"]),
+            || true
+        ));
+        assert!(!requires_go_fallback_with(&args(&["--json"]), || true));
+
+        // Go's flag package stops before the handshake (usage, exit 2) and
+        // consumes the next argument as the `-vault-agent` value, so a later
+        // flag must never reach the profile lookup.
+        assert!(!requires_go_fallback_with(
+            &args(&["--vault-agent", "--force-release", "--help"]),
+            || true
+        ));
+        assert!(!requires_go_fallback_with(
+            &args(&["--vault-agent=agent", "--help"]),
+            || true
+        ));
+        assert!(!requires_go_fallback_with(
+            &args(&["--vault-agent"]),
+            || true
+        ));
+        assert!(!requires_go_fallback_with(
+            &args(&["--unknown", "--vault-agent", "agent"]),
+            || true
+        ));
+
+        // The lifecycle flags keep the shipped installer semantics regardless
+        // of the profile precondition.
+        assert!(requires_go_fallback_with(
+            &args(&["--force-release"]),
+            || false
+        ));
+        assert!(requires_go_fallback_with(&args(&["--fix"]), || false));
     }
 
     #[test]

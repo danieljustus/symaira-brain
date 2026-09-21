@@ -23,7 +23,7 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
 
-.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
+.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -106,9 +106,27 @@ usage-oracle-check:
 policy-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/policy-oracle -check
 
+## xdg-oracle-check: Ensure XDG and legacy path precedence expectations match Go
+xdg-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/xdg-oracle -check
+
+## cli-oracle-check: Ensure the frozen CLI command-tree expectations match Go
+cli-oracle-check:
+	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" -check
+
+## db-memory-oracle-check: Ensure the frozen memory SQLite facts match Go
+db-memory-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/db-memory-oracle -check
+
 ## guard-oracle-check: Ensure Guard model/static-kernel expectations match Go
 guard-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-oracle -check
+
+## guard-doctor-oracle-check: Ensure the frozen guard doctor fixture matches Go
+guard-doctor-oracle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./guard/scripts/guard-doctor-oracle -check
 
 ## guard-scan-oracle-check: Ensure Guard scan fixtures and source bindings are current
 guard-scan-oracle-check:
@@ -202,6 +220,22 @@ rust-fast:
 	$(EXTERNAL_RUN) cargo test -p symbrain-cli -p symbrain-skills -p symbrain-guard-core --locked
 
 ## rust-check: Run the complete fast Rust quality gate
+#
+# The dependency list matches main's, which is the set that has actually run on
+# CI. Three oracles added on this branch (cli-oracle, xdg-oracle, guard-doctor)
+# are deliberately NOT gates yet: the branch has never been pushed before, so
+# none of them has ever run on a runner, and their fixtures turned out to be
+# calibrated to the recording machine rather than to a portable environment.
+# Measured failures on CI, each traced to the recording environment and not to
+# the Rust port:
+#   - cli-oracle: PATH and isolation-root shape leak into the fixture
+#     (`skills targets` INSTALLED column, `vault` passthrough, `sync` root form).
+#   - guard-doctor-oracle: frozen doctor output differs on a runner.
+#   - xdg-oracle, db-memory-oracle: pass locally, CI state unverified.
+# They stay runnable explicitly (`make cli-oracle-check`, and so on) so the
+# residual stays visible. Making them portable is tracked separately; wiring
+# them into the gate before that turns the incremental Rust entrypoint red for
+# reasons unrelated to the port.
 rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check guard-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked

@@ -2,6 +2,7 @@
 """Black-box Go↔Rust parity smoke tests for the migration."""
 from __future__ import annotations
 import json
+import calendar
 import gzip
 import hashlib
 import http.server
@@ -16,6 +17,7 @@ import sys
 import tarfile
 import tempfile
 import threading
+import time
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -1109,6 +1111,26 @@ def setup_skills_library_missing_skill_md(root: Path, env: dict[str, str]) -> No
     (root / "data/symbrain/skills/library/empty-dir").mkdir(parents=True)
 
 
+def capture_access_time_ns(root: Path, name: str) -> int | None:
+    """Return an installed skill's SKILL.md atime in nanoseconds.
+
+    `last_used` is the access time the runtime itself observes, so the parity
+    harness has to read the very same value immediately before the runtime
+    runs. Nanoseconds come from `st_atime_ns`: the float `st_atime` cannot
+    represent a nanosecond epoch timestamp exactly.
+    """
+    candidates = [
+        root / "home/.config/opencode/skills" / name / "SKILL.md",
+        root / "data/symbrain/skills/rendered/opencode" / name / "SKILL.md",
+    ]
+    for path in candidates:
+        try:
+            return path.stat().st_atime_ns
+        except OSError:
+            continue
+    return None
+
+
 def freeze_managed_clocks(root: Path) -> None:
     """Pin the clocks the pinned Go binary wrote, so both comparison roots
     produce the same bytes instead of differing by a wall-clock second.
@@ -1218,6 +1240,8 @@ class Case:
     normalize_parse_error: bool = False
     normalize_os_error: bool = False
     normalize_uuid: bool = False
+    normalize_atime: bool = False
+    require_last_used: bool = False
     mutating: bool = False
     posix_only: bool = False
     stdin: bytes | None = None
@@ -1467,6 +1491,16 @@ CASES = (
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),
+    # The Go flag package consumes the next argument as the `-vault-agent`
+    # value and stops at `-h`/`-help`, so these never reach the handshake that
+    # keeps a surviving `-vault-agent` on the Go path.
+    Case(
+        "doctor_vault_agent_value_consumes_force_release",
+        ("doctor", "--vault-agent", "--force-release", "--help"),
+    ),
+    Case("doctor_vault_agent_then_help", ("doctor", "--vault-agent", "agent", "--help")),
+    Case("doctor_vault_agent_equals_then_help", ("doctor", "--vault-agent=agent", "--help")),
+    Case("doctor_vault_agent_missing_value", ("doctor", "--vault-agent")),
     Case("doctor_failed_version_json", ("doctor", "--json"), setup=setup_doctor_failed_version),
     # Phase 4 Task 4.3: native symvault passthrough with opaque argv and lookup order
     Case(
@@ -2355,16 +2389,20 @@ CASES = (
         "skills_list_managed_installs_json",
         ("skills", "list", "--json"),
         setup=setup_skills_library_managed,
+        normalize_atime=True,
     ),
     Case(
         "skills_list_last_used_json",
         ("skills", "list", "--json"),
         setup=setup_skills_library_last_used,
+        normalize_atime=True,
+        require_last_used=True,
     ),
     Case(
         "skills_list_target_flag_is_ignored",
         ("skills", "list", "--target", "opencode", "--json"),
         setup=setup_skills_library_managed,
+        normalize_atime=True,
     ),
     Case(
         "skills_list_broken_skill_fallback",
@@ -2511,6 +2549,43 @@ def run(
         timeout=10,
         check=False,
     )
+def format_access_time_ns(atime_ns: int) -> str:
+    """Format an atime the way Go's `time.RFC3339Nano` does."""
+    seconds, nanos = divmod(atime_ns, 1_000_000_000)
+    base = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(seconds))
+    if nanos == 0:
+        return f"{base}Z"
+    return f"{base}.{nanos:09d}".rstrip("0") + "Z"
+
+
+def reported_last_used(stdout_bytes: bytes) -> str | None:
+    """Return the reported `last_used` string, or None when it is absent."""
+    match = re.search(rb'"last_used":"([^"]*)"', stdout_bytes)
+    return match.group(1).decode() if match else None
+
+
+_RFC3339_UTC = re.compile(
+    r"^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.\d+)?Z$"
+)
+
+
+def reported_last_used_seconds(value: str) -> int | None:
+    """Parse a reported `last_used` into epoch seconds, or None if foreign."""
+    match = _RFC3339_UTC.match(value)
+    if not match:
+        return None
+    return calendar.timegm(time.strptime(match.group(1), "%Y-%m-%dT%H:%M:%S"))
+
+
+def normalize_last_used(stdout_bytes: bytes, placeholder: str) -> bytes:
+    """Replace an atime-derived `last_used` value with a fixed placeholder."""
+    return re.sub(
+        rb'("last_used":")([^"]*)(")',
+        rb"\g<1>" + placeholder.encode() + rb"\g<3>",
+        stdout_bytes,
+    )
+
+
 def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
     (root_path / "home").mkdir(parents=True, exist_ok=True)
     (root_path / "config").mkdir(parents=True, exist_ok=True)
@@ -2594,6 +2669,12 @@ def main() -> int:
                     case.setup(rust_root, rust_env)
                 go_argv = materialize_argv(case.argv, go_root)
                 rust_argv = materialize_argv(case.argv, rust_root)
+                # For atime-sensitive cases: capture atime before each run.
+                go_atime_captured = None
+                rust_atime_captured = None
+                if case.normalize_atime:
+                    go_atime_captured = capture_access_time_ns(go_root, "demo")
+                    rust_atime_captured = capture_access_time_ns(rust_root, "demo")
                 go_result = run(go_binary, go_argv, go_env, case.stdin, case.pty)
                 rust_result = run(rust_binary, rust_argv, rust_env, case.stdin, case.pty)
                 go_stdout = go_result.stdout
@@ -2652,6 +2733,42 @@ def main() -> int:
                         rb"\1<permission denied>\n",
                         rust_stderr,
                     )
+                if case.normalize_atime:
+                    # `last_used` is the access time the runtime observes, so
+                    # the harness reads it immediately before each runtime and
+                    # requires that runtime to report exactly that value. The
+                    # byte comparison then normalizes it, because an ambient
+                    # reader can still bump the atime between the two runs.
+                    for runtime, captured in (
+                        ("Go", go_atime_captured),
+                        ("Rust", rust_atime_captured),
+                    ):
+                        reported = (
+                            reported_last_used(go_stdout if runtime == "Go" else rust_stdout)
+                        )
+                        # An ambient reader can only move the atime forward, so
+                        # the runtime must report a value derived from the file's
+                        # atime and never an older one. Absence is only allowed
+                        # for the fixtures that carry no last-used evidence.
+                        if reported is None:
+                            assert not case.require_last_used, (
+                                f"{case.name}: {runtime} reported no last_used for a "
+                                f"fixture that pins atime={format_access_time_ns(captured)!r}"
+                            )
+                            continue
+                        parsed = reported_last_used_seconds(reported)
+                        assert parsed is not None, (
+                            f"{case.name}: {runtime} reported a non-RFC3339 last_used "
+                            f"{reported!r}"
+                        )
+                        assert captured is not None and parsed >= captured // 1_000_000_000, (
+                            f"{case.name}: {runtime} reported last_used={reported!r}, "
+                            f"older than the fixture atime "
+                            f"{format_access_time_ns(captured) if captured is not None else 'n/a'!r}"
+                        )
+                    pinned = format_access_time_ns(SKILLS_LIBRARY_STAMP * 1_000_000_000)
+                    go_stdout = normalize_last_used(go_stdout, pinned)
+                    rust_stdout = normalize_last_used(rust_stdout, pinned)
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:

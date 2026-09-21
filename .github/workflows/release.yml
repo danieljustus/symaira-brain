@@ -46,10 +46,43 @@ jobs:
           # modules explicitly (currently only browse/, the Browse source
           # intake receiving copy — see browse/SOURCE_PROVENANCE.md; add
           # more -not -path exclusions if another nested go.mod is added).
-          fmt_out="$(gofmt -l $(find . -name '*.go' -not -path './browse/*' -not -path './.git/*'))"
-          if [ -n "$fmt_out" ]; then
+          set -euo pipefail
+          # Keep discovery NUL-delimited and invoke gofmt in bounded batches:
+          # expanding every path in one command can exceed macOS ARG_MAX, while
+          # the array preserves spaces and other whitespace in each path.
+          fmt_tmp="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/symbrain-gofmt.XXXXXX")"
+          trap 'rm -rf "$fmt_tmp"' EXIT
+          files_tmp="$fmt_tmp/files"
+          fmt_out="$fmt_tmp/gofmt.out"
+          : >"$fmt_out"
+
+          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -print0 >"$files_tmp"; then
+            echo "::error::find failed while collecting Go source files"
+            exit 1
+          fi
+
+          batch=()
+          check_batch() {
+            if ! gofmt -l "${batch[@]}" >>"$fmt_out"; then
+              echo "::error::gofmt failed while checking a batch of Go source files"
+              exit 1
+            fi
+            batch=()
+          }
+
+          while IFS= read -r -d '' path; do
+            batch+=("$path")
+            if [ "${#batch[@]}" -eq 100 ]; then
+              check_batch
+            fi
+          done <"$files_tmp"
+          if [ "${#batch[@]}" -gt 0 ]; then
+            check_batch
+          fi
+
+          if [ -s "$fmt_out" ]; then
             echo "gofmt needs to be run on:"
-            echo "$fmt_out"
+            cat "$fmt_out"
             exit 1
           fi
 

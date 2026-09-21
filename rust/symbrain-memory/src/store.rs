@@ -12,7 +12,7 @@ use sha2::{Digest, Sha256};
 use crate::activity::{ActivityPage, ActivitySearch};
 use crate::model::{Memory, SetOptions, Store, StoreError};
 use crate::rows::{row_memory, row_memory_score};
-use crate::schema::{MIGRATIONS, SCHEMA};
+use crate::schema::{INDEXES, MIGRATIONS, SCHEMA};
 const MAX_MEMORY_CONTENT: usize = 64 * 1024;
 const MAX_MEMORY_LABEL: usize = 256;
 const MAX_LIST_RESULTS: usize = 1000;
@@ -45,6 +45,11 @@ impl Store {
         )?;
         conn.execute_batch(SCHEMA)?;
         apply_column_parity(&conn)?;
+        // The indexes cover columns an older database only gains through the
+        // parity repair above, so they are created after it: applied together
+        // with the tables they would fail on a legacy `memories` that has no
+        // `tier` yet.
+        conn.execute_batch(INDEXES)?;
         let transaction = conn.unchecked_transaction()?;
         for version in MIGRATIONS {
             transaction.execute(
