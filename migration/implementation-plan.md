@@ -1,5 +1,23 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (symlink target): the install divergence is closed, not documented
+
+**Branch `fix/symlink-target-render-dir` (base: main `b8668f3f`).** This removes the last open divergence between the Rust skills install path and Go.
+
+**The fix.** `InstallOptions` gains an optional `render_dir`. In symlink mode the stable tree is now written to and linked at `<render_dir>/<target>/<name>` — exactly the `item.Path` Go's `render.RenderAll` produces and `install_ops.go` links to — instead of the hardcoded per-user cache. A caller with no render root (the gateway's in-memory install path) keeps the cache and says so in a comment; the option defaults to `None`, so no existing caller changes behaviour silently.
+
+**Proof, not assertion.** `rust/symbrain-skills/tests/runner_env_tests.rs::installed_symlinks_match_the_frozen_go_layout` runs the real runner over a throwaway root and asserts every installed symlink's resolved target against the layout frozen in `runner_oracle.json`. It fails before the fix and passes after, for all four targets (claude, codex, hermes, opencode).
+
+**Three defects surfaced while closing it, all fixed here:**
+
+1. `match` on a single `Some` pattern kept `cargo clippy --all-targets` red (3 errors); it is an `if let … else` now. Clippy --all-targets = 0.
+2. The new field broke a full-literal constructor in a **different** crate — `symbrain-gateway/src/embedded/skills.rs` failed with `missing field render_dir` and `cargo test -p symbrain-cli` exited 101. Per-crate testing never sees this; `cargo build --workspace --all-features` does.
+3. My own test resolved fixture paths wrongly (paths are relative, only targets carry `$ROOT`); it reported "not installed" for a target that was installed.
+
+**Gates measured on this branch:** `cargo fmt --all --check` clean; `cargo build --workspace --all-features` no errors; `cargo clippy -p symbrain-skills --all-targets` 0 errors; `cargo test -p symbrain-skills` 108 passed / 0 failed; `cargo test -p symbrain-cli` 216 passed / 0 failed; `cargo test -p symbrain-gateway` 13 passed / 0 failed; `go run ./scripts/skills-runner-oracle -check` passes.
+
+**Slice B is now unblocked.** The Go fallback in `sync_cli.rs` can drop once this lands: the runner's result messages (#644), its on-disk layout (#645) and now its symlink target are each frozen against real Go behaviour.
+
 ## Resume checkpoint — 2026-09-21 (install disk): the install divergence is now measured, not assumed
 
 **Branch `migration/install-disk-oracle-20260921` @ `276cd051` (base: main `d6f81c99`).**
