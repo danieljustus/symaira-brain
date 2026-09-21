@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 use chrono::{DateTime, FixedOffset};
 use symbrain_audit::RawJsonlAppender;
 use symbrain_core::exit;
+use symbrain_core::version;
 use symbrain_guard_core::external_decision::{
     MAX_REQUEST_BYTES, evaluate_at, evaluate_read_error_at,
 };
@@ -42,8 +43,15 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     match verb.as_ref() {
         "help" | "--help" | "-h" => Some(write_guard_usage(stdout, exit::OK)),
         "version" => {
-            let info =
-                symbrain_core::version::VersionInfo::new("symguard", env!("CARGO_PKG_VERSION"));
+            // The shipped `symguard version` prints a four-row block: its own
+            // version, the toolchain that built it, the platform, and a
+            // hard-coded build-time placeholder (`buildTime()` parses a
+            // constant date rather than recording a real one, so the port
+            // reproduces it verbatim instead of inventing a timestamp). The
+            // toolchain row names Rust honestly; the frozen expectation
+            // tokenizes that row, because no runner can pin a toolchain.
+            let version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
+            let info = version::VersionInfo::new("symguard", version);
             if args[1..].iter().any(|arg| arg == "--json") {
                 let _ = writeln!(
                     stdout,
@@ -51,7 +59,15 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
                     serde_json::to_string_pretty(&info).unwrap_or_default()
                 );
             } else {
-                let _ = writeln!(stdout, "symguard {}", info.version);
+                let _ = writeln!(stdout, "symguard {version}");
+                let _ = writeln!(stdout, "  rust    {}", crate::rustc_version());
+                let _ = writeln!(
+                    stdout,
+                    "  os/arch {}/{}",
+                    version::current_os(),
+                    version::current_arch()
+                );
+                let _ = writeln!(stdout, "  built   2026-01-01 (compile-time placeholder)");
             }
             Some(exit::OK)
         }

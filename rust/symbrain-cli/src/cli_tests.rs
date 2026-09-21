@@ -324,6 +324,8 @@ fn unrelated_native_doctor_and_setup_invocations_do_not_fallback() {
     let cases = [
         vec!["doctor", "--fix=false", "--help"],
         vec!["doctor", "--help", "--", "--force-release"],
+        // Go consumes `--force-release` as the `-vault-agent` value and stops
+        // at `--help`, so this case never consults the machine's profiles.
         vec!["doctor", "--vault-agent", "--force-release", "--help"],
         vec!["doctor", "--unknown", "--force-release"],
         vec!["setup", "--fix=false", "--help"],

@@ -1,0 +1,878 @@
+[
+  {
+    "id": "go --help",
+    "args": [
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "stderr": "",
+    "description": "top-level --help prints full usage"
+  },
+  {
+    "id": "go -h",
+    "args": [
+      "-h"
+    ],
+    "exit_code": 0,
+    "stdout": "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "stderr": "",
+    "description": "top-level -h prints full usage"
+  },
+  {
+    "id": "go help",
+    "args": [
+      "help"
+    ],
+    "exit_code": 0,
+    "stdout": "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "stderr": "",
+    "description": "top-level help prints full usage"
+  },
+  {
+    "id": "go",
+    "args": [],
+    "exit_code": 2,
+    "stdout": "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "stderr": "",
+    "description": "no arguments prints usage"
+  },
+  {
+    "id": "go bogus",
+    "args": [
+      "bogus"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain: unknown command \"bogus\"\n\nsymbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "description": "unknown command prints usage to stderr"
+  },
+  {
+    "id": "go version",
+    "args": [
+      "version"
+    ],
+    "exit_code": 0,
+    "stdout": "symbrain dev\n  go      \u003cgo\u003e\n  os/arch \u003cos/arch\u003e\n",
+    "stderr": "",
+    "description": "version bare prints human-readable"
+  },
+  {
+    "id": "go version --json",
+    "args": [
+      "version",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"tool\":\"symbrain\",\"version\":\"dev\",\"schema_version\":1}\n",
+    "stderr": "",
+    "description": "version --json prints JSON"
+  },
+  {
+    "id": "go --json version",
+    "args": [
+      "--json",
+      "version"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"tool\":\"symbrain\",\"version\":\"dev\",\"schema_version\":1}\n",
+    "stderr": "",
+    "description": "version with --json before command"
+  },
+  {
+    "id": "go version --bogus",
+    "args": [
+      "version",
+      "--bogus"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -bogus\nUsage of version:\n",
+    "description": "version rejects unknown flag"
+  },
+  {
+    "id": "go version --bogus=123",
+    "args": [
+      "version",
+      "--bogus=123"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -bogus\nUsage of version:\n",
+    "description": "version rejects unknown flag with value"
+  },
+  {
+    "id": "go version -h",
+    "args": [
+      "version",
+      "-h"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of version:\n",
+    "description": "version -h prints usage"
+  },
+  {
+    "id": "go version -help",
+    "args": [
+      "version",
+      "-help"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of version:\n",
+    "description": "version -help prints usage"
+  },
+  {
+    "id": "go version --help",
+    "args": [
+      "version",
+      "--help"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of version:\n",
+    "description": "version --help prints usage"
+  },
+  {
+    "id": "go version extra",
+    "args": [
+      "version",
+      "extra"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain version: unexpected argument \"extra\"\n",
+    "description": "version rejects extra positional"
+  },
+  {
+    "id": "go version -- extra",
+    "args": [
+      "version",
+      "--",
+      "extra"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain version: unexpected argument \"extra\"\n",
+    "description": "version rejects positional after terminator"
+  },
+  {
+    "id": "go version -",
+    "args": [
+      "version",
+      "-"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain version: unexpected argument \"-\"\n",
+    "description": "version rejects bare hyphen"
+  },
+  {
+    "id": "go config path",
+    "args": [
+      "config",
+      "path"
+    ],
+    "exit_code": 0,
+    "stdout": "\u003croot\u003e/home/.config/symbrain/config.toml\n",
+    "stderr": "",
+    "description": "config path prints path"
+  },
+  {
+    "id": "go config path extra",
+    "args": [
+      "config",
+      "path",
+      "extra"
+    ],
+    "exit_code": 2,
+    "stdout": "symbrain config path: unexpected argument \"extra\"\n",
+    "stderr": "",
+    "description": "config path rejects extra arg"
+  },
+  {
+    "id": "go config path --unexpected",
+    "args": [
+      "config",
+      "path",
+      "--unexpected"
+    ],
+    "exit_code": 2,
+    "stdout": "symbrain config path: unexpected argument \"-unexpected\"\n",
+    "stderr": "",
+    "description": "config path rejects unknown flag"
+  },
+  {
+    "id": "go config get",
+    "args": [
+      "config",
+      "get"
+    ],
+    "exit_code": 0,
+    "stdout": "(no config file at \u003croot\u003e/home/.config/symbrain/config.toml)\n",
+    "stderr": "",
+    "description": "config get prints whole file"
+  },
+  {
+    "id": "go config get nonexistent.key",
+    "args": [
+      "config",
+      "get",
+      "nonexistent.key"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain config get: key \"nonexistent.key\" is not set in \u003croot\u003e/home/.config/symbrain/config.toml\n",
+    "description": "config get missing key"
+  },
+  {
+    "id": "go config set",
+    "args": [
+      "config",
+      "set"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain config set: want exactly \u003ckey\u003e \u003cvalue\u003e\n",
+    "description": "config set missing args"
+  },
+  {
+    "id": "go profile list",
+    "args": [
+      "profile",
+      "list"
+    ],
+    "exit_code": 0,
+    "stdout": "no profiles found (run `symbrain init` for examples, or `symbrain profile add`)\n",
+    "stderr": "",
+    "description": "profile list"
+  },
+  {
+    "id": "go profile show",
+    "args": [
+      "profile",
+      "show"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain profile show \u003cname\u003e [--json]\n",
+    "description": "profile show missing name"
+  },
+  {
+    "id": "go profile add",
+    "args": [
+      "profile",
+      "add"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain profile add \u003cname\u003e [--from personal|restricted]\n",
+    "description": "profile add missing name"
+  },
+  {
+    "id": "go profile remove",
+    "args": [
+      "profile",
+      "remove"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain profile remove \u003cname\u003e [--force] [--project \u003cdir\u003e]\n",
+    "description": "profile remove missing name"
+  },
+  {
+    "id": "go doctor --unknown",
+    "args": [
+      "doctor",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n",
+    "description": "doctor rejects unknown flag"
+  },
+  {
+    "id": "go doctor --vault-agent",
+    "args": [
+      "doctor",
+      "--vault-agent"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag needs an argument: -vault-agent\nUsage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n",
+    "description": "doctor missing vault-agent value"
+  },
+  {
+    "id": "go init",
+    "args": [
+      "init"
+    ],
+    "exit_code": 0,
+    "stdout": "created \u003croot\u003e/home/.config/symbrain/config.toml\ncreated \u003croot\u003e/home/.config/symbrain/profiles/personal.toml\ncreated \u003croot\u003e/home/.config/symbrain/profiles/restricted.toml\ncreated \u003croot\u003e/home/.config/symbrain/profiles/foreign-read-only.toml\n",
+    "stderr": "",
+    "description": "init"
+  },
+  {
+    "id": "go init --help",
+    "args": [
+      "init",
+      "--help"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of init:\n",
+    "description": "init --help prints usage"
+  },
+  {
+    "id": "go setup --unknown",
+    "args": [
+      "setup",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of setup:\n  -allow-unsigned\n    \tinstall even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)\n  -fix\n    \trepair missing or version-mismatched binaries (alias for doctor --fix)\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -from-source string\n    \tbuild optional module binaries from the in-repo sources at this repository root and install them into the managed directory (instead of downloading releases)\n  -json\n    \temit machine-readable JSON\n  -modules string\n    \twith --from-source: comma-separated module selection (browse,operate,scope); default: modules enabled in config\n",
+    "description": "setup rejects unknown flag"
+  },
+  {
+    "id": "go install",
+    "args": [
+      "install"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain install: --harness is required (want one of: agents, antigravity, claude, claude-desktop, codex, cursor, hermes, openclaw, opencode)\n",
+    "description": "install missing harness"
+  },
+  {
+    "id": "go install --dry-run",
+    "args": [
+      "install",
+      "--dry-run"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain install: --harness is required (want one of: agents, antigravity, claude, claude-desktop, codex, cursor, hermes, openclaw, opencode)\n",
+    "description": "install missing harness with dry-run"
+  },
+  {
+    "id": "go install --unknown",
+    "args": [
+      "install",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of install:\n  -dry-run\n    \tprint a unified diff of the change and write nothing\n  -harness string\n    \tharness to install into: claude, claude-desktop, cursor, opencode, codex, antigravity (required)\n  -keep-superseded\n    \tkeep superseded symmemory/symskills MCP entries instead of migrating them out\n  -profile string\n    \tprofile to bind this harness connection to (default: the global config's default_profile)\n  -project string\n    \tproject directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)\n",
+    "description": "install rejects unknown flag"
+  },
+  {
+    "id": "go uninstall",
+    "args": [
+      "uninstall"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain uninstall: --harness is required (want one of: agents, antigravity, claude, claude-desktop, codex, cursor, hermes, openclaw, opencode)\n",
+    "description": "uninstall"
+  },
+  {
+    "id": "go uninstall --unknown",
+    "args": [
+      "uninstall",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of uninstall:\n  -dry-run\n    \tprint a unified diff of the change and write nothing\n  -harness string\n    \tharness to remove symbrain from: claude, claude-desktop, cursor, opencode, codex, antigravity (required)\n  -project string\n    \tproject directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)\n",
+    "description": "uninstall rejects unknown flag"
+  },
+  {
+    "id": "go sync",
+    "args": [
+      "sync"
+    ],
+    "exit_code": 0,
+    "stdout": "Instruction targets:\n  claude:      created\n  claude-desktop: skipped (harness \"claude-desktop\" has no instruction adapter)\n  cursor:      created\n  opencode:    skipped (harness \"opencode\" has no instruction adapter)\n  codex:       skipped (harness \"codex\" has no instruction adapter)\n  antigravity: created\n  agents:      created\n  hermes:      skipped (harness \"hermes\" has no instruction adapter)\n  openclaw:    skipped (harness \"openclaw\" has no instruction adapter)\n\nSkills:\n  claude:      ok (no skills rendered)\n  claude-desktop: skipped (no skill target for harness \"claude-desktop\")\n  cursor:      skipped (no skill target for harness \"cursor\")\n  opencode:    ok (no skills rendered)\n  codex:       ok (no skills rendered)\n  antigravity: ok (no skills rendered)\n  agents:      skipped (no skill target for harness \"agents\")\n  hermes:      ok (no skills rendered)\n  openclaw:    ok (no skills rendered)\n",
+    "stderr": "",
+    "description": "sync"
+  },
+  {
+    "id": "go sync --unknown",
+    "args": [
+      "sync",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n",
+    "description": "sync rejects unknown flag"
+  },
+  {
+    "id": "go harness",
+    "args": [
+      "harness"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain harness — inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+    "description": "harness missing subcommand"
+  },
+  {
+    "id": "go harness list",
+    "args": [
+      "harness",
+      "list"
+    ],
+    "exit_code": 0,
+    "stdout": "claude\tClaude Code\n  global\t\u003croot\u003e/home/.claude.json\tmissing\tservers=(none)\n\nclaude-desktop\tClaude Desktop\n  global\t\u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json\tmissing\tservers=(none)\n\ncursor\tCursor\n  global\t\u003croot\u003e/home/.cursor/mcp.json\tmissing\tservers=(none)\n\nopencode\tOpenCode\n  global\t\u003croot\u003e/home/.config/opencode/config.json\tmissing\tservers=(none)\n\ncodex\tCodex CLI\n  global\t\u003croot\u003e/home/.codex/config.toml\tmissing\tservers=(none)\n\nantigravity\tAntigravity\n  global\t\u003croot\u003e/home/.gemini/config/mcp_config.json\tmissing\tservers=(none)\n\n",
+    "stderr": "",
+    "description": "harness list"
+  },
+  {
+    "id": "go harness health",
+    "args": [
+      "harness",
+      "health"
+    ],
+    "exit_code": 0,
+    "stdout": "no MCP servers found\n",
+    "stderr": "",
+    "description": "harness health"
+  },
+  {
+    "id": "go usage",
+    "args": [
+      "usage"
+    ],
+    "exit_code": 0,
+    "stdout": "claude\tClaude\tnot configured\tNo Claude credentials found — add an admin key or sign in with the Claude CLI\ncodex\tCodex\tnot configured\tNo Codex credentials found — sign in with the Codex CLI\ncopilot\tGitHub Copilot\tnot configured\tNo Copilot token found — sign in with the Copilot CLI\ncursor\tCursor\tnot configured\tNo Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app\nkimi\tKimi Code\tnot configured\tNo Kimi Code CLI credentials found\nmoonshot\tMoonshot\tnot configured\tno API key configured (MOONSHOT_API_KEY)\nnous\tNous Portal\tnot configured\tNo Nous Portal credentials found — sign in with the Hermes CLI\nopencode\tOpenCode Go\tnot configured\tNo OpenCode Go credentials found — set OPENCODE_COOKIE or run OpenCode Go\nopenrouter\tOpenRouter\tnot configured\tno API key configured (OPENROUTER_API_KEY)\nantigravity\tAntigravity\terror\tall AI usage fallbacks failed: Antigravity is not running — no local quota server found.\n",
+    "stderr": "",
+    "description": "usage"
+  },
+  {
+    "id": "go mcp",
+    "args": [
+      "mcp"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain mcp: --profile is required (or --profile-file \u003cpath\u003e)\n",
+    "description": "mcp missing flags"
+  },
+  {
+    "id": "go mcp --unknown",
+    "args": [
+      "mcp",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of mcp:\n  -profile string\n    \tprofile name to serve (required unless --profile-file is given)\n  -profile-file string\n    \tload the profile from this TOML file instead of the profiles directory\n  -vault-agent string\n    \tvault agent name for --stdio mode (default: harness-detected or 'claude-code')\n",
+    "description": "mcp rejects unknown flag"
+  },
+  {
+    "id": "go audit",
+    "args": [
+      "audit"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain audit: subcommand required (tail)\n",
+    "description": "audit"
+  },
+  {
+    "id": "go audit --unknown",
+    "args": [
+      "audit",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of audit:\n",
+    "description": "audit rejects unknown flag"
+  },
+  {
+    "id": "go skills",
+    "args": [
+      "skills"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain skills — embedded skill library operations\n\nUsage:\n  symbrain skills \u003csubcommand\u003e [flags]\n\nSubcommands:\n  list        List the skills in the library with their install state\n  status      Classify installed skills against the library (drift report)\n  targets     Show the harness targets skills can be installed into\n  log         Read the local skill operation log\n  sync        Repair drifted installs (use --dry-run to see the plan first)\n  doctor      Report the configured skill paths and target roots\n\nUse --output table|json (or --json) for the result format. status, sync and\ntargets accept --scope user|project; status, sync and log accept --target.\nRun 'symbrain skills \u003csubcommand\u003e --help' for details.\n",
+    "description": "skills"
+  },
+  {
+    "id": "go skills list",
+    "args": [
+      "skills",
+      "list"
+    ],
+    "exit_code": 0,
+    "stdout": "No skills in the library.\n",
+    "stderr": "",
+    "description": "skills list"
+  },
+  {
+    "id": "go skills status",
+    "args": [
+      "skills",
+      "status"
+    ],
+    "exit_code": 0,
+    "stdout": "No installed skills found.\n",
+    "stderr": "",
+    "description": "skills status"
+  },
+  {
+    "id": "go skills targets",
+    "args": [
+      "skills",
+      "targets"
+    ],
+    "exit_code": 0,
+    "stdout": "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT\nclaude\tfalse\t0\t0\t\u003croot\u003e/home/.claude/skills\nopencode\tfalse\t0\t0\t\u003croot\u003e/home/.config/opencode/skills\ncodex\tfalse\t0\t0\t\u003croot\u003e/home/.agents/skills\nantigravity\tfalse\t0\t0\t\u003croot\u003e/home/.gemini/config/skills\nhermes\tfalse\t0\t0\t\u003croot\u003e/home/.hermes/skills/symaira\nopenclaw\tfalse\t0\t0\t\u003croot\u003e/home/.openclaw/skills\n",
+    "stderr": "",
+    "description": "skills targets"
+  },
+  {
+    "id": "go skills log",
+    "args": [
+      "skills",
+      "log"
+    ],
+    "exit_code": 0,
+    "stdout": "No recorded skill operations.\n",
+    "stderr": "",
+    "description": "skills log"
+  },
+  {
+    "id": "go skills sync",
+    "args": [
+      "skills",
+      "sync"
+    ],
+    "exit_code": 0,
+    "stdout": "Every installed skill is in sync.\n",
+    "stderr": "",
+    "description": "skills sync"
+  },
+  {
+    "id": "go skills doctor",
+    "args": [
+      "skills",
+      "doctor"
+    ],
+    "exit_code": 0,
+    "stdout": "config      \u003croot\u003e/home/.config/symskills/config.toml\nlibrary     \u003croot\u003e/data/symbrain/skills/library\nrendered    \u003croot\u003e/data/symbrain/skills/rendered\ncache       \u003croot\u003e/cache/symbrain/skills\nbase        \u003croot\u003e/data/symbrain/skills/base\nprofiles    \u003croot\u003e/home/.config/symskills/profiles\nlog         \u003croot\u003e/home/.local/share/symskills/events.jsonl\nproject     \u003croot\u003e/cwd\nversioning  true\n",
+    "stderr": "",
+    "description": "skills doctor"
+  },
+  {
+    "id": "go skills unknown",
+    "args": [
+      "skills",
+      "unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain skills: unknown subcommand \"unknown\"\n\nsymbrain skills — embedded skill library operations\n\nUsage:\n  symbrain skills \u003csubcommand\u003e [flags]\n\nSubcommands:\n  list        List the skills in the library with their install state\n  status      Classify installed skills against the library (drift report)\n  targets     Show the harness targets skills can be installed into\n  log         Read the local skill operation log\n  sync        Repair drifted installs (use --dry-run to see the plan first)\n  doctor      Report the configured skill paths and target roots\n\nUse --output table|json (or --json) for the result format. status, sync and\ntargets accept --scope user|project; status, sync and log accept --target.\nRun 'symbrain skills \u003csubcommand\u003e --help' for details.\n",
+    "description": "skills unknown subcommand"
+  },
+  {
+    "id": "go skills list --unknown",
+    "args": [
+      "skills",
+      "list",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of skills list:\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n",
+    "description": "skills list rejects unknown flag"
+  },
+  {
+    "id": "go activity",
+    "args": [
+      "activity"
+    ],
+    "exit_code": 2,
+    "stdout": "symbrain activity — bounded, profile-gated activity reads\n\nUsage:\n  symbrain activity \u003csearch|get|status\u003e [flags]\n\nEvery command requires --profile, an explicit bounded response budget, and (for search) an explicit RFC3339 window and result limit.\n",
+    "stderr": "",
+    "description": "activity"
+  },
+  {
+    "id": "go activity search",
+    "args": [
+      "activity",
+      "search"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain activity: --profile is required and must explicitly expose activity read tools\n",
+    "description": "activity search missing args"
+  },
+  {
+    "id": "go activity unknown",
+    "args": [
+      "activity",
+      "unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain activity: --profile is required and must explicitly expose activity read tools\n",
+    "description": "activity unknown subcommand"
+  },
+  {
+    "id": "go memory",
+    "args": [
+      "memory"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain memory — embedded memory store operations\n\nUsage:\n  symbrain memory \u003csubcommand\u003e [flags]\n\nSubcommands:\n  list        List stored memories (optionally filtered by scope)\n  search      Search memories by semantic relevance\n  set         Store a memory (requires --kind)\n  delete      Remove a memory by id\n  rules       List procedural rules\n  query-log   Inspect the memory retrieval log\n  sync        Synchronize memories with a remote memory server\n  serve       Run the memory HTTP API as a sync peer for 'memory sync --remote'\n\nUse --output table|json (or --json) for the result format. Read commands\naccept --scope/-s, --limit/-l, and --db; search takes one query argument.\nRun 'symbrain memory \u003csubcommand\u003e --help' for details.\nFor remote synchronization, run 'symbrain memory sync --help'.\nTo act as the remote peer for another machine's sync, run 'symbrain memory serve --help'.\n",
+    "description": "memory"
+  },
+  {
+    "id": "go memory list",
+    "args": [
+      "memory",
+      "list"
+    ],
+    "exit_code": 0,
+    "stdout": "No memories found.\n",
+    "stderr": "",
+    "description": "memory list"
+  },
+  {
+    "id": "go memory search",
+    "args": [
+      "memory",
+      "search"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain memory search \u003cquery\u003e [--scope \u003cscope\u003e] [--limit \u003cN\u003e] [--db \u003cpath\u003e]\n",
+    "description": "memory search missing query"
+  },
+  {
+    "id": "go memory set",
+    "args": [
+      "memory",
+      "set"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain memory set \u003ccontent\u003e --kind \u003ckind\u003e [--scope \u003cscope\u003e] [flags]\n",
+    "description": "memory set missing content"
+  },
+  {
+    "id": "go memory delete",
+    "args": [
+      "memory",
+      "delete"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "usage: symbrain memory delete \u003cid\u003e [--db \u003cpath\u003e]\n",
+    "description": "memory delete missing id"
+  },
+  {
+    "id": "go memory rules",
+    "args": [
+      "memory",
+      "rules"
+    ],
+    "exit_code": 0,
+    "stdout": "No rules found.\n",
+    "stderr": "",
+    "description": "memory rules"
+  },
+  {
+    "id": "go memory query-log",
+    "args": [
+      "memory",
+      "query-log"
+    ],
+    "exit_code": 0,
+    "stdout": "Total queries: 0\n\nNo recorded queries.\n",
+    "stderr": "",
+    "description": "memory query-log"
+  },
+  {
+    "id": "go memory sync",
+    "args": [
+      "memory",
+      "sync"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain memory sync: --remote is required\nsymbrain memory sync — synchronize the embedded memory store with a remote\n\nUsage:\n  symbrain memory sync --remote \u003curl\u003e [flags]\n\nFlags:\n  --remote \u003curl\u003e          Base URL of the remote memory server (required).\n                          Must use https, except http://localhost or\n                          127.0.0.1 for local development.\n  --pull                  Only pull remote changes into the local database.\n  --push                  Only push local changes to the remote server.\n                          (With neither flag, both directions run.)\n  --token \u003ctoken\u003e         Bearer token for the remote API. May come from\n                          $SYMBRAIN_MEMORY_SYNC_TOKEN instead; never pass it on the command line in\n                          shared shells.\n  --encrypted-relay       Exchange client-side AES-256-GCM encrypted blobs\n                          through the remote /api/sync/relay endpoint, so the\n                          relay never sees plaintext memory content.\n  --relay-passphrase \u003cp\u003e  Passphrase for --encrypted-relay. May come from\n                          $SYMBRAIN_MEMORY_SYNC_RELAY_PASSPHRASE instead. Both peers must share it.\n  --allow-insecure-http   Override the https requirement for non-loopback\n                          remotes. Bearer tokens will be sent in the clear;\n                          a WARNING is printed. Use only for testing.\n  --db \u003cpath\u003e             Database path override (default: the standard\n                          memory database under the XDG data directory).\n  --timeout \u003cduration\u003e    Per-run HTTP timeout (default 60s).\n\nThe local database and its per-remote sync cursors are reused in place;\nno export or import step is needed.\n",
+    "description": "memory sync missing --remote"
+  },
+  {
+    "id": "go memory serve",
+    "args": [
+      "memory",
+      "serve"
+    ],
+    "exit_code": 1,
+    "stdout": "symbrain memory serve: listening on http://127.0.0.1:8787\n",
+    "stderr": "symbrain memory serve: failed to bind to 127.0.0.1:8787: listen tcp 127.0.0.1:8787: bind: address already in use\n",
+    "description": "memory serve"
+  },
+  {
+    "id": "go guard",
+    "args": [
+      "guard"
+    ],
+    "exit_code": 2,
+    "stdout": "symguard — local-first security gateway (absorbed into symbrain)\n\nUsage:\n  symbrain guard \u003ccommand\u003e [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symbrain guard \u003ccommand\u003e --help' for details on a specific command.\n",
+    "stderr": "",
+    "description": "guard missing subcommand"
+  },
+  {
+    "id": "go guard version",
+    "args": [
+      "guard",
+      "version"
+    ],
+    "exit_code": 0,
+    "stdout": "symguard dev\n  go      \u003cgo\u003e\n  os/arch \u003cos/arch\u003e\n  built   2026-01-01 (compile-time placeholder)\n",
+    "stderr": "",
+    "description": "guard version"
+  },
+  {
+    "id": "go guard doctor",
+    "args": [
+      "guard",
+      "doctor"
+    ],
+    "exit_code": 0,
+    "stdout": "symguard doctor\n\n  Version:   dev\n  Go:        go1.26.7\n  OS/Arch:   darwin/arm64\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules — deny by default)\n  audit log        not initialized (created on first 'symguard decide')\n  spawn allowlist  not configured (empty — deny by default)\n  mcp servers      none discovered\n\nAll basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+    "stderr": "",
+    "description": "guard doctor, exit 1 (issues found)"
+  },
+  {
+    "id": "go guard decide",
+    "args": [
+      "guard",
+      "decide"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"decision\":\"deny\",\"reason\":\"decide: empty request\"}\n",
+    "stderr": "",
+    "description": "guard decide (reads stdin)"
+  },
+  {
+    "id": "go guard grants",
+    "args": [
+      "guard",
+      "grants"
+    ],
+    "exit_code": 0,
+    "stdout": "Usage:\n  symguard grants list\n  symguard grants revoke \u003cid\u003e | --all\n\nCommands:\n  list      List active grants\n  revoke    Revoke a grant by ID, or revoke every grant with --all\n\nRun 'symguard grants \u003ccommand\u003e --help' for details.\n",
+    "stderr": "",
+    "description": "guard grants"
+  },
+  {
+    "id": "go guard scan",
+    "args": [
+      "guard",
+      "scan"
+    ],
+    "exit_code": 0,
+    "stdout": "{\n  \"servers\": []\n}\n",
+    "stderr": "symguard scan: 5 finding(s)\n  unsupported [hermes] \u003croot\u003e/home/.config/hermes/config.json: config file not found\n  unsupported [cursor] \u003croot\u003e/home/.cursor/mcp.json: config file not found\n  unsupported [vscode] \u003croot\u003e/home/.vscode/mcp.json: config file not found\n  unsupported [opencode] \u003croot\u003e/home/.config/opencode/config.json: config file not found\n  unsupported [claude-desktop] \u003croot\u003e/home/Library/Application Support/Claude/claude_desktop_config.json: config file not found\n",
+    "description": "guard scan"
+  },
+  {
+    "id": "go guard unknown",
+    "args": [
+      "guard",
+      "unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain guard: unknown command \"unknown\"\n\nsymguard — local-first security gateway (absorbed into symbrain)\n\nUsage:\n  symbrain guard \u003ccommand\u003e [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symbrain guard \u003ccommand\u003e --help' for details on a specific command.\n",
+    "description": "guard unknown subcommand"
+  },
+  {
+    "id": "go vault",
+    "args": [
+      "vault"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "symbrain vault: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\nHint: install symvault or run `symbrain setup`.\n",
+    "description": "vault missing subcommand"
+  },
+  {
+    "id": "go skills list --help",
+    "args": [
+      "skills",
+      "list",
+      "--help"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of skills list:\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n",
+    "description": "skills list --help prints usage"
+  },
+  {
+    "id": "go memory list --help",
+    "args": [
+      "memory",
+      "list",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "symbrain memory list — list stored memories\n\nUsage:\n  symbrain memory list [flags]\n\nFlags:\n  --scope, -s \u003cscope\u003e  Filter by scope: global, project, agent, user, or session.\n  --limit, -l \u003cN\u003e      Maximum memories to return (default 100, max 1000).\n  --db \u003cpath\u003e          Database path override.\n  --output table|json   Output format (default table; global flag).\n",
+    "stderr": "",
+    "description": "memory list --help"
+  },
+  {
+    "id": "go guard decide --help",
+    "args": [
+      "guard",
+      "decide",
+      "--help"
+    ],
+    "exit_code": 0,
+    "stdout": "Usage:\n  symguard decide \u003c request.json\n\nReads one JSON decision request from stdin and writes the JSON decision\nto stdout:\n\n  request:  {\"command\": \"...\", \"risk_class\": \"low|medium|high|critical\",\n             \"domain\": \"...\", \"warnings\": [\"...\"]}\n  response: {\"decision\": \"allow|confirm|deny\", \"reason\": \"...\"}\n\nAny error produces decision \"deny\" with an explanatory reason.\n",
+    "stderr": "",
+    "description": "guard decide --help"
+  },
+  {
+    "id": "go serve",
+    "args": [
+      "serve"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain: 'serve' is deprecated; use 'symbrain mcp' instead (serve will be removed in a future release)\nsymbrain mcp: --profile is required (or --profile-file \u003cpath\u003e)\n",
+    "description": "serve prints deprecation warning to stderr"
+  },
+  {
+    "id": "go --json version",
+    "args": [
+      "--json",
+      "version"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"tool\":\"symbrain\",\"version\":\"dev\",\"schema_version\":1}\n",
+    "stderr": "",
+    "description": "version with global --json flag"
+  },
+  {
+    "id": "go --unknown",
+    "args": [
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain: unknown command \"--unknown\"\n\nsymbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain \u003ccommand\u003e [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create \u003cpath\u003e and set \u003cpath.field\u003e read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide \u003crequest-id\u003e --approve|--deny\n\nRun 'symbrain \u003ccommand\u003e --help' for details on a specific command.\n",
+    "description": "top-level unknown flag treated as unknown command"
+  }
+]

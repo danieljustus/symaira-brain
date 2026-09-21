@@ -1,6 +1,324 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
-## Latest integration update — guard CLI
+## Resume checkpoint — 2026-09-20, wave 4: the CLI tree has a consumer
+
+`CLI-006` now has a Rust consumer instead of a fixture nobody read:
+`rust/symbrain-cli/tests/cli_tree_tests.rs` runs the native binary once per case
+in `rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json` (81 cases,
+captured from the shipped binary), each with a throwaway `HOME`/`XDG` root and
+its own working directory, and asserts exit code, stdout and stderr after the
+same normalizations the oracle applied.
+
+- **70 of 81 match, and the 11 residual have four measured causes.** The verdict
+  is the consumer test's (it applies the oracle's normalizations); the cause was
+  established by running the native binary per case, not by reading the diff.
+  1. **Five command surfaces are not ported** (5 cases): `sync`,
+     `sync --unknown`, `harness list`, `harness health`, `guard doctor`. They
+     print `symbrain: command "<x>" is not ported yet and no Go fallback was
+     found; set SYMBRAIN_GO_BINARY` and exit 1, where the fixture holds the
+     shipped exit code. An earlier entry here called the usage-shaped ones "port
+     work on the exit code" — wrong: they never reach a usage parser, they stop
+     at the unported-command gate, so they close only when the surface is ported.
+  2. **Two cases are the flag package's own dump** (2 cases):
+     `skills list --help` and `skills list --unknown` print `Usage of skills
+     list:` followed by `PrintDefaults` formatting. They stay on Go on purpose:
+     reproducing that dump without the flag set would create a second source of
+     truth for the same bytes.
+  3. **Three cases are artifacts of the consumer's isolation, not port gaps**
+     (3 cases) — each verified by running the same command at a different root:
+     - `skills log` is native and byte-exact (`No recorded skill operations.`,
+       exit 0) when `HOME` has no symlinked ancestor. The consumer's root lives
+       under `/var/folders`, and `/var` is a symlink, so the native path
+       deliberately hands a log path with symlinked ancestors to Go.
+     - `skills targets` diverges in one column only: the fixture records
+       `claude`, `codex`, `antigravity` and `hermes` as `INSTALLED true`, the
+       consumer's run reports `false` for all six targets. Measured cause: that
+       column follows the **PATH** (harness CLI detection), not the root. With
+       the recorder's PATH and an isolated root the reference binary reproduces
+       the fixture's four `true` values exactly; with an empty PATH it reports
+       `false` for all six, like the native binary. The consumer pins `PATH` to
+       an empty directory, so its `false` is correct there and the case cannot be
+       verified against this recording. The target list itself — six targets,
+       order, skill roots — matches.
+     - `vault` exits 1 because `symvault` is not on the pinned empty `PATH`.
+  4. **One recording is environment-dependent** (1 case): `memory serve` holds a
+     port-conflict transcript, so it is not a parity target.
+- **The consumer now replays the tree in one shared root** (`1d6b57ba`), like the
+  oracle: the recording ran every case in a single throwaway root in fixture
+  order, so later cases saw the state earlier ones created. The consumer created
+  a fresh root per case, which compared the port against a state the recording
+  never had. No case changed verdict from the fix — it removes a false negative
+  rather than closing a gap.
+- **The wave-4 worktree is folded back and removed** (`84ba434e`): the consumer
+  and its supporting usage-text changes were cherry-picked onto this branch, and
+  `.worktrees/w4-cli` plus `migration/w4-cli` are gone. This branch is now the
+  single reference line for wave 4. The consumer is marked `#[ignore]` with its
+  reason (`59d43468`), because `cargo test --workspace` — and therefore
+  `make rust-check` — picks it up, and it would turn the incremental entrypoint
+  red before the residual above is closed. Run it on demand with
+  `cargo test -p symbrain-cli --test cli_tree_tests -- --ignored`; un-ignore it
+  and wire it into `rust-check` in the change that closes the residual.
+- **The `memory` usage and help shapes are ported** (`ff8bfde9`), the shipped
+  `skills` help text is used (`cf0f65e4`), and `guard version` prints the shipped
+  four-row block (`3397df22`). All three changes followed the same rule: the text
+  is taken from the shipped source, verified against the fixture, and never
+  invented. `MEMORY_USAGE` and `MEMORY_LIST_USAGE` are the Go literals verbatim;
+  the `memory sync` help is the *rendered* concatenation, because the Go source
+  builds its token line from a constant (a first extraction of that literal was
+  truncated at an inner backtick and would have been silently wrong).
+  `guard version` reports a hard-coded build-time placeholder because the shipped
+  `buildTime()` parses a constant date for every build.
+- **Rejected: a worker "fix" that faked the toolchain row.** One dispatch
+  replaced the native `version` output with `go      go0.0.0` so the fixture would
+  match. That is a fabricated user-visible value, so it was reverted; the honest
+  handling is the accepted-difference normalization the oracle itself documents
+  (the toolchain row is tokenized, its label stays truthful: `rust`, not `go`).
+- **The environment question is settled.** With `PATH` pinned to an empty
+  directory the native behaviour is deterministic (`skills status` 0/27/0 and
+  `skills targets` 0/638/0 across three runs), so the consumer is not flaky. An
+  earlier note here called `skills status` environment-sensitive: what it
+  actually shows is the *designed* fallback preference — the native binary
+  delegates when a Go fallback is reachable and serves the command itself when
+  it is not. The consumer pins the no-fallback case, which is the contract it
+  means to verify.
+- **One worker change was rejected as fabrication.** To satisfy the `version`
+  comparison it had replaced the native binary's honest
+  `  rust    {rustc_version()}` row with `  go      go0.0.0` — a made-up
+  toolchain version in user-facing output. Reverted. The case is now handled in
+  the comparison instead: the toolchain row is an accepted difference (the
+  oracle says so itself), so both sides reduce it to one token and the row count
+  and position stay compared. Its `mcp --unknown` usage fix was correct and was
+  kept.
+- **The first run reported 52 divergences and 40 of them were the harness, not
+  the port.** The consumer's `normalize_stderr` used `str::lines()`, which drops
+  a trailing newline, while the oracle's `strings.Split(s, "\n")` keeps the
+  trailing empty element — so every stderr expectation came out exactly one byte
+  short. Confirmed by running both binaries directly: for `bogus`, `version -h`
+  and `profile show` the native and shipped outputs are byte-identical. Lesson:
+  when a normalizer is ported, port its split semantics too, and when a run
+  reports many one-byte differences, suspect the harness before the code.
+
+## Resume checkpoint — 2026-09-20, wave 3: DB-001 divergence measured
+
+`DB-001`/`DB-002` moved from "no consumer" to "measured divergence": the native
+store is now held to the frozen Go facts by an executable differential test,
+and that test is red. The row stays `fixture-ready` until it is green.
+
+- **Acceptance test written** (`rust/symbrain-memory/src/db_oracle_tests.rs`,
+  inside the crate because `busy_timeout` and `foreign_keys` are
+  connection-scoped and can only be read from the store's own connection).
+  Passing today: the lock pragmas (`busy_timeout` 5000, `journal_mode` wal,
+  `foreign_keys` 1, `secure_delete` 1), the constraint cases (NULL
+  `created_at`/`updated_at` rejected, missing table rejected) and the ordering
+  cases (ties broken by id DESC, distinct timestamps by `created_at` DESC).
+- **Closed** (commit `76a14f3a`, on the integration branch). The port landed
+  with the acceptance test, because the test alone was red and the DDL alone
+  was unmeasured. `DB-001`/`DB-002` are now `green`:
+  1. **16 tables** added to the native schema: `audit_log`,
+     `consolidation_runs`, `context_profile_links`, `context_profiles`,
+     `entities_aliases`, `import_state`, `jwt_revocations`, `memories_fts`
+     (+ its four shadow tables), `memory_associations`, `memory_evidence`,
+     `query_log_results`, `sync_state`.
+  2. **`memories` column facts** aligned: the shipped order and the shipped
+     defaults. The native schema had added `DEFAULT ''` to `scope`, `metadata`
+     and `embedding`, which the shipped schema declares NOT NULL without a
+     default.
+  3. **16 `memories` indexes** added (kind, tier, review_status, expires_at,
+     content_hash, embedding_source, consolidation, consolidated_into,
+     created_by, importance, lsh, scope_lsh, superseded_by, updated_at,
+     valid_from, valid_to) plus the unique autoindex the shipped table carries.
+- **Two defects in the worker's port were caught by existing tests, not by the
+  worker's own report** — its summary claimed "all three checks pass" and did
+  not mention them, and clippy/fmt were red:
+  - the 16 new indexes sat inside `SCHEMA`, ahead of the `COLUMN_PARITY`
+    repair, so `Store::open` failed on any database written by an older
+    version (`no such column: tier`) — the indexes now live in `INDEXES` and
+    run after the repair;
+  - `COLUMN_PARITY` covered 5 columns while the shipped index set references
+    26, so an upgraded database would have kept missing columns a fresh one
+    has — it now covers every shipped `memories` column with its shipped
+    definition;
+  - a third gap **no test could see**: `memories_fts` was created without the
+    `memories_ai`/`_ad`/`_au` triggers, so the table existed and never received
+    a row. The oracle now records triggers and views (stored SQL; neither has a
+    PRAGMA), the differential test holds them to it, and a new contract test
+    proves a natively written row reaches the FTS index.
+  - the contract test's raw insert omitted `embedding`, which only worked
+    while the native schema wrongly gave that column a default.
+- **Verification on the integration branch:** `cargo test -p symbrain-memory`
+  21 lib + 7 contract, `clippy --all-targets -D warnings` clean,
+  `cargo fmt --check` clean, `make rust-check` exit 0 (all oracle checks: xdg
+  256, policy 50+30, guard 51, guard-doctor 7, catalog 3, cli 81, db-memory
+  29 tables / 4 negative / 2 ordering), `make parity-smoke` 457/457.
+- **The oracle was repaired first**, because three of its own cases were
+  hollow: the ordering seeds omitted `metadata` (NOT NULL without a default),
+  so the inserts failed silently and both expectations were captured as
+  `null`; the NULL-timestamp cases were rejected for `metadata` rather than for
+  the timestamp they name; and the legacy-migration case was dropped because
+  the oracle opened the legacy file with the driver name `sqlite3` while the
+  production package registers modernc's `sqlite`. Insert and open errors are
+  now fatal. Note that `make db-memory-oracle-check` exercises the **committed**
+  oracle (it exports `HEAD`), so an uncommitted oracle change is not covered by
+  it — regenerate and commit the fixture explicitly.
+- **Reachability, verified with a freshly built native binary and an isolated
+  `HOME`:** `symbrain memory …` is gated back to the shipped implementation and
+  resolves `<data>/memory/default.db` (it does **not** create a store through
+  the native code path), but `symbrain mcp` **is** live: the gateway opens
+  `symbrain_memory::Store` on the same `<data>/memory/default.db`
+  (`rust/symbrain-gateway/src/lib.rs`). An earlier probe of mine that suggested
+  the CLI path was native used a stale binary from 2026-09-17 and was wrong; the
+  corrected measurement is in #626, which the port closes.
+- **Branch state:** everything above is integrated on
+  `migration/rust-continue-20260920` (local, not pushed). The wave-3 worktree
+  `migration/w3-db-schema` has served its purpose and is removed. Nothing about
+  this slice is outstanding.
+
+## Resume checkpoint — 2026-09-20, wave 2 salvaged
+
+Both wave-2 workers reported `completed` but neither had committed, and one had
+derailed mid-task. Their branches were empty; the artifacts were found in the
+worktrees (one of them in the **shared coordinator checkout**) and were
+verified by hand before anything was kept.
+
+- **`DB-001`/`DB-002` → `fixture-ready`.** `scripts/db-memory-oracle` imports
+  `internal/memory/config` and `internal/memory/db`, creates a real store and
+  reads the schema, pragmas and constraint behaviour back out of SQLite:
+  29 tables, the full `memories` column set, 5 lock pragmas, and the NULL
+  timestamp, ordering and tie-break cases. `make db-memory-oracle-check` →
+  "0 drift on 29 tables, 3 negative cases, 2 ordering cases". No Rust test
+  consumes the fixture yet, so the rows are not green.
+- **`CLI-006` → `fixture-ready`.** `scripts/cli-oracle` freezes 81 cases of
+  command-tree and flag behaviour (measured stdout, stderr, exit codes,
+  including the negative flag cases), with the readable inventory in
+  `migration/cli-tree-inventory.md`. `make cli-oracle-check` → "0 drift on
+  81 cases".
+- **The CLI oracle as the worker left it was unsafe and was rebuilt.** It ran
+  the real binary with the ambient environment, so its own run executed
+  `setup` (downloading and installing managed binaries into the operator's
+  `~/.symaira/bin`), `doctor --fix`, and let `sync` write managed blocks into
+  this repository's `AGENTS.md`. It is now isolated (throwaway `HOME`/`XDG`,
+  scratch working directory), the two side-effecting cases are dropped, and
+  the per-run root, the checkout path, the toolchain line and the host platform
+  are placeholders. The fixture also carried 50 self-contradicting
+  descriptions (a dead `expectedExit` parameter asserting exit 64/100 while the
+  measured code was 2); the dead parameter is gone and the descriptions no
+  longer claim an exit code.
+- **Side effect on the operator's machine, reported:** `symdesk` v0.12.2 and
+  `symvault` v0.22.1 were installed into `~/.symaira/bin` at 14:27 by that
+  `setup` run (`symbrowse`/`symoperate`/`symscope` untouched from Sep 13).
+- **New defect filed: #625.** `symbrain setup` cannot install the pinned
+  `symcockpit` core: `managed: extract symcockpit: unsafe tar entry "./":
+  invalid archive path`. Reproduced with an isolated `HOME` so the operator's
+  binaries were not touched a second time.
+- **Process lesson for the next wave:** a worker's artifact must be inspected
+  and its side effects understood *before* it is run; an oracle that mutates
+  the machine or the checkout is not evidence. Ask workers to commit as soon as
+  the first slice passes, because a cut-off worker leaves nothing on its branch.
+
+## Resume checkpoint — 2026-09-20, wave 1 integrated
+
+Three workers were dispatched in isolated worktrees from `8ca8d2c5`. Two of
+them were cut off before committing and their summaries arrived truncated, so
+their branches were inspected and salvaged by hand instead of being trusted.
+
+- **`CFG-001` is green.** `scripts/xdg-oracle` is a source-bound Go oracle
+  (imports `internal/xdg`, injects HOME/XDG, 256 cases) and
+  `rust/symbrain-core/tests/xdg_paths_tests.rs` compares all eight resolution
+  functions against the frozen fixture. Verified on the integrated tree by the
+  author: `run-go-oracle.sh HEAD run ./scripts/xdg-oracle -check` →
+  "0 drift on 256 cases", and `cargo test -p symbrain-core` →
+  `xdg_paths_match_go_oracle ... ok`. No divergence was found; no Rust change
+  was needed. `make xdg-oracle-check` is wired into `rust-check`.
+- **`#624` (atime flake) is addressed in the harness.** The three
+  atime-derived cases now capture each runtime's own `SKILL.md` atime
+  (`st_atime_ns`, nanosecond-exact) immediately before that runtime runs,
+  require the reported `last_used` to be derived from that value (never older,
+  absent only where the fixture carries no evidence), and normalize the value
+  before the byte comparison. `skills_list_last_used_json` additionally
+  requires the value to be present, so the evidence contract is still checked.
+- **`guard doctor` stays on the Go fallback, with a frozen corpus.** The Go
+  oracle over seven scenarios is committed as `SEC-005` (`fixture-ready`, no
+  Rust consumer). Measurement from this wave: the production output is not
+  byte-stable even Go-to-Go, because it prints the building toolchain
+  (`go1.27.1` locally versus `go1.26.7` under `run-go-oracle.sh`) and absolute
+  temp-root paths. The oracle therefore writes `<root>` and `Go: <go>`
+  placeholders; the toolchain line is an explicit accepted difference. A Rust
+  module that hardcoded those lines was discarded — it is not a port.
+  `make guard-doctor-oracle-check` verifies the fixture against the pinned Go
+  revision and is wired into `rust-check`.
+- **Not authorized by this checkpoint:** Go removal, pushing/publishing,
+  release or product cutover, and any claim that the `fixture-ready` rows are
+  green.
+
+**Verified revision: `f2d18e3d`** on `migration/rust-continue-20260920`
+(local only — not pushed, no PR). Five commits on top of `4ca840c2`:
+`9e20d19a` (CFG-001 oracle), `0db1baf7` (guard-doctor fixture), `ca91ffdb`
+(gate wiring + SEC-005 row), `3b4526e1` (#624 harness fix), `f2d18e3d`
+(this checkpoint). The commit that adds this paragraph is docs-only, so the
+verified revision stays `f2d18e3d`.
+
+Verified at that revision: `make rust-check` → exit 0 (workspace fmt, clippy,
+tests, `cargo-deny` advisories/bans/licenses/sources ok, and the oracle checks
+`policy 0/50+30`, `xdg 0/256`, `guard 0/51`, `guard doctor 0/7`, `catalog 0/3`,
+…); `make parity-smoke` → exit 0, 457/457 cases. The wave-1 worker branches
+were cherry-picked, then removed; `.worktrees/` is back to the two wave-2
+worktrees.
+
+**Wave 2 dispatched** (`deleg_0befee8f`, 2 workers, both from `f2d18e3d`):
+`migration/w2-db` in `.worktrees/w2-db` → `DB-001`/`DB-002`; `migration/w2-cli`
+in `.worktrees/w2-cli` → `CLI-006`. Neither worker may touch the Makefile,
+`scripts/rust-differential.py` or this ledger. Coordinator must verify their
+commits and diffs, integrate in dependency order, and only then update rows.
+Still open and untouched: `SEC-001`, `SEC-002`, `GCLI-PLAT-01`, `DIST-001`,
+`DIST-002`, `GUI-001`.
+
+## Resume checkpoint — 2026-09-20 (session `migration/rust-continue-20260920`)
+
+Base revision: `48568aee` (main, CI green there including the macOS
+`rust-check parity-smoke` job). Integration branch:
+`migration/rust-continue-20260920`, local only — no push, no PR, no release.
+
+- **Reconciled stale ledger claims.** Section "Latest integration update — guard
+  CLI" below is historical. Its stated next action (reproduce
+  `{"command":"open"}x`, repair the trailing-JSON diagnostic) is **done and
+  verified on this revision**: the pinned Go oracle and the current native
+  binary both emit
+  `{"decision":"deny","reason":"decide: parse request: invalid character 'x' after top-level value"}`.
+  `rust/symbrain-cli/src/guard_cli.rs` already carries the regression test
+  `decide_preserves_go_trailing_json_diagnostic`. GCLI-F03 is closed by evidence,
+  not by re-implementation. GCLI-PLAT-01 (non-Unix audit path) and Phase 8.5/8.6
+  (`guard doctor` still returns `None` → Go fallback) remain open.
+- **Fixed and verified: doctor vault-agent routing (#616).** `make rust-check`
+  previously failed on any machine that has profiles, because
+  `doctor_cli::requires_go_fallback` returned at the first `-vault-agent` and
+  read the real XDG profile directory. The predicate now mirrors Go's
+  `flag.FlagSet` scan (value consumption, `-h`/`-help`, undefined flag, missing
+  value) and the profile precondition is injected
+  (`requires_go_fallback_with`). Evidence: `cargo test -p symbrain-cli --lib`
+  90 passed; `make rust-check parity-smoke` 458/458 twice; contract row
+  `CLI-006B`.
+- **Recorded external/new defect: #624.** Three atime-derived skills parity
+  cases (`skills_list_managed_installs_json`, `skills_list_last_used_json`,
+  `skills_list_target_flag_is_ignored`) flaked once and then passed 458/458 on
+  two consecutive re-runs with no source change. `last_used`
+  (`last_used_source: install_atime`) is the fixture file's atime, which the
+  fixture pins and an ambient reader can bump afterwards, leaving the two
+  runtimes reporting their own read clocks. Not a parity regression; the gate
+  stays flaky until the fixture compares the atime captured per runtime.
+- **Task order after this checkpoint** (dependency order, one writer each):
+  1. `CFG-001` — XDG and legacy path precedence: source-bound Go oracle plus
+     Rust comparison; row is `pending` while `rust/symbrain-core/src/xdg.rs` is
+     already implemented.
+  2. `#624` — make the atime-derived parity cases race-free (harness only).
+  3. Phase 8.5/8.6 — `guard doctor` native port (the last `guard` verb on the Go
+     fallback), then `SEC-001` secret-reference resolution and redaction.
+  4. Phase 10 (`DB-001`, `DB-002`) and Phase 11 (`DIST-001`, `DIST-002`,
+     `GUI-001`) remain untouched and are the largest open blocks.
+- **Not authorized by this checkpoint:** Go removal, pushing/publishing,
+  release or product cutover, and any claim that the `fixture-ready` rows are
+  green.
+
+## Latest integration update — guard CLI (historical, superseded above)
 
 The previously test-only Unix `guard decide` adapter is now wired into this
 local Rust integration candidate. Installed applications are unchanged. Other

@@ -1,0 +1,527 @@
+{
+  "schema": {
+    "tables": [
+      {
+        "name": "activity_episodes",
+        "sql": "CREATE TABLE activity_episodes (\n    id          TEXT PRIMARY KEY,\n    title       TEXT NOT NULL,\n    scope       TEXT NOT NULL DEFAULT '',\n    started_at  DATETIME NOT NULL,\n    ended_at    DATETIME NOT NULL,\n    confidence  REAL NOT NULL CHECK (confidence \u003e= 0 AND confidence \u003c= 1),\n    sources     TEXT NOT NULL DEFAULT '[]',\n    citations   TEXT NOT NULL DEFAULT '[]',\n    expires_at  DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "activity_segments",
+        "sql": "CREATE TABLE activity_segments (\n    id                 TEXT PRIMARY KEY,\n    source             TEXT NOT NULL,\n    granularity        TEXT NOT NULL CHECK (granularity IN ('10min', '6h')),\n    started_at         DATETIME NOT NULL,\n    ended_at           DATETIME NOT NULL,\n    applications       TEXT NOT NULL DEFAULT '[]',\n    redacted_summary   TEXT NOT NULL,\n    raw_ref            TEXT NOT NULL DEFAULT '',\n    prior_segment_ids  TEXT NOT NULL DEFAULT '[]',\n    superseded_by     TEXT NOT NULL DEFAULT '',\n    expires_at         DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "audit_log",
+        "sql": "CREATE TABLE audit_log (\n    id         TEXT PRIMARY KEY,\n    action     TEXT NOT NULL,       -- set, delete, purge, sync\n    memory_id  TEXT,                -- affected memory (nullable for bulk ops)\n    scope      TEXT,                -- memory scope at time of action\n    session    TEXT,                -- session that performed the action\n    actor      TEXT,                -- who performed the action\n    detail     TEXT,                -- optional JSON detail\n    created_at DATETIME NOT NULL DEFAULT (datetime('now'))\n, target_type TEXT, target_id TEXT)"
+      },
+      {
+        "name": "consolidation_runs",
+        "sql": "CREATE TABLE consolidation_runs (\n    id TEXT PRIMARY KEY,\n    run_at TEXT NOT NULL DEFAULT (datetime('now')),\n    status TEXT NOT NULL DEFAULT 'completed' CHECK (status IN ('completed', 'undone')),\n    summary_json TEXT NOT NULL,\n    total_archived INTEGER NOT NULL DEFAULT 0,\n    total_consolidated INTEGER NOT NULL DEFAULT 0\n)"
+      },
+      {
+        "name": "context_profile_links",
+        "sql": "CREATE TABLE context_profile_links (\n    id                  INTEGER PRIMARY KEY AUTOINCREMENT,\n    profile_id          TEXT NOT NULL REFERENCES context_profiles(id) ON DELETE CASCADE,\n    parent_profile_id   TEXT REFERENCES context_profiles(id) ON DELETE SET NULL,\n    scope               TEXT NOT NULL DEFAULT '',\n    filter_key          TEXT NOT NULL DEFAULT '',\n    filter_value        TEXT NOT NULL DEFAULT '',\n    precedence_order    INTEGER NOT NULL DEFAULT 0,\n    created_at          DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "context_profiles",
+        "sql": "CREATE TABLE context_profiles (\n    id          TEXT PRIMARY KEY,\n    name        TEXT NOT NULL UNIQUE COLLATE NOCASE,\n    description TEXT NOT NULL DEFAULT '',\n    base_scope  TEXT NOT NULL DEFAULT '',\n    created_at  DATETIME NOT NULL,\n    updated_at  DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "entities",
+        "sql": "CREATE TABLE entities (\n    id          TEXT PRIMARY KEY,\n    name        TEXT NOT NULL UNIQUE COLLATE NOCASE,\n    type        TEXT NOT NULL DEFAULT 'person',\n    aliases     TEXT NOT NULL DEFAULT '[]',\n    description TEXT NOT NULL DEFAULT '',\n    created_by  TEXT NOT NULL DEFAULT '',\n    created_at  DATETIME NOT NULL,\n    updated_at  DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "entities_aliases",
+        "sql": "CREATE TABLE entities_aliases (\n    entity_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,\n    alias     TEXT NOT NULL,\n    PRIMARY KEY (entity_id, alias)\n)"
+      },
+      {
+        "name": "entity_relations",
+        "sql": "CREATE TABLE entity_relations (\n    from_entity_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,\n    to_entity_id   TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,\n    relation_type  TEXT NOT NULL,\n    created_by     TEXT NOT NULL DEFAULT '',\n    created_at     DATETIME NOT NULL, id TEXT NOT NULL DEFAULT '', source TEXT NOT NULL DEFAULT '', source_ref TEXT NOT NULL DEFAULT '', verification TEXT NOT NULL DEFAULT '', evidence TEXT NOT NULL DEFAULT '', updated_at DATETIME, valid_from DATETIME, valid_until DATETIME,\n    PRIMARY KEY (from_entity_id, to_entity_id, relation_type)\n)"
+      },
+      {
+        "name": "import_state",
+        "sql": "CREATE TABLE import_state (\n    tool TEXT NOT NULL,\n    session_id TEXT NOT NULL,\n    imported_at DATETIME NOT NULL,\n    memory_count INTEGER NOT NULL DEFAULT 0,\n    PRIMARY KEY (tool, session_id)\n)"
+      },
+      {
+        "name": "jwt_revocations",
+        "sql": "CREATE TABLE jwt_revocations (\n    jti TEXT PRIMARY KEY,\n    revoked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP\n)"
+      },
+      {
+        "name": "memories",
+        "sql": "CREATE TABLE memories (\n    id TEXT PRIMARY KEY,\n    content TEXT NOT NULL,\n    scope TEXT NOT NULL,\n    metadata TEXT NOT NULL,\n    embedding TEXT NOT NULL,\n    created_at DATETIME NOT NULL,\n    updated_at DATETIME NOT NULL\n, embedding_dim INTEGER NOT NULL DEFAULT 0, lsh_hash INTEGER NOT NULL DEFAULT 0, created_by TEXT NOT NULL DEFAULT '', updated_by TEXT NOT NULL DEFAULT '', created_session TEXT NOT NULL DEFAULT '', updated_session TEXT NOT NULL DEFAULT '', consolidation_status TEXT NOT NULL DEFAULT 'raw', consolidated_into_id TEXT REFERENCES memories(id) ON DELETE SET NULL, importance REAL NOT NULL DEFAULT 0.5, valid_from DATETIME, valid_to DATETIME, superseded_by TEXT, embedding_source TEXT NOT NULL DEFAULT '', embedding_model TEXT NOT NULL DEFAULT '', content_hash TEXT DEFAULT '', tier TEXT NOT NULL DEFAULT 'long_term', expires_at DATETIME, embedding_binary BLOB, access_count INTEGER NOT NULL DEFAULT 1, last_access DATETIME, embedding_quantization TEXT NOT NULL DEFAULT '', review_status TEXT NOT NULL DEFAULT 'approved', kind TEXT NOT NULL DEFAULT '', decay_factor REAL NOT NULL DEFAULT 1.0, retired_at DATETIME, prev_access DATETIME)"
+      },
+      {
+        "name": "memories_fts",
+        "sql": "CREATE VIRTUAL TABLE memories_fts USING fts5(\n    id UNINDEXED,\n    content,\n    scope,\n    content=memories,\n    content_rowid=rowid,\n    tokenize='porter unicode61'\n)"
+      },
+      {
+        "name": "memories_fts_config",
+        "sql": "CREATE TABLE 'memories_fts_config'(k PRIMARY KEY, v) WITHOUT ROWID"
+      },
+      {
+        "name": "memories_fts_data",
+        "sql": "CREATE TABLE 'memories_fts_data'(id INTEGER PRIMARY KEY, block BLOB)"
+      },
+      {
+        "name": "memories_fts_docsize",
+        "sql": "CREATE TABLE 'memories_fts_docsize'(id INTEGER PRIMARY KEY, sz BLOB)"
+      },
+      {
+        "name": "memories_fts_idx",
+        "sql": "CREATE TABLE 'memories_fts_idx'(segid, term, pgno, PRIMARY KEY(segid, term)) WITHOUT ROWID"
+      },
+      {
+        "name": "memory_associations",
+        "sql": "CREATE TABLE memory_associations (\n    from_id    TEXT NOT NULL,\n    to_id      TEXT NOT NULL,\n    weight     REAL NOT NULL DEFAULT 1.0,\n    created_by TEXT NOT NULL DEFAULT '',\n    created_at DATETIME NOT NULL,\n    PRIMARY KEY (from_id, to_id)\n) WITHOUT ROWID"
+      },
+      {
+        "name": "memory_entities",
+        "sql": "CREATE TABLE memory_entities (\n    memory_id TEXT NOT NULL,\n    entity_id TEXT NOT NULL,\n    PRIMARY KEY (memory_id, entity_id)\n)"
+      },
+      {
+        "name": "memory_evidence",
+        "sql": "CREATE TABLE memory_evidence (\n    id TEXT PRIMARY KEY,\n    memory_id TEXT NOT NULL REFERENCES memories(id) ON DELETE CASCADE,\n    source_id TEXT NOT NULL DEFAULT '',\n    source_kind TEXT NOT NULL DEFAULT '',\n    text TEXT NOT NULL DEFAULT '',\n    evidence_text TEXT NOT NULL,\n    char_start INTEGER NOT NULL,\n    char_end INTEGER NOT NULL,\n    alignment_status TEXT NOT NULL,\n    created_at DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "profiles",
+        "sql": "CREATE TABLE profiles (\n    id          TEXT PRIMARY KEY,\n    name        TEXT NOT NULL UNIQUE COLLATE NOCASE,\n    type        TEXT NOT NULL DEFAULT 'agent',\n    role        TEXT NOT NULL DEFAULT 'readwrite',\n    description TEXT NOT NULL DEFAULT '',\n    metadata    TEXT NOT NULL DEFAULT '{}',\n    created_at  DATETIME NOT NULL,\n    updated_at  DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "query_log",
+        "sql": "CREATE TABLE query_log (\n    id          TEXT PRIMARY KEY,\n    tool        TEXT NOT NULL,       -- which MCP tool was called\n    query_text  TEXT,                -- the query/content passed to the tool\n    params      TEXT,                -- optional truncated JSON of tool params\n    duration_ms INTEGER NOT NULL DEFAULT 0,  -- execution time in milliseconds\n    created_at  DATETIME NOT NULL DEFAULT (datetime('now'))\n, actor TEXT, scope TEXT, session TEXT)"
+      },
+      {
+        "name": "query_log_results",
+        "sql": "CREATE TABLE query_log_results (\n    query_id  TEXT NOT NULL,\n    memory_id TEXT NOT NULL,\n    rank      INTEGER NOT NULL,\n    score     REAL NOT NULL,\n    PRIMARY KEY (query_id, memory_id),\n    FOREIGN KEY (query_id) REFERENCES query_log(id) ON DELETE CASCADE,\n    FOREIGN KEY (memory_id) REFERENCES memories(id) ON DELETE CASCADE\n)"
+      },
+      {
+        "name": "rules",
+        "sql": "CREATE TABLE rules (\n    id TEXT PRIMARY KEY,\n    content TEXT NOT NULL,\n    scope TEXT NOT NULL,\n    metadata TEXT NOT NULL,\n    created_at DATETIME NOT NULL\n, updated_at DATETIME, created_by TEXT NOT NULL DEFAULT '', updated_by TEXT NOT NULL DEFAULT '')"
+      },
+      {
+        "name": "schema_migrations",
+        "sql": "CREATE TABLE schema_migrations (\n\t\tversion TEXT PRIMARY KEY,\n\t\tapplied_at DATETIME DEFAULT CURRENT_TIMESTAMP\n\t)"
+      },
+      {
+        "name": "sessions",
+        "sql": "CREATE TABLE sessions (\n    id TEXT PRIMARY KEY,\n    summary TEXT NOT NULL,\n    updated_at DATETIME NOT NULL\n)"
+      },
+      {
+        "name": "sync_oplog",
+        "sql": "CREATE TABLE sync_oplog (\n    event_id INTEGER PRIMARY KEY AUTOINCREMENT,\n    op TEXT NOT NULL CHECK (op IN ('upsert', 'delete')),\n    memory_id TEXT NOT NULL,\n    ts DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))\n)"
+      },
+      {
+        "name": "sync_relay",
+        "sql": "CREATE TABLE sync_relay (\n    id TEXT PRIMARY KEY,\n    updated_at DATETIME NOT NULL,\n    blob BLOB NOT NULL\n)"
+      },
+      {
+        "name": "sync_state",
+        "sql": "CREATE TABLE sync_state (\n    remote TEXT PRIMARY KEY,\n    last_sync DATETIME NOT NULL\n)"
+      }
+    ],
+    "memories_columns": [
+      {
+        "name": "id",
+        "type": "TEXT",
+        "not_null": false,
+        "default_value": null,
+        "pk": 1
+      },
+      {
+        "name": "content",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "scope",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "metadata",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "embedding",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "created_at",
+        "type": "DATETIME",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "updated_at",
+        "type": "DATETIME",
+        "not_null": true,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "embedding_dim",
+        "type": "INTEGER",
+        "not_null": true,
+        "default_value": "0",
+        "pk": 0
+      },
+      {
+        "name": "lsh_hash",
+        "type": "INTEGER",
+        "not_null": true,
+        "default_value": "0",
+        "pk": 0
+      },
+      {
+        "name": "created_by",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "updated_by",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "created_session",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "updated_session",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "consolidation_status",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "'raw'",
+        "pk": 0
+      },
+      {
+        "name": "consolidated_into_id",
+        "type": "TEXT",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "importance",
+        "type": "REAL",
+        "not_null": true,
+        "default_value": "0.5",
+        "pk": 0
+      },
+      {
+        "name": "valid_from",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "valid_to",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "superseded_by",
+        "type": "TEXT",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "embedding_source",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "embedding_model",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "content_hash",
+        "type": "TEXT",
+        "not_null": false,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "tier",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "'long_term'",
+        "pk": 0
+      },
+      {
+        "name": "expires_at",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "embedding_binary",
+        "type": "BLOB",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "access_count",
+        "type": "INTEGER",
+        "not_null": true,
+        "default_value": "1",
+        "pk": 0
+      },
+      {
+        "name": "last_access",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "embedding_quantization",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "review_status",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "'approved'",
+        "pk": 0
+      },
+      {
+        "name": "kind",
+        "type": "TEXT",
+        "not_null": true,
+        "default_value": "''",
+        "pk": 0
+      },
+      {
+        "name": "decay_factor",
+        "type": "REAL",
+        "not_null": true,
+        "default_value": "1.0",
+        "pk": 0
+      },
+      {
+        "name": "retired_at",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      },
+      {
+        "name": "prev_access",
+        "type": "DATETIME",
+        "not_null": false,
+        "default_value": null,
+        "pk": 0
+      }
+    ],
+    "indexes": [
+      {
+        "name": "idx_memories_kind",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_kind ON memories(kind)"
+      },
+      {
+        "name": "idx_memories_review_status",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_review_status ON memories(review_status)"
+      },
+      {
+        "name": "idx_memories_expires_at",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_expires_at ON memories(expires_at)"
+      },
+      {
+        "name": "idx_memories_tier",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_tier ON memories(tier)"
+      },
+      {
+        "name": "idx_memories_content_hash",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_content_hash ON memories(content_hash)"
+      },
+      {
+        "name": "idx_memories_embedding_source",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_embedding_source ON memories(embedding_source)"
+      },
+      {
+        "name": "idx_memories_superseded_by",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_superseded_by ON memories(superseded_by)"
+      },
+      {
+        "name": "idx_memories_valid_to",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_valid_to ON memories(valid_to)"
+      },
+      {
+        "name": "idx_memories_valid_from",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_valid_from ON memories(valid_from)"
+      },
+      {
+        "name": "idx_memories_importance",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_importance ON memories(importance)"
+      },
+      {
+        "name": "idx_memories_consolidated_into",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_consolidated_into ON memories(consolidated_into_id)"
+      },
+      {
+        "name": "idx_memories_consolidation",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_consolidation ON memories(consolidation_status)"
+      },
+      {
+        "name": "idx_memories_created_by",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_created_by ON memories(created_by)"
+      },
+      {
+        "name": "idx_memories_lsh",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_lsh ON memories(lsh_hash)"
+      },
+      {
+        "name": "idx_memories_updated_at",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_updated_at ON memories(updated_at)"
+      },
+      {
+        "name": "idx_memories_scope_lsh",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_scope_lsh ON memories(scope, lsh_hash)"
+      },
+      {
+        "name": "idx_memories_scope",
+        "unique": false,
+        "sql": "CREATE INDEX idx_memories_scope ON memories(scope)"
+      },
+      {
+        "name": "sqlite_autoindex_memories_1",
+        "unique": false,
+        "sql": ""
+      }
+    ],
+    "triggers": [
+      {
+        "name": "memories_ad",
+        "sql": "CREATE TRIGGER memories_ad AFTER DELETE ON memories BEGIN\n    INSERT INTO memories_fts(memories_fts, rowid, id, content, scope) VALUES('delete', old.rowid, old.id, old.content, old.scope);\nEND"
+      },
+      {
+        "name": "memories_ai",
+        "sql": "CREATE TRIGGER memories_ai AFTER INSERT ON memories BEGIN\n    INSERT INTO memories_fts(rowid, id, content, scope) VALUES (new.rowid, new.id, new.content, new.scope);\nEND"
+      },
+      {
+        "name": "memories_au",
+        "sql": "CREATE TRIGGER memories_au AFTER UPDATE ON memories BEGIN\n    INSERT INTO memories_fts(memories_fts, rowid, id, content, scope) VALUES('delete', old.rowid, old.id, old.content, old.scope);\n    INSERT INTO memories_fts(rowid, id, content, scope) VALUES (new.rowid, new.id, new.content, new.scope);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_delete",
+        "sql": "CREATE TRIGGER trg_memories_oplog_delete\nAFTER DELETE ON memories\nWHEN COALESCE(json_extract(OLD.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('delete', OLD.id);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_insert",
+        "sql": "CREATE TRIGGER trg_memories_oplog_insert\nAFTER INSERT ON memories\nWHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);\nEND"
+      },
+      {
+        "name": "trg_memories_oplog_update",
+        "sql": "CREATE TRIGGER trg_memories_oplog_update\nAFTER UPDATE ON memories\nWHEN COALESCE(json_extract(NEW.metadata, '$.sync_exclude'), '') != 'true'\nBEGIN\n    INSERT INTO sync_oplog (op, memory_id) VALUES ('upsert', NEW.id);\nEND"
+      }
+    ],
+    "views": []
+  },
+  "negative_cases": [
+    {
+      "name": "null_created_at_rejected",
+      "sql": "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('null-ts-1', 'content', 'global', '{}', '', NULL, '2024-01-01 00:00:00')",
+      "rejected": true,
+      "error": "constraint failed: NOT NULL constraint failed: memories.created_at (1299)"
+    },
+    {
+      "name": "null_updated_at_rejected",
+      "sql": "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES ('null-ts-2', 'content', 'global', '{}', '', '2024-01-01 00:00:00', NULL)",
+      "rejected": true,
+      "error": "constraint failed: NOT NULL constraint failed: memories.updated_at (1299)"
+    },
+    {
+      "name": "missing_table_rejected",
+      "sql": "SELECT * FROM nonexistent_table",
+      "rejected": true,
+      "error": "SQL logic error: no such table: nonexistent_table (1)"
+    },
+    {
+      "name": "legacy_schema_migrated",
+      "sql": "SELECT embedding_dim FROM memories WHERE id = 'legacy-1'",
+      "rejected": false
+    }
+  ],
+  "ordering_cases": [
+    {
+      "seed_sql": "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES\n\t\t('tie-a', 'content-a', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),\n\t\t('tie-b', 'content-b', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00'),\n\t\t('tie-c', 'content-c', 'global', '{}', '', '2024-06-01 12:00:00', '2024-06-01 12:00:00')",
+      "query_sql": "SELECT id FROM memories WHERE id LIKE 'tie-%' ORDER BY created_at DESC, id DESC",
+      "name": "ordering_ties_by_id_desc",
+      "expected_ids": [
+        "tie-c",
+        "tie-b",
+        "tie-a"
+      ]
+    },
+    {
+      "seed_sql": "INSERT INTO memories (id, content, scope, metadata, embedding, created_at, updated_at) VALUES\n\t\t('order-old', 'content-old', 'global', '{}', '', '2024-01-01 00:00:00', '2024-01-01 00:00:00'),\n\t\t('order-new', 'content-new', 'global', '{}', '', '2024-12-31 23:59:59', '2024-12-31 23:59:59')",
+      "query_sql": "SELECT id FROM memories WHERE id LIKE 'order-%' ORDER BY created_at DESC, id DESC",
+      "name": "ordering_distinct_by_created_at_desc",
+      "expected_ids": [
+        "order-new",
+        "order-old"
+      ]
+    }
+  ],
+  "lock": {
+    "name": "single_connection_wal_foreign_keys_secure_delete",
+    "busy_timeout_ms": 5000,
+    "journal_mode": "wal",
+    "foreign_keys": 1,
+    "secure_delete": 1
+  }
+}

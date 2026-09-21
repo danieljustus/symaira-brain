@@ -21,17 +21,23 @@ use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
 
-const SKILLS_USAGE: &str = "symbrain skills — operate the embedded skill library
+/// The shipped `symbrain skills` help, verbatim from the shipped source.
+const SKILLS_USAGE: &str = r"symbrain skills — embedded skill library operations
 
 Usage:
-  symbrain skills list
-  symbrain skills status [--target NAME] [--scope user|project]
-  symbrain skills targets [--scope user|project]
-  symbrain skills log [--skill NAME] [--target NAME] [--limit N]
-  symbrain skills sync [--target NAME] [--scope user|project] [--dry-run]
-  symbrain skills doctor
+  symbrain skills <subcommand> [flags]
 
-The global --output table|json flag (or --json) selects the output format.
+Subcommands:
+  list        List the skills in the library with their install state
+  status      Classify installed skills against the library (drift report)
+  targets     Show the harness targets skills can be installed into
+  log         Read the local skill operation log
+  sync        Repair drifted installs (use --dry-run to see the plan first)
+  doctor      Report the configured skill paths and target roots
+
+Use --output table|json (or --json) for the result format. status, sync and
+targets accept --scope user|project; status, sync and log accept --target.
+Run 'symbrain skills <subcommand> --help' for details.
 ";
 
 #[derive(Debug, Serialize)]
