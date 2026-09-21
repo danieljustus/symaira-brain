@@ -1,5 +1,90 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-21 (final): PR #636 merged the whole slice, CI green on every platform
+
+**Committed, pushed, PR opened and CI-green — the "uncommitted" note in every
+checkpoint below is now historical.** Branch
+`migration/rust-sync-guard-doctor-20260921`, four commits, opened as
+[PR #636](https://github.com/danieljustus/symaira-brain/pull/636) against
+`main`, not yet merged (that's Daniel's call). Every job passed on the
+**first fully green run** after two rounds of fixes — this is exactly the
+"first real run on a runner" #631 warns about, and it found real, previously
+invisible gaps:
+
+- **Round 1** (commit `c022b3be`): CI's very first run found three things
+  local macOS testing never could. (1) `sync -h`/`--help` was rejected as an
+  ordinary unknown flag instead of Go's special-cased bare-usage response —
+  caught by `scripts/rust-differential.py`'s `sync_help` case, which
+  `make rust-check` alone never runs (only `make parity-smoke` does; that gap
+  in my own local verification is exactly why it went unnoticed). (2)
+  `guard-doctor-oracle`'s `normalize()` tokenized the Go-toolchain line but
+  never the `OS/Arch:` line, so the committed fixture baked in the recording
+  machine's literal `darwin/arm64` — invisible until run on a non-macOS
+  runner. (3) `cli_tree_expectations.json` bakes in the macOS-specific
+  Claude Desktop path (`Library/Application Support/Claude`); two independent
+  Go packages resolve a different, platform-correct XDG fallback on Linux for
+  the same harness (`internal/harness`: `.config/Claude`; corekit's
+  `mcpcfgkit`, used by `guard scan`: `.config/claude`, lowercase) — both
+  correct for their package, neither matching the fixture. All three fixed
+  and verified on both macOS and a real Linux environment (Docker,
+  `golang:1.26`) before pushing, not guessed.
+- **Round 2** (commit `eab40fda`): fixing round 1 by hand-editing
+  `cli_tree_expectations.json` directly (bypassing the oracle's own
+  normalization) missed that `scripts/cli-oracle/main.go`'s own
+  `normalizeStdout` needed the *same* claude-desktop-dir fix independently —
+  its self-check (fresh Go vs. frozen fixture, entirely independent of any
+  Rust code) still failed on Linux. Fixing that and regenerating properly
+  surfaced a second, unrelated latent gap: `cli-oracle`'s toolchain/platform
+  regexes only match `version`'s row shape, never `guard doctor`'s
+  differently-shaped capitalized header — the same gap already fixed in
+  `guard-doctor-oracle`'s own `normalize()` and in `cli_tree_tests.rs`, but
+  never in `cli-oracle`'s. A first regeneration attempt (accidentally built
+  with local `go1.27.1` instead of the pinned `go1.26.7`) produced an
+  unrelated-looking diff on that exact line — proof it was silently unpinned
+  to whatever toolchain built the reference binary, not a genuine accepted
+  difference. Fixed the same way as the other two: normalized, not papered
+  over with a lucky toolchain match.
+- **Verification method, both rounds:** every fix was reproduced and
+  confirmed against a real `golang:1.26` Docker container before pushing —
+  not inferred from reading code, not assumed from the macOS-only local
+  result. One apparent fourth failure (`external_decision_review`'s
+  git-history provenance check, inside a from-scratch `cargo test --workspace`
+  Linux run) was investigated and ruled out as an artifact of the Docker
+  reproduction itself (a `relativeworktrees` git repository extension the
+  container's older git can't parse) — confirmed by running `git show`
+  directly against the pinned commit on the host (succeeds) and by attempting
+  a plain `git clone` inside the same container (fails identically, proving
+  it's the container's git version, not the code or the platform).
+
+**Final CI result, this run:** every job green — both `rust-migration`
+variants (ubuntu, macOS), `Rust guard and pinned Go oracle` (the job running
+`cargo test --workspace`, which is what actually exercises the now-unignored
+`cli_tree_fixture_matches_native_binary`), all four `go-test-shard`s, and the
+Windows jobs (`rust-init-native (windows-2025)`, `rust-windows-audit-guard`,
+`browse-windows-daemon`). This is the first time `cli-oracle-check`,
+`guard-doctor-oracle-check`, and the un-ignored CLI parity test have ever
+been proven on any runner other than the machine that authored them.
+
+**Issue disposition, backed by this run's evidence, left for Daniel to close
+on merge (not closed automatically by this checkpoint):**
+- **#630** (isolation-root symlink shape) — fixed in both the Go oracle and
+  the Rust consumer test; `make cli-oracle-check` 81/81 on macOS and Linux.
+- **#629** (missing case timeout) — confirmed not applicable to the sibling
+  oracles; already closed by the existing cli-oracle fix on `main`.
+- **#627** (PATH leak) — already fixed on `main`; nothing left in this PR.
+- **#631** (wire a new gate only once proven on a runner) — this PR *is* that
+  proof: cli-oracle, xdg-oracle, db-memory-oracle, and guard-doctor-oracle
+  all ran green on ubuntu-latest and macos-15 CI runners for the first time,
+  in the same change that wired them into `rust-check`, exactly the practice
+  #631 asks for.
+
+**Nothing further is scoped or pending from this slice.** The full 7-scenario
+`guard doctor` port (config parsing, spawn allowlist, discovery, secret
+redaction beyond the empty-machine case) remains open Phase 8.5/8.6 work with
+its own oracle-defect fix (`discovered_server_secret_risk`, noted in
+`guard/scripts/guard-doctor-oracle/README.md`) — not started, not blocking
+anything in this PR, and deliberately left for its own dedicated slice.
+
 ## Resume checkpoint — 2026-09-21 (later still): `guard doctor` empty-machine ported, 81/81 un-ignored — uncommitted
 
 **Not committed**, same standing rule. `git status` now additionally shows
