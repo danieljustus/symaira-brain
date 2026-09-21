@@ -35,16 +35,25 @@ func writeFile(path, content string) {
 }
 
 func normalize(root, output string) string {
-	// The command prints absolute fixture paths and the building toolchain.
-	// Both differ per invocation (TMPDIR) and per Go toolchain, so a frozen
-	// fixture can only be guarded once they are placeholders. The toolchain
-	// line is an explicit accepted difference: a Rust binary reports its own
-	// toolchain and can never print `go1.26.7`.
+	// The command prints absolute fixture paths, the building toolchain, and
+	// the runtime OS/Arch. All three differ per invocation (TMPDIR), per Go
+	// toolchain, and per runner platform, so a frozen fixture can only be
+	// guarded once they are placeholders. Recorded once on a macOS machine,
+	// this fixture baked "OS/Arch: darwin/arm64" in as literal text until a
+	// Linux CI runner (the first time this check ran on any runner at all —
+	// see #631) surfaced the gap: "OS/Arch:" was never normalized, only
+	// "Go:" was. Both toolchain and platform lines are explicit accepted
+	// differences: a Rust binary reports its own toolchain and its own real
+	// OS/Arch, never a value borrowed from this Go fixture.
 	output = strings.ReplaceAll(output, root, "<root>")
-	return goVersionLine.ReplaceAllString(output, "${1}<go>")
+	output = goVersionLine.ReplaceAllString(output, "${1}<go>")
+	return osArchLine.ReplaceAllString(output, "${1}<os/arch>")
 }
 
-var goVersionLine = regexp.MustCompile(`(Go:\s+)\S+`)
+var (
+	goVersionLine = regexp.MustCompile(`(Go:\s+)\S+`)
+	osArchLine    = regexp.MustCompile(`(OS/Arch:\s+)\S+`)
+)
 
 func runCase(root, id string, setup func(string) error) (string, int, error) {
 	caseRoot := filepath.Join(root, id)

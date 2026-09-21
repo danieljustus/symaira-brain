@@ -183,6 +183,26 @@ fn normalize_accepted_differences(s: &str) -> String {
         .replace_all(&out, "  <os-arch>:")
         .to_string();
 
+    // Claude Desktop's config directory: this fixture was recorded once on
+    // macOS ("Library/Application Support/Claude"), but two independent Go
+    // packages resolve a *different*, platform-correct XDG fallback on
+    // Linux for the same harness — internal/harness (used by `harness
+    // list`) resolves ".config/Claude" (capitalized, verified against Go
+    // via the separately-passing xdg-oracle, 256 cases, 0 drift), while
+    // symaira-corekit's mcpcfgkit (used by `guard scan`'s discovery)
+    // resolves ".config/claude" (lowercase, verified against its own pinned
+    // source). Both are correct for their respective package, and neither
+    // matches the macOS-recorded fixture, so both forms reduce to one
+    // token. Verified by grep against cli_tree_expectations.json that the
+    // macOS form appears in exactly the two cases this was written for
+    // (`go harness list`, `go guard scan`), so this cannot swallow a real
+    // difference elsewhere.
+    let claude_desktop_dir =
+        regex::Regex::new(r"Library/Application Support/Claude|\.config/[Cc]laude").unwrap();
+    out = claude_desktop_dir
+        .replace_all(&out, "<claude-desktop-dir>")
+        .to_string();
+
     out
 }
 

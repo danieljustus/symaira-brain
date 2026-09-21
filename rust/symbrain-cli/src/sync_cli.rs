@@ -127,6 +127,13 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
         {
             project_dir = PathBuf::from(val);
             i += 1;
+        } else if arg == "-h" || arg == "--h" || arg == "-help" || arg == "--help" {
+            // Go's flag package special-cases an unregistered "-h"/"-help":
+            // it prints the flag set's usage and returns flag.ErrHelp, never
+            // "flag provided but not defined" (that message is reserved for
+            // every other unrecognized flag).
+            let _ = write!(stderr, "{SYNC_FLAGS_USAGE}");
+            return Err(exit::USAGE);
         } else if arg.starts_with('-') {
             let trimmed = arg.trim_start_matches('-');
             let name = trimmed.split_once('=').map_or(trimmed, |(name, _)| name);
@@ -383,5 +390,28 @@ mod tests {
             String::from_utf8(stderr).unwrap(),
             "flag provided but not defined: -unknown\nUsage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n"
         );
+    }
+
+    /// Matches the `sync_help` differential case in `scripts/rust-differential.py`
+    /// byte-for-byte: `-h`/`--help` are Go flag-package special cases (bare
+    /// usage, no "flag provided but not defined" line), not ordinary unknown
+    /// flags. Caught by CI's `make parity-smoke`, not by the 81-case CLI tree
+    /// fixture (which has no help-flag case for `sync`) — that gap is why this
+    /// regressed unnoticed locally.
+    #[test]
+    fn help_flag_prints_bare_usage_not_unknown_flag_rejection() {
+        for flag in ["-h", "--h", "-help", "--help"] {
+            let mut stderr = Vec::new();
+            let result = parse_args(&[OsString::from(flag)], &mut stderr);
+            assert!(
+                matches!(result, Err(code) if code == exit::USAGE),
+                "flag {flag}"
+            );
+            assert_eq!(
+                String::from_utf8(stderr).unwrap(),
+                SYNC_FLAGS_USAGE,
+                "flag {flag}"
+            );
+        }
     }
 }
