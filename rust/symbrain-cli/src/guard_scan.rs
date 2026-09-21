@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use serde::Serialize;
 use symbrain_core::exit;
 
-mod guard_scan_config;
+pub(crate) mod guard_scan_config;
 use guard_scan_config::parse_config;
 
 const USAGE: &str = "Usage:\n  symguard scan [--format table|json]\n\nDiscovers MCP servers across supported AI clients (hermes, claude-desktop,\ncursor, vscode, opencode). The inventory is written to stdout; findings —\nclients or entries that could not be mapped — are written to stderr.\n";
@@ -70,8 +70,8 @@ struct Finding {
 /// instead of maintaining a second copy of it.
 #[derive(Clone, Copy)]
 pub(crate) struct Source {
-    client: &'static str,
-    key: &'static str,
+    pub(crate) client: &'static str,
+    pub(crate) key: &'static str,
 }
 
 pub(crate) const SOURCES: [Source; 5] = [

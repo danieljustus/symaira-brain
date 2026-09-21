@@ -32,22 +32,57 @@ replaced with placeholders before the fixture is written:
   Go binary that built the command, so a byte fixture would drift with every
   Go patch release (`go1.27.1` locally versus `go1.26.7` under
   `run-go-oracle.sh`, which pins the toolchain from `go.mod`).
+- **The platform line** → `OS/Arch:   <os/arch>`. It is `runtime.GOOS`/
+  `GOARCH` of the machine running the command; the fixture was recorded on
+  macOS/arm64 and a Linux CI runner legitimately reports something else.
 
-`Go:` is therefore an **accepted difference**, not a verified match: a Rust
-binary reports its own toolchain and can never print a Go version. Every other
-line is compared byte-for-byte.
+`Go:` and `OS/Arch:` are therefore **accepted differences**, not verified
+matches: a Rust binary reports its own toolchain — it prints the row as
+`Rust:` with the real `rustc` version, never a fabricated Go one — and its own
+real platform. Every other line is compared byte-for-byte.
 
-## Status: fixture only — the Rust verb is not ported
+## Status: the Rust verb is ported, five of seven cases natively
 
-`symbrain guard doctor` still returns `None` in
-`rust/symbrain-cli/src/guard_cli.rs` and therefore runs on the Go fallback. The
-fixture exists so the next slice can compare against frozen bytes instead of
-re-deriving seven scenarios.
+`rust/symbrain-cli/src/guard_doctor.rs` implements `doctor` natively —
+`guard/internal/config`'s path resolution, TOML schema and `validate`,
+`guard/internal/spawn`'s allowlist matching, `guard/internal/discovery`'s
+client sources, parsing and plaintext-secret heuristic, and
+`guard/internal/audit`'s anchor probe. Five of the seven cases here
+(`empty_machine`, `healthy_config`, `audit_log_without_anchor`,
+`discovered_server_denied`, `discovered_server_secret_risk`) are produced by
+the Rust binary and compared against this fixture byte-for-byte by
+`rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs`, which runs with no
+`SYMBRAIN_GO_BINARY` and an empty `PATH`.
 
-Known gap in the corpus: `discovered_server_secret_risk` currently produces the
-same `[DENIED]` line as `discovered_server_denied`; the plaintext-secret
-warning appears to require a server that is on the spawn allowlist. The case
-should either be given an allowlisted server or renamed, once the port needs it.
+The remaining two fall back to Go **before any byte is written**, because both
+print another library's error text verbatim and no Rust re-implementation can
+reproduce it honestly:
+
+- `config_error` — `BurntSushi/toml`'s parser message
+  (`toml: line 1: expected '.' or '=', but got '[' instead`);
+- `audit_log_corrupt_anchor` — `encoding/json`'s message
+  (`invalid character 'o' in literal null (expecting 'u')`).
+
+The same gate covers every unreproducible state beyond these two fixtures: a
+config that fails `validate`, an unreadable file, a discovery source that
+exists but does not parse, and a single server carrying more than one
+plaintext secret key (Go emits those in `EnvKeys` order, which comes from a Go
+map range and is not stable between two Go runs — see the defect note below).
+
+An earlier revision of this file claimed `discovered_server_secret_risk`
+"currently produces the same `[DENIED]` line as `discovered_server_denied`"
+and that the plaintext-secret warning "appears to require a server that is on
+the spawn allowlist". That was wrong: `printSecretRisks` in `checks.go` does
+not look at `Allowed` at all, and the frozen fixture's secret case does emit
+the `Plaintext secret risk:` block and the symvault advisory line alongside the
+`[DENIED]` line. The corpus has no such gap and the case needs no change.
+
+Known Go-side defect, not fixed here (the fixture is frozen and only exercises
+one secret key per server, so it is not observable in this corpus):
+`mcpcfgkit`'s scan fills `Server.EnvKeys`/`EnvValues` with `for k, v := range
+env`, so a server with two or more plaintext secret keys produces a
+nondeterministic key order in doctor's `Plaintext secret risk:` line — two Go
+runs on identical input can disagree.
 
 A previous attempt hardcoded the Go lines into a Rust `doctor` module; that is
 not a port and was discarded.
