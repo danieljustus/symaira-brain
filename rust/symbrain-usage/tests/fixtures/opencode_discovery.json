@@ -1,0 +1,2922 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "generator": "scripts/usage-request-oracle/opencode/main.go",
+    "command": "go run ./scripts/usage-request-oracle/opencode",
+    "check_command": "go run ./scripts/usage-request-oracle/opencode -check",
+    "oracle_source": "internal/usage/opencode.go",
+    "oracle_sources": [
+      "internal/usage/opencode.go",
+      "internal/usage/opencode_parse.go"
+    ],
+    "oracle_anchors": [
+      "openCodeWorkspacesServerID",
+      "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+      "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+      "OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie.",
+      "OpenCode request failed: ",
+      "OpenCode API error: ",
+      "missing workspace id",
+      "missing usage fields",
+      "openCodeLooksSignedOut",
+      "wrk_[A-Za-z0-9]+",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+      "text/javascript, application/json;q=0.9, */*;q=0.8"
+    ],
+    "testdata": [
+      "internal/usage/testdata/opencode-workspaces.txt",
+      "internal/usage/testdata/opencode-subscription-json.txt"
+    ],
+    "transport": "deterministic recording transport: injected http.RoundTripper with canned responses; no network, no live provider data"
+  },
+  "cases": [
+    {
+      "id": "workspace_then_subscription_ok",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"workspaces\":[{\"id\":\"wrk_abc123def\",\"name\":\"personal\"},{\"id\":\"wrk_xyz789ghi\",\"name\":\"work\"}]}\n"
+        },
+        {
+          "status": 200,
+          "body": "{\"rollingUsage\":{\"usagePercent\":12.34,\"resetInSec\":3600},\"weeklyUsage\":{\"usagePercent\":45.6,\"resetInSec\":86400}}\n"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_abc123def%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123def/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "ok",
+        "snapshot": {
+          "source": "web",
+          "meters": [
+            {
+              "label": "5h window",
+              "used": "12.34",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            },
+            {
+              "label": "This week",
+              "used": "45.6",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "workspace_post_fallback_ok",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"workspaces\":[]}"
+        },
+        {
+          "status": 200,
+          "body": "{\"workspaces\":[{\"id\":\"wrk_abc123def\",\"name\":\"personal\"},{\"id\":\"wrk_xyz789ghi\",\"name\":\"work\"}]}\n"
+        },
+        {
+          "status": 200,
+          "body": "{\"rollingUsage\":{\"usagePercent\":12.34,\"resetInSec\":3600},\"weeklyUsage\":{\"usagePercent\":45.6,\"resetInSec\":86400}}\n"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        },
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_abc123def%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123def/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "ok",
+        "snapshot": {
+          "source": "web",
+          "meters": [
+            {
+              "label": "5h window",
+              "used": "12.34",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            },
+            {
+              "label": "This week",
+              "used": "45.6",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "workspace_lookup_missing_id",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+      }
+    },
+    {
+      "id": "workspace_signed_out_get",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"error\":\"please sign in\"}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "workspace_signed_out_post",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"workspaces\":[]}"
+        },
+        {
+          "status": 200,
+          "body": "{\"error\":\"please sign in\"}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "workspace_http_401",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 401,
+          "body": "{\"error\":\"nope\"}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "workspace_http_500_signed_out_body",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 500,
+          "body": "Please sign in to continue"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "workspace_http_500",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie"
+      },
+      "script": [
+        {
+          "status": 500,
+          "body": "oops"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode API error: HTTP 500"
+      }
+    },
+    {
+      "id": "subscription_override_ok",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"rollingUsage\":{\"usagePercent\":12.34,\"resetInSec\":3600},\"weeklyUsage\":{\"usagePercent\":45.6,\"resetInSec\":86400}}\n"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "ok",
+        "snapshot": {
+          "source": "web",
+          "meters": [
+            {
+              "label": "5h window",
+              "used": "12.34",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            },
+            {
+              "label": "This week",
+              "used": "45.6",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "subscription_url_override_ok",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_urlform9/billing"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"rollingUsage\":{\"usagePercent\":12.34,\"resetInSec\":3600},\"weeklyUsage\":{\"usagePercent\":45.6,\"resetInSec\":86400}}\n"
+        }
+      ],
+      "workspace": "wrk_urlform9",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_urlform9%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_urlform9/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "ok",
+        "snapshot": {
+          "source": "web",
+          "meters": [
+            {
+              "label": "5h window",
+              "used": "12.34",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            },
+            {
+              "label": "This week",
+              "used": "45.6",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "subscription_post_fallback_ok",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "not json at all"
+        },
+        {
+          "status": 200,
+          "body": "{\"rollingUsage\":{\"usagePercent\":12.34,\"resetInSec\":3600},\"weeklyUsage\":{\"usagePercent\":45.6,\"resetInSec\":86400}}\n"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_override1\"]"
+        }
+      ],
+      "result": {
+        "kind": "ok",
+        "snapshot": {
+          "source": "web",
+          "meters": [
+            {
+              "label": "5h window",
+              "used": "12.34",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            },
+            {
+              "label": "This week",
+              "used": "45.6",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "subscription_unparseable_both",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "not json at all"
+        },
+        {
+          "status": 200,
+          "body": "still not json"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_override1\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "subscription_signed_out_get",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{\"error\":\"please sign in\"}"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "subscription_signed_out_post",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "not json at all"
+        },
+        {
+          "status": 200,
+          "body": "{\"error\":\"please sign in\"}"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_override1\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+      }
+    },
+    {
+      "id": "network_error_first_request",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_override1"
+      },
+      "script": [
+        {
+          "error": "boom"
+        }
+      ],
+      "workspace": "wrk_override1",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_override1/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "class": "network",
+        "text": "all AI usage fallbacks failed: OpenCode request failed: Get \"https://opencode.ai/_server?args=%5B%22wrk_override1%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4\": boom"
+      }
+    },
+    {
+      "id": "workspace_only_no_cookie",
+      "env": {
+        "OPENCODE_WORKSPACE_ID": "dump-workspace"
+      },
+      "script": null,
+      "workspace": null,
+      "executed": [],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: "
+      }
+    },
+    {
+      "id": "normalize_bare_id",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_abc123"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_abc123",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_abc123%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_abc123\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_url_full",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_abc123/billing"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_abc123",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_abc123%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_abc123/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_abc123\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_url_padded",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "  https://opencode.ai/workspace/wrk_xyz987  "
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_xyz987",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_xyz987%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_xyz987/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_xyz987/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_xyz987\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_embedded_text",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "text wrk_embedded42 more"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_embedded42",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_embedded42%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_embedded42/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_embedded42/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_embedded42\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_empty",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": ""
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+      }
+    },
+    {
+      "id": "normalize_url_no_id",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+      }
+    },
+    {
+      "id": "normalize_wrk_underscore_only",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+      }
+    },
+    {
+      "id": "normalize_token_prefix",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "prefix_wrk_trail9"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_trail9",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_trail9%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_trail9/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_trail9/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_trail9\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_url_query",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_query7/billing?plan=pro"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_query7",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_query7%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_query7/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_query7/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_query7\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_url_fragment",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_frag8/billing#top"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_frag8",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_frag8%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_frag8/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_frag8/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_frag8\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_bad_percent",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_bad%zz"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_bad",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_bad%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_bad/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_bad/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_bad\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_dump_workspace",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "dump-workspace"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing workspace id"
+      }
+    },
+    {
+      "id": "normalize_wrk_space",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a b"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_a b",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_a+b%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_a b\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_wrk_quote",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a\"b"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_a\"b",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_a%5C%22b%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\"b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\"b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_a\\\"b\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_wrk_html",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a\u003cb"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_a\u003cb",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_a%5Cu003cb%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\u003cb/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\u003cb/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_a\\u003cb\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_wrk_star",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a*b"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_a*b",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_a%2Ab%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a*b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a*b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_a*b\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    },
+    {
+      "id": "normalize_wrk_line_sep",
+      "env": {
+        "OPENCODE_COOKIE": "dump-opencode-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a\u2028b"
+      },
+      "script": [
+        {
+          "status": 200,
+          "body": "{}"
+        },
+        {
+          "status": 200,
+          "body": "{}"
+        }
+      ],
+      "workspace": "wrk_a\u2028b",
+      "executed": [
+        {
+          "method": "GET",
+          "url": "https://opencode.ai/_server?args=%5B%22wrk_a%5Cu2028b%22%5D\u0026id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\u2028b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ]
+        },
+        {
+          "method": "POST",
+          "url": "https://opencode.ai/_server",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "text/javascript, application/json;q=0.9, */*;q=0.8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "CREDENTIAL"
+            },
+            {
+              "name": "Origin",
+              "value": "https://opencode.ai"
+            },
+            {
+              "name": "Referer",
+              "value": "https://opencode.ai/workspace/wrk_a\u2028b/billing"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "X-Server-Id",
+              "value": "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4"
+            },
+            {
+              "name": "X-Server-Instance",
+              "value": "server-fn:\u003crandom\u003e"
+            }
+          ],
+          "body": "[\"wrk_a\\u2028b\"]"
+        }
+      ],
+      "result": {
+        "kind": "error",
+        "text": "all AI usage fallbacks failed: OpenCode returned an unreadable response: missing usage fields"
+      }
+    }
+  ]
+}
