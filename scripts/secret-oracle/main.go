@@ -20,8 +20,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/memory/secrets"
@@ -74,25 +76,137 @@ type suite struct {
 	Cases          []oracleCase `json:"cases"`
 }
 
-func shellQuote(value string) string {
-	return "'" + strings.ReplaceAll(value, "'", "'\"'\"'") + "'"
+// fakeSymvaultSource is the compiled stand-in for the fake `symvault`
+// executable: it appends its argv (one argument per line) to the path declared
+// in the JSON sidecar next to itself, then obeys the canned stdout/stderr/
+// exit/sleep. It is a native binary rather than a script so no shell
+// interpreter is involved anywhere in the oracle (internal/security rejects
+// shell literals in walked Go files) and resolution still works with PATH
+// pointing at the fake bin directory alone.
+const fakeSymvaultSource = `package main
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"time"
+)
+
+func main() {
+	// exec.Command sets argv[0] to the bare name passed by the caller, so
+	// resolve the real running binary path first and fall back to argv[0].
+	self, err := os.Executable()
+	if err != nil {
+		self = os.Args[0]
+		if !filepath.IsAbs(self) {
+			if abs, absErr := filepath.Abs(self); absErr == nil {
+				self = abs
+			}
+		}
+	}
+	data, err := os.ReadFile(filepath.Join(filepath.Dir(self), "symvault.spec"))
+	if err != nil {
+		os.Exit(127)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		os.Exit(127)
+	}
+	argsPath, _ := m["args_path"].(string)
+	stdout, _ := m["stdout"].(string)
+	stderr, _ := m["stderr"].(string)
+	exit, _ := m["exit"].(float64)
+	sleepMS, _ := m["sleep_ms"].(float64)
+	// One line per argument; with no operands POSIX printf '%s\n' still runs
+	// once, producing a lone newline.
+	buf := []byte{}
+	if len(os.Args) == 1 {
+		buf = append(buf, '\n')
+	}
+	for _, a := range os.Args[1:] {
+		buf = append(buf, a...)
+		buf = append(buf, '\n')
+	}
+	if f, err := os.OpenFile(argsPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644); err == nil {
+		_, _ = f.Write(buf)
+		_ = f.Close()
+	}
+	if sleepMS > 0 {
+		time.Sleep(time.Duration(sleepMS) * time.Millisecond)
+		os.Exit(0)
+	}
+	_, _ = os.Stdout.WriteString(stdout)
+	_, _ = os.Stderr.WriteString(stderr)
+	os.Exit(int(exit))
+}
+`
+
+var (
+	fakeBuildOnce sync.Once
+	fakeBuildDir  string
+	fakeBinPath   string
+	fakeBuildErr  error
+)
+
+// fakeSymvaultBin compiles fakeSymvaultSource once per oracle run.
+func fakeSymvaultBin() (string, error) {
+	fakeBuildOnce.Do(func() {
+		dir, err := os.MkdirTemp("", "secret-oracle-fake-")
+		if err != nil {
+			fakeBuildErr = err
+			return
+		}
+		fakeBuildDir = dir
+		src := filepath.Join(dir, "main.go")
+		if err := os.WriteFile(src, []byte(fakeSymvaultSource), 0o644); err != nil {
+			fakeBuildErr = err
+			return
+		}
+		out := filepath.Join(dir, "symvault")
+		cmd := exec.Command("go", "build", "-o", out, src)
+		if output, err := cmd.CombinedOutput(); err != nil {
+			fakeBuildErr = fmt.Errorf("build fake symvault: %w: %s", err, output)
+			return
+		}
+		fakeBinPath = out
+	})
+	return fakeBinPath, fakeBuildErr
 }
 
-// writeFakeSymvault writes a POSIX script that logs its argv (one argument per
-// line) to argsPath, then obeys the canned spec. Only shell builtins plus an
-// absolute /bin/sleep are used, so resolution works with PATH pointing at the
-// fake bin directory alone.
-func writeFakeSymvault(binDir, argsPath string, spec symvaultSpec) {
-	script := "#!/bin/sh\nprintf '%s\\n' \"$@\" >> " + shellQuote(argsPath) + "\n"
-	if spec.SleepMS > 0 {
-		script += fmt.Sprintf("exec /bin/sleep %g\n", float64(spec.SleepMS)/1000)
-	} else {
-		script += "printf '%s' " + shellQuote(spec.Stdout) + "\n"
-		script += "printf '%s' " + shellQuote(spec.Stderr) + " >&2\n"
-		script += fmt.Sprintf("exit %d\n", spec.Exit)
+// cleanupFakeBuild removes the once-built helper binary.
+func cleanupFakeBuild() {
+	if fakeBuildDir != "" {
+		_ = os.RemoveAll(fakeBuildDir)
 	}
-	path := filepath.Join(binDir, "symvault")
-	if err := os.WriteFile(path, []byte(script), 0o755); err != nil {
+}
+
+// writeFakeSymvault places the compiled fake at binDir/symvault and writes the
+// case spec as a JSON sidecar next to it (argv logging target, canned
+// stdout/stderr, exit code, sleep).
+func writeFakeSymvault(binDir, argsPath string, spec symvaultSpec) {
+	bin, err := fakeSymvaultBin()
+	if err != nil {
+		panic(err)
+	}
+	payload, err := os.ReadFile(bin)
+	if err != nil {
+		panic(err)
+	}
+	type sidecarSpec struct {
+		ArgsPath string `json:"args_path"`
+		Stdout   string `json:"stdout"`
+		Stderr   string `json:"stderr"`
+		Exit     int    `json:"exit"`
+		SleepMS  int    `json:"sleep_ms"`
+	}
+	data, err := json.Marshal(sidecarSpec{argsPath, spec.Stdout, spec.Stderr, spec.Exit, spec.SleepMS})
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, "symvault"), payload, 0o755); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, "symvault.spec"), data, 0o644); err != nil {
 		panic(err)
 	}
 }
@@ -306,7 +420,7 @@ func buildCases() []oracleCase {
 
 		// Timeout config surface: DefaultTimeout shrinks and the exact
 		// deadline bytes surface through the wrapped error. The deadline
-		// keeps wide margin over /bin/sh spawn latency so the fake's argv
+		// keeps wide margin over helper spawn latency so the fake's argv
 		// log always lands before the kill — a tighter deadline races it.
 		resolveCase("shrunk_timeout_error_bytes", inputSpec{
 			Value: "symvault://slow/path", Symvault: &symvaultSpec{Mode: "fake", SleepMS: 3000},
@@ -362,6 +476,7 @@ func main() {
 
 	restoreHome := setupIsolatedHome()
 	defer restoreHome()
+	defer cleanupFakeBuild()
 
 	suite := generate()
 	data, err := json.MarshalIndent(suite, "", "  ")
