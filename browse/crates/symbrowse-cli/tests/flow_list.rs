@@ -38,26 +38,42 @@ fn flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery() {
     fs::create_dir(&root).unwrap();
     let rust = Path::new(env!("CARGO_BIN_EXE_symbrowse"));
     let go = std::env::var_os("SYMBROWSE_GO_ORACLE");
+    if let Some(binary) = &go {
+        assert!(
+            fs::read(rust).unwrap() != fs::read(binary).unwrap(),
+            "Go oracle must not be identical to the Rust CLI"
+        );
+    }
     let fixture: Value = serde_json::from_str(include_str!(
         "../../../testdata/port/workflows/workflows.json"
     ))
     .unwrap();
-    let flow_path = Path::new(".symbrowse").join("flows").join("capture.yml");
     let contents = serde_json::to_vec(&fixture["flow"]).unwrap();
 
     // Observed from Go newFlowListCommand at a92385d2deecc08d1fd96869908b81b7abd355fe
     // (Brain #662). An empty Go discovery is [], not null. CI also compares the
     // same commands against a real Go binary, without rewriting either result.
-    for populated in [false, true] {
-        let root = root.join(if populated { "populated" } else { "empty" });
+    for origin in ["empty", "project", "global"] {
+        let root = root.join(origin);
         fs::create_dir(&root).unwrap();
         fs::create_dir(root.join("home")).unwrap();
         fs::create_dir(root.join("empty-path")).unwrap();
-        let entries = if populated {
-            fs::create_dir_all(root.join(flow_path.parent().unwrap())).unwrap();
-            fs::write(root.join(&flow_path), &contents).unwrap();
+        let flow_path = match origin {
+            "empty" => None,
+            "project" => Some(Path::new(".symbrowse").join("flows").join("capture.yml")),
+            _ => Some(
+                root.join("home")
+                    .join(".config")
+                    .join("symbrowse")
+                    .join("flows")
+                    .join("capture.yml"),
+            ),
+        };
+        let entries = if let Some(path) = &flow_path {
+            fs::create_dir_all(root.join(path.parent().unwrap())).unwrap();
+            fs::write(root.join(path), &contents).unwrap();
             json!([{
-                "name": "fixture-flow", "path": flow_path, "origin": "project",
+                "name": "fixture-flow", "path": path, "origin": origin,
                 "version": 1, "steps": 5
             }])
         } else {
@@ -65,19 +81,25 @@ fn flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery() {
         };
         let expected = json!({"success": true, "data": {"flows": entries}});
         let actual = list(rust, &root);
-        assert_eq!(actual, expected, "populated={populated}");
+        assert_eq!(actual, expected, "origin={origin}");
         if let Some(binary) = &go {
             assert_eq!(actual, list(Path::new(binary), &root), "Go/Rust parity");
+            println!("Go/Rust flow-list case={origin} passed");
         }
-        assert_eq!(fs::read_dir(root.join("home")).unwrap().count(), 0);
+        assert_eq!(
+            fs::read_dir(root.join("home")).unwrap().count(),
+            if origin == "global" { 1 } else { 0 }
+        );
         assert_eq!(
             fs::read_dir(&root).unwrap().count(),
-            if populated { 3 } else { 2 }
+            if origin == "project" { 3 } else { 2 }
         );
-        if populated {
-            assert_eq!(fs::read(root.join(&flow_path)).unwrap(), contents);
+        if let Some(path) = flow_path {
+            assert_eq!(fs::read(root.join(&path)).unwrap(), contents);
             assert_eq!(
-                fs::read_dir(root.join(".symbrowse/flows")).unwrap().count(),
+                fs::read_dir(root.join(path.parent().unwrap()))
+                    .unwrap()
+                    .count(),
                 1
             );
         }

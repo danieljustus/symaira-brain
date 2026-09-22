@@ -335,12 +335,15 @@ fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCod
 
 fn run_flow_list(format: Format) -> ExitCode {
     let mut groups = Vec::new();
-    let project = PathBuf::from(".symbrowse/flows");
+    let project = PathBuf::from(".symbrowse").join("flows");
     if let Ok(found) = flows::discover_directory(&project, "project") {
         groups.push(found);
     }
     if let Ok(home) = std::env::var("HOME") {
-        let global = PathBuf::from(home).join(".config/symbrowse/flows");
+        let global = PathBuf::from(home)
+            .join(".config")
+            .join("symbrowse")
+            .join("flows");
         if let Ok(found) = flows::discover_directory(&global, "global") {
             groups.push(found);
         }
