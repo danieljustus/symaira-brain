@@ -1,0 +1,45 @@
+name: Browse flow-list parity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-flow-list.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flow-list:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-26, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: browse
+    env:
+      CGO_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+          cache-dependency-path: browse/go.sum
+      - name: Build the real Go CLI oracle
+        run: go build -trimpath -mod=readonly -o "$RUNNER_TEMP/symbrowse-go.exe" ./cmd/symbrowse
+      - name: Resolve the pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Compare isolated empty and populated flow discovery
+        # Only file-backed flow-list commands, using disposable per-case roots.
+        # A missing/invalid Go executable fails rather than skipping parity.
+        env:
+          SYMBROWSE_GO_ORACLE: ${{ runner.temp }}/symbrowse-go.exe
+          TMPDIR: ${{ runner.temp }}
+        run: cargo test -p symbrowse-cli --test flow_list --locked -- --nocapture

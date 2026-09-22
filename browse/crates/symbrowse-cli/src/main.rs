@@ -345,7 +345,7 @@ fn run_flow_list(format: Format) -> ExitCode {
             groups.push(found);
         }
     }
-    let data = serde_json::to_value(flows::merge_discovered(groups)).unwrap_or_default();
+    let data = serde_json::json!({"flows": flows::merge_discovered(groups)});
     match Envelope::ok(data, Vec::new()).render(format) {
         Ok(output) => write_stdout(&output),
         Err(error) => {
