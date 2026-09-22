@@ -34,7 +34,7 @@ GW-001,gateway,initialize and capability negotiation,scripts/gateway-oracle,rust
 GW-002,gateway,tools/list catalog metadata and stable order,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,parsed-json,green-native-8-of-8-go-oracle-black-box-cases
 GW-003,gateway,namespaced child tools/call routing hidden-tool behavior and error classification,scripts/gateway-oracle,rust/symbrain-gateway/tests/fixtures/gateway_cases.json,all,raw-frames-and-semantic,green-native-8-of-8-go-oracle-black-box-cases
 GW-004,gateway,stdout contains only JSON-RPC frames,scripts/gateway-oracle,rust/symbrain-gateway/tests/gateway_tests.rs,all,raw-bytes,green-native-8-of-8-go-oracle-black-box-cases-plus-ci-stdio-hygiene
-DOC-001,doctor,isolated XDG doctor JSON and human output,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,fixture-ready
+DOC-001,doctor,isolated XDG doctor JSON and human output,target/go/symbrain-go,scripts/rust-differential.py,all,bytes,green-457-parity-cases-doctor-json-and-human
 CFG-001,filesystem,"XDG and legacy path precedence (256-case source-bound matrix: HOME/XDG set vs unset vs empty, relative home, legacy fallback, config/profiles/data/audit/patterns/cache/managed-bin relationships, and the 128 no-usable-home error cases)",scripts/xdg-oracle,rust/symbrain-core/tests/xdg_paths_tests.rs;rust/symbrain-core/tests/fixtures/oracle_expectations.json,all,filesystem-manifest,green
 CFG-002,filesystem,atomic writes permissions symlinks,target/go/symbrain-go,scripts/rust-differential.py,all,filesystem-manifest,green
 PRF-001,profile,TOML schema defaults and server validation,scripts/policy-oracle,rust/symbrain-policy/tests,all,semantic,green
