@@ -272,3 +272,117 @@ struct BinaryResolutionTests {
         #expect(!diagnostic.contains("available on your PATH"))
     }
 }
+
+// MARK: - Real-binary JSON contract (GUI-001)
+
+/// Resolves the opt-in real-binary contract target.
+///
+/// Two channels, in order:
+/// 1. `SYMBRAIN_TEST_BINARY` — for invocations whose environment reaches the
+///    test process directly (e.g. a raw `xctest` run).
+/// 2. `$HOME/.symbrain-test-binary` — the xcodebuild channel. `xcodebuild
+///    test` only forwards scheme-declared variables plus base environment to
+///    the test process, so the invocation writes the absolute binary path
+///    into the isolated HOME it sets up. The file can only be honored when
+///    that HOME passes `guiContractHomeIsIsolated()`, so a marker can never
+///    aim the round trip at a real user installation.
+///
+/// Without either channel the contract test is disabled — CI runs only the
+/// fixture-based tests above.
+private func guiContractBinaryPath() -> String? {
+    let environment = ProcessInfo.processInfo.environment
+    func executable(_ path: String) -> String? {
+        FileManager.default.isExecutableFile(atPath: path) ? path : nil
+    }
+    if let path = environment["SYMBRAIN_TEST_BINARY"], !path.isEmpty,
+       let resolved = executable(path) {
+        return resolved
+    }
+    guard guiContractHomeIsIsolated(),
+          let home = environment["HOME"], !home.isEmpty else { return nil }
+    let marker = URL(fileURLWithPath: home).appendingPathComponent(".symbrain-test-binary")
+    guard let data = try? Data(contentsOf: marker),
+          let raw = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines),
+          !raw.isEmpty,
+          let resolved = executable(raw)
+    else { return nil }
+    return resolved
+}
+
+/// Refuses to run against the real user home.
+///
+/// The contract test performs a `profile add`/`remove` round trip, which
+/// writes into `$XDG_CONFIG_HOME/symbrain` (or `$HOME/.config/symbrain` when
+/// XDG is unset). Pointing that at the live user config would mutate a real
+/// installation, so the test requires an isolated `HOME` and forbids an
+/// XDG config root inside the real one. Invocations must therefore set an
+/// isolated HOME alongside the binary marker.
+private func guiContractHomeIsIsolated() -> Bool {
+    let environment = ProcessInfo.processInfo.environment
+    guard let home = environment["HOME"], !home.isEmpty,
+          let passwd = getpwuid(getuid()),
+          let pwDir = passwd.pointee.pw_dir
+    else { return false }
+    let realHome = String(cString: pwDir)
+    guard !realHome.isEmpty, home != realHome else { return false }
+    if let xdgConfig = environment["XDG_CONFIG_HOME"], !xdgConfig.isEmpty,
+       xdgConfig == realHome || xdgConfig.hasPrefix(realHome + "/.config") {
+        return false
+    }
+    return true
+}
+
+struct ConfiguredBinaryContractTests {
+    /// Proves the exact JSON contracts the Swift client decodes against a
+    /// real `symbrain` binary: `version`, `doctor`, the `profile`
+    /// add/list/show/remove round trip and `sync --dry-run`. Every decode
+    /// uses `CLIRunner.runDecoding` (snake_case, exit-code checked) through
+    /// `SymBrainClient`, so a Go↔Rust schema difference surfaces here as a
+    /// thrown `invalidJSON`/`executionFailed` error or a failed assertion.
+    @Test(.enabled(if: guiContractBinaryPath() != nil && guiContractHomeIsIsolated()))
+    func decodesEveryClientJSONSurfaceFromConfiguredBinary() async throws {
+        let path = try #require(guiContractBinaryPath())
+        let binary = URL(fileURLWithPath: path)
+        let client = SymBrainClient(userOverride: binary)
+        #expect(client.resolveBinary() == binary)
+
+        // version --json — the GUI<->core schema handshake (versionkit).
+        let info = try await client.version()
+        #expect(info.tool == "symbrain")
+        #expect(!info.version.isEmpty)
+        #expect(info.schemaVersion == 1)
+
+        // doctor --json — full report decode against an isolated config.
+        let report = try await client.doctor()
+        #expect(!report.configDir.path.isEmpty)
+        #expect(!report.dataDir.path.isEmpty)
+        #expect(!report.cacheDir.path.isEmpty)
+        #expect(!report.config.path.isEmpty)
+        #expect(report.profiles.isEmpty)
+        #expect(report.harnesses.contains { $0.name == "claude" })
+        #expect(report.servers.contains { $0.binary == "symvault" })
+
+        // profile add/list/show/remove round trip (writes stay in the
+        // isolated XDG/HOME the invocation set up).
+        let name = "gui-contract"
+        _ = try await client.profileAdd(name: name, from: "personal")
+        let listed = try await client.profileList()
+        #expect(listed.contains { $0.name == name })
+        #expect(listed.first?.servers.contains { $0.server == "vault" } == true)
+
+        let detail = try await client.profileShow(name: name)
+        #expect(detail.name == name)
+        #expect(!detail.description.isEmpty)
+        #expect(!detail.servers.isEmpty)
+
+        _ = try await client.profileRemove(name: name)
+        let afterRemove = try await client.profileList()
+        #expect(afterRemove.isEmpty)
+
+        // sync --json --dry-run — report decode; dry-run never writes.
+        let sync = try await client.sync(dryRun: true)
+        #expect(!sync.targets.isEmpty)
+        #expect(sync.targets.allSatisfy { !$0.name.isEmpty && !$0.path.isEmpty || $0.status == "skipped" })
+    }
+}
