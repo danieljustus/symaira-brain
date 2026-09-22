@@ -333,6 +333,54 @@ impl Catalog {
         )
     }
 
+    /// Evaluates a call and consults standing grants for `subject` when
+    /// the static result is Ask (SEC-002 port of `policy.EvaluateWithGrants`).
+    ///
+    /// The grant list is treated as untrusted: nil (`None`) and
+    /// foreign-subject entries are skipped exactly as Go's guard clause
+    /// does. Expiry uses the current instant, mirroring Go's
+    /// `time.Now()`; the oracle corpus pins only outcomes that cannot
+    /// flip (expiry in 2000 or 2999).
+    #[must_use]
+    pub fn evaluate_with_grants(
+        &self,
+        subject: &str,
+        call: &ToolCall,
+        default: Decision,
+        grants: &[crate::grant::Grant],
+    ) -> Result {
+        let static_result = self.evaluate(call, default);
+        if static_result.decision != Decision::Ask || subject.is_empty() {
+            return static_result;
+        }
+        let now = chrono::Utc::now().fixed_offset();
+        for standing in grants {
+            if standing.subject != subject {
+                continue;
+            }
+            if standing.authorizes(
+                call.capability.as_deref().unwrap_or_default(),
+                call.purpose.as_deref().unwrap_or_default(),
+                call.resource.as_deref().unwrap_or_default(),
+                call.scope.as_deref().unwrap_or_default(),
+                now,
+            ) {
+                // Go's upgrade literal copies only these five fields, so
+                // Bucket and Trace are cleared rather than inherited.
+                return Result {
+                    rule: static_result.rule,
+                    decision: Decision::Allow,
+                    reason: Some("covered by standing grant".into()),
+                    matched: static_result.matched,
+                    precedence: static_result.precedence,
+                    bucket: None,
+                    trace: Vec::new(),
+                };
+            }
+        }
+        static_result
+    }
+
     /// Concatenates catalogs, renumbers precedence, and revalidates IDs.
     pub fn merge(&self, other: &Self) -> std::result::Result<Self, PolicyError> {
         let mut rules = self.rules.clone();

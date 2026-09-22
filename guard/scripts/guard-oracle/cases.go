@@ -228,6 +228,7 @@ func buildSuite() oracleSuite {
 		cases = append(cases, successCase(tc.id, "marginal", tc.in, marginalOutput{Marginal: marginal, Reason: policy.MarginalCapabilityReason(tc.in.Tool, tc.in.AlreadyAllowed), Risk: risk, RiskReason: riskReason}))
 	}
 	cases = append(cases, sec002Cases()...)
+	cases = append(cases, sec002GrantsCases()...)
 	return oracleSuite{Cases: cases}
 }
 

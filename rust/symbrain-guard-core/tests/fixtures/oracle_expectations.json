@@ -1193,6 +1193,1514 @@
       },
       "success": true,
       "output_json": "{\"id\":\"evt_1_decide_1786017600000000000\",\"command\":\"\",\"decision\":\"deny\",\"reason\":\"decide: parse request: json: cannot unmarshal number into Go struct field request.risk_class of type string\",\"decided_at\":\"2026-08-06T12:00:00Z\"}"
+    },
+    {
+      "id": "grant_authorizes_exact_scope",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "grant_authorizes_wildcard_ceiling",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "*"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "device",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "grant_authorizes_ceiling_mismatch",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "vault"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_capability_mismatch",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_secret",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_purpose_mismatch",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "other-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_resource_mismatch",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/write_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_empty_call_scope",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_expired_exact",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2027-01-01T00:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_revoked",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z",
+          "revoked": true
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_unknown_grant_scope",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "cluster",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_missing_capability",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_missing_purpose",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_missing_resource",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_missing_expiry",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "0001-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_empty_ceiling_entry",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            ""
+          ],
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_missing_ceiling",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "expires_at": "2027-01-01T00:00:00Z"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_nil_grant",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": null,
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "false"
+    },
+    {
+      "id": "grant_authorizes_offset_expiry",
+      "kind": "grant_authorizes",
+      "input": {
+        "grant": {
+          "id": "g1",
+          "scope": "session",
+          "origin": {
+            "epoch": 1722924000,
+            "via": "approval"
+          },
+          "granted_at": "2026-08-06T10:00:00Z",
+          "subject": "agent-1",
+          "capability": "read_private",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ],
+          "expires_at": "2027-01-01T01:00:00+01:00"
+        },
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope": "session",
+        "now": "2026-08-06T12:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "grant_add_valid_session",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "add-1",
+        "scope": "session",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "agent-1",
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "grant_add_valid_device",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "add-2",
+        "scope": "device",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "agent-1",
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session",
+          "device"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": true,
+      "output_json": "true"
+    },
+    {
+      "id": "grant_add_nil",
+      "kind": "grant_add_validate",
+      "input": null,
+      "success": false,
+      "error": "grant: add nil grant"
+    },
+    {
+      "id": "grant_add_empty_id",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "",
+        "scope": "session",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "agent-1",
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "grant: add grant with empty ID"
+    },
+    {
+      "id": "grant_add_unknown_scope",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "g1",
+        "scope": "cluster",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "agent-1",
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "grant: add grant with unknown scope \"cluster\""
+    },
+    {
+      "id": "grant_add_empty_subject",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "g1",
+        "scope": "session",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "",
+        "capability": "read_private",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "grant: add grant with empty subject"
+    },
+    {
+      "id": "grant_add_incomplete_binding",
+      "kind": "grant_add_validate",
+      "input": {
+        "id": "g1",
+        "scope": "session",
+        "origin": {
+          "epoch": 1722924000,
+          "via": "approval"
+        },
+        "granted_at": "2026-08-06T10:00:00Z",
+        "subject": "agent-1",
+        "purpose": "oracle-purpose",
+        "resource": "fs/read_file",
+        "scope_ceiling": [
+          "session"
+        ],
+        "expires_at": "2027-01-01T00:00:00Z"
+      },
+      "success": false,
+      "error": "grant: add grant with incomplete authorization binding"
+    },
+    {
+      "id": "approval_grant_converts",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "ttl": 3600000000000,
+          "decided_at": "2026-08-06T12:00:00Z",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "{\"id\":\"gnt_injected\",\"scope\":\"session\",\"origin\":{\"epoch\":1786017600,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T12:00:00Z\",\"subject\":\"agent-1\",\"capability\":\"read_secret\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"session\"],\"expires_at\":\"2026-08-06T13:00:00Z\"}"
+    },
+    {
+      "id": "approval_grant_zero_ttl",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "decided_at": "2026-08-06T12:00:00Z",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "null"
+    },
+    {
+      "id": "approval_grant_negative_ttl",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "ttl": -1000000000,
+          "decided_at": "2026-08-06T12:00:00Z",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "null"
+    },
+    {
+      "id": "approval_grant_unapproved",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": false,
+          "ttl": 3600000000000,
+          "decided_at": "2026-08-06T12:00:00Z",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "null"
+    },
+    {
+      "id": "approval_grant_empty_subject",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "ttl": 3600000000000,
+          "decided_at": "2026-08-06T12:00:00Z",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "",
+        "grant_id": "gnt_injected"
+      },
+      "success": false,
+      "error": "approval: grant subject is empty"
+    },
+    {
+      "id": "approval_grant_offset_time",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "ttl": 3600000000000,
+          "decided_at": "2026-08-06T14:00:00+02:00",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope_ceiling": [
+            "session"
+          ]
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "{\"id\":\"gnt_injected\",\"scope\":\"session\",\"origin\":{\"epoch\":1786017600,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T14:00:00+02:00\",\"subject\":\"agent-1\",\"capability\":\"read_secret\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"session\"],\"expires_at\":\"2026-08-06T15:00:00+02:00\"}"
+    },
+    {
+      "id": "approval_grant_unbound_copy",
+      "kind": "approval_grant",
+      "input": {
+        "decision": {
+          "id": "apr-1",
+          "approved": true,
+          "ttl": 3600000000000,
+          "decided_at": "2026-08-06T12:00:00Z"
+        },
+        "subject": "agent-1",
+        "grant_id": "gnt_injected"
+      },
+      "success": true,
+      "output_json": "{\"id\":\"gnt_injected\",\"scope\":\"session\",\"origin\":{\"epoch\":1786017600,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T12:00:00Z\",\"subject\":\"agent-1\",\"expires_at\":\"2026-08-06T13:00:00Z\"}"
+    },
+    {
+      "id": "policy_grant_ask_upgraded",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"allow\",\"reason\":\"covered by standing grant\",\"matched\":true,\"precedence\":10}"
+    },
+    {
+      "id": "policy_grant_ask_without_grant",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": null
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_deny_never_upgraded",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "deny-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "deny",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "secret reads blocked"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"deny-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"deny\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"secret reads blocked\"},\"decision\":\"deny\",\"reason\":\"secret reads blocked\",\"matched\":true,\"precedence\":10,\"bucket\":\"deny\"}"
+    },
+    {
+      "id": "policy_grant_allow_unchanged",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "allow-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "allow",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read allowed"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"allow-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"allow\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read allowed\"},\"decision\":\"allow\",\"reason\":\"read allowed\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_wrong_subject_skipped",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-2",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_nil_entry_skipped",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          null,
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"allow\",\"reason\":\"covered by standing grant\",\"matched\":true,\"precedence\":10}"
+    },
+    {
+      "id": "policy_grant_expired_stays_ask",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2000-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_revoked_stays_ask",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z",
+            "revoked": true
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_ceiling_mismatch_stays_ask",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "vault"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_empty_subject_stays_ask",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "ask-1",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "ask",
+            "match": {
+              "capability": "read_secret"
+            },
+            "reason": "read needs approval"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"rule\":{\"id\":\"ask-1\",\"version\":\"1.0.0\",\"precedence\":10,\"decision\":\"ask\",\"match\":{\"capability\":\"read_secret\"},\"reason\":\"read needs approval\"},\"decision\":\"ask\",\"reason\":\"read needs approval\",\"matched\":true,\"precedence\":10,\"bucket\":\"allow\"}"
+    },
+    {
+      "id": "policy_grant_default_ask_upgraded",
+      "kind": "evaluate_with_grants",
+      "input": {
+        "rules": [
+          {
+            "id": "db-deny",
+            "version": "1.0.0",
+            "precedence": 10,
+            "decision": "deny",
+            "match": {
+              "server": "db"
+            },
+            "reason": "db denied"
+          }
+        ],
+        "call": {
+          "server": "fs",
+          "tool": "read_file",
+          "capability": "read_secret",
+          "purpose": "oracle-purpose",
+          "resource": "fs/read_file",
+          "scope": "session"
+        },
+        "default": "ask",
+        "subject": "agent-1",
+        "grants": [
+          {
+            "id": "g1",
+            "scope": "session",
+            "origin": {
+              "epoch": 1722924000,
+              "via": "approval"
+            },
+            "granted_at": "2026-08-06T10:00:00Z",
+            "subject": "agent-1",
+            "capability": "read_secret",
+            "purpose": "oracle-purpose",
+            "resource": "fs/read_file",
+            "scope_ceiling": [
+              "session"
+            ],
+            "expires_at": "2999-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "success": true,
+      "output_json": "{\"decision\":\"allow\",\"reason\":\"covered by standing grant\",\"matched\":false}"
+    },
+    {
+      "id": "grants_cli_list_empty",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"No active grants.\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_list_ordered",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "[\n  {\"id\":\"gnt-old\",\"scope\":\"device\",\"origin\":{\"epoch\":1722924000,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T10:00:00Z\",\"subject\":\"agent-old\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"session\"],\"expires_at\":\"2027-01-01T00:00:00Z\"},\n  {\"id\":\"gnt-frac\",\"scope\":\"vault\",\"origin\":{\"epoch\":1722924001,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T16:34:56.123456789+02:00\",\"subject\":\"agent-frac\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"vault\"],\"expires_at\":\"2027-06-01T00:00:00Z\"}\n]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"ID        SCOPE   SUBJECT     ORIGIN               GRANTED_AT\\ngnt-frac  vault   agent-frac  approval@1722924001  2026-08-06T14:34:56Z\\ngnt-old   device  agent-old   approval@1722924000  2026-08-06T10:00:00Z\\n\",\"store_exists\":true,\"store\":\"[\\n  {\\\"id\\\":\\\"gnt-old\\\",\\\"scope\\\":\\\"device\\\",\\\"origin\\\":{\\\"epoch\\\":1722924000,\\\"via\\\":\\\"approval\\\"},\\\"granted_at\\\":\\\"2026-08-06T10:00:00Z\\\",\\\"subject\\\":\\\"agent-old\\\",\\\"capability\\\":\\\"read_private\\\",\\\"purpose\\\":\\\"oracle-purpose\\\",\\\"resource\\\":\\\"fs/read_file\\\",\\\"scope_ceiling\\\":[\\\"session\\\"],\\\"expires_at\\\":\\\"2027-01-01T00:00:00Z\\\"},\\n  {\\\"id\\\":\\\"gnt-frac\\\",\\\"scope\\\":\\\"vault\\\",\\\"origin\\\":{\\\"epoch\\\":1722924001,\\\"via\\\":\\\"approval\\\"},\\\"granted_at\\\":\\\"2026-08-06T16:34:56.123456789+02:00\\\",\\\"subject\\\":\\\"agent-frac\\\",\\\"capability\\\":\\\"read_private\\\",\\\"purpose\\\":\\\"oracle-purpose\\\",\\\"resource\\\":\\\"fs/read_file\\\",\\\"scope_ceiling\\\":[\\\"vault\\\"],\\\"expires_at\\\":\\\"2027-06-01T00:00:00Z\\\"}\\n]\"}"
+    },
+    {
+      "id": "grants_cli_list_legacy",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "[{\"id\":\"legacy\",\"scope\":\"device\",\"subject\":\"agent-legacy\",\"granted_at\":\"2026-08-06T10:00:00Z\"}]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"ID      SCOPE   SUBJECT       ORIGIN  GRANTED_AT\\nlegacy  device  agent-legacy  @0      2026-08-06T10:00:00Z\\n\",\"store_exists\":true,\"store\":\"[{\\\"id\\\":\\\"legacy\\\",\\\"scope\\\":\\\"device\\\",\\\"subject\\\":\\\"agent-legacy\\\",\\\"granted_at\\\":\\\"2026-08-06T10:00:00Z\\\"}]\"}"
+    },
+    {
+      "id": "grants_cli_list_null_store",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "null\n"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"No active grants.\\n\",\"store_exists\":true,\"store\":\"null\\n\"}"
+    },
+    {
+      "id": "grants_cli_revoke_one",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke",
+          "gnt-b"
+        ],
+        "store": "[{\"id\":\"gnt-a\",\"scope\":\"device\",\"origin\":{\"epoch\":1722924000,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T10:00:00Z\",\"subject\":\"agent-a\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"session\"],\"expires_at\":\"2027-01-01T00:00:00Z\"},{\"id\":\"gnt-b\",\"scope\":\"vault\",\"origin\":{\"epoch\":1722924001,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T11:00:00Z\",\"subject\":\"agent-b\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"vault\"],\"expires_at\":\"2027-01-01T00:00:00Z\"}]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"Revoked grant gnt-b.\\n\",\"store_exists\":true,\"store\":\"[\\n  {\\n    \\\"id\\\": \\\"gnt-a\\\",\\n    \\\"scope\\\": \\\"device\\\",\\n    \\\"origin\\\": {\\n      \\\"epoch\\\": 1722924000,\\n      \\\"via\\\": \\\"approval\\\"\\n    },\\n    \\\"granted_at\\\": \\\"2026-08-06T10:00:00Z\\\",\\n    \\\"subject\\\": \\\"agent-a\\\",\\n    \\\"capability\\\": \\\"read_private\\\",\\n    \\\"purpose\\\": \\\"oracle-purpose\\\",\\n    \\\"resource\\\": \\\"fs/read_file\\\",\\n    \\\"scope_ceiling\\\": [\\n      \\\"session\\\"\\n    ],\\n    \\\"expires_at\\\": \\\"2027-01-01T00:00:00Z\\\"\\n  },\\n  {\\n    \\\"id\\\": \\\"gnt-b\\\",\\n    \\\"scope\\\": \\\"vault\\\",\\n    \\\"origin\\\": {\\n      \\\"epoch\\\": 1722924001,\\n      \\\"via\\\": \\\"approval\\\"\\n    },\\n    \\\"granted_at\\\": \\\"2026-08-06T11:00:00Z\\\",\\n    \\\"subject\\\": \\\"agent-b\\\",\\n    \\\"capability\\\": \\\"read_private\\\",\\n    \\\"purpose\\\": \\\"oracle-purpose\\\",\\n    \\\"resource\\\": \\\"fs/read_file\\\",\\n    \\\"scope_ceiling\\\": [\\n      \\\"vault\\\"\\n    ],\\n    \\\"expires_at\\\": \\\"2027-01-01T00:00:00Z\\\",\\n    \\\"revoked\\\": true\\n  }\\n]\"}"
+    },
+    {
+      "id": "grants_cli_revoke_all",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke",
+          "--all"
+        ],
+        "store": "[{\"id\":\"gnt-a\",\"scope\":\"device\",\"origin\":{\"epoch\":1722924000,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T10:00:00Z\",\"subject\":\"agent-a\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"session\"],\"expires_at\":\"2027-01-01T00:00:00Z\"},{\"id\":\"gnt-b\",\"scope\":\"vault\",\"origin\":{\"epoch\":1722924001,\"via\":\"approval\"},\"granted_at\":\"2026-08-06T11:00:00Z\",\"subject\":\"agent-b\",\"capability\":\"read_private\",\"purpose\":\"oracle-purpose\",\"resource\":\"fs/read_file\",\"scope_ceiling\":[\"vault\"],\"expires_at\":\"2027-01-01T00:00:00Z\"}]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"Revoked 2 grant(s).\\n\",\"store_exists\":true,\"store\":\"[\\n  {\\n    \\\"id\\\": \\\"gnt-a\\\",\\n    \\\"scope\\\": \\\"device\\\",\\n    \\\"origin\\\": {\\n      \\\"epoch\\\": 1722924000,\\n      \\\"via\\\": \\\"approval\\\"\\n    },\\n    \\\"granted_at\\\": \\\"2026-08-06T10:00:00Z\\\",\\n    \\\"subject\\\": \\\"agent-a\\\",\\n    \\\"capability\\\": \\\"read_private\\\",\\n    \\\"purpose\\\": \\\"oracle-purpose\\\",\\n    \\\"resource\\\": \\\"fs/read_file\\\",\\n    \\\"scope_ceiling\\\": [\\n      \\\"session\\\"\\n    ],\\n    \\\"expires_at\\\": \\\"2027-01-01T00:00:00Z\\\",\\n    \\\"revoked\\\": true\\n  },\\n  {\\n    \\\"id\\\": \\\"gnt-b\\\",\\n    \\\"scope\\\": \\\"vault\\\",\\n    \\\"origin\\\": {\\n      \\\"epoch\\\": 1722924001,\\n      \\\"via\\\": \\\"approval\\\"\\n    },\\n    \\\"granted_at\\\": \\\"2026-08-06T11:00:00Z\\\",\\n    \\\"subject\\\": \\\"agent-b\\\",\\n    \\\"capability\\\": \\\"read_private\\\",\\n    \\\"purpose\\\": \\\"oracle-purpose\\\",\\n    \\\"resource\\\": \\\"fs/read_file\\\",\\n    \\\"scope_ceiling\\\": [\\n      \\\"vault\\\"\\n    ],\\n    \\\"expires_at\\\": \\\"2027-01-01T00:00:00Z\\\",\\n    \\\"revoked\\\": true\\n  }\\n]\"}"
+    },
+    {
+      "id": "grants_cli_revoke_missing",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke",
+          "missing"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants: grant: not found: missing\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_revoke_missing_id",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants revoke: missing grant ID or --all\\nUsage:\\n  symguard grants list\\n  symguard grants revoke \\u003cid\\u003e | --all\\n\\nCommands:\\n  list      List active grants\\n  revoke    Revoke a grant by ID, or revoke every grant with --all\\n\\nRun 'symguard grants \\u003ccommand\\u003e --help' for details.\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_revoke_all_with_id",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke",
+          "--all",
+          "gnt-a"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants revoke: --all cannot be combined with a grant ID\\nUsage:\\n  symguard grants list\\n  symguard grants revoke \\u003cid\\u003e | --all\\n\\nCommands:\\n  list      List active grants\\n  revoke    Revoke a grant by ID, or revoke every grant with --all\\n\\nRun 'symguard grants \\u003ccommand\\u003e --help' for details.\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_revoke_unexpected_flag",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "revoke",
+          "-x"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants revoke: unexpected flag \\\"-x\\\"\\nUsage:\\n  symguard grants list\\n  symguard grants revoke \\u003cid\\u003e | --all\\n\\nCommands:\\n  list      List active grants\\n  revoke    Revoke a grant by ID, or revoke every grant with --all\\n\\nRun 'symguard grants \\u003ccommand\\u003e --help' for details.\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_unknown_subcommand",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "frobnicate"
+        ],
+        "store": ""
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"unknown grants subcommand: frobnicate\\n\\nUsage:\\n  symguard grants list\\n  symguard grants revoke \\u003cid\\u003e | --all\\n\\nCommands:\\n  list      List active grants\\n  revoke    Revoke a grant by ID, or revoke every grant with --all\\n\\nRun 'symguard grants \\u003ccommand\\u003e --help' for details.\\n\",\"store_exists\":false}"
+    },
+    {
+      "id": "grants_cli_list_malformed_store",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "{not json\n"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants: grant: parse \\u003cstore-dir\\u003e/grants.json: invalid character 'n' looking for beginning of object key string\\n\",\"store_exists\":true,\"store\":\"{not json\\n\"}"
+    },
+    {
+      "id": "grants_cli_list_unknown_scope",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "[{\"id\":\"g1\",\"scope\":\"cluster\",\"subject\":\"a\"}]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants: grant: parse \\u003cstore-dir\\u003e/grants.json: unknown scope \\\"cluster\\\"\\n\",\"store_exists\":true,\"store\":\"[{\\\"id\\\":\\\"g1\\\",\\\"scope\\\":\\\"cluster\\\",\\\"subject\\\":\\\"a\\\"}]\"}"
+    },
+    {
+      "id": "grants_cli_list_duplicate_id",
+      "kind": "grants_cli",
+      "input": {
+        "args": [
+          "list"
+        ],
+        "store": "[{\"id\":\"g1\",\"scope\":\"device\",\"subject\":\"a\"},{\"id\":\"g1\",\"scope\":\"vault\",\"subject\":\"b\"}]"
+      },
+      "success": true,
+      "output_json": "{\"stdout\":\"grants: grant: parse \\u003cstore-dir\\u003e/grants.json: duplicate grant ID \\\"g1\\\"\\n\",\"store_exists\":true,\"store\":\"[{\\\"id\\\":\\\"g1\\\",\\\"scope\\\":\\\"device\\\",\\\"subject\\\":\\\"a\\\"},{\\\"id\\\":\\\"g1\\\",\\\"scope\\\":\\\"vault\\\",\\\"subject\\\":\\\"b\\\"}]\"}"
     }
   ]
 }

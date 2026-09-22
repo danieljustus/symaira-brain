@@ -4,8 +4,10 @@ use chrono::{DateTime, FixedOffset};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
+use symbrain_guard_core::approval::{ApprovalDecision, grant_from_decision};
 use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
 use symbrain_guard_core::go_json::to_go_json_vec;
+use symbrain_guard_core::grant::Grant;
 use symbrain_guard_core::{
     Catalog, Decision, DecisionRequest, FailureMode, SourceType, classify_risk_with_reason,
     event_id, expired_at, marginal_capability_check, marginal_capability_reason, new_no_decision,
@@ -81,6 +83,38 @@ struct DecideAuditInput {
     request: String,
     now: String,
 }
+
+#[derive(Debug, Deserialize)]
+struct GrantAuthorizesInput {
+    grant: Option<Grant>,
+    capability: String,
+    purpose: String,
+    resource: String,
+    scope: String,
+    now: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ApprovalGrantInput {
+    decision: ApprovalDecision,
+    subject: String,
+    grant_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct GrantsEvalInput {
+    rules: Vec<Rule>,
+    call: ToolCall,
+    default: Decision,
+    subject: String,
+    // Go marshals a nil `[]*grant.Grant` as `null`, so accept null too.
+    grants: Option<Vec<Option<Grant>>>,
+}
+
+/// Kinds consumed by symbrain-cli's own guard oracle test: the grants
+/// store and renderer live in symbrain-cli, so this crate skips them and
+/// `symbrain-cli/tests/guard_oracle_grants.rs` asserts their bytes.
+const CLI_OWNED_KINDS: &[&str] = &["grants_cli"];
 
 /// Frozen instant for `decide_response` cases. Responses are
 /// clock-independent; this instant only needs to sit between the corpus's
@@ -267,6 +301,51 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
             String::from_utf8(to_go_json_vec(&record).map_err(|e| e.to_string())?)
                 .map_err(|e| e.to_string())
         }
+        "grant_authorizes" => {
+            let input: GrantAuthorizesInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = input
+                .now
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let authorized = input.grant.as_ref().is_some_and(|grant| {
+                grant.authorizes(
+                    &input.capability,
+                    &input.purpose,
+                    &input.resource,
+                    &input.scope,
+                    now,
+                )
+            });
+            Ok(serialize(&authorized))
+        }
+        "grant_add_validate" => {
+            let grant: Option<Grant> =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            Grant::validate_add(grant.as_ref())?;
+            Ok(serialize(&true))
+        }
+        "approval_grant" => {
+            let input: ApprovalGrantInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let converted = grant_from_decision(&input.decision, &input.subject, &input.grant_id)?;
+            String::from_utf8(to_go_json_vec(&converted).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
+        "evaluate_with_grants" => {
+            let input: GrantsEvalInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let catalog = Catalog::new(input.rules, "1.0.0").map_err(|e| e.to_string())?;
+            let grants: Vec<Grant> = input
+                .grants
+                .unwrap_or_default()
+                .into_iter()
+                .flatten()
+                .collect();
+            let result =
+                catalog.evaluate_with_grants(&input.subject, &input.call, input.default, &grants);
+            Ok(serialize(&result))
+        }
         other => Err(format!("unknown oracle kind {other}")),
     }
 }
@@ -275,9 +354,18 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
 fn guard_core_matches_go_oracle_bytes() {
     let suite: Suite = serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
         .expect("parse Guard oracle fixture");
+    let mut cli_owned = 0_usize;
     for case in &suite.cases {
+        if CLI_OWNED_KINDS.contains(&case.kind.as_str()) {
+            cli_owned += 1;
+            continue;
+        }
         assert_case(case, evaluate_case(case));
     }
+    assert!(
+        cli_owned >= 1,
+        "expected grants_cli cases owned by symbrain-cli's guard oracle test"
+    );
 }
 
 #[test]
