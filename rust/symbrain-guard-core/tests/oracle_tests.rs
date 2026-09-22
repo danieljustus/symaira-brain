@@ -1,8 +1,13 @@
 #![allow(clippy::too_many_lines)]
 
+use chrono::{DateTime, FixedOffset};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
+use symbrain_guard_core::approval::{ApprovalDecision, grant_from_decision};
+use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
+use symbrain_guard_core::go_json::to_go_json_vec;
+use symbrain_guard_core::grant::Grant;
 use symbrain_guard_core::{
     Catalog, Decision, DecisionRequest, FailureMode, SourceType, classify_risk_with_reason,
     event_id, expired_at, marginal_capability_check, marginal_capability_reason, new_no_decision,
@@ -65,6 +70,91 @@ struct NoDecisionInput {
     failure_mode: String,
     diagnostic: String,
 }
+
+#[derive(Debug, Deserialize)]
+struct DecideRequestInput {
+    request: String,
+    #[serde(default)]
+    sink_error: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct DecideAuditInput {
+    request: String,
+    now: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct GrantAuthorizesInput {
+    grant: Option<Grant>,
+    capability: String,
+    purpose: String,
+    resource: String,
+    scope: String,
+    now: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ApprovalGrantInput {
+    decision: ApprovalDecision,
+    subject: String,
+    grant_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct GrantsEvalInput {
+    rules: Vec<Rule>,
+    call: ToolCall,
+    default: Decision,
+    subject: String,
+    // Go marshals a nil `[]*grant.Grant` as `null`, so accept null too.
+    grants: Option<Vec<Option<Grant>>>,
+}
+
+/// Kinds consumed by symbrain-cli's own guard oracle test: the grants
+/// store and renderer live in symbrain-cli, so this crate skips them and
+/// `symbrain-cli/tests/guard_oracle_grants.rs` asserts their bytes.
+const CLI_OWNED_KINDS: &[&str] = &["grants_cli"];
+
+#[derive(Debug, Deserialize)]
+struct HashEntryInput {
+    entry: String,
+    prev_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyChainInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    expected_final_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyAnchorInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    anchor: Option<symbrain_guard_core::audit::ChainAnchor>,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyAnchorForLogInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    anchor: Option<symbrain_guard_core::audit::ChainAnchor>,
+    log_size: i64,
+    content_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ReadCheckpointInput {
+    content: Option<String>,
+}
+
+/// Frozen instant for `decide_response` cases. Responses are
+/// clock-independent; this instant only needs to sit between the corpus's
+/// far-past and far-future deadlines, exactly where Go's wall clock sat
+/// when the fixture was generated.
+const DECIDE_RESPONSE_NOW: &str = "2026-08-06T12:00:00Z";
 
 #[derive(Debug, serde::Serialize)]
 struct MarginalOutput {
@@ -204,6 +294,142 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
             };
             Ok(serialize(&output))
         }
+        "decide_response" => {
+            let input: DecideRequestInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = DECIDE_RESPONSE_NOW
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let sink_error = input.sink_error.clone();
+            let mut sink = |_record: &ExternalDecisionAudit| {
+                if sink_error.is_empty() {
+                    Ok(())
+                } else {
+                    Err(sink_error.clone())
+                }
+            };
+            let response = evaluate_at(input.request.as_bytes(), now, &mut sink);
+            let mut bytes = to_go_json_vec(&response).map_err(|e| e.to_string())?;
+            bytes.push(b'\n');
+            let stdout = String::from_utf8(bytes).map_err(|e| e.to_string())?;
+            // The fixture stores Go's json.Marshal of the stdout string
+            // (successCase encodes a Go string), so encode the captured
+            // stdout the same way before comparing.
+            String::from_utf8(to_go_json_vec(&stdout).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
+        "decide_audit" => {
+            let input: DecideAuditInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = input
+                .now
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let mut captured: Option<ExternalDecisionAudit> = None;
+            let mut sink = |record: &ExternalDecisionAudit| {
+                captured = Some(record.clone());
+                Ok(())
+            };
+            let _response = evaluate_at(input.request.as_bytes(), now, &mut sink);
+            let record = captured.ok_or_else(|| "decide wrote no audit record".to_owned())?;
+            String::from_utf8(to_go_json_vec(&record).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
+        "grant_authorizes" => {
+            let input: GrantAuthorizesInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = input
+                .now
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let authorized = input.grant.as_ref().is_some_and(|grant| {
+                grant.authorizes(
+                    &input.capability,
+                    &input.purpose,
+                    &input.resource,
+                    &input.scope,
+                    now,
+                )
+            });
+            Ok(serialize(&authorized))
+        }
+        "grant_add_validate" => {
+            let grant: Option<Grant> =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            Grant::validate_add(grant.as_ref())?;
+            Ok(serialize(&true))
+        }
+        "approval_grant" => {
+            let input: ApprovalGrantInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let converted = grant_from_decision(&input.decision, &input.subject, &input.grant_id)?;
+            String::from_utf8(to_go_json_vec(&converted).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
+        "evaluate_with_grants" => {
+            let input: GrantsEvalInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let catalog = Catalog::new(input.rules, "1.0.0").map_err(|e| e.to_string())?;
+            let grants: Vec<Grant> = input
+                .grants
+                .unwrap_or_default()
+                .into_iter()
+                .flatten()
+                .collect();
+            let result =
+                catalog.evaluate_with_grants(&input.subject, &input.call, input.default, &grants);
+            Ok(serialize(&result))
+        }
+        "audit_hash_entry" => {
+            let input: HashEntryInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let digest = symbrain_guard_core::audit::hash_entry(&input.entry, &input.prev_hash);
+            Ok(serialize(&digest))
+        }
+        "audit_verify_chain" => {
+            let input: VerifyChainInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_chain(
+                &input.entries,
+                &input.initial_hash,
+                &input.expected_final_hash,
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_verify_anchor" => {
+            let input: VerifyAnchorInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_anchor(
+                &input.entries,
+                &input.initial_hash,
+                input.anchor.as_ref(),
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_verify_anchor_for_log" => {
+            let input: VerifyAnchorForLogInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_anchor_for_log(
+                &input.entries,
+                &input.initial_hash,
+                input.anchor.as_ref(),
+                input.log_size,
+                &input.content_hash,
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_read_checkpoint" => {
+            let input: ReadCheckpointInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let anchor = match &input.content {
+                Some(content) => Some(symbrain_guard_core::audit::parse_anchor(
+                    content.as_bytes(),
+                )?),
+                None => None,
+            };
+            String::from_utf8(to_go_json_vec(&anchor).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
         other => Err(format!("unknown oracle kind {other}")),
     }
 }
@@ -212,9 +438,18 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
 fn guard_core_matches_go_oracle_bytes() {
     let suite: Suite = serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
         .expect("parse Guard oracle fixture");
+    let mut cli_owned = 0_usize;
     for case in &suite.cases {
+        if CLI_OWNED_KINDS.contains(&case.kind.as_str()) {
+            cli_owned += 1;
+            continue;
+        }
         assert_case(case, evaluate_case(case));
     }
+    assert!(
+        cli_owned >= 1,
+        "expected grants_cli cases owned by symbrain-cli's guard oracle test"
+    );
 }
 
 #[test]

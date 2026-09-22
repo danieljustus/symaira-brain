@@ -1,8 +1,8 @@
 //! Safe, deterministic Guard model and static policy kernel.
 //!
-//! This crate intentionally excludes approvals, grants, sequence state, audit,
-//! discovery, spawning, and CLI dispatch. The Go Guard implementation remains
-//! the production oracle until the full Guard matrix is green.
+//! This crate intentionally excludes discovery, spawning, and CLI
+//! dispatch. The Go Guard implementation remains the production oracle
+//! for those subsystems until the full Guard matrix is green.
 
 #![deny(unsafe_code)]
 
@@ -11,8 +11,11 @@ pub mod go_json;
 #[path = "external_deadline.rs"]
 pub mod go_time;
 
+pub mod approval;
+pub mod audit;
 pub mod capability;
 mod capability_wire;
+pub mod grant;
 pub mod key_storage;
 pub mod marginal;
 pub mod model;
