@@ -1,8 +1,11 @@
 #![allow(clippy::too_many_lines)]
 
+use chrono::{DateTime, FixedOffset};
 use serde::Deserialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
+use symbrain_guard_core::external_decision::{ExternalDecisionAudit, evaluate_at};
+use symbrain_guard_core::go_json::to_go_json_vec;
 use symbrain_guard_core::{
     Catalog, Decision, DecisionRequest, FailureMode, SourceType, classify_risk_with_reason,
     event_id, expired_at, marginal_capability_check, marginal_capability_reason, new_no_decision,
@@ -65,6 +68,25 @@ struct NoDecisionInput {
     failure_mode: String,
     diagnostic: String,
 }
+
+#[derive(Debug, Deserialize)]
+struct DecideRequestInput {
+    request: String,
+    #[serde(default)]
+    sink_error: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct DecideAuditInput {
+    request: String,
+    now: String,
+}
+
+/// Frozen instant for `decide_response` cases. Responses are
+/// clock-independent; this instant only needs to sit between the corpus's
+/// far-past and far-future deadlines, exactly where Go's wall clock sat
+/// when the fixture was generated.
+const DECIDE_RESPONSE_NOW: &str = "2026-08-06T12:00:00Z";
 
 #[derive(Debug, serde::Serialize)]
 struct MarginalOutput {
@@ -203,6 +225,47 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
                 risk_reason: risk_reason.unwrap_or_default(),
             };
             Ok(serialize(&output))
+        }
+        "decide_response" => {
+            let input: DecideRequestInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = DECIDE_RESPONSE_NOW
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let sink_error = input.sink_error.clone();
+            let mut sink = |_record: &ExternalDecisionAudit| {
+                if sink_error.is_empty() {
+                    Ok(())
+                } else {
+                    Err(sink_error.clone())
+                }
+            };
+            let response = evaluate_at(input.request.as_bytes(), now, &mut sink);
+            let mut bytes = to_go_json_vec(&response).map_err(|e| e.to_string())?;
+            bytes.push(b'\n');
+            let stdout = String::from_utf8(bytes).map_err(|e| e.to_string())?;
+            // The fixture stores Go's json.Marshal of the stdout string
+            // (successCase encodes a Go string), so encode the captured
+            // stdout the same way before comparing.
+            String::from_utf8(to_go_json_vec(&stdout).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
+        }
+        "decide_audit" => {
+            let input: DecideAuditInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let now: DateTime<FixedOffset> = input
+                .now
+                .parse::<DateTime<FixedOffset>>()
+                .map_err(|e| e.to_string())?;
+            let mut captured: Option<ExternalDecisionAudit> = None;
+            let mut sink = |record: &ExternalDecisionAudit| {
+                captured = Some(record.clone());
+                Ok(())
+            };
+            let _response = evaluate_at(input.request.as_bytes(), now, &mut sink);
+            let record = captured.ok_or_else(|| "decide wrote no audit record".to_owned())?;
+            String::from_utf8(to_go_json_vec(&record).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
         }
         other => Err(format!("unknown oracle kind {other}")),
     }

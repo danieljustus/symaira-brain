@@ -227,6 +227,7 @@ func buildSuite() oracleSuite {
 		risk, riskReason := policy.ClassifyRiskWithReason(tc.in.Tool, marginal, tc.in.AlreadyAllowed)
 		cases = append(cases, successCase(tc.id, "marginal", tc.in, marginalOutput{Marginal: marginal, Reason: policy.MarginalCapabilityReason(tc.in.Tool, tc.in.AlreadyAllowed), Risk: risk, RiskReason: riskReason}))
 	}
+	cases = append(cases, sec002Cases()...)
 	return oracleSuite{Cases: cases}
 }
 
