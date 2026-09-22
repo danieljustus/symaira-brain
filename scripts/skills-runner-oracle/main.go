@@ -330,8 +330,11 @@ func captureDisk(root, skipDir string) ([]diskEntry, error) {
 // generateDefaults freezes the directory resolution of config.Defaults() as
 // reached through skillsrunner.DefaultOptions, one scenario per branch of
 // internal/paths.resolve: current $XDG_DATA_HOME/symbrain/skills, the legacy
-// $XDG_DATA_HOME/symskills fallback, neither existing, a relative
-// XDG_DATA_HOME (ignored per the XDG spec) and XDG_DATA_HOME unset.
+// $XDG_DATA_HOME/symskills fallback, current and legacy both existing (current
+// wins), neither existing, a relative XDG_DATA_HOME (ignored per the XDG
+// spec), XDG_DATA_HOME unset with the current namespace, and XDG_DATA_HOME
+// unset with only the legacy tree — the layout a pre-absorption symskills
+// install leaves behind.
 func generateDefaults() []defaultsCase {
 	savedHome, hadHome := os.LookupEnv("HOME")
 	savedXDG, hadXDG := os.LookupEnv("XDG_DATA_HOME")
@@ -364,9 +367,11 @@ func generateDefaults() []defaultsCase {
 	}{
 		{name: "xdg_absolute_current_exists", xdg: "data", absolute: true, mkCurrent: true},
 		{name: "xdg_absolute_legacy_only", xdg: "data", absolute: true, mkLegacy: true},
+		{name: "xdg_absolute_both_exist", xdg: "data", absolute: true, mkCurrent: true, mkLegacy: true},
 		{name: "xdg_absolute_neither_exists", xdg: "data", absolute: true},
 		{name: "xdg_relative_is_ignored", xdg: "rel/data", mkCurrent: true},
 		{name: "xdg_unset_uses_home", mkCurrent: true},
+		{name: "xdg_unset_uses_legacy", mkLegacy: true},
 	}
 
 	for _, scenario := range scenarios {

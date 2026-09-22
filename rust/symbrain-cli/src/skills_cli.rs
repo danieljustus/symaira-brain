@@ -86,28 +86,45 @@ struct SkillSyncReport {
     dry_run: bool,
 }
 
+/// Resolves the skills data root once for every native skills command.
+///
+/// Delegates to [`symbrain_skills::runner::skills_data_root`], the resolver
+/// whose branches are frozen in the Go runner oracle's `defaults` scenarios:
+/// an absolute `$XDG_DATA_HOME` (relative values ignored per the XDG spec),
+/// else `$HOME/.local/share`; then `symbrain/skills` unless it is absent
+/// while the legacy `symskills` directory exists. Go's `config.Defaults()`
+/// resolves through the same `internal/paths.resolve` rule, so this is what
+/// keeps native `sync` on the tree Go would read instead of always landing
+/// in the current namespace over an empty legacy install (#621).
+///
+/// The fallback only covers the one branch the runner cannot decide — no
+/// absolute `$XDG_DATA_HOME` and no usable home — and preserves the
+/// pre-parity resolution for it, because the oracle freezes no case there.
+fn skills_data_root() -> PathBuf {
+    if let Ok(root) = symbrain_skills::runner::skills_data_root() {
+        return root;
+    }
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    if let Some(data) = symbrain_core::xdg::data_dir() {
+        data.join("skills")
+    } else {
+        home.join(".local").join("share").join("symskills")
+    }
+}
+
 pub(crate) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let data_root = skills_data_root();
     let library_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
         PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("library")
     } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("library")
+        data_root.join("library")
     };
 
     let base_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR") {
         PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("base")
     } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("base")
+        data_root.join("base")
     };
 
     (library_dir, base_dir, home)
@@ -980,6 +997,10 @@ fn run_sync(
         targets,
         skills: Vec::new(),
         base_dir: Some(base_dir),
+        // Go passes `env.cfg.RenderDir` (the same data root's `rendered/`)
+        // into install.Sync, so reinstall writes and links at
+        // `<data root>/rendered/<target>/<name>` — legacy root included.
+        render_dir: Some(skills_data_root().join("rendered")),
         // An empty mode preserves the marker's original copy/symlink mode.
         mode: String::new(),
         force: false,

@@ -424,7 +424,17 @@ impl Context for NoopContext {
 /// `$HOME/.local/share`; then `base/symbrain/skills`, unless that directory is
 /// absent while the legacy `base/symskills` exists, in which case the legacy
 /// directory wins.
-fn skills_data_root() -> Result<PathBuf, SkillError> {
+///
+/// Public so every native skills path (the CLI's library/base/render roots
+/// included) shares this one resolver instead of re-deriving the precedence;
+/// the branches are frozen by the `defaults` scenarios in
+/// `tests/fixtures/runner_oracle.json`.
+///
+/// # Errors
+///
+/// Returns the same error text Go's `os.UserHomeDir` produces when no
+/// absolute `$XDG_DATA_HOME` and no usable home directory are available.
+pub fn skills_data_root() -> Result<PathBuf, SkillError> {
     let base = match std::env::var("XDG_DATA_HOME") {
         Ok(value) if Path::new(&value).is_absolute() => PathBuf::from(value),
         _ => home_dir()?.join(".local/share"),

@@ -168,7 +168,7 @@ fn default_paths_match_the_go_oracle_for_every_resolution_branch() {
         .expect("fixture has defaults")
         .as_array()
         .unwrap();
-    assert_eq!(cases.len(), 5, "every branch of the Go resolution rule");
+    assert_eq!(cases.len(), 7, "every branch of the Go resolution rule");
 
     for case in cases {
         let name = case.get("name").and_then(Value::as_str).unwrap();

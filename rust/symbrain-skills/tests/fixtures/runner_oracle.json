@@ -152,6 +152,16 @@
       "legacy_created": true
     },
     {
+      "name": "xdg_absolute_both_exist",
+      "xdg_data_home": "$ROOT/xdg_absolute_both_exist/data",
+      "library_dir": "$ROOT/xdg_absolute_both_exist/data/symbrain/skills/library",
+      "render_dir": "$ROOT/xdg_absolute_both_exist/data/symbrain/skills/rendered",
+      "base_dir": "$ROOT/xdg_absolute_both_exist/data/symbrain/skills/base",
+      "legacy": false,
+      "current_created": true,
+      "legacy_created": true
+    },
+    {
       "name": "xdg_absolute_neither_exists",
       "xdg_data_home": "$ROOT/xdg_absolute_neither_exists/data",
       "library_dir": "$ROOT/xdg_absolute_neither_exists/data/symbrain/skills/library",
@@ -180,6 +190,16 @@
       "legacy": false,
       "current_created": true,
       "legacy_created": false
+    },
+    {
+      "name": "xdg_unset_uses_legacy",
+      "xdg_data_home": "",
+      "library_dir": "$ROOT/xdg_unset_uses_legacy/home/.local/share/symskills/library",
+      "render_dir": "$ROOT/xdg_unset_uses_legacy/home/.local/share/symskills/rendered",
+      "base_dir": "$ROOT/xdg_unset_uses_legacy/home/.local/share/symskills/base",
+      "legacy": true,
+      "current_created": false,
+      "legacy_created": true
     }
   ],
   "disk": [
@@ -347,7 +367,7 @@
     }
   ],
   "provenance": {
-    "go_revision": "d6f81c99b0565c5e0b72049cc59ad0ffbee5de49",
+    "go_revision": "85d528c4070c5e39d4149d6388bb740cfc681cce",
     "generator_command": "go run ./scripts/skills-runner-oracle",
     "go_toolchain": "go1.26.7",
     "note": "Captured from this working tree. A squash merge destroys the recorded revision, so re-run scripts/run-go-oracle.sh with the merged main revision and regenerate before trusting the pin."
