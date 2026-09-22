@@ -1,0 +1,12 @@
+{
+  "tag": "v0.17.0",
+  "commit": "0c2c7769ac6074264e1c02fcdf903188b4f3fa08",
+  "artifact": "evidence/artifact/symbrain-rollback-v0.11.0",
+  "artifact_sha256": "d50622d42d050761f0aaccac734dbd3cbc583ea41a5bf6004b611ba802cb3420",
+  "observed": {
+    "command": "env -i PATH=/usr/bin:/bin HOME=/var/folders/7v/7bpq0fjn44lflpxdylsx8qs40000gn/T/symbrain-rollback-home-w_vjjel0 ./evidence/artifact/symbrain-rollback-v0.11.0 version",
+    "exit_code": 0,
+    "stdout": "symbrain dev\n  go      go1.27.1\n  os/arch darwin/arm64\n",
+    "stderr": ""
+  }
+}
