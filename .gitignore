@@ -36,3 +36,7 @@ __pycache__/
 PLANUNG.md
 ARCHITEKTUR.md
 .app-test-build/
+
+# --- Generated tooling artifacts (written by sync/oracle runs; never published) ---
+.cursor/
+.phase0-evidence/
