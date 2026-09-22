@@ -34,7 +34,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -58,251 +57,6 @@ const (
 	// byte-for-byte by the port; the port compares the stable prefix only.
 	classNetwork = "network"
 )
-
-// scriptStep is one canned transport response: either a status/body pair or a
-// transport error. Every case declares exactly the steps the shipped strategy
-// may consume; exhausting the script is itself recorded as an error.
-type scriptStep struct {
-	Status int    `json:"status,omitempty"`
-	Body   string `json:"body,omitempty"`
-	Error  string `json:"error,omitempty"`
-}
-
-// headerPair keeps the dump explicit, like scripts/usage-request-oracle.
-type headerPair struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-type capturedRequest struct {
-	Method  string       `json:"method"`
-	URL     string       `json:"url"`
-	Headers []headerPair `json:"headers"`
-	Body    string       `json:"body,omitempty"`
-}
-
-type meterSummary struct {
-	Label    string  `json:"label"`
-	Used     *string `json:"used"`
-	Limit    *string `json:"limit"`
-	Unit     string  `json:"unit"`
-	ResetsAt bool    `json:"resets_at"`
-}
-
-type snapshotSummary struct {
-	Source string         `json:"source"`
-	Meters []meterSummary `json:"meters"`
-}
-
-type result struct {
-	Kind     string           `json:"kind"` // ok | error
-	Class    string           `json:"class,omitempty"`
-	Text     string           `json:"text,omitempty"`
-	Snapshot *snapshotSummary `json:"snapshot,omitempty"`
-}
-
-type recordedCase struct {
-	ID        string            `json:"id"`
-	Env       map[string]string `json:"env"`
-	Script    []scriptStep      `json:"script"`
-	Workspace *string           `json:"workspace"`
-	Executed  []capturedRequest `json:"executed"`
-	Result    result            `json:"result"`
-}
-
-type provenance struct {
-	Generator string `json:"generator"`
-	Command   string `json:"command"`
-	// CheckCommand is the byte-for-byte recheck the slice must run.
-	CheckCommand string `json:"check_command"`
-	OracleSource string `json:"oracle_source"`
-	// OracleSources lists every shipped Go file an anchor verbatim occurs in
-	// (the subscription parse text lives in opencode_parse.go).
-	OracleSources []string `json:"oracle_sources"`
-	OracleAnchors []string `json:"oracle_anchors"`
-	Testdata      []string `json:"testdata"`
-	Transport     string   `json:"transport"`
-}
-
-type dump struct {
-	SchemaVersion int            `json:"schema_version"`
-	Provenance    provenance     `json:"provenance"`
-	Cases         []recordedCase `json:"cases"`
-}
-
-// testCase declares one scenario: which environment the real provider sees
-// and which bounded responses the recording transport serves, in order.
-type testCase struct {
-	id        string
-	cookie    bool    // OPENCODE_COOKIE set
-	workspace *string // OPENCODE_WORKSPACE_ID (nil = unset)
-	script    []scriptStep
-}
-
-func ws(value string) *string { return &value }
-
-// Response bodies. The two JSON bodies are the shipped Go testdata fixtures,
-// loaded in main before the case table is built, so the corpus stays bound to
-// the parser inputs the Go tests use.
-var (
-	bodyWorkspaces   string
-	bodySubscription string
-)
-
-const (
-	bodyNoWorkspace  = `{"workspaces":[]}`
-	bodyEmpty        = `{}`
-	bodySignedOut    = `{"error":"please sign in"}`
-	bodyMalformed    = "not json at all"
-	bodyMalformedTwo = "still not json"
-	bodyServerError  = "oops"
-	bodySignedOut500 = "Please sign in to continue"
-)
-
-// probeScript serves a body with no workspace id and no usage fields, so the
-// workspace leg (no override id) and the subscription leg (override id) each
-// run exactly one request per attempt.
-func probeScript() []scriptStep {
-	return []scriptStep{{Status: 200, Body: bodyEmpty}, {Status: 200, Body: bodyEmpty}}
-}
-
-// cases is the declared corpus. main asserts the declared and executed case
-// IDs are equal; the Rust port repeats that assertion against the fixture.
-// Built after the testdata bodies are loaded.
-func cases() []testCase {
-	return []testCase{
-		// Workspace discovery: GET, then POST fallback, then signed-out and
-		// status handling (internal/usage/opencode.go fetchWorkspaceID).
-		{
-			id:     "workspace_then_subscription_ok",
-			cookie: true,
-			script: []scriptStep{{Status: 200, Body: bodyWorkspaces}, {Status: 200, Body: bodySubscription}},
-		},
-		{
-			id:     "workspace_post_fallback_ok",
-			cookie: true,
-			script: []scriptStep{
-				{Status: 200, Body: bodyNoWorkspace},
-				{Status: 200, Body: bodyWorkspaces},
-				{Status: 200, Body: bodySubscription},
-			},
-		},
-		{
-			id:     "workspace_lookup_missing_id",
-			cookie: true,
-			script: []scriptStep{{Status: 200, Body: bodyEmpty}, {Status: 200, Body: bodyEmpty}},
-		},
-		{
-			id:     "workspace_signed_out_get",
-			cookie: true,
-			script: []scriptStep{{Status: 200, Body: bodySignedOut}},
-		},
-		{
-			id:     "workspace_signed_out_post",
-			cookie: true,
-			script: []scriptStep{{Status: 200, Body: bodyNoWorkspace}, {Status: 200, Body: bodySignedOut}},
-		},
-		{
-			id:     "workspace_http_401",
-			cookie: true,
-			script: []scriptStep{{Status: 401, Body: `{"error":"nope"}`}},
-		},
-		{
-			id:     "workspace_http_500_signed_out_body",
-			cookie: true,
-			script: []scriptStep{{Status: 500, Body: bodySignedOut500}},
-		},
-		{
-			id:     "workspace_http_500",
-			cookie: true,
-			script: []scriptStep{{Status: 500, Body: bodyServerError}},
-		},
-
-		// Subscription fetch with an explicit override: GET, parse-check,
-		// POST fallback, signed-out (fetchSubscriptionInfo).
-		{
-			id:        "subscription_override_ok",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script:    []scriptStep{{Status: 200, Body: bodySubscription}},
-		},
-		{
-			id:        "subscription_url_override_ok",
-			cookie:    true,
-			workspace: ws("https://opencode.ai/workspace/wrk_urlform9/billing"),
-			script:    []scriptStep{{Status: 200, Body: bodySubscription}},
-		},
-		{
-			id:        "subscription_post_fallback_ok",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script: []scriptStep{
-				{Status: 200, Body: bodyMalformed},
-				{Status: 200, Body: bodySubscription},
-			},
-		},
-		{
-			id:        "subscription_unparseable_both",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script: []scriptStep{
-				{Status: 200, Body: bodyMalformed},
-				{Status: 200, Body: bodyMalformedTwo},
-			},
-		},
-		{
-			id:        "subscription_signed_out_get",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script:    []scriptStep{{Status: 200, Body: bodySignedOut}},
-		},
-		{
-			id:        "subscription_signed_out_post",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script: []scriptStep{
-				{Status: 200, Body: bodyMalformed},
-				{Status: 200, Body: bodySignedOut},
-			},
-		},
-
-		// Transport failure and the workspace-only configuration gate
-		// (Strategies() is empty without a cookie).
-		{
-			id:        "network_error_first_request",
-			cookie:    true,
-			workspace: ws("wrk_override1"),
-			script:    []scriptStep{{Error: "boom"}},
-		},
-		{
-			id:        "workspace_only_no_cookie",
-			cookie:    false,
-			workspace: ws("dump-workspace"),
-			script:    nil,
-		},
-
-		// Workspace-id normalization probes (openCodeNormalizeWorkspaceID):
-		// the observed normalized id is derived from the first executed
-		// request.
-		{id: "normalize_bare_id", cookie: true, workspace: ws("wrk_abc123"), script: probeScript()},
-		{id: "normalize_url_full", cookie: true, workspace: ws("https://opencode.ai/workspace/wrk_abc123/billing"), script: probeScript()},
-		{id: "normalize_url_padded", cookie: true, workspace: ws("  https://opencode.ai/workspace/wrk_xyz987  "), script: probeScript()},
-		{id: "normalize_embedded_text", cookie: true, workspace: ws("text wrk_embedded42 more"), script: probeScript()},
-		{id: "normalize_empty", cookie: true, workspace: ws(""), script: probeScript()},
-		{id: "normalize_url_no_id", cookie: true, workspace: ws("https://opencode.ai/workspace/"), script: probeScript()},
-		{id: "normalize_wrk_underscore_only", cookie: true, workspace: ws("wrk_"), script: probeScript()},
-		{id: "normalize_token_prefix", cookie: true, workspace: ws("prefix_wrk_trail9"), script: probeScript()},
-		{id: "normalize_url_query", cookie: true, workspace: ws("https://opencode.ai/workspace/wrk_query7/billing?plan=pro"), script: probeScript()},
-		{id: "normalize_url_fragment", cookie: true, workspace: ws("https://opencode.ai/workspace/wrk_frag8/billing#top"), script: probeScript()},
-		{id: "normalize_bad_percent", cookie: true, workspace: ws("https://opencode.ai/workspace/wrk_bad%zz"), script: probeScript()},
-		{id: "normalize_dump_workspace", cookie: true, workspace: ws("dump-workspace"), script: probeScript()},
-		{id: "normalize_wrk_space", cookie: true, workspace: ws("wrk_a b"), script: probeScript()},
-		{id: "normalize_wrk_quote", cookie: true, workspace: ws(`wrk_a"b`), script: probeScript()},
-		{id: "normalize_wrk_html", cookie: true, workspace: ws("wrk_a<b"), script: probeScript()},
-		{id: "normalize_wrk_star", cookie: true, workspace: ws("wrk_a*b"), script: probeScript()},
-		{id: "normalize_wrk_line_sep", cookie: true, workspace: ws("wrk_a\u2028b"), script: probeScript()},
-	}
-}
 
 // recordingTransport serves the case's script in order and records every
 // request it sees. Consuming more steps than declared is recorded as an
@@ -343,7 +97,9 @@ func (t *recordingTransport) RoundTrip(req *http.Request) (*http.Response, error
 	}, nil
 }
 
-func main() {
+func main() { os.Exit(run()) }
+
+func run() int {
 	check := flag.Bool("check", false, "fail if the committed fixture differs")
 	output := flag.String("output", defaultOutput, "fixture path")
 	flag.Parse()
@@ -351,7 +107,7 @@ func main() {
 	home, err := os.MkdirTemp("", "opencode-discovery-oracle-")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: temp home:", err)
-		os.Exit(1)
+		return 1
 	}
 	defer func() { _ = os.RemoveAll(home) }()
 
@@ -367,17 +123,17 @@ func main() {
 	bodyWorkspaces, err = readTestdata(testdata, "opencode-workspaces.txt")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle:", err)
-		os.Exit(1)
+		return 1
 	}
 	bodySubscription, err = readTestdata(testdata, "opencode-subscription-json.txt")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle:", err)
-		os.Exit(1)
+		return 1
 	}
 
-	declared := cases()
+	declared := append(cases(), reviewCases()...)
 	out := dump{
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		Provenance: provenance{
 			Generator:    "scripts/usage-request-oracle/opencode/main.go",
 			Command:      "go run ./scripts/usage-request-oracle/opencode",
@@ -410,24 +166,28 @@ func main() {
 		Cases: make([]recordedCase, 0, len(declared)),
 	}
 
+	if err := recordProvenance(&out.Provenance); err != nil {
+		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle:", err)
+		return 1
+	}
 	declaredIDs := make(map[string]bool, len(declared))
 	for _, tc := range declared {
 		if declaredIDs[tc.id] {
 			fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: duplicate case id:", tc.id)
-			os.Exit(1)
+			return 1
 		}
 		declaredIDs[tc.id] = true
 		out.Cases = append(out.Cases, runCase(tc))
 	}
 	if len(out.Cases) != len(declared) {
 		fmt.Fprintf(os.Stderr, "opencode-discovery-oracle: executed %d cases, declared %d\n", len(out.Cases), len(declared))
-		os.Exit(1)
+		return 1
 	}
 
 	encoded, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: encode:", err)
-		os.Exit(1)
+		return 1
 	}
 	encoded = append(encoded, '\n')
 
@@ -435,19 +195,20 @@ func main() {
 		existing, err := os.ReadFile(*output)
 		if err != nil || !bytes.Equal(existing, encoded) {
 			fmt.Fprintf(os.Stderr, "%s is out of date; run go run ./scripts/usage-request-oracle/opencode\n", *output)
-			os.Exit(1)
+			return 1
 		}
-		return
+		return 0
 	}
 	if err := os.MkdirAll(filepath.Dir(*output), 0o755); err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: mkdir:", err)
-		os.Exit(1)
+		return 1
 	}
 	if err := os.WriteFile(*output, encoded, 0o644); err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle: write:", err)
-		os.Exit(1)
+		return 1
 	}
 	fmt.Fprintln(os.Stderr, "wrote", *output)
+	return 0
 }
 
 // runCase drives the real provider once and records what actually executed.
@@ -521,12 +282,18 @@ func observedWorkspace(requests []*http.Request) *string {
 func summarize(snap *usage.UsageSnapshot) *snapshotSummary {
 	out := &snapshotSummary{Source: snap.Source, Meters: make([]meterSummary, 0, len(snap.Meters))}
 	for _, meter := range snap.Meters {
+		var resetAfterNS *int64
+		if meter.ResetsAt != nil {
+			delta := meter.ResetsAt.Sub(snap.FetchedAt).Nanoseconds()
+			resetAfterNS = &delta
+		}
 		out.Meters = append(out.Meters, meterSummary{
-			Label:    meter.Label,
-			Used:     meter.Used,
-			Limit:    meter.Limit,
-			Unit:     meter.Unit,
-			ResetsAt: meter.ResetsAt != nil,
+			Label:        meter.Label,
+			Used:         meter.Used,
+			Limit:        meter.Limit,
+			Unit:         meter.Unit,
+			ResetsAt:     meter.ResetsAt != nil,
+			ResetAfterNS: resetAfterNS,
 		})
 	}
 	return out
@@ -585,41 +352,8 @@ func sortedHeaderNames(header http.Header) []string {
 	return names
 }
 
-// normalize replaces machine-dependent values so the dump is diffable on any
-// host: the build's hostname, the runtime version, the host platform, the
-// temp home, and the dummy cookie credential. None of these appear in the
-// recorded OpenCode surfaces except the cookie; the replacements stay so a
-// future case that grows one fails loudly on the port side instead of
-// silently varying per host.
+// Only the fixture cookie and random request instance are normalized. Never
+// replace host/version/platform substrings inside behavior-bearing payloads.
 func normalize(text string) string {
-	if host, err := os.Hostname(); err == nil && host != "" {
-		text = strings.ReplaceAll(text, host, "<host>")
-	}
-	version := strings.TrimPrefix(runtime.Version(), "go")
-	text = strings.ReplaceAll(text, version, "<version>")
-	text = strings.ReplaceAll(text, platformDisplayName(), "<platform-display>")
-	text = strings.ReplaceAll(text, platformLabel(), "<platform>")
-	if home := os.Getenv("HOME"); home != "" {
-		text = strings.ReplaceAll(text, home, "<home>")
-	}
-	text = strings.ReplaceAll(text, fixtureCookie, "CREDENTIAL")
-	return text
-}
-
-// platformLabel mirrors the shipped provider's Kimi platform label, which maps
-// Go's `darwin` to `macos` (same helpers as scripts/usage-request-oracle).
-func platformLabel() string {
-	if runtime.GOOS == "darwin" {
-		return "macos"
-	}
-	return runtime.GOOS
-}
-
-// platformDisplayName mirrors the shipped display name used in the Kimi
-// identity header.
-func platformDisplayName() string {
-	if runtime.GOOS == "darwin" {
-		return "macOS"
-	}
-	return runtime.GOOS
+	return strings.ReplaceAll(text, fixtureCookie, "CREDENTIAL")
 }

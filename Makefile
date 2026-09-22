@@ -98,6 +98,11 @@ parity-smoke: rust-go-printable-check
 rust-go-printable-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run scripts/generate-go-printable-table.go -check
 
+.PHONY: usage-opencode-check
+## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
+usage-opencode-check:
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode -check
+
 ## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
 usage-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
@@ -234,7 +239,7 @@ rust-fast:
 # in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
 # all four pass locally; per #631 they are wired back in this same change so
 # CI proves them before merge, rather than being re-added on faith.
-rust-check: rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings

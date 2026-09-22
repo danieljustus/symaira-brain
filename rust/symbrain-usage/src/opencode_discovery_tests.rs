@@ -19,7 +19,7 @@ const ORACLE: &str = include_str!("../tests/fixtures/opencode_discovery.json");
 /// The corpus case ids in fixture order. The replay asserts this list so a
 /// fixture edit that adds, drops, or renames a case fails until the list is
 /// updated deliberately.
-const CASE_IDS: [&str; 33] = [
+const CASE_IDS: &[&str] = &[
     "workspace_then_subscription_ok",
     "workspace_post_fallback_ok",
     "workspace_lookup_missing_id",
@@ -53,15 +53,53 @@ const CASE_IDS: [&str; 33] = [
     "normalize_wrk_html",
     "normalize_wrk_star",
     "normalize_wrk_line_sep",
+    "js_get",
+    "json_custom",
+    "json_numeric_string",
+    "json_named_precedence",
+    "json_fractional_reset",
+    "json_fractional_negative_reset",
+    "js_generic",
+    "js_weekly_without_reset",
+    "js_missing_reset",
+    "js_ascii_space",
+    "signed_out_unicode",
+    "js_post",
+    "url_encoded_id",
+    "url_encoded_letter",
+    "url_encoded_slash",
+    "url_encoded_space",
+    "url_invalid_host_escape",
+    "url_invalid_user_escape",
+    "url_large_port",
+    "url_plus_port",
+    "url_empty_port",
+    "url_invalid_host_space",
+    "url_invalid_user_space",
+    "url_relative_three_slashes",
+    "url_opaque",
+    "url_empty_scheme",
 ];
 
-/// The Go chain runner's wrapper around strategy failures. It is only peeled
-/// off to recover the injected transport detail of the network-error case
-/// (see `scripted_transport`).
+// Stable provider wrappers. The network case compares class and raw injected
+// detail only: Go's HTTP-client wrapper is a separately tracked live-fetch gap.
 const CHAIN_PREFIX: &str = "all AI usage fallbacks failed: ";
 
 /// The shipped network wrapper (`openCodeError` kind=network).
 const NETWORK_PREFIX: &str = "OpenCode request failed: ";
+
+#[test]
+fn replay_rejects_altered_recorded_result_and_request() {
+    let oracle: Value = serde_json::from_str(ORACLE).unwrap();
+    let case = oracle["cases"][0].clone();
+    replay(&case);
+    let mut bad_result = case.clone();
+    bad_result["result"]["snapshot"]["meters"][0]["used"] = Value::String("wrong".into());
+    assert!(std::panic::catch_unwind(|| replay(&bad_result)).is_err());
+    let mut bad_request = case;
+    bad_request["executed"][0]["method"] = Value::String("DELETE".into());
+    assert!(std::panic::catch_unwind(|| replay(&bad_request)).is_err());
+}
 
 #[test]
 fn corpus_replays_case_for_case_against_the_shipped_recording() {
@@ -77,66 +115,10 @@ fn corpus_replays_case_for_case_against_the_shipped_recording() {
     }
 }
 
-#[test]
-fn provenance_binds_the_corpus_to_the_shipped_opencode_source() {
-    let oracle: Value = serde_json::from_str(ORACLE).expect("oracle fixture must parse");
-    let provenance = oracle.get("provenance").expect("provenance object");
-    assert_eq!(
-        provenance["generator"],
-        "scripts/usage-request-oracle/opencode/main.go"
-    );
-    assert_eq!(
-        provenance["command"],
-        "go run ./scripts/usage-request-oracle/opencode"
-    );
-    assert_eq!(
-        provenance["check_command"],
-        "go run ./scripts/usage-request-oracle/opencode -check"
-    );
-    assert_eq!(provenance["oracle_source"], "internal/usage/opencode.go");
-    let sources = provenance["oracle_sources"]
-        .as_array()
-        .expect("oracle_sources array");
-    assert_eq!(
-        sources.len(),
-        2,
-        "the corpus spans opencode.go and opencode_parse.go"
-    );
-    let transport = provenance["transport"].as_str().expect("transport label");
-    assert!(
-        transport.contains("no network"),
-        "transport must state that it is not live provider evidence"
-    );
-    // The corpus is only as trustworthy as its anchors: each one must exist
-    // verbatim in one of the shipped Go sources this slice ports.
-    let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
-    let mut shipped = String::new();
-    for source in sources {
-        let source_path = manifest
-            .join("../..")
-            .join(source.as_str().expect("source path"));
-        shipped.push_str(
-            &std::fs::read_to_string(&source_path)
-                .unwrap_or_else(|error| panic!("read {}: {error}", source_path.display())),
-        );
-    }
-    let anchors = provenance["oracle_anchors"]
-        .as_array()
-        .expect("oracle_anchors");
-    assert!(!anchors.is_empty(), "provenance must carry anchors");
-    for anchor in anchors {
-        let anchor = anchor.as_str().expect("anchor string");
-        assert!(
-            shipped.contains(anchor),
-            "anchor missing from the shipped OpenCode sources: {anchor}"
-        );
-    }
-}
+#[path = "opencode_provenance_tests.rs"]
+mod provenance;
 
-/// Rebuilds the recorder's canned answers from the recorded script: status
-/// steps become responses; the network step re-injects the exact transport
-/// detail recovered from the recorded error text (chain and network wrappers
-/// peeled off), so even the failure text compares exactly.
+// Inputs come from script only, never from the expected result.
 fn scripted_transport(case: &Value) -> Vec<Result<Response, String>> {
     // Cases that never issue a request record a null script.
     let Some(script) = case["script"].as_array() else {
@@ -146,17 +128,7 @@ fn scripted_transport(case: &Value) -> Vec<Result<Response, String>> {
         .iter()
         .map(|step| {
             if let Some(raw) = step.get("error").and_then(Value::as_str) {
-                let recorded = case
-                    .pointer("/result/text")
-                    .and_then(Value::as_str)
-                    .unwrap_or_else(|| {
-                        panic!("{}: network step records its error text", case["id"])
-                    });
-                let injected = recorded
-                    .strip_prefix(CHAIN_PREFIX)
-                    .and_then(|inner| inner.strip_prefix(NETWORK_PREFIX))
-                    .unwrap_or(raw);
-                return Err(injected.to_string());
+                return Err(raw.to_string());
             }
             let status = u16::try_from(step.get("status").and_then(Value::as_u64).unwrap_or(200))
                 .expect("recorded status fits u16");
@@ -278,23 +250,49 @@ fn replay(case: &Value) {
         assert_eq!(headers, expected_headers, "{id}[{index}]: headers");
     }
 
+    compare_result(id, &result, case);
+}
+
+fn compare_result(id: &str, result: &Result<UsageSnapshot, crate::UsageError>, case: &Value) {
     // Result parity: snapshot fields recorded by the Go oracle, or the exact
     // recorded error text.
     let recorded_result = &case["result"];
     match recorded_result["kind"].as_str().expect("result kind") {
         "ok" => {
-            let snapshot = result.unwrap_or_else(|error| {
+            let snapshot = result.as_ref().unwrap_or_else(|error| {
                 panic!("{id}: expected a snapshot from the recording, got {error}")
             });
             assert_eq!(snapshot.source, "web", "{id}: source");
-            compare_snapshot(id, &snapshot, recorded_result);
+            compare_snapshot(id, snapshot, recorded_result);
         }
         "error" => {
-            let error = result.expect_err("recorded result is an error").to_string();
+            let error = result
+                .as_ref()
+                .expect_err("recorded result is an error")
+                .to_string();
             let expected = recorded_result["text"]
                 .as_str()
                 .expect("recorded error text");
-            assert_eq!(error, expected, "{id}: error text");
+            if recorded_result["class"] == "network" {
+                let prefix = format!("{CHAIN_PREFIX}{NETWORK_PREFIX}");
+                let detail = case["script"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find_map(|step| step["error"].as_str())
+                    .expect("transport input");
+                assert_eq!(
+                    error,
+                    format!("{prefix}{detail}"),
+                    "{id}: raw transport detail"
+                );
+                assert!(
+                    expected.starts_with(&prefix) && expected.ends_with(detail),
+                    "{id}: Go network class"
+                );
+            } else {
+                assert_eq!(error, expected, "{id}: error text");
+            }
         }
         kind => panic!("{id}: unknown recorded result kind {kind}"),
     }
@@ -331,6 +329,13 @@ fn compare_snapshot(id: &str, snapshot: &UsageSnapshot, recorded: &Value) {
             meter.resets_at.is_some(),
             expected["resets_at"].as_bool().unwrap_or(false),
             "{id}: meter {index} resets_at"
+        );
+        assert_eq!(
+            meter
+                .resets_at
+                .and_then(|reset| (reset - snapshot.fetched_at).num_nanoseconds()),
+            expected["reset_after_ns"].as_i64(),
+            "{id}: meter {index} exact reset delta"
         );
     }
 }
