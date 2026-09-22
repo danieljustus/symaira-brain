@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "source": "gh release view v0.11.0 --json tagName,isDraft,isPrerelease,publishedAt,assets",
+  "repository": "github.com/danieljustus/symaira-brain",
+  "tag": "v0.11.0",
+  "version": "0.11.0",
+  "is_draft": false,
+  "is_prerelease": false,
+  "published_at": "2026-09-03T21:50:16Z",
+  "asset_count": 40,
+  "assets": [
+    {
+      "name": "Symaira-Brain-0.11.0-macos.dmg",
+      "size": 3600183,
+      "content_type": "application/x-apple-diskimage",
+      "digest": "sha256:c34425794a4d2f58aebb89c4bc63c2eccd4c5b5ab50e8bff220dfa7cb76be88b"
+    },
+    {
+      "name": "checksums.txt",
+      "size": 1272,
+      "content_type": "text/plain; charset=utf-8",
+      "digest": "sha256:1fafa582abe2d37a40a8469a1ac0e88ca2fa0e1194cd7fb1335f874e2c9be240"
+    },
+    {
+      "name": "checksums.txt.pem",
+      "size": 3488,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:90f03dc7ccad8d50f5d203b915d9a2a151357c203c70430eceedd8b885f2d059"
+    },
+    {
+      "name": "checksums.txt.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:59e60e8469f211fc4d65798466dab67faf8ca160bcf60659c5107b714f733f47"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz",
+      "size": 6343199,
+      "content_type": "application/gzip",
+      "digest": "sha256:c204a84f3d91dac27a69352477ae09096051518166c967647c6995c352e0af3f"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:18182496f3fe422de047cad036ff084b5336032aa7a0e90519c45770dcad75a0"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz.sbom.json",
+      "size": 19668,
+      "content_type": "application/json",
+      "digest": "sha256:455f2780cc829996d108c233bbf7c8f77b8b309c0df82670ac997d1c4fc83020"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz.sbom.json.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:0e71ec82225e04e951691b732159b7800558b0feb5527cf710a3452b109e1204"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:fd1ed68d0b9ab2843a162098da786e8317b83ed305835b2c02265b568e71da13"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_amd64.tar.gz.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:dd63ad24ab17d4a1ac0d33d8e23689a2039388def92bb1f861ea7a44952a1434"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz",
+      "size": 6000358,
+      "content_type": "application/gzip",
+      "digest": "sha256:9e1ceefa0fd99b470511a61684fbdd4ffce118a50ae7cfac17c17aa694869888"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:204478c0c5882218482898224ac9dddbadda1f082de8773a660b6e8c9e89c6b6"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz.sbom.json",
+      "size": 19668,
+      "content_type": "application/json",
+      "digest": "sha256:cc7f2f9432092a981153b80d2cb780abfd06d6e1060a14a3b1c331433bc10681"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz.sbom.json.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:5e599ec67d32ba822eb4ccda46c6b3c0ff0ef93378a6000fb81afcb2c3a6b12f"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:ec60209ea78581c7b54b9db5e2dde3e05492cb9e4f5cbfa22f3b5495a24d2d70"
+    },
+    {
+      "name": "symbrain_0.11.0_darwin_arm64.tar.gz.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:2f2447e7282b70fb76e444717a8d096520c6ec758a9e172cbd4f569bf6fb3231"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz",
+      "size": 6259513,
+      "content_type": "application/gzip",
+      "digest": "sha256:8c0500184a5f133dec804725f620c7fff787066128566f51c0afde41ce28c974"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz.pem",
+      "size": 3488,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:8ca4e74a3362023e955bb137515e64f5b42214dfb52329c1b77016cd1e353c75"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz.sbom.json",
+      "size": 17603,
+      "content_type": "application/json",
+      "digest": "sha256:6d896d3b6fbeb8ba3a4ac052833e830f7f0eb6373df256af4c4df8e11546ba54"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz.sbom.json.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:a88bc7237eb7513222c735d3340a7e65a2b5f44ee48fe28533b03ebfc7039d47"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:0bce882eba5c307ec599c9d90eb32bf29f6ffaddc912e0b41022f992d2568b22"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_amd64.tar.gz.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:346dcffecd5cf5b58cd776922a2e5ce2cbc43d4bae734a94ca9c914c816bbc95"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz",
+      "size": 5806698,
+      "content_type": "application/gzip",
+      "digest": "sha256:330821ae372a25f645289e2dc5ff225723d65fc0a5144d9eb33c67563086fa81"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:6fb3129470ed74984b00333df40d4cd38a86f2f156986e3ed29cbe857d01273e"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz.sbom.json",
+      "size": 17603,
+      "content_type": "application/json",
+      "digest": "sha256:5d7ee5a798acfe6e46cc0cf07bbf5dd7b0aa978d10d62ea62fb8d32af36237ca"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz.sbom.json.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:eb9c88ecfc575d8ef7c1b78bb8965ce07da4f0710766bf93dce13d3ddedcf584"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:f775ee39c682ddffd3feba17d515c30a148a33971be31f6a4c0f80cec82dd351"
+    },
+    {
+      "name": "symbrain_0.11.0_linux_arm64.tar.gz.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:4943e0bfae3bd740815af521d415b4ff50debaf872bd1b1497b3d519d8aeeaa1"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip",
+      "size": 6390086,
+      "content_type": "application/zip",
+      "digest": "sha256:69d9c328f2497035530c715998c71ab97a4ca8e0283c6f3afb3de68abf0154b9"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip.pem",
+      "size": 3488,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:154e1d5dfaefb7da21bad3ba85984c76c84a097c765997af5dabd9cfcf167937"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip.sbom.json",
+      "size": 20135,
+      "content_type": "application/json",
+      "digest": "sha256:a719ec7b048db292f5526b39cee41d07a27a35b5b18856e1fb46f0ea4a605077"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip.sbom.json.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:79d16f7a88efdc3760d1738f577f87f11ead0f180328b58aa228fe1f16cdd4d6"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:1237ef31b7d0de5c7e4945d0520a72fba8b045ed1cc98247617200ba9182ec86"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_amd64.zip.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:13214de810f308d497bc24cc3aada06a8ebf476a6e6930f0569af6460c71a6b7"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip",
+      "size": 5842267,
+      "content_type": "application/zip",
+      "digest": "sha256:ba34102087e0c1edc3a809cdfaa3c0bd4bdf896bce0add21ef74039f3387dd3f"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip.pem",
+      "size": 3480,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:6a940d68f5dcc37310e43ce0b069f067c16397590dfe7c65b2545c4ebfb2d8d7"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip.sbom.json",
+      "size": 20135,
+      "content_type": "application/json",
+      "digest": "sha256:cdeb4a74c7aa99a1d8cd4beaad5ecb5fc582735085dda8bb2d2f93b66db84fcc"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip.sbom.json.pem",
+      "size": 3488,
+      "content_type": "application/x-x509-ca-cert",
+      "digest": "sha256:0cf28f853270493320e013b3fe11650981f4ab52d4731ea8c3aa172d8d920205"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip.sbom.json.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:c0080e83479071c61cc86858c337049716e8d6554ad77ebe273f326a2ed06caf"
+    },
+    {
+      "name": "symbrain_0.11.0_windows_arm64.zip.sig",
+      "size": 96,
+      "content_type": "application/pgp-signature",
+      "digest": "sha256:253afb1ebedc97af92c4d6958ed7749d1497edcc477c243d29564c8e183d6b3a"
+    }
+  ]
+}
