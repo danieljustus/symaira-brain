@@ -14,6 +14,7 @@ use std::fs;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
 /// Environment variables that configure a provider on their own.
@@ -65,10 +66,22 @@ fn secret_reference_source(reference: &str) -> &'static str {
     }
 }
 
-fn is_secret_reference(value: &str) -> bool {
+/// Returns true for any Brain secret-reference scheme: `symvault://`, the
+/// deprecated `vault://` alias, `env://`, or `keychain://` — Go's
+/// `secrets.IsSecretReference` contract.
+#[must_use]
+pub fn is_secret_reference(value: &str) -> bool {
     ["symvault://", "vault://", "env://", "keychain://"]
         .iter()
         .any(|prefix| value.starts_with(prefix))
+}
+
+/// Returns true for the canonical `symvault://` scheme or the deprecated
+/// `vault://` alias — Go's `secrets.IsVaultURI` contract, which gates the
+/// environment fallback in [`resolve_reference`].
+#[must_use]
+pub fn is_vault_uri(value: &str) -> bool {
+    value.starts_with("symvault://") || value.starts_with("vault://")
 }
 
 /// Resolves one environment-sourced credential.
@@ -100,9 +113,7 @@ fn resolve_env(name: &str) -> Result<Option<(String, String)>, String> {
     } else {
         raw.strip_prefix("symvault://")
             .or_else(|| raw.strip_prefix("vault://"))
-            .filter(|path| {
-                !path.is_empty() && !path.starts_with('-') && !path.chars().any(char::is_control)
-            })
+            .filter(|path| validate_vault_path(path).is_ok())
             .and_then(|path| resolve_secret_command("symvault", &["get", "--", path, "--print"]))
     };
     match resolved {
@@ -126,62 +137,136 @@ fn resolve_env_or_file(
 }
 
 fn resolve_secret_command(command: &str, args: &[&str]) -> Option<String> {
-    let output = bounded_command_stdout(
+    let output = run_command_capture(
         command,
         args,
-        Duration::from_secs(5),
+        secretref_timeout(),
         MAX_CREDENTIAL_FILE_BYTES,
-    )?;
+    )
+    .ok()?;
     String::from_utf8(output)
         .ok()
         .map(|value| value.trim().to_owned())
         .filter(|value| !value.is_empty())
 }
 
-/// Runs one command with a hard deadline and a bounded stdout, never through a
-/// shell. Output goes to a temporary file so a child holding the pipe open
-/// cannot outlive cancellation.
-fn bounded_command_stdout(
+/// Why a bounded child command did not yield usable stdout.
+enum CommandFailure {
+    NotFound,
+    TimedOut,
+    ExitFailed { code: Option<i32>, stderr: Vec<u8> },
+    Other(String),
+}
+
+/// Runs one command with a hard deadline and bounded stdout/stderr capture,
+/// never through a shell. Each stream goes to a temporary file so a child
+/// holding a pipe open cannot outlive cancellation. This is the single
+/// subprocess runner behind both the legacy `Option` API and the
+/// Go-parity secret-reference path.
+fn run_command_capture(
     command: &str,
     args: &[&str],
     timeout: Duration,
     cap: u64,
-) -> Option<Vec<u8>> {
-    let file = tempfile::NamedTempFile::new().ok()?;
-    let handle = file.as_file().try_clone().ok()?;
+) -> Result<Vec<u8>, CommandFailure> {
+    let file =
+        tempfile::NamedTempFile::new().map_err(|error| CommandFailure::Other(error.to_string()))?;
+    let stderr_file =
+        tempfile::NamedTempFile::new().map_err(|error| CommandFailure::Other(error.to_string()))?;
+    let handle = file
+        .as_file()
+        .try_clone()
+        .map_err(|error| CommandFailure::Other(error.to_string()))?;
+    let stderr_handle = stderr_file
+        .as_file()
+        .try_clone()
+        .map_err(|error| CommandFailure::Other(error.to_string()))?;
     let mut child_command = Command::new(command);
     child_command
         .args(args)
         .stdin(Stdio::null())
-        .stderr(Stdio::null())
+        .stderr(Stdio::from(stderr_handle))
         .stdout(Stdio::from(handle));
     #[cfg(unix)]
     std::os::unix::process::CommandExt::process_group(&mut child_command, 0);
-    let mut child = child_command.spawn().ok()?;
+    let mut child = match child_command.spawn() {
+        Ok(child) => child,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Err(CommandFailure::NotFound);
+        }
+        Err(error) => return Err(CommandFailure::Other(error.to_string())),
+    };
     let deadline = Instant::now() + timeout;
     loop {
         match child.try_wait() {
             Ok(Some(status)) => {
                 if !status.success() {
-                    return None;
+                    let stderr = read_capture(stderr_file.as_file(), cap);
+                    return Err(CommandFailure::ExitFailed {
+                        code: status.code(),
+                        stderr,
+                    });
                 }
                 break;
             }
             Ok(None) if Instant::now() < deadline => {
                 std::thread::sleep(Duration::from_millis(5));
             }
-            Ok(None) | Err(_) => {
+            Ok(None) => {
                 terminate_child(&mut child);
-                return None;
+                return Err(CommandFailure::TimedOut);
+            }
+            Err(error) => {
+                terminate_child(&mut child);
+                return Err(CommandFailure::Other(error.to_string()));
             }
         }
     }
     terminate_child(&mut child);
-    let mut file = file.as_file().try_clone().ok()?;
-    file.seek(SeekFrom::Start(0)).ok()?;
+    let mut file = file
+        .as_file()
+        .try_clone()
+        .map_err(|error| CommandFailure::Other(error.to_string()))?;
+    file.seek(SeekFrom::Start(0))
+        .map_err(|error| CommandFailure::Other(error.to_string()))?;
     let mut output = Vec::new();
-    file.take(cap + 1).read_to_end(&mut output).ok()?;
-    (output.len() as u64 <= cap).then_some(output)
+    file.take(cap + 1)
+        .read_to_end(&mut output)
+        .map_err(|error| CommandFailure::Other(error.to_string()))?;
+    if output.len() as u64 > cap {
+        return Err(CommandFailure::Other(
+            "command output exceeds the bounded read limit".into(),
+        ));
+    }
+    Ok(output)
+}
+
+fn read_capture(file: &std::fs::File, cap: u64) -> Vec<u8> {
+    let Ok(mut file) = file.try_clone() else {
+        return Vec::new();
+    };
+    if file.seek(SeekFrom::Start(0)).is_err() {
+        return Vec::new();
+    }
+    let mut buffer = Vec::new();
+    if file.take(cap + 1).read_to_end(&mut buffer).is_err() {
+        return Vec::new();
+    }
+    if buffer.len() as u64 > cap {
+        buffer.truncate(usize::try_from(cap).unwrap_or(usize::MAX));
+    }
+    buffer
+}
+
+/// Legacy surface: probes and the usage credential path keep their
+/// `Option<Vec<u8>>` contract over the shared runner.
+fn bounded_command_stdout(
+    command: &str,
+    args: &[&str],
+    timeout: Duration,
+    cap: u64,
+) -> Option<Vec<u8>> {
+    run_command_capture(command, args, timeout, cap).ok()
 }
 
 fn terminate_child(child: &mut std::process::Child) {
@@ -194,6 +279,237 @@ fn terminate_child(child: &mut std::process::Child) {
     }
     let _ = child.kill();
     let _ = child.wait();
+}
+
+// ---------------------------------------------------------------------------
+// Secret-reference resolution: freezes internal/memory/secrets + corekit's
+// secretref byte contract, verified by tests/secret_oracle_tests.rs against
+// the Go-generated fixtures/secret_oracle.json.
+// ---------------------------------------------------------------------------
+
+/// Mirrors corekit's exported `secretref.DefaultTimeout` variable: the bound
+/// every `symvault`/`security` subprocess runs under. Shrinkable so tests can
+/// exercise deadline bytes without sleeping the shipped 5s.
+static SECRETREF_TIMEOUT_MS: AtomicU64 = AtomicU64::new(5_000);
+
+/// The current secret subprocess timeout (shipped default: 5 seconds).
+#[must_use]
+pub fn secretref_timeout() -> Duration {
+    Duration::from_millis(SECRETREF_TIMEOUT_MS.load(Ordering::Relaxed))
+}
+
+/// Replaces the secret subprocess timeout, mirroring Go's assignment to
+/// `secretref.DefaultTimeout`. Tests restore it with `Duration::from_secs(5)`.
+pub fn set_secretref_timeout(timeout: Duration) {
+    let milliseconds = u64::try_from(timeout.as_millis()).unwrap_or(u64::MAX);
+    SECRETREF_TIMEOUT_MS.store(milliseconds, Ordering::Relaxed);
+}
+
+/// Renders a duration the way Go's `time.Duration.String` renders the whole
+/// second / whole millisecond values this surface exposes: "5s", "150ms".
+fn go_duration(timeout: Duration) -> String {
+    let milliseconds = timeout.as_millis();
+    if milliseconds.is_multiple_of(1_000) {
+        format!("{}s", milliseconds / 1_000)
+    } else {
+        format!("{milliseconds}ms")
+    }
+}
+
+/// corekit's `validateVaultPath`, checked before the binary is looked up.
+fn validate_vault_path(path: &str) -> Result<(), String> {
+    if path.is_empty() {
+        return Err("invalid symvault credential path: empty".to_owned());
+    }
+    if path.starts_with('-') {
+        return Err("invalid symvault credential path: must not start with '-'".to_owned());
+    }
+    if path.contains('\0') {
+        return Err("invalid symvault credential path: contains a null byte".to_owned());
+    }
+    if path.chars().any(char::is_control) {
+        return Err("invalid symvault credential path: contains control characters".to_owned());
+    }
+    Ok(())
+}
+
+/// corekit's `refLabel`: empty references report `<default>`.
+fn reference_label(reference: &str) -> &str {
+    if reference.is_empty() {
+        "<default>"
+    } else {
+        reference
+    }
+}
+
+/// corekit's subprocess failure texts: symvault's `LookPath` message, the
+/// Go-wrapped deadline message, and `exit status N[: stderr detail]`.
+fn command_failure_message(
+    failure: CommandFailure,
+    action: &str,
+    binary: &str,
+    timeout: Duration,
+) -> String {
+    match failure {
+        CommandFailure::NotFound if binary == "symvault" => {
+            "symvault binary not found on PATH".to_owned()
+        }
+        CommandFailure::NotFound => format!("exec: {binary:?}: executable file not found in $PATH"),
+        CommandFailure::TimedOut => format!(
+            "secretref: subprocess timed out: {action} timed out after {}",
+            go_duration(timeout)
+        ),
+        CommandFailure::ExitFailed { code, stderr } => {
+            let status = code.map_or_else(
+                || "signal: killed".to_owned(),
+                |code| format!("exit status {code}"),
+            );
+            let detail = String::from_utf8_lossy(&stderr).trim().to_owned();
+            if detail.is_empty() {
+                status
+            } else {
+                format!("{status}: {detail}")
+            }
+        }
+        CommandFailure::Other(message) => message,
+    }
+}
+
+/// corekit's `secretref.Resolve` dispatcher. Go always passes an empty
+/// default, so the bare-name branch exists only for byte parity.
+fn resolve_shared_reference(reference: &str) -> Result<String, String> {
+    if reference.is_empty() {
+        return Err("no credential reference or default provided".to_owned());
+    }
+    if let Some(path) = reference.strip_prefix("symvault://") {
+        return resolve_symvault_reference(reference, path);
+    }
+    if let Some(rest) = reference.strip_prefix("keychain://") {
+        return match rest.split_once('/') {
+            Some((service, account)) if !service.is_empty() && !account.is_empty() => {
+                resolve_keychain_reference(reference, service, account)
+            }
+            _ => Err(format!(
+                "resolve {}: invalid keychain reference, expected keychain://service/account",
+                reference_label(reference)
+            )),
+        };
+    }
+    if let Some(name) = reference.strip_prefix("env://") {
+        return match env_raw(name) {
+            Some(value) => Ok(value),
+            None => Err(format!(
+                "environment variable {name} is not set (reference {})",
+                reference_label(reference)
+            )),
+        };
+    }
+    Err(format!(
+        "environment variable {reference} is not set (reference {})",
+        reference_label(reference)
+    ))
+}
+
+fn resolve_symvault_reference(reference: &str, path: &str) -> Result<String, String> {
+    let label = reference_label(reference);
+    validate_vault_path(path).map_err(|error| format!("resolve {label}: {error}"))?;
+    let timeout = secretref_timeout();
+    let output = run_command_capture(
+        "symvault",
+        &["get", "--", path, "--print"],
+        timeout,
+        MAX_CREDENTIAL_FILE_BYTES,
+    )
+    .map_err(|failure| {
+        format!(
+            "resolve {label}: {}",
+            command_failure_message(failure, "symvault get", "symvault", timeout)
+        )
+    })?;
+    // Go runs TrimSpace over the raw bytes; a non-UTF-8 secret would diverge
+    // here only (lossy replacement), and no shipped provider emits one.
+    Ok(String::from_utf8_lossy(&output).trim().to_owned())
+}
+
+/// Go spawns the bare `security` binary with no pre-lookup, so only macOS
+/// resolves `keychain://` references.
+#[cfg(target_os = "macos")]
+fn resolve_keychain_reference(
+    reference: &str,
+    service: &str,
+    account: &str,
+) -> Result<String, String> {
+    let label = reference_label(reference);
+    let timeout = secretref_timeout();
+    let output = run_command_capture(
+        "security",
+        &["find-generic-password", "-w", "-s", service, "-a", account],
+        timeout,
+        MAX_CREDENTIAL_FILE_BYTES,
+    )
+    .map_err(|failure| {
+        format!(
+            "resolve {label}: {}",
+            command_failure_message(failure, "keychain lookup", "security", timeout)
+        )
+    })?;
+    Ok(String::from_utf8_lossy(&output).trim().to_owned())
+}
+
+#[cfg(not(target_os = "macos"))]
+fn resolve_keychain_reference(
+    reference: &str,
+    _service: &str,
+    _account: &str,
+) -> Result<String, String> {
+    Err(format!(
+        "resolve {}: keychain:// references are only resolvable on macOS",
+        reference_label(reference)
+    ))
+}
+
+/// Go's `internal/memory/secrets.Resolve`: plain values stay literal,
+/// `vault://` is a deprecated alias for `symvault://`, and vault failures
+/// fall back to `env_fallback` when it names a non-empty environment
+/// variable. Error bytes match Go exactly and never contain the secret.
+///
+/// # Errors
+/// Returns the Go-identical wrapped resolution error.
+pub fn resolve_reference(value: &str, env_fallback: &str) -> Result<String, String> {
+    if value.is_empty() || !is_secret_reference(value) {
+        return Ok(value.to_owned());
+    }
+    let reference = match value.strip_prefix("vault://") {
+        Some(rest) => format!("symvault://{rest}"),
+        None => value.to_owned(),
+    };
+    let failure = match resolve_shared_reference(&reference) {
+        Ok(secret) if !secret.is_empty() => return Ok(secret),
+        Ok(_) => "shared resolver returned empty secret".to_owned(),
+        Err(message) => message,
+    };
+    if is_vault_uri(value)
+        && !env_fallback.is_empty()
+        && let Some(fallback) = env_raw(env_fallback)
+    {
+        return Ok(fallback);
+    }
+    Err(format!(
+        "secret resolution failed for {reference}: {failure}; set env var {env_fallback} as fallback or install symvault"
+    ))
+}
+
+/// Go's `internal/memory/secrets.ResolveOrEnv`: a non-empty value resolves
+/// through [`resolve_reference`] with `env_name` as its fallback; an empty
+/// value reads `env_name` directly, defaulting to an empty string.
+///
+/// # Errors
+/// Propagates [`resolve_reference`]'s Go-identical error bytes.
+pub fn resolve_reference_or_env(value: &str, env_name: &str) -> Result<String, String> {
+    if !value.is_empty() {
+        return resolve_reference(value, env_name);
+    }
+    Ok(env_raw(env_name).unwrap_or_default())
 }
 
 fn read_limited(path: &Path) -> Option<Vec<u8>> {
