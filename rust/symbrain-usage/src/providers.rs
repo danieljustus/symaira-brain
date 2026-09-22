@@ -21,7 +21,10 @@ use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
 mod provider_config;
-pub use provider_config::{all_providers, needs_go_fallback};
+pub use provider_config::{
+    all_providers, is_secret_reference, is_vault_uri, needs_go_fallback, resolve_reference,
+    resolve_reference_or_env, secretref_timeout, set_secretref_timeout,
+};
 
 const MAX_CREDENTIAL_FILE_BYTES: u64 = 64 * 1024;
 
