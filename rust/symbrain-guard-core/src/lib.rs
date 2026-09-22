@@ -12,6 +12,7 @@ pub mod go_json;
 pub mod go_time;
 
 pub mod approval;
+pub mod audit;
 pub mod capability;
 mod capability_wire;
 pub mod grant;

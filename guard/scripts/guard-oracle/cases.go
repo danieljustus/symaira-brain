@@ -229,6 +229,7 @@ func buildSuite() oracleSuite {
 	}
 	cases = append(cases, sec002Cases()...)
 	cases = append(cases, sec002GrantsCases()...)
+	cases = append(cases, sec002ChainCases()...)
 	return oracleSuite{Cases: cases}
 }
 

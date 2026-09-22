@@ -116,6 +116,40 @@ struct GrantsEvalInput {
 /// `symbrain-cli/tests/guard_oracle_grants.rs` asserts their bytes.
 const CLI_OWNED_KINDS: &[&str] = &["grants_cli"];
 
+#[derive(Debug, Deserialize)]
+struct HashEntryInput {
+    entry: String,
+    prev_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyChainInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    expected_final_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyAnchorInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    anchor: Option<symbrain_guard_core::audit::ChainAnchor>,
+}
+
+#[derive(Debug, Deserialize)]
+struct VerifyAnchorForLogInput {
+    entries: Vec<String>,
+    initial_hash: String,
+    anchor: Option<symbrain_guard_core::audit::ChainAnchor>,
+    log_size: i64,
+    content_hash: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ReadCheckpointInput {
+    content: Option<String>,
+}
+
 /// Frozen instant for `decide_response` cases. Responses are
 /// clock-independent; this instant only needs to sit between the corpus's
 /// far-past and far-future deadlines, exactly where Go's wall clock sat
@@ -345,6 +379,56 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
             let result =
                 catalog.evaluate_with_grants(&input.subject, &input.call, input.default, &grants);
             Ok(serialize(&result))
+        }
+        "audit_hash_entry" => {
+            let input: HashEntryInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let digest = symbrain_guard_core::audit::hash_entry(&input.entry, &input.prev_hash);
+            Ok(serialize(&digest))
+        }
+        "audit_verify_chain" => {
+            let input: VerifyChainInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_chain(
+                &input.entries,
+                &input.initial_hash,
+                &input.expected_final_hash,
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_verify_anchor" => {
+            let input: VerifyAnchorInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_anchor(
+                &input.entries,
+                &input.initial_hash,
+                input.anchor.as_ref(),
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_verify_anchor_for_log" => {
+            let input: VerifyAnchorForLogInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let valid = symbrain_guard_core::audit::verify_anchor_for_log(
+                &input.entries,
+                &input.initial_hash,
+                input.anchor.as_ref(),
+                input.log_size,
+                &input.content_hash,
+            );
+            Ok(serialize(&valid))
+        }
+        "audit_read_checkpoint" => {
+            let input: ReadCheckpointInput =
+                serde_json::from_value(case.input.clone()).map_err(|e| e.to_string())?;
+            let anchor = match &input.content {
+                Some(content) => Some(symbrain_guard_core::audit::parse_anchor(
+                    content.as_bytes(),
+                )?),
+                None => None,
+            };
+            String::from_utf8(to_go_json_vec(&anchor).map_err(|e| e.to_string())?)
+                .map_err(|e| e.to_string())
         }
         other => Err(format!("unknown oracle kind {other}")),
     }
