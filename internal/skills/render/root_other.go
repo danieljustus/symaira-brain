@@ -21,5 +21,5 @@ func openRenderDirNoFollow(root *os.Root, rel string) (*os.Root, error) {
 }
 
 func openRenderFileNoFollow(root *os.Root, path string) (*os.File, error) {
-	return root.OpenFile(path, os.O_RDONLY, 0)
+	return root.OpenFile(path, os.O_RDWR, 0)
 }

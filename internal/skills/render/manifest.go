@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -19,10 +20,22 @@ func writeMaterializedFile(root *os.Root, path string, data []byte, mode os.File
 	if err := renderFault("write", path); err != nil {
 		return err
 	}
-	if err := skill.WriteRootFile(root, path, data, mode); err != nil {
+	writeMode := mode
+	if runtime.GOOS == "windows" {
+		// Windows FlushFileBuffers requires a writable handle. Apply the
+		// read-only attribute only after the staged file has been synced.
+		writeMode |= 0o200
+	}
+	if err := skill.WriteRootFile(root, path, data, writeMode); err != nil {
 		return err
 	}
-	return syncRootFile(root, path)
+	if err := syncRootFile(root, path); err != nil {
+		return err
+	}
+	if writeMode != mode {
+		return root.Chmod(path, mode)
+	}
+	return nil
 }
 
 var errMarkerTooLarge = errors.New("render marker exceeds maximum input size")
