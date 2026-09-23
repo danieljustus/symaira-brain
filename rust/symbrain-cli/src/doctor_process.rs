@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::{OsStr, OsString};
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -8,8 +9,39 @@ use std::time::{Duration, Instant};
 pub(super) fn which(binary: &str) -> Option<PathBuf> {
     let path = env::var_os("PATH")?;
     env::split_paths(&path)
-        .map(|dir| dir.join(binary))
+        .flat_map(|dir| {
+            executable_names(
+                OsStr::new(binary),
+                env::var_os("PATHEXT").as_deref(),
+                cfg!(windows),
+            )
+            .into_iter()
+            .map(move |name| dir.join(name))
+        })
         .find(|candidate| candidate.is_file() && is_executable(candidate))
+}
+
+fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> Vec<OsString> {
+    if Path::new(binary).extension().is_some() {
+        return vec![binary.to_os_string()];
+    }
+    if windows {
+        let extensions = path_ext
+            .map(OsStr::to_string_lossy)
+            .unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
+        std::iter::once(binary.to_os_string())
+            .chain(
+                extensions
+                    .split(';')
+                    .filter(|extension| !extension.is_empty())
+                    .map(|extension| {
+                        OsString::from(format!("{}{extension}", binary.to_string_lossy()))
+                    }),
+            )
+            .collect()
+    } else {
+        vec![binary.to_os_string()]
+    }
 }
 
 #[cfg(unix)]
@@ -106,6 +138,32 @@ fn join_reader(
         .join()
         .map_err(|_| format!("capture child {stream}: reader panicked"))?
         .map_err(|error| format!("capture child {stream}: {error}"))
+}
+
+#[cfg(test)]
+mod executable_name_tests {
+    use super::executable_names;
+    use std::ffi::{OsStr, OsString};
+
+    #[test]
+    fn windows_lookup_adds_pathext_only_when_no_extension_is_given() {
+        assert_eq!(
+            executable_names(OsStr::new("symvault"), Some(OsStr::new(".EXE;.CMD")), true),
+            vec![
+                OsString::from("symvault"),
+                OsString::from("symvault.EXE"),
+                OsString::from("symvault.CMD")
+            ]
+        );
+        assert_eq!(
+            executable_names(
+                OsStr::new("symvault.exe"),
+                Some(OsStr::new(".EXE;.CMD")),
+                true,
+            ),
+            vec![OsString::from("symvault.exe")]
+        );
+    }
 }
 
 #[cfg(all(test, unix))]

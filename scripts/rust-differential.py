@@ -2777,6 +2777,18 @@ def go_reports_install_atime(goos: str) -> bool:
     return goos in {"linux", "darwin"}
 
 
+def normalize_fixture_root(data: bytes, root: Path) -> bytes:
+    """Replace only the supplied fixture root in plain or JSON-escaped output."""
+    raw_root = str(root).encode()
+    json_root = json.dumps(str(root), ensure_ascii=True)[1:-1].encode("ascii")
+    return data.replace(json_root, b"<root>").replace(raw_root, b"<root>")
+
+
+def normalize_atomic_tempfile(data: bytes) -> bytes:
+    """Normalize only the random suffix on atomic-write rename source paths."""
+    return re.sub(rb"(rename [^\r\n]*?\.tmp-)[^\\/: ]+", rb"\1<random>", data)
+
+
 def normalize_last_used(stdout_bytes: bytes, placeholder: str) -> bytes:
     """Replace an atime-derived `last_used` value with a fixed placeholder."""
     return re.sub(
@@ -2912,10 +2924,10 @@ def main() -> int:
                 go_stderr = go_result.stderr
                 rust_stderr = rust_result.stderr
                 # Normalize the isolated fixture roots in output paths
-                go_stdout = go_stdout.replace(str(go_root).encode(), b"<root>")
-                rust_stdout = rust_stdout.replace(str(rust_root).encode(), b"<root>")
-                go_stderr = go_stderr.replace(str(go_root).encode(), b"<root>")
-                rust_stderr = rust_stderr.replace(str(rust_root).encode(), b"<root>")
+                go_stdout = normalize_fixture_root(go_stdout, go_root)
+                rust_stdout = normalize_fixture_root(rust_stdout, rust_root)
+                go_stderr = normalize_fixture_root(go_stderr, go_root)
+                rust_stderr = normalize_fixture_root(rust_stderr, rust_root)
                 backup_timestamp = rb"\.bak\.[0-9]{8}T[0-9]{6}Z(?:\.[0-9]+)?"
                 go_stdout = re.sub(backup_timestamp, b".bak.<timestamp>", go_stdout)
                 rust_stdout = re.sub(backup_timestamp, b".bak.<timestamp>", rust_stdout)
@@ -2953,6 +2965,8 @@ def main() -> int:
                     go_stderr = re.sub(uuid_pattern, b"<uuid>", go_stderr)
                     rust_stderr = re.sub(uuid_pattern, b"<uuid>", rust_stderr)
                 if case.normalize_os_error:
+                    go_stderr = normalize_atomic_tempfile(go_stderr)
+                    rust_stderr = normalize_atomic_tempfile(rust_stderr)
                     go_stderr = re.sub(
                         rb"(symbrain config (?:get|set): (?:read|parse|backup|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
                         rb"\1<permission denied>\n",

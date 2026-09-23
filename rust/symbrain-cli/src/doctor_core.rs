@@ -276,44 +276,7 @@ pub(super) fn check_harness(spec: HarnessSpec, profiles_dir: &Path) -> HarnessCh
 }
 
 pub(super) fn harness_path(spec: HarnessSpec) -> Option<PathBuf> {
-    let home = xdg::home_dir()?;
-    let config_home = user_config_dir(&home);
-    match spec.name {
-        "claude" => Some(home.join(".claude.json")),
-        "claude-desktop" => {
-            #[cfg(target_os = "macos")]
-            {
-                Some(home.join("Library/Application Support/Claude/claude_desktop_config.json"))
-            }
-            #[cfg(not(target_os = "macos"))]
-            {
-                Some(config_home?.join("Claude/claude_desktop_config.json"))
-            }
-        }
-        "cursor" => Some(home.join(".cursor/mcp.json")),
-        "opencode" => Some(config_home?.join("opencode/config.json")),
-        "codex" => Some(home.join(".codex/config.toml")),
-        "antigravity" => Some(home.join(".gemini/config/mcp_config.json")),
-        _ => None,
-    }
-}
-
-#[cfg(windows)]
-fn user_config_dir(_home: &Path) -> Option<PathBuf> {
-    env::var_os("APPDATA")
-        .filter(|value| !value.is_empty())
-        .map(PathBuf::from)
-}
-
-#[cfg(not(windows))]
-fn user_config_dir(home: &Path) -> Option<PathBuf> {
-    match env::var_os("XDG_CONFIG_HOME").filter(|value| !value.is_empty()) {
-        Some(value) => {
-            let path = PathBuf::from(value);
-            path.is_absolute().then_some(path)
-        }
-        None => Some(home.join(".config")),
-    }
+    symbrain_harness::lookup(spec.name).ok()?.config_path().ok()
 }
 
 pub(super) fn parse_server_map(
