@@ -218,6 +218,9 @@ pub fn write_snapshot_for_scope(
             fault,
         )?;
         super::sync::sync_dir(&root, Path::new(&stage_name), None)?;
+        // cap-std holds Windows directories without FILE_SHARE_DELETE, so
+        // release the staged child before atomically renaming it.
+        drop(stage_root);
         publish_base(
             &root,
             &stage_name,

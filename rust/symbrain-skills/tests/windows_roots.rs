@@ -46,7 +46,8 @@ fn junction(link: &Path, target: &Path) {
 #[test]
 fn drive_root_materializes_and_installs_real_skill() {
     let temp = tempfile::tempdir().expect("root");
-    let (bundle, rendered) = rendered_source(&temp.path().join("library/windows-root"));
+    let source = temp.path().join("library/windows-root");
+    let (bundle, rendered) = rendered_source(&source);
     let output = temp.path().join("render");
     let tree = materialize(&bundle, &rendered, &output).expect("materialize on drive");
     assert_eq!(
@@ -71,10 +72,35 @@ fn drive_root_materializes_and_installs_real_skill() {
         rendered.skill_md
     );
     assert!(result.path.join(".symskills.json").is_file());
-    assert!(
-        home.join(".local/share/symskills/base/opencode/windows-root/manifest.json")
-            .is_file(),
-        "base snapshot must be installed too"
+    let manifest = home.join(".local/share/symskills/base/opencode/windows-root/manifest.json");
+    let first_manifest = fs::read(&manifest).expect("installed base snapshot");
+
+    fs::write(
+        source.join("SKILL.md"),
+        b"---\nname: windows-root\ndescription: native install test\n---\nUpdated body.\n",
+    )
+    .expect("updated source");
+    let updated_bundle = load_bundle(&source).expect("updated bundle");
+    let updated_rendered = render_target(&updated_bundle, "opencode", &RenderMetadata::default())
+        .expect("updated render");
+    let replaced = install_rendered(
+        &updated_bundle,
+        &updated_rendered,
+        &InstallOptions {
+            home_dir: home,
+            mode: "copy".to_owned(),
+            ..Default::default()
+        },
+    )
+    .expect("replace installation on drive");
+    assert_eq!(replaced.path, result.path);
+    assert_eq!(
+        fs::read(replaced.path.join("SKILL.md")).expect("replaced bytes"),
+        updated_rendered.skill_md
+    );
+    assert_ne!(
+        fs::read(manifest).expect("replaced base snapshot"),
+        first_manifest
     );
 }
 
