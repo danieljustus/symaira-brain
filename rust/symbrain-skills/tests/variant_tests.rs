@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::fs;
 
 use serde_json::Value;
 use symbrain_skills::variant::{
@@ -9,6 +8,9 @@ use symbrain_skills::variant::{
     Options, Problem, Region, apply, check_overrides, check_region_targets, check_terms,
     find_mentions, scan_text, unscoped_text,
 };
+
+#[path = "common/mod.rs"]
+mod common;
 
 fn options(target: &str) -> Options {
     Options {
@@ -207,10 +209,7 @@ fn marker_grammar_matches_go_case_and_separator_rules() {
 
 #[test]
 fn diagnostic_messages_match_go_oracle() {
-    let oracle_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/oracle_expectations.json");
-    let oracle: Value =
-        serde_json::from_slice(&fs::read(oracle_path).expect("oracle JSON")).expect("oracle JSON");
+    let oracle: Value = serde_json::from_slice(&common::skills_oracle()).expect("oracle JSON");
     let known = ["claude".to_string(), "hermes".to_string()];
     for case in oracle["diagnostics"].as_array().expect("diagnostics") {
         let id = case["id"].as_str().expect("diagnostic id");
@@ -286,10 +285,7 @@ fn diagnostic_messages_match_go_oracle() {
 
 #[test]
 fn variant_outputs_match_go_target_goldens() {
-    let oracle_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures/oracle_expectations.json");
-    let oracle: Value = serde_json::from_slice(&fs::read(oracle_path).expect("oracle fixture"))
-        .expect("oracle JSON");
+    let oracle: Value = serde_json::from_slice(&common::skills_oracle()).expect("oracle JSON");
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../internal/skills/render/testdata/variant-source");
     let bundle = symbrain_skills::load_bundle(&root).expect("variant fixture");

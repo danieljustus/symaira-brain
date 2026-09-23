@@ -1,12 +1,20 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+#[path = "common/mod.rs"]
+mod common;
+
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use symbrain_skills::install::{InstallOptions, StatusOptions, install_rendered, status};
 use symbrain_skills::{RenderMetadata, load_bundle, materialize, render_target};
 
 #[derive(Debug, Deserialize)]
 struct OracleFixture {
+    schema_version: u32,
+    generator_sha256: String,
+    go_sources: BTreeMap<String, String>,
     cases: Vec<OracleCase>,
 }
 
@@ -39,8 +47,36 @@ struct Artifact {
 #[test]
 fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
     let fixture: OracleFixture =
-        serde_json::from_slice(include_bytes!("fixtures/install_status_oracle.json"))
-            .expect("install oracle fixture");
+        serde_json::from_slice(&common::skills_install_oracle()).expect("install oracle fixture");
+    assert_eq!(fixture.schema_version, 1);
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    assert_eq!(
+        fixture.generator_sha256,
+        sha256(&repo.join("scripts/skills-install-oracle/main.go")),
+        "Go install-oracle generator changed"
+    );
+    let expected_sources = BTreeSet::from([
+        "internal/skills/install/install.go",
+        "internal/skills/install/status.go",
+        "internal/skills/install/base.go",
+        "internal/skills/install/classify.go",
+        "internal/skills/render/render_target.go",
+    ]);
+    assert_eq!(
+        fixture
+            .go_sources
+            .keys()
+            .map(String::as_str)
+            .collect::<BTreeSet<_>>(),
+        expected_sources
+    );
+    for (source, expected) in &fixture.go_sources {
+        assert_eq!(
+            sha256(&repo.join(source)),
+            *expected,
+            "Go install/status source changed: {source}"
+        );
+    }
     assert_eq!(fixture.cases.len(), 11);
     for case in fixture.cases {
         let root = tempfile::tempdir().expect("case root");
@@ -132,6 +168,14 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
             case.id
         );
     }
+}
+
+fn sha256(path: &Path) -> String {
+    let bytes = fs::read(path).unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
+    Sha256::digest(bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect()
 }
 
 fn write_oracle_skill(root: &Path, body: &str) {

@@ -7,6 +7,9 @@ use symbrain_skills::{
     validate_skill_name, validate_with_targets,
 };
 
+#[path = "common/mod.rs"]
+mod common;
+
 fn fixture(name: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../internal/skills/render/testdata")
@@ -189,10 +192,7 @@ fn escaping_symlink_resource_is_rejected() {
 
 #[test]
 fn loader_matches_go_oracle_fixture() {
-    let oracle_path =
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/oracle_expectations.json");
-    let oracle: Value = serde_json::from_slice(&fs::read(oracle_path).expect("oracle fixture"))
-        .expect("oracle JSON");
+    let oracle: Value = serde_json::from_slice(&common::skills_oracle()).expect("oracle JSON");
     for case in oracle["cases"].as_array().expect("oracle cases") {
         let id = case["id"].as_str().expect("case id");
         let bundle = load_bundle(&fixture(id)).expect("Go fixture bundle");

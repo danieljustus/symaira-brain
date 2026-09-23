@@ -261,9 +261,10 @@ fn opencode_user_status_managed_marker_row_matches_go_bytes() {
     );
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
+    let path = serde_json::to_string(&skill.to_string_lossy()).unwrap();
     let expected = format!(
-        "{{\"installs\":[{{\"target\":\"opencode\",\"name\":\"managed\",\"path\":\"{}\",\"status\":\"orphaned\",\"mode\":\"copy\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"abc123\",\"allow_executable\":true}}],\"summary\":{{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":1,\"unmanaged\":0}}}}\n",
-        skill.display()
+        "{{\"installs\":[{{\"target\":\"opencode\",\"name\":\"managed\",\"path\":{},\"status\":\"orphaned\",\"mode\":\"copy\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"abc123\",\"allow_executable\":true}}],\"summary\":{{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":1,\"unmanaged\":0}}}}\n",
+        path
     );
     assert_eq!(output.stdout, expected.as_bytes());
 }
