@@ -292,5 +292,21 @@
       "stdout_only_jsonrpc": true,
       "stdout_non_protocol_bytes": 0
     }
-  ]
+  ],
+  "cancellation": {
+    "request": {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "method": "tools/call",
+      "params": {
+        "arguments": {
+          "probe": "cancel"
+        },
+        "name": "vault_health"
+      }
+    },
+    "child_call_started": true,
+    "connection_cancelled": true,
+    "stdout": "{\"jsonrpc\":\"2.0\",\"id\":2,\"result\":{\"content\":[{\"text\":\"broker: tools/call canceled: context canceled\",\"type\":\"text\"}],\"isError\":true}}\n"
+  }
 }

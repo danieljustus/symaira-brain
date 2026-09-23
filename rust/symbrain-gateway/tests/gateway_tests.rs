@@ -1,12 +1,16 @@
 use std::collections::BTreeMap;
+use std::io::{self, Cursor, Read};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use serde_json::value::RawValue;
 use serde_json::{Value, json};
 use symbrain_broker::{CallToolResult, ContentBlock, Tool};
 use symbrain_gateway::{BackendError, Gateway, GatewayBackend, GatewayError};
-use symbrain_mcp::{Request, Server};
+use symbrain_mcp::{DispatchContext, Request, Server, ServerError};
 use symbrain_policy::profile::parse::parse;
 
 const FIXTURE: &str = include_str!("fixtures/gateway_cases.json");
@@ -17,6 +21,7 @@ struct Fixture {
     profile_toml: String,
     child_tools: Vec<FixtureTool>,
     cases: Vec<Case>,
+    cancellation: CancellationCase,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,6 +48,14 @@ struct Case {
     error_classifications: Vec<ErrorClassification>,
 }
 
+#[derive(Debug, Deserialize)]
+struct CancellationCase {
+    request: Value,
+    child_call_started: bool,
+    connection_cancelled: bool,
+    stdout: String,
+}
+
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 struct ErrorClassification {
     request_id: i64,
@@ -54,6 +67,68 @@ struct FixtureBackend {
     tools: Vec<Tool>,
     behavior: BTreeMap<String, String>,
     calls: Mutex<Vec<(String, Option<String>)>>,
+}
+
+struct CancellationBackend {
+    tools: Vec<Tool>,
+    started: Sender<()>,
+}
+
+impl GatewayBackend for CancellationBackend {
+    fn list_tools(&self) -> Result<Vec<Tool>, BackendError> {
+        Ok(self.tools.clone())
+    }
+
+    fn call_tool(
+        &self,
+        _name: &str,
+        _arguments: Option<&RawValue>,
+    ) -> Result<CallToolResult, BackendError> {
+        Err(BackendError::Internal(
+            "cancellation test must receive dispatch context".to_string(),
+        ))
+    }
+
+    fn call_tool_with_context(
+        &self,
+        _name: &str,
+        _arguments: Option<&RawValue>,
+        context: DispatchContext<'_>,
+    ) -> Result<CallToolResult, BackendError> {
+        self.started
+            .send(())
+            .map_err(|error| BackendError::Internal(error.to_string()))?;
+        let deadline = Instant::now() + Duration::from_secs(3);
+        while !context.is_cancelled() {
+            if Instant::now() >= deadline {
+                return Err(BackendError::Internal(
+                    "connection cancellation was not observed".to_string(),
+                ));
+            }
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        Err(BackendError::Cancelled {
+            op: "tools/call".to_string(),
+        })
+    }
+}
+
+struct CancellationReader {
+    input: Cursor<Vec<u8>>,
+    finish: Receiver<()>,
+}
+
+impl Read for CancellationReader {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        let count = self.input.read(buffer)?;
+        if count > 0 {
+            return Ok(count);
+        }
+        self.finish
+            .recv()
+            .map_err(|error| io::Error::other(error.to_string()))?;
+        Ok(0)
+    }
 }
 
 impl GatewayBackend for FixtureBackend {
@@ -212,6 +287,64 @@ fn fixture_is_the_complete_gateway_black_box_contract() {
             );
         }
     }
+}
+
+#[test]
+fn in_flight_tools_call_cancellation_matches_go_oracle() {
+    let fixture: Fixture = serde_json::from_str(FIXTURE).expect("gateway fixture");
+    assert!(fixture.cancellation.child_call_started);
+    assert!(fixture.cancellation.connection_cancelled);
+
+    let (started_tx, started_rx) = mpsc::channel();
+    let backend: Arc<dyn GatewayBackend> = Arc::new(CancellationBackend {
+        tools: vec![Tool {
+            name: "health".to_string(),
+            description: "slow cancellation probe".to_string(),
+            input_schema: None,
+            annotations: None,
+        }],
+        started: started_tx,
+    });
+    let profile = parse("gateway-fixture", &fixture.profile_toml).expect("fixture profile");
+    let gateway = Gateway::new(
+        profile,
+        BTreeMap::from([("vault".to_string(), backend)]),
+        "dev",
+    )
+    .expect("gateway assembly");
+    let mut input = serde_json::to_vec(&fixture.cancellation.request).expect("request JSON");
+    input.push(b'\n');
+    let (finish_tx, finish_rx) = mpsc::channel();
+    let reader = CancellationReader {
+        input: Cursor::new(input),
+        finish: finish_rx,
+    };
+    let cancelled = Arc::new(AtomicBool::new(false));
+    let worker_cancelled = Arc::clone(&cancelled);
+    let worker = std::thread::spawn(move || {
+        let server = Server::new(gateway);
+        let mut output = Vec::new();
+        let result = server.serve_io_with_cancel(worker_cancelled.as_ref(), reader, &mut output);
+        (result, output)
+    });
+
+    if let Err(error) = started_rx.recv_timeout(Duration::from_secs(2)) {
+        cancelled.store(true, Ordering::Release);
+        let _ = finish_tx.send(());
+        let _ = worker.join();
+        panic!("gateway never dispatched the in-flight call: {error}");
+    }
+    cancelled.store(true, Ordering::Release);
+    finish_tx
+        .send(())
+        .expect("release reader after cancellation");
+
+    let (result, output) = worker.join().expect("join MCP serve loop");
+    assert!(matches!(result, Err(ServerError::Cancelled)));
+    assert_eq!(
+        String::from_utf8(output).expect("UTF-8 response stream"),
+        fixture.cancellation.stdout
+    );
 }
 
 #[test]

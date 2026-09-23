@@ -40,7 +40,7 @@ impl fmt::Display for BrokerError {
                 }
             }
             Self::Timeout { op } => write!(f, "broker: {op}: timeout"),
-            Self::Cancelled { op } => write!(f, "broker: {op}: cancelled"),
+            Self::Cancelled { op } => write!(f, "broker: {op} canceled: context canceled"),
             Self::Rpc { code, message } => write!(f, "broker: rpc error {code}: {message}"),
             Self::ProtocolMismatch { expected, actual } => {
                 write!(

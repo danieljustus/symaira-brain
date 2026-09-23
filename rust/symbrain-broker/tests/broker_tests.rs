@@ -104,19 +104,27 @@ fn slow_call_times_out_and_shutdown_reaps_child() {
 
 #[test]
 fn in_flight_child_call_observes_connection_cancellation() {
-    let mut config = cfg_with_env(&[("FAKEMCP_SLOW_MS", "2000")]);
+    let temp = tempfile::tempdir().expect("tempdir");
+    let marker = temp.path().join("call.marker");
+    let marker_path = marker.to_str().expect("marker path is UTF-8");
+    let mut config = cfg_with_env(&[
+        ("FAKEMCP_SLOW_MS", "2000"),
+        ("FAKEMCP_CALL_MARKER", marker_path),
+    ]);
     config.call_timeout = Duration::from_secs(5);
     let server = Arc::new(ManagedServer::new(config));
     let _ = server.list_tools().expect("list tools");
     let cancelled = Arc::new(AtomicBool::new(false));
     let worker_server = Arc::clone(&server);
     let worker_cancelled = Arc::clone(&cancelled);
-    let started = Instant::now();
     let worker = std::thread::spawn(move || {
         worker_server
             .call_tool_with_cancel("slow", None, &|| worker_cancelled.load(Ordering::Acquire))
     });
-    std::thread::sleep(Duration::from_millis(50));
+    wait_until(|| {
+        std::fs::read_to_string(&marker).is_ok_and(|calls| calls.lines().any(|call| call == "slow"))
+    });
+    let started = Instant::now();
     cancelled.store(true, Ordering::Release);
 
     let error = worker
@@ -124,6 +132,10 @@ fn in_flight_child_call_observes_connection_cancellation() {
         .expect("join cancellation worker")
         .expect_err("cancelled call must fail");
     assert!(matches!(error, BrokerError::Cancelled { .. }));
+    assert_eq!(
+        error.to_string(),
+        "broker: tools/call canceled: context canceled"
+    );
     assert!(started.elapsed() < Duration::from_secs(1));
     server.shutdown();
 }
