@@ -48,6 +48,9 @@ def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]
         for name, asset in assets.items()
         if name.endswith((".tar.gz", ".zip")) and "_windows_" not in name
     }
+    expected_formula_urls = {repo_url + name for name in expected_formula}
+    all_formula_urls = re.findall(r'^\s*url "([^"]*/releases/download/[^"]+)"\s*$', formula, re.MULTILINE)
+    require(len(all_formula_urls) == len(expected_formula_urls) and set(all_formula_urls) == expected_formula_urls, "Homebrew formula has extra or missing release-download URLs")
     formula_pairs = re.findall(
         r'^\s*url "(' + re.escape(repo_url) + r'([^"]+))"\s*\n\s*sha256 "([0-9a-f]{64})"',
         formula,
@@ -60,6 +63,8 @@ def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]
     dmg_name = f"Symaira-Brain-{version}-macos.dmg"
     dmg_digest = assets[dmg_name]["digest"].removeprefix("sha256:")
     expected_cask_url = f"https://{manifest['repository']}/releases/download/v#{{version}}/Symaira-Brain-#{{version}}-macos.dmg"
+    all_cask_release_urls = re.findall(r'^\s*url "([^"]*/releases/download/[^"]+)"\s*$', cask, re.MULTILINE)
+    require(all_cask_release_urls == [expected_cask_url], "Homebrew cask has extra or missing release-download URLs")
     require(re.findall(r'^\s*version "([^"]+)"\s*$', cask, re.MULTILINE) == [version], "Homebrew cask version differs from the release manifest")
     require(re.findall(r'^\s*sha256 "([0-9a-f]{64})"\s*$', cask, re.MULTILINE) == [dmg_digest], "Homebrew cask checksum differs from the release manifest")
     cask_urls = re.findall(r'^\s*url "([^"]+)"\s*$', cask, re.MULTILINE)
