@@ -296,6 +296,22 @@ jobs:
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
+  rust-mcp-fuzz-smoke:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install nightly Rust and pinned cargo-fuzz
+        run: |
+          rustup toolchain install nightly --profile minimal
+          cargo install cargo-fuzz --version 0.13.2 --locked
+      - name: Fuzz both MCP targets with retained Go seeds
+        run: make rust-fuzz-smoke
+
   # Windows native audit capability and guard decide adapter test gate.
   # Exercises handle-relative directory capability, reparse-point rejection,
   # and guard decide adapter on native Windows runners.
