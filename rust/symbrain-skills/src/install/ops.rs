@@ -348,12 +348,16 @@ pub(crate) fn install_symlink(
         0o644,
         fault,
     )?;
-    #[cfg(not(windows))]
+    #[cfg(any(unix, windows))]
     {
         let name = replace::safe_name(destination.file_name())?;
         let backup = backup_existing(destination, fault)?;
         let temp = replace::unique_name(".symskills-link-")?;
-        if let Err(error) = root.symlink_contents(source, &temp) {
+        #[cfg(windows)]
+        let link_result = root.symlink_dir(source, &temp);
+        #[cfg(not(windows))]
+        let link_result = root.symlink_contents(source, &temp);
+        if let Err(error) = link_result {
             if let Some(backup) = backup {
                 let _ = restore_backup(&backup, destination);
             }
@@ -383,7 +387,7 @@ pub(crate) fn install_symlink(
         }
         Ok(())
     }
-    #[cfg(not(unix))]
+    #[cfg(all(not(unix), not(windows)))]
     {
         let _ = root;
         let _ = fault;

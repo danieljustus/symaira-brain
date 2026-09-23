@@ -122,11 +122,11 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
         let mut expected_artifacts = case.expected.artifacts;
         #[cfg(windows)]
         for artifact in &mut expected_artifacts {
-            if artifact.path.ends_with("/.symskills.json") {
-                if let Some(bytes) = &artifact.bytes {
-                    let decoded = decode_base64(bytes);
-                    artifact.bytes = Some(base64(&normalize_marker_bytes(&decoded, root.path())));
-                }
+            if artifact.path.ends_with("/.symskills.json")
+                && let Some(bytes) = &artifact.bytes
+            {
+                let decoded = decode_base64(bytes);
+                artifact.bytes = Some(base64(&normalize_marker_bytes(&decoded, root.path())));
             }
         }
         assert_eq!(

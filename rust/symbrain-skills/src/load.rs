@@ -137,10 +137,8 @@ fn open_read(root: &Dir, relative: &Path, name: &str) -> Result<cap_std::fs::Fil
 fn go_io_error(error: &std::io::Error) -> String {
     let message = error.to_string();
     #[cfg(windows)]
-    if error.kind() == std::io::ErrorKind::NotFound {
-        if let Some((context, _)) = message.rsplit_once(": ") {
-            return format!("{context}: The system cannot find the file specified.");
-        }
+    if let Some(context) = message.strip_suffix(": no such file or directory") {
+        return format!("{context}: The system cannot find the file specified.");
     }
     message
 }

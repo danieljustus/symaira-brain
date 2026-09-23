@@ -56,9 +56,9 @@ fn run_child_case(test_name: &str, envs: &[(String, String)]) -> String {
 /// Rust install layer materializes into a per-user cache and links there. The
 /// fixture records the Go target under `$ROOT`, so the assertion below fails
 /// until the install layer is given the render path.
-// Windows install currently rejects symlink mode, so this exact layout check
-// only applies on platforms where the production symlink mode is supported.
-#[cfg(unix)]
+// The Go and Rust runners both publish managed directory symlinks on Windows
+// and Unix, so this verifies the same target layout on both platforms.
+#[cfg(any(unix, windows))]
 #[test]
 fn installed_symlinks_match_the_frozen_go_layout() {
     let fixture = load_fixture();

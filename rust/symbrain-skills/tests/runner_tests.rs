@@ -248,9 +248,8 @@ fn broken_skill_names_the_target_in_the_install_path() {
     assert_case_matches("failure_visible_and_reported", &fixture, &res);
 }
 
-// Runner defaults to managed symlink installs, unsupported by the Windows
-// install layer; the copy-mode lifecycle is covered cross-platform elsewhere.
-#[cfg(unix)]
+// Runner defaults to managed symlink installs on both Unix and Windows.
+#[cfg(any(unix, windows))]
 #[test]
 fn populated_library_processes_every_target_without_a_legacy_binary() {
     // Go's TestRun_NoLegacyBinaryProcessesTargets: no symskills binary is
