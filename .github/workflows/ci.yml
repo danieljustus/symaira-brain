@@ -361,6 +361,7 @@ jobs:
           set -euo pipefail
           for case in \
             "symbrain-skills runner_env_tests conflicting_home_variables_use_the_go_platform_home" \
+            "symbrain-skills runner_env_tests default_paths_match_the_go_oracle_for_every_resolution_branch" \
             "symbrain-cli skills_sync_legacy_roots native_sync_plan_uses_the_platform_home_when_home_variables_disagree"; do
             read -r package suite name <<<"$case"
             output=$(cargo test -p "$package" --test "$suite" "$name" --locked -- --exact 2>&1) || { printf '%s\n' "$output"; exit 1; }
