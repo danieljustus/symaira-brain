@@ -67,6 +67,19 @@ fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
     let root = real_root(root);
     let home = root.join("home");
     fs::create_dir_all(&home).unwrap();
+    let empty_path = root.join("empty-path");
+    fs::create_dir_all(&empty_path).unwrap();
+
+    #[cfg(windows)]
+    let (app_data, local_app_data, temp) = {
+        let app_data = home.join("AppData").join("Roaming");
+        let local_app_data = home.join("AppData").join("Local");
+        let temp = root.join("temp");
+        for path in [&app_data, &local_app_data, &temp] {
+            fs::create_dir_all(path).unwrap();
+        }
+        (app_data, local_app_data, temp)
+    };
 
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     cmd.env_clear();
@@ -97,23 +110,15 @@ fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
         .env("XDG_DATA_HOME", root.join("data"))
         .env("XDG_CACHE_HOME", root.join("cache"))
         .env("XDG_STATE_HOME", root.join("state"))
-        .env("PATH", root.join("empty-path"))
+        .env("PATH", empty_path)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
     #[cfg(windows)]
-    {
-        let appdata = home.join("AppData").join("Roaming");
-        let local_appdata = home.join("AppData").join("Local");
-        let temp = root.join("temp");
-        for path in [&appdata, &local_appdata, &temp] {
-            fs::create_dir_all(path).unwrap();
-        }
-        cmd.env("APPDATA", appdata)
-            .env("LOCALAPPDATA", local_appdata)
-            .env("TEMP", &temp)
-            .env("TMP", temp);
-    }
+    cmd.env("APPDATA", app_data)
+        .env("LOCALAPPDATA", local_app_data)
+        .env("TEMP", &temp)
+        .env("TMP", temp);
     cmd
 }
 

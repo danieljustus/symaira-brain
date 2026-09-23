@@ -1038,8 +1038,10 @@ def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
 
 def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> None:
     # Go encodes skills reports with `json.Encoder`, which escapes `&`, `<` and
-    # `>`; a name carrying those bytes proves the native encoder matches.
-    write_opencode_skill(root, "a&b<c>d")
+    # `>`; Windows forbids angle brackets in file names, so its native case
+    # keeps the legal ampersand and still verifies escaping on the live path.
+    name = "a&b-c-d" if os.name == "nt" else "a&b<c>d"
+    write_opencode_skill(root, name)
 
 
 def setup_memory_rules(root: Path, env: dict[str, str]) -> None:

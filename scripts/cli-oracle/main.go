@@ -133,9 +133,9 @@ func main() {
 }
 
 // oracleEnv and oracleRoot isolate every case from the ambient machine:
-// HOME and the XDG roots point into a throwaway directory, so the oracle can
-// never read or write the operator's real config, profiles or managed
-// binaries. Paths in the captured output are rewritten to <root>.
+// HOME, XDG roots and (on Windows) the user-profile roots point into a
+// throwaway directory, so the oracle cannot read or write the operator's real
+// config, profiles or managed binaries. Paths in captured output become <root>.
 var (
 	oracleEnv  []string
 	oracleRoot string
@@ -157,6 +157,9 @@ func setupOracleEnv() error {
 	oracleRoot = root
 	oracleCwd, _ = os.Getwd()
 	home := filepath.Join(root, "home")
+	if err := os.MkdirAll(home, 0o755); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Join(root, "cwd"), 0o755); err != nil {
 		return err
 	}
@@ -172,32 +175,55 @@ func setupOracleEnv() error {
 		return err
 	}
 
-	oracleEnv = append(os.Environ(),
-		"HOME="+home,
-		"XDG_CONFIG_HOME="+filepath.Join(home, ".config"),
-		"XDG_DATA_HOME="+filepath.Join(root, "data"),
-		"XDG_CACHE_HOME="+filepath.Join(root, "cache"),
-		"XDG_STATE_HOME="+filepath.Join(root, "state"),
-		"PATH="+emptyPath,
-	)
+	oracleEnv = os.Environ()
+	for _, pair := range [][2]string{
+		{"HOME", home},
+		{"XDG_CONFIG_HOME", filepath.Join(home, ".config")},
+		{"XDG_DATA_HOME", filepath.Join(root, "data")},
+		{"XDG_CACHE_HOME", filepath.Join(root, "cache")},
+		{"XDG_STATE_HOME", filepath.Join(root, "state")},
+		{"PATH", emptyPath},
+	} {
+		oracleEnv = setEnv(oracleEnv, pair[0], pair[1])
+	}
 	if runtime.GOOS == "windows" {
 		appData := filepath.Join(home, "AppData", "Roaming")
 		localAppData := filepath.Join(home, "AppData", "Local")
 		temp := filepath.Join(root, "temp")
-		for _, dir := range []string{appData, localAppData, temp} {
-			if err := os.MkdirAll(dir, 0o755); err != nil {
+		for _, path := range []string{appData, localAppData, temp} {
+			if err := os.MkdirAll(path, 0o755); err != nil {
 				return err
 			}
 		}
-		oracleEnv = append(oracleEnv,
-			"USERPROFILE="+home,
-			"APPDATA="+appData,
-			"LOCALAPPDATA="+localAppData,
-			"TEMP="+temp,
-			"TMP="+temp,
-		)
+		for _, pair := range [][2]string{
+			{"USERPROFILE", home},
+			{"APPDATA", appData},
+			{"LOCALAPPDATA", localAppData},
+			{"TEMP", temp},
+			{"TMP", temp},
+		} {
+			oracleEnv = setEnv(oracleEnv, pair[0], pair[1])
+		}
+		if drive := filepath.VolumeName(home); drive != "" {
+			oracleEnv = setEnv(oracleEnv, "HOMEDRIVE", drive)
+			oracleEnv = setEnv(oracleEnv, "HOMEPATH", strings.TrimPrefix(home, drive))
+		}
 	}
 	return nil
+}
+
+// setEnv replaces an inherited variable instead of appending a duplicate.
+// Windows environment variable names are case-insensitive, and leaving both
+// runner and oracle values in Cmd.Env can make the selected home ambiguous.
+func setEnv(env []string, key, value string) []string {
+	filtered := make([]string, 0, len(env)+1)
+	for _, entry := range env {
+		name, _, ok := strings.Cut(entry, "=")
+		if !ok || !strings.EqualFold(name, key) {
+			filtered = append(filtered, entry)
+		}
+	}
+	return append(filtered, key+"="+value)
 }
 
 // buildCases generates test cases by invoking the real Go binary.
