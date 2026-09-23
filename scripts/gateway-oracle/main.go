@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -387,7 +388,11 @@ func buildFake(root string) (string, func(), error) {
 		return "", func() {}, err
 	}
 	cleanup := func() { _ = os.RemoveAll(dir) }
-	path := filepath.Join(dir, "fakemcp")
+	executable := "fakemcp"
+	if runtime.GOOS == "windows" {
+		executable += ".exe"
+	}
+	path := filepath.Join(dir, executable)
 	cmd := exec.Command("go", "build", "-o", path, "./internal/broker/testdata/fakemcp")
 	cmd.Dir = root
 	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
