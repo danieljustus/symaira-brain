@@ -138,13 +138,19 @@ fn normalize_stdout(s: &str, root: &str, repo: &str) -> String {
     let platform_re = regex::Regex::new(r"(?m)^(\s*os/arch\s+)\S+$").unwrap();
     out = platform_re.replace_all(&out, "${1}<os/arch>").to_string();
 
+    normalize_accepted_differences(&normalize_tokenized_paths(&out))
+}
+
+/// Normalize separators only in paths rooted at an oracle placeholder. The
+/// Go Windows fixture contains native backslashes; all other output bytes must
+/// remain byte-for-byte comparable.
+fn normalize_tokenized_paths(s: &str) -> String {
     let root_path = regex::Regex::new(r"(<root>|<repo>)[/\\][^\s:]+").unwrap();
-    let out = root_path
-        .replace_all(&out, |captures: &regex::Captures<'_>| {
+    root_path
+        .replace_all(s, |captures: &regex::Captures<'_>| {
             captures[0].replace('\\', "/")
         })
-        .into_owned();
-    normalize_accepted_differences(&out)
+        .into_owned()
 }
 
 /// Normalize stderr exactly like the Go oracle's `normalizeStderr`:
@@ -315,7 +321,8 @@ fn cli_tree_fixture_matches_native_binary() {
         let actual_stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let norm_stdout =
             normalize_stdout(&actual_stdout, root.path().to_str().unwrap(), &repo_root);
-        let expected_stdout = normalize_accepted_differences(&case.stdout);
+        let expected_stdout =
+            normalize_tokenized_paths(&normalize_accepted_differences(&case.stdout));
 
         if norm_stdout != expected_stdout {
             let diff = first_diff_offset(norm_stdout.as_bytes(), expected_stdout.as_bytes());
@@ -351,7 +358,8 @@ fn cli_tree_fixture_matches_native_binary() {
             root.path().to_str().unwrap(),
             &repo_root,
         ));
-        let expected_stderr = normalize_accepted_differences(&case.stderr);
+        let expected_stderr =
+            normalize_tokenized_paths(&normalize_accepted_differences(&case.stderr));
         #[cfg(windows)]
         let expected_stderr = expected_stderr.replace("$PATH", "%PATH%");
 
@@ -398,5 +406,15 @@ mod tests {
     fn fixture_loads_and_has_correct_count() {
         let cases = load_fixture();
         assert_eq!(cases.len(), 81);
+    }
+
+    #[test]
+    fn path_separator_normalization_is_confined_to_oracle_roots() {
+        assert_eq!(
+            normalize_tokenized_paths(
+                "<root>\\home\\.claude\\config.json https://example.test/a\\b outside\\path"
+            ),
+            "<root>/home/.claude/config.json https://example.test/a\\b outside\\path"
+        );
     }
 }
