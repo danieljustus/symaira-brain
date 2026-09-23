@@ -150,6 +150,8 @@ func evaluateGo(env map[string]string) map[string]string {
 	origXdgData := os.Getenv("XDG_DATA_HOME")
 	origXdgCache := os.Getenv("XDG_CACHE_HOME")
 	origUserProfile, hadUserProfile := os.LookupEnv("USERPROFILE")
+	origHomeDrive, hadHomeDrive := os.LookupEnv("HOMEDRIVE")
+	origHomePath, hadHomePath := os.LookupEnv("HOMEPATH")
 
 	// Set environment
 	if v, ok := env["HOME"]; ok && v != "" {
@@ -173,6 +175,10 @@ func evaluateGo(env map[string]string) map[string]string {
 		os.Unsetenv("XDG_CACHE_HOME")
 	}
 	if runtime.GOOS == "windows" {
+		// Keep an unset USERPROFILE truly home-less: os.UserHomeDir otherwise
+		// falls back to the runner's HOMEDRIVE + HOMEPATH.
+		os.Unsetenv("HOMEDRIVE")
+		os.Unsetenv("HOMEPATH")
 		if env["HOME"] != "" {
 			os.Setenv("USERPROFILE", env["HOME"])
 		} else {
@@ -227,6 +233,16 @@ func evaluateGo(env map[string]string) map[string]string {
 			os.Setenv("USERPROFILE", origUserProfile)
 		} else {
 			os.Unsetenv("USERPROFILE")
+		}
+		if hadHomeDrive {
+			os.Setenv("HOMEDRIVE", origHomeDrive)
+		} else {
+			os.Unsetenv("HOMEDRIVE")
+		}
+		if hadHomePath {
+			os.Setenv("HOMEPATH", origHomePath)
+		} else {
+			os.Unsetenv("HOMEPATH")
 		}
 	}
 
