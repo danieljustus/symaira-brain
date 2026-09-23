@@ -10,11 +10,10 @@
 //! configuration keeps the whole command on the shipped implementation, so
 //! only the default path has to be reproduced here.
 //!
-//! One honest limit: the recency term is computed against the current clock, so
-//! a result scored for an *almost new* memory can differ in its last `float32`
-//! digit between two processes started milliseconds apart. The differential
-//! fixture uses a memory dated months ago, where the term is six orders of
-//! magnitude below one `float32` step.
+//! One honest limit: recency uses a wall-clock read in each process, so a score
+//! near an `f32` rounding midpoint can differ between sequential Go/Rust runs.
+//! The differential search fixture dates memories to 2000, making recency
+//! smaller than an `f64` ULP before the result is narrowed to `f32`.
 
 use chrono::{DateTime, Utc};
 use rusqlite::Connection;

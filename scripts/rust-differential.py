@@ -1227,6 +1227,18 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
     os.utime(database, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
 
 
+def setup_memory_search_seeded(root: Path, env: dict[str, str]) -> None:
+    """Keep search's recency contribution below an f64 ULP across processes."""
+    setup_memory_seeded(root, env)
+    database = root / "data/symbrain/memory/default.db"
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute("UPDATE memories SET created_at = '2000-01-02 03:04:05'")
+        connection.commit()
+    finally:
+        connection.close()
+
+
 def set_access_times(root: Path, name: str, access: float) -> None:
     """Give an installed skill's SKILL.md an explicit access time.
 
@@ -2179,56 +2191,55 @@ CASES = (
     Case("memory_list_seeded", ("memory", "list", "--json"), setup=setup_memory_seeded),
     # `memory search` ranks embedding candidates. The query is the seeded row's
     # own content: the LSH neighbourhood of a different phrase does not contain
-    # it, so a paraphrased query would compare two empty reports. Ranking is
-    # reproducible because the fixture pins the row's clock to a fixed date -
-    # the recency term of a freshly written row would drift between the two
-    # roots.
+    # it, so a paraphrased query would compare two empty reports. Search uses
+    # separate wall-clock reads in each process; the old fixture date makes its
+    # recency term smaller than an f64 ULP before the score is narrowed to f32.
     Case(
         "memory_search_seeded",
         ("memory", "search", "alpha memory content", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_table",
         ("memory", "search", "alpha memory content"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_scope",
         ("memory", "search", "alpha memory content", "-s", "global", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_other_scope",
         ("memory", "search", "alpha memory content", "-s", "project", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_limit",
         ("memory", "search", "alpha memory content", "-l", "1", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_limit_zero",
         ("memory", "search", "alpha memory content", "--limit", "0", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_two_candidates_limit",
         ("memory", "search", "alpha memory content", "--limit", "2", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_two_candidates_limit_one",
         ("memory", "search", "alpha memory content", "--limit", "1", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     # `--db` and `--limit` together are the shape whose values must be consumed
     # as flag values rather than counted as query arguments.
     Case(
         "memory_search_db_override",
         ("memory", "search", "alpha memory content", "--db", "MEMORY_DB", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_limit_and_db",
@@ -2242,12 +2253,12 @@ CASES = (
             "MEMORY_DB",
             "--json",
         ),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_no_candidate",
         ("memory", "search", "zzz", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_no_candidate_table",
