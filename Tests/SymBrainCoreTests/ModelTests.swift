@@ -278,14 +278,10 @@ struct BinaryResolutionTests {
 /// Resolves the opt-in real-binary contract target.
 ///
 /// Two channels, in order:
-/// 1. `SYMBRAIN_TEST_BINARY` — for invocations whose environment reaches the
-///    test process directly (e.g. a raw `xctest` run).
-/// 2. `$HOME/.symbrain-test-binary` — the xcodebuild channel. `xcodebuild
-///    test` only forwards scheme-declared variables plus base environment to
-///    the test process, so the invocation writes the absolute binary path
-///    into the isolated HOME it sets up. The file can only be honored when
-///    that HOME passes `guiContractHomeIsIsolated()`, so a marker can never
-///    aim the round trip at a real user installation.
+/// 1. `SYMBRAIN_TEST_BINARY` — for direct invocations and `xcodebuild test`
+///    with `TEST_RUNNER_SYMBRAIN_TEST_BINARY` forwarded to the test process.
+/// 2. `$HOME/.symbrain-test-binary` — for test runners that do not forward
+///    the variable. The marker is honored only for an isolated HOME.
 ///
 /// Without either channel the contract test is disabled — CI runs only the
 /// fixture-based tests above.
