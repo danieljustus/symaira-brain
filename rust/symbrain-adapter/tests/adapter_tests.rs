@@ -170,8 +170,8 @@ fn oracle_render_cases_match_go_byte_for_byte() {
         .expect("registered adapter")
         .expect("adapter exists");
         assert_eq!(
-            rendered.path.to_string_lossy(),
-            case.target_path,
+            rendered.path,
+            PathBuf::from(&case.target_path),
             "path {}",
             case.id
         );

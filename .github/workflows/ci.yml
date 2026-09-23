@@ -401,6 +401,16 @@ jobs:
           cargo build -p symbrain-cli --locked
           python3 scripts/init-oracle/test_compare.py
           python3 scripts/init-oracle/compare.py --rust-binary "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}" --output target/init-oracle/report.json
+      - name: Test additional Rust contracts on native Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p symbrain-instructions --test instruction_tests --locked
+          cargo test -p symbrain-adapter --test adapter_tests --locked
+          cargo test -p symbrain-usage --test usage_tests --locked
+          cargo test -p symbrain-cli --lib usage_cli::tests --locked
+          cargo test -p symbrain-cli --test profile_cli_tests --locked
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

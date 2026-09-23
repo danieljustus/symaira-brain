@@ -15,7 +15,8 @@ fn command_for(root: &TempDir, args: &[&str]) -> Command {
     command
         .args(args)
         .current_dir(&project)
-        .env("HOME", home)
+        .env("HOME", &home)
+        .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", config)
         .env_remove("SYMBRAIN_GO_BINARY");
     command
