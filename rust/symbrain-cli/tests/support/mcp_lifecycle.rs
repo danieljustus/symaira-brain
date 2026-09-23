@@ -80,7 +80,7 @@ impl Gateway {
     fn spawn() -> Self {
         let root = TempDir::new().unwrap();
         let fake = super::write_fake(&root);
-        fs::write(&fake, include_str!("mcp_lifecycle.py")).unwrap();
+        fs::write(&fake.command, include_str!("mcp_lifecycle.py")).unwrap();
         let profile = super::write_profile(&root, &fake);
         let stdout = root.path().join("stdout.jsonl");
         let stderr = root.path().join("stderr.log");
