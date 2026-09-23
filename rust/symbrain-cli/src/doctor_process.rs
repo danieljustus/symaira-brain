@@ -24,11 +24,12 @@ pub(super) fn which(binary: &str) -> Option<PathBuf> {
 fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> Vec<OsString> {
     if windows {
         let extensions =
-            path_ext.map_or_else(|| ".COM;.EXE;.BAT;.CMD".into(), OsStr::to_string_lossy);
+            path_ext.map_or_else(|| ".com;.exe;.bat;.cmd".into(), OsStr::to_string_lossy);
         let candidates = extensions
             .split(';')
             .filter(|extension| !extension.is_empty())
             .map(|extension| {
+                let extension = extension.to_ascii_lowercase();
                 let separator = if extension.starts_with('.') { "" } else { "." };
                 OsString::from(format!(
                     "{}{separator}{extension}",
@@ -150,8 +151,8 @@ mod executable_name_tests {
         assert_eq!(
             executable_names(OsStr::new("symvault"), Some(OsStr::new(".EXE;.CMD")), true),
             vec![
-                OsString::from("symvault.EXE"),
-                OsString::from("symvault.CMD")
+                OsString::from("symvault.exe"),
+                OsString::from("symvault.cmd")
             ]
         );
         assert_eq!(
@@ -162,13 +163,13 @@ mod executable_name_tests {
             ),
             vec![
                 OsString::from("symvault.exe"),
-                OsString::from("symvault.exe.EXE"),
-                OsString::from("symvault.exe.CMD"),
+                OsString::from("symvault.exe.exe"),
+                OsString::from("symvault.exe.cmd"),
             ]
         );
         assert_eq!(
             executable_names(OsStr::new("symvault"), Some(OsStr::new("EXE")), true),
-            vec![OsString::from("symvault.EXE")]
+            vec![OsString::from("symvault.exe")]
         );
     }
 }
