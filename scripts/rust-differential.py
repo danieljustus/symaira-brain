@@ -2834,6 +2834,7 @@ def get_fs_manifest(root: Path) -> dict[str, tuple[str, int, bytes]]:
                 # Installation time is the only nondeterministic provenance
                 # field. Validate it, then compare all remaining bytes.
                 built_at = json.loads(content)["built_at"]
+                assert built_at.endswith("Z"), f"{rel}: built_at must be UTC"
                 datetime.fromisoformat(built_at.replace("Z", "+00:00"))
                 content = re.sub(
                     rb'"built_at": "[^"]+"',
