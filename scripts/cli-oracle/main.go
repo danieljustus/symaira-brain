@@ -27,6 +27,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -92,7 +93,11 @@ func main() {
 		defer ln.Close()
 	}
 
-	cases := buildCases(*goBinary)
+	cases, err := buildCases(*goBinary)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "build Go oracle binary: %v\n", err)
+		return
+	}
 	data, err := json.MarshalIndent(cases, "", "  ")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "json marshal: %v\n", err)
@@ -179,10 +184,14 @@ func setupOracleEnv() error {
 }
 
 // buildCases generates test cases by invoking the real Go binary.
-func buildCases(goBinary string) []TestCase {
+func buildCases(goBinary string) ([]TestCase, error) {
 	bin := goBinary
 	if bin == "" {
-		bin = buildGoBinary()
+		var err error
+		bin, err = buildGoBinary()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	cases := []TestCase{}
@@ -320,7 +329,7 @@ func buildCases(goBinary string) []TestCase {
 	// Unknown flag at top level (treated as unknown command by run())
 	cases = append(cases, runCase(bin, []string{"--unknown"}, "top-level unknown flag treated as unknown command"))
 
-	return cases
+	return cases, nil
 }
 
 // runCase invokes the Go binary with args and captures stdout/stderr/exit.
@@ -451,13 +460,23 @@ func removeLinePrefix(s, prefix string) string {
 	return strings.Join(out, "\n")
 }
 
-// buildGoBinary builds the Go binary at the pinned revision.
-func buildGoBinary() string {
-	// This is called by the oracle script; in practice, run-go-oracle.sh
-	// handles building the binary at the pinned revision.
-	// The oracle expects the binary to be passed via -go-binary or
-	// the environment to have a pre-built binary available.
-	// For the -check path, the fixture is pre-generated and compared.
-	// For regeneration, the coordinator runs this with the built binary path.
-	return "symbrain-go" // fallback; actual path provided via -go-binary
+// executableName returns the native executable name for a Go binary.
+func executableName(name, goos string) string {
+	if goos == "windows" && !strings.HasSuffix(strings.ToLower(name), ".exe") {
+		return name + ".exe"
+	}
+	return name
+}
+
+// buildGoBinary builds the Go binary in the oracle's isolated temp root.
+// An explicit -go-binary remains available to callers that need a pinned build.
+func buildGoBinary() (string, error) {
+	bin := filepath.Join(oracleRoot, executableName("symbrain-go", runtime.GOOS))
+	cmd := exec.Command("go", "build", "-o", bin, "./cmd/symbrain")
+	cmd.Dir = oracleCwd
+	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return "", fmt.Errorf("go build: %w: %s", err, strings.TrimSpace(string(output)))
+	}
+	return bin, nil
 }

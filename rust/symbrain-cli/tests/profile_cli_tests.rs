@@ -359,6 +359,13 @@ fn remove_rejects_symlinked_profiles_root_without_touching_target() {
 
     let output = run_profile(&root, &["profile", "remove", "existing", "--force"]);
     assert!(!output.status.success(), "stderr: {:?}", output.stderr);
+    if cfg!(windows) {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            stderr.contains("open configuration directory component \"profiles\": reparse point"),
+            "unexpected Windows reparse-point diagnostic: {stderr}"
+        );
+    }
     assert_eq!(std::fs::read(&victim).unwrap(), b"outside\n");
 }
 
