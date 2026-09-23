@@ -208,6 +208,15 @@ jobs:
       - name: Rust MCP stdio and lifecycle gate
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
+      # Compare the shipped Go and native Rust executables across raw MCP
+      # frames, a hermetic stdio child, malformed frames, CLI failures and
+      # SIGTERM while stdin remains open.
+      - name: Go/Rust MCP executable differential gate
+        run: |
+          go build -o "$RUNNER_TEMP/symbrain-go-mcp" ./cmd/symbrain
+          cargo build -p symbrain-cli --bin symbrain --locked
+          python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
+
   # Keep raw invalid-UTF-8 diagnostics and persisted audit fields pinned to
   # the immutable Go 1.26.7 checkpoint using the real production binaries.
   # native_repair.py also checks the checked-in fixture byte-for-byte against

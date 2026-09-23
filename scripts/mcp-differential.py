@@ -48,11 +48,60 @@ enabled = false
 enabled = false
 '''
 DEPRECATED_SERVE = b"symbrain: 'serve' is deprecated; use 'symbrain mcp' instead (serve will be removed in a future release)\n"
+MALFORMED_FRAMES = (
+    ("invalid_length", b"Content-Length: nope\r\n\r\n"),
+    ("zero_length", b"Content-Length: 0\r\n\r\n"),
+    ("missing_length", b"Content-Type: application/json\r\n\r\n"),
+    ("partial_body", b"Content-Length: 10\r\n\r\n{}"),
+)
+CLI_FAILURES = (
+    ("missing_profile", ("mcp",)),
+    ("conflicting_profiles", ("mcp", "--profile", "room", "--profile-file", "room.toml")),
+    ("unknown_flag", ("mcp", "--bogus")),
+    ("missing_flag_value", ("mcp", "--profile")),
+    ("missing_profile_file", ("mcp", "--profile-file", "missing.toml")),
+    ("missing_named_profile", ("mcp", "--profile", "missing")),
+)
+
+FAKE_CHILD = r'''import json
+import sys
+
+def send(request_id, result=None, error=None):
+    response = {"jsonrpc": "2.0", "id": request_id}
+    if error is not None:
+        response["error"] = error
+    else:
+        response["result"] = result
+    print(json.dumps(response, separators=(",", ":")), flush=True)
+
+for line in sys.stdin:
+    try:
+        request = json.loads(line)
+    except Exception:
+        continue
+    if "id" not in request:
+        continue
+    request_id = request["id"]
+    if request.get("method") == "initialize":
+        send(request_id, {"protocolVersion": "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "fixture", "version": "1"}})
+    elif request.get("method") == "tools/list":
+        send(request_id, {"tools": [{"name": "echo", "description": "fixture echo", "inputSchema": {"type": "object"}, "annotations": {"readOnlyHint": True}}]})
+    elif request.get("method") == "tools/call":
+        args = request.get("params", {}).get("arguments", {})
+        send(request_id, {"content": [{"type": "text", "text": json.dumps(args, separators=(",", ":"))}], "isError": False})
+    else:
+        send(request_id, error={"code": -32601, "message": "Method not found"})
+'''
 
 
 def input_bytes(framing: str) -> bytes:
+    values = REQUESTS
+    return encode_requests(values, framing)
+
+
+def encode_requests(values: tuple[dict, ...], framing: str) -> bytes:
     output = bytearray()
-    for value in REQUESTS:
+    for value in values:
         body = json.dumps(value, separators=(",", ":")).encode()
         if framing == "line":
             output.extend(body + b"\n")
@@ -119,6 +168,69 @@ def run(binary: pathlib.Path, root: pathlib.Path, profile: pathlib.Path, framing
     )
 
 
+def write_foreign_profile(root: pathlib.Path) -> pathlib.Path:
+    child = root / "foreign-child.py"
+    child.write_text(FAKE_CHILD, encoding="utf-8")
+    profile = root / "foreign-profile.toml"
+    profile.write_text(
+        PROFILE
+        + "\n[servers.fixture]\n"
+        + "enabled = true\naccess = \"write\"\n"
+        + f"command = {json.dumps(sys.executable)}\n"
+        + f"args = [{json.dumps(str(child))}]\n",
+        encoding="utf-8",
+    )
+    return profile
+
+
+def run_raw(binary: pathlib.Path, root: pathlib.Path, profile: pathlib.Path, data: bytes) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        [str(binary), "mcp", "--profile-file", str(profile)],
+        input=data,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=root,
+        env=environment(root),
+        timeout=15,
+        check=False,
+    )
+
+
+def run_args(binary: pathlib.Path, root: pathlib.Path, args: tuple[str, ...]) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run(
+        [str(binary), *args],
+        input=b"",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=root,
+        env=environment(root),
+        timeout=15,
+        check=False,
+    )
+
+
+def assert_exact(go: subprocess.CompletedProcess[bytes], rust: subprocess.CompletedProcess[bytes], label: str) -> None:
+    actual = (go.returncode, go.stdout, go.stderr)
+    expected = (rust.returncode, rust.stdout, rust.stderr)
+    assert actual == expected, f"{label} differs:\nGo={actual!r}\nRust={expected!r}"
+
+
+def assert_foreign_child(go: subprocess.CompletedProcess[bytes], rust: subprocess.CompletedProcess[bytes], framing: str) -> None:
+    assert (go.returncode, go.stderr) == (rust.returncode, rust.stderr)
+    assert go.returncode == 0 and go.stderr == b"", (go.returncode, go.stderr)
+    go_frames, rust_frames = frames(go.stdout, framing), frames(rust.stdout, framing)
+    assert [frame[1].get("id") for frame in go_frames] == [1, 2, 3]
+    assert [frame[1].get("id") for frame in rust_frames] == [1, 2, 3]
+    assert go_frames[0][0] == rust_frames[0][0], "foreign child changed the initialize frame"
+    go_tools = {tool["name"]: tool for tool in go_frames[1][1]["result"]["tools"]}
+    rust_tools = {tool["name"]: tool for tool in rust_frames[1][1]["result"]["tools"]}
+    assert "echo" in go_tools and "echo" in rust_tools
+    assert go_tools["echo"] == rust_tools["echo"], (go_tools["echo"], rust_tools["echo"])
+    assert go_frames[2][0] == rust_frames[2][0], "foreign stdio child call frame differs"
+    assert go_frames[2][1]["result"]["isError"] is False
+    assert go_frames[2][1]["result"]["content"][0]["text"] == '{"value":"child-roundtrip"}'
+
+
 def assert_session(go: subprocess.CompletedProcess[bytes], rust: subprocess.CompletedProcess[bytes], framing: str) -> None:
     assert go.returncode == rust.returncode == 0, (go.returncode, rust.returncode, go.stderr, rust.stderr)
     assert go.stderr == rust.stderr == b"", (go.stderr, rust.stderr)
@@ -159,6 +271,10 @@ def assert_sigterm(binary: pathlib.Path, root: pathlib.Path, profile: pathlib.Pa
         parsed = frames(response, "line")
         assert parsed[0][1].get("id") == 1, response
         child.send_signal(signal.SIGTERM)
+        # Keep stdin open throughout signal handling. Calling communicate()
+        # here closes it immediately and races EOF against SIGTERM, producing
+        # a different shutdown path in the Go oracle.
+        child.wait(timeout=5)
         stdout, stderr = child.communicate(timeout=5)
     except BaseException:
         if child.poll() is None:
@@ -189,6 +305,47 @@ def main() -> int:
             assert legacy.returncode == go.returncode and legacy.stdout == go.stdout
             assert legacy.stderr == DEPRECATED_SERVE
             print(f"PASS Go/Rust MCP {framing} frames, embedded memory calls, status and stderr")
+        child_root = root / "foreign-child"
+        child_root.mkdir()
+        child_profile = write_foreign_profile(child_root)
+        child_requests = (
+            request(1, "initialize"),
+            request(None, "notifications/initialized"),
+            request(2, "tools/list"),
+            request(3, "tools/call", {"name": "echo", "arguments": {"value": "child-roundtrip"}}),
+        )
+        for framing in ("line", "content-length"):
+            data = encode_requests(child_requests, framing)
+            go = run_raw(go_binary, child_root, child_profile, data)
+            rust = run_raw(rust_binary, child_root, child_profile, data)
+            assert_foreign_child(go, rust, framing)
+        print("PASS Go/Rust MCP foreign stdio child initialize/list/call, notification silence, frames and diagnostics")
+
+        malformed_root = root / "malformed-frames"
+        malformed_root.mkdir()
+        malformed_profile = malformed_root / "profile.toml"
+        malformed_profile.write_text(PROFILE, encoding="utf-8")
+        for case, data in MALFORMED_FRAMES:
+            go = run_raw(go_binary, malformed_root, malformed_profile, data)
+            rust = run_raw(rust_binary, malformed_root, malformed_profile, data)
+            assert_exact(go, rust, f"malformed frame {case}")
+        print("PASS Go/Rust MCP malformed frame status and stderr corpus")
+
+        cli_root = root / "cli-errors"
+        cli_root.mkdir()
+        named_profile = cli_root / "config" / "symbrain" / "profiles" / "room.toml"
+        named_profile.parent.mkdir(parents=True)
+        named_profile.write_text(PROFILE.replace('name = "mcp-oracle"', 'name = "room"'), encoding="utf-8")
+        go = run_args(go_binary, cli_root, ("mcp", "--profile", "room"))
+        rust = run_args(rust_binary, cli_root, ("mcp", "--profile", "room"))
+        assert_exact(go, rust, "named --profile success")
+        assert go.returncode == 0 and go.stdout == go.stderr == b""
+        for case, args in CLI_FAILURES:
+            go = run_args(go_binary, cli_root, args)
+            rust = run_args(rust_binary, cli_root, args)
+            assert_exact(go, rust, f"CLI failure {case}")
+            assert go.returncode == 2 and go.stdout == b"", (case, go.returncode, go.stdout)
+        print("PASS Go/Rust MCP --profile/--profile-file resolution and flag/profile failure status, stdout, stderr")
         if os.name != "nt":
             go_lifecycle = assert_sigterm(go_binary, root / "sigterm-go", profile)
             rust_lifecycle = assert_sigterm(rust_binary, root / "sigterm-rust", profile)

@@ -18,7 +18,6 @@ use symbrain_audit::{Config as AuditConfig, Logger};
 use symbrain_broker::{Config as BrokerConfig, ManagedServer};
 use symbrain_core::exit;
 use symbrain_gateway::{Gateway, GatewayBackend};
-use symbrain_mcp::ServerError;
 use symbrain_policy::{Profile, SERVER_OPERATE, SERVER_SCOPE, VAULT_MODE_OFF, load, load_file};
 use toml_edit::{DocumentMut, Item, Value};
 
@@ -136,19 +135,7 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
 
     loop {
         if worker.is_finished() {
-            let result = worker.join();
-            shutdown_all(&managed);
-            return match result {
-                Ok(Ok(()) | Err(ServerError::Cancelled)) => exit::OK,
-                Ok(Err(error)) => {
-                    let _ = writeln!(stderr, "symbrain mcp: {error}");
-                    exit::GENERIC
-                }
-                Err(_) => {
-                    let _ = writeln!(stderr, "symbrain mcp: gateway worker panicked");
-                    exit::GENERIC
-                }
-            };
+            return finish_worker(worker, &managed, &cancelled, stderr);
         }
         if cancelled.load(Ordering::Acquire) {
             shutdown_all(&managed);
@@ -158,6 +145,30 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             return exit::OK;
         }
         thread::sleep(Duration::from_millis(10));
+    }
+}
+
+fn finish_worker(
+    worker: thread::JoinHandle<Result<(), symbrain_mcp::ServerError>>,
+    managed: &[Arc<ManagedServer>],
+    cancelled: &AtomicBool,
+    stderr: &mut dyn Write,
+) -> u8 {
+    let result = worker.join();
+    shutdown_all(managed);
+    match result {
+        Ok(Ok(())) => exit::OK,
+        Ok(Err(symbrain_mcp::ServerError::Cancelled)) if cancelled.load(Ordering::Acquire) => {
+            exit::OK
+        }
+        Ok(Err(error)) => {
+            let _ = writeln!(stderr, "symbrain mcp: {error}");
+            exit::GENERIC
+        }
+        Err(_) => {
+            let _ = writeln!(stderr, "symbrain mcp: gateway worker panicked");
+            exit::GENERIC
+        }
     }
 }
 
