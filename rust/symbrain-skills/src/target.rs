@@ -118,7 +118,7 @@ pub fn config_dir(
             project.map(|path| path.join(".agents"))
         }
         ("hermes", "project") => project.map(|path| path.join(".hermes")),
-        ("opencode", _) => Some(home.join(".config/opencode")),
+        ("opencode", _) => Some(home.join(".config").join("opencode")),
         ("claude", _) => Some(home.join(".claude")),
         ("codex", _) => Some(home.join(".agents")),
         ("hermes", _) => Some(home.join(".hermes")),

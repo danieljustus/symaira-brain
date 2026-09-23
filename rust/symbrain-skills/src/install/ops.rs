@@ -354,7 +354,10 @@ pub(crate) fn install_symlink(
         let backup = backup_existing(destination, fault)?;
         let temp = replace::unique_name(".symskills-link-")?;
         #[cfg(windows)]
-        let link_result = root.symlink_dir(source, &temp);
+        // Windows directory symlinks require an absolute target here. cap-std
+        // rejects absolute link targets by design, so use the already-validated
+        // managed cache source and the trusted destination parent path.
+        let link_result = std::os::windows::fs::symlink_dir(source, parent.join(&temp));
         #[cfg(not(windows))]
         let link_result = root.symlink_contents(source, &temp);
         if let Err(error) = link_result {
