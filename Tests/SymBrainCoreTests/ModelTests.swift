@@ -278,8 +278,8 @@ struct BinaryResolutionTests {
 /// Resolves the opt-in real-binary contract target.
 ///
 /// Two channels, in order:
-/// 1. `SYMBRAIN_TEST_BINARY` — for direct invocations and `xcodebuild test`
-///    with `TEST_RUNNER_SYMBRAIN_TEST_BINARY` forwarded to the test process.
+/// 1. `SYMBRAIN_TEST_BINARY` — for direct invocations and the
+///    `SymBrainCoreContract` scheme's test environment.
 /// 2. `$HOME/.symbrain-test-binary` — for test runners that do not forward
 ///    the variable. The marker is honored only for an isolated HOME.
 ///
