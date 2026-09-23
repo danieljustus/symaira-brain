@@ -22,21 +22,25 @@ pub(super) fn which(binary: &str) -> Option<PathBuf> {
 }
 
 fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> Vec<OsString> {
-    if Path::new(binary).extension().is_some() {
+    if !windows && Path::new(binary).extension().is_some() {
         return vec![binary.to_os_string()];
     }
     if windows {
         let extensions =
             path_ext.map_or_else(|| ".COM;.EXE;.BAT;.CMD".into(), OsStr::to_string_lossy);
+        let candidates = extensions
+            .split(';')
+            .filter(|extension| !extension.is_empty())
+            .map(|extension| {
+                let separator = if extension.starts_with('.') { "" } else { "." };
+                OsString::from(format!(
+                    "{}{separator}{extension}",
+                    binary.to_string_lossy()
+                ))
+            });
         std::iter::once(binary.to_os_string())
-            .chain(
-                extensions
-                    .split(';')
-                    .filter(|extension| !extension.is_empty())
-                    .map(|extension| {
-                        OsString::from(format!("{}{extension}", binary.to_string_lossy()))
-                    }),
-            )
+            .filter(|_| Path::new(binary).extension().is_some())
+            .chain(candidates)
             .collect()
     } else {
         vec![binary.to_os_string()]
@@ -149,7 +153,6 @@ mod executable_name_tests {
         assert_eq!(
             executable_names(OsStr::new("symvault"), Some(OsStr::new(".EXE;.CMD")), true),
             vec![
-                OsString::from("symvault"),
                 OsString::from("symvault.EXE"),
                 OsString::from("symvault.CMD")
             ]
@@ -160,7 +163,15 @@ mod executable_name_tests {
                 Some(OsStr::new(".EXE;.CMD")),
                 true,
             ),
-            vec![OsString::from("symvault.exe")]
+            vec![
+                OsString::from("symvault.exe"),
+                OsString::from("symvault.exe.EXE"),
+                OsString::from("symvault.exe.CMD"),
+            ]
+        );
+        assert_eq!(
+            executable_names(OsStr::new("symvault"), Some(OsStr::new("EXE")), true),
+            vec![OsString::from("symvault.EXE")]
         );
     }
 }
