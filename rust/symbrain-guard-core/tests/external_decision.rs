@@ -214,9 +214,12 @@ fn pinned_go_fixture_matches_direct_response_bytes() {
         let expected = if case.id == "audit-failure" {
             let path =
                 PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/audit-failure-data");
-            String::from_utf8(expected)
-                .expect("sanitized response is UTF-8")
-                .replace("__AUDIT_FAILURE_PATH__", &path.display().to_string())
+            let expected = String::from_utf8(expected).expect("sanitized response is UTF-8");
+            let path = serde_json::to_string(&path.display().to_string())
+                .expect("audit failure path is JSON encodable");
+            let escaped_path = &path[1..path.len() - 1];
+            expected
+                .replace("__AUDIT_FAILURE_PATH__", escaped_path)
                 .into_bytes()
         } else {
             expected

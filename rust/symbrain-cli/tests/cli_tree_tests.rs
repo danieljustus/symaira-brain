@@ -45,9 +45,16 @@ fn load_fixture() -> Vec<TestCase> {
 /// capability opens fail with ENOTDIR for any harness/instructions read
 /// (see #630, the same defect measured in the Go oracle's temp root).
 fn real_root(root: &TempDir) -> PathBuf {
-    root.path()
-        .canonicalize()
-        .unwrap_or_else(|_| root.path().to_path_buf())
+    #[cfg(windows)]
+    {
+        root.path().to_path_buf()
+    }
+    #[cfg(not(windows))]
+    {
+        root.path()
+            .canonicalize()
+            .unwrap_or_else(|_| root.path().to_path_buf())
+    }
 }
 
 fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
@@ -125,6 +132,12 @@ fn normalize_stdout(s: &str, root: &str, repo: &str) -> String {
     let platform_re = regex::Regex::new(r"(?m)^(\s*os/arch\s+)\S+$").unwrap();
     out = platform_re.replace_all(&out, "${1}<os/arch>").to_string();
 
+    let root_path = regex::Regex::new(r"(<root>|<repo>)[/\\][^\s:]+").unwrap();
+    let out = root_path
+        .replace_all(&out, |captures: &regex::Captures<'_>| {
+            captures[0].replace('\\', "/")
+        })
+        .into_owned();
     normalize_accepted_differences(&out)
 }
 
@@ -315,7 +328,11 @@ fn cli_tree_fixture_matches_native_binary() {
             root.path().to_str().unwrap(),
             &repo_root,
         ));
-        let expected_stderr = normalize_accepted_differences(&case.stderr);
+        let mut expected_stderr = normalize_accepted_differences(&case.stderr);
+        #[cfg(windows)]
+        {
+            expected_stderr = expected_stderr.replace("$PATH", "%PATH%");
+        }
 
         if norm_stderr != expected_stderr {
             let diff = first_diff_offset(norm_stderr.as_bytes(), expected_stderr.as_bytes());

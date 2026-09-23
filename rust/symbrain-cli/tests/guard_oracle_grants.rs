@@ -50,7 +50,9 @@ struct GrantsCliOutput {
 }
 
 fn normalize(value: &str, dir: &Path) -> String {
-    value.replace(&dir.display().to_string(), "<store-dir>")
+    value
+        .replace(&dir.display().to_string(), "<store-dir>")
+        .replace("<store-dir>\\grants.json", "<store-dir>/grants.json")
 }
 
 #[test]

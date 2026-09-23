@@ -11,6 +11,7 @@ use tempfile::TempDir;
 #[path = "support/mcp_lifecycle.rs"]
 mod mcp_lifecycle;
 
+#[cfg(not(windows))]
 const FAKE_MCP: &str = r#"#!/usr/bin/python3
 import json
 import sys
@@ -43,26 +44,98 @@ for line in sys.stdin:
         send(request_id, error={"code": -32601, "message": "Method not found"})
 "#;
 
-fn write_fake(root: &TempDir) -> std::path::PathBuf {
-    let path = root.path().join("fake-mcp.py");
-    std::fs::write(&path, FAKE_MCP).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let mut permissions = std::fs::metadata(&path).unwrap().permissions();
-        permissions.set_mode(0o755);
-        std::fs::set_permissions(&path, permissions).unwrap();
+#[cfg(windows)]
+const FAKE_MCP_POWERSHELL: &str = r#"
+$utf8 = [System.Text.UTF8Encoding]::new($false)
+[Console]::InputEncoding = $utf8
+[Console]::OutputEncoding = $utf8
+while (($line = [Console]::In.ReadLine()) -ne $null) {
+    try { $request = ConvertFrom-Json -InputObject $line } catch { continue }
+    if ($null -eq $request.id) { continue }
+    $response = @{ jsonrpc = '2.0'; id = $request.id }
+    switch ($request.method) {
+        'initialize' {
+            $response.result = @{ protocolVersion = '2024-11-05'; capabilities = @{ tools = @{} }; serverInfo = @{ name = 'fake'; version = '1' } }
+        }
+        'tools/list' {
+            $response.result = @{ tools = @(@{ name = 'echo'; description = 'echo'; inputSchema = @{ type = 'object' }; annotations = @{ readOnlyHint = $true } }) }
+        }
+        'tools/call' {
+            $text = ConvertTo-Json -InputObject $request.params.arguments -Depth 64 -Compress
+            $response.result = @{ content = @(@{ type = 'text'; text = $text }); isError = $false }
+        }
+        default { $response.error = @{ code = -32601; message = 'Method not found' } }
     }
-    path
+    [Console]::Out.WriteLine((ConvertTo-Json -InputObject $response -Depth 64 -Compress))
+}
+"#;
+
+struct FakeCommand {
+    command: std::path::PathBuf,
+    args: Vec<String>,
 }
 
-fn write_profile(root: &TempDir, fake: &std::path::Path) -> std::path::PathBuf {
+fn write_fake(root: &TempDir) -> FakeCommand {
+    #[cfg(windows)]
+    {
+        let path = root.path().join("fake-mcp.ps1");
+        std::fs::write(&path, FAKE_MCP_POWERSHELL).unwrap();
+        let system_root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("windir"))
+            .expect("Windows system root");
+        let powershell = std::path::PathBuf::from(system_root)
+            .join("System32")
+            .join("WindowsPowerShell")
+            .join("v1.0")
+            .join("powershell.exe");
+        return FakeCommand {
+            command: powershell,
+            args: vec![
+                "-NoProfile".to_owned(),
+                "-NonInteractive".to_owned(),
+                "-File".to_owned(),
+                path.to_string_lossy().into_owned(),
+            ],
+        };
+    }
+    #[cfg(not(windows))]
+    {
+        let path = root.path().join("fake-mcp.py");
+        std::fs::write(&path, FAKE_MCP).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut permissions = std::fs::metadata(&path).unwrap().permissions();
+            permissions.set_mode(0o755);
+            std::fs::set_permissions(&path, permissions).unwrap();
+        }
+        FakeCommand {
+            command: path,
+            args: Vec::new(),
+        }
+    }
+}
+
+fn toml_string(value: &str) -> String {
+    toml_edit::Value::from(value).to_string()
+}
+
+fn toml_args(args: &[String]) -> String {
+    let mut values = toml_edit::Array::new();
+    for arg in args {
+        values.push(arg.as_str());
+    }
+    values.to_string()
+}
+
+fn write_profile(root: &TempDir, fake: &FakeCommand) -> std::path::PathBuf {
     let path = root.path().join("room.toml");
-    let command = fake.to_str().unwrap().replace('"', "\\\"");
     std::fs::write(
         &path,
         format!(
-            "[profile]\nname = \"room\"\n\n[servers.foreign]\nenabled = true\ncommand = \"{command}\"\naccess = \"write\"\n"
+            "[profile]\nname = \"room\"\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();
@@ -93,7 +166,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     }
     command
         .args(args)
-        .env_clear()
         .env("HOME", root.path().join("home"))
         .env("USERPROFILE", root.path().join("home"))
         .env("XDG_CONFIG_HOME", root.path().join("config"))
@@ -175,8 +247,9 @@ fn native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution() {
     std::fs::write(
         &profile,
         format!(
-            "[profile]\nname = \"audited\"\n\n[audit]\nenabled = true\nverbose = true\n\n[servers.foreign]\nenabled = true\ncommand = \"{}\"\naccess = \"write\"\n",
-            fake.display()
+            "[profile]\nname = \"audited\"\n\n[audit]\nenabled = true\nverbose = true\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();
@@ -220,11 +293,12 @@ fn mcp_profile_flag_loads_xdg_profile_directory() {
     let profiles = root.path().join("config").join("symbrain").join("profiles");
     std::fs::create_dir_all(&profiles).unwrap();
     let profile = profiles.join("named.toml");
-    let command = fake.to_str().unwrap();
     std::fs::write(
         &profile,
         format!(
-            "[profile]\nname = \"named\"\n\n[servers.foreign]\nenabled = true\ncommand = \"{command}\"\naccess = \"write\"\n"
+            "[profile]\nname = \"named\"\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();

@@ -45,6 +45,33 @@ fn fixture() -> serde_json::Value {
     serde_json::from_slice(&data).expect("fixture is JSON")
 }
 
+fn native_command() -> String {
+    #[cfg(windows)]
+    {
+        let system_root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("windir"))
+            .unwrap_or_else(|| r"C:\Windows".into());
+        std::path::PathBuf::from(system_root)
+            .join("System32")
+            .join("where.exe")
+            .to_string_lossy()
+            .into_owned()
+    }
+    #[cfg(not(windows))]
+    {
+        "/usr/bin/true".to_owned()
+    }
+}
+
+fn normalize_root_paths(value: &str) -> String {
+    let paths = regex::Regex::new(r"(<root>)[/\\][^\s:]+").unwrap();
+    paths
+        .replace_all(value, |captures: &regex::Captures<'_>| {
+            captures[0].replace('\\', "/")
+        })
+        .into_owned()
+}
+
 /// Mirrors the oracle's own per-case scaffolding.
 fn setup(id: &str, case_root: &Path) {
     fs::create_dir_all(case_root.join("home/.config/symguard")).unwrap();
@@ -53,11 +80,14 @@ fn setup(id: &str, case_root: &Path) {
     let log = case_root.join("data/symguard/audit.log");
     match id {
         "empty_machine" => {}
-        "healthy_config" => fs::write(
-            &config,
-            "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = \"/usr/bin/true\"\n",
-        )
-        .unwrap(),
+        "healthy_config" => {
+            let command = toml_edit::Value::from(native_command().as_str()).to_string();
+            fs::write(
+                &config,
+                format!("[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = {command}\n"),
+            )
+            .unwrap();
+        }
         "config_error" => fs::write(&config, "not [valid = toml").unwrap(),
         "audit_log_without_anchor" => fs::write(&log, "{\"entry_id\":\"1\"}\n").unwrap(),
         "audit_log_corrupt_anchor" => {
@@ -67,22 +97,22 @@ fn setup(id: &str, case_root: &Path) {
         "discovered_server_denied" => {
             let cursor = case_root.join("home/.cursor");
             fs::create_dir_all(&cursor).unwrap();
-            fs::write(
-                cursor.join("mcp.json"),
-                r#"{"mcpServers":{"demo":{"command":"/usr/bin/true","args":["--once"]}}}"#,
-            )
-            .unwrap();
+            let mcp = serde_json::json!({
+                "mcpServers": {"demo": {"command": native_command(), "args": ["--once"]}}
+            });
+            fs::write(cursor.join("mcp.json"), serde_json::to_vec(&mcp).unwrap()).unwrap();
         }
         "discovered_server_secret_risk" => {
             let cursor = case_root.join("home/.cursor");
             fs::create_dir_all(&cursor).unwrap();
-            fs::write(
-                cursor.join("mcp.json"),
-                r#"{"mcpServers":{"server-with-secret":{"command":"/usr/bin/env","env":{"SECRET_KEY":"literal"}}}}"#,
-            )
-            .unwrap();
+            let mcp = serde_json::json!({
+                "mcpServers": {"server-with-secret": {"command": native_command(), "env": {"SECRET_KEY": "literal"}}}
+            });
+            fs::write(cursor.join("mcp.json"), serde_json::to_vec(&mcp).unwrap()).unwrap();
         }
-        other => panic!("unknown oracle case {other:?} — the fixture grew a case this test does not set up"),
+        other => panic!(
+            "unknown oracle case {other:?} — the fixture grew a case this test does not set up"
+        ),
     }
 }
 
@@ -124,6 +154,9 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
     let temp = TempDir::new().unwrap();
     // The oracle rewrites its own mktemp root to <root>; macOS hands out
     // /var/... symlinks to /private/var/..., so canonicalize like it does.
+    #[cfg(windows)]
+    let root = temp.path().to_path_buf();
+    #[cfg(not(windows))]
     let root = fs::canonicalize(temp.path()).unwrap();
 
     let mut native = Vec::new();
@@ -135,8 +168,8 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         let output = run(&case_root);
 
         let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
-        let normalized =
-            doctor_header::normalize(&stdout.replace(root.to_str().expect("utf8 root"), "<root>"));
+        let rooted = stdout.replace(root.to_str().expect("utf8 root"), "<root>");
+        let normalized = doctor_header::normalize(&normalize_root_paths(&rooted));
 
         if let Some((_, reason)) = GATED_CASES.iter().find(|(name, _)| *name == id) {
             assert!(
@@ -155,6 +188,9 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         let expected: String =
             serde_json::from_str(case["output_json"].as_str().expect("output_json"))
                 .expect("output_json holds a JSON string");
+        let expected = expected
+            .replace("/usr/bin/true", &native_command())
+            .replace("/usr/bin/env", &native_command());
         let expected = doctor_header::normalize(&expected);
         assert_eq!(
             normalized, expected,

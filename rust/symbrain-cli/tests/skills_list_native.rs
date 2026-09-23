@@ -57,7 +57,13 @@ fn empty_library_json_matches_go_bytes() {
 }
 
 fn write_library_skill(root: &TempDir, name: &str, extra: &str) -> std::path::PathBuf {
-    let directory = root.path().join("data/symbrain/skills/library").join(name);
+    let directory = root
+        .path()
+        .join("data")
+        .join("symbrain")
+        .join("skills")
+        .join("library")
+        .join(name);
     std::fs::create_dir_all(&directory).unwrap();
     std::fs::write(
         directory.join("SKILL.md"),

@@ -821,13 +821,13 @@ fn parse_scope_flag(args: &[OsString]) -> Result<String, String> {
 
 fn skill_root_for(target: &str, home: &std::path::Path) -> PathBuf {
     match target {
-        "claude" => home.join(".claude/skills"),
-        "opencode" => home.join(".config/opencode/skills"),
-        "codex" => home.join(".agents/skills"),
-        "antigravity" => home.join(".gemini/config/skills"),
-        "hermes" => home.join(".hermes/skills/symaira"),
-        "openclaw" => home.join(".openclaw/skills"),
-        _ => home.join(".local/share/symskills/skills"),
+        "claude" => native_join(home, ".claude/skills"),
+        "opencode" => native_join(home, ".config/opencode/skills"),
+        "codex" => native_join(home, ".agents/skills"),
+        "antigravity" => native_join(home, ".gemini/config/skills"),
+        "hermes" => native_join(home, ".hermes/skills/symaira"),
+        "openclaw" => native_join(home, ".openclaw/skills"),
+        _ => native_join(home, ".local/share/symskills/skills"),
     }
 }
 
@@ -838,7 +838,7 @@ fn skill_root_for(target: &str, home: &std::path::Path) -> PathBuf {
 /// read.
 fn opencode_status_root(scope: &str) -> PathBuf {
     if scope == "project" {
-        return current_project_dir().join(".opencode/skills");
+        return native_join(&current_project_dir(), ".opencode/skills");
     }
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     skill_root_for("opencode", &home)
@@ -847,12 +847,24 @@ fn opencode_status_root(scope: &str) -> PathBuf {
 fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {
     match target {
         "claude" => home.join(".claude"),
-        "opencode" => home.join(".config/opencode"),
+        "opencode" => native_join(home, ".config/opencode"),
         "codex" => home.join(".codex"),
-        "antigravity" => home.join(".gemini/config"),
+        "antigravity" => native_join(home, ".gemini/config"),
         "hermes" => home.join(".hermes"),
         "openclaw" => home.join(".openclaw"),
         _ => home.to_path_buf(),
+    }
+}
+
+fn native_join(base: &std::path::Path, suffix: &str) -> PathBuf {
+    let joined = base.join(suffix);
+    #[cfg(windows)]
+    {
+        joined.components().collect()
+    }
+    #[cfg(not(windows))]
+    {
+        joined
     }
 }
 
@@ -1131,10 +1143,10 @@ fn skills_config_path() -> PathBuf {
 
 fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<PathBuf> {
     let root = match target {
-        "claude" => project.join(".claude/skills"),
-        "opencode" => project.join(".opencode/skills"),
-        "codex" | "antigravity" | "openclaw" => project.join(".agents/skills"),
-        "hermes" => project.join(".hermes/skills"),
+        "claude" => native_join(project, ".claude/skills"),
+        "opencode" => native_join(project, ".opencode/skills"),
+        "codex" | "antigravity" | "openclaw" => native_join(project, ".agents/skills"),
+        "hermes" => native_join(project, ".hermes/skills"),
         _ => return None,
     };
     Some(root)

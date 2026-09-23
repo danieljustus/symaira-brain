@@ -37,7 +37,7 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use toml_edit::{DocumentMut, Item, Table, Value};
 
@@ -519,33 +519,25 @@ fn allows(server: &Discovered, allowlist: &[SpawnEntry]) -> bool {
     })
 }
 
-/// Ports Go's `filepath.Clean` for the slash-separated paths the allowlist
-/// requires (entries must be absolute, so there is no relative-path case to
-/// carry).
+/// Ports Go's platform-native `filepath.Clean` for absolute allowlist paths.
 fn clean_path(path: &str) -> String {
-    let rooted = path.starts_with('/');
-    let mut out: Vec<&str> = Vec::new();
-    for part in path.split('/') {
-        match part {
-            "" | "." => {}
-            ".." => {
-                if out.last().is_some_and(|last| *last != "..") {
-                    out.pop();
-                } else if !rooted {
-                    out.push("..");
+    let mut cleaned = PathBuf::new();
+    for component in Path::new(path).components() {
+        match component {
+            Component::Prefix(_) | Component::RootDir | Component::Normal(_) => {
+                cleaned.push(component.as_os_str());
+            }
+            Component::CurDir => {}
+            Component::ParentDir => {
+                if cleaned.file_name().is_some_and(|name| name != "..") {
+                    cleaned.pop();
+                } else if !cleaned.has_root() {
+                    cleaned.push(component.as_os_str());
                 }
             }
-            other => out.push(other),
         }
     }
-    let joined = out.join("/");
-    if rooted {
-        format!("/{joined}")
-    } else if joined.is_empty() {
-        ".".to_owned()
-    } else {
-        joined
-    }
+    cleaned.to_string_lossy().into_owned()
 }
 
 // ---------------------------------------------------------------------------
@@ -663,26 +655,60 @@ mod tests {
         }
     }
 
+    fn native_command() -> String {
+        #[cfg(windows)]
+        {
+            let system_root = env::var_os("SystemRoot")
+                .or_else(|| env::var_os("windir"))
+                .unwrap_or_else(|| r"C:\Windows".into());
+            PathBuf::from(system_root)
+                .join("System32")
+                .join("where.exe")
+                .to_string_lossy()
+                .into_owned()
+        }
+        #[cfg(not(windows))]
+        {
+            "/usr/bin/true".to_owned()
+        }
+    }
+
+    fn parent_path_variant(path: &str) -> String {
+        let path = Path::new(path);
+        let parent = path.parent().expect("absolute path has parent");
+        let grandparent = parent.parent().expect("test path has grandparent");
+        let parent_name = parent.file_name().expect("parent name");
+        let file_name = path.file_name().expect("file name");
+        grandparent
+            .join(parent_name)
+            .join("..")
+            .join(parent_name)
+            .join(file_name)
+            .to_string_lossy()
+            .into_owned()
+    }
+
     #[test]
     fn allowlist_is_deny_by_default_and_prefix_matched() {
+        let command = native_command();
         let entry = SpawnEntry {
-            path: "/usr/bin/true".to_owned(),
+            path: command.clone(),
             argv_prefix: vec!["--once".to_owned()],
         };
-        assert!(!allows(&stdio("/usr/bin/true", &["--once"]), &[]));
+        assert!(!allows(&stdio(&command, &["--once"]), &[]));
         assert!(allows(
-            &stdio("/usr/bin/true", &["--once", "--extra"]),
+            &stdio(&command, &["--once", "--extra"]),
             std::slice::from_ref(&entry)
         ));
         assert!(!allows(
-            &stdio("/usr/bin/true", &["--twice"]),
+            &stdio(&command, &["--twice"]),
             std::slice::from_ref(&entry)
         ));
         // Relative commands can never match an absolute entry.
         assert!(!allows(&stdio("true", &[]), std::slice::from_ref(&entry)));
         // ..-containing paths clean to the same file, as filepath.Clean does.
         assert!(allows(
-            &stdio("/usr/lib/../bin/true", &["--once"]),
+            &stdio(&parent_path_variant(&command), &["--once"]),
             std::slice::from_ref(&entry)
         ));
         // HTTP servers are not gated at all.
@@ -704,13 +730,17 @@ mod tests {
 
     #[test]
     fn config_parses_the_healthy_fixture_and_gates_on_invalid_toml() {
-        let healthy = "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = \"/usr/bin/true\"\n";
-        let loaded = parse_and_validate(healthy).expect("healthy config is native");
+        let command = native_command();
+        let command = Value::from(command.as_str());
+        let healthy = format!(
+            "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = {command}\n"
+        );
+        let loaded = parse_and_validate(&healthy).expect("healthy config is native");
         assert_eq!(loaded.rules, 1);
         assert_eq!(
             loaded.allowlist,
             vec![SpawnEntry {
-                path: "/usr/bin/true".to_owned(),
+                path: native_command(),
                 argv_prefix: Vec::new(),
             }]
         );
