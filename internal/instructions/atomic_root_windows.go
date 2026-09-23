@@ -17,9 +17,8 @@ type windowsAtomicParent struct {
 }
 
 const (
-	directoryTraverseAccess    = windows.FILE_LIST_DIRECTORY | windows.FILE_TRAVERSE | windows.FILE_READ_ATTRIBUTES | windows.READ_CONTROL | windows.SYNCHRONIZE
-	directoryCreateChildAccess = directoryTraverseAccess | windows.FILE_APPEND_DATA
-	directoryWriteAccess       = windows.FILE_GENERIC_READ | windows.FILE_GENERIC_WRITE | windows.SYNCHRONIZE
+	directoryTraverseAccess = windows.FILE_LIST_DIRECTORY | windows.FILE_TRAVERSE | windows.FILE_READ_ATTRIBUTES | windows.READ_CONTROL | windows.SYNCHRONIZE
+	directoryWriteAccess    = windows.FILE_GENERIC_READ | windows.FILE_GENERIC_WRITE | windows.SYNCHRONIZE
 )
 
 func openAtomicParent(trustedRoot, parentName string, createParent bool) (atomicParent, error) {
@@ -140,17 +139,7 @@ func (p *windowsAtomicParent) openDirectory(name string, create, writable bool) 
 	}
 	handle, err := ntCreate(p.handle, name, access, windows.FILE_OPEN, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
 	if err != nil && create {
-		creator, creatorErr := ntCreate(p.handle, ".", directoryCreateChildAccess, windows.FILE_OPEN, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
-		if creatorErr != nil {
-			return nil, creatorErr
-		}
-		handle, err = ntCreate(creator, name, access, windows.FILE_OPEN_IF, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
-		if closeErr := windows.CloseHandle(creator); closeErr != nil {
-			if handle != windows.InvalidHandle {
-				_ = windows.CloseHandle(handle)
-			}
-			return nil, closeErr
-		}
+		handle, err = ntCreate(p.handle, name, access, windows.FILE_OPEN_IF, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
 	}
 	if err != nil {
 		return nil, err

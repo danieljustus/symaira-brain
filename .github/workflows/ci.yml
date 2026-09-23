@@ -515,6 +515,7 @@ jobs:
           # SKL-001..003; INS-001; ADR-005; SEC-002..005.
           go run ./scripts/skills-oracle -output "$RUNNER_TEMP/skills-oracle-windows.json" || failed=1
           go run ./scripts/skills-install-oracle -output "$RUNNER_TEMP/skills-install-oracle-windows.json" || failed=1
+          go test ./internal/instructions -run TestWriteFileAtomicCreatesNestedParentAndLeavesNoTempFile -count=1 -timeout=60s || failed=1
           echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$RUNNER_TEMP/skills-oracle-windows.json" >> "$GITHUB_ENV"
           echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$RUNNER_TEMP/skills-install-oracle-windows.json" >> "$GITHUB_ENV"
           go run ./guard/scripts/guard-oracle -output "$RUNNER_TEMP/guard_oracle_windows.json" || failed=1

@@ -30,12 +30,6 @@ func TestAncestorTraversalDoesNotRequestWriteAccess(t *testing.T) {
 	if directoryTraverseAccess&writeBits != 0 {
 		t.Fatalf("ancestor traversal access %#x contains write bits %#x", directoryTraverseAccess, directoryTraverseAccess&writeBits)
 	}
-	if directoryCreateChildAccess&windows.FILE_APPEND_DATA == 0 {
-		t.Fatalf("create-parent access %#x lacks FILE_ADD_SUBDIRECTORY", directoryCreateChildAccess)
-	}
-	if directoryCreateChildAccess&(windows.FILE_WRITE_DATA|windows.FILE_WRITE_ATTRIBUTES|windows.FILE_WRITE_EA) != 0 {
-		t.Fatalf("create-parent access %#x requests unrelated write rights", directoryCreateChildAccess)
-	}
 	if directoryWriteAccess&writeBits == 0 {
 		t.Fatalf("final parent access %#x lacks write bits", directoryWriteAccess)
 	}
