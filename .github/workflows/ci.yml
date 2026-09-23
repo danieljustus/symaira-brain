@@ -354,6 +354,19 @@ jobs:
           set -euo pipefail
           cargo fmt --all --check
           cargo clippy -p symbrain-cli --all-targets --all-features --locked -- -D warnings
+      - name: Test skills home resolution on native Windows
+        if: ${{ matrix.os == 'windows-2025' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for case in \
+            "symbrain-skills runner_env_tests conflicting_home_variables_use_the_go_platform_home" \
+            "symbrain-cli skills_sync_legacy_roots native_sync_plan_uses_the_platform_home_when_home_variables_disagree"; do
+            read -r package suite name <<<"$case"
+            output=$(cargo test -p "$package" --test "$suite" "$name" --locked -- --exact 2>&1) || { printf '%s\n' "$output"; exit 1; }
+            printf '%s\n' "$output"
+            [[ "$output" == *"test result: ok. 1 passed; 0 failed;"* ]]
+          done
       # Keep lint failures fatal, but collect independent runtime diagnostics.
       - name: Execute native init tests and Go differential
         if: ${{ !cancelled() }}
