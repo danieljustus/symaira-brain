@@ -1,5 +1,4 @@
 use super::{Provider, Request};
-use serde_json::Value;
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::io::{Read, Seek, SeekFrom};
@@ -26,8 +25,9 @@ pub(super) fn request_for(
         ("nous", _) => ("GET", format!("{}/api/oauth/account", validated_base(provider.base_url.as_deref().unwrap_or("https://portal.nousresearch.com"), "https://portal.nousresearch.com")), None),
         ("openrouter", _) => ("GET", format!("{}/auth/key", validated_base(provider.base_url.as_deref().unwrap_or("https://openrouter.ai/api/v1"), "https://openrouter.ai/api/v1")), None),
         ("opencode", "workspace_get") => ("GET", "https://opencode.ai/_server?id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f".into(), None),
-        ("opencode", "web_post") => ("POST", "https://opencode.ai/_server".into(), Some(format!("[\"{}\"]", argument.unwrap_or("")))),
-        ("opencode", _) => ("GET", format!("https://opencode.ai/_server?args=%5B%22{}%22%5D&id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4", encode_query_arg(argument.unwrap_or(""))), None),
+        ("opencode", "workspace_post") => ("POST", "https://opencode.ai/_server".into(), Some("[]".into())),
+        ("opencode", "web_post") => ("POST", "https://opencode.ai/_server".into(), Some(go_json_string_array(argument.unwrap_or("")))),
+        ("opencode", _) => ("GET", format!("https://opencode.ai/_server?args={}&id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4", encode_query_arg(&go_json_string_array(argument.unwrap_or("")))), None),
         ("antigravity", "local") => {
             let raw = argument.unwrap_or("https://127.0.0.1:0/RetrieveUserQuotaSummary");
             let (base, endpoint) = raw.rsplit_once('/').unwrap_or((raw, "RetrieveUserQuotaSummary"));
@@ -74,7 +74,9 @@ pub(super) fn request_for(
     }
     if id == "opencode" {
         let server_id = match source {
-            "workspace_get" => "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f",
+            "workspace_get" | "workspace_post" => {
+                "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f"
+            }
             _ => "7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4",
         };
         headers.insert("X-Server-Id".into(), server_id.into());
@@ -89,7 +91,7 @@ pub(super) fn request_for(
         headers.insert("Origin".into(), "https://opencode.ai".into());
         headers.insert(
             "Referer".into(),
-            if source == "workspace_get" {
+            if matches!(source, "workspace_get" | "workspace_post") {
                 "https://opencode.ai".into()
             } else {
                 format!(
@@ -141,11 +143,34 @@ fn encode_query_arg(value: &str) -> String {
     value.bytes().fold(String::new(), |mut out, byte| {
         if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
             out.push(byte as char);
+        } else if byte == b' ' {
+            // Go's url.QueryEscape (used by url.Values.Encode) renders a space
+            // as '+', not %20.
+            out.push('+');
         } else {
             let _ = write!(out, "%{byte:02X}");
         }
         out
     })
+}
+
+/// Serializes one request argument the way the shipped code's
+/// `json.Marshal([]any{arg})` does for the `args` query value and the POST
+/// body: compact JSON whose strings carry Go's HTML escapes (`&`, `<`, `>`)
+/// and U+2028/U+2029 escapes, which `serde_json` leaves alone. None of those
+/// characters can occur in the JSON structure itself, so escaping them after
+/// serialization cannot alter non-string content.
+fn go_json_string_array(value: &str) -> String {
+    let mut encoded =
+        serde_json::to_string(&[value]).expect("serializing a string slice cannot fail");
+    encoded = encoded
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e");
+    encoded = encoded
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029");
+    encoded
 }
 
 pub(crate) fn validated_base(raw: &str, fallback: &str) -> String {
@@ -353,29 +378,9 @@ fn terminate_probe(child: &mut std::process::Child) {
     let _ = child.wait();
 }
 
-pub(super) fn normalize_workspace(raw: &str) -> String {
-    raw.split_whitespace()
-        .find(|x| x.starts_with("wrk_"))
-        .map(|x| {
-            x.trim_matches(|c: char| !c.is_ascii_alphanumeric() && c != '_')
-                .to_string()
-        })
-        .unwrap_or_default()
-}
-pub(super) fn extract_workspace(body: &[u8]) -> Option<String> {
-    serde_json::from_slice::<Value>(body)
-        .ok()
-        .and_then(|value| {
-            value
-                .pointer("/workspaces/0/id")
-                .and_then(Value::as_str)
-                .map(str::to_owned)
-        })
-        .or_else(|| {
-            let workspace = normalize_workspace(&String::from_utf8_lossy(body));
-            (!workspace.is_empty()).then_some(workspace)
-        })
-}
+#[path = "provider_opencode_workspace.rs"]
+mod opencode_workspace;
+pub(super) use opencode_workspace::{extract_workspace, looks_signed_out, normalize_workspace};
 
 #[cfg(test)]
 #[path = "provider_requests_tests.rs"]

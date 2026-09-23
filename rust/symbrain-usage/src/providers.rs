@@ -12,11 +12,11 @@ use provider_errors::status_error;
 #[path = "provider_requests.rs"]
 mod provider_requests;
 pub(crate) use provider_requests::trusted_https_url;
-use provider_requests::{
-    command_output_with_cancel, extract_workspace, normalize_workspace, request_for,
-};
+use provider_requests::{command_output_with_cancel, request_for};
 #[path = "provider_fetch.rs"]
 mod provider_fetch;
+#[path = "provider_opencode.rs"]
+mod provider_opencode;
 use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
@@ -207,47 +207,6 @@ impl Provider {
         }
         Err(UsageError::chain(&self.id, errors))
     }
-    fn fetch_opencode(
-        &self,
-        transport: &Arc<dyn Transport>,
-        cancel: &Cancellation,
-    ) -> Result<UsageSnapshot, UsageError> {
-        let cookie = self.credential();
-        let workspace = self
-            .credentials
-            .iter()
-            .find(|(s, _)| s == "workspace")
-            .map_or("", |(_, value)| value.as_str());
-        let workspace = normalize_workspace(workspace);
-        let id = if workspace.is_empty() {
-            let response = transport
-                .request_with_cancel(request_for(self, "workspace_get", cookie, None), cancel)
-                .map_err(|e| UsageError::transport(&self.id, &e))?;
-            if !(200..300).contains(&response.status) {
-                return Err(status_error(&self.id, response.status, &response.headers));
-            }
-            extract_workspace(&response.body)
-                .ok_or_else(|| UsageError::parse(&self.id, "missing workspace id"))?
-        } else {
-            workspace
-        };
-        let response = transport
-            .request_with_cancel(request_for(self, "web", cookie, Some(&id)), cancel)
-            .map_err(|e| UsageError::transport(&self.id, &e))?;
-        if !(200..300).contains(&response.status) {
-            return Err(status_error(&self.id, response.status, &response.headers));
-        }
-        parse_snapshot(&self.id, "web", &response.body, Utc::now()).or_else(|_| {
-            let fallback = request_for(self, "web_post", cookie, Some(&id));
-            let response = transport
-                .request_with_cancel(fallback, cancel)
-                .map_err(|e| UsageError::transport(&self.id, &e))?;
-            if !(200..300).contains(&response.status) {
-                return Err(status_error(&self.id, response.status, &response.headers));
-            }
-            parse_snapshot(&self.id, "web", &response.body, Utc::now())
-        })
-    }
     fn fetch_antigravity_fixture(
         &self,
         transport: &Arc<dyn Transport>,
@@ -387,3 +346,7 @@ impl Provider {
         Err(last_error)
     }
 }
+
+#[cfg(test)]
+#[path = "opencode_discovery_tests.rs"]
+mod opencode_discovery_tests;
