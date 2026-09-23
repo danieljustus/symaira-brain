@@ -46,11 +46,12 @@ var oracleEnvNames = []string{
 }
 
 type symvaultSpec struct {
-	Mode    string `json:"mode"` // "fake" runs, "absent" is not on PATH
-	Stdout  string `json:"stdout,omitempty"`
-	Stderr  string `json:"stderr,omitempty"`
-	Exit    int    `json:"exit,omitempty"`
-	SleepMS int    `json:"sleep_ms,omitempty"`
+	Mode        string `json:"mode"` // "fake" runs, "absent" is not on PATH
+	Stdout      string `json:"stdout,omitempty"`
+	StdoutBytes []int  `json:"stdout_bytes,omitempty"`
+	Stderr      string `json:"stderr,omitempty"`
+	Exit        int    `json:"exit,omitempty"`
+	SleepMS     int    `json:"sleep_ms,omitempty"`
 }
 
 type inputSpec struct {
@@ -68,6 +69,7 @@ type oracleCase struct {
 	Timeout           string    `json:"timeout,omitempty"`
 	Success           *bool     `json:"success,omitempty"`
 	Value             string    `json:"value,omitempty"`
+	ValueBytes        []int     `json:"value_bytes,omitempty"`
 	Error             string    `json:"error,omitempty"`
 	Argv              []string  `json:"argv"`
 	IsVaultURI        *bool     `json:"is_vault_uri,omitempty"`
@@ -201,6 +203,7 @@ func main() {
 	}
 	argsPath, _ := m["args_path"].(string)
 	stdout, _ := m["stdout"].(string)
+	stdoutBytes, _ := m["stdout_bytes"].([]any)
 	stderr, _ := m["stderr"].(string)
 	exit, _ := m["exit"].(float64)
 	sleepMS, _ := m["sleep_ms"].(float64)
@@ -220,7 +223,15 @@ func main() {
 	}
 	// Canned output is written before any sleep so a timeout probe
 	// exercises 'value obtained, then deadline' on the real path.
-	_, _ = os.Stdout.WriteString(stdout)
+	if len(stdoutBytes) > 0 {
+		data := make([]byte, len(stdoutBytes))
+		for i, value := range stdoutBytes {
+			data[i] = byte(value.(float64))
+		}
+		_, _ = os.Stdout.Write(data)
+	} else {
+		_, _ = os.Stdout.WriteString(stdout)
+	}
 	_, _ = os.Stderr.WriteString(stderr)
 	if sleepMS > 0 {
 		time.Sleep(time.Duration(sleepMS) * time.Millisecond)
@@ -282,13 +293,14 @@ func writeFakeSymvault(binDir, argsPath string, spec symvaultSpec) {
 		panic(err)
 	}
 	type sidecarSpec struct {
-		ArgsPath string `json:"args_path"`
-		Stdout   string `json:"stdout"`
-		Stderr   string `json:"stderr"`
-		Exit     int    `json:"exit"`
-		SleepMS  int    `json:"sleep_ms"`
+		ArgsPath    string `json:"args_path"`
+		Stdout      string `json:"stdout"`
+		StdoutBytes []int  `json:"stdout_bytes,omitempty"`
+		Stderr      string `json:"stderr"`
+		Exit        int    `json:"exit"`
+		SleepMS     int    `json:"sleep_ms"`
 	}
-	data, err := json.Marshal(sidecarSpec{argsPath, spec.Stdout, spec.Stderr, spec.Exit, spec.SleepMS})
+	data, err := json.Marshal(sidecarSpec{argsPath, spec.Stdout, spec.StdoutBytes, spec.Stderr, spec.Exit, spec.SleepMS})
 	if err != nil {
 		panic(err)
 	}
@@ -419,6 +431,13 @@ func resolveCase(id string, in inputSpec, timeout time.Duration) oracleCase {
 		Error:   message,
 		Argv:    argv,
 	}
+	if in.Symvault != nil && len(in.Symvault.StdoutBytes) > 0 && success {
+		// JSON strings replace invalid UTF-8. Record the resolver's actual bytes.
+		result.Value = ""
+		for _, b := range []byte(value) {
+			result.ValueBytes = append(result.ValueBytes, int(b))
+		}
+	}
 	if timeout > 0 {
 		result.Kind = "timeout"
 		result.Timeout = timeout.String()
@@ -462,6 +481,10 @@ func buildCases() []oracleCase {
 
 		// Resolution through the real subprocess path.
 		resolveCase("canonical_ok", inputSpec{Value: "symvault://symaira/memory/jwt", Symvault: working}, 0),
+		resolveCase("non_utf8_symvault_stdout", inputSpec{
+			Value:    "symvault://raw/bytes",
+			Symvault: &symvaultSpec{Mode: "fake", StdoutBytes: []int{255, 254, 115, 101, 99, 114, 101, 116, 10}},
+		}, 0),
 		resolveCase("alias_ok_equivalent", inputSpec{Value: "vault://symaira/memory/jwt", Symvault: working}, 0),
 		resolveCase("alias_missing_path_error_bytes", inputSpec{Value: "vault://unknown/path", Symvault: failing}, 0),
 		resolveCase("missing_path_error_names_env_fallback", inputSpec{

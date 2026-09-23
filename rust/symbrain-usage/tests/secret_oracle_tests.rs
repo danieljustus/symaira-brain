@@ -47,6 +47,8 @@ struct Case {
     #[serde(default)]
     value: String,
     #[serde(default)]
+    value_bytes: Vec<u8>,
+    #[serde(default)]
     error: String,
     #[serde(default)]
     argv: Option<Vec<String>>,
@@ -76,6 +78,8 @@ struct SymvaultSpec {
     mode: String,
     #[serde(default)]
     stdout: String,
+    #[serde(default)]
+    stdout_bytes: Vec<u8>,
     #[serde(default)]
     stderr: String,
     #[serde(default)]
@@ -141,6 +145,13 @@ fn write_fake_symvault(bin_dir: &Path, args_path: &Path, spec: &SymvaultSpec) {
     // Canned output is written before any sleep so a timeout probe
     // exercises "value obtained, then deadline" like the Go helper.
     let _ = writeln!(script, "printf '%s' {}", shell_quote(&spec.stdout));
+    if !spec.stdout_bytes.is_empty() {
+        let mut octal = String::new();
+        for byte in &spec.stdout_bytes {
+            let _ = write!(octal, "\\{byte:03o}");
+        }
+        let _ = writeln!(script, "printf '%b' {}", shell_quote(&octal));
+    }
     let _ = writeln!(script, "printf '%s' {} >&2", shell_quote(&spec.stderr));
     if spec.sleep_ms > 0 {
         // Whole-second sleeps render bare; sub-second values keep three
@@ -165,7 +176,7 @@ fn write_fake_symvault(bin_dir: &Path, args_path: &Path, spec: &SymvaultSpec) {
 }
 
 struct CaseSetup {
-    _dir: tempfile::TempDir,
+    dir: tempfile::TempDir,
     args_path: PathBuf,
     old_path: String,
 }
@@ -189,7 +200,7 @@ fn setup_case(input: &Input) -> CaseSetup {
         set_env(name, value);
     }
     CaseSetup {
-        _dir: dir,
+        dir,
         args_path,
         old_path,
     }
@@ -338,10 +349,70 @@ fn scheme_acceptance_matches_go_classification() {
 #[test]
 fn resolve_value_and_error_bytes_match_go() {
     let all = cases("resolve");
-    assert_eq!(all.len(), 14, "resolve cases");
-    for case in &all {
+    assert_eq!(all.len(), 15, "resolve cases");
+    for case in all.iter().filter(|case| case.value_bytes.is_empty()) {
         run_case(case);
     }
+}
+
+#[test]
+fn non_utf8_secret_fails_closed_instead_of_silently_changing_bytes() {
+    let parsed = fixture();
+    let case = parsed
+        .cases
+        .iter()
+        .find(|case| case.id == "non_utf8_symvault_stdout")
+        .expect("Go-generated raw-byte case");
+    assert_eq!(case.success, Some(true), "Go returned the raw secret");
+    let spec = case.input.symvault.as_ref().expect("fake subprocess");
+    assert_eq!(spec.stdout_bytes.last(), Some(&b'\n'));
+    assert_eq!(
+        case.value_bytes,
+        spec.stdout_bytes[..spec.stdout_bytes.len() - 1]
+    );
+    assert!(std::str::from_utf8(&case.value_bytes).is_err());
+
+    let _guard = lock();
+    let setup = setup_case(&case.input);
+    let error = resolve_reference(&case.input.value, "").expect_err("must reject invalid UTF-8");
+    assert_eq!(
+        error,
+        "secret resolution failed for symvault://raw/bytes: resolve symvault://raw/bytes: non-UTF-8 secret output; set env var  as fallback or install symvault"
+    );
+    assert!(!error.contains(char::REPLACEMENT_CHARACTER));
+    assert_eq!(
+        read_argv(&setup.args_path),
+        case.argv.clone().unwrap_or_default()
+    );
+    teardown(setup);
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn non_utf8_keychain_stdout_uses_the_same_fail_closed_decoder() {
+    let parsed = fixture();
+    let case = parsed
+        .cases
+        .iter()
+        .find(|case| case.id == "non_utf8_symvault_stdout")
+        .expect("Go-generated raw-byte input");
+    let _guard = lock();
+    let setup = setup_case(&case.input);
+    // This PATH-local stand-in cannot access the operator's login keychain.
+    fs::copy(
+        setup.dir.path().join("bin/symvault"),
+        setup.dir.path().join("bin/security"),
+    )
+    .expect("fake security executable");
+    let error = resolve_reference("keychain://fake/account", "")
+        .expect_err("keychain must reject invalid UTF-8 too");
+    assert!(error.contains("resolve keychain://fake/account: non-UTF-8 secret output"));
+    assert!(!error.contains(char::REPLACEMENT_CHARACTER));
+    assert_eq!(
+        read_argv(&setup.args_path),
+        ["find-generic-password", "-w", "-s", "fake", "-a", "account"]
+    );
+    teardown(setup);
 }
 
 #[test]
@@ -399,7 +470,7 @@ fn fixture_pins_timeout_surface_count_and_ids() {
         SHIPPED_TIMEOUT,
         "native default timeout"
     );
-    assert_eq!(parsed.cases.len(), 29, "fixture case count");
+    assert_eq!(parsed.cases.len(), 30, "fixture case count");
     let mut ids: Vec<&str> = parsed.cases.iter().map(|case| case.id.as_str()).collect();
     let before = ids.len();
     ids.sort_unstable();

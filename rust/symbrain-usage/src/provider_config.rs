@@ -426,9 +426,15 @@ fn resolve_symvault_reference(reference: &str, path: &str) -> Result<String, Str
             command_failure_message(failure, "symvault get", "symvault", timeout)
         )
     })?;
-    // Go runs TrimSpace over the raw bytes; a non-UTF-8 secret would diverge
-    // here only (lossy replacement), and no shipped provider emits one.
-    Ok(String::from_utf8_lossy(&output).trim().to_owned())
+    decode_secret_stdout(output, label)
+}
+
+fn decode_secret_stdout(output: Vec<u8>, label: &str) -> Result<String, String> {
+    // The public API returns String. Reject unrepresentable bytes rather than
+    // silently changing an authentication secret with replacement characters.
+    String::from_utf8(output)
+        .map(|value| value.trim().to_owned())
+        .map_err(|_| format!("resolve {label}: non-UTF-8 secret output"))
 }
 
 /// Go spawns the bare `security` binary with no pre-lookup, so only macOS
@@ -453,7 +459,7 @@ fn resolve_keychain_reference(
             command_failure_message(failure, "keychain lookup", "security", timeout)
         )
     })?;
-    Ok(String::from_utf8_lossy(&output).trim().to_owned())
+    decode_secret_stdout(output, label)
 }
 
 #[cfg(not(target_os = "macos"))]
