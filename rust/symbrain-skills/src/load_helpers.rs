@@ -7,14 +7,16 @@ pub(crate) fn read_bundle_bytes(
     read_limited(&root.root_cap, relative, name, limit)
 }
 
-pub(crate) fn read_bundle_text(
+pub(crate) fn read_bundle_optional_bytes(
     root: &Bundle,
     relative: &Path,
     name: &str,
     limit: u64,
-) -> Result<String, SkillError> {
-    let bytes = read_bundle_bytes(root, relative, name, limit)?;
-    String::from_utf8(bytes).map_err(|_| SkillError(format!("invalid_utf8_overlay: {name}")))
+) -> Result<Option<Vec<u8>>, SkillError> {
+    if !optional_entry_exists(&root.root_cap, relative, name)? {
+        return Ok(None);
+    }
+    read_bundle_bytes(root, relative, name, limit).map(Some)
 }
 
 fn load_overrides(

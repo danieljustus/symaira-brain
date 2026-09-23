@@ -64,6 +64,30 @@ fn opencode_source_matches_go_rendered_skill_bytes() {
 }
 
 #[test]
+fn missing_optional_render_overlays_are_empty() {
+    let temp = tempfile::tempdir().expect("bundle parent");
+    let root = temp.path().join("minimal-skill");
+    fs::create_dir(&root).expect("bundle root");
+    fs::write(
+        root.join("SKILL.md"),
+        "---\nname: minimal-skill\ndescription: test\n---\nBase body.\n",
+    )
+    .expect("SKILL.md");
+
+    let bundle = load_bundle(&root).expect("bundle without overlays");
+    let rendered = render_target(&bundle, "opencode", &RenderMetadata::default())
+        .expect("render without overlays");
+    assert_eq!(rendered.frontmatter.name, "minimal-skill");
+    assert!(rendered.skill_md.ends_with(b"Base body.\n"));
+
+    fs::create_dir_all(root.join("overlays/opencode")).expect("empty overlay target");
+    let bundle = load_bundle(&root).expect("bundle with empty target");
+    let empty_target = render_target(&bundle, "opencode", &RenderMetadata::default())
+        .expect("render without optional files");
+    assert_eq!(empty_target.skill_md, rendered.skill_md);
+}
+
+#[test]
 fn opencode_materialization_excludes_controls_and_preserves_support_bytes() {
     let bundle = load_bundle(&fixture("source")).expect("source fixture");
     let rendered =

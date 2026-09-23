@@ -196,17 +196,23 @@ fn read_dir(
         .map_err(|error| SkillError(format!("read {name} entry: {error}")))
 }
 
+fn optional_entry_exists(root: &Dir, relative: &Path, name: &str) -> Result<bool, SkillError> {
+    // Check the entry itself: a dangling link must not masquerade as an absent tree.
+    match root.symlink_metadata(relative) {
+        Ok(_) => Ok(true),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(false),
+        Err(error) => Err(SkillError(format!("stat {name}: {error}"))),
+    }
+}
 fn read_optional_dir(
     root: &Dir,
     relative: &Path,
     name: &str,
 ) -> Result<Option<Vec<cap_std::fs::DirEntry>>, SkillError> {
-    // Check the entry itself: a dangling link must not masquerade as an absent tree.
-    match root.symlink_metadata(relative) {
-        Ok(_) => read_dir(root, relative, name).map(Some),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
-        Err(error) => Err(SkillError(format!("stat {name}: {error}"))),
+    if !optional_entry_exists(root, relative, name)? {
+        return Ok(None);
     }
+    read_dir(root, relative, name).map(Some)
 }
 
 fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillError> {

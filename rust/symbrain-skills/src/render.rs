@@ -8,7 +8,7 @@ use serde_json::{Map, Value};
 use toml_edit::{DocumentMut, Item};
 
 use crate::encode::encode_skill_md;
-use crate::load::read_bundle_bytes;
+use crate::load::read_bundle_optional_bytes;
 use crate::model::{
     Bundle, Frontmatter, MAX_INPUT_SIZE, Manifest, SkillError, TargetConfig, validate_skill_name,
 };
@@ -261,14 +261,12 @@ fn apply_frontmatter_overlay(
     frontmatter: &mut Frontmatter,
 ) -> Result<(), SkillError> {
     let path = format!("overlays/{target_name}/frontmatter.toml");
-    let raw = match read_bundle_bytes(bundle, Path::new(&path), &path, MAX_INPUT_SIZE) {
-        Ok(bytes) => String::from_utf8(bytes)
-            .map_err(|_| SkillError(format!("invalid_utf8_overlay: {path}")))?,
-        Err(error) if error.0.contains("No such file") || error.0.contains("not found") => {
-            return Ok(());
-        }
-        Err(error) => return Err(error),
+    let Some(raw) = read_bundle_optional_bytes(bundle, Path::new(&path), &path, MAX_INPUT_SIZE)?
+    else {
+        return Ok(());
     };
+    let raw =
+        String::from_utf8(raw).map_err(|_| SkillError(format!("invalid_utf8_overlay: {path}")))?;
     let document = raw
         .parse::<DocumentMut>()
         .map_err(|error| SkillError(format!("parse {path}: {error}")))?;
@@ -374,12 +372,9 @@ fn overlay_text(
         }
         path.to_string_lossy().replace('\\', "/")
     };
-    match read_bundle_bytes(bundle, Path::new(&path), &path, MAX_INPUT_SIZE) {
-        Ok(bytes) => String::from_utf8(bytes)
-            .map_err(|_| SkillError(format!("invalid_utf8_overlay: {path}"))),
-        Err(error) if error.0.contains("No such file") || error.0.contains("not found") => {
-            Ok(String::new())
-        }
-        Err(error) => Err(error),
-    }
+    let Some(bytes) = read_bundle_optional_bytes(bundle, Path::new(&path), &path, MAX_INPUT_SIZE)?
+    else {
+        return Ok(String::new());
+    };
+    String::from_utf8(bytes).map_err(|_| SkillError(format!("invalid_utf8_overlay: {path}")))
 }
