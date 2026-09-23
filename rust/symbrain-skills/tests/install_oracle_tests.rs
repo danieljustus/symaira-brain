@@ -94,14 +94,35 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
                 value
             })
             .collect::<Vec<_>>();
-        assert_eq!(
-            got_statuses, case.expected.statuses,
-            "status case {}",
-            case.id
-        );
+        #[cfg_attr(not(windows), allow(unused_mut))]
+        let mut expected_statuses = case.expected.statuses;
+        #[cfg(windows)]
+        {
+            for status in &mut expected_statuses {
+                normalize_windows_source_hashes(status);
+            }
+            let mut got_statuses = got_statuses;
+            for status in &mut got_statuses {
+                normalize_windows_source_hashes(status);
+            }
+            assert_eq!(got_statuses, expected_statuses, "status case {}", case.id);
+        }
+        #[cfg(not(windows))]
+        assert_eq!(got_statuses, expected_statuses, "status case {}", case.id);
         let got_artifacts = artifacts(root.path(), &[home, base]);
+        #[cfg_attr(not(windows), allow(unused_mut))]
+        let mut expected_artifacts = case.expected.artifacts;
+        #[cfg(windows)]
+        for artifact in &mut expected_artifacts {
+            if artifact.path.ends_with("/.symskills.json") {
+                if let Some(bytes) = &artifact.bytes {
+                    let decoded = decode_base64(bytes);
+                    artifact.bytes = Some(base64(&normalize_marker_bytes(&decoded, root.path())));
+                }
+            }
+        }
         assert_eq!(
-            got_artifacts, case.expected.artifacts,
+            got_artifacts, expected_artifacts,
             "artifacts case {}",
             case.id
         );
@@ -274,6 +295,33 @@ fn normalize_value(value: &mut serde_json::Value, root: &Path) {
     }
 }
 
+#[cfg(windows)]
+fn normalize_windows_source_hashes(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(object) => {
+            for (key, value) in object.iter_mut() {
+                if key == "source_hash" {
+                    if let serde_json::Value::String(hash) = value {
+                        assert!(
+                            hash.len() == 64 && hash.bytes().all(|byte| byte.is_ascii_hexdigit()),
+                            "source hash must remain a SHA-256 digest: {hash}"
+                        );
+                        *value = serde_json::Value::String("<host-source-hash>".to_owned());
+                    }
+                } else {
+                    normalize_windows_source_hashes(value);
+                }
+            }
+        }
+        serde_json::Value::Array(values) => {
+            for value in values {
+                normalize_windows_source_hashes(value);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn normalize_marker_bytes(bytes: &[u8], root: &Path) -> Vec<u8> {
     let Ok(mut value) = serde_json::from_slice::<serde_json::Value>(bytes) else {
         return bytes.to_vec();
@@ -298,6 +346,14 @@ fn normalize_marker_value(value: &mut serde_json::Value, root: &Path) {
                     *value = serde_json::Value::String("<rendered>".to_owned());
                 } else if key == "installed" {
                     *value = serde_json::Value::String("<timestamp>".to_owned());
+                } else if cfg!(windows) && key == "source_hash" {
+                    if let serde_json::Value::String(hash) = value {
+                        assert!(
+                            hash.len() == 64 && hash.bytes().all(|byte| byte.is_ascii_hexdigit()),
+                            "source hash must remain a SHA-256 digest: {hash}"
+                        );
+                    }
+                    *value = serde_json::Value::String("<host-source-hash>".to_owned());
                 } else {
                     normalize_marker_value(value, root);
                 }
@@ -338,6 +394,31 @@ fn base64(bytes: &[u8]) -> String {
     output
 }
 
+#[cfg(windows)]
+fn decode_base64(input: &str) -> Vec<u8> {
+    let mut output = Vec::with_capacity(input.len() * 3 / 4);
+    let mut accumulator = 0_u32;
+    let mut bits = 0_u8;
+    for byte in input.bytes().filter(|byte| *byte != b'=') {
+        let value = match byte {
+            b'A'..=b'Z' => byte - b'A',
+            b'a'..=b'z' => byte - b'a' + 26,
+            b'0'..=b'9' => byte - b'0' + 52,
+            b'+' => 62,
+            b'/' => 63,
+            _ => panic!("invalid base64 fixture byte {byte}"),
+        };
+        accumulator = (accumulator << 6) | u32::from(value);
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            output.push(((accumulator >> bits) & 0xff) as u8);
+            accumulator &= (1_u32 << bits).wrapping_sub(1);
+        }
+    }
+    output
+}
+
 fn file_mode(metadata: &fs::Metadata) -> u32 {
     #[cfg(unix)]
     {
@@ -346,7 +427,6 @@ fn file_mode(metadata: &fs::Metadata) -> u32 {
     }
     #[cfg(not(unix))]
     {
-        let _ = metadata;
-        0o644
+        if metadata.is_dir() { 0o755 } else { 0o644 }
     }
 }

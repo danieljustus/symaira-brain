@@ -306,8 +306,10 @@ fn file_mode(metadata: &cap_std::fs::Metadata) -> u32 {
     }
     #[cfg(not(unix))]
     {
-        let _ = metadata;
-        0o644
+        // Windows does not expose POSIX permission bits. Keep the manifest's
+        // directory mode stable across hosts, matching the mode used when the
+        // rendered tree is created on Unix.
+        if metadata.is_dir() { 0o755 } else { 0o644 }
     }
 }
 
