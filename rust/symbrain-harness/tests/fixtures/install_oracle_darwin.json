@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
+  "go_revision": "2aa44723495ceff021bd42541d7578e2e3281c99",
   "generator_sha256": "cc0326a9e6811905804ee6298f95ff6ce23d9bc5465a92fe6abe58b0724ef8dc",
   "go_sources": {
     "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
@@ -8,7 +8,7 @@
     "internal/harness/backup.go": "f5e37b4ae3765abf62c5fcecd054962020e673059b74b92694bcebf52c186b1a",
     "internal/harness/document.go": "4e0d0f75f1c6362057e771b2750dd738b2650c646517208af92122e8faf720ee",
     "internal/harness/entry.go": "16e793ed021adff789958ae67869e90f5fbc73ec1124806a1558f90c4e7d6984",
-    "internal/harness/registry.go": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+    "internal/harness/registry.go": "f1d64e133e6bc1b0ff858cf47211e74c49cf987c237df9317bef4d5d05f02bfc",
     "internal/skills/install/base.go": "60aca8b91fac8bc47f6535f7348797c6ca683b72e99e0457d25bb129b5e9d91e",
     "internal/skills/install/classify.go": "ffe58b7332aab3ba1a3bee872a02ce9ce13c7fe71222fe75eba2e70a14c51bcf",
     "internal/skills/install/install.go": "205bcd074fb41000716b65b577c1c2efd1378cf88b18364d36dcada52596efca",
