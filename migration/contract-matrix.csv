@@ -53,7 +53,7 @@ SEC-004,security,Guard static buckets precedence merge scope ceilings marginal c
 SEC-005,security,"guard doctor output frozen from the production command with injected HOME/XDG over 7 scenarios (empty machine, healthy config, invalid TOML, missing/corrupt audit anchor, discovered server denied, discovered server with literal secret); paths and the Go toolchain line are placeholders, so the Go: line is an accepted difference",guard/scripts/guard-doctor-oracle,rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs;rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json,all,bytes-with-accepted-toolchain-line,green-native-5-of-7-scenarios-2-gated-to-go-before-output
 DIST-001,distribution,archive and binary names,current release,pending,all,artifact-manifest,pending
 DIST-002,distribution,checksums signatures SBOM Homebrew,current release,pending,all,artifact-manifest,pending
-GUI-001,Swift client,version and command JSON schemas,target/go/symbrain-go,pending,macos-ios,parsed-json,pending
+GUI-001,Swift client,version and command JSON schemas,target/go/symbrain-go,pending,macos,parsed-json,pending
 HAR-001,harness,exact nine-entry registry and injected Darwin/Linux/Windows config paths,internal/harness/registry_test.go;internal/harness/testdata,rust/symbrain-harness/tests/harness_tests.rs,all,registry-and-filesystem-manifest,green
 HAR-002,harness,entry classification and server inventory transport/env redaction,internal/harness/entry_test.go;internal/harness/serverinfo_test.go,rust/symbrain-harness/tests/harness_tests.rs,all,semantic,green
 HAR-003,harness,ordered JSON unknown-field duplicate-key numeric-lexeme and golden mutation behavior,internal/harness/testdata/golden,rust/symbrain-harness/tests/harness_tests.rs,all,bytes,green
