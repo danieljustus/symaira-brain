@@ -75,6 +75,7 @@ func runCase(root, id string, setup func(string) error) (string, int, error) {
 	dataHome := filepath.Join(caseRoot, "data")
 	symguardConfig := filepath.Join(configHome, "symguard", "config.toml")
 	os.Setenv("HOME", home)
+	os.Setenv("USERPROFILE", home)
 	os.Setenv("XDG_CONFIG_HOME", configHome)
 	os.Setenv("XDG_DATA_HOME", dataHome)
 	os.Setenv("SYMGUARD_CONFIG", symguardConfig)
