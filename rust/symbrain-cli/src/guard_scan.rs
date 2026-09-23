@@ -256,8 +256,8 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
 }
 
 /// Mirrors the Go adapter's string-based missing-file check. On Windows,
-/// ERROR_FILE_NOT_FOUND (2) is recognized by that check, but
-/// ERROR_PATH_NOT_FOUND (3) is not; on Unix all NotFound errors are skipped.
+/// `ERROR_FILE_NOT_FOUND` (2) is recognized by that check, but
+/// `ERROR_PATH_NOT_FOUND` (3) is not; on Unix all `NotFound` errors are skipped.
 pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
     if error.kind() != io::ErrorKind::NotFound {
         return false;
@@ -272,7 +272,7 @@ pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
     }
 }
 
-/// Formats the read diagnostic emitted by Go's os.ReadFile PathError.
+/// Formats the read diagnostic emitted by Go's os.ReadFile `PathError`.
 pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> String {
     let mut detail = error.to_string();
     if let Some(code) = error.raw_os_error() {

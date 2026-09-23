@@ -132,7 +132,7 @@ fn build_report() -> Option<(String, u8)> {
         checks = check_servers(servers, &allowlist)?;
     }
 
-    let discovery_problems = if discovery_error.is_some() { 1 } else { 0 };
+    let discovery_problems = usize::from(discovery_error.is_some());
     let problems = discovery_problems
         + checks
             .iter()

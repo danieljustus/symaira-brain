@@ -48,35 +48,7 @@ struct Artifact {
 fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
     let fixture: OracleFixture =
         serde_json::from_slice(&common::skills_install_oracle()).expect("install oracle fixture");
-    assert_eq!(fixture.schema_version, 1);
-    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    assert_eq!(
-        fixture.generator_sha256,
-        sha256(&repo.join("scripts/skills-install-oracle/main.go")),
-        "Go install-oracle generator changed"
-    );
-    let expected_sources = BTreeSet::from([
-        "internal/skills/install/install.go",
-        "internal/skills/install/status.go",
-        "internal/skills/install/base.go",
-        "internal/skills/install/classify.go",
-        "internal/skills/render/render_target.go",
-    ]);
-    assert_eq!(
-        fixture
-            .go_sources
-            .keys()
-            .map(String::as_str)
-            .collect::<BTreeSet<_>>(),
-        expected_sources
-    );
-    for (source, expected) in &fixture.go_sources {
-        assert_eq!(
-            sha256(&repo.join(source)),
-            *expected,
-            "Go install/status source changed: {source}"
-        );
-    }
+    check_provenance(&fixture);
     assert_eq!(fixture.cases.len(), 11);
     for case in fixture.cases {
         let root = tempfile::tempdir().expect("case root");
@@ -170,12 +142,41 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
     }
 }
 
+fn check_provenance(fixture: &OracleFixture) {
+    assert_eq!(fixture.schema_version, 1);
+    let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    assert_eq!(
+        fixture.generator_sha256,
+        sha256(&repo.join("scripts/skills-install-oracle/main.go")),
+        "Go install-oracle generator changed"
+    );
+    let expected_sources = BTreeSet::from([
+        "internal/skills/install/install.go",
+        "internal/skills/install/status.go",
+        "internal/skills/install/base.go",
+        "internal/skills/install/classify.go",
+        "internal/skills/render/render_target.go",
+    ]);
+    assert_eq!(
+        fixture
+            .go_sources
+            .keys()
+            .map(String::as_str)
+            .collect::<BTreeSet<_>>(),
+        expected_sources
+    );
+    for (source, expected) in &fixture.go_sources {
+        assert_eq!(
+            sha256(&repo.join(source)),
+            *expected,
+            "Go install/status source changed: {source}"
+        );
+    }
+}
+
 fn sha256(path: &Path) -> String {
     let bytes = fs::read(path).unwrap_or_else(|error| panic!("read {}: {error}", path.display()));
-    Sha256::digest(bytes)
-        .iter()
-        .map(|byte| format!("{byte:02x}"))
-        .collect()
+    format!("{:x}", Sha256::digest(bytes))
 }
 
 fn write_oracle_skill(root: &Path, body: &str) {

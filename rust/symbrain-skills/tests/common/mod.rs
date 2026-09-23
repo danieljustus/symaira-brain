@@ -5,13 +5,14 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 fn fixture(env_name: &str, checked_in_name: &str) -> Vec<u8> {
-    let path = std::env::var_os(env_name)
-        .map(PathBuf::from)
-        .unwrap_or_else(|| {
+    let path = std::env::var_os(env_name).map_or_else(
+        || {
             Path::new(env!("CARGO_MANIFEST_DIR"))
                 .join("tests/fixtures")
                 .join(checked_in_name)
-        });
+        },
+        PathBuf::from,
+    );
     fs::read(&path).unwrap_or_else(|error| panic!("read {}: {error}", path.display()))
 }
 
