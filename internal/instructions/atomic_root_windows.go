@@ -193,7 +193,7 @@ func (p *windowsAtomicParent) openTarget(name string, access uint32, disposition
 }
 
 func (p *windowsAtomicParent) Lstat(name string) (atomicFileInfo, error) {
-	handle, err := p.openTarget(name, windows.FILE_READ_ATTRIBUTES|windows.SYNCHRONIZE, windows.FILE_OPEN)
+	handle, err := ntCreate(p.handle, name, windows.FILE_READ_ATTRIBUTES|windows.SYNCHRONIZE, windows.FILE_OPEN, windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
 	if err != nil {
 		return atomicFileInfo{}, err
 	}
