@@ -1007,7 +1007,7 @@ jobs:
             else
               binary="$PWD/target/debug/symbrain"
             fi
-            gui_test_home="$RUNNER_TEMP/gui-contract-$implementation"
+            gui_test_home="$(mktemp -d "/tmp/gui-contract-$implementation.XXXXXX")"
             mkdir -p "$gui_test_home/.config"
             result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
             python3 - "$gui_test_home" "$binary" <<'PY'
