@@ -416,6 +416,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [ "${{ matrix.os }}" = windows-2025 ]; then
+            go run ./scripts/profile-remove-oracle -output "$RUNNER_TEMP/profile_remove_oracle_windows.json"
+            echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$RUNNER_TEMP/profile_remove_oracle_windows.json" >> "$GITHUB_ENV"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile_remove_oracle_windows.json"
+          fi
           cargo test -p symbrain-cli --test profile_cli_tests --locked
           if [ "${{ matrix.os }}" != windows-2025 ]; then
             if ! go run ./scripts/profile-remove-oracle -check; then
@@ -527,6 +532,7 @@ jobs:
             target/init-oracle/report.json
             ${{ runner.temp }}/xdg-oracle-windows.json
             ${{ runner.temp }}/cli_tree_windows.json
+            ${{ runner.temp }}/profile_remove_oracle_windows.json
             ${{ runner.temp }}/install_oracle_windows.json
             target/init-oracle/go-bin/*-stderr.log
             target/init-oracle/go-bin/*-stdout.log
