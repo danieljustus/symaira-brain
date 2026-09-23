@@ -86,8 +86,15 @@ fn xdg_paths_match_go_oracle() {
             actual.insert("managed_bin_dir".to_string(), "(error)".to_string());
         }
 
+        let normalize_separators = |paths: &BTreeMap<String, String>| {
+            paths
+                .iter()
+                .map(|(key, value)| (key.clone(), value.replace('\\', "/")))
+                .collect::<BTreeMap<_, _>>()
+        };
         assert_eq!(
-            actual, case.expect,
+            normalize_separators(&actual),
+            normalize_separators(&case.expect),
             "case {} differs from Go oracle",
             case.id
         );
