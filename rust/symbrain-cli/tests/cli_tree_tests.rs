@@ -274,6 +274,7 @@ fn assert_native_fixture() {
 }
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
     assert_eq!(cases.len(), 81, "fixture must contain 81 cases");
