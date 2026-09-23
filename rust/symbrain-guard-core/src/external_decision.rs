@@ -19,6 +19,9 @@ mod json_syntax;
 ///
 /// Callers that decode into a concrete type must still keep the type decoder's
 /// errors separate: this only establishes that the input is syntactically JSON.
+///
+/// # Errors
+/// Returns Go's JSON syntax diagnostic when the input is malformed.
 pub fn validate_go_json_syntax(input: &[u8]) -> Result<(), String> {
     json_syntax::validate(input)
 }

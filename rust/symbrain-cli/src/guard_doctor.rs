@@ -222,7 +222,7 @@ fn load_config(path: &Path) -> Option<ConfigState> {
     parse_and_validate(&doc).map(ConfigState::Loaded)
 }
 
-/// Maps only toml_edit's missing-`=` error with a printable ASCII offender;
+/// Maps only `toml_edit`'s missing-`=` error with a printable ASCII offender;
 /// all other parser messages stay on the Go fallback path.
 fn go_missing_equals_diagnostic(text: &str, error: &toml_edit::TomlError) -> Option<String> {
     if error.message() != "key with no value, expected `=`" {
@@ -236,11 +236,7 @@ fn go_missing_equals_diagnostic(text: &str, error: &toml_edit::TomlError) -> Opt
     if !(0x20..=0x7e).contains(&byte) || matches!(byte, b'\'' | b'"' | b'\\') {
         return None;
     }
-    let line = text.as_bytes()[..span.start]
-        .iter()
-        .filter(|&&b| b == b'\n')
-        .count()
-        + 1;
+    let line = text[..span.start].split('\n').count();
     Some(format!(
         "line {line}: expected '.' or '=', but got '{}' instead",
         char::from(byte)
