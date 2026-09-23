@@ -1,5 +1,6 @@
 //! Native symbrain skills targets user-scope byte contract.
 
+use std::fmt::Write as _;
 use std::process::{Command, Output};
 
 use tempfile::TempDir;
@@ -58,7 +59,7 @@ fn user_targets_table_matches_go_bytes_for_empty_sandbox() {
     .into_iter()
     .zip(roots)
     {
-        expected.push_str(&format!("{target}\tfalse\t0\t0\t{}\n", root.display()));
+        writeln!(&mut expected, "{target}\tfalse\t0\t0\t{}", root.display()).unwrap();
     }
     let output = run(&root, &["skills", "targets"]);
     assert!(output.status.success(), "stderr: {:?}", output.stderr);

@@ -328,11 +328,9 @@ fn cli_tree_fixture_matches_native_binary() {
             root.path().to_str().unwrap(),
             &repo_root,
         ));
-        let mut expected_stderr = normalize_accepted_differences(&case.stderr);
+        let expected_stderr = normalize_accepted_differences(&case.stderr);
         #[cfg(windows)]
-        {
-            expected_stderr = expected_stderr.replace("$PATH", "%PATH%");
-        }
+        let expected_stderr = expected_stderr.replace("$PATH", "%PATH%");
 
         if norm_stderr != expected_stderr {
             let diff = first_diff_offset(norm_stderr.as_bytes(), expected_stderr.as_bytes());
