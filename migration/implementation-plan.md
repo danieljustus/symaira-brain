@@ -1,5 +1,13 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-23 (integrated native gates)
+
+- **Mode:** execute; goal active. Draft PR #674 is the integration branch `codex/migration-integrated-20260923`; current pushed SHA `63451e94`. `main` remains at `2c7eac60`. No release, cutover, Go removal, paid provider, or cleanup is authorized.
+- **Integrated evidence at `6845ff09`:** CI run [35897948921](https://github.com/danieljustus/symaira-brain/actions/runs/35897948921) passed Linux/macOS `rust-migration` (`make rust-check parity-smoke`), GoReleaser snapshot/candidate-artifact checks, native Windows audit/guard, and the Go/Rust init, profile removal, gateway, and secret oracles. GUI failed because Xcode 26.6 skipped the binary contract test; native Windows failed strict Clippy, CLI differential, and Skills workspace tests. This run does not promote the ledger.
+- **GUI correction at `63451e94`:** the XcodeGen `SymBrainCoreContract` scheme supplies the isolated HOME/XDG and selected binary to the test process. Local Xcode 27 result bundles for Go and Rust each report exactly 1 passed, 0 failed, 0 skipped. `actionlint` and `git diff --check` pass. CI run [35899416792](https://github.com/danieljustus/symaira-brain/actions/runs/35899416792) is pending for Xcode 26.6 proof.
+- **Active slices:** Windows Skills modes/diagnostics/Clippy (`skills_win_round2`), Windows CLI doctor/profile parity (`cli_win_round2`), and a Go-vs-Rust embedded MCP CLI oracle for MCP-005 (`mcp_embedded_oracle`) are in isolated worktrees. Integrate only reviewed commits, then rerun native CI on the final ledger/documentation SHA.
+- **Release boundary:** DIST-001/002 have the offline `dist-oracle` (44/44) and six staged GoReleaser archives/checksums; current signed release assets, SBOM, Homebrew and install receipts require a real release and stay unverified under the user's explicit no-publication constraint.
+
 ## Resume checkpoint — 2026-09-23 (integrated evidence audit in progress)
 
 - **Mode:** execute; goal active. `origin/main` and local `main` are `2c7eac6034c15cc0d785bc309b263d92b64cb2fa`. This branch starts at PR #654 (`2731787d`) and merges that exact `main` as its second parent. The working-tree source under `rust/` and `scripts/secret-oracle/` is identical to `origin/main`; the ledger edits are not acceptance evidence themselves.
