@@ -2772,6 +2772,11 @@ def reported_last_used_seconds(value: str) -> int | None:
     return calendar.timegm(time.strptime(match.group(1), "%Y-%m-%dT%H:%M:%S"))
 
 
+def go_reports_install_atime(goos: str) -> bool:
+    """Go exposes filesystem atime only on the platforms with an accessor."""
+    return goos in {"linux", "darwin"}
+
+
 def normalize_last_used(stdout_bytes: bytes, placeholder: str) -> bytes:
     """Replace an atime-derived `last_used` value with a fixed placeholder."""
     return re.sub(
@@ -2974,9 +2979,10 @@ def main() -> int:
                         # An ambient reader can only move the atime forward, so
                         # the runtime must report a value derived from the file's
                         # atime and never an older one. Absence is only allowed
-                        # for the fixtures that carry no last-used evidence.
+                        # when the fixture has no evidence or Go has no atime
+                        # accessor on this platform.
                         if reported is None:
-                            assert not case.require_last_used, (
+                            assert not case.require_last_used or not go_reports_install_atime(sys.platform), (
                                 f"{case.name}: {runtime} reported no last_used for a "
                                 f"fixture that pins atime={format_access_time_ns(captured)!r}"
                             )
