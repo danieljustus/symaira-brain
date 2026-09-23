@@ -326,7 +326,7 @@ fn installed_version_probes_native_windows_executable() {
         temp.path(),
         "version-fixture",
         r##"fn main() {
-            println!(r#"{"version":"1.2.3"}"#);
+            println!("{}", r#"{"version":"1.2.3"}"#);
         }"##,
     );
     assert!(
