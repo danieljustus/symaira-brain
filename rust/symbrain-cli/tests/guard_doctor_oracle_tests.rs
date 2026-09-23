@@ -1,5 +1,5 @@
-//! Integration test: drives every one of the frozen `guard doctor` oracle's
-//! seven scenarios through the **native** `symbrain` binary.
+//! Integration test: drives every frozen `guard doctor` oracle scenario
+//! through the **native** `symbrain` binary.
 //!
 //! The setup reproduces `guard/scripts/guard-doctor-oracle/main.go`'s
 //! `runCase` exactly — same per-case root layout (`<root>/<id>/home/...`,
@@ -11,8 +11,7 @@
 //! Nativeness is proved structurally: `SYMBRAIN_GO_BINARY` is never set and
 //! `PATH` is an empty directory, so no Go fallback exists. A case that reached
 //! the fallback would print the "not ported yet and no Go fallback was found"
-//! message instead of a report, which is exactly what the gated cases are
-//! asserted to do.
+//! message instead of the oracle report.
 
 #[path = "common/doctor_header.rs"]
 mod doctor_header;
@@ -24,14 +23,6 @@ use std::process::{Command, Output, Stdio};
 use tempfile::TempDir;
 
 const FIXTURE_PATH: &str = "../symbrain-guard-core/tests/fixtures/doctor_oracle.json";
-
-/// Cases whose bytes this port deliberately declines to produce, with the
-/// reason each one is unreproducible. Every one of them must fall back to Go
-/// *before* writing any output — see `guard_doctor.rs`'s module docs.
-const GATED_CASES: &[(&str, &str)] = &[(
-    "config_error",
-    "Go prints BurntSushi's own parser text (`toml: line 1: expected '.' or '=' …`)",
-)];
 
 fn fixture() -> serde_json::Value {
     let path = std::env::var_os("SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE").map_or_else(
@@ -95,6 +86,8 @@ fn setup(id: &str, case_root: &Path) {
             .unwrap();
         }
         "config_error" => fs::write(&config, "not [valid = toml").unwrap(),
+        "config_error_other_ascii" => fs::write(&config, "name ! value").unwrap(),
+        "config_error_later_line" => fs::write(&config, "valid = \"ok\"\nname [value").unwrap(),
         "audit_log_without_anchor" => fs::write(&log, "{\"entry_id\":\"1\"}\n").unwrap(),
         "audit_log_corrupt_anchor" => {
             fs::write(&log, "{\"entry_id\":\"1\"}\n").unwrap();
@@ -153,10 +146,10 @@ fn run(case_root: &Path) -> Output {
 }
 
 #[test]
-fn every_oracle_case_is_native_or_explicitly_gated() {
+fn every_oracle_case_matches_native_go_bytes() {
     let suite = fixture();
     let cases = suite["cases"].as_array().expect("cases array");
-    assert_eq!(cases.len(), 7, "the frozen oracle has seven scenarios");
+    assert_eq!(cases.len(), 9, "the frozen oracle scenario count changed");
     let temp = TempDir::new().unwrap();
     // The oracle rewrites its own mktemp root to <root>; macOS hands out
     // /var/... symlinks to /private/var/..., so canonicalize like it does.
@@ -166,7 +159,6 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
     let root = fs::canonicalize(temp.path()).unwrap();
 
     let mut native = Vec::new();
-    let mut gated = Vec::new();
     for case in cases {
         let id = case["id"].as_str().expect("case id");
         let case_root = root.join(id);
@@ -176,20 +168,6 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
         let rooted = stdout.replace(root.to_str().expect("utf8 root"), "<root>");
         let normalized = doctor_header::normalize(&normalize_root_paths(&rooted));
-
-        if let Some((_, reason)) = GATED_CASES.iter().find(|(name, _)| *name == id) {
-            assert!(
-                stdout.is_empty(),
-                "{id}: gated cases must fall back before writing any byte ({reason}), got:\n{stdout}"
-            );
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            assert!(
-                stderr.contains("no Go fallback was found"),
-                "{id}: expected the Go fallback to be attempted, stderr was:\n{stderr}"
-            );
-            gated.push(id);
-            continue;
-        }
 
         let expected: String =
             serde_json::from_str(case["output_json"].as_str().expect("output_json"))
@@ -217,6 +195,9 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         vec![
             "empty_machine",
             "healthy_config",
+            "config_error",
+            "config_error_other_ascii",
+            "config_error_later_line",
             "audit_log_without_anchor",
             "audit_log_corrupt_anchor",
             "discovered_server_denied",
@@ -224,5 +205,4 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         ],
         "the set of natively handled cases changed"
     );
-    assert_eq!(gated, vec!["config_error"]);
 }

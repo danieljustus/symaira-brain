@@ -141,6 +141,14 @@ path = %q
 		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("not [valid = toml"), 0o644)
 	})
 
+	add("config_error_other_ascii", "missing equals with a printable ASCII offender", func(root string) error {
+		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("name ! value"), 0o644)
+	})
+
+	add("config_error_later_line", "missing equals on a later line", func(root string) error {
+		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("valid = \"ok\"\nname [value"), 0o644)
+	})
+
 	add("audit_log_without_anchor", "audit log exists but no anchor file (expected pre-Phase-3 state)", func(root string) error {
 		return os.WriteFile(filepath.Join(root, "data", "symguard", "audit.log"), []byte("{\"entry_id\":\"1\"}\n"), 0o644)
 	})

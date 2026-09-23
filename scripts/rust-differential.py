@@ -1455,8 +1455,8 @@ class Case:
     stdin: bytes | None = None
     pty: bool = False
 CASES = (
-    Case("guard_doctor_invalid_config_go_fallback", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config),
-    Case("guard_doctor_corrupt_anchor_go_fallback", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor),
+    Case("guard_doctor_invalid_config_native", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config, normalize_runtime=True),
+    Case("guard_doctor_corrupt_anchor_native", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor, normalize_runtime=True),
     Case("no_args", ()),
     Case("help", ("help",)),
     Case("help_long", ("--help",)),
@@ -2963,8 +2963,8 @@ def main() -> int:
                 go_stderr = re.sub(download_temp, b"<download>/", go_stderr)
                 rust_stderr = re.sub(download_temp, b"<download>/", rust_stderr)
                 if case.normalize_runtime:
-                    go_stdout = re.sub(rb"\n  go\s+[^\n]+", b"\n  <runtime>", go_stdout)
-                    rust_stdout = re.sub(rb"\n  rust\s+[^\n]+", b"\n  <runtime>", rust_stdout)
+                    go_stdout = re.sub(rb"\n  (?:go\s+go[0-9]|Go:\s+go[0-9])[^\n]+", b"\n  <runtime>", go_stdout)
+                    rust_stdout = re.sub(rb"\n  (?:rust\s+rustc|Rust:\s+rustc)[^\n]+", b"\n  <runtime>", rust_stdout)
                 if case.normalize_parse_error:
                     install_parse = rb"(symbrain install: config: failed to load .*?global config error: failed to parse .*?\.toml: ).*"
                     go_stderr = re.sub(install_parse, rb"\1<parse error>\n", go_stderr)
