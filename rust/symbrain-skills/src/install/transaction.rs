@@ -101,10 +101,67 @@ fn remove_entry_at(root: &cap_std::fs::Dir, name: &Path) -> Result<(), SkillErro
     let Some(metadata) = root.symlink_metadata(name).ok() else {
         return Ok(());
     };
-    let result = if metadata.file_type().is_symlink() || metadata.is_file() {
+    let result = if metadata.file_type().is_symlink() {
+        #[cfg(windows)]
+        {
+            // Windows distinguishes directory links from file links when
+            // deleting them: RemoveDirectoryW unlinks a directory symlink,
+            // while DeleteFileW returns access denied. Metadata from
+            // symlink_metadata retains the reparse-point attributes, so this
+            // selects the right deletion API without following the link.
+            if metadata.is_dir() {
+                root.remove_dir(name)
+            } else {
+                root.remove_file(name)
+            }
+        }
+        #[cfg(not(windows))]
+        {
+            root.remove_file(name)
+        }
+    } else if metadata.is_file() {
         root.remove_file(name)
     } else {
         root.remove_dir_all(name)
     };
     result.map_err(|error| SkillError(format!("remove transaction entry: {error}")))
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use std::fs;
+    use std::os::windows::fs::symlink_dir;
+
+    use super::{backup_existing, remove_tree};
+
+    #[test]
+    fn transaction_cleanup_unlinks_directory_symlink_without_touching_target() {
+        let temp = tempfile::tempdir().expect("transaction root");
+        let target = temp.path().join("rendered-skill");
+        fs::create_dir(&target).expect("target directory");
+        fs::write(target.join("SKILL.md"), b"target stays intact\n").expect("target file");
+
+        let destination = temp.path().join("installed-skill");
+        symlink_dir(&target, &destination).expect("create directory symlink");
+        let backup = backup_existing(&destination, None)
+            .expect("move directory symlink into transaction")
+            .expect("existing symlink has a backup");
+        let metadata = fs::symlink_metadata(&backup).expect("transaction link metadata");
+        assert!(
+            metadata.file_type().is_symlink(),
+            "backup remains a symlink"
+        );
+        assert!(
+            metadata.is_dir(),
+            "directory-link metadata retains its directory bit"
+        );
+
+        remove_tree(&backup).expect("remove transaction directory symlink");
+
+        assert!(fs::symlink_metadata(&backup).is_err(), "link is removed");
+        assert_eq!(
+            fs::read(target.join("SKILL.md")).expect("target still exists"),
+            b"target stays intact\n"
+        );
+    }
 }
