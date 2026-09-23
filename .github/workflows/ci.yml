@@ -1007,8 +1007,9 @@ jobs:
             else
               binary="$PWD/target/debug/symbrain"
             fi
-            gui_test_home="$(mktemp -d "/tmp/gui-contract-$implementation.XXXXXX")"
+            gui_test_home="$(mktemp -d "/private/tmp/gui-contract-$implementation.XXXXXX")"
             mkdir -p "$gui_test_home/.config"
+            printf '%s\n' "$binary" > "$gui_test_home/.symbrain-test-binary"
             result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
             python3 - "$gui_test_home" "$binary" <<'PY'
           from pathlib import Path

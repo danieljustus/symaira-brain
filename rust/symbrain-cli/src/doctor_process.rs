@@ -22,9 +22,6 @@ pub(super) fn which(binary: &str) -> Option<PathBuf> {
 }
 
 fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> Vec<OsString> {
-    if !windows && Path::new(binary).extension().is_some() {
-        return vec![binary.to_os_string()];
-    }
     if windows {
         let extensions =
             path_ext.map_or_else(|| ".COM;.EXE;.BAT;.CMD".into(), OsStr::to_string_lossy);
@@ -149,7 +146,7 @@ mod executable_name_tests {
     use std::ffi::{OsStr, OsString};
 
     #[test]
-    fn windows_lookup_adds_pathext_only_when_no_extension_is_given() {
+    fn windows_lookup_follows_pathext_order_and_ignores_extensionless_files() {
         assert_eq!(
             executable_names(OsStr::new("symvault"), Some(OsStr::new(".EXE;.CMD")), true),
             vec![
