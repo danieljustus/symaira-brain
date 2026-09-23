@@ -25,12 +25,18 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.11.0.json"
+DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.11.0.json"
 OIDC_ISSUER = "https://token.actions.githubusercontent.com"
 
 
 def require(ok: bool, message: str) -> None:
     if not ok:
         raise SystemExit(f"FAIL: {message}")
+
+
+def require_pinned_bytes(data: bytes, expected: str, label: str) -> None:
+    actual = "sha256:" + hashlib.sha256(data).hexdigest()
+    require(actual == expected, f"{label} differs from pinned live tap bytes: {actual}")
 
 
 def exact_asset_files(asset_dir: Path, expected_names: set[str]) -> dict[str, Path]:
@@ -44,44 +50,6 @@ def exact_asset_files(asset_dir: Path, expected_names: set[str]) -> dict[str, Pa
 def ensure_exact_asset_names(names: list[str], expected_names: set[str]) -> None:
     names = set(names)
     require(names == expected_names, f"asset directory mismatch: missing={sorted(expected_names - names)} extra={sorted(names - expected_names)}")
-
-
-def ruby_assignments(source: str) -> list[tuple[tuple[str, ...], str, str]]:
-    """Read active url/sha256/version calls with their Ruby block scopes."""
-    stack: list[str] = []
-    found: list[tuple[tuple[str, ...], str, str]] = []
-    opens = re.compile(r"^(?:(?:class|module|def|if|unless|case|begin|while|until|for)\b.*|.*\bdo(?:\s*\|[^|]*\|)?\s*(?:#.*)?)$")
-    assignment = re.compile(r'^(url|sha256|version)\s+"([^"]*)"(?:\s+#.*)?$')
-    for raw in source.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        close = re.fullmatch(r"end(?:\s+#.*)?", line)
-        if close:
-            require(bool(stack), "unbalanced end in Homebrew Ruby source")
-            stack.pop()
-            continue
-        match = assignment.fullmatch(line)
-        if match:
-            found.append((tuple(stack), match.group(1), match.group(2)))
-        if opens.fullmatch(line):
-            stack.append(line)
-    require(not stack, "unclosed block in Homebrew Ruby source")
-    return found
-
-
-def ruby_url_checksum_pairs(
-    source: str, allowed_scopes: set[tuple[str, ...]]
-) -> list[tuple[tuple[str, ...], str, str]]:
-    calls = ruby_assignments(source)
-    pairs = []
-    for index, (scope, name, value) in enumerate(calls[:-1]):
-        if name != "url" or scope not in allowed_scopes:
-            continue
-        next_scope, next_name, digest = calls[index + 1]
-        require(next_scope == scope and next_name == "sha256", f"active Homebrew URL has no adjacent checksum: {value}")
-        pairs.append((scope, value, digest))
-    return pairs
 
 
 def archive_file_names(asset_dir: Path, name: str) -> list[str]:
@@ -110,6 +78,7 @@ def main() -> None:
     parser.add_argument("--formula", required=True, type=Path, help="read-only Homebrew formula file")
     parser.add_argument("--cask", required=True, type=Path, help="read-only Homebrew cask file")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--tap-manifest", type=Path, default=DEFAULT_TAP_MANIFEST)
     parser.add_argument("--verify-signatures", action="store_true", help="verify cosign signatures, certificate identity, issuer, and Rekor inclusion")
     parser.add_argument("--verify-sboms", action="store_true", help="parse each SBOM with the syft CLI")
     args = parser.parse_args()
@@ -184,32 +153,14 @@ def main() -> None:
     print(f"ok: {len(sboms)} CycloneDX SBOMs with components{suffix}")
 
     version = manifest["version"]
-    repo_url = f"https://{manifest['repository']}/releases/download/v{version}/"
-    formula = args.formula.read_text()
-    formula_scopes = {
-        ("class Symbrain < Formula", "on_macos do", "if Hardware::CPU.intel?"),
-        ("class Symbrain < Formula", "on_macos do", "if Hardware::CPU.arm?"),
-        ("class Symbrain < Formula", "on_linux do", "if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?"),
-        ("class Symbrain < Formula", "on_linux do", "if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?"),
-    }
-    expected_formula = {
-        name: assets[name]["digest"].removeprefix("sha256:")
-        for name in archive_names if "_windows_" not in name
-    }
-    formula_links = ruby_url_checksum_pairs(formula, formula_scopes)
-    formula_by_name = {url.removeprefix(repo_url): digest for _, url, digest in formula_links if url.startswith(repo_url)}
-    require(len(formula_links) == len(expected_formula) and len(formula_by_name) == len(formula_links), "Homebrew formula has duplicate or missing active release links")
-    require(formula_by_name == expected_formula, "Homebrew formula release URLs/checksums differ from captured release")
-    cask = args.cask.read_text()
-    dmg_name = f"Symaira-Brain-{version}-macos.dmg"
-    dmg_digest = assets[dmg_name]["digest"].removeprefix("sha256:")
-    cask_scope = ("cask \"symbrain\" do",)
-    cask_values = [(name, value) for scope, name, value in ruby_assignments(cask) if scope == cask_scope]
-    require(cask_values.count(("version", version)) == 1, "Homebrew cask version mismatch")
-    require(cask_values.count(("sha256", dmg_digest)) == 1, "Homebrew cask DMG checksum mismatch")
-    cask_url = f"https://{manifest['repository']}/releases/download/v#{{version}}/Symaira-Brain-#{{version}}-macos.dmg"
-    require(cask_values.count(("url", cask_url)) == 1, "Homebrew cask release URL mismatch")
-    print(f"ok: Homebrew formula {len(expected_formula)} release links and cask DMG link/checksum")
+    tap_manifest = json.loads(args.tap_manifest.read_text())
+    require(tap_manifest["version"] == version, "tap snapshot version differs from release manifest")
+    require(re.fullmatch(r"[0-9a-f]{40}", tap_manifest["commit"]) is not None, "tap snapshot is not pinned to a commit")
+    require(tap_manifest["repository"] == "github.com/danieljustus/homebrew-tap", "tap snapshot repository mismatch")
+    tap_files = tap_manifest["files"]
+    require_pinned_bytes(args.formula.read_bytes(), tap_files["Formula/symbrain.rb"], "Homebrew formula")
+    require_pinned_bytes(args.cask.read_bytes(), tap_files["Casks/symbrain.rb"], "Homebrew cask")
+    print(f"ok: Homebrew formula and cask bytes match the verified tap snapshot at {tap_manifest['commit']}")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 """Small negative controls for release-verifier trust boundaries."""
 
 import importlib.util
+import hashlib
 import io
 import stat
 import sys
@@ -37,33 +38,17 @@ class ReleaseVerifierTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "asset directory mismatch"):
             verify_release.ensure_exact_asset_names(["checksums.txt", "extra.txt"], {"checksums.txt"})
 
-    def test_formula_comment_and_inactive_branch_are_not_active_links(self) -> None:
-        scope = ("class Symbrain < Formula", "on_macos do", "if Hardware::CPU.intel?")
-        source = '''class Symbrain < Formula
-  on_macos do
-    if Hardware::CPU.arm?
-      url "https://example.invalid/release.tar.gz"
-      sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    end
-  end
-end
-# url "https://example.invalid/release.tar.gz"
-# sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-'''
-        self.assertEqual([], verify_release.ruby_url_checksum_pairs(source, {scope}))
-
-    def test_cask_values_inside_inactive_block_are_not_active(self) -> None:
-        source = '''cask "symbrain" do
-  if false
-    version "0.11.0"
-    sha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    url "https://example.invalid/app.dmg"
-  end
-end
-'''
-        root_scope = ("cask \"symbrain\" do",)
-        active = [(key, value) for scope, key, value in verify_release.ruby_assignments(source) if scope == root_scope]
-        self.assertEqual([], active)
+    def test_changed_tap_comments_and_dynamic_calls_break_pinned_bytes(self) -> None:
+        canonical = b'url "https://example.invalid/app.dmg"\nsha256 "aaaaaaaa"\n'
+        digest = "sha256:" + hashlib.sha256(canonical).hexdigest()
+        replacements = (
+            b"=begin\nurl \"https://example.invalid/app.dmg\"\n=end\n",
+            b'url("https://example.invalid/app.dmg")\nsha256("aaaaaaaa")\n',
+        )
+        for changed in replacements:
+            with self.subTest(changed=changed):
+                with self.assertRaisesRegex(SystemExit, "differs from pinned live tap bytes"):
+                    verify_release.require_pinned_bytes(changed, digest, "Homebrew source")
 
 
 if __name__ == "__main__":
