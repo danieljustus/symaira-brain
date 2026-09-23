@@ -985,6 +985,40 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build test
 
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: steps.swift.outputs.changed == 'true'
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Compare GUI JSON decoding against Go and Rust binaries
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          go build -o "$RUNNER_TEMP/symbrain-go" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          for implementation in go rust; do
+            if [ "$implementation" = go ]; then
+              binary="$RUNNER_TEMP/symbrain-go"
+            else
+              binary="$PWD/target/debug/symbrain"
+            fi
+            gui_test_home="$RUNNER_TEMP/gui-contract-$implementation"
+            mkdir -p "$gui_test_home/.config"
+            printf '%s\n' "$binary" > "$gui_test_home/.symbrain-test-binary"
+            result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
+            env HOME="$gui_test_home" XDG_CONFIG_HOME="$gui_test_home/.config" \
+              xcodebuild -project SymBrain.xcodeproj \
+                -scheme SymBrainCore \
+                -destination 'platform=macOS' \
+                -derivedDataPath "$RUNNER_TEMP/SymBrain-macos-derived-data" \
+                -resultBundlePath "$result" \
+                -only-testing:SymBrainCoreTests/ConfiguredBinaryContractTests \
+                CODE_SIGNING_ALLOWED=NO test
+            xcrun xcresulttool get test-results summary --path "$result" | \
+              python3 -c 'import json,sys; x=json.load(sys.stdin); assert (x["totalTestCount"], x["passedTests"], x["failedTests"], x["skippedTests"]) == (1, 1, 0, 0), x'
+          done
+
       - name: Resolve pinned iOS simulator
         if: steps.swift.outputs.changed == 'true'
         id: sim
