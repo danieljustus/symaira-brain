@@ -80,8 +80,8 @@ fn decode(value: &str) -> Vec<u8> {
 }
 
 fn sha256(path: &Path) -> String {
-    let bytes = std::fs::read(path).expect("provenance source exists");
-    let digest = Sha256::digest(bytes);
+    let source = std::fs::read_to_string(path).expect("provenance source is UTF-8");
+    let digest = Sha256::digest(source.replace("\r\n", "\n").as_bytes());
     format!("{digest:x}")
 }
 

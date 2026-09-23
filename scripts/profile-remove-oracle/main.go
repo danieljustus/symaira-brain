@@ -57,10 +57,31 @@ type caseDef struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
+	compareRust := flag.String("compare-rust", "", "compare each isolated Go case with this Rust binary")
 	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_"+runtime.GOOS+".json", "fixture path")
 	flag.Parse()
 	root := repoRoot()
 	generated := generate(root)
+	if *compareRust != "" {
+		binary, err := filepath.Abs(*compareRust)
+		if err != nil {
+			fatalf("resolve Rust binary: %v", err)
+		}
+		caseIndex := 0
+		for _, definition := range definitions() {
+			if definition.PosixOnly && runtime.GOOS == "windows" {
+				continue
+			}
+			got := runCase(binary, definition)
+			want := generated.Cases[caseIndex]
+			if !reflect.DeepEqual(got, want) {
+				fatalf("case %d (%s) differs:\nGo: %+v\nRust: %+v", caseIndex, definition.ID, want, got)
+			}
+			caseIndex++
+		}
+		fmt.Printf("PASS: profile remove Go/Rust differential passed (%d cases)\n", caseIndex)
+		return
+	}
 	data, err := json.MarshalIndent(generated, "", "  ")
 	if err != nil {
 		fatalf("marshal oracle: %v", err)
@@ -181,6 +202,7 @@ func runCase(binary string, definition caseDef) result {
 	}
 	env := []string{
 		"HOME=" + home,
+		"USERPROFILE=" + home,
 		"XDG_CONFIG_HOME=" + config,
 		"LANG=C.UTF-8", "LC_ALL=C.UTF-8", "TZ=UTC",
 	}
@@ -328,7 +350,7 @@ func files(root string) []fileState {
 	return result
 }
 func normalize(root, value string) string {
-	return strings.ReplaceAll(value, filepath.ToSlash(root), "<root>")
+	return strings.ReplaceAll(strings.ReplaceAll(value, root, "<root>"), filepath.ToSlash(root), "<root>")
 }
 func repoRoot() string {
 	_, file, _, ok := runtime.Caller(0)
