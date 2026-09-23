@@ -24,6 +24,7 @@ fn sync_default_explicitly_skips_conflicts() {
         &rendered,
         &symbrain_skills::install::InstallOptions {
             home_dir: home.path().to_path_buf(),
+            mode: "copy".to_owned(),
             ..Default::default()
         },
     )

@@ -254,7 +254,9 @@ fn normalize_value(value: &mut serde_json::Value, root: &Path) {
             for (key, value) in object.iter_mut() {
                 if key == "path" || key == "error" {
                     if let serde_json::Value::String(text) = value {
-                        *text = text.replace(&root.to_string_lossy().replace('\\', "/"), "<root>");
+                        *text = text
+                            .replace('\\', "/")
+                            .replace(&root.to_string_lossy().replace('\\', "/"), "<root>");
                     }
                 } else if key == "installed_at" {
                     *value = serde_json::Value::String("<timestamp>".to_owned());

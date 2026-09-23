@@ -64,14 +64,19 @@ fn lifecycle_matrix_covers_all_targets_scopes_modes() {
             ("user", None),
             ("project", Some(tempfile::tempdir().expect("project"))),
         ] {
-            for mode in ["copy", "symlink"] {
-                run_lifecycle_case(
-                    &target,
-                    scope,
-                    project_dir.as_ref().map(tempfile::TempDir::path),
-                    mode,
-                );
-            }
+            run_lifecycle_case(
+                &target,
+                scope,
+                project_dir.as_ref().map(tempfile::TempDir::path),
+                "copy",
+            );
+            #[cfg(unix)]
+            run_lifecycle_case(
+                &target,
+                scope,
+                project_dir.as_ref().map(tempfile::TempDir::path),
+                "symlink",
+            );
         }
     }
 }
