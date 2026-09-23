@@ -164,6 +164,9 @@ fn handle_tool_call(
         write_error(writer, id, -32601, &format!("Unknown tool: {name}"));
         return;
     };
+    if let Ok(marker) = std::env::var("FAKEMCP_CALL_MARKER") {
+        record_call(&marker, name);
+    }
     let arguments = params
         .and_then(|value| value.get("arguments"))
         .cloned()
@@ -246,6 +249,19 @@ fn record_pid(path: &str) {
     }
     if let Ok(mut file) = options.open(path) {
         let _ = writeln!(file, "{}", std::process::id());
+    }
+}
+
+fn record_call(path: &str, name: &str) {
+    let mut options = OpenOptions::new();
+    options.create(true).append(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    if let Ok(mut file) = options.open(path) {
+        let _ = writeln!(file, "{name}");
     }
 }
 
