@@ -122,11 +122,6 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
         let mut expected_artifacts = case.expected.artifacts;
         #[cfg(windows)]
         for artifact in &mut expected_artifacts {
-            if artifact.kind == "file" && artifact.mode & 0o111 != 0 {
-                // Windows has no executable permission bit. The fixture is
-                // generated on Unix, where its source resource is executable.
-                artifact.mode &= !0o111;
-            }
             if artifact.path.ends_with("/.symskills.json") {
                 if let Some(bytes) = &artifact.bytes {
                     let decoded = decode_base64(bytes);
@@ -475,7 +470,11 @@ fn file_mode(metadata: &fs::Metadata) -> u32 {
         use std::os::unix::fs::PermissionsExt;
         metadata.permissions().mode() & 0o777
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    {
+        if metadata.is_dir() { 0o777 } else { 0o666 }
+    }
+    #[cfg(not(any(unix, windows)))]
     {
         if metadata.is_dir() { 0o755 } else { 0o644 }
     }

@@ -131,7 +131,18 @@ fn open_options() -> OpenOptions {
 
 fn open_read(root: &Dir, relative: &Path, name: &str) -> Result<cap_std::fs::File, SkillError> {
     root.open_with(relative, &open_options())
-        .map_err(|error| SkillError(format!("read {name}: {error}")))
+        .map_err(|error| SkillError(format!("read {name}: {}", go_io_error(&error))))
+}
+
+fn go_io_error(error: &std::io::Error) -> String {
+    let message = error.to_string();
+    #[cfg(windows)]
+    if error.kind() == std::io::ErrorKind::NotFound {
+        if let Some((context, _)) = message.rsplit_once(": ") {
+            return format!("{context}: The system cannot find the file specified.");
+        }
+    }
+    message
 }
 
 fn read_control(root: &Dir, _anchor: &Path, name: &str) -> Result<Vec<u8>, SkillError> {
@@ -290,7 +301,12 @@ fn resource_mode(metadata: &cap_std::fs::Metadata) -> u32 {
     {
         cap_std::fs::PermissionsExt::mode(&metadata.permissions()) & 0o777
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    {
+        let _ = metadata;
+        0o666
+    }
+    #[cfg(not(any(unix, windows)))]
     {
         let _ = metadata;
         0o644
