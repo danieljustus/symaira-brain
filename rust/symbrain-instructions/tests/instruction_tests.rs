@@ -356,12 +356,12 @@ fn source_paths_follow_xdg_and_project_layout() {
     let suite = oracle();
     let item = case(&suite, "source_paths");
     assert_eq!(
-        source.project_path.unwrap().to_string_lossy(),
-        item.expected_project_path
+        source.project_path.unwrap(),
+        PathBuf::from(&item.expected_project_path)
     );
     assert_eq!(
-        source.global_path.to_string_lossy(),
-        item.expected_global_path
+        source.global_path,
+        PathBuf::from(&item.expected_global_path)
     );
     assert_eq!(item.xdg_config_home, "/oracle-config");
     assert_eq!(
