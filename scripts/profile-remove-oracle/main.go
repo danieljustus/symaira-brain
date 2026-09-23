@@ -118,7 +118,11 @@ func fixtureMatches(existing []byte, generated oracle) bool {
 }
 
 func generate(root string) oracle {
-	binaryFile, err := os.CreateTemp("", "symbrain-go-profile-remove-oracle-")
+	pattern := "symbrain-go-profile-remove-oracle-*"
+	if runtime.GOOS == "windows" {
+		pattern += ".exe"
+	}
+	binaryFile, err := os.CreateTemp("", pattern)
 	if err != nil {
 		fatalf("create Go binary: %v", err)
 	}
@@ -233,6 +237,9 @@ func runCase(binary string, definition caseDef) result {
 	err = command.Run()
 	exit := 0
 	if err != nil {
+		if command.ProcessState == nil {
+			fatalf("start %s case %s: %v", binary, definition.ID, err)
+		}
 		exit = command.ProcessState.ExitCode()
 		if exit < 0 {
 			exit = 1
