@@ -1005,9 +1005,10 @@ jobs:
             fi
             gui_test_home="$RUNNER_TEMP/gui-contract-$implementation"
             mkdir -p "$gui_test_home/.config"
-            printf '%s\n' "$binary" > "$gui_test_home/.symbrain-test-binary"
             result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
-            env HOME="$gui_test_home" XDG_CONFIG_HOME="$gui_test_home/.config" \
+            env TEST_RUNNER_HOME="$gui_test_home" \
+                TEST_RUNNER_XDG_CONFIG_HOME="$gui_test_home/.config" \
+                TEST_RUNNER_SYMBRAIN_TEST_BINARY="$binary" \
               xcodebuild -project SymBrain.xcodeproj \
                 -scheme SymBrainCore \
                 -destination 'platform=macOS' \
