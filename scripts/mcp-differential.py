@@ -235,19 +235,23 @@ def assert_session(go: subprocess.CompletedProcess[bytes], rust: subprocess.Comp
     assert go.returncode == rust.returncode == 0, (go.returncode, rust.returncode, go.stderr, rust.stderr)
     assert go.stderr == rust.stderr == b"", (go.stderr, rust.stderr)
     go_frames, rust_frames = frames(go.stdout, framing), frames(rust.stdout, framing)
-    assert [frame[1].get("id") for frame in go_frames] == [1, 2, 3, 4]
-    assert [frame[1].get("id") for frame in rust_frames] == [1, 2, 3, 4]
+    # Both servers dispatch tools/call concurrently, so IDs 3 and 4 may finish in either order.
+    for response_frames in (go_frames, rust_frames):
+        ids = [frame[1].get("id") for frame in response_frames]
+        assert len(ids) == 4 and ids[:2] == [1, 2] and set(ids[2:]) == {3, 4}, ids
     assert all(frame[1].get("jsonrpc") == "2.0" for frame in go_frames + rust_frames)
     assert go_frames[0][0] == rust_frames[0][0], (go_frames[0], rust_frames[0])
     go_tools = {tool["name"] for tool in go_frames[1][1]["result"]["tools"]}
     rust_tools = {tool["name"] for tool in rust_frames[1][1]["result"]["tools"]}
     assert go_tools == rust_tools, (sorted(go_tools), sorted(rust_tools))
     assert {"bootstrap", "patterns", "memory_get", "memory_search"} <= go_tools
-    for index in (2, 3):
-        assert go_frames[index][0] == rust_frames[index][0], (go_frames[index], rust_frames[index])
-        assert go_frames[index][1]["result"]["isError"] is False
-    assert go_frames[2][1]["result"]["content"][0]["text"] == "memory not found: mcp-oracle-absent"
-    assert go_frames[3][1]["result"]["content"][0]["text"] == "No relevant memories found."
+    go_calls = {frame[1]["id"]: frame for frame in go_frames[2:]}
+    rust_calls = {frame[1]["id"]: frame for frame in rust_frames[2:]}
+    for request_id in (3, 4):
+        assert go_calls[request_id][0] == rust_calls[request_id][0], (go_calls[request_id], rust_calls[request_id])
+        assert go_calls[request_id][1]["result"]["isError"] is False
+    assert go_calls[3][1]["result"]["content"][0]["text"] == "memory not found: mcp-oracle-absent"
+    assert go_calls[4][1]["result"]["content"][0]["text"] == "No relevant memories found."
 
 
 def assert_sigterm(binary: pathlib.Path, root: pathlib.Path, profile: pathlib.Path) -> tuple[bytes, int, bytes, bytes]:
