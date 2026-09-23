@@ -13,6 +13,7 @@
 //
 //	go run ./scripts/dist-oracle -check                      # gate (exit 0/1)
 //	go run ./scripts/dist-oracle -check -manifest <path>     # point at another manifest copy (negative tests)
+//	go run ./scripts/dist-oracle -candidate-check -version 0.12.0 -assets <archive-bundle>
 //
 // The macOS GUI DMG is not produced by goreleaser; it is uploaded by
 // .github/workflows/release.yml via `gh release upload`. It is therefore
@@ -340,10 +341,38 @@ func notRunLines() []string {
 
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
+	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
+	version := flag.String("version", "", "candidate version without the v prefix")
 	manifestPath := flag.String("manifest", defaultManifest, "path to the pinned release manifest JSON")
 	goreleaserPath := flag.String("goreleaser", defaultGoreleaser, "path to the goreleaser config")
 	workflowPath := flag.String("workflow", defaultWorkflow, "path to the release workflow binding external assets")
 	flag.Parse()
+
+	if *candidateCheck {
+		if *assetsDir == "" || *version == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-check requires -assets and -version")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := checkCandidateArtifacts(&cfg, *version, resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: candidate artifacts: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-artifacts: PASS %d archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
+		return
+	}
 
 	if !*check {
 		fmt.Fprintln(os.Stderr, "dist-oracle: refusing to run without -check (this tool only gates; it never writes fixtures)")
