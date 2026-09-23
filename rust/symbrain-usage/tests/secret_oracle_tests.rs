@@ -176,6 +176,7 @@ fn write_fake_symvault(bin_dir: &Path, args_path: &Path, spec: &SymvaultSpec) {
 }
 
 struct CaseSetup {
+    #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     dir: tempfile::TempDir,
     args_path: PathBuf,
     old_path: String,
