@@ -45,7 +45,10 @@ fn install_copy_writes_marker_base_and_strips_executable_bits() {
     .expect("install");
     assert_eq!(result.action, "installed");
     assert_eq!(result.mode, "copy");
+    #[cfg(unix)]
     assert_eq!(result.mode_changes.len(), 1);
+    #[cfg(not(unix))]
+    assert!(result.mode_changes.is_empty());
     let destination = home.path().join(".config/opencode/skills/demo");
     assert_eq!(
         fs::read(destination.join("SKILL.md")).expect("installed skill"),
@@ -196,6 +199,7 @@ fn drift_table_and_status_are_deterministic() {
         &rendered,
         &InstallOptions {
             home_dir: home.path().to_path_buf(),
+            mode: "copy".to_owned(),
             ..Default::default()
         },
     )
