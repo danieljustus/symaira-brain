@@ -119,6 +119,10 @@ pub struct SyncOptions {
     pub skills: Vec<String>,
     /// Optional custom base root.
     pub base_dir: Option<PathBuf>,
+    /// Where rendered artifacts are written, mirroring Go's
+    /// `SyncOptions.RenderDir` (the CLI passes `config.Defaults().RenderDir`).
+    /// `None` keeps the per-user render cache fallback.
+    pub render_dir: Option<PathBuf>,
     /// Copy or managed symlink; empty preserves each marker's mode.
     pub mode: String,
     /// Adopt unmanaged destinations when reinstalling.
@@ -247,6 +251,7 @@ fn reinstall(
                 .then(|| options.project_dir.clone())
                 .flatten(),
             base_dir: options.base_dir.clone(),
+            render_dir: options.render_dir.clone(),
             mode,
             force: options.force,
             events_path: options.events_path.clone(),

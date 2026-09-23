@@ -168,7 +168,7 @@ fn default_paths_match_the_go_oracle_for_every_resolution_branch() {
         .expect("fixture has defaults")
         .as_array()
         .unwrap();
-    assert_eq!(cases.len(), 5, "every branch of the Go resolution rule");
+    assert_eq!(cases.len(), 7, "every branch of the Go resolution rule");
 
     for case in cases {
         let name = case.get("name").and_then(Value::as_str).unwrap();
@@ -203,7 +203,13 @@ fn default_paths_match_the_go_oracle_for_every_resolution_branch() {
             fs::create_dir_all(data_base.join("symskills")).unwrap();
         }
 
-        let mut envs = vec![("HOME".to_string(), home.to_string_lossy().into_owned())];
+        let mut envs = vec![
+            ("HOME".to_string(), home.to_string_lossy().into_owned()),
+            (
+                "USERPROFILE".to_string(),
+                home.to_string_lossy().into_owned(),
+            ),
+        ];
         if let Some(value) = xdg {
             envs.push(("XDG_DATA_HOME".to_string(), value));
         }
@@ -218,7 +224,45 @@ fn default_paths_match_the_go_oracle_for_every_resolution_branch() {
         assert_eq!(field(&stdout, "library"), expected("library_dir"), "{name}");
         assert_eq!(field(&stdout, "render"), expected("render_dir"), "{name}");
         assert_eq!(field(&stdout, "base"), expected("base_dir"), "{name}");
+        assert_eq!(field(&stdout, "home"), home.to_string_lossy(), "{name}");
     }
+}
+
+/// A competing current root under the wrong home must not outrank the legacy
+/// root under the platform home when `XDG_DATA_HOME` is unset.
+#[test]
+fn conflicting_home_variables_use_the_go_platform_home() {
+    let tmp = tempfile::tempdir().unwrap();
+    let home = tmp.path().join("home");
+    let profile = tmp.path().join("profile");
+    let selected = if cfg!(windows) { &profile } else { &home };
+    let other = if cfg!(windows) { &home } else { &profile };
+    let legacy = selected.join(".local/share/symskills");
+    fs::create_dir_all(&legacy).unwrap();
+    fs::create_dir_all(other.join(".local/share/symbrain/skills")).unwrap();
+    let stdout = run_child_case(
+        "child_resolves_defaults",
+        &[
+            ("HOME".to_string(), home.to_string_lossy().into_owned()),
+            (
+                "USERPROFILE".to_string(),
+                profile.to_string_lossy().into_owned(),
+            ),
+        ],
+    );
+    assert_eq!(
+        field(&stdout, "library"),
+        legacy.join("library").to_string_lossy()
+    );
+    assert_eq!(
+        field(&stdout, "render"),
+        legacy.join("rendered").to_string_lossy()
+    );
+    assert_eq!(
+        field(&stdout, "base"),
+        legacy.join("base").to_string_lossy()
+    );
+    assert_eq!(field(&stdout, "home"), selected.to_string_lossy());
 }
 
 /// Go's `TestRunBinaryPresenceChangesNothing`: a legacy `symskills` binary first
@@ -288,7 +332,7 @@ fn a_legacy_symskills_binary_on_path_changes_nothing() {
 }
 
 /// Child case: resolve the defaults under the parent's environment and print
-/// the three paths.
+/// the three paths and the harness home.
 #[test]
 #[ignore = "runs in a child process prepared by default_paths_match_the_go_oracle_for_every_resolution_branch"]
 fn child_resolves_defaults() {
@@ -298,6 +342,7 @@ fn child_resolves_defaults() {
     println!("library={}", opts.library_dir);
     println!("render={}", opts.render_dir);
     println!("base={}", opts.base_dir);
+    println!("home={}", opts.home_dir);
 }
 
 /// Child case: dry-run over claude and codex while a legacy binary sits first on
