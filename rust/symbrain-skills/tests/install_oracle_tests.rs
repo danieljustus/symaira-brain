@@ -114,6 +114,11 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
         let mut expected_artifacts = case.expected.artifacts;
         #[cfg(windows)]
         for artifact in &mut expected_artifacts {
+            if artifact.kind == "file" && artifact.mode & 0o111 != 0 {
+                // Windows has no executable permission bit. The fixture is
+                // generated on Unix, where its source resource is executable.
+                artifact.mode &= !0o111;
+            }
             if artifact.path.ends_with("/.symskills.json") {
                 if let Some(bytes) = &artifact.bytes {
                     let decoded = decode_base64(bytes);

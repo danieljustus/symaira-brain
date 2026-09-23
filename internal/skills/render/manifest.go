@@ -222,7 +222,7 @@ func syncRootDir(root *os.Root, path string) error {
 		return err
 	}
 	defer dir.Close()
-	return dir.Sync()
+	return syncDirectoryHandle(dir)
 }
 
 func syncRootTree(root *os.Root, rel string) error {
