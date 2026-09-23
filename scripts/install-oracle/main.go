@@ -371,6 +371,7 @@ func files(root string) []fileState {
 }
 
 func normalize(root, value string) string {
+	value = strings.ReplaceAll(value, root, "<root>")
 	value = strings.ReplaceAll(value, filepath.ToSlash(root), "<root>")
 	return timestampPattern.ReplaceAllString(value, ".bak.<timestamp>")
 }

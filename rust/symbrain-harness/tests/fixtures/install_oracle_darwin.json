@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "go_revision": "cefb5af2afba1ea1883c935a1881d16fc9b39b61",
-  "generator_sha256": "7130b859705ab42f4c4910a74597eb9d749720edbb1155c2ff8984e73d7fe687",
+  "generator_sha256": "cc0326a9e6811905804ee6298f95ff6ce23d9bc5465a92fe6abe58b0724ef8dc",
   "go_sources": {
     "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
     "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
