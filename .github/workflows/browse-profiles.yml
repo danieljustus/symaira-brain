@@ -1,0 +1,55 @@
+name: Browse browser-profile parity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-profiles.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profiles:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-26, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: browse
+    env:
+      CGO_ENABLED: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+          cache-dependency-path: browse/go.sum
+      - name: Build the real Go CLI oracle
+        run: go build -trimpath -mod=readonly -o "$RUNNER_TEMP/symbrowse-go.exe" ./cmd/symbrowse
+      - name: Resolve the pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Compare native browser-profile discovery and output
+        # Read-only discovery in synthetic HOME/USERPROFILE/XDG/LOCALAPPDATA roots.
+        # A missing or identical Go executable fails rather than skipping parity.
+        env:
+          SYMBROWSE_GO_ORACLE: ${{ runner.temp }}/symbrowse-go.exe
+          TMPDIR: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo test -p symbrowse-cli --test profiles --all-features --locked -- --nocapture
+      - name: Retain synthetic fixtures and exact CLI streams
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-profiles-${{ matrix.os }}-${{ github.sha }}
+          path: ${{ runner.temp }}/symbrowse-profiles-*
+          if-no-files-found: warn
+          retention-days: 14
