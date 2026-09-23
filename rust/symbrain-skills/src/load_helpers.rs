@@ -17,10 +17,6 @@ pub(crate) fn read_bundle_text(
     String::from_utf8(bytes).map_err(|_| SkillError(format!("invalid_utf8_overlay: {name}")))
 }
 
-fn is_not_found(error: &SkillError) -> bool {
-    error.0.contains("No such file or directory") || error.0.contains("not found")
-}
-
 fn load_overrides(
     root: &Dir,
     _anchor: &Path,
@@ -28,12 +24,8 @@ fn load_overrides(
     std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>>,
     SkillError,
 > {
-    let mut targets = match read_dir(root, Path::new("overlays"), "overlays") {
-        Ok(entries) => entries,
-        Err(error) if is_not_found(&error) => {
-            return Ok(std::collections::BTreeMap::new());
-        }
-        Err(error) => return Err(error),
+    let Some(mut targets) = read_optional_dir(root, Path::new("overlays"), "overlays")? else {
+        return Ok(std::collections::BTreeMap::new());
     };
     targets.sort_by_key(cap_std::fs::DirEntry::file_name);
     let mut result = std::collections::BTreeMap::new();
@@ -48,10 +40,8 @@ fn load_overrides(
         let blocks = PathBuf::from("overlays")
             .join(&target_name)
             .join(variant::BLOCKS_DIR);
-        let mut files = match read_dir(root, &blocks, "overlay blocks") {
-            Ok(entries) => entries,
-            Err(error) if is_not_found(&error) => continue,
-            Err(error) => return Err(error),
+        let Some(mut files) = read_optional_dir(root, &blocks, "overlay blocks")? else {
+            continue;
         };
         files.sort_by_key(cap_std::fs::DirEntry::file_name);
         let mut values = std::collections::BTreeMap::new();
