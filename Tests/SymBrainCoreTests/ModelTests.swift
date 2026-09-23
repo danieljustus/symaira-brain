@@ -324,11 +324,19 @@ private func guiContractHomeIsIsolated() -> Bool {
           let passwd = getpwuid(getuid()),
           let pwDir = passwd.pointee.pw_dir
     else { return false }
-    let realHome = String(cString: pwDir)
-    guard !realHome.isEmpty, home != realHome else { return false }
-    if let xdgConfig = environment["XDG_CONFIG_HOME"], !xdgConfig.isEmpty,
-       xdgConfig == realHome || xdgConfig.hasPrefix(realHome + "/.config") {
-        return false
+    let realHome = URL(fileURLWithPath: String(cString: pwDir))
+        .standardizedFileURL.resolvingSymlinksInPath().path
+    let testHome = URL(fileURLWithPath: home)
+        .standardizedFileURL.resolvingSymlinksInPath().path
+    guard !realHome.isEmpty, testHome != realHome,
+          !testHome.hasPrefix(realHome + "/")
+    else { return false }
+    if let xdgConfig = environment["XDG_CONFIG_HOME"], !xdgConfig.isEmpty {
+        let configPath = URL(fileURLWithPath: xdgConfig)
+            .standardizedFileURL.resolvingSymlinksInPath().path
+        if configPath == realHome || configPath.hasPrefix(realHome + "/") {
+            return false
+        }
     }
     return true
 }
