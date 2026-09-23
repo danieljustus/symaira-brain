@@ -857,14 +857,15 @@ fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {
 }
 
 fn native_join(base: &std::path::Path, suffix: &str) -> PathBuf {
-    let joined = base.join(suffix);
     #[cfg(windows)]
     {
-        joined.components().collect()
+        suffix
+            .split('/')
+            .fold(base.to_path_buf(), |path, component| path.join(component))
     }
     #[cfg(not(windows))]
     {
-        joined
+        base.join(suffix)
     }
 }
 

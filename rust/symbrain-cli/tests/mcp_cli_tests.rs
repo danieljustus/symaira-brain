@@ -50,8 +50,8 @@ $utf8 = [System.Text.UTF8Encoding]::new($false)
 [Console]::InputEncoding = $utf8
 [Console]::OutputEncoding = $utf8
 while (($line = [Console]::In.ReadLine()) -ne $null) {
-    try { $request = ConvertFrom-Json -InputObject $line } catch { continue }
-    if ($null -eq $request.id) { continue }
+    try { $request = ConvertFrom-Json -InputObject $line -ErrorAction Stop } catch { continue }
+    if ($request.PSObject.Properties.Name -notcontains 'id') { continue }
     $response = @{ jsonrpc = '2.0'; id = $request.id }
     switch ($request.method) {
         'initialize' {
@@ -93,6 +93,9 @@ fn write_fake(root: &TempDir) -> FakeCommand {
             args: vec![
                 "-NoProfile".to_owned(),
                 "-NonInteractive".to_owned(),
+                "-NoLogo".to_owned(),
+                "-ExecutionPolicy".to_owned(),
+                "Bypass".to_owned(),
                 "-File".to_owned(),
                 path.to_string_lossy().into_owned(),
             ],
@@ -233,7 +236,12 @@ fn mcp_subprocess_runs_native_initialize_list_call_and_silent_notification() {
         .iter()
         .map(|tool| tool["name"].as_str().unwrap())
         .collect::<Vec<_>>();
-    assert_eq!(names, ["bootstrap", "patterns", "echo"]);
+    assert_eq!(
+        names,
+        ["bootstrap", "patterns", "echo"],
+        "foreign server tools were not merged: {:?}",
+        responses[2]
+    );
     assert_eq!(responses[3]["id"], 3);
     assert_eq!(responses[3]["result"]["isError"], false);
     assert_eq!(responses[3]["result"]["content"][0]["text"], r#"{"x":1}"#);

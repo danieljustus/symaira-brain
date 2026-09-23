@@ -254,6 +254,12 @@ fn expected_files(files: &[OracleFile]) -> Vec<ObservedFile> {
         .map(|file| ObservedFile {
             path: file.path.clone(),
             file_type: file.file_type.clone(),
+            // Windows does not expose POSIX execute/write permission bits.
+            // Keep comparing types, paths, symlink targets, and exact bytes;
+            // compare POSIX modes on Unix where the filesystem can report them.
+            #[cfg(windows)]
+            mode: 0,
+            #[cfg(not(windows))]
             mode: file.mode,
             bytes: file.bytes.as_deref().map(decode_base64),
             target: file.target.clone(),
@@ -295,6 +301,22 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
         .env("LANG", "C.UTF-8")
         .env("LC_ALL", "C.UTF-8")
         .env("TZ", "UTC");
+    #[cfg(windows)]
+    {
+        command.env("USERPROFILE", root.join("home"));
+        for key in [
+            "SystemRoot",
+            "windir",
+            "ComSpec",
+            "TEMP",
+            "TMP",
+            "SystemDrive",
+        ] {
+            if let Some(value) = std::env::var_os(key) {
+                command.env(key, value);
+            }
+        }
+    }
     if case.id == "default_profile_env_override" {
         command.env("SYMBRAIN_DEFAULT_PROFILE", "restricted");
     }
@@ -316,7 +338,11 @@ fn install_oracle_fixture_is_consumed_by_the_native_rust_cli() {
     assert_eq!(oracle.go_sources.len(), 13);
     for case in &oracle.cases {
         let (exit, stdout, stderr, files) = run_case(case);
-        assert_eq!(exit, case.exit, "{} exit", case.id);
+        assert_eq!(
+            exit, case.exit,
+            "{} exit; stdout={stdout:?}; stderr={stderr:?}",
+            case.id
+        );
         assert_eq!(stdout, case.stdout, "{} stdout", case.id);
         assert_eq!(stderr, case.stderr, "{} stderr", case.id);
         assert_eq!(files, expected_files(&case.files), "{} filesystem", case.id);
