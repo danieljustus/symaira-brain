@@ -180,6 +180,23 @@ func setupOracleEnv() error {
 		"XDG_STATE_HOME="+filepath.Join(root, "state"),
 		"PATH="+emptyPath,
 	)
+	if runtime.GOOS == "windows" {
+		appData := filepath.Join(home, "AppData", "Roaming")
+		localAppData := filepath.Join(home, "AppData", "Local")
+		temp := filepath.Join(root, "temp")
+		for _, dir := range []string{appData, localAppData, temp} {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return err
+			}
+		}
+		oracleEnv = append(oracleEnv,
+			"USERPROFILE="+home,
+			"APPDATA="+appData,
+			"LOCALAPPDATA="+localAppData,
+			"TEMP="+temp,
+			"TMP="+temp,
+		)
+	}
 	return nil
 }
 

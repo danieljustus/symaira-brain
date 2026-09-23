@@ -59,10 +59,10 @@ fn write_fake(root: &TempDir) -> FakeCommand {
             .expect("Python is required by the native MCP fixture");
         assert!(output.status.success(), "Python lookup failed: {output:?}");
         let python = String::from_utf8(output.stdout).unwrap();
-        return FakeCommand {
+        FakeCommand {
             command: python.trim().into(),
             args: vec![path.to_string_lossy().into_owned()],
-        };
+        }
     }
     #[cfg(not(windows))]
     {

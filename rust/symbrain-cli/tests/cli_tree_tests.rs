@@ -81,8 +81,6 @@ fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
             "PATHEXT",
             "ComSpec",
             "COMSPEC",
-            "TEMP",
-            "TMP",
             "SystemDrive",
         ] {
             if let Some(val) = std::env::var_os(key) {
@@ -103,6 +101,19 @@ fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    #[cfg(windows)]
+    {
+        let appdata = home.join("AppData").join("Roaming");
+        let local_appdata = home.join("AppData").join("Local");
+        let temp = root.join("temp");
+        for path in [&appdata, &local_appdata, &temp] {
+            fs::create_dir_all(path).unwrap();
+        }
+        cmd.env("APPDATA", appdata)
+            .env("LOCALAPPDATA", local_appdata)
+            .env("TEMP", &temp)
+            .env("TMP", temp);
+    }
     cmd
 }
 
