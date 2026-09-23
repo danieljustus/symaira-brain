@@ -82,6 +82,8 @@ fn drive_root_materializes_and_installs_real_skill() {
 fn junction_ancestors_are_refused_without_touching_outside() {
     let temp = tempfile::tempdir().expect("root");
     let (bundle, rendered) = rendered_source(&temp.path().join("library/windows-root"));
+    materialize(&bundle, &rendered, &temp.path().join("render-control"))
+        .expect("control materialization must succeed before refusal checks");
     let outside = tempfile::tempdir().expect("outside");
     let sentinel = outside.path().join("sentinel.txt");
     fs::write(&sentinel, b"outside\n").expect("sentinel");
@@ -103,35 +105,40 @@ fn junction_ancestors_are_refused_without_touching_outside() {
 
     let home_link = temp.path().join("home-link");
     junction(&home_link, outside.path());
+    let ancestor_error = install_rendered(
+        &bundle,
+        &rendered,
+        &InstallOptions {
+            home_dir: home_link,
+            mode: "copy".to_owned(),
+            ..Default::default()
+        },
+    )
+    .expect_err("install through junction must be refused");
     assert!(
-        install_rendered(
-            &bundle,
-            &rendered,
-            &InstallOptions {
-                home_dir: home_link,
-                mode: "copy".to_owned(),
-                ..Default::default()
-            }
-        )
-        .is_err(),
-        "install through junction must be refused"
+        ancestor_error.0.contains("root") && !ancestor_error.0.contains("materialize:"),
+        "install must reach the home root before refusal: {ancestor_error}"
     );
     let final_home = temp.path().join("home-final");
     let final_parent = final_home.join(".config/opencode/skills");
     fs::create_dir_all(&final_parent).expect("install parent");
     junction(&final_parent.join("windows-root"), outside.path());
+    let final_error = install_rendered(
+        &bundle,
+        &rendered,
+        &InstallOptions {
+            home_dir: final_home,
+            mode: "copy".to_owned(),
+            ..Default::default()
+        },
+    )
+    .expect_err("install onto a junction must be refused");
     assert!(
-        install_rendered(
-            &bundle,
-            &rendered,
-            &InstallOptions {
-                home_dir: final_home,
-                mode: "copy".to_owned(),
-                ..Default::default()
-            }
-        )
-        .is_err(),
-        "install onto a junction must be refused"
+        !final_error.0.contains("materialize:")
+            && (final_error.0.contains("root")
+                || final_error.0.contains("unmanaged")
+                || final_error.0.contains("symlink")),
+        "install must reach the destination before refusal: {final_error}"
     );
     let mut entries = fs::read_dir(outside.path())
         .expect("outside entries")

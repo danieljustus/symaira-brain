@@ -285,7 +285,11 @@ fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resul
         .map_err(io::Error::from)?;
         rustix::fs::fsync(&fd).map_err(io::Error::from)
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    {
+        sync_windows_dir(root, path)
+    }
+    #[cfg(not(any(unix, windows)))]
     {
         open_child_nofollow(root, path)?.into_std_file().sync_all()
     }

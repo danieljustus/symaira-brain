@@ -31,6 +31,15 @@ pub(crate) fn open_child_nofollow(root: &Dir, name: &Path) -> io::Result<Dir> {
     Ok(child)
 }
 
+/// Windows cannot use `FlushFileBuffers` on cap-std's read-only directory
+/// handle. Validate the no-follow directory capability instead; staged files
+/// are still flushed individually before any rename is published.
+#[cfg(windows)]
+pub(crate) fn sync_windows_dir(root: &Dir, path: &Path) -> io::Result<()> {
+    let _directory = open_child_nofollow(root, path)?;
+    Ok(())
+}
+
 /// Windows junctions and other reparse tags need the same refusal as symlinks.
 pub(crate) fn is_reparse_point(metadata: &cap_std::fs::Metadata) -> bool {
     #[cfg(windows)]
