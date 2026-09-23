@@ -304,18 +304,22 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
     #[cfg(windows)]
     {
         command.env("USERPROFILE", root.join("home"));
-        for key in [
-            "SystemRoot",
-            "windir",
-            "ComSpec",
-            "TEMP",
-            "TMP",
-            "SystemDrive",
-        ] {
+        let appdata = root.join("home").join("AppData").join("Roaming");
+        let local_appdata = root.join("home").join("AppData").join("Local");
+        let temp = root.join("temp");
+        for path in [&appdata, &local_appdata, &temp] {
+            fs::create_dir_all(path).unwrap();
+        }
+        for key in ["SystemRoot", "windir", "ComSpec", "SystemDrive"] {
             if let Some(value) = std::env::var_os(key) {
                 command.env(key, value);
             }
         }
+        command
+            .env("APPDATA", appdata)
+            .env("LOCALAPPDATA", local_appdata)
+            .env("TEMP", &temp)
+            .env("TMP", temp);
     }
     if case.id == "default_profile_env_override" {
         command.env("SYMBRAIN_DEFAULT_PROFILE", "restricted");
