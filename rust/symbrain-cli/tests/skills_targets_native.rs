@@ -193,9 +193,13 @@ fn scope_flag_is_native_but_config_stays_on_go() {
     );
     assert!(project.status.success(), "stderr: {:?}", project.stderr);
     let row = opencode_row(&project);
+    #[cfg(windows)]
+    let project_root = root.path().to_path_buf();
+    #[cfg(not(windows))]
+    let project_root = root.path().canonicalize().unwrap();
     assert_eq!(
         row["effective_skill_root"],
-        root.path()
+        project_root
             .join("project")
             .join(".opencode")
             .join("skills")
