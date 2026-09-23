@@ -3,6 +3,7 @@
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 
+mod cap_root;
 mod encode;
 pub mod install;
 pub mod library;

@@ -48,10 +48,10 @@ impl Options {
             opts.base_dir = default_base_dir()?;
         }
         if opts.home_dir.is_empty() {
-            // Go wraps os.UserHomeDir's error verbatim, whose text on Unix is
-            // "$HOME is not defined".
-            opts.home_dir = std::env::var("HOME")
-                .map_err(|_| SkillError("resolve home directory: $HOME is not defined".into()))?;
+            opts.home_dir = home_dir()
+                .map_err(|error| SkillError(format!("resolve home directory: {error}")))?
+                .to_string_lossy()
+                .into_owned();
         }
         if opts.timeout == Duration::ZERO {
             opts.timeout = DEFAULT_TIMEOUT;
@@ -421,10 +421,20 @@ impl Context for NoopContext {
 /// Resolves the skills data root the way Go's `sharedpaths.SkillsDataDir()`
 /// does through `internal/paths.resolve`: `$XDG_DATA_HOME` when it holds an
 /// absolute path (a relative value is ignored per the XDG spec), else
-/// `$HOME/.local/share`; then `base/symbrain/skills`, unless that directory is
+/// `os.UserHomeDir()/.local/share`; then `base/symbrain/skills`, unless that directory is
 /// absent while the legacy `base/symskills` exists, in which case the legacy
 /// directory wins.
-fn skills_data_root() -> Result<PathBuf, SkillError> {
+///
+/// Public so every native skills path (the CLI's library/base/render roots
+/// included) shares this one resolver instead of re-deriving the precedence;
+/// the branches are frozen by the `defaults` scenarios in
+/// `tests/fixtures/runner_oracle.json`.
+///
+/// # Errors
+///
+/// Returns the same error text Go's `os.UserHomeDir` produces when no
+/// absolute `$XDG_DATA_HOME` and no usable home directory are available.
+pub fn skills_data_root() -> Result<PathBuf, SkillError> {
     let base = match std::env::var("XDG_DATA_HOME") {
         Ok(value) if Path::new(&value).is_absolute() => PathBuf::from(value),
         _ => home_dir()?.join(".local/share"),
@@ -440,11 +450,17 @@ fn skills_data_root() -> Result<PathBuf, SkillError> {
     Ok(current)
 }
 
-/// Reads `$HOME`, reporting the same error text Go's `os.UserHomeDir` produces.
+/// Reads the platform home variable with Go's `os.UserHomeDir` error text.
 fn home_dir() -> Result<PathBuf, SkillError> {
-    std::env::var("HOME")
+    let (name, error) = if cfg!(windows) {
+        ("USERPROFILE", "%userprofile% is not defined")
+    } else {
+        ("HOME", "$HOME is not defined")
+    };
+    std::env::var_os(name)
+        .filter(|value| !value.is_empty())
         .map(PathBuf::from)
-        .map_err(|_| SkillError("$HOME is not defined".into()))
+        .ok_or_else(|| SkillError(error.into()))
 }
 
 /// Stringifies a resolved default path.

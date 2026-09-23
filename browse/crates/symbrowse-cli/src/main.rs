@@ -1,5 +1,7 @@
 #![deny(unsafe_code)]
 
+mod browser_profiles;
+
 use std::{
     collections::BTreeMap,
     ffi::OsString,
@@ -78,7 +80,7 @@ enum Action {
     },
     McpListProfiles,
     ProfileList {
-        format: Format,
+        arguments: Vec<String>,
     },
     ToolList {
         profiles: String,
@@ -178,7 +180,7 @@ fn main() -> ExitCode {
             engine,
         }) => run_mcp(session, profiles, allow_private, engine),
         Ok(Action::McpListProfiles) => write_stdout(MCP_PROFILE_LIST),
-        Ok(Action::ProfileList { format }) => run_profile_list(format),
+        Ok(Action::ProfileList { arguments }) => browser_profiles::run(&arguments),
         Ok(Action::ToolList { profiles, format }) => run_tool_list(profiles, format),
         Ok(Action::Dispatch {
             session,
@@ -203,24 +205,6 @@ fn main() -> ExitCode {
 }
 
 const MCP_PROFILE_LIST: &str = "core     14 tools  Page interaction and reading: open, snapshot, click, fill, type, press, wait, read, get, find. The default profile.\n           tools: open, snapshot, click, fill, type, press, wait, read, get, find, fetch_url, fetch_batch, cache_get, wayback_snapshots\nnav       3 tools  History navigation: back, forward, reload.\n           tools: back, forward, reload\nstate     0 tools  Sessions, cookies, storage, state save/load, auth login. Tools land with the state milestone (v0.4.0).\nnetwork   0 tools  Routing, mocking, request inspection, HAR, headers, offline. Tools land with the network milestone (v1.0.0).\ndebug     0 tools  Console, errors, eval, a11y, diff, doctor. Tools land with the reach milestones (v1.0.0).\nflows     0 tools  Flow list/run/record. Tools land with the flows milestone (v0.6.0).\n";
-
-fn run_profile_list(format: Format) -> ExitCode {
-    if matches!(format, Format::Text) {
-        return write_stdout(MCP_PROFILE_LIST);
-    }
-    let profiles = serde_json::json!([
-        {"name":"core","tools":14,"description":"Page interaction and reading"},
-        {"name":"nav","tools":3,"description":"History navigation"},
-        {"name":"state","tools":0,"description":"Sessions and state"},
-        {"name":"network","tools":0,"description":"Network controls"},
-        {"name":"debug","tools":0,"description":"Diagnostics"},
-        {"name":"flows","tools":0,"description":"Flow list/run/record"}
-    ]);
-    match Envelope::ok(profiles, Vec::new()).render(format) {
-        Ok(output) => write_stdout(&output),
-        Err(_) => ExitCode::from(1),
-    }
-}
 
 fn run_tool_list(profiles: String, format: Format) -> ExitCode {
     let selected = match registry::validate_profile_selection(&profiles) {
@@ -335,17 +319,20 @@ fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCod
 
 fn run_flow_list(format: Format) -> ExitCode {
     let mut groups = Vec::new();
-    let project = PathBuf::from(".symbrowse/flows");
+    let project = PathBuf::from(".symbrowse").join("flows");
     if let Ok(found) = flows::discover_directory(&project, "project") {
         groups.push(found);
     }
     if let Ok(home) = std::env::var("HOME") {
-        let global = PathBuf::from(home).join(".config/symbrowse/flows");
+        let global = PathBuf::from(home)
+            .join(".config")
+            .join("symbrowse")
+            .join("flows");
         if let Ok(found) = flows::discover_directory(&global, "global") {
             groups.push(found);
         }
     }
-    let data = serde_json::to_value(flows::merge_discovered(groups)).unwrap_or_default();
+    let data = serde_json::json!({"flows": flows::merge_discovered(groups)});
     match Envelope::ok(data, Vec::new()).render(format) {
         Ok(output) => write_stdout(&output),
         Err(error) => {
@@ -1055,7 +1042,11 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "daemon" => parse_daemon(&values, command_index),
         "mcp" => parse_mcp(&values, command_index),
         "flow" | "workflow" => parse_flow(&values, command_index),
-        "profiles" => parse_profiles(&values, command_index),
+        "profiles" => {
+            let mut arguments = values;
+            arguments.remove(command_index);
+            Ok(Action::ProfileList { arguments })
+        }
         "tools" => parse_tools(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" => {
@@ -1387,35 +1378,6 @@ fn take_positional(
         args.insert(key.to_owned(), serde_json::Value::String(value));
         positional.remove(0);
     }
-}
-
-fn parse_profiles(values: &[String], index: usize) -> Result<Action, ParseError> {
-    if values.get(index + 1).map(String::as_str) != Some("list") {
-        return Err(ParseError {
-            message: "profiles requires list".into(),
-            exit_code: 2,
-        });
-    }
-    let mut format = Format::Text;
-    let mut i = index + 2;
-    while i < values.len() {
-        match values[i].as_str() {
-            "--json" => format = Format::Json,
-            "--output" => {
-                i += 1;
-                format = parse_format(required_value(values, i, "--output")?)?;
-            }
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
-            value => {
-                return Err(ParseError {
-                    message: format!("unknown argument {value:?}"),
-                    exit_code: 2,
-                });
-            }
-        }
-        i += 1;
-    }
-    Ok(Action::ProfileList { format })
 }
 
 fn parse_tools(values: &[String], index: usize) -> Result<Action, ParseError> {

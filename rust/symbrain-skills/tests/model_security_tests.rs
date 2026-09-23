@@ -44,6 +44,32 @@ fn manifest_inline_tables_load_like_go() {
 }
 
 #[test]
+fn missing_optional_overlay_trees_are_empty() {
+    let temp = tempfile::tempdir().expect("tempdir");
+    let root = temp.path().join("plain-skill");
+    fs::create_dir_all(&root).expect("root");
+    fs::write(
+        root.join("SKILL.md"),
+        "---\nname: plain-skill\ndescription: test\n---\nBody\n",
+    )
+    .expect("skill");
+    assert!(
+        load_bundle(&root)
+            .expect("no overlays")
+            .block_overrides
+            .is_empty()
+    );
+
+    fs::create_dir_all(root.join("overlays/claude")).expect("overlay target");
+    assert!(
+        load_bundle(&root)
+            .expect("no overlay blocks")
+            .block_overrides
+            .is_empty()
+    );
+}
+
+#[test]
 fn relative_root_is_stored_as_an_absolute_logical_path() {
     let temp = tempfile::tempdir_in(".").expect("tempdir");
     let root = temp.path().join("relative-skill");

@@ -4,8 +4,11 @@
 //
 // Frozen seams: scheme acceptance/rejection, deprecated vault:// alias
 // equivalence, env-fallback precedence via ResolveOrEnv, exact error bytes for
-// missing paths/invalid paths/absent binaries, and the subprocess timeout
-// config surface (corekit secretref.DefaultTimeout).
+// missing paths/invalid paths/absent binaries, the subprocess timeout
+// config surface (corekit secretref.DefaultTimeout), and the redaction
+// invariant (internal/memory/secrets/resolve.go:44): every failed case
+// records which channels its setup plaintexts could leak into — always
+// none, asserted by both the generator and the Rust suite.
 //
 // Output: rust/symbrain-usage/tests/fixtures/secret_oracle.json, consumed by
 // rust/symbrain-usage/tests/secret_oracle_tests.rs.
@@ -22,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -42,11 +46,12 @@ var oracleEnvNames = []string{
 }
 
 type symvaultSpec struct {
-	Mode    string `json:"mode"` // "fake" runs, "absent" is not on PATH
-	Stdout  string `json:"stdout,omitempty"`
-	Stderr  string `json:"stderr,omitempty"`
-	Exit    int    `json:"exit,omitempty"`
-	SleepMS int    `json:"sleep_ms,omitempty"`
+	Mode        string `json:"mode"` // "fake" runs, "absent" is not on PATH
+	Stdout      string `json:"stdout,omitempty"`
+	StdoutBytes []int  `json:"stdout_bytes,omitempty"`
+	Stderr      string `json:"stderr,omitempty"`
+	Exit        int    `json:"exit,omitempty"`
+	SleepMS     int    `json:"sleep_ms,omitempty"`
 }
 
 type inputSpec struct {
@@ -64,16 +69,100 @@ type oracleCase struct {
 	Timeout           string    `json:"timeout,omitempty"`
 	Success           *bool     `json:"success,omitempty"`
 	Value             string    `json:"value,omitempty"`
+	ValueBytes        []int     `json:"value_bytes,omitempty"`
 	Error             string    `json:"error,omitempty"`
 	Argv              []string  `json:"argv"`
 	IsVaultURI        *bool     `json:"is_vault_uri,omitempty"`
 	IsSecretReference *bool     `json:"is_secret_reference,omitempty"`
+
+	// value_leaks pins internal/memory/secrets/resolve.go:44 for failed
+	// cases: whether any setup plaintext appears in each recorded channel.
+	// Every shipped failure case records all-false; the Rust suite asserts it.
+	ValueLeaks *valueLeakRecord `json:"value_leaks,omitempty"`
 }
 
 type suite struct {
 	SchemaVersion  int          `json:"schema_version"`
 	DefaultTimeout string       `json:"default_timeout"`
 	Cases          []oracleCase `json:"cases"`
+}
+
+// valueLeakRecord pins the contract documented on
+// internal/memory/secrets/resolve.go: "On failure, a descriptive error is
+// returned — the secret value is never included in error messages." For a
+// failed case, each channel reports whether any plaintext secret used in
+// the case's setup appears in that recorded output:
+//
+//   - error:  the recorded Go error text
+//   - stdout: the value Go surfaced from the subprocess stdout; always
+//     empty on failure because Go discards stdout bytes when the command
+//     errors or exceeds its deadline
+//   - stderr: the recorded subprocess stderr bytes — the diagnostic
+//     channel corekit folds into the error verbatim, by design
+//   - argv:   the arguments Go passed to the subprocess
+//
+// Classified plaintexts are the injected environment values and the
+// trimmed bytes the fake symvault prints on stdout (the `--print` secret
+// channel). Fake stderr is deliberately not a plaintext source: corekit
+// surfaces it inside errors as failure diagnostics, never as a resolved
+// value.
+type valueLeakRecord struct {
+	Plaintexts []string `json:"plaintexts"`
+	Error      bool     `json:"error"`
+	Stdout     bool     `json:"stdout"`
+	Stderr     bool     `json:"stderr"`
+	Argv       bool     `json:"argv"`
+}
+
+// setupPlaintexts lists the plaintext secrets a case's setup handles, in a
+// deterministic order: sorted environment keys first, then the fake
+// symvault stdout secret.
+func setupPlaintexts(in inputSpec) []string {
+	plaintexts := make([]string, 0, len(in.Env)+1)
+	names := make([]string, 0, len(in.Env))
+	for name := range in.Env {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		if value := strings.TrimSpace(in.Env[name]); value != "" {
+			plaintexts = append(plaintexts, value)
+		}
+	}
+	if in.Symvault != nil && in.Symvault.Mode == "fake" {
+		if value := strings.TrimSpace(in.Symvault.Stdout); value != "" {
+			plaintexts = append(plaintexts, value)
+		}
+	}
+	return plaintexts
+}
+
+// computeValueLeaks scans a case's recorded channels for its setup
+// plaintexts. The result is attached to every failed case and must be
+// all-false (enforced in buildCases).
+func computeValueLeaks(c oracleCase) valueLeakRecord {
+	leaks := valueLeakRecord{Plaintexts: setupPlaintexts(c.Input)}
+	stderr := ""
+	if c.Input.Symvault != nil {
+		stderr = c.Input.Symvault.Stderr
+	}
+	for _, plaintext := range leaks.Plaintexts {
+		if strings.Contains(c.Error, plaintext) {
+			leaks.Error = true
+		}
+		if strings.Contains(c.Value, plaintext) {
+			leaks.Stdout = true
+		}
+		if strings.Contains(stderr, plaintext) {
+			leaks.Stderr = true
+		}
+		for _, arg := range c.Argv {
+			if strings.Contains(arg, plaintext) {
+				leaks.Argv = true
+			}
+		}
+	}
+	return leaks
 }
 
 // fakeSymvaultSource is the compiled stand-in for the fake `symvault`
@@ -114,6 +203,7 @@ func main() {
 	}
 	argsPath, _ := m["args_path"].(string)
 	stdout, _ := m["stdout"].(string)
+	stdoutBytes, _ := m["stdout_bytes"].([]any)
 	stderr, _ := m["stderr"].(string)
 	exit, _ := m["exit"].(float64)
 	sleepMS, _ := m["sleep_ms"].(float64)
@@ -131,12 +221,22 @@ func main() {
 		_, _ = f.Write(buf)
 		_ = f.Close()
 	}
+	// Canned output is written before any sleep so a timeout probe
+	// exercises 'value obtained, then deadline' on the real path.
+	if len(stdoutBytes) > 0 {
+		data := make([]byte, len(stdoutBytes))
+		for i, value := range stdoutBytes {
+			data[i] = byte(value.(float64))
+		}
+		_, _ = os.Stdout.Write(data)
+	} else {
+		_, _ = os.Stdout.WriteString(stdout)
+	}
+	_, _ = os.Stderr.WriteString(stderr)
 	if sleepMS > 0 {
 		time.Sleep(time.Duration(sleepMS) * time.Millisecond)
 		os.Exit(0)
 	}
-	_, _ = os.Stdout.WriteString(stdout)
-	_, _ = os.Stderr.WriteString(stderr)
 	os.Exit(int(exit))
 }
 `
@@ -193,13 +293,14 @@ func writeFakeSymvault(binDir, argsPath string, spec symvaultSpec) {
 		panic(err)
 	}
 	type sidecarSpec struct {
-		ArgsPath string `json:"args_path"`
-		Stdout   string `json:"stdout"`
-		Stderr   string `json:"stderr"`
-		Exit     int    `json:"exit"`
-		SleepMS  int    `json:"sleep_ms"`
+		ArgsPath    string `json:"args_path"`
+		Stdout      string `json:"stdout"`
+		StdoutBytes []int  `json:"stdout_bytes,omitempty"`
+		Stderr      string `json:"stderr"`
+		Exit        int    `json:"exit"`
+		SleepMS     int    `json:"sleep_ms"`
 	}
-	data, err := json.Marshal(sidecarSpec{argsPath, spec.Stdout, spec.Stderr, spec.Exit, spec.SleepMS})
+	data, err := json.Marshal(sidecarSpec{argsPath, spec.Stdout, spec.StdoutBytes, spec.Stderr, spec.Exit, spec.SleepMS})
 	if err != nil {
 		panic(err)
 	}
@@ -330,6 +431,13 @@ func resolveCase(id string, in inputSpec, timeout time.Duration) oracleCase {
 		Error:   message,
 		Argv:    argv,
 	}
+	if in.Symvault != nil && len(in.Symvault.StdoutBytes) > 0 && success {
+		// JSON strings replace invalid UTF-8. Record the resolver's actual bytes.
+		result.Value = ""
+		for _, b := range []byte(value) {
+			result.ValueBytes = append(result.ValueBytes, int(b))
+		}
+	}
 	if timeout > 0 {
 		result.Kind = "timeout"
 		result.Timeout = timeout.String()
@@ -373,6 +481,10 @@ func buildCases() []oracleCase {
 
 		// Resolution through the real subprocess path.
 		resolveCase("canonical_ok", inputSpec{Value: "symvault://symaira/memory/jwt", Symvault: working}, 0),
+		resolveCase("non_utf8_symvault_stdout", inputSpec{
+			Value:    "symvault://raw/bytes",
+			Symvault: &symvaultSpec{Mode: "fake", StdoutBytes: []int{255, 254, 115, 101, 99, 114, 101, 116, 10}},
+		}, 0),
 		resolveCase("alias_ok_equivalent", inputSpec{Value: "vault://symaira/memory/jwt", Symvault: working}, 0),
 		resolveCase("alias_missing_path_error_bytes", inputSpec{Value: "vault://unknown/path", Symvault: failing}, 0),
 		resolveCase("missing_path_error_names_env_fallback", inputSpec{
@@ -425,6 +537,44 @@ func buildCases() []oracleCase {
 		resolveCase("shrunk_timeout_error_bytes", inputSpec{
 			Value: "symvault://slow/path", Symvault: &symvaultSpec{Mode: "fake", SleepMS: 3000},
 		}, 1000*time.Millisecond),
+
+		// Value-leak probes: a failure path reached AFTER a secret value
+		// was obtained. The fake prints the plaintext on stdout, then the
+		// subprocess fails (non-zero exit) or outlives the deadline
+		// (timeout). Go discards stdout bytes on failure, so the recorded
+		// error/value/argv must never contain the echoed plaintext —
+		// value_leaks records exactly which channels leaked (all false).
+		resolveCase("failure_after_echoed_value_never_in_error", inputSpec{
+			Value: "symvault://leak/probe",
+			Symvault: &symvaultSpec{
+				Mode:   "fake",
+				Stdout: "echoed-after-failure-secret",
+				Stderr: "credential lookup denied\n",
+				Exit:   3,
+			},
+		}, 0),
+		resolveCase("timeout_after_echoed_value_never_in_error", inputSpec{
+			Value: "symvault://slow/echo",
+			Symvault: &symvaultSpec{
+				Mode:    "fake",
+				Stdout:  "timeout-after-echo-secret",
+				SleepMS: 3000,
+			},
+		}, 1000*time.Millisecond),
+	}
+
+	// Suite-wide redaction invariant: no failure case may record a setup
+	// plaintext in any channel. Generation fails loudly if one ever does.
+	for i := range cases {
+		if cases[i].Success == nil || *cases[i].Success {
+			continue
+		}
+		leaks := computeValueLeaks(cases[i])
+		if leaks.Error || leaks.Stdout || leaks.Stderr || leaks.Argv {
+			fmt.Fprintf(os.Stderr, "secret oracle: redaction invariant violated for %s: %+v\n", cases[i].ID, leaks)
+			os.Exit(1)
+		}
+		cases[i].ValueLeaks = &leaks
 	}
 	return cases
 }

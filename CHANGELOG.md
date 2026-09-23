@@ -9,6 +9,39 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.12.0] - 2026-09-22
+
+### Added
+- Native Rust parity slices behind frozen Go oracles: secret-reference
+  resolution (SEC-001), guard decision/grant/audit-chain bytes (SEC-002),
+  guard doctor (5 of 7 oracle cases), the skillsrunner, and native skills
+  execution in `sync` instead of deferring to Go (#652, #650, #639, #644,
+  #647, #636, #628, #611).
+- Browse, Operate and Scope are now buildable, replaceable Brain modules
+  with a consolidated lifecycle (#592).
+- Reviewed native vault approval management plus a discoverable approval
+  passthrough from Brain (#588, #590).
+- Sequence-repetition detector slice in the guard scanner (#533).
+
+### Changed
+- Installed skills are linked at the render directory so the native layout
+  matches the Go implementation (#646).
+- Configuration edits are previewable and recoverable (#585).
+- Runtime Go dependencies refreshed via the go-minor-patch group (#609).
+
+### Fixed
+- The managed symvault helper is a compiled binary instead of a fake shell
+  script (#656).
+- Source setup and lifecycle fallback restored for modules (#593).
+- Safe vault CLI error classification (#583).
+- rustls bumped past a security advisory (#600).
+- Batch fmt-check paths for release gofmt (#607, #608).
+- Post-merge flake in managed-core Fix mismatch selection (#595).
+
+### Security
+- SEC-001 secret-reference freezing and SEC-002 guard-chain parity landed
+  natively, proven byte-comparison-first against the Go oracle (#652, #650).
+
 ## [v0.11.0] - 2026-09-03
 
 ### Added

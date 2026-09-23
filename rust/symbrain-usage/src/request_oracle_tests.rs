@@ -193,17 +193,14 @@ fn requests_match_the_shipped_oracle_recording() {
             continue;
         }
         let provider = provider_for(case);
-        // The shipped OpenCode strategy performs its workspace lookup under the
-        // source name `web`. Only that first request is compared: the shipped
-        // strategy retries the lookup with a POST when the response carries no
-        // workspace id and detects a signed-out body, which the port does not do
-        // yet (issue #620).
-        let request_source = if case.provider == "opencode" {
-            "workspace_get"
-        } else {
-            case.source
-        };
-        let request = request_for(&provider, request_source, case.credential, None);
+        if case.provider == "opencode" {
+            // The shipped OpenCode strategy walks GET workspace -> POST
+            // workspace against the recorder's `200 {}` answers; replay the
+            // whole executed sequence, not just its first request.
+            replay_opencode_walk(case, entry, &provider);
+            continue;
+        }
+        let request = request_for(&provider, case.source, case.credential, None);
         let shipped = entry["requests"]
             .as_array()
             .expect("requests")
@@ -270,6 +267,10 @@ fn requests_match_the_shipped_oracle_recording() {
         assert_eq!(ported, expected, "{} headers", case.provider);
     }
 }
+
+#[path = "request_oracle_opencode_tests.rs"]
+mod opencode_walk;
+use opencode_walk::replay_opencode_walk;
 
 #[test]
 fn provider_error_texts_match_the_shipped_oracle_recording() {

@@ -5,6 +5,8 @@ use crate::{UsageError, UsageMeter, UsageSnapshot};
 
 #[path = "parser_extra.rs"]
 mod parser_extra;
+#[path = "parser_opencode.rs"]
+mod parser_opencode;
 
 pub(crate) fn parse_snapshot(
     id: &str,
@@ -12,6 +14,9 @@ pub(crate) fn parse_snapshot(
     body: &[u8],
     now: DateTime<Utc>,
 ) -> Result<UsageSnapshot, UsageError> {
+    if id == "opencode" {
+        return parser_opencode::parse(body, now);
+    }
     if body.is_empty() {
         return Err(UsageError::parse(id, "empty response"));
     }
@@ -60,7 +65,6 @@ pub(crate) fn parse_snapshot(
             parser_extra::parse_nous(&value, &mut snapshot);
             Ok(())
         }
-        "opencode" => parser_extra::parse_opencode(&value, &mut snapshot),
         "openrouter" => parser_extra::parse_openrouter(&value, &mut snapshot),
         "antigravity" => parser_extra::parse_antigravity(&value, &mut snapshot),
         _ => Err(UsageError::parse(id, "unknown provider")),

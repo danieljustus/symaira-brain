@@ -3,6 +3,7 @@
 #![allow(clippy::collapsible_if)]
 use std::path::{Path, PathBuf};
 
+#[cfg(not(windows))]
 use cap_fs_ext::DirExt;
 use cap_std::fs::Dir;
 use serde::Serialize;
@@ -11,6 +12,8 @@ use std::os::fd::AsFd;
 
 use super::replace::FaultPoint;
 use super::sync_lock::acquire_pull_lock;
+#[cfg(windows)]
+use crate::cap_root::sync_windows_dir;
 use crate::model::{MAX_RESOURCE_ENTRIES, SkillError};
 use crate::{RenderMetadata, load_bundle, render_target};
 
@@ -78,7 +81,12 @@ pub(crate) fn sync_dir(
         rustix::fs::fsync(&fd)
             .map_err(|error| SkillError(format!("sync staged directory: {error}")))
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    {
+        sync_windows_dir(root, path)
+            .map_err(|error| SkillError(format!("open directory for sync: {error}")))
+    }
+    #[cfg(not(any(unix, windows)))]
     {
         root.open_dir_nofollow(path)
             .map_err(|error| SkillError(format!("open directory for sync: {error}")))?
@@ -119,6 +127,10 @@ pub struct SyncOptions {
     pub skills: Vec<String>,
     /// Optional custom base root.
     pub base_dir: Option<PathBuf>,
+    /// Where rendered artifacts are written, mirroring Go's
+    /// `SyncOptions.RenderDir` (the CLI passes `config.Defaults().RenderDir`).
+    /// `None` keeps the per-user render cache fallback.
+    pub render_dir: Option<PathBuf>,
     /// Copy or managed symlink; empty preserves each marker's mode.
     pub mode: String,
     /// Adopt unmanaged destinations when reinstalling.
@@ -247,6 +259,7 @@ fn reinstall(
                 .then(|| options.project_dir.clone())
                 .flatten(),
             base_dir: options.base_dir.clone(),
+            render_dir: options.render_dir.clone(),
             mode,
             force: options.force,
             events_path: options.events_path.clone(),
