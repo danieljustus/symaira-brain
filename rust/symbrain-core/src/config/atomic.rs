@@ -4,6 +4,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
+#[cfg(windows)]
 use tempfile::Builder as TempFileBuilder;
 #[cfg(not(windows))]
 use tempfile::NamedTempFile;

@@ -139,8 +139,7 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             let result = worker.join();
             shutdown_all(&managed);
             return match result {
-                Ok(Ok(())) => exit::OK,
-                Ok(Err(ServerError::Cancelled)) => exit::OK,
+                Ok(Ok(()) | Err(ServerError::Cancelled)) => exit::OK,
                 Ok(Err(error)) => {
                     let _ = writeln!(stderr, "symbrain mcp: {error}");
                     exit::GENERIC

@@ -26,9 +26,8 @@ fn executable_names(binary: &OsStr, path_ext: Option<&OsStr>, windows: bool) -> 
         return vec![binary.to_os_string()];
     }
     if windows {
-        let extensions = path_ext
-            .map(OsStr::to_string_lossy)
-            .unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into());
+        let extensions =
+            path_ext.map_or_else(|| ".COM;.EXE;.BAT;.CMD".into(), OsStr::to_string_lossy);
         std::iter::once(binary.to_os_string())
             .chain(
                 extensions
