@@ -137,6 +137,16 @@ def setup_malformed_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     _write_text(cfg_dir / "config.toml", "invalid = [ unterminated toml\n")
+def setup_guard_doctor_invalid_config(_root: Path, env: dict[str, str]) -> None:
+    config = Path(env["XDG_CONFIG_HOME"]) / "symguard" / "config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    _write_text(config, "not [valid = toml")
+    env["SYMGUARD_CONFIG"] = str(config)
+def setup_guard_doctor_corrupt_anchor(_root: Path, env: dict[str, str]) -> None:
+    data = Path(env["XDG_DATA_HOME"]) / "symguard"
+    data.mkdir(parents=True, exist_ok=True)
+    _write_text(data / "audit.log", '{"entry_id":"1"}\n')
+    _write_text(data / "audit.log.anchor", "not json")
 def setup_install_default_profile(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "config.toml"
     cfg.parent.mkdir(parents=True, exist_ok=True)
@@ -1445,6 +1455,8 @@ class Case:
     stdin: bytes | None = None
     pty: bool = False
 CASES = (
+    Case("guard_doctor_invalid_config_go_fallback", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config),
+    Case("guard_doctor_corrupt_anchor_go_fallback", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor),
     Case("no_args", ()),
     Case("help", ("help",)),
     Case("help_long", ("--help",)),
