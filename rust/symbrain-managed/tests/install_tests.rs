@@ -94,7 +94,15 @@ impl Drop for TestServer {
     }
 }
 
-fn archive(binary_name: &str, bytes: &[u8]) -> Vec<u8> {
+fn archive(platform: Platform, binary_name: &str, bytes: &[u8]) -> Vec<u8> {
+    if platform.os == "windows" {
+        let mut zip = zip::ZipWriter::new(std::io::Cursor::new(Vec::new()));
+        zip.start_file(binary_name, zip::write::SimpleFileOptions::default())
+            .unwrap();
+        zip.write_all(bytes).unwrap();
+        return zip.finish().unwrap().into_inner();
+    }
+
     let encoder = GzEncoder::new(Vec::new(), Compression::default());
     let mut tar = tar::Builder::new(encoder);
     let mut header = tar::Header::new_gnu();
@@ -105,6 +113,36 @@ fn archive(binary_name: &str, bytes: &[u8]) -> Vec<u8> {
     tar.append(&header, bytes).unwrap();
     let encoder = tar.into_inner().unwrap();
     encoder.finish().unwrap()
+}
+
+fn fixture_binary(platform: Platform, unix_bytes: &'static [u8]) -> &'static [u8] {
+    if platform.os == "windows" {
+        b"MZ native Windows install fixture\r\n"
+    } else {
+        unix_bytes
+    }
+}
+
+#[cfg(windows)]
+fn compile_version_probe(temp: &Path, name: &str, source: &str) -> std::path::PathBuf {
+    let source_path = temp.join(format!("{name}.rs"));
+    let binary_path = temp.join(format!("{name}.exe"));
+    std::fs::write(&source_path, source).expect("write native Windows fixture source");
+    let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
+    let output = std::process::Command::new(rustc)
+        .arg("--edition=2024")
+        .arg(&source_path)
+        .arg("-o")
+        .arg(&binary_path)
+        .output()
+        .expect("run rustc for native Windows version fixture");
+    assert!(
+        output.status.success(),
+        "rustc fixture failed: {}\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    binary_path
 }
 
 fn fixture_core() -> Core {
@@ -139,11 +177,8 @@ fn fixture_routes(core: &Core, platform: Platform, archive: &[u8]) -> BTreeMap<S
 fn installer_downloads_fallback_asset_verifies_and_installs() {
     let core = fixture_core();
     let platform = Platform::current().unwrap();
-    if platform.os == "windows" {
-        return;
-    }
-    let binary = b"#!/bin/sh\necho native\n";
-    let archive = archive(&core.binary_name, binary);
+    let binary = fixture_binary(platform, b"#!/bin/sh\necho native\n");
+    let archive = archive(platform, &core.binary_name, binary);
     let server = TestServer::start(fixture_routes(&core, platform, &archive));
     let temp = tempfile::tempdir().unwrap();
     let mut warnings = Vec::new();
@@ -158,6 +193,17 @@ fn installer_downloads_fallback_asset_verifies_and_installs() {
 
     assert_eq!(std::fs::read(temp.path().join("tool")).unwrap(), binary);
     assert!(warnings.is_empty());
+    let requests = server.requests.lock().unwrap();
+    let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
+    assert!(requests.contains(&format!("{prefix}checksums.txt")));
+    assert!(requests.contains(&format!(
+        "{prefix}{}",
+        core.asset_name(platform.os, platform.arch)
+    )));
+    assert!(requests.contains(&format!(
+        "{prefix}{}",
+        core.asset_name_alt(platform.os, platform.arch)
+    )));
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -176,11 +222,8 @@ fn installer_downloads_fallback_asset_verifies_and_installs() {
 fn installer_prefers_versioned_asset_with_manifest_pin() {
     let mut core = fixture_core();
     let platform = Platform::current().unwrap();
-    if platform.os == "windows" {
-        return;
-    }
-    let binary = b"versioned";
-    let archive = archive(&core.binary_name, binary);
+    let binary = fixture_binary(platform, b"versioned");
+    let archive = archive(platform, &core.binary_name, binary);
     let primary = core.asset_name(platform.os, platform.arch);
     core.sha256
         .insert(primary.clone(), format!("{:x}", Sha256::digest(&archive)));
@@ -192,16 +235,19 @@ fn installer_prefers_versioned_asset_with_manifest_pin() {
     installer.install(&core, platform, &mut Vec::new()).unwrap();
 
     assert_eq!(std::fs::read(temp.path().join("tool")).unwrap(), binary);
+    assert!(server.requests.lock().unwrap().contains(&format!(
+        "/{}/releases/download/{}/{}",
+        core.repo,
+        core.tag(),
+        primary
+    )));
 }
 
 #[test]
 fn pinned_primary_mismatch_does_not_downgrade_to_alternate() {
     let mut core = fixture_core();
     let platform = Platform::current().unwrap();
-    if platform.os == "windows" {
-        return;
-    }
-    let archive = archive(&core.binary_name, b"untrusted replacement");
+    let archive = archive(platform, &core.binary_name, b"untrusted replacement");
     let primary = core.asset_name(platform.os, platform.arch);
     let alternate = core.asset_name_alt(platform.os, platform.arch);
     core.sha256.insert(primary.clone(), "0".repeat(64));
@@ -228,16 +274,16 @@ fn pinned_primary_mismatch_does_not_downgrade_to_alternate() {
 
     assert!(error.to_string().contains("pinned checksum"));
     assert!(!temp.path().join("tool").exists());
+    let requests = server.requests.lock().unwrap();
+    assert!(requests.contains(&format!("{prefix}{primary}")));
+    assert!(!requests.contains(&format!("{prefix}{alternate}")));
 }
 
 #[test]
 fn checksum_failure_leaves_existing_binary_untouched() {
     let mut core = fixture_core();
     let platform = Platform::current().unwrap();
-    if platform.os == "windows" {
-        return;
-    }
-    let archive = archive(&core.binary_name, b"replacement");
+    let archive = archive(platform, &core.binary_name, b"replacement");
     let alternate = core.asset_name_alt(platform.os, platform.arch);
     core.sha256.insert(alternate.clone(), "0".repeat(64));
     let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
@@ -270,6 +316,59 @@ fn installed_version_probes_json_and_normalizes_v_prefix() {
         installed_version(Path::new("/missing"), "tool").unwrap(),
         ""
     );
+}
+
+#[test]
+#[cfg(windows)]
+fn installed_version_probes_native_windows_executable() {
+    let temp = tempfile::tempdir().unwrap();
+    let binary = compile_version_probe(
+        temp.path(),
+        "version-fixture",
+        r##"fn main() {
+            println!(r#"{"version":"1.2.3"}"#);
+        }"##,
+    );
+    assert!(
+        std::process::Command::new(&binary)
+            .args(["version", "--json"])
+            .output()
+            .expect("run native fixture")
+            .status
+            .success()
+    );
+
+    let bin_dir = tempfile::tempdir().unwrap();
+    let installed = bin_dir.path().join("tool");
+    std::fs::copy(binary, installed).expect("install native probe fixture");
+    let version = installed_version(bin_dir.path(), "tool").unwrap();
+    assert_eq!(version, "1.2.3");
+    assert!(versions_match(&version, "v1.2.3"));
+    assert_eq!(
+        installed_version(&temp.path().join("absent"), "tool").unwrap(),
+        ""
+    );
+}
+
+#[test]
+#[cfg(windows)]
+fn installed_version_timeout_kills_native_windows_executable() {
+    use std::time::Duration;
+
+    let temp = tempfile::tempdir().unwrap();
+    let binary = compile_version_probe(
+        temp.path(),
+        "slow-version-fixture",
+        "fn main() { std::thread::sleep(std::time::Duration::from_secs(20)); }",
+    );
+    let bin_dir = tempfile::tempdir().unwrap();
+    let installed = bin_dir.path().join("tool");
+    std::fs::copy(binary, installed).expect("install slow native probe fixture");
+
+    let started = std::time::Instant::now();
+    let error = installed_version(bin_dir.path(), "tool").unwrap_err();
+    assert!(error.to_string().contains("timed out"));
+    assert!(started.elapsed() < Duration::from_secs(5));
 }
 
 #[test]
