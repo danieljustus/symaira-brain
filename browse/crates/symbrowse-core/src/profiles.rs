@@ -32,7 +32,7 @@ pub fn discover(root: &Path) -> io::Result<Vec<Profile>> {
                 return None;
             }
             let name = entry.file_name().to_string_lossy().into_owned();
-            if !is_profile_name(&name) || !entry.path().join("Preferences").is_file() {
+            if !is_profile_name(&name) || entry.path().join("Preferences").metadata().is_err() {
                 return None;
             }
             Some(Profile {
@@ -45,6 +45,38 @@ pub fn discover(root: &Path) -> io::Result<Vec<Profile>> {
         .collect::<Vec<_>>();
     profiles.sort_by(|a, b| (!a.is_default, &a.name).cmp(&(!b.is_default, &b.name)));
     Ok(profiles)
+}
+
+/// Render the Go profile struct's YAML field order and names, which differ
+/// from its JSON tags. Reuse the shared scalar encoder for paths and strings.
+#[must_use]
+pub fn render_yaml(profiles: &[Profile]) -> String {
+    let mut output = String::from("success: true\ndata:\n");
+    if profiles.is_empty() {
+        output.push_str("    profiles: []\n");
+    } else {
+        output.push_str("    profiles:\n");
+        for profile in profiles {
+            for (key, value) in [
+                ("name", serde_json::json!(profile.name)),
+                ("path", serde_json::json!(profile.path)),
+                ("browser", serde_json::json!(profile.browser)),
+                ("isdefault", serde_json::json!(profile.is_default)),
+            ] {
+                output.push_str(if key == "name" {
+                    "        - "
+                } else {
+                    "          "
+                });
+                output.push_str(key);
+                output.push_str(": ");
+                output.push_str(&crate::output::yaml_scalar(&value));
+                output.push('\n');
+            }
+        }
+    }
+    output.push_str("warnings: []\nerror: null\n");
+    output
 }
 
 #[must_use]
@@ -101,10 +133,12 @@ mod tests {
                 fs::write(dir.join("Preferences"), b"{}").unwrap();
             }
         }
+        // The Go oracle accepts any successful stat, including a directory marker.
+        fs::create_dir_all(root.join("Profile 4").join("Preferences")).unwrap();
         let got = discover(&root).unwrap();
         assert_eq!(
             got.iter().map(|p| p.name.as_str()).collect::<Vec<_>>(),
-            ["Default", "Profile 2"]
+            ["Default", "Profile 2", "Profile 4"]
         );
         assert!(!is_profile_name("Profile 11"));
         assert!(discover(&root.join("missing")).unwrap().is_empty());
