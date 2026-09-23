@@ -16,6 +16,7 @@ import argparse
 import hashlib
 import json
 import re
+import stat
 import subprocess
 import tarfile
 import zipfile
@@ -32,9 +33,80 @@ def require(ok: bool, message: str) -> None:
         raise SystemExit(f"FAIL: {message}")
 
 
+def exact_asset_files(asset_dir: Path, expected_names: set[str]) -> dict[str, Path]:
+    entries = list(asset_dir.iterdir())
+    ensure_exact_asset_names([path.name for path in entries], expected_names)
+    for path in entries:
+        require(path.is_file() and not path.is_symlink(), f"release asset is not a regular file: {path.name}")
+    return {path.name: path for path in entries}
+
+
+def ensure_exact_asset_names(names: list[str], expected_names: set[str]) -> None:
+    names = set(names)
+    require(names == expected_names, f"asset directory mismatch: missing={sorted(expected_names - names)} extra={sorted(names - expected_names)}")
+
+
+def ruby_assignments(source: str) -> list[tuple[tuple[str, ...], str, str]]:
+    """Read active url/sha256/version calls with their Ruby block scopes."""
+    stack: list[str] = []
+    found: list[tuple[tuple[str, ...], str, str]] = []
+    opens = re.compile(r"^(?:(?:class|module|def|if|unless|case|begin|while|until|for)\b.*|.*\bdo(?:\s*\|[^|]*\|)?\s*(?:#.*)?)$")
+    assignment = re.compile(r'^(url|sha256|version)\s+"([^"]*)"(?:\s+#.*)?$')
+    for raw in source.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        close = re.fullmatch(r"end(?:\s+#.*)?", line)
+        if close:
+            require(bool(stack), "unbalanced end in Homebrew Ruby source")
+            stack.pop()
+            continue
+        match = assignment.fullmatch(line)
+        if match:
+            found.append((tuple(stack), match.group(1), match.group(2)))
+        if opens.fullmatch(line):
+            stack.append(line)
+    require(not stack, "unclosed block in Homebrew Ruby source")
+    return found
+
+
+def ruby_url_checksum_pairs(
+    source: str, allowed_scopes: set[tuple[str, ...]]
+) -> list[tuple[tuple[str, ...], str, str]]:
+    calls = ruby_assignments(source)
+    pairs = []
+    for index, (scope, name, value) in enumerate(calls[:-1]):
+        if name != "url" or scope not in allowed_scopes:
+            continue
+        next_scope, next_name, digest = calls[index + 1]
+        require(next_scope == scope and next_name == "sha256", f"active Homebrew URL has no adjacent checksum: {value}")
+        pairs.append((scope, value, digest))
+    return pairs
+
+
+def archive_file_names(asset_dir: Path, name: str) -> list[str]:
+    path = asset_dir / name
+    if name.endswith(".tar.gz"):
+        with tarfile.open(path, "r:gz") as archive:
+            members = archive.getmembers()
+            require(all(item.isfile() for item in members), f"unexpected non-file entry in {name}")
+            return [item.name for item in members]
+    with zipfile.ZipFile(path) as archive:
+        return zip_file_names(archive, name)
+
+
+def zip_file_names(archive: zipfile.ZipFile, name: str) -> list[str]:
+    members = archive.infolist()
+    for item in members:
+        mode = item.external_attr >> 16
+        file_type = stat.S_IFMT(mode)
+        require(not item.is_dir() and file_type in (0, stat.S_IFREG), f"non-regular ZIP entry in {name}: {item.filename}")
+    return [item.filename for item in members]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--assets", required=True, type=Path, help="directory containing downloaded release assets")
+    parser.add_argument("--assets", required=True, type=Path, help="directory containing only the downloaded release assets")
     parser.add_argument("--formula", required=True, type=Path, help="read-only Homebrew formula file")
     parser.add_argument("--cask", required=True, type=Path, help="read-only Homebrew cask file")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
@@ -44,9 +116,10 @@ def main() -> None:
 
     manifest = json.loads(args.manifest.read_text())
     assets = {item["name"]: item for item in manifest["assets"]}
-    files = {path.name: path for path in args.assets.iterdir() if path.is_file()}
+    require(len(assets) == len(manifest["assets"]), "manifest contains duplicate asset names")
     require(len(assets) == manifest["asset_count"], "manifest asset_count is inconsistent")
     require(manifest["tag"] == f"v{manifest['version']}", "manifest tag/version mismatch")
+    files = exact_asset_files(args.assets, set(assets))
     for name, asset in assets.items():
         path = files.get(name)
         require(path is not None, f"missing release asset {name}")
@@ -91,14 +164,7 @@ def main() -> None:
 
     archive_names = {name for name in assets if name.endswith((".tar.gz", ".zip"))}
     for name in sorted(archive_names):
-        if name.endswith(".tar.gz"):
-            with tarfile.open(args.assets / name, "r:gz") as archive:
-                members = archive.getmembers()
-                names = [item.name for item in members]
-                require(all(item.isfile() for item in members), f"unexpected non-file entry in {name}")
-        else:
-            with zipfile.ZipFile(args.assets / name) as archive:
-                names = archive.namelist()
+        names = archive_file_names(args.assets, name)
         binary = "symbrain.exe" if "_windows_" in name else "symbrain"
         require(len(names) == len(set(names)), f"duplicate archive entries in {name}")
         require(set(names) == {"AGENTS.md", "LICENSE", "README.md", binary}, f"unexpected archive contents in {name}: {names}")
@@ -120,24 +186,29 @@ def main() -> None:
     version = manifest["version"]
     repo_url = f"https://{manifest['repository']}/releases/download/v{version}/"
     formula = args.formula.read_text()
-    formula_links = re.findall(
-        r'^\s*url "(' + re.escape(repo_url) + r'([^"]+))"\s*\n\s*sha256 "([0-9a-f]{64})"',
-        formula,
-        re.MULTILINE,
-    )
+    formula_scopes = {
+        ("class Symbrain < Formula", "on_macos do", "if Hardware::CPU.intel?"),
+        ("class Symbrain < Formula", "on_macos do", "if Hardware::CPU.arm?"),
+        ("class Symbrain < Formula", "on_linux do", "if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?"),
+        ("class Symbrain < Formula", "on_linux do", "if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?"),
+    }
     expected_formula = {
         name: assets[name]["digest"].removeprefix("sha256:")
         for name in archive_names if "_windows_" not in name
     }
-    require(len(formula_links) == len(expected_formula), "Homebrew formula has duplicate or missing release links")
-    require({name: digest for _, name, digest in formula_links} == expected_formula, "Homebrew formula release URLs/checksums differ from captured release")
+    formula_links = ruby_url_checksum_pairs(formula, formula_scopes)
+    formula_by_name = {url.removeprefix(repo_url): digest for _, url, digest in formula_links if url.startswith(repo_url)}
+    require(len(formula_links) == len(expected_formula) and len(formula_by_name) == len(formula_links), "Homebrew formula has duplicate or missing active release links")
+    require(formula_by_name == expected_formula, "Homebrew formula release URLs/checksums differ from captured release")
     cask = args.cask.read_text()
     dmg_name = f"Symaira-Brain-{version}-macos.dmg"
     dmg_digest = assets[dmg_name]["digest"].removeprefix("sha256:")
-    require(re.search(rf'^\s*version "{re.escape(version)}"\s*$', cask, re.MULTILINE) is not None, "Homebrew cask version mismatch")
-    require(re.search(rf'^\s*sha256 "{dmg_digest}"\s*$', cask, re.MULTILINE) is not None, "Homebrew cask DMG checksum mismatch")
+    cask_scope = ("cask \"symbrain\" do",)
+    cask_values = [(name, value) for scope, name, value in ruby_assignments(cask) if scope == cask_scope]
+    require(cask_values.count(("version", version)) == 1, "Homebrew cask version mismatch")
+    require(cask_values.count(("sha256", dmg_digest)) == 1, "Homebrew cask DMG checksum mismatch")
     cask_url = f"https://{manifest['repository']}/releases/download/v#{{version}}/Symaira-Brain-#{{version}}-macos.dmg"
-    require(cask_url in cask, "Homebrew cask release URL mismatch")
+    require(cask_values.count(("url", cask_url)) == 1, "Homebrew cask release URL mismatch")
     print(f"ok: Homebrew formula {len(expected_formula)} release links and cask DMG link/checksum")
 
 
