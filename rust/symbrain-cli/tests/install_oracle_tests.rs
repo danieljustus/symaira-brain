@@ -53,6 +53,8 @@ fn fixture() -> Oracle {
         "install_oracle_darwin.json"
     } else if cfg!(target_os = "linux") {
         "install_oracle_linux.json"
+    } else if cfg!(target_os = "windows") {
+        "install_oracle_windows.json"
     } else {
         panic!("install oracle has no fixture for this target OS")
     };

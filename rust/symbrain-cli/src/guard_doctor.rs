@@ -658,7 +658,14 @@ mod tests {
     fn native_command() -> String {
         #[cfg(windows)]
         {
-            r"C:\Windows\System32\where.exe".to_owned()
+            let system_root = env::var_os("SystemRoot")
+                .or_else(|| env::var_os("windir"))
+                .unwrap_or_else(|| r"C:\Windows".into());
+            PathBuf::from(system_root)
+                .join("System32")
+                .join("where.exe")
+                .to_string_lossy()
+                .into_owned()
         }
         #[cfg(not(windows))]
         {
