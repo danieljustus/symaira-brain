@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/danieljustus/symaira-brain/guard/cmd/symguard/doctor"
@@ -120,7 +121,7 @@ func buildSuite() doctorSuite {
 	add("empty_machine", "no config file, no audit log, no discovered servers", func(root string) error { return nil })
 
 	add("healthy_config", "valid config with 1 rule, 1 allowlist entry", func(root string) error {
-		config := `[defaults]
+		config := fmt.Sprintf(`[defaults]
 shell = "allow"
 read_secret = "deny"
 
@@ -131,8 +132,8 @@ decision = "allow"
 
 [spawn]
 [[spawn.allowlist]]
-path = "/usr/bin/true"
-`
+path = %q
+`, oracleCommand())
 		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte(config), 0o644)
 	})
 
@@ -171,6 +172,20 @@ path = "/usr/bin/true"
 		Cases:  cases,
 		Source: "guard/cmd/symguard/doctor/command.go + checks.go",
 	}
+}
+
+func oracleCommand() string {
+	if runtime.GOOS != "windows" {
+		return "/usr/bin/true"
+	}
+	systemRoot := os.Getenv("SystemRoot")
+	if systemRoot == "" {
+		systemRoot = os.Getenv("windir")
+	}
+	if systemRoot == "" {
+		systemRoot = `C:\Windows`
+	}
+	return filepath.Join(systemRoot, "System32", "where.exe")
 }
 
 func mustJSON(value any) []byte {
