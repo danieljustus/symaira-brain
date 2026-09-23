@@ -221,6 +221,13 @@ fn normalize_accepted_differences(s: &str) -> String {
     // so there is exactly one normalization for it (see the module's docs).
     out = doctor_header::normalize(&out);
 
+    #[cfg(not(windows))]
+    {
+        let path =
+            regex::Regex::new(r"Library/Application Support/Claude|\.config/[Cc]laude").unwrap();
+        out = path.replace_all(&out, "<claude-desktop-dir>").to_string();
+    }
+
     out
 }
 

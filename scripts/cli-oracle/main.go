@@ -438,8 +438,9 @@ func runCase(binary string, args []string, description string) TestCase {
 // the same directory both as /var/... and as /private/var/..., so both forms
 // have to be rewritten or the fixture drifts between runs.
 var (
-	toolchainLine = regexp.MustCompile(`(?m)^(\s*go\s+)go\d+\.\d+(?:\.\d+)?$`)
-	platformLine  = regexp.MustCompile(`(?m)^(\s*os/arch\s+)\S+$`)
+	toolchainLine     = regexp.MustCompile(`(?m)^(\s*go\s+)go\d+\.\d+(?:\.\d+)?$`)
+	platformLine      = regexp.MustCompile(`(?m)^(\s*os/arch\s+)\S+$`)
+	claudeDesktopPath = regexp.MustCompile(`Library/Application Support/Claude|\.config/[Cc]laude`)
 	// `guard doctor`'s own header block uses a different shape than `version`'s
 	// ("  Go:        go1.26.7" / "  OS/Arch:   darwin/arm64", capitalized
 	// labels with colons) that toolchainLine/platformLine above don't match,
@@ -470,6 +471,9 @@ func normalizeStdout(s, root string) string {
 	s = platformLine.ReplaceAllString(s, "${1}<os/arch>")
 	s = doctorToolchainLine.ReplaceAllString(s, "${1}<go>")
 	s = doctorOsArchLine.ReplaceAllString(s, "${1}<os/arch>")
+	if runtime.GOOS != "windows" {
+		return claudeDesktopPath.ReplaceAllString(s, "<claude-desktop-dir>")
+	}
 	return s
 }
 
