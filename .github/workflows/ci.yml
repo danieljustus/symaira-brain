@@ -442,10 +442,71 @@ jobs:
           set -euo pipefail
           go run ./scripts/secret-oracle -check
           cargo test -p symbrain-usage --test secret_oracle_tests --locked
+      # Named Go fixture gates for contract rows without a native Windows
+      # oracle invocation elsewhere in this job. The workspace test below
+      # executes the matching Rust package/test targets on the same runner.
+      - name: Check portable CLI, config, policy, and data oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          set -euo pipefail
+          # CLI-006; CFG-001 is generated per Windows because its path cases
+          # intentionally model the host's filepath.IsAbs behavior.
+          go run ./scripts/cli-oracle -check
+          go run ./scripts/xdg-oracle -output "$RUNNER_TEMP/xdg-oracle-windows.json"
+          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$RUNNER_TEMP/xdg-oracle-windows.json" >> "$GITHUB_ENV"
+          SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json" cargo test -p symbrain-core --test xdg_paths_tests --locked
+          # PRF-001, POL-001/002; CAT-001; AUD-001; PAT-001; ACT-001; DB-001/002.
+          go run ./scripts/policy-oracle -check
+          go run ./scripts/catalog-oracle -check
+          go run ./scripts/audit-oracle -check
+          go run ./scripts/patterns-activity-oracle -check
+          go run ./scripts/db-memory-oracle -check
+      - name: Check portable broker, managed, and harness oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # BRK-001/002, MAN-001, ARC-001, HAR-001..006.
+          go run ./scripts/broker-oracle -check
+          go test ./internal/broker -count=1
+          go test ./internal/managed -count=1
+          go test ./internal/managed -run TestRustManagedOracleFixture -count=1
+          go test ./internal/harness -count=1
+      - name: Check portable skills, instructions, adapters, and guard oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # SKL-001; INS-001; ADR-005; SEC-002..005.
+          go run ./scripts/skills-oracle -check
+          go run ./scripts/instructions-oracle -check
+          go run ./scripts/adapters-oracle -check
+          go run ./guard/scripts/guard-oracle -check
+          go run ./guard/scripts/guard-doctor-oracle -check
+      - name: Differential-test portable native Windows CLI cases
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          set -euo pipefail
+          go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
       - name: Capture native Windows install oracle
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
-        run: go run ./scripts/install-oracle -output "$RUNNER_TEMP/install_oracle_windows.json"
+        run: |
+          set -euo pipefail
+          go run ./scripts/install-oracle -check
+          go run ./scripts/install-oracle -output "$RUNNER_TEMP/install_oracle_windows.json"
+      - name: Report release-only rows awaiting signed artifacts
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: echo "::notice::DIST-001 and DIST-002 are release-time contract rows; no current-release artifacts exist for pre-release native Windows Go/Rust differential evidence."
       - name: Test Rust workspace on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
@@ -457,6 +518,7 @@ jobs:
           name: init-${{ matrix.os }}-${{ github.sha }}
           path: |
             target/init-oracle/report.json
+            ${{ runner.temp }}/xdg-oracle-windows.json
             ${{ runner.temp }}/install_oracle_windows.json
             target/init-oracle/go-bin/*-stderr.log
             target/init-oracle/go-bin/*-stdout.log
