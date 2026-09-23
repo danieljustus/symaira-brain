@@ -340,12 +340,19 @@ fn preserves_non_utf8_bytes_like_go_strings() {
 
 #[test]
 fn source_paths_follow_xdg_and_project_layout() {
-    let home = Path::new("/oracle-home");
+    #[cfg(windows)]
+    let home = std::env::temp_dir()
+        .ancestors()
+        .last()
+        .expect("temp drive root")
+        .join("oracle-home");
+    #[cfg(not(windows))]
+    let home = PathBuf::from("/oracle-home");
     let project = Path::new("/oracle-project");
-    let source = Source::with_environment(Some(project), None, Some(home));
+    let source = Source::with_environment(Some(project), None, Some(&home));
     assert_eq!(
         source.global_path,
-        PathBuf::from("/oracle-home/.config/symbrain/instructions.md")
+        home.join(".config/symbrain/instructions.md")
     );
     assert_eq!(
         source.project_path,
@@ -356,7 +363,7 @@ fn source_paths_follow_xdg_and_project_layout() {
     #[cfg(not(windows))]
     let xdg = Path::new("/custom/config");
     assert_eq!(
-        resolve_global_path(Some(xdg), Some(home)),
+        resolve_global_path(Some(xdg), Some(&home)),
         xdg.join("symbrain/instructions.md")
     );
     let suite = oracle();
@@ -372,7 +379,7 @@ fn source_paths_follow_xdg_and_project_layout() {
     assert_eq!(item.xdg_config_home, "/oracle-config");
     #[cfg(not(windows))]
     assert_eq!(
-        resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(home)),
+        resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(&home)),
         PathBuf::from(&item.expected_xdg_global_path)
     );
 }
