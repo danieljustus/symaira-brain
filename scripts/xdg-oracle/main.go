@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/xdg"
@@ -65,29 +66,36 @@ func main() {
 func buildCases() []TestCase {
 	cases := []TestCase{}
 
+	// Use platform-native absolute paths so the `abs` cases exercise the
+	// current filepath implementation instead of Unix slash paths on Windows.
+	homeAbs := absoluteTestPath("home", "user")
+	configAbs := absoluteTestPath("abs", "config")
+	dataAbs := absoluteTestPath("abs", "data")
+	cacheAbs := absoluteTestPath("abs", "cache")
+
 	// HOME combinations
 	homes := []struct {
 		name string
 		val  string
-	}{{"unset", ""}, {"abs", "/home/user"}, {"rel", "relative/home"}, {"empty", ""}}
+	}{{"unset", ""}, {"abs", homeAbs}, {"rel", "relative/home"}, {"empty", ""}}
 
 	// XDG_CONFIG_HOME
 	xdgConfigs := []struct {
 		name string
 		val  string
-	}{{"unset", ""}, {"abs", "/abs/config"}, {"rel", "relative/config"}, {"empty", ""}}
+	}{{"unset", ""}, {"abs", configAbs}, {"rel", "relative/config"}, {"empty", ""}}
 
 	// XDG_DATA_HOME
 	xdgData := []struct {
 		name string
 		val  string
-	}{{"unset", ""}, {"abs", "/abs/data"}, {"rel", "relative/data"}, {"empty", ""}}
+	}{{"unset", ""}, {"abs", dataAbs}, {"rel", "relative/data"}, {"empty", ""}}
 
 	// XDG_CACHE_HOME
 	xdgcaches := []struct {
 		name string
 		val  string
-	}{{"unset", ""}, {"abs", "/abs/cache"}, {"rel", "relative/cache"}, {"empty", ""}}
+	}{{"unset", ""}, {"abs", cacheAbs}, {"rel", "relative/cache"}, {"empty", ""}}
 
 	for _, home := range homes {
 		for _, xdgConfig := range xdgConfigs {
@@ -128,11 +136,20 @@ func buildCases() []TestCase {
 	return cases
 }
 
+func absoluteTestPath(parts ...string) string {
+	root := string(filepath.Separator)
+	if runtime.GOOS == "windows" {
+		root = `C:\`
+	}
+	return filepath.Join(append([]string{root}, parts...)...)
+}
+
 func evaluateGo(env map[string]string) map[string]string {
 	origHome := os.Getenv("HOME")
 	origXdgConfig := os.Getenv("XDG_CONFIG_HOME")
 	origXdgData := os.Getenv("XDG_DATA_HOME")
 	origXdgCache := os.Getenv("XDG_CACHE_HOME")
+	origUserProfile, hadUserProfile := os.LookupEnv("USERPROFILE")
 
 	// Set environment
 	if v, ok := env["HOME"]; ok && v != "" {
@@ -154,6 +171,13 @@ func evaluateGo(env map[string]string) map[string]string {
 		os.Setenv("XDG_CACHE_HOME", v)
 	} else {
 		os.Unsetenv("XDG_CACHE_HOME")
+	}
+	if runtime.GOOS == "windows" {
+		if env["HOME"] != "" {
+			os.Setenv("USERPROFILE", env["HOME"])
+		} else {
+			os.Unsetenv("USERPROFILE")
+		}
 	}
 
 	// Small delay for env to take effect
@@ -198,6 +222,13 @@ func evaluateGo(env map[string]string) map[string]string {
 	os.Setenv("XDG_CONFIG_HOME", origXdgConfig)
 	os.Setenv("XDG_DATA_HOME", origXdgData)
 	os.Setenv("XDG_CACHE_HOME", origXdgCache)
+	if runtime.GOOS == "windows" {
+		if hadUserProfile {
+			os.Setenv("USERPROFILE", origUserProfile)
+		} else {
+			os.Unsetenv("USERPROFILE")
+		}
+	}
 
 	return result
 }
