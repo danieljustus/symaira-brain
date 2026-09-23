@@ -27,6 +27,8 @@ from external_env import ensure_external_environment
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
+WINDOWS_STUB_TEMP: tempfile.TemporaryDirectory[str] | None = None
+WINDOWS_STUB_BINARY: Path | None = None
 SAMPLE_CONFIG_TOML = """# Symaira Brain Global Configuration
 default_profile = "personal"
 [audit]
@@ -313,11 +315,15 @@ def setup_doctor_empty(root: Path, env: dict[str, str]) -> None:
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
-    _write_fake_vault(
-        binary_dir / "symvault",
-        "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\nprintf 'not found\\n' >&2",
-        exit_code=1,
-    )
+    if os.name == "nt":
+        _install_windows_stub(binary_dir / "symvault.exe")
+        env["SYMBRAIN_TEST_FAKE_SYMVAULT_MODE"] = "doctor_failed_version"
+    else:
+        _write_fake_vault(
+            binary_dir / "symvault",
+            "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\nprintf 'not found\\n' >&2",
+            exit_code=1,
+        )
     env["PATH"] = str(binary_dir)
 def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
     audit_dir = Path(env["XDG_DATA_HOME"]) / "symbrain" / "audit"
@@ -453,26 +459,179 @@ def setup_correct_managed_binaries(root: Path, env: dict[str, str]) -> None:
     setup_release_fixture(root, env)
     bin_dir = Path(env["HOME"]) / ".symaira" / "bin"
     bin_dir.mkdir(parents=True)
-    versions = {
-        "symvault": "0.21.1",
-        "symcockpit": "0.5.3",
-        "symdesk": "0.11.1",
-    }
-    for name, version in versions.items():
-        script = f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n"
+    for name, core in _managed_cores().items():
+        if core.get("optional", False):
+            continue
+        version = _version_without_tag(str(core["version"]))
         path = bin_dir / name
-        _write_text(path, script)
-        path.chmod(0o755)
+        if os.name == "nt":
+            _install_windows_stub(path)
+        else:
+            script = f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n"
+            _write_text(path, script)
+            path.chmod(0o755)
 def setup_mismatched_managed_binaries(root: Path, env: dict[str, str]) -> None:
     setup_correct_managed_binaries(root, env)
     path = Path(env["HOME"]) / ".symaira" / "bin" / "symdesk"
-    _write_text(path, "#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
-    path.chmod(0o755)
+    if os.name == "nt":
+        env["SYMBRAIN_TEST_MANAGED_SYMDESK_VERSION"] = "0.0.0"
+    else:
+        _write_text(path, "#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
+        path.chmod(0o755)
 def setup_failing_cosign(root: Path, env: dict[str, str]) -> None:
     setup_release_fixture(root, env)
     cosign = Path(env["PATH"]) / "cosign"
-    _write_text(cosign, "#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
-    cosign.chmod(0o755)
+    if os.name == "nt":
+        _install_windows_stub(cosign.with_suffix(".exe"))
+    else:
+        _write_text(cosign, "#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
+        cosign.chmod(0o755)
+
+
+def _install_windows_stub(path: Path) -> None:
+    if WINDOWS_STUB_BINARY is None:
+        raise RuntimeError("native Windows fixture executable was not built")
+    shutil.copyfile(WINDOWS_STUB_BINARY, path)
+
+
+def _managed_cores() -> dict[str, dict[str, object]]:
+    manifest_path = Path(__file__).resolve().parent.parent / "internal/managed/manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    cores = manifest.get("cores")
+    if not isinstance(cores, dict):
+        raise RuntimeError(f"managed manifest has no core map: {manifest_path}")
+    return cores
+
+
+def _version_without_tag(version: str) -> str:
+    return version.removeprefix("v")
+
+
+def _archive_name(core: dict[str, object], goos: str, goarch: str, *, alternate: bool = False) -> str:
+    binary = str(core["binary_name"])
+    arch = str(core.get("asset_arch") or goarch)
+    extension = "zip" if goos == "windows" else "tar.gz"
+    if alternate:
+        return f"{binary}_{goos}_{arch}.{extension}"
+    version = _version_without_tag(str(core["version"]))
+    return f"{core['asset_prefix']}_{version}_{goos}_{arch}.{extension}"
+
+
+def _archive_binary_path(core: dict[str, object], goos: str, goarch: str) -> str:
+    binary = str(core["binary_name"])
+    prefix = str(core["asset_prefix"])
+    if prefix.startswith("symaira-vault"):
+        arch = str(core.get("asset_arch") or goarch)
+        version = _version_without_tag(str(core["version"]))
+        return f"{prefix}_{version}_{goos}_{arch}/{binary}"
+    return binary
+
+
+def _assert_current_managed_install(root: Path, env: dict[str, str], runtime: str) -> None:
+    target_os = "darwin" if sys.platform == "darwin" else "windows" if os.name == "nt" else "linux"
+    bin_dir = Path(env["HOME"]) / ".symaira" / "bin"
+    for core in _managed_cores().values():
+        if core.get("optional", False):
+            continue
+        platforms = core.get("platforms")
+        if isinstance(platforms, list) and platforms and target_os not in platforms:
+            continue
+        binary_name = str(core["binary_name"])
+        binary = bin_dir / binary_name
+        if not binary.is_file():
+            raise AssertionError(
+                f"{runtime} setup reported success but did not install {binary_name} under {root}"
+            )
+        try:
+            result = run(binary, ("version", "--json"), env)
+        except OSError as err:
+            raise AssertionError(
+                f"{runtime} installed {binary_name} but could not execute its version probe: {err}"
+            ) from err
+        expected = (json.dumps(
+            {"version": _version_without_tag(str(core["version"]))},
+            separators=(",", ":"),
+        ) + "\n").encode()
+        if result.returncode != 0 or result.stdout != expected or result.stderr:
+            raise AssertionError(
+                f"{runtime} installed {binary_name} probe mismatch: "
+                f"exit={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}, "
+                f"want stdout={expected!r}"
+            )
+
+
+def _build_windows_stub() -> None:
+    global WINDOWS_STUB_TEMP, WINDOWS_STUB_BINARY
+    if os.name != "nt":
+        return
+    go = shutil.which("go")
+    if go is None:
+        raise RuntimeError("native Windows parity fixtures require the Go toolchain")
+    WINDOWS_STUB_TEMP = tempfile.TemporaryDirectory(prefix="symbrain-parity-stubs-")
+    root = Path(WINDOWS_STUB_TEMP.name)
+    source = root / "main.go"
+    WINDOWS_STUB_BINARY = root / "symbrain-parity-stub.exe"
+    version_entries = ",\n".join(
+        f"\t\t{json.dumps(str(core['binary_name']))}: "
+        f"{json.dumps(_version_without_tag(str(core['version'])))},"
+        for core in _managed_cores().values()
+    )
+    go_source = r'''package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func main() {
+	name := strings.TrimSuffix(strings.ToLower(filepath.Base(os.Args[0])), ".exe")
+	if name == "cosign" {
+		fmt.Println("cosign stdout")
+		fmt.Fprintln(os.Stderr, "cosign stderr")
+		os.Exit(9)
+	}
+	if name == "symvault" && os.Getenv("SYMBRAIN_TEST_FAKE_SYMVAULT_MODE") == "doctor_failed_version" {
+		if len(os.Args) > 1 && os.Args[1] == "version" {
+			fmt.Print(`{"version":"9.9.9"}`)
+			os.Exit(42)
+		}
+		fmt.Fprintln(os.Stderr, "not found")
+		os.Exit(1)
+	}
+	version := map[string]string{
+__VERSION_ENTRIES__
+	}[name]
+	if name == "symdesk" {
+		if override := os.Getenv("SYMBRAIN_TEST_MANAGED_SYMDESK_VERSION"); override != "" {
+			version = override
+		}
+	}
+	if version == "" || len(os.Args) < 2 || os.Args[1] != "version" {
+		fmt.Fprintln(os.Stderr, "unsupported fixture invocation")
+		os.Exit(2)
+	}
+	fmt.Printf("{\"version\":%q}\n", version)
+}
+'''.replace("__VERSION_ENTRIES__", version_entries)
+    _write_text(
+        source,
+        go_source,
+    )
+    result = subprocess.run(
+        [go, "build", "-trimpath", "-o", str(WINDOWS_STUB_BINARY), str(source)],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=root,
+        env={**os.environ, "CGO_ENABLED": "0", "GO111MODULE": "off"},
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "build native Windows parity fixture executable failed: "
+            + result.stderr.decode("utf-8", errors="replace")
+        )
 class ReleaseFixtureServer:
     def __init__(self) -> None:
         self.routes = self._build_routes()
@@ -507,30 +666,45 @@ class ReleaseFixtureServer:
         target_os = "darwin" if sys.platform == "darwin" else "windows" if os.name == "nt" else "linux"
         machine = platform.machine().lower()
         target_arch = "arm64" if machine in {"arm64", "aarch64"} else "amd64"
-        cores = (
-            ("danieljustus/symaira-vault", "v0.21.1", "symvault", target_arch),
-            ("danieljustus/symaira-desktop", "v0.11.1", "symdesk", target_arch),
-        )
-        if target_os == "darwin":
-            cores += (("danieljustus/symaira-cockpit", "v0.5.3", "symcockpit", "universal"),)
         routes: dict[str, bytes] = {}
-        extension = "zip" if target_os == "windows" else "tar.gz"
-        for repo, tag, binary, arch in cores:
-            asset = f"{binary}_{target_os}_{arch}.{extension}"
-            version = tag.removeprefix("v")
-            executable = (
-                f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n".encode()
-            )
+        for core in _managed_cores().values():
+            if core.get("optional", False):
+                continue
+            platforms = core.get("platforms")
+            if isinstance(platforms, list) and platforms and target_os not in platforms:
+                continue
+
+            version = _version_without_tag(str(core["version"]))
+            tag = f"v{version}"
+            repo = str(core["repo"])
+            binary = str(core["binary_name"])
+            extension = "zip" if target_os == "windows" else "tar.gz"
+            asset_name = _archive_name(core, target_os, target_arch)
+            alternate_name = _archive_name(core, target_os, target_arch, alternate=True)
+            # Manifest-pinned primary archives cannot be synthetic: serving a
+            # fixture under that name would necessarily violate its immutable
+            # SHA-256 pin. Exercise the real fallback and checksum-file path.
+            pinned_assets = core.get("sha256", {})
+            asset = alternate_name if asset_name in pinned_assets else asset_name
+            archive_binary = _archive_binary_path(core, target_os, target_arch)
+            if target_os == "windows":
+                if WINDOWS_STUB_BINARY is None:
+                    raise RuntimeError("native Windows release fixtures require the Go stub executable")
+                executable = WINDOWS_STUB_BINARY.read_bytes()
+            else:
+                executable = (
+                    f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n".encode()
+                )
             if extension == "zip":
                 output = io.BytesIO()
                 with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
-                    archive.writestr(binary, executable)
+                    archive.writestr(archive_binary, executable)
                 archive_bytes = output.getvalue()
             else:
                 output = io.BytesIO()
                 with gzip.GzipFile(fileobj=output, mode="wb", mtime=0) as compressed:
                     with tarfile.open(fileobj=compressed, mode="w") as archive:
-                        info = tarfile.TarInfo(binary)
+                        info = tarfile.TarInfo(archive_binary)
                         info.mode = 0o755
                         info.size = len(executable)
                         info.mtime = 0
@@ -539,8 +713,12 @@ class ReleaseFixtureServer:
             prefix = f"/{repo}/releases/download/{tag}/"
             routes[prefix + asset] = archive_bytes
             digest = hashlib.sha256(archive_bytes).hexdigest()
-            routes[prefix + "checksums.txt"] = f"{digest}  {asset}\n".encode()
-            if binary == "symvault":
+            if binary == "symcockpit":
+                checksum_asset = "checksums.txt"
+            else:
+                checksum_asset = f"{core['asset_prefix']}_{version}_checksums.txt"
+            routes[prefix + checksum_asset] = f"{digest}  {asset}\n".encode()
+            if core.get("has_cosign", False):
                 routes[prefix + asset + ".sig"] = b"fixture-signature"
                 routes[prefix + asset + ".pem"] = b"fixture-certificate"
         return routes
@@ -1249,7 +1427,6 @@ class Case:
     require_last_used: bool = False
     mutating: bool = False
     posix_only: bool = False
-    windows_skip_reason: str | None = None
     stdin: bytes | None = None
     pty: bool = False
 CASES = (
@@ -1511,7 +1688,6 @@ CASES = (
         "doctor_failed_version_json",
         ("doctor", "--json"),
         setup=setup_doctor_failed_version,
-        windows_skip_reason="fixture uses an extensionless POSIX shell executable",
     ),
     # Phase 4 Task 4.3: native symvault passthrough with opaque argv and lookup order
     Case(
@@ -1531,7 +1707,6 @@ CASES = (
         "vault_missing_binary",
         ("vault",),
         setup=setup_release_fixture,
-        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case("vault_configured_binary_missing", ("vault",), setup=setup_vault_config_missing, posix_only=True),
     Case("vault_empty_config_uses_path", ("vault",), setup=setup_vault_empty_config, posix_only=True),
@@ -1543,56 +1718,48 @@ CASES = (
         ("setup", "-"),
         setup=setup_release_fixture,
         mutating=True,
-        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_install_json",
         ("setup", "--allow-unsigned", "--json"),
         setup=setup_release_fixture,
         mutating=True,
-        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_install_human",
         ("setup", "--allow-unsigned"),
         setup=setup_release_fixture,
         mutating=True,
-        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_install_cosign_fail_json",
         ("setup", "--json"),
         setup=setup_release_fixture,
         mutating=True,
-        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_cosign_command_fail_json",
         ("setup", "--json"),
         setup=setup_failing_cosign,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_correct_json",
         ("setup", "--fix", "--json"),
         setup=setup_correct_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_correct_human",
         ("setup", "--fix"),
         setup=setup_correct_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_mismatched_json",
         ("setup", "--fix", "--allow-unsigned", "--json"),
         setup=setup_mismatched_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     # Phase 6.3A: native install/uninstall parity, including filesystem side effects.
     Case(
@@ -2672,14 +2839,13 @@ def main() -> int:
         return 2
     go_binary = Path(sys.argv[1]).resolve()
     rust_binary = Path(sys.argv[2]).resolve()
+    _build_windows_stub()
     fixture_server = ReleaseFixtureServer()
     RELEASE_BASE_URL = fixture_server.__enter__()
     failures: list[str] = []
     def windows_skip_reason(case: Case) -> str | None:
         if os.name != "nt":
             return None
-        if case.windows_skip_reason:
-            return case.windows_skip_reason
         if case.posix_only:
             return "POSIX-only filesystem/process behavior"
         if any(isinstance(arg, bytes) for arg in case.argv):
@@ -2813,6 +2979,25 @@ def main() -> int:
                     pinned = format_access_time_ns(SKILLS_LIBRARY_STAMP * 1_000_000_000)
                     go_stdout = normalize_last_used(go_stdout, pinned)
                     rust_stdout = normalize_last_used(rust_stdout, pinned)
+                install_verified = True
+                if case.name in {"setup_install_json", "setup_install_human"}:
+                    # Go and Rust could otherwise agree on a shared download
+                    # failure while neither installs an executable.
+                    for runtime, command_result, root, env in (
+                        ("Go", go_result, go_root, go_env),
+                        ("Rust", rust_result, rust_root, rust_env),
+                    ):
+                        if command_result.returncode != 0:
+                            failures.append(
+                                f"{case.name}: {runtime} setup exited "
+                                f"{command_result.returncode}, so fixture installation cannot pass"
+                            )
+                            install_verified = False
+                        try:
+                            _assert_current_managed_install(root, env, runtime)
+                        except AssertionError as err:
+                            failures.append(f"{case.name}: {err}")
+                            install_verified = False
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:
@@ -2826,7 +3011,7 @@ def main() -> int:
                         failures.append(
                             f"{case.name} filesystem mismatch: Go={go_manifest!r}, Rust={rust_manifest!r}"
                         )
-                    else:
+                    elif install_verified:
                         print(f"PASS {case.name} (stdout, stderr, exit code, fs manifest/modes)")
                 else:
                     print(f"PASS {case.name}")
