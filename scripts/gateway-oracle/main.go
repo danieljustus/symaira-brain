@@ -325,6 +325,7 @@ func runCancellationCase(root, fakePath string) (cancellationCase, error) {
 		}
 	}
 
+	cancelledAt := time.Now()
 	cancel()
 	_ = inputWriter.Close()
 	select {
@@ -334,6 +335,35 @@ func runCancellationCase(root, fakePath string) (cancellationCase, error) {
 		}
 	case <-time.After(3 * time.Second):
 		return cancellationCase{}, fmt.Errorf("serve did not finish after connection cancellation")
+	}
+	if elapsed := time.Since(cancelledAt); elapsed >= 3*time.Second {
+		return cancellationCase{}, fmt.Errorf("connection cancellation took %s", elapsed)
+	}
+	frames, valid, nonProtocol, err := parseFrames(output.Bytes())
+	if err != nil || !valid || nonProtocol != 0 || len(frames) != 1 {
+		return cancellationCase{}, fmt.Errorf(
+			"cancelled tools/call emitted invalid stdout (valid=%t, non_protocol=%d, frames=%d, err=%v)",
+			valid, nonProtocol, len(frames), err,
+		)
+	}
+	var response struct {
+		JSONRPC string `json:"jsonrpc"`
+		ID      int    `json:"id"`
+		Result  struct {
+			IsError bool `json:"isError"`
+			Content []struct {
+				Type string `json:"type"`
+				Text string `json:"text"`
+			} `json:"content"`
+		} `json:"result"`
+	}
+	if err := json.Unmarshal(frames[0], &response); err != nil {
+		return cancellationCase{}, fmt.Errorf("decode cancellation response: %w", err)
+	}
+	if response.JSONRPC != "2.0" || response.ID != 2 || !response.Result.IsError ||
+		len(response.Result.Content) != 1 || response.Result.Content[0].Type != "text" ||
+		response.Result.Content[0].Text != "broker: tools/call canceled: context canceled" {
+		return cancellationCase{}, fmt.Errorf("unexpected in-flight cancellation response: %s", frames[0])
 	}
 
 	return cancellationCase{
