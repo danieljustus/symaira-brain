@@ -496,9 +496,9 @@ jobs:
           failed=0
           # BRK-001/002, MAN-001, ARC-001, HAR-001..006.
           go run ./scripts/broker-oracle -check || failed=1
-          go test ./internal/broker -count=1 || failed=1
-          go test ./internal/managed -count=1 || failed=1
-          go test ./internal/harness -count=1 || failed=1
+          go test ./internal/broker -count=1 -timeout=90s || failed=1
+          go test ./internal/managed -count=1 -timeout=90s || failed=1
+          go test ./internal/harness -count=1 -timeout=90s || failed=1
           exit "$failed"
       - name: Check portable skills, instructions, adapters, and guard oracles on Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
