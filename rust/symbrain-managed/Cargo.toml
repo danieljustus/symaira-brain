@@ -8,6 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+chrono.workspace = true
 flate2 = "=1.1.10"
 serde.workspace = true
 serde_json.workspace = true
