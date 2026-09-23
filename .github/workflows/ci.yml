@@ -410,7 +410,16 @@ jobs:
           cargo test -p symbrain-adapter --test adapter_tests --locked
           cargo test -p symbrain-usage --test usage_tests --locked
           cargo test -p symbrain-cli --lib usage_cli::tests --locked
+      - name: Compare profile removal with the native Go CLI
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
           cargo test -p symbrain-cli --test profile_cli_tests --locked
+          if [ "${{ matrix.os }}" != windows-2025 ]; then
+            go run ./scripts/profile-remove-oracle -check
+          fi
+          go run ./scripts/profile-remove-oracle --compare-rust "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}"
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
