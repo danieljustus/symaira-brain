@@ -422,6 +422,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          go run ./scripts/instructions-oracle -output "$RUNNER_TEMP/instructions-oracle-windows.json"
+          go run ./scripts/adapters-oracle -output "$RUNNER_TEMP/adapters-oracle-windows.json"
+          echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$RUNNER_TEMP/instructions-oracle-windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_ADAPTERS_ORACLE_FIXTURE=$RUNNER_TEMP/adapters-oracle-windows.json" >> "$GITHUB_ENV"
+          export SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE="$RUNNER_TEMP/instructions-oracle-windows.json"
+          export SYMBRAIN_ADAPTERS_ORACLE_FIXTURE="$RUNNER_TEMP/adapters-oracle-windows.json"
           cargo test -p symbrain-instructions --test instruction_tests --locked
           cargo test -p symbrain-adapter --test adapter_tests --locked
           go run ./scripts/usage-oracle -check
@@ -507,10 +513,10 @@ jobs:
           set -uo pipefail
           failed=0
           # SKL-001..003; INS-001; ADR-005; SEC-002..005.
-          go run ./scripts/skills-oracle -check || failed=1
-          go run ./scripts/skills-install-oracle -check || failed=1
-          go run ./scripts/instructions-oracle -check || failed=1
-          go run ./scripts/adapters-oracle -check || failed=1
+          go run ./scripts/skills-oracle -output "$RUNNER_TEMP/skills-oracle-windows.json" || failed=1
+          go run ./scripts/skills-install-oracle -output "$RUNNER_TEMP/skills-install-oracle-windows.json" || failed=1
+          echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$RUNNER_TEMP/skills-oracle-windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$RUNNER_TEMP/skills-install-oracle-windows.json" >> "$GITHUB_ENV"
           go run ./guard/scripts/guard-oracle -output "$RUNNER_TEMP/guard_oracle_windows.json" || failed=1
           go run ./guard/scripts/guard-doctor-oracle -output "$RUNNER_TEMP/guard_doctor_oracle_windows.json" || failed=1
           echo "SYMBRAIN_GUARD_ORACLE_FIXTURE=$RUNNER_TEMP/guard_oracle_windows.json" >> "$GITHUB_ENV"
@@ -548,6 +554,10 @@ jobs:
           name: init-${{ matrix.os }}-${{ github.sha }}
           path: |
             target/init-oracle/report.json
+            ${{ runner.temp }}/instructions-oracle-windows.json
+            ${{ runner.temp }}/adapters-oracle-windows.json
+            ${{ runner.temp }}/skills-oracle-windows.json
+            ${{ runner.temp }}/skills-install-oracle-windows.json
             ${{ runner.temp }}/xdg-oracle-windows.json
             ${{ runner.temp }}/cli_tree_windows.json
             ${{ runner.temp }}/profile_remove_oracle_windows.json
