@@ -18,6 +18,7 @@ use symbrain_audit::{Config as AuditConfig, Logger};
 use symbrain_broker::{Config as BrokerConfig, ManagedServer};
 use symbrain_core::exit;
 use symbrain_gateway::{Gateway, GatewayBackend};
+use symbrain_mcp::ServerError;
 use symbrain_policy::{Profile, SERVER_OPERATE, SERVER_SCOPE, VAULT_MODE_OFF, load, load_file};
 use toml_edit::{DocumentMut, Item, Value};
 
@@ -139,6 +140,7 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             shutdown_all(&managed);
             return match result {
                 Ok(Ok(())) => exit::OK,
+                Ok(Err(ServerError::Cancelled)) => exit::OK,
                 Ok(Err(error)) => {
                     let _ = writeln!(stderr, "symbrain mcp: {error}");
                     exit::GENERIC

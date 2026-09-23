@@ -293,3 +293,73 @@ pub(super) fn assert_sigterm_shutdown() {
     );
     gateway.complete = true;
 }
+
+pub(super) fn assert_idle_sigterm_shutdown() {
+    let root = TempDir::new().unwrap();
+    let profile = root.path().join("idle.toml");
+    fs::write(
+        &profile,
+        "[profile]\nname = \"idle\"\n\n[audit]\nenabled = false\n",
+    )
+    .unwrap();
+    let stdout = root.path().join("stdout.jsonl");
+    let stderr = root.path().join("stderr.log");
+    let mut child = super::command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()])
+        .process_group(0)
+        .stdout(File::create(&stdout).unwrap())
+        .stderr(File::create(&stderr).unwrap())
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(b"{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}\n")
+        .unwrap();
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            panic!("idle MCP exited before readiness: {status}");
+        }
+        let output = fs::read_to_string(&stdout).unwrap();
+        if let Some(line) = output.lines().next() {
+            let response: Value = serde_json::from_str(line).unwrap();
+            assert_eq!(response["id"], 1);
+            assert_eq!(response["result"]["serverInfo"]["name"], "symbrain");
+            break;
+        }
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            panic!("idle MCP did not initialize");
+        }
+        thread::sleep(POLL);
+    }
+
+    assert!(
+        signal(&child.id().to_string(), "-TERM").unwrap().success(),
+        "failed to signal idle MCP"
+    );
+    let deadline = Instant::now() + Duration::from_secs(5);
+    let status = loop {
+        if let Some(status) = child.try_wait().unwrap() {
+            break status;
+        }
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            panic!("idle MCP did not stop after SIGTERM");
+        }
+        thread::sleep(POLL);
+    };
+    assert!(status.success(), "idle MCP status: {status}");
+    assert_eq!(
+        String::from_utf8(fs::read(&stdout).unwrap())
+            .unwrap()
+            .lines()
+            .count(),
+        1
+    );
+    assert!(fs::read(&stderr).unwrap().is_empty(), "unexpected stderr");
+}

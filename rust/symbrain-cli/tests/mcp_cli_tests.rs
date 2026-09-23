@@ -361,6 +361,12 @@ fn sigterm_cancels_gateway_and_terminates_child_process_group() {
     mcp_lifecycle::assert_sigterm_shutdown();
 }
 
+#[cfg(unix)]
+#[test]
+fn sigterm_while_idle_exits_cleanly_with_stdin_open() {
+    mcp_lifecycle::assert_idle_sigterm_shutdown();
+}
+
 #[test]
 fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
     let root = TempDir::new().unwrap();

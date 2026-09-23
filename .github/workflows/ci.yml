@@ -459,6 +459,9 @@ jobs:
           set -euo pipefail
           go run ./scripts/mcp-oracle -check
           go run ./scripts/gateway-oracle -check
+          CGO_ENABLED=0 go build -trimpath -o "target/mcp-go${{ matrix.os == 'windows-2025' && '.exe' || '' }}" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          python3 scripts/mcp-differential.py "target/mcp-go${{ matrix.os == 'windows-2025' && '.exe' || '' }}" "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}"
           cargo test -p symbrain-mcp --locked
           cargo test -p symbrain-gateway --test gateway_tests --locked
           cargo test -p symbrain-broker --test broker_tests --locked
