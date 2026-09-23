@@ -1,8 +1,10 @@
 //! Provenance sidecars for binaries installed from pinned releases.
 
-use std::fs;
 use std::io::Write;
 use std::path::Path;
+
+#[cfg(unix)]
+use std::fs;
 
 use chrono::{SecondsFormat, Utc};
 use serde::Serialize;
