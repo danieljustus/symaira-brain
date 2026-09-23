@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use crate::load::read_bundle_text;
+use crate::load::read_bundle_optional_bytes;
 use crate::model::{
     Bundle, Issue, MAX_BODY_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH, MAX_RESOURCE_SIZE,
 };
@@ -297,22 +297,15 @@ fn safe_relative_file(bundle: &Bundle, reference: &str) -> Result<(), String> {
             "overlay reference {reference:?} escapes skill root"
         ));
     }
-    read_bundle_text(
-        bundle,
-        path,
-        &format!("overlay reference {reference:?}"),
-        crate::model::MAX_INPUT_SIZE,
-    )
-    .map(|_| ())
-    .map_err(|error| {
-        if error.0.contains("No such file or directory") || error.0.contains("not found") {
-            // Keep the user-facing diagnostic byte-for-byte with Go's os.Root
-            // error on the supported Unix platforms.
-            format!(
-                "overlay reference {reference:?}: read {reference}: openat {reference}: no such file or directory"
-            )
-        } else {
-            error.to_string()
-        }
-    })
+    let name = format!("overlay reference {reference:?}");
+    match read_bundle_optional_bytes(bundle, path, &name, crate::model::MAX_INPUT_SIZE) {
+        Ok(Some(bytes)) => String::from_utf8(bytes)
+            .map(|_| ())
+            .map_err(|_| format!("invalid_utf8_overlay: {name}")),
+        // Keep the user-facing diagnostic byte-for-byte with the Go oracle.
+        Ok(None) => Err(format!(
+            "{name}: read {reference}: openat {reference}: no such file or directory"
+        )),
+        Err(error) => Err(error.to_string()),
+    }
 }

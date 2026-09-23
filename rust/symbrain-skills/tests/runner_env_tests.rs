@@ -221,10 +221,22 @@ fn default_paths_match_the_go_oracle_for_every_resolution_branch() {
                 .unwrap_or_else(|| panic!("{name}: fixture has no {key}"))
                 .replacen("$ROOT", &root_text, 1)
         };
-        assert_eq!(field(&stdout, "library"), expected("library_dir"), "{name}");
-        assert_eq!(field(&stdout, "render"), expected("render_dir"), "{name}");
-        assert_eq!(field(&stdout, "base"), expected("base_dir"), "{name}");
-        assert_eq!(field(&stdout, "home"), home.to_string_lossy(), "{name}");
+        assert_eq!(
+            PathBuf::from(field(&stdout, "library")),
+            PathBuf::from(expected("library_dir")),
+            "{name}"
+        );
+        assert_eq!(
+            PathBuf::from(field(&stdout, "render")),
+            PathBuf::from(expected("render_dir")),
+            "{name}"
+        );
+        assert_eq!(
+            PathBuf::from(field(&stdout, "base")),
+            PathBuf::from(expected("base_dir")),
+            "{name}"
+        );
+        assert_eq!(PathBuf::from(field(&stdout, "home")), home, "{name}");
     }
 }
 
@@ -251,18 +263,15 @@ fn conflicting_home_variables_use_the_go_platform_home() {
         ],
     );
     assert_eq!(
-        field(&stdout, "library"),
-        legacy.join("library").to_string_lossy()
+        PathBuf::from(field(&stdout, "library")),
+        legacy.join("library")
     );
     assert_eq!(
-        field(&stdout, "render"),
-        legacy.join("rendered").to_string_lossy()
+        PathBuf::from(field(&stdout, "render")),
+        legacy.join("rendered")
     );
-    assert_eq!(
-        field(&stdout, "base"),
-        legacy.join("base").to_string_lossy()
-    );
-    assert_eq!(field(&stdout, "home"), selected.to_string_lossy());
+    assert_eq!(PathBuf::from(field(&stdout, "base")), legacy.join("base"));
+    assert_eq!(PathBuf::from(field(&stdout, "home")), selected.as_path());
 }
 
 /// Go's `TestRunBinaryPresenceChangesNothing`: a legacy `symskills` binary first

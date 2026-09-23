@@ -363,7 +363,13 @@ fn native_sync_plan_uses_the_platform_home_when_home_variables_disagree() {
     let mut command = command(&scenario, None, &["sync", "--dry-run"]);
     command.env(if cfg!(windows) { "HOME" } else { "USERPROFILE" }, &other);
     let output = command.output().unwrap();
-    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(
+        output.status.success(),
+        "status: {:?}; stdout: {:?}; stderr: {:?}",
+        output.status,
+        stdout(&output),
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert_eq!(stdout(&output).matches("ok (1 skills planned)").count(), 6);
     assert!(
         !legacy.join("rendered").exists(),
