@@ -238,7 +238,7 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
                     message: error,
                 }),
             },
-            Err(error) if error.kind() == io::ErrorKind::NotFound => findings.push(Finding {
+            Err(error) if missing_source_is_silent(&error) => findings.push(Finding {
                 client: source.client.to_owned(),
                 path,
                 status: "unsupported",
@@ -246,13 +246,42 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
             }),
             Err(error) => findings.push(Finding {
                 client: source.client.to_owned(),
+                message: read_error_message(&path, &error),
                 path,
                 status: "unsupported",
-                message: format!("read failed: {error}"),
             }),
         }
     }
     (servers, findings)
+}
+
+/// Mirrors the Go adapter's string-based missing-file check. On Windows,
+/// ERROR_FILE_NOT_FOUND (2) is recognized by that check, but
+/// ERROR_PATH_NOT_FOUND (3) is not; on Unix all NotFound errors are skipped.
+pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
+    if error.kind() != io::ErrorKind::NotFound {
+        return false;
+    }
+    #[cfg(windows)]
+    {
+        error.raw_os_error() != Some(3)
+    }
+    #[cfg(not(windows))]
+    {
+        true
+    }
+}
+
+/// Formats the read diagnostic emitted by Go's os.ReadFile PathError.
+pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> String {
+    let mut detail = error.to_string();
+    if let Some(code) = error.raw_os_error() {
+        let suffix = format!(" (os error {code})");
+        if let Some(without_code) = detail.strip_suffix(&suffix) {
+            detail = without_code.to_owned();
+        }
+    }
+    format!("read failed: open {}: {detail}", path.display())
 }
 
 pub(crate) fn source_path(source: Source) -> PathBuf {
@@ -351,6 +380,19 @@ mod tests {
             parse_flags(&args, &mut Vec::new(), &mut Vec::new()),
             Ok(None)
         );
+    }
+
+    #[test]
+    fn missing_source_error_classification_matches_go_platform_behavior() {
+        let missing_file = io::Error::from(io::ErrorKind::NotFound);
+        assert!(missing_source_is_silent(&missing_file));
+
+        #[cfg(windows)]
+        {
+            assert!(missing_source_is_silent(&io::Error::from_raw_os_error(2)));
+            let missing_parent = io::Error::from_raw_os_error(3);
+            assert!(!missing_source_is_silent(&missing_parent));
+        }
     }
 
     #[test]

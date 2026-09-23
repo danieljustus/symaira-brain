@@ -391,11 +391,16 @@ func grantsCliCase(id string, input grantsCliInput) oracleCase {
 	}()
 	var out bytes.Buffer
 	grants.Run(input.Args, &out)
-	stdout := strings.ReplaceAll(out.String(), dir, storeDirPlaceholder)
+	stdout := normalizeStorePath(out.String(), dir)
 	persisted, rerr := os.ReadFile(storePath)
 	output := grantsCliOutput{Stdout: stdout, StoreExists: rerr == nil}
 	if rerr == nil {
-		output.Store = strings.ReplaceAll(string(persisted), dir, storeDirPlaceholder)
+		output.Store = normalizeStorePath(string(persisted), dir)
 	}
 	return successCase(id, "grants_cli", input, output)
+}
+
+func normalizeStorePath(value, dir string) string {
+	value = strings.ReplaceAll(value, dir, storeDirPlaceholder)
+	return strings.ReplaceAll(value, storeDirPlaceholder+`\grants.json`, storeDirPlaceholder+"/grants.json")
 }

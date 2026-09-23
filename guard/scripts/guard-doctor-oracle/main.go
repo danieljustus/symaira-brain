@@ -66,11 +66,22 @@ func runCase(root, id string, setup func(string) error) (string, int, error) {
 	if err := os.MkdirAll(filepath.Join(caseRoot, "data", "symguard"), 0o755); err != nil {
 		return "", 0, fmt.Errorf("mkdir data: %w", err)
 	}
+	home := filepath.Join(caseRoot, "home")
+	for _, relative := range []string{
+		".config/hermes",
+		".cursor",
+		".vscode",
+		".config/opencode",
+		".config/claude",
+	} {
+		if err := os.MkdirAll(filepath.Join(home, relative), 0o755); err != nil {
+			return "", 0, fmt.Errorf("mkdir discovery source: %w", err)
+		}
+	}
 	if err := setup(caseRoot); err != nil {
 		return "", 0, fmt.Errorf("setup %s: %w", id, err)
 	}
 
-	home := filepath.Join(caseRoot, "home")
 	configHome := filepath.Join(home, ".config")
 	dataHome := filepath.Join(caseRoot, "data")
 	symguardConfig := filepath.Join(configHome, "symguard", "config.toml")

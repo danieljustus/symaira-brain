@@ -3,8 +3,8 @@
 //!
 //! The setup reproduces `guard/scripts/guard-doctor-oracle/main.go`'s
 //! `runCase` exactly — same per-case root layout (`<root>/<id>/home/...`,
-//! `<root>/<id>/data/symguard`), same injected `HOME`, `XDG_CONFIG_HOME`,
-//! `XDG_DATA_HOME` and `SYMGUARD_CONFIG` — and the same normalization
+//! `<root>/<id>/data/symguard`), same injected home, XDG and config variables,
+//! and the same normalization
 //! (`<root>` for the temp root, plus the shared header normalization for the
 //! two rows no fixture can pin).
 //!
@@ -79,6 +79,15 @@ fn normalize_root_paths(value: &str) -> String {
 fn setup(id: &str, case_root: &Path) {
     fs::create_dir_all(case_root.join("home/.config/symguard")).unwrap();
     fs::create_dir_all(case_root.join("data/symguard")).unwrap();
+    for relative in [
+        "home/.config/hermes",
+        "home/.cursor",
+        "home/.vscode",
+        "home/.config/opencode",
+        "home/.config/claude",
+    ] {
+        fs::create_dir_all(case_root.join(relative)).unwrap();
+    }
     let config = case_root.join("home/.config/symguard/config.toml");
     let log = case_root.join("data/symguard/audit.log");
     match id {
@@ -194,7 +203,7 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         let expected = expected
             .replace("/usr/bin/true", &native_command())
             .replace("/usr/bin/env", &native_command());
-        let expected = doctor_header::normalize(&expected);
+        let expected = doctor_header::normalize(&normalize_root_paths(&expected));
         assert_eq!(
             normalized, expected,
             "{id}: native bytes differ from the frozen Go oracle"

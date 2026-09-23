@@ -65,7 +65,11 @@ pub(crate) fn run(stdout: &mut dyn Write) -> Option<u8> {
 fn build_report() -> Option<(String, u8)> {
     let config = load_config(&config_path())?;
     let audit = audit_status(&super::audit_path())?;
-    let servers = discover_all()?;
+    let discovery = discover_all()?;
+    let (servers, discovery_error) = match discovery {
+        DiscoveryOutcome::Servers(servers) => (servers, None),
+        DiscoveryOutcome::Error(error) => (Vec::new(), Some(error)),
+    };
 
     let mut out = String::new();
     let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
@@ -119,17 +123,21 @@ fn build_report() -> Option<(String, u8)> {
     }
 
     let mut checks = Vec::new();
-    if servers.is_empty() {
+    if let Some(error) = &discovery_error {
+        row("mcp servers", &format!("error: {error}"));
+    } else if servers.is_empty() {
         row("mcp servers", "none discovered");
     } else {
         row("mcp servers", &format!("{} discovered", servers.len()));
         checks = check_servers(servers, &allowlist)?;
     }
 
-    let problems = checks
-        .iter()
-        .filter(|c| !c.allowed || !c.secrets.is_empty())
-        .count();
+    let discovery_problems = if discovery_error.is_some() { 1 } else { 0 };
+    let problems = discovery_problems
+        + checks
+            .iter()
+            .filter(|c| !c.allowed || !c.secrets.is_empty())
+            .count();
 
     print_server_checks(&mut out, &checks);
     print_secret_risks(&mut out, &checks);
@@ -414,18 +422,30 @@ struct Discovered {
     env: BTreeMap<String, String>,
 }
 
-/// Ports `discovery.DiscoverAll()`. Missing config files are skipped, as in
-/// Go. Anything Go would surface as a non-missing-file `StatusUnsupported`
-/// finding (and therefore as an `mcp servers  error: discovery: …` line
-/// carrying an upstream parser message) gates instead.
-fn discover_all() -> Option<Vec<Discovered>> {
+/// Ports `discovery.DiscoverAll()`. Missing files are skipped except for
+/// Windows path-not-found errors, which Go's string-based missing-file check
+/// surfaces as an `mcp servers error: discovery: …` report. Unreproducible
+/// parser errors still gate to the Go fallback.
+enum DiscoveryOutcome {
+    Servers(Vec<Discovered>),
+    Error(String),
+}
+
+fn discover_all() -> Option<DiscoveryOutcome> {
     let mut servers = Vec::new();
     for source in guard_scan::SOURCES {
         let path = guard_scan::source_path(source);
         let data = match fs::read(&path) {
             Ok(data) => data,
-            Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
-            Err(_) => return None,
+            Err(error) if guard_scan::missing_source_is_silent(&error) => continue,
+            Err(error) => {
+                return Some(DiscoveryOutcome::Error(format!(
+                    "discovery: {} ({}): [unsupported] {}",
+                    source.client,
+                    path.display(),
+                    guard_scan::read_error_message(&path, &error)
+                )));
+            }
         };
         let entries = guard_scan_config::parse_config(&data, source.key).ok()?;
         for (name, entry) in entries {
@@ -445,7 +465,7 @@ fn discover_all() -> Option<Vec<Discovered>> {
             });
         }
     }
-    Some(servers)
+    Some(DiscoveryOutcome::Servers(servers))
 }
 
 // ---------------------------------------------------------------------------
