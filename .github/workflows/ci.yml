@@ -430,7 +430,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          go run ./scripts/mcp-oracle -check
           go run ./scripts/gateway-oracle -check
+          cargo test -p symbrain-mcp --locked
           cargo test -p symbrain-gateway --test gateway_tests --locked
           cargo test -p symbrain-broker --test broker_tests --locked
       - name: Check secret resolution against native Go
@@ -440,6 +442,10 @@ jobs:
           set -euo pipefail
           go run ./scripts/secret-oracle -check
           cargo test -p symbrain-usage --test secret_oracle_tests --locked
+      - name: Capture native Windows install oracle
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: go run ./scripts/install-oracle -output "$RUNNER_TEMP/install_oracle_windows.json"
       - name: Test Rust workspace on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
@@ -451,6 +457,7 @@ jobs:
           name: init-${{ matrix.os }}-${{ github.sha }}
           path: |
             target/init-oracle/report.json
+            ${{ runner.temp }}/install_oracle_windows.json
             target/init-oracle/go-bin/*-stderr.log
             target/init-oracle/go-bin/*-stdout.log
           retention-days: 14
