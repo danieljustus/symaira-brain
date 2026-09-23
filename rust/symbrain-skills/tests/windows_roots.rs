@@ -29,7 +29,9 @@ fn junction(link: &Path, target: &Path) {
         .expect("run mklink");
     assert!(
         output.status.success(),
-        "mklink /J failed: {} {}",
+        "mklink /J {} -> {} failed: {} {}",
+        link.display(),
+        target.display(),
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
@@ -123,7 +125,10 @@ fn junction_ancestors_are_refused_without_touching_outside() {
 
     let render_final = temp.path().join("render-final");
     fs::create_dir_all(render_final.join("opencode")).expect("render parent");
-    junction(&render_final.join("opencode/windows-root"), outside.path());
+    junction(
+        &render_final.join("opencode").join("windows-root"),
+        outside.path(),
+    );
     assert!(
         materialize(&bundle, &rendered, &render_final).is_err(),
         "materialization onto a junction must be refused"
@@ -146,7 +151,7 @@ fn junction_ancestors_are_refused_without_touching_outside() {
         "install must reach the home root before refusal: {ancestor_error}"
     );
     let final_home = temp.path().join("home-final");
-    let final_parent = final_home.join(".config/opencode/skills");
+    let final_parent = final_home.join(".config").join("opencode").join("skills");
     fs::create_dir_all(&final_parent).expect("install parent");
     junction(&final_parent.join("windows-root"), outside.path());
     let final_error = install_rendered(
