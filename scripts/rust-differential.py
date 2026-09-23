@@ -110,33 +110,38 @@ lt_frac_trailing = 07:32:00.120000
 lt_frac_zero = 07:32:00.000
 lt_no_sec = 07:32
 """
+def _write_text(path: Path, text: str, encoding: str = "utf-8") -> None:
+    """Write deterministic UTF-8 fixture bytes without Windows newline conversion."""
+    path.write_bytes(text.encode(encoding))
+
+
 def setup_xdg_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", SAMPLE_CONFIG_TOML)
 def setup_codex_stale_auth(_root: Path, env: dict[str, str]) -> None:
     codex_dir = Path(env["HOME"]) / ".codex"
     codex_dir.mkdir(parents=True, exist_ok=True)
     # A logged-out Codex CLI leaves an auth file without an access token; the
     # provider reports "expired" and never reaches the network.
-    (codex_dir / "auth.json").write_text('{"OPENAI_API_KEY":"stale"}\n')
+    _write_text(codex_dir / "auth.json", '{"OPENAI_API_KEY":"stale"}\n')
 def setup_home_config(_root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = ""
     cfg_dir = Path(env["HOME"]) / ".config" / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", SAMPLE_CONFIG_TOML)
 def setup_malformed_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text("invalid = [ unterminated toml\n")
+    _write_text(cfg_dir / "config.toml", "invalid = [ unterminated toml\n")
 def setup_install_default_profile(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "config.toml"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    cfg.write_text('default_profile = "personal"\n')
+    _write_text(cfg, 'default_profile = "personal"\n')
 def setup_install_malformed_global(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "config.toml"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    cfg.write_text("invalid = [ unterminated toml\n")
+    _write_text(cfg, "invalid = [ unterminated toml\n")
 def setup_install_malformed(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".claude.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
@@ -171,36 +176,36 @@ def setup_install_installed(_root: Path, env: dict[str, str]) -> None:
 def setup_conflict_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text('default_profile = "personal"\n')
+    _write_text(cfg_dir / "config.toml", 'default_profile = "personal"\n')
 def setup_existing_parent_mode(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_dir.chmod(0o755)
-    (cfg_dir / "config.toml").write_text('existing = true\n')
+    _write_text(cfg_dir / "config.toml", 'existing = true\n')
 def setup_symlink_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "target.toml").write_text('target = true\n')
+    _write_text(cfg_dir / "target.toml", 'target = true\n')
     (cfg_dir / "config.toml").symlink_to("target.toml")
 def setup_readonly_config_dir(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text('existing = true\n')
+    _write_text(cfg_dir / "config.toml", 'existing = true\n')
     cfg_dir.chmod(0o500)
 def setup_unreadable_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_file = cfg_dir / "config.toml"
-    cfg_file.write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_file, SAMPLE_CONFIG_TOML)
     cfg_file.chmod(0o000)
 def setup_floats_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(FLOATS_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", FLOATS_CONFIG_TOML)
 def setup_datetime_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(DATETIME_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", DATETIME_CONFIG_TOML)
 
 INLINE_CONFIG_TOML = """# Inline tables fixture
 [server]
@@ -211,7 +216,7 @@ tree = { mid = { leaf = "initial", count = 10 } }
 def setup_inline_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(INLINE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", INLINE_CONFIG_TOML)
 
 COMPLEX_CONFIG_TOML = """# Complex config fixture
 items = ["apple", "banana"]
@@ -226,25 +231,25 @@ port = 9000
 def setup_complex_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(COMPLEX_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", COMPLEX_CONFIG_TOML)
 def setup_profile_fixture(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "good.toml").write_text(
+    _write_text(profiles / "good.toml",
         '[profile]\nname = "good"\ndescription = "Good profile"\n'
         '[servers.vault]\nenabled = true\nmode = "request_only"\n'
     )
-    (profiles / "broken.toml").write_text('[profile]\nname = "wrong-name"\n')
+    _write_text(profiles / "broken.toml", '[profile]\nname = "wrong-name"\n')
 def setup_profile_existing(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "existing.toml").write_text('[profile]\nname = "existing"\n')
+    _write_text(profiles / "existing.toml", '[profile]\nname = "existing"\n')
 def setup_profile_remove_existing(_root: Path, env: dict[str, str]) -> None:
     setup_profile_existing(_root, env)
 def setup_profile_remove_bound_global(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "bound.toml").write_text('[profile]\nname = "bound"\n')
+    _write_text(profiles / "bound.toml", '[profile]\nname = "bound"\n')
     config = Path(env["HOME"]) / ".claude.json"
     config.parent.mkdir(parents=True, exist_ok=True)
     config.write_bytes(
@@ -273,7 +278,7 @@ def setup_profile_remove_symlink_profiles_root(_root: Path, env: dict[str, str])
     profiles_parent.mkdir(parents=True, exist_ok=True)
     outside = Path(env["XDG_CONFIG_HOME"]) / "outside-profiles"
     outside.mkdir(parents=True, exist_ok=True)
-    outside.joinpath("existing.toml").write_text("outside\n")
+    _write_text(outside.joinpath("existing.toml"), "outside\n")
     profiles = profiles_parent / "profiles"
     if profiles.exists():
         profiles.rmdir()
@@ -289,7 +294,7 @@ def setup_profile_remove_symlink(root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
     target = root / "profile-target.toml"
-    target.write_text('[profile]\nname = "target"\n')
+    _write_text(target, '[profile]\nname = "target"\n')
     (profiles / "existing.toml").symlink_to(target)
 def setup_profile_remove_fifo(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
@@ -349,9 +354,9 @@ def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
         },
     ]
     lines = [json.dumps(entry, separators=(",", ":")) for entry in entries]
-    (audit_dir / "alpha.jsonl").write_text("\n".join(lines) + "\n")
+    _write_text(audit_dir / "alpha.jsonl", "\n".join(lines) + "\n")
 def _write_fake_vault(path: Path, body: str, exit_code: int = 0) -> None:
-    path.write_text(f"#!/bin/sh\n{body}\nexit {exit_code}\n")
+    _write_text(path, f"#!/bin/sh\n{body}\nexit {exit_code}\n")
     path.chmod(0o755)
 def setup_vault_path_fixture(root: Path, env: dict[str, str]) -> None:
     vault_dir = root / "vault-path"
@@ -389,7 +394,7 @@ def setup_vault_config_override(root: Path, env: dict[str, str]) -> None:
     _write_fake_vault(configured, "printf 'configured-child\\n'")
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
-    (config_dir / "config.toml").write_text(
+    _write_text(config_dir / "config.toml",
         f"[servers.vault]\nbinary_path = {json.dumps(str(configured))}\n"
     )
     env["PATH"] = str(path_dir)
@@ -425,7 +430,7 @@ def setup_vault_config_missing(root: Path, env: dict[str, str]) -> None:
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
     missing = root / "missing" / "symvault"
-    (config_dir / "config.toml").write_text(
+    _write_text(config_dir / "config.toml",
         f"[servers.vault]\nbinary_path = {json.dumps(str(missing))}\n"
     )
     env["PATH"] = str(empty_path)
@@ -433,7 +438,7 @@ def setup_vault_empty_config(root: Path, env: dict[str, str]) -> None:
     setup_vault_path_fixture(root, env)
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
-    (config_dir / "config.toml").write_text('[servers.vault]\nbinary_path = ""\n')
+    _write_text(config_dir / "config.toml", '[servers.vault]\nbinary_path = ""\n')
 def setup_vault_raw_env_missing(root: Path, env: dict[str, str]) -> None:
     empty_path = root / "empty-path"
     empty_path.mkdir()
@@ -456,17 +461,17 @@ def setup_correct_managed_binaries(root: Path, env: dict[str, str]) -> None:
     for name, version in versions.items():
         script = f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n"
         path = bin_dir / name
-        path.write_text(script)
+        _write_text(path, script)
         path.chmod(0o755)
 def setup_mismatched_managed_binaries(root: Path, env: dict[str, str]) -> None:
     setup_correct_managed_binaries(root, env)
     path = Path(env["HOME"]) / ".symaira" / "bin" / "symdesk"
-    path.write_text("#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
+    _write_text(path, "#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
     path.chmod(0o755)
 def setup_failing_cosign(root: Path, env: dict[str, str]) -> None:
     setup_release_fixture(root, env)
     cosign = Path(env["PATH"]) / "cosign"
-    cosign.write_text("#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
+    _write_text(cosign, "#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
     cosign.chmod(0o755)
 class ReleaseFixtureServer:
     def __init__(self) -> None:
@@ -577,13 +582,13 @@ def write_skills_marker(directory: Path, **overrides: object) -> None:
         "allow_executable": True,
     }
     marker.update(overrides)
-    (directory / ".symskills.json").write_text(json.dumps(marker), encoding="utf-8")
+    _write_text(directory / ".symskills.json", json.dumps(marker), encoding="utf-8")
 
 
 def write_opencode_skill(root: Path, name: str) -> Path:
     directory = opencode_skills_root(root) / name
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "SKILL.md").write_text(f"{name}\n", encoding="utf-8")
+    _write_text(directory / "SKILL.md", f"{name}\n", encoding="utf-8")
     return directory
 
 
@@ -598,11 +603,11 @@ def setup_skills_opencode_unmanaged_skill(root: Path, env: dict[str, str]) -> No
 def setup_skills_opencode_dir_without_skill(root: Path, env: dict[str, str]) -> None:
     directory = opencode_skills_root(root) / "notaskill"
     directory.mkdir(parents=True)
-    (directory / "notes.txt").write_text("notes\n", encoding="utf-8")
+    _write_text(directory / "notes.txt", "notes\n", encoding="utf-8")
 
 
 def setup_skills_opencode_regular_file(root: Path, env: dict[str, str]) -> None:
-    (opencode_skills_root(root) / "README.md").write_text("readme\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "readme\n", encoding="utf-8")
 
 
 def setup_skills_opencode_dangling_symlink(root: Path, env: dict[str, str]) -> None:
@@ -616,14 +621,14 @@ def setup_skills_opencode_symlink_to_dir(root: Path, env: dict[str, str]) -> Non
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside-skill"
     target.mkdir(parents=True, exist_ok=True)
-    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    _write_text(target / "SKILL.md", "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linked")
 
 
 def setup_skills_opencode_symlink_to_file(root: Path, env: dict[str, str]) -> None:
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside-file.md"
-    target.write_text("outside\n", encoding="utf-8")
+    _write_text(target, "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linkedfile")
 
 
@@ -632,7 +637,7 @@ def setup_skills_opencode_symlink_to_marker_file(root: Path, env: dict[str, str]
     # `<link>/.symskills.json`, fails, and reports the entry as unmanaged.
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/marker-file.json"
-    target.write_text(
+    _write_text(target,
         json.dumps(
             {
                 "schema_version": 1,
@@ -653,7 +658,7 @@ def setup_skills_opencode_symlink_chain(root: Path, env: dict[str, str]) -> None
     # A second link level is the one shape the native scan refuses to follow.
     real = root / "home/.config/opencode/real-dir"
     real.mkdir(parents=True, exist_ok=True)
-    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    _write_text(real / "SKILL.md", "real\n", encoding="utf-8")
     middle = root / "home/.config/opencode/middle-link"
     os.symlink(real, middle)
     os.symlink(middle, opencode_skills_root(root) / "chain")
@@ -670,14 +675,14 @@ def setup_skills_opencode_foreign_marker(root: Path, env: dict[str, str]) -> Non
 
 def setup_skills_opencode_legacy_hash_only_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "legacy")
-    (directory / ".symskills.json").write_text(
+    _write_text(directory / ".symskills.json",
         json.dumps({"source_hash": "abc123"}), encoding="utf-8"
     )
 
 
 def setup_skills_opencode_malformed_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "broken")
-    (directory / ".symskills.json").write_text("{not json", encoding="utf-8")
+    _write_text(directory / ".symskills.json", "{not json", encoding="utf-8")
 
 
 def setup_skills_opencode_unsupported_schema_marker(root: Path, env: dict[str, str]) -> None:
@@ -688,7 +693,7 @@ def setup_skills_opencode_unsupported_schema_marker(root: Path, env: dict[str, s
 
 def setup_skills_opencode_empty_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "emptymarker")
-    (directory / ".symskills.json").write_text("", encoding="utf-8")
+    _write_text(directory / ".symskills.json", "", encoding="utf-8")
 
 
 def setup_skills_opencode_wrong_type_marker(root: Path, env: dict[str, str]) -> None:
@@ -698,7 +703,7 @@ def setup_skills_opencode_wrong_type_marker(root: Path, env: dict[str, str]) -> 
 def setup_skills_opencode_mixed(root: Path, env: dict[str, str]) -> None:
     for name in ("zebra", "alpha", "middle"):
         write_opencode_skill(root, name)
-    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "ignored\n", encoding="utf-8")
 
 
 def project_scope_fixture(setup: Callable[[Path, dict[str, str]], None]) -> Callable[[Path, dict[str, str]], None]:
@@ -726,7 +731,7 @@ def setup_skills_opencode_project_symlink_to_file(root: Path, env: dict[str, str
     skills = root / "project/.opencode/skills"
     skills.mkdir(parents=True)
     target = skills.parent / "outside-file.md"
-    target.write_text("outside\n", encoding="utf-8")
+    _write_text(target, "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linkedfile")
 
 
@@ -735,7 +740,7 @@ def setup_skills_opencode_project_symlink_chain(root: Path, env: dict[str, str])
     skills.mkdir(parents=True)
     real = skills.parent / "real-dir"
     real.mkdir(parents=True)
-    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    _write_text(real / "SKILL.md", "real\n", encoding="utf-8")
     middle = skills.parent / "middle-link"
     os.symlink(real, middle)
     os.symlink(middle, skills / "chain")
@@ -748,7 +753,7 @@ def setup_skills_opencode_project_isolated_from_user_root(root: Path, env: dict[
     skills.mkdir(parents=True)
     projects_skill = skills / "only-here"
     projects_skill.mkdir()
-    (projects_skill / "SKILL.md").write_text("only-here\n", encoding="utf-8")
+    _write_text(projects_skill / "SKILL.md", "only-here\n", encoding="utf-8")
 
 
 SKILLS_LIBRARY_STAMP = 1767323045  # 2026-01-02T03:04:05Z
@@ -762,7 +767,7 @@ def write_library_skill(root: Path, name: str) -> Path:
     """
     directory = root / "data/symbrain/skills/library" / name
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "SKILL.md").write_text(
+    _write_text(directory / "SKILL.md",
         f"---\nname: {name}\ndescription: library fixture\nlicense: Apache-2.0\n---\n\n# {name}\n\nBody.\n",
         encoding="utf-8",
     )
@@ -774,14 +779,14 @@ def write_library_skill(root: Path, name: str) -> Path:
 def write_symskills_config(root: Path, body: str) -> None:
     config = root / "config/symskills/config.toml"
     config.parent.mkdir(parents=True, exist_ok=True)
-    config.write_text(body, encoding="utf-8")
+    _write_text(config, body, encoding="utf-8")
 
 
 def setup_skills_targets_mixed(root: Path, env: dict[str, str]) -> None:
     write_opencode_skill(root, "handwritten")
     directory = write_opencode_skill(root, "managed")
     write_skills_marker(directory)
-    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "ignored\n", encoding="utf-8")
 
 
 def setup_skills_targets_empty_root(root: Path, env: dict[str, str]) -> None:
@@ -808,7 +813,7 @@ def setup_skills_targets_symlink_entry(root: Path, env: dict[str, str]) -> None:
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside"
     target.mkdir(parents=True, exist_ok=True)
-    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    _write_text(target / "SKILL.md", "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linked")
 
 
@@ -820,7 +825,7 @@ def setup_skills_dynamic_config(root: Path, env: dict[str, str]) -> None:
 def setup_skills_event_log(root: Path, env: dict[str, str]) -> None:
     log = root / "home/.local/share/symskills/events.jsonl"
     log.parent.mkdir(parents=True, exist_ok=True)
-    log.write_text(
+    _write_text(log,
         json.dumps(
             {
                 "ts": "2026-01-02T03:04:05Z",
@@ -840,7 +845,7 @@ def setup_activity_profile(root: Path, env: dict[str, str]) -> None:
     """A profile that explicitly grants the activity read tools."""
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "reader.toml").write_text(
+    _write_text(profiles / "reader.toml",
         '[profile]\nname = "reader"\n'
         "[servers.memory]\nenabled = true\n"
         'tools_allow = ["activity_status", "activity_get", "activity_search"]\n'
@@ -1062,7 +1067,7 @@ def setup_skills_library_categories(root: Path, env: dict[str, str]) -> None:
     """Case variants and stray whitespace must collapse to one spelling."""
     for name, category in (("alpha", "Guides"), ("beta", "  guides  "), ("gamma", "GUIDES")):
         directory = write_library_skill(root, name)
-        (directory / "SKILL.md").write_text(
+        _write_text(directory / "SKILL.md",
             f"---\nname: {name}\ndescription: {name} skill\nlicense: Apache-2.0\ncategory: \"{category}\"\n---\n\n# {name}\n",
             encoding="utf-8",
         )
@@ -1074,7 +1079,7 @@ def setup_skills_library_managed(root: Path, env: dict[str, str]) -> None:
     """A library skill with a real install: installs and last_rendered_at."""
     write_library_skill(root, "demo")
     directory = root / "data/symbrain/skills/library/demo"
-    (directory / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    _write_text(directory / "SKILL.md", MANAGED_SKILL_MD, encoding="utf-8")
     subprocess.run(
         [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
         env=env,
@@ -1103,7 +1108,7 @@ def setup_skills_library_broken_skill(root: Path, env: dict[str, str]) -> None:
     write_library_skill(root, "good")
     directory = root / "data/symbrain/skills/library/broken"
     directory.mkdir(parents=True)
-    (directory / "SKILL.md").write_text("no frontmatter here\n", encoding="utf-8")
+    _write_text(directory / "SKILL.md", "no frontmatter here\n", encoding="utf-8")
 
 
 def setup_skills_library_missing_skill_md(root: Path, env: dict[str, str]) -> None:
@@ -1143,7 +1148,7 @@ def freeze_managed_clocks(root: Path) -> None:
         data = json.loads(marker_file.read_text(encoding="utf-8"))
         if "installed" in data:
             data["installed"] = "2026-01-02T03:04:05Z"
-            marker_file.write_text(json.dumps(data), encoding="utf-8")
+            _write_text(marker_file, json.dumps(data), encoding="utf-8")
     log = root / "home/.local/share/symskills/events.jsonl"
     if log.is_file():
         lines = []
@@ -1153,7 +1158,7 @@ def freeze_managed_clocks(root: Path) -> None:
             record = json.loads(line)
             record["ts"] = "2026-01-02T03:04:05Z"
             lines.append(json.dumps(record))
-        log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_text(log, "\n".join(lines) + "\n", encoding="utf-8")
     for path in sorted(root.rglob("SKILL.md")):
         os.utime(path, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
         os.utime(path.parent, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
@@ -1168,7 +1173,7 @@ def generate_managed_install(root: Path, env: dict[str, str]) -> Path:
     """
     skill_dir = root / "data/symbrain/skills/library/demo"
     skill_dir.mkdir(parents=True, exist_ok=True)
-    (skill_dir / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    _write_text(skill_dir / "SKILL.md", MANAGED_SKILL_MD, encoding="utf-8")
     subprocess.run(
         [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
         env=env,
@@ -1244,6 +1249,7 @@ class Case:
     require_last_used: bool = False
     mutating: bool = False
     posix_only: bool = False
+    windows_skip_reason: str | None = None
     stdin: bytes | None = None
     pty: bool = False
 CASES = (
@@ -1501,7 +1507,12 @@ CASES = (
     Case("doctor_vault_agent_then_help", ("doctor", "--vault-agent", "agent", "--help")),
     Case("doctor_vault_agent_equals_then_help", ("doctor", "--vault-agent=agent", "--help")),
     Case("doctor_vault_agent_missing_value", ("doctor", "--vault-agent")),
-    Case("doctor_failed_version_json", ("doctor", "--json"), setup=setup_doctor_failed_version),
+    Case(
+        "doctor_failed_version_json",
+        ("doctor", "--json"),
+        setup=setup_doctor_failed_version,
+        windows_skip_reason="fixture uses an extensionless POSIX shell executable",
+    ),
     # Phase 4 Task 4.3: native symvault passthrough with opaque argv and lookup order
     Case(
         "vault_passthrough_argv_stdio",
@@ -1516,30 +1527,44 @@ CASES = (
     Case("vault_managed_precedes_path", ("vault",), setup=setup_vault_managed_precedence, posix_only=True),
     Case("vault_configured_precedes_managed", ("vault",), setup=setup_vault_config_override, posix_only=True),
     Case("vault_env_override_precedes_config", ("vault",), setup=setup_vault_env_override, posix_only=True),
-    Case("vault_missing_binary", ("vault",), setup=setup_release_fixture),
+    Case(
+        "vault_missing_binary",
+        ("vault",),
+        setup=setup_release_fixture,
+        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
+    ),
     Case("vault_configured_binary_missing", ("vault",), setup=setup_vault_config_missing, posix_only=True),
     Case("vault_empty_config_uses_path", ("vault",), setup=setup_vault_empty_config, posix_only=True),
     Case("vault_raw_env_missing", ("vault",), setup=setup_vault_raw_env_missing, posix_only=True),
     # Phase 4 Task 4.2: native managed setup against immutable local archives
     Case("setup_unknown_flag", ("setup", "--unknown")),
-    Case("setup_lone_hyphen", ("setup", "-"), setup=setup_release_fixture, mutating=True),
+    Case(
+        "setup_lone_hyphen",
+        ("setup", "-"),
+        setup=setup_release_fixture,
+        mutating=True,
+        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
+    ),
     Case(
         "setup_install_json",
         ("setup", "--allow-unsigned", "--json"),
         setup=setup_release_fixture,
         mutating=True,
+        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_install_human",
         ("setup", "--allow-unsigned"),
         setup=setup_release_fixture,
         mutating=True,
+        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_install_cosign_fail_json",
         ("setup", "--json"),
         setup=setup_release_fixture,
         mutating=True,
+        windows_skip_reason="release archive fixture contains a POSIX shell stub, not a PE executable",
     ),
     Case(
         "setup_cosign_command_fail_json",
@@ -2606,6 +2631,14 @@ def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
         "PROJECT": str(root_path / "project"),
         "SYMBRAIN_GO_BINARY": str(go_binary),
     }
+    if os.name == "nt":
+        # subprocess replaces the parent environment, so keep the Windows
+        # runtime variables needed by CreateProcess and align the Go/Rust
+        # home-directory contracts with the hermetic fixture root.
+        env["USERPROFILE"] = env["HOME"]
+        for key in ("SystemRoot", "windir", "ComSpec", "PATHEXT"):
+            if value := os.environ.get(key):
+                env[key] = value
     for key in ("TMPDIR", "TMP", "TEMP"):
         if value := os.environ.get(key):
             env[key] = value
@@ -2642,12 +2675,23 @@ def main() -> int:
     fixture_server = ReleaseFixtureServer()
     RELEASE_BASE_URL = fixture_server.__enter__()
     failures: list[str] = []
-    cases = tuple(
-        case
-        for case in CASES
-        if (os.name == "posix" or not case.posix_only)
-        and (os.name == "posix" or not any(isinstance(arg, bytes) for arg in case.argv))
-    )
+    def windows_skip_reason(case: Case) -> str | None:
+        if os.name != "nt":
+            return None
+        if case.windows_skip_reason:
+            return case.windows_skip_reason
+        if case.posix_only:
+            return "POSIX-only filesystem/process behavior"
+        if any(isinstance(arg, bytes) for arg in case.argv):
+            return "raw-byte argv is not representable by Windows process APIs"
+        return None
+
+    skipped_cases = tuple((case.name, windows_skip_reason(case)) for case in CASES if windows_skip_reason(case))
+    cases = tuple(case for case in CASES if not windows_skip_reason(case))
+    if skipped_cases:
+        print(f"SKIP {len(skipped_cases)} platform-specific parity cases:")
+        for name, reason in skipped_cases:
+            print(f"  {name}: {reason}")
     for case in cases:
         with tempfile.TemporaryDirectory(prefix="symbrain-parity-") as temp_dir:
             # macOS exposes /var as a symlink to /private/var. The native
