@@ -129,7 +129,7 @@ fn stdout(output: &Output) -> String {
 }
 
 fn sha256_hex(path: &Path) -> String {
-    let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{}", error));
+    let bytes = std::fs::read(path).unwrap_or_else(|error| panic!("{error}"));
     format!("{:x}", Sha256::digest(bytes))
 }
 
@@ -331,4 +331,30 @@ fn both_layouts_present_sync_uses_the_current_namespace() {
         )),
         "native list resolves the current root:\n{list_stdout}"
     );
+}
+
+#[test]
+fn native_sync_uses_the_platform_home_when_home_variables_disagree() {
+    let tmp = TempDir::new().unwrap();
+    let scenario = tmp.path().join("different-homes");
+    let home = scenario.join("home");
+    let other = scenario.join("other-home");
+    let legacy = home.join(".local/share/symskills");
+    write_named_skill(&legacy.join("library/demo"), "demo");
+
+    let mut command = command(&scenario, None, &["sync"]);
+    command.env(if cfg!(windows) { "HOME" } else { "USERPROFILE" }, &other);
+    let output = command.output().unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert_eq!(
+        stdout(&output)
+            .matches("ok (1 skills rendered and installed)")
+            .count(),
+        6
+    );
+    assert_eq!(
+        std::fs::read_link(home.join(".hermes/skills/symaira/demo")).unwrap(),
+        legacy.join("rendered/hermes/demo"),
+    );
+    assert!(!other.join(".local/share/symskills").exists());
 }
