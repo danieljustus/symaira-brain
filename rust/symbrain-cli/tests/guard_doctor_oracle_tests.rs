@@ -40,7 +40,10 @@ const GATED_CASES: &[(&str, &str)] = &[
 ];
 
 fn fixture() -> serde_json::Value {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH);
+    let path = std::env::var_os("SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE").map_or_else(
+        || Path::new(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH),
+        std::path::PathBuf::from,
+    );
     let data = fs::read(&path).unwrap_or_else(|e| panic!("read {}: {e}", path.display()));
     serde_json::from_slice(&data).expect("fixture is JSON")
 }

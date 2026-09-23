@@ -11,7 +11,6 @@ use tempfile::TempDir;
 #[path = "support/mcp_lifecycle.rs"]
 mod mcp_lifecycle;
 
-#[cfg(not(windows))]
 const FAKE_MCP: &str = r#"#!/usr/bin/python3
 import json
 import sys
@@ -44,32 +43,6 @@ for line in sys.stdin:
         send(request_id, error={"code": -32601, "message": "Method not found"})
 "#;
 
-#[cfg(windows)]
-const FAKE_MCP_POWERSHELL: &str = r#"
-$utf8 = [System.Text.UTF8Encoding]::new($false)
-[Console]::InputEncoding = $utf8
-[Console]::OutputEncoding = $utf8
-while (($line = [Console]::In.ReadLine()) -ne $null) {
-    try { $request = ConvertFrom-Json -InputObject $line -ErrorAction Stop } catch { continue }
-    if ($request.PSObject.Properties.Name -notcontains 'id') { continue }
-    $response = @{ jsonrpc = '2.0'; id = $request.id }
-    switch ($request.method) {
-        'initialize' {
-            $response.result = @{ protocolVersion = '2024-11-05'; capabilities = @{ tools = @{} }; serverInfo = @{ name = 'fake'; version = '1' } }
-        }
-        'tools/list' {
-            $response.result = @{ tools = @(@{ name = 'echo'; description = 'echo'; inputSchema = @{ type = 'object' }; annotations = @{ readOnlyHint = $true } }) }
-        }
-        'tools/call' {
-            $text = ConvertTo-Json -InputObject $request.params.arguments -Depth 64 -Compress
-            $response.result = @{ content = @(@{ type = 'text'; text = $text }); isError = $false }
-        }
-        default { $response.error = @{ code = -32601; message = 'Method not found' } }
-    }
-    [Console]::Out.WriteLine((ConvertTo-Json -InputObject $response -Depth 64 -Compress))
-}
-"#;
-
 struct FakeCommand {
     command: std::path::PathBuf,
     args: Vec<String>,
@@ -78,27 +51,17 @@ struct FakeCommand {
 fn write_fake(root: &TempDir) -> FakeCommand {
     #[cfg(windows)]
     {
-        let path = root.path().join("fake-mcp.ps1");
-        std::fs::write(&path, FAKE_MCP_POWERSHELL).unwrap();
-        let system_root = std::env::var_os("SystemRoot")
-            .or_else(|| std::env::var_os("windir"))
-            .expect("Windows system root");
-        let powershell = std::path::PathBuf::from(system_root)
-            .join("System32")
-            .join("WindowsPowerShell")
-            .join("v1.0")
-            .join("powershell.exe");
+        let path = root.path().join("fake-mcp.py");
+        std::fs::write(&path, FAKE_MCP).unwrap();
+        let output = Command::new("python")
+            .args(["-c", "import sys; print(sys.executable)"])
+            .output()
+            .expect("Python is required by the native MCP fixture");
+        assert!(output.status.success(), "Python lookup failed: {output:?}");
+        let python = String::from_utf8(output.stdout).unwrap();
         return FakeCommand {
-            command: powershell,
-            args: vec![
-                "-NoProfile".to_owned(),
-                "-NonInteractive".to_owned(),
-                "-NoLogo".to_owned(),
-                "-ExecutionPolicy".to_owned(),
-                "Bypass".to_owned(),
-                "-File".to_owned(),
-                path.to_string_lossy().into_owned(),
-            ],
+            command: python.trim().into(),
+            args: vec![path.to_string_lossy().into_owned()],
         };
     }
     #[cfg(not(windows))]

@@ -130,7 +130,7 @@ func ntCreate(root windows.Handle, name string, access, disposition, options uin
 }
 
 func openWindowsDirectory(path string, access, disposition uint32) (windows.Handle, error) {
-	return ntCreate(windows.InvalidHandle, path, access, disposition, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
+	return ntCreate(0, path, access, disposition, windows.FILE_DIRECTORY_FILE|windows.FILE_OPEN_REPARSE_POINT|windows.FILE_SYNCHRONOUS_IO_NONALERT)
 }
 
 func (p *windowsAtomicParent) openDirectory(name string, create, writable bool) (*windowsAtomicParent, error) {

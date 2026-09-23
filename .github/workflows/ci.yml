@@ -495,8 +495,10 @@ jobs:
           go run ./scripts/skills-install-oracle -check || failed=1
           go run ./scripts/instructions-oracle -check || failed=1
           go run ./scripts/adapters-oracle -check || failed=1
-          go run ./guard/scripts/guard-oracle -check || failed=1
-          go run ./guard/scripts/guard-doctor-oracle -check || failed=1
+          go run ./guard/scripts/guard-oracle -output "$RUNNER_TEMP/guard_oracle_windows.json" || failed=1
+          go run ./guard/scripts/guard-doctor-oracle -output "$RUNNER_TEMP/guard_doctor_oracle_windows.json" || failed=1
+          echo "SYMBRAIN_GUARD_ORACLE_FIXTURE=$RUNNER_TEMP/guard_oracle_windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$RUNNER_TEMP/guard_doctor_oracle_windows.json" >> "$GITHUB_ENV"
           exit "$failed"
       - name: Differential-test portable native Windows CLI cases
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
@@ -534,6 +536,8 @@ jobs:
             ${{ runner.temp }}/cli_tree_windows.json
             ${{ runner.temp }}/profile_remove_oracle_windows.json
             ${{ runner.temp }}/install_oracle_windows.json
+            ${{ runner.temp }}/guard_oracle_windows.json
+            ${{ runner.temp }}/guard_doctor_oracle_windows.json
             target/init-oracle/go-bin/*-stderr.log
             target/init-oracle/go-bin/*-stdout.log
           retention-days: 14
