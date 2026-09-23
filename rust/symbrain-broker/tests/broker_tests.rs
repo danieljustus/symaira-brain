@@ -124,6 +124,10 @@ fn in_flight_child_call_observes_connection_cancellation() {
         .expect("join cancellation worker")
         .expect_err("cancelled call must fail");
     assert!(matches!(error, BrokerError::Cancelled { .. }));
+    assert_eq!(
+        error.to_string(),
+        "broker: tools/call canceled: context canceled"
+    );
     assert!(started.elapsed() < Duration::from_secs(1));
     server.shutdown();
 }

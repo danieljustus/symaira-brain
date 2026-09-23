@@ -31,7 +31,7 @@ impl fmt::Display for BackendError {
             Self::Closed { op, detail } => {
                 write!(f, "broker: {op}: child closed: {detail}")
             }
-            Self::Cancelled { op } => write!(f, "broker: {op}: cancelled"),
+            Self::Cancelled { op } => write!(f, "broker: {op} canceled: context canceled"),
             Self::Internal(message) => f.write_str(message),
         }
     }

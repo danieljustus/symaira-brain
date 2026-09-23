@@ -70,6 +70,14 @@ type fixture struct {
 	ProfileTOML   string            `json:"profile_toml"`
 	ChildTools    []childTool       `json:"child_tools"`
 	Cases         []caseExpectation `json:"cases"`
+	Cancellation  cancellationCase  `json:"cancellation"`
+}
+
+type cancellationCase struct {
+	Request          request `json:"request"`
+	ChildCallStarted bool    `json:"child_call_started"`
+	ConnectionCancel bool    `json:"connection_cancelled"`
+	Stdout           string  `json:"stdout"`
 }
 
 func tools(toolError bool) []childTool {
@@ -217,6 +225,124 @@ func runCase(root, fakePath string, requests []request, childTools []childTool) 
 	return result, nil
 }
 
+func runCancellationCase(root, fakePath string) (cancellationCase, error) {
+	home, err := os.MkdirTemp(root, "gateway-cancel-home-")
+	if err != nil {
+		return cancellationCase{}, err
+	}
+	defer os.RemoveAll(home)
+
+	configDir := filepath.Join(home, ".config", "symbrain", "profiles")
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
+		return cancellationCase{}, err
+	}
+	if err := os.WriteFile(filepath.Join(configDir, "gateway-fixture.toml"), []byte(profileTOML), 0o600); err != nil {
+		return cancellationCase{}, err
+	}
+
+	oldHome, hadHome := os.LookupEnv("HOME")
+	oldConfig, hadConfig := os.LookupEnv("XDG_CONFIG_HOME")
+	defer func() {
+		if hadHome {
+			_ = os.Setenv("HOME", oldHome)
+		} else {
+			_ = os.Unsetenv("HOME")
+		}
+		if hadConfig {
+			_ = os.Setenv("XDG_CONFIG_HOME", oldConfig)
+		} else {
+			_ = os.Unsetenv("XDG_CONFIG_HOME")
+		}
+	}()
+	if err := os.Setenv("HOME", home); err != nil {
+		return cancellationCase{}, err
+	}
+	if err := os.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config")); err != nil {
+		return cancellationCase{}, err
+	}
+	p, err := profile.Load("gateway-fixture")
+	if err != nil {
+		return cancellationCase{}, fmt.Errorf("load fixture profile: %w", err)
+	}
+
+	childTools := []childTool{{Name: "health", Description: "slow cancellation probe", Behavior: "slow"}}
+	toolJSON, err := json.Marshal(childTools)
+	if err != nil {
+		return cancellationCase{}, err
+	}
+	marker := filepath.Join(home, "child-call-started")
+	discard := slog.New(slog.NewTextHandler(io.Discard, nil))
+	managed := broker.NewManagedServer(broker.ServerConfig{
+		Name:            "vault",
+		BinaryPath:      fakePath,
+		Env:             []string{"FAKEMCP_TOOLS=" + string(toolJSON), "FAKEMCP_SLOW_MS=5000", "FAKEMCP_CALL_MARKER=" + marker},
+		InitTimeout:     2 * time.Second,
+		CallTimeout:     10 * time.Second,
+		ShutdownTimeout: 25 * time.Millisecond,
+		Logger:          discard,
+	})
+	defer managed.Shutdown()
+	server := gateway.New(p, map[string]*broker.ManagedServer{"vault": managed}, discard, nil, "dev")
+
+	req := callRequest(2, "vault_health", map[string]any{"probe": "cancel"})
+	data, err := json.Marshal(req)
+	if err != nil {
+		return cancellationCase{}, err
+	}
+	data = append(data, '\n')
+	inputReader, inputWriter := io.Pipe()
+	defer inputReader.Close()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var output bytes.Buffer
+	serveDone := make(chan error, 1)
+	go func() { serveDone <- server.ServeIO(ctx, inputReader, &output) }()
+	if _, err := inputWriter.Write(data); err != nil {
+		_ = inputWriter.Close()
+		return cancellationCase{}, fmt.Errorf("write cancellation request: %w", err)
+	}
+
+	deadline := time.NewTimer(3 * time.Second)
+	ticker := time.NewTicker(5 * time.Millisecond)
+	defer deadline.Stop()
+	defer ticker.Stop()
+	for {
+		if contents, err := os.ReadFile(marker); err == nil && strings.TrimSpace(string(contents)) == "health" {
+			break
+		}
+		select {
+		case err := <-serveDone:
+			_ = inputWriter.Close()
+			return cancellationCase{}, fmt.Errorf("gateway exited before child call started: %v", err)
+		case <-ticker.C:
+		case <-deadline.C:
+			cancel()
+			_ = inputWriter.Close()
+			serveErr := <-serveDone
+			contents, markerErr := os.ReadFile(marker)
+			return cancellationCase{}, fmt.Errorf("timed out waiting for child tools/call marker (serve=%v, marker=%q, marker_error=%v, child_error=%v, stdout=%q)", serveErr, contents, markerErr, managed.LastError(), output.String())
+		}
+	}
+
+	cancel()
+	_ = inputWriter.Close()
+	select {
+	case err := <-serveDone:
+		if err != context.Canceled {
+			return cancellationCase{}, fmt.Errorf("serve cancelled session: got %v, want context canceled", err)
+		}
+	case <-time.After(3 * time.Second):
+		return cancellationCase{}, fmt.Errorf("serve did not finish after connection cancellation")
+	}
+
+	return cancellationCase{
+		Request:          req,
+		ChildCallStarted: true,
+		ConnectionCancel: true,
+		Stdout:           output.String(),
+	}, nil
+}
+
 func normalizeRuntimeOutput(output string) string {
 	const marker = `\"generated_at\":\"`
 	start := strings.Index(output, marker)
@@ -321,6 +447,11 @@ func generate(root string) (fixture, error) {
 		got.ID = tc.id
 		result.Cases = append(result.Cases, got)
 	}
+	cancelled, err := runCancellationCase(root, fakePath)
+	if err != nil {
+		return fixture{}, fmt.Errorf("case tools-call-connection-cancelled: %w", err)
+	}
+	result.Cancellation = cancelled
 	return result, nil
 }
 
