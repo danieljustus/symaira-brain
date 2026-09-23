@@ -286,19 +286,23 @@ pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> S
 
 pub(crate) fn source_path(source: Source) -> PathBuf {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    // Join components so Windows diagnostics use native separators like filepath.Join.
     match source.client {
-        "hermes" => home.join(".config/hermes/config.json"),
-        "cursor" => home.join(".cursor/mcp.json"),
-        "vscode" => home.join(".vscode/mcp.json"),
-        "opencode" => home.join(".config/opencode/config.json"),
-        "claude-desktop" if cfg!(target_os = "macos") => {
-            home.join("Library/Application Support/Claude/claude_desktop_config.json")
-        }
+        "hermes" => home.join(".config").join("hermes").join("config.json"),
+        "cursor" => home.join(".cursor").join("mcp.json"),
+        "vscode" => home.join(".vscode").join("mcp.json"),
+        "opencode" => home.join(".config").join("opencode").join("config.json"),
+        "claude-desktop" if cfg!(target_os = "macos") => home
+            .join("Library")
+            .join("Application Support")
+            .join("Claude")
+            .join("claude_desktop_config.json"),
         "claude-desktop" => env::var_os("XDG_CONFIG_HOME")
             .filter(|v| !v.is_empty())
             .map(PathBuf::from)
             .map_or_else(|| home.join(".config"), PathBuf::from)
-            .join("claude/claude_desktop_config.json"),
+            .join("claude")
+            .join("claude_desktop_config.json"),
         _ => PathBuf::new(),
     }
 }
