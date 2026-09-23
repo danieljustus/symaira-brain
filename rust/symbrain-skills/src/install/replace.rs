@@ -9,15 +9,15 @@ use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use ambient_authority::ambient_authority;
 #[cfg(unix)]
 use cap_fs_ext::OpenOptionsExt;
-use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
+use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 #[cfg(unix)]
 use cap_std::fs::PermissionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 
 use super::sync::{sync_dir, sync_tree};
+use crate::cap_root::{is_reparse_point, open_child_nofollow, open_filesystem_root};
 use crate::model::{MAX_INPUT_SIZE, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError};
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
@@ -55,7 +55,7 @@ pub(crate) fn replace_tree(
     let existing = root.symlink_metadata(&name).ok();
     if existing
         .as_ref()
-        .is_some_and(|metadata| metadata.file_type().is_symlink())
+        .is_some_and(|metadata| metadata.file_type().is_symlink() || is_reparse_point(metadata))
     {
         return Err(SkillError("destination skill path is a symlink".to_owned()));
     }
@@ -153,25 +153,26 @@ pub(crate) fn unique_name(prefix: &str) -> Result<PathBuf, SkillError> {
 /// Opens an existing directory without creating components or following
 /// symlink ancestors. Read-only callers use this to avoid changing status
 /// scans merely by probing absent target roots.
-pub(crate) fn open_existing_dir(path: &Path) -> Result<Dir, SkillError> {
-    let absolute = std::path::absolute(path)
-        .map_err(|error| SkillError(format!("resolve existing root: {error}")))?;
-    let mut current = Dir::open_ambient_dir(Path::new("/"), ambient_authority())
-        .map_err(|error| SkillError(format!("open filesystem root: {error}")))?;
+pub(crate) fn open_existing_dir(path: &Path) -> io::Result<Dir> {
+    let absolute = std::path::absolute(path)?;
+    let mut current = open_filesystem_root(&absolute)?;
     let mut first_normal = true;
     for component in absolute.components() {
         let Component::Normal(name) = component else {
-            if matches!(component, Component::RootDir) {
+            if matches!(component, Component::Prefix(_) | Component::RootDir) {
                 continue;
             }
-            return Err(SkillError("unsafe existing root path".to_owned()));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "unsafe existing root path",
+            ));
         };
-        let next = if first_normal && name == "var" {
+        let next = if cfg!(unix) && first_normal && name == "var" {
             current.open_dir(name)
         } else {
-            current.open_dir_nofollow(name)
+            open_child_nofollow(&current, Path::new(name))
         };
-        current = next.map_err(|error| SkillError(format!("open existing root: {error}")))?;
+        current = next?;
         first_normal = false;
     }
     Ok(current)
@@ -180,20 +181,20 @@ pub(crate) fn open_existing_dir(path: &Path) -> Result<Dir, SkillError> {
 pub(crate) fn open_trusted_dir(path: &Path) -> Result<Dir, SkillError> {
     let absolute = std::path::absolute(path)
         .map_err(|error| SkillError(format!("resolve trusted root: {error}")))?;
-    let mut current = Dir::open_ambient_dir(Path::new("/"), ambient_authority())
+    let mut current = open_filesystem_root(&absolute)
         .map_err(|error| SkillError(format!("open filesystem root: {error}")))?;
     let mut first_normal = true;
     for component in absolute.components() {
         let Component::Normal(name) = component else {
-            if matches!(component, Component::RootDir) {
+            if matches!(component, Component::Prefix(_) | Component::RootDir) {
                 continue;
             }
             return Err(SkillError("unsafe trusted root path".to_owned()));
         };
-        let next = if first_normal && name == "var" {
+        let next = if cfg!(unix) && first_normal && name == "var" {
             current.open_dir(name)
         } else {
-            current.open_dir_nofollow(name)
+            open_child_nofollow(&current, Path::new(name))
         };
         first_normal = false;
         current = match next {
@@ -202,8 +203,7 @@ pub(crate) fn open_trusted_dir(path: &Path) -> Result<Dir, SkillError> {
                 current.create_dir(name).map_err(|error| {
                     SkillError(format!("create trusted root component: {error}"))
                 })?;
-                current
-                    .open_dir_nofollow(name)
+                open_child_nofollow(&current, Path::new(name))
                     .map_err(|error| SkillError(format!("open trusted root component: {error}")))?
             }
             Err(error) => return Err(SkillError(format!("open trusted root: {error}"))),
@@ -225,8 +225,7 @@ fn ensure_dirs(root: &Dir, relative: &Path) -> Result<(), SkillError> {
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
             Err(error) => return Err(SkillError(format!("create output directory: {error}"))),
         }
-        current = current
-            .open_dir_nofollow(name)
+        current = open_child_nofollow(&current, Path::new(name))
             .map_err(|error| SkillError(format!("open output directory: {error}")))?;
     }
     Ok(())
@@ -287,7 +286,7 @@ fn copy_tree(
         let metadata = source_root
             .symlink_metadata(&source_path)
             .map_err(|error| SkillError(format!("stat rendered entry: {error}")))?;
-        if metadata.file_type().is_symlink() {
+        if metadata.file_type().is_symlink() || is_reparse_point(&metadata) {
             return Err(SkillError("rendered tree contains a symlink".to_owned()));
         }
         if metadata.is_dir() {

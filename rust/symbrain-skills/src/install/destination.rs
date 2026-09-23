@@ -140,8 +140,8 @@ pub(crate) fn entry_metadata(path: &Path) -> Result<Option<cap_std::fs::Metadata
         .ok_or_else(|| SkillError("path has no parent".to_owned()))?;
     let root = match open_existing_dir(parent) {
         Ok(root) => root,
-        Err(error) if error.0.contains("No such file or directory") => return Ok(None),
-        Err(error) => return Err(error),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(SkillError(format!("open existing root: {error}"))),
     };
     let name = safe_name(path.file_name())?;
     match root.symlink_metadata(name) {

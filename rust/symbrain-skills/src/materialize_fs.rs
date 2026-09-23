@@ -91,15 +91,15 @@ fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result
 fn open_root(path: &Path) -> io::Result<Dir> {
     let absolute = std::path::absolute(path)?;
     let absolute = normalize_system_alias(&absolute);
-    let mut root = Dir::open_ambient_dir(Path::new("/"), ambient_authority())?;
+    let mut root = open_filesystem_root(&absolute)?;
     for component in absolute.components() {
         let Component::Normal(name) = component else {
-            if matches!(component, Component::RootDir) {
+            if matches!(component, Component::Prefix(_) | Component::RootDir) {
                 continue;
             }
             return Err(io::Error::new(io::ErrorKind::InvalidInput, "unsafe destination root"));
         };
-        match root.open_dir_nofollow(name) {
+        match open_child_nofollow(&root, Path::new(name)) {
             Ok(child) => root = child,
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
                 root.create_dir(name).map_err(|error| {
@@ -108,7 +108,7 @@ fn open_root(path: &Path) -> io::Result<Dir> {
                         format!("create destination component {}: {error}", name.to_string_lossy()),
                     )
                 })?;
-                root = root.open_dir_nofollow(name)?;
+                root = open_child_nofollow(&root, Path::new(name))?;
             }
             Err(error) => return Err(error),
         }
@@ -146,7 +146,7 @@ fn ensure_dir(root: &Dir, relative: &Path) -> io::Result<()> {
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
             Err(error) => return Err(error),
         }
-        current = current.open_dir_nofollow(name)?;
+        current = open_child_nofollow(&current, Path::new(name))?;
     }
     Ok(())
 }
@@ -285,9 +285,13 @@ fn sync_dir(root: &Dir, path: &Path, fault_operation: Option<&str>) -> io::Resul
         .map_err(io::Error::from)?;
         rustix::fs::fsync(&fd).map_err(io::Error::from)
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
     {
-        root.open_dir_nofollow(path)?.into_std_file().sync_all()
+        sync_windows_dir(root, path)
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        open_child_nofollow(root, path)?.into_std_file().sync_all()
     }
 }
 
