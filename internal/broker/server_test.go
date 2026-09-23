@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"syscall"
 	"testing"
@@ -350,6 +351,12 @@ func TestManagedServer_NoZombieProcesses(t *testing.T) {
 	case <-c.Exited():
 	case <-time.After(5 * time.Second):
 		t.Fatal("child process was not reaped after Shutdown()")
+	}
+
+	if runtime.GOOS == "windows" {
+		// The exited channel closes only after cmd.Wait has reaped the child.
+		// Windows does not support the Unix signal-zero liveness probe below.
+		return
 	}
 
 	// Verify process is dead (kill with signal 0).

@@ -3,6 +3,7 @@ package harness
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
@@ -287,38 +288,38 @@ func resolveClaudeDesktopConfigPath(goos string, getenv func(string) string) (st
 
 	switch goos {
 	case "darwin":
-		home, err := userHomeDirFor(getenv)
+		home, err := userHomeDirFor(goos, getenv)
 		if err != nil {
 			return "", err
 		}
-		return filepath.Join(home, "Library", "Application Support", "Claude", filename), nil
+		return path.Join(home, "Library", "Application Support", "Claude", filename), nil
 	case "windows":
 		if appData := getenv("APPDATA"); appData != "" {
 			return filepath.Join(appData, "Claude", filename), nil
 		}
-		home, err := userHomeDirFor(getenv)
+		home, err := userHomeDirFor(goos, getenv)
 		if err != nil {
 			return "", err
 		}
 		return filepath.Join(home, "AppData", "Roaming", "Claude", filename), nil
 	default: // linux and other XDG-style platforms
 		if base := getenv("XDG_CONFIG_HOME"); base != "" {
-			return filepath.Join(base, "Claude", filename), nil
+			return path.Join(base, "Claude", filename), nil
 		}
-		home, err := userHomeDirFor(getenv)
+		home, err := userHomeDirFor(goos, getenv)
 		if err != nil {
 			return "", err
 		}
-		return filepath.Join(home, ".config", "Claude", filename), nil
+		return path.Join(home, ".config", "Claude", filename), nil
 	}
 }
 
 // userHomeDirFor mirrors os.UserHomeDir's platform lookup but reads through
 // the injected getenv, so resolveClaudeDesktopConfigPath is fully
 // deterministic under test.
-func userHomeDirFor(getenv func(string) string) (string, error) {
+func userHomeDirFor(goos string, getenv func(string) string) (string, error) {
 	env := "HOME"
-	if runtime.GOOS == "windows" {
+	if goos == "windows" {
 		env = "USERPROFILE"
 	}
 	if v := getenv(env); v != "" {

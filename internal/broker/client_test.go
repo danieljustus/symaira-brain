@@ -475,6 +475,10 @@ func TestDiscover_OverrideRequiresExecutableRegularFile(t *testing.T) {
 func TestDiscover_ManagedDirectorySelection(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	if runtime.GOOS == "windows" {
+		// os.UserHomeDir ignores HOME on Windows and reads USERPROFILE.
+		t.Setenv("USERPROFILE", home)
+	}
 	t.Setenv("PATH", "")
 	binDir := filepath.Join(home, ".symaira", "bin")
 	if err := os.MkdirAll(binDir, 0o755); err != nil {

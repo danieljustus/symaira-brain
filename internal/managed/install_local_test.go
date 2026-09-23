@@ -107,7 +107,7 @@ func TestInstall_WritesReleaseProvenance(t *testing.T) {
 		AssetPrefix: "example-core",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	checksumHex := HashBinary(archive)
 	assetName := core.AssetName(goos, goarch)
 	checksumsContent := fmt.Sprintf("%s  %s\n", checksumHex, assetName)
