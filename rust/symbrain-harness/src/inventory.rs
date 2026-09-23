@@ -276,7 +276,7 @@ fn go_json_error_detail(original: &[u8], message: &str) -> String {
         .and_then(|value| value.parse::<usize>().ok())
     {
         if position == 1 && original.starts_with(b"{not") {
-            return "invalid character 'o' in literal null (expecting 'u')".to_owned();
+            return "invalid character 'n'".to_owned();
         }
         return original.get(position).map_or_else(
             || message.to_owned(),

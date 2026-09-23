@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "go_revision": "67585b5453bb81f51025c1adbac4e6625bb8d0f1",
-  "generator_sha256": "e7d689950e460ba1928a776177b41fc969dc1f82cb2da211239b2e5698faa723",
+  "generator_sha256": "882d42ecf6e52a28028a2290cf2939408199baa3f35884e06063c7ceb19d0db0",
   "go_sources": {
     "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
     "cmd/symbrain/cmd_profile_add.go": "3883ad6634df715ab3b991ef887e78b0d3ef30138aa3a5260e4181d827d86f03",
@@ -624,7 +624,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\nRefusing to remove. Use --force to override.\n",
+      "stderr": "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude (\u003croot\u003e/home/.claude.json): parse configuration: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\nRefusing to remove. Use --force to override.\n",
       "files": [
         {
           "path": "config",

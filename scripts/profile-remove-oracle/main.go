@@ -206,6 +206,24 @@ func runCase(binary string, definition caseDef) result {
 		"XDG_CONFIG_HOME=" + config,
 		"LANG=C.UTF-8", "LC_ALL=C.UTF-8", "TZ=UTC",
 	}
+	if runtime.GOOS == "windows" {
+		for _, key := range []string{"SystemRoot", "WINDIR", "COMSPEC", "PATHEXT", "PATH", "SystemDrive"} {
+			if value, ok := os.LookupEnv(key); ok {
+				env = append(env, key+"="+value)
+			}
+		}
+		for key, path := range map[string]string{
+			"APPDATA":      filepath.Join(home, "AppData", "Roaming"),
+			"LOCALAPPDATA": filepath.Join(home, "AppData", "Local"),
+			"TEMP":         filepath.Join(root, "temp"),
+			"TMP":          filepath.Join(root, "temp"),
+		} {
+			if err := os.MkdirAll(path, 0o700); err != nil {
+				fatalf("create isolated Windows %s: %v", key, err)
+			}
+			env = append(env, key+"="+path)
+		}
+	}
 	command := exec.Command(binary, args...)
 	command.Dir = project
 	command.Env = env

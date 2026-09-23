@@ -408,6 +408,7 @@ jobs:
           set -euo pipefail
           cargo test -p symbrain-instructions --test instruction_tests --locked
           cargo test -p symbrain-adapter --test adapter_tests --locked
+          go run ./scripts/usage-oracle -check
           cargo test -p symbrain-usage --test usage_tests --locked
           cargo test -p symbrain-cli --lib usage_cli::tests --locked
       - name: Compare profile removal with the native Go CLI
@@ -417,9 +418,17 @@ jobs:
           set -euo pipefail
           cargo test -p symbrain-cli --test profile_cli_tests --locked
           if [ "${{ matrix.os }}" != windows-2025 ]; then
-            go run ./scripts/profile-remove-oracle -check
+            if ! go run ./scripts/profile-remove-oracle -check; then
+              go run ./scripts/profile-remove-oracle -output "$RUNNER_TEMP/profile-remove-generated.json"
+              diff -u "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_$(go env GOOS).json" "$RUNNER_TEMP/profile-remove-generated.json" || true
+              exit 1
+            fi
           fi
           go run ./scripts/profile-remove-oracle --compare-rust "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}"
+      - name: Test Rust workspace on native Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: cargo test --workspace --all-features --locked --no-fail-fast
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
