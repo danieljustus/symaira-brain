@@ -133,6 +133,7 @@ fn build_go_fake_mcp(directory: &Path) -> PathBuf {
 }
 
 fn cancellation_child_env(marker: &Path) -> Vec<(String, String)> {
+    #[allow(unused_mut)] // Windows adds process environment needed by the Go child.
     let mut env = vec![
         (
             "FAKEMCP_TOOLS".to_string(),
