@@ -39,6 +39,34 @@ def require_pinned_bytes(data: bytes, expected: str, label: str) -> None:
     require(actual == expected, f"{label} differs from pinned live tap bytes: {actual}")
 
 
+def verify_tap_links(formula: str, cask: str, manifest: dict) -> tuple[int, int]:
+    version = manifest["version"]
+    repo_url = f"https://{manifest['repository']}/releases/download/v{version}/"
+    assets = {asset["name"]: asset for asset in manifest["assets"]}
+    expected_formula = {
+        name: asset["digest"].removeprefix("sha256:")
+        for name, asset in assets.items()
+        if name.endswith((".tar.gz", ".zip")) and "_windows_" not in name
+    }
+    formula_pairs = re.findall(
+        r'^\s*url "(' + re.escape(repo_url) + r'([^"]+))"\s*\n\s*sha256 "([0-9a-f]{64})"',
+        formula,
+        re.MULTILINE,
+    )
+    actual_formula = {name: digest for _, name, digest in formula_pairs}
+    require(len(formula_pairs) == len(expected_formula), "Homebrew formula has missing or duplicate release links")
+    require(actual_formula == expected_formula, "Homebrew formula URLs/checksums differ from the release manifest")
+
+    dmg_name = f"Symaira-Brain-{version}-macos.dmg"
+    dmg_digest = assets[dmg_name]["digest"].removeprefix("sha256:")
+    expected_cask_url = f"https://{manifest['repository']}/releases/download/v#{{version}}/Symaira-Brain-#{{version}}-macos.dmg"
+    require(re.findall(r'^\s*version "([^"]+)"\s*$', cask, re.MULTILINE) == [version], "Homebrew cask version differs from the release manifest")
+    require(re.findall(r'^\s*sha256 "([0-9a-f]{64})"\s*$', cask, re.MULTILINE) == [dmg_digest], "Homebrew cask checksum differs from the release manifest")
+    cask_urls = re.findall(r'^\s*url "([^"]+)"\s*$', cask, re.MULTILINE)
+    require(cask_urls.count(expected_cask_url) == 1, "Homebrew cask URL differs from the release manifest")
+    return len(expected_formula), 1
+
+
 def exact_asset_files(asset_dir: Path, expected_names: set[str]) -> dict[str, Path]:
     entries = list(asset_dir.iterdir())
     ensure_exact_asset_names([path.name for path in entries], expected_names)
@@ -160,7 +188,8 @@ def main() -> None:
     tap_files = tap_manifest["files"]
     require_pinned_bytes(args.formula.read_bytes(), tap_files["Formula/symbrain.rb"], "Homebrew formula")
     require_pinned_bytes(args.cask.read_bytes(), tap_files["Casks/symbrain.rb"], "Homebrew cask")
-    print(f"ok: Homebrew formula and cask bytes match the verified tap snapshot at {tap_manifest['commit']}")
+    formula_count, cask_count = verify_tap_links(args.formula.read_text(), args.cask.read_text(), manifest)
+    print(f"ok: Homebrew tap snapshot {tap_manifest['commit']}; formula links {formula_count}, cask links {cask_count}")
 
 
 if __name__ == "__main__":

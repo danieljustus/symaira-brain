@@ -4,6 +4,7 @@
 import importlib.util
 import hashlib
 import io
+import json
 import stat
 import sys
 import unittest
@@ -49,6 +50,26 @@ class ReleaseVerifierTests(unittest.TestCase):
             with self.subTest(changed=changed):
                 with self.assertRaisesRegex(SystemExit, "differs from pinned live tap bytes"):
                     verify_release.require_pinned_bytes(changed, digest, "Homebrew source")
+
+    def test_wrong_manifest_formula_digest_is_rejected(self) -> None:
+        manifest = json.loads(verify_release.DEFAULT_MANIFEST.read_text())
+        assets = {asset["name"]: asset for asset in manifest["assets"]}
+        formula = "\n".join(
+            f'url "https://{manifest["repository"]}/releases/download/v{manifest["version"]}/{name}"\n'
+            f'sha256 "{assets[name]["digest"].removeprefix("sha256:")}"'
+            for name in sorted(assets)
+            if name.endswith((".tar.gz", ".zip")) and "_windows_" not in name
+        )
+        dmg_name = f'Symaira-Brain-{manifest["version"]}-macos.dmg'
+        cask = (
+            f'cask "symbrain" do\n  version "{manifest["version"]}"\n'
+            f'  sha256 "{assets[dmg_name]["digest"].removeprefix("sha256:")}"\n'
+            f'  url "https://{manifest["repository"]}/releases/download/v#{{version}}/Symaira-Brain-#{{version}}-macos.dmg"\nend\n'
+        )
+        formula_asset = next(name for name in assets if name.endswith("darwin_arm64.tar.gz"))
+        assets[formula_asset]["digest"] = "sha256:" + "0" * 64
+        with self.assertRaisesRegex(SystemExit, "Homebrew formula URLs/checksums differ"):
+            verify_release.verify_tap_links(formula, cask, manifest)
 
 
 if __name__ == "__main__":
