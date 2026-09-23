@@ -28,16 +28,10 @@ const FIXTURE_PATH: &str = "../symbrain-guard-core/tests/fixtures/doctor_oracle.
 /// Cases whose bytes this port deliberately declines to produce, with the
 /// reason each one is unreproducible. Every one of them must fall back to Go
 /// *before* writing any output — see `guard_doctor.rs`'s module docs.
-const GATED_CASES: &[(&str, &str)] = &[
-    (
-        "config_error",
-        "Go prints BurntSushi's own parser text (`toml: line 1: expected '.' or '=' …`)",
-    ),
-    (
-        "audit_log_corrupt_anchor",
-        "Go prints encoding/json's own error text (`invalid character 'o' in literal null …`)",
-    ),
-];
+const GATED_CASES: &[(&str, &str)] = &[(
+    "config_error",
+    "Go prints BurntSushi's own parser text (`toml: line 1: expected '.' or '=' …`)",
+)];
 
 fn fixture() -> serde_json::Value {
     let path = std::env::var_os("SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE").map_or_else(
@@ -224,10 +218,11 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
             "empty_machine",
             "healthy_config",
             "audit_log_without_anchor",
+            "audit_log_corrupt_anchor",
             "discovered_server_denied",
             "discovered_server_secret_risk",
         ],
         "the set of natively handled cases changed"
     );
-    assert_eq!(gated, vec!["config_error", "audit_log_corrupt_anchor"]);
+    assert_eq!(gated, vec!["config_error"]);
 }

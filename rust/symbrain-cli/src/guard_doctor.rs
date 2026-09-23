@@ -21,8 +21,8 @@
 //! * a config file that exists but does not parse/validate — Go prints
 //!   `BurntSushi`'s own parser text (`toml: line 1: expected '.' or '='…`),
 //!   which no Rust TOML crate reproduces;
-//! * an audit anchor that exists but does not parse — Go prints
-//!   `encoding/json`'s own error text;
+//! * an audit anchor with valid JSON but the wrong `ChainAnchor` shape still
+//!   gates, because serde's type errors differ from `encoding/json`;
 //! * any discovery source that exists but fails to read or parse, or an
 //!   entry with neither `command` nor `url` — Go turns those into an
 //!   `mcp servers  error: discovery: …` line carrying the upstream parser's
@@ -107,7 +107,7 @@ fn build_report() -> Option<(String, u8)> {
     } else {
         row("policy", "defaults only (no rules — deny by default)");
     }
-    row("audit log", audit.as_str());
+    row("audit log", audit.0.as_str());
 
     let allowlist = loaded.allowlist;
     if allowlist.is_empty() {
@@ -134,6 +134,7 @@ fn build_report() -> Option<(String, u8)> {
 
     let discovery_problems = usize::from(discovery_error.is_some());
     let problems = discovery_problems
+        + usize::from(audit.1)
         + checks
             .iter()
             .filter(|c| !c.allowed || !c.secrets.is_empty())
@@ -363,10 +364,13 @@ fn read_allowlist(doc: &DocumentMut) -> Option<Vec<SpawnEntry>> {
 // ---------------------------------------------------------------------------
 
 /// Ports doctor's audit-log branch. `None` gates to Go.
-fn audit_status(log_path: &Path) -> Option<String> {
+fn audit_status(log_path: &Path) -> Option<(String, bool)> {
     match fs::metadata(log_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
-            return Some("not initialized (created on first 'symguard decide')".to_owned());
+            return Some((
+                "not initialized (created on first 'symguard decide')".to_owned(),
+                false,
+            ));
         }
         // Go prints `error: <the os.Stat error>` here; not reproducible.
         Err(_) => return None,
@@ -375,18 +379,34 @@ fn audit_status(log_path: &Path) -> Option<String> {
     // audit.DefaultAnchorPath(logPath) == logPath + ".anchor"
     let mut anchor_path = log_path.as_os_str().to_owned();
     anchor_path.push(".anchor");
-    let anchor = match fs::read(PathBuf::from(anchor_path)) {
+    let anchor_path = PathBuf::from(anchor_path);
+    let anchor = match fs::read(&anchor_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => None,
         Err(_) => return None,
         Ok(data) => Some(data),
     };
     match anchor {
-        None => Some("ok (JSONL, chain anchor pending Phase 3 sink)".to_owned()),
+        None => Some((
+            "ok (JSONL, chain anchor pending Phase 3 sink)".to_owned(),
+            false,
+        )),
         Some(data) => {
-            // auditkit.ReadCheckpoint json.Unmarshal's into ChainAnchor; any
-            // failure carries encoding/json's own message, so gate on it.
+            // Syntax errors come from the shared Go-compatible scanner. Keep
+            // valid-JSON type/shape failures gated because serde diagnostics
+            // do not match encoding/json.
+            if let Err(error) =
+                symbrain_guard_core::external_decision::validate_go_json_syntax(&data)
+            {
+                return Some((
+                    format!(
+                        "error: anchor {}: auditkit: parse anchor: {error}",
+                        anchor_path.display()
+                    ),
+                    true,
+                ));
+            }
             serde_json::from_slice::<ChainAnchor>(&data).ok()?;
-            Some("ok (hash-chained, anchor present)".to_owned())
+            Some(("ok (hash-chained, anchor present)".to_owned(), false))
         }
     }
 }
@@ -782,12 +802,12 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let log = dir.path().join("audit.log");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("not initialized (created on first 'symguard decide')")
         );
         fs::write(&log, b"{\"entry_id\":\"1\"}\n").expect("write log");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("ok (JSONL, chain anchor pending Phase 3 sink)")
         );
         fs::write(
@@ -796,11 +816,22 @@ mod tests {
         )
         .expect("write anchor");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("ok (hash-chained, anchor present)")
         );
-        // A corrupt anchor is Go's encoding/json message — gate.
+        // Syntax errors use the shared Go-compatible JSON scanner.
         fs::write(dir.path().join("audit.log.anchor"), b"not json").expect("write anchor");
+        let status = audit_status(&log).expect("syntax error is native");
+        assert!(status.0.ends_with(
+            "auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')"
+        ));
+        assert!(status.1);
+        // Valid JSON with an incompatible type remains gated.
+        fs::write(
+            dir.path().join("audit.log.anchor"),
+            br#"{"entry_count":"one"}"#,
+        )
+        .expect("write anchor");
         assert!(audit_status(&log).is_none());
     }
 
