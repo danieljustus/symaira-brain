@@ -5,14 +5,16 @@ use std::io::{self, Read, Write};
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use cap_fs_ext::{DirExt, FollowSymlinks, OpenOptionsFollowExt};
-use cap_std::ambient_authority;
+#[cfg(unix)]
+use cap_fs_ext::DirExt;
+use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 use cap_std::fs::{Dir, OpenOptions};
 #[cfg(unix)]
 use cap_std::fs::{OpenOptionsExt, PermissionsExt};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::cap_root::{is_reparse_point, open_child_nofollow, open_filesystem_root};
 use crate::load::read_bundle_bytes;
 use crate::model::{
     Bundle, MAX_INPUT_SIZE, MAX_RESOURCE_SIZE, MAX_TOTAL_RESOURCE_BYTES, SkillError,
@@ -112,7 +114,7 @@ fn materialize_inner(
     let _destination_lock =
         lock_destination(&destination, parent, &relative).map_err(|error| io_error(&error))?;
     if let Ok(metadata) = destination.symlink_metadata(&relative) {
-        if metadata.file_type().is_symlink() {
+        if metadata.file_type().is_symlink() || is_reparse_point(&metadata) {
             return Err(SkillError(
                 "destination skill directory is a symlink".into(),
             ));
