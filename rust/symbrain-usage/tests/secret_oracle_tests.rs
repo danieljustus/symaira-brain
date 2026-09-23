@@ -2,13 +2,11 @@
 //! `internal/memory/secrets` — and re-runs every case through the native
 //! resolution path against an equivalent fake `symvault` on PATH. Never the
 //! real binary, keychain, or network.
-#![cfg(unix)]
-
 use std::collections::BTreeMap;
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, MutexGuard, PoisonError};
+use std::process::Command;
+use std::sync::{Mutex, MutexGuard, OnceLock, PoisonError};
 use std::time::Duration;
 
 use serde::Deserialize;
@@ -23,6 +21,12 @@ const ORACLE_ENV: &[&str] = &[
     "SECRET_ORACLE_PRESENT",
     "SECRET_ORACLE_ABSENT",
     "SECRET_ORACLE_OR_ENV",
+    "SECRET_ORACLE_FAKE_ARGS_PATH",
+    "SECRET_ORACLE_FAKE_STDOUT",
+    "SECRET_ORACLE_FAKE_STDOUT_BYTES",
+    "SECRET_ORACLE_FAKE_STDERR",
+    "SECRET_ORACLE_FAKE_EXIT",
+    "SECRET_ORACLE_FAKE_SLEEP_MS",
 ];
 const SHIPPED_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -132,47 +136,64 @@ fn remove_env(name: &str) {
     unsafe { std::env::remove_var(name) };
 }
 
-fn shell_quote(value: &str) -> String {
-    format!("'{}'", value.replace('\'', "'\"'\"'"))
+fn fake_symvault_image() -> &'static [u8] {
+    static IMAGE: OnceLock<Vec<u8>> = OnceLock::new();
+    IMAGE.get_or_init(|| {
+        let temp = tempfile::tempdir().expect("fake symvault build directory");
+        let source =
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/support/fake_symvault.rs");
+        let output = temp.path().join(executable_name("fake-symvault"));
+        let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
+        let result = Command::new(rustc)
+            .arg("--edition=2024")
+            .arg(source)
+            .arg("-o")
+            .arg(&output)
+            .output()
+            .expect("start rustc for fake symvault");
+        assert!(
+            result.status.success(),
+            "compile fake symvault: {}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        fs::read(output).expect("read compiled fake symvault")
+    })
+}
+
+fn executable_name(base: &str) -> String {
+    if cfg!(windows) {
+        format!("{base}.exe")
+    } else {
+        base.to_owned()
+    }
 }
 
 fn write_fake_symvault(bin_dir: &Path, args_path: &Path, spec: &SymvaultSpec) {
-    use std::fmt::Write;
-    let mut script = format!(
-        "#!/bin/sh\nprintf '%s\\n' \"$@\" >> {}\n",
-        shell_quote(&args_path.to_string_lossy())
+    let path = bin_dir.join(executable_name("symvault"));
+    fs::write(&path, fake_symvault_image()).expect("fake symvault executable");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut permissions = fs::metadata(&path)
+            .expect("fake symvault metadata")
+            .permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(&path, permissions).expect("fake symvault mode");
+    }
+    set_env("SECRET_ORACLE_FAKE_ARGS_PATH", &args_path.to_string_lossy());
+    set_env("SECRET_ORACLE_FAKE_STDOUT", &spec.stdout);
+    set_env(
+        "SECRET_ORACLE_FAKE_STDOUT_BYTES",
+        &spec
+            .stdout_bytes
+            .iter()
+            .map(u8::to_string)
+            .collect::<Vec<_>>()
+            .join(","),
     );
-    // Canned output is written before any sleep so a timeout probe
-    // exercises "value obtained, then deadline" like the Go helper.
-    let _ = writeln!(script, "printf '%s' {}", shell_quote(&spec.stdout));
-    if !spec.stdout_bytes.is_empty() {
-        let mut octal = String::new();
-        for byte in &spec.stdout_bytes {
-            let _ = write!(octal, "\\{byte:03o}");
-        }
-        let _ = writeln!(script, "printf '%b' {}", shell_quote(&octal));
-    }
-    let _ = writeln!(script, "printf '%s' {} >&2", shell_quote(&spec.stderr));
-    if spec.sleep_ms > 0 {
-        // Whole-second sleeps render bare; sub-second values keep three
-        // digits so /bin/sleep gets a stable decimal on every Unix.
-        let seconds = spec.sleep_ms / 1000;
-        let millis = spec.sleep_ms % 1000;
-        if millis == 0 {
-            let _ = writeln!(script, "exec /bin/sleep {seconds}");
-        } else {
-            let _ = writeln!(script, "exec /bin/sleep {seconds}.{millis:03}");
-        }
-    } else {
-        let _ = writeln!(script, "exit {}", spec.exit);
-    }
-    let path = bin_dir.join("symvault");
-    fs::write(&path, script).expect("fake symvault script");
-    let mut permissions = fs::metadata(&path)
-        .expect("fake symvault metadata")
-        .permissions();
-    permissions.set_mode(0o755);
-    fs::set_permissions(&path, permissions).expect("fake symvault mode");
+    set_env("SECRET_ORACLE_FAKE_STDERR", &spec.stderr);
+    set_env("SECRET_ORACLE_FAKE_EXIT", &spec.exit.to_string());
+    set_env("SECRET_ORACLE_FAKE_SLEEP_MS", &spec.sleep_ms.to_string());
 }
 
 struct CaseSetup {
@@ -190,7 +211,8 @@ fn setup_case(input: &Input) -> CaseSetup {
     if let Some(spec) = &input.symvault
         && spec.mode == "fake"
     {
-        write_fake_symvault(&bin_dir, &args_path, spec);
+        // Compile before replacing PATH with the isolated fake-bin directory.
+        let _ = fake_symvault_image();
     }
     let old_path = std::env::var("PATH").unwrap_or_default();
     set_env("PATH", &bin_dir.to_string_lossy());
@@ -199,6 +221,11 @@ fn setup_case(input: &Input) -> CaseSetup {
     }
     for (name, value) in &input.env {
         set_env(name, value);
+    }
+    if let Some(spec) = &input.symvault
+        && spec.mode == "fake"
+    {
+        write_fake_symvault(&bin_dir, &args_path, spec);
     }
     CaseSetup {
         dir,
