@@ -428,8 +428,16 @@ fn non_utf8_keychain_stdout_uses_the_same_fail_closed_decoder() {
     let setup = setup_case(&case.input);
     // This PATH-local stand-in cannot access the operator's login keychain.
     fs::copy(
-        setup.dir.path().join("bin/symvault"),
-        setup.dir.path().join("bin/security"),
+        setup
+            .dir
+            .path()
+            .join("bin")
+            .join(executable_name("symvault")),
+        setup
+            .dir
+            .path()
+            .join("bin")
+            .join(executable_name("security")),
     )
     .expect("fake security executable");
     let error = resolve_reference("keychain://fake/account", "")

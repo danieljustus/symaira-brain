@@ -29,9 +29,8 @@ fn main() {
 
     let stdout_bytes = env("SECRET_ORACLE_FAKE_STDOUT_BYTES");
     let mut stdout = io::stdout().lock();
-    if stdout_bytes.is_empty() {
-        let _ = stdout.write_all(env("SECRET_ORACLE_FAKE_STDOUT").as_bytes());
-    } else {
+    let _ = stdout.write_all(env("SECRET_ORACLE_FAKE_STDOUT").as_bytes());
+    if !stdout_bytes.is_empty() {
         for byte in stdout_bytes.split(',') {
             match byte.parse::<u8>() {
                 Ok(value) => {
