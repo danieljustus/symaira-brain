@@ -3,6 +3,7 @@ package harness
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -81,7 +82,13 @@ func TestBackup_PreservesFileMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Stat(backup): %v", err)
 	}
-	if info.Mode().Perm() != 0o640 {
+	if runtime.GOOS == "windows" {
+		// Windows exposes the read-only bit through FileMode; it cannot
+		// represent the POSIX 0640 group permissions used by this fixture.
+		if info.Mode().Perm()&0o200 == 0 {
+			t.Errorf("backup should remain writable on Windows, mode = %v", info.Mode().Perm())
+		}
+	} else if info.Mode().Perm() != 0o640 {
 		t.Errorf("backup mode = %v, want %v", info.Mode().Perm(), os.FileMode(0o640))
 	}
 }

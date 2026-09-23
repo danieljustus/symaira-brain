@@ -4,6 +4,9 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
+#[cfg(windows)]
+use tempfile::Builder as TempFileBuilder;
+#[cfg(not(windows))]
 use tempfile::NamedTempFile;
 
 /// Retries an operation up to 10 attempts with a 10ms backoff on error.
@@ -68,6 +71,14 @@ pub fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."));
+    #[cfg(windows)]
+    let temp = TempFileBuilder::new()
+        .prefix(&format!(
+            "{}.tmp-",
+            path.file_name().unwrap_or_default().to_string_lossy()
+        ))
+        .tempfile_in(parent)?;
+    #[cfg(not(windows))]
     let temp = NamedTempFile::new_in(parent)?;
     let temp_file = temp.as_file();
     #[cfg(unix)]
@@ -89,16 +100,51 @@ pub fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
         // On Windows and other non-Unix systems, close the temp file handle
         // before renaming so it doesn't hold a sharing lock.
         let temp_path = temp.into_temp_path();
-        atomic_rename(&temp_path, path)?;
+        if let Err(error) = atomic_rename(&temp_path, path) {
+            #[cfg(windows)]
+            return Err(std::io::Error::new(
+                error.kind(),
+                format!(
+                    "rename {} {}: {}",
+                    temp_path.display(),
+                    path.display(),
+                    go_windows_io_error(&error)
+                ),
+            ));
+            #[cfg(not(windows))]
+            return Err(error);
+        }
         // Keep the temp file from being deleted on drop after successful rename.
         std::mem::forget(temp_path);
         Ok(())
     }
 }
 
+#[cfg(windows)]
+fn go_windows_io_error(error: &std::io::Error) -> String {
+    match error.raw_os_error() {
+        Some(5) => "Access is denied.".to_owned(),
+        Some(3) => "The system cannot find the path specified.".to_owned(),
+        _ => error.to_string(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_errors_match_go_path_error_text() {
+        assert_eq!(
+            go_windows_io_error(&std::io::Error::from_raw_os_error(5)),
+            "Access is denied."
+        );
+        assert_eq!(
+            go_windows_io_error(&std::io::Error::from_raw_os_error(3)),
+            "The system cannot find the path specified."
+        );
+    }
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     #[test]

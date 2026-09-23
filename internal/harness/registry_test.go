@@ -3,6 +3,7 @@ package harness
 import (
 	"errors"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -100,7 +101,7 @@ func TestNames_SortedAndComplete(t *testing.T) {
 
 func TestConfigPath_UsesHome(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setTestHome(t, home)
 	t.Setenv("XDG_CONFIG_HOME", "")
 
 	cases := []struct {
@@ -131,7 +132,7 @@ func TestConfigPath_UsesHome(t *testing.T) {
 
 func TestOpencodeConfigPath_RespectsXDGConfigHome(t *testing.T) {
 	home := t.TempDir()
-	t.Setenv("HOME", home)
+	setTestHome(t, home)
 
 	t.Run("default", func(t *testing.T) {
 		t.Setenv("XDG_CONFIG_HOME", "")
@@ -159,6 +160,14 @@ func TestOpencodeConfigPath_RespectsXDGConfigHome(t *testing.T) {
 			t.Errorf("ConfigPath() = %q, want %q", got, want)
 		}
 	})
+}
+
+func setTestHome(t *testing.T, home string) {
+	t.Helper()
+	t.Setenv("HOME", home)
+	if runtime.GOOS == "windows" {
+		t.Setenv("USERPROFILE", home)
+	}
 }
 
 func TestResolveClaudeDesktopConfigPath(t *testing.T) {

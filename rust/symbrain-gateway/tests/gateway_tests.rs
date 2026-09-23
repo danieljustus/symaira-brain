@@ -1,12 +1,19 @@
 use std::collections::BTreeMap;
+use std::fs;
+use std::io::{self, Cursor, Read};
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::mpsc::{self, Receiver};
 use std::sync::{Arc, Mutex};
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use serde_json::value::RawValue;
 use serde_json::{Value, json};
-use symbrain_broker::{CallToolResult, ContentBlock, Tool};
+use symbrain_broker::{CallToolResult, Config, ContentBlock, ManagedServer, Tool};
 use symbrain_gateway::{BackendError, Gateway, GatewayBackend, GatewayError};
-use symbrain_mcp::{Request, Server};
+use symbrain_mcp::{Request, Server, ServerError};
 use symbrain_policy::profile::parse::parse;
 
 const FIXTURE: &str = include_str!("fixtures/gateway_cases.json");
@@ -17,6 +24,7 @@ struct Fixture {
     profile_toml: String,
     child_tools: Vec<FixtureTool>,
     cases: Vec<Case>,
+    cancellation: CancellationCase,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,6 +51,14 @@ struct Case {
     error_classifications: Vec<ErrorClassification>,
 }
 
+#[derive(Debug, Deserialize)]
+struct CancellationCase {
+    request: Value,
+    child_call_started: bool,
+    connection_cancelled: bool,
+    stdout: String,
+}
+
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 struct ErrorClassification {
     request_id: i64,
@@ -54,6 +70,102 @@ struct FixtureBackend {
     tools: Vec<Tool>,
     behavior: BTreeMap<String, String>,
     calls: Mutex<Vec<(String, Option<String>)>>,
+}
+
+struct CancellationReader {
+    input: Cursor<Vec<u8>>,
+    finish: Receiver<()>,
+}
+
+static NEXT_TEST_DIR: AtomicU64 = AtomicU64::new(0);
+
+struct TestTempDir(PathBuf);
+
+impl TestTempDir {
+    fn new() -> Self {
+        let unique = NEXT_TEST_DIR.fetch_add(1, Ordering::Relaxed);
+        let path = std::env::temp_dir().join(format!(
+            "symbrain-gateway-cancel-{}-{unique}",
+            std::process::id()
+        ));
+        fs::create_dir(&path).expect("create cancellation fixture temp directory");
+        Self(path)
+    }
+
+    fn path(&self) -> &Path {
+        &self.0
+    }
+}
+
+impl Drop for TestTempDir {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
+}
+
+fn build_go_fake_mcp(directory: &Path) -> PathBuf {
+    let repository = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .expect("resolve repository root");
+    let mut executable = directory.join("fakemcp");
+    if cfg!(windows) {
+        executable.set_extension("exe");
+    }
+    let output = Command::new("go")
+        .args([
+            "build",
+            "-trimpath",
+            "-o",
+            executable.to_str().expect("fixture path is UTF-8"),
+            "./internal/broker/testdata/fakemcp",
+        ])
+        .current_dir(repository)
+        .env("CGO_ENABLED", "0")
+        .output()
+        .expect("run Go compiler for the same fake child used by the oracle");
+    assert!(
+        output.status.success(),
+        "build Go fake MCP child failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    executable
+}
+
+fn cancellation_child_env(marker: &Path) -> Vec<(String, String)> {
+    #[allow(unused_mut)] // Windows adds process environment needed by the Go child.
+    let mut env = vec![
+        (
+            "FAKEMCP_TOOLS".to_string(),
+            r#"[{"name":"health","description":"slow cancellation probe","behavior":"slow"}]"#
+                .to_string(),
+        ),
+        ("FAKEMCP_SLOW_MS".to_string(), "5000".to_string()),
+        (
+            "FAKEMCP_CALL_MARKER".to_string(),
+            marker.to_string_lossy().into_owned(),
+        ),
+    ];
+    #[cfg(windows)]
+    for key in ["SystemRoot", "windir", "ComSpec", "PATHEXT", "PATH"] {
+        if let Ok(value) = std::env::var(key) {
+            env.push((key.to_string(), value));
+        }
+    }
+    env
+}
+
+impl Read for CancellationReader {
+    fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+        let count = self.input.read(buffer)?;
+        if count > 0 {
+            return Ok(count);
+        }
+        self.finish
+            .recv()
+            .map_err(|error| io::Error::other(error.to_string()))?;
+        Ok(0)
+    }
 }
 
 impl GatewayBackend for FixtureBackend {
@@ -212,6 +324,77 @@ fn fixture_is_the_complete_gateway_black_box_contract() {
             );
         }
     }
+}
+
+#[test]
+fn in_flight_tools_call_cancellation_matches_go_oracle() {
+    let fixture: Fixture = serde_json::from_str(FIXTURE).expect("gateway fixture");
+    assert!(fixture.cancellation.child_call_started);
+    assert!(fixture.cancellation.connection_cancelled);
+
+    let temp = TestTempDir::new();
+    let fake_mcp = build_go_fake_mcp(temp.path());
+    let marker = temp.path().join("child-call-started");
+    let managed = Arc::new(ManagedServer::new(Config {
+        name: "vault".to_string(),
+        binary_path: fake_mcp.to_string_lossy().into_owned(),
+        init_timeout: Duration::from_secs(2),
+        call_timeout: Duration::from_secs(10),
+        shutdown_timeout: Duration::from_millis(25),
+        env: Some(cancellation_child_env(&marker)),
+        ..Config::default()
+    }));
+    let backend: Arc<dyn GatewayBackend> = managed.clone();
+    let profile = parse("gateway-fixture", &fixture.profile_toml).expect("fixture profile");
+    let gateway = Gateway::new(
+        profile,
+        BTreeMap::from([("vault".to_string(), backend)]),
+        "dev",
+    )
+    .expect("gateway assembly");
+    let mut input = serde_json::to_vec(&fixture.cancellation.request).expect("request JSON");
+    input.push(b'\n');
+    let (finish_tx, finish_rx) = mpsc::channel();
+    let reader = CancellationReader {
+        input: Cursor::new(input),
+        finish: finish_rx,
+    };
+    let cancelled = Arc::new(AtomicBool::new(false));
+    let worker_cancelled = Arc::clone(&cancelled);
+    let worker = std::thread::spawn(move || {
+        let server = Server::new(gateway);
+        let mut output = Vec::new();
+        let result = server.serve_io_with_cancel(worker_cancelled.as_ref(), reader, &mut output);
+        (result, output)
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(3);
+    while !fs::read_to_string(&marker).is_ok_and(|calls| calls.lines().any(|call| call == "health"))
+        && Instant::now() < deadline
+    {
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    let child_started =
+        fs::read_to_string(&marker).is_ok_and(|calls| calls.lines().any(|call| call == "health"));
+    if !child_started {
+        cancelled.store(true, Ordering::Release);
+        let _ = finish_tx.send(());
+        let _ = worker.join();
+        managed.shutdown();
+        panic!("gateway never dispatched the in-flight call to the Go fake child");
+    }
+    cancelled.store(true, Ordering::Release);
+    finish_tx
+        .send(())
+        .expect("release reader after cancellation");
+
+    let (result, output) = worker.join().expect("join MCP serve loop");
+    managed.shutdown();
+    assert!(matches!(result, Err(ServerError::Cancelled)));
+    assert_eq!(
+        String::from_utf8(output).expect("UTF-8 response stream"),
+        fixture.cancellation.stdout
+    );
 }
 
 #[test]

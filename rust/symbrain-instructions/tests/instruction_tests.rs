@@ -61,8 +61,11 @@ struct Case {
 }
 
 fn oracle() -> Oracle {
-    serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-        .expect("oracle fixture must be valid JSON")
+    let data = std::env::var_os("SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE").map_or_else(
+        || include_bytes!("fixtures/oracle_expectations.json").to_vec(),
+        |path| std::fs::read(path).expect("native instructions oracle fixture"),
+    );
+    serde_json::from_slice(&data).expect("oracle fixture must be valid JSON")
 }
 
 fn decode(value: &str) -> Vec<u8> {
@@ -337,35 +340,46 @@ fn preserves_non_utf8_bytes_like_go_strings() {
 
 #[test]
 fn source_paths_follow_xdg_and_project_layout() {
-    let home = Path::new("/oracle-home");
+    #[cfg(windows)]
+    let home = std::env::temp_dir()
+        .ancestors()
+        .last()
+        .expect("temp drive root")
+        .join("oracle-home");
+    #[cfg(not(windows))]
+    let home = PathBuf::from("/oracle-home");
     let project = Path::new("/oracle-project");
-    let source = Source::with_environment(Some(project), None, Some(home));
+    let source = Source::with_environment(Some(project), None, Some(&home));
     assert_eq!(
         source.global_path,
-        PathBuf::from("/oracle-home/.config/symbrain/instructions.md")
+        home.join(".config/symbrain/instructions.md")
     );
     assert_eq!(
         source.project_path,
         Some(PathBuf::from("/oracle-project/.symbrain/instructions.md"))
     );
+    #[cfg(windows)]
+    let xdg = Path::new("C:\\custom\\config");
+    #[cfg(not(windows))]
     let xdg = Path::new("/custom/config");
     assert_eq!(
-        resolve_global_path(Some(xdg), Some(home)),
-        PathBuf::from("/custom/config/symbrain/instructions.md")
+        resolve_global_path(Some(xdg), Some(&home)),
+        xdg.join("symbrain/instructions.md")
     );
     let suite = oracle();
     let item = case(&suite, "source_paths");
     assert_eq!(
-        source.project_path.unwrap().to_string_lossy(),
-        item.expected_project_path
+        source.project_path.unwrap(),
+        PathBuf::from(&item.expected_project_path)
     );
     assert_eq!(
-        source.global_path.to_string_lossy(),
-        item.expected_global_path
+        source.global_path,
+        PathBuf::from(&item.expected_global_path)
     );
     assert_eq!(item.xdg_config_home, "/oracle-config");
+    #[cfg(not(windows))]
     assert_eq!(
-        resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(home)),
+        resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(&home)),
         PathBuf::from(&item.expected_xdg_global_path)
     );
 }

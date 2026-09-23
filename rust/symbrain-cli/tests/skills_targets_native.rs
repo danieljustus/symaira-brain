@@ -1,5 +1,6 @@
 //! Native symbrain skills targets user-scope byte contract.
 
+use std::fmt::Write as _;
 use std::process::{Command, Output};
 
 use tempfile::TempDir;
@@ -38,21 +39,28 @@ fn run(root: &TempDir, args: &[&str]) -> Output {
 fn user_targets_table_matches_go_bytes_for_empty_sandbox() {
     let root = TempDir::new().unwrap();
     let home = root.path().join("home");
-    let expected = format!(
-        "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT\n\
-claude\tfalse\t0\t0\t{}/.claude/skills\n\
-opencode\tfalse\t0\t0\t{}/.config/opencode/skills\n\
-codex\tfalse\t0\t0\t{}/.agents/skills\n\
-antigravity\tfalse\t0\t0\t{}/.gemini/config/skills\n\
-hermes\tfalse\t0\t0\t{}/.hermes/skills/symaira\n\
-openclaw\tfalse\t0\t0\t{}/.openclaw/skills\n",
-        home.display(),
-        home.display(),
-        home.display(),
-        home.display(),
-        home.display(),
-        home.display()
-    );
+    let roots = [
+        home.join(".claude").join("skills"),
+        home.join(".config").join("opencode").join("skills"),
+        home.join(".agents").join("skills"),
+        home.join(".gemini").join("config").join("skills"),
+        home.join(".hermes").join("skills").join("symaira"),
+        home.join(".openclaw").join("skills"),
+    ];
+    let mut expected = String::from("TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT\n");
+    for (target, root) in [
+        "claude",
+        "opencode",
+        "codex",
+        "antigravity",
+        "hermes",
+        "openclaw",
+    ]
+    .into_iter()
+    .zip(roots)
+    {
+        writeln!(&mut expected, "{target}\tfalse\t0\t0\t{}", root.display()).unwrap();
+    }
     let output = run(&root, &["skills", "targets"]);
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
@@ -185,10 +193,16 @@ fn scope_flag_is_native_but_config_stays_on_go() {
     );
     assert!(project.status.success(), "stderr: {:?}", project.stderr);
     let row = opencode_row(&project);
+    #[cfg(windows)]
+    let project_root = root.path().to_path_buf();
+    #[cfg(not(windows))]
+    let project_root = root.path().canonicalize().unwrap();
     assert_eq!(
         row["effective_skill_root"],
-        root.path()
-            .join("project/.opencode/skills")
+        project_root
+            .join("project")
+            .join(".opencode")
+            .join("skills")
             .display()
             .to_string()
     );

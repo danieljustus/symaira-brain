@@ -303,9 +303,15 @@ fn safe_relative_file(bundle: &Bundle, reference: &str) -> Result<(), String> {
             .map(|_| ())
             .map_err(|_| format!("invalid_utf8_overlay: {name}")),
         // Keep the user-facing diagnostic byte-for-byte with the Go oracle.
-        Ok(None) => Err(format!(
-            "{name}: read {reference}: openat {reference}: no such file or directory"
-        )),
+        Ok(None) => {
+            #[cfg(windows)]
+            let not_found = "The system cannot find the file specified.";
+            #[cfg(not(windows))]
+            let not_found = "no such file or directory";
+            Err(format!(
+                "{name}: read {reference}: openat {reference}: {not_found}"
+            ))
+        }
         Err(error) => Err(error.to_string()),
     }
 }

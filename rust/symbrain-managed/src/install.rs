@@ -14,7 +14,7 @@ use ureq::Agent;
 
 use crate::{
     Core, ManagedError, Platform, atomic_install, download_url, extract_binary, find_checksum,
-    normalize_version, verify_checksum,
+    normalize_version, provenance::record_release_provenance, verify_checksum,
 };
 
 const DEFAULT_BASE_URL: &str = "https://github.com";
@@ -142,6 +142,12 @@ impl Installer {
             ManagedError::IoContext(format!("mkdir {}", self.bin_dir.display()), error)
         })?;
         atomic_install(&self.bin_dir, &core.binary_name, &binary)?;
+        record_release_provenance(&self.bin_dir, core, &binary).map_err(|error| {
+            ManagedError::Context(format!(
+                "managed: record provenance for {}: {error}",
+                core.binary_name
+            ))
+        })?;
         Ok(InstallOutcome::Installed)
     }
 

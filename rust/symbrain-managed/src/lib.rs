@@ -5,6 +5,7 @@
 mod archive;
 mod install;
 mod manifest;
+mod provenance;
 
 pub use archive::{
     atomic_install, extract_binary, find_checksum, safe_archive_path, sha256_file, verify_checksum,

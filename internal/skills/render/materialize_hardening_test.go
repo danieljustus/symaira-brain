@@ -65,6 +65,21 @@ func TestWriteRenderedRollbackPreservesOldTreeOnEveryInjectedFailure(t *testing.
 	}
 }
 
+func TestSyncRootDirValidatesPathAndCompletesOnCurrentPlatform(t *testing.T) {
+	root, err := os.OpenRoot(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+
+	if err := syncRootDir(root, "missing"); err == nil {
+		t.Fatal("syncRootDir accepted a missing directory")
+	}
+	if err := syncRootDir(root, "."); err != nil {
+		t.Fatalf("syncRootDir on the opened root: %v", err)
+	}
+}
+
 func TestWriteRenderedRebuildsPoisonedManifestOutputs(t *testing.T) {
 	bundle, item := hardeningBundle(t)
 	out := filepath.Join(t.TempDir(), "rendered")

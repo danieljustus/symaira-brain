@@ -115,11 +115,43 @@ impl std::error::Error for ProfileError {
 }
 
 fn go_io_error(error: &io::Error) -> String {
+    #[cfg(windows)]
+    match error.raw_os_error() {
+        Some(2) => return "The system cannot find the file specified.".to_string(),
+        Some(3) => return "The system cannot find the path specified.".to_string(),
+        _ => {}
+    }
     match error.kind() {
         io::ErrorKind::NotFound => "no such file or directory".to_string(),
         io::ErrorKind::PermissionDenied => "permission denied".to_string(),
         io::ErrorKind::AlreadyExists => "file exists".to_string(),
         _ => error.to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::go_io_error;
+    use std::io;
+
+    #[test]
+    fn missing_path_error_matches_go_wording() {
+        #[cfg(windows)]
+        {
+            assert_eq!(
+                go_io_error(&io::Error::from_raw_os_error(2)),
+                "The system cannot find the file specified."
+            );
+            assert_eq!(
+                go_io_error(&io::Error::from_raw_os_error(3)),
+                "The system cannot find the path specified."
+            );
+        }
+        #[cfg(not(windows))]
+        assert_eq!(
+            go_io_error(&io::Error::new(io::ErrorKind::NotFound, "missing")),
+            "no such file or directory"
+        );
     }
 }
 

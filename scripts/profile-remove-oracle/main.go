@@ -39,28 +39,53 @@ type result struct {
 	Files  []fileState `json:"files"`
 }
 
+type skippedCase struct {
+	ID                string `json:"id"`
+	Reason            string `json:"reason"`
+	NativeAlternative string `json:"native_alternative"`
+}
+
 type oracle struct {
 	SchemaVersion   int               `json:"schema_version"`
 	GoRevision      string            `json:"go_revision"`
 	GeneratorSHA256 string            `json:"generator_sha256"`
 	GoSources       map[string]string `json:"go_sources"`
 	Cases           []result          `json:"cases"`
+	SkippedCases    []skippedCase     `json:"skipped_cases,omitempty"`
 }
 
 type caseDef struct {
-	ID        string
-	Args      []string
-	Stdin     []byte
-	Setup     func(root, home, config, project string) error
-	PosixOnly bool
+	ID                 string
+	Args               []string
+	Stdin              []byte
+	Setup              func(root, home, config, project string) error
+	WindowsSkipReason  string
+	WindowsAlternative string
 }
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
+	compareRust := flag.String("compare-rust", "", "compare each isolated Go case with this Rust binary")
 	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_"+runtime.GOOS+".json", "fixture path")
 	flag.Parse()
 	root := repoRoot()
 	generated := generate(root)
+	if *compareRust != "" {
+		binary, err := filepath.Abs(*compareRust)
+		if err != nil {
+			fatalf("resolve Rust binary: %v", err)
+		}
+		definitions := runnableDefinitions()
+		for caseIndex, definition := range definitions {
+			got := runCase(binary, definition)
+			want := generated.Cases[caseIndex]
+			if !reflect.DeepEqual(got, want) {
+				fatalf("case %d (%s) differs:\nGo: %+v\nRust: %+v", caseIndex, definition.ID, want, got)
+			}
+		}
+		fmt.Printf("PASS: profile remove Go/Rust differential passed (%d cases)\n", len(definitions))
+		return
+	}
 	data, err := json.MarshalIndent(generated, "", "  ")
 	if err != nil {
 		fatalf("marshal oracle: %v", err)
@@ -97,7 +122,11 @@ func fixtureMatches(existing []byte, generated oracle) bool {
 }
 
 func generate(root string) oracle {
-	binaryFile, err := os.CreateTemp("", "symbrain-go-profile-remove-oracle-")
+	pattern := "symbrain-go-profile-remove-oracle-*"
+	if runtime.GOOS == "windows" {
+		pattern += ".exe"
+	}
+	binaryFile, err := os.CreateTemp("", pattern)
 	if err != nil {
 		fatalf("create Go binary: %v", err)
 	}
@@ -118,10 +147,9 @@ func generate(root string) oracle {
 		GeneratorSHA256: fileSHA256(filepath.Join(root, "scripts", "profile-remove-oracle", "main.go")),
 		GoSources:       sourceHashes(root),
 	}
-	for _, definition := range definitions() {
-		if definition.PosixOnly && runtime.GOOS == "windows" {
-			continue
-		}
+	runnable, skipped := splitDefinitions(runtime.GOOS)
+	generated.SkippedCases = skipped
+	for _, definition := range runnable {
 		generated.Cases = append(generated.Cases, runCase(binary, definition))
 	}
 	return generated
@@ -138,18 +166,42 @@ func definitions() []caseDef {
 		{ID: "bound_global_refuses", Args: []string{"profile", "remove", "bound"}, Setup: setupBoundGlobal},
 		{ID: "bound_project_refuses", Args: []string{"profile", "remove", "existing", "--project", "PROJECT"}, Setup: setupBoundProject},
 		{ID: "bound_project_relative_refuses", Args: []string{"profile", "remove", "existing", "--project", "."}, Setup: setupBoundProject},
-		{ID: "bound_project_symlink_refuses", Args: []string{"profile", "remove", "existing", "--project", "project-link"}, Setup: setupBoundProjectSymlink, PosixOnly: true},
+		{ID: "bound_project_symlink_refuses", Args: []string{"profile", "remove", "existing", "--project", "project-link"}, Setup: setupBoundProjectSymlink},
 		{ID: "bound_force", Args: []string{"profile", "remove", "bound", "--force"}, Setup: setupBoundGlobal},
 		{ID: "malformed_profile", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupMalformedProfile},
 		{ID: "malformed_harness_config", Args: []string{"profile", "remove", "bound", "--force"}, Setup: setupMalformedHarness},
 		{ID: "malformed_harness_refuses", Args: []string{"profile", "remove", "bound"}, Setup: setupMalformedHarness},
-		{ID: "symlink", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupSymlink, PosixOnly: true},
-		{ID: "symlink_profiles_root", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupSymlinkProfilesRoot, PosixOnly: true},
-		{ID: "special_file", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupFIFO, PosixOnly: true},
+		{ID: "symlink", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupSymlink},
+		{ID: "symlink_profiles_root", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupSymlinkProfilesRoot},
+		{ID: "special_file", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupFIFO,
+			WindowsSkipReason:  "POSIX FIFO created with mkfifo has no ordinary Win32 filesystem entry equivalent",
+			WindowsAlternative: "symlink and symlink_profiles_root exercise Windows reparse-point deletion and ancestor refusal; neither is claimed equivalent to a FIFO"},
 		{ID: "empty_directory", Args: []string{"profile", "remove", "existing", "--force"}, Setup: setupDirectory},
 		{ID: "force_before_name", Args: []string{"profile", "remove", "--force", "existing"}, Setup: setupExisting},
 		{ID: "terminator", Args: []string{"profile", "remove", "existing", "--", "--force"}, Setup: setupExisting},
 	}
+}
+
+func runnableDefinitions() []caseDef {
+	runnable, _ := splitDefinitions(runtime.GOOS)
+	return runnable
+}
+
+func splitDefinitions(goos string) ([]caseDef, []skippedCase) {
+	definitions := definitions()
+	runnable := make([]caseDef, 0, len(definitions))
+	var skipped []skippedCase
+	for _, definition := range definitions {
+		if goos == "windows" && definition.WindowsSkipReason != "" {
+			skipped = append(skipped, skippedCase{
+				ID: definition.ID, Reason: definition.WindowsSkipReason,
+				NativeAlternative: definition.WindowsAlternative,
+			})
+			continue
+		}
+		runnable = append(runnable, definition)
+	}
+	return runnable, skipped
 }
 
 func runCase(binary string, definition caseDef) result {
@@ -181,8 +233,27 @@ func runCase(binary string, definition caseDef) result {
 	}
 	env := []string{
 		"HOME=" + home,
+		"USERPROFILE=" + home,
 		"XDG_CONFIG_HOME=" + config,
 		"LANG=C.UTF-8", "LC_ALL=C.UTF-8", "TZ=UTC",
+	}
+	if runtime.GOOS == "windows" {
+		for _, key := range []string{"SystemRoot", "WINDIR", "COMSPEC", "PATHEXT", "PATH", "SystemDrive"} {
+			if value, ok := os.LookupEnv(key); ok {
+				env = append(env, key+"="+value)
+			}
+		}
+		for key, path := range map[string]string{
+			"APPDATA":      filepath.Join(home, "AppData", "Roaming"),
+			"LOCALAPPDATA": filepath.Join(home, "AppData", "Local"),
+			"TEMP":         filepath.Join(root, "temp"),
+			"TMP":          filepath.Join(root, "temp"),
+		} {
+			if err := os.MkdirAll(path, 0o700); err != nil {
+				fatalf("create isolated Windows %s: %v", key, err)
+			}
+			env = append(env, key+"="+path)
+		}
 	}
 	command := exec.Command(binary, args...)
 	command.Dir = project
@@ -193,6 +264,9 @@ func runCase(binary string, definition caseDef) result {
 	err = command.Run()
 	exit := 0
 	if err != nil {
+		if command.ProcessState == nil {
+			fatalf("start %s case %s: %v", binary, definition.ID, err)
+		}
 		exit = command.ProcessState.ExitCode()
 		if exit < 0 {
 			exit = 1
@@ -328,7 +402,7 @@ func files(root string) []fileState {
 	return result
 }
 func normalize(root, value string) string {
-	return strings.ReplaceAll(value, filepath.ToSlash(root), "<root>")
+	return strings.ReplaceAll(strings.ReplaceAll(value, root, "<root>"), filepath.ToSlash(root), "<root>")
 }
 func repoRoot() string {
 	_, file, _, ok := runtime.Caller(0)

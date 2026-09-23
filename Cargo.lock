@@ -1046,6 +1046,7 @@ dependencies = [
 name = "symbrain-managed"
 version = "0.12.0"
 dependencies = [
+ "chrono",
  "flate2",
  "serde",
  "serde_json",

@@ -25,6 +25,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -248,6 +249,14 @@ var (
 	fakeBuildErr  error
 )
 
+// fakeSymvaultName includes the extension Windows PATH lookup requires.
+func fakeSymvaultName() string {
+	if runtime.GOOS == "windows" {
+		return "symvault.exe"
+	}
+	return "symvault"
+}
+
 // fakeSymvaultBin compiles fakeSymvaultSource once per oracle run.
 func fakeSymvaultBin() (string, error) {
 	fakeBuildOnce.Do(func() {
@@ -262,7 +271,7 @@ func fakeSymvaultBin() (string, error) {
 			fakeBuildErr = err
 			return
 		}
-		out := filepath.Join(dir, "symvault")
+		out := filepath.Join(dir, fakeSymvaultName())
 		cmd := exec.Command("go", "build", "-o", out, src)
 		if output, err := cmd.CombinedOutput(); err != nil {
 			fakeBuildErr = fmt.Errorf("build fake symvault: %w: %s", err, output)
@@ -304,7 +313,7 @@ func writeFakeSymvault(binDir, argsPath string, spec symvaultSpec) {
 	if err != nil {
 		panic(err)
 	}
-	if err := os.WriteFile(filepath.Join(binDir, "symvault"), payload, 0o755); err != nil {
+	if err := os.WriteFile(filepath.Join(binDir, fakeSymvaultName()), payload, 0o755); err != nil {
 		panic(err)
 	}
 	if err := os.WriteFile(filepath.Join(binDir, "symvault.spec"), data, 0o644); err != nil {

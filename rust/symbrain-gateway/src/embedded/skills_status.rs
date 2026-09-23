@@ -320,7 +320,8 @@ mod tests {
             target_status("hermes", &home, Some(&project), "project").expect("project");
         assert_eq!(project_status["display_name"], "Hermes");
         let expected = project
-            .join(".hermes/skills")
+            .join(".hermes")
+            .join("skills")
             .to_string_lossy()
             .into_owned();
         assert_eq!(project_status["effective_skill_root"], expected);

@@ -79,7 +79,7 @@ pub(crate) fn run_remove(args: &[OsString], stdout: &mut dyn Write, stderr: &mut
                 return report_missing_profile(&name, stderr);
             }
             Err(error) => {
-                let detail = profile_remove_open_error(&profiles_dir, &error);
+                let detail = profile_remove_open_error(&profiles_dir, &path, &error);
                 let _ = writeln!(
                     stderr,
                     "symbrain profile remove: remove {}: {detail}",
@@ -236,7 +236,25 @@ fn clean_project_path(path: &Path) -> PathBuf {
     result
 }
 
-fn profile_remove_open_error(profiles_dir: &Path, error: &io::Error) -> String {
+fn profile_remove_open_error(profiles_dir: &Path, path: &Path, error: &io::Error) -> String {
+    // Windows reports attempts to open a path through a directory reparse
+    // point as ERROR_CANT_ACCESS_FILE (681), rather than NotADirectory. Match
+    // Go's specific safe-refusal message only when metadata confirms that the
+    // profiles directory itself is the symlink; preserve all other OS errors.
+    if cfg!(windows)
+        && error.raw_os_error() == Some(681)
+        && std::fs::symlink_metadata(profiles_dir)
+            .is_ok_and(|metadata| metadata.file_type().is_symlink())
+    {
+        let name = profiles_dir
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy();
+        return format!(
+            "remove {}: open configuration directory component {name:?}: reparse point",
+            path.display()
+        );
+    }
     if error.kind() != io::ErrorKind::NotADirectory {
         return error.to_string();
     }

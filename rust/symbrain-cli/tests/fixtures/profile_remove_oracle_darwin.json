@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "go_revision": "67585b5453bb81f51025c1adbac4e6625bb8d0f1",
-  "generator_sha256": "cce45fb1abdd173a21731a60e430e8a04baf2e8ddb3c3d3c83f34b540e5f271b",
+  "generator_sha256": "90579528e79a465f62d134d5729d38ff98fcf5fc1026f4721b1141b81293b547",
   "go_sources": {
     "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
     "cmd/symbrain/cmd_profile_add.go": "3883ad6634df715ab3b991ef887e78b0d3ef30138aa3a5260e4181d827d86f03",
@@ -16,7 +16,7 @@
     "internal/harness/inventory_read_unix.go": "2bfe251a766cf90187cfd9d4e2e9674b2b78dd4d632e4aa8d9550ef610d1687b",
     "internal/harness/json_document.go": "e60f849e2e0ca9a4ce42c2f144bfb2c0b9d6be3f26d7911c53fccfca79310c75",
     "internal/harness/ordered_map.go": "287c1c92388352c794efebf36f19fcacfeee8ea62b5ba552a5d6131d743b8042",
-    "internal/harness/registry.go": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+    "internal/harness/registry.go": "f1d64e133e6bc1b0ff858cf47211e74c49cf987c237df9317bef4d5d05f02bfc",
     "internal/harness/toml_document.go": "1710e2552f35ceafac1a06f7844044630e5b4e969b59b0028173bcfb5035eadf",
     "internal/profile/profile.go": "04f4ce69003c7f2bb8a654f4f8c0585c8a38b945556aef8d7049088c1316dfd4",
     "internal/profile/remove_other.go": "eb4f3455be8dee18d65eb7405c5e0b0d13b4275db4b5b5263d4a68a1fe265ae4",

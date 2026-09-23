@@ -155,7 +155,11 @@ func diagnoseMismatch(existing []byte, generated oracle) {
 }
 
 func generate(root string) oracle {
-	goBinary, err := os.CreateTemp("", "symbrain-go-install-oracle-*")
+	pattern := "symbrain-go-install-oracle-*"
+	if runtime.GOOS == "windows" {
+		pattern += ".exe"
+	}
+	goBinary, err := os.CreateTemp("", pattern)
 	if err != nil {
 		fatalf("create Go binary: %v", err)
 	}
@@ -240,11 +244,30 @@ func runCase(binary string, definition caseDef) result {
 	}
 	env := []string{
 		"HOME=" + home,
+		"USERPROFILE=" + home,
 		"XDG_CONFIG_HOME=" + config,
 		"XDG_DATA_HOME=" + filepath.Join(root, "data"),
 		"XDG_CACHE_HOME=" + filepath.Join(root, "cache"),
 		"XDG_STATE_HOME=" + filepath.Join(root, "state"),
 		"LANG=C.UTF-8", "LC_ALL=C.UTF-8", "TZ=UTC",
+	}
+	if runtime.GOOS == "windows" {
+		for _, key := range []string{"SystemRoot", "WINDIR", "COMSPEC", "PATHEXT", "PATH", "SystemDrive"} {
+			if value, ok := os.LookupEnv(key); ok {
+				env = append(env, key+"="+value)
+			}
+		}
+		for key, path := range map[string]string{
+			"APPDATA":      filepath.Join(home, "AppData", "Roaming"),
+			"LOCALAPPDATA": filepath.Join(home, "AppData", "Local"),
+			"TEMP":         filepath.Join(root, "temp"),
+			"TMP":          filepath.Join(root, "temp"),
+		} {
+			if err := os.MkdirAll(path, 0o700); err != nil {
+				fatalf("create isolated Windows %s: %v", key, err)
+			}
+			env = append(env, key+"="+path)
+		}
 	}
 	for key, value := range definition.Env {
 		env = append(env, key+"="+value)
@@ -257,6 +280,9 @@ func runCase(binary string, definition caseDef) result {
 	err = command.Run()
 	exit := 0
 	if err != nil {
+		if command.ProcessState == nil {
+			fatalf("start %s case %s: %v", binary, definition.ID, err)
+		}
 		if status, ok := command.ProcessState.Sys().(interface{ ExitStatus() int }); ok {
 			exit = status.ExitStatus()
 		} else if command.ProcessState.ExitCode() >= 0 {
@@ -345,6 +371,7 @@ func files(root string) []fileState {
 }
 
 func normalize(root, value string) string {
+	value = strings.ReplaceAll(value, root, "<root>")
 	value = strings.ReplaceAll(value, filepath.ToSlash(root), "<root>")
 	return timestampPattern.ReplaceAllString(value, ".bak.<timestamp>")
 }

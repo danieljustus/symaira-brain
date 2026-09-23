@@ -47,8 +47,11 @@ struct Case {
 }
 
 fn oracle() -> Oracle {
-    serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-        .expect("adapter oracle fixture must be valid JSON")
+    let data = std::env::var_os("SYMBRAIN_ADAPTERS_ORACLE_FIXTURE").map_or_else(
+        || include_bytes!("fixtures/oracle_expectations.json").to_vec(),
+        |path| std::fs::read(path).expect("native adapters oracle fixture"),
+    );
+    serde_json::from_slice(&data).expect("adapter oracle fixture must be valid JSON")
 }
 
 fn decode(value: &str) -> Vec<u8> {
@@ -80,8 +83,8 @@ fn decode(value: &str) -> Vec<u8> {
 }
 
 fn sha256(path: &Path) -> String {
-    let bytes = std::fs::read(path).expect("provenance source exists");
-    let digest = Sha256::digest(bytes);
+    let source = std::fs::read_to_string(path).expect("provenance source is UTF-8");
+    let digest = Sha256::digest(source.replace("\r\n", "\n").as_bytes());
     format!("{digest:x}")
 }
 
@@ -170,8 +173,8 @@ fn oracle_render_cases_match_go_byte_for_byte() {
         .expect("registered adapter")
         .expect("adapter exists");
         assert_eq!(
-            rendered.path.to_string_lossy(),
-            case.target_path,
+            rendered.path,
+            PathBuf::from(&case.target_path),
             "path {}",
             case.id
         );

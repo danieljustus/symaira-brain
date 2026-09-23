@@ -1,6 +1,9 @@
 use std::fs;
 use std::path::Path;
 
+#[path = "common/mod.rs"]
+mod common;
+
 use symbrain_skills::{
     RenderMetadata, TargetConfig, default_targets, load_bundle, materialize, render_target,
 };
@@ -32,8 +35,7 @@ fn unknown_and_disabled_targets_are_rejected_before_rendering() {
     let unknown = render_target(&bundle, "not-a-target", &RenderMetadata::default())
         .expect_err("unknown target");
     let oracle: serde_json::Value =
-        serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-            .expect("oracle");
+        serde_json::from_slice(&common::skills_oracle()).expect("oracle");
     let expected = oracle["security_cases"]
         .as_array()
         .and_then(|cases| cases.iter().find(|case| case["id"] == "unknown_target"))
@@ -103,8 +105,7 @@ fn opencode_materialization_excludes_controls_and_preserves_support_bytes() {
     let marker: serde_json::Value =
         serde_json::from_slice(&fs::read(&marker_path).expect("marker")).expect("marker");
     let oracle: serde_json::Value =
-        serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-            .expect("oracle");
+        serde_json::from_slice(&common::skills_oracle()).expect("oracle");
     let expected_hash = oracle["render_cases"]
         .as_array()
         .and_then(|cases| cases.iter().find(|case| case["id"] == "source/opencode"))
@@ -218,8 +219,7 @@ fn render_rejects_go_render_blocking_validation_cases() {
             _ => unreachable!(),
         }
         let oracle: serde_json::Value =
-            serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-                .expect("oracle");
+            serde_json::from_slice(&common::skills_oracle()).expect("oracle");
         let expected = oracle["security_cases"]
             .as_array()
             .and_then(|cases| cases.iter().find(|case| case["id"] == name))

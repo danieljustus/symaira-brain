@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -37,6 +38,9 @@ func buildFake() (string, func()) {
 		panic(err)
 	}
 	path := filepath.Join(dir, "fakemcp")
+	if runtime.GOOS == "windows" {
+		path += ".exe"
+	}
 	cmd := exec.Command("go", "build", "-o", path, "./internal/broker/testdata/fakemcp")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		os.RemoveAll(dir)

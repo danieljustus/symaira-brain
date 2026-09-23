@@ -162,6 +162,7 @@ func renderBytesCase(id string, existing, content, expected []byte) Case {
 func newSourceCase() Case {
 	oldHome, hadHome := os.LookupEnv("HOME")
 	oldXDG, hadXDG := os.LookupEnv("XDG_CONFIG_HOME")
+	oldProfile, hadProfile := os.LookupEnv("USERPROFILE")
 	defer func() {
 		if hadHome {
 			_ = os.Setenv("HOME", oldHome)
@@ -173,9 +174,20 @@ func newSourceCase() Case {
 		} else {
 			_ = os.Unsetenv("XDG_CONFIG_HOME")
 		}
+		if hadProfile {
+			_ = os.Setenv("USERPROFILE", oldProfile)
+		} else {
+			_ = os.Unsetenv("USERPROFILE")
+		}
 	}()
 	if err := os.Setenv("HOME", "/oracle-home"); err != nil {
 		fatalf("set source path home: %v", err)
+	}
+	if runtime.GOOS == "windows" {
+		profile := filepath.Join(filepath.VolumeName(os.TempDir())+string(filepath.Separator), "oracle-home")
+		if err := os.Setenv("USERPROFILE", profile); err != nil {
+			fatalf("set source path profile: %v", err)
+		}
 	}
 	if err := os.Unsetenv("XDG_CONFIG_HOME"); err != nil {
 		fatalf("unset source path XDG config: %v", err)
