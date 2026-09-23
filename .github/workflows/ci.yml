@@ -1005,11 +1005,48 @@ jobs:
         uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
 
       - name: goreleaser release --snapshot --clean
+        id: snapshot
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
           version: '~> v2'
           args: release --snapshot --clean --skip=sign
+
+      - name: Verify unpublished snapshot archives and checksums
+        env:
+          GORELEASER_ARTIFACTS: ${{ steps.snapshot.outputs.artifacts }}
+          GORELEASER_METADATA: ${{ steps.snapshot.outputs.metadata }}
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import json, os; print(json.loads(os.environ["GORELEASER_METADATA"])["version"])')"
+          candidate_dir="$RUNNER_TEMP/symbrain-candidate-archives"
+          mkdir -p "$candidate_dir"
+          python3 - "$candidate_dir" <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import sys
+
+          destination = Path(sys.argv[1])
+          artifacts = json.loads(os.environ["GORELEASER_ARTIFACTS"])
+          selected = [item for item in artifacts if item.get("type") in {"Archive", "Checksum"}]
+          archives = [item for item in selected if item["type"] == "Archive"]
+          checksums = [item for item in selected if item["type"] == "Checksum"]
+          if len(checksums) != 1:
+              raise SystemExit(f"expected one GoReleaser checksum artifact, found {len(checksums)}")
+          if not archives:
+              raise SystemExit("GoReleaser output contains no Archive artifacts")
+          for item in selected:
+              source = Path(item["path"])
+              if source.is_absolute() or ".." in source.parts or source.name != item["name"]:
+                  raise SystemExit(f"unsafe or inconsistent GoReleaser artifact path: {item}")
+              if not source.is_file() or source.is_symlink():
+                  raise SystemExit(f"GoReleaser artifact is not a regular file: {source}")
+              shutil.copy2(source, destination / item["name"])
+          print(f"staged {len(archives)} GoReleaser archives and {checksums[0]['name']}")
+          PY
+          go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
 
   coverage:
     needs: build-test

@@ -52,6 +52,16 @@ func checkCandidateArtifacts(cfg *goreleaserConfig, version, assetsDir string) e
 	if checksumName == "" || hasUnrenderedTokens(checksumName) {
 		return fmt.Errorf("cannot derive checksum filename")
 	}
+	allowedChecksumExtras := make(map[string]struct{})
+	if len(cfg.SBOMs) > 0 && cfg.SBOMs[0].Artifacts == "archive" && len(cfg.SBOMs[0].Documents) > 0 {
+		documentTemplate := cfg.SBOMs[0].Documents[0]
+		if strings.HasPrefix(documentTemplate, "${artifact}") {
+			suffix := strings.TrimPrefix(documentTemplate, "${artifact}")
+			for name := range expectedArchives {
+				allowedChecksumExtras[name+suffix] = struct{}{}
+			}
+		}
+	}
 
 	entries, err := os.ReadDir(assetsDir)
 	if err != nil {
@@ -113,7 +123,7 @@ func checkCandidateArtifacts(cfg *goreleaserConfig, version, assetsDir string) e
 		digest := sha256.Sum256(data)
 		checksums[name] = hex.EncodeToString(digest[:])
 	}
-	if err := verifyCandidateChecksums(files[checksumName], checksums); err != nil {
+	if err := verifyCandidateChecksums(files[checksumName], checksums, allowedChecksumExtras); err != nil {
 		return err
 	}
 	return nil
@@ -166,7 +176,11 @@ func candidateArchiveMembers(path, name string) ([]string, error) {
 	return nil, fmt.Errorf("unsupported archive format for %s", name)
 }
 
-func verifyCandidateChecksums(path string, expected map[string]string) error {
+func verifyCandidateChecksums(
+	path string,
+	expected map[string]string,
+	allowedExtras map[string]struct{},
+) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("read candidate checksums: %w", err)
@@ -188,12 +202,22 @@ func verifyCandidateChecksums(path string, expected map[string]string) error {
 		}
 		got[fields[1]] = fields[0]
 	}
-	if len(got) != len(expected) {
-		return fmt.Errorf("checksums.txt has %d entries, want %d archive entries", len(got), len(expected))
+	if len(got) < len(expected) ||
+		len(got) > len(expected)+len(allowedExtras) ||
+		(len(got) > len(expected) && len(got) != len(expected)+len(allowedExtras)) {
+		return fmt.Errorf("checksums.txt has %d entries, want %d archive entries plus configured SBOM entries", len(got), len(expected))
 	}
 	for name, digest := range expected {
 		if got[name] != digest {
 			return fmt.Errorf("checksums.txt digest mismatch for %s", name)
+		}
+	}
+	for name := range got {
+		if _, isArchive := expected[name]; isArchive {
+			continue
+		}
+		if _, isConfiguredSBOM := allowedExtras[name]; !isConfiguredSBOM {
+			return fmt.Errorf("checksums.txt has unexpected entry for %q", name)
 		}
 	}
 	return nil
