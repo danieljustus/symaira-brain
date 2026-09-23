@@ -85,12 +85,14 @@ fn entry_semantics_match_go_and_are_cross_platform() {
     let entry = Entry::new("personal");
     assert!(entry.is_symbrain());
     assert_eq!(entry.profile(), Some("personal"));
-    assert!(
-        !Entry {
+    assert_eq!(
+        Entry {
             command: r"C:\bin\symbrain".into(),
             args: vec![],
         }
-        .is_symbrain()
+        .is_symbrain(),
+        cfg!(windows),
+        "filepath.Base follows the host platform separator"
     );
     assert!(
         Entry {
@@ -105,8 +107,12 @@ fn entry_semantics_match_go_and_are_cross_platform() {
             args: vec![],
         }
         .superseded_core(),
-        None,
-        "backslashes are ordinary characters on Unix"
+        if cfg!(windows) {
+            Some("symmemory")
+        } else {
+            None
+        },
+        "filepath.Base follows the host platform separator"
     );
     assert_eq!(
         Entry {
