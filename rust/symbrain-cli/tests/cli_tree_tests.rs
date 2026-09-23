@@ -250,27 +250,30 @@ fn first_diff_offset(a: &[u8], b: &[u8]) -> Option<usize> {
     if a.len() == b.len() { None } else { Some(len) }
 }
 
+#[cfg(windows)]
+fn assert_native_fixture() {
+    let generated = PathBuf::from(
+        std::env::var_os("SYMBRAIN_CLI_TREE_ORACLE_FIXTURE")
+            .expect("Windows fixture provenance must come from the Go oracle step"),
+    );
+    let checked_in = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH);
+    assert_ne!(
+        generated, checked_in,
+        "Windows must use its native Go fixture"
+    );
+    assert!(
+        generated.is_file(),
+        "Go-generated Windows fixture is missing"
+    );
+}
+
 #[test]
 fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
     assert_eq!(cases.len(), 81, "fixture must contain 81 cases");
 
     #[cfg(windows)]
-    {
-        let generated = PathBuf::from(
-            std::env::var_os("SYMBRAIN_CLI_TREE_ORACLE_FIXTURE")
-                .expect("Windows fixture provenance must come from the Go oracle step"),
-        );
-        let checked_in = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH);
-        assert_ne!(
-            generated, checked_in,
-            "Windows must use its native Go fixture"
-        );
-        assert!(
-            generated.is_file(),
-            "Go-generated Windows fixture is missing"
-        );
-    }
+    assert_native_fixture();
 
     let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()

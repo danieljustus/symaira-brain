@@ -20,6 +20,7 @@ import threading
 import time
 import zipfile
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
@@ -571,7 +572,7 @@ def _build_windows_stub() -> None:
     root = Path(WINDOWS_STUB_TEMP.name)
     source = root / "main.go"
     WINDOWS_STUB_BINARY = root / "symbrain-parity-stub.exe"
-    version_entries = ",\n".join(
+    version_entries = "\n".join(
         f"\t\t{json.dumps(str(core['binary_name']))}: "
         f"{json.dumps(_version_without_tag(str(core['version'])))},"
         for core in _managed_cores().values()
@@ -2829,6 +2830,17 @@ def get_fs_manifest(root: Path) -> dict[str, tuple[str, int, bytes]]:
                 content = p.read_bytes()
             except OSError as err:
                 content = f"<read error: {err}>".encode()
+            if rel.endswith(".provenance.json"):
+                # Installation time is the only nondeterministic provenance
+                # field. Validate it, then compare all remaining bytes.
+                built_at = json.loads(content)["built_at"]
+                datetime.fromisoformat(built_at.replace("Z", "+00:00"))
+                content = re.sub(
+                    rb'"built_at": "[^"]+"',
+                    b'"built_at": "<timestamp>"',
+                    content,
+                    count=1,
+                )
             manifest[rel] = ("file", mode, content)
     return manifest
 def main() -> int:
