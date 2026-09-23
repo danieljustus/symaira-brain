@@ -1007,15 +1007,30 @@ jobs:
             gui_test_home="$RUNNER_TEMP/gui-contract-$implementation"
             mkdir -p "$gui_test_home/.config"
             result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
+            python3 - "$gui_test_home" "$binary" <<'PY'
+          from pathlib import Path
+          import sys
+          import xml.etree.ElementTree as ET
+
+          scheme = Path('SymBrain.xcodeproj/xcshareddata/xcschemes/SymBrainCoreContract.xcscheme')
+          home, binary = sys.argv[1:]
+          values = {'HOME': home, 'XDG_CONFIG_HOME': home + '/.config', 'SYMBRAIN_TEST_BINARY': binary}
+          tree = ET.parse(scheme)
+          found = set()
+          for variable in tree.iter('EnvironmentVariable'):
+              key = variable.get('key')
+              if key in values:
+                  variable.set('value', values[key])
+                  found.add(key)
+          assert found == values.keys(), found
+          tree.write(scheme, encoding='UTF-8', xml_declaration=True)
+          PY
             xcodebuild -project SymBrain.xcodeproj \
                 -scheme SymBrainCoreContract \
                 -destination 'platform=macOS' \
                 -derivedDataPath "$RUNNER_TEMP/SymBrain-macos-derived-data" \
                 -resultBundlePath "$result" \
                 -only-testing:SymBrainCoreTests/ConfiguredBinaryContractTests \
-                SYMBRAIN_CONTRACT_HOME="$gui_test_home" \
-                SYMBRAIN_CONTRACT_XDG_CONFIG_HOME="$gui_test_home/.config" \
-                SYMBRAIN_CONTRACT_BINARY="$binary" \
                 CODE_SIGNING_ALLOWED=NO test
             xcrun xcresulttool get test-results summary --path "$result" | \
               python3 -c 'import json,sys; x=json.load(sys.stdin); assert (x["totalTestCount"], x["passedTests"], x["failedTests"], x["skippedTests"]) == (1, 1, 0, 0), x'
