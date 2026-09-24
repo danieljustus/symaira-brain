@@ -355,13 +355,25 @@ jobs:
             cargo install cargo-deny --version 0.20.2 --locked
           fi
 
-      - name: Generate native Windows XDG oracle fixture
+      - name: Generate native Windows oracle fixtures
         shell: bash
         run: |
           set -euo pipefail
-          fixture="$RUNNER_TEMP/xdg-oracle-windows.json"
-          ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$fixture"
-          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$fixture" >> "$GITHUB_ENV"
+          xdg_fixture="$RUNNER_TEMP/xdg-oracle-windows.json"
+          doctor_fixture="$RUNNER_TEMP/guard-doctor-oracle-windows.json"
+          instructions_fixture="$RUNNER_TEMP/instructions-oracle-windows.json"
+          cli_fixture="$RUNNER_TEMP/cli-tree-oracle-windows.json"
+          profile_remove_fixture="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$xdg_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./guard/scripts/guard-doctor-oracle -output "$doctor_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/cli-oracle -output "$cli_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"
+          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"
 
       - name: Rust workspace and Go fixture gates on native Windows
         shell: bash

@@ -206,7 +206,11 @@ func mustJSON(value any) []byte {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output does not match existing file")
-	output := flag.String("output", "rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json", "output expectations path")
+	defaultOutput := os.Getenv("SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json"
+	}
+	output := flag.String("output", defaultOutput, "output expectations path")
 	flag.Parse()
 
 	suite := buildSuite()

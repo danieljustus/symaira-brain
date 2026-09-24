@@ -76,7 +76,11 @@ type Suite struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output does not match existing file")
-	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json", "output path")
+	defaultOutput := os.Getenv("SYMBRAIN_CLI_TREE_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "output path")
 	goBinary := flag.String("go-binary", "", "path to Go binary (defaults to building via run-go-oracle.sh)")
 	flag.Parse()
 
