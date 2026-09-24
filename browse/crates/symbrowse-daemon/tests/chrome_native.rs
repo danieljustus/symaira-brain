@@ -189,6 +189,14 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         .as_array()
         .expect("nested frame children");
     assert!(!children.is_empty(), "frame response: {frames}");
+    let flat = request(&socket, "frames.list", json!({}));
+    let flat_frames = flat["data"]["frames"].as_array().expect("flat frames");
+    assert!(flat_frames.len() >= 2, "flat frame response: {flat}");
+    assert!(
+        flat_frames
+            .iter()
+            .all(|frame| frame.get("children").is_none())
+    );
     assert!(
         children
             .iter()

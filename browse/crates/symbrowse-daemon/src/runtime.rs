@@ -743,7 +743,16 @@ impl DispatchRuntime {
                 json!({"closed": format!("t{}", closed_index + 1), "active": format!("t{}", active_index + 1)})
             }
             "frames.list" | "frame.tree" => {
-                json!({"frames": page.frames().await.map_err(runtime_error)?})
+                let mut frames = page.frames().await.map_err(runtime_error)?;
+                if frame.cmd == "frames.list" {
+                    let mut pending = frames;
+                    frames = Vec::new();
+                    while let Some(mut item) = pending.pop() {
+                        pending.extend(item.children.drain(..).rev());
+                        frames.push(item);
+                    }
+                }
+                json!({"frames": frames})
             }
             "a11y" => json!({"nodes": page.accessibility_tree().await.map_err(runtime_error)?}),
             "dialog" => {
