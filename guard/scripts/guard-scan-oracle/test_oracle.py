@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -12,10 +13,11 @@ class OracleFixtureTests(unittest.TestCase):
         fixture = json.loads(oracle.FIXTURE.read_text(encoding="utf-8"))
         oracle.verify_binding(fixture)
         self.assertEqual(fixture["case_count"], len(fixture["cases"]))
-        self.assertEqual(fixture["case_count"], 9)
+        self.assertEqual(fixture["case_count"], 8 if os.name == "nt" else 9)
         ids = [case["id"] for case in fixture["cases"]]
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual({"darwin", "linux"}, set(fixture["platform_xdg_sources"]))
+        self.assertEqual(fixture.get("native_platform"), "windows" if os.name == "nt" else None)
 
     def test_windows_projection_excludes_only_the_posix_tty_case(self):
         fixture = json.loads(oracle.FIXTURE.read_text(encoding="utf-8"))
@@ -27,6 +29,15 @@ class OracleFixtureTests(unittest.TestCase):
             [case["id"] for case in fixture["cases"] if not case["tty"]],
             ids,
         )
+
+    def test_fixture_drift_reports_the_first_changed_case_stream(self):
+        fixture = json.loads(oracle.FIXTURE.read_text(encoding="utf-8"))
+        changed = json.loads(json.dumps(fixture))
+        changed["cases"][0]["stdout"]["sha256"] = "different"
+        changed["cases"][0]["args"] = ["different"]
+        differences = oracle.fixture_differences(fixture, changed)
+        self.assertTrue(any("default-pipe-json stdout differs" in item for item in differences))
+        self.assertTrue(any("default-pipe-json args differs" in item for item in differences))
 
     def test_oracle_module_import_does_not_require_posix_terminal_modules(self):
         subprocess.run(

@@ -91,8 +91,9 @@ def main() -> int:
         raise RuntimeError(f"native binary is not executable: {binary}")
     fixture = json.loads(oracle.FIXTURE.read_text(encoding="utf-8"))
     oracle.verify_binding(fixture)
-    if fixture.get("case_count") != 9 or len(fixture.get("cases", [])) != 9:
-        raise RuntimeError("fixture must contain exactly 9 scan cases")
+    expected_count = 8 if os.name == "nt" else 9
+    if fixture.get("case_count") != expected_count or len(fixture.get("cases", [])) != expected_count:
+        raise RuntimeError(f"fixture must contain exactly {expected_count} native scan cases")
     failures = compare(binary, fixture)
     if failures:
         raise RuntimeError("native/Go scan parity failed:\n" + "\n".join(f"  {failure}" for failure in failures))

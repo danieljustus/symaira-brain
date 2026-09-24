@@ -18,7 +18,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "scripts"))
 from external_env import ensure_external_environment as ensure_shared_external_environment
 
-FIXTURE = HERE / "fixture.json"
+FIXTURE = Path(os.environ.get("SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE", str(HERE / "fixture.json")))
 PINNED_COMMIT_SHA = "9c0e2b259753901a372ed5a688382bb6d4fadd18"
 # The pin covers the Go sources whose scan behaviour this oracle freezes. It
 # deliberately excludes go.mod and go.sum: those change on every dependency
@@ -67,6 +67,11 @@ def verify_binding(document: dict[str, object]) -> dict[str, str]:
     current = {path: sha256((ROOT / path).read_bytes()) for path in GO_SOURCE_PATHS}
     if current != expected:
         raise RuntimeError("working-tree Go scan sources drifted from the pinned revision")
+    if os.name == "nt" and document.get("native_platform") != "windows":
+        raise RuntimeError(
+            "Windows requires a native Go scan fixture; set "
+            "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE to a fixture generated on this runner"
+        )
     return expected
 
 
@@ -237,6 +242,54 @@ def fixture_for_platform(document: dict[str, object], *, windows: bool) -> dict[
     return projected
 
 
+def fixture_differences(expected: dict[str, object], actual: dict[str, object]) -> list[str]:
+    differences: list[str] = []
+    compared_fields = {
+        "schema_version", "source_commit", "source_files", "native_platform",
+        "platform_xdg_sources", "case_count", "cases",
+    }
+    for field in sorted((expected.keys() | actual.keys()) - compared_fields):
+        if field not in expected or field not in actual or expected[field] != actual[field]:
+            differences.append(f"{field} differs")
+    for field in ("schema_version", "source_commit", "source_files", "native_platform", "platform_xdg_sources"):
+        if expected.get(field) != actual.get(field) or (field in expected) != (field in actual):
+            differences.append(f"{field} differs")
+
+    expected_cases = {case["id"]: case for case in expected["cases"]}
+    actual_cases = {case["id"]: case for case in actual["cases"]}
+    if len(expected_cases) != len(expected["cases"]) or len(actual_cases) != len(actual["cases"]):
+        differences.append("duplicate case IDs")
+    if list(expected_cases) != list(actual_cases):
+        differences.append(
+            f"case IDs/order differ (expected {list(expected_cases)!r}, actual {list(actual_cases)!r})"
+        )
+    if expected.get("case_count") != actual.get("case_count"):
+        differences.append(f"case_count differs (expected {expected.get('case_count')}, actual {actual.get('case_count')})")
+
+    for case_id in expected_cases:
+        if case_id not in actual_cases:
+            continue
+        expected_case, actual_case = expected_cases[case_id], actual_cases[case_id]
+        if expected_case.get("exit_code") != actual_case.get("exit_code"):
+            differences.append(
+                f"{case_id} exit_code differs (expected {expected_case.get('exit_code')}, actual {actual_case.get('exit_code')})"
+            )
+        for stream in ("stdout", "stderr"):
+            expected_stream, actual_stream = expected_case.get(stream, {}), actual_case.get(stream, {})
+            if expected_stream != actual_stream or (stream in expected_case) != (stream in actual_case):
+                differences.append(
+                    f"{case_id} {stream} differs "
+                    f"(expected sha256={expected_stream.get('sha256')}, actual sha256={actual_stream.get('sha256')})"
+                )
+        compared_case_fields = {"id", "exit_code", "stdout", "stderr"}
+        for field in sorted((expected_case.keys() | actual_case.keys()) - compared_case_fields):
+            if field not in expected_case or field not in actual_case or expected_case[field] != actual_case[field]:
+                differences.append(f"{case_id} {field} differs")
+    if expected != actual and not differences:
+        differences.append("fixture contains an unclassified difference")
+    return differences
+
+
 def build_and_run() -> dict[str, object]:
     expected = require_pin()
     runtime_parent = Path(os.environ.get("SYMAIRA_EXTERNAL_RUNTIME_ROOT", tempfile.gettempdir()))
@@ -273,7 +326,7 @@ def build_and_run() -> dict[str, object]:
         ])
         matrix_env = dict(build_env)
         matrix_env.update({"XDG_CONFIG_HOME": "/oracle-config"})
-        return {
+        fixture = {
             "schema_version": 1,
             "source_commit": PINNED_COMMIT_SHA,
             "source_files": expected,
@@ -281,6 +334,9 @@ def build_and_run() -> dict[str, object]:
             "cases": cases,
             "platform_xdg_sources": matrix(source, matrix_env),
         }
+        if os.name == "nt":
+            fixture["native_platform"] = "windows"
+        return fixture
     finally:
         subprocess.run(["git", "worktree", "remove", "--force", str(source)], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
         shutil.rmtree(runtime, ignore_errors=True)
@@ -290,6 +346,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("action", choices=("write", "check"))
     args = parser.parse_args()
+    if os.name == "nt" and not os.environ.get("SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE"):
+        raise RuntimeError(
+            "Windows scan oracle commands require SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE "
+            "so native output cannot overwrite or be compared with the POSIX fixture"
+        )
     ensure_shared_external_environment(__file__)
     if args.action == "check":
         current = json.loads(FIXTURE.read_text(encoding="utf-8"))
@@ -297,8 +358,14 @@ def main() -> int:
     generated = build_and_run()
     if args.action == "check":
         expected = fixture_for_platform(current, windows=os.name == "nt")
-        if json.dumps(expected, indent=2, sort_keys=True) + "\n" != json.dumps(generated, indent=2, sort_keys=True) + "\n":
-            raise RuntimeError("guard scan oracle fixture drifted; run guard/scripts/guard-scan-oracle/run.sh write after changing the pin")
+        differences = fixture_differences(expected, generated)
+        if differences:
+            raise RuntimeError(
+                "guard scan oracle fixture drifted:\n  "
+                + "\n  ".join(differences[:20])
+                + "\nregenerate with guard/scripts/guard-scan-oracle/run.sh write "
+                "(Windows must use SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE in runner temp)"
+            )
         suffix = "; POSIX TTY case excluded" if os.name == "nt" else ""
         print(f"PASS: guard scan oracle byte check passed ({generated['case_count']} cases{suffix})")
     else:

@@ -369,11 +369,14 @@ jobs:
           ./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/cli-oracle -output "$cli_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"
+          scan_fixture="$RUNNER_TEMP/guard-scan-oracle-windows.json"
+          SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE="$scan_fixture" ./guard/scripts/guard-scan-oracle/run.sh write
           echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture" >> "$GITHUB_ENV"
 
       - name: Rust workspace and Go fixture gates on native Windows
         shell: bash
