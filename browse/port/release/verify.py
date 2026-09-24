@@ -142,7 +142,11 @@ def _read_archive_members(path: Path) -> tuple[set[str], dict[str, int]]:
                 members = archive.infolist()
                 if any(not _safe_member_name(member.filename) for member in members):
                     raise GateError(f"archive path traversal in {path.name}")
-                if any(member.is_dir() or stat.S_ISLNK(member.external_attr >> 16) for member in members):
+                if any(
+                    member.is_dir()
+                    or stat.S_IFMT(member.external_attr >> 16) not in {0, stat.S_IFREG}
+                    for member in members
+                ):
                     raise GateError(f"archive contains non-regular entries in {path.name}")
                 names = {member.filename for member in members}
                 if len(names) != len(members):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import subprocess
+import stat
 import sys
 import tempfile
 import unittest
@@ -77,6 +78,19 @@ class CandidateTests(unittest.TestCase):
             with zipfile.ZipFile(archive, "w") as output:
                 output.writestr("bin/symbrowse", b"binary")
             with self.assertRaisesRegex(candidate.verify.GateError, "archive layout mismatch"):
+                candidate.verify._verify_archive_layout(
+                    archive, {"symbrowse", "LICENSE", "README.md", "AGENTS.md"}
+                )
+
+    def test_zip_layout_rejects_special_file_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            archive = Path(temp) / "candidate.zip"
+            with zipfile.ZipFile(archive, "w") as output:
+                for name in ("symbrowse", "LICENSE", "README.md", "AGENTS.md"):
+                    entry = zipfile.ZipInfo(name)
+                    entry.external_attr = (stat.S_IFIFO | 0o600) << 16 if name == "symbrowse" else 0o644 << 16
+                    output.writestr(entry, b"fixture")
+            with self.assertRaisesRegex(candidate.verify.GateError, "non-regular entries"):
                 candidate.verify._verify_archive_layout(
                     archive, {"symbrowse", "LICENSE", "README.md", "AGENTS.md"}
                 )
