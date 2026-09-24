@@ -103,8 +103,8 @@
     {
       "id": "DMN-008-client-autostart",
       "platforms": ["darwin", "linux"],
-      "go": ["go", "test", "./internal/daemon", "./cmd/symbrowse", "-run", "Autostart|Client|Engine", "-count=1"],
-      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "autostart", "--locked"]
+      "go": ["go", "test", "./internal/daemon", "./internal/mcp", "./cmd/symbrowse", "-run", "Autostart|Client|Engine", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked"]
     }
   ]
 }

@@ -179,37 +179,24 @@ impl Client {
         let data = status.data.unwrap_or(Value::Null);
         let session_ok =
             data.get("session").and_then(Value::as_str) == Some(self.options.session.as_str());
-        let engine_ok = self
-            .options
-            .expected_engine
-            .as_ref()
-            .is_none_or(|expected| {
-                data.get("engine").and_then(Value::as_str) == Some(expected.as_str())
-            });
-        let policy_ok = self
-            .options
-            .expected_policy
-            .as_ref()
-            .is_none_or(|expected| {
-                serde_json::to_value(expected)
-                    .ok()
-                    .is_some_and(|value| data.get("policy") == Some(&value))
-            });
-        if session_ok && engine_ok && policy_ok {
-            return Ok(());
+        if !session_ok {
+            return Err(ClientError::Transport(DaemonError {
+                code: codes::DAEMON_UNAVAILABLE.into(),
+                message: "running daemon reported a different session".into(),
+                hint: "check the daemon socket and session configuration".into(),
+                retryable: Some(true),
+                ..Default::default()
+            }));
         }
-        let _ = self.request_once(&Frame {
-            cmd: "daemon.stop".into(),
-            session: self.options.session.clone(),
-            ..Frame::default()
-        });
-        Err(ClientError::Transport(DaemonError {
-            code: codes::DAEMON_UNAVAILABLE.into(),
-            message: "existing daemon configuration is incompatible; it was stopped".into(),
-            hint: "retry to start a daemon with the requested session configuration".into(),
-            retryable: Some(true),
-            ..Default::default()
-        }))
+
+        for warning in status_mismatch_warnings(
+            &data,
+            self.options.expected_engine.as_deref(),
+            self.options.expected_policy.as_ref(),
+        ) {
+            eprintln!("warning: {warning}");
+        }
+        Ok(())
     }
 
     fn start_daemon(&self) -> Result<Child, ClientError> {
@@ -426,6 +413,32 @@ impl Client {
     fn request_once(&self, _frame: &Frame) -> Result<Response, ClientError> {
         Err(ClientError::Unsupported)
     }
+}
+
+fn status_mismatch_warnings(
+    data: &Value,
+    expected_engine: Option<&str>,
+    expected_policy: Option<&crate::PolicyStatus>,
+) -> Vec<String> {
+    let mut warnings = Vec::new();
+    if let Some(expected) = expected_engine {
+        let actual = data.get("engine").and_then(Value::as_str);
+        if actual != Some(expected) {
+            warnings.push(format!(
+                "running daemon engine {:?} differs from requested engine {:?}",
+                actual, expected
+            ));
+        }
+    }
+    if let Some(expected) = expected_policy {
+        let matches = serde_json::to_value(expected)
+            .ok()
+            .is_some_and(|value| data.get("policy") == Some(&value));
+        if !matches {
+            warnings.push("running daemon policy differs from requested policy".into());
+        }
+    }
+    warnings
 }
 
 #[cfg(unix)]
@@ -690,6 +703,31 @@ mod tests {
             io::Error::other("password=hidden"),
         );
         assert!(!error.to_string().contains("hidden"));
+    }
+
+    #[test]
+    fn engine_and_policy_mismatches_are_reported_as_warnings() {
+        let warnings = status_mismatch_warnings(
+            &serde_json::json!({
+                "engine": "chrome",
+                "policy": {
+                    "allowed_domains": [],
+                    "ssrf_enabled": false,
+                    "fetch_ssrf_enabled": false,
+                    "allow_private": false
+                }
+            }),
+            Some("firefox"),
+            Some(&crate::PolicyStatus {
+                ssrf_enabled: true,
+                fetch_ssrf_enabled: true,
+                allow_private: true,
+                ..Default::default()
+            }),
+        );
+        assert_eq!(warnings.len(), 2);
+        assert!(warnings[0].contains("engine"));
+        assert!(warnings[1].contains("policy"));
     }
 
     #[test]

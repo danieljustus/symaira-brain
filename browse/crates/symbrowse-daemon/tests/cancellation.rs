@@ -344,6 +344,78 @@ mod unix {
     }
 
     #[test]
+    fn engine_and_policy_mismatches_warn_without_stopping_daemon() {
+        let root = root("config-mismatch");
+        fs::create_dir_all(&root).unwrap();
+        let socket = root.join("default.sock");
+        let listener = std::os::unix::net::UnixListener::bind(&socket).unwrap();
+        let (commands, seen) = mpsc::channel();
+        let thread = thread::spawn(move || {
+            for _ in 0..2 {
+                let (stream, _) = listener.accept().expect("accept daemon fixture");
+                let mut reader = BufReader::new(stream);
+                let mut line = String::new();
+                reader.read_line(&mut line).expect("read daemon request");
+                let frame: Frame = serde_json::from_str(&line).expect("decode daemon request");
+                commands.send(frame.cmd.clone()).unwrap();
+                let response = if frame.cmd == "daemon.status" {
+                    symbrowse_daemon::success_response(
+                        Some(serde_json::json!({
+                            "session": "default",
+                            "engine": "chrome",
+                            "policy": {
+                                "allowed_domains": [],
+                                "ssrf_enabled": false,
+                                "fetch_ssrf_enabled": false,
+                                "allow_private": false
+                            }
+                        })),
+                        Vec::new(),
+                    )
+                } else {
+                    symbrowse_daemon::success_response(
+                        Some(serde_json::json!({"ok": true})),
+                        Vec::new(),
+                    )
+                };
+                let mut writer = reader.into_inner();
+                writer
+                    .write_all(
+                        format!("{}\n", serde_json::to_string(&response).unwrap()).as_bytes(),
+                    )
+                    .expect("write daemon fixture response");
+                writer.flush().expect("flush daemon fixture response");
+            }
+        });
+
+        let client = Client::new(ClientOptions {
+            socket_path: socket,
+            session: "default".into(),
+            read_timeout: Duration::from_millis(100),
+            autostart: false,
+            expected_engine: Some("firefox".into()),
+            expected_policy: Some(symbrowse_daemon::PolicyStatus {
+                ssrf_enabled: true,
+                fetch_ssrf_enabled: true,
+                allow_private: true,
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+        let response = client
+            .request(Frame {
+                cmd: "tabs.list".into(),
+                ..Default::default()
+            })
+            .expect("config mismatches must not block request");
+        assert!(response.success);
+        thread.join().unwrap();
+        let seen: Vec<_> = seen.try_iter().collect();
+        assert_eq!(seen, ["tabs.list", "daemon.status"]);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn dmn006_operation_deadline_cancels_handler_and_keeps_connection_usable() {
         let root = root("late-response");
         let socket = root.join("default.sock");
