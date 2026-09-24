@@ -2,6 +2,13 @@ use crate::{FirefoxError, FirefoxSession};
 use serde_json::{Value, json};
 use std::{path::Path, time::Duration};
 
+fn events_for_context(events: Vec<Value>, context: &str) -> Vec<Value> {
+    events
+        .into_iter()
+        .filter(|event| event["params"]["context"].as_str() == Some(context))
+        .collect()
+}
+
 impl FirefoxSession {
     /// Set the deadline used by subsequent BiDi commands.
     pub fn set_timeout(&mut self, timeout: Duration) {
@@ -13,14 +20,14 @@ impl FirefoxSession {
         self.endpoint
     }
 
-    /// Subscribe to completed network responses for the current context.
+    /// Subscribe to completed network responses and keep only this context's events.
     pub async fn start_response_capture(&mut self) -> Result<(), FirefoxError> {
         self.bidi.events.clear();
         self.bidi.events_overflowed = false;
         self.bidi
             .command(
                 "session.subscribe",
-                json!({"events":["network.responseCompleted"],"contexts":[self.context]}),
+                json!({"events":["network.responseCompleted"]}),
                 self.timeout,
             )
             .await?;
@@ -39,7 +46,10 @@ impl FirefoxSession {
                 "Firefox response capture exceeded its 256-event bound".into(),
             ));
         }
-        Ok(std::mem::take(&mut self.bidi.events))
+        Ok(events_for_context(
+            std::mem::take(&mut self.bidi.events),
+            &self.context,
+        ))
     }
 
     /// Route browser downloads into an existing caller-owned directory.
@@ -61,5 +71,25 @@ impl FirefoxSession {
             )
             .await?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::events_for_context;
+    use serde_json::json;
+
+    #[test]
+    fn network_events_are_filtered_to_the_owned_browsing_context() {
+        let selected = events_for_context(
+            vec![
+                json!({"method":"network.responseCompleted","params":{"context":"owned","request":{"url":"http://127.0.0.1/page"}}}),
+                json!({"method":"network.responseCompleted","params":{"context":"other","request":{"url":"http://unrelated.invalid/"}}}),
+                json!({"method":"network.responseCompleted","params":{"request":{"url":"http://unknown.invalid/"}}}),
+            ],
+            "owned",
+        );
+        assert_eq!(selected.len(), 1);
+        assert_eq!(selected[0]["params"]["context"], "owned");
     }
 }
