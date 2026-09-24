@@ -115,7 +115,9 @@ jobs:
 
       - name: Test all Rust migration crates on this native target
         shell: bash
-        run: cargo test --workspace --all-features --locked
+        run: |
+          git fetch --no-tags --depth=1 origin 0b585d52915a824664e1377d0a995dff3f5405cd
+          cargo test --workspace --all-features --locked
 
       - name: Upload target package for same-SHA merge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
