@@ -31,7 +31,7 @@ jobs:
       - name: Verify pinned toolchain
         run: rustup show active-toolchain
       - name: Test daemon contracts
-        run: cargo test -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
+        run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
       - name: Exercise daemon lifecycle and races
         run: |
           python3 port/harness/run.py --suite daemon
