@@ -348,9 +348,9 @@ def launch_daemon(command: list[str], root: Path, env: dict[str, str]) -> tuple[
     return process, stderr_path
 
 
-def daemon_endpoint(session: str, env: dict[str, str]) -> str | Path:
+def daemon_endpoint(session: str, env: dict[str, str], *, static_mode: bool) -> str | Path:
     """Return the isolated per-probe daemon endpoint for this host."""
-    if os.name == "nt":
+    if os.name == "nt" and static_mode:
         # Matches symbrowse-daemon's default_socket_path on Windows. Session
         # names are randomized per probe and never derived from user data.
         return rf"\\.\pipe\symbrowse-{session}"
@@ -454,7 +454,7 @@ def windows_pipe_exchange(endpoint: str, payload: bytes, timeout: float) -> byte
 
 def daemon_exchange(endpoint: str | Path, frame: dict[str, object], timeout: float) -> bytes:
     payload = (json.dumps(frame) + "\n").encode()
-    if os.name == "nt":
+    if os.name == "nt" and isinstance(endpoint, str):
         return windows_pipe_exchange(str(endpoint), payload, timeout)
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
         connection.settimeout(timeout)
@@ -464,7 +464,7 @@ def daemon_exchange(endpoint: str | Path, frame: dict[str, object], timeout: flo
 
 
 def endpoint_ready(endpoint: str | Path) -> bool:
-    if os.name == "nt":
+    if os.name == "nt" and isinstance(endpoint, str):
         wait_named_pipe, _, _, _ = _windows_pipe_api()
         return bool(wait_named_pipe(str(endpoint), 25))
     return Path(endpoint).exists()
@@ -490,16 +490,11 @@ def daemon_ping_until_ready(endpoint: str | Path, session: str, process: subproc
 def daemon_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
-    if os.name == "nt" and not static_mode:
-        return {
-            "status": "unsupported",
-            "reason": "Go daemon binds Unix sockets; only the Rust candidate exposes the native Windows named pipe",
-        }
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
     results: list[dict[str, object]] = []
     session = probe_session("rust016")
-    endpoint = daemon_endpoint(session, env)
+    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     for _ in range(runs):
         process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
         started = time.perf_counter_ns()
@@ -563,18 +558,13 @@ def negative_control_rejected(expected_url: str) -> bool:
 def fetch_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
-    if os.name == "nt" and not static_mode:
-        return {
-            "status": "unsupported",
-            "reason": "Go fetch daemon requires its Unix-socket transport; Windows named-pipe fetch is Rust-only",
-        }
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "fetch daemon probe requires Unix sockets or Windows named pipes"}
     server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     session = probe_session("rust016-fetch")
-    endpoint = daemon_endpoint(session, env)
+    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
         startup_deadline = time.monotonic() + 5
@@ -712,7 +702,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
             ).strip(),
             "host": {"system": platform.system(), "machine": platform.machine()},
-            "daemon_transport": "windows-named-pipe" if os.name == "nt" else "unix-domain-socket",
+            "daemon_transport": "go-unix-socket/rust-named-pipe" if os.name == "nt" else "unix-domain-socket",
             "daemon_session_policy": "randomized per probe invocation to avoid user or concurrent daemon collisions",
             "runs_per_workload": args.runs,
             "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
@@ -725,11 +715,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "Peak RSS is collected from child-process resource usage where the host exposes it; daemon RSS remains unavailable in this portable runner.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
-                *(
-                    ["The Go daemon exposes Unix sockets only; Windows native-pipe samples are Rust-only and cannot satisfy the paired RUST-016 gate."]
-                    if os.name == "nt"
-                    else []
-                ),
+                *(["Windows compares Go Unix sockets with Rust named pipes; IPC transport differs."] if os.name == "nt" else []),
             ],
         }
         for name, path in (("go", args.go), ("rust", args.rust)):

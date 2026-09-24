@@ -113,7 +113,7 @@ jobs:
           cargo build --release --locked --bin symbrowse
           Copy-Item "target\release\symbrowse.exe" "$env:RUNNER_TEMP\symbrowse-rust.exe"
 
-      - name: Run native 30-sample CLI, MCP, named-pipe daemon, and static-fetch probes
+      - name: Run native 30-sample CLI, MCP, daemon, and static-fetch probes
         working-directory: browse
         shell: pwsh
         run: |
@@ -130,15 +130,13 @@ jobs:
           assert report["host"]["system"] == "Windows", report["host"]
           assert report["runs_per_workload"] == 30
           go, rust = report["binaries"]["go"], report["binaries"]["rust"]
-          for implementation, value in (("go", go), ("rust", rust)):
-              for workload in ("cli", "mcp"):
-                  assert value[workload]["status"] == "pass", (implementation, workload, value.get(workload))
-                  assert value[workload]["samples"] == 30, (implementation, workload, value[workload])
-          for workload in ("daemon", "fetch"):
-              assert rust[workload]["status"] == "pass", (workload, rust.get(workload))
-              assert rust[workload]["samples"] == 30, (workload, rust[workload])
-              assert go[workload]["status"] == "unsupported", (workload, go.get(workload))
-          assert report["gate"] == "blocked", "Windows Go/Rust paired gate must remain blocked while Go lacks named pipes"
+          for workload in ("cli", "mcp", "daemon", "fetch"):
+              left, right = go[workload], rust[workload]
+              assert left["status"] == right["status"] == "pass", (workload, left, right)
+              assert left["samples"] == right["samples"] == 30
+              assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, workload
+          assert report["gate"] == "pass", report["gate"]
+          assert report["candidate_size_bytes"] <= report["reference_size_bytes"] * 0.8
           '@ | python -
 
       - name: Upload native benchmark evidence
