@@ -64,7 +64,11 @@ pub fn redact_str(input: &str) -> String {
                 {
                     value_start += 1;
                 }
-                let end = value_end(&output, value_start);
+                let end = value_end(
+                    &output,
+                    value_start,
+                    !matches!(*key, "auth" | "authorization"),
+                );
                 if end <= value_start {
                     cursor = value_start;
                     continue;
@@ -77,7 +81,7 @@ pub fn redact_str(input: &str) -> String {
     redact_url_credentials(&output)
 }
 
-fn value_end(text: &str, start: usize) -> usize {
+fn value_end(text: &str, start: usize, stop_on_space: bool) -> usize {
     let bytes = text.as_bytes();
     let mut end = start;
     let quoted = bytes
@@ -94,10 +98,8 @@ fn value_end(text: &str, start: usize) -> usize {
             return end + 1;
         }
         if !quoted
-            && matches!(
-                byte,
-                b' ' | b'\t' | b'\r' | b'\n' | b',' | b'}' | b']' | b';'
-            )
+            && (matches!(byte, b'\r' | b'\n' | b',' | b'}' | b']' | b';')
+                || (stop_on_space && matches!(byte, b' ' | b'\t')))
         {
             break;
         }
@@ -231,5 +233,8 @@ mod tests {
         );
         assert!(!json.to_string().contains("abc"));
         assert!(!json.to_string().contains("xyz"));
+        let header = redact_str("Authorization: Bearer fixture-secret\nstatus: 401");
+        assert!(!header.contains("fixture-secret"), "{header}");
+        assert!(header.contains("status: 401"));
     }
 }
