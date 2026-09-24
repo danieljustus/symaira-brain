@@ -511,9 +511,19 @@ def daemon_probe(
             if b'"success":true' not in response:
                 results.append({"status": "error", "reason": "daemon ping failed"})
             else:
-                results.append({"status": "pass", "duration_ns": time.perf_counter_ns() - started})
-            daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+                duration = time.perf_counter_ns() - started
+            try:
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+            except OSError as error:
+                # A Windows pipe may close before the stop reply is read;
+                # a clean daemon exit still proves the stop was delivered.
+                if os.name != "nt" or getattr(error, "winerror", None) != 233:
+                    raise
             process.wait(timeout=5)
+            if process.returncode != 0:
+                raise OSError(f"daemon exited with status {process.returncode}")
+            if b'"success":true' in response:
+                results.append({"status": "pass", "duration_ns": duration})
         except (OSError, subprocess.TimeoutExpired) as error:
             results.append({"status": "error", "reason": str(error)})
         finally:
