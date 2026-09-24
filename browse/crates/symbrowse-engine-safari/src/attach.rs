@@ -8,6 +8,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use serde::{Deserialize, Serialize};
 use symbrowse_core::policy::{Allowlist, SsrfGuard};
 use symbrowse_engine::capabilities::{Capabilities, capabilities_for};
 use symbrowse_engine::{Context, NavigationResult, Page};
@@ -18,6 +19,19 @@ pub const DEFAULT_TAB_NAME: &str = "Symaira";
 pub const DEFAULT_COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 pub const DEFAULT_NAVIGATION_TIMEOUT: Duration = Duration::from_secs(30);
 const MAX_SCRIPT_BYTES: usize = 1024 * 1024;
+
+/// One tab reported by the attached Safari window.
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SafariTabInfo {
+    pub id: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub label: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub url: String,
+    pub active: bool,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub target_id: String,
+}
 
 /// A prerequisite that must be diagnosed before Safari automation is used.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -485,6 +499,70 @@ impl<R: ScriptRunner> AttachEngine<R> {
         })
     }
 
+    /// List the tabs in Safari's selected window without changing its state.
+    pub fn tab_list(&self, _context: &Context) -> Result<Vec<SafariTabInfo>, AttachError> {
+        self.ensure_open()?;
+        let script = r#"tell application "Safari"
+  set out to ""
+  repeat with t in tabs of window 1
+    set out to out & (name of t) & "\t" & (URL of t) & "\n"
+  end repeat
+  return out
+end tell"#;
+        let output = self.runner.run(script, self.command_timeout)?;
+        Ok(output
+            .trim_end_matches('\n')
+            .split('\n')
+            .filter(|line| !line.is_empty())
+            .map(|line| {
+                let (label, url) = line.split_once('\t').unwrap_or((line, ""));
+                SafariTabInfo {
+                    label: label.to_owned(),
+                    url: url.to_owned(),
+                    ..SafariTabInfo::default()
+                }
+            })
+            .collect())
+    }
+
+    /// Open and pin a named tab after validating its target before Apple Events.
+    pub fn tab_new(
+        &mut self,
+        _context: &Context,
+        label: &str,
+        target: &str,
+    ) -> Result<Page, AttachError> {
+        self.ensure_open()?;
+        let target = validate_web_target(target)?;
+        if let Err(reason) = self.navigation_policy.check(&target) {
+            return Err(AttachError::InvalidTarget { target, reason });
+        }
+        let script = format!(
+            "tell application \"Safari\"\nset newTab to make new tab with properties {{URL:{}}} at end of tabs of window 1\nset name of newTab to {}\nreturn name of newTab\nend tell",
+            apple_string(&target),
+            apple_string(label)
+        );
+        let name = self.runner.run(&script, self.command_timeout)?;
+        let name = name.trim().trim_matches('"');
+        if !name.is_empty() {
+            self.tab_name = name.to_owned();
+        }
+        Ok(Page {
+            id: "safari-live".to_owned(),
+            session_id: String::new(),
+        })
+    }
+
+    /// Close the currently pinned tab; closing the engine itself never quits Safari.
+    pub fn tab_close(&self, _page: &Page) -> Result<(), AttachError> {
+        self.ensure_open()?;
+        let script = format!(
+            "tell application \"Safari\"\nclose {}\nend tell",
+            self.tab_reference()
+        );
+        self.runner.run(&script, self.command_timeout).map(|_| ())
+    }
+
     pub fn navigate(&self, _page: &Page, target: &str) -> Result<NavigationResult, AttachError> {
         self.ensure_open()?;
         let target = validate_web_target(target)?;
@@ -558,7 +636,7 @@ impl<R: ScriptRunner> AttachEngine<R> {
 
     #[must_use]
     pub fn capabilities(&self) -> Capabilities {
-        let mut implemented = vec!["InspectionEngine", "NavigationStateProvider"];
+        let mut implemented = vec!["InspectionEngine", "NavigationStateProvider", "TabManager"];
         if self.interactions_opt_in && self.navigation_policy.is_active() {
             implemented.push("InteractionEngine");
         }

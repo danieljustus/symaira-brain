@@ -1,7 +1,7 @@
 {
   "fixture": "testdata/port/engine/chrome-full.json",
   "fixture_sha256": "2557622940d9a8351cb1ed7c086d62b3e11d724a543a9033f6b9b47b2f2836fb",
-  "generator_sha256": "a30474b5ee55a02312bdac2a8d415c241ca2249a1005bb4dfe254ac18d6856d6",
+  "generator_sha256": "f052348a3d7c204864aa0f4164c70b5d9f73bd2a092516ccf7828ab8a6c25a8d",
   "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
   "schema_version": 1,
   "source_files": {

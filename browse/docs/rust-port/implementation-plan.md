@@ -374,9 +374,15 @@ allowlist/SSRF checks run before navigation side effects; AppleScript travels
 through stdin; subprocess trees, input/output, BiDi commands and cleanup are
 bounded; and BiDi endpoints must be loopback `ws`/`wss` URLs without userinfo.
 Injected tests cover lifecycle, policy, capabilities, protocol errors and
-descendant cleanup. A real macOS Safari BiDi session now exercises navigation,
-evaluation, bounded cleanup, and the production daemon socket path without any
-Chrome fallback. A real Safari attach session, Go-generated frame fixtures, and
+descendant cleanup. The daemon-path BiDi smoke is gated by the Safari native
+harness, which must set `SYMBROWSE_E2E=1` and run the `safari_native` daemon
+test; it launches an isolated session against a localhost fixture. This native
+gate has not run in the current checkout because a normal Safari process is
+open, and the harness refuses to touch that session. The Go fixture files are
+present, current Go sources match their recorded source hashes, and direct Go
+fixture-generator tests reproduce the checked-in fixture byte for byte. The
+source-bound checker now pins to reachable commit
+`dc9c54e41beccf131fbe70e3f45bfff98871e709`. A real Safari attach session and
 native amd64 macOS execution remain, so ENG-008 stays `todo` and this item is
 not complete.
 

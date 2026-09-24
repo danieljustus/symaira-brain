@@ -61,7 +61,9 @@ def source_hashes(paths: tuple[str, ...]) -> dict[str, str]:
     result: dict[str, str] = {}
     for relative in paths:
         current = (ROOT / relative).read_bytes()
-        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:browse/{relative}"], cwd=ROOT)
+        pinned = subprocess.check_output(
+            ["git", "show", f"{ORACLE_COMMIT}:browse/{relative}"], cwd=ROOT
+        )
         if current != pinned:
             raise SystemExit(f"oracle source differs from pinned commit: {relative}")
         result[relative] = sha256(current)
@@ -256,7 +258,7 @@ def native_gate(suite: str) -> dict[str, Any]:
         return evidence
 
     env = os.environ.copy()
-    env["SYMBROWSE_E2E"] = "1" if suite == "chrome-full" else env.get("SYMBROWSE_E2E", "0")
+    env["SYMBROWSE_E2E"] = "1" if suite in {"chrome-full", "safari"} else env.get("SYMBROWSE_E2E", "0")
     env["SYMBROWSE_NATIVE_TARGETS"] = "1"
     if suite == "chrome-full":
         command = [
@@ -275,10 +277,13 @@ def native_gate(suite: str) -> dict[str, Any]:
             "cargo",
             "test",
             "-p",
-            "symbrowse-engine-safari",
-            "--tests",
+            "symbrowse-daemon",
+            "--test",
+            "safari_native",
             "--locked",
             "--",
+            "--exact",
+            "production_daemon_path_runs_safari_bidi_and_reaps_owned_driver",
             "--nocapture",
         ]
     evidence["command"] = command
@@ -291,7 +296,7 @@ def native_gate(suite: str) -> dict[str, Any]:
             evidence["reason"] = (
                 "native Chrome launch, CDP surface, and bounded profile cleanup passed"
                 if suite == "chrome-full"
-                else "native Safari launch, BiDi session, command, and bounded cleanup passed"
+                else "native Safari daemon path, BiDi session, command, and bounded cleanup passed"
             )
         else:
             evidence["reason"] = "native test returned a non-zero exit code"

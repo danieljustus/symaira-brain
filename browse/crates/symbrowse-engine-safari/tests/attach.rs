@@ -103,6 +103,7 @@ fn attach_capabilities_are_honest() {
             .iter()
             .any(|name| name == "InspectionEngine")
     );
+    assert!(read_only.interfaces.iter().any(|name| name == "TabManager"));
     assert!(
         !read_only
             .interfaces
@@ -137,6 +138,51 @@ fn attach_capabilities_are_honest() {
             .interfaces
             .iter()
             .any(|name| name == "InteractionEngine")
+    );
+}
+
+#[test]
+fn attach_tab_manager_lists_opens_and_closes_the_pinned_tab() {
+    let listing_runner =
+        FakeRunner::with_answer("Docs\thttps://example.test/docs\nHome\thttps://example.test/\n");
+    let listing = AttachEngine::new(listing_runner);
+    let context = listing.new_context().unwrap();
+    let tabs = listing.tab_list(&context).expect("tab list");
+    assert_eq!(tabs.len(), 2);
+    assert_eq!(tabs[0].label, "Docs");
+    assert_eq!(tabs[0].url, "https://example.test/docs");
+    assert!(!tabs[0].active);
+
+    let runner = FakeRunner::with_answer("Research");
+    let mut engine = AttachEngine::new(runner.clone());
+    let context = engine.new_context().unwrap();
+    let page = engine
+        .tab_new(&context, "Research", "https://example.test/research")
+        .expect("new tab");
+    assert_eq!(page.id, "safari-live");
+    let calls = runner.calls();
+    assert!(calls[0].contains("make new tab"));
+    assert!(calls[0].contains("https://example.test/research"));
+    assert!(calls[0].contains("Research"));
+    engine.tab_close(&page).expect("close pinned tab");
+    assert!(runner.calls()[1].contains("tab \"Research\" of window 1"));
+}
+
+#[test]
+fn attach_tab_new_checks_navigation_policy_before_apple_events() {
+    let runner = FakeRunner::default();
+    let policy = NavigationPolicy::from_allowlist(&["allowed.example".to_owned()]);
+    let mut engine = AttachEngine::new(runner.clone()).with_navigation_policy(policy);
+    let context = engine.new_context().unwrap();
+    let error = engine
+        .tab_new(&context, "Blocked", "https://blocked.example/")
+        .expect_err("blocked tab target");
+    assert!(
+        matches!(error, AttachError::InvalidTarget { reason, .. } if reason.contains("allowlist"))
+    );
+    assert!(
+        runner.calls().is_empty(),
+        "blocked target reached Apple Events"
     );
 }
 

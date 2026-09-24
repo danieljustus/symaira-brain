@@ -11,8 +11,8 @@ use symbrowse_engine::capabilities::OPTIONAL_INTERFACE_NAMES;
 use symbrowse_engine::{EvaluationResult, Page};
 use symbrowse_engine_safari::{
     BIDI_ENGINE_KIND, BidiEngine, BidiError, BidiTransport, BoxFuture, DriverOptions,
-    NavigationPolicy, ProcessAdapter, ProcessHandle, TransportConnector, parse_session_response,
-    require_loopback, session_request,
+    NavigationPolicy, ProcessAdapter, ProcessHandle, SafariBlockedRequest, TransportConnector,
+    parse_session_response, require_loopback, session_request,
 };
 
 #[derive(Clone, Default)]
@@ -55,11 +55,14 @@ fn bidi_capabilities_partition_excludes_unsupported_interactions() {
     assert_eq!(
         caps.interfaces,
         [
-            "CookieEngine",
+            "FrameManager",
             "InspectionEngine",
-            "NavigationStateProvider"
+            "NavigationStateProvider",
+            "NetworkPolicyReporter",
+            "TabManager",
         ]
     );
+    assert!(caps.unsupported.iter().any(|name| name == "CookieEngine"));
     assert!(
         caps.unsupported
             .iter()
@@ -132,14 +135,25 @@ async fn bidi_policy_denies_before_transport() {
     let mut engine =
         BidiEngine::from_transport(Box::new(fake.clone()), "page-1").with_navigation_policy(policy);
     let page = engine.new_page().expect("page");
-    let error = engine
-        .navigate(&page, "https://blocked.example/")
-        .await
-        .expect_err("blocked navigation");
-    assert!(
-        matches!(error, BidiError::InvalidTarget { reason, .. } if reason.contains("allowlist"))
-    );
+    for _ in 0..2 {
+        let error = engine
+            .navigate(&page, "https://blocked.example/")
+            .await
+            .expect_err("blocked navigation");
+        assert!(
+            matches!(error, BidiError::InvalidTarget { reason, .. } if reason.contains("allowlist"))
+        );
+    }
     assert!(fake.calls().is_empty(), "denied URL reached BidiTransport");
+    assert_eq!(
+        engine.blocked_requests(),
+        [SafariBlockedRequest {
+            url: "https://blocked.example/".to_owned(),
+            resource_type: "document".to_owned(),
+            count: 2,
+            reason: "domain allowlist".to_owned(),
+        }]
+    );
 
     let fake = FakeTransport::default();
     let ssrf = SsrfGuard::with_lookup(false, |_host| Ok(vec!["127.0.0.1".to_owned()]));
@@ -178,14 +192,14 @@ async fn bidi_navigation_evaluation_and_cleanup_use_injected_transport() {
             .capabilities()
             .interfaces
             .iter()
-            .any(|name| name == "CookieEngine")
+            .any(|name| name == "FrameManager")
     );
     assert!(
         engine
             .capabilities()
             .unsupported
             .iter()
-            .any(|name| name == "FrameManager" || name == "TabManager" || name == "NetworkEvents")
+            .any(|name| name == "NetworkEvents" || name == "CookieEngine")
     );
     assert!(engine.screenshot().is_err());
     engine.close().await.expect("close");

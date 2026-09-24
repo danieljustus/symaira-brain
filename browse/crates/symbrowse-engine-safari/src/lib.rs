@@ -15,11 +15,11 @@ mod bidi;
 pub use attach::{
     AttachEngine, AttachError, DEFAULT_COMMAND_TIMEOUT, DEFAULT_NAVIGATION_TIMEOUT,
     DEFAULT_TAB_NAME, ENGINE_KIND as ATTACH_ENGINE_KIND, NavigationPolicy, OsascriptRunner,
-    SafariPrerequisite, ScriptRunner,
+    SafariPrerequisite, SafariTabInfo, ScriptRunner,
 };
 pub use bidi::{
     BidiEngine, BidiError, BidiTransport, BoxFuture, DRIVER_PATH, DriverOptions,
-    ENGINE_KIND as BIDI_ENGINE_KIND, ProcessAdapter, ProcessHandle, SessionCapabilities,
-    SystemProcessAdapter, TransportConnector, WebSocketConnector, parse_session_response,
-    require_loopback, session_request,
+    ENGINE_KIND as BIDI_ENGINE_KIND, ProcessAdapter, ProcessHandle, SafariBlockedRequest,
+    SessionCapabilities, SystemProcessAdapter, TransportConnector, WebSocketConnector,
+    parse_session_response, require_loopback, session_request,
 };
