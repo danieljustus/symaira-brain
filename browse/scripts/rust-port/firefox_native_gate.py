@@ -130,6 +130,14 @@ def pe_machine(path: Path) -> int:
     return struct.unpack_from("<H", header, offset + 4)[0]
 
 
+def verify_executable_version(stdout: str, version: str) -> None:
+    """Check the executable's version line while allowing runtime warnings on stderr."""
+    first_line = stdout.splitlines()[0].strip() if stdout.splitlines() else ""
+    expected = f"Mozilla Firefox {version}"
+    if first_line != expected:
+        raise ValueError(f"executable Nightly identity mismatch: expected {expected!r}; got {first_line!r}")
+
+
 def download(name: str, destination: Path) -> None:
     if name != "index.html" and Path(name).name != name:
         raise ValueError(f"unsafe artifact name: {name}")
@@ -258,9 +266,7 @@ def prepare(target: str, destination: Path) -> None:
     else:
         command = [str(executable), "--version"]
     result = subprocess.run(command, check=True, capture_output=True, text=True, timeout=30)
-    output = (result.stdout + result.stderr).strip()
-    if output != f"Mozilla Firefox {version}":
-        raise ValueError(f"executable Nightly identity mismatch: expected {version}; got {output!r}")
+    verify_executable_version(result.stdout, version)
     print(
         f"Verified Firefox Nightly {version} ({target}), Mozilla source {revision}, "
         f"SHA-256 {actual_digest}, native binary {executable}"

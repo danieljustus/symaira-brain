@@ -14,6 +14,7 @@ from firefox_native_gate import (
     safe_relative,
     version_key,
     verify_metadata,
+    verify_executable_version,
 )
 
 
@@ -108,6 +109,11 @@ class FirefoxNativeGateTests(unittest.TestCase):
 
     def test_nightly_version_order_is_numeric(self):
         self.assertGreater(version_key("10.0a1"), version_key("9.0a99"))
+
+    def test_version_identity_ignores_runtime_warning_stream(self):
+        verify_executable_version("Mozilla Firefox 158.0a1\n", "158.0a1")
+        with self.assertRaisesRegex(ValueError, "identity mismatch"):
+            verify_executable_version("warning\nMozilla Firefox 158.0a1\n", "158.0a1")
 
 
 if __name__ == "__main__":
