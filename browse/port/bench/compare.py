@@ -176,8 +176,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         size_reduction = (1.0 - candidate_size / baseline_size) * 100.0
         result["size_reduction_percent"] = size_reduction
 
+    value_reasons = []
+    if size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION:
+        value_reasons.append("binary_size")
+    rss_reduction = None
+    if len(rss_medians) == 2:
+        rss_reduction = (1.0 - rss_medians[args.candidate] / rss_medians[args.reference]) * 100.0
+        if rss_medians[args.candidate] * 100 <= rss_medians[args.reference] * (100 - VALUE_SIZE_REDUCTION):
+            value_reasons.append("median_rss")
+    result["value_gate"] = {
+        "satisfied": bool(value_reasons),
+        "satisfied_by": value_reasons,
+        "binary_size_reduction_percent": size_reduction,
+        "median_rss_reduction_percent": rss_reduction,
+    }
+
     p95_ok = len(comparable) == len(workload_pairs) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
-    value_ok = size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION
+    value_ok = bool(value_reasons)
     if not comparable:
         result["reasons"].append("no complete representative workload pair")
     elif len(comparable) != len(workload_pairs):
@@ -185,7 +200,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not p95_ok:
         result["reasons"].append("p95 regression gate is missing or exceeds 10%")
     if not value_ok:
-        result["reasons"].append("20% binary size gain is not evidenced")
+        result["reasons"].append("neither binary size nor median RSS is improved by at least 20%")
     if not result["reasons"]:
         result["gate"] = "pass"
     print(json.dumps(result, indent=2))
