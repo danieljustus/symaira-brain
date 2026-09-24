@@ -117,6 +117,16 @@ func TestWriteHumanQuotedNamesUseGoControlEscapes(t *testing.T) {
 	}
 }
 
+func TestWriteHumanNamesEscapeGoNonprintableUnicodeCategories(t *testing.T) {
+	got := writeHumanForTest(t, map[string]any{
+		"tabs": []any{map[string]any{"id": "t1", "label": "\u200b\u2028\ue000\u0378\u00a0\u00ad\U0010ffff"}},
+	})
+	want := "tabs:\n- t1 \"\\u200b\\u2028\\ue000\\u0378\\u00a0\\u00ad\\U0010ffff\"\n"
+	if got != want {
+		t.Fatalf("human tab output = %q, want %q", got, want)
+	}
+}
+
 func TestWriteHumanUnknownPayloadUsesIndentedJSON(t *testing.T) {
 	got := writeHumanForTest(t, map[string]any{"z": "last", "a": float64(1)})
 	want := "{\n  \"a\": 1,\n  \"z\": \"last\"\n}\n"

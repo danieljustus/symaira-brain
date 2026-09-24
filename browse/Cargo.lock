@@ -1902,6 +1902,7 @@ dependencies = [
  "aes-gcm",
  "fs2",
  "getrandom 0.4.3",
+ "icu_properties",
  "proptest",
  "rustix",
  "serde",

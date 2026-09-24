@@ -2,6 +2,7 @@
 
 //! Unified JSON, YAML and human output envelope contracts.
 
+use icu_properties::{props::GeneralCategory, CodePointMapData};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -650,9 +651,7 @@ fn tab_text(tab: &Value) -> String {
     }
 }
 
-/// Quotes text using Go's `strconv.Quote` escapes for control characters.
-/// JSON quoting differs here: Go uses short escapes and `\\xNN` for ASCII
-/// controls, and `\\uNNNN` for the C1 controls.
+/// Quotes text using Go's `strconv.Quote` escapes and Unicode printability.
 fn go_quote(text: &str) -> String {
     use std::fmt::Write as _;
 
@@ -673,15 +672,52 @@ fn go_quote(text: &str) -> String {
                 write!(quoted, "\\x{:02x}", u32::from(character))
                     .expect("writing into a String cannot fail");
             }
-            character if character.is_control() => {
-                write!(quoted, "\\u{:04x}", u32::from(character))
-                    .expect("writing into a String cannot fail");
+            character if !go_is_print(character) => {
+                let scalar = u32::from(character);
+                if scalar <= 0xffff {
+                    write!(quoted, "\\u{scalar:04x}").expect("writing into a String cannot fail");
+                } else {
+                    write!(quoted, "\\U{scalar:08x}").expect("writing into a String cannot fail");
+                }
             }
             character => quoted.push(character),
         }
     }
     quoted.push('"');
     quoted
+}
+
+/// Go's `unicode.IsPrint` definition: L, M, N, P, and S categories plus ASCII
+/// space. ICU4X's locked Unicode 17 data matches the Go 1.27 Unicode tables.
+fn go_is_print(character: char) -> bool {
+    if character == ' ' {
+        return true;
+    }
+    matches!(
+        CodePointMapData::<GeneralCategory>::new().get(character),
+        GeneralCategory::UppercaseLetter
+            | GeneralCategory::LowercaseLetter
+            | GeneralCategory::TitlecaseLetter
+            | GeneralCategory::ModifierLetter
+            | GeneralCategory::OtherLetter
+            | GeneralCategory::NonspacingMark
+            | GeneralCategory::EnclosingMark
+            | GeneralCategory::SpacingMark
+            | GeneralCategory::DecimalNumber
+            | GeneralCategory::LetterNumber
+            | GeneralCategory::OtherNumber
+            | GeneralCategory::ConnectorPunctuation
+            | GeneralCategory::DashPunctuation
+            | GeneralCategory::OpenPunctuation
+            | GeneralCategory::ClosePunctuation
+            | GeneralCategory::InitialPunctuation
+            | GeneralCategory::FinalPunctuation
+            | GeneralCategory::OtherPunctuation
+            | GeneralCategory::MathSymbol
+            | GeneralCategory::CurrencySymbol
+            | GeneralCategory::ModifierSymbol
+            | GeneralCategory::OtherSymbol
+    )
 }
 
 fn human_scalar(value: &Value) -> String {
@@ -802,6 +838,17 @@ mod tests {
         assert_eq!(
             snapshot,
             "snapshot diff:\nadded:\n- button \"a\\x01\\nb\"\n"
+        );
+    }
+
+    #[test]
+    fn human_names_escape_go_nonprintable_unicode_categories() {
+        let rendered = human(
+            json!({"tabs":[{"id":"t1","label":"\u{200b}\u{2028}\u{e000}\u{0378}\u{00a0}\u{00ad}\u{10ffff}"}]}),
+        );
+        assert_eq!(
+            rendered,
+            "tabs:\n- t1 \"\\u200b\\u2028\\ue000\\u0378\\u00a0\\u00ad\\U0010ffff\"\n"
         );
     }
 }
