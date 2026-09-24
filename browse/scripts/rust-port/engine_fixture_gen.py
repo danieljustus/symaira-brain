@@ -23,7 +23,7 @@ from external_env import ensure_external_environment
 
 ensure_external_environment(__file__)
 
-ORACLE_COMMIT = "652453d1595fc302bd69c328e7da8a21dbee28b9"
+ORACLE_COMMIT = "dc9c54e41beccf131fbe70e3f45bfff98871e709"
 SOURCE_FILES = (
     "internal/engine/engine.go",
     "internal/engine/stable_refs.go",
@@ -43,7 +43,7 @@ def source_hashes(root: Path) -> dict[str, str]:
     hashes: dict[str, str] = {}
     for relative in SOURCE_FILES:
         current = (root / relative).read_bytes()
-        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:{relative}"], cwd=root)
+        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:browse/{relative}"], cwd=root)
         if current != pinned:
             raise SystemExit(f"oracle source differs from pinned commit: {relative}")
         hashes[relative] = sha256(current)
