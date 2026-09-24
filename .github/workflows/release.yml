@@ -8,7 +8,7 @@ on:
     inputs:
       tag:
         description: 'Tag to build DMG for (e.g. v0.2.2)'
-        required: false
+        required: true
         type: string
 
 permissions:
@@ -32,6 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -106,6 +107,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -125,6 +128,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -142,11 +146,22 @@ jobs:
 
       - name: Check if release already exists (avoid rerun deadlock)
         id: check_release
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if gh release view "${{ github.ref_name }}" --repo ${{ github.repository }} 2>/dev/null; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && ! "$INPUT_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Manual recovery requires an explicit SemVer release tag"
+            exit 1
+          fi
+          if gh release view "$RELEASE_TAG" --repo ${{ github.repository }} 2>/dev/null; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            gh release view "${{ github.ref_name }}" --repo ${{ github.repository }} --json assets --jq '.assets[].name' | sort > /tmp/existing-assets.txt
           else
+            if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo "::error::Manual recovery requires an existing release at $RELEASE_TAG"
+              exit 1
+            fi
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -162,7 +177,7 @@ jobs:
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
 
       - name: Build and push Homebrew formula only (rerun)
-        if: steps.check_release.outputs.exists == 'true'
+        if: steps.check_release.outputs.exists == 'true' && github.event_name != 'workflow_dispatch'
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
@@ -182,6 +197,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Verify Xcode 26 toolchain for Icon Composer
         run: |
@@ -195,21 +211,11 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          # On tag push (release workflow): use GITHUB_REF_NAME
-          # On workflow_dispatch: use the provided input or derive from latest tag
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ -n "${{ inputs.tag }}" ]]; then
-              TAG="${{ inputs.tag }}"
-              VERSION="${TAG#v}"
-            else
-              TAG="$(git describe --tags --abbrev=0)"
-              VERSION="${TAG#v}"
-            fi
-          else
-            TAG="${{ github.ref_name }}"
-            VERSION="${GITHUB_REF_NAME#v}"
-          fi
+          TAG="$RELEASE_TAG"
+          VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "Using tag=$TAG version=$VERSION"
@@ -385,21 +391,9 @@ jobs:
       - name: Determine version
         id: version
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          # On tag push (release workflow): use GITHUB_REF_NAME.
-          # On workflow_dispatch: use the provided input or the latest release
-          # tag (there is no source checkout here, so resolve via the GH API
-          # instead of git describe).
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            if [[ -n "${{ inputs.tag }}" ]]; then
-              TAG="${{ inputs.tag }}"
-            else
-              TAG="$(gh release list --repo danieljustus/symaira-brain --limit 1 --json tagName --jq '.[0].tagName')"
-            fi
-          else
-            TAG="${{ github.ref_name }}"
-          fi
+          TAG="$RELEASE_TAG"
           VERSION="${TAG#v}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
