@@ -29,7 +29,7 @@ fn go_generated_static_vectors_match() {
         serde_json::from_str(include_str!("../../../port/fixtures/fetch/static.json")).unwrap();
     assert_eq!(
         fixture.oracle_commit,
-        "652453d1595fc302bd69c328e7da8a21dbee28b9"
+        "dc9c54e41beccf131fbe70e3f45bfff98871e709"
     );
     assert_eq!(
         fixture.generated_by,

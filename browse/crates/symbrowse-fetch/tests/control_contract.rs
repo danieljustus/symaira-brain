@@ -83,7 +83,7 @@ fn pinned_go_control_fixture_has_provenance_and_full_boundaries() {
     let fixture = fixture();
     assert_eq!(
         fixture.oracle_commit,
-        "652453d1595fc302bd69c328e7da8a21dbee28b9"
+        "dc9c54e41beccf131fbe70e3f45bfff98871e709"
     );
     assert_eq!(
         fixture.generated_by,

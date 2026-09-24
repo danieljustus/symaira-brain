@@ -1,5 +1,5 @@
 {
-  "oracle_commit": "652453d1595fc302bd69c328e7da8a21dbee28b9",
+  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
   "generated_by": "scripts/rust-port/fetch_fixture_gen.go",
   "source_digest": "4924c02927471d138aef6ba9b13be237d6f4bd0ad91472e322c1a50505750ac1",
   "vector_count": 28,

@@ -22,9 +22,10 @@ import (
 	"github.com/danieljustus/symaira-browse/internal/policy"
 	"github.com/danieljustus/symaira-browse/internal/session"
 	"github.com/danieljustus/symaira-browse/internal/trace"
+	"github.com/danieljustus/symaira-browse/scripts/rust-port/internal/sourcepin"
 )
 
-const oracleCommit = "652453d1595fc302bd69c328e7da8a21dbee28b9"
+const oracleCommit = "dc9c54e41beccf131fbe70e3f45bfff98871e709"
 const fixedTime = "2026-08-06T12:00:00Z"
 
 var workflowSources = []string{
@@ -40,6 +41,9 @@ var workflowSources = []string{
 }
 
 func sourceManifest() (map[string]string, string, error) {
+	if err := sourcepin.Verify(oracleCommit, workflowSources); err != nil {
+		return nil, "", err
+	}
 	files := make(map[string]string, len(workflowSources))
 	digest := sha256.New()
 	for _, path := range workflowSources {
