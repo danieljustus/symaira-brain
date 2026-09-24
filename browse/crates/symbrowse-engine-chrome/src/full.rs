@@ -968,28 +968,24 @@ mod tests {
     }
 
     #[test]
-    fn frame_fixture_flattens_deterministically() {
-        let raw = json!({"frame":{"id":"root","url":"https://example.test","name":"main","loaderId":"loader-root","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]},"childFrames":[{"frame":{"id":"child","parentId":"root","url":"https://example.test/child","name":"child","loaderId":"loader-child","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]}}]});
-        let tree: page::FrameTree = serde_json::from_value(raw).unwrap();
-        let mut frames = Vec::new();
-        flatten_frames(&tree, &mut frames);
+    fn frame_tree_matches_source_bound_go_fixture() {
+        let fixture: Value = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../testdata/port/engine/chrome-full.json"
+        )))
+        .unwrap();
+        let expected: Vec<FrameInfo> = serde_json::from_value(fixture["frames"].clone()).unwrap();
         assert_eq!(
-            frames,
-            vec![
-                FrameInfo {
-                    id: "root".into(),
-                    parent_id: "".into(),
-                    name: "main".into(),
-                    url: "https://example.test".into()
-                },
-                FrameInfo {
-                    id: "child".into(),
-                    parent_id: "root".into(),
-                    name: "child".into(),
-                    url: "https://example.test/child".into()
-                }
-            ]
+            expected.len(),
+            2,
+            "the pinned fixture covers root and child frames"
         );
+
+        let raw = json!({"frame":{"id":"root","url":"https://example.test/","name":"main","loaderId":"loader-root","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]},"childFrames":[{"frame":{"id":"child","parentId":"root","url":"https://example.test/frame","name":"nested","loaderId":"loader-child","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]}}]});
+        let tree: page::FrameTree = serde_json::from_value(raw).unwrap();
+        let mut actual = Vec::new();
+        flatten_frames(&tree, &mut actual);
+        assert_eq!(actual, expected);
     }
 
     #[test]
