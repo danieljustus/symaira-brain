@@ -213,16 +213,17 @@ loop:
 		}
 	}
 
+	c.mu.Lock()
+	pending := c.pending
+	c.pending = nil
+	// Done must not become observable before new calls see the closed state.
 	c.doneOnce.Do(func() {
 		c.doneErr = loopErr
 		close(c.done)
 	})
+	c.mu.Unlock()
 
 	// Fail every call still waiting for a response.
-	c.mu.Lock()
-	pending := c.pending
-	c.pending = nil
-	c.mu.Unlock()
 	for _, ch := range pending {
 		close(ch)
 	}
