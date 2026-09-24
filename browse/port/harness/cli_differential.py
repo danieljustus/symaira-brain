@@ -98,7 +98,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
         "back", "batch", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "focus", "forward", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
+        "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
         "read", "reload", "scrollintoview", "select", "snapshot", "state", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
@@ -124,7 +124,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
         ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
-        ["eval"], ["flow", "list"],
+        ["frame", "tree"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
@@ -394,7 +394,7 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             result = {key: frame.get(key) for key in ("cmd", "session", "args")}
             # Go omits nil RawMessage args for these zero-argument wrappers;
             # Rust sends an empty object because its daemon validates object args.
-            if result["cmd"] in {"dialog.status", "dialog.dismiss", "tab.list", "window.new"} and result["args"] is None:
+            if result["cmd"] in {"dialog.status", "dialog.dismiss", "tab.list", "window.new", "frame.tree"} and result["args"] is None:
                 result["args"] = {}
             return result
 
@@ -534,6 +534,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["scrollintoview", "#target", "extra"], b"", False),
         ("CLI-003", ["check", "--selector", "#agree"], b"", False),
         ("CLI-003", ["check", "--", "--selector"], b"", True),
+        ("CLI-002", ["frame", "tree", "--json"], b"", True),
+        ("CLI-002", ["frame", "--session", "default", "tree"], b"", True),
+        ("CLI-003", ["frame", "tree", "extra"], b"", False),
+        ("CLI-003", ["frame", "--session"], b"", False),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:

@@ -8,6 +8,41 @@ pub(super) fn help(command: &str, suffix: &[&str]) -> Option<&'static str> {
         .collect::<Vec<_>>()
         .join(" ");
     match path.as_str() {
+        "frame" => Some(
+            r###"Inspect the nested frame tree
+
+Usage:
+  symbrowse frame [command]
+
+Available Commands:
+  tree        Show the nested frame tree of the active tab
+
+Flags:
+  -h, --help             help for frame
+      --session string   daemon session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse frame [command] --help" for more information about a command.
+"###,
+        ),
+        "frame tree" => Some(
+            r###"Show the nested frame tree of the active tab
+
+Usage:
+  symbrowse frame tree [flags]
+
+Flags:
+  -h, --help   help for tree
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
         "tab" => Some(
             r###"Manage session tabs (list, new, switch, close)
 

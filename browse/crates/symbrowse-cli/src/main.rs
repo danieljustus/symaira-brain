@@ -1328,6 +1328,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "flow" | "workflow" => parse_flow(&values, command_index),
         "dialog" => parse_dialog(&values, command_index),
         "tab" => parse_tab(&values, command_index),
+        "frame" => parse_frame(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -1347,7 +1348,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, snapshot, state, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, snapshot, state, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -2223,6 +2224,96 @@ fn parse_tab(values: &[String], command_index: usize) -> Result<Action, ParseErr
         session,
         command: command.to_owned(),
         args,
+        format,
+    })
+}
+
+fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand_index = None;
+    let mut scan = command_index + 1;
+    while scan < values.len() {
+        match values[scan].as_str() {
+            "tree" => {
+                subcommand_index = Some(scan);
+                break;
+            }
+            "--session" => {
+                session = required_value(values, scan + 1, "--session")?.to_owned();
+                scan += 1;
+            }
+            "--output" => {
+                format = parse_format(required_value(values, scan + 1, "--output")?)?;
+                scan += 1;
+            }
+            "--json" => {}
+            value if value.starts_with("--json=") => {
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Err(ParseError {
+                    message: format!("unknown command {:?} for \"symbrowse frame\"", values[scan]),
+                    exit_code: 2,
+                });
+            }
+        }
+        scan += 1;
+    }
+    let Some(subcommand_index) = subcommand_index else {
+        return Ok(Action::Help(
+            help_catalog::help("frame", &[]).unwrap().to_owned(),
+        ));
+    };
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        if index == subcommand_index {
+            index += 1;
+            continue;
+        }
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    if let Some(value) = positional.first() {
+        return Err(ParseError {
+            message: format!("unknown command {value:?} for \"symbrowse frame tree\""),
+            exit_code: 2,
+        });
+    }
+    Ok(Action::Dispatch {
+        session,
+        command: "frame.tree".to_owned(),
+        args: serde_json::json!({}),
         format,
     })
 }
@@ -3281,6 +3372,27 @@ mod tests {
             })
         );
         assert!(parse(&args(&["check", "--selector", "#agree"])).is_err());
+    }
+
+    #[test]
+    fn frame_tree_is_the_only_advertised_frame_operation() {
+        assert_eq!(
+            parse(&args(&["frame", "tree", "--session", "work"])),
+            Ok(Action::Dispatch {
+                session: "work".to_owned(),
+                command: "frame.tree".to_owned(),
+                args: serde_json::json!({}),
+                format: Format::Text,
+            })
+        );
+        let Action::Help(parent) = parse(&args(&["frame"])).expect("frame help") else {
+            panic!("wrong action");
+        };
+        assert!(parent.contains("tree        Show the nested frame tree"));
+        assert!(!parent.contains("main        Address the main frame"));
+        assert!(!parent.contains("select      Address a nested frame"));
+        assert!(parse(&args(&["frame", "main"])).is_err());
+        assert!(parse(&args(&["frame", "tree", "extra"])).is_err());
     }
 
     #[test]
