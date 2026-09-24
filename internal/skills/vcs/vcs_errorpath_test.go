@@ -101,56 +101,46 @@ func TestRestoreReplacesTreeAndCommits(t *testing.T) {
 	}
 }
 
-func TestEnsureParentInsideRefusesSymlinkEscape(t *testing.T) {
-	root := t.TempDir()
-	outside := t.TempDir()
-	sub := filepath.Join(root, "sub")
-	if err := os.Symlink(outside, sub); err != nil {
-		t.Fatal(err)
-	}
-	err := ensureParentInside(root, filepath.Join(sub, "file.txt"))
-	if err == nil || !strings.Contains(err.Error(), "escapes destination via symlink") {
-		t.Fatalf("expected symlink-escape refusal, got %v", err)
-	}
-}
-
-func TestEnsureParentInsideRefusesOutsidePath(t *testing.T) {
-	root := t.TempDir()
-	outside := t.TempDir()
-	err := ensureParentInside(root, filepath.Join(outside, "file.txt"))
-	if err == nil || !strings.Contains(err.Error(), "escapes destination") {
-		t.Fatalf("expected outside-path refusal, got %v", err)
-	}
-}
-
-func TestEnsureParentInsideCreatesMissingParent(t *testing.T) {
-	// Production passes an EvalSymlinks-canonicalized root (dstAbs), so the
-	// test must too — otherwise macOS's /var -> /private/var symlink trips
-	// the escape guard on a perfectly nested path.
-	root, err := filepath.EvalSymlinks(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	target := filepath.Join(root, "newdir", "deep", "file.txt")
-	if err := ensureParentInside(root, target); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(filepath.Join(root, "newdir", "deep")); err != nil {
-		t.Fatalf("parent not created: %v", err)
-	}
-}
-
-func TestEnsureParentInsideAcceptsNestedPath(t *testing.T) {
-	root, err := filepath.EvalSymlinks(t.TempDir())
-	if err != nil {
-		t.Fatal(err)
-	}
-	nested := filepath.Join(root, "a", "b")
-	if err := os.MkdirAll(nested, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	if err := ensureParentInside(root, filepath.Join(nested, "x.md")); err != nil {
-		t.Fatalf("nested path refused: %v", err)
+func TestExtractRevConfinesWritesThroughDestinationSymlinks(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		parent bool
+	}{
+		{"parent symlink", true},
+		{"file symlink", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir, first := makeHistoryRepo(t)
+			dst, outside := t.TempDir(), t.TempDir()
+			rev := first
+			if tc.parent {
+				var err error
+				rev, err = Head(dir)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(outside, filepath.Join(dst, "scripts")); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				if err := os.WriteFile(filepath.Join(outside, "SKILL.md"), []byte("untouched"), 0o644); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(filepath.Join(outside, "SKILL.md"), filepath.Join(dst, "SKILL.md")); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := ExtractRev(dir, rev, dst); err == nil {
+				t.Fatal("extraction through an escaping destination symlink must fail")
+			}
+			if tc.parent {
+				if _, err := os.Stat(filepath.Join(outside, "run.sh")); !os.IsNotExist(err) {
+					t.Fatalf("extraction wrote through a directory symlink: %v", err)
+				}
+			} else if data, err := os.ReadFile(filepath.Join(outside, "SKILL.md")); err != nil || string(data) != "untouched" {
+				t.Fatalf("extraction overwrote a file symlink target: %q %v", data, err)
+			}
+		})
 	}
 }
 
@@ -227,25 +217,33 @@ func TestRestoreFailsWhenEntryRemovalBlocked(t *testing.T) {
 	}
 }
 
-func TestEnsureParentInsideFailsOnBrokenSymlink(t *testing.T) {
-	root := t.TempDir()
-	broken := filepath.Join(root, "broken")
-	if err := os.Symlink(filepath.Join(root, "missing-target"), broken); err != nil {
+func TestExtractRevFailsOnBrokenParentSymlink(t *testing.T) {
+	dir, _ := makeHistoryRepo(t)
+	rev, err := Head(dir)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if err := ensureParentInside(root, filepath.Join(broken, "f.txt")); err == nil {
-		t.Fatal("expected EvalSymlinks failure for broken parent symlink")
+	dst := t.TempDir()
+	if err := os.Symlink(filepath.Join(dst, "missing-target"), filepath.Join(dst, "scripts")); err != nil {
+		t.Fatal(err)
+	}
+	if err := ExtractRev(dir, rev, dst); err == nil {
+		t.Fatal("expected extraction failure for broken parent symlink")
 	}
 }
 
-func TestEnsureParentInsideFailsWhenParentPathBlocked(t *testing.T) {
-	root := t.TempDir()
-	// A regular file in the parent path makes MkdirAll fail with ENOTDIR.
-	file := filepath.Join(root, "notdir")
+func TestExtractRevFailsWhenParentPathBlocked(t *testing.T) {
+	dir, _ := makeHistoryRepo(t)
+	rev, err := Head(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dst := t.TempDir()
+	file := filepath.Join(dst, "scripts")
 	if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := ensureParentInside(root, filepath.Join(file, "sub", "f.txt")); err == nil {
-		t.Fatal("expected MkdirAll failure")
+	if err := ExtractRev(dir, rev, dst); err == nil {
+		t.Fatal("expected extraction failure when a parent is a file")
 	}
 }

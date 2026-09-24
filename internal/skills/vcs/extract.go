@@ -20,12 +20,13 @@ func ExtractRev(dir, rev, dst string) error {
 	if err := os.MkdirAll(dst, 0o755); err != nil {
 		return err
 	}
-	// Resolve the destination root so later EvalSymlinks comparisons agree
-	// on the canonical path (on macOS /var resolves to /private/var).
-	dstAbs, err := filepath.EvalSymlinks(dst)
+	// Root confines every filesystem operation, including those following
+	// symlinks already present in the destination or earlier archive entries.
+	root, err := os.OpenRoot(dst)
 	if err != nil {
 		return err
 	}
+	defer root.Close()
 	cmd := exec.Command(path, "archive", "--format=tar", rev)
 	cmd.Dir = dir
 	cmd.Env = gitEnv()
@@ -35,15 +36,8 @@ func ExtractRev(dir, rev, dst string) error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("git archive %s: %w: %s", rev, err, strings.TrimSpace(errBuf.String()))
 	}
-	dstAbs = filepath.Clean(dstAbs)
 	tr := tar.NewReader(&buf)
 	for {
-		// Extraction is guarded by layered, regression-tested checks
-		// (prefix check on the joined target, EvalSymlinks parent
-		// resolution, absolute/dotdot linkname refusal) which CodeQL's
-		// taint model does not recognize.
-		// CodeQL: exclude — target is confined below dstAbs and its
-		// resolved parent is checked before every extraction operation.
 		hdr, err := tr.Next()
 		if errors.Is(err, io.EOF) {
 			return nil
@@ -52,28 +46,19 @@ func ExtractRev(dir, rev, dst string) error {
 			return err
 		}
 		name := filepath.Clean(filepath.FromSlash(hdr.Name))
-		target := filepath.Join(dstAbs, name)
-		// Canonical zip-slip guard on the joined target: it must stay
-		// under the destination root.
-		if target != dstAbs && !strings.HasPrefix(target, filepath.Clean(dstAbs)+string(os.PathSeparator)) {
+		if !filepath.IsLocal(name) || (name == "." && hdr.Typeflag != tar.TypeDir) {
 			return fmt.Errorf("archive entry %q escapes destination", hdr.Name)
-		}
-		// Verify the (possibly symlinked) parent still resolves inside the
-		// destination root. Without this, an earlier symlink entry could
-		// redirect a later file write outside the archive root.
-		if err := ensureParentInside(dstAbs, target); err != nil {
-			return err
 		}
 		switch hdr.Typeflag {
 		case tar.TypeDir:
-			if err := os.MkdirAll(target, 0o755); err != nil {
+			if err := root.MkdirAll(name, 0o755); err != nil {
 				return err
 			}
 		case tar.TypeReg:
-			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+			if err := root.MkdirAll(filepath.Dir(name), 0o755); err != nil {
 				return err
 			}
-			f, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode)&0o777)
+			f, err := root.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.FileMode(hdr.Mode)&0o777)
 			if err != nil {
 				return err
 			}
@@ -85,18 +70,18 @@ func ExtractRev(dir, rev, dst string) error {
 				return err
 			}
 		case tar.TypeSymlink:
-			// The link name must not be absolute and, once resolved
-			// against the link's directory, must stay inside the
-			// destination root — an unchecked linkname could point
-			// anywhere on the machine.
-			linkPath := filepath.Clean(filepath.Join(filepath.Dir(target), filepath.FromSlash(hdr.Linkname)))
-			if filepath.IsAbs(hdr.Linkname) || !strings.HasPrefix(linkPath, filepath.Clean(dstAbs)+string(os.PathSeparator)) {
+			linkName := filepath.FromSlash(hdr.Linkname)
+			linkPath := filepath.Clean(filepath.Join(filepath.Dir(name), linkName))
+			if hdr.Linkname == "" || filepath.IsAbs(linkName) || !filepath.IsLocal(linkPath) || linkPath == "." {
 				return fmt.Errorf("archive symlink %q escapes destination", hdr.Name)
 			}
-			_ = os.Remove(target)
-			// CodeQL: exclude — absolute and escaping link targets are
-			// rejected before the symlink is created.
-			if err := os.Symlink(hdr.Linkname, target); err != nil {
+			if err := root.MkdirAll(filepath.Dir(name), 0o755); err != nil {
+				return err
+			}
+			if err := root.Remove(name); err != nil && !os.IsNotExist(err) {
+				return err
+			}
+			if err := root.Symlink(linkName, name); err != nil {
 				return err
 			}
 		default:
@@ -104,25 +89,6 @@ func ExtractRev(dir, rev, dst string) error {
 			// tracked skill trees never contain them.
 		}
 	}
-}
-
-// ensureParentInside verifies that the parent directory of path resolves
-// inside root, so writes cannot be redirected through a symlink created by
-// an earlier archive entry. The parent is created first when missing.
-func ensureParentInside(root, path string) error {
-	parent := filepath.Dir(path)
-	if err := os.MkdirAll(parent, 0o755); err != nil {
-		return err
-	}
-	resolved, err := filepath.EvalSymlinks(parent)
-	if err != nil {
-		return err
-	}
-	rel, err := filepath.Rel(root, resolved)
-	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return fmt.Errorf("archive entry escapes destination via symlink: %q resolves to %q", path, resolved)
-	}
-	return nil
 }
 
 // Restore replaces the working tree of the repository at dir with a copy
