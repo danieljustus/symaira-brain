@@ -86,7 +86,7 @@ jobs:
           rustup show active-toolchain
           rustup target add "$TARGET"
           version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
-          cargo build --locked --release -p symbrain-cli --bin symbrain --target "$TARGET"
+          SYMBRAIN_VERSION="$version" cargo build --locked --release -p symbrain-cli --bin symbrain --target "$TARGET"
 
           executable=target/$TARGET/release/symbrain
           if [[ "$TARGET_GOOS" == windows ]]; then executable+=".exe"; fi
