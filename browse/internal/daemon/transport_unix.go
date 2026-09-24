@@ -29,3 +29,7 @@ func listenEndpoint(path string) (net.Listener, error) {
 func dialEndpoint(ctx context.Context, path string) (net.Conn, error) {
 	return (&net.Dialer{}).DialContext(ctx, "unix", path)
 }
+
+func windowsSocketPathIn(base, session string) string {
+	return filepath.Join(base, session+".sock")
+}
