@@ -208,7 +208,7 @@ impl DispatchRuntime {
                 #[cfg(not(target_os = "macos"))]
                 if matches!(self.spec.engine.as_str(), "safari-attach" | "safari-bidi") {
                     return Err(DaemonError {
-                        code: codes::OPERATION_FAILED.into(),
+                        code: codes::DAEMON_UNAVAILABLE.into(),
                         message: "Safari engines are only available on macOS".into(),
                         ..Default::default()
                     });
@@ -603,7 +603,7 @@ impl DispatchRuntime {
         #[cfg(not(target_os = "macos"))]
         if matches!(self.spec.engine.as_str(), "safari-attach" | "safari-bidi") {
             return Err(DaemonError {
-                code: codes::OPERATION_FAILED.into(),
+                code: codes::DAEMON_UNAVAILABLE.into(),
                 message: "Safari engines are only available on macOS".into(),
                 ..Default::default()
             });
@@ -1937,6 +1937,30 @@ mod tests {
             ))
             .expect_err("missing explicit Chrome must fail");
         assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    #[test]
+    fn selected_safari_is_typed_unavailable_on_other_platforms() {
+        for engine in ["safari-attach", "safari-bidi"] {
+            let mut spec = temp_spec(engine);
+            spec.engine = engine.into();
+            let runtime = DispatchRuntime::new(spec).expect("runtime");
+            for cmd in ["capabilities", "open"] {
+                let error = runtime
+                    .runtime
+                    .block_on(runtime.dispatch(
+                        Frame {
+                            cmd: cmd.into(),
+                            args: Some(json!({"url":"data:text/html,fixture"})),
+                            ..Frame::default()
+                        },
+                        OperationContext::for_test(),
+                    ))
+                    .expect_err("Safari must not substitute another engine");
+                assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+            }
+        }
     }
 
     #[cfg(target_os = "macos")]
