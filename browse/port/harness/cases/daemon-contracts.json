@@ -4,11 +4,31 @@
     {
       "id": "DMN-002-frame-limits",
       "platforms": ["all"],
-      "coverage": ["malformed-json", "empty-cmd", "whitespace-cmd", "vertical-tab-tail", "one-mib-boundary", "oversized-line"],
+      "coverage": ["malformed-json", "truncated-json", "invalid-escape", "invalid-number", "empty-cmd", "whitespace-cmd", "vertical-tab-tail", "one-mib-boundary", "oversized-line"],
       "expected": {
         "malformed_json": {
           "class": "malformed_request",
           "message": "decode frame: invalid character 'n' looking for beginning of object key string"
+        },
+        "truncated_object": {
+          "class": "malformed_request",
+          "message": "decode frame: unexpected end of JSON input"
+        },
+        "truncated_string": {
+          "class": "malformed_request",
+          "message": "decode frame: unexpected end of JSON input"
+        },
+        "invalid_escape": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character 'q' in string escape code"
+        },
+        "leading_zero_number": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '1' after object key:value pair"
+        },
+        "invalid_exponent": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '}' in exponent of numeric literal"
         },
         "empty_cmd": {
           "class": "malformed_request",
@@ -34,7 +54,7 @@
       "go": ["go", "test", "./internal/daemon", "-run", "TestDecodeFrameAndStableResponseSchema|TestDecodeFrameValidation", "-count=1"],
       "go_oracle": ["go", "run", "./port/harness/daemon_frame_limits_oracle.go"],
       "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "frame_line_ending_and_limit_match_go_scanner", "--locked"],
-      "rust_protocol": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "empty_command_and_one_mib_boundary_are_checked", "--locked"]
+      "rust_protocol": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "protocol::tests::", "--locked"]
     },
     {
       "id": "DMN-003-peer-uid",

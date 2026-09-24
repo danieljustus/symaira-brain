@@ -42,12 +42,17 @@ func main() {
 	boundaryPayload := prefix + strings.Repeat("x", maxFrameBytes-1-len(prefix)-len(suffix)) + suffix
 	oversizedPayload := prefix + strings.Repeat("x", maxFrameBytes-len(prefix)-len(suffix)) + suffix
 	results := map[string]result{
-		"malformed_json":    classify([]byte("{not json\n")),
-		"empty_cmd":         classify([]byte("{}\n")),
-		"boundary":          classify([]byte(boundaryPayload + "\n")),
-		"oversized":         classify([]byte(oversizedPayload + "\n")),
-		"vertical_tab_tail": classify([]byte("{\"cmd\":\"x\"}\x0b\n")),
-		"whitespace_cmd":    classify([]byte("{\"cmd\":\" \"}\n")),
+		"malformed_json":      classify([]byte("{not json\n")),
+		"truncated_object":    classify([]byte("{\"cmd\":\n")),
+		"truncated_string":    classify([]byte("{\"cmd\":\"x\"\n")),
+		"invalid_escape":      classify([]byte("{\"cmd\":\"x\\q\"}\n")),
+		"leading_zero_number": classify([]byte("{\"cmd\":01}\n")),
+		"invalid_exponent":    classify([]byte("{\"cmd\":1e}\n")),
+		"empty_cmd":           classify([]byte("{}\n")),
+		"boundary":            classify([]byte(boundaryPayload + "\n")),
+		"oversized":           classify([]byte(oversizedPayload + "\n")),
+		"vertical_tab_tail":   classify([]byte("{\"cmd\":\"x\"}\x0b\n")),
+		"whitespace_cmd":      classify([]byte("{\"cmd\":\" \"}\n")),
 	}
 	encoded, err := json.Marshal(results)
 	if err != nil {

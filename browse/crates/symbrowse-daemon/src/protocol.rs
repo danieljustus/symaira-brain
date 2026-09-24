@@ -109,6 +109,33 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
 
 fn go_json_error(raw: &[u8], error: &serde_json::Error) -> String {
     let detail = error.to_string();
+    if error.classify() == serde_json::error::Category::Eof {
+        return "unexpected end of JSON input".into();
+    }
+
+    let offset = raw
+        .split_inclusive(|byte| *byte == b'\n')
+        .take(error.line().saturating_sub(1))
+        .map(<[u8]>::len)
+        .sum::<usize>()
+        .saturating_add(error.column().saturating_sub(1));
+    let character = raw.get(offset).copied().unwrap_or_default();
+    if detail.starts_with("invalid escape") {
+        return format!(
+            "invalid character {} in string escape code",
+            go_quote_byte(character)
+        );
+    }
+    if detail.starts_with("invalid number") {
+        let previous = raw.get(offset.saturating_sub(1)).copied();
+        let context = match previous {
+            Some(b'e' | b'E') => "in exponent of numeric literal",
+            Some(b'0') if character.is_ascii_digit() => "after object key:value pair",
+            _ => return detail,
+        };
+        return format!("invalid character {} {context}", go_quote_byte(character));
+    }
+
     let context = if detail.starts_with("key must be a string") {
         "looking for beginning of object key string"
     } else if detail.starts_with("trailing characters") {
@@ -120,13 +147,6 @@ fn go_json_error(raw: &[u8], error: &serde_json::Error) -> String {
     // Go's encoding/json reports the offending byte and parser state here,
     // while serde_json reports a category and line/column. Keep this mapping
     // at the shared frame boundary so malformed daemon requests stay stable.
-    let offset = raw
-        .split_inclusive(|byte| *byte == b'\n')
-        .take(error.line().saturating_sub(1))
-        .map(<[u8]>::len)
-        .sum::<usize>()
-        .saturating_add(error.column().saturating_sub(1));
-    let character = raw.get(offset).copied().unwrap_or_default();
     format!("invalid character {} {context}", go_quote_byte(character))
 }
 
@@ -217,5 +237,31 @@ mod tests {
             decode_frame(&raw).unwrap_err().code,
             codes::MALFORMED_REQUEST
         );
+    }
+
+    #[test]
+    fn malformed_json_messages_match_go() {
+        let cases: &[(&[u8], &str)] = &[
+            (b"{\"cmd\":", "decode frame: unexpected end of JSON input"),
+            (
+                b"{\"cmd\":\"x\"",
+                "decode frame: unexpected end of JSON input",
+            ),
+            (
+                b"{\"cmd\":\"x\\q\"}",
+                "decode frame: invalid character 'q' in string escape code",
+            ),
+            (
+                b"{\"cmd\":01}",
+                "decode frame: invalid character '1' after object key:value pair",
+            ),
+            (
+                b"{\"cmd\":1e}",
+                "decode frame: invalid character '}' in exponent of numeric literal",
+            ),
+        ];
+        for (raw, expected) in cases {
+            assert_eq!(decode_frame(raw).unwrap_err().message, *expected, "{raw:?}");
+        }
     }
 }

@@ -757,6 +757,9 @@ def main() -> int:
         frame_case = next(case for case in cases if case["id"] == "DMN-002-frame-limits")
         if frame_case.get("coverage") != [
             "malformed-json",
+            "truncated-json",
+            "invalid-escape",
+            "invalid-number",
             "empty-cmd",
             "whitespace-cmd",
             "vertical-tab-tail",
