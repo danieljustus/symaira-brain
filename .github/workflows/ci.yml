@@ -366,7 +366,7 @@ jobs:
           profile_remove_fixture="$RUNNER_TEMP/profile-remove-oracle-windows.json"
           skills_fixture="$RUNNER_TEMP/skills-oracle-windows.json"
           skills_install_fixture="$RUNNER_TEMP/skills-install-oracle-windows.json"
-          cli_go_binary="$PWD/target/go/symbrain-go"
+          cli_go_binary="$PWD/target/go/symbrain-go.exe"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$xdg_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./guard/scripts/guard-doctor-oracle -output "$doctor_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"
