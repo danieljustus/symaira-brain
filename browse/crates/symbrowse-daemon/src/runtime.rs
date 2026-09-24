@@ -1429,7 +1429,11 @@ impl DispatchRuntime {
             (!self.spec.executable_path.as_os_str().is_empty())
                 .then_some(self.spec.executable_path.as_path()),
         )
-        .map_err(runtime_error)?;
+        .map_err(|error| DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message: redact_str(&error),
+            ..Default::default()
+        })?;
         let session = ChromeSession::connect(
             BrowserMode::Launch {
                 executable,
@@ -1913,6 +1917,26 @@ mod tests {
         spec.allow_private = true;
         spec.engine = "static".into();
         spec
+    }
+
+    #[test]
+    fn missing_selected_chrome_is_typed_unavailable_without_fallback() {
+        let mut spec = temp_spec("missing-chrome");
+        spec.engine = "chrome".into();
+        spec.executable_path = spec.state_dir.join("missing-chrome-executable");
+        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "open".into(),
+                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect_err("missing explicit Chrome must fail");
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
     }
 
     #[cfg(target_os = "macos")]
