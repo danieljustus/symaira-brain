@@ -101,7 +101,7 @@ fn format_go_float(f: f64, w: &mut String) {
     }
 }
 
-fn local_offset_seconds() -> i32 {
+pub(super) fn local_offset_seconds() -> i32 {
     use chrono::Offset as _;
     static OFFSET: std::sync::OnceLock<i32> = std::sync::OnceLock::new();
     *OFFSET.get_or_init(|| chrono::Local::now().offset().fix().local_minus_utc())
