@@ -4,11 +4,12 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, native_target_matches, nearest_rank,
     remove_owned_tempdir,
-    paired_gate_passes, validate_read_output,
+    paired_gate_passes, validate_read_output, wait_for_daemon_exit,
 )
 
 
@@ -53,6 +54,13 @@ class ChromePairTests(unittest.TestCase):
 
             self.assertEqual(attempts, 2)
             self.assertFalse(profile.exists())
+
+    def test_shutdown_waits_until_no_autostart_status_disconnects(self):
+        running = (0, json.dumps({"success": True, "data": {"running": True, "pid": 123}}), "")
+        stopped = (1, "", "daemon unavailable")
+        with patch("chrome_pair.run_cli", side_effect=[running, stopped]) as run_cli:
+            self.assertTrue(wait_for_daemon_exit(Path("symbrowse"), "session", {}, Path("."), sleep=lambda _: None))
+        self.assertEqual(run_cli.call_count, 2)
 
 
 if __name__ == "__main__":

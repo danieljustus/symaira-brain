@@ -147,10 +147,18 @@ def command(binary: Path, args: list[str], session: str) -> list[str]:
     return [str(binary), "--json", args[0], "--session", session, *args[1:]]
 
 
-def run_cli(binary: Path, args: list[str], session: str, env: dict[str, str], cwd: Path) -> tuple[int, str, str]:
+def run_cli(
+    binary: Path,
+    args: list[str],
+    session: str,
+    env: dict[str, str],
+    cwd: Path,
+    *,
+    timeout: float = 45,
+) -> tuple[int, str, str]:
     result = subprocess.run(
         command(binary, args, session), cwd=cwd, env=env, capture_output=True,
-        text=True, timeout=45, check=False,
+        text=True, timeout=timeout, check=False,
     )
     if len(result.stdout) > MAX_OUTPUT or len(result.stderr) > MAX_OUTPUT:
         return result.returncode or 1, "", "output limit exceeded"
@@ -168,31 +176,76 @@ def validate_read_output(output: str) -> bool:
     return FIXTURE_TITLE.casefold() in serialized and FIXTURE_TOKEN.casefold() in serialized
 
 
+def wait_for_daemon_exit(
+    binary: Path,
+    session: str,
+    env: dict[str, str],
+    cwd: Path,
+    *,
+    timeout: float = 10.0,
+    sleep=time.sleep,
+) -> bool:
+    """Wait until daemon.stop's asynchronous server teardown has completed."""
+    deadline = time.monotonic() + timeout
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        try:
+            code, stdout, _ = run_cli(
+                binary, ["daemon", "status"], session, env, cwd,
+                timeout=min(1.0, remaining),
+            )
+        except subprocess.TimeoutExpired:
+            sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+            continue
+        except OSError:
+            return False
+        if code != 0:
+            return True
+        try:
+            document = json.loads(stdout)
+        except json.JSONDecodeError:
+            return False
+        data = document.get("data") if isinstance(document, dict) else None
+        if isinstance(data, dict) and data.get("running") is False:
+            return True
+        sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+
+
 def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str, root: Path, index: int) -> dict[str, Any]:
     session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
     env = make_env(root, implementation, chrome, launcher)
     started = time.perf_counter_ns()
+    outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
     try:
         opened = run_cli(binary, ["open", url], session, env, root)
         if opened[0] != 0:
-            return {"status": "error", "phase": "open", "exit_code": opened[0],
-                    "stdout_sha256": hashlib.sha256(opened[1].encode()).hexdigest(),
-                    "stderr_sha256": hashlib.sha256(opened[2].encode()).hexdigest()}
-        read = run_cli(binary, ["read"], session, env, root)
-        elapsed = time.perf_counter_ns() - started
-        if read[0] != 0 or not validate_read_output(read[1]):
-            return {"status": "error", "phase": "read", "exit_code": read[0],
-                    "semantic_contract": "local fixture title/token must appear in JSON read output",
-                    "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
-                    "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed}
-        return {"status": "pass", "duration_ns": elapsed}
+            outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
+                       "stdout_sha256": hashlib.sha256(opened[1].encode()).hexdigest(),
+                       "stderr_sha256": hashlib.sha256(opened[2].encode()).hexdigest()}
+        else:
+            read = run_cli(binary, ["read"], session, env, root)
+            elapsed = time.perf_counter_ns() - started
+            if read[0] != 0 or not validate_read_output(read[1]):
+                outcome = {"status": "error", "phase": "read", "exit_code": read[0],
+                           "semantic_contract": "local fixture title/token must appear in JSON read output",
+                           "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
+                           "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed}
+            else:
+                outcome = {"status": "pass", "duration_ns": elapsed}
     except (OSError, subprocess.TimeoutExpired) as error:
-        return {"status": "error", "reason": type(error).__name__, "duration_ns": time.perf_counter_ns() - started}
+        outcome = {"status": "error", "reason": type(error).__name__, "duration_ns": time.perf_counter_ns() - started}
     finally:
         try:
             run_cli(binary, ["daemon", "stop"], session, env, root)
+            if not wait_for_daemon_exit(binary, session, env, root):
+                outcome = {"status": "error", "phase": "daemon-stop",
+                           "reason": "daemon did not exit within 10 seconds after stop"}
         except (OSError, subprocess.TimeoutExpired):
-            pass
+            outcome = {"status": "error", "phase": "daemon-stop",
+                       "reason": "daemon shutdown could not be confirmed"}
+    return outcome
 
 
 def identity(binary: Path) -> dict[str, Any]:
