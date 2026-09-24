@@ -24,8 +24,8 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.11.0.json"
-DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.11.0.json"
+DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.12.0.json"
+DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.12.0.json"
 OIDC_ISSUER = "https://token.actions.githubusercontent.com"
 
 

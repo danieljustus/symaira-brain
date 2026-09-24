@@ -5,7 +5,7 @@
 // and asserts that set equals the golden manifest captured from the real
 // GitHub release.
 //
-// The golden fixture (scripts/dist-oracle/fixtures/manifest_v0.11.0.json) is a
+// The golden fixture (scripts/dist-oracle/fixtures/manifest_v0.12.0.json) is a
 // real capture: `gh release view v0.11.0 --json ...assets`, real asset names,
 // sizes and sha256 digests only. This tool is offline and deterministic; it
 // never invents names and never claims to have run cosign/syft/goreleaser.
@@ -35,7 +35,7 @@ import (
 
 const (
 	defaultGoreleaser = ".goreleaser.yml"
-	defaultManifest   = "scripts/dist-oracle/fixtures/manifest_v0.11.0.json"
+	defaultManifest   = "scripts/dist-oracle/fixtures/manifest_v0.12.0.json"
 	defaultWorkflow   = ".github/workflows/release.yml"
 
 	// sigSuffix is goreleaser's default signature sidecar suffix. The config
