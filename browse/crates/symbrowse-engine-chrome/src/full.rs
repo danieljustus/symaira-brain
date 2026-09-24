@@ -205,7 +205,14 @@ impl ChromeSession {
         &self,
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
-        ChromePage::new(self.browser.new_page(url.into()).await?).await
+        let url = url.into();
+        // Windows can stall when chromiumoxide creates a target with its URL
+        // already set; open it after the blank target is attached to the handler.
+        let page = ChromePage::new(self.browser.new_page("about:blank").await?).await?;
+        if url != "about:blank" {
+            page.open(&url).await?;
+        }
+        Ok(page)
     }
 
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {
