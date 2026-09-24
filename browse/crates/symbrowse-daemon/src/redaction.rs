@@ -140,22 +140,26 @@ pub fn redact_args(args: &[String]) -> Vec<String> {
         if redact_next {
             output.push(REDACTED.to_owned());
             redact_next = false;
-        } else if SECRET_KEYS
-            .iter()
-            .any(|key| lower == format!("--{key}") || lower == format!("-{key}"))
-        {
+        } else if let Some((name, _)) = lower.split_once('=') {
+            if secret_option_name(name) {
+                let split = arg.find('=').unwrap_or(arg.len());
+                output.push(format!("{}={REDACTED}", &arg[..split]));
+            } else {
+                output.push(redact_str(arg));
+            }
+        } else if secret_option_name(&lower) {
             output.push(arg.clone());
             redact_next = true;
-        } else if SECRET_KEYS.iter().any(|key| {
-            lower.starts_with(&format!("--{key}=")) || lower.starts_with(&format!("{key}="))
-        }) {
-            let split = arg.find('=').unwrap_or(arg.len());
-            output.push(format!("{}={REDACTED}", &arg[..split]));
         } else {
             output.push(redact_str(arg));
         }
     }
     output
+}
+
+fn secret_option_name(name: &str) -> bool {
+    let name = name.trim_start_matches('-').replace('-', "_");
+    SECRET_KEYS.contains(&name.as_str())
 }
 
 #[must_use]

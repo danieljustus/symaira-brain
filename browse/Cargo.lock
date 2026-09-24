@@ -1881,6 +1881,7 @@ dependencies = [
  "symbrowse-daemon",
  "symbrowse-mcp",
  "symbrowse-protocol",
+ "tempfile",
 ]
 
 [[package]]

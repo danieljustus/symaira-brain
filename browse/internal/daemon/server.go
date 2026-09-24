@@ -323,7 +323,7 @@ type handlerResult struct {
 func handlerErrorResponse(err error) Response {
 	var protocolErr *Error
 	if errors.As(err, &protocolErr) {
-		return Response{Success: false, Error: protocolErr}
+		return Response{Success: false, Error: redactError(protocolErr)}
 	}
 	var metadata metadataError
 	if errors.As(err, &metadata) {
@@ -331,13 +331,29 @@ func handlerErrorResponse(err error) Response {
 		requiresConfirmation := metadata.RequiresConfirmation()
 		return Response{Success: false, Error: &Error{
 			Code:                     metadata.ErrorCode(),
-			Message:                  err.Error(),
+			Message:                  RedactDiagnostic(err.Error()),
 			Retryable:                &retryable,
 			RequiresUserConfirmation: &requiresConfirmation,
-			ResumeHint:               metadata.ResumeGuidance(),
+			ResumeHint:               RedactDiagnostic(metadata.ResumeGuidance()),
 		}}
 	}
 	return ErrorResponse("operation_failed", err.Error())
+}
+
+func redactError(err *Error) *Error {
+	if err == nil {
+		return nil
+	}
+	redacted := *err
+	redacted.Message = RedactDiagnostic(redacted.Message)
+	redacted.Hint = RedactDiagnostic(redacted.Hint)
+	redacted.ResumeHint = RedactDiagnostic(redacted.ResumeHint)
+	if err.Details != nil {
+		if details, ok := RedactDiagnosticValue(err.Details).(map[string]any); ok {
+			redacted.Details = details
+		}
+	}
+	return &redacted
 }
 
 type metadataError interface {

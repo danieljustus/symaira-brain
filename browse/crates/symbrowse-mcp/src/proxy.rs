@@ -69,7 +69,7 @@ impl ToolError {
 
     #[must_use]
     pub fn display_message(&self) -> String {
-        format!("{}: {}", self.code, self.message)
+        format!("{}: {}", self.code, redact_str(&self.message))
     }
 
     #[must_use]
@@ -78,7 +78,7 @@ impl ToolError {
         data.insert("code".to_owned(), Value::String(self.code.clone()));
         data.insert("message".to_owned(), Value::String(self.display_message()));
         if let Some(hint) = &self.hint {
-            data.insert("hint".to_owned(), Value::String(hint.clone()));
+            data.insert("hint".to_owned(), Value::String(redact_str(hint)));
         }
         if let Some(value) = self.retryable {
             data.insert("retryable".to_owned(), Value::Bool(value));
@@ -87,10 +87,10 @@ impl ToolError {
             data.insert("requires_confirmation".to_owned(), Value::Bool(value));
         }
         if let Some(value) = &self.resume_hint {
-            data.insert("resume_hint".to_owned(), Value::String(value.clone()));
+            data.insert("resume_hint".to_owned(), Value::String(redact_str(value)));
         }
         if let Some(value) = &self.details {
-            data.insert("details".to_owned(), value.clone());
+            data.insert("details".to_owned(), symbrowse_daemon::redact_json(value));
         }
         Value::Object(data)
     }

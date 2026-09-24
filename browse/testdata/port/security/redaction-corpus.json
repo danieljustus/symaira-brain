@@ -1,0 +1,32 @@
+{
+  "secret_values": [
+    "synthetic-secret-password-7e71",
+    "synthetic-secret-token-44a2",
+    "synthetic-secret-api-key-19c8",
+    "synthetic-secret-url-password-a533",
+    "synthetic-secret-query-token-1f09",
+    "synthetic-secret-encryption-key-0d46"
+  ],
+  "text": "login failed: password=synthetic-secret-password-7e71 token: synthetic-secret-token-44a2\nAuthorization: Bearer synthetic-secret-api-key-19c8\nstatus: 401 https://user:synthetic-secret-url-password-a533@example.test/socket",
+  "args": [
+    "symbrowse",
+    "--token",
+    "synthetic-secret-token-44a2",
+    "--api-key=synthetic-secret-api-key-19c8",
+    "--endpoint=https://user:synthetic-secret-url-password-a533@example.test/socket"
+  ],
+  "env": [
+    ["SYMBROWSE_ENCRYPTION_KEY", "synthetic-secret-encryption-key-0d46"],
+    ["SAFE_VALUE", "password=synthetic-secret-password-7e71"]
+  ],
+  "json": {
+    "password": "synthetic-secret-password-7e71",
+    "nested": {
+      "api_key": "synthetic-secret-api-key-19c8",
+      "message": "Authorization: Bearer synthetic-secret-token-44a2"
+    },
+    "status": 401
+  },
+  "endpoint": "ws://user:synthetic-secret-url-password-a533@127.0.0.1:9222/json?token=synthetic-secret-query-token-1f09&mode=active",
+  "error": "invalid autosave policy \"invalid\""
+}

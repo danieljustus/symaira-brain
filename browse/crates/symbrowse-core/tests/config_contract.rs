@@ -8,7 +8,9 @@ use std::{
 };
 
 use serde::Deserialize;
-use symbrowse_core::config::{Field, FlagOverrides, LoadContext, load, show_fields};
+use symbrowse_core::config::{
+    Field, FlagOverrides, LoadContext, load, render_show_text, render_show_yaml, show_fields,
+};
 
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(1);
 
@@ -167,6 +169,41 @@ fn config_show_omits_encryption_key_material() {
         !json.contains(MARKER),
         "config show exposed encryption key material"
     );
+    fs::remove_dir_all(root).expect("remove config fixture root");
+}
+
+#[test]
+fn config_show_redacts_endpoint_credentials_and_secret_environment_values() {
+    const CORPUS: &[u8] = include_bytes!("../../../testdata/port/security/redaction-corpus.json");
+    let corpus: serde_json::Value =
+        serde_json::from_slice(CORPUS).expect("decode redaction corpus");
+    let endpoint = corpus["endpoint"].as_str().expect("corpus endpoint");
+    let secrets = corpus["secret_values"]
+        .as_array()
+        .expect("corpus secret markers");
+    let root = test_root("redaction-endpoint");
+    let mut context = context(&root);
+    context
+        .env
+        .insert("SYMBROWSE_CDP_ENDPOINT".to_owned(), endpoint.to_owned());
+    context.env.insert(
+        "SYMBROWSE_ENCRYPTION_KEY".to_owned(),
+        secrets[5].as_str().unwrap().to_owned(),
+    );
+    let result = load(&context).expect("load synthetic credential endpoint");
+    let fields = show_fields(&result);
+    let output = format!("{}{}", render_show_text(&result), render_show_yaml(&result));
+    let endpoint_value = &fields["cdp_endpoint"].value;
+    assert!(endpoint_value.contains("127.0.0.1:9222"));
+    assert!(endpoint_value.contains("mode=active"));
+    for secret in secrets {
+        let secret = secret.as_str().unwrap();
+        assert!(!output.contains(secret), "config show leaked {secret}");
+        assert!(
+            !endpoint_value.contains(secret),
+            "endpoint output leaked {secret}"
+        );
+    }
     fs::remove_dir_all(root).expect("remove config fixture root");
 }
 

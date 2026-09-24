@@ -212,13 +212,24 @@ func daemonToolError(response daemon.Response) error {
 	}
 	return &toolError{
 		code:                 response.Error.Code,
-		message:              response.Error.Message,
-		hint:                 response.Error.Hint,
+		message:              daemon.RedactDiagnostic(response.Error.Message),
+		hint:                 daemon.RedactDiagnostic(response.Error.Hint),
 		retryable:            pointerBool(response.Error.Retryable),
 		requiresConfirmation: pointerBool(response.Error.RequiresUserConfirmation),
-		resumeHint:           response.Error.ResumeHint,
-		details:              response.Error.Details,
+		resumeHint:           daemon.RedactDiagnostic(response.Error.ResumeHint),
+		details:              redactedDetails(response.Error.Details),
 	}
+}
+
+func redactedDetails(details map[string]any) map[string]any {
+	if details == nil {
+		return nil
+	}
+	redacted, ok := daemon.RedactDiagnosticValue(details).(map[string]any)
+	if !ok {
+		return map[string]any{"redacted": true}
+	}
+	return redacted
 }
 
 // toolError is a daemon failure on its way to an MCP client. Its methods are

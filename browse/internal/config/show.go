@@ -39,7 +39,7 @@ func showFields(result Result) map[string]Field {
 		"fetch_no_cache":    {Value: strconv.FormatBool(cfg.FetchNoCache), Source: result.Sources["fetch_no_cache"]},
 		"fetch_robots":      {Value: strconv.FormatBool(cfg.FetchRobots), Source: result.Sources["fetch_robots"]},
 		"fetch_user_agent":  {Value: cfg.FetchUserAgent, Source: result.Sources["fetch_user_agent"]},
-		"cdp_endpoint":      {Value: cfg.CDPEndpoint, Source: result.Sources["cdp_endpoint"]},
+		"cdp_endpoint":      {Value: redactEndpoint(cfg.CDPEndpoint), Source: result.Sources["cdp_endpoint"]},
 		"config_dir":        {Value: cfg.ConfigDir, Source: result.Sources["config_dir"]},
 		"daemon_log":        {Value: cfg.DaemonLogPath, Source: result.Sources["daemon_log"]},
 		"engine":            {Value: cfg.Engine, Source: result.Sources["engine"]},

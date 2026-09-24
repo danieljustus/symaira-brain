@@ -9,6 +9,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 const APP_NAME: &str = "symbrowse";
 const FIELDS: [&str; 26] = [
@@ -355,7 +356,7 @@ pub fn show_fields(result: &Result) -> BTreeMap<String, Field> {
         ("autosave_key", config.autosave_key.clone()),
         ("cache_dir", config.cache_dir.clone()),
         ("cache_ttl_hours", config.cache_ttl_hours.to_string()),
-        ("cdp_endpoint", config.cdp_endpoint.clone()),
+        ("cdp_endpoint", redact_cdp_endpoint(&config.cdp_endpoint)),
         ("config_dir", config.config_dir.clone()),
         ("daemon_log", config.daemon_log.clone()),
         ("engine", config.engine.clone()),
@@ -386,6 +387,67 @@ pub fn show_fields(result: &Result) -> BTreeMap<String, Field> {
             )
         })
         .collect()
+}
+
+fn redact_cdp_endpoint(endpoint: &str) -> String {
+    let Ok(mut url) = Url::parse(endpoint) else {
+        return if endpoint.is_empty() {
+            String::new()
+        } else {
+            "[REDACTED]".to_owned()
+        };
+    };
+    if url.host_str().is_none() {
+        return "[REDACTED]".to_owned();
+    }
+    let mut changed = false;
+    if !url.username().is_empty() || url.password().is_some() {
+        let _ = url.set_password(None);
+        let _ = url.set_username("");
+        changed = true;
+    }
+    let mut pairs: Vec<(String, String)> = url
+        .query_pairs()
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
+    for (key, value) in &mut pairs {
+        if secret_endpoint_key(key) {
+            *value = "[REDACTED]".to_owned();
+            changed = true;
+        }
+    }
+    if !changed {
+        return endpoint.to_owned();
+    }
+    if url.query().is_some() {
+        url.set_query(None);
+        url.query_pairs_mut().extend_pairs(pairs);
+    }
+    url.to_string()
+}
+
+fn secret_endpoint_key(key: &str) -> bool {
+    let normalized: String = key
+        .chars()
+        .filter(|character| *character != '_' && *character != '-')
+        .flat_map(char::to_lowercase)
+        .collect();
+    [
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "authorization",
+        "auth",
+        "cookie",
+        "credential",
+        "apikey",
+        "accesskey",
+        "privatekey",
+        "encryptionkey",
+    ]
+    .iter()
+    .any(|secret| normalized.contains(secret))
 }
 
 /// Renders `config show` text in stable lexical field order.
