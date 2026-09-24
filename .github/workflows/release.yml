@@ -174,7 +174,7 @@ jobs:
 
   macos-gui-dmg:
     name: macOS GUI DMG
-    runs-on: macos-15
+    runs-on: macos-26
     environment: release
     needs: [release]
     steps:
@@ -182,6 +182,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+
+      - name: Verify Xcode 26 toolchain for Icon Composer
+        run: |
+          set -euo pipefail
+          XCODE_VERSION="$(xcodebuild -version | sed -n '1p')"
+          echo "$XCODE_VERSION"
+          case "$XCODE_VERSION" in
+            Xcode\ 26.*|Xcode\ 27.*) ;;
+            *) echo "::error::Expected Xcode 26 or newer, got: $XCODE_VERSION"; exit 1 ;;
+          esac
 
       - name: Determine version
         id: version
