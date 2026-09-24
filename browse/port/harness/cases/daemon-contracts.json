@@ -89,7 +89,7 @@
       "platforms": ["darwin", "linux"],
       "coverage": ["client-read-timeout", "operation-timeout-keeps-connection-usable", "client-disconnect-does-not-cancel-blocked-handler"],
       "go": ["go", "test", "./internal/daemon", "-run", "Timeout|Deadline|Cancel|Disconnect", "-count=1"],
-      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked"]
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked", "dmn006"]
     },
     {
       "id": "DMN-007-session-registry",

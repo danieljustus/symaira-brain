@@ -11,7 +11,7 @@ mod unix {
         path::{Path, PathBuf},
         sync::{
             Arc,
-            atomic::{AtomicU64, Ordering},
+            atomic::{AtomicBool, AtomicU64, Ordering},
             mpsc,
         },
         thread,
@@ -101,7 +101,7 @@ mod unix {
     }
 
     #[test]
-    fn timed_out_client_request_is_not_retried_as_autostart() {
+    fn dmn006_client_read_timeout_has_operation_timeout_code_and_diagnostics() {
         let root = root("client-timeout");
         let socket = root.join("default.sock");
         let marker = root.join("autostarted");
@@ -128,8 +128,8 @@ mod unix {
 
         let client = Client::new(ClientOptions {
             socket_path: socket.clone(),
-            session: "default".into(),
-            read_timeout: Duration::from_millis(10),
+            session: "slow-sess".into(),
+            read_timeout: Duration::from_millis(30),
             startup_timeout: Duration::from_millis(30),
             autostart: true,
             start: Some(StartOptions {
@@ -147,7 +147,23 @@ mod unix {
             })
             .expect_err("a client deadline must fail the request");
         match error {
-            ClientError::Transport(error) => assert_eq!(error.code, codes::OPERATION_TIMEOUT),
+            ClientError::Transport(error) => {
+                assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+                assert!(
+                    !error
+                        .message
+                        .contains(&socket.to_string_lossy().to_string()),
+                    "timeout message leaked socket path: {}",
+                    error.message
+                );
+                let details = error.details.expect("timeout diagnostics");
+                assert_eq!(details["session"], "slow-sess");
+                assert_eq!(details["socket_path"], socket.to_string_lossy().as_ref());
+                let seconds = details["timeout_seconds"]
+                    .as_f64()
+                    .expect("timeout seconds");
+                assert!((seconds - 0.03).abs() < f64::EPSILON);
+            }
             other => panic!("client timeout = {other:?}"),
         }
         thread::sleep(Duration::from_millis(50));
@@ -328,18 +344,21 @@ mod unix {
     }
 
     #[test]
-    fn late_handler_completion_does_not_emit_a_second_response() {
+    fn dmn006_operation_deadline_cancels_handler_and_keeps_connection_usable() {
         let root = root("late-response");
         let socket = root.join("default.sock");
+        let cancelled_after_deadline = Arc::new(AtomicBool::new(false));
+        let handler_cancelled = cancelled_after_deadline.clone();
         let server = Arc::new(
             Server::new(ServerOptions {
                 socket_path: socket.clone(),
                 session: "default".into(),
                 idle_timeout: None,
-                operation_timeout: Duration::from_millis(10),
-                handler: Some(Arc::new(|frame, _| {
+                operation_timeout: Duration::from_millis(25),
+                handler: Some(Arc::new(move |frame, operation| {
                     if frame.cmd == "slow" {
                         thread::sleep(Duration::from_millis(50));
+                        handler_cancelled.store(operation.is_cancelled(), Ordering::Release);
                     }
                     Ok((Some(serde_json::json!({"pong": true})), Vec::new()))
                 })),
@@ -366,9 +385,17 @@ mod unix {
         let first: serde_json::Value = serde_json::from_str(&first).unwrap();
         let second: serde_json::Value = serde_json::from_str(&second).unwrap();
         assert_eq!(first["error"]["code"], "operation_timeout");
+        assert_eq!(
+            first["error"]["message"],
+            "daemon operation exceeded its timeout"
+        );
         assert_eq!(second["data"]["pong"], true);
 
         thread::sleep(Duration::from_millis(75));
+        assert!(
+            cancelled_after_deadline.load(Ordering::Acquire),
+            "operation deadline did not cancel the handler context"
+        );
         let mut late = String::new();
         let read = reader.read_line(&mut late);
         assert!(
@@ -382,7 +409,7 @@ mod unix {
     }
 
     #[test]
-    fn client_disconnect_does_not_cancel_blocked_handler_or_stop_daemon() {
+    fn dmn006_client_disconnect_does_not_cancel_blocked_handler_or_stop_daemon() {
         let root = tempfile::Builder::new()
             .prefix("sb-")
             .tempdir_in(socket_temp_parent())
