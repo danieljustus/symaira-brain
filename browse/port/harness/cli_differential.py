@@ -99,7 +99,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "back", "batch", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "scrollintoview", "select", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
+        "read", "reload", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -123,11 +123,13 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
+        ["session"], ["session", "list"], ["session", "info"],
         ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
         ["frame", "tree"], ["set", "offline"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
-        ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["storage"], ["storage", "get"], ["version"],
+        ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
+        ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"], ["version"],
     ]
     for path in go_paths:
         argv = [*path, "--help"]
@@ -196,6 +198,14 @@ class UnixDaemonStub:
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
                                 "items": {"alpha": "one", "beta": "two"}}
+                    elif frame.get("cmd") == "storage.set":
+                        data = {"set": (frame.get("args") or {}).get("key", "")}
+                    elif frame.get("cmd") == "storage.clear":
+                        data = {"cleared": (frame.get("args") or {}).get("kind", "")}
+                    elif frame.get("cmd") == "session.list":
+                        data = {"schema_version": 1, "sessions": []}
+                    elif frame.get("cmd") == "session.info":
+                        data = {"name": frame.get("session", "default"), "active_tabs": 0}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -302,6 +312,14 @@ class WindowsNamedPipeStub:
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
                                 "items": {"alpha": "one", "beta": "two"}}
+                    elif frame.get("cmd") == "storage.set":
+                        data = {"set": (frame.get("args") or {}).get("key", "")}
+                    elif frame.get("cmd") == "storage.clear":
+                        data = {"cleared": (frame.get("args") or {}).get("kind", "")}
+                    elif frame.get("cmd") == "session.list":
+                        data = {"schema_version": 1, "sessions": []}
+                    elif frame.get("cmd") == "session.info":
+                        data = {"name": frame.get("session", SESSION), "active_tabs": 0}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -506,6 +524,14 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["storage", "get", "local", "beta"], b"", True),
         ("CLI-002", ["--output=json", "storage", "--session=default", "get", "session", "alpha"], b"", True),
         ("CLI-002", ["storage", "--session", "default", "get", "local", "--json"], b"", True),
+        ("CLI-002", ["storage", "set", "session", "alpha", "value with spaces"], b"", True),
+        ("CLI-002", ["--output=json", "storage", "--session=default", "set", "local", "quoted\"key", "line\nvalue"], b"", True),
+        ("CLI-002", ["storage", "clear", "local", "--json"], b"", True),
+        ("CLI-002", ["storage", "--session", "default", "clear", "session"], b"", True),
+        ("CLI-002", ["session", "list", "--json"], b"", True),
+        ("CLI-002", ["session", "--session", "default", "info", "--output=json"], b"", True),
+        ("CLI-003", ["storage", "set", "local", "key"], b"", False),
+        ("CLI-003", ["storage", "clear"], b"", False),
         ("CLI-003", ["dialog", "auto"], b"", False),
         ("CLI-003", ["dialog", "auto", "accept", "extra"], b"", False),
         ("CLI-003", ["dialog", "accept", "a", "b"], b"", False),

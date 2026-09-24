@@ -368,10 +368,14 @@ fn source_paths_follow_xdg_and_project_layout() {
     );
     let suite = oracle();
     let item = case(&suite, "source_paths");
+    // The committed oracle was generated on Unix; Windows paths are checked
+    // against the native layout above instead of its Unix path literals.
+    #[cfg(not(windows))]
     assert_eq!(
         source.project_path.unwrap(),
         PathBuf::from(&item.expected_project_path)
     );
+    #[cfg(not(windows))]
     assert_eq!(
         source.global_path,
         PathBuf::from(&item.expected_global_path)

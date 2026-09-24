@@ -109,6 +109,20 @@ impl SafariRuntime {
                 let data = crate::runtime::storage_list_response(kind, captured)?;
                 Ok((Some(data), Vec::new()))
             }
+            "storage.set" => {
+                let (kind, key, script) = crate::runtime::storage_set_request(args)?;
+                self.eval(&script).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                Ok((Some(json!({"set":key})), Vec::new()))
+            }
+            "storage.clear" => {
+                let (kind, script) = crate::runtime::storage_clear_request(args)?;
+                self.eval(&script)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                Ok((Some(json!({"cleared":kind})), Vec::new()))
+            }
             "open" | "goto" => {
                 let url = required(args, "url")?;
                 let result = self.navigate(url).await.map_err(runtime_error)?;

@@ -234,9 +234,8 @@ impl DispatchRuntime {
             | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept" | "dialog.dismiss"
             | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
             | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "storage.get" | "storage.list" | "storage.set" | "download" => {
-                self.browser_command(&frame).await
-            }
+            | "cookies.set" | "storage.get" | "storage.list" | "storage.set" | "storage.clear"
+            | "download" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -618,6 +617,20 @@ impl DispatchRuntime {
                     .await
                     .map_err(runtime_error)?;
                 storage_list_response(kind, captured)?
+            }
+            "storage.set" => {
+                let (kind, key, script) = storage_set_request(args)?;
+                page.evaluate_script(&script).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                json!({"set":key})
+            }
+            "storage.clear" => {
+                let (kind, script) = storage_clear_request(args)?;
+                page.evaluate_script(&script)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                json!({"cleared":kind})
             }
             "tabs.list" | "tab.list" => {
                 let (tabs, active_id) = {
@@ -1318,22 +1331,31 @@ impl DispatchRuntime {
                 Ok((Some(data), Vec::new()))
             }
             "storage.set" => {
-                let local = args
-                    .get("local_storage")
-                    .cloned()
-                    .unwrap_or_else(|| json!({}));
-                let session_storage = args
-                    .get("session_storage")
-                    .cloned()
-                    .unwrap_or_else(|| json!({}));
-                let local = serde_json::to_string(&local).map_err(runtime_error)?;
-                let session_storage =
-                    serde_json::to_string(&session_storage).map_err(runtime_error)?;
-                let expression = format!(
-                    "(() => {{ for (const [k,v] of Object.entries({local})) localStorage.setItem(k,v); for (const [k,v] of Object.entries({session_storage})) sessionStorage.setItem(k,v); return true; }})()"
-                );
-                let value = session.evaluate(&expression).await.map_err(runtime_error)?;
-                Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
+                let (kind, key, expression) = storage_set_request(args)?;
+                let value = session.evaluate(&expression).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                if !value.exception_text.is_empty() {
+                    return Err(runtime_error(format!(
+                        "set {kind} storage {key:?}: {}",
+                        value.exception_text
+                    )));
+                }
+                Ok((Some(json!({"set":key})), Vec::new()))
+            }
+            "storage.clear" => {
+                let (kind, expression) = storage_clear_request(args)?;
+                let value = session
+                    .evaluate(&expression)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                if !value.exception_text.is_empty() {
+                    return Err(runtime_error(format!(
+                        "clear {kind} storage: {}",
+                        value.exception_text
+                    )));
+                }
+                Ok((Some(json!({"cleared":kind})), Vec::new()))
             }
             "click" | "type" | "fill" => {
                 let selector = args
@@ -1712,7 +1734,12 @@ pub fn dispatch_once(spec: SessionSpec, frame: Frame) -> crate::Response {
 pub(crate) fn storage_kind(
     args: &serde_json::Map<String, Value>,
 ) -> Result<&'static str, DaemonError> {
-    match args.get("kind").and_then(Value::as_str).unwrap_or_default() {
+    let kind = match args.get("kind") {
+        None | Some(Value::Null) => "",
+        Some(Value::String(kind)) => kind.as_str(),
+        Some(_) => return Err(malformed("kind must be a string")),
+    };
+    match kind {
         "local" => Ok("local"),
         "session" => Ok("session"),
         other => Err(runtime_error(format!("invalid storage kind {other:?}"))),
@@ -1731,10 +1758,11 @@ pub(crate) fn storage_list_script(kind: &str) -> String {
 }
 
 pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value, DaemonError> {
-    let origin = captured
-        .get("origin")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
+    let origin = match captured.get("origin") {
+        None | Some(Value::Null) => "",
+        Some(Value::String(origin)) => origin.as_str(),
+        Some(_) => return Err(runtime_error("storage origin is not a string")),
+    };
     let items = match captured.get("items") {
         None | Some(Value::Null) => serde_json::Map::new(),
         Some(Value::Object(items)) => {
@@ -1759,6 +1787,58 @@ pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value
         Some(_) => return Err(runtime_error("storage items are not an object")),
     };
     Ok(json!({"origin":origin,"kind":kind,"items":items}))
+}
+
+pub(crate) fn storage_set_request(
+    args: &serde_json::Map<String, Value>,
+) -> Result<(String, String, String), DaemonError> {
+    let kind = storage_kind(args)?.to_owned();
+    let key = storage_string_arg(args, "key")?.to_owned();
+    let value = storage_string_arg(args, "value")?;
+    if key.trim().is_empty() {
+        return Err(runtime_error("storage key is required"));
+    }
+    let expression = storage_set_script(&kind, &key, value)?;
+    Ok((kind, key, expression))
+}
+
+fn storage_string_arg<'a>(
+    args: &'a serde_json::Map<String, Value>,
+    name: &str,
+) -> Result<&'a str, DaemonError> {
+    match args.get(name) {
+        None | Some(Value::Null) => Ok(""),
+        Some(Value::String(value)) => Ok(value),
+        Some(_) => Err(malformed(format!("{name} must be a string"))),
+    }
+}
+
+fn storage_set_script(kind: &str, key: &str, value: &str) -> Result<String, DaemonError> {
+    let key = serde_json::to_string(key).map_err(runtime_error)?;
+    let value = serde_json::to_string(value).map_err(runtime_error)?;
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    Ok(format!(
+        "(function(){{ const s = window.{store}; s.setItem({key}, {value}); return true; }})()"
+    ))
+}
+
+pub(crate) fn storage_clear_request(
+    args: &serde_json::Map<String, Value>,
+) -> Result<(String, String), DaemonError> {
+    let kind = storage_kind(args)?.to_owned();
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    Ok((
+        kind,
+        format!("(function(){{ window.{store}.clear(); return true; }})()"),
+    ))
 }
 
 fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String> {
@@ -2497,6 +2577,39 @@ mod tests {
                 .unwrap_err()
                 .code,
             codes::OPERATION_FAILED
+        );
+    }
+
+    #[test]
+    fn storage_mutations_match_go_single_item_and_clear_payloads() {
+        let set_args = json!({
+            "kind":"session",
+            "key":"quote\" and newline\n",
+            "value":"\"payload\"\n"
+        })
+        .as_object()
+        .unwrap()
+        .clone();
+        let (kind, key, script) = storage_set_request(&set_args).unwrap();
+        assert_eq!(kind, "session");
+        assert_eq!(key, "quote\" and newline\n");
+        assert!(script.contains("window.sessionStorage"));
+        let encoded_key = serde_json::to_string(&key).unwrap();
+        let encoded_value = serde_json::to_string("\"payload\"\n").unwrap();
+        assert!(script.contains(&format!("setItem({encoded_key}, {encoded_value})")));
+
+        let clear_args = json!({"kind":"local"}).as_object().unwrap().clone();
+        let (kind, script) = storage_clear_request(&clear_args).unwrap();
+        assert_eq!(kind, "local");
+        assert!(script.contains("window.localStorage.clear()"));
+
+        let bad_args = json!({"kind":"local","key":" \t","value":"x"})
+            .as_object()
+            .unwrap()
+            .clone();
+        assert_eq!(
+            storage_set_request(&bad_args).unwrap_err().message,
+            "storage key is required"
         );
     }
 }

@@ -274,12 +274,13 @@ fn run_dispatch(
     format: Format,
 ) -> ExitCode {
     let frame = Frame {
+        args: (!matches!(command.as_str(), "session.list" | "session.info")).then_some(args),
         cmd: command,
-        args: Some(args),
         session: session.clone(),
         ..Frame::default()
     };
     let is_network_offline = frame.cmd == "network.offline";
+    let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
             .ok()
@@ -314,6 +315,9 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_storage_mutation && format == Format::Text {
+            return write_stdout("ok\n");
+        }
         if is_network_offline && format == Format::Text {
             return write_stdout("ok\n");
         }
@@ -1387,7 +1391,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             return Ok(Action::Help(root_help()));
         };
         let command = values[command_index].as_str();
-        let suffix = if command == "storage" {
+        let suffix = if matches!(command, "storage" | "session") {
             let mut suffix = Vec::new();
             let mut skip_value = false;
             for value in &values[command_index + 1..help_index] {
@@ -1436,6 +1440,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "tab" => parse_tab(&values, command_index),
         "frame" => parse_frame(&values, command_index),
         "storage" => parse_storage(&values, command_index),
+        "session" => parse_session(&values, command_index),
         "set" => parse_set(&values, command_index),
         "profiles" => {
             let mut arguments = values;
@@ -1456,7 +1461,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, session, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1564,12 +1569,39 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             ))
         }
         ("storage", None) => Some(
-            "Inspect per-origin web storage\n\nUsage:\n  symbrowse storage [command]\n\nAvailable Commands:\n  get         Read web storage values for the current origin\n\nFlags:\n  -h, --help             help for storage\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse storage [command] --help\" for more information about a command.\n".to_owned(),
+            "Inspect and manage per-origin web storage\n\nUsage:\n  symbrowse storage [command]\n\nAvailable Commands:\n  clear       Remove all web storage values of one kind for the current origin\n  get         Read web storage values for the current origin\n  set         Write one web storage value for the current origin\n\nFlags:\n  -h, --help             help for storage\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse storage [command] --help\" for more information about a command.\n".to_owned(),
         ),
         ("storage", Some("get")) => Some(plain(
             "Read web storage values for the current origin",
-            "symbrowse storage get <local|session> [key]",
+            "symbrowse storage get <local|session> [key] [flags]",
             "  -h, --help   help for get\n",
+            session_global,
+        )),
+        ("storage", Some("set")) => Some(plain(
+            "Write one web storage value for the current origin",
+            "symbrowse storage set <local|session> <key> <value> [flags]",
+            "  -h, --help   help for set\n",
+            session_global,
+        )),
+        ("storage", Some("clear")) => Some(plain(
+            "Remove all web storage values of one kind for the current origin",
+            "symbrowse storage clear <local|session> [flags]",
+            "  -h, --help   help for clear\n",
+            session_global,
+        )),
+        ("session", None) => Some(
+            "Inspect browser sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  info        Show session information\n  list        List sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse session [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("session", Some("list")) => Some(plain(
+            "List sessions",
+            "symbrowse session list [flags]",
+            "  -h, --help   help for list\n",
+            session_global,
+        )),
+        ("session", Some("info")) => Some(plain(
+            "Show session information",
+            "symbrowse session info [flags]",
+            "  -h, --help   help for info\n",
             session_global,
         )),
         ("flow", Some("list")) => Some(plain(
@@ -2054,7 +2086,7 @@ fn parse_storage(values: &[String], command_index: usize) -> Result<Action, Pars
         }
         match value.as_str() {
             "--" => positional_only = true,
-            "get" if subcommand.is_none() => subcommand = Some("get"),
+            "get" | "set" | "clear" if subcommand.is_none() => subcommand = Some(value.as_str()),
             "--json" => json = true,
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
@@ -2084,22 +2116,102 @@ fn parse_storage(values: &[String], command_index: usize) -> Result<Action, Pars
     let Some(subcommand) = subcommand else {
         return Ok(Action::Help(command_help("storage", &[]).unwrap()));
     };
-    if subcommand != "get" {
-        unreachable!("storage only recognizes the get command");
-    }
-    if !(1..=2).contains(&positional.len()) {
-        return Err(ParseError {
+    match subcommand {
+        "get" if (1..=2).contains(&positional.len()) => Ok(Action::StorageGet {
+            session,
+            kind: positional[0].clone(),
+            key: positional.get(1).cloned(),
+            format,
+        }),
+        "get" => Err(ParseError {
             message: format!(
                 "accepts between 1 and 2 arg(s), received {}",
                 positional.len()
             ),
             exit_code: 2,
+        }),
+        "set" if positional.len() == 3 => Ok(Action::Dispatch {
+            session,
+            command: "storage.set".to_owned(),
+            args: serde_json::json!({
+                "kind": positional[0], "key": positional[1], "value": positional[2]
+            }),
+            format,
+        }),
+        "set" => Err(ParseError {
+            message: format!("accepts 3 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        "clear" if positional.len() == 1 => Ok(Action::Dispatch {
+            session,
+            command: "storage.clear".to_owned(),
+            args: serde_json::json!({"kind": positional[0]}),
+            format,
+        }),
+        "clear" => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        _ => unreachable!("storage subcommand selected from supported names"),
+    }
+}
+
+fn parse_session(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "list" | "info" if subcommand.is_none() => subcommand = Some(value.as_str()),
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse session\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(command_help("session", &[]).unwrap()));
+    };
+    if !positional.is_empty() {
+        return Err(ParseError {
+            message: format!("unknown argument {:?}", positional[0]),
+            exit_code: 2,
         });
     }
-    Ok(Action::StorageGet {
+    Ok(Action::Dispatch {
         session,
-        kind: positional[0].clone(),
-        key: positional.get(1).cloned(),
+        command: format!("session.{subcommand}"),
+        args: serde_json::json!({}),
         format,
     })
 }
@@ -3635,19 +3747,51 @@ mod tests {
         );
         assert!(parse(&args(&["storage", "get"])).is_err());
         assert!(parse(&args(&["storage", "get", "local", "key", "extra"])).is_err());
-        assert!(parse(&args(&["storage", "clear", "local"])).is_err());
+        assert!(parse(&args(&["storage", "set", "local", "key"])).is_err());
+        assert!(parse(&args(&["storage", "clear"])).is_err());
         let Action::Help(help) = parse(&args(&["storage", "--help"])).unwrap() else {
             panic!("storage help expected")
         };
         assert!(help.contains("get         Read web storage values"));
-        assert!(!help.contains("clear"));
-        assert!(!help.contains("set         Write"));
+        assert!(help.contains("clear       Remove all web storage values"));
+        assert!(help.contains("set         Write one web storage value"));
         let Action::Help(get_help) =
             parse(&args(&["storage", "--session", "work", "get", "--help"])).unwrap()
         else {
             panic!("storage get help after persistent flag expected")
         };
         assert!(get_help.contains("symbrowse storage get <local|session> [key]"));
+        assert!(matches!(
+            parse(&args(&["storage", "set", "session", "token", "secret-like-value"])),
+            Ok(Action::Dispatch {
+                command,
+                args,
+                ..
+            }) if command == "storage.set"
+                && args == serde_json::json!({"kind":"session","key":"token","value":"secret-like-value"})
+        ));
+        assert!(matches!(
+            parse(&args(&["storage", "clear", "local", "--json"])),
+            Ok(Action::Dispatch {
+                command,
+                args,
+                format: Format::Json,
+                ..
+            }) if command == "storage.clear" && args == serde_json::json!({"kind":"local"})
+        ));
+        assert!(matches!(
+            parse(&args(&[
+                "storage",
+                "--session",
+                "work",
+                "set",
+                "local",
+                "key",
+                "value",
+                "--help"
+            ])),
+            Ok(Action::Help(_))
+        ));
     }
 
     #[test]
