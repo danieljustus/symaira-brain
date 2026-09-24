@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import sys
 import unittest
@@ -66,6 +67,32 @@ class CargoTargetRootTests(unittest.TestCase):
         root = Path("/workspace/browse")
         target = Path("/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/browse-target")
         self.assertEqual(run.cargo_target_root(root, {"CARGO_TARGET_DIR": str(target)}), target)
+
+
+class CompatSidecarHarnessTests(unittest.TestCase):
+    def test_fixture_covers_executable_fetch_002_and_fetch_011_cases(self) -> None:
+        fixture = json.loads(
+            (ROOT / "browse/port/harness/cases/compat-sidecar.json").read_text()
+        )
+        cases = {case["id"]: case for case in fixture["cases"]}
+        self.assertEqual(fixture["protocol"], 1)
+        self.assertEqual(
+            cases["compat-six-profiles"]["profiles"],
+            ["chrome", "edge", "firefox", "ios", "opera", "safari"],
+        )
+        for case_id in (
+            "compat-pinned-identity",
+            "compat-request-id",
+            "compat-bounded-frame",
+            "compat-integrity-error",
+            "compat-typed-fetch-error",
+            "compat-timeout-restart",
+            "compat-clean-exit",
+            "compat-private-endpoint",
+        ):
+            self.assertIn(case_id, cases)
+        self.assertIn("target/compat-sidecar/", cases["compat-rollback-go"]["build"])
+        self.assertNotIn("dist/", cases["compat-rollback-go"]["build"])
 
 
 if __name__ == "__main__":

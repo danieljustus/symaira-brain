@@ -586,10 +586,32 @@ def main() -> int:
         return 0
     elif args.suite == "compat-sidecar":
         fixture = json.loads((root / "port/harness/cases/compat-sidecar.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
+        assert fixture["schema_version"] == 1
+        assert {case["id"] for case in fixture["cases"]} == {
+            "compat-handshake",
+            "compat-pinned-identity",
+            "compat-six-profiles",
+            "compat-request-id",
+            "compat-bounded-frame",
+            "compat-integrity-error",
+            "compat-typed-fetch-error",
+            "compat-timeout-restart",
+            "compat-clean-exit",
+            "compat-private-endpoint",
+            "compat-rollback-go",
+        }
+        compat_binary = external_output(root, env, "target/compat-sidecar/symbrowse-compat")
+        if os.name == "nt":
+            compat_binary = compat_binary.with_suffix(".exe")
+        compat_binary.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        env["SYMBROWSE_COMPAT_BINARY"] = str(compat_binary)
         commands = [
-            ["go", "build", "-trimpath", "-o", str(external_output(root, env, "dist/symbrowse-compat")), "./cmd/symbrowse"],
-            ["cargo", "test", "-p", "symbrowse-compat", "-p", "symbrowse-daemon", "--locked"],
+            ["go", "build", "-trimpath", "-o", str(compat_binary), "./cmd/symbrowse"],
+            ["cargo", "test", "-p", "symbrowse-compat", "--locked"],
+            [
+                "cargo", "test", "-p", "symbrowse-compat", "--test", "go_sidecar", "--locked",
+                "--", "--ignored",
+            ],
         ]
     elif args.suite == "workflows":
         commands = [
