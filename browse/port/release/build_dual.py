@@ -379,7 +379,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "artifacts": {name: len(entries) for name, entries in artifacts.items()},
         "blocked": blocked,
         "signing": "not performed; signature-input manifests require a later signing job",
-        "native_runtime_proof": [proof["target"] for proof in proofs if proof["native_runtime_proof"]],
+        "native_runtime_proof": sorted({proof["target"] for proof in proofs if proof["native_runtime_proof"]}),
         "cutover": "blocked until signatures, all six targets, native platform proofs and value gates pass",
     }
     (output / "build-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
