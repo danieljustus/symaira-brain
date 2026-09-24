@@ -1,65 +1,111 @@
 {
-  "fixtures": {
-    "eof": {
-      "input": "eof.in",
-      "output": "eof.out"
-    },
-    "framed_initialize": {
-      "input": "framed_initialize.in",
-      "output": "framed_initialize.out"
-    },
-    "initialize": {
-      "input": "initialize.in",
-      "output": "initialize.out"
-    },
-    "initialized": {
-      "input": "initialized.in",
-      "output": "initialized.out"
-    },
-    "malformed": {
-      "input": "malformed.in",
-      "output": "malformed.out"
-    },
-    "missing_argument": {
-      "input": "missing_argument.in",
-      "output": "missing_argument.out"
-    },
-    "notifications": {
-      "input": "notifications.in",
-      "output": "notifications.out"
-    },
-    "tool_error": {
-      "input": "tool_error.in",
-      "output": "tool_error.out"
-    },
-    "tools_all": {
-      "input": "tools_all.in",
-      "output": "tools_all.out"
-    },
-    "tools_core": {
-      "input": "tools_core.in",
-      "output": "tools_core.out"
-    },
-    "tools_nav": {
-      "input": "tools_nav.in",
-      "output": "tools_nav.out"
-    },
-    "unknown_method": {
-      "input": "unknown_method.in",
-      "output": "unknown_method.out"
-    },
-    "unknown_tool": {
-      "input": "unknown_tool.in",
-      "output": "unknown_tool.out"
-    }
-  },
-  "oracle_commit": "652453d1595fc302bd69c328e7da8a21dbee28b9",
-  "oracle_release": "v0.8.0",
   "schema_version": 1,
+  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
+  "oracle_release": "v0.8.0",
+  "generated_by": "scripts/rust-port/cmd/mcpfixturegen",
+  "generator_sha256": "40476ccbbd82bdb02d21b5891c0564332dba1682fef1dca7c2aa8b7038870f8b",
   "source_files": {
     "cmd/symbrowse/mcp.go": "2b227ad48822e009f769b7cd9340b16148da3ac28788c164bb284a75f56d7d2f",
+    "go.mod": "f0fc46c2e4f00a37b5d1a1a2e71f6a304f18fa0fa66c99349d79e7c84a223f6c",
+    "go.sum": "193a7ce10382dfc8729af660178e4fd9ce7d5dc34a941e55bcc2673a95568587",
+    "internal/daemon/client.go": "5ddb1196e25acb800a118190f568db26f2cbad5efc8938a695ef66ebf22f95e5",
+    "internal/daemon/protocol.go": "18baed0904f0be6f34bef196fbdfcbd6c9c9545ad478bc112241b6c58a80dc58",
+    "internal/daemon/server.go": "8f8cac924af5f5f96222a7f348a722e4dfbca49e09e52a8b56c1f004b5b744f0",
     "internal/mcp/profiles.go": "7dbe1c0ab408d8ad69776fd5858f6db65be041ecfa8c8108cb86f58a45dffb46",
     "internal/mcp/server.go": "40b261d7c443447fee9dcf9605294657d84a882893c683807451dcee4d658ab4",
     "internal/mcp/tools.go": "9295edc4517b07a3ff767b16716ab129d91278db9c447d6501fb7f8a381ab212"
+  },
+  "fixtures": {
+    "eof": {
+      "input": "eof.in",
+      "input_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "output": "eof.out",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "profile": "core"
+    },
+    "framed_initialize": {
+      "input": "framed_initialize.in",
+      "input_sha256": "6de987fc1e786c8c3813c4e19a02d37567ca566d87b7611acc9df5dc60466f11",
+      "output": "framed_initialize.out",
+      "output_sha256": "85201c07d11ec520b2b5c75eff75ccd38b559c98cade8e69ba90b980006c73f9",
+      "profile": "core"
+    },
+    "initialize": {
+      "input": "initialize.in",
+      "input_sha256": "4782c5a93e7a5db96a7d680be2661c29deea1bb1c591070f3e90277d2977da09",
+      "output": "initialize.out",
+      "output_sha256": "eaddc1e1aebf6e5fcc50320b4e476e6a155ee1e26239aac4967d026dc1b7ea25",
+      "profile": "core"
+    },
+    "initialized": {
+      "input": "initialized.in",
+      "input_sha256": "450e643eb7e4b12bdbc1751b4260b4d00fff686b36f67d6bbea0b22c897bed56",
+      "output": "initialized.out",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "profile": "core"
+    },
+    "malformed": {
+      "input": "malformed.in",
+      "input_sha256": "8c69fc307fed3936d6a8ac679c0079c9bfd11f9de2a43e20ae25ff2a899d9776",
+      "output": "malformed.out",
+      "output_sha256": "36bb7e848335c954ceb516bbdc00ffc65f4d1ae574a6942bf6d296df5dff339a",
+      "profile": "core"
+    },
+    "missing_argument": {
+      "input": "missing_argument.in",
+      "input_sha256": "dbe87ab7f45015283f234431d0707c8bcbf30a3b64bd2fd828ea697735fe2ba0",
+      "output": "missing_argument.out",
+      "output_sha256": "393d3ab744b281064c52362639adf4d98f9bdba7f8a5c28e8eae459aa956a54d",
+      "profile": "core"
+    },
+    "notifications": {
+      "input": "notifications.in",
+      "input_sha256": "5857e82582ea004793c7e8df2f3f28ab5e6f685974d0261983e57896cbb0dbd4",
+      "output": "notifications.out",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "profile": "core"
+    },
+    "tool_error": {
+      "input": "tool_error.in",
+      "input_sha256": "4f3e7317d8347a7e477fd788f92c5ae58cfb424b04680ba81225630ba985006e",
+      "output": "tool_error.out",
+      "output_sha256": "9ec1d30209b7126ae9de6957bd1b8a45881387e4364f479850266b78ea1aa9c4",
+      "profile": "core"
+    },
+    "tools_all": {
+      "input": "tools_all.in",
+      "input_sha256": "d059fc1a28537e4788d50b9fbb56654fc9612b090e780f0b85e8071601dfa24e",
+      "output": "tools_all.out",
+      "output_sha256": "e78d34ceeb4d644d7eed5f54d46bf04ba4f08ac5005703672ee7692c81270c07",
+      "profile": "all"
+    },
+    "tools_core": {
+      "input": "tools_core.in",
+      "input_sha256": "d059fc1a28537e4788d50b9fbb56654fc9612b090e780f0b85e8071601dfa24e",
+      "output": "tools_core.out",
+      "output_sha256": "f55e44dff83df37a92a7f95c66ecb25d00a24e8cb46e39d95de7c5ce99181ec0",
+      "profile": "core"
+    },
+    "tools_nav": {
+      "input": "tools_nav.in",
+      "input_sha256": "d059fc1a28537e4788d50b9fbb56654fc9612b090e780f0b85e8071601dfa24e",
+      "output": "tools_nav.out",
+      "output_sha256": "4e5340c09bb4b4baf90be9e4f3a894742d803c371a41e59f79899daeebd9a7e5",
+      "profile": "nav"
+    },
+    "unknown_method": {
+      "input": "unknown_method.in",
+      "input_sha256": "27021880ab908a3b9dbf17b76b2ae7920f6c45270bd9f8a7887126738f1d9b65",
+      "output": "unknown_method.out",
+      "output_sha256": "05d1a5483c3c63476ae77e71386f6b1997f61b52bcce6bb7685c584a7982e2a0",
+      "profile": "core"
+    },
+    "unknown_tool": {
+      "input": "unknown_tool.in",
+      "input_sha256": "bf35962032ed4ceff9703b727ed0cccd2c1987251bc9647ab4729fbc3404d10b",
+      "output": "unknown_tool.out",
+      "output_sha256": "5dbeb6a9d28242924117a11521ad4eb3ab7bfa7a37e275e4e6faf3b656570552",
+      "profile": "core"
+    }
   }
 }
