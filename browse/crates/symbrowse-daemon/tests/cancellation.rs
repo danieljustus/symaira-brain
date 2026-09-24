@@ -326,12 +326,14 @@ mod unix {
         spec.idle_timeout = None;
         let upstream = TcpListener::bind(("127.0.0.1", 0)).unwrap();
         let upstream_url = format!("http://{}", upstream.local_addr().unwrap());
+        let (request_started, request_ready) = mpsc::channel();
         thread::spawn(move || {
             let Ok((mut stream, _)) = upstream.accept() else {
                 return;
             };
             let mut request = [0_u8; 1024];
             let _ = std::io::Read::read(&mut stream, &mut request);
+            let _ = request_started.send(());
             thread::sleep(Duration::from_secs(5));
         });
         let server = Arc::new(
@@ -366,13 +368,25 @@ mod unix {
                 ..Default::default()
             })
         });
-        thread::sleep(Duration::from_millis(50));
+        request_ready
+            .recv_timeout(Duration::from_secs(2))
+            .expect("upstream request started before cancellation");
         server.stop();
         assert!(thread.join().unwrap().is_ok());
         let request_result = request.join().unwrap();
         match request_result {
             Ok(response) => assert_eq!(response.error.unwrap().code, codes::OPERATION_TIMEOUT),
             Err(ClientError::Transport(error)) => assert_eq!(error.code, "daemon_unavailable"),
+            Err(ClientError::Io(error)) => assert!(
+                matches!(
+                    error.kind(),
+                    std::io::ErrorKind::ConnectionReset
+                        | std::io::ErrorKind::BrokenPipe
+                        | std::io::ErrorKind::UnexpectedEof
+                        | std::io::ErrorKind::NotConnected
+                ),
+                "unexpected cancellation I/O error: {error:?}"
+            ),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }
 
