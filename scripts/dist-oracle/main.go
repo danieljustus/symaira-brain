@@ -14,6 +14,8 @@
 //	go run ./scripts/dist-oracle -check                      # gate (exit 0/1)
 //	go run ./scripts/dist-oracle -check -manifest <path>     # point at another manifest copy (negative tests)
 //	go run ./scripts/dist-oracle -candidate-check -version 0.12.0 -assets <archive-bundle>
+//	go run ./scripts/dist-oracle -native-package -version 0.12.0 -binary target/<triple>/release/symbrain -assets <one-target-dir>
+//	go run ./scripts/dist-oracle -candidate-merge -version 0.12.0 -packages <six-native-package-dirs> -assets <archive-bundle>
 //
 // The macOS GUI DMG is not produced by goreleaser; it is uploaded by
 // .github/workflows/release.yml via `gh release upload`. It is therefore
@@ -27,6 +29,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -342,12 +345,65 @@ func notRunLines() []string {
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	nativePackage := flag.Bool("native-package", false, "verify a native Rust symbrain binary and package its archive/checksum")
+	candidateMerge := flag.Bool("candidate-merge", false, "merge six native Rust packages and run the full candidate artifact check")
 	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
+	packagesDir := flag.String("packages", "", "directory with six subdirectories from -native-package")
+	binaryPath := flag.String("binary", "", "prebuilt Rust symbrain binary for -native-package")
 	version := flag.String("version", "", "candidate version without the v prefix")
 	manifestPath := flag.String("manifest", defaultManifest, "path to the pinned release manifest JSON")
 	goreleaserPath := flag.String("goreleaser", defaultGoreleaser, "path to the goreleaser config")
 	workflowPath := flag.String("workflow", defaultWorkflow, "path to the release workflow binding external assets")
 	flag.Parse()
+
+	if *candidateMerge {
+		if *assetsDir == "" || *version == "" || *packagesDir == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-merge requires -version, -packages, and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := mergeNativeCandidatePackages(&cfg, *version, resolvePath(*packagesDir), resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: merge native candidates: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-merge: PASS %d native target archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		return
+	}
+
+	if *nativePackage {
+		if *assetsDir == "" || *version == "" || *binaryPath == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -native-package requires -version, -binary, and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		archive, err := packageNativeCandidate(&cfg, *version, *binaryPath, resolvePath(*assetsDir))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: native candidate: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("native-candidate: PASS %s %s/%s Rust symbrain %s\n", archive, runtime.GOOS, runtime.GOARCH, *version)
+		return
+	}
 
 	if *candidateCheck {
 		if *assetsDir == "" || *version == "" {

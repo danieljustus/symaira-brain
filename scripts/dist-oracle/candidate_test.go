@@ -26,8 +26,11 @@ func TestCandidateArchiveBundleChecksNamesContentsAndChecksums(t *testing.T) {
 		t.Fatal(err)
 	}
 	assets := t.TempDir()
+	packages := filepath.Join(t.TempDir(), "native-packages")
+	if err := os.Mkdir(packages, 0o700); err != nil {
+		t.Fatal(err)
+	}
 	const version = "0.12.0"
-	var checksumLines []string
 	for _, goos := range cfg.Builds[0].GOOS {
 		for _, goarch := range cfg.Builds[0].GOARCH {
 			name := renderTemplate(cfg.Archives[0].NameTemplate, cfg.ProjectName, version, goos, goarch) + "." + formatFor(cfg.Archives[0], goos)
@@ -76,27 +79,63 @@ func TestCandidateArchiveBundleChecksNamesContentsAndChecksums(t *testing.T) {
 				}
 				data = output.Bytes()
 			}
-			if err := os.WriteFile(filepath.Join(assets, name), data, 0o600); err != nil {
+			pkg := filepath.Join(packages, goos+"-"+goarch)
+			if err := os.Mkdir(pkg, 0o700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(pkg, name), data, 0o600); err != nil {
 				t.Fatal(err)
 			}
 			digest := sha256.Sum256(data)
-			checksumLines = append(checksumLines, fmt.Sprintf("%s  %s", hex.EncodeToString(digest[:]), name))
+			checksum := fmt.Sprintf("%s  %s\n", hex.EncodeToString(digest[:]), name)
+			if err := os.WriteFile(filepath.Join(pkg, cfg.Checksum.NameTemplate), []byte(checksum), 0o600); err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
-	if err := os.WriteFile(filepath.Join(assets, cfg.Checksum.NameTemplate), []byte(strings.Join(checksumLines, "\n")+"\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := checkCandidateArtifacts(&cfg, version, assets); err != nil {
-		t.Fatalf("valid local candidate bundle rejected: %v", err)
+	if err := mergeNativeCandidatePackages(&cfg, version, packages, assets); err != nil {
+		t.Fatalf("valid native candidate packages rejected: %v", err)
 	}
 
 	checksums := filepath.Join(assets, cfg.Checksum.NameTemplate)
+	checksumLines := strings.Split(strings.TrimSpace(string(mustRead(t, checksums))), "\n")
 	changed := strings.Replace(string(mustRead(t, checksums)), checksumLines[0][:64], strings.Repeat("0", 64), 1)
 	if err := os.WriteFile(checksums, []byte(changed), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := checkCandidateArtifacts(&cfg, version, assets); err == nil || !strings.Contains(err.Error(), "digest mismatch") {
 		t.Fatalf("bad archive checksum error = %v, want digest mismatch", err)
+	}
+}
+
+func TestNativeCandidateIdentityRequiresRustProductVersionAndTarget(t *testing.T) {
+	validJSON := []byte(`{"tool":"symbrain","version":"0.12.0","schema_version":1}`)
+	identity, err := parseVersionIdentity(validJSON)
+	if err != nil || verifyVersionIdentity(identity, "0.12.0") != nil {
+		t.Fatalf("parseVersionIdentity() = %#v, %v", identity, err)
+	}
+	for _, invalid := range [][]byte{
+		[]byte(`{"tool":"symbrain-go","version":"0.12.0","schema_version":1}`),
+		[]byte(`{"tool":"symbrain","version":"0.12.0","schema_version":1} {}`),
+	} {
+		got, err := parseVersionIdentity(invalid)
+		if err == nil {
+			err = verifyVersionIdentity(got, "0.12.0")
+		}
+		if err == nil {
+			t.Fatalf("parseVersionIdentity(%q) unexpectedly succeeded", invalid)
+		}
+	}
+	if !matchesNativeRustVersion("symbrain 0.12.0\n  rust    rustc\n  os/arch darwin/arm64\n", "0.12.0", "darwin", "arm64") {
+		t.Fatal("valid Rust target identity rejected")
+	}
+	for _, output := range []string{
+		"symbrain 0.12.0\n  Go      go1.26\n  OS/Arch darwin/arm64\n",
+		"symbrain 0.12.0\n  rust    rustc\n  os/arch darwin/amd64\n",
+	} {
+		if matchesNativeRustVersion(output, "0.12.0", "darwin", "arm64") {
+			t.Fatalf("wrong identity accepted: %q", output)
+		}
 	}
 }
 
