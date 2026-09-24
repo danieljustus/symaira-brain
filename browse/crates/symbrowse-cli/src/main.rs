@@ -303,9 +303,16 @@ fn run_tool_list(profiles: String, format: Format) -> ExitCode {
 fn run_dispatch(
     session: String,
     command: String,
-    args: serde_json::Value,
+    mut args: serde_json::Value,
     format: Format,
 ) -> ExitCode {
+    let a11y_url = if command == "a11y" {
+        args.as_object_mut()
+            .and_then(|args| args.remove("url"))
+            .and_then(|url| url.as_str().map(str::to_owned))
+    } else {
+        None
+    };
     let frame = Frame {
         args: (!matches!(command.as_str(), "session.list" | "session.info")).then_some(args),
         cmd: command,
@@ -313,6 +320,7 @@ fn run_dispatch(
         ..Frame::default()
     };
     let is_network_offline = frame.cmd == "network.offline";
+    let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
@@ -328,15 +336,36 @@ fn run_dispatch(
     } else {
         None
     };
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    if let Some(url) = a11y_url {
+        let open_response = match client.request(Frame {
+            cmd: "open".into(),
+            args: Some(serde_json::json!({"url": url})),
+            session: session.clone(),
+            ..Frame::default()
+        }) {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::DAEMON_UNAVAILABLE,
+                    error.to_string(),
+                );
+            }
+        };
+        if !open_response.success {
+            let error = open_response.error.unwrap_or_default();
+            return render_dispatch_error(format, &error.code, error.message);
+        }
+    }
     let response = match if let Some(response) = direct {
         Ok(response)
     } else {
-        Client::new(ClientOptions {
-            socket_path: default_socket_path(&session),
-            session,
-            ..ClientOptions::default()
-        })
-        .request(frame)
+        client.request(frame)
     } {
         Ok(response) => response,
         Err(error) => {
@@ -348,6 +377,28 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_screenshot && format == Format::Text {
+            let data = response.data.unwrap_or(serde_json::Value::Null);
+            let path = data
+                .get("path")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("");
+            let width = data
+                .get("width")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or(0);
+            let height = data
+                .get("height")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or(0);
+            let bytes = data
+                .get("bytes")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or(0);
+            return write_stdout(&format!(
+                "screenshot saved to {path} ({width}x{height}, {bytes} bytes)\n"
+            ));
+        }
         if is_storage_mutation && format == Format::Text {
             return write_stdout("ok\n");
         }
@@ -1792,7 +1843,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "tools" => parse_tools(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
-        | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" => {
+        | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" | "a11y" | "screenshot" => {
             parse_dispatch(&values, command_index)
         }
         command => Err(ParseError {
@@ -1803,8 +1854,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, cache, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, session, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
-        .to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -1826,6 +1876,13 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("a11y", None) => Some(plain(
+            "Run an axe-core accessibility audit on the current page",
+            "symbrowse a11y [url] [flags]",
+            "  -h, --help              help for a11y\n      --selector string   restrict the audit to a CSS selector\n      --session string    daemon session name (default \"default\")\n      --tags string       comma-separated WCAG tags (e.g. wcag2a,wcag2aa)\n",
+            global,
+        )),
+        ("screenshot", None) => Some("Capture the page (viewport, --full page, or --selector element)\n\nUsage:\n  symbrowse screenshot [path] [flags]\n\nFlags:\n      --format string           image format: png or jpeg (default \"png\")\n      --full                    capture the whole page, not just the viewport\n  -h, --help                    help for screenshot\n      --quality int             jpeg quality 0-100 (jpeg only)\n      --screenshot-dir string   allow writing the screenshot into this directory (default: the cache out directory)\n      --selector string         capture the element matched by a CSS selector or @ref\n      --session string          session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("set", None) => Some(
             "Apply supported session-wide emulation settings\n\nUsage:\n  symbrowse set [command]\n\nAvailable Commands:\n  offline     Emulate offline (default: on)\n\nFlags:\n  -h, --help             help for set\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse set [command] --help\" for more information about a command.\n".to_owned(),
         ),
@@ -2134,6 +2191,16 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                     serde_json::Value::String(required_value(values, index, "--selector")?.into()),
                 );
             }
+            "--tags" if name == "a11y" => {
+                index += 1;
+                let tags = required_value(values, index, "--tags")?
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|tag| !tag.is_empty())
+                    .map(|tag| serde_json::Value::String(tag.to_owned()))
+                    .collect();
+                args.insert("tags".into(), serde_json::Value::Array(tags));
+            }
             "--kind" => {
                 index += 1;
                 args.insert(
@@ -2160,6 +2227,25 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                 args.insert(
                     "format".into(),
                     serde_json::Value::String(required_value(values, index, "--format")?.into()),
+                );
+            }
+            "--quality" if name == "screenshot" => {
+                index += 1;
+                let quality = required_value(values, index, "--quality")?
+                    .parse::<i64>()
+                    .map_err(|_| ParseError {
+                        message: "invalid quality".into(),
+                        exit_code: 2,
+                    })?;
+                args.insert("quality".into(), serde_json::Value::from(quality));
+            }
+            "--screenshot-dir" if name == "screenshot" => {
+                index += 1;
+                args.insert(
+                    "dir".into(),
+                    serde_json::Value::String(
+                        required_value(values, index, "--screenshot-dir")?.into(),
+                    ),
                 );
             }
             "--action" | "--name" => {
@@ -2221,6 +2307,9 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                 let key = value.trim_start_matches('-').replace('-', "_");
                 args.insert(key, serde_json::Value::Bool(true));
             }
+            "--full" if name == "screenshot" => {
+                args.insert("full".into(), serde_json::Value::Bool(true));
+            }
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
             value if value.starts_with("--kind=") => {
@@ -2232,6 +2321,15 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                     serde_json::Value::String(value[11..].into()),
                 );
             }
+            value if name == "a11y" && value.starts_with("--tags=") => {
+                let tags = value[7..]
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|tag| !tag.is_empty())
+                    .map(|tag| serde_json::Value::String(tag.to_owned()))
+                    .collect();
+                args.insert("tags".into(), serde_json::Value::Array(tags));
+            }
             value if value.starts_with("--value=") => {
                 args.insert("value".into(), serde_json::Value::String(value[8..].into()));
             }
@@ -2240,6 +2338,16 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
             }
             value if value.starts_with("--query=") => {
                 args.insert("query".into(), serde_json::Value::String(value[8..].into()));
+            }
+            value if name == "screenshot" && value.starts_with("--quality=") => {
+                let quality = value[10..].parse::<i64>().map_err(|_| ParseError {
+                    message: "invalid quality".into(),
+                    exit_code: 2,
+                })?;
+                args.insert("quality".into(), serde_json::Value::from(quality));
+            }
+            value if name == "screenshot" && value.starts_with("--screenshot-dir=") => {
+                args.insert("dir".into(), serde_json::Value::String(value[17..].into()));
             }
             value if value.starts_with('-') => {
                 return Err(unknown_flag(value));
@@ -2259,6 +2367,23 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         }
         "press" => take_positional(&mut args, &mut positional, "key"),
         "get" | "is" => take_positional(&mut args, &mut positional, "kind"),
+        "a11y" => {
+            take_positional(&mut args, &mut positional, "url");
+            args.entry("tags").or_insert(serde_json::Value::Null);
+            args.entry("selector")
+                .or_insert_with(|| serde_json::Value::String(String::new()));
+        }
+        "screenshot" => {
+            take_positional(&mut args, &mut positional, "path");
+            args.entry("full").or_insert(serde_json::Value::Bool(false));
+            args.entry("selector")
+                .or_insert_with(|| serde_json::Value::String(String::new()));
+            args.entry("format")
+                .or_insert_with(|| serde_json::Value::String("png".into()));
+            args.entry("quality").or_insert(serde_json::Value::from(0));
+            args.entry("dir")
+                .or_insert_with(|| serde_json::Value::String(String::new()));
+        }
         _ => {}
     }
     if name == "fill" {
@@ -2323,7 +2448,7 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         command = format!("{name}.{kind}");
     }
     if !positional.is_empty() {
-        if matches!(name, "fetch" | "goto" | "open") {
+        if matches!(name, "fetch" | "goto" | "open" | "a11y" | "screenshot") {
             return Err(ParseError {
                 message: format!("accepts at most 1 arg(s), received {supplied_positional_count}"),
                 exit_code: 2,
@@ -4283,6 +4408,102 @@ mod tests {
     }
 
     #[test]
+    fn a11y_routes_tags_selector_and_optional_url() {
+        let Action::Dispatch {
+            session,
+            command,
+            args: payload,
+            format,
+        } = parse(&args(&[
+            "a11y",
+            "https://fixture.invalid",
+            "--tags",
+            "wcag2a, ,wcag2aa",
+            "--selector",
+            ".main",
+            "--output=json",
+        ]))
+        .unwrap()
+        else {
+            panic!("a11y must dispatch");
+        };
+        assert_eq!(session, "default");
+        assert_eq!(command, "a11y");
+        assert_eq!(format, Format::Json);
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "url": "https://fixture.invalid",
+                "tags": ["wcag2a", "wcag2aa"],
+                "selector": ".main",
+            })
+        );
+
+        let Action::Dispatch { args: defaults, .. } = parse(&args(&["a11y"])).unwrap() else {
+            panic!("a11y must dispatch");
+        };
+        assert_eq!(defaults, serde_json::json!({"tags": null, "selector": ""}));
+        assert!(parse(&args(&["a11y", "one", "two"])).is_err());
+    }
+
+    #[test]
+    fn screenshot_routes_go_payload_and_argument_limits() {
+        let Action::Dispatch {
+            session,
+            command,
+            args: payload,
+            format,
+        } = parse(&args(&[
+            "screenshot",
+            "fixture.jpg",
+            "--full",
+            "--selector",
+            "#hero",
+            "--format",
+            "jpeg",
+            "--quality",
+            "80",
+            "--screenshot-dir",
+            "/tmp/screens",
+            "--json",
+        ]))
+        .unwrap()
+        else {
+            panic!("screenshot must dispatch");
+        };
+        assert_eq!(session, "default");
+        assert_eq!(command, "screenshot");
+        assert_eq!(format, Format::Json);
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "path": "fixture.jpg",
+                "full": true,
+                "selector": "#hero",
+                "format": "jpeg",
+                "quality": 80,
+                "dir": "/tmp/screens",
+            })
+        );
+
+        let Action::Dispatch { args: defaults, .. } = parse(&args(&["screenshot"])).unwrap() else {
+            panic!("screenshot must dispatch");
+        };
+        assert_eq!(
+            defaults,
+            serde_json::json!({
+                "full": false,
+                "selector": "",
+                "format": "png",
+                "quality": 0,
+                "dir": "",
+            })
+        );
+        assert!(parse(&args(&["screenshot", "one", "two"])).is_err());
+        assert!(parse(&args(&["screenshot", "--quality", "bad"])).is_err());
+    }
+
+    #[test]
     fn cache_get_parses_range_and_format_flags() {
         assert_eq!(
             parse(&args(&[
@@ -4511,16 +4732,30 @@ mod tests {
             panic!("root help action")
         };
         for implemented in [
-            "eval", "flow", "open", "state", "tools", "version", "workflow",
+            "eval",
+            "flow",
+            "open",
+            "screenshot",
+            "state",
+            "tab",
+            "tools",
+            "version",
+            "workflow",
         ] {
             assert!(
                 root.contains(implemented),
                 "root help omitted {implemented}"
             );
-        }
-        for unsupported in ["cookies", "screenshot", "tab", "auth"] {
             assert!(
-                !root.contains(unsupported),
+                matches!(parse(&args(&[implemented, "--help"])), Ok(Action::Help(_))),
+                "root help advertised {implemented} without a Rust help/dispatch path"
+            );
+        }
+        for unsupported in ["cookies", "scroll", "auth"] {
+            assert!(
+                !root
+                    .lines()
+                    .any(|line| line.starts_with(&format!("  {unsupported} "))),
                 "root help advertised {unsupported}"
             );
             assert!(parse(&args(&[unsupported, "--help"])).is_err());

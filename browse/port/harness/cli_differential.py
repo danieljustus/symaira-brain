@@ -98,9 +98,9 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "back", "batch", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -108,19 +108,30 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     rust_help = rust_root["stdout"].decode("utf-8", "replace")
     match = go_root["returncode"] == 0 and rust_root["returncode"] == 0
     advertised: set[str] = set()
-    section = re.search(r"^Implemented Commands:\s*\n((?:\s{2}[^\n]*\n)+)", rust_help, re.MULTILINE)
-    if section:
-        advertised = {name.strip() for name in section.group(1).split(",")}
+    advertised = set(command_names(rust_root["stdout"], root=True))
     # scrollintoview is a runnable Go command with exact help, but Cobra omits
     # it from the grouped root listing in the current Go binary.
     go_visible = advertised - {"fetch", "tools", "workflow", "scrollintoview"}
     match = match and advertised == expected and go_visible <= go_commands
     rows = [{"case": "CLI-001-supported", "argv": ["--help"], "matched": match,
-             "criterion": "Rust advertises exactly its implemented root commands; each primary command exists in Go",
+             "criterion": "Rust root help lists its real command/help routes; shared advertised commands exist in Go",
              "go_commands": sorted(go_commands), "rust_commands": sorted(advertised),
+             "full_go_root_byte_parity": (go_root["returncode"] == rust_root["returncode"]
+                                           and go_root["stdout"] == rust_root["stdout"]
+                                           and go_root["stderr"] == rust_root["stderr"]),
+             "go_only_root_commands": sorted(go_commands - advertised),
+             "rust_only_root_commands": sorted(advertised - go_commands),
              "go": output_record(go_root), "rust": output_record(rust_root)}]
+    full_root_match = (go_root["returncode"] == rust_root["returncode"]
+                       and go_root["stdout"] == rust_root["stdout"]
+                       and go_root["stderr"] == rust_root["stderr"])
+    rows.append({"case": "CLI-001-full-root", "argv": ["--help"], "matched": full_root_match,
+                 "criterion": "byte-identical complete Go/Rust root help including command inventory",
+                 "go_only_root_commands": sorted(go_commands - advertised),
+                 "rust_only_root_commands": sorted(advertised - go_commands),
+                 "go": output_record(go_root), "rust": output_record(rust_root)})
     go_paths = [
-        ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"],
+        ["a11y"], ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"], ["screenshot"],
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
@@ -155,11 +166,13 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
 
 
 class UnixDaemonStub:
-    def __init__(self, path: Path, *, status_probe: bool):
+    def __init__(self, path: Path, *, status_probe: bool, request_count: int | None = None):
         self.path = path
         self.frame: dict[str, Any] | None = None
+        self.frames: list[dict[str, Any]] = []
         self.error: str | None = None
         self.status_probe = status_probe
+        self.request_count = request_count
         self.thread: threading.Thread | None = None
         self.listener: socket.socket | None = None
 
@@ -178,7 +191,7 @@ class UnixDaemonStub:
     def _serve(self) -> None:
         assert self.listener is not None
         try:
-            request_count = 2 if self.status_probe else 1
+            request_count = self.request_count if self.request_count is not None else (2 if self.status_probe else 1)
             for request_index in range(request_count):
                 connection, _ = self.listener.accept()
                 with connection:
@@ -192,6 +205,7 @@ class UnixDaemonStub:
                         if len(raw) > MAX_CAPTURE_BYTES:
                             raise RuntimeError("daemon request exceeded the 1 MiB bound")
                     frame = json.loads(bytes(raw).split(b"\n", 1)[0])
+                    self.frames.append(frame)
                     if request_index == 0:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
@@ -208,6 +222,8 @@ class UnixDaemonStub:
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
                         data = {"name": frame.get("session", "default"), "active_tabs": 0}
+                    elif frame.get("cmd") == "a11y":
+                        data = {"nodes": []}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -239,10 +255,12 @@ class WindowsNamedPipeStub:
     ERROR_PIPE_CONNECTED = 535
     INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
 
-    def __init__(self, *, status_probe: bool):
+    def __init__(self, *, status_probe: bool, request_count: int | None = None):
         self.frame: dict[str, Any] | None = None
+        self.frames: list[dict[str, Any]] = []
         self.error: str | None = None
         self.status_probe = status_probe
+        self.request_count = request_count
         self.thread: threading.Thread | None = None
         self.ready = threading.Event()
         self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -279,7 +297,7 @@ class WindowsNamedPipeStub:
 
     def _serve(self) -> None:
         try:
-            request_count = 2 if self.status_probe else 1
+            request_count = self.request_count if self.request_count is not None else (2 if self.status_probe else 1)
             for request_index in range(request_count):
                 handle = self.kernel.CreateNamedPipeW(
                     self.PIPE, self.PIPE_ACCESS_DUPLEX,
@@ -306,6 +324,7 @@ class WindowsNamedPipeStub:
                         if len(raw) > MAX_CAPTURE_BYTES:
                             raise RuntimeError("daemon request exceeded the 1 MiB bound")
                     frame = json.loads(bytes(raw).split(b"\n", 1)[0])
+                    self.frames.append(frame)
                     if request_index == 0:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
@@ -322,6 +341,8 @@ class WindowsNamedPipeStub:
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
                         data = {"name": frame.get("session", SESSION), "active_tabs": 0}
+                    elif frame.get("cmd") == "a11y":
+                        data = {"nodes": []}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -384,25 +405,33 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
     go_frame = rust_frame = None
     if stub:
         try:
+            has_a11y_url = (argv[:1] == ["a11y"] and any(
+                value.startswith(("http://", "https://")) for value in argv[1:]))
+            go_count = 2 if has_a11y_url else 1
+            rust_count = 4 if has_a11y_url else 2
             if os.name == "nt":
-                with WindowsNamedPipeStub(status_probe=False) as go_stub:
+                with WindowsNamedPipeStub(status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
                 go_frame = go_stub.frame
+                go_frames = go_stub.frames
                 go_error = go_stub.error
-                with WindowsNamedPipeStub(status_probe=True) as rust_stub:
+                with WindowsNamedPipeStub(status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
                 rust_frame = rust_stub.frame
+                rust_frames = rust_stub.frames
                 rust_error = rust_stub.error
             else:
                 go_path = socket_path(env)
-                with UnixDaemonStub(go_path, status_probe=False) as go_stub:
+                with UnixDaemonStub(go_path, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
                 go_frame = go_stub.frame
+                go_frames = go_stub.frames
                 go_error = go_stub.error
                 rust_path = socket_path(env)
-                with UnixDaemonStub(rust_path, status_probe=True) as rust_stub:
+                with UnixDaemonStub(rust_path, status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
                 rust_frame = rust_stub.frame
+                rust_frames = rust_stub.frames
                 rust_error = rust_stub.error
         except (OSError, RuntimeError) as error:
             return {"case": "harness_error", "argv": argv,
@@ -440,6 +469,16 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if argv[:1] == ["a11y"]:
+            def actual_frames(frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                return [payload_raw(frame) for frame in frames if frame.get("cmd") != "daemon.status"]
+
+            go_actual = actual_frames(go_frames)
+            rust_actual = actual_frames(rust_frames)
+            row["go_actual_frames"] = go_actual
+            row["rust_actual_frames"] = rust_actual
+            row["daemon_actual_frames_match"] = go_actual == rust_actual
+            row["matched"] = bool(row["matched"] and row["daemon_actual_frames_match"])
     return row
 
 
@@ -467,6 +506,13 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["cache", "get", f"fetch:{fetch_key}", "--range=2-3", "--json"], b"", False),
         ("CLI-003", ["cache", "get", "fetch:bad-key", "--json"], b"", False),
         ("CLI-003", ["cache", "get", output_id, "--range=0-2", "--json"], b"", False),
+        ("CLI-002", ["a11y", "--json"], b"", True),
+        ("CLI-002", ["a11y", "--selector", ".main", "--tags", "wcag2a, ,wcag2aa", "https://fixture.invalid", "--json"], b"", True),
+        ("CLI-003", ["a11y", "one", "two"], b"", False),
+        ("CLI-002", ["screenshot"], b"", True),
+        ("CLI-002", ["screenshot", "--json"], b"", True),
+        ("CLI-002", ["screenshot", "fixture.jpg", "--full", "--selector", "#hero", "--format", "jpeg", "--quality", "80", "--screenshot-dir", "/tmp/screens", "--json"], b"", True),
+        ("CLI-003", ["screenshot", "one", "two"], b"", False),
         ("CLI-002", ["goto", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-002", ["open", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-003", ["state", "save"], b"", False),
