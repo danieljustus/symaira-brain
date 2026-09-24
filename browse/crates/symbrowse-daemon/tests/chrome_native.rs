@@ -184,9 +184,15 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let frames = request(&socket, "frame.tree", json!({}));
     assert_eq!(frames["success"], true, "frame response: {frames}");
     let listed = frames["data"]["frames"].as_array().expect("frame tree");
-    assert!(listed.len() >= 2, "frame response: {frames}");
+    let root_frame = listed.first().expect("root frame");
+    let children = root_frame["children"]
+        .as_array()
+        .expect("nested frame children");
+    assert!(!children.is_empty(), "frame response: {frames}");
     assert!(
-        listed.iter().any(|frame| frame["parent_id"].is_string()),
+        children
+            .iter()
+            .any(|frame| frame["parent_id"].as_str() == root_frame["id"].as_str()),
         "frame response: {frames}"
     );
     let ax = request(&socket, "a11y", json!({}));

@@ -538,7 +538,13 @@ fn listen_windows(server: &Server) -> Result<(), ServerError> {
                     continue;
                 }
             }
-            Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+            Err(error)
+                if error.kind() == io::ErrorKind::WouldBlock
+                    || error.kind() == io::ErrorKind::TimedOut
+                    // Win32 ERROR_SEM_TIMEOUT can be surfaced without the
+                    // TimedOut kind by the nonblocking named-pipe acceptor.
+                    || error.raw_os_error() == Some(121) =>
+            {
                 thread::sleep(Duration::from_millis(25));
             }
             Err(error) => {
@@ -937,15 +943,7 @@ fn serve_connection_parts<S>(
         });
         let result = loop {
             match rx.recv_timeout(operation.remaining().min(Duration::from_millis(10))) {
-                Ok(Ok((data, warnings))) => break success_response(data, warnings),
-                Ok(Err(error)) => {
-                    break Response {
-                        success: false,
-                        data: None,
-                        error: Some(crate::redaction::redact_error(error)),
-                        warnings: Vec::new(),
-                    };
-                }
+                Ok(result) => break operation_result_response(result, &operation),
                 Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
                     break error_response(codes::OPERATION_FAILED, "daemon handler disconnected");
                 }
@@ -980,6 +978,28 @@ fn serve_connection_parts<S>(
         if write_response(reader.get_mut(), result).is_err() {
             return;
         }
+    }
+}
+
+fn operation_result_response(
+    result: Result<(Option<Value>, Vec<Warning>), DaemonError>,
+    operation: &OperationContext,
+) -> Response {
+    if operation.remaining().is_zero() {
+        operation.cancel();
+        return error_response(
+            codes::OPERATION_TIMEOUT,
+            "daemon operation exceeded its timeout",
+        );
+    }
+    match result {
+        Ok((data, warnings)) => success_response(data, warnings),
+        Err(error) => Response {
+            success: false,
+            data: None,
+            error: Some(crate::redaction::redact_error(error)),
+            warnings: Vec::new(),
+        },
     }
 }
 
@@ -1357,6 +1377,22 @@ mod tests {
             socket_path("/tmp/run", "x").unwrap(),
             PathBuf::from("/tmp/run/x.sock")
         );
+    }
+
+    #[test]
+    fn completed_handler_result_after_deadline_is_reported_as_timeout() {
+        let operation = OperationContext {
+            cancelled: Arc::new(AtomicBool::new(false)),
+            shutdown: Arc::new(AtomicBool::new(false)),
+            deadline: Instant::now() - Duration::from_millis(1),
+        };
+        let response =
+            operation_result_response(Ok((Some(json!({"done": true})), vec![])), &operation);
+        assert_eq!(
+            response.error.expect("timeout error").code,
+            codes::OPERATION_TIMEOUT
+        );
+        assert!(operation.is_cancelled());
     }
 
     #[cfg(windows)]
