@@ -28,6 +28,8 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # fixture generators verify the pinned Go source commit
       - name: Verify pinned toolchain
         run: rustup show active-toolchain
       - name: Set up Go oracle
