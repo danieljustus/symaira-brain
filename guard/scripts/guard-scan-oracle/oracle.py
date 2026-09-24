@@ -8,13 +8,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import pty
-import select
 import shutil
 import subprocess
 import sys
 import tempfile
-import tty
 
 ROOT = Path(__file__).resolve().parents[3]
 HERE = Path(__file__).resolve().parent
@@ -82,7 +79,7 @@ def config_files(root: Path, *, missing_hermes: bool = False, unknown_opencode: 
         "vscode": home / ".vscode/mcp.json",
         "opencode": home / ".config/opencode/config.json",
         "claude": (home / "Library/Application Support/Claude/claude_desktop_config.json")
-        if os.uname().sysname == "Darwin"
+        if sys.platform == "darwin"
         else xdg / "claude/claude_desktop_config.json",
     }
     contents = {
@@ -146,6 +143,12 @@ def run_pipe(binary: Path, args: list[str], env: dict[str, str], cwd: Path) -> t
 
 
 def run_tty(binary: Path, args: list[str], env: dict[str, str], cwd: Path) -> tuple[int, bytes, bytes]:
+    if os.name == "nt":
+        raise RuntimeError("the pseudoterminal oracle case is POSIX-only")
+    import pty
+    import select
+    import tty
+
     master, slave = pty.openpty()
     try:
         tty.setraw(slave)
@@ -225,6 +228,15 @@ func main() { os.Setenv("XDG_CONFIG_HOME", "/oracle-config"); out := map[string]
         helper.unlink(missing_ok=True)
 
 
+def fixture_for_platform(document: dict[str, object], *, windows: bool) -> dict[str, object]:
+    if not windows:
+        return document
+    projected = dict(document)
+    projected["cases"] = [case for case in document["cases"] if not case.get("tty", False)]
+    projected["case_count"] = len(projected["cases"])
+    return projected
+
+
 def build_and_run() -> dict[str, object]:
     expected = require_pin()
     runtime_parent = Path(os.environ.get("SYMAIRA_EXTERNAL_RUNTIME_ROOT", tempfile.gettempdir()))
@@ -232,7 +244,7 @@ def build_and_run() -> dict[str, object]:
     shutil.rmtree(runtime, ignore_errors=True)
     runtime.mkdir(parents=True)
     source = runtime / "source"
-    binary = runtime / "symbrain-go"
+    binary = runtime / ("symbrain-go.exe" if os.name == "nt" else "symbrain-go")
     try:
         subprocess.run(["git", "worktree", "add", "--quiet", "--detach", str(source), PINNED_COMMIT_SHA], cwd=ROOT, check=True)
         build_env = dict(os.environ)
@@ -246,7 +258,11 @@ def build_and_run() -> dict[str, object]:
         root.mkdir()
         cases = [
             run_scan_case(binary, source, root, "default-pipe-json", [], repeat=2),
-            run_scan_case(binary, source, root, "default-tty-table", [], tty_mode=True),
+        ]
+        # Python's stdlib has no Windows PTY support; retain all pipe cases.
+        if os.name != "nt":
+            cases.append(run_scan_case(binary, source, root, "default-tty-table", [], tty_mode=True))
+        cases.extend([
             run_scan_case(binary, source, root, "explicit-json", ["--format", "json"]),
             run_scan_case(binary, source, root, "explicit-table", ["--format", "table"]),
             run_scan_case(binary, source, root, "help", ["--help"]),
@@ -254,7 +270,7 @@ def build_and_run() -> dict[str, object]:
             run_scan_case(binary, source, root, "error-format-missing", ["--format"]),
             run_scan_case(binary, source, root, "error-format-unsupported", ["--format", "xml"]),
             run_scan_case(binary, source, runtime / "case-missing", "one-finding-missing-hermes", ["--format", "json"], missing_hermes=True, unknown_opencode=False, repeat=3),
-        ]
+        ])
         matrix_env = dict(build_env)
         matrix_env.update({"XDG_CONFIG_HOME": "/oracle-config"})
         return {
@@ -280,9 +296,11 @@ def main() -> int:
         verify_binding(current)
     generated = build_and_run()
     if args.action == "check":
-        if json.dumps(current, indent=2, sort_keys=True) + "\n" != json.dumps(generated, indent=2, sort_keys=True) + "\n":
+        expected = fixture_for_platform(current, windows=os.name == "nt")
+        if json.dumps(expected, indent=2, sort_keys=True) + "\n" != json.dumps(generated, indent=2, sort_keys=True) + "\n":
             raise RuntimeError("guard scan oracle fixture drifted; run guard/scripts/guard-scan-oracle/run.sh write after changing the pin")
-        print(f"PASS: guard scan oracle byte check passed ({generated['case_count']} cases)")
+        suffix = "; POSIX TTY case excluded" if os.name == "nt" else ""
+        print(f"PASS: guard scan oracle byte check passed ({generated['case_count']} cases{suffix})")
     else:
         FIXTURE.write_text(json.dumps(generated, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(f"Wrote {FIXTURE} ({generated['case_count']} cases)")
