@@ -491,10 +491,7 @@ fn snapshot_item_text(item: &Value) -> String {
         .and_then(Value::as_str)
         .filter(|s| !s.is_empty())
     {
-        Some(name) => format!(
-            "{role} {}",
-            serde_json::to_string(name).expect("string serialization cannot fail")
-        ),
+        Some(name) => format!("{role} {}", go_quote(name)),
         None => role.to_owned(),
     }
 }
@@ -638,7 +635,7 @@ fn tab_text(tab: &Value) -> String {
         parts.push(id.to_owned());
     }
     if !label.is_empty() && label != id {
-        parts.push(serde_json::to_string(label).expect("string serialization cannot fail"));
+        parts.push(go_quote(label));
     }
     if !url.is_empty() {
         parts.push(url.to_owned());
@@ -651,6 +648,40 @@ fn tab_text(tab: &Value) -> String {
     } else {
         parts.join(" ")
     }
+}
+
+/// Quotes text using Go's `strconv.Quote` escapes for control characters.
+/// JSON quoting differs here: Go uses short escapes and `\\xNN` for ASCII
+/// controls, and `\\uNNNN` for the C1 controls.
+fn go_quote(text: &str) -> String {
+    use std::fmt::Write as _;
+
+    let mut quoted = String::with_capacity(text.len() + 2);
+    quoted.push('"');
+    for character in text.chars() {
+        match character {
+            '"' => quoted.push_str("\\\""),
+            '\\' => quoted.push_str("\\\\"),
+            '\x07' => quoted.push_str("\\a"),
+            '\x08' => quoted.push_str("\\b"),
+            '\x0c' => quoted.push_str("\\f"),
+            '\n' => quoted.push_str("\\n"),
+            '\r' => quoted.push_str("\\r"),
+            '\t' => quoted.push_str("\\t"),
+            '\x0b' => quoted.push_str("\\v"),
+            character if character < ' ' || character == '\x7f' => {
+                write!(quoted, "\\x{:02x}", u32::from(character))
+                    .expect("writing into a String cannot fail");
+            }
+            character if character.is_control() => {
+                write!(quoted, "\\u{:04x}", u32::from(character))
+                    .expect("writing into a String cannot fail");
+            }
+            character => quoted.push(character),
+        }
+    }
+    quoted.push('"');
+    quoted
 }
 
 fn human_scalar(value: &Value) -> String {
@@ -760,5 +791,17 @@ mod tests {
         let rendered = human(json!({"cookies":[{"name":"auth","value":"secret-token"}]}));
         assert_eq!(rendered, "cookies:\n- auth\n");
         assert!(!rendered.contains("secret-token"));
+    }
+
+    #[test]
+    fn human_tab_and_snapshot_names_use_go_control_escapes() {
+        let tab = human(json!({"tabs":[{"id":"t1","label":"a\u{1}\t\u{7f}\u{85}b"}]}));
+        assert_eq!(tab, "tabs:\n- t1 \"a\\x01\\t\\x7f\\u0085b\"\n");
+
+        let snapshot = human(json!({"added":[{"role":"button","name":"a\u{1}\nb"}]}));
+        assert_eq!(
+            snapshot,
+            "snapshot diff:\nadded:\n- button \"a\\x01\\nb\"\n"
+        );
     }
 }

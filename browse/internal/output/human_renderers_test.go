@@ -101,6 +101,22 @@ func TestWriteHumanTabsPayload(t *testing.T) {
 	}
 }
 
+func TestWriteHumanQuotedNamesUseGoControlEscapes(t *testing.T) {
+	tab := writeHumanForTest(t, map[string]any{
+		"tabs": []any{map[string]any{"id": "t1", "label": "a\x01\t\x7f\u0085b"}},
+	})
+	if want := "tabs:\n- t1 \"a\\x01\\t\\x7f\\u0085b\"\n"; tab != want {
+		t.Fatalf("human tab output = %q, want %q", tab, want)
+	}
+
+	snapshot := writeHumanForTest(t, map[string]any{
+		"added": []any{map[string]any{"role": "button", "name": "a\x01\nb"}},
+	})
+	if want := "snapshot diff:\nadded:\n- button \"a\\x01\\nb\"\n"; snapshot != want {
+		t.Fatalf("human snapshot output = %q, want %q", snapshot, want)
+	}
+}
+
 func TestWriteHumanUnknownPayloadUsesIndentedJSON(t *testing.T) {
 	got := writeHumanForTest(t, map[string]any{"z": "last", "a": float64(1)})
 	want := "{\n  \"a\": 1,\n  \"z\": \"last\"\n}\n"
