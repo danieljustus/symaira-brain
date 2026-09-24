@@ -52,6 +52,11 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+
       - name: Run Go engine contract oracles
         run: go test ./internal/engine ./internal/engine/chrome ./internal/engine/doctor ./internal/flows ./cmd/symbrowse -run 'Launch|Attach|Discover|Timeout|Interaction|Inspection|Find|Wait|Tab|Frame|Dialog|Network|Upload|Download|Screenshot|A11y'
 

@@ -430,11 +430,29 @@ def windows_pipe_exchange(endpoint: str, payload: bytes, timeout: float) -> byte
         if not set_pipe_state(handle, ctypes.byref(mode), None, None):
             raise ctypes.WinError(ctypes.get_last_error())
         payload_buffer = ctypes.create_string_buffer(payload)
-        written = ctypes.c_uint32()
-        if not write_file(handle, payload_buffer, len(payload), ctypes.byref(written), None):
-            raise ctypes.WinError(ctypes.get_last_error())
-        if written.value != len(payload):
-            raise OSError("named-pipe request frame was only partially written")
+        offset = 0
+        while offset < len(payload):
+            if time.monotonic() >= deadline:
+                raise TimeoutError("named-pipe request exceeded probe deadline")
+            written = ctypes.c_uint32()
+            remaining = len(payload) - offset
+            if not write_file(
+                handle,
+                ctypes.byref(payload_buffer, offset),
+                remaining,
+                ctypes.byref(written),
+                None,
+            ):
+                error = ctypes.get_last_error()
+                if error == 232:  # PIPE_NOWAIT reports ERROR_NO_DATA while its buffer is full.
+                    time.sleep(min(0.005, max(0.0, deadline - time.monotonic())))
+                    continue
+                raise ctypes.WinError(error)
+            if written.value > remaining:
+                raise OSError("named-pipe write reported more bytes than requested")
+            offset += written.value
+            if written.value == 0:
+                time.sleep(min(0.005, max(0.0, deadline - time.monotonic())))
         result = bytearray()
         while time.monotonic() < deadline:
             chunk = ctypes.create_string_buffer(min(4096, MAX_OUTPUT + 1 - len(result)))

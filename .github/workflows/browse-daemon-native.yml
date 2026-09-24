@@ -49,6 +49,7 @@ jobs:
           go test ./internal/output ./cmd/symbrowse -run 'Human|YAML|Output' -count=1
           go test ./internal/daemon -run 'Malformed|Frame|Large' -count=1
       - name: Compare native Go and Rust Browse CLI cases
+        continue-on-error: true # Report parity after the independent daemon contracts run.
         run: |
           go_binary="$RUNNER_TEMP/symbrowse-go"
           rust_binary=target/release/symbrowse
@@ -114,3 +115,5 @@ jobs:
         run: |
           cargo test -p symbrowse-engine-safari --test bidi --locked real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate -- --exact
           cargo test -p symbrowse-engine-safari --test attach --locked real_safari_attach_uses_and_closes_only_its_named_loopback_tab -- --ignored --exact
+      - name: Enforce native CLI parity
+        run: python3 -c 'import json, sys; sys.exit(0 if json.load(open(sys.argv[1], encoding="utf-8"))["parity_established"] else 1)' "$RUNNER_TEMP/cli-differential.json"
