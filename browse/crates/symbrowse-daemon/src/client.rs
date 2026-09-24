@@ -117,20 +117,33 @@ impl Client {
             Err(error) if self.options.autostart && should_autostart(&error) => {
                 let mut child = self.start_daemon()?;
                 let deadline = Instant::now() + self.options.startup_timeout;
-                loop {
-                    if let Ok(response) = self.checked_request(&frame) {
+                let mut last_error = match self.checked_request(&frame) {
+                    Ok(response) => {
                         // Dropping Child closes this client's process handle
                         // without killing the detached daemon. Forgetting it
                         // leaks the handle for every autostarted request.
                         drop(child);
                         return Ok(response);
                     }
+                    Err(error) => error,
+                };
+                loop {
                     let remaining = deadline.saturating_duration_since(Instant::now());
                     if remaining.is_zero() {
                         terminate_child(&mut child);
-                        return Err(self.startup_timeout_error());
+                        return Err(self.startup_timeout_error(&last_error));
                     }
                     thread::sleep(remaining.min(Duration::from_millis(25)));
+                    match self.checked_request(&frame) {
+                        Ok(response) => {
+                            // Dropping Child closes this client's process handle
+                            // without killing the detached daemon. Forgetting it
+                            // leaks the handle for every autostarted request.
+                            drop(child);
+                            return Ok(response);
+                        }
+                        Err(error) => last_error = error,
+                    }
                 }
             }
             Err(error) => Err(error),
@@ -239,21 +252,38 @@ impl Client {
     }
 
     fn start_error(&self, error: io::Error) -> ClientError {
-        self.daemon_unavailable_error(format!(
-            "failed to start daemon for session {:?}: {}",
-            self.options.session,
-            redact_str(&error.to_string())
-        ))
+        self.daemon_unavailable_error(
+            format!(
+                "failed to start daemon for session {:?}: {}",
+                self.options.session,
+                redact_str(&error.to_string())
+            ),
+            None,
+        )
     }
 
-    fn startup_timeout_error(&self) -> ClientError {
-        self.daemon_unavailable_error(format!(
-            "daemon did not become ready for session {:?}",
-            self.options.session
-        ))
+    fn startup_timeout_error(&self, last_error: &ClientError) -> ClientError {
+        self.daemon_unavailable_error(
+            format!(
+                "daemon did not become ready for session {:?}",
+                self.options.session
+            ),
+            Some(last_error),
+        )
     }
 
-    fn daemon_unavailable_error(&self, message: String) -> ClientError {
+    fn daemon_unavailable_error(
+        &self,
+        message: String,
+        last_error: Option<&ClientError>,
+    ) -> ClientError {
+        let mut details = serde_json::json!({
+            "session": self.options.session,
+            "socket_path": self.options.socket_path,
+        });
+        if let Some(error) = last_error {
+            details["last_error"] = self.last_error_details(error);
+        }
         ClientError::Transport(DaemonError {
             code: codes::DAEMON_UNAVAILABLE.into(),
             message,
@@ -261,11 +291,29 @@ impl Client {
                 "start daemon manually with `symbrowse daemon --session {}`",
                 self.options.session
             ),
-            details: Some(redact_json(&serde_json::json!({
-                "session": self.options.session,
-                "socket_path": self.options.socket_path,
-            }))),
+            details: Some(redact_json(&details)),
             ..Default::default()
+        })
+    }
+
+    fn last_error_details(&self, error: &ClientError) -> Value {
+        let (kind, code, message) = match error {
+            ClientError::Transport(error) => {
+                ("transport", error.code.clone(), error.message.clone())
+            }
+            ClientError::Io(error) => ("io", "io_error".into(), error.to_string()),
+            ClientError::Unsupported => (
+                "unsupported",
+                "unsupported".into(),
+                "daemon transport is unsupported".into(),
+            ),
+        };
+        let socket_path = self.options.socket_path.to_string_lossy();
+        let message = message.replace(socket_path.as_ref(), "<socket>");
+        serde_json::json!({
+            "kind": kind,
+            "code": code,
+            "message": message,
         })
     }
 
@@ -642,6 +690,44 @@ mod tests {
             io::Error::other("password=hidden"),
         );
         assert!(!error.to_string().contains("hidden"));
+    }
+
+    #[test]
+    fn startup_timeout_keeps_redacted_last_retry_cause() {
+        let socket = PathBuf::from("/tmp/private-daemon.sock");
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "default".into(),
+            ..Default::default()
+        });
+        let last_error = ClientError::Transport(DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message: format!(
+                "connect failed at {} password=fixture-secret",
+                socket.display()
+            ),
+            ..Default::default()
+        });
+
+        let ClientError::Transport(timeout) = client.startup_timeout_error(&last_error) else {
+            panic!("startup timeout must be a transport error");
+        };
+        assert_eq!(timeout.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            timeout.message,
+            "daemon did not become ready for session \"default\""
+        );
+        let details = timeout.details.expect("startup diagnostics");
+        let cause = &details["last_error"];
+        assert_eq!(cause["kind"], "transport");
+        assert_eq!(cause["code"], codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            cause["message"],
+            "connect failed at <socket> password=[REDACTED]"
+        );
+        let serialized_cause = cause.to_string();
+        assert!(!serialized_cause.contains(&socket.to_string_lossy().to_string()));
+        assert!(!serialized_cause.contains("fixture-secret"));
     }
 
     #[cfg(target_os = "linux")]
