@@ -50,7 +50,10 @@ mod windows {
             ) {
                 Ok(stream) => return stream,
                 Err(error)
-                    if matches!(error.kind(), ErrorKind::NotFound | ErrorKind::WouldBlock) =>
+                    if matches!(
+                        error.kind(),
+                        ErrorKind::NotFound | ErrorKind::WouldBlock | ErrorKind::TimedOut
+                    ) =>
                 {
                     last_error = Some(error);
                     thread::sleep(Duration::from_millis(10));
