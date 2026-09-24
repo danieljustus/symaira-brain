@@ -96,6 +96,17 @@ func TestCandidateArchiveBundleChecksNamesContentsAndChecksums(t *testing.T) {
 	if err := mergeNativeCandidatePackages(&cfg, version, packages, assets); err != nil {
 		t.Fatalf("valid native candidate packages rejected: %v", err)
 	}
+	occupied := t.TempDir()
+	sentinel := filepath.Join(occupied, "preserve-me")
+	if err := os.WriteFile(sentinel, []byte("foreign output"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := mergeNativeCandidatePackages(&cfg, version, packages, occupied); err == nil {
+		t.Fatal("merge into a non-empty output directory unexpectedly succeeded")
+	}
+	if got := string(mustRead(t, sentinel)); got != "foreign output" {
+		t.Fatalf("merge changed pre-existing output: %q", got)
+	}
 
 	checksums := filepath.Join(assets, cfg.Checksum.NameTemplate)
 	checksumLines := strings.Split(strings.TrimSpace(string(mustRead(t, checksums))), "\n")
@@ -116,6 +127,7 @@ func TestNativeCandidateIdentityRequiresRustProductVersionAndTarget(t *testing.T
 	}
 	for _, invalid := range [][]byte{
 		[]byte(`{"tool":"symbrain-go","version":"0.12.0","schema_version":1}`),
+		[]byte(`{"tool":"symbrain","version":"0.12.1","schema_version":1}`),
 		[]byte(`{"tool":"symbrain","version":"0.12.0","schema_version":1} {}`),
 	} {
 		got, err := parseVersionIdentity(invalid)
@@ -132,6 +144,7 @@ func TestNativeCandidateIdentityRequiresRustProductVersionAndTarget(t *testing.T
 	for _, output := range []string{
 		"symbrain 0.12.0\n  Go      go1.26\n  OS/Arch darwin/arm64\n",
 		"symbrain 0.12.0\n  rust    rustc\n  os/arch darwin/amd64\n",
+		"symbrain 0.12.0\n  rust    \n  os/arch darwin/arm64\n",
 	} {
 		if matchesNativeRustVersion(output, "0.12.0", "darwin", "arm64") {
 			t.Fatalf("wrong identity accepted: %q", output)
