@@ -17,6 +17,8 @@ import verify
 def _checked_archive(dual: Path, implementation: str, name: str) -> Path | None:
     directory = dual / implementation
     archive = directory / name
+    if archive.is_symlink():
+        raise verify.GateError(f"{implementation} archive must not be a symlink: {name}")
     if not archive.is_file():
         return None
     checksums = verify._read_checksum_manifest(directory / "checksums.txt")
@@ -54,12 +56,16 @@ def _extract_binary(archive: Path, destination: Path, binary_name: str) -> Path:
             members = [item for item in source.infolist() if not item.is_dir() and Path(item.filename).name == binary_name]
             if len(members) != 1:
                 raise verify.GateError(f"{archive.name} must contain exactly one {binary_name}")
+            if members[0].file_size > 256 * 1024 * 1024:
+                raise verify.GateError(f"{archive.name} binary exceeds candidate size limit")
             data = source.read(members[0])
     else:
         with tarfile.open(archive, "r:gz") as source:
             members = [item for item in source.getmembers() if item.isfile() and Path(item.name).name == binary_name]
             if len(members) != 1:
                 raise verify.GateError(f"{archive.name} must contain exactly one {binary_name}")
+            if members[0].size > 256 * 1024 * 1024:
+                raise verify.GateError(f"{archive.name} binary exceeds candidate size limit")
             stream = source.extractfile(members[0])
             if stream is None:
                 raise verify.GateError(f"cannot read {binary_name} from {archive.name}")
