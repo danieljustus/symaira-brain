@@ -302,7 +302,12 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             capture = {"executable_path": str(binary),
                        "executable_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                        "compiler": {"go_version": "go1.26.6", "goos": "darwin", "goarch": "arm64"}}
-            result = subprocess.CompletedProcess([], 0, f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n", "")
+            result = subprocess.CompletedProcess(
+                [], 0,
+                f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n"
+                f"\tdep\t{validate_mod.AZURETLS_MODULE_PATH}\t{validate_mod.HISTORICAL_AZURETLS_MODULE}\th1:test\n",
+                "",
+            )
             with patch.object(validate_mod.subprocess, "run", return_value=result):
                 validate_mod.verify_artifacts(capture, evidence_root=root, go="unit-only-go")
                 for field, value, message in [
@@ -315,6 +320,15 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
                         changed = dict(capture, **{field: value})
                         with self.assertRaisesRegex(validate_mod.CaptureError, message):
                             validate_mod.verify_artifacts(changed, evidence_root=root, go="unit-only-go")
+            unpinned = subprocess.CompletedProcess(
+                [], 0,
+                f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n"
+                f"\tdep\t{validate_mod.AZURETLS_MODULE_PATH}\tv9.9.9\th1:test\n",
+                "",
+            )
+            with patch.object(validate_mod.subprocess, "run", return_value=unpinned):
+                with self.assertRaisesRegex(validate_mod.CaptureError, "pinned AzureTLS v1.13.2"):
+                    validate_mod.verify_artifacts(capture, evidence_root=root, go="unit-only-go")
 
     def test_compat_build_identity_is_checked(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -468,6 +482,33 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             copy_path.write_bytes(source.read_bytes() + b"\\n")
             with self.assertRaisesRegex(validate_mod.CaptureError, "pinned Git object"):
                 validate_mod.load_historical_oracle(copy_path, repo_root=ROOT)
+
+    def test_source_bound_report_keeps_oracle_invalidated_and_parity_unclaimed(self) -> None:
+        raw = b"source-bound capture bytes"
+        capture = {
+            "capture_kind": "loopback_hermetic_production_client",
+            "worktree_head": "a" * 40,
+            "compiler": {"go_version": "go1.26.6", "goos": "linux", "goarch": "amd64"},
+            "executable_sha256": "b" * 64,
+            "build_inputs": [{"path": "browse/go.mod"}],
+            "profiles": [{"profile": profile} for profile in validate_mod.FETCH_PROFILES],
+        }
+        report = validate_mod.source_bound_capture_report(capture, raw)
+        self.assertEqual(report["capture_sha256_self_measured"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(report["historical_oracle_status"], "INVALIDATED")
+        self.assertFalse(report["current_source_bound_oracle_established"])
+        self.assertFalse(report["native_rust_parity_compared"])
+        self.assertEqual(len(report["wire_validation"]["profiles"]), 6)
+        capture["capture_kind"] = "loopback_hermetic_compat_sidecar"
+        with self.assertRaisesRegex(validate_mod.CaptureError, "production_client capture"):
+            validate_mod.source_bound_capture_report(capture, raw)
+
+    def test_ci_go_environment_does_not_require_local_nvme_cache_vars(self) -> None:
+        with patch.dict(os.environ, {"CI": "true"}, clear=True):
+            environment = validate_mod.verified_external_go_environment()
+        self.assertEqual(environment["GOPROXY"], "off")
+        self.assertEqual(environment["GOWORK"], "off")
+        self.assertEqual(environment["GOFLAGS"], "-mod=readonly")
 
     def test_rejects_every_mutation(self) -> None:
         self.assertEqual(len(MUTATIONS), 18, "update this count when the table changes")
