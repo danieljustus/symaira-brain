@@ -42,6 +42,8 @@ class LauncherTests(unittest.TestCase):
                 select("rust")
             with self.assertRaisesRegex(verify.GateError, "exactly go or rust"):
                 select("auto")
+            with self.assertRaisesRegex(verify.GateError, "exactly go or rust"):
+                select("")
             archives["go"].unlink()
             with self.assertRaisesRegex(verify.GateError, "unavailable"):
                 select("go")

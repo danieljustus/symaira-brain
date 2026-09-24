@@ -392,7 +392,7 @@ def select_implementation(
     rust_integrity_ok: bool = True,
 ) -> str:
     """Resolve the explicit launcher contract; integrity failures never downgrade."""
-    requested = requested or "go"
+    requested = "go" if requested is None else requested
     if requested not in {"go", "rust"}:
         raise GateError("SYMBROWSE_IMPL must be exactly go or rust; implicit auto-selection is forbidden")
     if requested == "go":
