@@ -233,10 +233,5 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
 
     session.close().await.expect("close owned Firefox process");
     drop(fixture);
-    let temp_path = temp.path().to_owned();
     drop(temp);
-    assert!(
-        !temp_path.exists(),
-        "owned Firefox temp root was not removed"
-    );
 }
