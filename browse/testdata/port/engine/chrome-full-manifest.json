@@ -1,8 +1,8 @@
 {
   "fixture": "testdata/port/engine/chrome-full.json",
   "fixture_sha256": "2557622940d9a8351cb1ed7c086d62b3e11d724a543a9033f6b9b47b2f2836fb",
-  "generator_sha256": "dff4d88184d5e1b0e04bfff692bf05a02047560fba1171286327668b96a966fa",
-  "oracle_commit": "652453d1595fc302bd69c328e7da8a21dbee28b9",
+  "generator_sha256": "a30474b5ee55a02312bdac2a8d415c241ca2249a1005bb4dfe254ac18d6856d6",
+  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
   "schema_version": 1,
   "source_files": {
     "internal/engine/chrome/chrome.go": "e69467075e2ff7411ea9cf4ef839270c7a706e2524b46d0a405762faf5ca7958",

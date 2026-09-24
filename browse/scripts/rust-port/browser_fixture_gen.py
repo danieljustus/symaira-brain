@@ -27,7 +27,7 @@ from external_env import ensure_external_environment
 
 ensure_external_environment(__file__)
 
-ORACLE_COMMIT = "652453d1595fc302bd69c328e7da8a21dbee28b9"
+ORACLE_COMMIT = "dc9c54e41beccf131fbe70e3f45bfff98871e709"
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = ROOT / "testdata/port/engine"
 CHROME_FIXTURE = FIXTURE_DIR / "chrome-full.json"
@@ -61,7 +61,7 @@ def source_hashes(paths: tuple[str, ...]) -> dict[str, str]:
     result: dict[str, str] = {}
     for relative in paths:
         current = (ROOT / relative).read_bytes()
-        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:{relative}"], cwd=ROOT)
+        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:browse/{relative}"], cwd=ROOT)
         if current != pinned:
             raise SystemExit(f"oracle source differs from pinned commit: {relative}")
         result[relative] = sha256(current)
