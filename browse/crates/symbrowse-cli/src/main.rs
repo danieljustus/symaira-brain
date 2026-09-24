@@ -1335,7 +1335,8 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         }
         "tools" => parse_tools(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
-        | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" => {
+        | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
+        | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" => {
             parse_dispatch(&values, command_index)
         }
         command => Err(ParseError {
@@ -1346,7 +1347,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, dialog, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tab, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, snapshot, state, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1356,6 +1357,13 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         "workflow" => "flow",
         other => other,
     };
+    if matches!(
+        target,
+        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview"
+    ) && first.is_none()
+    {
+        return Some(interaction_help(target));
+    }
     let global = "Global Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n";
     let session_global = "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n";
     let plain = |description: &str, usage: &str, flags: &str, globals: &str| {
@@ -1491,6 +1499,17 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
     }
 }
 
+fn interaction_help(action: &str) -> String {
+    let value_help = if action == "select" {
+        "The value or label of the option to select from the drop-down."
+    } else {
+        "Not used for this interaction."
+    };
+    format!(
+        "{action} performs the {action} interaction on the targeted element.\n\nAccepted selector forms:\n  - CSS selector (e.g. \"button.submit\", \"#username\", \"input[name='q']\")\n  - Stable @eN ref from snapshot (e.g. \"@e1\", \"@e2\")\n  - Role/name pair as supported by the engine (e.g. role and accessible name)\n\nOptional [value] argument:\n  {value_help}\n\nUsage:\n  symbrowse {action} <selector> [value] [flags]\n\nFlags:\n  -h, --help             help for {action}\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+    )
+}
+
 fn root_version_requested(values: &[String]) -> Result<bool, ParseError> {
     for value in values.iter().take_while(|value| value.as_str() != "--") {
         if matches!(value.as_str(), "-v" | "--version") {
@@ -1556,6 +1575,10 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     } else {
         name.to_owned()
     };
+    let interaction = matches!(
+        name,
+        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview"
+    );
     let mut session = "default".to_owned();
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut positional = Vec::new();
@@ -1564,6 +1587,16 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     let mut positional_only = false;
     while index < values.len() {
         let value = &values[index];
+        if interaction
+            && !positional_only
+            && value.starts_with('-')
+            && !matches!(value.as_str(), "--" | "--json" | "--output" | "--session")
+            && !value.starts_with("--json=")
+            && !value.starts_with("--output=")
+            && !value.starts_with("--session=")
+        {
+            return Err(unknown_flag(value));
+        }
         if positional_only {
             positional.push(value.clone());
             index += 1;
@@ -1707,7 +1740,10 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         "fetch" | "read" | "open" | "goto" => {
             take_positional(&mut args, &mut positional, "url");
         }
-        "click" | "fill" => take_positional(&mut args, &mut positional, "selector"),
+        "click" | "fill" | "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck"
+        | "scrollintoview" => {
+            take_positional(&mut args, &mut positional, "selector");
+        }
         "press" => take_positional(&mut args, &mut positional, "key"),
         "get" | "is" => take_positional(&mut args, &mut positional, "kind"),
         _ => {}
@@ -1741,6 +1777,19 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     }
     if name == "get" || name == "is" {
         take_positional(&mut args, &mut positional, "selector");
+    }
+    if interaction {
+        if name == "select" {
+            take_positional(&mut args, &mut positional, "value");
+        }
+        let max = if name == "select" { 2 } else { 1 };
+        if supplied_positional_count == 0 || supplied_positional_count > max {
+            return Err(ParseError {
+                message: format!("{name} requires a selector and optional value"),
+                exit_code: 2,
+            });
+        }
+        args.insert("action".into(), serde_json::Value::String(name.to_owned()));
     }
     if json {
         format = Format::Json;
@@ -1781,6 +1830,9 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         "get" | "is" => &["kind"][..],
         "find" => &["kind", "query"][..],
         "wait" => &["kind"][..],
+        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" => {
+            &["selector"][..]
+        }
         _ => &[][..],
     };
     for required in required {
@@ -3162,6 +3214,73 @@ mod tests {
         ));
         assert!(parse(&args(&["tab", "switch"])).is_err());
         assert!(parse(&args(&["tab", "list", "extra"])).is_err());
+    }
+
+    #[test]
+    fn implemented_interactions_dispatch_go_action_payloads() {
+        for (argv, expected_command, expected_args) in [
+            (
+                &["check", "#agree"][..],
+                "check",
+                serde_json::json!({"action": "check", "selector": "#agree"}),
+            ),
+            (
+                &["dblclick", "button.submit"][..],
+                "dblclick",
+                serde_json::json!({"action": "dblclick", "selector": "button.submit"}),
+            ),
+            (
+                &["focus", "#search"][..],
+                "focus",
+                serde_json::json!({"action": "focus", "selector": "#search"}),
+            ),
+            (
+                &["hover", "#menu"][..],
+                "hover",
+                serde_json::json!({"action": "hover", "selector": "#menu"}),
+            ),
+            (
+                &["select", "#country", "DE"][..],
+                "select",
+                serde_json::json!({"action": "select", "selector": "#country", "value": "DE"}),
+            ),
+            (
+                &["uncheck", "#newsletter"][..],
+                "uncheck",
+                serde_json::json!({"action": "uncheck", "selector": "#newsletter"}),
+            ),
+            (
+                &["scrollintoview", "#target"][..],
+                "scrollintoview",
+                serde_json::json!({"action": "scrollintoview", "selector": "#target"}),
+            ),
+        ] {
+            let Action::Dispatch {
+                command,
+                args: payload,
+                ..
+            } = parse(&args(argv)).expect("interaction dispatch")
+            else {
+                panic!("wrong action for {argv:?}");
+            };
+            assert_eq!(command, expected_command, "argv={argv:?}");
+            assert_eq!(payload, expected_args, "argv={argv:?}");
+        }
+        assert_eq!(
+            parse(&args(&["check"])),
+            Err(ParseError {
+                message: "check requires a selector and optional value".to_owned(),
+                exit_code: 2,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["check", "#agree", "extra"])),
+            Err(ParseError {
+                message: "check requires a selector and optional value".to_owned(),
+                exit_code: 2,
+            })
+        );
+        assert!(parse(&args(&["check", "--selector", "#agree"])).is_err());
     }
 
     #[test]

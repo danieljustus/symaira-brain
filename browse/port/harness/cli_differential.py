@@ -97,9 +97,9 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "back", "batch", "click", "config", "daemon", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "forward", "get", "goto", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "snapshot", "state", "tab", "tools", "type", "version", "wait", "workflow",
+        "back", "batch", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "flow", "focus", "forward", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
+        "read", "reload", "scrollintoview", "select", "snapshot", "state", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -110,7 +110,9 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     section = re.search(r"^Implemented Commands:\s*\n((?:\s{2}[^\n]*\n)+)", rust_help, re.MULTILINE)
     if section:
         advertised = {name.strip() for name in section.group(1).split(",")}
-    go_visible = advertised - {"fetch", "tools", "workflow"}
+    # scrollintoview is a runnable Go command with exact help, but Cobra omits
+    # it from the grouped root listing in the current Go binary.
+    go_visible = advertised - {"fetch", "tools", "workflow", "scrollintoview"}
     match = match and advertised == expected and go_visible <= go_commands
     rows = [{"case": "CLI-001-supported", "argv": ["--help"], "matched": match,
              "criterion": "Rust advertises exactly its implemented root commands; each primary command exists in Go",
@@ -120,7 +122,9 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"],
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
-        ["tab", "window"], ["tab", "window", "window"], ["eval"], ["flow", "list"],
+        ["tab", "window"], ["tab", "window", "window"],
+        ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
+        ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
@@ -516,6 +520,20 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["tab", "--session"], b"", False),
         ("CLI-003", ["tab", "list", "--label", "x"], b"", False),
         ("CLI-003", ["tab", "new", "--label"], b"", False),
+        ("CLI-002", ["check", "#agree", "--json"], b"", True),
+        ("CLI-002", ["dblclick", "button.submit"], b"", True),
+        ("CLI-002", ["focus", "#search", "--session", "default"], b"", True),
+        ("CLI-002", ["hover", "#menu"], b"", True),
+        ("CLI-002", ["select", "#country", "DE"], b"", True),
+        ("CLI-002", ["select", "#country"], b"", True),
+        ("CLI-002", ["uncheck", "#newsletter"], b"", True),
+        ("CLI-002", ["scrollintoview", "#target", "--output=json"], b"", True),
+        ("CLI-003", ["check"], b"", False),
+        ("CLI-003", ["check", "#agree", "extra"], b"", False),
+        ("CLI-003", ["select", "#country", "DE", "extra"], b"", False),
+        ("CLI-003", ["scrollintoview", "#target", "extra"], b"", False),
+        ("CLI-003", ["check", "--selector", "#agree"], b"", False),
+        ("CLI-003", ["check", "--", "--selector"], b"", True),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:
