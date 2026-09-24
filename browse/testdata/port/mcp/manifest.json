@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
-  "oracle_commit": "bb14da4a4434724d4f60b0d1d29e20403e789679",
+  "oracle_commit": "635dd4050025e410926e940830f1aa7d33229005",
   "oracle_release": "v0.8.0",
   "generated_by": "scripts/rust-port/cmd/mcpfixturegen",
-  "generator_sha256": "7e47920a6312ae8831c7025a096d61ffcd9c2003f8a1b25724c0799a04eec1c3",
+  "generator_sha256": "62736e187ec2c2ace52db9d470750edca9176482f8f63671a83907da8b9b09a2",
   "source_files": {
     "cmd/symbrowse/mcp.go": "2b227ad48822e009f769b7cd9340b16148da3ac28788c164bb284a75f56d7d2f",
-    "go.mod": "f0fc46c2e4f00a37b5d1a1a2e71f6a304f18fa0fa66c99349d79e7c84a223f6c",
-    "go.sum": "193a7ce10382dfc8729af660178e4fd9ce7d5dc34a941e55bcc2673a95568587",
-    "internal/daemon/client.go": "5ddb1196e25acb800a118190f568db26f2cbad5efc8938a695ef66ebf22f95e5",
+    "go.mod": "2b7e511854c42ac55070021d06609fd96d3ef005efcfd94125df39bde01cb0f6",
+    "go.sum": "5bfb5cf7f0b51ac0377cd106cad6a271ffd40193fc99a54ae050a555c6e5a5b0",
+    "internal/daemon/client.go": "2017febc9d96054335802dec2b72069001ccdd88cd9b2c10cd1adab362f19714",
     "internal/daemon/protocol.go": "e430ba7033021354b939abb1b7d12ef6894b7629ec72454aa041cd0168114934",
     "internal/daemon/redaction.go": "ece648e20406e040596163dfc36c66a3a8681b1849454e9d1dc0159739ef3aaa",
-    "internal/daemon/server.go": "748b9a451852c0ce25e9fefe3bc1a8ef996af0a394ffa868f5001a6595d0b352",
+    "internal/daemon/server.go": "be98d13eb935960419b180f1735606ec4c4fe11d4b2e33f869b28008ce1f308d",
     "internal/mcp/profiles.go": "7dbe1c0ab408d8ad69776fd5858f6db65be041ecfa8c8108cb86f58a45dffb46",
     "internal/mcp/server.go": "93c54ea5245689c0e5705f50aa28abd33fbcc62b9fd0b2de7c1a847bd6ef93e1",
     "internal/mcp/tools.go": "9295edc4517b07a3ff767b16716ab129d91278db9c447d6501fb7f8a381ab212"

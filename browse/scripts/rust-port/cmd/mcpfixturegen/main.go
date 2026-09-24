@@ -23,7 +23,7 @@ import (
 	"github.com/danieljustus/symaira-browse/internal/mcp"
 )
 
-const oracleCommit = "bb14da4a4434724d4f60b0d1d29e20403e789679"
+const oracleCommit = "635dd4050025e410926e940830f1aa7d33229005"
 
 var sourceFiles = []string{
 	"go.mod",
