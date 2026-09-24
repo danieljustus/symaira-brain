@@ -147,6 +147,7 @@ jobs:
       - name: Check if release already exists (avoid rerun deadlock)
         id: check_release
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
           EVENT_NAME: ${{ github.event_name }}
           INPUT_TAG: ${{ inputs.tag }}
