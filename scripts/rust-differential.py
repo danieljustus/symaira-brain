@@ -1454,6 +1454,7 @@ class Case:
     posix_only: bool = False
     stdin: bytes | None = None
     pty: bool = False
+    timeout_seconds: int = 10
 CASES = (
     Case("guard_doctor_invalid_config_native", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config, normalize_runtime=True),
     Case("guard_doctor_corrupt_anchor_native", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor, normalize_runtime=True),
@@ -2292,6 +2293,9 @@ CASES = (
         "memory_query_log_seeded",
         ("memory", "query-log", "--json"),
         setup=setup_memory_seeded,
+        # This native Windows parity case exceeded the generic command budget;
+        # remain bounded while allowing the loaded runner extra startup time.
+        timeout_seconds=30,
     ),
     # `activity`: the dispatch text and the policy message are native, the
     # subcommands themselves stay on Go until their budget and page shapes are
@@ -2534,6 +2538,7 @@ CASES = (
         "memory_query_log_seeded_table",
         ("memory", "query-log"),
         setup=setup_memory_seeded,
+        timeout_seconds=30,
     ),
     Case("memory_query_log_fallback", ("memory", "query-log", "--json")),
     # `sync` pushes instructions and skills to installed harnesses; it was
@@ -2730,6 +2735,7 @@ def run(
     env: dict[str, str],
     stdin: bytes | None = None,
     use_pty: bool = False,
+    timeout_seconds: int = 10,
 ) -> subprocess.CompletedProcess[bytes]:
     if use_pty:
         master, slave = pty.openpty()
@@ -2755,7 +2761,7 @@ def run(
             chunks.append(chunk)
         os.close(master)
         return subprocess.CompletedProcess(
-            [str(binary), *argv], process.wait(timeout=10), b"".join(chunks), b""
+            [str(binary), *argv], process.wait(timeout=timeout_seconds), b"".join(chunks), b""
         )
     return subprocess.run(
         [str(binary), *argv],
@@ -2764,7 +2770,7 @@ def run(
         input=stdin if stdin is not None else b"",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        timeout=10,
+        timeout=timeout_seconds,
         check=False,
     )
 def format_access_time_ns(atime_ns: int) -> str:
@@ -2940,8 +2946,12 @@ def main() -> int:
                 if case.normalize_atime:
                     go_atime_captured = capture_access_time_ns(go_root, "demo")
                     rust_atime_captured = capture_access_time_ns(rust_root, "demo")
-                go_result = run(go_binary, go_argv, go_env, case.stdin, case.pty)
-                rust_result = run(rust_binary, rust_argv, rust_env, case.stdin, case.pty)
+                go_result = run(
+                    go_binary, go_argv, go_env, case.stdin, case.pty, case.timeout_seconds
+                )
+                rust_result = run(
+                    rust_binary, rust_argv, rust_env, case.stdin, case.pty, case.timeout_seconds
+                )
                 go_stdout = go_result.stdout
                 rust_stdout = rust_result.stdout
                 go_stderr = go_result.stderr
