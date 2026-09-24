@@ -82,5 +82,8 @@ jobs:
           cargo test -p symbrowse-engine --all-targets --locked
           go run ./scripts/rust-port/cmd/workflowgen --check
           cargo test -p symbrowse-core --test workflows_contract --locked
-          go run ./scripts/rust-port/cmd/mcpfixturegen --check
+          # The Go fixture producer uses Unix sockets; Windows replays its pinned frames.
+          if [[ "$RUNNER_OS" != Windows ]]; then
+            go run ./scripts/rust-port/cmd/mcpfixturegen --check
+          fi
           cargo test -p symbrowse-mcp --test raw_frames --locked
