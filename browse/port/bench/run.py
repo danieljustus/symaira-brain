@@ -18,10 +18,6 @@ import platform
 import secrets
 import signal
 import sys
-try:
-    import resource
-except ImportError:  # pragma: no cover - resource is not available on native Windows
-    resource = None  # type: ignore[assignment]
 import socket
 import statistics
 import subprocess
@@ -212,17 +208,8 @@ def read_startup_diagnostic(path: Path, limit: int = 1 << 20) -> str:
     return detail or "startup process exited without diagnostics"
 
 
-def child_peak_rss_bytes() -> int | None:
-    if resource is None:
-        return None
-    value = int(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
-    # macOS reports bytes; Linux and the BSDs report KiB.
-    return value if platform.system() == "Darwin" else value * 1024
-
-
 def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict[str, object]:
     started = time.perf_counter_ns()
-    rss_before = child_peak_rss_bytes()
     try:
         result = subprocess.run(
             [str(binary), *probe.argv],
@@ -239,11 +226,10 @@ def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict
             "status": "error",
             "reason": "timeout",
             "duration_ns": time.perf_counter_ns() - started,
-            "peak_rss_bytes": child_peak_rss_bytes(),
+            "peak_rss_bytes": None,
         }
     duration = time.perf_counter_ns() - started
-    rss_after = child_peak_rss_bytes()
-    peak_rss = None if rss_before is None or rss_after is None else max(0, rss_after - rss_before)
+    peak_rss = None
     stdout = result.stdout[:MAX_OUTPUT]
     stderr = result.stderr[:MAX_OUTPUT]
     if len(result.stdout) > MAX_OUTPUT or len(result.stderr) > MAX_OUTPUT:
@@ -722,7 +708,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "binaries": {},
             "gate": "blocked",
             "limitations": [
-                "Peak RSS is collected from child-process resource usage where the host exposes it; daemon RSS remains unavailable in this portable runner.",
+                "Per-process peak RSS is not measured by this portable runner; the value gate uses binary size.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
                 *(["Windows compares Go Unix sockets with Rust named pipes; IPC transport differs."] if os.name == "nt" else []),
