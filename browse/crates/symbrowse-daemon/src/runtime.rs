@@ -1890,8 +1890,9 @@ mod tests {
 
         static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
         for _ in 0..100 {
+            // Unix sockets need room for their filename under long CI temp paths.
             let root = std::env::temp_dir().join(format!(
-                "symbrowse-runtime-{name}-{}-{}",
+                "b-{}-{}",
                 std::process::id(),
                 NEXT_ROOT.fetch_add(1, Ordering::Relaxed)
             ));
