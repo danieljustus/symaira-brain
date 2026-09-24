@@ -279,15 +279,23 @@ class UnixDaemonStub:
 class WindowsNamedPipeStub:
     """Bounded byte-stream stub for the production Windows daemon pipe."""
 
-    PIPE = rf"\\.\pipe\symbrowse-{SESSION}"
+    PIPE_PREFIX = r"\\.\pipe\symbrowse-"
     PIPE_ACCESS_DUPLEX = 0x00000003
     PIPE_TYPE_BYTE = 0x00000000
     PIPE_READMODE_BYTE = 0x00000000
     PIPE_WAIT = 0x00000000
     ERROR_PIPE_CONNECTED = 535
+    ERROR_PIPE_BUSY = 231
     INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
+    GENERIC_READ = 0x80000000
+    GENERIC_WRITE = 0x40000000
+    OPEN_EXISTING = 3
+    FILE_ATTRIBUTE_NORMAL = 0x00000080
+    SHUTDOWN_FRAME = b'{"_harness_shutdown":true}\n'
 
-    def __init__(self, *, status_probe: bool, request_count: int | None = None):
+    def __init__(self, *, session: str = SESSION, status_probe: bool, request_count: int | None = None):
+        self.session = session
+        self.pipe = self.PIPE_PREFIX + session
         self.frame: dict[str, Any] | None = None
         self.frames: list[dict[str, Any]] = []
         self.error: str | None = None
@@ -295,6 +303,8 @@ class WindowsNamedPipeStub:
         self.request_count = request_count
         self.thread: threading.Thread | None = None
         self.ready = threading.Event()
+        self.pipe_ready = threading.Event()
+        self.stopping = threading.Event()
         self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
         self.kernel.CreateNamedPipeW.argtypes = [
             wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD,
@@ -316,12 +326,21 @@ class WindowsNamedPipeStub:
         self.kernel.FlushFileBuffers.argtypes = [wintypes.HANDLE]
         self.kernel.DisconnectNamedPipe.argtypes = [wintypes.HANDLE]
         self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        self.kernel.CreateFileW.argtypes = [
+            wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+            wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE,
+        ]
+        self.kernel.CreateFileW.restype = wintypes.HANDLE
+        self.kernel.WaitNamedPipeW.argtypes = [wintypes.LPCWSTR, wintypes.DWORD]
+        self.kernel.WaitNamedPipeW.restype = wintypes.BOOL
 
     def __enter__(self) -> "WindowsNamedPipeStub":
         self.thread = threading.Thread(target=self._serve, daemon=True)
         self.thread.start()
         if not self.ready.wait(timeout=5):
-            raise RuntimeError(self.error or "Windows daemon test pipe was not ready")
+            error = RuntimeError(self.error or "Windows daemon test pipe was not ready")
+            self.__exit__()
+            raise error
         return self
 
     def _win_error(self, operation: str) -> OSError:
@@ -331,13 +350,16 @@ class WindowsNamedPipeStub:
         try:
             request_count = self.request_count if self.request_count is not None else (2 if self.status_probe else 1)
             for request_index in range(request_count):
+                if self.stopping.is_set():
+                    break
                 handle = self.kernel.CreateNamedPipeW(
-                    self.PIPE, self.PIPE_ACCESS_DUPLEX,
+                    self.pipe, self.PIPE_ACCESS_DUPLEX,
                     self.PIPE_TYPE_BYTE | self.PIPE_READMODE_BYTE | self.PIPE_WAIT,
                     1, MAX_CAPTURE_BYTES, MAX_CAPTURE_BYTES, 5000, None,
                 )
                 if handle == self.INVALID_HANDLE_VALUE:
                     raise self._win_error("CreateNamedPipeW")
+                self.pipe_ready.set()
                 if request_index == 0:
                     self.ready.set()
                 try:
@@ -355,6 +377,8 @@ class WindowsNamedPipeStub:
                         raw.extend(chunk.raw[:read.value])
                         if len(raw) > MAX_CAPTURE_BYTES:
                             raise RuntimeError("daemon request exceeded the 1 MiB bound")
+                    if bytes(raw).split(b"\n", 1)[0] == self.SHUTDOWN_FRAME.rstrip(b"\n"):
+                        break
                     frame = json.loads(bytes(raw).split(b"\n", 1)[0])
                     self.frames.append(frame)
                     if request_index == 0:
@@ -414,13 +438,46 @@ class WindowsNamedPipeStub:
                 finally:
                     self.kernel.DisconnectNamedPipe(handle)
                     self.kernel.CloseHandle(handle)
+                    self.pipe_ready.clear()
         except Exception as error:  # retained in the bounded report
-            self.error = str(error)
+            if not self.stopping.is_set():
+                self.error = str(error)
             self.ready.set()
 
     def __exit__(self, *_: object) -> None:
-        if self.thread is not None:
-            self.thread.join(timeout=16)
+        if self.thread is None:
+            return
+        if self.thread.is_alive():
+            self.stopping.set()
+            deadline = time.monotonic() + 3
+            while self.thread.is_alive() and time.monotonic() < deadline:
+                if not self.pipe_ready.wait(timeout=0.05):
+                    continue
+                handle = self.kernel.CreateFileW(
+                    self.pipe, self.GENERIC_READ | self.GENERIC_WRITE, 0, None,
+                    self.OPEN_EXISTING, self.FILE_ATTRIBUTE_NORMAL, None,
+                )
+                if handle == self.INVALID_HANDLE_VALUE:
+                    last_error = ctypes.get_last_error()
+                    if last_error == self.ERROR_PIPE_BUSY:
+                        self.kernel.WaitNamedPipeW(self.pipe, 100)
+                    else:
+                        self.error = str(ctypes.WinError(last_error, "CreateFileW(shutdown)"))
+                        break
+                    continue
+                try:
+                    written = wintypes.DWORD()
+                    payload = ctypes.create_string_buffer(self.SHUTDOWN_FRAME, len(self.SHUTDOWN_FRAME))
+                    if not self.kernel.WriteFile(handle, payload, len(self.SHUTDOWN_FRAME), ctypes.byref(written), None):
+                        self.error = str(self._win_error("WriteFile(shutdown)"))
+                    elif written.value != len(self.SHUTDOWN_FRAME):
+                        self.error = "short write to Windows daemon shutdown pipe"
+                finally:
+                    self.kernel.CloseHandle(handle)
+                break
+        self.thread.join(timeout=3)
+        if self.thread.is_alive() and self.error is None:
+            self.error = "Windows daemon stub thread did not stop after shutdown frame"
 
 
 def make_env(root: Path) -> dict[str, str]:
@@ -448,15 +505,25 @@ def make_env(root: Path) -> dict[str, str]:
     return env
 
 
-def socket_path(env: dict[str, str]) -> Path:
+def socket_path(env: dict[str, str], session: str = SESSION) -> Path:
     if sys.platform == "darwin":
-        return Path(env["HOME"]) / "Library/Caches/symbrowse/run" / f"{SESSION}.sock"
-    return Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{SESSION}.sock"
+        return Path(env["HOME"]) / "Library/Caches/symbrowse/run" / f"{session}.sock"
+    return Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"
+
+
+def session_from_argv(argv: list[str]) -> str:
+    for index, value in enumerate(argv):
+        if value == "--session" and index + 1 < len(argv):
+            return argv[index + 1]
+        if value.startswith("--session="):
+            return value[len("--session="):]
+    return SESSION
 
 
 def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                       env: dict[str, str], *, stub: bool) -> dict[str, Any]:
     go_frame = rust_frame = None
+    session = session_from_argv(argv)
     if stub:
         try:
             has_a11y_url = (argv[:1] == ["a11y"] and any(
@@ -464,24 +531,24 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             go_count = 2 if has_a11y_url else 1
             rust_count = 4 if has_a11y_url else 2
             if os.name == "nt":
-                with WindowsNamedPipeStub(status_probe=False, request_count=go_count) as go_stub:
+                with WindowsNamedPipeStub(session=session, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
                 go_frame = go_stub.frame
                 go_frames = go_stub.frames
                 go_error = go_stub.error
-                with WindowsNamedPipeStub(status_probe=True, request_count=rust_count) as rust_stub:
+                with WindowsNamedPipeStub(session=session, status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
                 rust_frame = rust_stub.frame
                 rust_frames = rust_stub.frames
                 rust_error = rust_stub.error
             else:
-                go_path = socket_path(env)
+                go_path = socket_path(env, session)
                 with UnixDaemonStub(go_path, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
                 go_frame = go_stub.frame
                 go_frames = go_stub.frames
                 go_error = go_stub.error
-                rust_path = socket_path(env)
+                rust_path = socket_path(env, session)
                 with UnixDaemonStub(rust_path, status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
                 rust_frame = rust_stub.frame

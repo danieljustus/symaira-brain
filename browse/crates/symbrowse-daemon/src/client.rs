@@ -662,16 +662,26 @@ fn timed_out(operation: &str) -> io::Error {
     io::Error::new(io::ErrorKind::TimedOut, operation)
 }
 
-fn unavailable(options: &ClientOptions, error: io::Error) -> ClientError {
+fn unavailable(options: &ClientOptions, _error: io::Error) -> ClientError {
+    // Match Go's public envelope: retain only the stable session/socket fields,
+    // while keeping OS dial details out of JSON output.
+    let mut hint = format!(
+        "start daemon with 'symbrowse daemon --session {}'",
+        options.session
+    );
+    if !options.autostart {
+        hint.push_str(" (autostart disabled via SYMBROWSE_NO_AUTOSTART)");
+    }
+    hint.push_str(&format!(
+        "; see daemon log at {}",
+        default_log_path().display()
+    ));
     ClientError::Transport(DaemonError {
         code: codes::DAEMON_UNAVAILABLE.into(),
         message: format!("daemon is unavailable for session {:?}", options.session),
-        hint: format!(
-            "start daemon with `symbrowse daemon --session {}`",
-            options.session
-        ),
+        hint,
         details: Some(redact_json(
-            &serde_json::json!({"session": options.session, "socket_path": options.socket_path.display().to_string(), "transport_error": error.to_string()}),
+            &serde_json::json!({"session": options.session, "socket_path": options.socket_path.display().to_string()}),
         )),
         ..Default::default()
     })
@@ -703,6 +713,35 @@ mod tests {
             io::Error::other("password=hidden"),
         );
         assert!(!error.to_string().contains("hidden"));
+    }
+
+    #[test]
+    fn unavailable_metadata_matches_go_cli_contract() {
+        let options = ClientOptions {
+            session: "fixture".into(),
+            socket_path: PathBuf::from("/tmp/fixture.sock"),
+            autostart: false,
+            ..ClientOptions::default()
+        };
+        let ClientError::Transport(error) = unavailable(&options, io::Error::other("refused"))
+        else {
+            panic!("unavailable must preserve transport metadata");
+        };
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            error.hint,
+            format!(
+                "start daemon with 'symbrowse daemon --session fixture' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at {}",
+                default_log_path().display()
+            )
+        );
+        assert_eq!(
+            error.details,
+            Some(serde_json::json!({
+                "session": "fixture",
+                "socket_path": "/tmp/fixture.sock"
+            }))
+        );
     }
 
     #[test]

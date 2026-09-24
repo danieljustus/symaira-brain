@@ -17,6 +17,13 @@ assert SPEC and SPEC.loader
 run = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = run
 SPEC.loader.exec_module(run)
+CLI_SPEC = importlib.util.spec_from_file_location(
+    "browse_cli_differential", ROOT / "browse/port/harness/cli_differential.py"
+)
+assert CLI_SPEC and CLI_SPEC.loader
+cli_differential = importlib.util.module_from_spec(CLI_SPEC)
+sys.modules[CLI_SPEC.name] = cli_differential
+CLI_SPEC.loader.exec_module(cli_differential)
 
 
 class CargoTargetRootTests(unittest.TestCase):
@@ -85,6 +92,18 @@ class CargoTargetRootTests(unittest.TestCase):
         self.assertEqual(run.cargo_target_root(root, {"CARGO_TARGET_DIR": str(target)}), target)
 
 
+class CliDifferentialSessionTests(unittest.TestCase):
+    def test_stub_session_matches_both_flag_forms(self) -> None:
+        self.assertEqual(
+            cli_differential.session_from_argv(["journal", "show", "--session", "fixture"]),
+            "fixture",
+        )
+        self.assertEqual(
+            cli_differential.session_from_argv(["journal", "show", "--session=fixture"]),
+            "fixture",
+        )
+
+
 class CompatSidecarHarnessTests(unittest.TestCase):
     def test_fixture_covers_executable_fetch_002_and_fetch_011_cases(self) -> None:
         fixture = json.loads(
@@ -112,6 +131,7 @@ class CompatSidecarHarnessTests(unittest.TestCase):
         self.assertEqual(
             cases["compat-bounded-frame"]["tests"],
             [
+                "compat_sidecar_bounds_inbound_ndjson_frames",
                 "ndjson_reader_bounds_frames_before_unbounded_growth",
                 "outbound_frames_are_bounded_including_the_newline",
             ],
@@ -121,13 +141,19 @@ class CompatSidecarHarnessTests(unittest.TestCase):
             "compat-pinned-identity": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
             "compat-six-profiles": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
             "compat-request-id": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
-            "compat-integrity-error": "handshake_pins_protocol_component_and_oracle",
             "compat-typed-fetch-error": "production_go_sidecar_returns_a_typed_fetch_error",
             "compat-timeout-restart": "production_go_sidecar_discards_late_response_after_timeout_restart",
             "compat-clean-exit": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
             "compat-rollback-go": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
         }.items():
             self.assertEqual(cases[case_id]["test"], expected_test)
+        self.assertEqual(
+            cases["compat-integrity-error"]["tests"],
+            [
+                "handshake_pins_protocol_component_and_oracle",
+                "compat_sidecar_rejects_unpinned_handshake_identity",
+            ],
+        )
         self.assertEqual(
             cases["compat-private-endpoint"]["tests"],
             [

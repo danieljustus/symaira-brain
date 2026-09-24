@@ -33,8 +33,8 @@ use symbrowse_core::{
     output::{Envelope, Format},
 };
 use symbrowse_daemon::{
-    Client, ClientOptions, Frame, PolicyStatus, Server, ServerOptions, SessionSpec,
-    codes as daemon_codes, default_socket_path, dispatch_once,
+    Client, ClientError, ClientOptions, DaemonError, Frame, PolicyStatus, Server, ServerOptions,
+    SessionSpec, codes as daemon_codes, default_socket_path, dispatch_once,
 };
 use symbrowse_mcp::{ServeOptions, registry, serve_stdio};
 use symbrowse_protocol::{render_root_version, render_version_json, render_version_text};
@@ -373,11 +373,7 @@ fn run_dispatch(
         }) {
             Ok(response) => response,
             Err(error) => {
-                return render_dispatch_error(
-                    format,
-                    daemon_codes::DAEMON_UNAVAILABLE,
-                    error.to_string(),
-                );
+                return render_client_error(format, error);
             }
         };
         if !open_response.success {
@@ -392,11 +388,7 @@ fn run_dispatch(
     } {
         Ok(response) => response,
         Err(error) => {
-            return render_dispatch_error(
-                format,
-                daemon_codes::DAEMON_UNAVAILABLE,
-                error.to_string(),
-            );
+            return render_client_error(format, error);
         }
     };
     if response.success {
@@ -501,8 +493,7 @@ fn run_dispatch(
             }
         }
     } else {
-        let error = response.error.unwrap_or_default();
-        render_dispatch_error(format, &error.code, error.message)
+        render_daemon_error(format, response.error.unwrap_or_default())
     }
 }
 
@@ -1386,8 +1377,8 @@ fn padded_group_end(input: &[u8], padding_index: usize) -> Option<usize> {
     (canonical_padding && group_start + 4 < input.len()).then_some(group_start + 4)
 }
 
-fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCode {
-    let mapped = match code {
+fn error_code(code: &str) -> ErrorCode {
+    match code {
         "invalid_args" => ErrorCode::InvalidArgs,
         daemon_codes::MALFORMED_REQUEST => ErrorCode::MalformedRequest,
         daemon_codes::UNKNOWN_COMMAND => ErrorCode::UnknownCommand,
@@ -1396,8 +1387,53 @@ fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCod
         daemon_codes::DAEMON_UNAVAILABLE => ErrorCode::DaemonUnavailable,
         daemon_codes::INVALID_SESSION => ErrorCode::InvalidSession,
         _ => ErrorCode::OperationFailed,
-    };
-    match Envelope::failure(mapped, message).render(format) {
+    }
+}
+
+fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCode {
+    let mapped = error_code(code);
+    if format == Format::Text {
+        let _ = writeln!(io::stderr(), "{message}");
+    } else {
+        render_envelope_error(Envelope::failure(mapped, message), format);
+    }
+    ExitCode::from(mapped.exit_code())
+}
+
+fn render_client_error(format: Format, error: ClientError) -> ExitCode {
+    match error {
+        ClientError::Transport(error) => render_daemon_error(format, error),
+        ClientError::Io(error) => {
+            render_dispatch_error(format, daemon_codes::DAEMON_UNAVAILABLE, error.to_string())
+        }
+        ClientError::Unsupported => render_dispatch_error(
+            format,
+            daemon_codes::DAEMON_UNAVAILABLE,
+            "daemon sockets are not supported on this platform".to_owned(),
+        ),
+    }
+}
+
+fn render_daemon_error(format: Format, error: DaemonError) -> ExitCode {
+    let mapped = error_code(&error.code);
+    if format == Format::Text {
+        let _ = writeln!(io::stderr(), "{}", error.message);
+    } else {
+        let mut envelope = Envelope::failure(mapped, error.message);
+        if let Some(payload) = envelope.error.as_mut() {
+            payload.hint = error.hint;
+            payload.details = error.details;
+            payload.retryable = error.retryable;
+            payload.requires_user_confirmation = error.requires_user_confirmation;
+            payload.resume_hint = error.resume_hint;
+        }
+        render_envelope_error(envelope, format);
+    }
+    ExitCode::from(mapped.exit_code())
+}
+
+fn render_envelope_error(envelope: Envelope, format: Format) {
+    match envelope.render(format) {
         Ok(output) => {
             let _ = io::stdout().write_all(output.as_bytes());
         }
@@ -1405,7 +1441,6 @@ fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCod
             let _ = writeln!(io::stderr(), "dispatch failed");
         }
     }
-    ExitCode::from(mapped.exit_code())
 }
 
 fn run_flow_list(format: Format) -> ExitCode {
