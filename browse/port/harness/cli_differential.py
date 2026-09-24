@@ -93,13 +93,20 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
         if go_result["returncode"] == 0:
             children = command_names(go_result["stdout"], root=not path)
             pending.extend((*path, name) for name in children if name not in {"help"})
+    for path in [("help",), ("help", "scroll")]:
+        args = list(path)
+        go_result = run_process(go, args, env)
+        rust_result = run_process(rust, args, env)
+        matched = all(go_result.get(k) == rust_result.get(k) for k in ("returncode", "stdout", "stderr"))
+        comparisons.append({"case": "CLI-001-help-alias", "argv": args, "matched": matched,
+                            "go": output_record(go_result), "rust": output_record(rust_result)})
     return comparisons
 
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
+        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "mcp", "open", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
@@ -143,7 +150,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["version"],
+        ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["version"],
     ]
     for path in go_paths:
         argv = [*path, "--help"]

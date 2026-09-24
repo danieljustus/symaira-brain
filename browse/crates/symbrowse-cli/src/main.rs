@@ -2151,6 +2151,9 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         if let Some(text) = command_help(command, &suffix) {
             return Ok(Action::Help(text));
         }
+        if command == "help" {
+            return parse_help(&values, command_index);
+        }
     }
     let Some(command_index) = top_command_index(&values) else {
         if let Some(value) = values.iter().find(|value| value.starts_with('-')) {
@@ -2184,6 +2187,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             Ok(Action::ProfileList { arguments })
         }
         "tools" => parse_tools(&values, command_index),
+        "help" => parse_help(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
         | "focus" | "hover" | "select" | "uncheck" | "scroll" | "scrollintoview" | "a11y"
@@ -2195,8 +2199,40 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     }
 }
 
+fn parse_help(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let path = values[command_index + 1..]
+        .iter()
+        .take_while(|value| value.as_str() != "--")
+        .filter(|value| !value.starts_with('-'))
+        .map(String::as_str)
+        .collect::<Vec<_>>();
+    let Some((target, suffix)) = path.split_first() else {
+        if values[command_index + 1..]
+            .iter()
+            .any(|value| matches!(value.as_str(), "-h" | "--help"))
+        {
+            return Ok(Action::Help(help_command_help().to_owned()));
+        }
+        return Ok(Action::Help(root_help()));
+    };
+    if *target == "help" {
+        return Ok(Action::Help(help_command_help().to_owned()));
+    }
+    if let Some(text) = help_catalog::help(target, suffix) {
+        return Ok(Action::Help(text.to_owned()));
+    }
+    if let Some(text) = command_help(target, suffix) {
+        return Ok(Action::Help(text));
+    }
+    Ok(Action::Help(root_help()))
+}
+
+fn help_command_help() -> &'static str {
+    "Help provides help for any command in the application.\nSimply type symbrowse help [path to command] for full details.\n\nUsage:\n  symbrowse help [command] [flags]\n\nFlags:\n  -h, --help   help for help\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+}
+
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -5309,6 +5345,32 @@ mod tests {
                 "{path:?}"
             );
         }
+    }
+
+    #[test]
+    fn help_command_routes_root_and_known_command_help() {
+        let Action::Help(root) = parse(&args(&["help"])).expect("help root") else {
+            panic!("help should print root help");
+        };
+        assert_eq!(root, super::root_help());
+        assert!(root.contains("  help           Help about any command"));
+
+        let Action::Help(usage) = parse(&args(&["help", "scroll"])).expect("scroll help") else {
+            panic!("help scroll should print command help");
+        };
+        let Action::Help(direct_usage) =
+            parse(&args(&["scroll", "--help"])).expect("direct scroll help")
+        else {
+            panic!("scroll --help should print command help");
+        };
+        assert_eq!(usage, direct_usage);
+
+        let Action::Help(help_usage) =
+            parse(&args(&["help", "--help"])).expect("help command usage")
+        else {
+            panic!("help --help should print help command usage");
+        };
+        assert_eq!(help_usage, super::help_command_help());
     }
 
     #[test]
