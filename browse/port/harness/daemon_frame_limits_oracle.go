@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Command daemon_frame_limits_oracle exercises Go's production frame decoder
 // behind the same bufio.Scanner line framing used by internal/daemon.Server.
 package main

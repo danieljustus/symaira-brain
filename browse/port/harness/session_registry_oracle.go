@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Command session_registry_oracle emits the stable Go session-registry contract.
 package main
 
