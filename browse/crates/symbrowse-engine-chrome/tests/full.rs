@@ -213,8 +213,10 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     );
 
     let frames = page.frames().await.expect("frame tree");
+    assert_eq!(frames.len(), 1, "frame tree has one root");
     assert!(
-        frames
+        frames[0]
+            .children
             .iter()
             .any(|frame| frame.url.starts_with("about:srcdoc"))
     );

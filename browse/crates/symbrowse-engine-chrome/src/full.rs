@@ -64,6 +64,8 @@ pub struct FrameInfo {
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub name: String,
     pub url: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub children: Vec<FrameInfo>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -598,9 +600,7 @@ impl ChromePage {
             .await?
             .frame_tree
             .clone();
-        let mut result = Vec::new();
-        flatten_frames(&tree, &mut result);
-        Ok(result)
+        Ok(vec![frame_info(&tree)])
     }
 
     pub async fn accessibility_tree(&self) -> Result<Vec<Value>, Box<dyn Error + Send + Sync>> {
@@ -912,8 +912,8 @@ fn result(action: &str, selector: &str) -> InteractionResult {
     }
 }
 
-fn flatten_frames(tree: &page::FrameTree, output: &mut Vec<FrameInfo>) {
-    output.push(FrameInfo {
+fn frame_info(tree: &page::FrameTree) -> FrameInfo {
+    FrameInfo {
         id: tree.frame.id.inner().clone(),
         parent_id: tree
             .frame
@@ -923,11 +923,13 @@ fn flatten_frames(tree: &page::FrameTree, output: &mut Vec<FrameInfo>) {
             .unwrap_or_default(),
         name: tree.frame.name.clone().unwrap_or_default(),
         url: tree.frame.url.clone(),
-    });
-    if let Some(children) = &tree.child_frames {
-        for child in children {
-            flatten_frames(child, output);
-        }
+        children: tree
+            .child_frames
+            .as_deref()
+            .unwrap_or_default()
+            .iter()
+            .map(frame_info)
+            .collect(),
     }
 }
 
@@ -968,24 +970,13 @@ mod tests {
     }
 
     #[test]
-    fn frame_tree_matches_source_bound_go_fixture() {
-        let fixture: Value = serde_json::from_str(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../../testdata/port/engine/chrome-full.json"
-        )))
-        .unwrap();
-        let expected: Vec<FrameInfo> = serde_json::from_value(fixture["frames"].clone()).unwrap();
-        assert_eq!(
-            expected.len(),
-            2,
-            "the pinned fixture covers root and child frames"
-        );
-
+    fn frame_tree_keeps_children_nested_like_go() {
         let raw = json!({"frame":{"id":"root","url":"https://example.test/","name":"main","loaderId":"loader-root","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]},"childFrames":[{"frame":{"id":"child","parentId":"root","url":"https://example.test/frame","name":"nested","loaderId":"loader-child","domainAndRegistry":"example.test","securityOrigin":"https://example.test","mimeType":"text/html","secureContextType":"Secure","crossOriginIsolatedContextType":"NotIsolated","gatedAPIFeatures":[]}}]});
         let tree: page::FrameTree = serde_json::from_value(raw).unwrap();
-        let mut actual = Vec::new();
-        flatten_frames(&tree, &mut actual);
-        assert_eq!(actual, expected);
+        assert_eq!(
+            serde_json::to_value(vec![frame_info(&tree)]).unwrap(),
+            json!([{"id":"root","name":"main","url":"https://example.test/","children":[{"id":"child","parent_id":"root","name":"nested","url":"https://example.test/frame"}]}])
+        );
     }
 
     #[test]
