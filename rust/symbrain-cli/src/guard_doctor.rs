@@ -77,7 +77,7 @@ fn build_report() -> Option<(String, u8)> {
     };
 
     let mut out = String::new();
-    let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
+    let build_version = super::GUARD_VERSION;
     out.push_str("symguard doctor\n\n");
     let _ = writeln!(out, "  Version:   {build_version}");
     // Go's own line here is `runtime.Version()`. A Rust binary has no Go
