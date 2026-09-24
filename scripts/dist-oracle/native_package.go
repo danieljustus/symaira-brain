@@ -168,7 +168,7 @@ func verifyNativeRustIdentity(binaryPath, version, goos, goarch string) error {
 
 func verifyVersionIdentity(identity versionIdentity, version string) error {
 	if identity.Tool != "symbrain" || identity.Version != version || identity.SchemaVersion != 1 {
-		return fmt.Errorf("candidate identity is tool=%q version=%q schema_version=%d; want symbrain %s schema_version=1", identity.Tool, identity.Version, identity.SchemaVersion, version)
+		return fmt.Errorf("candidate version identity does not match the expected tool, version, or schema")
 	}
 	return nil
 }
