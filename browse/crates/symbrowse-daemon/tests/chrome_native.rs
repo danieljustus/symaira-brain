@@ -293,7 +293,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
                 "Chrome connected without sending an HTTP fixture request",
             ));
         }
-        let body = b"<h1>network</h1>";
+        let body = b"<script>document.cookie='fixture_sid=fixture-cookie-value; path=/'</script><h1>network</h1>";
         let header = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
             body.len()
@@ -334,6 +334,37 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
             .as_array()
             .is_some_and(|events| events.iter().any(|event| event["status"] == 200)),
         "network capture: {captured}"
+    );
+    let cookie_url = format!("http://{address}/");
+    let listed_cookies = request(&client, "cookies.list", json!({}));
+    assert_eq!(listed_cookies["success"], true, "cookie list failed");
+    assert_eq!(
+        listed_cookies["data"]["origin"],
+        format!("http://{address}")
+    );
+    assert!(
+        listed_cookies["data"]["cookies"]
+            .as_array()
+            .is_some_and(|cookies| {
+                cookies.iter().any(|cookie| {
+                    cookie["name"] == "fixture_sid" && cookie["value"] == "fixture-cookie-value"
+                })
+            }),
+        "cookie list omitted the isolated fixture cookie"
+    );
+    let cleared_cookie = request(
+        &client,
+        "cookies.clear",
+        json!({"name":"fixture_sid","url":cookie_url}),
+    );
+    assert_eq!(cleared_cookie["success"], true, "cookie clear failed");
+    let listed_after_clear = request(&client, "cookies.list", json!({}));
+    assert_eq!(listed_after_clear["success"], true, "cookie relist failed");
+    assert!(
+        !listed_after_clear["data"]["cookies"]
+            .as_array()
+            .is_some_and(|cookies| cookies.iter().any(|cookie| cookie["name"] == "fixture_sid")),
+        "cleared fixture cookie remained visible"
     );
     let framed = request(
         &client,

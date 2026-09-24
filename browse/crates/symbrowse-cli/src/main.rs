@@ -306,6 +306,14 @@ fn run_dispatch(
     mut args: serde_json::Value,
     format: Format,
 ) -> ExitCode {
+    let cookie_reveal = if command == "cookies.list" {
+        args.as_object_mut()
+            .and_then(|args| args.remove("reveal"))
+            .and_then(|value| value.as_str().map(str::to_owned))
+            .unwrap_or_default()
+    } else {
+        String::new()
+    };
     let a11y_url = if command == "a11y" {
         args.as_object_mut()
             .and_then(|args| args.remove("url"))
@@ -314,7 +322,11 @@ fn run_dispatch(
         None
     };
     let frame = Frame {
-        args: (!matches!(command.as_str(), "session.list" | "session.info")).then_some(args),
+        args: (!matches!(
+            command.as_str(),
+            "session.list" | "session.info" | "cookies.list"
+        ))
+        .then_some(args),
         cmd: command,
         session: session.clone(),
         ..Frame::default()
@@ -322,6 +334,8 @@ fn run_dispatch(
     let is_network_offline = frame.cmd == "network.offline";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
+    let is_cookie_clear = frame.cmd == "cookies.clear";
+    let is_cookie_list = frame.cmd == "cookies.list";
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
             .ok()
@@ -405,8 +419,40 @@ fn run_dispatch(
         if is_network_offline && format == Format::Text {
             return write_stdout("ok\n");
         }
+        if is_cookie_clear && format == Format::Text {
+            return write_stdout("ok\n");
+        }
+        let response_data = response.data.unwrap_or(serde_json::Value::Null);
+        if is_cookie_list && format == Format::Text {
+            return match render_cookie_list_text(&response_data, &cookie_reveal) {
+                Ok(output) => write_stdout(&output),
+                Err(error) => render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error),
+            };
+        }
+        if is_cookie_list && format == Format::Json {
+            let warnings = response
+                .warnings
+                .into_iter()
+                .map(|warning| symbrowse_core::output::Warning {
+                    kind: warning.kind,
+                    severity: warning.severity,
+                    message: warning.message,
+                    r#ref: warning.r#ref,
+                    excerpt: warning.excerpt,
+                })
+                .collect();
+            return match render_cookie_list_json(&response_data, &cookie_reveal, warnings) {
+                Ok(output) => write_stdout(&output),
+                Err(error) => render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error),
+            };
+        }
+        let response_data = if is_cookie_list {
+            mask_cookie_list(response_data, &cookie_reveal)
+        } else {
+            response_data
+        };
         let envelope = Envelope::ok(
-            response.data.unwrap_or(serde_json::Value::Null),
+            response_data,
             response
                 .warnings
                 .into_iter()
@@ -429,6 +475,224 @@ fn run_dispatch(
         let error = response.error.unwrap_or_default();
         render_dispatch_error(format, &error.code, error.message)
     }
+}
+
+fn reveal_cookie(name: &str, reveal: &str) -> bool {
+    reveal == "all" || reveal.split(',').any(|allowed| allowed.trim() == name)
+}
+
+fn masked_cookie_value(value: &str) -> String {
+    if value.is_empty() {
+        return String::new();
+    }
+    let bytes = value.as_bytes();
+    if bytes.len() <= 8 {
+        return "••••".to_owned();
+    }
+    let mut masked = Vec::with_capacity(16);
+    masked.extend_from_slice(&bytes[..4]);
+    masked.extend_from_slice("••••".as_bytes());
+    masked.extend_from_slice(&bytes[bytes.len() - 4..]);
+    String::from_utf8_lossy(&masked).into_owned()
+}
+
+fn mask_cookie_list(mut data: serde_json::Value, reveal: &str) -> serde_json::Value {
+    if let Some(cookies) = data
+        .get_mut("cookies")
+        .and_then(serde_json::Value::as_array_mut)
+    {
+        for cookie in cookies {
+            let name = cookie
+                .get("name")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("");
+            if !reveal_cookie(name, reveal) {
+                let replacement = cookie
+                    .get("value")
+                    .and_then(serde_json::Value::as_str)
+                    .map(masked_cookie_value);
+                if let Some(replacement) = replacement {
+                    cookie["value"] = serde_json::Value::String(replacement);
+                }
+            }
+        }
+    }
+    data
+}
+
+fn render_cookie_list_text(data: &serde_json::Value, reveal: &str) -> Result<String, String> {
+    let cookies = data
+        .get("cookies")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(|| "cookie response has no cookies array".to_owned())?;
+    let mut output = String::new();
+    for cookie in cookies {
+        let get_string = |key: &str| {
+            cookie
+                .get(key)
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+        };
+        let name = get_string("name");
+        let raw_value = get_string("value");
+        let value = if reveal_cookie(name, reveal) {
+            raw_value.to_owned()
+        } else {
+            masked_cookie_value(raw_value)
+        };
+        let mut flags = Vec::new();
+        if cookie
+            .get("secure")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false)
+        {
+            flags.push("secure");
+        }
+        if cookie
+            .get("http_only")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false)
+        {
+            flags.push("httpOnly");
+        }
+        if cookie
+            .get("session")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false)
+        {
+            flags.push("session");
+        }
+        let flags = if flags.is_empty() {
+            "-".to_owned()
+        } else {
+            flags.join(",")
+        };
+        output.push_str(&format!(
+            "{}\t{}\t{}\t{}\t{}\n",
+            name,
+            value,
+            get_string("domain"),
+            get_string("path"),
+            flags
+        ));
+    }
+    Ok(output)
+}
+
+struct CookieCliNumber(f64);
+
+impl Serialize for CookieCliNumber {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        if self.0.fract() == 0.0 && self.0 >= i64::MIN as f64 && self.0 <= i64::MAX as f64 {
+            serializer.serialize_i64(self.0 as i64)
+        } else {
+            serializer.serialize_f64(self.0)
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct CookieCliItem<'a> {
+    name: &'a str,
+    value: String,
+    domain: &'a str,
+    path: &'a str,
+    expires: CookieCliNumber,
+    size: i64,
+    http_only: bool,
+    secure: bool,
+    session: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    same_site: Option<&'a str>,
+}
+
+#[derive(Serialize)]
+struct CookieCliData<'a> {
+    origin: &'a str,
+    cookies: Vec<CookieCliItem<'a>>,
+}
+
+#[derive(Serialize)]
+struct CookieCliEnvelope<'a> {
+    success: bool,
+    data: CookieCliData<'a>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    warnings: Vec<symbrowse_core::output::Warning>,
+}
+
+fn render_cookie_list_json(
+    data: &serde_json::Value,
+    reveal: &str,
+    warnings: Vec<symbrowse_core::output::Warning>,
+) -> Result<String, String> {
+    let origin = data
+        .get("origin")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| "cookie response has no origin".to_owned())?;
+    let raw_cookies = data
+        .get("cookies")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(|| "cookie response has no cookies array".to_owned())?;
+    let cookies = raw_cookies
+        .iter()
+        .map(|cookie| {
+            let text = |key: &str| {
+                cookie
+                    .get(key)
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+            };
+            let name = text("name");
+            let value = text("value");
+            CookieCliItem {
+                name,
+                value: if reveal_cookie(name, reveal) {
+                    value.to_owned()
+                } else {
+                    masked_cookie_value(value)
+                },
+                domain: text("domain"),
+                path: text("path"),
+                expires: CookieCliNumber(
+                    cookie
+                        .get("expires")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0),
+                ),
+                size: cookie
+                    .get("size")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0),
+                http_only: cookie
+                    .get("http_only")
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false),
+                secure: cookie
+                    .get("secure")
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false),
+                session: cookie
+                    .get("session")
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false),
+                same_site: (!text("same_site").is_empty()).then(|| text("same_site")),
+            }
+        })
+        .collect();
+    let envelope = CookieCliEnvelope {
+        success: true,
+        data: CookieCliData { origin, cookies },
+        warnings,
+    };
+    serde_json::to_string(&envelope)
+        .map(|mut output| {
+            output.push('\n');
+            output
+        })
+        .map_err(|error| error.to_string())
 }
 
 fn run_session_id(scope: &str, prefix: &str, format: Format) -> ExitCode {
@@ -1832,6 +2096,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "tab" => parse_tab(&values, command_index),
         "frame" => parse_frame(&values, command_index),
         "storage" => parse_storage(&values, command_index),
+        "cookies" => parse_cookies(&values, command_index),
         "session" => parse_session(&values, command_index),
         "cache" => parse_cache(&values, command_index),
         "set" => parse_set(&values, command_index),
@@ -1854,7 +2119,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        List current-origin cookies and delete one by name\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -1876,6 +2141,17 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("cookies", None) => Some("List current-origin cookies and delete one by name\n\nUsage:\n  symbrowse cookies [command]\n\nAvailable Commands:\n  clear       Delete one cookie by name\n  list        List cookies visible to the current page\n\nFlags:\n  -h, --help             help for cookies\n      --reveal string   show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string  session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cookies [command] --help\" for more information about a command.\n".to_owned()),
+        ("cookies", Some("list")) => Some(plain(
+            "List cookies visible to the current page", "symbrowse cookies list [flags]",
+            "  -h, --help   help for list\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n",
+        )),
+        ("cookies", Some("clear")) => Some(plain(
+            "Delete one cookie by name", "symbrowse cookies clear <name> [flags]",
+            "  -h, --help         help for clear\n      --url string   URL scope of the cookie (default: current page URL)\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n",
+        )),
         ("a11y", None) => Some(plain(
             "Run an axe-core accessibility audit on the current page",
             "symbrowse a11y [url] [flags]",
@@ -2635,6 +2911,93 @@ fn parse_storage(values: &[String], command_index: usize) -> Result<Action, Pars
             exit_code: 2,
         }),
         _ => unreachable!("storage subcommand selected from supported names"),
+    }
+}
+
+fn parse_cookies(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut reveal = String::new();
+    let mut url = String::new();
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "list" | "clear" if subcommand.is_none() => subcommand = Some(value.as_str()),
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            "--reveal" => {
+                index += 1;
+                reveal = required_value(values, index, "--reveal")?.to_owned();
+            }
+            value if value.starts_with("--reveal=") => reveal = value[9..].to_owned(),
+            "--url" => {
+                index += 1;
+                url = required_value(values, index, "--url")?.to_owned();
+            }
+            value if value.starts_with("--url=") => url = value[6..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse cookies\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(command_help("cookies", &[]).unwrap()));
+    };
+    match subcommand {
+        "list" if positional.is_empty() && url.is_empty() => Ok(Action::Dispatch {
+            session,
+            command: "cookies.list".into(),
+            args: serde_json::json!({"reveal": reveal}),
+            format,
+        }),
+        "list" => Err(if let Some(extra) = positional.first() {
+            ParseError {
+                message: format!("unknown command {extra:?} for \"symbrowse cookies list\""),
+                exit_code: 2,
+            }
+        } else {
+            unknown_flag("--url")
+        }),
+        "clear" if positional.len() == 1 => Ok(Action::Dispatch {
+            session,
+            command: "cookies.clear".into(),
+            args: serde_json::json!({"name": positional[0], "url": url}),
+            format,
+        }),
+        "clear" => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        _ => unreachable!("cookies subcommand selected from supported names"),
     }
 }
 
@@ -4004,8 +4367,9 @@ fn write_stdout(value: &str) -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::{
-        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_string, parse,
-        parse_cache_range, render_session_id_json, render_state_key_init, session_id_info,
+        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_string, mask_cookie_list,
+        parse, parse_cache_range, render_cookie_list_json, render_cookie_list_text,
+        render_session_id_json, render_state_key_init, session_id_info,
     };
     use std::ffi::OsString;
     use std::path::Path;
@@ -4733,6 +5097,7 @@ mod tests {
         };
         for implemented in [
             "eval",
+            "cookies",
             "flow",
             "open",
             "screenshot",
@@ -4751,7 +5116,7 @@ mod tests {
                 "root help advertised {implemented} without a Rust help/dispatch path"
             );
         }
-        for unsupported in ["cookies", "scroll", "auth"] {
+        for unsupported in ["scroll", "auth"] {
             assert!(
                 !root
                     .lines()
@@ -4773,5 +5138,63 @@ mod tests {
                 "{path:?}"
             );
         }
+    }
+
+    #[test]
+    fn cookies_cli_routes_are_scoped_and_values_are_masked_by_default() {
+        let Action::Dispatch {
+            command,
+            args: payload,
+            ..
+        } = parse(&args(&["cookies", "list", "--reveal", "sid"])).unwrap()
+        else {
+            panic!("cookies list should dispatch");
+        };
+        assert_eq!(command, "cookies.list");
+        assert_eq!(payload, serde_json::json!({"reveal":"sid"}));
+        let Action::Dispatch {
+            command,
+            args: payload,
+            ..
+        } = parse(&args(&[
+            "cookies",
+            "clear",
+            "sid",
+            "--url",
+            "https://example.test/path",
+        ]))
+        .unwrap()
+        else {
+            panic!("cookies clear should dispatch");
+        };
+        assert_eq!(command, "cookies.clear");
+        assert_eq!(
+            payload,
+            serde_json::json!({"name":"sid","url":"https://example.test/path"})
+        );
+        assert!(parse(&args(&["cookies", "clear"])).is_err());
+        assert!(parse(&args(&["cookies", "list", "extra"])).is_err());
+
+        let data = serde_json::json!({"origin":"https://example.test","cookies":[
+            {"name":"sid","value":"0123456789abcdef"},
+            {"name":"short","value":"tiny"},
+            {"name":"empty","value":""}
+        ]});
+        let masked = mask_cookie_list(data.clone(), "");
+        assert_eq!(masked["cookies"][0]["value"], "0123••••cdef");
+        assert_eq!(masked["cookies"][1]["value"], "••••");
+        assert_eq!(masked["cookies"][2]["value"], "");
+        assert_eq!(
+            mask_cookie_list(data.clone(), " sid ")["cookies"][0]["value"],
+            "0123456789abcdef"
+        );
+        assert_eq!(
+            render_cookie_list_text(&data, "").unwrap(),
+            "sid\t0123••••cdef\t\t\t-\nshort\t••••\t\t\t-\nempty\t\t\t\t-\n"
+        );
+        assert_eq!(
+            render_cookie_list_json(&data, "", Vec::new()).unwrap(),
+            "{\"success\":true,\"data\":{\"origin\":\"https://example.test\",\"cookies\":[{\"name\":\"sid\",\"value\":\"0123••••cdef\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false},{\"name\":\"short\",\"value\":\"••••\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false},{\"name\":\"empty\",\"value\":\"\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false}]}}\n"
+        );
     }
 }

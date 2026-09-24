@@ -100,7 +100,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "screenshot", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -142,7 +142,8 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
-        ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"], ["version"],
+        ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
+        ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["version"],
     ]
     for path in go_paths:
         argv = [*path, "--help"]
@@ -218,6 +219,14 @@ class UnixDaemonStub:
                         data = {"set": (frame.get("args") or {}).get("key", "")}
                     elif frame.get("cmd") == "storage.clear":
                         data = {"cleared": (frame.get("args") or {}).get("kind", "")}
+                    elif frame.get("cmd") == "cookies.list":
+                        data = {"origin": "https://fixture.invalid", "cookies": [{
+                            "name": "sid", "value": "0123456789abcdef", "domain": "fixture.invalid",
+                            "path": "/", "expires": -1, "size": 20, "http_only": True,
+                            "secure": True, "session": True, "same_site": "Lax",
+                        }]}
+                    elif frame.get("cmd") == "cookies.clear":
+                        data = {"cleared": (frame.get("args") or {}).get("name", "")}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -337,6 +346,14 @@ class WindowsNamedPipeStub:
                         data = {"set": (frame.get("args") or {}).get("key", "")}
                     elif frame.get("cmd") == "storage.clear":
                         data = {"cleared": (frame.get("args") or {}).get("kind", "")}
+                    elif frame.get("cmd") == "cookies.list":
+                        data = {"origin": "https://fixture.invalid", "cookies": [{
+                            "name": "sid", "value": "0123456789abcdef", "domain": "fixture.invalid",
+                            "path": "/", "expires": -1, "size": 20, "http_only": True,
+                            "secure": True, "session": True, "same_site": "Lax",
+                        }]}
+                    elif frame.get("cmd") == "cookies.clear":
+                        data = {"cleared": (frame.get("args") or {}).get("name", "")}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -596,6 +613,11 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["storage", "set", "session", "alpha", "value with spaces"], b"", True),
         ("CLI-002", ["--output=json", "storage", "--session=default", "set", "local", "quoted\"key", "line\nvalue"], b"", True),
         ("CLI-002", ["storage", "clear", "local", "--json"], b"", True),
+        ("CLI-002", ["cookies", "list"], b"", True),
+        ("CLI-002", ["cookies", "list", "--json"], b"", True),
+        ("CLI-002", ["cookies", "list", "--reveal", "sid", "--json"], b"", True),
+        ("CLI-002", ["cookies", "clear", "sid"], b"", True),
+        ("CLI-002", ["cookies", "clear", "sid", "--url", "https://fixture.invalid/" , "--json"], b"", True),
         ("CLI-002", ["storage", "--session", "default", "clear", "session"], b"", True),
         ("CLI-002", ["session", "list", "--json"], b"", True),
         ("CLI-002", ["session", "--session", "default", "info", "--output=json"], b"", True),
@@ -606,6 +628,9 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["session", "id", "--scope=invalid", "--json"], b"", False),
         ("CLI-003", ["storage", "set", "local", "key"], b"", False),
         ("CLI-003", ["storage", "clear"], b"", False),
+        ("CLI-003", ["cookies", "list", "extra"], b"", False),
+        ("CLI-003", ["cookies", "clear"], b"", False),
+        ("CLI-003", ["cookies", "clear", "one", "two"], b"", False),
         ("CLI-003", ["dialog", "auto"], b"", False),
         ("CLI-003", ["dialog", "auto", "accept", "extra"], b"", False),
         ("CLI-003", ["dialog", "accept", "a", "b"], b"", False),

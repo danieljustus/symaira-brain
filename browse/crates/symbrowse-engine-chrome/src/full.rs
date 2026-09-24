@@ -333,11 +333,23 @@ impl ChromePage {
 
     /// Read complete cookie metadata through Chrome's Network domain.
     pub async fn cookies(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        self.cookies_for_urls(&[]).await
+    }
+
+    /// Read only cookies applicable to the supplied page URLs.
+    pub async fn cookies_for_urls(
+        &self,
+        urls: &[String],
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let params = if urls.is_empty() {
+            network::GetCookiesParams::default()
+        } else {
+            network::GetCookiesParams::builder()
+                .urls(urls.iter().cloned())
+                .build()
+        };
         Ok(serde_json::to_value(
-            self.page
-                .execute(network::GetCookiesParams::default())
-                .await?
-                .result,
+            self.page.execute(params).await?.result,
         )?)
     }
 
@@ -347,6 +359,21 @@ impl ChromePage {
         Ok(serde_json::to_value(
             self.page.execute(params).await?.result,
         )?)
+    }
+
+    /// Delete a cookie by name within one URL's domain and path scope.
+    pub async fn delete_cookie(
+        &self,
+        name: &str,
+        url: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let params = network::DeleteCookiesParams::builder()
+            .name(name)
+            .url(url)
+            .build()
+            .map_err(|error| format!("build delete-cookie request: {error}"))?;
+        self.page.execute(params).await?;
+        Ok(())
     }
 
     pub async fn snapshot(&self) -> Result<Vec<Value>, Box<dyn Error + Send + Sync>> {

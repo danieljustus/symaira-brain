@@ -234,8 +234,8 @@ impl DispatchRuntime {
             | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept" | "dialog.dismiss"
             | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
             | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "storage.get" | "storage.list" | "storage.set" | "storage.clear"
-            | "download" => self.browser_command(&frame).await,
+            | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get" | "storage.list"
+            | "storage.set" | "storage.clear" | "download" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -608,7 +608,12 @@ impl DispatchRuntime {
             });
         }
         let page = self.ensure_browser().await?;
-        let args = object_args(frame)?;
+        let empty_args = serde_json::Map::new();
+        let args = if frame.cmd == "cookies.list" && frame.args.is_none() {
+            &empty_args
+        } else {
+            object_args(frame)?
+        };
         let data = match frame.cmd.as_str() {
             "storage.list" => {
                 let kind = storage_kind(args)?;
@@ -868,6 +873,45 @@ impl DispatchRuntime {
                     .collect();
                 page.block_urls(urls).await.map_err(runtime_error)?;
                 json!({"blocked": true})
+            }
+            "cookies.list" => {
+                let origin = page
+                    .evaluate_script("location.origin")
+                    .await
+                    .map_err(runtime_error)?
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_owned();
+                let cookies = if origin.is_empty() || origin == "null" {
+                    json!({"cookies": []})
+                } else {
+                    page.cookies_for_urls(std::slice::from_ref(&origin))
+                        .await
+                        .map_err(runtime_error)?
+                };
+                cookie_list_payload(&origin, cookies)?
+            }
+            "cookies.clear" => {
+                let name = required_string(args, "name")?;
+                let url = match args.get("url").and_then(Value::as_str) {
+                    Some(url) if !url.is_empty() => url.to_owned(),
+                    _ => page
+                        .evaluate_script("location.href")
+                        .await
+                        .map_err(runtime_error)?
+                        .as_str()
+                        .filter(|url| url.starts_with("http://") || url.starts_with("https://"))
+                        .ok_or_else(|| {
+                            malformed(
+                                "cookies.clear requires a current HTTP(S) page or an explicit URL",
+                            )
+                        })?
+                        .to_owned(),
+                };
+                page.delete_cookie(name, &url)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"cleared": name})
             }
             "screenshot" => serde_json::to_value(
                 page.screenshot(
@@ -1800,6 +1844,39 @@ pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value
     Ok(json!({"origin":origin,"kind":kind,"items":items}))
 }
 
+fn cookie_list_payload(origin: &str, captured: Value) -> Result<Value, DaemonError> {
+    let cookies = captured
+        .get("cookies")
+        .and_then(Value::as_array)
+        .ok_or_else(|| runtime_error("cookie response has no cookies array"))?;
+    let mut output = Vec::with_capacity(cookies.len());
+    for cookie in cookies {
+        let cookie = cookie
+            .as_object()
+            .ok_or_else(|| runtime_error("cookie response contains a non-object cookie"))?;
+        let string = |key: &str| cookie.get(key).and_then(Value::as_str).unwrap_or_default();
+        let number = cookie.get("expires").and_then(Value::as_f64).unwrap_or(0.0);
+        let size = cookie.get("size").and_then(Value::as_i64).unwrap_or(0);
+        let same_site = string("sameSite");
+        let mut value = json!({
+            "name": string("name"),
+            "value": string("value"),
+            "domain": string("domain"),
+            "path": string("path"),
+            "expires": number,
+            "size": size,
+            "http_only": cookie.get("httpOnly").and_then(Value::as_bool).unwrap_or(false),
+            "secure": cookie.get("secure").and_then(Value::as_bool).unwrap_or(false),
+            "session": cookie.get("session").and_then(Value::as_bool).unwrap_or(false),
+        });
+        if !same_site.is_empty() {
+            value["same_site"] = Value::String(same_site.to_owned());
+        }
+        output.push(value);
+    }
+    Ok(json!({"origin": origin, "cookies": output}))
+}
+
 pub(crate) fn storage_set_request(
     args: &serde_json::Map<String, Value>,
 ) -> Result<(String, String, String), DaemonError> {
@@ -2589,6 +2666,31 @@ mod tests {
                 .code,
             codes::OPERATION_FAILED
         );
+    }
+
+    #[test]
+    fn cookie_list_projects_only_go_metadata_and_keeps_origin_scope() {
+        let result = cookie_list_payload(
+            "https://example.test",
+            json!({"cookies":[{
+                "name":"sid", "value":"fixture-secret", "domain":"example.test",
+                "path":"/", "expires":-1.0, "size":20, "httpOnly":true,
+                "secure":true, "session":true, "sameSite":"Lax",
+                "priority":"High", "sourcePort":443, "partitionKey":{"topLevelSite":"https://elsewhere.test"}
+            }]}),
+        ).unwrap();
+        assert_eq!(result["origin"], "https://example.test");
+        assert_eq!(
+            result["cookies"][0],
+            json!({
+                "name":"sid", "value":"fixture-secret", "domain":"example.test",
+                "path":"/", "expires":-1.0, "size":20, "http_only":true,
+                "secure":true, "session":true, "same_site":"Lax"
+            })
+        );
+        assert!(result.to_string().contains("fixture-secret"));
+        assert!(!result.to_string().contains("sourcePort"));
+        assert!(!result.to_string().contains("partitionKey"));
     }
 
     #[test]
