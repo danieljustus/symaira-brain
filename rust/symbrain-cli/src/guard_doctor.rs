@@ -18,11 +18,10 @@
 //! a false clean report, because a wrong answer here hides real
 //! spawn-allowlist and plaintext-secret findings. The gates are:
 //!
-//! * a config file that exists but does not parse/validate — Go prints
-//!   `BurntSushi`'s own parser text (`toml: line 1: expected '.' or '='…`),
-//!   which no Rust TOML crate reproduces;
-//! * an audit anchor that exists but does not parse — Go prints
-//!   `encoding/json`'s own error text;
+//! * a config parse/validation error other than TOML's simple missing-`=`
+//!   diagnostic — the Rust parser can reproduce only that narrow Go message;
+//! * an audit anchor with valid JSON but the wrong `ChainAnchor` shape still
+//!   gates, because serde's type errors differ from `encoding/json`;
 //! * any discovery source that exists but fails to read or parse, or an
 //!   entry with neither `command` nor `url` — Go turns those into an
 //!   `mcp servers  error: discovery: …` line carrying the upstream parser's
@@ -65,10 +64,16 @@ pub(crate) fn run(stdout: &mut dyn Write) -> Option<u8> {
 fn build_report() -> Option<(String, u8)> {
     let config = load_config(&config_path())?;
     let audit = audit_status(&super::audit_path())?;
-    let discovery = discover_all()?;
-    let (servers, discovery_error) = match discovery {
-        DiscoveryOutcome::Servers(servers) => (servers, None),
-        DiscoveryOutcome::Error(error) => (Vec::new(), Some(error)),
+    let (config_status, loaded) = match config {
+        ConfigState::Missing => (
+            "not configured (no config file found)".to_owned(),
+            Some(LoadedConfig::default()),
+        ),
+        ConfigState::Loaded(loaded) => ("ok".to_owned(), Some(loaded)),
+        ConfigState::ParseError(error) => (
+            format!("error: config: parse {}: {error}", config_path().display()),
+            None,
+        ),
     };
 
     let mut out = String::new();
@@ -92,22 +97,30 @@ fn build_report() -> Option<(String, u8)> {
     };
     row("binary", "ok");
     row("go runtime", "ok");
-    let loaded = match config {
-        ConfigState::Missing => {
-            row("config", "not configured (no config file found)");
-            LoadedConfig::default()
+    row("config", &config_status);
+    if let Some(loaded) = &loaded {
+        if loaded.rules > 0 {
+            row("policy", &format!("ok ({} rule(s))", loaded.rules));
+        } else {
+            row("policy", "defaults only (no rules — deny by default)");
         }
-        ConfigState::Loaded(loaded) => {
-            row("config", "ok");
-            loaded
-        }
-    };
-    if loaded.rules > 0 {
-        row("policy", &format!("ok ({} rule(s))", loaded.rules));
     } else {
-        row("policy", "defaults only (no rules — deny by default)");
+        row("policy", "not loaded (config error)");
     }
-    row("audit log", audit.as_str());
+    row("audit log", audit.0.as_str());
+
+    if loaded.is_none() {
+        let issues = 2 + usize::from(audit.1);
+        let _ = writeln!(out, "\n{issues} issue(s) found. See details above.");
+        return Some((out, exit::GENERIC));
+    }
+    let loaded = loaded?;
+
+    let discovery = discover_all()?;
+    let (servers, discovery_error) = match discovery {
+        DiscoveryOutcome::Servers(servers) => (servers, None),
+        DiscoveryOutcome::Error(error) => (Vec::new(), Some(error)),
+    };
 
     let allowlist = loaded.allowlist;
     if allowlist.is_empty() {
@@ -134,6 +147,7 @@ fn build_report() -> Option<(String, u8)> {
 
     let discovery_problems = usize::from(discovery_error.is_some());
     let problems = discovery_problems
+        + usize::from(audit.1)
         + checks
             .iter()
             .filter(|c| !c.allowed || !c.secrets.is_empty())
@@ -183,12 +197,11 @@ struct LoadedConfig {
     allowlist: Vec<SpawnEntry>,
 }
 
-/// The three outcomes of `config.Load()` that doctor distinguishes. The
-/// error outcome is not represented: Go prints `BurntSushi`'s or its own
-/// `validate` text there, and this port gates instead of guessing.
+/// The outcomes of `config.Load()` that doctor can reproduce natively.
 enum ConfigState {
     Missing,
     Loaded(LoadedConfig),
+    ParseError(String),
 }
 
 /// Ports `config.Load()`. `None` means Go would print an error string this
@@ -199,7 +212,35 @@ fn load_config(path: &Path) -> Option<ConfigState> {
         Err(error) if error.kind() == io::ErrorKind::NotFound => return Some(ConfigState::Missing),
         Err(_) => return None,
     };
-    parse_and_validate(&text).map(ConfigState::Loaded)
+    let doc = match text.parse::<DocumentMut>() {
+        Ok(doc) => doc,
+        Err(error) => {
+            let diagnostic = go_missing_equals_diagnostic(&text, &error)?;
+            return Some(ConfigState::ParseError(format!("toml: {diagnostic}")));
+        }
+    };
+    parse_and_validate(&doc).map(ConfigState::Loaded)
+}
+
+/// Maps only `toml_edit`'s missing-`=` error with a printable ASCII offender;
+/// all other parser messages stay on the Go fallback path.
+fn go_missing_equals_diagnostic(text: &str, error: &toml_edit::TomlError) -> Option<String> {
+    if error.message() != "key with no value, expected `=`" {
+        return None;
+    }
+    let span = error.span()?;
+    if !span.is_empty() || !text.is_char_boundary(span.start) {
+        return None;
+    }
+    let byte = *text.as_bytes().get(span.start)?;
+    if !(0x20..=0x7e).contains(&byte) || matches!(byte, b'\'' | b'"' | b'\\') {
+        return None;
+    }
+    let line = text[..span.start].split('\n').count();
+    Some(format!(
+        "line {line}: expected '.' or '=', but got '{}' instead",
+        char::from(byte)
+    ))
 }
 
 const VALID_DECISIONS: [&str; 6] = ["allow", "ask", "deny", "redact", "readonly", "sandbox"];
@@ -208,13 +249,12 @@ const VALID_DECISIONS: [&str; 6] = ["allow", "ask", "deny", "redact", "readonly"
 /// on it. Every shape mismatch (a Go decode error) and every `validate()`
 /// rejection returns `None`, because both print library or format text this
 /// port does not reproduce.
-fn parse_and_validate(text: &str) -> Option<LoadedConfig> {
-    let doc = text.parse::<DocumentMut>().ok()?;
-    check_defaults(&doc)?;
-    let rules = count_rules(&doc)?;
-    check_sequence(&doc)?;
-    check_unprinted_sections(&doc)?;
-    let allowlist = read_allowlist(&doc)?;
+fn parse_and_validate(doc: &DocumentMut) -> Option<LoadedConfig> {
+    check_defaults(doc)?;
+    let rules = count_rules(doc)?;
+    check_sequence(doc)?;
+    check_unprinted_sections(doc)?;
+    let allowlist = read_allowlist(doc)?;
     Some(LoadedConfig { rules, allowlist })
 }
 
@@ -363,10 +403,13 @@ fn read_allowlist(doc: &DocumentMut) -> Option<Vec<SpawnEntry>> {
 // ---------------------------------------------------------------------------
 
 /// Ports doctor's audit-log branch. `None` gates to Go.
-fn audit_status(log_path: &Path) -> Option<String> {
+fn audit_status(log_path: &Path) -> Option<(String, bool)> {
     match fs::metadata(log_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
-            return Some("not initialized (created on first 'symguard decide')".to_owned());
+            return Some((
+                "not initialized (created on first 'symguard decide')".to_owned(),
+                false,
+            ));
         }
         // Go prints `error: <the os.Stat error>` here; not reproducible.
         Err(_) => return None,
@@ -375,18 +418,34 @@ fn audit_status(log_path: &Path) -> Option<String> {
     // audit.DefaultAnchorPath(logPath) == logPath + ".anchor"
     let mut anchor_path = log_path.as_os_str().to_owned();
     anchor_path.push(".anchor");
-    let anchor = match fs::read(PathBuf::from(anchor_path)) {
+    let anchor_path = PathBuf::from(anchor_path);
+    let anchor = match fs::read(&anchor_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => None,
         Err(_) => return None,
         Ok(data) => Some(data),
     };
     match anchor {
-        None => Some("ok (JSONL, chain anchor pending Phase 3 sink)".to_owned()),
+        None => Some((
+            "ok (JSONL, chain anchor pending Phase 3 sink)".to_owned(),
+            false,
+        )),
         Some(data) => {
-            // auditkit.ReadCheckpoint json.Unmarshal's into ChainAnchor; any
-            // failure carries encoding/json's own message, so gate on it.
+            // Syntax errors come from the shared Go-compatible scanner. Keep
+            // valid-JSON type/shape failures gated because serde diagnostics
+            // do not match encoding/json.
+            if let Err(error) =
+                symbrain_guard_core::external_decision::validate_go_json_syntax(&data)
+            {
+                return Some((
+                    format!(
+                        "error: anchor {}: auditkit: parse anchor: {error}",
+                        anchor_path.display()
+                    ),
+                    true,
+                ));
+            }
             serde_json::from_slice::<ChainAnchor>(&data).ok()?;
-            Some("ok (hash-chained, anchor present)".to_owned())
+            Some(("ok (hash-chained, anchor present)".to_owned(), false))
         }
     }
 }
@@ -664,6 +723,11 @@ fn print_secret_risks(out: &mut String, checks: &[ServerCheck]) {
 mod tests {
     use super::*;
 
+    fn parse_and_validate_text(text: &str) -> Option<LoadedConfig> {
+        let doc = text.parse::<DocumentMut>().ok()?;
+        parse_and_validate(&doc)
+    }
+
     fn stdio(command: &str, args: &[&str]) -> Discovered {
         Discovered {
             name: "s".to_owned(),
@@ -755,7 +819,7 @@ mod tests {
         let healthy = format!(
             "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = {command}\n"
         );
-        let loaded = parse_and_validate(&healthy).expect("healthy config is native");
+        let loaded = parse_and_validate_text(&healthy).expect("healthy config is native");
         assert_eq!(loaded.rules, 1);
         assert_eq!(
             loaded.allowlist,
@@ -765,16 +829,40 @@ mod tests {
             }]
         );
 
-        // The frozen `config_error` fixture: Go prints BurntSushi's text.
-        assert!(parse_and_validate("not [valid = toml").is_none());
+        // Parsing and validation both fail closed here.
+        assert!(parse_and_validate_text("not [valid = toml").is_none());
         // validate() rejections gate too.
-        assert!(parse_and_validate("[defaults]\nshell = \"nonsense\"\n").is_none());
+        assert!(parse_and_validate_text("[defaults]\nshell = \"nonsense\"\n").is_none());
         assert!(
-            parse_and_validate("[spawn]\n[[spawn.allowlist]]\npath = \"relative\"\n").is_none()
+            parse_and_validate_text("[spawn]\n[[spawn.allowlist]]\npath = \"relative\"\n")
+                .is_none()
         );
-        assert!(parse_and_validate("[[rules]]\ndecision = \"allow\"\n[rules.match]\n").is_none());
-        assert!(parse_and_validate("[sequence]\nenabled = true\nthreshold = 1\n").is_none());
-        assert!(parse_and_validate("[sequence]\nenabled = true\n").is_some());
+        assert!(
+            parse_and_validate_text("[[rules]]\ndecision = \"allow\"\n[rules.match]\n").is_none()
+        );
+        assert!(parse_and_validate_text("[sequence]\nenabled = true\nthreshold = 1\n").is_none());
+        assert!(parse_and_validate_text("[sequence]\nenabled = true\n").is_some());
+    }
+
+    #[test]
+    fn unsupported_missing_equals_offenders_stay_gated() {
+        for text in [
+            "name \"value\"",
+            "name 'value'",
+            "name \\ value",
+            "name \x01 value",
+            "name é value",
+            "name",
+        ] {
+            let error = text
+                .parse::<DocumentMut>()
+                .expect_err("the fixture must be invalid TOML");
+            assert_eq!(
+                go_missing_equals_diagnostic(text, &error),
+                None,
+                "must leave {text:?} to Go"
+            );
+        }
     }
 
     #[test]
@@ -782,12 +870,12 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let log = dir.path().join("audit.log");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("not initialized (created on first 'symguard decide')")
         );
         fs::write(&log, b"{\"entry_id\":\"1\"}\n").expect("write log");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("ok (JSONL, chain anchor pending Phase 3 sink)")
         );
         fs::write(
@@ -796,11 +884,22 @@ mod tests {
         )
         .expect("write anchor");
         assert_eq!(
-            audit_status(&log).as_deref(),
+            audit_status(&log).as_ref().map(|status| status.0.as_str()),
             Some("ok (hash-chained, anchor present)")
         );
-        // A corrupt anchor is Go's encoding/json message — gate.
+        // Syntax errors use the shared Go-compatible JSON scanner.
         fs::write(dir.path().join("audit.log.anchor"), b"not json").expect("write anchor");
+        let status = audit_status(&log).expect("syntax error is native");
+        assert!(status.0.ends_with(
+            "auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')"
+        ));
+        assert!(status.1);
+        // Valid JSON with an incompatible type remains gated.
+        fs::write(
+            dir.path().join("audit.log.anchor"),
+            br#"{"entry_count":"one"}"#,
+        )
+        .expect("write anchor");
         assert!(audit_status(&log).is_none());
     }
 
