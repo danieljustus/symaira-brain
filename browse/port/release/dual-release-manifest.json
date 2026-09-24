@@ -14,7 +14,6 @@
     "availability_failure": "fallback_go",
     "integrity_failure": "block_no_fallback"
   },
-  "release_state": "prerelease-only; no cutover",
   "targets": [
     "darwin-amd64",
     "darwin-arm64",

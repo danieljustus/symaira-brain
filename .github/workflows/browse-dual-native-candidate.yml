@@ -87,7 +87,8 @@ jobs:
           python3 -m unittest \
             port/release/test_build_dual.py \
             port/release/test_binary_smoke.py \
-            port/release/test_candidate.py
+            port/release/test_candidate.py \
+            port/release/test_launch_candidate.py
           version="0.0.0-${GITHUB_SHA:0:12}"
           python3 port/release/build_dual.py \
             --version "$version" \
@@ -95,6 +96,9 @@ jobs:
             --source-revision "$GITHUB_SHA" \
             --strict \
             --output "$RUNNER_TEMP/browse-dual-$BROWSE_TARGET"
+          candidate="$RUNNER_TEMP/browse-dual-$BROWSE_TARGET"
+          python3 port/release/launch_candidate.py --candidate "$candidate" --version "$version" --target "$BROWSE_TARGET" -- version --json >/dev/null
+          SYMBROWSE_IMPL=rust python3 port/release/launch_candidate.py --candidate "$candidate" --version "$version" --target "$BROWSE_TARGET" -- version --json >/dev/null
 
       - name: Upload native candidate package for this SHA
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
