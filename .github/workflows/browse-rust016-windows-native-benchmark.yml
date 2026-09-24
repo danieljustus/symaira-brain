@@ -124,6 +124,8 @@ jobs:
           with tempfile.TemporaryDirectory(prefix="sb-unix-") as directory:
               path = pathlib.Path(directory, "probe.sock")
               try:
+                  if not hasattr(socket, "AF_UNIX"):
+                      raise OSError("Python on this runner has no AF_UNIX support")
                   with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as listener:
                       listener.bind(str(path))
                   print("Windows AF_UNIX bind: pass")

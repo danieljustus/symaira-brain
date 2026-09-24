@@ -155,6 +155,7 @@ async fn exercise_full_chrome_surface() {
     let upload = profile.join("upload.txt");
     fs::write(&upload, "uploaded-by-rust012").expect("write upload fixture");
 
+    eprintln!("chrome_full_stage=launch-start");
     let session = ChromeSession::connect(
         BrowserMode::Launch {
             executable: chrome_executable(),
@@ -165,6 +166,8 @@ async fn exercise_full_chrome_surface() {
     )
     .await
     .expect("launch Chrome");
+    eprintln!("chrome_full_stage=launch-complete");
+    eprintln!("chrome_full_stage=new-page-start");
     let page = session
         .new_page(format!("{}/", server.base_url))
         .await

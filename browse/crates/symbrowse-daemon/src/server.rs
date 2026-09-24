@@ -545,7 +545,8 @@ fn listen_windows(server: &Server) -> Result<(), ServerError> {
                     // TimedOut kind by the nonblocking named-pipe acceptor.
                     || error.raw_os_error() == Some(121) =>
             {
-                thread::sleep(Duration::from_millis(25));
+                // ponytail: 5 ms polling bounds pipe latency; use interruptible accept if idle CPU matters.
+                thread::sleep(Duration::from_millis(5));
             }
             Err(error) => {
                 server.stop();
