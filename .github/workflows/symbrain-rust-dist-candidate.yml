@@ -98,6 +98,21 @@ jobs:
             -binary "$executable" \
             -assets "$package"
 
+      - name: Compare native Go and Rust CLI and MCP contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+          go_binary="$RUNNER_TEMP/symbrain-go"
+          rust_binary="target/$TARGET/release/symbrain"
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            go_binary+=.exe
+            rust_binary+=.exe
+          fi
+          go build -ldflags "-X main.version=$version" -o "$go_binary" ./cmd/symbrain
+          python3 scripts/rust-differential.py "$go_binary" "$rust_binary"
+          python3 scripts/mcp-differential.py "$go_binary" "$rust_binary"
+
       - name: Upload target package for same-SHA merge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
