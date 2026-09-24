@@ -169,6 +169,42 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     page.wait_for_selector("#text", true, Duration::from_secs(5))
         .await
         .expect("wait for initial page");
+    let audit = page
+        .axe_audit(&["wcag2a".to_owned()], "")
+        .await
+        .expect("axe-core audit");
+    assert_eq!(audit["axe_version"], "4.10.2", "audit: {audit}");
+    assert_eq!(audit["url"], format!("{}/", server.base_url));
+    assert!(audit["violation_count"].as_u64().unwrap_or_default() > 0);
+    assert!(
+        audit["violations"].as_array().is_some_and(|violations| {
+            violations
+                .iter()
+                .any(|violation| violation["id"] == "label")
+        }),
+        "expected axe label violation, got {audit}"
+    );
+    assert!(audit["passes"].as_u64().is_some());
+    assert!(audit["incomplete"].as_u64().is_some());
+    let scoped_audit = page
+        .axe_audit(&["wcag2a".to_owned()], "#text")
+        .await
+        .expect("selector-scoped axe-core audit");
+    assert!(
+        scoped_audit["violations"]
+            .as_array()
+            .is_some_and(|violations| {
+                violations
+                    .iter()
+                    .flat_map(|violation| violation["nodes"].as_array().into_iter().flatten())
+                    .any(|node| {
+                        node["target"]
+                            .as_array()
+                            .is_some_and(|targets| targets.iter().any(|target| target == "#text"))
+                    })
+            }),
+        "selector-scoped audit did not report #text: {scoped_audit}"
+    );
     assert_eq!(page.inspect("#text", "count").await.expect("count"), 1);
     assert!(page.inspect("#text", "find").await.expect("find").as_bool() == Some(true));
     assert_eq!(
@@ -350,13 +386,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     assert!(
         matches!(page.har().await, Err(error) if error.downcast_ref::<UnsupportedOperation>().is_some())
     );
-    assert!(
-        matches!(page.axe_audit().await, Err(error) if error.downcast_ref::<UnsupportedOperation>().is_some())
-    );
-    assert_eq!(
-        capabilities().unsupported,
-        vec!["har-export", "axe-core-audit"]
-    );
+    assert_eq!(capabilities().unsupported, vec!["har-export"]);
 
     session.close().await.expect("close Chrome");
     cleanup_profile(&profile);

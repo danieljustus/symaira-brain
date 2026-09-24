@@ -163,5 +163,5 @@ func TestSnapshotNoInjectionScanDisablesTheScan(t *testing.T) {
 }
 
 func dialUnix(path string) (interface{ Close() error }, error) {
-	return net.Dial("unix", path)
+	return dialTestEndpoint(path)
 }

@@ -226,6 +226,72 @@ impl ResponseCache {
             serde_json::from_slice(&meta).map_err(|e| CacheError::Serialize(e.to_string()))?;
         Ok((body, meta))
     }
+
+    /// Loads a user-facing cache entry using the Go cache's metadata TTL rule.
+    /// The pipeline's `get` method uses file modification time for its cache
+    /// policy; the CLI contract instead uses `stored_at` and the TTL persisted
+    /// in the Go metadata, falling back to the effective configuration value.
+    pub fn load_key(&self, key: &str, default_ttl_nanos: i64) -> Result<Vec<u8>, CacheError> {
+        if key.len() != 64
+            || !key
+                .bytes()
+                .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+        {
+            return Err(CacheError::NotFound(key.into()));
+        }
+        let directory = self.root.join(&key[..2]);
+        let metadata_path = directory.join(format!("{key}.meta.json"));
+        let body_path = directory.join(format!("{key}.body"));
+        let raw = fs::read(&metadata_path).map_err(|error| {
+            if error.kind() == io::ErrorKind::NotFound {
+                CacheError::NotFound(key.into())
+            } else {
+                CacheError::Io(error)
+            }
+        })?;
+        let metadata: serde_json::Value = serde_json::from_slice(&raw)
+            .map_err(|error| CacheError::Serialize(error.to_string()))?;
+        let stored_at = match metadata.get("stored_at") {
+            None | Some(serde_json::Value::Null) => {
+                time::OffsetDateTime::from_unix_timestamp_nanos(-62_135_596_800_000_000_000)
+                    .map_err(|error| CacheError::Serialize(error.to_string()))?
+            }
+            Some(serde_json::Value::String(value)) => {
+                time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339)
+                    .map_err(|error| CacheError::Serialize(error.to_string()))?
+            }
+            _ => {
+                return Err(CacheError::Serialize(
+                    "stored_at must be an RFC3339 timestamp".into(),
+                ));
+            }
+        };
+        let metadata_ttl = match metadata.get("ttl") {
+            None | Some(serde_json::Value::Null) => 0,
+            Some(serde_json::Value::Number(value)) => value
+                .as_i64()
+                .ok_or_else(|| CacheError::Serialize("ttl must be an integer".into()))?,
+            _ => return Err(CacheError::Serialize("ttl must be an integer".into())),
+        };
+        let ttl_nanos = if metadata_ttl <= 0 {
+            default_ttl_nanos
+        } else {
+            metadata_ttl
+        };
+        let age_nanos = (time::OffsetDateTime::now_utc() - stored_at)
+            .whole_nanoseconds()
+            .clamp(i64::MIN as i128, i64::MAX as i128);
+        if age_nanos > i128::from(ttl_nanos) {
+            return Err(CacheError::Expired(key.into()));
+        }
+        fs::read(body_path).map_err(|error| {
+            if error.kind() == io::ErrorKind::NotFound {
+                CacheError::NotFound(key.into())
+            } else {
+                CacheError::Io(error)
+            }
+        })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -21,6 +21,7 @@ use serde::Serialize;
 use sha2::{Digest, Sha256};
 use symbrowse_core::{
     batch::{self, ItemOutput},
+    cache::Cache,
     config::{
         FlagOverrides, LoadContext, SelectionView, explicit_selection, load, render_show_text,
         render_show_yaml, show_fields,
@@ -105,6 +106,11 @@ enum Action {
         session: String,
         command: String,
         args: serde_json::Value,
+        format: Format,
+    },
+    CacheGet {
+        id: String,
+        range: Option<String>,
         format: Format,
     },
     SessionId {
@@ -239,6 +245,7 @@ fn main() -> ExitCode {
             args,
             format,
         }) => run_dispatch(session, command, args, format),
+        Ok(Action::CacheGet { id, range, format }) => run_cache_get(id, range, format),
         Ok(Action::SessionId {
             scope,
             prefix,
@@ -390,7 +397,7 @@ fn run_session_id(scope: &str, prefix: &str, format: Format) -> ExitCode {
             {
                 let _ = io::stdout().write_all(output.as_bytes());
             }
-            return ExitCode::from(ErrorCode::Internal.exit_code());
+            return ExitCode::from(1);
         }
     };
 
@@ -404,6 +411,125 @@ fn run_session_id(scope: &str, prefix: &str, format: Format) -> ExitCode {
             _ => ExitCode::from(1),
         },
     }
+}
+
+fn run_cache_get(id: String, range: Option<String>, format: Format) -> ExitCode {
+    let context = match LoadContext::from_process(FlagOverrides::default()) {
+        Ok(context) => context,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let config = match load(&context) {
+        Ok(result) => result.config,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let cache_root = PathBuf::from(&config.cache_dir);
+    let content = if let Some(key) = id.strip_prefix("fetch:") {
+        let ttl_nanos = config.cache_ttl_hours.wrapping_mul(3_600_000_000_000);
+        symbrowse_fetch::cache::ResponseCache::new(cache_root.join("fetch"))
+            .load_key(key, ttl_nanos)
+            .map_err(|error| match error {
+                symbrowse_fetch::cache::CacheError::NotFound(_) => {
+                    format!("fetch cache entry not found: {key}")
+                }
+                symbrowse_fetch::cache::CacheError::Expired(_) => {
+                    format!("fetch cache entry expired: {key}")
+                }
+                other => other.to_string(),
+            })
+    } else {
+        Cache::new(cache_root.join("out"), Duration::ZERO)
+            .load(&id)
+            .map_err(|error| error.to_string())
+    };
+    let content = match content {
+        Ok(content) => content,
+        Err(message) => return write_cache_get_error(message, format),
+    };
+    let content = if let Some(range) = range.as_deref().filter(|value| !value.trim().is_empty()) {
+        let (start, end) = match parse_cache_range(range) {
+            Ok(bounds) => bounds,
+            Err(message) => return write_cache_get_error(message, format),
+        };
+        line_range_bytes(&content, start, end)
+    } else {
+        content
+    };
+    if format == Format::Text {
+        let mut stdout = io::stdout().lock();
+        if stdout.write_all(&content).is_err() || stdout.write_all(b"\n").is_err() {
+            return ExitCode::from(1);
+        }
+        return ExitCode::SUCCESS;
+    }
+    let mut data = serde_json::Map::new();
+    data.insert("cache_id".into(), serde_json::Value::String(id));
+    data.insert(
+        "content".into(),
+        serde_json::Value::String(String::from_utf8_lossy(&content).into_owned()),
+    );
+    if let Some(range) = range.filter(|value| !value.trim().is_empty()) {
+        data.insert("range".into(), serde_json::Value::String(range));
+    }
+    match Envelope::ok(serde_json::Value::Object(data), Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => write_cache_get_error(error.to_string(), format),
+    }
+}
+
+fn parse_cache_range(spec: &str) -> Result<(usize, usize), String> {
+    let spec = spec.trim();
+    let (start, end) = spec.split_once('-').unwrap_or((spec, ""));
+    let start = if start.is_empty() {
+        0
+    } else {
+        start
+            .parse::<usize>()
+            .ok()
+            .filter(|value| *value > 0)
+            .ok_or_else(|| {
+                format!("invalid range {spec:?}: start must be a positive line number")
+            })?
+    };
+    let end = if end.is_empty() {
+        0
+    } else {
+        end.parse::<usize>()
+            .ok()
+            .filter(|value| *value >= start)
+            .ok_or_else(|| format!("invalid range {spec:?}: end must be >= start"))?
+    };
+    Ok((start, end))
+}
+
+fn line_range_bytes(content: &[u8], start: usize, end: usize) -> Vec<u8> {
+    let lines: Vec<_> = content.split(|byte| *byte == b'\n').collect();
+    let first = start.max(1);
+    if first > lines.len() {
+        return Vec::new();
+    }
+    let last = if end < first || end == 0 {
+        lines.len()
+    } else {
+        end.min(lines.len())
+    };
+    let mut result = Vec::new();
+    for (index, line) in lines[first - 1..last].iter().enumerate() {
+        if index > 0 {
+            result.push(b'\n');
+        }
+        result.extend_from_slice(line);
+    }
+    result
+}
+
+fn write_cache_get_error(message: String, format: Format) -> ExitCode {
+    if format == Format::Text {
+        let _ = writeln!(io::stderr(), "{message}");
+    } else if let Ok(output) = Envelope::failure(ErrorCode::Internal, &message).render(format) {
+        let _ = io::stdout().write_all(output.as_bytes());
+    }
+    // The Go CLI classifies ordinary cache/config errors as ExitGeneric (1).
+    ExitCode::from(1)
 }
 
 fn render_session_id_json(info: &SessionIdInfo) -> String {
@@ -1656,6 +1782,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "frame" => parse_frame(&values, command_index),
         "storage" => parse_storage(&values, command_index),
         "session" => parse_session(&values, command_index),
+        "cache" => parse_cache(&values, command_index),
         "set" => parse_set(&values, command_index),
         "profiles" => {
             let mut arguments = values;
@@ -1676,7 +1803,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, session, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, cache, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, session, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1736,6 +1863,15 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             "Show the effective configuration and its source",
             "symbrowse config show [flags]",
             "      --cache-dir string         override the cache directory\n      --config-dir string        override the config directory\n      --executable-path string   override the browser executable path\n  -h, --help                     help for show\n      --log-format string        override the configured log format\n      --log-level string         override the configured log level\n      --state-dir string         override the state directory\n",
+            global,
+        )),
+        ("cache", None) => Some(
+            "Inspect the truncate-and-store output cache\n\nUsage:\n  symbrowse cache [command]\n\nAvailable Commands:\n  get         Print a cached output (optionally one line range)\n\nFlags:\n  -h, --help   help for cache\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cache [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("cache", Some("get")) => Some(plain(
+            "Print a cached output (optionally one line range)",
+            "symbrowse cache get <id> [flags]",
+            "  -h, --help           help for get\n      --range string   1-indexed inclusive line range a-b (e.g. 40-120)\n",
             global,
         )),
         ("state", None) => Some(
@@ -2403,20 +2539,16 @@ fn parse_session(values: &[String], command_index: usize) -> Result<Action, Pars
                 format = parse_format(required_value(values, index, "--output")?)?;
             }
             value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
-            "--scope" if subcommand == Some("id") => {
+            "--scope" => {
                 index += 1;
                 scope = required_value(values, index, "--scope")?.to_owned();
             }
-            value if subcommand == Some("id") && value.starts_with("--scope=") => {
-                scope = value[8..].to_owned();
-            }
-            "--prefix" if subcommand == Some("id") => {
+            value if value.starts_with("--scope=") => scope = value[8..].to_owned(),
+            "--prefix" => {
                 index += 1;
                 prefix = required_value(values, index, "--prefix")?.to_owned();
             }
-            value if subcommand == Some("id") && value.starts_with("--prefix=") => {
-                prefix = value[9..].to_owned();
-            }
+            value if value.starts_with("--prefix=") => prefix = value[9..].to_owned(),
             "--session" => {
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
@@ -2458,6 +2590,66 @@ fn parse_session(values: &[String], command_index: usize) -> Result<Action, Pars
         args: serde_json::json!({}),
         format,
     })
+}
+
+fn parse_cache(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut range = None;
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "get" if subcommand.is_none() => subcommand = Some("get"),
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            "--range" => {
+                index += 1;
+                range = Some(required_value(values, index, "--range")?.to_owned());
+            }
+            value if value.starts_with("--range=") => range = Some(value[8..].to_owned()),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse cache\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    match subcommand {
+        None => Ok(Action::Help(
+            command_help("cache", &[]).expect("cache help is defined"),
+        )),
+        Some("get") if positional.len() == 1 => Ok(Action::CacheGet {
+            id: positional.remove(0),
+            range,
+            format,
+        }),
+        Some("get") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        _ => unreachable!("cache subcommand selected from supported names"),
+    }
 }
 
 fn parse_dialog(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -3686,8 +3878,12 @@ fn write_stdout(value: &str) -> ExitCode {
 
 #[cfg(test)]
 mod tests {
-    use super::{Action, Format, KeyInitResult, ParseError, parse, render_state_key_init};
+    use super::{
+        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_string, parse,
+        parse_cache_range, render_session_id_json, render_state_key_init, session_id_info,
+    };
     use std::ffi::OsString;
+    use std::path::Path;
 
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
@@ -4083,6 +4279,30 @@ mod tests {
         assert_eq!(
             go_json_string("quote\" slash\\ newline\n"),
             "\"quote\\\" slash\\\\ newline\\n\""
+        );
+    }
+
+    #[test]
+    fn cache_get_parses_range_and_format_flags() {
+        assert_eq!(
+            parse(&args(&[
+                "cache",
+                "get",
+                "out_0123456789ab",
+                "--range=2-4",
+                "--json"
+            ])),
+            Ok(Action::CacheGet {
+                id: "out_0123456789ab".to_owned(),
+                range: Some("2-4".to_owned()),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(parse_cache_range("-3"), Ok((0, 3)));
+        assert_eq!(parse_cache_range("2-"), Ok((2, 0)));
+        assert_eq!(
+            parse_cache_range("0-3"),
+            Err("invalid range \"0-3\": start must be a positive line number".to_owned())
         );
     }
 

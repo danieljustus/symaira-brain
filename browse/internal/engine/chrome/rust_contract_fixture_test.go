@@ -72,7 +72,7 @@ func TestGenerateRustPortChromeContractFixture(t *testing.T) {
 			"empty_selector":     "selector must not be empty",
 			"timeout":            "bounded by request timeout",
 		},
-		Unsupported: []string{"har-export", "axe-core-audit"},
+		Unsupported: []string{"har-export"},
 		Cleanup: map[string]interface{}{
 			"owned_process_killed":    true,
 			"owned_process_reaped":    true,

@@ -121,7 +121,7 @@ def validate_shape(suite: str, fixture: Path) -> None:
         missing = required - data.keys()
         if missing:
             raise SystemExit(f"chrome-full: missing fixture fields: {sorted(missing)}")
-        if data["unsupported"] != ["har-export", "axe-core-audit"]:
+        if data["unsupported"] != ["har-export"]:
             raise SystemExit("chrome-full: unsupported capability boundary drifted")
         if not data["cleanup"]["owned_process_killed"] or not data["cleanup"]["private_profile_removed"]:
             raise SystemExit("chrome-full: cleanup proof is incomplete")

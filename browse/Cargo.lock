@@ -1880,6 +1880,7 @@ dependencies = [
  "sha2",
  "symbrowse-core",
  "symbrowse-daemon",
+ "symbrowse-fetch",
  "symbrowse-mcp",
  "symbrowse-protocol",
  "tempfile",

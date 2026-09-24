@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from ctypes import wintypes
@@ -124,6 +125,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
         ["session"], ["session", "id"], ["session", "list"], ["session", "info"],
+        ["cache", "get"],
         ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
         ["frame", "tree"], ["set", "offline"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
@@ -442,7 +444,29 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
 
 
 def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    cache_root = Path(env["SYMBROWSE_CACHE_DIR"])
+    output_id = "out_0123456789ab"
+    output_root = cache_root / "out"
+    output_root.mkdir(parents=True, exist_ok=True)
+    (output_root / f"{output_id}.json").write_bytes(b"first\nsecond\nthird")
+    expires = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+    created = (datetime.now(timezone.utc) - timedelta(minutes=1)).isoformat().replace("+00:00", "Z")
+    (output_root / f"{output_id}.meta.json").write_text(json.dumps({
+        "id": output_id, "created_at": created, "expires_at": expires,
+    }))
+    fetch_key = "a" * 64
+    fetch_root = cache_root / "fetch" / fetch_key[:2]
+    fetch_root.mkdir(parents=True, exist_ok=True)
+    (fetch_root / f"{fetch_key}.body").write_bytes(b"first\nsecond\nthird")
+    (fetch_root / f"{fetch_key}.meta.json").write_text(json.dumps({
+        "url": "https://fixture.invalid", "stored_at": created, "ttl": 86_400_000_000_000,
+    }))
     cases = [
+        ("CLI-002", ["cache", "get", output_id], b"", False),
+        ("CLI-002", ["cache", "get", output_id, "--range=2-2", "--json"], b"", False),
+        ("CLI-002", ["cache", "get", f"fetch:{fetch_key}", "--range=2-3", "--json"], b"", False),
+        ("CLI-003", ["cache", "get", "fetch:bad-key", "--json"], b"", False),
+        ("CLI-003", ["cache", "get", output_id, "--range=0-2", "--json"], b"", False),
         ("CLI-002", ["goto", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-002", ["open", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-003", ["state", "save"], b"", False),

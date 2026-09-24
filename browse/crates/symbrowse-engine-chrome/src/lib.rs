@@ -23,6 +23,7 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
     symbrowse_engine::capabilities::capabilities_for(
         "chrome",
         [
+            "A11yAuditor",
             "AXSelectorResolver",
             "CookieEngine",
             "DialogController",

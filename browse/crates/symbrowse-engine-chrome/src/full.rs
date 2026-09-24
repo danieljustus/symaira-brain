@@ -1,9 +1,9 @@
 //! Chrome interaction, inspection, frame, network and artifact adapter.
 //!
 //! The adapter intentionally exposes only operations that are backed by a CDP
-//! command in chromiumoxide.  Features which need a separate protocol (for
-//! example axe-core injection or HAR export) are represented by an explicit
-//! [`UnsupportedOperation`] error rather than a best-effort implementation.
+//! command in chromiumoxide. Features which need a separate protocol (for
+//! example HAR export) are represented by an explicit [`UnsupportedOperation`]
+//! error rather than a best-effort implementation.
 
 use std::{
     error::Error,
@@ -23,6 +23,9 @@ use serde_json::Value;
 use tokio::sync::Mutex;
 
 use crate::{BrowserMode, ConnectionMode, launch};
+
+// Keep the Rust audit offline and tied to the Go oracle's vendored axe-core.
+const AXE_CORE_SOURCE: &str = include_str!("../../../internal/engine/axe/assets/axe.min.js");
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnsupportedOperation(pub &'static str);
@@ -143,7 +146,7 @@ pub fn capabilities() -> ChromeCapabilities {
         .into_iter()
         .map(str::to_owned)
         .collect(),
-        inspection: ["find", "get", "is", "count"]
+        inspection: ["axe-audit", "find", "get", "is", "count"]
             .into_iter()
             .map(str::to_owned)
             .collect(),
@@ -165,10 +168,7 @@ pub fn capabilities() -> ChromeCapabilities {
         .into_iter()
         .map(str::to_owned)
         .collect(),
-        unsupported: ["har-export", "axe-core-audit"]
-            .into_iter()
-            .map(str::to_owned)
-            .collect(),
+        unsupported: ["har-export"].into_iter().map(str::to_owned).collect(),
     }
 }
 
@@ -877,9 +877,127 @@ impl ChromePage {
         )
         .into())
     }
-    pub async fn axe_audit(&self) -> Result<Artifact, Box<dyn Error + Send + Sync>> {
-        Err(UnsupportedOperation("axe-core is not bundled or injected by this crate").into())
+    /// Run the same offline axe-core audit used by the Go Chrome engine and
+    /// return its stable CLI/daemon summary shape.
+    pub async fn axe_audit(
+        &self,
+        tags: &[String],
+        selector: &str,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let mut options = serde_json::Map::new();
+        if !tags.is_empty() {
+            options.insert(
+                "runOnly".into(),
+                serde_json::json!({"type": "tag", "values": tags}),
+            );
+        }
+        if !selector.trim().is_empty() {
+            // Match the Go wrapper's explicit null option when auditing a
+            // selector root; axe-core treats the selector itself as context.
+            options.insert("exclude".into(), Value::Null);
+        }
+        let options = serde_json::to_string(&options)?;
+        let source = serde_json::to_string(AXE_CORE_SOURCE)?;
+        let root = if selector.trim().is_empty() {
+            "document".to_owned()
+        } else {
+            serde_json::to_string(selector)?
+        };
+        let expression = format!(
+            "(()=>{{if(!(window.axe&&window.axe.run)){{(0,eval)({source});}}return window.axe.run({root},{options}).then(results=>({{axe_version:window.axe.version,results}}));}})()"
+        );
+        let raw = self
+            .page
+            .evaluate(expression)
+            .await?
+            .into_value::<Value>()?;
+        let results = raw.get("results").ok_or("axe-core returned no result")?;
+        let violations = results
+            .get("violations")
+            .and_then(Value::as_array)
+            .ok_or("axe-core returned no violations array")?;
+        let violations = violations
+            .iter()
+            .map(summarize_violation)
+            .collect::<Vec<_>>();
+        // Go keeps a successful audit if reading the current URL fails.
+        let url = self.page.url().await.ok().flatten().unwrap_or_default();
+        Ok(serde_json::json!({
+            "axe_version": raw.get("axe_version").and_then(Value::as_str).unwrap_or_default(),
+            "url": url,
+            "violation_count": violations.len(),
+            "violations": violations,
+            "passes": results.get("passes").and_then(Value::as_array).map_or(0, Vec::len),
+            "incomplete": results.get("incomplete").and_then(Value::as_array).map_or(0, Vec::len),
+        }))
     }
+}
+
+fn summarize_violation(violation: &Value) -> Value {
+    let mut summary = serde_json::Map::new();
+    for field in ["id", "impact", "description"] {
+        summary.insert(
+            field.to_owned(),
+            Value::String(
+                violation
+                    .get(field)
+                    .and_then(Value::as_str)
+                    .unwrap_or_default()
+                    .to_owned(),
+            ),
+        );
+    }
+    for field in ["help", "helpUrl"] {
+        if let Some(value) = violation
+            .get(field)
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+        {
+            summary.insert(
+                if field == "helpUrl" {
+                    "help_url".to_owned()
+                } else {
+                    field.to_owned()
+                },
+                Value::String(value.to_owned()),
+            );
+        }
+    }
+    if let Some(tags) = violation
+        .get("tags")
+        .and_then(Value::as_array)
+        .filter(|tags| !tags.is_empty())
+    {
+        summary.insert("tags".to_owned(), Value::Array(tags.clone()));
+    }
+    let nodes = violation
+        .get("nodes")
+        .and_then(Value::as_array)
+        .map(|nodes| {
+            nodes
+                .iter()
+                .map(|node| {
+                    let mut summary = serde_json::Map::new();
+                    summary.insert(
+                        "target".to_owned(),
+                        node.get("target").cloned().unwrap_or(Value::Null),
+                    );
+                    for field in ["html", "impact"] {
+                        if let Some(value) = node
+                            .get(field)
+                            .and_then(Value::as_str)
+                            .filter(|value| !value.is_empty())
+                        {
+                            summary.insert(field.to_owned(), Value::String(value.to_owned()));
+                        }
+                    }
+                    Value::Object(summary)
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    summary.insert("nodes".to_owned(), Value::Array(nodes));
+    Value::Object(summary)
 }
 
 pub struct NetworkCapture {
@@ -956,7 +1074,7 @@ mod tests {
         let value = crate::canonical_capabilities();
         assert!(value.interfaces.contains(&"TabManager".to_owned()));
         assert!(value.interfaces.contains(&"FileTransfer".to_owned()));
-        assert!(value.unsupported.contains(&"A11yAuditor".to_owned()));
+        assert!(value.interfaces.contains(&"A11yAuditor".to_owned()));
         assert!(value.unsupported.contains(&"SettingsEngine".to_owned()));
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
@@ -965,8 +1083,9 @@ mod tests {
     fn capabilities_are_explicit_and_sorted_with_unsupported_features() {
         let value = capabilities();
         assert_eq!(value.interactions.len(), 11);
+        assert!(value.inspection.contains(&"axe-audit".to_owned()));
         assert!(value.artifacts.contains(&"pdf".to_owned()));
-        assert_eq!(value.unsupported, vec!["har-export", "axe-core-audit"]);
+        assert_eq!(value.unsupported, vec!["har-export"]);
     }
 
     #[test]
@@ -986,9 +1105,28 @@ mod tests {
             ..Default::default()
         };
         assert!(options.format != "png");
-        assert!(matches!(
-            UnsupportedOperation("axe-core-audit").to_string().as_str(),
-            "unsupported Chrome operation: axe-core-audit"
-        ));
+    }
+
+    #[test]
+    fn axe_summary_matches_go_field_names_and_bounds_node_data() {
+        let violation = json!({
+            "id": "label",
+            "impact": "critical",
+            "description": "Form elements must have labels",
+            "help": "Form elements must have labels",
+            "helpUrl": "https://example.test/rule",
+            "tags": ["wcag2a"],
+            "nodes": [{
+                "target": ["#email"],
+                "html": "<input id=\"email\">",
+                "impact": "critical",
+                "failureSummary": "excluded by the Go A11yNode contract"
+            }]
+        });
+        let summary = summarize_violation(&violation);
+        assert_eq!(summary["help_url"], "https://example.test/rule");
+        assert!(summary.get("helpUrl").is_none());
+        assert_eq!(summary["nodes"][0]["target"], json!(["#email"]));
+        assert!(summary["nodes"][0].get("failureSummary").is_none());
     }
 }

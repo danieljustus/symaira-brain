@@ -775,7 +775,18 @@ impl DispatchRuntime {
                 }
                 json!({"frames": frames})
             }
-            "a11y" => json!({"nodes": page.accessibility_tree().await.map_err(runtime_error)?}),
+            "a11y" => {
+                let tags = args.get("tags").cloned().unwrap_or_else(|| json!([]));
+                let tags: Vec<String> = serde_json::from_value(tags).map_err(runtime_error)?;
+                let selector = args.get("selector").and_then(Value::as_str).unwrap_or("");
+                page.axe_audit(&tags, selector)
+                    .await
+                    .map_err(|error| DaemonError {
+                        code: "a11y_failed".into(),
+                        message: error.to_string(),
+                        ..Default::default()
+                    })?
+            }
             "dialog" => {
                 let accept = args.get("accept").and_then(Value::as_bool).unwrap_or(false);
                 let prompt = args

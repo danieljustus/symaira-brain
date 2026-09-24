@@ -51,7 +51,7 @@ fn chrome_fixture_is_pinned_and_covers_eng_005_to_007() {
             .expect("screenshot error")
             .contains("png or jpeg")
     );
-    assert_eq!(fixture.unsupported, ["har-export", "axe-core-audit"]);
+    assert_eq!(fixture.unsupported, ["har-export"]);
     assert_eq!(fixture.cleanup["owned_process_killed"], true);
     assert_eq!(fixture.cleanup["owned_process_reaped"], true);
     assert_eq!(fixture.cleanup["private_profile_removed"], true);

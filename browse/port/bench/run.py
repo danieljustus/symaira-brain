@@ -352,11 +352,10 @@ def launch_daemon(command: list[str], root: Path, env: dict[str, str]) -> tuple[
     return process, stderr_path
 
 
-def daemon_endpoint(session: str, env: dict[str, str], *, static_mode: bool) -> str | Path:
+def daemon_endpoint(session: str, env: dict[str, str]) -> str | Path:
     """Return the isolated per-probe daemon endpoint for this host."""
-    if os.name == "nt" and static_mode:
-        # Matches symbrowse-daemon's default_socket_path on Windows. Session
-        # names are randomized per probe and never derived from user data.
+    if os.name == "nt":
+        # Both daemons use the same named-pipe path on Windows.
         return rf"\\.\pipe\symbrowse-{session}"
     if platform.system() == "Darwin":
         return (
@@ -499,7 +498,7 @@ def daemon_probe(
     results: list[dict[str, object]] = []
     steady_results: list[dict[str, object]] = []
     session = probe_session("r")
-    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
+    endpoint = daemon_endpoint(session, env)
     for _ in range(runs):
         started = time.perf_counter_ns()
         process: subprocess.Popen[bytes] | None = None
@@ -562,7 +561,7 @@ def mcp_probe(binary: Path, env: dict[str, str], root: Path, runs: int, *, stati
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     session = probe_session("m")
-    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
+    endpoint = daemon_endpoint(session, env)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
         deadline = time.monotonic() + 5
@@ -637,7 +636,7 @@ def fetch_probe(
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     session = probe_session("f")
-    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
+    endpoint = daemon_endpoint(session, env)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
         startup_deadline = time.monotonic() + 5
@@ -771,7 +770,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
             ).strip(),
             "host": {"system": platform.system(), "machine": platform.machine()},
-            "daemon_transport": "go-unix-socket/rust-named-pipe" if os.name == "nt" else "unix-domain-socket",
+            "daemon_transport": "windows-named-pipe" if os.name == "nt" else "unix-domain-socket",
             "daemon_session_policy": "randomized per probe invocation to avoid user or concurrent daemon collisions",
             "runs_per_workload": args.runs,
             "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
@@ -785,7 +784,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "source_revision identifies the checkout; binary SHA-256 identifies measured bytes. CI build steps bind them.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
-                *(["Windows compares Go Unix sockets with Rust named pipes; IPC transport differs."] if os.name == "nt" else []),
             ],
         }
         for name, path in (("go", args.go), ("rust", args.rust)):

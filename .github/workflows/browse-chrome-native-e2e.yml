@@ -52,6 +52,9 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      - name: Run Go engine contract oracles
+        run: go test ./internal/engine ./internal/engine/chrome ./internal/engine/doctor ./internal/flows ./cmd/symbrowse -run 'Launch|Attach|Discover|Timeout|Interaction|Inspection|Find|Wait|Tab|Frame|Dialog|Network|Upload|Download|Screenshot|A11y'
+
       - name: Fetch official Chrome for Testing artifact
         id: cft
         run: python3 port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/symbrowse-cft"
@@ -70,6 +73,7 @@ jobs:
             export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
           fi
           cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test full -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
         env:
           SYMBROWSE_E2E: '1'
           SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}

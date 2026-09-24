@@ -216,6 +216,16 @@ fn loader_matches_go_oracle_fixture() {
             "manifest_terms": bundle.manifest.terms,
             "target_names": target_names,
         });
-        assert_eq!(actual, *case, "Go loader drift for {id}");
+        let mut expected = (*case).clone();
+        #[cfg(windows)]
+        for resource in expected["resources"]
+            .as_array_mut()
+            .expect("fixture resources")
+        {
+            // Windows reports ACL-derived resource modes through the 0666 fallback.
+            resource["mode"] = json!("0666");
+            resource["executable"] = json!(false);
+        }
+        assert_eq!(actual, expected, "Go loader drift for {id}");
     }
 }
