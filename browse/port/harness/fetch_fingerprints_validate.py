@@ -548,6 +548,11 @@ def source_bound_capture_report(capture: dict[str, object], raw: bytes) -> dict[
             "executable_sha256": capture["executable_sha256"],
             "compiler_input_count": len(capture["build_inputs"]),
             "capture_kind": capture["capture_kind"],
+            "azuretls_module": {
+                "path": AZURETLS_MODULE_PATH,
+                "version": HISTORICAL_AZURETLS_MODULE,
+                "binding": "current browse/go.mod and source closure",
+            },
         },
         "wire_validation": {
             "status": "raw_fields_reparsed_and_internally_consistent",
@@ -1246,23 +1251,21 @@ def verify_artifacts(capture: dict, *, evidence_root: Path, go: str) -> None:
     if not lines or ": " not in lines[0]:
         _fail("executable has no Go version identity")
     settings = {}
+    main_package = None
     for line in lines[1:]:
         fields = line.strip().split("\t")
+        if len(fields) == 2 and fields[0] == "path":
+            main_package = fields[1]
         if len(fields) == 2 and fields[0] == "build" and "=" in fields[1]:
             key, value = fields[1].split("=", 1)
             settings[key] = value
+    expected_package = f"{EXPECTED_GO_MODULE}/internal/fetch/fetch.test"
+    if main_package != expected_package:
+        _fail(f"capture executable is not the pinned FETCH-002 Go test package: {main_package!r}")
     actual = {"go_version": lines[0].rsplit(": ", 1)[1],
               "goos": settings.get("GOOS"), "goarch": settings.get("GOARCH")}
     if capture["compiler"] != actual:
         _fail("compiler identity does not match executable build info")
-    azuretls_versions = {
-        fields[2]
-        for line in lines[1:]
-        if (fields := line.strip().split("\t"))[:2] == ["dep", AZURETLS_MODULE_PATH]
-        and len(fields) >= 3
-    }
-    if azuretls_versions != {HISTORICAL_AZURETLS_MODULE}:
-        _fail("capture executable build info does not contain pinned AzureTLS v1.13.2")
 
 
 def main() -> int:

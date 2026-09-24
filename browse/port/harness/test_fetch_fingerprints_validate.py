@@ -302,10 +302,11 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             capture = {"executable_path": str(binary),
                        "executable_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                        "compiler": {"go_version": "go1.26.6", "goos": "darwin", "goarch": "arm64"}}
+            package_path = f"{validate_mod.EXPECTED_GO_MODULE}/internal/fetch/fetch.test"
             result = subprocess.CompletedProcess(
                 [], 0,
-                f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n"
-                f"\tdep\t{validate_mod.AZURETLS_MODULE_PATH}\t{validate_mod.HISTORICAL_AZURETLS_MODULE}\th1:test\n",
+                f"{binary}: go1.26.6\n\tpath\t{package_path}\n"
+                "\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n",
                 "",
             )
             with patch.object(validate_mod.subprocess, "run", return_value=result):
@@ -320,14 +321,14 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
                         changed = dict(capture, **{field: value})
                         with self.assertRaisesRegex(validate_mod.CaptureError, message):
                             validate_mod.verify_artifacts(changed, evidence_root=root, go="unit-only-go")
-            unpinned = subprocess.CompletedProcess(
+            wrong_package = subprocess.CompletedProcess(
                 [], 0,
-                f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n"
-                f"\tdep\t{validate_mod.AZURETLS_MODULE_PATH}\tv9.9.9\th1:test\n",
+                f"{binary}: go1.26.6\n\tpath\t{validate_mod.EXPECTED_GO_MODULE}/cmd/symbrowse\n"
+                "\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n",
                 "",
             )
-            with patch.object(validate_mod.subprocess, "run", return_value=unpinned):
-                with self.assertRaisesRegex(validate_mod.CaptureError, "pinned AzureTLS v1.13.2"):
+            with patch.object(validate_mod.subprocess, "run", return_value=wrong_package):
+                with self.assertRaisesRegex(validate_mod.CaptureError, "not the pinned FETCH-002 Go test package"):
                     validate_mod.verify_artifacts(capture, evidence_root=root, go="unit-only-go")
 
     def test_compat_build_identity_is_checked(self) -> None:
