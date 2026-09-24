@@ -384,6 +384,7 @@ mod unix {
                         | std::io::ErrorKind::BrokenPipe
                         | std::io::ErrorKind::UnexpectedEof
                         | std::io::ErrorKind::NotConnected
+                        | std::io::ErrorKind::InvalidInput
                 ),
                 "unexpected cancellation I/O error: {error:?}"
             ),

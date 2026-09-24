@@ -2245,6 +2245,7 @@ mod tests {
                     | std::io::ErrorKind::BrokenPipe
                     | std::io::ErrorKind::UnexpectedEof
                     | std::io::ErrorKind::NotConnected
+                    | std::io::ErrorKind::InvalidInput
             )),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }
