@@ -329,3 +329,25 @@ func TestExtractRevRefusesEscapingSymlink(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractRevPreservesInternalSymlink(t *testing.T) {
+	dir := makeSkillDir(t)
+	if _, err := Init(dir); err != nil {
+		t.Fatal(err)
+	}
+	writeFile(t, filepath.Join(dir, "SKILL.md"), "---\nname: example\ndescription: x\n---\n")
+	if err := os.Symlink("SKILL.md", filepath.Join(dir, "alias.md")); err != nil {
+		t.Fatal(err)
+	}
+	rev, err := Commit(dir, "add internal symlink")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dst := t.TempDir()
+	if err := ExtractRev(dir, rev, dst); err != nil {
+		t.Fatal(err)
+	}
+	if target, err := os.Readlink(filepath.Join(dst, "alias.md")); err != nil || target != "SKILL.md" {
+		t.Fatalf("internal symlink not preserved: %q %v", target, err)
+	}
+}
