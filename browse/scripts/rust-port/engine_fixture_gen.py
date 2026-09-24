@@ -76,7 +76,7 @@ def manifest(root: Path) -> dict[str, object]:
         "normalization": "route tree strings omitted; refs/diffs preserved pending issue #401",
         "source_files": source_hashes(root),
         "generator_sha256": sha256(Path(__file__).read_bytes()),
-        "fixture": str(FIXTURE_RELATIVE),
+        "fixture": FIXTURE_RELATIVE.as_posix(),
         "route_count": len(data["routes"]),
     }
 
