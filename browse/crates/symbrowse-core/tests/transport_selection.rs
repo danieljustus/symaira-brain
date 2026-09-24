@@ -8,8 +8,8 @@ use std::{
 
 use serde::Deserialize;
 use symbrowse_core::config::{
-    FlagOverrides, LoadContext, TransportMode, explicit_selection, load, render_show_yaml,
-    resolve_selection,
+    explicit_selection, load, render_show_yaml, resolve_selection, FlagOverrides, LoadContext,
+    TransportMode,
 };
 
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(1);
@@ -75,6 +75,66 @@ fn every_transport_selection_fixture_case_matches_rust() {
             ),
         }
     }
+}
+
+#[test]
+fn explicit_engine_without_mode_reports_the_effective_selection() {
+    let root = std::env::temp_dir().join(format!(
+        "symbrowse-engine-only-selection-{}-{}",
+        std::process::id(),
+        NEXT_ROOT.fetch_add(1, Ordering::Relaxed)
+    ));
+    let mut context = LoadContext {
+        home: root.join("home"),
+        cwd: root.join("project"),
+        xdg_config_home: Some(root.join("xdg-config")),
+        xdg_cache_home: None,
+        xdg_state_home: None,
+        env: HashMap::new(),
+        flags: FlagOverrides::default(),
+    };
+    fs::create_dir_all(&context.home).expect("create fixture home");
+    fs::create_dir_all(&context.cwd).expect("create fixture project");
+    let global = context
+        .xdg_config_home
+        .as_ref()
+        .unwrap()
+        .join("symbrowse/config.toml");
+    fs::create_dir_all(global.parent().unwrap()).expect("create global config directory");
+
+    for (engine, expected_mode, expected_engine) in [
+        ("chrome", "browser", Some("chrome")),
+        ("safari-bidi", "browser", Some("safari-bidi")),
+        ("static", "static", None),
+    ] {
+        fs::write(&global, format!("engine = {engine:?}\n")).expect("write engine-only config");
+        let loaded = load(&context).expect("load engine-only selection");
+        let selection = explicit_selection(&loaded).expect("explicit engine must be reported");
+        assert_eq!(selection.mode, expected_mode, "engine={engine}");
+        assert_eq!(
+            selection.engine.as_deref(),
+            expected_engine,
+            "engine={engine}"
+        );
+        assert_eq!(
+            serde_json::to_value(&selection).unwrap(),
+            serde_json::json!({"mode": expected_mode, "engine": expected_engine}),
+            "engine={engine} machine-readable selection"
+        );
+        let yaml = render_show_yaml(&loaded);
+        assert!(
+            yaml.contains(&format!("mode: {expected_mode}")),
+            "engine={engine}: {yaml}"
+        );
+        match expected_engine {
+            Some(selected_engine) => assert!(
+                yaml.contains(&format!("engine: {selected_engine}")),
+                "engine={engine}: {yaml}"
+            ),
+            None => assert!(yaml.contains("engine: null"), "engine={engine}: {yaml}"),
+        }
+    }
+    fs::remove_dir_all(root).expect("remove unique config fixture root");
 }
 
 #[test]

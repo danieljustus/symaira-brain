@@ -172,9 +172,21 @@ pub struct SelectionView {
 
 #[must_use]
 pub fn explicit_selection(result: &Result) -> Option<SelectionView> {
-    (result.sources["mode"] != "default").then(|| SelectionView {
-        mode: result.config.mode.clone(),
-        engine: (result.config.mode == "browser").then(|| result.config.engine.clone()),
+    let mode_was_selected = result.sources["mode"] != "default";
+    let engine_was_selected = result.sources["engine"] != "default";
+    (mode_was_selected || engine_was_selected).then(|| {
+        // `engine = "static"` is the legacy Go spelling of the static
+        // transport. When no mode is configured, report the effective
+        // selection rather than the config struct's browser default.
+        let mode = if !mode_was_selected && result.config.engine == "static" {
+            "static"
+        } else {
+            result.config.mode.as_str()
+        };
+        SelectionView {
+            mode: mode.to_owned(),
+            engine: (mode == "browser").then(|| result.config.engine.clone()),
+        }
     })
 }
 
@@ -809,36 +821,30 @@ mod selection_tests {
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "chrome".into());
-        assert!(
-            load(&context)
-                .unwrap_err()
-                .to_string()
-                .contains("engine_not_allowed")
-        );
+        assert!(load(&context)
+            .unwrap_err()
+            .to_string()
+            .contains("engine_not_allowed"));
         context
             .env
             .insert("SYMBROWSE_MODE".into(), "browser".into());
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "unknown".into());
-        assert!(
-            load(&context)
-                .unwrap_err()
-                .to_string()
-                .contains("invalid_browser_engine")
-        );
+        assert!(load(&context)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid_browser_engine"));
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "static".into());
         context
             .env
             .insert("SYMBROWSE_MODE".into(), "unknown".into());
-        assert!(
-            load(&context)
-                .unwrap_err()
-                .to_string()
-                .contains("invalid_transport_mode")
-        );
+        assert!(load(&context)
+            .unwrap_err()
+            .to_string()
+            .contains("invalid_transport_mode"));
     }
 
     #[test]
