@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import hashlib
 import json
 import os
 import platform
 import random
+import shutil
 import statistics
 import subprocess
 import sys
@@ -32,6 +34,30 @@ TARGETS = {
     "windows-arm64": ("Windows", {"arm64", "aarch64"}),
 }
 SUPPORTED_CFT = set(TARGETS) - {"windows-arm64"}
+
+
+def remove_owned_tempdir(
+    root: Path,
+    *,
+    timeout: float = 5.0,
+    remove=shutil.rmtree,
+    sleep=time.sleep,
+) -> None:
+    """Retry removal only for this runner-owned profile after browser shutdown."""
+    deadline = time.monotonic() + timeout
+    while root.exists():
+        try:
+            remove(root)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            if error.errno not in {errno.ENOTEMPTY, errno.EBUSY, errno.EACCES, errno.EPERM}:
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise
+            sleep(min(0.05, remaining))
 
 
 class FixtureHandler(BaseHTTPRequestHandler):
@@ -227,10 +253,13 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 order.reverse()
             for implementation in order:
                 binary = args.go if implementation == "go" else args.rust
-                with tempfile.TemporaryDirectory(prefix=f"p3-{implementation[0]}-") as temp:
+                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-"))
+                try:
                     samples[implementation].append(
-                        flow(binary, implementation, args.chrome, args.chrome_launcher, url, Path(temp), index)
+                        flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)
                     )
+                finally:
+                    remove_owned_tempdir(temp)
     finally:
         server.shutdown()
         thread.join(timeout=3)

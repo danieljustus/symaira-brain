@@ -1,8 +1,13 @@
 import json
+import errno
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, native_target_matches, nearest_rank,
+    remove_owned_tempdir,
     paired_gate_passes, validate_read_output,
 )
 
@@ -27,6 +32,27 @@ class ChromePairTests(unittest.TestCase):
         self.assertTrue(native_target_matches("linux-arm64", "Linux", "aarch64"))
         self.assertFalse(native_target_matches("linux-arm64", "Linux", "x86_64"))
         self.assertTrue(native_target_matches("windows-arm64", "Windows", "ARM64"))
+
+    def test_owned_profile_cleanup_retries_transient_chrome_write(self):
+        with tempfile.TemporaryDirectory() as parent:
+            profile = Path(parent) / "Default"
+            profile.mkdir()
+            (profile / "Preferences").write_text("fixture", encoding="utf-8")
+            attempts = 0
+
+            def remove_after_browser_exit(path):
+                nonlocal attempts
+                attempts += 1
+                if attempts == 1:
+                    raise OSError(errno.ENOTEMPTY, "Chrome is still flushing profile data")
+                shutil.rmtree(path)
+
+            remove_owned_tempdir(
+                profile, timeout=0.2, remove=remove_after_browser_exit, sleep=lambda _: None
+            )
+
+            self.assertEqual(attempts, 2)
+            self.assertFalse(profile.exists())
 
 
 if __name__ == "__main__":
