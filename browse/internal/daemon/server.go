@@ -109,7 +109,7 @@ func (s *Server) bindLocked() (net.Listener, error) {
 	if err := removeStaleSocket(s.options.SocketPath); err != nil {
 		return nil, err
 	}
-	listener, err := net.Listen("unix", s.options.SocketPath)
+	listener, err := listenEndpoint(s.options.SocketPath)
 	if err != nil {
 		return nil, fmt.Errorf("listen on %s: %w", s.options.SocketPath, err)
 	}
@@ -127,7 +127,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 			return nil, nil, fmt.Errorf("no command handler is configured")
 		}
 	}
-	if err := prepareSocketDir(filepathDir(s.options.SocketPath)); err != nil {
+	if err := prepareEndpoint(s.options.SocketPath); err != nil {
 		return err
 	}
 	// Stale-socket handling and bind must be atomic across processes: two
@@ -144,15 +144,13 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Chmod(s.options.SocketPath, 0o600); err != nil {
-		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+	if err := secureEndpoint(s.options.SocketPath); err != nil {
+		cleanupEndpoint(listener, s.options.SocketPath)
 		return fmt.Errorf("secure socket: %w", err)
 	}
 	startedAt := time.Now()
 	if _, err := s.registry.Ensure(s.options.Session); err != nil {
-		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+		cleanupEndpoint(listener, s.options.SocketPath)
 		return err
 	}
 	s.mu.Lock()
@@ -160,15 +158,54 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.startedAt = startedAt
 	s.lastRequestNanos.Store(startedAt.UnixNano())
 	s.mu.Unlock()
+	var stopAcceptWorker func()
 	defer func() {
-		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+		cleanupEndpoint(listener, s.options.SocketPath)
+		if stopAcceptWorker != nil {
+			stopAcceptWorker()
+		}
 		s.mu.Lock()
 		s.listener = nil
 		s.mu.Unlock()
 		s.registry.Clear()
 	}()
 
+	deadlineListener, supportsDeadline := listener.(interface{ SetDeadline(time.Time) error })
+	var accepted <-chan acceptResult
+	if !supportsDeadline {
+		accepts := make(chan acceptResult, 1)
+		done := make(chan struct{})
+		workerDone := make(chan struct{})
+		go func() {
+			defer close(workerDone)
+			for {
+				conn, err := listener.Accept()
+				select {
+				case accepts <- acceptResult{conn: conn, err: err}:
+				case <-done:
+					if conn != nil {
+						_ = conn.Close()
+					}
+					return
+				}
+				if err != nil {
+					return
+				}
+			}
+		}()
+		stopAcceptWorker = func() {
+			close(done)
+			<-workerDone
+			select {
+			case result := <-accepts:
+				if result.conn != nil {
+					_ = result.conn.Close()
+				}
+			default:
+			}
+		}
+		accepted = accepts
+	}
 	for {
 		if err := ctx.Err(); err != nil {
 			return nil
@@ -176,21 +213,41 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		if s.options.IdleTimeout > 0 && time.Since(s.lastActivity()) >= s.options.IdleTimeout {
 			return ErrIdleTimeout
 		}
-		if deadlineListener, ok := listener.(interface{ SetDeadline(time.Time) error }); ok {
+		if supportsDeadline {
 			_ = deadlineListener.SetDeadline(time.Now().Add(250 * time.Millisecond))
-		}
-		conn, err := listener.Accept()
-		if err != nil {
-			if errors.Is(err, net.ErrClosed) || errors.Is(ctx.Err(), context.Canceled) {
-				return nil
+			conn, err := listener.Accept()
+			if err != nil {
+				if errors.Is(err, net.ErrClosed) || errors.Is(ctx.Err(), context.Canceled) {
+					return nil
+				}
+				if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+					continue
+				}
+				return fmt.Errorf("accept daemon connection: %w", err)
 			}
-			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				continue
-			}
-			return fmt.Errorf("accept daemon connection: %w", err)
+			go s.serveConn(conn)
+			continue
 		}
-		go s.serveConn(conn)
+		select {
+		case result := <-accepted:
+			if result.err != nil {
+				if errors.Is(result.err, net.ErrClosed) || errors.Is(ctx.Err(), context.Canceled) {
+					return nil
+				}
+				return fmt.Errorf("accept daemon connection: %w", result.err)
+			}
+			go s.serveConn(result.conn)
+		case <-ctx.Done():
+			return nil
+		case <-time.After(250 * time.Millisecond):
+			continue
+		}
 	}
+}
+
+type acceptResult struct {
+	conn net.Conn
+	err  error
 }
 
 // Close stops accepting new connections. Existing handlers are allowed to

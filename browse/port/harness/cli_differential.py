@@ -123,7 +123,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
-        ["session"], ["session", "list"], ["session", "info"],
+        ["session"], ["session", "id"], ["session", "list"], ["session", "info"],
         ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
         ["frame", "tree"], ["set", "offline"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
@@ -383,8 +383,7 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
     if stub:
         try:
             if os.name == "nt":
-                go_path = socket_path(env)
-                with UnixDaemonStub(go_path, status_probe=False) as go_stub:
+                with WindowsNamedPipeStub(status_probe=False) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
                 go_frame = go_stub.frame
                 go_error = go_stub.error
@@ -530,6 +529,11 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["storage", "--session", "default", "clear", "session"], b"", True),
         ("CLI-002", ["session", "list", "--json"], b"", True),
         ("CLI-002", ["session", "--session", "default", "info", "--output=json"], b"", True),
+        ("CLI-002", ["session", "id"], b"", False),
+        ("CLI-002", ["session", "id", "--scope=repo", "--prefix=fixture", "--json"], b"", False),
+        ("CLI-002", ["session", "id", "--scope=cwd", "--prefix=html<&", "--output=json"], b"", False),
+        ("CLI-003", ["session", "--scope=repo", "id"], b"", False),
+        ("CLI-003", ["session", "id", "--scope=invalid", "--json"], b"", False),
         ("CLI-003", ["storage", "set", "local", "key"], b"", False),
         ("CLI-003", ["storage", "clear"], b"", False),
         ("CLI-003", ["dialog", "auto"], b"", False),

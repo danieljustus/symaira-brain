@@ -8,8 +8,8 @@ use std::{
     ffi::OsString,
     fs,
     io::{self, Read, Write},
-    path::PathBuf,
-    process::ExitCode,
+    path::{Path, PathBuf},
+    process::{Command, ExitCode},
     time::Duration,
 };
 
@@ -18,6 +18,7 @@ use base64::{
     engine::general_purpose::{GeneralPurpose, GeneralPurposeConfig},
 };
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 use symbrowse_core::{
     batch::{self, ItemOutput},
     config::{
@@ -106,6 +107,11 @@ enum Action {
         args: serde_json::Value,
         format: Format,
     },
+    SessionId {
+        scope: String,
+        prefix: String,
+        format: Format,
+    },
     StorageGet {
         session: String,
         kind: String,
@@ -166,6 +172,21 @@ struct StateSuccess<'a> {
     data: &'a KeyInitResult,
 }
 
+#[derive(Serialize)]
+struct SessionIdInfo {
+    id: String,
+    scope: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    prefix: String,
+    origin_path: String,
+    #[serde(skip_serializing_if = "is_false")]
+    fallback: bool,
+}
+
+fn is_false(value: &bool) -> bool {
+    !value
+}
+
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     match parse(&args) {
@@ -218,6 +239,11 @@ fn main() -> ExitCode {
             args,
             format,
         }) => run_dispatch(session, command, args, format),
+        Ok(Action::SessionId {
+            scope,
+            prefix,
+            format,
+        }) => run_session_id(&scope, &prefix, format),
         Ok(Action::StorageGet {
             session,
             kind,
@@ -345,6 +371,195 @@ fn run_dispatch(
         let error = response.error.unwrap_or_default();
         render_dispatch_error(format, &error.code, error.message)
     }
+}
+
+fn run_session_id(scope: &str, prefix: &str, format: Format) -> ExitCode {
+    let info = match derive_session_id(scope, prefix) {
+        Ok(info) => info,
+        Err(message) => {
+            if format == Format::Text {
+                let _ = writeln!(io::stderr(), "{message}");
+            } else if format == Format::Json {
+                let output = format!(
+                    "{{\"success\":false,\"error\":{{\"code\":\"internal\",\"message\":{}}}}}\n",
+                    go_json_string(&message)
+                );
+                let _ = io::stdout().write_all(output.as_bytes());
+            } else if let Ok(output) =
+                Envelope::failure(ErrorCode::Internal, &message).render(format)
+            {
+                let _ = io::stdout().write_all(output.as_bytes());
+            }
+            return ExitCode::from(ErrorCode::Internal.exit_code());
+        }
+    };
+
+    match format {
+        Format::Text => write_stdout(&format!("{}\n", info.id)),
+        Format::Json => write_stdout(&render_session_id_json(&info)),
+        Format::Yaml => match serde_json::to_value(&info)
+            .map(|data| Envelope::ok(data, Vec::new()).render(Format::Yaml))
+        {
+            Ok(Ok(output)) => write_stdout(&output),
+            _ => ExitCode::from(1),
+        },
+    }
+}
+
+fn render_session_id_json(info: &SessionIdInfo) -> String {
+    let mut output = format!(
+        "{{\"success\":true,\"data\":{{\"id\":{},\"scope\":{}",
+        go_json_string(&info.id),
+        go_json_string(&info.scope)
+    );
+    if !info.prefix.is_empty() {
+        output.push_str(&format!(",\"prefix\":{}", go_json_string(&info.prefix)));
+    }
+    output.push_str(&format!(
+        ",\"origin_path\":{}",
+        go_json_string(&info.origin_path)
+    ));
+    if info.fallback {
+        output.push_str(",\"fallback\":true");
+    }
+    output.push_str("}}\n");
+    output
+}
+
+fn derive_session_id(scope: &str, prefix: &str) -> Result<SessionIdInfo, String> {
+    if !matches!(scope, "worktree" | "repo" | "cwd") {
+        return Err(format!("invalid scope {scope:?}"));
+    }
+    let cwd = session_working_directory()
+        .map_err(|error| format!("determine working directory: {error}"))?;
+    if scope == "cwd" {
+        return Ok(session_id_info(scope, prefix, &cwd, true));
+    }
+
+    let Some(top_level) = git_output(&cwd, &["rev-parse", "--show-toplevel"]) else {
+        return Ok(session_id_info(scope, prefix, &cwd, true));
+    };
+    let worktree = clean_absolute_path(Path::new(top_level.trim()));
+    let Some(common_output) = git_output(&cwd, &["rev-parse", "--git-common-dir"]) else {
+        return Ok(session_id_info(scope, prefix, &worktree, false));
+    };
+    let common = PathBuf::from(common_output.trim());
+    let common = if common.is_absolute() {
+        common
+    } else {
+        worktree.join(common)
+    };
+    let common = clean_absolute_path(&common);
+    let repository = if common.file_name().is_some_and(|name| name == ".git") {
+        common.parent().unwrap_or(&common).to_path_buf()
+    } else {
+        common
+    };
+    let anchor = if scope == "repo" {
+        repository
+    } else {
+        worktree
+    };
+    Ok(session_id_info(scope, prefix, &anchor, false))
+}
+
+fn session_working_directory() -> std::io::Result<PathBuf> {
+    let cwd = std::env::current_dir()?;
+    #[cfg(unix)]
+    if let Some(logical) = std::env::var_os("PWD").map(PathBuf::from)
+        && logical.is_absolute()
+        && let (Ok(logical_real), Ok(cwd_real)) =
+            (std::fs::canonicalize(&logical), std::fs::canonicalize(&cwd))
+        && logical_real == cwd_real
+    {
+        return Ok(clean_absolute_path(&logical));
+    }
+    Ok(clean_absolute_path(&cwd))
+}
+
+fn session_id_info(scope: &str, prefix: &str, anchor: &Path, fallback: bool) -> SessionIdInfo {
+    let origin_path = normalized_path_string(anchor);
+    let digest = Sha256::digest(origin_path.as_bytes());
+    let short_hash = digest[..8]
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect::<String>();
+    let id = if prefix.is_empty() {
+        short_hash
+    } else {
+        format!("{prefix}-{short_hash}")
+    };
+    SessionIdInfo {
+        id,
+        scope: scope.to_owned(),
+        prefix: prefix.to_owned(),
+        origin_path,
+        fallback,
+    }
+}
+
+fn git_output(directory: &Path, arguments: &[&str]) -> Option<String> {
+    let output = Command::new("git")
+        .args(arguments)
+        .current_dir(directory)
+        .output()
+        .ok()?;
+    output
+        .status
+        .success()
+        .then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
+}
+
+fn clean_absolute_path(path: &Path) -> PathBuf {
+    let mut cleaned = PathBuf::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if !cleaned.pop() && !path.has_root() {
+                    cleaned.push("..");
+                }
+            }
+            other => cleaned.push(other.as_os_str()),
+        }
+    }
+    cleaned
+}
+
+fn normalized_path_string(path: &Path) -> String {
+    let path = path.to_string_lossy().into_owned();
+    #[cfg(windows)]
+    {
+        path.replace('/', "\\")
+    }
+    #[cfg(not(windows))]
+    {
+        path
+    }
+}
+
+fn go_json_string(value: &str) -> String {
+    let mut output = String::with_capacity(value.len() + 2);
+    output.push('"');
+    for character in value.chars() {
+        match character {
+            '"' => output.push_str("\\\""),
+            '\\' => output.push_str("\\\\"),
+            '\u{0008}' => output.push_str("\\b"),
+            '\u{000c}' => output.push_str("\\f"),
+            '\n' => output.push_str("\\n"),
+            '\r' => output.push_str("\\r"),
+            '\t' => output.push_str("\\t"),
+            '\u{2028}' => output.push_str("\\u2028"),
+            '\u{2029}' => output.push_str("\\u2029"),
+            character if character <= '\u{001f}' => {
+                output.push_str(&format!("\\u{:04x}", character as u32));
+            }
+            character => output.push(character),
+        }
+    }
+    output.push('"');
+    output
 }
 
 fn run_storage_get(session: String, kind: String, key: Option<String>, format: Format) -> ExitCode {
@@ -1590,8 +1805,14 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             session_global,
         )),
         ("session", None) => Some(
-            "Inspect browser sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  info        Show session information\n  list        List sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse session [command] --help\" for more information about a command.\n".to_owned(),
+            "Inspect browser sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  id          Derive a stable, collision-free session id from the local repository layout\n  info        Show session information\n  list        List sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse session [command] --help\" for more information about a command.\n".to_owned(),
         ),
+        ("session", Some("id")) => Some(plain(
+            "Derive a stable, collision-free session id from the local repository layout",
+            "symbrowse session id [flags]",
+            "  -h, --help            help for id\n      --prefix string   optional id prefix (e.g. an agent name)\n      --scope string    anchor scope: worktree, repo or cwd (default \"worktree\")\n",
+            session_global,
+        )),
         ("session", Some("list")) => Some(plain(
             "List sessions",
             "symbrowse session list [flags]",
@@ -2159,6 +2380,8 @@ fn parse_storage(values: &[String], command_index: usize) -> Result<Action, Pars
 fn parse_session(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
+    let mut scope = String::from("worktree");
+    let mut prefix = String::new();
     let mut subcommand = None;
     let mut positional = Vec::new();
     let mut positional_only = false;
@@ -2172,7 +2395,7 @@ fn parse_session(values: &[String], command_index: usize) -> Result<Action, Pars
         }
         match value.as_str() {
             "--" => positional_only = true,
-            "list" | "info" if subcommand.is_none() => subcommand = Some(value.as_str()),
+            "list" | "info" | "id" if subcommand.is_none() => subcommand = Some(value.as_str()),
             "--json" => json = true,
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
@@ -2180,6 +2403,20 @@ fn parse_session(values: &[String], command_index: usize) -> Result<Action, Pars
                 format = parse_format(required_value(values, index, "--output")?)?;
             }
             value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            "--scope" if subcommand == Some("id") => {
+                index += 1;
+                scope = required_value(values, index, "--scope")?.to_owned();
+            }
+            value if subcommand == Some("id") && value.starts_with("--scope=") => {
+                scope = value[8..].to_owned();
+            }
+            "--prefix" if subcommand == Some("id") => {
+                index += 1;
+                prefix = required_value(values, index, "--prefix")?.to_owned();
+            }
+            value if subcommand == Some("id") && value.starts_with("--prefix=") => {
+                prefix = value[9..].to_owned();
+            }
             "--session" => {
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
@@ -2206,6 +2443,13 @@ fn parse_session(values: &[String], command_index: usize) -> Result<Action, Pars
         return Err(ParseError {
             message: format!("unknown argument {:?}", positional[0]),
             exit_code: 2,
+        });
+    }
+    if subcommand == "id" {
+        return Ok(Action::SessionId {
+            scope,
+            prefix,
+            format,
         });
     }
     Ok(Action::Dispatch {
@@ -3792,6 +4036,54 @@ mod tests {
             ])),
             Ok(Action::Help(_))
         ));
+    }
+
+    #[test]
+    fn session_id_parses_flags_and_preserves_go_json_order() {
+        assert_eq!(
+            parse(&args(&[
+                "session",
+                "--session",
+                "ignored",
+                "id",
+                "--scope=repo",
+                "--prefix",
+                "agent",
+                "--output=json"
+            ])),
+            Ok(Action::SessionId {
+                scope: "repo".to_owned(),
+                prefix: "agent".to_owned(),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["session", "id", "--scope", "invalid"])),
+            Ok(Action::SessionId {
+                scope: "invalid".to_owned(),
+                prefix: String::new(),
+                format: Format::Text,
+            })
+        );
+        assert!(parse(&args(&["session", "--scope=repo", "id"])).is_err());
+        let hashed = session_id_info("repo", "agent", Path::new("/tmp/origin"), false);
+        assert_eq!(hashed.id, "agent-28a1676df0916386");
+        assert_eq!(hashed.origin_path, "/tmp/origin");
+        let info = SessionIdInfo {
+            id: "agent-1234567890abcdef".to_owned(),
+            scope: "repo".to_owned(),
+            prefix: "agent<&".to_owned(),
+            origin_path: "/tmp/a&b".to_owned(),
+            fallback: false,
+        };
+        assert_eq!(
+            render_session_id_json(&info),
+            "{\"success\":true,\"data\":{\"id\":\"agent-1234567890abcdef\",\"scope\":\"repo\",\"prefix\":\"agent<&\",\"origin_path\":\"/tmp/a&b\"}}\n"
+        );
+        assert_eq!(
+            go_json_string("quote\" slash\\ newline\n"),
+            "\"quote\\\" slash\\\\ newline\\n\""
+        );
     }
 
     #[test]

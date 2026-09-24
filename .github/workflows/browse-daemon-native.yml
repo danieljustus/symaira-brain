@@ -43,6 +43,11 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: browse/go.mod
+      - name: Verify Go batch, output and daemon-frame oracles
+        run: |
+          go test ./cmd/symbrowse -run 'TestBatch' -count=1
+          go test ./internal/output ./cmd/symbrowse -run 'Human|YAML|Output' -count=1
+          go test ./internal/daemon -run 'Malformed|Frame|Large' -count=1
       - name: Compare native Go and Rust Browse CLI cases
         run: |
           go_binary="$RUNNER_TEMP/symbrowse-go"

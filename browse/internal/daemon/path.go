@@ -36,6 +36,11 @@ func SocketPath(session string) (string, error) {
 	if !validSession.MatchString(session) {
 		return "", fmt.Errorf("invalid session %q: use 1-64 letters, digits, '.', '_' or '-'", session)
 	}
+	if runtime.GOOS == "windows" {
+		// Keep the endpoint identical to the Rust daemon so Go oracle and Rust
+		// clients can share a session over the native Windows transport.
+		return `\\.\pipe\symbrowse-` + session, nil
+	}
 	base, err := socketBaseDir()
 	if err != nil {
 		return "", err
@@ -51,6 +56,9 @@ func SocketPathIn(base, session string) (string, error) {
 	}
 	if base == "" {
 		return "", errors.New("socket base directory is empty")
+	}
+	if runtime.GOOS == "windows" {
+		return windowsSocketPathIn(base, session), nil
 	}
 	return filepath.Join(base, session+".sock"), nil
 }
@@ -92,6 +100,11 @@ func prepareSocketDir(path string) error {
 // probed first and ErrDaemonAlreadyRunning is returned when something answers,
 // so the losing starter connects to the winner instead of replacing it.
 func removeStaleSocket(path string) error {
+	if runtime.GOOS == "windows" {
+		// Named-pipe names live in the kernel namespace, not as filesystem
+		// socket entries. ListenPipe's exclusive first instance owns creation.
+		return nil
+	}
 	info, err := os.Lstat(path)
 	if os.IsNotExist(err) {
 		return nil

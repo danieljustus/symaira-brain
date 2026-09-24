@@ -494,11 +494,6 @@ def daemon_ping_until_ready(endpoint: str | Path, session: str, process: subproc
 def daemon_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
-    if os.name == "nt" and not static_mode:
-        return {
-            "status": "unsupported",
-            "reason": "Go daemon binds Unix sockets; only the Rust candidate exposes the native Windows named pipe",
-        }
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
     results: list[dict[str, object]] = []
