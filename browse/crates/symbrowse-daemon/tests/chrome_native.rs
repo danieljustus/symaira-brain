@@ -1,59 +1,101 @@
-#![cfg(target_os = "macos")]
-
 use std::{
     fs,
-    io::{BufRead, BufReader, Read, Write},
+    io::{Read, Write},
     net::TcpListener,
-    os::unix::net::UnixStream,
     path::PathBuf,
     thread,
-    time::Duration,
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use serde_json::{Value, json};
-use symbrowse_daemon::{Frame, Server, ServerOptions, SessionSpec};
+use symbrowse_daemon::{Client, ClientOptions, Frame, Server, ServerOptions, SessionSpec};
 
 fn enabled() -> bool {
     std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1"))
 }
 
-fn request(socket: &PathBuf, command: &str, args: Value) -> Value {
-    let mut stream = UnixStream::connect(socket).expect("connect daemon");
+fn request(client: &Client, command: &str, args: Value) -> Value {
     let frame = Frame {
         cmd: command.to_owned(),
         args: Some(args),
-        session: "native-chrome".into(),
+        session: client.options().session.clone(),
         ..Frame::default()
     };
-    let line = serde_json::to_string(&frame).expect("encode frame");
-    writeln!(stream, "{line}").expect("write frame");
-    let mut response = String::new();
-    BufReader::new(stream)
-        .read_line(&mut response)
-        .expect("read response");
-    serde_json::from_str(&response).expect("decode response")
+    let response = client
+        .request(frame)
+        .unwrap_or_else(|error| panic!("request {command}: {error}"));
+    serde_json::to_value(response).expect("encode response")
 }
 
 #[test]
-fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
+fn production_daemon_path_runs_chrome_over_platform_transport() {
     if !enabled() {
         return;
     }
-    let root = std::env::temp_dir().join(format!("symbrowse-daemon-chrome-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(&root).expect("create isolated root");
-    let mut spec = SessionSpec::for_session("native-chrome");
+    let unique = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock after epoch")
+        .as_nanos();
+    let root = std::env::temp_dir().join(format!(
+        "symbrowse-daemon-chrome-{}-{unique}",
+        std::process::id()
+    ));
+    fs::create_dir(&root).expect("create isolated root");
+    let session = format!("native-chrome-{}", std::process::id());
+    let mut spec = SessionSpec::for_session(&session);
     spec.state_dir = root.join("state");
     spec.cache_dir = root.join("cache");
-    spec.socket_path = root.join("daemon.sock");
-    spec.operation_timeout = Duration::from_secs(10);
+    spec.daemon_log = root.join("daemon.log");
+    let mut private_socket_dir = None;
+    if cfg!(windows) {
+        spec.socket_path = symbrowse_daemon::default_socket_path(&session);
+    } else if cfg!(target_os = "macos") {
+        // Keep the sockaddr path short without asking the daemon to chmod the
+        // shared /tmp directory. The daemon secures only this private child.
+        let directory =
+            PathBuf::from("/private/tmp").join(format!("sbchrome-{}", std::process::id()));
+        fs::create_dir(&directory).expect("create private socket directory");
+        spec.socket_path = directory.join("daemon.sock");
+        private_socket_dir = Some(directory);
+    } else {
+        spec.socket_path = root.join("daemon.sock");
+    }
+    spec.operation_timeout = Duration::from_secs(45);
     spec.idle_timeout = Some(Duration::from_secs(30));
     let profile = spec.user_data_dir();
+    let expect_unavailable = std::env::var_os("SYMBROWSE_E2E_EXPECT_CHROME_UNAVAILABLE")
+        .is_some_and(|value| value == "1");
+    let chrome_version = std::env::var("SYMBROWSE_CHROME_VERSION").ok();
+    if expect_unavailable {
+        assert!(
+            std::env::var_os("SYMBROWSE_CHROME_EXECUTABLE").is_some(),
+            "unavailable target must use an explicit missing Chrome path"
+        );
+        assert!(
+            chrome_version.is_none(),
+            "unavailable target has no Chrome version"
+        );
+    } else {
+        assert!(
+            std::env::var_os("SYMBROWSE_CHROME_EXECUTABLE").is_some(),
+            "set SYMBROWSE_CHROME_EXECUTABLE to the isolated Chrome for Testing binary"
+        );
+        assert!(
+            chrome_version
+                .as_deref()
+                .is_some_and(|version| !version.is_empty()),
+            "set SYMBROWSE_CHROME_VERSION from the tested executable"
+        );
+        eprintln!(
+            "native_e2e_engine=chrome version={}",
+            chrome_version.unwrap()
+        );
+    }
 
     let server = std::sync::Arc::new(
         Server::new(ServerOptions {
             session_spec: Some(spec.clone()),
-            operation_timeout: Duration::from_secs(10),
+            operation_timeout: Duration::from_secs(45),
             idle_timeout: Some(Duration::from_secs(30)),
             ..ServerOptions::default()
         })
@@ -62,30 +104,82 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     let socket = spec.socket_path.clone();
     let server_for_thread = std::sync::Arc::clone(&server);
     let thread = thread::spawn(move || server_for_thread.listen_and_serve().expect("serve daemon"));
-    for _ in 0..100 {
-        if socket.exists() {
+    let client = Client::new(ClientOptions {
+        socket_path: socket.clone(),
+        session: session.clone(),
+        read_timeout: Duration::from_secs(60),
+        startup_timeout: Duration::from_secs(5),
+        autostart: false,
+        expected_engine: Some("chrome".into()),
+        ..ClientOptions::default()
+    });
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        if client
+            .request(Frame {
+                cmd: "daemon.status".into(),
+                session: session.clone(),
+                ..Frame::default()
+            })
+            .is_ok()
+        {
             break;
         }
+        assert!(
+            Instant::now() < deadline,
+            "daemon endpoint did not become ready"
+        );
         thread::sleep(Duration::from_millis(20));
     }
-    assert!(socket.exists(), "daemon socket did not appear");
 
-    let capabilities = request(&socket, "capabilities", json!({}));
+    let capabilities = request(&client, "capabilities", json!({}));
     assert_eq!(capabilities["success"], true);
+    if expect_unavailable {
+        let opened = request(
+            &client,
+            "open",
+            json!({"url": "data:text/html,<title>must-not-fallback</title>"}),
+        );
+        assert_eq!(opened["success"], false, "open response: {opened}");
+        assert!(
+            matches!(
+                opened["error"]["code"].as_str(),
+                Some("unavailable" | "precondition" | "daemon_unavailable")
+            ),
+            "missing Chrome must return the typed unavailable/precondition error: {opened}"
+        );
+        assert!(
+            opened["error"]["message"]
+                .as_str()
+                .is_some_and(|message| message.contains("SYMBROWSE_CHROME_EXECUTABLE")),
+            "error must identify the explicit missing executable: {opened}"
+        );
+        server.stop();
+        thread.join().expect("join daemon");
+        assert!(
+            !profile.exists(),
+            "an unavailable Chrome launch must not create a browser profile"
+        );
+        if let Some(directory) = private_socket_dir {
+            fs::remove_dir_all(directory).expect("remove private socket directory");
+        }
+        fs::remove_dir_all(root).expect("remove isolated root");
+        return;
+    }
     let opened = request(
-        &socket,
+        &client,
         "open",
         json!({"url": "data:text/html,<title>daemon</title><h1>native</h1>"}),
     );
     assert_eq!(opened["success"], true, "open response: {opened}");
-    let script = request(&socket, "read", json!({}));
+    let script = request(&client, "read", json!({}));
     assert!(
         script["data"]
             .as_str()
             .is_some_and(|text| text.contains("native")),
         "read response: {script}"
     );
-    let tabs = request(&socket, "tabs.list", json!({}));
+    let tabs = request(&client, "tabs.list", json!({}));
     assert_eq!(tabs["success"], true, "tabs response: {tabs}");
     let listed = tabs["data"]["tabs"].as_array().expect("tab list");
     assert!(!listed.is_empty(), "tabs response: {tabs}");
@@ -96,14 +190,14 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(active.len(), 1, "tabs response: {tabs}");
     assert_eq!(tabs["data"]["active"], active[0]["id"]);
     let created = request(
-        &socket,
+        &client,
         "tab.new",
         json!({"label":"second","url":"data:text/html,<h1>second</h1>"}),
     );
     assert_eq!(created["success"], true, "tab.new response: {created}");
     assert_eq!(created["data"]["tab"], "t2");
     assert_eq!(created["data"]["label"], "second");
-    let listed_tabs = request(&socket, "tab.list", json!({}));
+    let listed_tabs = request(&client, "tab.list", json!({}));
     assert_eq!(
         listed_tabs["success"], true,
         "tab.list response: {listed_tabs}"
@@ -113,25 +207,25 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         Some(2)
     );
     assert_eq!(listed_tabs["data"]["active"], "t2");
-    let switched = request(&socket, "tab.switch", json!({"tab":"t1"}));
+    let switched = request(&client, "tab.switch", json!({"tab":"t1"}));
     assert_eq!(switched["success"], true, "tab.switch response: {switched}");
-    let original = request(&socket, "read", json!({}));
+    let original = request(&client, "read", json!({}));
     assert!(
         original["data"]
             .as_str()
             .is_some_and(|text| text.contains("native")),
         "switched tab read: {original}"
     );
-    let closed = request(&socket, "tab.close", json!({"tab":"second"}));
+    let closed = request(&client, "tab.close", json!({"tab":"second"}));
     assert_eq!(closed["success"], true, "tab.close response: {closed}");
     assert_eq!(closed["data"]["closed"], "t2");
     assert_eq!(closed["data"]["active"], "t1");
-    let remaining = request(&socket, "tab.list", json!({}));
+    let remaining = request(&client, "tab.list", json!({}));
     assert_eq!(remaining["data"]["tabs"].as_array().map(Vec::len), Some(1));
-    let window = request(&socket, "window.new", json!({}));
+    let window = request(&client, "window.new", json!({}));
     assert_eq!(window["success"], true, "window.new response: {window}");
     assert_eq!(window["data"]["tab"], "t2");
-    let closed_window = request(&socket, "tab.close", json!({}));
+    let closed_window = request(&client, "tab.close", json!({}));
     assert_eq!(
         closed_window["success"], true,
         "close active tab: {closed_window}"
@@ -152,17 +246,17 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
             .expect("write fixture header");
         stream.write_all(body).expect("write fixture body");
     });
-    let started = request(&socket, "network.capture", json!({}));
+    let started = request(&client, "network.capture", json!({}));
     assert_eq!(started["success"], true, "network capture start: {started}");
     assert_eq!(started["data"]["started"], true);
     let url = format!("http://{address}/");
-    let network_page = request(&socket, "open", json!({"url": url}));
+    let network_page = request(&client, "open", json!({"url": url}));
     assert_eq!(
         network_page["success"], true,
         "network page: {network_page}"
     );
     fixture.join().expect("fixture thread");
-    let captured = request(&socket, "network.requests", json!({}));
+    let captured = request(&client, "network.requests", json!({}));
     assert_eq!(captured["success"], true, "network capture: {captured}");
     assert!(
         captured["data"]["count"]
@@ -176,20 +270,27 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         "network capture: {captured}"
     );
     let framed = request(
-        &socket,
+        &client,
         "open",
         json!({"url": "data:text/html,<iframe id='outer' srcdoc=\"<iframe id='inner' srcdoc='nested'></iframe>\"></iframe>"}),
     );
     assert_eq!(framed["success"], true, "frame page: {framed}");
-    let frames = request(&socket, "frame.tree", json!({}));
+    let frames = request(&client, "frame.tree", json!({}));
     assert_eq!(frames["success"], true, "frame response: {frames}");
-    let listed = frames["data"]["frames"].as_array().expect("frame tree");
-    let root_frame = listed.first().expect("root frame");
-    let children = root_frame["children"]
+    let roots = frames["data"]["frames"]
         .as_array()
-        .expect("nested frame children");
-    assert!(!children.is_empty(), "frame response: {frames}");
-    let flat = request(&socket, "frames.list", json!({}));
+        .expect("frame tree roots");
+    assert_eq!(roots.len(), 1, "frame response: {frames}");
+    let outer = roots[0]["children"][0].clone();
+    assert_eq!(outer["name"], "outer", "frame response: {frames}");
+    assert_eq!(
+        outer["parent_id"], roots[0]["id"],
+        "frame response: {frames}"
+    );
+    let inner = outer["children"][0].clone();
+    assert_eq!(inner["name"], "inner", "frame response: {frames}");
+    assert_eq!(inner["parent_id"], outer["id"], "frame response: {frames}");
+    let flat = request(&client, "frames.list", json!({}));
     let flat_frames = flat["data"]["frames"].as_array().expect("flat frames");
     assert!(flat_frames.len() >= 2, "flat frame response: {flat}");
     assert!(
@@ -197,17 +298,11 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
             .iter()
             .all(|frame| frame.get("children").is_none())
     );
-    assert!(
-        children
-            .iter()
-            .any(|frame| frame["parent_id"].as_str() == root_frame["id"].as_str()),
-        "frame response: {frames}"
-    );
-    let ax = request(&socket, "a11y", json!({}));
+    let ax = request(&client, "a11y", json!({}));
     assert_eq!(ax["success"], true, "a11y response: {ax}");
 
     let interactions = request(
-        &socket,
+        &client,
         "open",
         json!({"url": "data:text/html,%3Cinput%20id%3D%27text%27%20onfocus%3D%22this.dataset.focused%3D%27yes%27%22%3E%3Cselect%20id%3D%27choice%27%3E%3Coption%20value%3D%27one%27%3EOne%3C%2Foption%3E%3Coption%20value%3D%27two%27%3ETwo%3C%2Foption%3E%3C%2Fselect%3E%3Cinput%20id%3D%27check%27%20type%3D%27checkbox%27%3E%3Cdiv%20id%3D%27dbl%27%20ondblclick%3D%22this.dataset.doubled%3D%27yes%27%22%3EDouble%3C%2Fdiv%3E%3Cdiv%20id%3D%27hover%27%20onmouseenter%3D%22this.dataset.hovered%3D%27yes%27%22%3EHover%3C%2Fdiv%3E"}),
     );
@@ -223,53 +318,53 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
         ("check", json!({"selector":"#check"})),
         ("uncheck", json!({"selector":"#check"})),
     ] {
-        let response = request(&socket, command, args);
+        let response = request(&client, command, args);
         assert_eq!(response["success"], true, "{command} response: {response}");
         assert_eq!(response["data"]["action"], command);
         if command == "focus" {
             let focused = request(
-                &socket,
+                &client,
                 "get.attr",
                 json!({"selector":"#text","attribute":"data-focused"}),
             );
             assert_eq!(focused["data"], "yes", "focus state: {focused}");
         }
         if command == "check" {
-            let checked = request(&socket, "is.checked", json!({"selector":"#check"}));
+            let checked = request(&client, "is.checked", json!({"selector":"#check"}));
             assert_eq!(checked["data"], true, "check state: {checked}");
         }
     }
     let doubled = request(
-        &socket,
+        &client,
         "get.attr",
         json!({"selector":"#dbl","attribute":"data-doubled"}),
     );
     assert_eq!(doubled["data"], "yes", "double-click state: {doubled}");
     let hovered = request(
-        &socket,
+        &client,
         "get.attr",
         json!({"selector":"#hover","attribute":"data-hovered"}),
     );
     assert_eq!(hovered["data"], "yes", "hover state: {hovered}");
-    let selected = request(&socket, "get.value", json!({"selector":"#choice"}));
+    let selected = request(&client, "get.value", json!({"selector":"#choice"}));
     assert_eq!(selected["data"], "two", "select state: {selected}");
-    let checked = request(&socket, "is.checked", json!({"selector":"#check"}));
+    let checked = request(&client, "is.checked", json!({"selector":"#check"}));
     assert_eq!(checked["data"], false, "uncheck state: {checked}");
 
-    let no_dialog = request(&socket, "dialog.status", json!({}));
+    let no_dialog = request(&client, "dialog.status", json!({}));
     assert_eq!(
         no_dialog["success"], true,
         "empty dialog status: {no_dialog}"
     );
     assert_eq!(no_dialog["data"]["handled"], true);
     let prompt_page = request(
-        &socket,
+        &client,
         "open",
         json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Eprompt('native%20prompt'%2C'seed')%2C100)%3C%2Fscript%3E"}),
     );
     assert_eq!(prompt_page["success"], true, "prompt page: {prompt_page}");
     thread::sleep(Duration::from_millis(250));
-    let prompt_status = request(&socket, "dialog.status", json!({}));
+    let prompt_status = request(&client, "dialog.status", json!({}));
     assert_eq!(
         prompt_status["success"], true,
         "prompt status: {prompt_status}"
@@ -278,63 +373,65 @@ fn production_daemon_path_runs_chrome_and_reaps_owned_profile() {
     assert_eq!(prompt_status["data"]["message"], "native prompt");
     assert_eq!(prompt_status["data"]["default"], "seed");
     assert_eq!(prompt_status["data"]["handled"], false);
-    let accepted = request(&socket, "dialog.accept", json!({"text":"answer"}));
+    let accepted = request(&client, "dialog.accept", json!({"text":"answer"}));
     assert_eq!(accepted["success"], true, "dialog accept: {accepted}");
     assert_eq!(accepted["data"], json!({"handled":true,"action":"accept"}));
-    let handled = request(&socket, "dialog.status", json!({}));
+    let handled = request(&client, "dialog.status", json!({}));
     assert_eq!(
         handled["data"]["handled"], true,
         "handled status: {handled}"
     );
 
     let alert_page = request(
-        &socket,
+        &client,
         "open",
         json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('native%20alert')%2C100)%3C%2Fscript%3E"}),
     );
     assert_eq!(alert_page["success"], true, "alert page: {alert_page}");
     thread::sleep(Duration::from_millis(250));
-    let dismissed = request(&socket, "dialog.dismiss", json!({}));
+    let dismissed = request(&client, "dialog.dismiss", json!({}));
     assert_eq!(dismissed["success"], true, "dialog dismiss: {dismissed}");
     assert_eq!(
         dismissed["data"],
         json!({"handled":true,"action":"dismiss"})
     );
-    let no_pending = request(&socket, "dialog.dismiss", json!({}));
+    let no_pending = request(&client, "dialog.dismiss", json!({}));
     assert_eq!(
         no_pending["success"], false,
         "no-pending dismiss: {no_pending}"
     );
 
-    let auto = request(&socket, "dialog.auto", json!({"mode":"dismiss"}));
+    let auto = request(&client, "dialog.auto", json!({"mode":"dismiss"}));
     assert_eq!(auto["success"], true, "dialog auto: {auto}");
     assert_eq!(auto["data"], json!({"auto_mode":"dismiss"}));
     let auto_alert = request(
-        &socket,
+        &client,
         "open",
         json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('auto%20dismiss')%2C100)%3C%2Fscript%3E"}),
     );
     assert_eq!(auto_alert["success"], true, "auto alert page: {auto_alert}");
     thread::sleep(Duration::from_millis(250));
-    let auto_status = request(&socket, "dialog.status", json!({}));
+    let auto_status = request(&client, "dialog.status", json!({}));
     assert_eq!(auto_status["success"], true, "auto status: {auto_status}");
     assert_eq!(auto_status["data"]["handled"], true);
     assert_eq!(auto_status["data"]["auto_mode"], "dismiss");
-    let auto_off = request(&socket, "dialog.auto", json!({"mode":"off"}));
+    let auto_off = request(&client, "dialog.auto", json!({"mode":"off"}));
     assert_eq!(auto_off["success"], true, "dialog auto off: {auto_off}");
     assert_eq!(auto_off["data"], json!({"auto_mode":"off"}));
 
-    let unsupported = request(&socket, "network.har", json!({}));
+    let unsupported = request(&client, "network.har", json!({}));
     assert_eq!(unsupported["success"], false);
     assert_eq!(unsupported["error"]["code"], "unsupported");
 
-    // The one-second idle budget lets the production accept loop stop and run
-    // its owned socket/profile cleanup without touching any user browser.
+    // Stop the production accept loop before removing this test's private state.
     server.stop();
     let _ = thread.join();
     // A configured session profile is persistent by contract. The daemon must
     // not delete it; only the engine's internally-created temporary profile is
     // removable on close.
     assert!(profile.exists(), "configured session profile disappeared");
+    if let Some(directory) = private_socket_dir {
+        fs::remove_dir_all(directory).expect("remove private socket directory");
+    }
     let _ = fs::remove_dir_all(root);
 }

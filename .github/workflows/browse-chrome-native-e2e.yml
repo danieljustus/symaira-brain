@@ -1,0 +1,76 @@
+name: Browse Chrome native E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['browse/**', '.github/workflows/browse-chrome-native-e2e.yml']
+  push:
+    branches: [main]
+    paths: ['browse/**', '.github/workflows/browse-chrome-native-e2e.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browse-chrome-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chrome-native:
+    name: Chrome daemon E2E (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-amd64
+            cft: linux64
+          - runner: ubuntu-24.04-arm
+            platform: linux-arm64
+            cft: linux-arm64
+          - runner: macos-15-intel
+            platform: darwin-amd64
+            cft: mac-x64
+          - runner: macos-15
+            platform: darwin-arm64
+            cft: mac-arm64
+          - runner: windows-2025
+            platform: windows-amd64
+            cft: win64
+          - runner: windows-11-arm
+            platform: windows-arm64
+            cft: win-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Fetch official Chrome for Testing artifact
+        id: cft
+        run: python3 port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/symbrowse-cft"
+
+      - name: Run Chrome production-daemon E2E
+        if: steps.cft.outputs.available == 'true'
+        run: cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}
+          SYMBROWSE_CHROME_VERSION: ${{ steps.cft.outputs.version }}
+
+      - name: Verify explicit unavailable behavior on Windows ARM64
+        if: steps.cft.outputs.available == 'false'
+        run: |
+          echo "No official Chrome for Testing Windows ARM64 asset is published at ${{ steps.cft.outputs.metadata }}."
+          echo "Testing that an explicitly selected but unavailable Chrome returns a typed error without engine substitution."
+          cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_E2E_EXPECT_CHROME_UNAVAILABLE: '1'
+          SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}
