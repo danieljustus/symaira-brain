@@ -258,7 +258,8 @@ fn home_for_platform(
     user_profile: Option<std::ffi::OsString>,
     windows: bool,
 ) -> Option<std::ffi::OsString> {
-    if windows { user_profile } else { home }
+    let selected = if windows { user_profile } else { home };
+    selected.filter(|path| !path.is_empty())
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -807,6 +808,14 @@ mod selection_tests {
         );
         assert_eq!(home_for_platform(Some("ignored".into()), None, true), None);
         assert_eq!(home_for_platform(None, Some("ignored".into()), false), None);
+        assert_eq!(
+            home_for_platform(Some("/unix/home".into()), Some("".into()), true),
+            None
+        );
+        assert_eq!(
+            home_for_platform(Some("".into()), Some("C:\\Users\\agent".into()), false),
+            None
+        );
     }
 
     #[test]
