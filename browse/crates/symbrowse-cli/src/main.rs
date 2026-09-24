@@ -342,6 +342,7 @@ fn run_dispatch(
     let is_cookie_clear = frame.cmd == "cookies.clear";
     let is_cookie_set = frame.cmd == "cookies.set";
     let is_cookie_list = frame.cmd == "cookies.list";
+    let is_upload = frame.cmd == "upload";
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
             .ok()
@@ -432,6 +433,13 @@ fn run_dispatch(
             return write_stdout("ok\n");
         }
         let response_data = response.data.unwrap_or(serde_json::Value::Null);
+        if is_upload && format == Format::Text {
+            let count = response_data
+                .get("uploaded")
+                .and_then(serde_json::Value::as_array)
+                .map_or(0, Vec::len);
+            return write_stdout(&format!("uploaded {count} file(s)\n"));
+        }
         if is_cookie_list && format == Format::Text {
             return match render_cookie_list_text(&response_data, &cookie_reveal) {
                 Ok(output) => write_stdout(&output),
@@ -2191,7 +2199,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
         | "focus" | "hover" | "select" | "uncheck" | "scroll" | "scrollintoview" | "a11y"
-        | "screenshot" => parse_dispatch(&values, command_index),
+        | "screenshot" | "upload" => parse_dispatch(&values, command_index),
         command => Err(ParseError {
             message: format!("unknown command {command:?} for \"symbrowse\""),
             exit_code: 2,
@@ -2232,7 +2240,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2399,6 +2407,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             "  -h, --help   help for clear\n",
             session_global,
         )),
+        ("upload", None) => Some("upload sets the value of a file input element matching <selector>.\n\nAccepted selector forms:\n  - CSS selector (e.g. \"button.submit\", \"#username\", \"input[name='q']\")\n  - Stable @eN ref from snapshot (e.g. \"@e1\", \"@e2\")\n  - Role/name pair as supported by the engine (e.g. role and accessible name)\n\nPositional arguments:\n  <selector>  Target file input element\n  <files...>  One or more local file paths to upload\n\nOptional [value] argument:\n  Not used; specify file paths as positional arguments.\n\nUsage:\n  symbrowse upload <selector> <files...> [flags]\n\nFlags:\n  -h, --help             help for upload\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("session", None) => Some(
             "Inspect browser sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  id          Derive a stable, collision-free session id from the local repository layout\n  info        Show session information\n  list        List sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse session [command] --help\" for more information about a command.\n".to_owned(),
         ),
@@ -2566,6 +2575,16 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     let mut positional_only = false;
     while index < values.len() {
         let value = &values[index];
+        if name == "upload"
+            && !positional_only
+            && value.starts_with('-')
+            && !matches!(value.as_str(), "--" | "--json" | "--output" | "--session")
+            && !value.starts_with("--json=")
+            && !value.starts_with("--output=")
+            && !value.starts_with("--session=")
+        {
+            return Err(unknown_flag(value));
+        }
         if interaction
             && !positional_only
             && value.starts_with('-')
@@ -2767,6 +2786,29 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     }
     let supplied_positional_count = positional.len();
     match name {
+        "upload" => {
+            if supplied_positional_count < 2 {
+                return Err(ParseError {
+                    message: format!(
+                        "requires at least 2 arg(s), only received {supplied_positional_count}"
+                    ),
+                    exit_code: 2,
+                });
+            }
+            args.insert(
+                "selector".into(),
+                serde_json::Value::String(positional.remove(0)),
+            );
+            args.insert(
+                "files".into(),
+                serde_json::Value::Array(
+                    positional
+                        .drain(..)
+                        .map(serde_json::Value::String)
+                        .collect(),
+                ),
+            );
+        }
         "fetch" | "read" | "open" | "goto" => {
             take_positional(&mut args, &mut positional, "url");
         }
@@ -5311,6 +5353,7 @@ mod tests {
             "state",
             "tab",
             "tools",
+            "upload",
             "version",
             "workflow",
         ] {
@@ -5371,6 +5414,67 @@ mod tests {
             panic!("help --help should print help command usage");
         };
         assert_eq!(help_usage, super::help_command_help());
+    }
+
+    #[test]
+    fn upload_cli_preserves_file_arguments_without_client_supplied_roots() {
+        let Action::Dispatch {
+            session,
+            command,
+            args: payload,
+            ..
+        } = parse(&args(&[
+            "upload",
+            "input[type=file]",
+            "one.txt",
+            "--session",
+            "alpha",
+            "two.txt",
+        ]))
+        .expect("upload dispatch")
+        else {
+            panic!("upload should dispatch");
+        };
+        assert_eq!(session, "alpha");
+        assert_eq!(command, "upload");
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "selector":"input[type=file]",
+                "files":["one.txt", "two.txt"]
+            })
+        );
+
+        let Action::Dispatch { args: payload, .. } = parse(&args(&[
+            "upload",
+            "@e2",
+            "--json",
+            "--",
+            "-leading-dash.txt",
+        ]))
+        .expect("upload paths after --") else {
+            panic!("upload should dispatch");
+        };
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "selector":"@e2",
+                "files":["-leading-dash.txt"]
+            })
+        );
+        assert!(parse(&args(&["upload"])).is_err());
+        assert!(parse(&args(&["upload", "input[type=file]"])).is_err());
+        assert!(parse(&args(&["upload", "--selector", "#file", "one.txt"])).is_err());
+        assert!(
+            parse(&args(&[
+                "upload",
+                "#file",
+                "one.txt",
+                "--allowed-dirs",
+                "/tmp"
+            ]))
+            .is_err()
+        );
     }
 
     #[test]

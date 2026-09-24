@@ -957,28 +957,13 @@ impl DispatchRuntime {
             "pdf" => serde_json::to_value(page.pdf().await.map_err(runtime_error)?)
                 .map_err(runtime_error)?,
             "upload" => {
-                let files = args
-                    .get("files")
-                    .and_then(Value::as_array)
-                    .ok_or_else(|| malformed("upload requires files"))?
-                    .iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned)
-                    .collect::<Vec<_>>();
-                let allowed = args
-                    .get("allowed_dirs")
-                    .and_then(Value::as_array)
-                    .map(|v| {
-                        v.iter()
-                            .filter_map(Value::as_str)
-                            .map(str::to_owned)
-                            .collect::<Vec<_>>()
-                    })
-                    .unwrap_or_default();
-                page.upload_files(required_string(args, "selector")?, &files, &allowed)
+                let request = upload_request(args, &self.spec.upload_dirs)?;
+                let checked = symbrowse_engine::files::guard_upload_request(&request)
+                    .map_err(runtime_error)?;
+                page.upload_files(&request.selector, &request.files, &request.allowed_dirs)
                     .await
                     .map_err(runtime_error)?;
-                json!({"uploaded": files})
+                json!({"uploaded": checked.uploaded})
             }
             "open" | "goto" => page
                 .open(required_string(args, "url")?)
@@ -1843,6 +1828,30 @@ pub(crate) fn storage_kind(
     }
 }
 
+fn upload_request(
+    args: &serde_json::Map<String, Value>,
+    configured_dirs: &[String],
+) -> Result<symbrowse_engine::files::UploadRequest, DaemonError> {
+    let files = args
+        .get("files")
+        .and_then(Value::as_array)
+        .ok_or_else(|| malformed("upload requires files"))?
+        .iter()
+        .map(|file| {
+            file.as_str()
+                .map(str::to_owned)
+                .ok_or_else(|| malformed("upload files must contain strings"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(symbrowse_engine::files::UploadRequest {
+        selector: required_string(args, "selector")?.to_owned(),
+        files,
+        // This boundary is daemon-owned: untrusted frames may never widen the
+        // configured roots by providing their own `allowed_dirs` value.
+        allowed_dirs: configured_dirs.to_vec(),
+    })
+}
+
 pub(crate) fn storage_list_script(kind: &str) -> String {
     let store = if kind == "session" {
         "sessionStorage"
@@ -2258,6 +2267,23 @@ mod tests {
         spec.engine = "static".into();
         spec.mode = "static".into();
         spec
+    }
+
+    #[test]
+    fn upload_frames_cannot_widen_server_configured_roots() {
+        let args = json!({
+            "selector": "input[type=file]",
+            "files": ["/safe/uploads/fixture.txt"],
+            "allowed_dirs": ["/attacker/controlled"]
+        });
+        let request = super::upload_request(
+            args.as_object().expect("object args"),
+            &["/safe/uploads".to_owned()],
+        )
+        .expect("well-formed upload request");
+        assert_eq!(request.selector, "input[type=file]");
+        assert_eq!(request.files, ["/safe/uploads/fixture.txt"]);
+        assert_eq!(request.allowed_dirs, ["/safe/uploads"]);
     }
 
     #[test]

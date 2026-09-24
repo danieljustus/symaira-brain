@@ -17,6 +17,8 @@ pub struct SessionSpec {
     pub executable_path: PathBuf,
     pub cdp_endpoint: String,
     pub allowed_domains: Vec<String>,
+    /// Server-owned filesystem roots accepted by the path-guarded upload route.
+    pub upload_dirs: Vec<String>,
     pub ssrf_enabled: bool,
     pub allow_private: bool,
     pub fetch_robots: bool,
@@ -45,6 +47,12 @@ impl SessionSpec {
             executable_path: PathBuf::new(),
             cdp_endpoint: String::new(),
             allowed_domains: Vec::new(),
+            upload_dirs: vec![
+                std::env::current_dir()
+                    .unwrap_or_else(|_| PathBuf::from("."))
+                    .to_string_lossy()
+                    .into_owned(),
+            ],
             ssrf_enabled: false,
             allow_private: false,
             fetch_robots: true,
@@ -78,6 +86,7 @@ impl SessionSpec {
         spec.executable_path = PathBuf::from(&config.executable_path);
         spec.cdp_endpoint = config.cdp_endpoint.clone();
         spec.allowed_domains = config.allowed_domains.clone();
+        spec.upload_dirs = config.upload_dirs.clone();
         spec.ssrf_enabled = config.ssrf_enabled;
         spec.allow_private = config.allow_private;
         spec.fetch_robots = config.fetch_robots;
@@ -228,6 +237,32 @@ mod tests {
         assert!(spec.state_store_dir().ends_with("states"));
         assert!(spec.user_data_dir().ends_with("sessions/alpha"));
         assert!(spec.output_cache_dir().ends_with("out"));
+    }
+
+    #[test]
+    fn configured_upload_roots_are_owned_by_the_session_spec() {
+        let root =
+            std::env::temp_dir().join(format!("symbrowse-upload-spec-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        context.env.insert(
+            "SYMBROWSE_UPLOAD_DIRS".into(),
+            format!(
+                "{},{}",
+                root.join("one").display(),
+                root.join("two").display()
+            ),
+        );
+        let config = load(&context).expect("load config").config;
+        let spec = SessionSpec::from_config(&config, "alpha");
+        assert_eq!(spec.upload_dirs, config.upload_dirs);
     }
 
     #[test]
