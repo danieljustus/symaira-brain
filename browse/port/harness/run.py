@@ -120,6 +120,30 @@ def run_daemon_frame_limit_case(case: dict, root: Path, env: dict[str, str]) -> 
         run(case[key], root, env)
 
 
+def run_daemon_registry_case(case: dict, root: Path, env: dict[str, str]) -> None:
+    outputs = {}
+    for language, key in (("Go", "go_oracle"), ("Rust", "rust_oracle")):
+        command = case[key]
+        print("+", " ".join(command), flush=True)
+        result = subprocess.run(
+            command,
+            cwd=root,
+            env=env,
+            check=True,
+            timeout=600,
+            capture_output=True,
+            text=True,
+        )
+        outputs[language] = json.loads(result.stdout)
+    if outputs["Go"] != outputs["Rust"]:
+        raise AssertionError(
+            "DMN-007 Go/Rust registry JSON-semantic outputs differ: "
+            f"Go={outputs['Go']!r}, Rust={outputs['Rust']!r}"
+        )
+    run(case["go"], root, env)
+    run(case["rust"], root, env)
+
+
 def wait_for_path(path: Path, timeout: float = 5.0) -> None:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -453,6 +477,7 @@ ALL_SUITES = (
     "workflows",
     "daemon",
     "daemon-frame-limits",
+    "daemon-session-registry",
     "daemon-contracts",
     "chrome-spike",
     "chrome-full",
@@ -706,6 +731,12 @@ def main() -> int:
         run_daemon_frame_limit_case(case, root, env)
         print("DMN-002 frame-limit suite passed")
         return 0
+    elif args.suite == "daemon-session-registry":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        case = next(case for case in fixture["cases"] if case["id"] == "DMN-007-session-registry")
+        run_daemon_registry_case(case, root, env)
+        print("DMN-007 session-registry suite passed (Go/Rust JSON-semantic)")
+        return 0
     elif args.suite == "daemon-contracts":
         fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
         if fixture.get("schema_version") != 1:
@@ -777,6 +808,10 @@ def main() -> int:
             if case["id"] == "DMN-002-frame-limits":
                 run_daemon_frame_limit_case(case, root, env)
                 print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
+                continue
+            if case["id"] == "DMN-007-session-registry":
+                run_daemon_registry_case(case, root, env)
+                print(f"executed {case['id']} Go/Rust JSON-semantic oracle", flush=True)
                 continue
             run(case["go"], root, env)
             run(case["rust"], root, env)
