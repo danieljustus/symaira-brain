@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import json
 import os
@@ -14,6 +15,7 @@ import tempfile
 import threading
 from pathlib import Path
 from typing import Any
+from ctypes import wintypes
 
 
 MAX_CAPTURE_BYTES = 1 << 20
@@ -114,6 +116,21 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
              "criterion": "Rust advertises exactly its implemented root commands; each primary command exists in Go",
              "go_commands": sorted(go_commands), "rust_commands": sorted(advertised),
              "go": output_record(go_root), "rust": output_record(rust_root)}]
+    go_paths = [
+        ["batch"], ["config"], ["config", "show"], ["eval"], ["flow", "list"],
+        ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
+        ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
+        ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
+    ]
+    for path in go_paths:
+        argv = [*path, "--help"]
+        go_result = run_process(go, argv, env)
+        rust_result = run_process(rust, argv, env)
+        equal = all(go_result.get(key) == rust_result.get(key)
+                    for key in ("returncode", "stdout", "stderr"))
+        rows.append({"case": "CLI-001-supported-byte", "argv": argv, "matched": equal,
+                     "criterion": "byte-identical Go help for a Rust-implemented command",
+                     "go": output_record(go_result), "rust": output_record(rust_result)})
     for argv in (["flow", "--help"], ["flow", "validate", "--help"],
                  ["state", "key", "init", "--help"], ["tools", "list", "--help"],
                  ["config", "show", "--help"]):
@@ -136,8 +153,8 @@ class UnixDaemonStub:
         self.listener: socket.socket | None = None
 
     def __enter__(self) -> "UnixDaemonStub":
-        if os.name != "posix":
-            raise RuntimeError("the local CLI daemon stub currently requires Unix sockets")
+        if not hasattr(socket, "AF_UNIX"):
+            raise RuntimeError("this Python runtime does not expose Unix-domain sockets")
         self.path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.listener.bind(str(self.path))
@@ -188,6 +205,114 @@ class UnixDaemonStub:
             pass
 
 
+class WindowsNamedPipeStub:
+    """Bounded byte-stream stub for the production Windows daemon pipe."""
+
+    PIPE = rf"\\.\pipe\symbrowse-{SESSION}"
+    PIPE_ACCESS_DUPLEX = 0x00000003
+    PIPE_TYPE_BYTE = 0x00000000
+    PIPE_READMODE_BYTE = 0x00000000
+    PIPE_WAIT = 0x00000000
+    ERROR_PIPE_CONNECTED = 535
+    INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
+
+    def __init__(self, *, status_probe: bool):
+        self.frame: dict[str, Any] | None = None
+        self.error: str | None = None
+        self.status_probe = status_probe
+        self.thread: threading.Thread | None = None
+        self.ready = threading.Event()
+        self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        self.kernel.CreateNamedPipeW.argtypes = [
+            wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD,
+            wintypes.DWORD, wintypes.DWORD, wintypes.DWORD, wintypes.LPVOID,
+        ]
+        self.kernel.CreateNamedPipeW.restype = wintypes.HANDLE
+        self.kernel.ConnectNamedPipe.argtypes = [wintypes.HANDLE, wintypes.LPVOID]
+        self.kernel.ConnectNamedPipe.restype = wintypes.BOOL
+        self.kernel.ReadFile.argtypes = [
+            wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD,
+            ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID,
+        ]
+        self.kernel.ReadFile.restype = wintypes.BOOL
+        self.kernel.WriteFile.argtypes = [
+            wintypes.HANDLE, wintypes.LPCVOID, wintypes.DWORD,
+            ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID,
+        ]
+        self.kernel.WriteFile.restype = wintypes.BOOL
+        self.kernel.FlushFileBuffers.argtypes = [wintypes.HANDLE]
+        self.kernel.DisconnectNamedPipe.argtypes = [wintypes.HANDLE]
+        self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+
+    def __enter__(self) -> "WindowsNamedPipeStub":
+        self.thread = threading.Thread(target=self._serve, daemon=True)
+        self.thread.start()
+        if not self.ready.wait(timeout=5):
+            raise RuntimeError(self.error or "Windows daemon test pipe was not ready")
+        return self
+
+    def _win_error(self, operation: str) -> OSError:
+        return ctypes.WinError(ctypes.get_last_error(), operation)
+
+    def _serve(self) -> None:
+        try:
+            request_count = 2 if self.status_probe else 1
+            for request_index in range(request_count):
+                handle = self.kernel.CreateNamedPipeW(
+                    self.PIPE, self.PIPE_ACCESS_DUPLEX,
+                    self.PIPE_TYPE_BYTE | self.PIPE_READMODE_BYTE | self.PIPE_WAIT,
+                    1, MAX_CAPTURE_BYTES, MAX_CAPTURE_BYTES, 5000, None,
+                )
+                if handle == self.INVALID_HANDLE_VALUE:
+                    raise self._win_error("CreateNamedPipeW")
+                if request_index == 0:
+                    self.ready.set()
+                try:
+                    if not self.kernel.ConnectNamedPipe(handle, None):
+                        if ctypes.get_last_error() != self.ERROR_PIPE_CONNECTED:
+                            raise self._win_error("ConnectNamedPipe")
+                    raw = bytearray()
+                    while b"\n" not in raw:
+                        chunk = ctypes.create_string_buffer(65536)
+                        read = wintypes.DWORD()
+                        if not self.kernel.ReadFile(handle, chunk, len(chunk), ctypes.byref(read), None):
+                            raise self._win_error("ReadFile")
+                        if read.value == 0:
+                            break
+                        raw.extend(chunk.raw[:read.value])
+                        if len(raw) > MAX_CAPTURE_BYTES:
+                            raise RuntimeError("daemon request exceeded the 1 MiB bound")
+                    frame = json.loads(bytes(raw).split(b"\n", 1)[0])
+                    if request_index == 0:
+                        self.frame = frame
+                    if frame.get("cmd") == "daemon.status":
+                        data = {"session": frame.get("session", SESSION)}
+                    else:
+                        args = frame.get("args") or {}
+                        data = {"url": args.get("url", ""), "value": 2,
+                                "expression": args.get("expression", "")}
+                    response = json.dumps(
+                        {"success": True, "data": data, "warnings": []},
+                        separators=(",", ":"),
+                    ).encode() + b"\n"
+                    written = wintypes.DWORD()
+                    buffer = ctypes.create_string_buffer(response, len(response))
+                    if not self.kernel.WriteFile(handle, buffer, len(response), ctypes.byref(written), None):
+                        raise self._win_error("WriteFile")
+                    if written.value != len(response):
+                        raise RuntimeError("short write to Windows daemon pipe")
+                finally:
+                    self.kernel.DisconnectNamedPipe(handle)
+                    self.kernel.CloseHandle(handle)
+        except Exception as error:  # retained in the bounded report
+            self.error = str(error)
+            self.ready.set()
+
+    def __exit__(self, *_: object) -> None:
+        if self.thread is not None:
+            self.thread.join(timeout=16)
+
+
 def make_env(root: Path) -> dict[str, str]:
     home = root / "home"
     runtime = root / "runtime"
@@ -223,19 +348,31 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                       env: dict[str, str], *, stub: bool) -> dict[str, Any]:
     go_frame = rust_frame = None
     if stub:
-        if os.name != "posix":
-            return {"case": "unsupported", "argv": argv,
-                    "reason": "Windows named-pipe daemon stub is not implemented"}
-        go_path = socket_path(env)
-        with UnixDaemonStub(go_path, status_probe=False) as go_stub:
-            go_result = run_process(go, argv, env, stdin)
-        go_frame = go_stub.frame
-        go_error = go_stub.error
-        rust_path = socket_path(env)
-        with UnixDaemonStub(rust_path, status_probe=True) as rust_stub:
-            rust_result = run_process(rust, argv, env, stdin)
-        rust_frame = rust_stub.frame
-        rust_error = rust_stub.error
+        try:
+            if os.name == "nt":
+                go_path = socket_path(env)
+                with UnixDaemonStub(go_path, status_probe=False) as go_stub:
+                    go_result = run_process(go, argv, env, stdin)
+                go_frame = go_stub.frame
+                go_error = go_stub.error
+                with WindowsNamedPipeStub(status_probe=True) as rust_stub:
+                    rust_result = run_process(rust, argv, env, stdin)
+                rust_frame = rust_stub.frame
+                rust_error = rust_stub.error
+            else:
+                go_path = socket_path(env)
+                with UnixDaemonStub(go_path, status_probe=False) as go_stub:
+                    go_result = run_process(go, argv, env, stdin)
+                go_frame = go_stub.frame
+                go_error = go_stub.error
+                rust_path = socket_path(env)
+                with UnixDaemonStub(rust_path, status_probe=True) as rust_stub:
+                    rust_result = run_process(rust, argv, env, stdin)
+                rust_frame = rust_stub.frame
+                rust_error = rust_stub.error
+        except (OSError, RuntimeError) as error:
+            return {"case": "harness_error", "argv": argv,
+                    "reason": f"could not run bounded daemon stub: {error}"}
     else:
         go_result = run_process(go, argv, env, stdin)
         rust_result = run_process(rust, argv, env, stdin)
@@ -319,6 +456,41 @@ def main() -> int:
     common = root / f"cli-base-{os.getpid()}"
     common.mkdir(mode=0o700)
     env = make_env(common)
+    short_path_links: list[Path] = []
+    if sys.platform == "darwin":
+        short_home_link = Path("/tmp") / f"symbrowse-cli-home-{os.getpid()}"
+        try:
+            short_home_link.symlink_to(env["HOME"], target_is_directory=True)
+        except FileExistsError:
+            parser.error(f"temporary macOS HOME link already exists: {short_home_link}")
+        env["HOME"] = str(short_home_link)
+        short_path_links.append(short_home_link)
+    elif sys.platform.startswith("linux"):
+        short_runtime_link = Path("/tmp") / f"symbrowse-cli-runtime-{os.getpid()}"
+        try:
+            short_runtime_link.symlink_to(env["XDG_RUNTIME_DIR"], target_is_directory=True)
+        except FileExistsError:
+            parser.error(f"temporary Linux runtime link already exists: {short_runtime_link}")
+        env["XDG_RUNTIME_DIR"] = str(short_runtime_link)
+        short_path_links.append(short_runtime_link)
+    elif os.name == "nt":
+        windows_runtime = Path(tempfile.gettempdir()) / f"symbrowse-cli-runtime-{os.getpid()}"
+        try:
+            windows_runtime.mkdir(mode=0o700)
+        except FileExistsError:
+            parser.error(f"temporary Windows runtime directory already exists: {windows_runtime}")
+        env["XDG_RUNTIME_DIR"] = str(windows_runtime)
+    if os.name in {"posix", "nt"}:
+        max_socket_path_bytes = 103 if sys.platform == "darwin" or os.name == "nt" else 107
+        encoded_path = os.fsencode(socket_path(env))
+        if len(encoded_path) > max_socket_path_bytes:
+            for link in short_path_links:
+                link.unlink()
+            parser.error(
+                f"Unix daemon test socket path is {len(encoded_path)} bytes; "
+                f"this platform permits at most {max_socket_path_bytes}. "
+                "Use --temp-root on a shorter path."
+            )
     rows = [] if args.skip_help_tree else help_tree(args.go.resolve(), args.rust.resolve(), env)
     rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
@@ -329,17 +501,21 @@ def main() -> int:
         "rust_binary_sha256": sha256(args.rust.read_bytes()),
         "platform": sys.platform,
         "isolated_env_root": str(common),
+        "short_socket_path_links": [str(link) for link in short_path_links],
         "rows": rows,
         "summary": {"cases": len(rows), "matched": sum(row.get("matched") is True for row in rows),
                     "mismatched": sum(row.get("matched") is False for row in rows),
-                    "unsupported": sum(row.get("case") == "unsupported" for row in rows)},
+                    "unsupported": sum(row.get("case") == "unsupported" for row in rows),
+                    "harness_errors": sum(row.get("case") == "harness_error" for row in rows)},
         "parity_established": False,
     }
     args.report.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    for link in short_path_links:
+        link.unlink()
     print(json.dumps(report["summary"], sort_keys=True))
     print(f"report: {args.report}")
-    return 0 if report["summary"]["mismatched"] == 0 and report["summary"]["unsupported"] == 0 else 1
+    return 0 if all(report["summary"][key] == 0 for key in ("mismatched", "unsupported", "harness_errors")) else 1
 
 
 if __name__ == "__main__":
