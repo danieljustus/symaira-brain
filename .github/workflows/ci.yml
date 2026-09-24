@@ -364,11 +364,15 @@ jobs:
           instructions_fixture="$RUNNER_TEMP/instructions-oracle-windows.json"
           cli_fixture="$RUNNER_TEMP/cli-tree-oracle-windows.json"
           profile_remove_fixture="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+          skills_fixture="$RUNNER_TEMP/skills-oracle-windows.json"
+          skills_install_fixture="$RUNNER_TEMP/skills-install-oracle-windows.json"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$xdg_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./guard/scripts/guard-doctor-oracle -output "$doctor_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/cli-oracle -output "$cli_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-oracle -output "$skills_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-install-oracle -output "$skills_install_fixture"
           scan_fixture="$RUNNER_TEMP/guard-scan-oracle-windows.json"
           SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE="$scan_fixture" ./guard/scripts/guard-scan-oracle/run.sh write
           echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"
@@ -376,6 +380,8 @@ jobs:
           echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$skills_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$skills_install_fixture" >> "$GITHUB_ENV"
           echo "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture" >> "$GITHUB_ENV"
 
       - name: Rust workspace and Go fixture gates on native Windows
