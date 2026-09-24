@@ -173,6 +173,12 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
     let temp = tempfile::tempdir().expect("create owned Firefox test directory");
     let profile = temp.path().join("profile");
     let download_dir = temp.path().join("downloads");
+    std::fs::create_dir(&profile).expect("create owned Firefox profile");
+    std::fs::write(
+        profile.join("user.js"),
+        b"user_pref(\"remote.experimental.enabled\", true);\n",
+    )
+    .expect("enable Nightly-only BiDi network and download features in isolated profile");
     std::fs::create_dir(&download_dir).expect("create owned download directory");
     let fixture = FixtureServer::start();
     let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(20))
