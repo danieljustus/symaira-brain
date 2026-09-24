@@ -355,6 +355,14 @@ jobs:
             cargo install cargo-deny --version 0.20.2 --locked
           fi
 
+      - name: Generate native Windows XDG oracle fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture="$RUNNER_TEMP/xdg-oracle-windows.json"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$fixture"
+          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$fixture" >> "$GITHUB_ENV"
+
       - name: Rust workspace and Go fixture gates on native Windows
         shell: bash
         run: make rust-check
