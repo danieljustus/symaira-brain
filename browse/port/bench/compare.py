@@ -18,6 +18,7 @@ VALUE_SIZE_REDUCTION = 20.0
 VALUE_RSS_REDUCTION = 20.0
 MAX_P95_REGRESSION = 10.0
 REQUIRED_WORKLOADS = ("cli", "mcp", "daemon", "fetch")
+CLI_VARIANTS = ("help", "config")
 
 
 def pct(reference: float, candidate: float) -> float:
@@ -77,12 +78,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["reasons"].append("benchmark report did not pass its paired execution gate")
     for label, value in ((args.reference, reference), (args.candidate, candidate)):
         identity = value.get("identity")
-        if not isinstance(identity, dict) or not identity.get("sha256") or not identity.get("vcs_revision"):
-            result["reasons"].append(f"{label} binary identity digest and revision are required")
+        if not isinstance(identity, dict) or not identity.get("sha256"):
+            result["reasons"].append(f"{label} binary identity digest is required")
+    if not report.get("source_revision"):
+        result["reasons"].append("source checkout revision is required")
+    workload_pairs = {name: (reference.get(name), candidate.get(name)) for name in REQUIRED_WORKLOADS}
+    left_variants = reference.get("cli_variants") if isinstance(reference.get("cli_variants"), dict) else {}
+    right_variants = candidate.get("cli_variants") if isinstance(candidate.get("cli_variants"), dict) else {}
+    workload_pairs.update({f"cli/{name}": (left_variants.get(name), right_variants.get(name)) for name in CLI_VARIANTS})
     comparable = []
-    for name in REQUIRED_WORKLOADS:
-        left = reference.get(name)
-        right = candidate.get(name)
+    for name, (left, right) in workload_pairs.items():
         if not isinstance(left, dict) or left.get("status") != "pass":
             result["reasons"].append(f"{args.reference} workload {name} is not executable")
             continue
@@ -133,13 +138,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         rss_reduction = (1.0 - candidate_rss / baseline_rss) * 100.0
         result["rss_reduction_percent"] = rss_reduction
 
-    p95_ok = len(comparable) == len(REQUIRED_WORKLOADS) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
+    p95_ok = len(comparable) == len(workload_pairs) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
     value_ok = (size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION) or (
         rss_reduction is not None and rss_reduction >= VALUE_RSS_REDUCTION
     )
     if not comparable:
         result["reasons"].append("no complete representative workload pair")
-    elif len(comparable) != len(REQUIRED_WORKLOADS):
+    elif len(comparable) != len(workload_pairs):
         result["reasons"].append("every representative workload must have a Go/Rust pair")
     if not p95_ok:
         result["reasons"].append("p95 regression gate is missing or exceeds 10%")

@@ -627,19 +627,12 @@ def fetch_probe(
         server.server_close()
 
 
-def binary_identity(binary: Path, repo_root: Path) -> dict[str, object]:
+def binary_identity(binary: Path) -> dict[str, object]:
     digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-    try:
-        revision = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.DEVNULL
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        revision = "unknown"
     return {
         "path": str(binary),
         "size_bytes": binary.stat().st_size,
         "sha256": digest,
-        "vcs_revision": revision,
     }
 
 
@@ -648,7 +641,6 @@ def run_binary(
     selected: Collection[str],
     runs: int,
     root: Path,
-    repo_root: Path,
     *,
     static_mode: bool,
 ) -> dict[str, object]:
@@ -664,10 +656,18 @@ def run_binary(
             '{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
         ),
     }
-    result: dict[str, object] = {"identity": binary_identity(binary, repo_root)}
+    result: dict[str, object] = {"identity": binary_identity(binary)}
     for name, probe in probes.items():
         if name in selected:
             result[name] = summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+    if "cli" in selected:
+        result["cli_variants"] = {
+            name: summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+            for name, probe in {
+                "help": Probe("help", ("--help",)),
+                "config": Probe("config", ("config", "show", "--json")),
+            }.items()
+        }
     if "daemon" in selected:
         result["daemon"] = daemon_probe(binary, env, root, runs, static_mode=static_mode)
     if "fetch" in selected:
@@ -710,6 +710,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             "gate": "blocked",
             "limitations": [
                 "Per-process peak RSS is not measured by this portable runner; the value gate uses binary size.",
+                "source_revision identifies the checkout; binary SHA-256 identifies measured bytes. CI build steps bind them.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
                 *(["Windows compares Go Unix sockets with Rust named pipes; IPC transport differs."] if os.name == "nt" else []),
@@ -724,7 +725,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 selected,
                 args.runs,
                 root,
-                Path(__file__).resolve().parents[2],
                 static_mode=name == "rust",
             )
         rust_result = report["binaries"].get("rust")
@@ -750,6 +750,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 continue
             for workload in selected:
                 if not isinstance(binary_result.get(workload), dict) or binary_result[workload].get("status") != "pass":
+                    all_pass = False
+            if "cli" in selected:
+                variants = binary_result.get("cli_variants", {})
+                if any(variants.get(name, {}).get("status") != "pass" for name in ("help", "config")):
                     all_pass = False
         report["gate"] = "pass" if all_pass else "blocked"
         output.parent.mkdir(parents=True, exist_ok=True)

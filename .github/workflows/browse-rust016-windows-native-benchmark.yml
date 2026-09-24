@@ -50,7 +50,7 @@ jobs:
             --output "$RUNNER_TEMP/browse-rust016-${{ matrix.target }}.json" \
             --runs 30 --strict
           python3 - "$RUNNER_TEMP/browse-rust016-${{ matrix.target }}.json" <<'PY'
-          import json, pathlib, statistics, sys
+          import json, pathlib, sys
           report = json.loads(pathlib.Path(sys.argv[1]).read_text())
           assert report["source_revision"] == __import__("os").environ["GITHUB_SHA"]
           assert report["gate"] == "pass" and report["runs_per_workload"] == 30
@@ -60,17 +60,14 @@ jobs:
               assert left["status"] == right["status"] == "pass", (workload, left, right)
               assert left["samples"] == right["samples"] == 30
               assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, workload
+          for variant in ("help", "config"):
+              left, right = go["cli_variants"][variant], rust["cli_variants"][variant]
+              assert left["status"] == right["status"] == "pass", variant
+              assert left["samples"] == right["samples"] == 30
+              assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, variant
           size_gain = 1 - report["candidate_size_bytes"] / report["reference_size_bytes"]
-          rss_pairs = [
-              (go[name]["median_peak_rss_bytes"], rust[name]["median_peak_rss_bytes"])
-              for name in ("cli", "mcp", "daemon", "fetch")
-              if isinstance(go[name].get("median_peak_rss_bytes"), int)
-              and isinstance(rust[name].get("median_peak_rss_bytes"), int)
-              and go[name]["median_peak_rss_bytes"] > 0
-          ]
-          rss_gain = 1 - statistics.median(right for _, right in rss_pairs) / statistics.median(left for left, _ in rss_pairs) if rss_pairs else None
-          print(f"native value gate: size gain {size_gain:.1%}; RSS gain {rss_gain}")
-          assert size_gain >= 0.2 or (rss_gain is not None and rss_gain >= 0.2)
+          print(f"native value gate: size gain {size_gain:.1%}")
+          assert size_gain >= 0.2
           PY
 
       - name: Upload native benchmark evidence
@@ -135,6 +132,11 @@ jobs:
               assert left["status"] == right["status"] == "pass", (workload, left, right)
               assert left["samples"] == right["samples"] == 30
               assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, workload
+          for variant in ("help", "config"):
+              left, right = go["cli_variants"][variant], rust["cli_variants"][variant]
+              assert left["status"] == right["status"] == "pass", variant
+              assert left["samples"] == right["samples"] == 30
+              assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, variant
           assert report["gate"] == "pass", report["gate"]
           assert report["candidate_size_bytes"] <= report["reference_size_bytes"] * 0.8
           '@ | python -
