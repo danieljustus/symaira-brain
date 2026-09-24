@@ -117,6 +117,12 @@ jobs:
         shell: bash
         run: |
           git fetch --no-tags --depth=1 origin 0b585d52915a824664e1377d0a995dff3f5405cd
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            export SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json"
+            export SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli-tree-windows.json"
+            go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
+            go run ./scripts/cli-oracle -go-binary "$RUNNER_TEMP/symbrain-go.exe" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
+          fi
           cargo test --workspace --all-features --locked
 
       - name: Upload target package for same-SHA merge
