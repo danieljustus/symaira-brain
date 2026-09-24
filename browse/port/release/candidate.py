@@ -218,6 +218,10 @@ def check(candidate: Path, version: str, source_revision: str) -> dict[str, Any]
     for implementation in verify.IMPLEMENTATIONS:
         directory = dual / implementation
         expected = {verify.archive_name(version, os_name, arch) for os_name, arch in verify.TARGETS}
+        expected_files = expected | {f"{name}.sbom" for name in expected} | {"checksums.txt", verify.SIGNATURE_INPUTS_NAME}
+        actual_files = {path.name for path in directory.iterdir() if path.is_file()}
+        if actual_files != expected_files:
+            raise verify.GateError(f"{implementation} candidate has unexpected or missing package files")
         archives = {path.name: path for path in directory.iterdir() if path.is_file() and path.name.endswith((".zip", ".tar.gz"))}
         if set(archives) != expected:
             raise verify.GateError(f"{implementation} candidate does not have the exact six archive names")
