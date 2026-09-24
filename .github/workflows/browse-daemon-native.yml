@@ -72,6 +72,8 @@ jobs:
         run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --test session_registry --locked
       - name: Compare daemon deadline, registry and autostart contracts
         run: python3 port/harness/run.py --suite daemon-contracts
+      - name: Compare configuration and transport selection contracts
+        run: python3 port/harness/run.py --suite config-contracts
       - name: Exercise daemon lifecycle and races
         run: |
           python3 port/harness/run.py --suite daemon

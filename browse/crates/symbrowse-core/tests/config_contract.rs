@@ -109,6 +109,51 @@ fn config_validation_errors_match_go() {
 }
 
 #[test]
+fn xdg_home_fallbacks_and_relative_values_match_go_path_joining() {
+    let root = test_root("xdg-paths");
+    let home = root.join("home");
+    let mut context = context(&root);
+    context.xdg_config_home = None;
+    context.xdg_cache_home = None;
+    context.xdg_state_home = None;
+    let result = load(&context).expect("load with XDG values unset");
+    assert_eq!(
+        PathBuf::from(result.config.config_dir),
+        home.join(".config/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.cache_dir),
+        home.join(".cache/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.state_dir),
+        home.join(".local/state/symbrowse")
+    );
+
+    context.xdg_config_home = Some(PathBuf::from("relative/config"));
+    context.xdg_cache_home = Some(PathBuf::from("relative/cache"));
+    context.xdg_state_home = Some(PathBuf::from("relative/state"));
+    let result = load(&context).expect("load with relative XDG values");
+    assert_eq!(
+        PathBuf::from(result.config.config_dir),
+        PathBuf::from("relative/config/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.cache_dir),
+        PathBuf::from("relative/cache/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.state_dir),
+        PathBuf::from("relative/state/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.daemon_log),
+        PathBuf::from("relative/state/symbrowse/daemon.log")
+    );
+    fs::remove_dir_all(root).expect("remove config fixture root");
+}
+
+#[test]
 fn config_show_omits_encryption_key_material() {
     const MARKER: &str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
     let root = test_root("redaction");

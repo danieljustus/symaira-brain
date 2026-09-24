@@ -28,6 +28,43 @@ func TestDefaultPathsHonorsXDGHomeOverrides(t *testing.T) {
 	}
 }
 
+func TestDefaultPathsFallsBackToHomeAndPreservesRelativeOverrides(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	for _, name := range []string{"XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+		t.Setenv(name, "")
+	}
+	paths, err := DefaultPaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantHome := Paths{
+		ConfigDir: filepath.Join(home, ".config", appName),
+		CacheDir:  filepath.Join(home, ".cache", appName),
+		StateDir:  filepath.Join(home, ".local", "state", appName),
+	}
+	if !reflect.DeepEqual(paths, wantHome) {
+		t.Fatalf("unset XDG paths = %#v, want %#v", paths, wantHome)
+	}
+
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join("relative", "config"))
+	t.Setenv("XDG_CACHE_HOME", filepath.Join("relative", "cache"))
+	t.Setenv("XDG_STATE_HOME", filepath.Join("relative", "state"))
+	paths, err = DefaultPaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantRelative := Paths{
+		ConfigDir: filepath.Join("relative", "config", appName),
+		CacheDir:  filepath.Join("relative", "cache", appName),
+		StateDir:  filepath.Join("relative", "state", appName),
+	}
+	if !reflect.DeepEqual(paths, wantRelative) {
+		t.Fatalf("relative XDG paths = %#v, want %#v", paths, wantRelative)
+	}
+}
+
 func TestLoadWithOverridesIncludesStableEnvironmentSettings(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

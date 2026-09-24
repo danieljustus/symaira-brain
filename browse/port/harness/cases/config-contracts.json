@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "CFG-001-config-precedence",
+      "platforms": ["all"],
+      "go": ["go", "test", "./internal/config", "-run", "Contract|Precedence|Override", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "config_contract", "--locked"]
+    },
+    {
+      "id": "CFG-002-xdg-config-cache-state",
+      "platforms": ["all"],
+      "go": ["go", "test", "./internal/config", "-run", "DefaultPaths", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "config_contract", "xdg_home_fallbacks", "--locked"]
+    },
+    {
+      "id": "CFG-002-daemon-socket-path",
+      "platforms": ["all"],
+      "go": ["go", "test", "./internal/daemon", "-run", "SocketBaseDir", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "default_socket_paths_follow_go_xdg_cache_and_runtime_rules", "--locked"]
+    },
+    {
+      "id": "CFG-005-engine-precedence",
+      "platforms": ["all"],
+      "go": ["go", "test", "./cmd/symbrowse", "./internal/config", "-run", "Engine", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "transport_selection_obeys_toml_environment_and_flag_precedence", "--locked"]
+    },
+    {
+      "id": "CFG-006-transport-selection",
+      "platforms": ["all"],
+      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "--locked"]
+    }
+  ]
+}

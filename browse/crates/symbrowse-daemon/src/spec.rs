@@ -158,27 +158,63 @@ pub fn default_log_path() -> PathBuf {
 
 #[must_use]
 pub fn default_socket_path(session: &str) -> PathBuf {
-    if cfg!(windows) {
+    let platform = if cfg!(windows) {
+        "windows"
+    } else if cfg!(target_os = "macos") {
+        "macos"
+    } else {
+        "unix"
+    };
+    let home = std::env::var_os("HOME")
+        .or_else(|| {
+            cfg!(windows)
+                .then(|| std::env::var_os("USERPROFILE"))
+                .flatten()
+        })
+        .map(PathBuf::from);
+    socket_path_for(
+        session,
+        platform,
+        home,
+        std::env::var_os("XDG_RUNTIME_DIR").map(PathBuf::from),
+        std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
+        std::env::temp_dir(),
+    )
+}
+
+fn socket_path_for(
+    session: &str,
+    platform: &str,
+    home: Option<PathBuf>,
+    runtime_dir: Option<PathBuf>,
+    cache_home: Option<PathBuf>,
+    temp_dir: PathBuf,
+) -> PathBuf {
+    if platform == "windows" {
         return PathBuf::from(format!(r"\\.\pipe\symbrowse-{session}"));
     }
-    if cfg!(target_os = "macos") {
-        return std::env::var_os("HOME").map_or_else(
-            || std::env::temp_dir().join(format!("symbrowse-{session}.sock")),
+    if platform == "macos" {
+        return home.map_or_else(
+            || temp_dir.join(format!("symbrowse-{session}.sock")),
             |home| {
-                PathBuf::from(home)
-                    .join("Library/Caches/symbrowse/run")
+                home.join("Library/Caches/symbrowse/run")
                     .join(format!("{session}.sock"))
             },
         );
     }
-    if let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") {
-        return PathBuf::from(runtime)
-            .join("symbrowse")
-            .join(format!("{session}.sock"));
+    if let Some(runtime) = runtime_dir {
+        return runtime.join("symbrowse").join(format!("{session}.sock"));
     }
-    default_state_dir()
-        .join("run")
-        .join(format!("{session}.sock"))
+    cache_home
+        .or_else(|| home.map(|path| path.join(".cache")))
+        .map_or_else(
+            || {
+                temp_dir
+                    .join("symbrowse/run")
+                    .join(format!("{session}.sock"))
+            },
+            |cache| cache.join("symbrowse/run").join(format!("{session}.sock")),
+        )
 }
 
 #[cfg(test)]
@@ -192,6 +228,53 @@ mod tests {
         assert!(spec.state_store_dir().ends_with("states"));
         assert!(spec.user_data_dir().ends_with("sessions/alpha"));
         assert!(spec.output_cache_dir().ends_with("out"));
+    }
+
+    #[test]
+    fn default_socket_paths_follow_go_xdg_cache_and_runtime_rules() {
+        let home = PathBuf::from("/home/agent");
+        let temp = PathBuf::from("/tmp");
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                None,
+                None,
+                temp.clone(),
+            ),
+            PathBuf::from("/home/agent/.cache/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                None,
+                Some(PathBuf::from("/xdg/cache")),
+                temp.clone(),
+            ),
+            PathBuf::from("/xdg/cache/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                Some(PathBuf::from("relative/runtime")),
+                Some(PathBuf::from("/xdg/cache")),
+                temp.clone(),
+            ),
+            PathBuf::from("relative/runtime/symbrowse/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for("alpha", "macos", Some(home), None, None, temp.clone()),
+            PathBuf::from("/home/agent/Library/Caches/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for("alpha", "windows", None, None, None, temp),
+            PathBuf::from(r"\\.\pipe\symbrowse-alpha")
+        );
     }
 
     #[test]

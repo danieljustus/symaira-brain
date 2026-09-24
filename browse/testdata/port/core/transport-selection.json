@@ -6,8 +6,13 @@
     {"id":"browser-safari","mode":"browser","engine":"safari","expect":"safari"},
     {"id":"browser-firefox","mode":"browser","engine":"firefox","expect":"firefox"},
     {"id":"browser-missing-engine","mode":"browser","engine":null,"error":"browser_engine_required"},
+    {"id":"browser-empty-engine","mode":"browser","engine":"","error":"browser_engine_required"},
+    {"id":"compat-mode","mode":"compat","engine":null,"expect":"compat"},
+    {"id":"compat-engine-conflict","mode":"compat","engine":"safari","error":"engine_not_allowed"},
     {"id":"static-engine-conflict","mode":"static","engine":"chrome","error":"engine_not_allowed"},
+    {"id":"safari-attach-alias","mode":"browser","engine":"safari-attach","expect":"safari"},
     {"id":"unknown-mode","mode":"wat","engine":null,"error":"invalid_transport_mode"},
-    {"id":"unknown-engine","mode":"browser","engine":"wat","error":"invalid_browser_engine"}
+    {"id":"unknown-engine","mode":"browser","engine":"wat","error":"invalid_browser_engine"},
+    {"id":"omitted-mode","mode":null,"engine":null,"error":"browser_engine_required"}
   ]
 }

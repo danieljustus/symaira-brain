@@ -438,6 +438,7 @@ ALL_SUITES = (
     "chrome-full",
     "safari",
     "browser-transport",
+    "config-contracts",
     "compat-sidecar",
 )
 
@@ -547,12 +548,45 @@ def main() -> int:
         ]
     elif args.suite == "browser-transport":
         fixture = json.loads((root / "testdata/port/core/transport-selection.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
-        assert {case["id"] for case in fixture["cases"]} == {
-            "static-default", "browser-chrome", "browser-safari", "browser-firefox",
-            "browser-missing-engine", "static-engine-conflict", "unknown-mode", "unknown-engine",
+        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 13
+        commands = [["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "--locked"]]
+    elif args.suite == "config-contracts":
+        fixture = json.loads((root / "port/harness/cases/config-contracts.json").read_text())
+        assert fixture["schema_version"] == 1
+        expected_ids = {
+            "CFG-001-config-precedence",
+            "CFG-002-xdg-config-cache-state",
+            "CFG-002-daemon-socket-path",
+            "CFG-005-engine-precedence",
+            "CFG-006-transport-selection",
         }
-        commands = [["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"]]
+        assert {case["id"] for case in fixture["cases"]} == expected_ids
+        platform = (
+            "darwin" if sys.platform == "darwin" else
+            "windows" if os.name == "nt" else
+            "linux"
+        )
+        commands = []
+        seen = set()
+        for case in fixture["cases"]:
+            if "all" not in case["platforms"] and platform not in case["platforms"]:
+                continue
+            for key in ("go", "rust"):
+                command = case.get(key)
+                if command is None:
+                    continue
+                identity = tuple(command)
+                if identity not in seen:
+                    seen.add(identity)
+                    commands.append(command)
+        commands.extend([
+            ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "missing_selected_chrome_is_typed_unavailable_without_fallback", "--locked"],
+        ])
+        if platform != "darwin":
+            commands.append([
+                "cargo", "test", "-p", "symbrowse-daemon", "--lib",
+                "selected_safari_is_typed_unavailable_on_other_platforms", "--locked",
+            ])
     elif args.suite == "fetch-fingerprints":
         # The capture, historical oracle and both binaries are retained artifacts.
         # This suite never builds or self-approves any of them.
