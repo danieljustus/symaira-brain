@@ -55,6 +55,22 @@ class CargoTargetRootTests(unittest.TestCase):
         path = Path("/tmp/fetch-report.json")
         self.assertEqual(run.external_file(path, {"CI": "1"}, name="--report"), path)
 
+    def test_compat_binary_override_supports_explicit_internal_ci_cache(self) -> None:
+        root = Path("/workspace/browse")
+        binary = Path("/tmp/symbrain-rescue-target/symbrowse-compat")
+        self.assertEqual(
+            run.compat_binary_path(root, {"CI": "1", "SYMBROWSE_COMPAT_BINARY": str(binary)}),
+            binary,
+        )
+
+    def test_direct_macos_compat_override_stays_on_external_volume(self) -> None:
+        with patch.object(run.sys, "platform", "darwin"):
+            with self.assertRaisesRegex(RuntimeError, "SYMBROWSE_COMPAT_BINARY must be under"):
+                run.compat_binary_path(
+                    Path("/workspace/browse"),
+                    {"SYMBROWSE_COMPAT_BINARY": "/tmp/symbrowse-compat"},
+                )
+
     def test_relative_target_is_resolved_against_browse_root(self) -> None:
         root = Path("/workspace/browse")
         with patch.object(run.sys, "platform", "linux"):
@@ -93,6 +109,32 @@ class CompatSidecarHarnessTests(unittest.TestCase):
             self.assertIn(case_id, cases)
         self.assertIn("target/compat-sidecar/", cases["compat-rollback-go"]["build"])
         self.assertNotIn("dist/", cases["compat-rollback-go"]["build"])
+        self.assertEqual(
+            cases["compat-bounded-frame"]["tests"],
+            [
+                "ndjson_reader_bounds_frames_before_unbounded_growth",
+                "outbound_frames_are_bounded_including_the_newline",
+            ],
+        )
+        for case_id, expected_test in {
+            "compat-handshake": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            "compat-pinned-identity": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            "compat-six-profiles": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            "compat-request-id": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            "compat-integrity-error": "handshake_pins_protocol_component_and_oracle",
+            "compat-typed-fetch-error": "production_go_sidecar_returns_a_typed_fetch_error",
+            "compat-timeout-restart": "production_go_sidecar_discards_late_response_after_timeout_restart",
+            "compat-clean-exit": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            "compat-rollback-go": "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+        }.items():
+            self.assertEqual(cases[case_id]["test"], expected_test)
+        self.assertEqual(
+            cases["compat-private-endpoint"]["tests"],
+            [
+                "private_runtime_directory_schema_and_unix_mode",
+                "production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof",
+            ],
+        )
 
 
 if __name__ == "__main__":

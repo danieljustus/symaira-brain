@@ -308,14 +308,18 @@ fn validate_handshake_ack(ack: Frame) -> Result<(), CompatError> {
     }
 }
 async fn write_frame(stdin: &mut ChildStdin, frame: &Frame) -> Result<(), CompatError> {
-    let bytes = serde_json::to_vec(frame)?;
-    if bytes.len().saturating_add(1) > MAX_FRAME_BYTES {
-        return Err(CompatError::FrameTooLarge);
-    }
+    let bytes = encode_frame(frame)?;
     stdin.write_all(&bytes).await?;
     stdin.write_all(b"\n").await?;
     stdin.flush().await?;
     Ok(())
+}
+fn encode_frame(frame: &Frame) -> Result<Vec<u8>, CompatError> {
+    let bytes = serde_json::to_vec(frame)?;
+    if bytes.len().saturating_add(1) > MAX_FRAME_BYTES {
+        return Err(CompatError::FrameTooLarge);
+    }
+    Ok(bytes)
 }
 async fn read_line<R: AsyncBufRead + Unpin>(reader: &mut R) -> Result<Vec<u8>, CompatError> {
     let mut line = Vec::new();
@@ -383,7 +387,7 @@ mod tests {
     }
 
     #[test]
-    fn endpoint_schema_is_private() {
+    fn private_runtime_directory_schema_and_unix_mode() {
         let root = TestRoot::new();
         let endpoint = private_endpoint(&root.0, "sidecar.sock").unwrap();
         assert!(endpoint.private);
@@ -470,5 +474,28 @@ mod tests {
                 assert_eq!(result.unwrap().len(), MAX_FRAME_BYTES);
             }
         }
+    }
+
+    #[test]
+    fn outbound_frames_are_bounded_including_the_newline() {
+        let mut frame = Frame::Handshake {
+            protocol: PROTOCOL_VERSION,
+            component: String::new(),
+            oracle: String::new(),
+        };
+        let base_length = serde_json::to_vec(&frame).unwrap().len();
+        let component_length = MAX_FRAME_BYTES - 1 - base_length;
+        if let Frame::Handshake { component, .. } = &mut frame {
+            component.push_str(&"x".repeat(component_length));
+        }
+        assert_eq!(encode_frame(&frame).unwrap().len() + 1, MAX_FRAME_BYTES);
+
+        if let Frame::Handshake { component, .. } = &mut frame {
+            component.push('x');
+        }
+        assert!(matches!(
+            encode_frame(&frame),
+            Err(CompatError::FrameTooLarge)
+        ));
     }
 }

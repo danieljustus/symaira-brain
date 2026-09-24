@@ -62,7 +62,7 @@ fn request(url: String, profile: &str) -> Request {
 
 #[tokio::test]
 #[ignore = "requires the native Go compat executable"]
-async fn production_go_sidecar_exchanges_versioned_requests() {
+async fn production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof() {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind loopback fixture");
     let address = listener.local_addr().expect("fixture address");
     let server = thread::spawn(move || {
@@ -102,12 +102,11 @@ async fn production_go_sidecar_exchanges_versioned_requests() {
         .await
         .expect("restarted Go sidecar exits on EOF");
     server.join().expect("fixture server");
-
-    exercise_typed_fetch_error().await;
-    exercise_timeout_restart().await;
 }
 
-async fn exercise_typed_fetch_error() {
+#[tokio::test]
+#[ignore = "requires the native Go compat executable"]
+async fn production_go_sidecar_returns_a_typed_fetch_error() {
     let mut client = sidecar(Duration::from_secs(10));
     let response = client
         .request_with_timeout(request("not-a-valid-url".into(), "chrome"))
@@ -120,7 +119,9 @@ async fn exercise_typed_fetch_error() {
     client.shutdown().await.expect("Go sidecar exits on EOF");
 }
 
-async fn exercise_timeout_restart() {
+#[tokio::test]
+#[ignore = "requires the native Go compat executable"]
+async fn production_go_sidecar_discards_late_response_after_timeout_restart() {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind loopback fixture");
     let address = listener.local_addr().expect("fixture address");
     let (accepted_tx, accepted_rx) = mpsc::channel();

@@ -288,6 +288,20 @@ def external_file(path: Path, env: dict[str, str], *, name: str) -> Path:
     return resolved
 
 
+def compat_binary_path(root: Path, env: dict[str, str]) -> Path:
+    configured = env.get("SYMBROWSE_COMPAT_BINARY", "").strip()
+    if configured:
+        path = Path(configured).expanduser()
+        if not path.is_absolute():
+            raise RuntimeError("SYMBROWSE_COMPAT_BINARY must be an absolute path")
+        binary = external_file(path, env, name="SYMBROWSE_COMPAT_BINARY")
+    else:
+        binary = external_output(root, env, "target/compat-sidecar/symbrowse-compat")
+    if os.name == "nt" and binary.suffix.lower() != ".exe":
+        binary = binary.with_suffix(".exe")
+    return binary
+
+
 def lifecycle_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str) -> None:
     session = f"contract-{suffix}"
     socket_path = daemon_socket_path(runtime, session)
@@ -680,9 +694,7 @@ def main() -> int:
             "compat-private-endpoint",
             "compat-rollback-go",
         }
-        compat_binary = external_output(root, env, "target/compat-sidecar/symbrowse-compat")
-        if os.name == "nt":
-            compat_binary = compat_binary.with_suffix(".exe")
+        compat_binary = compat_binary_path(root, env)
         compat_binary.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         env["SYMBROWSE_COMPAT_BINARY"] = str(compat_binary)
         commands = [
