@@ -106,7 +106,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "mcp", "open", "press", "profiles",
+        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "mcp", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "upload", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
@@ -150,6 +150,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
+        ["policy"], ["policy", "explain"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
     for path in go_paths:
@@ -238,6 +239,9 @@ class UnixDaemonStub:
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
+                    elif frame.get("cmd") == "policy.explain":
+                        data = {"explanation": "fixture policy explanation", "source": "built-in",
+                                "decider": "policy", "guard_active": False}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -369,6 +373,9 @@ class WindowsNamedPipeStub:
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
+                    elif frame.get("cmd") == "policy.explain":
+                        data = {"explanation": "fixture policy explanation", "source": "built-in",
+                                "decider": "policy", "guard_active": False}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -549,6 +556,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["screenshot", "one", "two"], b"", False),
         ("CLI-002", ["goto", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-002", ["open", "https://fixture.invalid", "--json"], b"", True),
+        ("CLI-002", ["policy", "explain", "snapshot", "--url", "https://fixture.invalid", "--mode", "tty"], b"", True),
+        ("CLI-002", ["policy", "explain", "snapshot", "--url", "https://fixture.invalid", "--mode", "mcp", "--json"], b"", True),
+        ("CLI-003", ["policy", "explain"], b"", False),
+        ("CLI-003", ["policy", "explain", "snapshot", "extra"], b"", False),
         ("CLI-002", ["upload", "input[type=file]", "one.txt", "two.txt"], b"", True),
         ("CLI-002", ["upload", "@e2", "--json", "--", "-leading-dash.txt"], b"", True),
         ("CLI-003", ["upload"], b"", False),

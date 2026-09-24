@@ -6,7 +6,8 @@ use serde_json::{Value, json};
 use symbrowse_compat::{CompatClient, Request as CompatRequest};
 use symbrowse_core::{
     flows,
-    policy::Allowlist,
+    policy::{Allowlist, Mode as PolicyMode, Policy, classify, policy_host},
+    policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
     state::{Cookie, OriginState},
     state_store::Store,
@@ -193,6 +194,7 @@ impl DispatchRuntime {
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
+            "policy.explain" => self.policy_explain(&frame),
             "flow.run" => self.flow_run(&frame, operation.clone()).await,
             "capabilities" => {
                 #[cfg(target_os = "macos")]
@@ -516,6 +518,62 @@ impl DispatchRuntime {
             result["content"] = Value::String(cache::line_range(&content, start, end));
         }
         Ok((Some(result), Vec::new()))
+    }
+
+    fn policy_explain(&self, frame: &Frame) -> HandlerResult {
+        let args = object_args(frame)?;
+        let command = required_string(args, "command")?;
+        let url = args.get("url").and_then(Value::as_str).unwrap_or_default();
+        let requested_mode = args
+            .get("mode")
+            .and_then(Value::as_str)
+            .filter(|mode| !mode.is_empty());
+        let mode = match requested_mode {
+            Some("mcp") => PolicyMode::Mcp,
+            Some(_) => PolicyMode::Tty,
+            None if std::env::var("SYMBROWSE_MCP").as_deref() == Ok("1") => PolicyMode::Mcp,
+            None => PolicyMode::Tty,
+        };
+        let policy_path = self.spec.state_dir.join("policy.toml");
+        let policy = Policy::load(&policy_path).unwrap_or_else(|_| Policy {
+            source: policy_path.display().to_string(),
+            ..Policy::default()
+        });
+        let mut explanation = policy.explain(command, url, mode).map_err(runtime_error)?;
+        let class = classify(command).map_err(runtime_error)?;
+        let host = policy_host(url);
+        let guard = Guard::detect();
+        let (decider, reason) = if let Some(guard) = &guard {
+            let input = GuardInput {
+                command: command.to_owned(),
+                class,
+                domain: host,
+                warnings: Vec::new(),
+            };
+            match guard.decide(&input) {
+                Ok(outcome) if outcome.reason.is_empty() => ("guard", "guard".to_owned()),
+                Ok(outcome) => ("guard", format!("guard:{}", outcome.reason)),
+                Err(error) => ("guard", format!("guard failure: {error}")),
+            }
+        } else {
+            let (_, origin) = policy.decide(class, &host, mode);
+            ("policy", origin)
+        };
+        let guard_command = guard
+            .as_ref()
+            .map_or_else(|| "not configured".to_owned(), Guard::command);
+        explanation.push_str(&format!(
+            "\ndecider:   {decider}\nguard:     {guard_command}\nreason:    {reason}"
+        ));
+        Ok((
+            Some(json!({
+                "explanation": explanation,
+                "source": policy.source,
+                "decider": decider,
+                "guard_active": guard.is_some(),
+            })),
+            Vec::new(),
+        ))
     }
 
     async fn wayback_snapshots(&self, frame: &Frame) -> HandlerResult {
@@ -2267,6 +2325,70 @@ mod tests {
         spec.engine = "static".into();
         spec.mode = "static".into();
         spec
+    }
+
+    #[test]
+    fn policy_explain_uses_session_policy_and_returns_go_response_shape() {
+        let spec = temp_spec("policy-explain");
+        let expected_source = spec.state_dir.join("policy.toml").display().to_string();
+        let response = super::dispatch_once(
+            spec,
+            Frame {
+                cmd: "policy.explain".into(),
+                args: Some(json!({
+                    "command":"snapshot", "url":"https://example.invalid/path", "mode":"mcp"
+                })),
+                session: "policy-explain".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(
+            response.success,
+            "policy explain failed: {:?}",
+            response.error
+        );
+        let data = response.data.expect("policy response data");
+        assert_eq!(data["source"], expected_source);
+        assert_eq!(
+            data["guard_active"].as_bool(),
+            Some(data["decider"] == "guard")
+        );
+        let explanation = data["explanation"].as_str().expect("explanation text");
+        for expected in [
+            "command:  snapshot",
+            "url:      https://example.invalid/path",
+            "host:     example.invalid",
+            "mode:     mcp",
+            "decider:   ",
+            "guard:     ",
+            "reason:    ",
+        ] {
+            assert!(
+                explanation.contains(expected),
+                "missing {expected:?}: {explanation}"
+            );
+        }
+    }
+
+    #[test]
+    fn policy_explain_rejects_unclassified_commands() {
+        let response = super::dispatch_once(
+            temp_spec("policy-explain-invalid"),
+            Frame {
+                cmd: "policy.explain".into(),
+                args: Some(json!({"command":"not-a-real-command"})),
+                session: "policy-explain-invalid".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(!response.success);
+        assert!(
+            response
+                .error
+                .expect("policy error")
+                .message
+                .contains("risk classification")
+        );
     }
 
     #[test]

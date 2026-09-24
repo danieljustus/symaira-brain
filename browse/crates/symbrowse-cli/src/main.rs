@@ -343,6 +343,7 @@ fn run_dispatch(
     let is_cookie_set = frame.cmd == "cookies.set";
     let is_cookie_list = frame.cmd == "cookies.list";
     let is_upload = frame.cmd == "upload";
+    let is_policy_explain = frame.cmd == "policy.explain";
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
             .ok()
@@ -433,6 +434,13 @@ fn run_dispatch(
             return write_stdout("ok\n");
         }
         let response_data = response.data.unwrap_or(serde_json::Value::Null);
+        if is_policy_explain && format == Format::Text {
+            let explanation = response_data
+                .get("explanation")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("");
+            return write_stdout(&format!("{explanation}\n"));
+        }
         if is_upload && format == Format::Text {
             let count = response_data
                 .get("uploaded")
@@ -2189,6 +2197,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "session" => parse_session(&values, command_index),
         "cache" => parse_cache(&values, command_index),
         "set" => parse_set(&values, command_index),
+        "policy" => parse_policy(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -2240,7 +2249,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2299,6 +2308,8 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("set", Some("offline")) => Some(
             "Emulate offline (default: on)\n\nUsage:\n  symbrowse set offline [on|off] [flags]\n\nFlags:\n  -h, --help   help for offline\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned(),
         ),
+        ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
+        ("policy", Some("explain")) => Some("Show the effective decision for a command against a URL\n\nUsage:\n  symbrowse policy explain <command> [flags]\n\nFlags:\n  -h, --help          help for explain\n      --mode string   policy mode: mcp or tty (default: daemon mode)\n      --url string    URL whose host the rule is evaluated against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("version", None) => Some(plain(
             "Print the symbrowse version",
             "symbrowse version [flags]",
@@ -3101,6 +3112,72 @@ fn parse_storage(values: &[String], command_index: usize) -> Result<Action, Pars
             exit_code: 2,
         }),
         _ => unreachable!("storage subcommand selected from supported names"),
+    }
+}
+
+fn parse_policy(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut url = String::new();
+    let mut mode = String::new();
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "explain" if subcommand.is_none() => subcommand = Some("explain"),
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--url" => {
+                index += 1;
+                url = required_value(values, index, "--url")?.to_owned();
+            }
+            "--mode" => {
+                index += 1;
+                mode = required_value(values, index, "--mode")?.to_owned();
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--url=") => url = value[6..].to_owned(),
+            value if value.starts_with("--mode=") => mode = value[7..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse policy\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    match subcommand {
+        None => Ok(Action::Help(command_help("policy", &[]).unwrap())),
+        Some("explain") if positional.len() == 1 => Ok(Action::Dispatch {
+            session,
+            command: "policy.explain".into(),
+            args: serde_json::json!({
+                "command": positional[0], "url": url, "mode": mode
+            }),
+            format,
+        }),
+        Some("explain") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        _ => unreachable!("policy subcommand selected from supported names"),
     }
 }
 
@@ -5414,6 +5491,41 @@ mod tests {
             panic!("help --help should print help command usage");
         };
         assert_eq!(help_usage, super::help_command_help());
+    }
+
+    #[test]
+    fn policy_explain_cli_dispatches_command_url_mode_and_session() {
+        let Action::Dispatch {
+            session,
+            command,
+            args: payload,
+            format,
+        } = parse(&args(&[
+            "policy",
+            "explain",
+            "snapshot",
+            "--url",
+            "https://example.invalid/path",
+            "--mode=mcp",
+            "--session",
+            "research",
+            "--json",
+        ]))
+        .expect("policy explain")
+        else {
+            panic!("policy explain should dispatch");
+        };
+        assert_eq!(session, "research");
+        assert_eq!(command, "policy.explain");
+        assert_eq!(format, Format::Json);
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "command":"snapshot", "url":"https://example.invalid/path", "mode":"mcp"
+            })
+        );
+        assert!(parse(&args(&["policy", "explain"])).is_err());
+        assert!(parse(&args(&["policy", "explain", "snapshot", "extra"])).is_err());
     }
 
     #[test]
