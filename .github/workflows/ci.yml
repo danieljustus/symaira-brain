@@ -849,6 +849,14 @@ jobs:
           go build ./...
           go vet ./...
 
+      - name: Verify source-bound Browse fixtures
+        if: steps.browse.outputs.changed == 'true'
+        working-directory: browse
+        run: |
+          python3 scripts/rust-port/engine_fixture_gen.py --check
+          python3 scripts/rust-port/browser_fixture_gen.py --suite all --check
+          python3 scripts/rust-port/file_guard_fixture_gen.py --check
+
       - name: Resolve pinned Rust toolchain
         if: steps.browse.outputs.changed == 'true'
         working-directory: browse
