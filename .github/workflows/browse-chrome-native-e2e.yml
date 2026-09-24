@@ -58,7 +58,18 @@ jobs:
 
       - name: Run Chrome production-daemon E2E
         if: steps.cft.outputs.available == 'true'
-        run: cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+        run: |
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            export SYMBROWSE_CHROME_REAL_EXECUTABLE="$SYMBROWSE_CHROME_EXECUTABLE"
+            wrapper="$RUNNER_TEMP/symbrowse-cft/chrome-ci-wrapper"
+            cat > "$wrapper" <<'SH'
+          #!/usr/bin/env bash
+          exec "$SYMBROWSE_CHROME_REAL_EXECUTABLE" --no-sandbox "$@"
+          SH
+            chmod +x "$wrapper"
+            export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
+          fi
+          cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
         env:
           SYMBROWSE_E2E: '1'
           SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}

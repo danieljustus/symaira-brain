@@ -125,7 +125,13 @@ def main() -> int:
     isolated_home.mkdir(mode=0o700)
     probe_env = os.environ.copy()
     probe_env.update({"HOME": str(isolated_home), "USERPROFILE": str(isolated_home)})
-    result = subprocess.run([str(binary), "--version"], capture_output=True, text=True,
+    if os.name == "nt":
+        probe_env["SYMBROWSE_CFT_BINARY"] = str(binary)
+        probe = ["powershell", "-NoProfile", "-NonInteractive", "-Command",
+                 "(Get-Item -LiteralPath $env:SYMBROWSE_CFT_BINARY).VersionInfo.ProductVersion"]
+    else:
+        probe = [str(binary), "--version"]
+    result = subprocess.run(probe, capture_output=True, text=True,
                             timeout=30, check=False, env=probe_env)
     version = result.stdout.strip() or result.stderr.strip()
     if result.returncode != 0 or stable["version"] not in version:

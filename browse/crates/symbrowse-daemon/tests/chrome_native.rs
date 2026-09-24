@@ -157,8 +157,10 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         server.stop();
         thread.join().expect("join daemon");
         assert!(
-            !profile.exists(),
-            "an unavailable Chrome launch must not create a browser profile"
+            profile
+                .read_dir()
+                .is_ok_and(|mut entries| entries.next().is_none()),
+            "an unavailable Chrome launch must not write browser profile data"
         );
         if let Some(directory) = private_socket_dir {
             fs::remove_dir_all(directory).expect("remove private socket directory");
