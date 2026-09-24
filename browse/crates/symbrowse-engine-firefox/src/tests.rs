@@ -1,5 +1,9 @@
 use super::*;
-use std::path::Path;
+use crate::startup::{capture_startup_output, captured_output, startup_detail};
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+};
 
 #[test]
 fn capabilities_are_truthful() {

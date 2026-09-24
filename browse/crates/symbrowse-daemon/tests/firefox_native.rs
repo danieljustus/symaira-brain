@@ -72,8 +72,18 @@ fn serve_fixture_request(stream: &mut TcpStream) {
         let _ = stream.write_all(response.as_bytes());
         return;
     }
+    if request.starts_with("GET /download ") {
+        let body = b"Firefox native download fixture";
+        let header = format!(
+            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=fixture.txt\r\nConnection: close\r\n\r\n",
+            body.len()
+        );
+        let _ = stream.write_all(header.as_bytes());
+        let _ = stream.write_all(body);
+        return;
+    }
     let body = br#"<!doctype html><title>Firefox fixture</title>
-<input id="name"><button id="go" onclick="document.title='clicked'">go</button>
+<input id="name"><button id="go" onclick="document.title='clicked'">go</button><a id="download" href="/download">download</a>
 <script>localStorage.setItem('native','local');sessionStorage.setItem('native','session');</script>"#;
     let header = format!(
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n",
@@ -105,6 +115,21 @@ async fn wait_for_string(session: &mut FirefoxSession, expression: &str, expecte
             "Firefox value did not reach {expected:?}; last value: {actual:?}"
         );
         tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+}
+
+async fn wait_for_download(path: &std::path::Path) -> Vec<u8> {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+    loop {
+        if let Ok(bytes) = std::fs::read(path) {
+            return bytes;
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "Firefox did not finish download to {}",
+            path.display()
+        );
+        tokio::time::sleep(Duration::from_millis(50)).await;
     }
 }
 
@@ -147,10 +172,16 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
 
     let temp = tempfile::tempdir().expect("create owned Firefox test directory");
     let profile = temp.path().join("profile");
+    let download_dir = temp.path().join("downloads");
+    std::fs::create_dir(&download_dir).expect("create owned download directory");
     let fixture = FixtureServer::start();
     let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(20))
         .await
         .expect("launch Firefox with the owned isolated profile");
+    session
+        .start_response_capture()
+        .await
+        .expect("subscribe to Firefox network response events");
 
     session
         .navigate(&format!("{}/redirect", fixture.base_url()))
@@ -165,6 +196,18 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
     assert_eq!(
         evaluate_string(&mut session, "document.title").await,
         "Firefox fixture"
+    );
+    let responses = session
+        .take_response_capture()
+        .await
+        .expect("drain Firefox response events");
+    assert!(
+        responses.iter().any(|event| {
+            event["method"] == "network.responseCompleted"
+                && event["params"]["request"]["url"] == format!("{}/page", fixture.base_url())
+                && event["params"]["response"]["status"] == 200
+        }),
+        "Firefox response capture omitted the fixture response: {responses:?}"
     );
 
     let stored = evaluate_string(
@@ -231,7 +274,35 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
             .is_some_and(|data| !data.is_empty())
     );
 
+    session
+        .allow_downloads(&download_dir)
+        .await
+        .expect("configure downloads inside the owned isolated directory");
+    session
+        .interact("click", "#download", None)
+        .await
+        .expect("start the fixture download");
+    assert_eq!(
+        wait_for_download(&download_dir.join("fixture.txt")).await,
+        b"Firefox native download fixture"
+    );
+
+    session.set_timeout(Duration::from_secs(1));
+    let timeout = session
+        .evaluate("new Promise(() => {})")
+        .await
+        .expect_err("unresolved JavaScript promise must hit the BiDi deadline");
+    assert!(
+        matches!(timeout, FirefoxError::Timeout { ref operation, timeout } if operation == "script.evaluate" && timeout == Duration::from_secs(1)),
+        "unexpected Firefox timeout error: {timeout}"
+    );
+
+    let endpoint = session.remote_endpoint();
     session.close().await.expect("close owned Firefox process");
+    assert!(
+        TcpStream::connect_timeout(&endpoint, Duration::from_millis(100)).is_err(),
+        "Firefox BiDi endpoint remained open after close"
+    );
     drop(fixture);
     drop(temp);
 }
