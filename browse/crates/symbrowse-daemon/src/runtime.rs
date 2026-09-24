@@ -6,6 +6,10 @@ use serde_json::{Value, json};
 use symbrowse_compat::{CompatClient, Request as CompatRequest};
 use symbrowse_core::{
     flows,
+    journal::{
+        Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
+        Store as JournalStore,
+    },
     policy::{Allowlist, Mode as PolicyMode, Policy, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
@@ -195,6 +199,7 @@ impl DispatchRuntime {
             "cache.get" => self.cache_get(&frame),
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
             "policy.explain" => self.policy_explain(&frame),
+            "journal.tail" | "journal.show" => self.journal_read(&frame),
             "flow.run" => self.flow_run(&frame, operation.clone()).await,
             "capabilities" => {
                 #[cfg(target_os = "macos")]
@@ -518,6 +523,38 @@ impl DispatchRuntime {
             result["content"] = Value::String(cache::line_range(&content, start, end));
         }
         Ok((Some(result), Vec::new()))
+    }
+
+    fn journal_read(&self, frame: &Frame) -> HandlerResult {
+        let args = object_args(frame)?;
+        let session = args
+            .get("session")
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+            .unwrap_or(&frame.session);
+        let path = self.spec.state_dir.join("journal");
+        if let Ok(metadata) = std::fs::symlink_metadata(&path) {
+            if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                return Err(runtime_error("journal directory must be a real directory"));
+            }
+        }
+        let store = JournalStore::new(&path, session, JournalRedactor::standard(), "")
+            .map_err(runtime_error)?;
+        let entries = if frame.cmd == "journal.tail" {
+            let lines = args.get("lines").and_then(Value::as_i64).unwrap_or(0);
+            store.tail(if lines <= 0 { 0 } else { lines as usize })
+        } else {
+            store.read()
+        }
+        .map_err(runtime_error)?;
+        Ok((
+            Some(json!({
+                "schema_version": JOURNAL_SCHEMA_VERSION,
+                "session": session,
+                "entries": entries,
+            })),
+            Vec::new(),
+        ))
     }
 
     fn policy_explain(&self, frame: &Frame) -> HandlerResult {
@@ -2388,6 +2425,68 @@ mod tests {
                 .expect("policy error")
                 .message
                 .contains("risk classification")
+        );
+    }
+
+    #[test]
+    fn journal_tail_reads_the_requested_session_and_limit() {
+        let spec = temp_spec("journal-read");
+        let directory = spec.state_dir.join("journal");
+        let store = JournalStore::new(&directory, "other", JournalRedactor::standard(), "")
+            .expect("journal fixture store");
+        for command in ["open", "click", "snapshot"] {
+            store
+                .append(symbrowse_core::journal::Entry {
+                    session: "other".into(),
+                    command: command.into(),
+                    risk_class: "read".into(),
+                    decider: "policy".into(),
+                    result: "ok".into(),
+                    ..Default::default()
+                })
+                .expect("append fixture entry");
+        }
+        let response = super::dispatch_once(
+            spec,
+            Frame {
+                cmd: "journal.tail".into(),
+                args: Some(json!({"session":"other", "lines":2})),
+                session: "default".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(
+            response.success,
+            "journal tail failed: {:?}",
+            response.error
+        );
+        let data = response.data.expect("journal response data");
+        assert_eq!(data["schema_version"], JOURNAL_SCHEMA_VERSION);
+        assert_eq!(data["session"], "other");
+        let entries = data["entries"].as_array().expect("journal entries");
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0]["command"], "click");
+        assert_eq!(entries[1]["command"], "snapshot");
+    }
+
+    #[test]
+    fn journal_read_rejects_unsafe_session_names() {
+        let response = super::dispatch_once(
+            temp_spec("journal-invalid-session"),
+            Frame {
+                cmd: "journal.show".into(),
+                args: Some(json!({"session":"../outside"})),
+                session: "default".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(!response.success);
+        assert!(
+            response
+                .error
+                .expect("journal error")
+                .message
+                .contains("invalid journal session")
         );
     }
 

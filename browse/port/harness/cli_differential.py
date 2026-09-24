@@ -106,7 +106,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "mcp", "open", "policy", "press", "profiles",
+        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "upload", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
@@ -151,6 +151,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
         ["policy"], ["policy", "explain"],
+        ["journal"], ["journal", "tail"], ["journal", "show"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
     for path in go_paths:
@@ -242,6 +243,13 @@ class UnixDaemonStub:
                     elif frame.get("cmd") == "policy.explain":
                         data = {"explanation": "fixture policy explanation", "source": "built-in",
                                 "decider": "policy", "guard_active": False}
+                    elif frame.get("cmd") in ("journal.tail", "journal.show"):
+                        args = frame.get("args") or {}
+                        data = {"schema_version": 1, "session": args.get("session", "default"), "entries": [{
+                            "schema_version": 1, "timestamp": "2026-09-25T12:00:00Z",
+                            "session": args.get("session", "default"), "command": "snapshot",
+                            "risk_class": "read", "decider": "policy", "result": "ok",
+                        }]}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -376,6 +384,13 @@ class WindowsNamedPipeStub:
                     elif frame.get("cmd") == "policy.explain":
                         data = {"explanation": "fixture policy explanation", "source": "built-in",
                                 "decider": "policy", "guard_active": False}
+                    elif frame.get("cmd") in ("journal.tail", "journal.show"):
+                        args = frame.get("args") or {}
+                        data = {"schema_version": 1, "session": args.get("session", "default"), "entries": [{
+                            "schema_version": 1, "timestamp": "2026-09-25T12:00:00Z",
+                            "session": args.get("session", "default"), "command": "snapshot",
+                            "risk_class": "read", "decider": "policy", "result": "ok",
+                        }]}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -556,6 +571,9 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["screenshot", "one", "two"], b"", False),
         ("CLI-002", ["goto", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-002", ["open", "https://fixture.invalid", "--json"], b"", True),
+        ("CLI-002", ["journal", "tail", "--lines", "1", "--session", "fixture"], b"", True),
+        ("CLI-002", ["journal", "show", "--session", "fixture", "--json"], b"", True),
+        ("CLI-003", ["journal", "tail", "extra"], b"", False),
         ("CLI-002", ["policy", "explain", "snapshot", "--url", "https://fixture.invalid", "--mode", "tty"], b"", True),
         ("CLI-002", ["policy", "explain", "snapshot", "--url", "https://fixture.invalid", "--mode", "mcp", "--json"], b"", True),
         ("CLI-003", ["policy", "explain"], b"", False),
