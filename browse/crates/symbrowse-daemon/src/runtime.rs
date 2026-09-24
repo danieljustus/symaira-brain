@@ -1916,6 +1916,7 @@ mod tests {
         spec.cache_dir = root.join("cache");
         spec.allow_private = true;
         spec.engine = "static".into();
+        spec.mode = "static".into();
         spec
     }
 
@@ -1923,6 +1924,7 @@ mod tests {
     fn missing_selected_chrome_is_typed_unavailable_without_fallback() {
         let mut spec = temp_spec("missing-chrome");
         spec.engine = "chrome".into();
+        spec.mode = "browser".into();
         spec.executable_path = spec.state_dir.join("missing-chrome-executable");
         let runtime = DispatchRuntime::new(spec).expect("runtime");
         let error = runtime
@@ -1945,6 +1947,7 @@ mod tests {
         for engine in ["safari-attach", "safari-bidi"] {
             let mut spec = temp_spec(engine);
             spec.engine = engine.into();
+            spec.mode = "browser".into();
             let runtime = DispatchRuntime::new(spec).expect("runtime");
             for cmd in ["capabilities", "open"] {
                 let error = runtime
@@ -1968,6 +1971,7 @@ mod tests {
     fn safari_bidi_capabilities_are_planned_without_starting_safari() {
         let mut spec = temp_spec("safari-capabilities");
         spec.engine = "safari-bidi".into();
+        spec.mode = "browser".into();
         let runtime = DispatchRuntime::new(spec).expect("runtime");
         let (data, _) = runtime
             .runtime
@@ -2005,6 +2009,7 @@ mod tests {
     fn safari_bidi_interactions_are_rejected_before_initialization() {
         let mut spec = temp_spec("safari-interactions");
         spec.engine = "safari-bidi".into();
+        spec.mode = "browser".into();
         let runtime = DispatchRuntime::new(spec).expect("runtime");
         for command in ["click", "fill", "type", "press"] {
             let error = runtime
@@ -2160,6 +2165,7 @@ mod tests {
         let root = unique_test_root("server-flow");
         let mut spec = SessionSpec::for_session("server-flow-cancel");
         spec.engine = "static".into();
+        spec.mode = "static".into();
         spec.allow_private = true;
         #[cfg(unix)]
         {
