@@ -65,6 +65,10 @@ jobs:
               assert left["status"] == right["status"] == "pass", variant
               assert left["samples"] == right["samples"] == 30
               assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, variant
+          left, right = go["daemon"]["steady_state_100_frames"], rust["daemon"]["steady_state_100_frames"]
+          assert left["status"] == right["status"] == "pass"
+          assert left["samples"] == right["samples"] == 30
+          assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1
           size_gain = 1 - report["candidate_size_bytes"] / report["reference_size_bytes"]
           print(f"native value gate: size gain {size_gain:.1%}")
           assert size_gain >= 0.2
@@ -137,6 +141,10 @@ jobs:
               assert left["status"] == right["status"] == "pass", variant
               assert left["samples"] == right["samples"] == 30
               assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1, variant
+          left, right = go["daemon"]["steady_state_100_frames"], rust["daemon"]["steady_state_100_frames"]
+          assert left["status"] == right["status"] == "pass"
+          assert left["samples"] == right["samples"] == 30
+          assert right["p95_duration_ns"] <= left["p95_duration_ns"] * 1.1
           assert report["gate"] == "pass", report["gate"]
           assert report["candidate_size_bytes"] <= report["reference_size_bytes"] * 0.8
           '@ | python -

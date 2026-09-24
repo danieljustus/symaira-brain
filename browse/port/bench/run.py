@@ -254,6 +254,20 @@ def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict
             "stdout_sha256": __import__("hashlib").sha256(stdout.encode()).hexdigest(),
             "stderr_sha256": __import__("hashlib").sha256(stderr.encode()).hexdigest(),
         }
+    if probe.name == "mcp":
+        try:
+            frames = [json.loads(line) for line in stdout.splitlines()]
+            if [frame.get("id") for frame in frames] != [1, 2, 3]:
+                raise ValueError("initialize/list/call response IDs differ")
+            if any("result" not in frame for frame in frames):
+                raise ValueError("initialize/list/call did not all succeed")
+            call = frames[2]["result"]
+            if call.get("isError") or not call.get("content"):
+                raise ValueError("MCP tool call failed or returned no content")
+            if "fixture" not in json.dumps(call["content"]).lower():
+                raise ValueError("MCP fetch did not return the local fixture")
+        except (ValueError, TypeError, AttributeError) as error:
+            return {"status": "error", "reason": f"MCP response mismatch: {error}", "duration_ns": duration}
     return {
         "status": "pass",
         "duration_ns": duration,
@@ -480,6 +494,7 @@ def daemon_probe(
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
     results: list[dict[str, object]] = []
+    steady_results: list[dict[str, object]] = []
     session = probe_session("r")
     endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     for _ in range(runs):
@@ -499,6 +514,12 @@ def daemon_probe(
                 results.append({"status": "error", "reason": "daemon ping failed"})
             else:
                 duration = time.perf_counter_ns() - started
+                steady_started = time.perf_counter_ns()
+                for _ in range(100):
+                    ping = daemon_exchange(endpoint, {"cmd": "daemon.ping", "session": session}, 3)
+                    if b'"success":true' not in ping:
+                        raise OSError("steady-state daemon ping failed")
+                steady_results.append({"status": "pass", "duration_ns": time.perf_counter_ns() - steady_started})
             try:
                 daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
             except OSError as error:
@@ -513,10 +534,51 @@ def daemon_probe(
                 results.append({"status": "pass", "duration_ns": duration})
         except (OSError, subprocess.TimeoutExpired) as error:
             results.append({"status": "error", "reason": str(error)})
+            steady_results.append({"status": "error", "reason": str(error)})
         finally:
             terminate_process_tree(process)
             stderr_path.unlink(missing_ok=True)
-    return summarize(results)
+    result = summarize(results)
+    result["steady_state_100_frames"] = summarize(steady_results)
+    return result
+
+
+def mcp_probe(binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool) -> dict[str, object]:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    session = probe_session("m")
+    endpoint = daemon_endpoint(session, env, static_mode=static_mode)
+    process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
+    try:
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and not endpoint_ready(endpoint):
+            if process.poll() is not None:
+                break
+            time.sleep(0.02)
+        if not endpoint_ready(endpoint):
+            return startup_failure(process, "MCP daemon endpoint did not appear", stderr_path)
+        daemon_ping_until_ready(endpoint, session, process, deadline)
+        url = f"http://127.0.0.1:{server.server_port}/fixture.html"
+        frames = [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "rust016", "version": "0"}}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+            {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "fetch_url", "arguments": {"url": url, "no_cache": True}}},
+        ]
+        probe = Probe("mcp", ("mcp", "--engine", "static", "--session", session, "--allow-private", "--tools", "all"),
+                      "".join(json.dumps(frame) + "\n" for frame in frames))
+        return summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+    finally:
+        try:
+            if endpoint_ready(endpoint):
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+        except OSError:
+            pass
+        terminate_process_tree(process)
+        stderr_path.unlink(missing_ok=True)
+        server.shutdown()
+        thread.join(timeout=3)
+        server.server_close()
 
 
 def fetch_semantics(response: bytes, expected_url: str) -> tuple[bool, str]:
@@ -649,12 +711,6 @@ def run_binary(
     env = implementation_env(root, "rust" if static_mode else "go")
     probes = {
         "cli": Probe("cli", ("version", "--json")),
-        "mcp": Probe(
-            "mcp",
-            ("mcp", "--engine", "static"),
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"rust016","version":"0"}}}\n'
-            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
-        ),
     }
     result: dict[str, object] = {"identity": binary_identity(binary)}
     for name, probe in probes.items():
@@ -670,6 +726,8 @@ def run_binary(
         }
     if "daemon" in selected:
         result["daemon"] = daemon_probe(binary, env, root, runs, static_mode=static_mode)
+    if "mcp" in selected:
+        result["mcp"] = mcp_probe(binary, env, root, runs, static_mode=static_mode)
     if "fetch" in selected:
         result["fetch"] = fetch_probe(binary, env, root, runs, static_mode=static_mode)
     return result
@@ -755,6 +813,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 variants = binary_result.get("cli_variants", {})
                 if any(variants.get(name, {}).get("status") != "pass" for name in ("help", "config")):
                     all_pass = False
+            if "daemon" in selected and binary_result.get("daemon", {}).get("steady_state_100_frames", {}).get("status") != "pass":
+                all_pass = False
         report["gate"] = "pass" if all_pass else "blocked"
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

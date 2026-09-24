@@ -86,6 +86,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     left_variants = reference.get("cli_variants") if isinstance(reference.get("cli_variants"), dict) else {}
     right_variants = candidate.get("cli_variants") if isinstance(candidate.get("cli_variants"), dict) else {}
     workload_pairs.update({f"cli/{name}": (left_variants.get(name), right_variants.get(name)) for name in CLI_VARIANTS})
+    workload_pairs["daemon/steady_state_100_frames"] = (
+        reference.get("daemon", {}).get("steady_state_100_frames"),
+        candidate.get("daemon", {}).get("steady_state_100_frames"),
+    )
     comparable = []
     for name, (left, right) in workload_pairs.items():
         if not isinstance(left, dict) or left.get("status") != "pass":
