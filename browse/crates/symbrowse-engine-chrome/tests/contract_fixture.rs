@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::{fs, path::PathBuf};
 
-const ORACLE_COMMIT: &str = "652453d1595fc302bd69c328e7da8a21dbee28b9";
+const ORACLE_COMMIT: &str = "dc9c54e41beccf131fbe70e3f45bfff98871e709";
 
 #[derive(Debug, Deserialize)]
 struct Fixture {
