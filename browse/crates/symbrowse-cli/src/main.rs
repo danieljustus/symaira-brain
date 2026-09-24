@@ -12,6 +12,10 @@ use std::{
     time::Duration,
 };
 
+use base64::{
+    Engine as _, alphabet,
+    engine::general_purpose::{GeneralPurpose, GeneralPurposeConfig},
+};
 use serde::Serialize;
 use symbrowse_core::{
     batch::{self, ItemOutput},
@@ -34,8 +38,14 @@ const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
     None => "dev",
 };
 
+const GO_STANDARD_BASE64: GeneralPurpose = GeneralPurpose::new(
+    &alphabet::STANDARD,
+    GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
+);
+
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
+    Help(String),
     RootVersion,
     Version {
         structured: bool,
@@ -147,6 +157,7 @@ struct StateSuccess<'a> {
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     match parse(&args) {
+        Ok(Action::Help(text)) => write_stdout(&text),
         Ok(Action::RootVersion) => write_stdout(&render_root_version(VERSION)),
         Ok(Action::Version { structured: true }) => match render_version_json(VERSION) {
             Ok(output) => write_stdout(&output),
@@ -481,73 +492,37 @@ fn run_eval(
 }
 
 fn decode_standard_base64(input: &str) -> Result<Vec<u8>, usize> {
-    fn value(byte: u8) -> Option<u8> {
-        match byte {
-            b'A'..=b'Z' => Some(byte - b'A'),
-            b'a'..=b'z' => Some(byte - b'a' + 26),
-            b'0'..=b'9' => Some(byte - b'0' + 52),
-            b'+' => Some(62),
-            b'/' => Some(63),
-            _ => None,
-        }
-    }
-
-    let mut bytes = Vec::with_capacity(input.len());
+    let mut filtered = Vec::with_capacity(input.len());
     let mut offsets = Vec::with_capacity(input.len());
     for (index, byte) in input.bytes().enumerate() {
-        if byte == b'\r' || byte == b'\n' {
-            continue;
+        if byte != b'\r' && byte != b'\n' {
+            filtered.push(byte);
+            offsets.push(index);
         }
-        bytes.push(byte);
-        offsets.push(index);
     }
-    if bytes.is_empty() {
-        return Ok(Vec::new());
-    }
-    let mut output = Vec::with_capacity(bytes.len() / 4 * 3);
-    let mut index = 0;
-    while index < bytes.len() {
-        let remaining = bytes.len() - index;
-        if remaining < 4 {
-            value(bytes[index]).ok_or(offsets[index])?;
-            if remaining < 2 || bytes[index + 1] == b'=' {
-                return Err(offsets[index]);
+    GO_STANDARD_BASE64.decode(&filtered).map_err(|error| {
+        use base64::DecodeError;
+        let decoded_index = match error {
+            DecodeError::InvalidByte(index, b'=')
+                if let Some(end) = padded_group_end(&filtered, index) =>
+            {
+                end
             }
-            value(bytes[index + 1]).ok_or(offsets[index + 1])?;
-            if remaining == 2 {
-                return Err(offsets[index]);
-            }
-            if bytes[index + 2] == b'=' {
-                return Err(offsets.last().copied().unwrap_or(0) + 1);
-            }
-            value(bytes[index + 2]).ok_or(offsets[index + 2])?;
-            return Err(offsets[index]);
-        }
-        let a = value(bytes[index]).ok_or(offsets[index])?;
-        let b = value(bytes[index + 1]).ok_or(offsets[index + 1])?;
-        let c = bytes[index + 2];
-        let d = bytes[index + 3];
-        if c == b'=' {
-            if d != b'=' || index + 4 != bytes.len() || b & 0x0f != 0 {
-                return Err(offsets[index + 2]);
-            }
-            output.push((a << 2) | (b >> 4));
-        } else {
-            let c = value(c).ok_or(offsets[index + 2])?;
-            output.push((a << 2) | (b >> 4));
-            output.push((b << 4) | (c >> 2));
-            if d == b'=' {
-                if index + 4 != bytes.len() || c & 0x03 != 0 {
-                    return Err(offsets[index + 3]);
-                }
-            } else {
-                let d = value(d).ok_or(offsets[index + 3])?;
-                output.push((c << 6) | d);
-            }
-        }
-        index += 4;
-    }
-    Ok(output)
+            DecodeError::InvalidByte(index, _) | DecodeError::InvalidLastSymbol(index, _) => index,
+            DecodeError::InvalidLength(length) => length.saturating_sub(length % 4),
+            DecodeError::InvalidPadding if filtered.last() == Some(&b'=') => filtered.len(),
+            DecodeError::InvalidPadding => filtered.len().saturating_sub(filtered.len() % 4),
+        };
+        offsets.get(decoded_index).copied().unwrap_or(input.len())
+    })
+}
+
+fn padded_group_end(input: &[u8], padding_index: usize) -> Option<usize> {
+    let group_start = padding_index.checked_sub(padding_index % 4)?;
+    let group = input.get(group_start..group_start + 4)?;
+    let canonical_padding =
+        (group[2] == b'=' && group[3] == b'=') || (group[3] == b'=' && group[2] != b'=');
+    (canonical_padding && group_start + 4 < input.len()).then_some(group_start + 4)
 }
 
 fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCode {
@@ -1277,6 +1252,24 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     if root_version_requested(&values)? {
         return Ok(Action::RootVersion);
     }
+    if let Some(help_index) = values
+        .iter()
+        .take_while(|value| value.as_str() != "--")
+        .position(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        let Some(command_index) = top_command_index(&values[..help_index]) else {
+            return Ok(Action::Help(root_help()));
+        };
+        let command = values[command_index].as_str();
+        let suffix = values[command_index + 1..help_index]
+            .iter()
+            .filter(|value| !value.starts_with('-'))
+            .map(String::as_str)
+            .collect::<Vec<_>>();
+        if let Some(text) = command_help(command, &suffix) {
+            return Ok(Action::Help(text));
+        }
+    }
     let Some(command_index) = top_command_index(&values) else {
         if let Some(value) = values.iter().find(|value| value.starts_with('-')) {
             return Err(ParseError {
@@ -1313,6 +1306,68 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             exit_code: 2,
         }),
     }
+}
+
+fn root_help() -> String {
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+        .to_owned()
+}
+
+fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
+    let first = suffix.first().copied();
+    let target = match command {
+        "workflow" => "flow",
+        other => other,
+    };
+    let usage = match (target, first) {
+        ("config", Some("show")) => "symbrowse config show [flags]",
+        ("config", None) => "symbrowse config show [flags]",
+        ("state", Some("key")) if suffix.get(1) == Some(&"init") => {
+            "symbrowse state key init [flags]"
+        }
+        ("state", Some("key")) => "symbrowse state key init [flags]",
+        ("state", Some(subcommand @ ("save" | "load" | "show" | "clear"))) => {
+            return Some(format!(
+                "Usage:\n  symbrowse state {subcommand} <name> [flags]\n\nManage named browser state snapshots.\n"
+            ));
+        }
+        ("state", Some(subcommand @ ("list" | "clean"))) => {
+            return Some(format!(
+                "Usage:\n  symbrowse state {subcommand} [flags]\n\nManage named browser state snapshots.\n"
+            ));
+        }
+        ("state", None) => "symbrowse state <save|load|show|clear|list|clean|key init> [flags]",
+        ("flow", Some(subcommand @ ("list" | "validate" | "run"))) => {
+            let args = match subcommand {
+                "validate" => " <path>",
+                "run" => " <path>",
+                _ => "",
+            };
+            return Some(format!(
+                "Usage:\n  symbrowse flow {subcommand}{args} [flags]\n\nList, validate, and run browser flows.\n"
+            ));
+        }
+        ("flow", None) => "symbrowse flow <list|validate|run> [path] [flags]",
+        ("tools", Some("list")) => "symbrowse tools list [flags]",
+        ("tools", None) => "symbrowse tools list [flags]",
+        ("daemon", Some("status" | "stop")) => "symbrowse daemon <status|stop> [flags]",
+        ("daemon", None | Some("run")) => "symbrowse daemon [run] [flags]",
+        ("mcp", None) => "symbrowse mcp [--list-profiles] [flags]",
+        ("batch", None) => "symbrowse batch [command ...] [flags]",
+        ("eval", None) => "symbrowse eval <expression> [--stdin] [--base64] [flags]",
+        ("version", None) => "symbrowse version [--json] [flags]",
+        ("profiles", None) => "symbrowse profiles [flags]",
+        ("open" | "goto" | "fetch", None) => "symbrowse <open|goto|fetch> <url> [flags]",
+        (
+            "back" | "click" | "fill" | "find" | "forward" | "get" | "is" | "press" | "read"
+            | "reload" | "snapshot" | "type" | "wait",
+            None,
+        ) => "symbrowse <command> [arguments] [flags]",
+        _ => return None,
+    };
+    Some(format!(
+        "Usage:\n  {usage}\n\nUse --help with an implemented command for its usage.\n"
+    ))
 }
 
 fn root_version_requested(values: &[String]) -> Result<bool, ParseError> {
@@ -2525,7 +2580,46 @@ mod tests {
             Ok(b"document.title".to_vec())
         );
         assert_eq!(super::decode_standard_base64("MSsy\n"), Ok(b"1+2".to_vec()));
+        assert_eq!(super::decode_standard_base64("AB=="), Ok(vec![0]));
         assert_eq!(super::decode_standard_base64("!!!"), Err(0));
         assert_eq!(super::decode_standard_base64("YQ="), Err(3));
+        assert_eq!(super::decode_standard_base64("YQ==x"), Err(4));
+        assert_eq!(super::decode_standard_base64("YQ=\n"), Err(4));
+        assert_eq!(super::decode_standard_base64("AA==\nA"), Err(5));
+    }
+
+    #[test]
+    fn help_lists_only_commands_with_rust_dispatch_paths() {
+        let Action::Help(root) = parse(&args(&["--help"])).expect("root help") else {
+            panic!("root help action")
+        };
+        for implemented in [
+            "eval", "flow", "open", "state", "tools", "version", "workflow",
+        ] {
+            assert!(
+                root.contains(implemented),
+                "root help omitted {implemented}"
+            );
+        }
+        for unsupported in ["cookies", "screenshot", "tab", "auth"] {
+            assert!(
+                !root.contains(unsupported),
+                "root help advertised {unsupported}"
+            );
+            assert!(parse(&args(&[unsupported, "--help"])).is_err());
+        }
+
+        for path in [
+            &["flow", "--help"][..],
+            &["flow", "validate", "--help"][..],
+            &["state", "key", "init", "--help"][..],
+            &["tools", "list", "--help"][..],
+            &["config", "show", "--help"][..],
+        ] {
+            assert!(
+                matches!(parse(&args(path)), Ok(Action::Help(_))),
+                "{path:?}"
+            );
+        }
     }
 }

@@ -12,6 +12,7 @@ name = "symbrowse"
 path = "src/main.rs"
 
 [dependencies]
+base64 = "=0.22.1"
 serde.workspace = true
 serde_json.workspace = true
 symbrowse-core = { path = "../symbrowse-core", version = "=0.0.0" }

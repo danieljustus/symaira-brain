@@ -93,6 +93,39 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
     return comparisons
 
 
+def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    expected = {
+        "back", "batch", "click", "config", "daemon", "eval", "fetch", "fill", "find",
+        "flow", "forward", "get", "goto", "is", "mcp", "open", "press", "profiles",
+        "read", "reload", "snapshot", "state", "tools", "type", "version", "wait", "workflow",
+    }
+    go_root = run_process(go, ["--help"], env)
+    rust_root = run_process(rust, ["--help"], env)
+    go_commands = set(command_names(go_root["stdout"], root=True))
+    rust_help = rust_root["stdout"].decode("utf-8", "replace")
+    match = go_root["returncode"] == 0 and rust_root["returncode"] == 0
+    advertised: set[str] = set()
+    section = re.search(r"^Implemented Commands:\s*\n((?:\s{2}[^\n]*\n)+)", rust_help, re.MULTILINE)
+    if section:
+        advertised = {name.strip() for name in section.group(1).split(",")}
+    go_visible = advertised - {"fetch", "tools", "workflow"}
+    match = match and advertised == expected and go_visible <= go_commands
+    rows = [{"case": "CLI-001-supported", "argv": ["--help"], "matched": match,
+             "criterion": "Rust advertises exactly its implemented root commands; each primary command exists in Go",
+             "go_commands": sorted(go_commands), "rust_commands": sorted(advertised),
+             "go": output_record(go_root), "rust": output_record(rust_root)}]
+    for argv in (["flow", "--help"], ["flow", "validate", "--help"],
+                 ["state", "key", "init", "--help"], ["tools", "list", "--help"],
+                 ["config", "show", "--help"]):
+        result = run_process(rust, list(argv), env)
+        help_text = result["stdout"].decode("utf-8", "replace")
+        okay = result["returncode"] == 0 and "Usage:" in help_text and not result["stderr"]
+        rows.append({"case": "CLI-001-supported", "argv": list(argv), "matched": okay,
+                     "criterion": "implemented command help exits successfully with usage",
+                     "rust": output_record(result)})
+    return rows
+
+
 class UnixDaemonStub:
     def __init__(self, path: Path, *, status_probe: bool):
         self.path = path
@@ -239,6 +272,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-004", ["config", "--output=json", "show", "--json"], b"", False),
         ("CLI-004", ["config", "show", "--output", "yaml", "--output=text"], b"", False),
         ("CLI-004", ["config", "show", "--", "--json"], b"", False),
+        ("CLI-004", ["--json", "eval", "1+1"], b"", True),
+        ("CLI-004", ["--output", "json", "eval", "1+1"], b"", True),
+        ("CLI-004", ["eval", "--output", "json", "1+1"], b"", True),
+        ("CLI-004", ["--output", "yaml", "eval", "1+1", "--json"], b"", True),
         ("CLI-005", ["eval", "1+1", "--json"], b"", True),
         ("CLI-005", ["eval", "1+1"], b"", True),
         ("CLI-005", ["eval", "ignored", "--stdin", "--json"], b"document.title", True),
@@ -247,6 +284,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-005", ["eval", "1+1", "extra", "--json"], b"", True),
         ("CLI-005", ["eval", "--json"], b"", False),
         ("CLI-005", ["eval", "!!!", "--base64", "--json"], b"", False),
+        ("CLI-005", ["eval", "YQ==x", "--base64", "--json"], b"", False),
+        ("CLI-005", ["eval", "YQ=\n", "--base64", "--json"], b"", False),
+        ("CLI-005", ["eval", "AA==\nA", "--base64", "--json"], b"", False),
+        ("CLI-005", ["eval", "AB==", "--base64", "--json"], b"", True),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:
@@ -279,6 +320,7 @@ def main() -> int:
     common.mkdir(mode=0o700)
     env = make_env(common)
     rows = [] if args.skip_help_tree else help_tree(args.go.resolve(), args.rust.resolve(), env)
+    rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
     report = {
         "schema_version": 1,
