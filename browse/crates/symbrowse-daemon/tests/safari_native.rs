@@ -1,7 +1,6 @@
 #![cfg(target_os = "macos")]
 
 use std::{
-    fs,
     io::{BufRead, BufReader, Write},
     os::unix::net::UnixStream,
     path::Path,
@@ -38,9 +37,11 @@ fn production_daemon_path_runs_safari_bidi_and_reaps_owned_driver() {
     if std::env::var_os("SYMBROWSE_E2E").as_deref() != Some(std::ffi::OsStr::new("1")) {
         return;
     }
-    let root = std::env::temp_dir().join(format!("symbrowse-daemon-safari-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(&root).expect("create isolated root");
+    let temp = tempfile::Builder::new()
+        .prefix("symbrowse-daemon-safari-")
+        .tempdir()
+        .expect("create isolated root");
+    let root = temp.path();
     let mut spec = SessionSpec::for_session("native-safari");
     spec.engine = "safari-bidi".into();
     spec.state_dir = root.join("state");
@@ -107,5 +108,4 @@ fn production_daemon_path_runs_safari_bidi_and_reaps_owned_driver() {
     server.stop();
     let _ = thread.join();
     assert!(profile.exists(), "configured session profile disappeared");
-    let _ = fs::remove_dir_all(root);
 }

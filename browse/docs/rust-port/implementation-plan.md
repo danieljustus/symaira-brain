@@ -376,9 +376,13 @@ bounded; and BiDi endpoints must be loopback `ws`/`wss` URLs without userinfo.
 Injected tests cover lifecycle, policy, capabilities, protocol errors and
 descendant cleanup. The daemon-path BiDi smoke is gated by the Safari native
 harness, which must set `SYMBROWSE_E2E=1` and run the `safari_native` daemon
-test; it launches an isolated session against a localhost fixture. This native
-gate has not run in the current checkout because a normal Safari process is
-open, and the harness refuses to touch that session. The Go fixture files are
+test; it launches an isolated session against a localhost fixture. The
+`browse-daemon-native.yml` workflow runs BiDi, Apple Events attach and daemon
+smokes on x64 and arm64 macOS runners, retaining per-architecture logs. It
+reports the SafariDriver version but does not enable Remote Automation or grant
+Automation permission; those remain explicit native-gate prerequisites. The
+local native gate is not run when an existing Safari session could be affected.
+The Go fixture files are
 present, current Go sources match their recorded source hashes, and direct Go
 fixture-generator tests reproduce the checked-in fixture byte for byte. The
 source-bound checker now pins to reachable commit

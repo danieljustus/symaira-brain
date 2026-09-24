@@ -388,6 +388,23 @@ fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
         "the native Safari test must be explicitly enabled"
     );
     let runner = OsascriptRunner::default();
+    let tab_name = format!("Symaira ENG-008 {}", std::process::id());
+    let mut engine = AttachEngine::new(runner.clone()).with_tab_name(tab_name.clone());
+    let capabilities = engine.capabilities();
+    assert_eq!(capabilities.kind, "safari-attach");
+    assert_eq!(capabilities.launch_mode, "attach");
+    assert!(
+        capabilities
+            .interfaces
+            .iter()
+            .any(|name| name == "TabManager")
+    );
+    assert!(
+        capabilities
+            .unsupported
+            .iter()
+            .any(|name| name == "NetworkEvents")
+    );
     runner
         .run(
             "tell application \"Safari\" to make new document",
@@ -396,8 +413,6 @@ fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
         .expect("ask Safari to open a test window");
 
     let fixture = LoopbackFixture::start();
-    let tab_name = format!("Symaira ENG-008 {}", std::process::id());
-    let mut engine = AttachEngine::new(runner).with_tab_name(tab_name.clone());
     let context = engine.new_context().expect("attach context");
     let mut page = None;
     let outcome = (|| {

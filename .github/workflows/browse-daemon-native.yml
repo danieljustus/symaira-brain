@@ -112,8 +112,36 @@ jobs:
         if: runner.os == 'macOS'
         env:
           SYMBROWSE_NATIVE_TARGETS: "1"
+          SYMBROWSE_E2E: "1"
         run: |
-          cargo test -p symbrowse-engine-safari --test bidi --locked real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate -- --exact
-          cargo test -p symbrowse-engine-safari --test attach --locked real_safari_attach_uses_and_closes_only_its_named_loopback_tab -- --ignored --exact
+          set -uo pipefail
+          result=0
+          run_gate() {
+            echo "::group::${1}"
+            shift
+            "$@"
+            code=$?
+            echo "native gate exit=$code"
+            echo "::endgroup::"
+            if [[ "$code" -ne 0 ]]; then result=1; fi
+          }
+          {
+            echo "Safari native receipt: sha=$GITHUB_SHA arch=$RUNNER_ARCH runner=${ImageOS:-unknown}"
+            run_gate "macOS version" sw_vers
+            run_gate "Safari WebDriver version" /usr/bin/safaridriver --version
+            run_gate "BiDi launch, navigation, JS, capability truth, cleanup" cargo test -p symbrowse-engine-safari --test bidi --locked real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate -- --exact
+            run_gate "Apple Events attach, navigation, capability truth, detach" cargo test -p symbrowse-engine-safari --test attach --locked real_safari_attach_uses_and_closes_only_its_named_loopback_tab -- --ignored --exact
+            run_gate "Production daemon BiDi and owned driver cleanup" cargo test -p symbrowse-daemon --test safari_native --locked production_daemon_path_runs_safari_bidi_and_reaps_owned_driver -- --exact
+            echo "Safari native suite result=$result; automation permissions were not enabled by this workflow."
+            exit "$result"
+          } 2>&1 | tee "$RUNNER_TEMP/safari-native-${RUNNER_ARCH}.log"
+      - name: Retain native Safari evidence per runner architecture
+        if: always() && runner.os == 'macOS'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-safari-native-${{ github.sha }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/safari-native-${{ runner.arch }}.log
+          if-no-files-found: warn
+          retention-days: 14
       - name: Enforce native CLI parity
         run: python3 -c 'import json, sys; sys.exit(0 if json.load(open(sys.argv[1], encoding="utf-8"))["parity_established"] else 1)' "$RUNNER_TEMP/cli-differential.json"

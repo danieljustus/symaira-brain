@@ -391,6 +391,24 @@ async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
             .value
             .expect("Safari returned a title value");
         assert_eq!(title, "Symaira ENG-008 fixture");
+        let capabilities = engine.capabilities();
+        assert_eq!(capabilities.kind, "safari-bidi");
+        assert!(
+            capabilities
+                .interfaces
+                .iter()
+                .any(|name| name == "InspectionEngine")
+        );
+        assert!(
+            capabilities
+                .unsupported
+                .iter()
+                .any(|name| name == "NetworkEvents")
+        );
+        assert!(matches!(
+            engine.screenshot(),
+            Err(BidiError::Unsupported { operation }) if operation == "screenshot"
+        ));
         engine.close().await.expect("close isolated Safari session");
     } else {
         assert!(
