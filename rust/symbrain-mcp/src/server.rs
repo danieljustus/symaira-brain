@@ -84,7 +84,9 @@ pub enum ServerError {
 impl fmt::Display for ServerError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Frame(error) => write!(formatter, "mcp: read frame: {error}"),
+            // Keep subprocess stderr aligned with Go's mcpserver read error
+            // prefix so malformed-frame diagnostics remain differential-testable.
+            Self::Frame(error) => write!(formatter, "mcpserver: read error: {error}"),
             Self::Dispatch(error) => write!(formatter, "mcp: dispatch: {error}"),
             Self::Response(error) => write!(formatter, "mcp: write response: {error}"),
             Self::Cancelled => formatter.write_str("mcp: cancelled"),

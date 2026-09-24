@@ -120,6 +120,10 @@ where
 /// `open <path>: no such file or directory`; `io::Error`'s own `Display`
 /// appends `(os error N)`, which would not match those bytes.
 fn go_reason(error: &io::Error) -> String {
+    #[cfg(windows)]
+    if error.raw_os_error() == Some(3) {
+        return "The system cannot find the path specified.".to_owned();
+    }
     match error.kind() {
         io::ErrorKind::NotFound => "no such file or directory".to_owned(),
         io::ErrorKind::PermissionDenied => "permission denied".to_owned(),
@@ -217,6 +221,20 @@ mod tests {
     use tempfile::tempdir;
 
     use super::*;
+
+    #[test]
+    fn missing_path_error_matches_go_wording() {
+        #[cfg(windows)]
+        assert_eq!(
+            go_reason(&io::Error::from_raw_os_error(3)),
+            "The system cannot find the path specified."
+        );
+        #[cfg(not(windows))]
+        assert_eq!(
+            go_reason(&io::Error::new(io::ErrorKind::NotFound, "missing")),
+            "no such file or directory"
+        );
+    }
 
     fn line(session: &str, reason: &str) -> String {
         serde_json::to_string(&Entry {

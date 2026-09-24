@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "GitHub contents API at immutable tap commit b33def77e4ca9e20f692bff49bb2c52cc0c09ad8",
+  "repository": "github.com/danieljustus/homebrew-tap",
+  "commit": "b33def77e4ca9e20f692bff49bb2c52cc0c09ad8",
+  "version": "0.11.0",
+  "files": {
+    "Formula/symbrain.rb": "sha256:e7e845ef0b302f83a41787f42c8da8f6cd62ae9ea78edd7362345b695576fcf9",
+    "Casks/symbrain.rb": "sha256:900591ff6df7a4b6d11e9814d0b014505d13f200987c601d0e42345413418b4c"
+  }
+}

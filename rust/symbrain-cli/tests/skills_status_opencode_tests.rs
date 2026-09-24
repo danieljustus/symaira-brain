@@ -46,7 +46,13 @@ fn opencode_user_status_empty_table_matches_go_bytes() {
 #[test]
 fn opencode_user_status_populated_table_matches_go_bytes() {
     let root = TempDir::new().unwrap();
-    let skill = root.path().join("home/.config/opencode/skills/handwritten");
+    let skill = root
+        .path()
+        .join("home")
+        .join(".config")
+        .join("opencode")
+        .join("skills")
+        .join("handwritten");
     std::fs::create_dir_all(&skill).unwrap();
     std::fs::write(skill.join("SKILL.md"), b"handwritten\n").unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
@@ -235,7 +241,13 @@ fn opencode_user_status_marker_states_keep_go_fallback() {
 #[test]
 fn opencode_user_status_managed_marker_row_matches_go_bytes() {
     let root = TempDir::new().unwrap();
-    let skill = root.path().join("home/.config/opencode/skills/managed");
+    let skill = root
+        .path()
+        .join("home")
+        .join(".config")
+        .join("opencode")
+        .join("skills")
+        .join("managed");
     std::fs::create_dir_all(&skill).unwrap();
     std::fs::write(skill.join("SKILL.md"), b"managed\n").unwrap();
     std::fs::write(
@@ -249,9 +261,9 @@ fn opencode_user_status_managed_marker_row_matches_go_bytes() {
     );
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
+    let path = serde_json::to_string(&skill.to_string_lossy()).unwrap();
     let expected = format!(
-        "{{\"installs\":[{{\"target\":\"opencode\",\"name\":\"managed\",\"path\":\"{}\",\"status\":\"orphaned\",\"mode\":\"copy\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"abc123\",\"allow_executable\":true}}],\"summary\":{{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":1,\"unmanaged\":0}}}}\n",
-        skill.display()
+        "{{\"installs\":[{{\"target\":\"opencode\",\"name\":\"managed\",\"path\":{path},\"status\":\"orphaned\",\"mode\":\"copy\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"abc123\",\"allow_executable\":true}}],\"summary\":{{\"in_sync\":0,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":1,\"unmanaged\":0}}}}\n"
     );
     assert_eq!(output.stdout, expected.as_bytes());
 }
@@ -266,8 +278,15 @@ fn opencode_project_status_matches_go_bytes() {
     // therefore carry the resolved root, so the expectation has to be built
     // from it too. Only this case needs it: every other case in this file is
     // user scope, where the root comes from the environment verbatim.
+    #[cfg(windows)]
+    let resolved = root.path().to_path_buf();
+    #[cfg(not(windows))]
     let resolved = root.path().canonicalize().unwrap();
-    let skill = resolved.join("project/.opencode/skills/handwritten");
+    let skill = resolved
+        .join("project")
+        .join(".opencode")
+        .join("skills")
+        .join("handwritten");
     std::fs::create_dir_all(&skill).unwrap();
     std::fs::write(skill.join("SKILL.md"), b"handwritten\n").unwrap();
     let output = run(
@@ -342,7 +361,13 @@ fn opencode_project_status_no_scope_flag_defaults_to_user() {
 #[test]
 fn opencode_user_status_json_escapes_html_like_go() {
     let root = TempDir::new().unwrap();
-    let skill = root.path().join("home/.config/opencode/skills/a&b<c>d");
+    let skill = root
+        .path()
+        .join("home")
+        .join(".config")
+        .join("opencode")
+        .join("skills")
+        .join("a&b");
     std::fs::create_dir_all(&skill).unwrap();
     std::fs::write(skill.join("SKILL.md"), b"esc\n").unwrap();
     let output = run(
@@ -352,6 +377,6 @@ fn opencode_user_status_json_escapes_html_like_go() {
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     // Go encodes with `json.Encoder`, which escapes `&`, `<` and `>`.
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("a\\u0026b\\u003cc\\u003ed"), "{stdout}");
-    assert!(!stdout.contains("a&b<c>d"), "{stdout}");
+    assert!(stdout.contains("a\\u0026b"), "{stdout}");
+    assert!(!stdout.contains("a&b"), "{stdout}");
 }

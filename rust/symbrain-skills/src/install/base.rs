@@ -360,7 +360,12 @@ fn file_mode(metadata: &cap_std::fs::Metadata) -> String {
     {
         return format!("{:04o}", metadata.permissions().mode() & 0o777);
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
+    {
+        let _ = metadata;
+        "0666".to_owned()
+    }
+    #[cfg(not(any(unix, windows)))]
     {
         let _ = metadata;
         "0644".to_owned()

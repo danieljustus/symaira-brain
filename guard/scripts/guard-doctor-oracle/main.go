@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/danieljustus/symaira-brain/guard/cmd/symguard/doctor"
@@ -66,15 +67,27 @@ func runCase(root, id string, setup func(string) error) (string, int, error) {
 	if err := os.MkdirAll(filepath.Join(caseRoot, "data", "symguard"), 0o755); err != nil {
 		return "", 0, fmt.Errorf("mkdir data: %w", err)
 	}
+	home := filepath.Join(caseRoot, "home")
+	for _, relative := range []string{
+		".config/hermes",
+		".cursor",
+		".vscode",
+		".config/opencode",
+		".config/claude",
+	} {
+		if err := os.MkdirAll(filepath.Join(home, relative), 0o755); err != nil {
+			return "", 0, fmt.Errorf("mkdir discovery source: %w", err)
+		}
+	}
 	if err := setup(caseRoot); err != nil {
 		return "", 0, fmt.Errorf("setup %s: %w", id, err)
 	}
 
-	home := filepath.Join(caseRoot, "home")
 	configHome := filepath.Join(home, ".config")
 	dataHome := filepath.Join(caseRoot, "data")
 	symguardConfig := filepath.Join(configHome, "symguard", "config.toml")
 	os.Setenv("HOME", home)
+	os.Setenv("USERPROFILE", home)
 	os.Setenv("XDG_CONFIG_HOME", configHome)
 	os.Setenv("XDG_DATA_HOME", dataHome)
 	os.Setenv("SYMGUARD_CONFIG", symguardConfig)
@@ -108,7 +121,7 @@ func buildSuite() doctorSuite {
 	add("empty_machine", "no config file, no audit log, no discovered servers", func(root string) error { return nil })
 
 	add("healthy_config", "valid config with 1 rule, 1 allowlist entry", func(root string) error {
-		config := `[defaults]
+		config := fmt.Sprintf(`[defaults]
 shell = "allow"
 read_secret = "deny"
 
@@ -119,13 +132,21 @@ decision = "allow"
 
 [spawn]
 [[spawn.allowlist]]
-path = "/usr/bin/true"
-`
+path = %q
+`, oracleCommand())
 		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte(config), 0o644)
 	})
 
 	add("config_error", "config file exists but contains invalid TOML", func(root string) error {
 		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("not [valid = toml"), 0o644)
+	})
+
+	add("config_error_other_ascii", "missing equals with a printable ASCII offender", func(root string) error {
+		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("name ! value"), 0o644)
+	})
+
+	add("config_error_later_line", "missing equals on a later line", func(root string) error {
+		return os.WriteFile(filepath.Join(root, "home", ".config", "symguard", "config.toml"), []byte("valid = \"ok\"\nname [value"), 0o644)
 	})
 
 	add("audit_log_without_anchor", "audit log exists but no anchor file (expected pre-Phase-3 state)", func(root string) error {
@@ -159,6 +180,20 @@ path = "/usr/bin/true"
 		Cases:  cases,
 		Source: "guard/cmd/symguard/doctor/command.go + checks.go",
 	}
+}
+
+func oracleCommand() string {
+	if runtime.GOOS != "windows" {
+		return "/usr/bin/true"
+	}
+	systemRoot := os.Getenv("SystemRoot")
+	if systemRoot == "" {
+		systemRoot = os.Getenv("windir")
+	}
+	if systemRoot == "" {
+		systemRoot = `C:\Windows`
+	}
+	return filepath.Join(systemRoot, "System32", "where.exe")
 }
 
 func mustJSON(value any) []byte {

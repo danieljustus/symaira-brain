@@ -36,7 +36,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache Rust guard dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -61,7 +61,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache cargo-audit dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -88,7 +88,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache cargo-deny dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry

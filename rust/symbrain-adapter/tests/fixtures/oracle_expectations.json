@@ -36,7 +36,7 @@
     },
     {
       "path": "internal/harness/registry.go",
-      "sha256": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
+      "sha256": "f1d64e133e6bc1b0ff858cf47211e74c49cf987c237df9317bef4d5d05f02bfc",
       "rollback_sha256": "1838f7afe97122ff944b4c74c5f304f26e5a33f2512a2e07e257f5067923d1db",
       "rollback_present": true
     },

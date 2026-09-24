@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fs;
 use std::path::PathBuf;
 
 use serde::Deserialize;
@@ -24,10 +25,44 @@ fn get_env(env: &BTreeMap<String, String>, key: &str) -> Option<PathBuf> {
     env.get(key).filter(|v| !v.is_empty()).map(PathBuf::from)
 }
 
+fn load_fixture() -> Vec<u8> {
+    match std::env::var_os("SYMBRAIN_XDG_ORACLE_FIXTURE") {
+        Some(path) => fs::read(PathBuf::from(path)).expect("read platform Go oracle fixture"),
+        None if cfg!(windows) => {
+            panic!("native Windows tests require SYMBRAIN_XDG_ORACLE_FIXTURE from the Go oracle")
+        }
+        None => include_bytes!("fixtures/oracle_expectations.json").to_vec(),
+    }
+}
+
 #[test]
 fn xdg_paths_match_go_oracle() {
-    let suite: Suite = serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-        .expect("parse xdg oracle fixture");
+    let fixture = load_fixture();
+    let suite: Suite = serde_json::from_slice(&fixture).expect("parse xdg oracle fixture");
+    assert_eq!(
+        suite.cases.len(),
+        256,
+        "the full 4x4x4x4 XDG matrix must run"
+    );
+
+    #[cfg(windows)]
+    for case in &suite.cases {
+        for (dimension, key) in [
+            ("home=abs", "HOME"),
+            ("xdg-config=abs", "XDG_CONFIG_HOME"),
+            ("xdg-data=abs", "XDG_DATA_HOME"),
+            ("xdg-cache=abs", "XDG_CACHE_HOME"),
+        ] {
+            if case.id.split(',').any(|part| part == dimension) {
+                let value = case.env.get(key).expect("absolute case has a path");
+                assert!(
+                    PathBuf::from(value).is_absolute(),
+                    "case {} must use native absolute {key}: {value:?}",
+                    case.id
+                );
+            }
+        }
+    }
 
     for case in suite.cases {
         let home = get_env(&case.env, "HOME");
@@ -86,8 +121,15 @@ fn xdg_paths_match_go_oracle() {
             actual.insert("managed_bin_dir".to_string(), "(error)".to_string());
         }
 
+        let normalize_separators = |paths: &BTreeMap<String, String>| {
+            paths
+                .iter()
+                .map(|(key, value)| (key.clone(), value.replace('\\', "/")))
+                .collect::<BTreeMap<_, _>>()
+        };
         assert_eq!(
-            actual, case.expect,
+            normalize_separators(&actual),
+            normalize_separators(&case.expect),
             "case {} differs from Go oracle",
             case.id
         );

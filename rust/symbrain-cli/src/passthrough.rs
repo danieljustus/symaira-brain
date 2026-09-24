@@ -365,11 +365,15 @@ mod tests {
         let second = root.path().join("second");
         fs::create_dir_all(&first).expect("first dir");
         fs::create_dir_all(&second).expect("second dir");
-        executable(&second.join(VAULT_BINARY), "");
+        #[cfg(windows)]
+        let expected_binary = second.join(format!("{VAULT_BINARY}.exe"));
+        #[cfg(not(windows))]
+        let expected_binary = second.join(VAULT_BINARY);
+        executable(&expected_binary, "");
 
         let found = path_lookup_in(OsStr::new(VAULT_BINARY), vec![first, second.clone()]);
-        assert_eq!(found, Some(second.join(VAULT_BINARY)));
-        assert!(is_executable_file(&second.join(VAULT_BINARY)));
+        assert_eq!(found, Some(expected_binary.clone()));
+        assert!(is_executable_file(&expected_binary));
     }
 
     #[test]

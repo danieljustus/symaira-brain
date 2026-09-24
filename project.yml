@@ -151,6 +151,19 @@ schemes:
       targets:
         - SymBrainCoreTests
 
+  SymBrainCoreContract:
+    build:
+      targets:
+        SymBrainCore: all
+    test:
+      config: Debug
+      targets:
+        - SymBrainCoreTests
+      environmentVariables:
+        HOME: "$(SYMBRAIN_CONTRACT_HOME)"
+        XDG_CONFIG_HOME: "$(SYMBRAIN_CONTRACT_XDG_CONFIG_HOME)"
+        SYMBRAIN_TEST_BINARY: "$(SYMBRAIN_CONTRACT_BINARY)"
+
   SymBrainMobile:
     build:
       targets:

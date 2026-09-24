@@ -135,19 +135,7 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
 
     loop {
         if worker.is_finished() {
-            let result = worker.join();
-            shutdown_all(&managed);
-            return match result {
-                Ok(Ok(())) => exit::OK,
-                Ok(Err(error)) => {
-                    let _ = writeln!(stderr, "symbrain mcp: {error}");
-                    exit::GENERIC
-                }
-                Err(_) => {
-                    let _ = writeln!(stderr, "symbrain mcp: gateway worker panicked");
-                    exit::GENERIC
-                }
-            };
+            return finish_worker(worker, &managed, &cancelled, stderr);
         }
         if cancelled.load(Ordering::Acquire) {
             shutdown_all(&managed);
@@ -157,6 +145,30 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             return exit::OK;
         }
         thread::sleep(Duration::from_millis(10));
+    }
+}
+
+fn finish_worker(
+    worker: thread::JoinHandle<Result<(), symbrain_mcp::ServerError>>,
+    managed: &[Arc<ManagedServer>],
+    cancelled: &AtomicBool,
+    stderr: &mut dyn Write,
+) -> u8 {
+    let result = worker.join();
+    shutdown_all(managed);
+    match result {
+        Ok(Ok(())) => exit::OK,
+        Ok(Err(symbrain_mcp::ServerError::Cancelled)) if cancelled.load(Ordering::Acquire) => {
+            exit::OK
+        }
+        Ok(Err(error)) => {
+            let _ = writeln!(stderr, "symbrain mcp: {error}");
+            exit::GENERIC
+        }
+        Err(_) => {
+            let _ = writeln!(stderr, "symbrain mcp: gateway worker panicked");
+            exit::GENERIC
+        }
     }
 }
 

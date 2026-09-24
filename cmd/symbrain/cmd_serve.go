@@ -66,12 +66,36 @@ func cmdMcp(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 	gw := gateway.New(p, servers, logkit.Default(), cfg, version)
 	gw.SetMemoryServer(memoryServer)
 
-	if err := gw.ServeIO(ctx, os.Stdin, os.Stdout); err != nil {
+	if err := serveMCPStdio(ctx, gw); err != nil {
+		if ctx.Err() != nil {
+			return exitcodes.ExitOK
+		}
 		fmt.Fprintf(stderr, "symbrain mcp: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
 
 	return exitcodes.ExitOK
+}
+
+// serveMCPStdio makes a blocking stdin read interruptible by gateway context
+// cancellation. corekit's MCP server checks context between reads, but a pipe
+// read itself does not wake when a signal cancels that context.
+func serveMCPStdio(ctx context.Context, gw *gateway.Server) error {
+	reader, writer := io.Pipe()
+	stopCloseReader := context.AfterFunc(ctx, func() {
+		_ = reader.CloseWithError(ctx.Err())
+	})
+	defer stopCloseReader()
+	defer reader.Close()
+	go func() {
+		_, err := io.Copy(writer, os.Stdin)
+		if err != nil {
+			_ = writer.CloseWithError(err)
+		} else {
+			_ = writer.Close()
+		}
+	}()
+	return gw.ServeIO(ctx, reader, os.Stdout)
 }
 
 // resolveServeProfile loads the profile from exactly one of the two

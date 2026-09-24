@@ -436,8 +436,12 @@ fn evaluate_case(case: &Case) -> std::result::Result<String, String> {
 
 #[test]
 fn guard_core_matches_go_oracle_bytes() {
-    let suite: Suite = serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-        .expect("parse Guard oracle fixture");
+    let fixture = std::env::var_os("SYMBRAIN_GUARD_ORACLE_FIXTURE")
+        .map(std::fs::read)
+        .transpose()
+        .expect("read native Guard oracle fixture")
+        .unwrap_or_else(|| include_bytes!("fixtures/oracle_expectations.json").to_vec());
+    let suite: Suite = serde_json::from_slice(&fixture).expect("parse Guard oracle fixture");
     let mut cli_owned = 0_usize;
     for case in &suite.cases {
         if CLI_OWNED_KINDS.contains(&case.kind.as_str()) {

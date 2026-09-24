@@ -43,26 +43,65 @@ for line in sys.stdin:
         send(request_id, error={"code": -32601, "message": "Method not found"})
 "#;
 
-fn write_fake(root: &TempDir) -> std::path::PathBuf {
-    let path = root.path().join("fake-mcp.py");
-    std::fs::write(&path, FAKE_MCP).unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let mut permissions = std::fs::metadata(&path).unwrap().permissions();
-        permissions.set_mode(0o755);
-        std::fs::set_permissions(&path, permissions).unwrap();
-    }
-    path
+struct FakeCommand {
+    command: std::path::PathBuf,
+    args: Vec<String>,
 }
 
-fn write_profile(root: &TempDir, fake: &std::path::Path) -> std::path::PathBuf {
+fn write_fake(root: &TempDir) -> FakeCommand {
+    #[cfg(windows)]
+    {
+        let path = root.path().join("fake-mcp.py");
+        std::fs::write(&path, FAKE_MCP).unwrap();
+        let output = Command::new("python")
+            .args(["-c", "import sys; print(sys.executable)"])
+            .output()
+            .expect("Python is required by the native MCP fixture");
+        assert!(output.status.success(), "Python lookup failed: {output:?}");
+        let python = String::from_utf8(output.stdout).unwrap();
+        FakeCommand {
+            command: python.trim().into(),
+            args: vec![path.to_string_lossy().into_owned()],
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let path = root.path().join("fake-mcp.py");
+        std::fs::write(&path, FAKE_MCP).unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut permissions = std::fs::metadata(&path).unwrap().permissions();
+            permissions.set_mode(0o755);
+            std::fs::set_permissions(&path, permissions).unwrap();
+        }
+        FakeCommand {
+            command: path,
+            args: Vec::new(),
+        }
+    }
+}
+
+fn toml_string(value: &str) -> String {
+    toml_edit::Value::from(value).to_string()
+}
+
+fn toml_args(args: &[String]) -> String {
+    let mut values = toml_edit::Array::new();
+    for arg in args {
+        values.push(arg.as_str());
+    }
+    values.to_string()
+}
+
+fn write_profile(root: &TempDir, fake: &FakeCommand) -> std::path::PathBuf {
     let path = root.path().join("room.toml");
-    let command = fake.to_str().unwrap().replace('"', "\\\"");
     std::fs::write(
         &path,
         format!(
-            "[profile]\nname = \"room\"\n\n[servers.foreign]\nenabled = true\ncommand = \"{command}\"\naccess = \"write\"\n"
+            "[profile]\nname = \"room\"\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();
@@ -93,7 +132,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     }
     command
         .args(args)
-        .env_clear()
         .env("HOME", root.path().join("home"))
         .env("USERPROFILE", root.path().join("home"))
         .env("XDG_CONFIG_HOME", root.path().join("config"))
@@ -161,7 +199,12 @@ fn mcp_subprocess_runs_native_initialize_list_call_and_silent_notification() {
         .iter()
         .map(|tool| tool["name"].as_str().unwrap())
         .collect::<Vec<_>>();
-    assert_eq!(names, ["bootstrap", "patterns", "echo"]);
+    assert_eq!(
+        names,
+        ["bootstrap", "patterns", "echo"],
+        "foreign server tools were not merged: {:?}",
+        responses[2]
+    );
     assert_eq!(responses[3]["id"], 3);
     assert_eq!(responses[3]["result"]["isError"], false);
     assert_eq!(responses[3]["result"]["content"][0]["text"], r#"{"x":1}"#);
@@ -175,8 +218,9 @@ fn native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution() {
     std::fs::write(
         &profile,
         format!(
-            "[profile]\nname = \"audited\"\n\n[audit]\nenabled = true\nverbose = true\n\n[servers.foreign]\nenabled = true\ncommand = \"{}\"\naccess = \"write\"\n",
-            fake.display()
+            "[profile]\nname = \"audited\"\n\n[audit]\nenabled = true\nverbose = true\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();
@@ -220,11 +264,12 @@ fn mcp_profile_flag_loads_xdg_profile_directory() {
     let profiles = root.path().join("config").join("symbrain").join("profiles");
     std::fs::create_dir_all(&profiles).unwrap();
     let profile = profiles.join("named.toml");
-    let command = fake.to_str().unwrap();
     std::fs::write(
         &profile,
         format!(
-            "[profile]\nname = \"named\"\n\n[servers.foreign]\nenabled = true\ncommand = \"{command}\"\naccess = \"write\"\n"
+            "[profile]\nname = \"named\"\n\n[servers.foreign]\nenabled = true\ncommand = {}\nargs = {}\naccess = \"write\"\n",
+            toml_string(&fake.command.to_string_lossy()),
+            toml_args(&fake.args)
         ),
     )
     .unwrap();
@@ -314,6 +359,12 @@ fn enabled_skills_server_exposes_native_tools_without_go_fallback() {
 #[test]
 fn sigterm_cancels_gateway_and_terminates_child_process_group() {
     mcp_lifecycle::assert_sigterm_shutdown();
+}
+
+#[cfg(unix)]
+#[test]
+fn sigterm_while_idle_exits_cleanly_with_stdin_open() {
+    mcp_lifecycle::assert_idle_sigterm_shutdown();
 }
 
 #[test]

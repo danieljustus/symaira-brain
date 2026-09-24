@@ -47,8 +47,11 @@ struct Case {
 }
 
 fn oracle() -> Oracle {
-    serde_json::from_slice(include_bytes!("fixtures/oracle_expectations.json"))
-        .expect("adapter oracle fixture must be valid JSON")
+    let data = std::env::var_os("SYMBRAIN_ADAPTERS_ORACLE_FIXTURE").map_or_else(
+        || include_bytes!("fixtures/oracle_expectations.json").to_vec(),
+        |path| std::fs::read(path).expect("native adapters oracle fixture"),
+    );
+    serde_json::from_slice(&data).expect("adapter oracle fixture must be valid JSON")
 }
 
 fn decode(value: &str) -> Vec<u8> {

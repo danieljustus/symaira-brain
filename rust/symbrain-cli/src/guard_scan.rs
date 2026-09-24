@@ -5,7 +5,7 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::PathBuf;
+use std::path::{Component, Path, PathBuf};
 
 use serde::Serialize;
 use symbrain_core::exit;
@@ -238,7 +238,7 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
                     message: error,
                 }),
             },
-            Err(error) if error.kind() == io::ErrorKind::NotFound => findings.push(Finding {
+            Err(error) if missing_source_is_silent(&error) => findings.push(Finding {
                 client: source.client.to_owned(),
                 path,
                 status: "unsupported",
@@ -246,32 +246,95 @@ fn scan_all() -> (Vec<Server>, Vec<Finding>) {
             }),
             Err(error) => findings.push(Finding {
                 client: source.client.to_owned(),
+                message: read_error_message(&path, &error),
                 path,
                 status: "unsupported",
-                message: format!("read failed: {error}"),
             }),
         }
     }
     (servers, findings)
 }
 
+/// Mirrors the Go adapter's string-based missing-file check. On Windows,
+/// `ERROR_FILE_NOT_FOUND` (2) is recognized by that check, but
+/// `ERROR_PATH_NOT_FOUND` (3) is not; on Unix all `NotFound` errors are skipped.
+pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
+    if error.kind() != io::ErrorKind::NotFound {
+        return false;
+    }
+    #[cfg(windows)]
+    {
+        error.raw_os_error() != Some(3)
+    }
+    #[cfg(not(windows))]
+    {
+        true
+    }
+}
+
+/// Formats the read diagnostic emitted by Go's os.ReadFile `PathError`.
+pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> String {
+    let mut detail = error.to_string();
+    if let Some(code) = error.raw_os_error() {
+        let suffix = format!(" (os error {code})");
+        if let Some(without_code) = detail.strip_suffix(&suffix) {
+            detail = without_code.to_owned();
+        }
+    }
+    format!("read failed: open {}: {detail}", path.display())
+}
+
 pub(crate) fn source_path(source: Source) -> PathBuf {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    match source.client {
-        "hermes" => home.join(".config/hermes/config.json"),
-        "cursor" => home.join(".cursor/mcp.json"),
-        "vscode" => home.join(".vscode/mcp.json"),
-        "opencode" => home.join(".config/opencode/config.json"),
-        "claude-desktop" if cfg!(target_os = "macos") => {
-            home.join("Library/Application Support/Claude/claude_desktop_config.json")
-        }
+    // Join components so Windows diagnostics use native separators like filepath.Join.
+    let path = match source.client {
+        "hermes" => home.join(".config").join("hermes").join("config.json"),
+        "cursor" => home.join(".cursor").join("mcp.json"),
+        "vscode" => home.join(".vscode").join("mcp.json"),
+        "opencode" => home.join(".config").join("opencode").join("config.json"),
+        "claude-desktop" if cfg!(target_os = "macos") => home
+            .join("Library")
+            .join("Application Support")
+            .join("Claude")
+            .join("claude_desktop_config.json"),
         "claude-desktop" => env::var_os("XDG_CONFIG_HOME")
             .filter(|v| !v.is_empty())
             .map(PathBuf::from)
             .map_or_else(|| home.join(".config"), PathBuf::from)
-            .join("claude/claude_desktop_config.json"),
+            .join("claude")
+            .join("claude_desktop_config.json"),
         _ => PathBuf::new(),
+    };
+    clean_native_path(&path)
+}
+
+/// Clean a path like Go `filepath.Clean`, including slash-form Windows input.
+pub(crate) fn clean_native_path(path: &Path) -> PathBuf {
+    #[cfg(windows)]
+    let converted = PathBuf::from(path.to_string_lossy().replace('/', "\\"));
+    #[cfg(windows)]
+    let path = converted.as_path();
+
+    let mut result = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::Prefix(_) | Component::RootDir | Component::Normal(_) => {
+                result.push(component.as_os_str());
+            }
+            Component::CurDir => {}
+            Component::ParentDir => {
+                if result.file_name().is_some_and(|name| name != "..") {
+                    result.pop();
+                } else if !result.has_root() {
+                    result.push(component.as_os_str());
+                }
+            }
+        }
     }
+    if result.as_os_str().is_empty() {
+        result.push(".");
+    }
+    result
 }
 
 fn view(server: Server) -> ServerView {
@@ -350,6 +413,45 @@ mod tests {
         assert_eq!(
             parse_flags(&args, &mut Vec::new(), &mut Vec::new()),
             Ok(None)
+        );
+    }
+
+    #[test]
+    fn missing_source_error_classification_matches_go_platform_behavior() {
+        let missing_file = io::Error::from(io::ErrorKind::NotFound);
+        assert!(missing_source_is_silent(&missing_file));
+
+        #[cfg(windows)]
+        {
+            assert!(missing_source_is_silent(&io::Error::from_raw_os_error(2)));
+            let missing_parent = io::Error::from_raw_os_error(3);
+            assert!(!missing_source_is_silent(&missing_parent));
+        }
+    }
+
+    #[test]
+    fn source_paths_clean_parent_components() {
+        let raw = PathBuf::from("parent")
+            .join("discard")
+            .join("..")
+            .join("config.json");
+        assert_eq!(
+            clean_native_path(&raw),
+            PathBuf::from("parent").join("config.json")
+        );
+        assert_eq!(
+            clean_native_path(Path::new("foo/../claude/config.json")),
+            PathBuf::from("claude").join("config.json")
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn source_paths_clean_slash_form_windows_base() {
+        let raw = Path::new("C:/parent/../xdg/claude/config.json");
+        assert_eq!(
+            clean_native_path(raw).to_string_lossy(),
+            r"C:\xdg\claude\config.json"
         );
     }
 

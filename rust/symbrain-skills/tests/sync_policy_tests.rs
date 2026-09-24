@@ -24,6 +24,7 @@ fn sync_default_explicitly_skips_conflicts() {
         &rendered,
         &symbrain_skills::install::InstallOptions {
             home_dir: home.path().to_path_buf(),
+            mode: "copy".to_owned(),
             ..Default::default()
         },
     )
@@ -161,7 +162,7 @@ fn sync_harness_changed_uses_go_pull_diagnostic() {
     assert_eq!(results[0].error, "harness changed; use symskills pull");
 }
 
-#[cfg(unix)]
+#[cfg(any(unix, windows))]
 #[test]
 fn sync_empty_mode_preserves_symlink_marker() {
     let library = tempfile::tempdir().expect("library");

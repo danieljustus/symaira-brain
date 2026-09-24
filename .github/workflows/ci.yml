@@ -174,7 +174,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache Rust quality dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -207,6 +207,15 @@ jobs:
       # workspace-wide test log.
       - name: Rust MCP stdio and lifecycle gate
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      # Compare the shipped Go and native Rust executables across raw MCP
+      # frames, a hermetic stdio child, malformed frames, CLI failures and
+      # SIGTERM while stdin remains open.
+      - name: Go/Rust MCP executable differential gate
+        run: |
+          go build -o "$RUNNER_TEMP/symbrain-go-mcp" ./cmd/symbrain
+          cargo build -p symbrain-cli --bin symbrain --locked
+          python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
   # Keep raw invalid-UTF-8 diagnostics and persisted audit fields pinned to
   # the immutable Go 1.26.7 checkpoint using the real production binaries.
@@ -266,7 +275,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache Rust quality dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -296,6 +305,22 @@ jobs:
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
+  rust-mcp-fuzz-smoke:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Install nightly Rust and pinned cargo-fuzz
+        run: |
+          rustup toolchain install nightly --profile minimal
+          cargo install cargo-fuzz --version 0.13.2 --locked
+      - name: Fuzz both MCP targets with retained Go seeds
+        run: make rust-fuzz-smoke
+
   # Windows native audit capability and guard decide adapter test gate.
   # Exercises handle-relative directory capability, reparse-point rejection,
   # and guard decide adapter on native Windows runners.
@@ -311,7 +336,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache Rust test dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -341,7 +366,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Cache Rust init dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -406,6 +431,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          go run ./scripts/instructions-oracle -output "$RUNNER_TEMP/instructions-oracle-windows.json"
+          go run ./scripts/adapters-oracle -output "$RUNNER_TEMP/adapters-oracle-windows.json"
+          echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$RUNNER_TEMP/instructions-oracle-windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_ADAPTERS_ORACLE_FIXTURE=$RUNNER_TEMP/adapters-oracle-windows.json" >> "$GITHUB_ENV"
+          export SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE="$RUNNER_TEMP/instructions-oracle-windows.json"
+          export SYMBRAIN_ADAPTERS_ORACLE_FIXTURE="$RUNNER_TEMP/adapters-oracle-windows.json"
           cargo test -p symbrain-instructions --test instruction_tests --locked
           cargo test -p symbrain-adapter --test adapter_tests --locked
           go run ./scripts/usage-oracle -check
@@ -416,6 +447,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          if [ "${{ matrix.os }}" = windows-2025 ]; then
+            go run ./scripts/profile-remove-oracle -output "$RUNNER_TEMP/profile_remove_oracle_windows.json"
+            echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$RUNNER_TEMP/profile_remove_oracle_windows.json" >> "$GITHUB_ENV"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile_remove_oracle_windows.json"
+          fi
           cargo test -p symbrain-cli --test profile_cli_tests --locked
           if [ "${{ matrix.os }}" != windows-2025 ]; then
             if ! go run ./scripts/profile-remove-oracle -check; then
@@ -425,6 +461,101 @@ jobs:
             fi
           fi
           go run ./scripts/profile-remove-oracle --compare-rust "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}"
+      - name: Check gateway cancellation against native Go
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          go run ./scripts/mcp-oracle -check
+          go run ./scripts/gateway-oracle -check
+          CGO_ENABLED=0 go build -trimpath -o "target/mcp-go${{ matrix.os == 'windows-2025' && '.exe' || '' }}" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          python3 scripts/mcp-differential.py "target/mcp-go${{ matrix.os == 'windows-2025' && '.exe' || '' }}" "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}"
+          cargo test -p symbrain-mcp --locked
+          cargo test -p symbrain-gateway --test gateway_tests --locked
+          cargo test -p symbrain-broker --test broker_tests --locked
+      - name: Check secret resolution against native Go
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          go run ./scripts/secret-oracle -check
+          cargo test -p symbrain-usage --test secret_oracle_tests --locked
+      # Named Go fixture gates for contract rows without a native Windows
+      # oracle invocation elsewhere in this job. The workspace test below
+      # executes the matching Rust package/test targets on the same runner.
+      - name: Check portable CLI, config, policy, and data oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          set -uo pipefail
+          failed=0
+          # CLI-006 and CFG-001 use native Go fixtures on Windows.
+          go run ./scripts/xdg-oracle -output "$RUNNER_TEMP/xdg-oracle-windows.json"
+          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$RUNNER_TEMP/xdg-oracle-windows.json" >> "$GITHUB_ENV"
+          SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json" cargo test -p symbrain-core --test xdg_paths_tests --locked || failed=1
+          go run ./scripts/cli-oracle -output "$RUNNER_TEMP/cli_tree_windows.json" || failed=1
+          echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$RUNNER_TEMP/cli_tree_windows.json" >> "$GITHUB_ENV"
+          SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli_tree_windows.json" cargo test -p symbrain-cli --test cli_tree_tests --locked || failed=1
+          # PRF-001, POL-001/002; CAT-001; AUD-001; PAT-001; ACT-001; DB-001/002.
+          go run ./scripts/policy-oracle -check || failed=1
+          go run ./scripts/catalog-oracle -check || failed=1
+          go run ./scripts/audit-oracle -check || failed=1
+          go run ./scripts/patterns-activity-oracle -check || failed=1
+          go run ./scripts/db-memory-oracle -check || failed=1
+          exit "$failed"
+      - name: Check portable broker, managed, and harness oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          failed=0
+          # BRK-001/002, MAN-001, ARC-001, HAR-001..006.
+          go run ./scripts/broker-oracle -check || failed=1
+          go test ./internal/broker -count=1 -timeout=90s || failed=1
+          go test ./internal/managed -count=1 -timeout=90s || failed=1
+          go test ./internal/harness -count=1 -timeout=90s || failed=1
+          exit "$failed"
+      - name: Check portable skills, instructions, adapters, and guard oracles on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          failed=0
+          # SKL-001..003; INS-001; ADR-005; SEC-002..005.
+          go run ./scripts/skills-oracle -output "$RUNNER_TEMP/skills-oracle-windows.json" || failed=1
+          go run ./scripts/skills-install-oracle -output "$RUNNER_TEMP/skills-install-oracle-windows.json" || failed=1
+          go test ./internal/instructions -run TestWriteFileAtomicCreatesNestedParentAndLeavesNoTempFile -count=1 -timeout=60s || failed=1
+          echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$RUNNER_TEMP/skills-oracle-windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$RUNNER_TEMP/skills-install-oracle-windows.json" >> "$GITHUB_ENV"
+          go run ./guard/scripts/guard-oracle -output "$RUNNER_TEMP/guard_oracle_windows.json" || failed=1
+          go run ./guard/scripts/guard-doctor-oracle -output "$RUNNER_TEMP/guard_doctor_oracle_windows.json" || failed=1
+          echo "SYMBRAIN_GUARD_ORACLE_FIXTURE=$RUNNER_TEMP/guard_oracle_windows.json" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$RUNNER_TEMP/guard_doctor_oracle_windows.json" >> "$GITHUB_ENV"
+          exit "$failed"
+      - name: Differential-test portable native Windows CLI cases
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+        run: |
+          set -euo pipefail
+          go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+      - name: Capture native Windows install oracle
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          go run ./scripts/install-oracle -check
+          go run ./scripts/install-oracle -output "$RUNNER_TEMP/install_oracle_windows.json"
+      - name: Report release-only rows awaiting signed artifacts
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: bash
+        run: echo "::notice::DIST-001 and DIST-002 are release-time contract rows; no current-release artifacts exist for pre-release native Windows Go/Rust differential evidence."
       - name: Test Rust workspace on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
@@ -436,6 +567,16 @@ jobs:
           name: init-${{ matrix.os }}-${{ github.sha }}
           path: |
             target/init-oracle/report.json
+            ${{ runner.temp }}/instructions-oracle-windows.json
+            ${{ runner.temp }}/adapters-oracle-windows.json
+            ${{ runner.temp }}/skills-oracle-windows.json
+            ${{ runner.temp }}/skills-install-oracle-windows.json
+            ${{ runner.temp }}/xdg-oracle-windows.json
+            ${{ runner.temp }}/cli_tree_windows.json
+            ${{ runner.temp }}/profile_remove_oracle_windows.json
+            ${{ runner.temp }}/install_oracle_windows.json
+            ${{ runner.temp }}/guard_oracle_windows.json
+            ${{ runner.temp }}/guard_doctor_oracle_windows.json
             target/init-oracle/go-bin/*-stderr.log
             target/init-oracle/go-bin/*-stdout.log
           retention-days: 14
@@ -759,7 +900,7 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Cache Browse Rust test dependencies
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cargo/registry
@@ -857,6 +998,57 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build test
 
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        if: steps.swift.outputs.changed == 'true'
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Compare GUI JSON decoding against Go and Rust binaries
+        if: steps.swift.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          go build -o "$RUNNER_TEMP/symbrain-go" ./cmd/symbrain
+          cargo build -p symbrain-cli --locked
+          for implementation in go rust; do
+            if [ "$implementation" = go ]; then
+              binary="$RUNNER_TEMP/symbrain-go"
+            else
+              binary="$PWD/target/debug/symbrain"
+            fi
+            gui_test_home="$(mktemp -d "/private/tmp/gui-contract-$implementation.XXXXXX")"
+            mkdir -p "$gui_test_home/.config"
+            printf '%s\n' "$binary" > "$gui_test_home/.symbrain-test-binary"
+            result="$RUNNER_TEMP/gui-contract-$implementation.xcresult"
+            python3 - "$gui_test_home" "$binary" <<'PY'
+          from pathlib import Path
+          import sys
+          import xml.etree.ElementTree as ET
+
+          scheme = Path('SymBrain.xcodeproj/xcshareddata/xcschemes/SymBrainCoreContract.xcscheme')
+          home, binary = sys.argv[1:]
+          values = {'HOME': home, 'XDG_CONFIG_HOME': home + '/.config', 'SYMBRAIN_TEST_BINARY': binary}
+          tree = ET.parse(scheme)
+          found = set()
+          for variable in tree.iter('EnvironmentVariable'):
+              key = variable.get('key')
+              if key in values:
+                  variable.set('value', values[key])
+                  found.add(key)
+          assert found == values.keys(), found
+          tree.write(scheme, encoding='UTF-8', xml_declaration=True)
+          PY
+            xcodebuild -project SymBrain.xcodeproj \
+                -scheme SymBrainCoreContract \
+                -destination 'platform=macOS' \
+                -derivedDataPath "$RUNNER_TEMP/SymBrain-macos-derived-data" \
+                -resultBundlePath "$result" \
+                -only-testing:SymBrainCoreTests/ConfiguredBinaryContractTests \
+                CODE_SIGNING_ALLOWED=NO test
+            xcrun xcresulttool get test-results summary --path "$result" | \
+              python3 -c 'import json,sys; x=json.load(sys.stdin); assert (x["totalTestCount"], x["passedTests"], x["failedTests"], x["skippedTests"]) == (1, 1, 0, 0), x'
+          done
+
       - name: Resolve pinned iOS simulator
         if: steps.swift.outputs.changed == 'true'
         id: sim
@@ -903,11 +1095,48 @@ jobs:
         uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
 
       - name: goreleaser release --snapshot --clean
+        id: snapshot
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser
           version: '~> v2'
           args: release --snapshot --clean --skip=sign
+
+      - name: Verify unpublished snapshot archives and checksums
+        env:
+          GORELEASER_ARTIFACTS: ${{ steps.snapshot.outputs.artifacts }}
+          GORELEASER_METADATA: ${{ steps.snapshot.outputs.metadata }}
+        run: |
+          set -euo pipefail
+          version="$(python3 -c 'import json, os; print(json.loads(os.environ["GORELEASER_METADATA"])["version"])')"
+          candidate_dir="$RUNNER_TEMP/symbrain-candidate-archives"
+          mkdir -p "$candidate_dir"
+          python3 - "$candidate_dir" <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import sys
+
+          destination = Path(sys.argv[1])
+          artifacts = json.loads(os.environ["GORELEASER_ARTIFACTS"])
+          selected = [item for item in artifacts if item.get("type") in {"Archive", "Checksum"}]
+          archives = [item for item in selected if item["type"] == "Archive"]
+          checksums = [item for item in selected if item["type"] == "Checksum"]
+          if len(checksums) != 1:
+              raise SystemExit(f"expected one GoReleaser checksum artifact, found {len(checksums)}")
+          if not archives:
+              raise SystemExit("GoReleaser output contains no Archive artifacts")
+          for item in selected:
+              source = Path(item["path"])
+              if source.is_absolute() or ".." in source.parts or source.name != item["name"]:
+                  raise SystemExit(f"unsafe or inconsistent GoReleaser artifact path: {item}")
+              if not source.is_file() or source.is_symlink():
+                  raise SystemExit(f"GoReleaser artifact is not a regular file: {source}")
+              shutil.copy2(source, destination / item["name"])
+          print(f"staged {len(archives)} GoReleaser archives and {checksums[0]['name']}")
+          PY
+          go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
 
   coverage:
     needs: build-test

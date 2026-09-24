@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -51,6 +52,14 @@ func buildArchive(t *testing.T, binaryName string, data []byte) []byte {
 	return buf.Bytes()
 }
 
+func buildPlatformArchive(t *testing.T, binaryName string, data []byte) []byte {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		return buildZipArchive(t, binaryName, data)
+	}
+	return buildArchive(t, binaryName, data)
+}
+
 // buildArchiveMulti builds a tar.gz containing multiple top-level files,
 // reproducing a release archive that packages more than one binary
 // together (e.g. symaira-desktop's archive ships both "symdesk" and
@@ -77,6 +86,28 @@ func buildArchiveMulti(t *testing.T, files map[string][]byte) []byte {
 	return buf.Bytes()
 }
 
+func buildPlatformArchiveMulti(t *testing.T, files map[string][]byte) []byte {
+	t.Helper()
+	if runtime.GOOS != "windows" {
+		return buildArchiveMulti(t, files)
+	}
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+	for name, data := range files {
+		w, err := zw.Create(name)
+		if err != nil {
+			t.Fatalf("zip create %q: %v", name, err)
+		}
+		if _, err := w.Write(data); err != nil {
+			t.Fatalf("zip write %q: %v", name, err)
+		}
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatalf("zip close: %v", err)
+	}
+	return buf.Bytes()
+}
+
 // TestInstall_MultiBinaryArchivePicksNamedBinary reproduces the
 // symaira-desktop release layout, where one archive packages both
 // "symdesk" and "symroom": Install must extract exactly the binary
@@ -95,7 +126,7 @@ func TestInstall_MultiBinaryArchivePicksNamedBinary(t *testing.T) {
 	}
 	symdeskData := []byte("#!/bin/sh\necho symdesk\n")
 	symroomData := []byte("#!/bin/sh\necho symroom\n")
-	archive := buildArchiveMulti(t, map[string][]byte{
+	archive := buildPlatformArchiveMulti(t, map[string][]byte{
 		"symdesk": symdeskData,
 		"symroom": symroomData,
 		"LICENSE": []byte("license text"),
@@ -216,7 +247,7 @@ func TestInstall_AgainstTestServer(t *testing.T) {
 		AssetPrefix: "example-core",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	checksum := sha256.Sum256(archive)
 	checksumHex := hex.EncodeToString(checksum[:])
 
@@ -263,7 +294,7 @@ func TestInstall_ChecksumMismatch(t *testing.T) {
 		BinaryName:  "example-core",
 		AssetPrefix: "example-core",
 	}
-	archive := buildArchive(t, core.BinaryName, []byte("data"))
+	archive := buildPlatformArchive(t, core.BinaryName, []byte("data"))
 	assetName := core.AssetName(goos, goarch)
 	// Deliberately wrong checksum.
 	checksumsContent := fmt.Sprintf("%s  %s\n", strings.Repeat("0", 64), assetName)
@@ -357,7 +388,7 @@ func TestInstall_HasCosign_MissingSignature_FailsClosed(t *testing.T) {
 
 	core := cosignCore()
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	altName := core.AssetNameAlt(goos, goarch)
 
@@ -391,7 +422,7 @@ func TestInstall_HasCosign_AllowUnsigned_InstallsWithWarning(t *testing.T) {
 
 	core := cosignCore()
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	altName := core.AssetNameAlt(goos, goarch)
 
@@ -433,7 +464,7 @@ func TestInstall_PinnedChecksum_MismatchFailsIndependentlyOfChecksumsTxt(t *test
 		AssetPrefix: "example-core",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	altName := core.AssetNameAlt(goos, goarch)
 	// The manifest pin is deliberately wrong even though checksums.txt
@@ -475,7 +506,7 @@ func TestInstall_PinnedChecksum_UsedInsteadOfChecksumsTxt(t *testing.T) {
 		AssetPrefix: "example-core",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	sum := sha256.Sum256(archive)
 	core.SHA256 = map[string]string{assetName: hex.EncodeToString(sum[:])}
@@ -521,7 +552,7 @@ func TestInstall_RequestsPinnedTagNotLatestAlias(t *testing.T) {
 		AssetPrefix: "example-core",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	sum := sha256.Sum256(archive)
 	core.SHA256 = map[string]string{assetName: hex.EncodeToString(sum[:])}
@@ -573,7 +604,7 @@ func TestInstall_ChecksumsVersionedNameFallsBackToBareName(t *testing.T) {
 		AssetPrefix: "example-cockpit",
 	}
 	binaryData := []byte("#!/bin/sh\necho example\n")
-	archive := buildArchive(t, core.BinaryName, binaryData)
+	archive := buildPlatformArchive(t, core.BinaryName, binaryData)
 	assetName := core.AssetName(goos, goarch)
 	checksum := sha256.Sum256(archive)
 	checksumsContent := fmt.Sprintf("%s  %s\n", hex.EncodeToString(checksum[:]), assetName)
@@ -696,16 +727,13 @@ func TestInstall_PinnedPrimaryMismatchDoesNotDowngradeToAlternate(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if goos == "windows" {
-		t.Skip("fixture uses tar.gz")
-	}
 	core := &Core{
 		Version:     "v1.0.0",
 		Repo:        "example/example-core",
 		BinaryName:  "example-core",
 		AssetPrefix: "example-core",
 	}
-	archive := buildArchive(t, core.BinaryName, []byte("untrusted replacement"))
+	archive := buildPlatformArchive(t, core.BinaryName, []byte("untrusted replacement"))
 	primary := core.AssetName(goos, goarch)
 	alternate := core.AssetNameAlt(goos, goarch)
 	core.SHA256 = map[string]string{primary: strings.Repeat("0", 64)}

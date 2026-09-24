@@ -50,12 +50,18 @@ struct GrantsCliOutput {
 }
 
 fn normalize(value: &str, dir: &Path) -> String {
-    value.replace(&dir.display().to_string(), "<store-dir>")
+    value
+        .replace(&dir.display().to_string(), "<store-dir>")
+        .replace("<store-dir>\\grants.json", "<store-dir>/grants.json")
 }
 
 #[test]
 fn grants_cli_matches_go_oracle_bytes() {
-    let suite: Suite = serde_json::from_str(FIXTURE).expect("fixture parses");
+    let fixture = std::env::var("SYMBRAIN_GUARD_ORACLE_FIXTURE").map_or_else(
+        |_| FIXTURE.to_owned(),
+        |path| std::fs::read_to_string(path).expect("read native Guard oracle fixture"),
+    );
+    let suite: Suite = serde_json::from_str(&fixture).expect("fixture parses");
     let mut counted = 0_usize;
     for case in &suite.cases {
         if case.kind != "grants_cli" {

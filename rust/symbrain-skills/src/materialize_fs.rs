@@ -304,10 +304,13 @@ fn file_mode(metadata: &cap_std::fs::Metadata) -> u32 {
     {
         metadata.permissions().mode() & 0o777
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
     {
-        let _ = metadata;
-        0o644
+        if metadata.is_dir() { 0o777 } else { 0o666 }
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        if metadata.is_dir() { 0o755 } else { 0o644 }
     }
 }
 

@@ -82,18 +82,18 @@ pub fn skill_root(
 ) -> Option<PathBuf> {
     let project = project.filter(|path| !path.as_os_str().is_empty());
     match (target_name, scope) {
-        ("opencode", "project") => project.map(|path| path.join(".opencode/skills")),
-        ("claude", "project") => project.map(|path| path.join(".claude/skills")),
+        ("opencode", "project") => project.map(|path| path.join(".opencode").join("skills")),
+        ("claude", "project") => project.map(|path| path.join(".claude").join("skills")),
         ("codex" | "antigravity" | "openclaw", "project") => {
-            project.map(|path| path.join(".agents/skills"))
+            project.map(|path| path.join(".agents").join("skills"))
         }
-        ("hermes", "project") => project.map(|path| path.join(".hermes/skills")),
-        ("opencode", _) => Some(home.join(".config/opencode/skills")),
-        ("claude", _) => Some(home.join(".claude/skills")),
-        ("codex", _) => Some(home.join(".agents/skills")),
-        ("hermes", _) => Some(home.join(".hermes/skills/symaira")),
-        ("antigravity", _) => Some(home.join(".gemini/config/skills")),
-        ("openclaw", _) => Some(home.join(".openclaw/skills")),
+        ("hermes", "project") => project.map(|path| path.join(".hermes").join("skills")),
+        ("opencode", _) => Some(home.join(".config").join("opencode").join("skills")),
+        ("claude", _) => Some(home.join(".claude").join("skills")),
+        ("codex", _) => Some(home.join(".agents").join("skills")),
+        ("hermes", _) => Some(home.join(".hermes").join("skills").join("symaira")),
+        ("antigravity", _) => Some(home.join(".gemini").join("config").join("skills")),
+        ("openclaw", _) => Some(home.join(".openclaw").join("skills")),
         _ => None,
     }
 }
@@ -118,11 +118,11 @@ pub fn config_dir(
             project.map(|path| path.join(".agents"))
         }
         ("hermes", "project") => project.map(|path| path.join(".hermes")),
-        ("opencode", _) => Some(home.join(".config/opencode")),
+        ("opencode", _) => Some(home.join(".config").join("opencode")),
         ("claude", _) => Some(home.join(".claude")),
         ("codex", _) => Some(home.join(".agents")),
         ("hermes", _) => Some(home.join(".hermes")),
-        ("antigravity", _) => Some(home.join(".gemini/config")),
+        ("antigravity", _) => Some(home.join(".gemini").join("config")),
         ("openclaw", _) => Some(home.join(".openclaw")),
         _ => None,
     }

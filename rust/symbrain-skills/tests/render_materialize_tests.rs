@@ -235,6 +235,82 @@ fn all_variant_targets_match_go_golden_trees() {
     }
 }
 
+#[cfg(windows)]
+#[derive(serde::Deserialize, serde::Serialize)]
+struct GoldenMarker {
+    output_digest: String,
+    output_manifest: Vec<GoldenOutputEntry>,
+    source_hash: String,
+}
+
+#[cfg(windows)]
+#[derive(serde::Deserialize, serde::Serialize)]
+struct GoldenOutputEntry {
+    path: String,
+    kind: String,
+    mode: String,
+    size: u64,
+    sha256: String,
+}
+
+/// Unix golden trees are checked in with Unix permission bits. Windows has
+/// Go's corresponding 0666/0777 modes, which also flow into these digests.
+#[cfg(windows)]
+fn normalize_windows_marker(bytes: &[u8], is_unix_golden: bool) -> Vec<u8> {
+    use sha2::{Digest, Sha256};
+
+    let mut marker: GoldenMarker = serde_json::from_slice(bytes).expect("render marker JSON");
+    let digest = format!(
+        "{:x}",
+        Sha256::digest(
+            serde_json::to_vec(&marker.output_manifest).expect("serialize output manifest")
+        )
+    );
+    assert_eq!(
+        marker.output_digest, digest,
+        "marker digest matches manifest"
+    );
+    assert_eq!(marker.source_hash.len(), 64, "source hash is SHA-256");
+    assert!(
+        marker
+            .source_hash
+            .bytes()
+            .all(|byte| byte.is_ascii_hexdigit()),
+        "source hash is hexadecimal"
+    );
+
+    for entry in &mut marker.output_manifest {
+        let (unix_mode, windows_mode) = match entry.kind.as_str() {
+            "file" => ("0644", "0666"),
+            "dir" => ("0755", "0777"),
+            kind => panic!("unexpected output entry kind: {kind}"),
+        };
+        assert_eq!(
+            entry.mode,
+            if is_unix_golden {
+                unix_mode
+            } else {
+                windows_mode
+            },
+            "{} mode on {} fixture",
+            entry.path,
+            if is_unix_golden { "Unix" } else { "Windows" }
+        );
+        windows_mode.clone_into(&mut entry.mode);
+    }
+    marker.output_digest = format!(
+        "{:x}",
+        Sha256::digest(
+            serde_json::to_vec(&marker.output_manifest).expect("serialize normalized manifest")
+        )
+    );
+    // Source hashing includes source modes; the fixture is Unix but the tree
+    // under test was created natively on Windows. Its exact Windows hash is
+    // covered by the Go-generated oracle fixture in render_tests.
+    "platform-specific-source-hash".clone_into(&mut marker.source_hash);
+    serde_json::to_vec_pretty(&marker).expect("serialize normalized marker")
+}
+
 fn assert_tree_matches(actual: &std::path::Path, expected: &std::path::Path, target: &str) {
     let collect = |root: &std::path::Path| {
         let mut files = std::collections::BTreeMap::new();
@@ -266,6 +342,15 @@ fn assert_tree_matches(actual: &std::path::Path, expected: &std::path::Path, tar
     );
     for (path, expected_bytes) in expected_files {
         let actual_bytes = &actual_files[&path];
+        #[cfg(windows)]
+        if path == ".symskills.json" {
+            assert_eq!(
+                normalize_windows_marker(actual_bytes, false),
+                normalize_windows_marker(&expected_bytes, true),
+                "{target}: {path} drift after Windows mode normalization"
+            );
+            continue;
+        }
         assert_eq!(
             actual_bytes,
             &expected_bytes,

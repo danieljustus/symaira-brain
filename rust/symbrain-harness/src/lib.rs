@@ -159,15 +159,27 @@ pub(crate) fn relative_path(kind: registry::PathKind, target_os: &str) -> std::p
         },
         registry::PathKind::Unsupported => &[],
     };
-    if target_os == "windows" {
-        std::path::PathBuf::from(parts.join("\\"))
-    } else {
-        let mut path = std::path::PathBuf::new();
-        for part in parts {
-            path.push(part);
+    target_join("", parts, target_os)
+}
+
+fn target_join(base: &str, parts: &[&str], target_os: &str) -> std::path::PathBuf {
+    let separator = if target_os == "windows" { '\\' } else { '/' };
+    let mut joined = base.replace(
+        if separator == '\\' { '/' } else { '\\' },
+        &separator.to_string(),
+    );
+    if !joined.is_empty() {
+        while joined.len() > 1 && joined.ends_with(['/', '\\']) {
+            joined.pop();
         }
-        path
     }
+    for part in parts {
+        if !joined.is_empty() && !joined.ends_with(separator) {
+            joined.push(separator);
+        }
+        joined.push_str(part.trim_matches(['/', '\\']));
+    }
+    std::path::PathBuf::from(joined)
 }
 
 /// Resolves a config path using an injected target OS and environment.
@@ -196,22 +208,7 @@ pub(crate) fn resolve_path(
         .map(str::to_owned)
         .ok_or_else(|| HarnessError::Unsupported("unable to resolve home directory".to_owned()))
     };
-    let join = |base: String, parts: &[&str]| {
-        if target_os == "windows" {
-            std::path::PathBuf::from(
-                std::iter::once(base)
-                    .chain(parts.iter().map(|part| (*part).to_owned()))
-                    .collect::<Vec<_>>()
-                    .join("\\"),
-            )
-        } else {
-            let mut path = std::path::PathBuf::from(base);
-            for part in parts {
-                path.push(part);
-            }
-            path
-        }
-    };
+    let join = |base: String, parts: &[&str]| target_join(&base, parts, target_os);
     let result = match kind {
         registry::PathKind::Home(parts) => join(home()?, parts),
         registry::PathKind::Xdg(parts) => {

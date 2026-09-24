@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"testing"
 )
 
@@ -350,7 +351,7 @@ func TestAtomicInstall(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stat installed binary: %v", err)
 	}
-	if info.Mode().Perm()&0111 == 0 {
+	if runtime.GOOS != "windows" && info.Mode().Perm()&0111 == 0 {
 		t.Error("installed binary is not executable")
 	}
 

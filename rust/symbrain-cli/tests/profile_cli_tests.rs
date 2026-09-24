@@ -42,6 +42,28 @@ fn run_profile_with_stdin(root: &TempDir, args: &[&str], input: &[u8]) -> std::p
     child.wait_with_output().unwrap()
 }
 
+fn create_file_symlink(target: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        std::os::unix::fs::symlink(target, link)
+    }
+    #[cfg(windows)]
+    {
+        std::os::windows::fs::symlink_file(target, link)
+    }
+}
+
+fn create_dir_symlink(target: &std::path::Path, link: &std::path::Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        std::os::unix::fs::symlink(target, link)
+    }
+    #[cfg(windows)]
+    {
+        std::os::windows::fs::symlink_dir(target, link)
+    }
+}
+
 #[test]
 fn add_uses_restricted_template_by_default_and_secure_modes() {
     let root = TempDir::new().unwrap();
@@ -206,21 +228,23 @@ fn remove_refuses_global_and_project_bindings_without_side_effects() {
     assert!(profile.exists());
 }
 
-#[cfg(unix)]
 #[test]
-fn remove_deletes_symlink_and_special_file_without_following() {
-    use std::os::unix::fs::symlink;
+fn remove_deletes_file_symlink_without_following() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     std::fs::create_dir_all(&profiles).unwrap();
     let outside = root.path().join("outside.toml");
     std::fs::write(&outside, b"outside\n").unwrap();
-    symlink(&outside, profiles.join("existing.toml")).unwrap();
+    create_file_symlink(&outside, &profiles.join("existing.toml")).unwrap();
     let output = run_profile(&root, &["profile", "remove", "existing", "--force"]);
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(!profiles.join("existing.toml").exists());
     assert_eq!(std::fs::read(&outside).unwrap(), b"outside\n");
+}
 
+#[cfg(unix)]
+#[test]
+fn remove_deletes_fifo_without_following() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     std::fs::create_dir_all(&profiles).unwrap();
@@ -235,14 +259,20 @@ fn remove_deletes_symlink_and_special_file_without_following() {
 
 #[test]
 fn remove_oracle_fixture_records_source_provenance() {
-    let fixture_name = if cfg!(target_os = "macos") {
-        "profile_remove_oracle_darwin.json"
+    let path = if let Some(path) = std::env::var_os("SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE") {
+        std::path::PathBuf::from(path)
+    } else if cfg!(windows) {
+        panic!("native Windows requires SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE from the Go oracle")
     } else {
-        "profile_remove_oracle_linux.json"
+        let fixture_name = if cfg!(target_os = "macos") {
+            "profile_remove_oracle_darwin.json"
+        } else {
+            "profile_remove_oracle_linux.json"
+        };
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures")
+            .join(fixture_name)
     };
-    let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures")
-        .join(fixture_name);
     let fixture: serde_json::Value = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
     assert_eq!(fixture["schema_version"], 1);
     assert!(fixture["go_revision"].as_str().unwrap().len() >= 7);
@@ -281,12 +311,43 @@ fn remove_oracle_fixture_records_source_provenance() {
             .iter()
             .any(|case| case["id"] == "bound_global_refuses")
     );
+    let case_ids = fixture["cases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|case| case["id"].as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    if cfg!(windows) {
+        assert_eq!(case_ids.len(), 19);
+        for id in [
+            "bound_project_symlink_refuses",
+            "symlink",
+            "symlink_profiles_root",
+        ] {
+            assert!(
+                case_ids.contains(id),
+                "Windows oracle omitted native case {id}"
+            );
+        }
+        let skipped = fixture["skipped_cases"].as_array().unwrap();
+        assert_eq!(skipped.len(), 1);
+        assert_eq!(skipped[0]["id"], "special_file");
+        assert_eq!(
+            skipped[0]["reason"],
+            "POSIX FIFO created with mkfifo has no ordinary Win32 filesystem entry equivalent"
+        );
+        assert_eq!(
+            skipped[0]["native_alternative"],
+            "symlink and symlink_profiles_root exercise Windows reparse-point deletion and ancestor refusal; neither is claimed equivalent to a FIFO"
+        );
+    } else {
+        assert_eq!(case_ids.len(), 20);
+        assert!(fixture["skipped_cases"].is_null());
+    }
 }
 
-#[cfg(unix)]
 #[test]
 fn remove_rejects_symlinked_profiles_root_without_touching_target() {
-    use std::os::unix::fs::symlink;
     let root = TempDir::new().unwrap();
     let profiles_parent = root.path().join("config/symbrain");
     let outside = root.path().join("outside-profiles");
@@ -294,18 +355,22 @@ fn remove_rejects_symlinked_profiles_root_without_touching_target() {
     std::fs::create_dir_all(&outside).unwrap();
     let victim = outside.join("existing.toml");
     std::fs::write(&victim, b"outside\n").unwrap();
-    symlink(&outside, profiles_parent.join("profiles")).unwrap();
+    create_dir_symlink(&outside, &profiles_parent.join("profiles")).unwrap();
 
     let output = run_profile(&root, &["profile", "remove", "existing", "--force"]);
     assert!(!output.status.success(), "stderr: {:?}", output.stderr);
+    if cfg!(windows) {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            stderr.contains("open configuration directory component \"profiles\": reparse point"),
+            "unexpected Windows reparse-point diagnostic: {stderr}"
+        );
+    }
     assert_eq!(std::fs::read(&victim).unwrap(), b"outside\n");
 }
 
-#[cfg(unix)]
 #[test]
-fn remove_fails_closed_for_symlink_and_fifo_harness_configs() {
-    use std::os::unix::fs::symlink;
-
+fn remove_fails_closed_for_symlink_harness_config() {
     let root = TempDir::new().unwrap();
     let profile = root.path().join("config/symbrain/profiles/bound.toml");
     std::fs::create_dir_all(profile.parent().unwrap()).unwrap();
@@ -317,14 +382,18 @@ fn remove_fails_closed_for_symlink_and_fifo_harness_configs() {
         br#"{"mcpServers":{"symbrain":{"command":"symbrain","args":["mcp","--profile","bound"]}}}"#,
     )
     .unwrap();
-    symlink(&real_config, root.path().join("home/.claude.json")).unwrap();
+    create_file_symlink(&real_config, &root.path().join("home/.claude.json")).unwrap();
     let output = run_profile(&root, &["profile", "remove", "bound"]);
     assert_eq!(output.status.code(), Some(1), "stderr: {:?}", output.stderr);
     assert!(profile.exists());
     assert!(String::from_utf8_lossy(&output.stderr).contains(
         "symbrain profile remove: unable to safely inspect harness bindings:\n  - claude ("
     ));
+}
 
+#[cfg(unix)]
+#[test]
+fn remove_fails_closed_for_fifo_harness_config() {
     let root = TempDir::new().unwrap();
     let profile = root.path().join("config/symbrain/profiles/existing.toml");
     std::fs::create_dir_all(profile.parent().unwrap()).unwrap();
@@ -368,8 +437,7 @@ fn remove_keeps_relative_project_display_and_rejects_symlink_project_root() {
         br#"{"mcpServers":{"symbrain":{"command":"symbrain","args":["mcp","--profile","existing"]}}}"#,
     )
     .unwrap();
-    #[cfg(unix)]
-    std::os::unix::fs::symlink(&real_project, root.path().join("project/project-link")).unwrap();
+    create_dir_symlink(&real_project, &root.path().join("project/project-link")).unwrap();
     let output = run_profile(
         &root,
         &["profile", "remove", "existing", "--project", "project-link"],

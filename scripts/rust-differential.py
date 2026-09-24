@@ -20,6 +20,7 @@ import threading
 import time
 import zipfile
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
@@ -27,6 +28,8 @@ from external_env import ensure_external_environment
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
+WINDOWS_STUB_TEMP: tempfile.TemporaryDirectory[str] | None = None
+WINDOWS_STUB_BINARY: Path | None = None
 SAMPLE_CONFIG_TOML = """# Symaira Brain Global Configuration
 default_profile = "personal"
 [audit]
@@ -110,33 +113,48 @@ lt_frac_trailing = 07:32:00.120000
 lt_frac_zero = 07:32:00.000
 lt_no_sec = 07:32
 """
+def _write_text(path: Path, text: str, encoding: str = "utf-8") -> None:
+    """Write deterministic UTF-8 fixture bytes without Windows newline conversion."""
+    path.write_bytes(text.encode(encoding))
+
+
 def setup_xdg_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", SAMPLE_CONFIG_TOML)
 def setup_codex_stale_auth(_root: Path, env: dict[str, str]) -> None:
     codex_dir = Path(env["HOME"]) / ".codex"
     codex_dir.mkdir(parents=True, exist_ok=True)
     # A logged-out Codex CLI leaves an auth file without an access token; the
     # provider reports "expired" and never reaches the network.
-    (codex_dir / "auth.json").write_text('{"OPENAI_API_KEY":"stale"}\n')
+    _write_text(codex_dir / "auth.json", '{"OPENAI_API_KEY":"stale"}\n')
 def setup_home_config(_root: Path, env: dict[str, str]) -> None:
     env["XDG_CONFIG_HOME"] = ""
     cfg_dir = Path(env["HOME"]) / ".config" / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", SAMPLE_CONFIG_TOML)
 def setup_malformed_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text("invalid = [ unterminated toml\n")
+    _write_text(cfg_dir / "config.toml", "invalid = [ unterminated toml\n")
+def setup_guard_doctor_invalid_config(_root: Path, env: dict[str, str]) -> None:
+    config = Path(env["XDG_CONFIG_HOME"]) / "symguard" / "config.toml"
+    config.parent.mkdir(parents=True, exist_ok=True)
+    _write_text(config, "not [valid = toml")
+    env["SYMGUARD_CONFIG"] = str(config)
+def setup_guard_doctor_corrupt_anchor(_root: Path, env: dict[str, str]) -> None:
+    data = Path(env["XDG_DATA_HOME"]) / "symguard"
+    data.mkdir(parents=True, exist_ok=True)
+    _write_text(data / "audit.log", '{"entry_id":"1"}\n')
+    _write_text(data / "audit.log.anchor", "not json")
 def setup_install_default_profile(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "config.toml"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    cfg.write_text('default_profile = "personal"\n')
+    _write_text(cfg, 'default_profile = "personal"\n')
 def setup_install_malformed_global(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "config.toml"
     cfg.parent.mkdir(parents=True, exist_ok=True)
-    cfg.write_text("invalid = [ unterminated toml\n")
+    _write_text(cfg, "invalid = [ unterminated toml\n")
 def setup_install_malformed(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".claude.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
@@ -171,36 +189,36 @@ def setup_install_installed(_root: Path, env: dict[str, str]) -> None:
 def setup_conflict_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text('default_profile = "personal"\n')
+    _write_text(cfg_dir / "config.toml", 'default_profile = "personal"\n')
 def setup_existing_parent_mode(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_dir.chmod(0o755)
-    (cfg_dir / "config.toml").write_text('existing = true\n')
+    _write_text(cfg_dir / "config.toml", 'existing = true\n')
 def setup_symlink_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "target.toml").write_text('target = true\n')
+    _write_text(cfg_dir / "target.toml", 'target = true\n')
     (cfg_dir / "config.toml").symlink_to("target.toml")
 def setup_readonly_config_dir(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text('existing = true\n')
+    _write_text(cfg_dir / "config.toml", 'existing = true\n')
     cfg_dir.chmod(0o500)
 def setup_unreadable_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg_file = cfg_dir / "config.toml"
-    cfg_file.write_text(SAMPLE_CONFIG_TOML)
+    _write_text(cfg_file, SAMPLE_CONFIG_TOML)
     cfg_file.chmod(0o000)
 def setup_floats_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(FLOATS_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", FLOATS_CONFIG_TOML)
 def setup_datetime_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(DATETIME_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", DATETIME_CONFIG_TOML)
 
 INLINE_CONFIG_TOML = """# Inline tables fixture
 [server]
@@ -211,7 +229,7 @@ tree = { mid = { leaf = "initial", count = 10 } }
 def setup_inline_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(INLINE_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", INLINE_CONFIG_TOML)
 
 COMPLEX_CONFIG_TOML = """# Complex config fixture
 items = ["apple", "banana"]
@@ -226,25 +244,25 @@ port = 9000
 def setup_complex_config(_root: Path, env: dict[str, str]) -> None:
     cfg_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    (cfg_dir / "config.toml").write_text(COMPLEX_CONFIG_TOML)
+    _write_text(cfg_dir / "config.toml", COMPLEX_CONFIG_TOML)
 def setup_profile_fixture(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "good.toml").write_text(
+    _write_text(profiles / "good.toml",
         '[profile]\nname = "good"\ndescription = "Good profile"\n'
         '[servers.vault]\nenabled = true\nmode = "request_only"\n'
     )
-    (profiles / "broken.toml").write_text('[profile]\nname = "wrong-name"\n')
+    _write_text(profiles / "broken.toml", '[profile]\nname = "wrong-name"\n')
 def setup_profile_existing(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "existing.toml").write_text('[profile]\nname = "existing"\n')
+    _write_text(profiles / "existing.toml", '[profile]\nname = "existing"\n')
 def setup_profile_remove_existing(_root: Path, env: dict[str, str]) -> None:
     setup_profile_existing(_root, env)
 def setup_profile_remove_bound_global(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "bound.toml").write_text('[profile]\nname = "bound"\n')
+    _write_text(profiles / "bound.toml", '[profile]\nname = "bound"\n')
     config = Path(env["HOME"]) / ".claude.json"
     config.parent.mkdir(parents=True, exist_ok=True)
     config.write_bytes(
@@ -273,7 +291,7 @@ def setup_profile_remove_symlink_profiles_root(_root: Path, env: dict[str, str])
     profiles_parent.mkdir(parents=True, exist_ok=True)
     outside = Path(env["XDG_CONFIG_HOME"]) / "outside-profiles"
     outside.mkdir(parents=True, exist_ok=True)
-    outside.joinpath("existing.toml").write_text("outside\n")
+    _write_text(outside.joinpath("existing.toml"), "outside\n")
     profiles = profiles_parent / "profiles"
     if profiles.exists():
         profiles.rmdir()
@@ -289,7 +307,7 @@ def setup_profile_remove_symlink(root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
     target = root / "profile-target.toml"
-    target.write_text('[profile]\nname = "target"\n')
+    _write_text(target, '[profile]\nname = "target"\n')
     (profiles / "existing.toml").symlink_to(target)
 def setup_profile_remove_fifo(_root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
@@ -308,11 +326,15 @@ def setup_doctor_empty(root: Path, env: dict[str, str]) -> None:
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
-    _write_fake_vault(
-        binary_dir / "symvault",
-        "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\nprintf 'not found\\n' >&2",
-        exit_code=1,
-    )
+    if os.name == "nt":
+        _install_windows_stub(binary_dir / "symvault.exe")
+        env["SYMBRAIN_TEST_FAKE_SYMVAULT_MODE"] = "doctor_failed_version"
+    else:
+        _write_fake_vault(
+            binary_dir / "symvault",
+            "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\nprintf 'not found\\n' >&2",
+            exit_code=1,
+        )
     env["PATH"] = str(binary_dir)
 def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
     audit_dir = Path(env["XDG_DATA_HOME"]) / "symbrain" / "audit"
@@ -349,9 +371,9 @@ def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
         },
     ]
     lines = [json.dumps(entry, separators=(",", ":")) for entry in entries]
-    (audit_dir / "alpha.jsonl").write_text("\n".join(lines) + "\n")
+    _write_text(audit_dir / "alpha.jsonl", "\n".join(lines) + "\n")
 def _write_fake_vault(path: Path, body: str, exit_code: int = 0) -> None:
-    path.write_text(f"#!/bin/sh\n{body}\nexit {exit_code}\n")
+    _write_text(path, f"#!/bin/sh\n{body}\nexit {exit_code}\n")
     path.chmod(0o755)
 def setup_vault_path_fixture(root: Path, env: dict[str, str]) -> None:
     vault_dir = root / "vault-path"
@@ -389,7 +411,7 @@ def setup_vault_config_override(root: Path, env: dict[str, str]) -> None:
     _write_fake_vault(configured, "printf 'configured-child\\n'")
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
-    (config_dir / "config.toml").write_text(
+    _write_text(config_dir / "config.toml",
         f"[servers.vault]\nbinary_path = {json.dumps(str(configured))}\n"
     )
     env["PATH"] = str(path_dir)
@@ -425,7 +447,7 @@ def setup_vault_config_missing(root: Path, env: dict[str, str]) -> None:
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
     missing = root / "missing" / "symvault"
-    (config_dir / "config.toml").write_text(
+    _write_text(config_dir / "config.toml",
         f"[servers.vault]\nbinary_path = {json.dumps(str(missing))}\n"
     )
     env["PATH"] = str(empty_path)
@@ -433,7 +455,7 @@ def setup_vault_empty_config(root: Path, env: dict[str, str]) -> None:
     setup_vault_path_fixture(root, env)
     config_dir = Path(env["XDG_CONFIG_HOME"]) / "symbrain"
     config_dir.mkdir(parents=True)
-    (config_dir / "config.toml").write_text('[servers.vault]\nbinary_path = ""\n')
+    _write_text(config_dir / "config.toml", '[servers.vault]\nbinary_path = ""\n')
 def setup_vault_raw_env_missing(root: Path, env: dict[str, str]) -> None:
     empty_path = root / "empty-path"
     empty_path.mkdir()
@@ -448,26 +470,179 @@ def setup_correct_managed_binaries(root: Path, env: dict[str, str]) -> None:
     setup_release_fixture(root, env)
     bin_dir = Path(env["HOME"]) / ".symaira" / "bin"
     bin_dir.mkdir(parents=True)
-    versions = {
-        "symvault": "0.21.1",
-        "symcockpit": "0.5.3",
-        "symdesk": "0.11.1",
-    }
-    for name, version in versions.items():
-        script = f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n"
+    for name, core in _managed_cores().items():
+        if core.get("optional", False):
+            continue
+        version = _version_without_tag(str(core["version"]))
         path = bin_dir / name
-        path.write_text(script)
-        path.chmod(0o755)
+        if os.name == "nt":
+            _install_windows_stub(path)
+        else:
+            script = f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n"
+            _write_text(path, script)
+            path.chmod(0o755)
 def setup_mismatched_managed_binaries(root: Path, env: dict[str, str]) -> None:
     setup_correct_managed_binaries(root, env)
     path = Path(env["HOME"]) / ".symaira" / "bin" / "symdesk"
-    path.write_text("#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
-    path.chmod(0o755)
+    if os.name == "nt":
+        env["SYMBRAIN_TEST_MANAGED_SYMDESK_VERSION"] = "0.0.0"
+    else:
+        _write_text(path, "#!/bin/sh\nprintf '{\"version\":\"0.0.0\"}\\n'\n")
+        path.chmod(0o755)
 def setup_failing_cosign(root: Path, env: dict[str, str]) -> None:
     setup_release_fixture(root, env)
     cosign = Path(env["PATH"]) / "cosign"
-    cosign.write_text("#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
-    cosign.chmod(0o755)
+    if os.name == "nt":
+        _install_windows_stub(cosign.with_suffix(".exe"))
+    else:
+        _write_text(cosign, "#!/bin/sh\nprintf 'cosign stdout\\n'\nprintf 'cosign stderr\\n' >&2\nexit 9\n")
+        cosign.chmod(0o755)
+
+
+def _install_windows_stub(path: Path) -> None:
+    if WINDOWS_STUB_BINARY is None:
+        raise RuntimeError("native Windows fixture executable was not built")
+    shutil.copyfile(WINDOWS_STUB_BINARY, path)
+
+
+def _managed_cores() -> dict[str, dict[str, object]]:
+    manifest_path = Path(__file__).resolve().parent.parent / "internal/managed/manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    cores = manifest.get("cores")
+    if not isinstance(cores, dict):
+        raise RuntimeError(f"managed manifest has no core map: {manifest_path}")
+    return cores
+
+
+def _version_without_tag(version: str) -> str:
+    return version.removeprefix("v")
+
+
+def _archive_name(core: dict[str, object], goos: str, goarch: str, *, alternate: bool = False) -> str:
+    binary = str(core["binary_name"])
+    arch = str(core.get("asset_arch") or goarch)
+    extension = "zip" if goos == "windows" else "tar.gz"
+    if alternate:
+        return f"{binary}_{goos}_{arch}.{extension}"
+    version = _version_without_tag(str(core["version"]))
+    return f"{core['asset_prefix']}_{version}_{goos}_{arch}.{extension}"
+
+
+def _archive_binary_path(core: dict[str, object], goos: str, goarch: str) -> str:
+    binary = str(core["binary_name"])
+    prefix = str(core["asset_prefix"])
+    if prefix.startswith("symaira-vault"):
+        arch = str(core.get("asset_arch") or goarch)
+        version = _version_without_tag(str(core["version"]))
+        return f"{prefix}_{version}_{goos}_{arch}/{binary}"
+    return binary
+
+
+def _assert_current_managed_install(root: Path, env: dict[str, str], runtime: str) -> None:
+    target_os = "darwin" if sys.platform == "darwin" else "windows" if os.name == "nt" else "linux"
+    bin_dir = Path(env["HOME"]) / ".symaira" / "bin"
+    for core in _managed_cores().values():
+        if core.get("optional", False):
+            continue
+        platforms = core.get("platforms")
+        if isinstance(platforms, list) and platforms and target_os not in platforms:
+            continue
+        binary_name = str(core["binary_name"])
+        binary = bin_dir / binary_name
+        if not binary.is_file():
+            raise AssertionError(
+                f"{runtime} setup reported success but did not install {binary_name} under {root}"
+            )
+        try:
+            result = run(binary, ("version", "--json"), env)
+        except OSError as err:
+            raise AssertionError(
+                f"{runtime} installed {binary_name} but could not execute its version probe: {err}"
+            ) from err
+        expected = (json.dumps(
+            {"version": _version_without_tag(str(core["version"]))},
+            separators=(",", ":"),
+        ) + "\n").encode()
+        if result.returncode != 0 or result.stdout != expected or result.stderr:
+            raise AssertionError(
+                f"{runtime} installed {binary_name} probe mismatch: "
+                f"exit={result.returncode}, stdout={result.stdout!r}, stderr={result.stderr!r}, "
+                f"want stdout={expected!r}"
+            )
+
+
+def _build_windows_stub() -> None:
+    global WINDOWS_STUB_TEMP, WINDOWS_STUB_BINARY
+    if os.name != "nt":
+        return
+    go = shutil.which("go")
+    if go is None:
+        raise RuntimeError("native Windows parity fixtures require the Go toolchain")
+    WINDOWS_STUB_TEMP = tempfile.TemporaryDirectory(prefix="symbrain-parity-stubs-")
+    root = Path(WINDOWS_STUB_TEMP.name)
+    source = root / "main.go"
+    WINDOWS_STUB_BINARY = root / "symbrain-parity-stub.exe"
+    version_entries = "\n".join(
+        f"\t\t{json.dumps(str(core['binary_name']))}: "
+        f"{json.dumps(_version_without_tag(str(core['version'])))},"
+        for core in _managed_cores().values()
+    )
+    go_source = r'''package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func main() {
+	name := strings.TrimSuffix(strings.ToLower(filepath.Base(os.Args[0])), ".exe")
+	if name == "cosign" {
+		fmt.Println("cosign stdout")
+		fmt.Fprintln(os.Stderr, "cosign stderr")
+		os.Exit(9)
+	}
+	if name == "symvault" && os.Getenv("SYMBRAIN_TEST_FAKE_SYMVAULT_MODE") == "doctor_failed_version" {
+		if len(os.Args) > 1 && os.Args[1] == "version" {
+			fmt.Print(`{"version":"9.9.9"}`)
+			os.Exit(42)
+		}
+		fmt.Fprintln(os.Stderr, "not found")
+		os.Exit(1)
+	}
+	version := map[string]string{
+__VERSION_ENTRIES__
+	}[name]
+	if name == "symdesk" {
+		if override := os.Getenv("SYMBRAIN_TEST_MANAGED_SYMDESK_VERSION"); override != "" {
+			version = override
+		}
+	}
+	if version == "" || len(os.Args) < 2 || os.Args[1] != "version" {
+		fmt.Fprintln(os.Stderr, "unsupported fixture invocation")
+		os.Exit(2)
+	}
+	fmt.Printf("{\"version\":%q}\n", version)
+}
+'''.replace("__VERSION_ENTRIES__", version_entries)
+    _write_text(
+        source,
+        go_source,
+    )
+    result = subprocess.run(
+        [go, "build", "-trimpath", "-o", str(WINDOWS_STUB_BINARY), str(source)],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=root,
+        env={**os.environ, "CGO_ENABLED": "0", "GO111MODULE": "off"},
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            "build native Windows parity fixture executable failed: "
+            + result.stderr.decode("utf-8", errors="replace")
+        )
 class ReleaseFixtureServer:
     def __init__(self) -> None:
         self.routes = self._build_routes()
@@ -502,30 +677,45 @@ class ReleaseFixtureServer:
         target_os = "darwin" if sys.platform == "darwin" else "windows" if os.name == "nt" else "linux"
         machine = platform.machine().lower()
         target_arch = "arm64" if machine in {"arm64", "aarch64"} else "amd64"
-        cores = (
-            ("danieljustus/symaira-vault", "v0.21.1", "symvault", target_arch),
-            ("danieljustus/symaira-desktop", "v0.11.1", "symdesk", target_arch),
-        )
-        if target_os == "darwin":
-            cores += (("danieljustus/symaira-cockpit", "v0.5.3", "symcockpit", "universal"),)
         routes: dict[str, bytes] = {}
-        extension = "zip" if target_os == "windows" else "tar.gz"
-        for repo, tag, binary, arch in cores:
-            asset = f"{binary}_{target_os}_{arch}.{extension}"
-            version = tag.removeprefix("v")
-            executable = (
-                f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n".encode()
-            )
+        for core in _managed_cores().values():
+            if core.get("optional", False):
+                continue
+            platforms = core.get("platforms")
+            if isinstance(platforms, list) and platforms and target_os not in platforms:
+                continue
+
+            version = _version_without_tag(str(core["version"]))
+            tag = f"v{version}"
+            repo = str(core["repo"])
+            binary = str(core["binary_name"])
+            extension = "zip" if target_os == "windows" else "tar.gz"
+            asset_name = _archive_name(core, target_os, target_arch)
+            alternate_name = _archive_name(core, target_os, target_arch, alternate=True)
+            # Manifest-pinned primary archives cannot be synthetic: serving a
+            # fixture under that name would necessarily violate its immutable
+            # SHA-256 pin. Exercise the real fallback and checksum-file path.
+            pinned_assets = core.get("sha256", {})
+            asset = alternate_name if asset_name in pinned_assets else asset_name
+            archive_binary = _archive_binary_path(core, target_os, target_arch)
+            if target_os == "windows":
+                if WINDOWS_STUB_BINARY is None:
+                    raise RuntimeError("native Windows release fixtures require the Go stub executable")
+                executable = WINDOWS_STUB_BINARY.read_bytes()
+            else:
+                executable = (
+                    f"#!/bin/sh\nprintf '{{\"version\":\"{version}\"}}\\n'\n".encode()
+                )
             if extension == "zip":
                 output = io.BytesIO()
                 with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
-                    archive.writestr(binary, executable)
+                    archive.writestr(archive_binary, executable)
                 archive_bytes = output.getvalue()
             else:
                 output = io.BytesIO()
                 with gzip.GzipFile(fileobj=output, mode="wb", mtime=0) as compressed:
                     with tarfile.open(fileobj=compressed, mode="w") as archive:
-                        info = tarfile.TarInfo(binary)
+                        info = tarfile.TarInfo(archive_binary)
                         info.mode = 0o755
                         info.size = len(executable)
                         info.mtime = 0
@@ -534,8 +724,12 @@ class ReleaseFixtureServer:
             prefix = f"/{repo}/releases/download/{tag}/"
             routes[prefix + asset] = archive_bytes
             digest = hashlib.sha256(archive_bytes).hexdigest()
-            routes[prefix + "checksums.txt"] = f"{digest}  {asset}\n".encode()
-            if binary == "symvault":
+            if binary == "symcockpit":
+                checksum_asset = "checksums.txt"
+            else:
+                checksum_asset = f"{core['asset_prefix']}_{version}_checksums.txt"
+            routes[prefix + checksum_asset] = f"{digest}  {asset}\n".encode()
+            if core.get("has_cosign", False):
                 routes[prefix + asset + ".sig"] = b"fixture-signature"
                 routes[prefix + asset + ".pem"] = b"fixture-certificate"
         return routes
@@ -577,13 +771,13 @@ def write_skills_marker(directory: Path, **overrides: object) -> None:
         "allow_executable": True,
     }
     marker.update(overrides)
-    (directory / ".symskills.json").write_text(json.dumps(marker), encoding="utf-8")
+    _write_text(directory / ".symskills.json", json.dumps(marker), encoding="utf-8")
 
 
 def write_opencode_skill(root: Path, name: str) -> Path:
     directory = opencode_skills_root(root) / name
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "SKILL.md").write_text(f"{name}\n", encoding="utf-8")
+    _write_text(directory / "SKILL.md", f"{name}\n", encoding="utf-8")
     return directory
 
 
@@ -598,11 +792,11 @@ def setup_skills_opencode_unmanaged_skill(root: Path, env: dict[str, str]) -> No
 def setup_skills_opencode_dir_without_skill(root: Path, env: dict[str, str]) -> None:
     directory = opencode_skills_root(root) / "notaskill"
     directory.mkdir(parents=True)
-    (directory / "notes.txt").write_text("notes\n", encoding="utf-8")
+    _write_text(directory / "notes.txt", "notes\n", encoding="utf-8")
 
 
 def setup_skills_opencode_regular_file(root: Path, env: dict[str, str]) -> None:
-    (opencode_skills_root(root) / "README.md").write_text("readme\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "readme\n", encoding="utf-8")
 
 
 def setup_skills_opencode_dangling_symlink(root: Path, env: dict[str, str]) -> None:
@@ -616,14 +810,14 @@ def setup_skills_opencode_symlink_to_dir(root: Path, env: dict[str, str]) -> Non
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside-skill"
     target.mkdir(parents=True, exist_ok=True)
-    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    _write_text(target / "SKILL.md", "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linked")
 
 
 def setup_skills_opencode_symlink_to_file(root: Path, env: dict[str, str]) -> None:
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside-file.md"
-    target.write_text("outside\n", encoding="utf-8")
+    _write_text(target, "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linkedfile")
 
 
@@ -632,7 +826,7 @@ def setup_skills_opencode_symlink_to_marker_file(root: Path, env: dict[str, str]
     # `<link>/.symskills.json`, fails, and reports the entry as unmanaged.
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/marker-file.json"
-    target.write_text(
+    _write_text(target,
         json.dumps(
             {
                 "schema_version": 1,
@@ -653,7 +847,7 @@ def setup_skills_opencode_symlink_chain(root: Path, env: dict[str, str]) -> None
     # A second link level is the one shape the native scan refuses to follow.
     real = root / "home/.config/opencode/real-dir"
     real.mkdir(parents=True, exist_ok=True)
-    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    _write_text(real / "SKILL.md", "real\n", encoding="utf-8")
     middle = root / "home/.config/opencode/middle-link"
     os.symlink(real, middle)
     os.symlink(middle, opencode_skills_root(root) / "chain")
@@ -670,14 +864,14 @@ def setup_skills_opencode_foreign_marker(root: Path, env: dict[str, str]) -> Non
 
 def setup_skills_opencode_legacy_hash_only_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "legacy")
-    (directory / ".symskills.json").write_text(
+    _write_text(directory / ".symskills.json",
         json.dumps({"source_hash": "abc123"}), encoding="utf-8"
     )
 
 
 def setup_skills_opencode_malformed_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "broken")
-    (directory / ".symskills.json").write_text("{not json", encoding="utf-8")
+    _write_text(directory / ".symskills.json", "{not json", encoding="utf-8")
 
 
 def setup_skills_opencode_unsupported_schema_marker(root: Path, env: dict[str, str]) -> None:
@@ -688,7 +882,7 @@ def setup_skills_opencode_unsupported_schema_marker(root: Path, env: dict[str, s
 
 def setup_skills_opencode_empty_marker(root: Path, env: dict[str, str]) -> None:
     directory = write_opencode_skill(root, "emptymarker")
-    (directory / ".symskills.json").write_text("", encoding="utf-8")
+    _write_text(directory / ".symskills.json", "", encoding="utf-8")
 
 
 def setup_skills_opencode_wrong_type_marker(root: Path, env: dict[str, str]) -> None:
@@ -698,7 +892,7 @@ def setup_skills_opencode_wrong_type_marker(root: Path, env: dict[str, str]) -> 
 def setup_skills_opencode_mixed(root: Path, env: dict[str, str]) -> None:
     for name in ("zebra", "alpha", "middle"):
         write_opencode_skill(root, name)
-    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "ignored\n", encoding="utf-8")
 
 
 def project_scope_fixture(setup: Callable[[Path, dict[str, str]], None]) -> Callable[[Path, dict[str, str]], None]:
@@ -726,7 +920,7 @@ def setup_skills_opencode_project_symlink_to_file(root: Path, env: dict[str, str
     skills = root / "project/.opencode/skills"
     skills.mkdir(parents=True)
     target = skills.parent / "outside-file.md"
-    target.write_text("outside\n", encoding="utf-8")
+    _write_text(target, "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linkedfile")
 
 
@@ -735,7 +929,7 @@ def setup_skills_opencode_project_symlink_chain(root: Path, env: dict[str, str])
     skills.mkdir(parents=True)
     real = skills.parent / "real-dir"
     real.mkdir(parents=True)
-    (real / "SKILL.md").write_text("real\n", encoding="utf-8")
+    _write_text(real / "SKILL.md", "real\n", encoding="utf-8")
     middle = skills.parent / "middle-link"
     os.symlink(real, middle)
     os.symlink(middle, skills / "chain")
@@ -748,7 +942,7 @@ def setup_skills_opencode_project_isolated_from_user_root(root: Path, env: dict[
     skills.mkdir(parents=True)
     projects_skill = skills / "only-here"
     projects_skill.mkdir()
-    (projects_skill / "SKILL.md").write_text("only-here\n", encoding="utf-8")
+    _write_text(projects_skill / "SKILL.md", "only-here\n", encoding="utf-8")
 
 
 SKILLS_LIBRARY_STAMP = 1767323045  # 2026-01-02T03:04:05Z
@@ -762,7 +956,7 @@ def write_library_skill(root: Path, name: str) -> Path:
     """
     directory = root / "data/symbrain/skills/library" / name
     directory.mkdir(parents=True, exist_ok=True)
-    (directory / "SKILL.md").write_text(
+    _write_text(directory / "SKILL.md",
         f"---\nname: {name}\ndescription: library fixture\nlicense: Apache-2.0\n---\n\n# {name}\n\nBody.\n",
         encoding="utf-8",
     )
@@ -774,14 +968,14 @@ def write_library_skill(root: Path, name: str) -> Path:
 def write_symskills_config(root: Path, body: str) -> None:
     config = root / "config/symskills/config.toml"
     config.parent.mkdir(parents=True, exist_ok=True)
-    config.write_text(body, encoding="utf-8")
+    _write_text(config, body, encoding="utf-8")
 
 
 def setup_skills_targets_mixed(root: Path, env: dict[str, str]) -> None:
     write_opencode_skill(root, "handwritten")
     directory = write_opencode_skill(root, "managed")
     write_skills_marker(directory)
-    (opencode_skills_root(root) / "README.md").write_text("ignored\n", encoding="utf-8")
+    _write_text(opencode_skills_root(root) / "README.md", "ignored\n", encoding="utf-8")
 
 
 def setup_skills_targets_empty_root(root: Path, env: dict[str, str]) -> None:
@@ -808,7 +1002,7 @@ def setup_skills_targets_symlink_entry(root: Path, env: dict[str, str]) -> None:
     skills = opencode_skills_root(root)
     target = root / "home/.config/opencode/outside"
     target.mkdir(parents=True, exist_ok=True)
-    (target / "SKILL.md").write_text("outside\n", encoding="utf-8")
+    _write_text(target / "SKILL.md", "outside\n", encoding="utf-8")
     os.symlink(target, skills / "linked")
 
 
@@ -820,7 +1014,7 @@ def setup_skills_dynamic_config(root: Path, env: dict[str, str]) -> None:
 def setup_skills_event_log(root: Path, env: dict[str, str]) -> None:
     log = root / "home/.local/share/symskills/events.jsonl"
     log.parent.mkdir(parents=True, exist_ok=True)
-    log.write_text(
+    _write_text(log,
         json.dumps(
             {
                 "ts": "2026-01-02T03:04:05Z",
@@ -840,7 +1034,7 @@ def setup_activity_profile(root: Path, env: dict[str, str]) -> None:
     """A profile that explicitly grants the activity read tools."""
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
-    (profiles / "reader.toml").write_text(
+    _write_text(profiles / "reader.toml",
         '[profile]\nname = "reader"\n'
         "[servers.memory]\nenabled = true\n"
         'tools_allow = ["activity_status", "activity_get", "activity_search"]\n'
@@ -854,8 +1048,10 @@ def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
 
 def setup_skills_opencode_escapable_name(root: Path, env: dict[str, str]) -> None:
     # Go encodes skills reports with `json.Encoder`, which escapes `&`, `<` and
-    # `>`; a name carrying those bytes proves the native encoder matches.
-    write_opencode_skill(root, "a&b<c>d")
+    # `>`; Windows forbids angle brackets in file names, so its native case
+    # keeps the legal ampersand and still verifies escaping on the live path.
+    name = "a&b-c-d" if os.name == "nt" else "a&b<c>d"
+    write_opencode_skill(root, name)
 
 
 def setup_memory_rules(root: Path, env: dict[str, str]) -> None:
@@ -1041,6 +1237,18 @@ def setup_memory_seeded(root: Path, env: dict[str, str]) -> None:
     os.utime(database, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
 
 
+def setup_memory_search_seeded(root: Path, env: dict[str, str]) -> None:
+    """Keep search's recency contribution below an f64 ULP across processes."""
+    setup_memory_seeded(root, env)
+    database = root / "data/symbrain/memory/default.db"
+    connection = sqlite3.connect(database)
+    try:
+        connection.execute("UPDATE memories SET created_at = '2000-01-02 03:04:05'")
+        connection.commit()
+    finally:
+        connection.close()
+
+
 def set_access_times(root: Path, name: str, access: float) -> None:
     """Give an installed skill's SKILL.md an explicit access time.
 
@@ -1062,7 +1270,7 @@ def setup_skills_library_categories(root: Path, env: dict[str, str]) -> None:
     """Case variants and stray whitespace must collapse to one spelling."""
     for name, category in (("alpha", "Guides"), ("beta", "  guides  "), ("gamma", "GUIDES")):
         directory = write_library_skill(root, name)
-        (directory / "SKILL.md").write_text(
+        _write_text(directory / "SKILL.md",
             f"---\nname: {name}\ndescription: {name} skill\nlicense: Apache-2.0\ncategory: \"{category}\"\n---\n\n# {name}\n",
             encoding="utf-8",
         )
@@ -1074,7 +1282,7 @@ def setup_skills_library_managed(root: Path, env: dict[str, str]) -> None:
     """A library skill with a real install: installs and last_rendered_at."""
     write_library_skill(root, "demo")
     directory = root / "data/symbrain/skills/library/demo"
-    (directory / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    _write_text(directory / "SKILL.md", MANAGED_SKILL_MD, encoding="utf-8")
     subprocess.run(
         [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
         env=env,
@@ -1103,7 +1311,7 @@ def setup_skills_library_broken_skill(root: Path, env: dict[str, str]) -> None:
     write_library_skill(root, "good")
     directory = root / "data/symbrain/skills/library/broken"
     directory.mkdir(parents=True)
-    (directory / "SKILL.md").write_text("no frontmatter here\n", encoding="utf-8")
+    _write_text(directory / "SKILL.md", "no frontmatter here\n", encoding="utf-8")
 
 
 def setup_skills_library_missing_skill_md(root: Path, env: dict[str, str]) -> None:
@@ -1143,7 +1351,7 @@ def freeze_managed_clocks(root: Path) -> None:
         data = json.loads(marker_file.read_text(encoding="utf-8"))
         if "installed" in data:
             data["installed"] = "2026-01-02T03:04:05Z"
-            marker_file.write_text(json.dumps(data), encoding="utf-8")
+            _write_text(marker_file, json.dumps(data), encoding="utf-8")
     log = root / "home/.local/share/symskills/events.jsonl"
     if log.is_file():
         lines = []
@@ -1153,7 +1361,7 @@ def freeze_managed_clocks(root: Path) -> None:
             record = json.loads(line)
             record["ts"] = "2026-01-02T03:04:05Z"
             lines.append(json.dumps(record))
-        log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_text(log, "\n".join(lines) + "\n", encoding="utf-8")
     for path in sorted(root.rglob("SKILL.md")):
         os.utime(path, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
         os.utime(path.parent, (SKILLS_LIBRARY_STAMP, SKILLS_LIBRARY_STAMP))
@@ -1168,7 +1376,7 @@ def generate_managed_install(root: Path, env: dict[str, str]) -> Path:
     """
     skill_dir = root / "data/symbrain/skills/library/demo"
     skill_dir.mkdir(parents=True, exist_ok=True)
-    (skill_dir / "SKILL.md").write_text(MANAGED_SKILL_MD, encoding="utf-8")
+    _write_text(skill_dir / "SKILL.md", MANAGED_SKILL_MD, encoding="utf-8")
     subprocess.run(
         [env["SYMBRAIN_GO_BINARY"], "sync", "opencode"],
         env=env,
@@ -1247,6 +1455,8 @@ class Case:
     stdin: bytes | None = None
     pty: bool = False
 CASES = (
+    Case("guard_doctor_invalid_config_native", ("guard", "doctor"), setup=setup_guard_doctor_invalid_config, normalize_runtime=True),
+    Case("guard_doctor_corrupt_anchor_native", ("guard", "doctor"), setup=setup_guard_doctor_corrupt_anchor, normalize_runtime=True),
     Case("no_args", ()),
     Case("help", ("help",)),
     Case("help_long", ("--help",)),
@@ -1501,7 +1711,11 @@ CASES = (
     Case("doctor_vault_agent_then_help", ("doctor", "--vault-agent", "agent", "--help")),
     Case("doctor_vault_agent_equals_then_help", ("doctor", "--vault-agent=agent", "--help")),
     Case("doctor_vault_agent_missing_value", ("doctor", "--vault-agent")),
-    Case("doctor_failed_version_json", ("doctor", "--json"), setup=setup_doctor_failed_version),
+    Case(
+        "doctor_failed_version_json",
+        ("doctor", "--json"),
+        setup=setup_doctor_failed_version,
+    ),
     # Phase 4 Task 4.3: native symvault passthrough with opaque argv and lookup order
     Case(
         "vault_passthrough_argv_stdio",
@@ -1516,13 +1730,22 @@ CASES = (
     Case("vault_managed_precedes_path", ("vault",), setup=setup_vault_managed_precedence, posix_only=True),
     Case("vault_configured_precedes_managed", ("vault",), setup=setup_vault_config_override, posix_only=True),
     Case("vault_env_override_precedes_config", ("vault",), setup=setup_vault_env_override, posix_only=True),
-    Case("vault_missing_binary", ("vault",), setup=setup_release_fixture),
+    Case(
+        "vault_missing_binary",
+        ("vault",),
+        setup=setup_release_fixture,
+    ),
     Case("vault_configured_binary_missing", ("vault",), setup=setup_vault_config_missing, posix_only=True),
     Case("vault_empty_config_uses_path", ("vault",), setup=setup_vault_empty_config, posix_only=True),
     Case("vault_raw_env_missing", ("vault",), setup=setup_vault_raw_env_missing, posix_only=True),
     # Phase 4 Task 4.2: native managed setup against immutable local archives
     Case("setup_unknown_flag", ("setup", "--unknown")),
-    Case("setup_lone_hyphen", ("setup", "-"), setup=setup_release_fixture, mutating=True),
+    Case(
+        "setup_lone_hyphen",
+        ("setup", "-"),
+        setup=setup_release_fixture,
+        mutating=True,
+    ),
     Case(
         "setup_install_json",
         ("setup", "--allow-unsigned", "--json"),
@@ -1546,28 +1769,24 @@ CASES = (
         ("setup", "--json"),
         setup=setup_failing_cosign,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_correct_json",
         ("setup", "--fix", "--json"),
         setup=setup_correct_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_correct_human",
         ("setup", "--fix"),
         setup=setup_correct_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     Case(
         "setup_fix_mismatched_json",
         ("setup", "--fix", "--allow-unsigned", "--json"),
         setup=setup_mismatched_managed_binaries,
         mutating=True,
-        posix_only=True,
     ),
     # Phase 6.3A: native install/uninstall parity, including filesystem side effects.
     Case(
@@ -1984,56 +2203,55 @@ CASES = (
     Case("memory_list_seeded", ("memory", "list", "--json"), setup=setup_memory_seeded),
     # `memory search` ranks embedding candidates. The query is the seeded row's
     # own content: the LSH neighbourhood of a different phrase does not contain
-    # it, so a paraphrased query would compare two empty reports. Ranking is
-    # reproducible because the fixture pins the row's clock to a fixed date -
-    # the recency term of a freshly written row would drift between the two
-    # roots.
+    # it, so a paraphrased query would compare two empty reports. Search uses
+    # separate wall-clock reads in each process; the old fixture date makes its
+    # recency term smaller than an f64 ULP before the score is narrowed to f32.
     Case(
         "memory_search_seeded",
         ("memory", "search", "alpha memory content", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_table",
         ("memory", "search", "alpha memory content"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_scope",
         ("memory", "search", "alpha memory content", "-s", "global", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_other_scope",
         ("memory", "search", "alpha memory content", "-s", "project", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_limit",
         ("memory", "search", "alpha memory content", "-l", "1", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_seeded_limit_zero",
         ("memory", "search", "alpha memory content", "--limit", "0", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_two_candidates_limit",
         ("memory", "search", "alpha memory content", "--limit", "2", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_two_candidates_limit_one",
         ("memory", "search", "alpha memory content", "--limit", "1", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     # `--db` and `--limit` together are the shape whose values must be consumed
     # as flag values rather than counted as query arguments.
     Case(
         "memory_search_db_override",
         ("memory", "search", "alpha memory content", "--db", "MEMORY_DB", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_limit_and_db",
@@ -2047,12 +2265,12 @@ CASES = (
             "MEMORY_DB",
             "--json",
         ),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_no_candidate",
         ("memory", "search", "zzz", "--json"),
-        setup=setup_memory_seeded,
+        setup=setup_memory_search_seeded,
     ),
     Case(
         "memory_search_no_candidate_table",
@@ -2577,6 +2795,23 @@ def reported_last_used_seconds(value: str) -> int | None:
     return calendar.timegm(time.strptime(match.group(1), "%Y-%m-%dT%H:%M:%S"))
 
 
+def go_reports_install_atime(goos: str) -> bool:
+    """Go exposes filesystem atime only on the platforms with an accessor."""
+    return goos in {"linux", "darwin"}
+
+
+def normalize_fixture_root(data: bytes, root: Path) -> bytes:
+    """Replace only the supplied fixture root in plain or JSON-escaped output."""
+    raw_root = str(root).encode()
+    json_root = json.dumps(str(root), ensure_ascii=True)[1:-1].encode("ascii")
+    return data.replace(json_root, b"<root>").replace(raw_root, b"<root>")
+
+
+def normalize_atomic_tempfile(data: bytes) -> bytes:
+    """Normalize only the random suffix on atomic-write rename source paths."""
+    return re.sub(rb"(rename [^\r\n]*?\.tmp-)[^\\/: ]+", rb"\1<random>", data)
+
+
 def normalize_last_used(stdout_bytes: bytes, placeholder: str) -> bytes:
     """Replace an atime-derived `last_used` value with a fixed placeholder."""
     return re.sub(
@@ -2606,6 +2841,14 @@ def prepare_root(root_path: Path, go_binary: Path) -> dict[str, str]:
         "PROJECT": str(root_path / "project"),
         "SYMBRAIN_GO_BINARY": str(go_binary),
     }
+    if os.name == "nt":
+        # subprocess replaces the parent environment, so keep the Windows
+        # runtime variables needed by CreateProcess and align the Go/Rust
+        # home-directory contracts with the hermetic fixture root.
+        env["USERPROFILE"] = env["HOME"]
+        for key in ("SystemRoot", "windir", "ComSpec", "PATHEXT"):
+            if value := os.environ.get(key):
+                env[key] = value
     for key in ("TMPDIR", "TMP", "TEMP"):
         if value := os.environ.get(key):
             env[key] = value
@@ -2629,6 +2872,18 @@ def get_fs_manifest(root: Path) -> dict[str, tuple[str, int, bytes]]:
                 content = p.read_bytes()
             except OSError as err:
                 content = f"<read error: {err}>".encode()
+            if rel.endswith(".provenance.json"):
+                # Installation time is the only nondeterministic provenance
+                # field. Validate it, then compare all remaining bytes.
+                built_at = json.loads(content)["built_at"]
+                assert built_at.endswith("Z"), f"{rel}: built_at must be UTC"
+                datetime.fromisoformat(built_at.replace("Z", "+00:00"))
+                content = re.sub(
+                    rb'"built_at": "[^"]+"',
+                    b'"built_at": "<timestamp>"',
+                    content,
+                    count=1,
+                )
             manifest[rel] = ("file", mode, content)
     return manifest
 def main() -> int:
@@ -2639,15 +2894,25 @@ def main() -> int:
         return 2
     go_binary = Path(sys.argv[1]).resolve()
     rust_binary = Path(sys.argv[2]).resolve()
+    _build_windows_stub()
     fixture_server = ReleaseFixtureServer()
     RELEASE_BASE_URL = fixture_server.__enter__()
     failures: list[str] = []
-    cases = tuple(
-        case
-        for case in CASES
-        if (os.name == "posix" or not case.posix_only)
-        and (os.name == "posix" or not any(isinstance(arg, bytes) for arg in case.argv))
-    )
+    def windows_skip_reason(case: Case) -> str | None:
+        if os.name != "nt":
+            return None
+        if case.posix_only:
+            return "POSIX-only filesystem/process behavior"
+        if any(isinstance(arg, bytes) for arg in case.argv):
+            return "raw-byte argv is not representable by Windows process APIs"
+        return None
+
+    skipped_cases = tuple((case.name, windows_skip_reason(case)) for case in CASES if windows_skip_reason(case))
+    cases = tuple(case for case in CASES if not windows_skip_reason(case))
+    if skipped_cases:
+        print(f"SKIP {len(skipped_cases)} platform-specific parity cases:")
+        for name, reason in skipped_cases:
+            print(f"  {name}: {reason}")
     for case in cases:
         with tempfile.TemporaryDirectory(prefix="symbrain-parity-") as temp_dir:
             # macOS exposes /var as a symlink to /private/var. The native
@@ -2682,10 +2947,10 @@ def main() -> int:
                 go_stderr = go_result.stderr
                 rust_stderr = rust_result.stderr
                 # Normalize the isolated fixture roots in output paths
-                go_stdout = go_stdout.replace(str(go_root).encode(), b"<root>")
-                rust_stdout = rust_stdout.replace(str(rust_root).encode(), b"<root>")
-                go_stderr = go_stderr.replace(str(go_root).encode(), b"<root>")
-                rust_stderr = rust_stderr.replace(str(rust_root).encode(), b"<root>")
+                go_stdout = normalize_fixture_root(go_stdout, go_root)
+                rust_stdout = normalize_fixture_root(rust_stdout, rust_root)
+                go_stderr = normalize_fixture_root(go_stderr, go_root)
+                rust_stderr = normalize_fixture_root(rust_stderr, rust_root)
                 backup_timestamp = rb"\.bak\.[0-9]{8}T[0-9]{6}Z(?:\.[0-9]+)?"
                 go_stdout = re.sub(backup_timestamp, b".bak.<timestamp>", go_stdout)
                 rust_stdout = re.sub(backup_timestamp, b".bak.<timestamp>", rust_stdout)
@@ -2698,8 +2963,8 @@ def main() -> int:
                 go_stderr = re.sub(download_temp, b"<download>/", go_stderr)
                 rust_stderr = re.sub(download_temp, b"<download>/", rust_stderr)
                 if case.normalize_runtime:
-                    go_stdout = re.sub(rb"\n  go\s+[^\n]+", b"\n  <runtime>", go_stdout)
-                    rust_stdout = re.sub(rb"\n  rust\s+[^\n]+", b"\n  <runtime>", rust_stdout)
+                    go_stdout = re.sub(rb"\n  (?:go\s+go[0-9]|Go:\s+go[0-9])[^\n]+", b"\n  <runtime>", go_stdout)
+                    rust_stdout = re.sub(rb"\n  (?:rust\s+rustc|Rust:\s+rustc)[^\n]+", b"\n  <runtime>", rust_stdout)
                 if case.normalize_parse_error:
                     install_parse = rb"(symbrain install: config: failed to load .*?global config error: failed to parse .*?\.toml: ).*"
                     go_stderr = re.sub(install_parse, rb"\1<parse error>\n", go_stderr)
@@ -2723,6 +2988,8 @@ def main() -> int:
                     go_stderr = re.sub(uuid_pattern, b"<uuid>", go_stderr)
                     rust_stderr = re.sub(uuid_pattern, b"<uuid>", rust_stderr)
                 if case.normalize_os_error:
+                    go_stderr = normalize_atomic_tempfile(go_stderr)
+                    rust_stderr = normalize_atomic_tempfile(rust_stderr)
                     go_stderr = re.sub(
                         rb"(symbrain config (?:get|set): (?:read|parse|backup|write|create) [^:]+: ).*(?:[Pp]ermission denied).*",
                         rb"\1<permission denied>\n",
@@ -2749,9 +3016,10 @@ def main() -> int:
                         # An ambient reader can only move the atime forward, so
                         # the runtime must report a value derived from the file's
                         # atime and never an older one. Absence is only allowed
-                        # for the fixtures that carry no last-used evidence.
+                        # when the fixture has no evidence or Go has no atime
+                        # accessor on this platform.
                         if reported is None:
-                            assert not case.require_last_used, (
+                            assert not case.require_last_used or not go_reports_install_atime(sys.platform), (
                                 f"{case.name}: {runtime} reported no last_used for a "
                                 f"fixture that pins atime={format_access_time_ns(captured)!r}"
                             )
@@ -2769,6 +3037,25 @@ def main() -> int:
                     pinned = format_access_time_ns(SKILLS_LIBRARY_STAMP * 1_000_000_000)
                     go_stdout = normalize_last_used(go_stdout, pinned)
                     rust_stdout = normalize_last_used(rust_stdout, pinned)
+                install_verified = True
+                if case.name in {"setup_install_json", "setup_install_human"}:
+                    # Go and Rust could otherwise agree on a shared download
+                    # failure while neither installs an executable.
+                    for runtime, command_result, root, env in (
+                        ("Go", go_result, go_root, go_env),
+                        ("Rust", rust_result, rust_root, rust_env),
+                    ):
+                        if command_result.returncode != 0:
+                            failures.append(
+                                f"{case.name}: {runtime} setup exited "
+                                f"{command_result.returncode}, so fixture installation cannot pass"
+                            )
+                            install_verified = False
+                        try:
+                            _assert_current_managed_install(root, env, runtime)
+                        except AssertionError as err:
+                            failures.append(f"{case.name}: {err}")
+                            install_verified = False
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:
@@ -2782,7 +3069,7 @@ def main() -> int:
                         failures.append(
                             f"{case.name} filesystem mismatch: Go={go_manifest!r}, Rust={rust_manifest!r}"
                         )
-                    else:
+                    elif install_verified:
                         print(f"PASS {case.name} (stdout, stderr, exit code, fs manifest/modes)")
                 else:
                     print(f"PASS {case.name}")

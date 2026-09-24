@@ -1,18 +1,17 @@
-//! Integration test: drives every one of the frozen `guard doctor` oracle's
-//! seven scenarios through the **native** `symbrain` binary.
+//! Integration test: drives every frozen `guard doctor` oracle scenario
+//! through the **native** `symbrain` binary.
 //!
 //! The setup reproduces `guard/scripts/guard-doctor-oracle/main.go`'s
 //! `runCase` exactly — same per-case root layout (`<root>/<id>/home/...`,
-//! `<root>/<id>/data/symguard`), same injected `HOME`, `XDG_CONFIG_HOME`,
-//! `XDG_DATA_HOME` and `SYMGUARD_CONFIG` — and the same normalization
+//! `<root>/<id>/data/symguard`), same injected home, XDG and config variables,
+//! and the same normalization
 //! (`<root>` for the temp root, plus the shared header normalization for the
 //! two rows no fixture can pin).
 //!
 //! Nativeness is proved structurally: `SYMBRAIN_GO_BINARY` is never set and
 //! `PATH` is an empty directory, so no Go fallback exists. A case that reached
 //! the fallback would print the "not ported yet and no Go fallback was found"
-//! message instead of a report, which is exactly what the gated cases are
-//! asserted to do.
+//! message instead of the oracle report.
 
 #[path = "common/doctor_header.rs"]
 mod doctor_header;
@@ -25,40 +24,70 @@ use tempfile::TempDir;
 
 const FIXTURE_PATH: &str = "../symbrain-guard-core/tests/fixtures/doctor_oracle.json";
 
-/// Cases whose bytes this port deliberately declines to produce, with the
-/// reason each one is unreproducible. Every one of them must fall back to Go
-/// *before* writing any output — see `guard_doctor.rs`'s module docs.
-const GATED_CASES: &[(&str, &str)] = &[
-    (
-        "config_error",
-        "Go prints BurntSushi's own parser text (`toml: line 1: expected '.' or '=' …`)",
-    ),
-    (
-        "audit_log_corrupt_anchor",
-        "Go prints encoding/json's own error text (`invalid character 'o' in literal null …`)",
-    ),
-];
-
 fn fixture() -> serde_json::Value {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH);
+    let path = std::env::var_os("SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE").map_or_else(
+        || Path::new(env!("CARGO_MANIFEST_DIR")).join(FIXTURE_PATH),
+        std::path::PathBuf::from,
+    );
     let data = fs::read(&path).unwrap_or_else(|e| panic!("read {}: {e}", path.display()));
     serde_json::from_slice(&data).expect("fixture is JSON")
+}
+
+fn native_command() -> String {
+    #[cfg(windows)]
+    {
+        let system_root = std::env::var_os("SystemRoot")
+            .or_else(|| std::env::var_os("windir"))
+            .unwrap_or_else(|| r"C:\Windows".into());
+        std::path::PathBuf::from(system_root)
+            .join("System32")
+            .join("where.exe")
+            .to_string_lossy()
+            .into_owned()
+    }
+    #[cfg(not(windows))]
+    {
+        "/usr/bin/true".to_owned()
+    }
+}
+
+fn normalize_root_paths(value: &str) -> String {
+    let paths = regex::Regex::new(r"(<root>)[/\\][^\s:]+").unwrap();
+    paths
+        .replace_all(value, |captures: &regex::Captures<'_>| {
+            captures[0].replace('\\', "/")
+        })
+        .into_owned()
 }
 
 /// Mirrors the oracle's own per-case scaffolding.
 fn setup(id: &str, case_root: &Path) {
     fs::create_dir_all(case_root.join("home/.config/symguard")).unwrap();
     fs::create_dir_all(case_root.join("data/symguard")).unwrap();
+    for relative in [
+        "home/.config/hermes",
+        "home/.cursor",
+        "home/.vscode",
+        "home/.config/opencode",
+        "home/.config/claude",
+    ] {
+        fs::create_dir_all(case_root.join(relative)).unwrap();
+    }
     let config = case_root.join("home/.config/symguard/config.toml");
     let log = case_root.join("data/symguard/audit.log");
     match id {
         "empty_machine" => {}
-        "healthy_config" => fs::write(
-            &config,
-            "[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = \"/usr/bin/true\"\n",
-        )
-        .unwrap(),
+        "healthy_config" => {
+            let command = toml_edit::Value::from(native_command().as_str()).to_string();
+            fs::write(
+                &config,
+                format!("[defaults]\nshell = \"allow\"\nread_secret = \"deny\"\n\n[[rules]]\nmatch.server = \"symmemory\"\nmatch.tool = \"memory_search\"\ndecision = \"allow\"\n\n[spawn]\n[[spawn.allowlist]]\npath = {command}\n"),
+            )
+            .unwrap();
+        }
         "config_error" => fs::write(&config, "not [valid = toml").unwrap(),
+        "config_error_other_ascii" => fs::write(&config, "name ! value").unwrap(),
+        "config_error_later_line" => fs::write(&config, "valid = \"ok\"\nname [value").unwrap(),
         "audit_log_without_anchor" => fs::write(&log, "{\"entry_id\":\"1\"}\n").unwrap(),
         "audit_log_corrupt_anchor" => {
             fs::write(&log, "{\"entry_id\":\"1\"}\n").unwrap();
@@ -67,22 +96,22 @@ fn setup(id: &str, case_root: &Path) {
         "discovered_server_denied" => {
             let cursor = case_root.join("home/.cursor");
             fs::create_dir_all(&cursor).unwrap();
-            fs::write(
-                cursor.join("mcp.json"),
-                r#"{"mcpServers":{"demo":{"command":"/usr/bin/true","args":["--once"]}}}"#,
-            )
-            .unwrap();
+            let mcp = serde_json::json!({
+                "mcpServers": {"demo": {"command": native_command(), "args": ["--once"]}}
+            });
+            fs::write(cursor.join("mcp.json"), serde_json::to_vec(&mcp).unwrap()).unwrap();
         }
         "discovered_server_secret_risk" => {
             let cursor = case_root.join("home/.cursor");
             fs::create_dir_all(&cursor).unwrap();
-            fs::write(
-                cursor.join("mcp.json"),
-                r#"{"mcpServers":{"server-with-secret":{"command":"/usr/bin/env","env":{"SECRET_KEY":"literal"}}}}"#,
-            )
-            .unwrap();
+            let mcp = serde_json::json!({
+                "mcpServers": {"server-with-secret": {"command": native_command(), "env": {"SECRET_KEY": "literal"}}}
+            });
+            fs::write(cursor.join("mcp.json"), serde_json::to_vec(&mcp).unwrap()).unwrap();
         }
-        other => panic!("unknown oracle case {other:?} — the fixture grew a case this test does not set up"),
+        other => panic!(
+            "unknown oracle case {other:?} — the fixture grew a case this test does not set up"
+        ),
     }
 }
 
@@ -117,17 +146,19 @@ fn run(case_root: &Path) -> Output {
 }
 
 #[test]
-fn every_oracle_case_is_native_or_explicitly_gated() {
+fn every_oracle_case_matches_native_go_bytes() {
     let suite = fixture();
     let cases = suite["cases"].as_array().expect("cases array");
-    assert_eq!(cases.len(), 7, "the frozen oracle has seven scenarios");
+    assert_eq!(cases.len(), 9, "the frozen oracle scenario count changed");
     let temp = TempDir::new().unwrap();
     // The oracle rewrites its own mktemp root to <root>; macOS hands out
     // /var/... symlinks to /private/var/..., so canonicalize like it does.
+    #[cfg(windows)]
+    let root = temp.path().to_path_buf();
+    #[cfg(not(windows))]
     let root = fs::canonicalize(temp.path()).unwrap();
 
     let mut native = Vec::new();
-    let mut gated = Vec::new();
     for case in cases {
         let id = case["id"].as_str().expect("case id");
         let case_root = root.join(id);
@@ -135,27 +166,16 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         let output = run(&case_root);
 
         let stdout = String::from_utf8(output.stdout).expect("utf8 stdout");
-        let normalized =
-            doctor_header::normalize(&stdout.replace(root.to_str().expect("utf8 root"), "<root>"));
-
-        if let Some((_, reason)) = GATED_CASES.iter().find(|(name, _)| *name == id) {
-            assert!(
-                stdout.is_empty(),
-                "{id}: gated cases must fall back before writing any byte ({reason}), got:\n{stdout}"
-            );
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            assert!(
-                stderr.contains("no Go fallback was found"),
-                "{id}: expected the Go fallback to be attempted, stderr was:\n{stderr}"
-            );
-            gated.push(id);
-            continue;
-        }
+        let rooted = stdout.replace(root.to_str().expect("utf8 root"), "<root>");
+        let normalized = doctor_header::normalize(&normalize_root_paths(&rooted));
 
         let expected: String =
             serde_json::from_str(case["output_json"].as_str().expect("output_json"))
                 .expect("output_json holds a JSON string");
-        let expected = doctor_header::normalize(&expected);
+        let expected = expected
+            .replace("/usr/bin/true", &native_command())
+            .replace("/usr/bin/env", &native_command());
+        let expected = doctor_header::normalize(&normalize_root_paths(&expected));
         assert_eq!(
             normalized, expected,
             "{id}: native bytes differ from the frozen Go oracle"
@@ -175,11 +195,14 @@ fn every_oracle_case_is_native_or_explicitly_gated() {
         vec![
             "empty_machine",
             "healthy_config",
+            "config_error",
+            "config_error_other_ascii",
+            "config_error_later_line",
             "audit_log_without_anchor",
+            "audit_log_corrupt_anchor",
             "discovered_server_denied",
             "discovered_server_secret_risk",
         ],
         "the set of natively handled cases changed"
     );
-    assert_eq!(gated, vec!["config_error", "audit_log_corrupt_anchor"]);
 }
