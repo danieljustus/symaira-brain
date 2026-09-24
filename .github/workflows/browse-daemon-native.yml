@@ -1,0 +1,38 @@
+name: Browse daemon native parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+
+jobs:
+  daemon:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Verify pinned toolchain
+        run: rustup show active-toolchain
+      - name: Test daemon contracts
+        run: cargo test -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
+      - name: Exercise daemon lifecycle and races
+        run: |
+          python3 port/harness/run.py --suite daemon
+          python3 port/harness/run.py --suite daemon-races --repeat 50
