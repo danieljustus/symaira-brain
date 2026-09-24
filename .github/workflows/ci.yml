@@ -911,6 +911,49 @@ jobs:
         working-directory: browse
         run: cargo test -p symbrowse-daemon --test platform --locked
 
+  # Compare the CoreKit-backed Rust version contract with the Go oracle on
+  # native Windows; cross-compilation cannot establish Windows runtime parity.
+  browse-corekit-version-windows:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+          cache-dependency-path: browse/go.sum
+
+      - name: Resolve pinned Rust toolchain
+        working-directory: browse
+        run: rustup show active-toolchain
+
+      - name: Test and build native Windows binaries
+        working-directory: browse
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test -p symbrowse-protocol --locked
+          go build -o "$RUNNER_TEMP/symbrowse-go.exe" ./cmd/symbrowse
+          cargo build -p symbrowse-cli --locked
+
+      - name: Compare CoreKit-backed version output with Go
+        working-directory: browse
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/symbrowse-go.exe" version >"$RUNNER_TEMP/go-version.txt"
+          target/debug/symbrowse.exe version >"$RUNNER_TEMP/rust-version.txt"
+          cmp "$RUNNER_TEMP/go-version.txt" "$RUNNER_TEMP/rust-version.txt"
+          "$RUNNER_TEMP/symbrowse-go.exe" version --json >"$RUNNER_TEMP/go-version.json"
+          target/debug/symbrowse.exe version --json >"$RUNNER_TEMP/rust-version.json"
+          cmp "$RUNNER_TEMP/go-version.json" "$RUNNER_TEMP/rust-version.json"
+
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only
   # at release time (precedent: v0.5.1 GUI release-asset failure, #212,
