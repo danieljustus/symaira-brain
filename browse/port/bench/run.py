@@ -116,7 +116,8 @@ def base_env(root: Path) -> dict[str, str]:
         _TEMP_HOME_ALIASES.append(alias_dir)
         home = Path(alias_dir.name) / "home"
         home.symlink_to(isolated_home, target_is_directory=True)
-    runtime = root / "runtime"
+    # Go uses AF_UNIX on Windows, where the socket pathname is length-limited.
+    runtime = root / ("r" if os.name == "nt" else "runtime")
     cache = root / "cache"
     for path in (home, runtime, cache):
         path.mkdir(mode=0o700, exist_ok=True)
@@ -479,7 +480,7 @@ def daemon_probe(
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
     results: list[dict[str, object]] = []
-    session = probe_session("rust016")
+    session = probe_session("r")
     endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     for _ in range(runs):
         process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
@@ -559,7 +560,7 @@ def fetch_probe(
     server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    session = probe_session("rust016-fetch")
+    session = probe_session("f")
     endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
