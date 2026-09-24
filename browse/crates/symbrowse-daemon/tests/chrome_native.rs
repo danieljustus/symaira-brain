@@ -1,7 +1,7 @@
 use std::{
     fs,
-    io::{Read, Write},
-    net::TcpListener,
+    io::{self, Read, Write},
+    net::{TcpListener, TcpStream},
     path::PathBuf,
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -25,6 +25,44 @@ fn request(client: &Client, command: &str, args: Value) -> Value {
         .request(frame)
         .unwrap_or_else(|error| panic!("request {command}: {error}"));
     serde_json::to_value(response).expect("encode response")
+}
+
+fn accept_fixture_request(
+    listener: &TcpListener,
+    timeout: Duration,
+) -> io::Result<(TcpStream, std::net::SocketAddr)> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        match listener.accept() {
+            Ok(accepted) => return Ok(accepted),
+            Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                if Instant::now() >= deadline {
+                    return Err(io::Error::new(
+                        io::ErrorKind::TimedOut,
+                        "timed out waiting for Chrome's network fixture request",
+                    ));
+                }
+                thread::sleep(Duration::from_millis(20));
+            }
+            Err(error) => return Err(error),
+        }
+    }
+}
+
+#[test]
+fn network_fixture_accept_has_a_deadline() {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind fixture listener");
+    listener
+        .set_nonblocking(true)
+        .expect("set fixture listener nonblocking");
+    let error = accept_fixture_request(&listener, Duration::from_millis(50))
+        .expect_err("no client should connect");
+    assert_eq!(error.kind(), io::ErrorKind::TimedOut);
+    assert!(
+        error
+            .to_string()
+            .contains("Chrome's network fixture request")
+    );
 }
 
 #[test]
@@ -235,18 +273,41 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let listener = TcpListener::bind("127.0.0.1:0").expect("bind fixture server");
     let address = listener.local_addr().expect("fixture address");
     let fixture = thread::spawn(move || {
-        let (mut stream, _) = listener.accept().expect("accept fixture request");
+        listener
+            .set_nonblocking(true)
+            .expect("set fixture listener nonblocking");
+        let (mut stream, _) = accept_fixture_request(&listener, Duration::from_secs(15))?;
+        stream.set_nonblocking(false)?;
+        stream.set_read_timeout(Some(Duration::from_secs(5)))?;
+        stream.set_write_timeout(Some(Duration::from_secs(5)))?;
         let mut request = [0_u8; 1024];
-        let _ = stream.read(&mut request).expect("read fixture request");
+        if stream.read(&mut request).map_err(|error| {
+            io::Error::new(
+                error.kind(),
+                format!("read Chrome fixture request: {error}"),
+            )
+        })? == 0
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::UnexpectedEof,
+                "Chrome connected without sending an HTTP fixture request",
+            ));
+        }
         let body = b"<h1>network</h1>";
         let header = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
             body.len()
         );
-        stream
-            .write_all(header.as_bytes())
-            .expect("write fixture header");
-        stream.write_all(body).expect("write fixture body");
+        stream.write_all(header.as_bytes()).map_err(|error| {
+            io::Error::new(
+                error.kind(),
+                format!("write Chrome fixture header: {error}"),
+            )
+        })?;
+        stream.write_all(body).map_err(|error| {
+            io::Error::new(error.kind(), format!("write Chrome fixture body: {error}"))
+        })?;
+        Ok::<(), io::Error>(())
     });
     let started = request(&client, "network.capture", json!({}));
     assert_eq!(started["success"], true, "network capture start: {started}");
@@ -257,7 +318,10 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         network_page["success"], true,
         "network page: {network_page}"
     );
-    fixture.join().expect("fixture thread");
+    fixture
+        .join()
+        .unwrap_or_else(|_| panic!("Chrome network fixture thread panicked"))
+        .unwrap_or_else(|error| panic!("Chrome network fixture failed: {error}"));
     let captured = request(&client, "network.requests", json!({}));
     assert_eq!(captured["success"], true, "network capture: {captured}");
     assert!(
