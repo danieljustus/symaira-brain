@@ -359,7 +359,10 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     );
     assert_eq!(cleared_cookie["success"], true, "cookie clear failed");
     let listed_after_clear = request(&client, "cookies.list", json!({}));
-    assert_eq!(listed_after_clear["success"], true, "cookie relist failed");
+    assert_eq!(
+        listed_after_clear["success"], true,
+        "cookie relist failed: {listed_after_clear}"
+    );
     assert!(
         !listed_after_clear["data"]["cookies"]
             .as_array()

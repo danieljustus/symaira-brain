@@ -1845,10 +1845,12 @@ pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value
 }
 
 fn cookie_list_payload(origin: &str, captured: Value) -> Result<Value, DaemonError> {
-    let cookies = captured
-        .get("cookies")
-        .and_then(Value::as_array)
-        .ok_or_else(|| runtime_error("cookie response has no cookies array"))?;
+    let empty = Vec::new();
+    let cookies = match captured.get("cookies") {
+        None | Some(Value::Null) if captured.is_null() || captured.as_object().is_some() => &empty,
+        Some(Value::Array(cookies)) => cookies,
+        _ => return Err(runtime_error("cookie response has no cookies array")),
+    };
     let mut output = Vec::with_capacity(cookies.len());
     for cookie in cookies {
         let cookie = cookie
@@ -2691,6 +2693,14 @@ mod tests {
         assert!(result.to_string().contains("fixture-secret"));
         assert!(!result.to_string().contains("sourcePort"));
         assert!(!result.to_string().contains("partitionKey"));
+        assert_eq!(
+            cookie_list_payload("https://example.test", Value::Null).unwrap()["cookies"],
+            json!([])
+        );
+        assert_eq!(
+            cookie_list_payload("https://example.test", json!({})).unwrap()["cookies"],
+            json!([])
+        );
     }
 
     #[test]
