@@ -96,3 +96,10 @@ jobs:
           go test ./internal/engine/safari ./internal/engine/safaribidi -count=1
           cargo test -p symbrowse-engine-safari --tests --locked
           cargo test -p symbrowse-daemon --lib safari_prerequisites_report_unavailable_without_engine_substitution --locked
+      - name: Exercise native Safari attach and BiDi against loopback
+        if: runner.os == 'macOS'
+        env:
+          SYMBROWSE_NATIVE_TARGETS: "1"
+        run: |
+          cargo test -p symbrowse-engine-safari --test bidi --locked real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate -- --exact
+          cargo test -p symbrowse-engine-safari --test attach --locked real_safari_attach_uses_and_closes_only_its_named_loopback_tab -- --ignored --exact

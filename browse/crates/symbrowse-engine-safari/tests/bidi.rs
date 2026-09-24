@@ -1,8 +1,15 @@
 #![cfg(target_os = "macos")]
 
 use std::{
+    io::{Read, Write},
+    net::TcpListener,
     path::Path,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
+    thread,
+    time::Duration,
 };
 
 use serde_json::{Value, json};
@@ -347,6 +354,13 @@ async fn bidi_protocol_errors_remain_typed() {
 async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
     let native =
         std::env::var_os("SYMBROWSE_NATIVE_TARGETS").as_deref() == Some(std::ffi::OsStr::new("1"));
+    if native {
+        assert_eq!(
+            std::env::var("GITHUB_ACTIONS").as_deref(),
+            Ok("true"),
+            "real Safari BiDi runs only on the isolated native CI runner"
+        );
+    }
     let options = if native {
         DriverOptions::default()
     } else {
@@ -363,19 +377,79 @@ async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
     let result = BidiEngine::launch(options).await;
     if native {
         let mut engine = result.expect("launch isolated safaridriver BiDi session");
+        let fixture = LoopbackFixture::start();
         let page = engine.new_page().expect("initial Safari automation page");
+        let navigation = engine
+            .navigate(&page, &fixture.url)
+            .await
+            .expect("navigate Safari to the loopback fixture");
+        assert_eq!(navigation.url, fixture.url);
         let title = engine
             .evaluate(&page, "document.title")
             .await
             .expect("evaluate document.title in Safari")
             .value
             .expect("Safari returned a title value");
-        assert_eq!(title, "");
+        assert_eq!(title, "Symaira ENG-008 fixture");
         engine.close().await.expect("close isolated Safari session");
     } else {
         assert!(
             matches!(result, Err(BidiError::Prerequisite { .. })),
             "native gate must be typed, not skipped"
         );
+    }
+}
+
+struct LoopbackFixture {
+    url: String,
+    stop: Arc<AtomicBool>,
+    thread: Option<thread::JoinHandle<()>>,
+}
+
+impl LoopbackFixture {
+    fn start() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind Safari loopback fixture");
+        let address = listener.local_addr().expect("fixture address");
+        listener
+            .set_nonblocking(true)
+            .expect("nonblocking fixture listener");
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_thread = Arc::clone(&stop);
+        let fixture = thread::spawn(move || {
+            while !stop_thread.load(Ordering::Acquire) {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+                        let mut request = [0_u8; 4096];
+                        let _ = stream.read(&mut request);
+                        let body = "<!doctype html><title>Symaira ENG-008 fixture</title>";
+                        let response = format!(
+                            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                            body.len(),
+                            body
+                        );
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+        Self {
+            url: format!("http://{address}/eng-008"),
+            stop,
+            thread: Some(fixture),
+        }
+    }
+}
+
+impl Drop for LoopbackFixture {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Release);
+        if let Some(thread) = self.thread.take() {
+            thread.join().expect("Safari fixture thread");
+        }
     }
 }

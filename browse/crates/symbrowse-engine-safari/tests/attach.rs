@@ -2,7 +2,13 @@
 
 use std::{
     fs,
-    sync::{Arc, Mutex},
+    io::{Read, Write},
+    net::TcpListener,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
+    thread,
     time::{Duration, Instant},
 };
 
@@ -366,6 +372,111 @@ fn osascript_runner_drains_large_output_and_enforces_bound() {
         Err(AttachError::Runner { message }) if message.contains("stdout exceeded")
     ));
     fs::remove_file(path).expect("remove helper");
+}
+
+#[test]
+#[ignore = "requires a dedicated native Safari runner with Automation permissions"]
+fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
+    assert_eq!(
+        std::env::var("GITHUB_ACTIONS").as_deref(),
+        Ok("true"),
+        "real Safari attach runs only on the isolated native CI runner"
+    );
+    assert_eq!(
+        std::env::var("SYMBROWSE_NATIVE_TARGETS").as_deref(),
+        Ok("1"),
+        "the native Safari test must be explicitly enabled"
+    );
+    let runner = OsascriptRunner::default();
+    runner
+        .run(
+            "tell application \"Safari\" to make new document",
+            Duration::from_secs(10),
+        )
+        .expect("ask Safari to open a test window");
+
+    let fixture = LoopbackFixture::start();
+    let tab_name = format!("Symaira ENG-008 {}", std::process::id());
+    let mut engine = AttachEngine::new(runner).with_tab_name(tab_name.clone());
+    let context = engine.new_context().expect("attach context");
+    let mut page = None;
+    let outcome = (|| {
+        engine.check_prerequisites()?;
+        engine.launch()?;
+        let test_page = engine.tab_new(&context, &tab_name, &fixture.url)?;
+        page = Some(test_page.clone());
+        let navigation = engine.navigate(&test_page, &fixture.url)?;
+        let title = engine.evaluate("document.title")?;
+        Ok::<_, AttachError>((navigation.url, title))
+    })();
+
+    if let Some(page) = page {
+        engine
+            .tab_close(&page)
+            .expect("close only the named test tab");
+    }
+    engine.close().expect("detach without quitting Safari");
+    drop(fixture);
+    let (url, title) = outcome.expect("Safari attach E2E");
+    assert!(url.starts_with("http://127.0.0.1:"), "{url}");
+    assert_eq!(
+        title,
+        serde_json::Value::String("Symaira ENG-008 fixture".into())
+    );
+}
+
+struct LoopbackFixture {
+    url: String,
+    stop: Arc<AtomicBool>,
+    thread: Option<thread::JoinHandle<()>>,
+}
+
+impl LoopbackFixture {
+    fn start() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind Safari loopback fixture");
+        let address = listener.local_addr().expect("fixture address");
+        listener
+            .set_nonblocking(true)
+            .expect("nonblocking fixture listener");
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_thread = Arc::clone(&stop);
+        let thread = thread::spawn(move || {
+            while !stop_thread.load(Ordering::Acquire) {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+                        let mut request = [0_u8; 4096];
+                        let _ = stream.read(&mut request);
+                        let body = "<!doctype html><title>Symaira ENG-008 fixture</title>";
+                        let response = format!(
+                            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                            body.len(),
+                            body
+                        );
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+        Self {
+            url: format!("http://{address}/eng-008"),
+            stop,
+            thread: Some(thread),
+        }
+    }
+}
+
+impl Drop for LoopbackFixture {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Release);
+        if let Some(thread) = self.thread.take() {
+            thread.join().expect("loopback fixture thread");
+        }
+    }
 }
 
 #[test]
