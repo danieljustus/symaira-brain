@@ -149,6 +149,11 @@ mod unix {
         match error {
             ClientError::Transport(error) => {
                 assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+                assert_eq!(error.message, "daemon response timed out after 30ms");
+                assert_eq!(
+                    error.hint,
+                    "increase timeout with SYMBROWSE_READ_TIMEOUT or inspect daemon logs for session \"slow-sess\""
+                );
                 assert!(
                     !error
                         .message

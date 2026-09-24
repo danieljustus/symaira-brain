@@ -545,9 +545,22 @@ fn map_io_error(options: &ClientOptions, error: io::Error, operation: &str) -> C
         error.kind(),
         io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
     ) {
+        let response_read = operation == "read daemon response";
         return ClientError::Transport(DaemonError {
             code: codes::OPERATION_TIMEOUT.into(),
-            message: format!("{operation} timed out after {:?}", options.read_timeout),
+            message: if response_read {
+                format!("daemon response timed out after {:?}", options.read_timeout)
+            } else {
+                format!("{operation} timed out after {:?}", options.read_timeout)
+            },
+            hint: if response_read {
+                format!(
+                    "increase timeout with SYMBROWSE_READ_TIMEOUT or inspect daemon logs for session {:?}",
+                    options.session
+                )
+            } else {
+                String::new()
+            },
             details: Some(redact_json(&serde_json::json!({
                 "session": options.session,
                 "socket_path": options.socket_path,
