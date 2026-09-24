@@ -105,6 +105,12 @@
       "platforms": ["darwin", "linux"],
       "go": ["go", "test", "./internal/daemon", "./internal/mcp", "./cmd/symbrowse", "-run", "Autostart|Client|Engine", "-count=1"],
       "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked"]
+    },
+    {
+      "id": "DMN-008-mcp-config-warnings",
+      "platforms": ["darwin", "linux"],
+      "go": ["go", "test", "./internal/mcp", "-run", "Engine", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-mcp", "engine_and_policy_mismatches_warn_without_stopping_daemon", "--locked"]
     }
   ]
 }
