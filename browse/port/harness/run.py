@@ -666,6 +666,8 @@ def main() -> int:
             run(case["go"], root, env)
             run(case["rust"], root, env)
             print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
+        print("daemon-contracts suite passed", flush=True)
+        return 0
     else:
         parser.error(f"unsupported suite: {args.suite}")
 
