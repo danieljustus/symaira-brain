@@ -9,7 +9,7 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
-## [v0.12.0] - 2026-09-22
+## [v0.12.0] - 2026-09-24
 
 ### Added
 - Native Rust parity slices behind frozen Go oracles: secret-reference
@@ -22,12 +22,19 @@ the [Unreleased] section is moved into a dated version section.
 - Reviewed native vault approval management plus a discoverable approval
   passthrough from Brain (#588, #590).
 - Sequence-repetition detector slice in the guard scanner (#533).
+- Native SymScope MCP listing and native scope capability inventory (#663,
+  #670).
+- Native managed Browse mode scaffolding and native managed Browse session
+  execution (#666, #669).
+- Native Guard doctor oracle diagnostics completed across target platforms
+  (#677, #674).
 
 ### Changed
 - Installed skills are linked at the render directory so the native layout
   matches the Go implementation (#646).
 - Configuration edits are previewable and recoverable (#585).
 - Runtime Go dependencies refreshed via the go-minor-patch group (#609).
+- Go module and Rust crate dependency groups bumped (#675, #676).
 
 ### Fixed
 - The managed symvault helper is a compiled binary instead of a fake shell
@@ -37,6 +44,11 @@ the [Unreleased] section is moved into a dated version section.
 - rustls bumped past a security advisory (#600).
 - Batch fmt-check paths for release gofmt (#607, #608).
 - Post-merge flake in managed-core Fix mismatch selection (#595).
+- Guard scanner matches invalid UTF-8 args across all scanner actions (#662).
+- Managed tool installation works on native Windows (#664).
+- Native skills capability roots are recognized on Windows (#665, #672).
+- Windows CI: GitHub diff harness and Go toolchain cache repair hardening
+  (#668, #671).
 
 ### Security
 - SEC-001 secret-reference freezing and SEC-002 guard-chain parity landed
