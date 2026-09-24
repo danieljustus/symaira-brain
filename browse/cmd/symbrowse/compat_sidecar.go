@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/danieljustus/symaira-browse/internal/fetch/fetch"
 	"github.com/spf13/cobra"
 )
+
+const compatMaxFrameBytes = 1 << 20
 
 type compatHandshakeWire struct {
 	Type      string `json:"type"`
@@ -54,21 +55,24 @@ func newCompatSidecarCommand() *cobra.Command {
 // CGO_ENABLED=0 go build -trimpath -o dist/symbrowse-compat ./cmd/symbrowse
 // and launch `dist/symbrowse-compat compat-sidecar` from the Rust daemon.
 func runCompatSidecar(cmd *cobra.Command, _ []string) error {
-	decoder := json.NewDecoder(cmd.InOrStdin())
+	decoder := bufio.NewReader(cmd.InOrStdin())
 	encoder := json.NewEncoder(cmd.OutOrStdout())
 	var handshake compatHandshakeWire
-	if err := decoder.Decode(&handshake); err != nil {
+	if err := decodeCompatFrame(decoder, &handshake); err != nil {
 		return err
 	}
 	if handshake.Type != "handshake" || handshake.Protocol != 1 {
 		return fmt.Errorf("compat_protocol_mismatch")
+	}
+	if handshake.Component != "symbrowse-rust" || handshake.Oracle != "go-azuretls-v0.8.0" {
+		return fmt.Errorf("compat_identity_mismatch")
 	}
 	if err := encoder.Encode(compatHandshakeWire{Type: "handshake_ack", Protocol: 1, Component: "symbrowse-go", Oracle: "go-azuretls-v0.8.0"}); err != nil {
 		return err
 	}
 	for {
 		var wire compatRequestWire
-		if err := decoder.Decode(&wire); err != nil {
+		if err := decodeCompatFrame(decoder, &wire); err != nil {
 			if err == io.EOF {
 				return nil
 			}
@@ -111,6 +115,36 @@ func runCompatSidecar(cmd *cobra.Command, _ []string) error {
 	}
 }
 
-// Keep the scanner limit documented for operators even though json.Decoder is used.
-var _ = bufio.MaxScanTokenSize
-var _ = os.Stderr
+func decodeCompatFrame(reader *bufio.Reader, target any) error {
+	frame, err := readCompatFrame(reader)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(frame, target)
+}
+
+func readCompatFrame(reader *bufio.Reader) ([]byte, error) {
+	var frame []byte
+	for {
+		part, err := reader.ReadSlice('\n')
+		if len(frame)+len(part) > compatMaxFrameBytes {
+			return nil, fmt.Errorf("compat_frame_too_large")
+		}
+		frame = append(frame, part...)
+		switch err {
+		case nil:
+			return frame, nil
+		case bufio.ErrBufferFull:
+			if len(frame) == compatMaxFrameBytes {
+				return nil, fmt.Errorf("compat_frame_too_large")
+			}
+		case io.EOF:
+			if len(frame) == 0 {
+				return nil, io.EOF
+			}
+			return frame, nil
+		default:
+			return nil, err
+		}
+	}
+}

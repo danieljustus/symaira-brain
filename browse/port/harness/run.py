@@ -699,6 +699,7 @@ def main() -> int:
         env["SYMBROWSE_COMPAT_BINARY"] = str(compat_binary)
         commands = [
             ["go", "build", "-trimpath", "-o", str(compat_binary), "./cmd/symbrowse"],
+            ["go", "test", "./cmd/symbrowse", "-run", "CompatSidecar", "-count=1"],
             ["cargo", "test", "-p", "symbrowse-compat", "--locked"],
             [
                 "cargo", "test", "-p", "symbrowse-compat", "--test", "go_sidecar", "--locked",
