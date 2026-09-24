@@ -265,7 +265,7 @@ fn run_dispatch(
         LoadContext::from_process(FlagOverrides::default())
             .ok()
             .and_then(|context| load(&context).ok())
-            .filter(|result| result.config.engine == "static")
+            .filter(|result| result.config.engine == "static" || result.config.mode == "static")
             .map(|result| {
                 dispatch_once(
                     SessionSpec::from_config(&result.config, &session),
@@ -779,6 +779,7 @@ fn run_daemon(
     ssrf: Option<bool>,
     allow_private: Option<bool>,
 ) -> ExitCode {
+    let engine_flag = !engine.is_empty();
     let context = match LoadContext::from_process(FlagOverrides::default()) {
         Ok(context) => context,
         Err(error) => {
@@ -810,12 +811,7 @@ fn run_daemon(
     // Static and compat transports do not accept a browser engine. Keep the
     // browser default only for browser mode; an inherited engine must not
     // poison an explicit transport selection.
-    let engine = if mode != "browser" {
-        "static".to_owned()
-    } else {
-        engine
-    };
-    let selection_engine = (mode == "browser").then_some(engine.as_str());
+    let selection_engine = (mode == "browser" || engine_flag).then_some(engine.as_str());
     if let Err(error) = symbrowse_core::config::resolve_selection(Some(&mode), selection_engine) {
         let _ = writeln!(
             io::stderr(),
@@ -824,6 +820,11 @@ fn run_daemon(
         );
         return ExitCode::from(1);
     }
+    let engine = if mode != "browser" {
+        "static".to_owned()
+    } else {
+        engine
+    };
     if let Err(error) = validate_engine(&engine) {
         let _ = writeln!(io::stderr(), "{error}");
         return ExitCode::from(1);

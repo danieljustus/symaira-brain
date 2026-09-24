@@ -296,10 +296,11 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
         daemon_log: display(state_home.join(APP_NAME).join("daemon.log")),
         approval_timeout: 60,
     };
-    let mut sources = FIELDS
+    let mut sources: BTreeMap<String, String> = FIELDS
         .iter()
         .map(|field| ((*field).to_owned(), "default".to_owned()))
         .collect();
+    sources.insert("mode".to_owned(), "default".to_owned());
     apply_file(
         &mut config,
         &mut sources,
@@ -321,7 +322,8 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     if sources["daemon_log"] == "default" {
         config.daemon_log = display(Path::new(&config.state_dir).join("daemon.log"));
     }
-    validate(&config).map_err(|error| ConfigError(format!("invalid configuration: {error}")))?;
+    validate(&config, &sources)
+        .map_err(|error| ConfigError(format!("invalid configuration: {error}")))?;
     Ok(Result { config, sources })
 }
 
@@ -588,7 +590,14 @@ fn apply_flags(config: &mut Config, sources: &mut BTreeMap<String, String>, flag
     flag!(engine);
 }
 
-fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
+fn validate(
+    config: &Config,
+    sources: &BTreeMap<String, String>,
+) -> std::result::Result<(), ConfigError> {
+    if !matches!(config.mode.as_str(), "static" | "browser" | "compat") {
+        let error = resolve_selection(Some(&config.mode), None).unwrap_err();
+        return Err(ConfigError(format!("{}: {}", error.code, error.message)));
+    }
     if config.idle_timeout < 0
         || config.operation_timeout <= 0
         || config.read_timeout <= 0
@@ -604,7 +613,10 @@ fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
             config.autosave
         )));
     }
-    if config.engine == "static" {
+    if config.engine == "static" && config.mode == "browser" && sources["mode"] == "default" {
+        return Ok(());
+    }
+    if config.engine == "static" && config.mode == "static" {
         return Ok(());
     }
     if !matches!(
@@ -616,7 +628,12 @@ fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
             config.engine
         )));
     }
-    resolve_selection(Some(&config.mode), Some(&config.engine))
+    let selected_engine = if config.mode != "browser" && sources["engine"] == "default" {
+        None
+    } else {
+        Some(config.engine.as_str())
+    };
+    resolve_selection(Some(&config.mode), selected_engine)
         .map_err(|error| ConfigError(format!("{}: {}", error.code, error.message)))?;
     Ok(())
 }
@@ -657,6 +674,46 @@ fn display(path: impl AsRef<Path>) -> String {
 #[cfg(test)]
 mod selection_tests {
     use super::*;
+
+    #[test]
+    fn transport_environment_is_validated_without_a_default_browser_conflict() {
+        let root = std::env::temp_dir().join(format!("symbrowse-cfgsel-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: HashMap::new(),
+            flags: FlagOverrides::default(),
+        };
+        for mode in ["static", "compat"] {
+            context.env.insert("SYMBROWSE_MODE".into(), mode.into());
+            assert_eq!(load(&context).expect("mode selection").config.mode, mode);
+        }
+        context.env.insert("SYMBROWSE_MODE".into(), "static".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "chrome".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("engine_not_allowed")
+        );
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "static".into());
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "unknown".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_transport_mode")
+        );
+    }
 
     #[test]
     fn selection_is_exhaustive_and_never_falls_back() {

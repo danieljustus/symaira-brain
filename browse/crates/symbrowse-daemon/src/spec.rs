@@ -60,17 +60,21 @@ impl SessionSpec {
         let mut spec = Self::for_session(session);
         spec.state_dir = PathBuf::from(&config.state_dir);
         spec.cache_dir = PathBuf::from(&config.cache_dir);
-        spec.engine = if config.engine.is_empty() {
-            "chrome"
-        } else {
-            &config.engine
-        }
-        .into();
         spec.mode = if config.engine == "static" {
             "static".into()
         } else {
             config.mode.clone()
         };
+        spec.engine = if spec.mode == "browser" {
+            if config.engine.is_empty() {
+                "chrome"
+            } else {
+                &config.engine
+            }
+        } else {
+            "static"
+        }
+        .into();
         spec.executable_path = PathBuf::from(&config.executable_path);
         spec.cdp_endpoint = config.cdp_endpoint.clone();
         spec.allowed_domains = config.allowed_domains.clone();
@@ -93,7 +97,7 @@ impl SessionSpec {
     }
 
     pub fn validate_selection(&self) -> Result<(), String> {
-        if self.engine == "static" {
+        if self.engine == "static" && matches!(self.mode.as_str(), "static" | "compat") {
             return Ok(());
         }
         resolve_selection(Some(&self.mode), Some(&self.engine))
@@ -180,6 +184,7 @@ pub fn default_socket_path(session: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use symbrowse_core::config::{FlagOverrides, LoadContext, load};
 
     #[test]
     fn spec_paths_are_one_configured_tree() {
@@ -187,5 +192,27 @@ mod tests {
         assert!(spec.state_store_dir().ends_with("states"));
         assert!(spec.user_data_dir().ends_with("sessions/alpha"));
         assert!(spec.output_cache_dir().ends_with("out"));
+    }
+
+    #[test]
+    fn nonbrowser_config_selects_no_browser_runtime() {
+        let root = std::env::temp_dir().join(format!("symbrowse-mode-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        for mode in ["static", "compat"] {
+            context.env.insert("SYMBROWSE_MODE".into(), mode.into());
+            let config = load(&context).expect("load transport").config;
+            let spec = SessionSpec::from_config(&config, "test");
+            assert_eq!(spec.mode, mode);
+            assert_eq!(spec.engine, "static");
+            spec.validate_selection().expect("non-browser transport");
+        }
     }
 }
