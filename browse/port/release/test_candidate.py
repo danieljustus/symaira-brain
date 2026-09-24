@@ -46,6 +46,31 @@ class CandidateTests(unittest.TestCase):
                 candidate.merge(packages, root / "output", "1.2.3", source)
             self.assertFalse((root / "output").exists())
 
+    def test_merge_rejects_nested_symlink_before_reading_candidate_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            packages = root / "packages"
+            packages.mkdir()
+            source = subprocess.run(
+                ["git", "rev-parse", "HEAD"], cwd=candidate.build_dual.ROOT, capture_output=True, text=True, check=True
+            ).stdout.strip()
+            target_dirs = [
+                packages / f"symbrowse-dual-{source}-{os_name}-{arch}"
+                for os_name, arch in candidate.verify.TARGETS
+            ]
+            for directory in target_dirs:
+                directory.mkdir()
+            outside = root / "outside.json"
+            outside.write_text("{}", encoding="utf-8")
+            try:
+                (target_dirs[0] / "build-report.json").symlink_to(outside)
+            except OSError as error:
+                self.skipTest(f"symlinks unavailable in this runner: {error}")
+
+            with self.assertRaisesRegex(candidate.verify.GateError, "candidate tree contains a symlink"):
+                candidate.merge(packages, root / "output", "1.2.3", source)
+            self.assertFalse((root / "output").exists())
+
     def test_archive_layout_keeps_paths_and_rejects_nested_or_duplicate_members(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             archive = Path(temp) / "candidate.zip"

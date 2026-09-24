@@ -15,6 +15,7 @@ if str(Path(__file__).resolve().parent) not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import build_dual
+from candidate_spdx import verify_candidate_spdx as _verify_candidate_spdx
 import verify
 
 
@@ -44,6 +45,14 @@ def _runner_matches(proof: dict[str, Any], target: str) -> bool:
         actual_arch, actual_arch.lower()
     )
     return (actual_os, actual_arch) == (expected_os, expected_arch)
+
+
+def _reject_symlink_tree(root: Path) -> None:
+    if root.is_symlink() or not root.is_dir():
+        raise verify.GateError(f"candidate tree must be a real directory: {root}")
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            raise verify.GateError(f"candidate tree contains a symlink: {path}")
 
 
 def _validate_target_package(root: Path, target: str, version: str, source_revision: str) -> list[dict[str, Any]]:
@@ -132,7 +141,10 @@ def merge(packages: Path, output: Path, version: str, source_revision: str) -> d
     targets = [f"{os_name}-{arch}" for os_name, arch in verify.TARGETS]
     roots = {target: packages / f"symbrowse-dual-{source_revision}-{target}" for target in targets}
     expected_dirs = {path.name for path in roots.values()}
-    if not packages.is_dir() or {path.name for path in packages.iterdir()} != expected_dirs:
+    if not packages.is_dir():
+        raise verify.GateError("downloaded package directories do not contain exactly the six same-SHA target artifacts")
+    _reject_symlink_tree(packages)
+    if {path.name for path in packages.iterdir()} != expected_dirs:
         raise verify.GateError("downloaded package directories do not contain exactly the six same-SHA target artifacts")
     if any(path.is_symlink() or not path.is_dir() for path in packages.iterdir()):
         raise verify.GateError("native package entries must be real target directories")
@@ -215,6 +227,7 @@ def check(candidate: Path, version: str, source_revision: str) -> dict[str, Any]
     dual = candidate / "dual" if (candidate / "dual").is_dir() else candidate
     if not re.fullmatch(r"[0-9a-f]{40,64}", source_revision):
         raise verify.GateError("source revision must be a full lowercase Git SHA")
+    _reject_symlink_tree(dual)
     implementation_report: dict[str, int] = {}
     specs: dict[str, list[verify.ArchiveSpec]] = {}
     for implementation in verify.IMPLEMENTATIONS:
@@ -338,41 +351,6 @@ def check(candidate: Path, version: str, source_revision: str) -> dict[str, Any]
         "publication": "not performed",
         "cutover": "not enabled",
     }
-
-
-def _verify_candidate_spdx(path: Path, archive: Path, implementation: str, version: str) -> None:
-    verify._verify_spdx(path)
-    document = read_json(path)
-    digest = sha256(archive)
-    expected_name = f"{archive.name}.sbom"
-    if (
-        document.get("dataLicense") != "CC0-1.0"
-        or document.get("SPDXID") != "SPDXRef-DOCUMENT"
-        or document.get("name") != f"symbrowse-{implementation}-{archive.name}"
-        or document.get("documentNamespace")
-        != f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive.name}#sha256-{digest}"
-        or document.get("creationInfo")
-        != {"created": "1970-01-01T00:00:00Z", "creators": ["Tool: symaira-browse dual release builder"]}
-    ):
-        raise verify.GateError(f"SPDX document identity mismatch for {expected_name}")
-    packages = document.get("packages")
-    if (
-        not isinstance(packages, list)
-        or len(packages) != 1
-        or packages[0]
-        != {
-            "SPDXID": "SPDXRef-Package-symbrowse",
-            "name": "symbrowse",
-            "versionInfo": version.removeprefix("v"),
-            "downloadLocation": "NOASSERTION",
-            "filesAnalyzed": False,
-            "checksums": [{"algorithm": "SHA256", "checksumValue": digest}],
-            "licenseConcluded": "NOASSERTION",
-            "licenseDeclared": "Apache-2.0",
-            "copyrightText": "NOASSERTION",
-        }
-    ):
-        raise verify.GateError(f"SPDX package identity or archive digest mismatch for {expected_name}")
 
 
 def main() -> int:
