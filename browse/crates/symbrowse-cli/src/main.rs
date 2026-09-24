@@ -1,6 +1,7 @@
 #![deny(unsafe_code)]
 
 mod browser_profiles;
+mod help_catalog;
 
 use std::{
     collections::BTreeMap,
@@ -712,11 +713,14 @@ fn run_mcp(
 }
 
 fn validate_engine(value: &str) -> Result<(), String> {
-    if matches!(value, "chrome" | "static" | "safari-attach" | "safari-bidi") {
+    if matches!(
+        value,
+        "chrome" | "firefox" | "static" | "safari-attach" | "safari-bidi"
+    ) {
         Ok(())
     } else {
         Err(format!(
-            "invalid engine {value:?}: use one of chrome, static, safari-attach, safari-bidi"
+            "invalid engine {value:?}: use one of chrome, firefox, static, safari-attach, safari-bidi"
         ))
     }
 }
@@ -1267,6 +1271,9 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             .filter(|value| !value.starts_with('-'))
             .map(String::as_str)
             .collect::<Vec<_>>();
+        if let Some(text) = help_catalog::help(command, &suffix) {
+            return Ok(Action::Help(text.to_owned()));
+        }
         if let Some(text) = command_help(command, &suffix) {
             return Ok(Action::Help(text));
         }
@@ -2029,11 +2036,14 @@ fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> 
         index += 1;
     }
     if let Some(value) = engine.as_deref()
-        && !matches!(value, "chrome" | "static" | "safari-attach" | "safari-bidi")
+        && !matches!(
+            value,
+            "chrome" | "firefox" | "static" | "safari-attach" | "safari-bidi"
+        )
     {
         return Err(ParseError {
             message: format!(
-                "invalid engine {value:?}: use one of chrome, static, safari-attach, safari-bidi"
+                "invalid engine {value:?}: use one of chrome, firefox, static, safari-attach, safari-bidi"
             ),
             exit_code: 1,
         });
@@ -2540,8 +2550,17 @@ mod tests {
         assert_eq!(error.exit_code, 1);
         assert_eq!(
             error.message,
-            "invalid engine \"netscape\": use one of chrome, static, safari-attach, safari-bidi"
+            "invalid engine \"netscape\": use one of chrome, firefox, static, safari-attach, safari-bidi"
         );
+    }
+
+    #[test]
+    fn mcp_accepts_firefox_engine() {
+        assert_eq!(super::validate_engine("firefox"), Ok(()));
+        assert!(matches!(
+            parse(&args(&["mcp", "--engine", "firefox"])),
+            Ok(Action::Mcp { engine: Some(engine), .. }) if engine == "firefox"
+        ));
     }
 
     #[test]
