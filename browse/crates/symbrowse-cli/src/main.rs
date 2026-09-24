@@ -358,10 +358,7 @@ fn parse_eval(values: &[String], command_index: usize) -> Result<Action, ParseEr
             _ if value.starts_with("--output=") => format = parse_format(&value[9..])?,
             _ if value.starts_with("--session=") => session = value[10..].to_owned(),
             _ if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             _ => {
                 expression.get_or_insert_with(|| value.clone());
@@ -1304,10 +1301,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     }
     let Some(command_index) = top_command_index(&values) else {
         if let Some(value) = values.iter().find(|value| value.starts_with('-')) {
-            return Err(ParseError {
-                message: format!("unknown flag: {value}"),
-                exit_code: 2,
-            });
+            return Err(unknown_flag(value));
         }
         return Err(ParseError {
             message: "a command is required".to_owned(),
@@ -1683,10 +1677,7 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                 args.insert("query".into(), serde_json::Value::String(value[8..].into()));
             }
             value if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             _ => positional.push(value.clone()),
         }
@@ -1886,10 +1877,7 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
                 inputs.insert(key.to_owned(), val.to_owned());
             }
             value if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             value if path.is_none() => path = Some(PathBuf::from(value)),
             value => {
@@ -1981,10 +1969,7 @@ fn parse_daemon(values: &[String], daemon_index: usize) -> Result<Action, ParseE
             value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
             "--json=true" => format = Format::Json,
             value if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             "daemon" => {}
             value => {
@@ -2045,10 +2030,7 @@ fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> 
             _ if value.starts_with("--engine=") => engine = Some(value[9..].to_owned()),
             _ if value == "--json" || value.starts_with("--json=") => {}
             _ if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             _ => {
                 return Err(ParseError {
@@ -2127,10 +2109,7 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
             value if value.starts_with("--output=") => output = value[9..].to_owned(),
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             value => names.push(value.to_owned()),
         }
@@ -2208,10 +2187,7 @@ fn parse_state(values: &[String], state_index: usize) -> Result<Action, ParseErr
             _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             _ if value.starts_with("--output=") => output = value[9..].to_owned(),
             _ if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             _ => {
                 return Err(ParseError {
@@ -2266,10 +2242,7 @@ fn parse_batch(values: &[String], batch_index: usize) -> Result<Action, ParseErr
             }
             _ if value.starts_with("--output=") => output = value[9..].to_owned(),
             _ if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
+                return Err(unknown_flag(value));
             }
             _ => commands.push(value.clone()),
         }
@@ -2323,6 +2296,7 @@ fn parse_version(values: &[String], version_index: usize) -> Result<Action, Pars
                 output = required_value(values, index, "--output")?.to_owned();
             }
             _ if value.starts_with("--output=") => output = value[9..].to_owned(),
+            _ if value.starts_with('-') => return Err(unknown_flag(value)),
             _ => return Err(unknown_version_argument(value)),
         }
         index += 1;
@@ -2388,13 +2362,13 @@ fn parse_config(values: &[String], config_index: usize) -> Result<Action, ParseE
             "--engine" => set_flag(values, &mut index, "--engine", &mut flags.engine)?,
             _ if value.starts_with("--output=") => output = value[9..].to_owned(),
             _ => {
-                return Err(ParseError {
-                    message: if value.starts_with('-') {
-                        format!("unknown flag: {value}")
-                    } else {
-                        format!("unknown command {value:?} for \"symbrowse config show\"")
-                    },
-                    exit_code: 2,
+                return Err(if value.starts_with('-') {
+                    unknown_flag(value)
+                } else {
+                    ParseError {
+                        message: format!("unknown command {value:?} for \"symbrowse config show\""),
+                        exit_code: 2,
+                    }
                 });
             }
         }
@@ -2429,8 +2403,15 @@ fn required_value<'a>(
         .map(String::as_str)
         .ok_or_else(|| ParseError {
             message: format!("flag needs an argument: {name}"),
-            exit_code: 2,
+            exit_code: 1,
         })
+}
+
+fn unknown_flag(value: &str) -> ParseError {
+    ParseError {
+        message: format!("unknown flag: {value}"),
+        exit_code: 1,
+    }
 }
 
 fn parse_format(value: &str) -> Result<Format, ParseError> {
@@ -2576,6 +2557,28 @@ mod tests {
             error.message,
             "invalid engine \"netscape\": use one of chrome, firefox, static, safari-attach, safari-bidi"
         );
+    }
+
+    #[test]
+    fn cobra_flag_parse_errors_use_failure_exit_code() {
+        for (values, expected) in [
+            (&["--unknown", "version"][..], "unknown flag: --unknown"),
+            (&["version", "--unknown"][..], "unknown flag: --unknown"),
+            (
+                &["config", "show", "--config-dir"][..],
+                "flag needs an argument: --config-dir",
+            ),
+            (&["mcp", "--engine"][..], "flag needs an argument: --engine"),
+        ] {
+            assert_eq!(
+                parse(&args(values)),
+                Err(ParseError {
+                    message: expected.to_owned(),
+                    exit_code: 1,
+                }),
+                "args={values:?}"
+            );
+        }
     }
 
     #[test]
