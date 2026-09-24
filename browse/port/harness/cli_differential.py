@@ -107,7 +107,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "upload", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "type", "uncheck", "upload", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -150,7 +150,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["policy"], ["policy", "explain"],
+        ["policy"], ["policy", "explain"], ["trace", "export"],
         ["journal"], ["journal", "tail"], ["journal", "show"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
@@ -247,7 +247,8 @@ class UnixDaemonStub:
                         args = frame.get("args") or {}
                         data = {"schema_version": 1, "session": args.get("session", "default"), "entries": [{
                             "schema_version": 1, "timestamp": "2026-09-25T12:00:00Z",
-                            "session": args.get("session", "default"), "command": "snapshot",
+                            "session": args.get("session", "default"), "command": "open",
+                            "args": {"url": "https://fixture.invalid/trace?a=one&b=two"},
                             "risk_class": "read", "decider": "policy", "result": "ok",
                         }]}
                     elif frame.get("cmd") == "session.list":
@@ -412,7 +413,8 @@ class WindowsNamedPipeStub:
                         args = frame.get("args") or {}
                         data = {"schema_version": 1, "session": args.get("session", "default"), "entries": [{
                             "schema_version": 1, "timestamp": "2026-09-25T12:00:00Z",
-                            "session": args.get("session", "default"), "command": "snapshot",
+                            "session": args.get("session", "default"), "command": "open",
+                            "args": {"url": "https://fixture.invalid/trace?a=one&b=two"},
                             "risk_class": "read", "decider": "policy", "result": "ok",
                         }]}
                     elif frame.get("cmd") == "session.list":
@@ -814,7 +816,84 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         row = compare_processes(go, rust, argv, stdin, env, stub=stub)
         row["case"] = contract
         comparisons.append(row)
+    comparisons.append(compare_trace_export(go, rust, env))
     return comparisons
+
+
+def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
+    argv = ["trace", "export", "--session", "fixture", "--out",
+            str(Path(env["TMPDIR"]) / "trace-export.json"), "--json"]
+    trace_path = Path(argv[5])
+
+    def run(binary: Path, *, status_probe: bool) -> tuple[dict[str, Any], dict[str, Any] | None, str | None]:
+        session = session_from_argv(argv)
+        if os.name == "nt":
+            with WindowsNamedPipeStub(
+                session=session, status_probe=status_probe, request_count=2 if status_probe else 1
+            ) as daemon:
+                result = run_process(binary, argv, env)
+            return result, daemon.frame, daemon.error
+        with UnixDaemonStub(
+            socket_path(env, session), status_probe=status_probe,
+            request_count=2 if status_probe else 1,
+        ) as daemon:
+            result = run_process(binary, argv, env)
+        return result, daemon.frame, daemon.error
+
+    try:
+        trace_path.unlink(missing_ok=True)
+        go_result, go_frame, go_stub_error = run(go, status_probe=False)
+        go_document = json.loads(trace_path.read_text()) if trace_path.is_file() else None
+        trace_path.unlink(missing_ok=True)
+        rust_result, rust_frame, rust_stub_error = run(rust, status_probe=True)
+        rust_document = json.loads(trace_path.read_text()) if trace_path.is_file() else None
+    except (OSError, RuntimeError, json.JSONDecodeError) as error:
+        return {"case": "CLI-001-trace-export", "argv": argv, "matched": False,
+                "error": str(error)}
+    finally:
+        try:
+            trace_path.unlink()
+        except FileNotFoundError:
+            pass
+
+    def stable_trace(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {key: stable_trace(item) for key, item in value.items() if key != "created_at"}
+        if isinstance(value, list):
+            return [stable_trace(item) for item in value]
+        return value
+
+    def frame_payload(frame: dict[str, Any] | None) -> dict[str, Any] | None:
+        if frame is None:
+            return None
+        return {key: frame.get(key) for key in ("cmd", "session", "args")}
+
+    timestamp_valid = True
+    for document in (go_document, rust_document):
+        try:
+            datetime.fromisoformat(document["created_at"].replace("Z", "+00:00"))
+        except (TypeError, KeyError, ValueError, AttributeError):
+            timestamp_valid = False
+    result_match = all(
+        go_result.get(key) == rust_result.get(key)
+        for key in ("returncode", "stdout", "stderr")
+    )
+    matched = bool(
+        result_match and go_result.get("returncode") == 0 and
+        stable_trace(go_document) == stable_trace(rust_document) and
+        timestamp_valid and frame_payload(go_frame) == frame_payload(rust_frame) and
+        go_frame is not None and rust_frame is not None and
+        go_frame.get("cmd") == "journal.show" and rust_frame.get("cmd") == "journal.show" and
+        not go_stub_error and not rust_stub_error
+    )
+    return {
+        "case": "CLI-001-trace-export", "argv": argv, "matched": matched,
+        "criterion": "trace export file matches Go apart from its independently generated timestamp",
+        "go": output_record(go_result), "rust": output_record(rust_result),
+        "go_trace": go_document, "rust_trace": rust_document,
+        "go_frame": frame_payload(go_frame), "rust_frame": frame_payload(rust_frame),
+        "go_stub_error": go_stub_error, "rust_stub_error": rust_stub_error,
+    }
 
 
 def without_batch_durations(value: Any) -> Any:

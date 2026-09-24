@@ -28,9 +28,11 @@ use symbrowse_core::{
     },
     error::ErrorCode,
     flows,
+    journal::Entry as JournalEntry,
     key_resolver::{KeyInitResult, KeyResolver},
     key_sources::SystemKeySources,
     output::{Envelope, Format},
+    trace,
 };
 use symbrowse_daemon::{
     Client, ClientError, ClientOptions, DaemonError, Frame, PolicyStatus, Server, ServerOptions,
@@ -38,6 +40,7 @@ use symbrowse_daemon::{
 };
 use symbrowse_mcp::{ServeOptions, registry, serve_stdio};
 use symbrowse_protocol::{render_root_version, render_version_json, render_version_text};
+use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 
 const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
     Some(version) => version,
@@ -149,6 +152,11 @@ enum Action {
         dry_run: bool,
         format: Format,
     },
+    TraceExport {
+        session: String,
+        path: PathBuf,
+        format: Format,
+    },
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -191,6 +199,29 @@ struct SessionIdInfo {
     origin_path: String,
     #[serde(skip_serializing_if = "is_false")]
     fallback: bool,
+}
+
+#[derive(Serialize)]
+struct TraceFileOutput {
+    schema_version: i64,
+    created_at: String,
+    session: String,
+    steps: Vec<TraceStepOutput>,
+}
+
+#[derive(Serialize)]
+struct TraceStepOutput {
+    command: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    selector: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    value: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    key: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    url: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    expected_url: String,
 }
 
 fn is_false(value: &bool) -> bool {
@@ -278,6 +309,11 @@ fn main() -> ExitCode {
             dry_run,
             format,
         }) => run_flow(session, path, inputs, dry_run, format),
+        Ok(Action::TraceExport {
+            session,
+            path,
+            format,
+        }) => run_trace_export(session, path, format),
         Err(error) => {
             let _ = writeln!(io::stderr(), "{}", error.message);
             ExitCode::from(error.exit_code)
@@ -607,6 +643,118 @@ fn mask_cookie_list(mut data: serde_json::Value, reveal: &str) -> serde_json::Va
         }
     }
     data
+}
+
+fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response = match client.request(Frame {
+        cmd: "journal.show".into(),
+        args: Some(serde_json::json!({"session": session})),
+        session: session.clone(),
+        ..Frame::default()
+    }) {
+        Ok(response) => response,
+        Err(error) => return render_client_error(format, error),
+    };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let entries = response
+        .data
+        .as_ref()
+        .and_then(|data| data.get("entries"))
+        .cloned()
+        .and_then(|entries| serde_json::from_value::<Vec<JournalEntry>>(entries).ok())
+        .unwrap_or_default();
+    let created_at = match now_rfc3339() {
+        Ok(created_at) => created_at,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("format trace timestamp: {error}"),
+            );
+        }
+    };
+    let file = trace::export(&entries, session.clone(), created_at);
+    if file.steps.is_empty() {
+        return render_dispatch_error(
+            format,
+            daemon_codes::OPERATION_FAILED,
+            format!("no replayable steps in the journal of session {session:?}"),
+        );
+    }
+    let output = TraceFileOutput {
+        schema_version: file.schema_version,
+        created_at: file.created_at,
+        session: file.session,
+        steps: file
+            .steps
+            .into_iter()
+            .map(|step| TraceStepOutput {
+                command: step.command,
+                selector: step.selector,
+                value: step.value,
+                key: step.key,
+                url: step.url,
+                expected_url: step.expected_url,
+            })
+            .collect(),
+    };
+    let bytes = match serde_json::to_string_pretty(&output) {
+        Ok(json) => go_json_html_escape(json).into_bytes(),
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("marshal trace: {error}"),
+            );
+        }
+    };
+    let mut options = fs::OpenOptions::new();
+    options.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let write_result = options
+        .open(&path)
+        .and_then(|mut output| output.write_all(&bytes));
+    if let Err(error) = write_result {
+        return render_dispatch_error(format, "operation_failed", format!("write trace: {error}"));
+    }
+    let step_count = output.steps.len();
+    let data = serde_json::json!({"steps": step_count, "file": path.display().to_string()});
+    if format == Format::Text {
+        write_stdout(&format!(
+            "exported {step_count} step(s) to {}\n",
+            path.display()
+        ))
+    } else {
+        match Envelope::ok(data, Vec::new()).render(format) {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        }
+    }
+}
+
+fn go_json_html_escape(json: String) -> String {
+    json.replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
+}
+
+fn now_rfc3339() -> Result<String, time::error::Format> {
+    OffsetDateTime::now_utc().format(&Rfc3339)
 }
 
 fn render_cookie_list_text(data: &serde_json::Value, reveal: &str) -> Result<String, String> {
@@ -2238,6 +2386,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "set" => parse_set(&values, command_index),
         "policy" => parse_policy(&values, command_index),
         "journal" => parse_journal(&values, command_index),
+        "trace" => parse_trace(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -2289,7 +2438,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2351,6 +2500,8 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
+        ("trace", Some("export")) => Some("Convert the session journal into a repeatable trace file\n\nUsage:\n  symbrowse trace export [flags]\n\nFlags:\n  -h, --help        help for export\n      --out string   trace file to write (default \"trace.json\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
         ("policy", Some("explain")) => Some("Show the effective decision for a command against a URL\n\nUsage:\n  symbrowse policy explain <command> [flags]\n\nFlags:\n  -h, --help          help for explain\n      --mode string   policy mode: mcp or tty (default: daemon mode)\n      --url string    URL whose host the rule is evaluated against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("version", None) => Some(plain(
@@ -3244,6 +3395,68 @@ fn parse_journal(values: &[String], command_index: usize) -> Result<Action, Pars
             format,
         }),
         _ => unreachable!("journal subcommand selected from supported names"),
+    }
+}
+
+fn parse_trace(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut path = PathBuf::from("trace.json");
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "export" if subcommand.is_none() => subcommand = Some("export"),
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--out" if subcommand == Some("export") => {
+                index += 1;
+                path = PathBuf::from(required_value(values, index, "--out")?);
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--out=") && subcommand == Some("export") => {
+                path = PathBuf::from(&value[6..]);
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            value if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse trace\""),
+                    exit_code: 2,
+                });
+            }
+            value => positional.push(value.to_owned()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    match subcommand {
+        None => Ok(Action::Help(command_help("trace", &[]).unwrap())),
+        Some("export") if positional.is_empty() => Ok(Action::TraceExport {
+            session,
+            path,
+            format,
+        }),
+        Some("export") => Err(ParseError {
+            message: format!(
+                "unknown command {:?} for \"symbrowse trace export\"",
+                positional[0]
+            ),
+            exit_code: 2,
+        }),
+        _ => unreachable!("trace subcommand selected from supported names"),
     }
 }
 
@@ -4819,9 +5032,10 @@ fn write_stdout(value: &str) -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::{
-        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_string, mask_cookie_list,
-        parse, parse_cache_range, parse_curl_cookie_line, render_cookie_list_json,
-        render_cookie_list_text, render_session_id_json, render_state_key_init, session_id_info,
+        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_html_escape,
+        go_json_string, mask_cookie_list, parse, parse_cache_range, parse_curl_cookie_line,
+        render_cookie_list_json, render_cookie_list_text, render_session_id_json,
+        render_state_key_init, session_id_info,
     };
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
@@ -5562,6 +5776,7 @@ mod tests {
             "state",
             "tab",
             "tools",
+            "trace",
             "upload",
             "version",
             "workflow",
@@ -5590,6 +5805,7 @@ mod tests {
             &["flow", "validate", "--help"][..],
             &["state", "key", "init", "--help"][..],
             &["tools", "list", "--help"][..],
+            &["trace", "export", "--help"][..],
             &["config", "show", "--help"][..],
         ] {
             assert!(
@@ -5664,6 +5880,51 @@ mod tests {
             "t\tsnapshot\tread\tpolicy\tok\n"
         );
         assert!(parse(&args(&["journal", "tail", "extra"])).is_err());
+    }
+
+    #[test]
+    fn trace_export_cli_parses_session_output_and_file() {
+        assert_eq!(
+            parse(&args(&[
+                "trace",
+                "export",
+                "--session=fixture",
+                "--out",
+                "fixture.json",
+                "--json"
+            ])),
+            Ok(Action::TraceExport {
+                session: "fixture".into(),
+                path: PathBuf::from("fixture.json"),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["trace", "export", "extra"])).is_err());
+    }
+
+    #[test]
+    fn trace_export_omits_empty_optional_step_fields_like_go() {
+        let output = super::TraceFileOutput {
+            schema_version: 1,
+            created_at: "2026-09-25T00:00:00Z".into(),
+            session: "fixture".into(),
+            steps: vec![super::TraceStepOutput {
+                command: "open".into(),
+                selector: String::new(),
+                value: String::new(),
+                key: String::new(),
+                url: "https://fixture.invalid".into(),
+                expected_url: "https://fixture.invalid".into(),
+            }],
+        };
+        assert_eq!(
+            serde_json::to_string(&output).expect("serialize trace"),
+            r#"{"schema_version":1,"created_at":"2026-09-25T00:00:00Z","session":"fixture","steps":[{"command":"open","url":"https://fixture.invalid","expected_url":"https://fixture.invalid"}]}"#
+        );
+        assert_eq!(
+            go_json_html_escape("https://fixture.invalid/?a=1&b=<x>".into()),
+            "https://fixture.invalid/?a=1\\u0026b=\\u003cx\\u003e"
+        );
     }
 
     #[test]
