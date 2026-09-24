@@ -347,6 +347,7 @@ fn parse_eval(values: &[String], command_index: usize) -> Result<Action, ParseEr
             "--stdin" => from_stdin = true,
             "--base64" | "-b" => base64 = true,
             "--json" => json = true,
+            _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 format = parse_format(required_value(values, index, "--output")?)?;
@@ -386,6 +387,7 @@ fn root_output_flags(values: &[String]) -> Result<(Format, bool), ParseError> {
         match values[index].as_str() {
             "--" => break,
             "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 format = parse_format(required_value(values, index, "--output")?)?;
@@ -1550,10 +1552,18 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     let mut positional = Vec::new();
     let mut args = serde_json::Map::new();
     let mut index = command_index + 1;
+    let mut positional_only = false;
     while index < values.len() {
         let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
         match value.as_str() {
+            "--" => positional_only = true,
             "--json" => json = true,
+            _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 format = parse_format(required_value(values, index, "--output")?)?;
@@ -1683,6 +1693,7 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         }
         index += 1;
     }
+    let supplied_positional_count = positional.len();
     match name {
         "fetch" | "read" | "open" | "goto" => {
             take_positional(&mut args, &mut positional, "url");
@@ -1741,6 +1752,12 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         command = format!("{name}.{kind}");
     }
     if !positional.is_empty() {
+        if matches!(name, "fetch" | "goto" | "open") {
+            return Err(ParseError {
+                message: format!("accepts at most 1 arg(s), received {supplied_positional_count}"),
+                exit_code: 2,
+            });
+        }
         return Err(ParseError {
             message: format!("unknown argument {:?}", positional[0]),
             exit_code: 2,
@@ -1837,24 +1854,69 @@ fn parse_tools(values: &[String], index: usize) -> Result<Action, ParseError> {
 }
 
 fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
-    let (subcommand, mut i) = match values.get(index + 1) {
-        None => ("list", index + 1),
-        Some(value) if value.starts_with('-') => ("list", index + 1),
-        Some(value) => (value.as_str(), index + 2),
-    };
-    let mut format = Format::Text;
+    let (root_format, mut json) = root_output_flags(&values[..index])?;
+    let mut output = match root_format {
+        Format::Text => "text",
+        Format::Json => "json",
+        Format::Yaml => "yaml",
+    }
+    .to_owned();
+    let mut subcommand = "list";
+    let mut subcommand_index = None;
+    let mut scan = index + 1;
+    while scan < values.len() {
+        match values[scan].as_str() {
+            "list" | "run" | "validate" => {
+                subcommand = values[scan].as_str();
+                subcommand_index = Some(scan);
+                break;
+            }
+            "--output" | "--session" => scan += 1,
+            "--json" | "--dry-run" => {}
+            value
+                if value.starts_with("--json=")
+                    || value.starts_with("--output=")
+                    || value.starts_with("--session=") => {}
+            _ if values[scan].starts_with('-') => {}
+            value => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for flow"),
+                    exit_code: 2,
+                });
+            }
+        }
+        scan += 1;
+    }
     let mut path = None;
     let mut session = "default".to_owned();
     let mut dry_run = false;
     let mut inputs = BTreeMap::new();
+    let mut i = index + 1;
+    let mut positional_only = false;
     while i < values.len() {
+        if Some(i) == subcommand_index {
+            i += 1;
+            continue;
+        }
+        if positional_only {
+            return Err(ParseError {
+                message: format!(
+                    "unknown command {:?} for \"symbrowse flow {subcommand}\"",
+                    values[i]
+                ),
+                exit_code: 2,
+            });
+        }
         match values[i].as_str() {
-            "--json" => format = Format::Json,
+            "--" => positional_only = true,
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--dry-run" => dry_run = true,
             "--output" => {
                 i += 1;
-                format = parse_format(required_value(values, i, "--output")?)?;
+                output = required_value(values, i, "--output")?.to_owned();
             }
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
             "--session" => {
                 i += 1;
                 session = required_value(values, i, "--session")?.to_owned();
@@ -1889,6 +1951,11 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
         }
         i += 1;
     }
+    let format = if json {
+        Format::Json
+    } else {
+        parse_format(&output)?
+    };
     match subcommand {
         "list" if path.is_none() => Ok(Action::FlowList { format }),
         "validate" => path
@@ -2180,6 +2247,7 @@ fn parse_state(values: &[String], state_index: usize) -> Result<Action, ParseErr
         let value = &values[index];
         match value.as_str() {
             "--json" => json = true,
+            _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 output = required_value(values, index, "--output")?.to_owned();
@@ -2291,6 +2359,7 @@ fn parse_version(values: &[String], version_index: usize) -> Result<Action, Pars
         match value.as_str() {
             "--" => after_separator = true,
             "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 output = required_value(values, index, "--output")?.to_owned();
@@ -2343,6 +2412,7 @@ fn parse_config(values: &[String], config_index: usize) -> Result<Action, ParseE
         }
         match value.as_str() {
             "--json" => json = true,
+            _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 output = required_value(values, index, "--output")?.to_owned();
