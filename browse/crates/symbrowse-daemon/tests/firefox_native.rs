@@ -93,6 +93,21 @@ async fn evaluate_string(session: &mut FirefoxSession, expression: &str) -> Stri
         .expect("Firefox expression returned a string")
 }
 
+async fn wait_for_string(session: &mut FirefoxSession, expression: &str, expected: &str) {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    loop {
+        let actual = evaluate_string(session, expression).await;
+        if actual == expected {
+            return;
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "Firefox value did not reach {expected:?}; last value: {actual:?}"
+        );
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+}
+
 #[tokio::test]
 #[ignore = "native gate: set SYMBROWSE_E2E=1 and pass -- --ignored"]
 async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
@@ -141,8 +156,12 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
         .navigate(&format!("{}/redirect", fixture.base_url()))
         .await
         .expect("follow fixture redirect");
-    let url = evaluate_string(&mut session, "location.href").await;
-    assert_eq!(url, format!("{}/page", fixture.base_url()));
+    wait_for_string(
+        &mut session,
+        "location.href",
+        &format!("{}/page", fixture.base_url()),
+    )
+    .await;
     assert_eq!(
         evaluate_string(&mut session, "document.title").await,
         "Firefox fixture"
