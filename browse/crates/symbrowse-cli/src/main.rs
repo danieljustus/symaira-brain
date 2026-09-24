@@ -92,6 +92,13 @@ enum Action {
         args: serde_json::Value,
         format: Format,
     },
+    Eval {
+        session: String,
+        expression: Option<String>,
+        from_stdin: bool,
+        base64: bool,
+        format: Format,
+    },
     FlowList {
         format: Format,
     },
@@ -188,6 +195,13 @@ fn main() -> ExitCode {
             args,
             format,
         }) => run_dispatch(session, command, args, format),
+        Ok(Action::Eval {
+            session,
+            expression,
+            from_stdin,
+            base64,
+            format,
+        }) => run_eval(session, expression, from_stdin, base64, format),
         Ok(Action::FlowList { format }) => run_flow_list(format),
         Ok(Action::FlowValidate { path, format }) => run_flow_validate(path, format),
         Ok(Action::FlowRun {
@@ -296,8 +310,249 @@ fn run_dispatch(
     }
 }
 
+fn parse_eval(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut expression = None;
+    let mut from_stdin = false;
+    let mut base64 = false;
+    let mut index = command_index + 1;
+    let mut positional_only = false;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            expression.get_or_insert_with(|| value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "--stdin" => from_stdin = true,
+            "--base64" | "-b" => base64 = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            _ if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            _ if value.starts_with("--session=") => session = value[10..].to_owned(),
+            _ if value.starts_with('-') => {
+                return Err(ParseError {
+                    message: format!("unknown flag: {value}"),
+                    exit_code: 2,
+                });
+            }
+            _ => {
+                expression.get_or_insert_with(|| value.clone());
+            }
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Eval {
+        session,
+        expression,
+        from_stdin,
+        base64,
+        format,
+    })
+}
+
+fn root_output_flags(values: &[String]) -> Result<(Format, bool), ParseError> {
+    let mut format = Format::Text;
+    let mut json = false;
+    let mut index = 0;
+    while index < values.len() {
+        match values[index].as_str() {
+            "--" => break,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            _ => {}
+        }
+        index += 1;
+    }
+    Ok((format, json))
+}
+
+fn run_eval(
+    session: String,
+    expression: Option<String>,
+    from_stdin: bool,
+    base64_encoded: bool,
+    format: Format,
+) -> ExitCode {
+    let expression = if from_stdin {
+        let mut bytes = Vec::new();
+        if let Err(error) = io::stdin().read_to_end(&mut bytes) {
+            return render_dispatch_error(
+                format,
+                "invalid_args",
+                format!("read expression from stdin: {error}"),
+            );
+        }
+        String::from_utf8_lossy(&bytes).into_owned()
+    } else if let Some(expression) = expression {
+        expression
+    } else {
+        return render_dispatch_error(
+            format,
+            "invalid_args",
+            "eval requires an expression argument (or --stdin)".into(),
+        );
+    };
+    let expression = if base64_encoded {
+        match decode_standard_base64(&expression) {
+            Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
+            Err(index) => {
+                return render_dispatch_error(
+                    format,
+                    "invalid_args",
+                    format!("decode base64 expression: illegal base64 data at input byte {index}"),
+                );
+            }
+        }
+    } else {
+        expression
+    };
+    let frame = Frame {
+        cmd: "eval".into(),
+        args: Some(serde_json::json!({"expression": expression})),
+        session: session.clone(),
+        ..Frame::default()
+    };
+    let response = match Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session,
+        ..ClientOptions::default()
+    })
+    .request(frame)
+    {
+        Ok(response) => response,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::DAEMON_UNAVAILABLE,
+                error.to_string(),
+            );
+        }
+    };
+    if !response.success {
+        let error = response.error.unwrap_or_default();
+        return render_dispatch_error(format, &error.code, error.message);
+    }
+    let data = response.data.unwrap_or(serde_json::Value::Null);
+    if format != Format::Text {
+        return match Envelope::ok(data, Vec::new()).render(format) {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
+    if let Some(exception) = data
+        .get("exception_text")
+        .and_then(serde_json::Value::as_str)
+        && !exception.is_empty()
+    {
+        let _ = writeln!(io::stderr(), "eval threw: {exception}");
+        return ExitCode::FAILURE;
+    }
+    let value = data
+        .get("value")
+        .cloned()
+        .unwrap_or(serde_json::Value::Null);
+    let output = if value.is_null() {
+        "undefined".to_owned()
+    } else {
+        value.to_string()
+    };
+    let _ = writeln!(io::stdout(), "{output}");
+    ExitCode::SUCCESS
+}
+
+fn decode_standard_base64(input: &str) -> Result<Vec<u8>, usize> {
+    fn value(byte: u8) -> Option<u8> {
+        match byte {
+            b'A'..=b'Z' => Some(byte - b'A'),
+            b'a'..=b'z' => Some(byte - b'a' + 26),
+            b'0'..=b'9' => Some(byte - b'0' + 52),
+            b'+' => Some(62),
+            b'/' => Some(63),
+            _ => None,
+        }
+    }
+
+    let mut bytes = Vec::with_capacity(input.len());
+    let mut offsets = Vec::with_capacity(input.len());
+    for (index, byte) in input.bytes().enumerate() {
+        if byte == b'\r' || byte == b'\n' {
+            continue;
+        }
+        bytes.push(byte);
+        offsets.push(index);
+    }
+    if bytes.is_empty() {
+        return Ok(Vec::new());
+    }
+    let mut output = Vec::with_capacity(bytes.len() / 4 * 3);
+    let mut index = 0;
+    while index < bytes.len() {
+        let remaining = bytes.len() - index;
+        if remaining < 4 {
+            value(bytes[index]).ok_or(offsets[index])?;
+            if remaining < 2 || bytes[index + 1] == b'=' {
+                return Err(offsets[index]);
+            }
+            value(bytes[index + 1]).ok_or(offsets[index + 1])?;
+            if remaining == 2 {
+                return Err(offsets[index]);
+            }
+            if bytes[index + 2] == b'=' {
+                return Err(offsets.last().copied().unwrap_or(0) + 1);
+            }
+            value(bytes[index + 2]).ok_or(offsets[index + 2])?;
+            return Err(offsets[index]);
+        }
+        let a = value(bytes[index]).ok_or(offsets[index])?;
+        let b = value(bytes[index + 1]).ok_or(offsets[index + 1])?;
+        let c = bytes[index + 2];
+        let d = bytes[index + 3];
+        if c == b'=' {
+            if d != b'=' || index + 4 != bytes.len() || b & 0x0f != 0 {
+                return Err(offsets[index + 2]);
+            }
+            output.push((a << 2) | (b >> 4));
+        } else {
+            let c = value(c).ok_or(offsets[index + 2])?;
+            output.push((a << 2) | (b >> 4));
+            output.push((b << 4) | (c >> 2));
+            if d == b'=' {
+                if index + 4 != bytes.len() || c & 0x03 != 0 {
+                    return Err(offsets[index + 3]);
+                }
+            } else {
+                let d = value(d).ok_or(offsets[index + 3])?;
+                output.push((c << 6) | d);
+            }
+        }
+        index += 4;
+    }
+    Ok(output)
+}
+
 fn render_dispatch_error(format: Format, code: &str, message: String) -> ExitCode {
     let mapped = match code {
+        "invalid_args" => ErrorCode::InvalidArgs,
         daemon_codes::MALFORMED_REQUEST => ErrorCode::MalformedRequest,
         daemon_codes::UNKNOWN_COMMAND => ErrorCode::UnknownCommand,
         daemon_codes::OPERATION_TIMEOUT => ErrorCode::OperationTimeout,
@@ -1036,6 +1291,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     };
     match values[command_index].as_str() {
         "version" => parse_version(&values, command_index),
+        "eval" => parse_eval(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
         "state" => parse_state_lifecycle(&values, command_index),
@@ -1125,14 +1381,14 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         name.to_owned()
     };
     let mut session = "default".to_owned();
-    let mut format = Format::Text;
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut positional = Vec::new();
     let mut args = serde_json::Map::new();
     let mut index = command_index + 1;
     while index < values.len() {
         let value = &values[index];
         match value.as_str() {
-            "--json" => format = Format::Json,
+            "--json" => json = true,
             "--output" => {
                 index += 1;
                 format = parse_format(required_value(values, index, "--output")?)?;
@@ -1303,6 +1559,9 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     }
     if name == "get" || name == "is" {
         take_positional(&mut args, &mut positional, "selector");
+    }
+    if json {
+        format = Format::Json;
     }
     if name == "wait"
         && !args.contains_key("kind")
@@ -1665,7 +1924,7 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
     let mut session = "default".to_owned();
     let mut output = "text".to_owned();
     let mut json = false;
-    let mut name = None;
+    let mut names = Vec::new();
     let mut older_than = None;
     let mut index = state_index + 2;
     while index < values.len() {
@@ -1699,13 +1958,7 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
                     exit_code: 2,
                 });
             }
-            value if name.is_none() => name = Some(value.to_owned()),
-            value => {
-                return Err(ParseError {
-                    message: format!("unknown argument {value:?}"),
-                    exit_code: 2,
-                });
-            }
+            value => names.push(value.to_owned()),
         }
         index += 1;
     }
@@ -1723,16 +1976,21 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
             });
         }
     };
-    if matches!(subcommand, "save" | "load" | "show" | "clear") && name.is_none() {
+    let expected = if matches!(subcommand, "save" | "load" | "show" | "clear") {
+        1
+    } else {
+        0
+    };
+    if names.len() != expected {
         return Err(ParseError {
-            message: format!("state {subcommand} requires a name"),
+            message: format!("accepts {expected} arg(s), received {}", names.len()),
             exit_code: 2,
         });
     }
     Ok(Action::StateOperation {
         session,
         command,
-        name,
+        name: names.into_iter().next(),
         older_than,
         format,
     })
@@ -1917,12 +2175,24 @@ fn parse_config(values: &[String], config_index: usize) -> Result<Action, ParseE
     let mut output = String::from("text");
     let mut flags = FlagOverrides::default();
     let mut index = 0;
+    let mut positional_only = false;
     while index < values.len() {
         if index == config_index || index == show_index {
             index += 1;
             continue;
         }
         let value = &values[index];
+        if value == "--" {
+            positional_only = true;
+            index += 1;
+            continue;
+        }
+        if positional_only {
+            return Err(ParseError {
+                message: format!("unknown command {value:?} for \"symbrowse config show\""),
+                exit_code: 2,
+            });
+        }
         match value.as_str() {
             "--json" => json = true,
             "--output" => {
@@ -2215,5 +2485,47 @@ mod tests {
             assert!(error.message.contains("unknown command"));
         }
         assert!(parse(&args(&["flow", "nope"])).is_err());
+    }
+
+    #[test]
+    fn eval_parser_preserves_go_input_and_inherited_output_flags() {
+        let Action::Eval {
+            expression,
+            from_stdin,
+            base64,
+            format,
+            ..
+        } = parse(&args(&[
+            "--json", "eval", "1+1", "ignored", "--stdin", "--base64",
+        ]))
+        .expect("eval parse")
+        else {
+            panic!("wrong eval action")
+        };
+        assert_eq!(expression.as_deref(), Some("1+1"));
+        assert!(from_stdin);
+        assert!(base64);
+        assert_eq!(format, Format::Json);
+
+        let Action::Eval {
+            expression, format, ..
+        } = parse(&args(&["--output", "yaml", "eval", "--output=text", "x"]))
+            .expect("eval output flags")
+        else {
+            panic!("wrong eval action")
+        };
+        assert_eq!(expression.as_deref(), Some("x"));
+        assert_eq!(format, Format::Text);
+    }
+
+    #[test]
+    fn standard_base64_decoder_matches_go_padding_and_newline_rules() {
+        assert_eq!(
+            super::decode_standard_base64("ZG9jdW1lbnQudGl0bGU="),
+            Ok(b"document.title".to_vec())
+        );
+        assert_eq!(super::decode_standard_base64("MSsy\n"), Ok(b"1+2".to_vec()));
+        assert_eq!(super::decode_standard_base64("!!!"), Err(0));
+        assert_eq!(super::decode_standard_base64("YQ="), Err(3));
     }
 }
