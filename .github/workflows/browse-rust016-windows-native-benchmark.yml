@@ -36,7 +36,7 @@ jobs:
           $ErrorActionPreference = "Stop"
           go build -o "$env:RUNNER_TEMP\symbrowse-go.exe" ./cmd/symbrowse
           cargo build --release --locked --bin symbrowse
-          Copy-Item "browse\target\release\symbrowse.exe" "$env:RUNNER_TEMP\symbrowse-rust.exe"
+          Copy-Item "target\release\symbrowse.exe" "$env:RUNNER_TEMP\symbrowse-rust.exe"
 
       - name: Run native 30-sample CLI, MCP, named-pipe daemon, and static-fetch probes
         working-directory: browse
