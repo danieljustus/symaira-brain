@@ -55,6 +55,9 @@ jobs:
           python3 port/harness/cli_differential.py --skip-help-tree \
             --go "$go_binary" --rust "$rust_binary" \
             --report "$RUNNER_TEMP/cli-differential.json" --temp-root "$RUNNER_TEMP"
+      - name: Verify Go daemon and session oracle
+        if: runner.os != 'Windows'
+        run: go test ./internal/daemon ./internal/sessionid ./cmd/symbrowse -run 'Timeout|Deadline|Cancel|Session|Registry|Autostart|Client|Engine' -count=1
       - name: Exercise the native Go compat process from Rust
         run: |
           go_binary="$RUNNER_TEMP/symbrowse-go"
