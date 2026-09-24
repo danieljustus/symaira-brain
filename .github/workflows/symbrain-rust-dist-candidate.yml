@@ -113,6 +113,10 @@ jobs:
           python3 scripts/rust-differential.py "$go_binary" "$rust_binary"
           python3 scripts/mcp-differential.py "$go_binary" "$rust_binary"
 
+      - name: Test all Rust migration crates on this native target
+        shell: bash
+        run: cargo test --workspace --all-features --locked
+
       - name: Upload target package for same-SHA merge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
