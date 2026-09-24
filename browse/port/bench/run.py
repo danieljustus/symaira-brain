@@ -423,7 +423,7 @@ def windows_pipe_exchange(endpoint: str, payload: bytes, timeout: float) -> byte
     try:
         # Nonblocking byte mode lets this probe enforce its own bounded read
         # deadline without creating worker threads that might outlive a run.
-        mode = ctypes.c_uint32(0x00000001 | 0x00000002)  # PIPE_READMODE_BYTE | PIPE_NOWAIT
+        mode = ctypes.c_uint32(0x00000001)  # PIPE_READMODE_BYTE is zero; PIPE_NOWAIT is one.
         if not set_pipe_state(handle, ctypes.byref(mode), None, None):
             raise ctypes.WinError(ctypes.get_last_error())
         payload_buffer = ctypes.create_string_buffer(payload)
