@@ -77,3 +77,5 @@ jobs:
           cargo test -p symbrowse-engine --all-targets --locked
           go run ./scripts/rust-port/cmd/workflowgen --check
           cargo test -p symbrowse-core --test workflows_contract --locked
+          go run ./scripts/rust-port/cmd/mcpfixturegen --check
+          cargo test -p symbrowse-mcp --test raw_frames --locked
