@@ -14,19 +14,24 @@ import (
 
 const maxFrameBytes = 1 << 20
 
-func classify(raw []byte) string {
+type result struct {
+	Class   string `json:"class"`
+	Message string `json:"message"`
+}
+
+func classify(raw []byte) result {
 	scanner := bufio.NewScanner(bytes.NewReader(raw))
 	scanner.Buffer(make([]byte, 4096), maxFrameBytes)
 	if !scanner.Scan() {
 		if scanner.Err() != nil {
-			return "connection_close"
+			return result{Class: "connection_close"}
 		}
-		return "eof"
+		return result{Class: "eof"}
 	}
 	if _, err := daemon.DecodeFrame(scanner.Bytes()); err != nil {
-		return "malformed_request"
+		return result{Class: "malformed_request", Message: err.Error()}
 	}
-	return "accepted"
+	return result{Class: "accepted"}
 }
 
 func main() {
@@ -34,8 +39,8 @@ func main() {
 	suffix := `"}}`
 	boundaryPayload := prefix + strings.Repeat("x", maxFrameBytes-1-len(prefix)-len(suffix)) + suffix
 	oversizedPayload := prefix + strings.Repeat("x", maxFrameBytes-len(prefix)-len(suffix)) + suffix
-	results := map[string]string{
-		"malformed_json":    classify([]byte("{not-json}\n")),
+	results := map[string]result{
+		"malformed_json":    classify([]byte("{not json\n")),
 		"empty_cmd":         classify([]byte("{}\n")),
 		"boundary":          classify([]byte(boundaryPayload + "\n")),
 		"oversized":         classify([]byte(oversizedPayload + "\n")),

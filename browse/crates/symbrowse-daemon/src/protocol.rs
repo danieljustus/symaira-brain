@@ -92,9 +92,9 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
             ..Default::default()
         });
     }
-    let frame: Frame = serde_json::from_slice(raw).map_err(|e| DaemonError {
+    let frame: Frame = serde_json::from_slice(raw).map_err(|error| DaemonError {
         code: codes::MALFORMED_REQUEST.into(),
-        message: format!("decode frame: {e}"),
+        message: format!("decode frame: {}", go_json_error(raw, &error)),
         ..Default::default()
     })?;
     if frame.cmd.is_empty() {
@@ -105,6 +105,46 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
         });
     }
     Ok(frame)
+}
+
+fn go_json_error(raw: &[u8], error: &serde_json::Error) -> String {
+    let detail = error.to_string();
+    let context = if detail.starts_with("key must be a string") {
+        "looking for beginning of object key string"
+    } else if detail.starts_with("trailing characters") {
+        "after top-level value"
+    } else {
+        return detail;
+    };
+
+    // Go's encoding/json reports the offending byte and parser state here,
+    // while serde_json reports a category and line/column. Keep this mapping
+    // at the shared frame boundary so malformed daemon requests stay stable.
+    let offset = raw
+        .split_inclusive(|byte| *byte == b'\n')
+        .take(error.line().saturating_sub(1))
+        .map(<[u8]>::len)
+        .sum::<usize>()
+        .saturating_add(error.column().saturating_sub(1));
+    let character = raw.get(offset).copied().unwrap_or_default();
+    format!("invalid character {} {context}", go_quote_byte(character))
+}
+
+fn go_quote_byte(byte: u8) -> String {
+    match byte {
+        b'\'' => "'\\''".to_owned(),
+        b'"' => "'\"'".to_owned(),
+        b'\\' => "'\\\\'".to_owned(),
+        b'\x07' => "'\\a'".to_owned(),
+        b'\x08' => "'\\b'".to_owned(),
+        b'\x0c' => "'\\f'".to_owned(),
+        b'\n' => "'\\n'".to_owned(),
+        b'\r' => "'\\r'".to_owned(),
+        b'\t' => "'\\t'".to_owned(),
+        b'\x0b' => "'\\v'".to_owned(),
+        0x20..=0x7e => format!("'{}'", char::from(byte)),
+        _ => format!("'\\x{byte:02x}'"),
+    }
 }
 
 pub fn error_response(code: impl Into<String>, message: impl Into<String>) -> Response {
@@ -161,6 +201,14 @@ mod tests {
         assert_eq!(
             decode_frame(b"{\"cmd\":\"x\"}\x0b").unwrap_err().code,
             codes::MALFORMED_REQUEST
+        );
+        assert_eq!(
+            decode_frame(b"{not json").unwrap_err().message,
+            "decode frame: invalid character 'n' looking for beginning of object key string"
+        );
+        assert_eq!(
+            decode_frame(b"{\"cmd\":\"x\"}\x0b").unwrap_err().message,
+            "decode frame: invalid character '\\v' after top-level value"
         );
         let value = serde_json::json!({"cmd":"x","args": "x".repeat(crate::MAX_FRAME_BYTES)});
         let raw = serde_json::to_vec(&value).unwrap();

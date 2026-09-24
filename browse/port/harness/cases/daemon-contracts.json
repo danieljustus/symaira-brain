@@ -6,12 +6,30 @@
       "platforms": ["all"],
       "coverage": ["malformed-json", "empty-cmd", "whitespace-cmd", "vertical-tab-tail", "one-mib-boundary", "oversized-line"],
       "expected": {
-        "malformed_json": "malformed_request",
-        "empty_cmd": "malformed_request",
-        "whitespace_cmd": "accepted",
-        "vertical_tab_tail": "malformed_request",
-        "boundary": "accepted",
-        "oversized": "connection_close"
+        "malformed_json": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character 'n' looking for beginning of object key string"
+        },
+        "empty_cmd": {
+          "class": "malformed_request",
+          "message": "missing cmd"
+        },
+        "whitespace_cmd": {
+          "class": "accepted",
+          "message": ""
+        },
+        "vertical_tab_tail": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '\\v' after top-level value"
+        },
+        "boundary": {
+          "class": "accepted",
+          "message": ""
+        },
+        "oversized": {
+          "class": "connection_close",
+          "message": ""
+        }
       },
       "go": ["go", "test", "./internal/daemon", "-run", "TestDecodeFrameAndStableResponseSchema|TestDecodeFrameValidation", "-count=1"],
       "go_oracle": ["go", "run", "./port/harness/daemon_frame_limits_oracle.go"],
