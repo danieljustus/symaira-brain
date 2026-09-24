@@ -8,9 +8,17 @@ use async_tungstenite::{tokio::connect_async, tungstenite::Message};
 use futures_util::StreamExt;
 use serde_json::{Value, json};
 use std::{
-    path::{Path, PathBuf},
+    path::PathBuf,
+    process::Stdio,
+    sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
+mod error;
+mod executable;
+mod startup;
+pub use error::FirefoxError;
+pub use executable::resolve_firefox_executable;
+use startup::{capture_startup_output, captured_output, startup_detail};
 use symbrowse_engine::{
     EvaluationResult, NavigationResult,
     capabilities::{Capabilities, capabilities_for},
@@ -58,31 +66,6 @@ fn context_partition(context: &str) -> Value {
     json!({"type":"context","context":context})
 }
 
-#[derive(Debug)]
-pub enum FirefoxError {
-    Unsupported {
-        operation: String,
-    },
-    Timeout {
-        operation: String,
-        timeout: Duration,
-    },
-    Driver(String),
-    InvalidTarget(String),
-}
-impl std::fmt::Display for FirefoxError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Unsupported { operation } => write!(f, "unsupported: {operation}"),
-            Self::Timeout { operation, timeout } => {
-                write!(f, "{operation} timed out after {timeout:?}")
-            }
-            Self::Driver(s) | Self::InvalidTarget(s) => f.write_str(s),
-        }
-    }
-}
-impl std::error::Error for FirefoxError {}
-
 pub fn canonical_capabilities() -> Capabilities {
     capabilities_for(
         ENGINE_KIND,
@@ -96,36 +79,6 @@ pub fn canonical_capabilities() -> Capabilities {
             "TabManager",
         ],
     )
-}
-
-pub fn resolve_firefox_executable(explicit: Option<&Path>) -> Result<PathBuf, FirefoxError> {
-    if let Some(path) = explicit {
-        if path.is_file() {
-            return Ok(path.to_owned());
-        }
-        return Err(FirefoxError::Driver(format!(
-            "Firefox executable not found at {}",
-            path.display()
-        )));
-    }
-    let candidates = if cfg!(target_os = "macos") {
-        vec![PathBuf::from(
-            "/Applications/Firefox.app/Contents/MacOS/firefox",
-        )]
-    } else if cfg!(windows) {
-        vec![PathBuf::from(
-            r"C:\Program Files\Mozilla Firefox\firefox.exe",
-        )]
-    } else {
-        vec![
-            PathBuf::from("/usr/bin/firefox"),
-            PathBuf::from("/usr/lib/firefox/firefox"),
-        ]
-    };
-    candidates
-        .into_iter()
-        .find(|p| p.is_file())
-        .ok_or_else(|| FirefoxError::Driver("Firefox executable is unavailable".into()))
 }
 
 struct Bidi {
@@ -203,21 +156,42 @@ impl FirefoxSession {
                 "--profile",
             ])
             .arg(&profile)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .kill_on_drop(true)
             .spawn()
             .map_err(|e| FirefoxError::Driver(format!("launch Firefox: {e}")))?;
+        let stdout = Arc::new(Mutex::new(Vec::new()));
+        let stderr = Arc::new(Mutex::new(Vec::new()));
+        let stdout_reader = child
+            .stdout
+            .take()
+            .map(|reader| tokio::spawn(capture_startup_output(reader, Arc::clone(&stdout))));
+        let stderr_reader = child
+            .stderr
+            .take()
+            .map(|reader| tokio::spawn(capture_startup_output(reader, Arc::clone(&stderr))));
         let started = Instant::now();
         while started.elapsed() < limit {
             if TcpStream::connect(("127.0.0.1", port)).await.is_ok() {
                 break;
             }
-            if child
+            if let Some(status) = child
                 .try_wait()
                 .map_err(|e| FirefoxError::Driver(e.to_string()))?
-                .is_some()
             {
+                if let Some(reader) = stdout_reader {
+                    let _ = reader.await;
+                }
+                if let Some(reader) = stderr_reader {
+                    let _ = reader.await;
+                }
+                let detail = startup_detail(&captured_output(&stdout), &captured_output(&stderr));
                 return Err(FirefoxError::Driver(
-                    "Firefox exited before BiDi became ready".into(),
+                    format!("Firefox exited before BiDi became ready ({status})")
+                        + &detail
+                            .map(|detail| format!("; {detail}"))
+                            .unwrap_or_default(),
                 ));
             }
             sleep(Duration::from_millis(50)).await;
@@ -225,8 +199,16 @@ impl FirefoxSession {
         if started.elapsed() >= limit {
             let _ = child.kill().await;
             let _ = child.wait().await;
+            if let Some(reader) = stdout_reader {
+                let _ = reader.await;
+            }
+            if let Some(reader) = stderr_reader {
+                let _ = reader.await;
+            }
             return Err(FirefoxError::Timeout {
-                operation: "Firefox BiDi readiness".into(),
+                operation: startup_detail(&captured_output(&stdout), &captured_output(&stderr))
+                    .map(|detail| format!("Firefox BiDi readiness: {detail}"))
+                    .unwrap_or_else(|| "Firefox BiDi readiness".into()),
                 timeout: limit,
             });
         }

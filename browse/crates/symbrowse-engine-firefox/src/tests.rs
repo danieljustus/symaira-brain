@@ -1,4 +1,5 @@
 use super::*;
+use std::path::Path;
 
 #[test]
 fn capabilities_are_truthful() {
@@ -53,4 +54,33 @@ fn invalid_explicit_path_is_typed() {
         resolve_firefox_executable(Some(Path::new("/missing/firefox"))),
         Err(FirefoxError::Driver(_))
     ));
+}
+
+#[test]
+fn readiness_diagnostic_includes_browser_output_and_supported_channel() {
+    let detail = startup_detail(
+        b"",
+        b"sandbox_extension_issue_file_to_process: denied\nSWGL mapping failed",
+    )
+    .expect("captured Firefox diagnostic");
+    assert!(detail.contains("Mozilla Firefox Nightly"));
+    assert!(detail.contains("sandbox_extension_issue_file_to_process"));
+    assert!(detail.contains("SWGL mapping failed"));
+}
+
+#[test]
+fn readiness_diagnostic_is_absent_without_browser_output() {
+    assert_eq!(startup_detail(b"", b""), None);
+}
+
+#[tokio::test]
+async fn startup_output_capture_keeps_only_bounded_tail() {
+    let expected = vec![b'x'; startup::STARTUP_OUTPUT_LIMIT + 128];
+    let output = Arc::new(Mutex::new(Vec::new()));
+    capture_startup_output(std::io::Cursor::new(expected.clone()), Arc::clone(&output)).await;
+    assert_eq!(
+        captured_output(&output),
+        expected[128..].to_vec(),
+        "diagnostics must remain bounded while preserving the latest output"
+    );
 }
