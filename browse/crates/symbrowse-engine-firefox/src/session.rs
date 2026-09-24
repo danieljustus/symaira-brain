@@ -155,8 +155,7 @@ impl FirefoxSession {
             sleep(Duration::from_millis(50)).await;
         }
         if started.elapsed() >= limit {
-            let _ = child.kill().await;
-            let _ = child.wait().await;
+            let _ = terminate_process(&mut child).await;
             if let Some(reader) = stdout_reader {
                 let _ = reader.await;
             }
@@ -170,11 +169,15 @@ impl FirefoxSession {
                 timeout: limit,
             });
         }
-        let (socket, _) = connect_async(format!("ws://{endpoint}/session"))
-            .await
-            .map_err(|e| {
-                FirefoxError::Driver(format!("connect Firefox BiDi loopback socket: {e}"))
-            })?;
+        let (socket, _) = match connect_async(format!("ws://{endpoint}/session")).await {
+            Ok(connection) => connection,
+            Err(error) => {
+                let _ = terminate_process(&mut child).await;
+                return Err(FirefoxError::Driver(format!(
+                    "connect Firefox BiDi loopback socket: {error}"
+                )));
+            }
+        };
 
         let mut session = Self {
             bidi: Bidi {
@@ -317,28 +320,7 @@ impl FirefoxSession {
             .command("session.end", json!({}), self.timeout)
             .await;
         if let Some(mut child) = self.child.take() {
-            let running = child
-                .try_wait()
-                .map_err(|error| FirefoxError::Driver(format!("check Firefox process: {error}")))?
-                .is_none();
-            if running {
-                if let Err(error) = child.start_kill() {
-                    let still_running = child
-                        .try_wait()
-                        .map_err(|check| {
-                            FirefoxError::Driver(format!("check Firefox process: {check}"))
-                        })?
-                        .is_none();
-                    if still_running {
-                        return Err(FirefoxError::Driver(format!(
-                            "stop Firefox process: {error}"
-                        )));
-                    }
-                }
-            }
-            child.wait().await.map_err(|error| {
-                FirefoxError::Driver(format!("wait for Firefox process: {error}"))
-            })?;
+            terminate_process(&mut child).await?;
         }
         Ok(())
     }
@@ -351,7 +333,60 @@ impl FirefoxSession {
 impl Drop for FirefoxSession {
     fn drop(&mut self) {
         if let Some(mut child) = self.child.take() {
+            #[cfg(windows)]
+            // Firefox Nightly may leave child processes owning the BiDi port
+            // after its parent exits; this session uses an isolated profile.
+            if !terminate_windows_process_tree(child.id()) {
+                let _ = child.start_kill();
+            }
+            #[cfg(not(windows))]
             let _ = child.start_kill();
         }
     }
+}
+
+async fn terminate_process(child: &mut Child) -> Result<(), FirefoxError> {
+    let running = child
+        .try_wait()
+        .map_err(|error| FirefoxError::Driver(format!("check Firefox process: {error}")))?
+        .is_none();
+    if running {
+        #[cfg(windows)]
+        let tree_stopped = terminate_windows_process_tree(child.id());
+        #[cfg(not(windows))]
+        let tree_stopped = false;
+
+        if !tree_stopped {
+            if let Err(error) = child.start_kill()
+                && child
+                    .try_wait()
+                    .map_err(|check| {
+                        FirefoxError::Driver(format!("check Firefox process: {check}"))
+                    })?
+                    .is_none()
+            {
+                return Err(FirefoxError::Driver(format!(
+                    "stop Firefox process: {error}"
+                )));
+            }
+        }
+    }
+    child
+        .wait()
+        .await
+        .map_err(|error| FirefoxError::Driver(format!("wait for Firefox process: {error}")))?;
+    Ok(())
+}
+
+#[cfg(windows)]
+fn terminate_windows_process_tree(pid: u32) -> bool {
+    // /T matters here: killing only the Firefox parent can leave the remote
+    // agent socket open in one of its child processes.
+    std::process::Command::new("taskkill.exe")
+        .args(["/PID", &pid.to_string(), "/T", "/F"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|status| status.success())
 }

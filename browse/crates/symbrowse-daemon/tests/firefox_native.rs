@@ -139,6 +139,20 @@ async fn wait_for_download(path: &std::path::Path, expected: &[u8]) -> Vec<u8> {
     }
 }
 
+async fn wait_for_endpoint_closed(endpoint: std::net::SocketAddr) {
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(2);
+    loop {
+        if TcpStream::connect_timeout(&endpoint, Duration::from_millis(100)).is_err() {
+            return;
+        }
+        assert!(
+            tokio::time::Instant::now() < deadline,
+            "Firefox BiDi endpoint remained open after process-tree cleanup"
+        );
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+}
+
 #[tokio::test]
 #[ignore = "native gate: set SYMBROWSE_E2E=1 and pass -- --ignored"]
 async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
@@ -315,10 +329,7 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
 
     let endpoint = session.remote_endpoint();
     session.close().await.expect("close owned Firefox process");
-    assert!(
-        TcpStream::connect_timeout(&endpoint, Duration::from_millis(100)).is_err(),
-        "Firefox BiDi endpoint remained open after close"
-    );
+    wait_for_endpoint_closed(endpoint).await;
     drop(fixture);
     drop(temp);
 }
