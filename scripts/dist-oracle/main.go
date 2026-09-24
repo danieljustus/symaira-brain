@@ -345,6 +345,7 @@ func notRunLines() []string {
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	candidateSBOM := flag.Bool("candidate-sbom", false, "generate deterministic SPDX sidecars and checksums for an unpublished snapshot")
 	nativePackage := flag.Bool("native-package", false, "verify a native Rust symbrain binary and package its archive/checksum")
 	candidateMerge := flag.Bool("candidate-merge", false, "merge six native Rust packages and run the full candidate artifact check")
 	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
@@ -355,6 +356,30 @@ func main() {
 	goreleaserPath := flag.String("goreleaser", defaultGoreleaser, "path to the goreleaser config")
 	workflowPath := flag.String("workflow", defaultWorkflow, "path to the release workflow binding external assets")
 	flag.Parse()
+
+	if *candidateSBOM {
+		if *assetsDir == "" || *version == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-sbom requires -version and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := generateCandidateSPDX(&cfg, *version, resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: generate candidate SPDX: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-spdx: PASS generated %d deterministic SPDX SBOMs and checksum entries for %s (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		return
+	}
 
 	if *candidateMerge {
 		if *assetsDir == "" || *version == "" || *packagesDir == "" {

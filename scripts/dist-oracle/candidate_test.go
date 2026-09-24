@@ -123,6 +123,33 @@ func TestCandidateArchiveBundleChecksNamesContentsAndChecksums(t *testing.T) {
 	if err := checkCandidateArtifacts(&cfg, version, assets); err != nil {
 		t.Fatalf("valid merged SPDX candidate rejected: %v", err)
 	}
+	// Snapshot archives arrive with archive-only checksums. The dedicated
+	// offline generator must verify those bytes before adding SPDX coverage.
+	snapshot := filepath.Join(t.TempDir(), "snapshot")
+	if err := os.Mkdir(snapshot, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	var archiveChecksums []string
+	for _, goos := range cfg.Builds[0].GOOS {
+		for _, goarch := range cfg.Builds[0].GOARCH {
+			name := renderTemplate(cfg.Archives[0].NameTemplate, cfg.ProjectName, version, goos, goarch) + "." + formatFor(cfg.Archives[0], goos)
+			data := mustRead(t, filepath.Join(assets, name))
+			if err := os.WriteFile(filepath.Join(snapshot, name), data, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			digest := sha256.Sum256(data)
+			archiveChecksums = append(archiveChecksums, hex.EncodeToString(digest[:])+"  "+name)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(snapshot, cfg.Checksum.NameTemplate), []byte(strings.Join(archiveChecksums, "\n")+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := generateCandidateSPDX(&cfg, version, snapshot); err != nil {
+		t.Fatalf("valid archive-only snapshot rejected: %v", err)
+	}
+	if err := checkCandidateArtifacts(&cfg, version, snapshot); err != nil {
+		t.Fatalf("generated SPDX candidate rejected: %v", err)
+	}
 
 	archiveName := renderTemplate(cfg.Archives[0].NameTemplate, cfg.ProjectName, version, "darwin", "arm64") + ".tar.gz"
 	sbomName, err := candidateSBOMName(&cfg, archiveName)
