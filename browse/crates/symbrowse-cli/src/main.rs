@@ -108,6 +108,10 @@ enum Action {
         args: serde_json::Value,
         format: Format,
     },
+    CookieImport {
+        session: String,
+        path: PathBuf,
+    },
     CacheGet {
         id: String,
         range: Option<String>,
@@ -245,6 +249,7 @@ fn main() -> ExitCode {
             args,
             format,
         }) => run_dispatch(session, command, args, format),
+        Ok(Action::CookieImport { session, path }) => run_cookie_import(session, path),
         Ok(Action::CacheGet { id, range, format }) => run_cache_get(id, range, format),
         Ok(Action::SessionId {
             scope,
@@ -335,6 +340,7 @@ fn run_dispatch(
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let is_cookie_clear = frame.cmd == "cookies.clear";
+    let is_cookie_set = frame.cmd == "cookies.set";
     let is_cookie_list = frame.cmd == "cookies.list";
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
@@ -422,6 +428,9 @@ fn run_dispatch(
         if is_cookie_clear && format == Format::Text {
             return write_stdout("ok\n");
         }
+        if is_cookie_set && format == Format::Text {
+            return write_stdout("ok\n");
+        }
         let response_data = response.data.unwrap_or(serde_json::Value::Null);
         if is_cookie_list && format == Format::Text {
             return match render_cookie_list_text(&response_data, &cookie_reveal) {
@@ -475,6 +484,75 @@ fn run_dispatch(
         let error = response.error.unwrap_or_default();
         render_dispatch_error(format, &error.code, error.message)
     }
+}
+
+fn run_cookie_import(session: String, path: PathBuf) -> ExitCode {
+    let contents = match fs::read_to_string(&path) {
+        Ok(contents) => contents,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "open curl cookie jar: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let mut imported = 0usize;
+    let mut skipped = 0usize;
+    for line in contents.lines() {
+        let Some(cookie) = parse_curl_cookie_line(line) else {
+            skipped += 1;
+            continue;
+        };
+        let response = match client.request(Frame {
+            cmd: "cookies.set".into(),
+            args: Some(serde_json::json!({"cookie":cookie,"url":""})),
+            session: session.clone(),
+            ..Frame::default()
+        }) {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    Format::Text,
+                    daemon_codes::DAEMON_UNAVAILABLE,
+                    error.to_string(),
+                );
+            }
+        };
+        if response.success {
+            imported += 1;
+        } else {
+            skipped += 1;
+        }
+    }
+    write_stdout(&format!(
+        "imported {imported} cookie(s), skipped {skipped}\n"
+    ))
+}
+
+fn parse_curl_cookie_line(line: &str) -> Option<serde_json::Value> {
+    let line = line.trim();
+    if line.is_empty() || line.starts_with('#') {
+        return None;
+    }
+    let fields = line.split_whitespace().collect::<Vec<_>>();
+    if fields.len() < 7 {
+        return None;
+    }
+    let expires = fields[4].parse::<f64>().unwrap_or(0.0);
+    Some(serde_json::json!({
+        "name": fields[5],
+        "value": fields[6],
+        "domain": fields[0],
+        "path": fields[2],
+        "expires": expires,
+        "size": 0,
+        "secure": fields[3].eq_ignore_ascii_case("TRUE"),
+        "http_only": false,
+        "session": false,
+    }))
 }
 
 fn reveal_cookie(name: &str, reveal: &str) -> bool {
@@ -2119,7 +2197,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        List current-origin cookies and delete one by name\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2141,7 +2219,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
-        ("cookies", None) => Some("List current-origin cookies and delete one by name\n\nUsage:\n  symbrowse cookies [command]\n\nAvailable Commands:\n  clear       Delete one cookie by name\n  list        List cookies visible to the current page\n\nFlags:\n  -h, --help             help for cookies\n      --reveal string   show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string  session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cookies [command] --help\" for more information about a command.\n".to_owned()),
+        ("cookies", None) => Some("Inspect and manage cookies of the current page origin\n\nUsage:\n  symbrowse cookies [command]\n\nAvailable Commands:\n  clear       Delete one cookie by name\n  list        List cookies visible to the current page\n  set         Set a cookie (or import cookies from a curl cookie jar with --curl)\n\nFlags:\n  -h, --help             help for cookies\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cookies [command] --help\" for more information about a command.\n".to_owned()),
         ("cookies", Some("list")) => Some(plain(
             "List cookies visible to the current page", "symbrowse cookies list [flags]",
             "  -h, --help   help for list\n",
@@ -2150,6 +2228,12 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("cookies", Some("clear")) => Some(plain(
             "Delete one cookie by name", "symbrowse cookies clear <name> [flags]",
             "  -h, --help         help for clear\n      --url string   URL scope of the cookie (default: current page URL)\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n",
+        )),
+        ("cookies", Some("set")) => Some(plain(
+            "Set a cookie (or import cookies from a curl cookie jar with --curl)",
+            "symbrowse cookies set <name> <value> [flags]",
+            "      --curl string     import cookies from a curl cookie jar (Netscape format) file\n      --domain string   cookie domain (default: derived from the page URL)\n  -h, --help            help for set\n      --http-only       mark the cookie as HTTP-only\n      --path string     cookie path (default \"/\")\n      --secure          mark the cookie as secure-only\n      --url string      URL scope for the cookie (default: current page URL)\n",
             "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n",
         )),
         ("a11y", None) => Some(plain(
@@ -2919,6 +3003,11 @@ fn parse_cookies(values: &[String], command_index: usize) -> Result<Action, Pars
     let mut session = String::from("default");
     let mut reveal = String::new();
     let mut url = String::new();
+    let mut domain = String::new();
+    let mut path = String::from("/");
+    let mut secure = false;
+    let mut http_only = false;
+    let mut curl_path: Option<PathBuf> = None;
     let mut subcommand = None;
     let mut positional = Vec::new();
     let mut positional_only = false;
@@ -2932,7 +3021,7 @@ fn parse_cookies(values: &[String], command_index: usize) -> Result<Action, Pars
         }
         match value.as_str() {
             "--" => positional_only = true,
-            "list" | "clear" if subcommand.is_none() => subcommand = Some(value.as_str()),
+            "list" | "clear" | "set" if subcommand.is_none() => subcommand = Some(value.as_str()),
             "--json" => json = true,
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
@@ -2955,6 +3044,29 @@ fn parse_cookies(values: &[String], command_index: usize) -> Result<Action, Pars
                 url = required_value(values, index, "--url")?.to_owned();
             }
             value if value.starts_with("--url=") => url = value[6..].to_owned(),
+            "--domain" => {
+                index += 1;
+                domain = required_value(values, index, "--domain")?.to_owned();
+            }
+            value if value.starts_with("--domain=") => domain = value[9..].to_owned(),
+            "--path" => {
+                index += 1;
+                path = required_value(values, index, "--path")?.to_owned();
+            }
+            value if value.starts_with("--path=") => path = value[7..].to_owned(),
+            "--secure" => secure = true,
+            value if value.starts_with("--secure=") => {
+                secure = parse_bool("--secure", &value[9..])?
+            }
+            "--http-only" => http_only = true,
+            value if value.starts_with("--http-only=") => {
+                http_only = parse_bool("--http-only", &value[12..])?;
+            }
+            "--curl" => {
+                index += 1;
+                curl_path = Some(PathBuf::from(required_value(values, index, "--curl")?));
+            }
+            value if value.starts_with("--curl=") => curl_path = Some(PathBuf::from(&value[7..])),
             value if value.starts_with('-') => return Err(unknown_flag(value)),
             _ if subcommand.is_none() => {
                 return Err(ParseError {
@@ -2995,6 +3107,31 @@ fn parse_cookies(values: &[String], command_index: usize) -> Result<Action, Pars
         }),
         "clear" => Err(ParseError {
             message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        "set" if curl_path.is_some() && positional.is_empty() => Ok(Action::CookieImport {
+            session,
+            path: curl_path.unwrap(),
+        }),
+        "set" if curl_path.is_some() => Err(ParseError {
+            message: format!("accepts 0 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        "set" if positional.len() == 2 => Ok(Action::Dispatch {
+            session,
+            command: "cookies.set".into(),
+            args: serde_json::json!({
+                "cookie": {
+                    "name": positional[0], "value": positional[1], "domain": domain,
+                    "path": path, "expires": 0.0, "size": 0, "secure": secure,
+                    "http_only": http_only, "session": false
+                },
+                "url": url
+            }),
+            format,
+        }),
+        "set" => Err(ParseError {
+            message: format!("accepts 2 arg(s), received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("cookies subcommand selected from supported names"),
@@ -4368,11 +4505,11 @@ fn write_stdout(value: &str) -> ExitCode {
 mod tests {
     use super::{
         Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_string, mask_cookie_list,
-        parse, parse_cache_range, render_cookie_list_json, render_cookie_list_text,
-        render_session_id_json, render_state_key_init, session_id_info,
+        parse, parse_cache_range, parse_curl_cookie_line, render_cookie_list_json,
+        render_cookie_list_text, render_session_id_json, render_state_key_init, session_id_info,
     };
     use std::ffi::OsString;
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
@@ -5174,6 +5311,46 @@ mod tests {
         );
         assert!(parse(&args(&["cookies", "clear"])).is_err());
         assert!(parse(&args(&["cookies", "list", "extra"])).is_err());
+        let Action::Dispatch {
+            command,
+            args: payload,
+            ..
+        } = parse(&args(&[
+            "cookies",
+            "set",
+            "sid",
+            "plain-value",
+            "--url",
+            "https://example.test/",
+            "--domain",
+            "example.test",
+            "--path",
+            "/account",
+            "--secure",
+            "--http-only",
+        ]))
+        .unwrap()
+        else {
+            panic!("cookies set should dispatch");
+        };
+        assert_eq!(command, "cookies.set");
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "cookie":{"name":"sid","value":"plain-value","domain":"example.test","path":"/account","expires":0.0,"size":0,"secure":true,"http_only":true,"session":false},
+                "url":"https://example.test/"
+            })
+        );
+        let Action::CookieImport { path, .. } =
+            parse(&args(&["cookies", "set", "--curl", "jar.txt"])).unwrap()
+        else {
+            panic!("cookies curl import should dispatch");
+        };
+        assert_eq!(path, PathBuf::from("jar.txt"));
+        assert_eq!(
+            parse_curl_cookie_line(".example.test\tTRUE\t/\tTRUE\t0\tsid\tvalue").unwrap(),
+            serde_json::json!({"name":"sid","value":"value","domain":".example.test","path":"/","expires":0.0,"size":0,"secure":true,"http_only":false,"session":false})
+        );
 
         let data = serde_json::json!({"origin":"https://example.test","cookies":[
             {"name":"sid","value":"0123456789abcdef"},

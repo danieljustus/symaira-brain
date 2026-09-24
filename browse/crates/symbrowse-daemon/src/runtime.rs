@@ -874,6 +874,37 @@ impl DispatchRuntime {
                 page.block_urls(urls).await.map_err(runtime_error)?;
                 json!({"blocked": true})
             }
+            "cookies.set" => {
+                let cookie = args
+                    .get("cookie")
+                    .ok_or_else(|| malformed("cookies.set requires cookie"))?;
+                let domain = cookie.get("domain").and_then(Value::as_str).unwrap_or("");
+                let url = match args.get("url").and_then(Value::as_str) {
+                    Some(url) if !url.is_empty() => url.to_owned(),
+                    _ if !domain.is_empty() => String::new(),
+                    _ => page
+                        .evaluate_script("location.href")
+                        .await
+                        .map_err(runtime_error)?
+                        .as_str()
+                        .filter(|url| url.starts_with("http://") || url.starts_with("https://"))
+                        .ok_or_else(|| {
+                            malformed(
+                                "cookies.set requires a current HTTP(S) page or an explicit URL",
+                            )
+                        })?
+                        .to_owned(),
+                };
+                let name = required_string(
+                    cookie
+                        .as_object()
+                        .ok_or_else(|| malformed("cookies.set requires cookie object"))?,
+                    "name",
+                )?;
+                let params = cookie_set_params(cookie, &url)?;
+                page.set_cookie(params).await.map_err(runtime_error)?;
+                json!({"set":name})
+            }
             "cookies.list" => {
                 let origin = page
                     .evaluate_script("location.origin")
@@ -1879,6 +1910,62 @@ fn cookie_list_payload(origin: &str, captured: Value) -> Result<Value, DaemonErr
     Ok(json!({"origin": origin, "cookies": output}))
 }
 
+fn cookie_set_params(cookie: &Value, url: &str) -> Result<Value, DaemonError> {
+    let cookie = cookie
+        .as_object()
+        .ok_or_else(|| malformed("cookies.set requires cookie object"))?;
+    let name = required_string(cookie, "name")?;
+    let value = cookie.get("value").and_then(Value::as_str).unwrap_or("");
+    let mut params = json!({"name":name,"value":value});
+    if !url.is_empty() {
+        if !(url.starts_with("http://") || url.starts_with("https://")) {
+            return Err(malformed("cookies.set URL must use HTTP or HTTPS"));
+        }
+        params["url"] = Value::String(url.to_owned());
+    }
+    for (source, target) in [("domain", "domain"), ("path", "path")] {
+        if let Some(value) = cookie
+            .get(source)
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+        {
+            params[target] = Value::String(value.to_owned());
+        }
+    }
+    if params.get("url").is_none() && params.get("domain").is_none() {
+        return Err(malformed(
+            "cookies.set requires an HTTP(S) URL or cookie domain",
+        ));
+    }
+    params["secure"] = Value::Bool(
+        cookie
+            .get("secure")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+    );
+    params["httpOnly"] = Value::Bool(
+        cookie
+            .get("http_only")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+    );
+    if let Some(same_site) = cookie
+        .get("same_site")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+    {
+        params["sameSite"] = Value::String(same_site.to_owned());
+    }
+    if let Some(expires) = cookie
+        .get("expires")
+        .and_then(Value::as_f64)
+        .filter(|expires| *expires > 0.0)
+    {
+        params["expires"] = json!(expires);
+    }
+    Ok(params)
+}
+
 pub(crate) fn storage_set_request(
     args: &serde_json::Map<String, Value>,
 ) -> Result<(String, String, String), DaemonError> {
@@ -2700,6 +2787,37 @@ mod tests {
         assert_eq!(
             cookie_list_payload("https://example.test", json!({})).unwrap()["cookies"],
             json!([])
+        );
+    }
+
+    #[test]
+    fn cookie_set_maps_go_fields_to_scoped_chrome_params() {
+        let cookie = json!({
+            "name":"sid", "value":"fixture-value", "domain":"",
+            "path":"/account", "expires":2000000000, "secure":true,
+            "http_only":true, "same_site":"Strict", "session":false
+        });
+        assert_eq!(
+            cookie_set_params(&cookie, "https://example.test/account").unwrap(),
+            json!({
+                "name":"sid", "value":"fixture-value", "url":"https://example.test/account",
+                "path":"/account", "expires":2000000000.0, "secure":true,
+                "httpOnly":true, "sameSite":"Strict"
+            })
+        );
+        assert_eq!(
+            cookie_set_params(
+                &json!({"name":"sid","value":"x","domain":"example.test"}),
+                ""
+            )
+            .unwrap()["domain"],
+            "example.test"
+        );
+        assert_eq!(
+            cookie_set_params(&cookie, "file:///tmp/file")
+                .unwrap_err()
+                .code,
+            codes::MALFORMED_REQUEST
         );
     }
 

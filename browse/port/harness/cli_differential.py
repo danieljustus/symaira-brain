@@ -143,7 +143,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["version"],
+        ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["version"],
     ]
     for path in go_paths:
         argv = [*path, "--help"]
@@ -227,6 +227,8 @@ class UnixDaemonStub:
                         }]}
                     elif frame.get("cmd") == "cookies.clear":
                         data = {"cleared": (frame.get("args") or {}).get("name", "")}
+                    elif frame.get("cmd") == "cookies.set":
+                        data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -354,6 +356,8 @@ class WindowsNamedPipeStub:
                         }]}
                     elif frame.get("cmd") == "cookies.clear":
                         data = {"cleared": (frame.get("args") or {}).get("name", "")}
+                    elif frame.get("cmd") == "cookies.set":
+                        data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "session.list":
                         data = {"schema_version": 1, "sessions": []}
                     elif frame.get("cmd") == "session.info":
@@ -517,6 +521,8 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
     (fetch_root / f"{fetch_key}.meta.json").write_text(json.dumps({
         "url": "https://fixture.invalid", "stored_at": created, "ttl": 86_400_000_000_000,
     }))
+    cookie_jar = Path(env["HOME"]) / "fixture.cookies.txt"
+    cookie_jar.write_text("# Netscape HTTP Cookie File\n.fixture.invalid\tTRUE\t/\tFALSE\t0\tjar_sid\tjar-value\n")
     cases = [
         ("CLI-002", ["cache", "get", output_id], b"", False),
         ("CLI-002", ["cache", "get", output_id, "--range=2-2", "--json"], b"", False),
@@ -618,6 +624,9 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["cookies", "list", "--reveal", "sid", "--json"], b"", True),
         ("CLI-002", ["cookies", "clear", "sid"], b"", True),
         ("CLI-002", ["cookies", "clear", "sid", "--url", "https://fixture.invalid/" , "--json"], b"", True),
+        ("CLI-002", ["cookies", "set", "sid", "value", "--url", "https://fixture.invalid/", "--json"], b"", True),
+        ("CLI-002", ["cookies", "set", "sid", "value", "--domain", ".fixture.invalid", "--path", "/", "--secure", "--http-only"], b"", True),
+        ("CLI-002", ["cookies", "set", "--curl", str(cookie_jar)], b"", True),
         ("CLI-002", ["storage", "--session", "default", "clear", "session"], b"", True),
         ("CLI-002", ["session", "list", "--json"], b"", True),
         ("CLI-002", ["session", "--session", "default", "info", "--output=json"], b"", True),
@@ -631,6 +640,7 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["cookies", "list", "extra"], b"", False),
         ("CLI-003", ["cookies", "clear"], b"", False),
         ("CLI-003", ["cookies", "clear", "one", "two"], b"", False),
+        ("CLI-003", ["cookies", "set", "only-one"], b"", False),
         ("CLI-003", ["dialog", "auto"], b"", False),
         ("CLI-003", ["dialog", "auto", "accept", "extra"], b"", False),
         ("CLI-003", ["dialog", "accept", "a", "b"], b"", False),

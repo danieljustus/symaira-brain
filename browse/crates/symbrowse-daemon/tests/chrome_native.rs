@@ -293,7 +293,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
                 "Chrome connected without sending an HTTP fixture request",
             ));
         }
-        let body = b"<script>document.cookie='fixture_sid=fixture-cookie-value; path=/'</script><h1>network</h1>";
+        let body = b"<h1>network</h1>";
         let header = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
             body.len()
@@ -336,6 +336,18 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "network capture: {captured}"
     );
     let cookie_url = format!("http://{address}/");
+    let set_cookie = request(
+        &client,
+        "cookies.set",
+        json!({
+            "cookie":{"name":"fixture_sid","value":"fixture-cookie-value","domain":"","path":"/","secure":false,"http_only":false},
+            "url":cookie_url
+        }),
+    );
+    assert_eq!(
+        set_cookie["success"], true,
+        "cookie set failed: {set_cookie}"
+    );
     let listed_cookies = request(&client, "cookies.list", json!({}));
     assert_eq!(listed_cookies["success"], true, "cookie list failed");
     assert_eq!(
