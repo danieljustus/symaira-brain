@@ -434,6 +434,103 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
     return comparisons
 
 
+def without_batch_durations(value: Any) -> Any:
+    """Remove execution timings, which are intentionally nondeterministic."""
+    if isinstance(value, dict):
+        return {key: without_batch_durations(item) for key, item in value.items()
+                if key != "duration_ms"}
+    if isinstance(value, list):
+        return [without_batch_durations(item) for item in value]
+    return value
+
+
+def compare_json_semantic(go: Path, rust: Path, argv: list[str], env: dict[str, str],
+                          *, case: str) -> dict[str, Any]:
+    go_result = run_process(go, argv, env)
+    rust_result = run_process(rust, argv, env)
+    go_value: Any = None
+    rust_value: Any = None
+    parse_error: str | None = None
+    try:
+        go_value = json.loads(go_result["stdout"])
+        rust_value = json.loads(rust_result["stdout"])
+    except (TypeError, json.JSONDecodeError) as error:
+        parse_error = str(error)
+    semantic_match = parse_error is None and without_batch_durations(go_value) == without_batch_durations(rust_value)
+    matched = (semantic_match and go_result.get("returncode") == rust_result.get("returncode")
+               and go_result.get("stderr") == rust_result.get("stderr")
+               and not go_result.get("error") and not rust_result.get("error"))
+    return {"case": case, "argv": argv, "matched": matched,
+            "criterion": "JSON semantics match after removing Go/Rust per-item timing",
+            "parse_error": parse_error, "go": output_record(go_result),
+            "rust": output_record(rust_result),
+            "go_data": without_batch_durations(go_value),
+            "rust_data": without_batch_durations(rust_value)}
+
+
+def run_batch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    """Exercise the bounded batch behavior shared by the current Go and Rust CLIs."""
+    cases = [
+        ("CLI-006", ["batch", "version --json", "version extra", "version --json"]),
+        ("CLI-006", ["batch", "--bail", "version extra", "version --json"]),
+        ("CLI-006", ["batch", "--dry-run", "open https://fixture.invalid", "version --json"]),
+    ]
+    comparisons = [compare_json_semantic(go, rust, argv, env, case=contract)
+                   for contract, argv in cases]
+    for row in comparisons:
+        if row["case"] == "CLI-006" and row["matched"]:
+            value = row["go_data"]
+            report = value if isinstance(value, dict) else {}
+            results = report.get("results", [])
+            if row["argv"][1] == "version --json":
+                row["matched"] = (
+                    isinstance(results, list) and len(results) == 3
+                    and all(isinstance(item, dict) for item in results)
+                    and [item.get("command") for item in results] ==
+                    ["version --json", "version extra", "version --json"]
+                    and isinstance(results[0].get("data"), dict)
+                    and results[0]["data"].get("tool") == "symbrowse"
+                    and results[1].get("success") is False
+                    and results[2].get("success") is True
+                )
+                row["criterion"] = "ordered mixed results and nested JSON data are preserved"
+            elif "--bail" in row["argv"]:
+                row["matched"] = (isinstance(results, list) and len(results) == 1
+                                   and isinstance(results[0], dict)
+                                   and results[0].get("success") is False
+                                   and report.get("bailed") is True)
+                row["criterion"] = "--bail stops after the first failed command"
+            else:
+                plan = report.get("plan", [])
+                row["matched"] = (isinstance(plan, list) and len(plan) == 2
+                                   and all(isinstance(item, dict) for item in plan)
+                                   and not report.get("results")
+                                   and [item.get("command") for item in plan] ==
+                                   ["open https://fixture.invalid", "version --json"])
+                row["criterion"] = "dry-run returns a plan and does not run command items"
+    yaml_cases = [
+        ("OUT-003", ["batch", "--output=yaml", "--dry-run",
+                     "open https://fixture.invalid", "version --json"]),
+        ("OUT-003", ["config", "show"]),
+        ("OUT-003", ["config", "show", "--output", "yaml"]),
+        ("OUT-003", ["profiles"]),
+        ("OUT-003", ["profiles", "--output", "yaml"]),
+        ("OUT-003", ["flow", "list"]),
+        ("OUT-003", ["flow", "list", "--output", "yaml"]),
+        ("OUT-003", ["version"]),
+        ("OUT-003", ["version", "--output", "yaml"]),
+    ]
+    for contract, argv in yaml_cases:
+        go_result = run_process(go, argv, env)
+        rust_result = run_process(rust, argv, env)
+        matched = all(go_result.get(key) == rust_result.get(key)
+                      for key in ("returncode", "stdout", "stderr"))
+        comparisons.append({"case": contract, "argv": argv, "matched": matched,
+                            "criterion": "byte-identical Go/Rust human or YAML output",
+                            "go": output_record(go_result), "rust": output_record(rust_result)})
+    return comparisons
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--go", required=True, type=Path, help="built Go symbrowse executable")
@@ -494,6 +591,7 @@ def main() -> int:
     rows = [] if args.skip_help_tree else help_tree(args.go.resolve(), args.rust.resolve(), env)
     rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
+    rows.extend(run_batch_cases(args.go.resolve(), args.rust.resolve(), env))
     report = {
         "schema_version": 1,
         "source_head": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
