@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -52,9 +53,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"BLOCK: {error}", file=sys.stderr)
         return 1
 
-    result: dict[str, Any] = {"schema_version": 2, "gate": "blocked", "workloads": {}, "reasons": []}
-    if report.get("schema_version") != 2 or report.get("report_version") != "rust016-benchmark-v2":
-        result["reasons"].append("versioned rust016-benchmark-v2 report is required")
+    result: dict[str, Any] = {"schema_version": 3, "gate": "blocked", "workloads": {}, "reasons": []}
+    if report.get("schema_version") != 3 or report.get("report_version") != "rust016-benchmark-v3":
+        result["reasons"].append("versioned rust016-benchmark-v3 report is required")
     if report.get("cache_policy") != "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe":
         result["reasons"].append("required cache policy is missing")
     if report.get("runs_per_workload") != 30:
@@ -125,6 +126,49 @@ def main(argv: Sequence[str] | None = None) -> int:
             result["workloads"][name]["hard_gate"] = "<=10%"
         comparable.append(change)
 
+    rss_medians: dict[str, int] = {}
+    rss_methods: dict[str, str] = {}
+    for label, value in ((args.reference, reference), (args.candidate, candidate)):
+        startup = value.get("cli")
+        samples = startup.get("raw_samples") if isinstance(startup, dict) else None
+        if (
+            not isinstance(startup, dict)
+            or startup.get("peak_rss_status") != "complete"
+            or not isinstance(samples, list)
+            or len(samples) != 30
+        ):
+            result["reasons"].append(f"{label} CLI startup peak RSS requires 30 complete samples")
+            continue
+        rss_values = [item.get("peak_rss_bytes") for item in samples if isinstance(item, dict)]
+        methods = [item.get("peak_rss_method") for item in samples if isinstance(item, dict)]
+        if (
+            len(rss_values) != 30
+            or any(not isinstance(item, int) or item <= 0 for item in rss_values)
+            or any(not isinstance(method, str) or not method for method in methods)
+            or len(set(methods)) != 1
+        ):
+            result["reasons"].append(f"{label} CLI startup RSS contains missing, zero, or untyped measurements")
+            continue
+        median_rss = int(statistics.median(rss_values))
+        if startup.get("median_peak_rss_bytes") != median_rss:
+            result["reasons"].append(f"{label} CLI startup RSS median does not match raw samples")
+            continue
+        rss_medians[label] = median_rss
+        rss_methods[label] = methods[0]
+    if len(rss_medians) == 2:
+        if rss_methods[args.reference] != rss_methods[args.candidate]:
+            result["reasons"].append("Go and Rust CLI RSS were measured by different OS mechanisms")
+        rss_change = pct(rss_medians[args.reference], rss_medians[args.candidate])
+        result["cli_peak_rss"] = {
+            f"{args.reference}_median_bytes": rss_medians[args.reference],
+            f"{args.candidate}_median_bytes": rss_medians[args.candidate],
+            "change_percent": rss_change,
+            "measurement_method": rss_methods[args.reference],
+            "hard_gate": "Rust median <=80% of Go median",
+        }
+        if rss_medians[args.candidate] > rss_medians[args.reference] * 0.8:
+            result["reasons"].append("Rust CLI startup median peak RSS exceeds 80% of the Go median")
+
     baseline_size = report.get("reference_size_bytes")
     candidate_size = report.get("candidate_size_bytes")
     size_reduction = None
@@ -141,7 +185,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not p95_ok:
         result["reasons"].append("p95 regression gate is missing or exceeds 10%")
     if not value_ok:
-        result["reasons"].append("20% binary size gain is not evidenced; this runner does not measure RSS")
+        result["reasons"].append("20% binary size gain is not evidenced")
     if not result["reasons"]:
         result["gate"] = "pass"
     print(json.dumps(result, indent=2))

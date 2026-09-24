@@ -209,46 +209,90 @@ def read_startup_diagnostic(path: Path, limit: int = 1 << 20) -> str:
     return detail or "startup process exited without diagnostics"
 
 
-def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict[str, object]:
+def run_once(
+    binary: Path, probe: Probe, env: dict[str, str], cwd: Path, *, measure_peak_rss: bool = False
+) -> dict[str, object]:
     started = time.perf_counter_ns()
-    try:
-        result = subprocess.run(
-            [str(binary), *probe.argv],
-            cwd=cwd,
-            env=env,
-            input=probe.stdin,
-            text=True,
-            capture_output=True,
-            timeout=15,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return {
-            "status": "error",
-            "reason": "timeout",
-            "duration_ns": time.perf_counter_ns() - started,
-            "peak_rss_bytes": None,
+    if measure_peak_rss:
+        request = {
+            "command": [str(binary), *probe.argv],
+            "cwd": str(cwd),
+            "env": env,
+            "stdin": probe.stdin,
+            "timeout": 15,
         }
-    duration = time.perf_counter_ns() - started
-    peak_rss = None
-    stdout = result.stdout[:MAX_OUTPUT]
-    stderr = result.stderr[:MAX_OUTPUT]
-    if len(result.stdout) > MAX_OUTPUT or len(result.stderr) > MAX_OUTPUT:
+        try:
+            worker = subprocess.run(
+                [sys.executable, str(Path(__file__).with_name("resource_probe.py"))],
+                cwd=cwd,
+                env=env,
+                input=json.dumps(request),
+                text=True,
+                capture_output=True,
+                timeout=20,
+                check=False,
+            )
+            measured = json.loads(worker.stdout) if worker.returncode == 0 else {}
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+            measured = {}
+        if not measured:
+            return {
+                "status": "error", "reason": "OS peak RSS measurement helper failed",
+                "duration_ns": time.perf_counter_ns() - started, "peak_rss_bytes": None,
+            }
+        duration = int(measured["duration_ns"])
+        if measured["timed_out"]:
+            return {"status": "error", "reason": "timeout", "duration_ns": duration, "peak_rss_bytes": None}
+        returncode = int(measured["returncode"])
+        stdout = str(measured["stdout"])
+        stderr = str(measured["stderr"])
+        output_too_large = measured["stdout_bytes"] > MAX_OUTPUT or measured["stderr_bytes"] > MAX_OUTPUT
+        peak_rss = measured.get("peak_rss_bytes")
+        peak_rss_method = measured.get("peak_rss_method")
+    else:
+        try:
+            result = subprocess.run(
+                [str(binary), *probe.argv],
+                cwd=cwd,
+                env=env,
+                input=probe.stdin,
+                text=True,
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "status": "error",
+                "reason": "timeout",
+                "duration_ns": time.perf_counter_ns() - started,
+                "peak_rss_bytes": None,
+            }
+        duration = time.perf_counter_ns() - started
+        returncode = result.returncode
+        stdout = result.stdout
+        stderr = result.stderr
+        output_too_large = len(stdout) > MAX_OUTPUT or len(stderr) > MAX_OUTPUT
+        peak_rss = None
+        peak_rss_method = None
+    stdout = stdout[:MAX_OUTPUT]
+    stderr = stderr[:MAX_OUTPUT]
+    if output_too_large:
         return {"status": "error", "reason": "output limit exceeded", "duration_ns": duration, "peak_rss_bytes": peak_rss}
     lowered = (stdout + stderr).lower()
     if b"password=" in lowered.encode() or b"token=" in lowered.encode():
         return {"status": "error", "reason": "secret-like output", "duration_ns": duration, "peak_rss_bytes": peak_rss}
-    if result.returncode == 0 and not stdout and not stderr:
+    if returncode == 0 and not stdout and not stderr:
         return {
             "status": "unsupported",
             "reason": "binary accepted command without observable output",
             "duration_ns": duration,
             "peak_rss_bytes": peak_rss,
         }
-    if result.returncode != 0:
+    if returncode != 0:
         return {
             "status": "unsupported" if "unknown command" in stderr.lower() or "not implemented" in stderr.lower() else "error",
-            "reason": f"exit {result.returncode}",
+            "reason": f"exit {returncode}",
             "duration_ns": duration,
             "peak_rss_bytes": peak_rss,
             "stdout_sha256": __import__("hashlib").sha256(stdout.encode()).hexdigest(),
@@ -272,6 +316,7 @@ def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict
         "status": "pass",
         "duration_ns": duration,
         "peak_rss_bytes": peak_rss,
+        "peak_rss_method": peak_rss_method,
         "stdout_bytes": len(stdout),
         "stderr_bytes": len(stderr),
     }
@@ -306,6 +351,7 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
             {
                 "duration_ns": item.get("duration_ns"),
                 "peak_rss_bytes": item.get("peak_rss_bytes"),
+                "peak_rss_method": item.get("peak_rss_method"),
             }
             for item in samples
         ],
@@ -314,8 +360,11 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
         "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
         "statuses": statuses,
     }
-    if peak_rss:
+    if len(peak_rss) == len(samples):
+        summary["peak_rss_status"] = "complete"
         summary["median_peak_rss_bytes"] = int(statistics.median(peak_rss))
+    else:
+        summary["peak_rss_status"] = "incomplete"
     return summary
 
 
@@ -746,10 +795,12 @@ def run_binary(
     result: dict[str, object] = {"identity": binary_identity(binary)}
     for name, probe in probes.items():
         if name in selected:
-            result[name] = summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+            result[name] = summarize([
+                run_once(binary, probe, env, root, measure_peak_rss=name == "cli") for _ in range(runs)
+            ])
     if "cli" in selected:
         result["cli_variants"] = {
-            name: summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+            name: summarize([run_once(binary, probe, env, root, measure_peak_rss=True) for _ in range(runs)])
             for name, probe in {
                 "help": Probe("help", ("--help",)),
                 "config": Probe("config", ("config", "show", "--json")),
@@ -781,8 +832,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     with tempfile.TemporaryDirectory(prefix="b-", dir=temporary_parent()) as raw:
         root = Path(raw)
         report: dict[str, Any] = {
-            "schema_version": 2,
-            "report_version": "rust016-benchmark-v2",
+            "schema_version": 3,
+            "report_version": "rust016-benchmark-v3",
             "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "source_revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
@@ -795,10 +846,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "workload_fixture": "rust016-static-fetch-html-v1",
             "workloads": sorted(selected),
             "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+            "peak_rss_metric": "per-process OS high-water resident memory; Windows reports PeakWorkingSetSize",
             "binaries": {},
             "gate": "blocked",
             "limitations": [
-                "Per-process peak RSS is not measured by this portable runner; the value gate uses binary size.",
+                "Peak RSS is unavailable on a sample if the host OS cannot report a positive process high-water value; such CLI measurements block the gate.",
                 "source_revision identifies the checkout; binary SHA-256 identifies measured bytes. CI build steps bind them.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
@@ -833,6 +885,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             if "cli" in selected:
                 variants = binary_result.get("cli_variants", {})
                 if any(variants.get(name, {}).get("status") != "pass" for name in ("help", "config")):
+                    all_pass = False
+                cli_summaries = [binary_result.get("cli", {}), variants.get("help", {}), variants.get("config", {})]
+                if any(
+                    summary.get("peak_rss_status") != "complete"
+                    or len(summary.get("raw_samples", [])) != args.runs
+                    for summary in cli_summaries
+                ):
                     all_pass = False
             if "daemon" in selected and binary_result.get("daemon", {}).get("steady_state_100_frames", {}).get("status") != "pass":
                 all_pass = False
