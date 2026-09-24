@@ -211,15 +211,26 @@ def archive_bytes(binary: Path, *, binary_name: str, root: Path, windows: bool) 
     return output.getvalue()
 
 
-def write_spdx(path: Path, archive_name: str, implementation: str, version: str) -> None:
+def write_spdx(path: Path, archive: Path, archive_name: str, implementation: str, version: str) -> None:
+    archive_digest = sha256(archive)
     document = {
         "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
         "name": f"symbrowse-{implementation}-{archive_name}",
-        "documentNamespace": f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive_name}",
+        "documentNamespace": f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive_name}#sha256-{archive_digest}",
         "creationInfo": {"created": "1970-01-01T00:00:00Z", "creators": ["Tool: symaira-browse dual release builder"]},
-        "packages": [{"SPDXID": "SPDXRef-Package-symbrowse", "name": "symbrowse", "versionInfo": version}],
+        "packages": [{
+            "SPDXID": "SPDXRef-Package-symbrowse",
+            "name": "symbrowse",
+            "versionInfo": version,
+            "downloadLocation": "NOASSERTION",
+            "filesAnalyzed": False,
+            "checksums": [{"algorithm": "SHA256", "checksumValue": archive_digest}],
+            "licenseConcluded": "NOASSERTION",
+            "licenseDeclared": "Apache-2.0",
+            "copyrightText": "NOASSERTION",
+        }],
     }
     path.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
@@ -232,7 +243,7 @@ def package(binary: Path, directory: Path, target: str, implementation: str, ver
     archive = directory / archive_name
     archive.write_bytes(archive_bytes(binary, binary_name=binary_name, root=root, windows=os_name == "windows"))
     sbom = directory / f"{archive_name}.sbom"
-    write_spdx(sbom, archive_name, implementation, version.removeprefix("v"))
+    write_spdx(sbom, archive, archive_name, implementation, version.removeprefix("v"))
     return {"archive": archive_name, "archive_sha256": sha256(archive), "sbom": sbom.name, "sbom_sha256": sha256(sbom)}
 
 

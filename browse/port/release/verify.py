@@ -116,7 +116,7 @@ def _sha256(path: Path) -> str:
 
 def _safe_member_name(name: str) -> bool:
     path = Path(name)
-    return not path.is_absolute() and ".." not in path.parts
+    return "\\" not in name and not path.is_absolute() and ".." not in path.parts
 
 
 def _read_archive_members(path: Path) -> tuple[set[str], dict[str, int]]:
@@ -127,8 +127,12 @@ def _read_archive_members(path: Path) -> tuple[set[str], dict[str, int]]:
                 members = archive.getmembers()
                 if any(not _safe_member_name(member.name) for member in members):
                     raise GateError(f"archive path traversal in {path.name}")
-                names = {Path(member.name).name for member in members if member.isfile()}
-                modes = {Path(member.name).name: member.mode for member in members if member.isfile()}
+                if any(not member.isfile() for member in members):
+                    raise GateError(f"archive contains non-regular entries in {path.name}")
+                names = {member.name for member in members}
+                if len(names) != len(members):
+                    raise GateError(f"archive contains duplicate members in {path.name}")
+                modes = {member.name: member.mode for member in members}
                 return names, modes
         except (tarfile.TarError, OSError) as error:
             raise GateError(f"cannot read {path.name}: {error}") from error
@@ -138,10 +142,22 @@ def _read_archive_members(path: Path) -> tuple[set[str], dict[str, int]]:
                 members = archive.infolist()
                 if any(not _safe_member_name(member.filename) for member in members):
                     raise GateError(f"archive path traversal in {path.name}")
-                return {Path(member.filename).name for member in members if not member.is_dir()}, {}
+                if any(member.is_dir() or stat.S_ISLNK(member.external_attr >> 16) for member in members):
+                    raise GateError(f"archive contains non-regular entries in {path.name}")
+                names = {member.filename for member in members}
+                if len(names) != len(members):
+                    raise GateError(f"archive contains duplicate members in {path.name}")
+                return names, {}
         except (zipfile.BadZipFile, OSError) as error:
             raise GateError(f"cannot read {path.name}: {error}") from error
     raise GateError(f"unsupported archive extension: {path.name}")
+
+
+def _verify_archive_layout(path: Path, expected: set[str]) -> dict[str, int]:
+    members, modes = _read_archive_members(path)
+    if members != expected:
+        raise GateError(f"{path.name} archive layout mismatch: expected {sorted(expected)}, got {sorted(members)}")
+    return modes
 
 
 def _read_checksum_manifest(path: Path) -> dict[str, str]:
@@ -313,9 +329,8 @@ def _validate_impl(directory: Path, implementation: str, version: str) -> list[A
     for os_name, arch in TARGETS:
         path = _discover_archive(directory, archive_name(version, os_name, arch))
         spec = ArchiveSpec(implementation, version.removeprefix("v"), os_name, arch, path)
-        members, modes = _read_archive_members(path)
-        if spec.binary_name not in members:
-            raise GateError(f"{path.name} does not contain the required binary {spec.binary_name}")
+        expected_members = {spec.binary_name, "LICENSE", "README.md", "AGENTS.md"}
+        modes = _verify_archive_layout(path, expected_members)
         if os_name != "windows" and not (modes.get(spec.binary_name, 0) & stat.S_IXUSR):
             raise GateError(f"{path.name} contains a non-executable {spec.binary_name}")
         if manifest[path.name] != _sha256(path):
@@ -568,15 +583,18 @@ def _write_signed_fixture(root: Path, *, missing_signature: bool = False, wrong_
             name = archive_name("0.8.0", os_name, arch)
             archive = directory / name
             binary_name = "not-symbrowse" if wrong_binary and implementation == "rust" else ("symbrowse.exe" if os_name == "windows" else "symbrowse")
+            members = {binary_name: b"binary", "LICENSE": b"license", "README.md": b"readme", "AGENTS.md": b"agents"}
             if os_name == "windows":
                 with zipfile.ZipFile(archive, "w") as stream:
-                    stream.writestr(binary_name, b"binary")
+                    for member_name, contents in members.items():
+                        stream.writestr(member_name, contents)
             else:
                 with tarfile.open(archive, "w:gz") as stream:
-                    info = tarfile.TarInfo(binary_name)
-                    info.size = len(b"binary")
-                    info.mode = 0o755
-                    stream.addfile(info, io.BytesIO(b"binary"))
+                    for member_name, contents in members.items():
+                        info = tarfile.TarInfo(member_name)
+                        info.size = len(contents)
+                        info.mode = 0o755 if member_name == binary_name else 0o644
+                        stream.addfile(info, io.BytesIO(contents))
             checksums.append(f"{_sha256(archive)}  {name}")
             sbom_path = directory / f"{name}.sbom"
             sbom_path.write_bytes(_spdx("symbrowse.exe" if os_name == "windows" else "symbrowse", name, implementation))
@@ -658,7 +676,7 @@ def self_test() -> None:
             assert result == expected, (requested, result)
         for kwargs, needle in (
             ({"missing_signature": True}, "signature"),
-            ({"wrong_binary": True}, "required binary"),
+            ({"wrong_binary": True}, "archive layout"),
         ):
             broken = root / ("broken-" + next(iter(kwargs)))
             _write_signed_fixture(broken, **kwargs)

@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 def check_binary(binary: Path, version: str) -> dict[str, object]:
-    """Require a native CLI to return its exact versionkit handshake."""
+    """Require exact version identity and a working help entry point."""
     result = subprocess.run(
         [str(binary), "version", "--json"], check=True, capture_output=True, text=True, timeout=30
     )
@@ -24,4 +24,9 @@ def check_binary(binary: Path, version: str) -> dict[str, object]:
         or identity["schema_version"] < 1
     ):
         raise ValueError(f"{binary} version identity mismatch: {identity!r}")
+    help_result = subprocess.run(
+        [str(binary), "--help"], check=True, capture_output=True, text=True, timeout=30
+    )
+    if not help_result.stdout.strip():
+        raise ValueError(f"{binary} emitted empty help output")
     return identity

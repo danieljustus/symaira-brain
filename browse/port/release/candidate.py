@@ -78,7 +78,7 @@ def _validate_target_package(root: Path, target: str, version: str, source_revis
         checksums = verify._read_checksum_manifest(directory / "checksums.txt")
         if checksums != {expected_archive: sha256(archive_path), sbom_path.name: sha256(sbom_path)}:
             raise verify.GateError(f"target checksum manifest mismatch for {implementation}/{target}")
-        verify._verify_spdx(sbom_path)
+        _verify_candidate_spdx(sbom_path, archive_path, implementation, version)
         signature_inputs = read_json(directory / verify.SIGNATURE_INPUTS_NAME)
         entries = signature_inputs.get("artifacts")
         if (
@@ -132,8 +132,10 @@ def merge(packages: Path, output: Path, version: str, source_revision: str) -> d
     targets = [f"{os_name}-{arch}" for os_name, arch in verify.TARGETS]
     roots = {target: packages / f"symbrowse-dual-{source_revision}-{target}" for target in targets}
     expected_dirs = {path.name for path in roots.values()}
-    if not packages.is_dir() or {path.name for path in packages.iterdir() if path.is_dir()} != expected_dirs:
+    if not packages.is_dir() or {path.name for path in packages.iterdir()} != expected_dirs:
         raise verify.GateError("downloaded package directories do not contain exactly the six same-SHA target artifacts")
+    if any(path.is_symlink() or not path.is_dir() for path in packages.iterdir()):
+        raise verify.GateError("native package entries must be real target directories")
     proofs: list[dict[str, Any]] = []
     for target, root in roots.items():
         proofs.extend(_validate_target_package(root, target, version, source_revision))
@@ -245,11 +247,12 @@ def check(candidate: Path, version: str, source_revision: str) -> dict[str, Any]
             name = verify.archive_name(version, os_name, arch)
             path = archives[name]
             spec = verify.ArchiveSpec(implementation, version, os_name, arch, path)
-            members, modes = verify._read_archive_members(path)
-            if spec.binary_name not in members or (os_name != "windows" and not (modes.get(spec.binary_name, 0) & 0o100)):
-                raise verify.GateError(f"{name} lacks an executable {spec.binary_name}")
+            expected_members = {spec.binary_name, "LICENSE", "README.md", "AGENTS.md"}
+            modes = verify._verify_archive_layout(path, expected_members)
+            if os_name != "windows" and not (modes.get(spec.binary_name, 0) & 0o100):
+                raise verify.GateError(f"{name} contains a non-executable {spec.binary_name}")
             sbom = directory / f"{name}.sbom"
-            verify._verify_spdx(sbom)
+            _verify_candidate_spdx(sbom, path, implementation, version)
             sbom_document = read_json(sbom)
             package_entries = sbom_document.get("packages")
             if (
@@ -335,6 +338,41 @@ def check(candidate: Path, version: str, source_revision: str) -> dict[str, Any]
         "publication": "not performed",
         "cutover": "not enabled",
     }
+
+
+def _verify_candidate_spdx(path: Path, archive: Path, implementation: str, version: str) -> None:
+    verify._verify_spdx(path)
+    document = read_json(path)
+    digest = sha256(archive)
+    expected_name = f"{archive.name}.sbom"
+    if (
+        document.get("dataLicense") != "CC0-1.0"
+        or document.get("SPDXID") != "SPDXRef-DOCUMENT"
+        or document.get("name") != f"symbrowse-{implementation}-{archive.name}"
+        or document.get("documentNamespace")
+        != f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive.name}#sha256-{digest}"
+        or document.get("creationInfo")
+        != {"created": "1970-01-01T00:00:00Z", "creators": ["Tool: symaira-browse dual release builder"]}
+    ):
+        raise verify.GateError(f"SPDX document identity mismatch for {expected_name}")
+    packages = document.get("packages")
+    if (
+        not isinstance(packages, list)
+        or len(packages) != 1
+        or packages[0]
+        != {
+            "SPDXID": "SPDXRef-Package-symbrowse",
+            "name": "symbrowse",
+            "versionInfo": version.removeprefix("v"),
+            "downloadLocation": "NOASSERTION",
+            "filesAnalyzed": False,
+            "checksums": [{"algorithm": "SHA256", "checksumValue": digest}],
+            "licenseConcluded": "NOASSERTION",
+            "licenseDeclared": "Apache-2.0",
+            "copyrightText": "NOASSERTION",
+        }
+    ):
+        raise verify.GateError(f"SPDX package identity or archive digest mismatch for {expected_name}")
 
 
 def main() -> int:

@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+import zipfile
 
 
 SPEC = importlib.util.spec_from_file_location("browse_release_candidate", Path(__file__).with_name("candidate.py"))
@@ -44,6 +45,28 @@ class CandidateTests(unittest.TestCase):
             with self.assertRaisesRegex(candidate.verify.GateError, "exactly the six same-SHA"):
                 candidate.merge(packages, root / "output", "1.2.3", source)
             self.assertFalse((root / "output").exists())
+
+    def test_archive_layout_keeps_paths_and_rejects_nested_or_duplicate_members(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            archive = Path(temp) / "candidate.zip"
+            with zipfile.ZipFile(archive, "w") as output:
+                output.writestr("bin/symbrowse", b"binary")
+            with self.assertRaisesRegex(candidate.verify.GateError, "archive layout mismatch"):
+                candidate.verify._verify_archive_layout(
+                    archive, {"symbrowse", "LICENSE", "README.md", "AGENTS.md"}
+                )
+
+    def test_candidate_spdx_binds_package_checksum_to_archive_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            archive = root / "symbrowse_1.2.3_linux_amd64.tar.gz"
+            archive.write_bytes(b"archive bytes")
+            sbom = root / f"{archive.name}.sbom"
+            candidate.build_dual.write_spdx(sbom, archive, archive.name, "rust", "1.2.3")
+            candidate._verify_candidate_spdx(sbom, archive, "rust", "1.2.3")
+            archive.write_bytes(b"changed archive bytes")
+            with self.assertRaisesRegex(candidate.verify.GateError, "SPDX document identity mismatch"):
+                candidate._verify_candidate_spdx(sbom, archive, "rust", "1.2.3")
 
 
 if __name__ == "__main__":
