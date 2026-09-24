@@ -1,0 +1,75 @@
+name: Browse RUST-016 Windows native benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "browse/**"
+      - ".github/workflows/browse-rust016-windows-native-benchmark.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-native:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+          cache: true
+          cache-dependency-path: browse/go.sum
+
+      - name: Resolve pinned Rust toolchain
+        working-directory: browse
+        run: rustup show active-toolchain
+
+      - name: Build Go and Rust release binaries
+        working-directory: browse
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          go build -o "$env:RUNNER_TEMP\symbrowse-go.exe" ./cmd/symbrowse
+          cargo build --release --locked --bin symbrowse
+          Copy-Item "browse\target\release\symbrowse.exe" "$env:RUNNER_TEMP\symbrowse-rust.exe"
+
+      - name: Run native 30-sample CLI, MCP, named-pipe daemon, and static-fetch probes
+        working-directory: browse
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          python port/bench/run.py `
+            --go "$env:RUNNER_TEMP\symbrowse-go.exe" `
+            --rust "$env:RUNNER_TEMP\symbrowse-rust.exe" `
+            --output "$env:RUNNER_TEMP\browse-rust016-windows.json" `
+            --runs 30
+          if ($LASTEXITCODE -ne 0) { throw "benchmark runner failed: $LASTEXITCODE" }
+          @'
+          import json, os, pathlib
+          report = json.loads(pathlib.Path(os.environ["RUNNER_TEMP"], "browse-rust016-windows.json").read_text())
+          assert report["host"]["system"] == "Windows", report["host"]
+          assert report["runs_per_workload"] == 30
+          go, rust = report["binaries"]["go"], report["binaries"]["rust"]
+          for implementation, value in (("go", go), ("rust", rust)):
+              for workload in ("cli", "mcp"):
+                  assert value[workload]["status"] == "pass", (implementation, workload, value.get(workload))
+                  assert value[workload]["samples"] == 30, (implementation, workload, value[workload])
+          for workload in ("daemon", "fetch"):
+              assert rust[workload]["status"] == "pass", (workload, rust.get(workload))
+              assert rust[workload]["samples"] == 30, (workload, rust[workload])
+              assert go[workload]["status"] == "unsupported", (workload, go.get(workload))
+          assert report["gate"] == "blocked", "Windows Go/Rust paired gate must remain blocked while Go lacks named pipes"
+          '@ | python -
+
+      - name: Upload native benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-rust016-windows-native-benchmark
+          path: ${{ runner.temp }}\browse-rust016-windows.json
+          if-no-files-found: warn

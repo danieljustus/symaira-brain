@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from pathlib import Path
 
 
@@ -80,6 +80,55 @@ class BenchmarkHarnessTests(unittest.TestCase):
         )
         self.assertNotIn("--engine", bench_run.daemon_command(binary, "rust", static_mode=True))
 
+    def test_windows_daemon_endpoint_matches_rust_daemon_contract(self) -> None:
+        with patch.object(bench_run.os, "name", "nt"):
+            self.assertEqual(
+                bench_run.daemon_endpoint("rust016", {"XDG_RUNTIME_DIR": "unused"}),
+                r"\\.\pipe\symbrowse-rust016",
+            )
+
+    def test_windows_profile_roots_are_isolated_under_benchmark_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch.object(bench_run, "Path", type(root)), patch.object(
+                bench_run.os, "name", "nt"
+            ), patch.object(bench_run.platform, "system", return_value="Windows"):
+                env = bench_run.base_env(root)
+            self.assertEqual(env["USERPROFILE"], env["HOME"])
+            self.assertEqual(env["APPDATA"], str(Path(env["HOME"]) / "AppData" / "Roaming"))
+            self.assertEqual(env["LOCALAPPDATA"], str(Path(env["HOME"]) / "AppData" / "Local"))
+
+    def test_probe_sessions_are_unique_for_named_pipe_isolation(self) -> None:
+        first = bench_run.probe_session("rust016")
+        second = bench_run.probe_session("rust016")
+        self.assertNotEqual(first, second)
+        self.assertRegex(first, r"^rust016-[0-9a-f]{16}$")
+
+    def test_daemon_startup_retries_transient_refused_connection(self) -> None:
+        process = Mock()
+        process.poll.return_value = None
+        with patch.object(
+            bench_run,
+            "daemon_exchange",
+            side_effect=[ConnectionRefusedError("listener not accepting yet"), b'{"success":true}\n'],
+        ) as exchange, patch.object(bench_run.time, "sleep"):
+            response = bench_run.daemon_ping_until_ready(
+                Path("unused"), "rust016", process, bench_run.time.monotonic() + 1
+            )
+        self.assertEqual(response, b'{"success":true}\n')
+        self.assertEqual(exchange.call_count, 2)
+
+    def test_windows_go_daemon_is_reported_unsupported(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            binary = Path(tmp) / "symbrowse.exe"
+            root = Path(tmp)
+            with patch.object(bench_run.os, "name", "nt"):
+                result = bench_run.daemon_probe(
+                    binary, {}, root, 30, static_mode=False
+                )
+        self.assertEqual(result["status"], "unsupported")
+        self.assertIn("Go daemon binds Unix sockets", str(result["reason"]))
+
     def test_environment_selection_is_implementation_specific(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -89,6 +138,20 @@ class BenchmarkHarnessTests(unittest.TestCase):
             self.assertNotIn("SYMBROWSE_MODE", go)
             self.assertEqual(rust["SYMBROWSE_MODE"], "browser")
             self.assertNotIn("SYMBROWSE_ENGINE", rust)
+
+    @unittest.skipUnless(
+        bench_run.EXTERNAL_RUNTIME_ROOT.is_mount(), "local NVMe volume is unavailable"
+    )
+    def test_macos_daemon_home_alias_keeps_external_socket_under_sun_len(self) -> None:
+        with patch.object(bench_run.platform, "system", return_value="Darwin"):
+            with tempfile.TemporaryDirectory(dir=bench_run.EXTERNAL_RUNTIME_ROOT) as tmp:
+                root = Path(tmp) / "long-worktree-name" / "benchmark"
+                root.mkdir(parents=True)
+                env = bench_run.base_env(root)
+                endpoint = bench_run.daemon_endpoint("rust016", env)
+                self.assertTrue(str(env["HOME"]).startswith("/tmp/sb-bench-"))
+                self.assertEqual(Path(env["HOME"]).resolve(), (root / "home").resolve())
+                self.assertLess(len(os.fsencode(endpoint)), 104)
 
     @unittest.skipUnless(os.name == "posix", "Unix process-group probe")
     def test_startup_failure_is_bounded_and_kills_descendant(self) -> None:

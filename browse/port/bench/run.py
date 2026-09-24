@@ -10,10 +10,12 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Collection
+import ctypes
 import hashlib
 import json
 import os
 import platform
+import secrets
 import signal
 import sys
 try:
@@ -40,6 +42,7 @@ MAX_OUTPUT = 1 << 20
 WORKLOADS = ("cli", "mcp", "daemon", "fetch")
 EXTERNAL_RUNTIME_ENV = "SYMAIRA_EXTERNAL_RUNTIME_ROOT"
 EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
+_TEMP_HOME_ALIASES: list[Any] = []
 
 
 def temporary_parent() -> str | None:
@@ -106,7 +109,17 @@ class FixtureHandler(BaseHTTPRequestHandler):
 
 
 def base_env(root: Path) -> dict[str, str]:
-    home = root / "home"
+    isolated_home = root / "home"
+    isolated_home.mkdir(mode=0o700, exist_ok=True)
+    home = isolated_home
+    if platform.system() == "Darwin":
+        # AF_UNIX paths have a small SUN_LEN limit. A lexical /tmp symlink
+        # keeps macOS daemon probes runnable while its target and all contents
+        # remain under the already-validated external temporary root.
+        alias_dir = tempfile.TemporaryDirectory(prefix="sb-bench-", dir="/tmp")
+        _TEMP_HOME_ALIASES.append(alias_dir)
+        home = Path(alias_dir.name) / "home"
+        home.symlink_to(isolated_home, target_is_directory=True)
     runtime = root / "runtime"
     cache = root / "cache"
     for path in (home, runtime, cache):
@@ -131,6 +144,9 @@ def base_env(root: Path) -> dict[str, str]:
         "SYMBROWSE_SYMGUARD": "off",
         "SYMBROWSE_ALLOW_PRIVATE": "true",
     }
+    if os.name == "nt":
+        env["APPDATA"] = str(home / "AppData" / "Roaming")
+        env["LOCALAPPDATA"] = str(home / "AppData" / "Local")
     (root / "tmp").mkdir(mode=0o700, exist_ok=True)
     for key in ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT"):
         if key in os.environ:
@@ -318,25 +334,28 @@ def launch_daemon(command: list[str], root: Path, env: dict[str, str]) -> tuple[
     fd, name = tempfile.mkstemp(prefix="symbrowse-startup-", suffix=".log", dir=root / "tmp")
     stderr_path = Path(name)
     try:
+        process_options: dict[str, object] = (
+            {"start_new_session": True}
+            if os.name == "posix"
+            else {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+        )
         with os.fdopen(fd, "wb") as stderr:
             process = subprocess.Popen(command, cwd=root, env=env, stdin=subprocess.DEVNULL,
-                                       stdout=subprocess.DEVNULL, stderr=stderr, start_new_session=True)
+                                       stdout=subprocess.DEVNULL, stderr=stderr, **process_options)
     except BaseException:
         stderr_path.unlink(missing_ok=True)
         raise
     return process, stderr_path
 
 
-def daemon_probe(
-    binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
-) -> dict[str, object]:
-    if os.name != "posix":
-        return {"status": "unsupported", "reason": "Unix socket probe requires a native Unix host"}
-    results: list[dict[str, object]] = []
-    session = "rust016"
-    socket_paths = [Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"]
+def daemon_endpoint(session: str, env: dict[str, str]) -> str | Path:
+    """Return the isolated per-probe daemon endpoint for this host."""
+    if os.name == "nt":
+        # Matches symbrowse-daemon's default_socket_path on Windows. Session
+        # names are randomized per probe and never derived from user data.
+        return rf"\\.\pipe\symbrowse-{session}"
     if platform.system() == "Darwin":
-        socket_paths.append(
+        return (
             Path(env["HOME"])
             / "Library"
             / "Caches"
@@ -344,42 +363,167 @@ def daemon_probe(
             / "run"
             / f"{session}.sock"
         )
+    return Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"
+
+
+def probe_session(name: str) -> str:
+    """Avoid attaching to a user's or another benchmark's named-pipe daemon."""
+    return f"{name}-{secrets.token_hex(8)}"
+
+
+def _windows_pipe_api() -> tuple[Any, Any, Any, Any]:
+    """Bind only the Win32 calls needed to exchange bounded JSON-line frames."""
+    if os.name != "nt":
+        raise OSError("Windows named pipes are available only on Windows")
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    wait_named_pipe = kernel32.WaitNamedPipeW
+    wait_named_pipe.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32]
+    wait_named_pipe.restype = ctypes.c_int
+    create_file = kernel32.CreateFileW
+    create_file.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32, ctypes.c_uint32,
+                            ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p]
+    create_file.restype = ctypes.c_void_p
+    set_pipe_state = kernel32.SetNamedPipeHandleState
+    set_pipe_state.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32),
+                               ctypes.c_void_p, ctypes.c_void_p]
+    set_pipe_state.restype = ctypes.c_int
+    read_file = kernel32.ReadFile
+    read_file.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
+                          ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+    read_file.restype = ctypes.c_int
+    write_file = kernel32.WriteFile
+    write_file.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
+                           ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+    write_file.restype = ctypes.c_int
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [ctypes.c_void_p]
+    close_handle.restype = ctypes.c_int
+    return wait_named_pipe, create_file, set_pipe_state, (read_file, write_file, close_handle)
+
+
+def windows_pipe_exchange(endpoint: str, payload: bytes, timeout: float) -> bytes:
+    """Connect to one private benchmark pipe instance and read one JSON line."""
+    wait_named_pipe, create_file, set_pipe_state, io_api = _windows_pipe_api()
+    read_file, write_file, close_handle = io_api
+    deadline = time.monotonic() + timeout
+    handle: int | None = None
+    while time.monotonic() < deadline:
+        if wait_named_pipe(endpoint, 100):
+            handle = create_file(endpoint, 0xC0000000, 0, None, 3, 0, None)
+            if handle not in (None, ctypes.c_void_p(-1).value):
+                break
+        else:
+            error = ctypes.get_last_error()
+            # ERROR_SEM_TIMEOUT means no instance is currently available;
+            # ERROR_FILE_NOT_FOUND means startup has not created it yet.
+            if error not in (2, 121):
+                raise ctypes.WinError(error)
+    if handle in (None, ctypes.c_void_p(-1).value):
+        raise TimeoutError("named-pipe instance did not become available")
+    try:
+        # Nonblocking byte mode lets this probe enforce its own bounded read
+        # deadline without creating worker threads that might outlive a run.
+        mode = ctypes.c_uint32(0x00000001 | 0x00000002)  # PIPE_READMODE_BYTE | PIPE_NOWAIT
+        if not set_pipe_state(handle, ctypes.byref(mode), None, None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        payload_buffer = ctypes.create_string_buffer(payload)
+        written = ctypes.c_uint32()
+        if not write_file(handle, payload_buffer, len(payload), ctypes.byref(written), None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        if written.value != len(payload):
+            raise OSError("named-pipe request frame was only partially written")
+        result = bytearray()
+        while time.monotonic() < deadline:
+            chunk = ctypes.create_string_buffer(min(4096, MAX_OUTPUT + 1 - len(result)))
+            count = ctypes.c_uint32()
+            if read_file(handle, chunk, len(chunk), ctypes.byref(count), None):
+                result.extend(chunk.raw[:count.value])
+                if b"\n" in result:
+                    return bytes(result[: result.index(b"\n") + 1])
+                if len(result) > MAX_OUTPUT:
+                    return bytes(result)
+            else:
+                error = ctypes.get_last_error()
+                if error not in (109, 232, 234, 536, 997):  # broken/no data/listening/overlapped
+                    raise ctypes.WinError(error)
+                time.sleep(0.005)
+        raise TimeoutError("named-pipe response exceeded probe deadline")
+    finally:
+        close_handle(handle)
+
+
+def daemon_exchange(endpoint: str | Path, frame: dict[str, object], timeout: float) -> bytes:
+    payload = (json.dumps(frame) + "\n").encode()
+    if os.name == "nt":
+        return windows_pipe_exchange(str(endpoint), payload, timeout)
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+        connection.settimeout(timeout)
+        connection.connect(str(endpoint))
+        connection.sendall(payload)
+        return connection.recv(MAX_OUTPUT + 1)
+
+
+def endpoint_ready(endpoint: str | Path) -> bool:
+    if os.name == "nt":
+        wait_named_pipe, _, _, _ = _windows_pipe_api()
+        return bool(wait_named_pipe(str(endpoint), 25))
+    return Path(endpoint).exists()
+
+
+def daemon_ping_until_ready(endpoint: str | Path, session: str, process: subprocess.Popen[bytes], deadline: float) -> bytes:
+    """Retry only the startup window where an endpoint exists before accept is ready."""
+    last_error: OSError | None = None
+    while time.monotonic() < deadline:
+        try:
+            return daemon_exchange(endpoint, {"cmd": "daemon.ping", "session": session},
+                                  max(0.05, deadline - time.monotonic()))
+        except OSError as error:
+            last_error = error
+            if process.poll() is not None:
+                break
+            time.sleep(0.01)
+    if last_error is not None:
+        raise last_error
+    raise TimeoutError("daemon did not accept a ping before the startup deadline")
+
+
+def daemon_probe(
+    binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
+) -> dict[str, object]:
+    if os.name == "nt" and not static_mode:
+        return {
+            "status": "unsupported",
+            "reason": "Go daemon binds Unix sockets; only the Rust candidate exposes the native Windows named pipe",
+        }
+    if os.name != "posix" and os.name != "nt":
+        return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
+    results: list[dict[str, object]] = []
+    session = probe_session("rust016")
+    endpoint = daemon_endpoint(session, env)
     for _ in range(runs):
         process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
         started = time.perf_counter_ns()
         try:
-            deadline = time.monotonic() + 5
-            while time.monotonic() < deadline and not any(path.exists() for path in socket_paths):
+            startup_deadline = time.monotonic() + 5
+            while time.monotonic() < startup_deadline and not endpoint_ready(endpoint):
                 if process.poll() is not None:
                     break
                 time.sleep(0.02)
-            socket_path = next((path for path in socket_paths if path.exists()), None)
-            if socket_path is None:
-                results.append(startup_failure(process, "daemon socket did not appear", stderr_path))
+            if not endpoint_ready(endpoint):
+                results.append(startup_failure(process, "daemon endpoint did not appear", stderr_path))
                 continue
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                connection.settimeout(3)
-                connection.connect(str(socket_path))
-                connection.sendall((json.dumps({"cmd": "daemon.ping", "session": session}) + "\n").encode())
-                response = connection.recv(1 << 16)
+            response = daemon_ping_until_ready(endpoint, session, process, startup_deadline)
             if b'"success":true' not in response:
                 results.append({"status": "error", "reason": "daemon ping failed"})
             else:
                 results.append({"status": "pass", "duration_ns": time.perf_counter_ns() - started})
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                connection.settimeout(3)
-                connection.connect(str(socket_path))
-                connection.sendall((json.dumps({"cmd": "daemon.stop", "session": session}) + "\n").encode())
-                connection.recv(1 << 16)
+            daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
             process.wait(timeout=5)
         except (OSError, subprocess.TimeoutExpired) as error:
             results.append({"status": "error", "reason": str(error)})
         finally:
             terminate_process_tree(process)
             stderr_path.unlink(missing_ok=True)
-            for socket_path in socket_paths:
-                if socket_path.exists():
-                    socket_path.unlink()
     return summarize(results)
 
 
@@ -419,30 +563,31 @@ def negative_control_rejected(expected_url: str) -> bool:
 def fetch_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
+    if os.name == "nt" and not static_mode:
+        return {
+            "status": "unsupported",
+            "reason": "Go fetch daemon requires its Unix-socket transport; Windows named-pipe fetch is Rust-only",
+        }
+    if os.name != "posix" and os.name != "nt":
+        return {"status": "unsupported", "reason": "fetch daemon probe requires Unix sockets or Windows named pipes"}
     server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    session = "rust016-fetch"
-    socket_paths = [Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"]
-    if platform.system() == "Darwin":
-        socket_paths.append(
-            Path(env["HOME"])
-            / "Library"
-            / "Caches"
-            / "symbrowse"
-            / "run"
-            / f"{session}.sock"
-        )
+    session = probe_session("rust016-fetch")
+    endpoint = daemon_endpoint(session, env)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
-        deadline = time.monotonic() + 5
-        while time.monotonic() < deadline and not any(path.exists() for path in socket_paths):
+        startup_deadline = time.monotonic() + 5
+        while time.monotonic() < startup_deadline and not endpoint_ready(endpoint):
             if process.poll() is not None:
                 break
             time.sleep(0.02)
-        socket_path = next((path for path in socket_paths if path.exists()), None)
-        if socket_path is None:
-            return startup_failure(process, "fetch daemon socket did not appear", stderr_path)
+        if not endpoint_ready(endpoint):
+            return startup_failure(process, "fetch daemon endpoint did not appear", stderr_path)
+        if b'"success":true' not in daemon_ping_until_ready(
+            endpoint, session, process, startup_deadline
+        ):
+            return {"status": "error", "reason": "fetch daemon readiness ping failed"}
         samples = []
         for index in range(runs):
             started = time.perf_counter_ns()
@@ -455,11 +600,7 @@ def fetch_probe(
                 },
             }
             try:
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                    connection.settimeout(15)
-                    connection.connect(str(socket_path))
-                    connection.sendall((json.dumps(frame) + "\n").encode())
-                    response = connection.recv(MAX_OUTPUT + 1)
+                response = daemon_exchange(endpoint, frame, 15)
                 duration = time.perf_counter_ns() - started
                 if len(response) > MAX_OUTPUT:
                     samples.append({"status": "error", "reason": "output limit exceeded"})
@@ -487,23 +628,13 @@ def fetch_probe(
         }
         return result
     finally:
-        socket_path = next((path for path in socket_paths if path.exists()), None)
-        if socket_path is not None:
-            try:
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                    connection.settimeout(3)
-                    connection.connect(str(socket_path))
-                    connection.sendall(
-                        (json.dumps({"cmd": "daemon.stop", "session": session}) + "\n").encode()
-                    )
-                    connection.recv(1 << 16)
-            except OSError:
-                pass
+        try:
+            if endpoint_ready(endpoint):
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+        except OSError:
+            pass
         terminate_process_tree(process)
         stderr_path.unlink(missing_ok=True)
-        for path in socket_paths:
-            if path.exists():
-                path.unlink()
         server.shutdown()
         thread.join(timeout=3)
         server.server_close()
@@ -581,6 +712,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
             ).strip(),
             "host": {"system": platform.system(), "machine": platform.machine()},
+            "daemon_transport": "windows-named-pipe" if os.name == "nt" else "unix-domain-socket",
+            "daemon_session_policy": "randomized per probe invocation to avoid user or concurrent daemon collisions",
             "runs_per_workload": args.runs,
             "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
             "workload_fixture": "rust016-static-fetch-html-v1",
@@ -592,6 +725,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "Peak RSS is collected from child-process resource usage where the host exposes it; daemon RSS remains unavailable in this portable runner.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
+                *(
+                    ["The Go daemon exposes Unix sockets only; Windows native-pipe samples are Rust-only and cannot satisfy the paired RUST-016 gate."]
+                    if os.name == "nt"
+                    else []
+                ),
             ],
         }
         for name, path in (("go", args.go), ("rust", args.rust)):
