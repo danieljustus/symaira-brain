@@ -123,8 +123,12 @@ jobs:
             go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
             go run ./scripts/cli-oracle -go-binary "$RUNNER_TEMP/symbrain-go.exe" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
           fi
-          version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
-          SYMBRAIN_VERSION="$version" cargo test --workspace --all-features --locked
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+            SYMBRAIN_VERSION="$version" cargo test --workspace --all-features --locked
+          else
+            cargo test --workspace --all-features --locked
+          fi
 
       - name: Upload target package for same-SHA merge
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
