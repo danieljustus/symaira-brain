@@ -433,6 +433,7 @@ ALL_SUITES = (
     "fetch-render",
     "workflows",
     "daemon",
+    "daemon-contracts",
     "chrome-spike",
     "chrome-full",
     "safari",
@@ -645,6 +646,26 @@ def main() -> int:
     elif args.suite == "daemon-races":
         daemon_suite(root, env, rounds=args.repeat, starters=50)
         return 0
+    elif args.suite == "daemon-contracts":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        if fixture.get("schema_version") != 1:
+            raise ValueError("unsupported daemon-contracts fixture schema")
+        expected = {
+            "DMN-006-deadlines",
+            "DMN-007-session-registry",
+            "DMN-008-client-autostart",
+        }
+        cases = fixture.get("cases", [])
+        if {case.get("id") for case in cases} != expected:
+            raise ValueError("daemon-contracts fixture IDs do not match DMN-006..008")
+        platform = "windows" if os.name == "nt" else ("darwin" if sys.platform == "darwin" else "linux")
+        for case in cases:
+            if "all" not in case["platforms"] and platform not in case["platforms"]:
+                print(f"skip {case['id']} on {platform}", flush=True)
+                continue
+            run(case["go"], root, env)
+            run(case["rust"], root, env)
+            print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
     else:
         parser.error(f"unsupported suite: {args.suite}")
 

@@ -26,6 +26,81 @@ mod unix {
     static NEXT: AtomicU64 = AtomicU64::new(1);
 
     #[test]
+    fn autostart_retries_until_the_daemon_is_ready() {
+        let root = tempfile::tempdir().expect("temporary autostart root");
+        let socket = root.path().join("retry.sock");
+        let launched = root.path().join("launched");
+        let completed = root.path().join("completed");
+        let log_path = root.path().join("daemon.log");
+        let test_binary = std::env::current_exe().expect("current test executable");
+        let command = format!(
+            "touch {}; sleep 0.12; {} --ignored --exact unix::autostart_daemon_child --nocapture; result=$?; touch {}; exit $result",
+            shell_quote(&launched),
+            shell_quote(&test_binary),
+            shell_quote(&completed),
+        );
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "retry-session".into(),
+            startup_timeout: Duration::from_secs(3),
+            autostart: true,
+            start: Some(StartOptions {
+                executable: PathBuf::from("/bin/sh"),
+                log_path,
+                args: vec![
+                    "-c".into(),
+                    format!(
+                        "export SYMBROWSE_DMN008_SOCKET={}; export SYMBROWSE_DMN008_SESSION=retry-session; {}",
+                        shell_quote(&socket),
+                        command
+                    ),
+                ],
+            }),
+            ..Default::default()
+        });
+
+        let response = client
+            .request(Frame {
+                cmd: "daemon.status".into(),
+                ..Default::default()
+            })
+            .expect("client retries while autostarted daemon becomes ready");
+        assert!(response.success, "status response = {response:?}");
+        assert!(launched.exists(), "autostart wrapper ran");
+        assert!(socket.exists(), "child daemon published its socket");
+
+        let stopped = client
+            .request(Frame {
+                cmd: "daemon.stop".into(),
+                ..Default::default()
+            })
+            .expect("stop autostarted daemon");
+        assert!(stopped.success, "stop response = {stopped:?}");
+        let deadline = Instant::now() + Duration::from_secs(3);
+        while Instant::now() < deadline && !completed.exists() {
+            thread::sleep(Duration::from_millis(10));
+        }
+        assert!(completed.exists(), "autostart child exited after stop");
+    }
+
+    #[test]
+    #[ignore = "launched as a child fixture by autostart_retries_until_the_daemon_is_ready"]
+    fn autostart_daemon_child() {
+        let socket_path = PathBuf::from(
+            std::env::var_os("SYMBROWSE_DMN008_SOCKET").expect("fixture socket path"),
+        );
+        let session = std::env::var("SYMBROWSE_DMN008_SESSION").expect("fixture session");
+        let server = Server::new(ServerOptions {
+            socket_path,
+            session,
+            idle_timeout: None,
+            ..Default::default()
+        })
+        .expect("child fixture server");
+        server.listen_and_serve().expect("child fixture serve");
+    }
+
+    #[test]
     fn timed_out_client_request_is_not_retried_as_autostart() {
         let root = root("client-timeout");
         let socket = root.join("default.sock");
@@ -438,5 +513,9 @@ mod unix {
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ))
+    }
+
+    fn shell_quote(path: &Path) -> String {
+        format!("'{}'", path.display().to_string().replace('\'', "'\\''"))
     }
 }
