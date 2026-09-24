@@ -45,6 +45,7 @@ import sys
 import tempfile
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 from typing import NoReturn
 
@@ -116,6 +117,10 @@ ORACLE_COMPARISON_FIELDS = (
     ("header_names", "header_names"),
 )
 FETCH_PROFILES = ("chrome", "edge", "firefox", "ios", "opera", "safari")
+# AzureTLS v1.13.2 maps chrome, edge, and opera to uTLS's
+# ShuffleChromeTLSExtensions. Their extension order is randomized for every
+# ClientHello; only membership can be compared with a single historical capture.
+SHUFFLED_EXTENSION_PROFILES = frozenset({"chrome", "edge", "opera"})
 EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
 ACCEPTANCE_BLOCKERS = (
     "historical oracle verdict is INVALIDATED; matching fields are diagnostic only",
@@ -824,7 +829,14 @@ def git_object_hash(repo_root: Path, repo_rel_path: str) -> str:
 
 
 def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, object]) -> dict[str, object]:
-    """Compare current Go-client wire fields; never normalize ordering."""
+    """Compare fields using the Go oracle's deterministic ordering contract.
+
+    Chrome, Edge, and Opera use AzureTLS's randomized Chrome extension shuffle,
+    so their historical extension order is diagnostic only; preserve the raw
+    capture but compare that field as a multiset. All other ordered fields stay
+    byte/order sensitive. This diagnostic comparator cannot validate an oracle
+    whose verdict is INVALIDATED.
+    """
     current = {row["profile"]: row for row in capture["profiles"]}
     historical_rows = {row["profile"]: row["oracle"] for row in historical["profiles"]}
     mismatches = []
@@ -838,8 +850,17 @@ def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, ob
         for current_field, historical_field in ORACLE_COMPARISON_FIELDS:
             actual = candidate.get(current_field)
             expected = oracle.get(historical_field)
-            equal = actual == expected
-            fields.append({"field": current_field, "equal": equal})
+            shuffled_extensions = (
+                current_field == "extensions_no_grease" and profile in SHUFFLED_EXTENSION_PROFILES
+            )
+            equal = Counter(actual) == Counter(expected) if shuffled_extensions else actual == expected
+            field_result = {"field": current_field, "equal": equal}
+            if shuffled_extensions:
+                field_result.update({
+                    "comparison": "unordered_multiset",
+                    "wire_order_equal": actual == expected,
+                })
+            fields.append(field_result)
             if not equal:
                 mismatches.append({
                     "profile": profile,
@@ -851,6 +872,7 @@ def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, ob
     return {
         "oracle_identity": historical["identity"],
         "oracle_source_commit": historical["source_commit"],
+        "extension_order_relaxed_profiles": sorted(SHUFFLED_EXTENSION_PROFILES),
         "profiles": profile_results,
         "mismatches": mismatches,
         "passed": not mismatches,
