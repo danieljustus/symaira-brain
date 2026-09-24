@@ -124,6 +124,10 @@ def case_env(root: Path, *, missing_hermes: bool = False, unknown_opencode: bool
         "XDG_CACHE_HOME": str(root / "cache"),
         "TMPDIR": str(root / "tmp"),
     })
+    if os.name == "nt":
+        # Rust follows Go's Windows home contract through USERPROFILE; Go also
+        # accepts HOME as a fallback, so provide both in the isolated oracle.
+        env["USERPROFILE"] = str(home)
     for name in ("data", "cache", "tmp"):
         (root / name).mkdir(parents=True, exist_ok=True)
     return env
