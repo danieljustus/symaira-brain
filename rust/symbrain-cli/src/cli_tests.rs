@@ -1,5 +1,10 @@
 use super::*;
 
+const TEST_VERSION: &str = match option_env!("SYMBRAIN_VERSION") {
+    Some(version) => version,
+    None => "dev",
+};
+
 fn execute(args: &[&str]) -> (u8, String, String) {
     let args = args.iter().map(OsString::from).collect::<Vec<_>>();
     let mut stdout = Vec::new();
@@ -34,7 +39,7 @@ fn version_json_keeps_schema() {
     assert_eq!(code, exit::OK);
     assert_eq!(
         serde_json::from_str::<serde_json::Value>(&stdout).expect("valid JSON"),
-        serde_json::json!({"tool":"symbrain","version":"dev","schema_version":1})
+        serde_json::json!({"tool":"symbrain","version":TEST_VERSION,"schema_version":1})
     );
     assert!(stderr.is_empty());
 }
@@ -43,7 +48,7 @@ fn version_json_keeps_schema() {
 fn version_terminator_alone_succeeds() {
     let (code, stdout, stderr) = execute(&["version", "--"]);
     assert_eq!(code, exit::OK);
-    assert!(stdout.starts_with("symbrain dev\n"));
+    assert!(stdout.starts_with(&format!("symbrain {TEST_VERSION}\n")));
     assert!(stderr.is_empty());
 }
 
@@ -53,7 +58,7 @@ fn version_terminator_with_json_succeeds() {
     assert_eq!(code, exit::OK);
     assert_eq!(
         serde_json::from_str::<serde_json::Value>(&stdout).expect("valid JSON"),
-        serde_json::json!({"tool":"symbrain","version":"dev","schema_version":1})
+        serde_json::json!({"tool":"symbrain","version":TEST_VERSION,"schema_version":1})
     );
     assert!(stderr.is_empty());
 }
