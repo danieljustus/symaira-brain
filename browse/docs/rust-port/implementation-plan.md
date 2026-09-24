@@ -271,6 +271,14 @@ compatibility transport. It is neither the static Rust transport nor evidence
 of a current Chrome, Safari or Firefox identity. See
 `rust009-tls-feasibility.md` and the retained per-profile evidence file.
 
+The Go-only capture generator and source-bound validator are now implemented
+in `internal/fetch/fetch/fetch_fingerprints_capture_test.go` and
+`port/harness/fetch_fingerprints_validate.py`. They retain and re-derive raw
+TLS ClientHello and HTTP/2 evidence for six profiles, but deliberately do not
+establish oracle trust or native Rust parity. The earlier missing-capture-suite
+blocker is resolved; FETCH-002 remains blocked on an accepted oracle and a
+Rust transport that passes raw-wire comparison within the dependency gates.
+
 **Files:**
 
 - Create: `crates/symbrowse-fetch/src/impersonated.rs`
