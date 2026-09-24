@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import json
 import os
 import struct
 import subprocess
@@ -293,6 +294,15 @@ MUTATIONS = [
 
 
 class FetchFingerprintsValidateMutationTests(unittest.TestCase):
+    def test_compiler_closure_decodes_go_json_as_utf8(self) -> None:
+        package = {"Dir": str(ROOT / "browse"), "GoFiles": ["go.mod"]}
+        result = subprocess.CompletedProcess([], 0, json.dumps(package), "")
+        validate_mod.compiler_input_closure.cache_clear()
+        with patch.object(validate_mod, "verified_external_go_environment", return_value={}), \
+             patch.object(validate_mod.subprocess, "run", return_value=result) as run:
+            validate_mod.compiler_input_closure(str(ROOT), "unit-only-go")
+        self.assertEqual(run.call_args.kwargs["encoding"], "utf-8")
+
     def test_artifact_identity(self) -> None:
         # Synthetic unit-only binary; only build-info parsing is mocked.
         with tempfile.TemporaryDirectory() as directory:

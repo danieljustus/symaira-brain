@@ -577,7 +577,7 @@ def compiler_input_closure(repo_root_string: str, go: str = "go") -> frozenset[s
         result = subprocess.run(
             [go, "list", "-deps", "-test", "-json", "./internal/fetch/fetch"],
             cwd=repo_root / "browse", env=verified_external_go_environment(),
-            capture_output=True, text=True, check=False, timeout=60,
+            capture_output=True, text=True, encoding="utf-8", check=False, timeout=60,
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         _fail(f"cannot resolve Go compiler input closure: {error}")
