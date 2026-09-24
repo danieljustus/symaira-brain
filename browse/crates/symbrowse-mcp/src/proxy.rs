@@ -133,6 +133,7 @@ impl Default for DaemonProxyOptions {
 pub struct DaemonProxy {
     options: DaemonProxyOptions,
     child: Option<Child>,
+    configuration_mismatch_warned: bool,
 }
 
 #[derive(Debug)]
@@ -167,6 +168,7 @@ impl DaemonProxy {
         Self {
             options,
             child: None,
+            configuration_mismatch_warned: false,
         }
     }
 
@@ -444,7 +446,7 @@ impl DaemonProxy {
 
     #[allow(clippy::result_large_err)]
     fn checked_request(
-        &self,
+        &mut self,
         endpoint: &str,
         frame: &DaemonFrame,
     ) -> Result<DaemonResponse, CheckedRequestError> {
@@ -465,12 +467,16 @@ impl DaemonProxy {
             return Err(CheckedRequestError::Fatal(status.into_tool_error()));
         }
         let data = status.data.unwrap_or(Value::Null);
-        for warning in status_mismatch_warnings(
+        let warnings = status_mismatch_warnings(
             &data,
             self.options.engine.as_deref(),
             self.options.allow_private,
-        ) {
-            eprintln!("warning: {warning}");
+        );
+        if !warnings.is_empty() && !self.configuration_mismatch_warned {
+            for warning in warnings {
+                eprintln!("warning: {warning}");
+            }
+            self.configuration_mismatch_warned = true;
         }
         self.request(endpoint, frame)
             .map_err(classify_checked_error)
