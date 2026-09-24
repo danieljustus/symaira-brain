@@ -30,9 +30,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Verify pinned toolchain
         run: rustup show active-toolchain
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
       - name: Test daemon contracts
         run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
       - name: Exercise daemon lifecycle and races
         run: |
           python3 port/harness/run.py --suite daemon
           python3 port/harness/run.py --suite daemon-races --repeat 50
+      - name: Exercise static fetch, engine, and workflow contracts
+        run: |
+          python3 port/harness/run.py --suite fetch-control
+          python3 port/harness/run.py --suite fetch-render --comparison bytes
+          python3 scripts/rust-port/engine_fixture_gen.py --check
+          cargo test -p symbrowse-engine --all-targets --locked
+          go run ./scripts/rust-port/cmd/workflowgen --check
+          cargo test -p symbrowse-core --test workflows_contract --locked
