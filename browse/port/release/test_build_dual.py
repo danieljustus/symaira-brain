@@ -26,7 +26,7 @@ class CargoTargetDirTests(unittest.TestCase):
             runtime = Path(temp)
             env = {build_dual.EXTERNAL_BASE_ENV: str(runtime / "builds" / "browse")}
             with patch.object(build_dual, "EXTERNAL_RUNTIME_ROOT", runtime), patch.object(
-                build_dual.Path, "is_mount", return_value=True
+                build_dual.Path, "is_mount", return_value=True, create=True
             ), patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
                 target = build_dual._cargo_target_dir(root, env)
             self.assertEqual(target, Path(env[build_dual.EXTERNAL_BASE_ENV]) / "cargo-target")
@@ -38,7 +38,7 @@ class CargoTargetDirTests(unittest.TestCase):
             runtime = Path(temp)
             env = {build_dual.EXTERNAL_BASE_ENV: str(runtime / "builds" / "browse")}
             with patch.object(build_dual, "EXTERNAL_RUNTIME_ROOT", runtime), patch.object(
-                build_dual.Path, "is_mount", return_value=True
+                build_dual.Path, "is_mount", return_value=True, create=True
             ), patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
                 build_dual.external_environment(env)
                 with self.assertRaisesRegex(RuntimeError, "--output must be under"):
