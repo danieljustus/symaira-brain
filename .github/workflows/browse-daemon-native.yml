@@ -32,6 +32,13 @@ jobs:
           fetch-depth: 0 # fixture generators verify the pinned Go source commit
       - name: Verify pinned toolchain
         run: rustup show active-toolchain
+      - name: Smoke native Rust CLI release build
+        run: |
+          cargo build -p symbrowse-cli --bin symbrowse --release --locked
+          executable=target/release/symbrowse
+          if [[ "$RUNNER_OS" == Windows ]]; then executable+=.exe; fi
+          "$executable" version --json
+          "$executable" --help
       - name: Set up Go oracle
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
