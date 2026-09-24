@@ -118,18 +118,24 @@ async fn wait_for_string(session: &mut FirefoxSession, expression: &str, expecte
     }
 }
 
-async fn wait_for_download(path: &std::path::Path) -> Vec<u8> {
+async fn wait_for_download(path: &std::path::Path, expected: &[u8]) -> Vec<u8> {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+    let mut observed = None;
     loop {
         if let Ok(bytes) = std::fs::read(path) {
-            return bytes;
+            if bytes == expected {
+                return bytes;
+            }
+            observed = Some(bytes);
         }
+        let now = tokio::time::Instant::now();
         assert!(
-            tokio::time::Instant::now() < deadline,
-            "Firefox did not finish download to {}",
-            path.display()
+            now < deadline,
+            "Firefox download at {} did not reach the expected bytes before deadline; last observed: {:?}",
+            path.display(),
+            observed
         );
-        tokio::time::sleep(Duration::from_millis(50)).await;
+        tokio::time::sleep(Duration::from_millis(50).min(deadline - now)).await;
     }
 }
 
@@ -289,7 +295,11 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
         .await
         .expect("start the fixture download");
     assert_eq!(
-        wait_for_download(&download_dir.join("fixture.txt")).await,
+        wait_for_download(
+            &download_dir.join("fixture.txt"),
+            b"Firefox native download fixture",
+        )
+        .await,
         b"Firefox native download fixture"
     );
 
