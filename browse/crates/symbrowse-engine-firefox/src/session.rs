@@ -336,7 +336,7 @@ impl Drop for FirefoxSession {
             #[cfg(windows)]
             // Firefox Nightly may leave child processes owning the BiDi port
             // after its parent exits; this session uses an isolated profile.
-            if !terminate_windows_process_tree(child.id()) {
+            if !child.id().is_some_and(terminate_windows_process_tree) {
                 let _ = child.start_kill();
             }
             #[cfg(not(windows))]
@@ -352,7 +352,7 @@ async fn terminate_process(child: &mut Child) -> Result<(), FirefoxError> {
         .is_none();
     if running {
         #[cfg(windows)]
-        let tree_stopped = terminate_windows_process_tree(child.id());
+        let tree_stopped = child.id().is_some_and(terminate_windows_process_tree);
         #[cfg(not(windows))]
         let tree_stopped = false;
 
