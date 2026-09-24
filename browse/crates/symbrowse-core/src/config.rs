@@ -162,6 +162,21 @@ pub struct Result {
     pub sources: BTreeMap<String, String>,
 }
 
+/// The effective transport exposed when a mode was explicitly selected.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct SelectionView {
+    pub mode: String,
+    pub engine: Option<String>,
+}
+
+#[must_use]
+pub fn explicit_selection(result: &Result) -> Option<SelectionView> {
+    (result.sources["mode"] != "default").then(|| SelectionView {
+        mode: result.config.mode.clone(),
+        engine: (result.config.mode == "browser").then(|| result.config.engine.clone()),
+    })
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct FlagOverrides {
     pub log_level: Option<String>,
@@ -397,6 +412,16 @@ pub fn render_show_yaml(result: &Result) -> String {
             yaml_config_string(&field.source)
         ));
     }
+    if let Some(selection) = explicit_selection(result) {
+        output.push_str(&format!(
+            "    selection:\n        mode: {}\n        engine: {}\n",
+            yaml_config_string(&selection.mode),
+            selection
+                .engine
+                .as_deref()
+                .map_or("null".to_owned(), yaml_config_string)
+        ));
+    }
     output.push_str("warnings: []\nerror: null\n");
     output
 }
@@ -623,6 +648,10 @@ fn validate(
         config.engine.as_str(),
         "" | "chrome" | "safari" | "safari-attach" | "safari-bidi" | "firefox"
     ) {
+        if sources["mode"] != "default" {
+            let error = resolve_selection(Some(&config.mode), Some(&config.engine)).unwrap_err();
+            return Err(ConfigError(format!("{}: {}", error.code, error.message)));
+        }
         return Err(ConfigError(format!(
             "invalid engine {:?}: use one of chrome, static, safari-attach, safari-bidi",
             config.engine
@@ -687,10 +716,33 @@ mod selection_tests {
             env: HashMap::new(),
             flags: FlagOverrides::default(),
         };
+        assert!(explicit_selection(&load(&context).expect("default")).is_none());
         for mode in ["static", "compat"] {
             context.env.insert("SYMBROWSE_MODE".into(), mode.into());
-            assert_eq!(load(&context).expect("mode selection").config.mode, mode);
+            let result = load(&context).expect("mode selection");
+            assert_eq!(result.config.mode, mode);
+            assert_eq!(
+                explicit_selection(&result),
+                Some(SelectionView {
+                    mode: mode.into(),
+                    engine: None,
+                })
+            );
+            assert!(render_show_yaml(&result).contains("engine: null"));
         }
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "browser".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "firefox".into());
+        assert_eq!(
+            explicit_selection(&load(&context).expect("browser selection")),
+            Some(SelectionView {
+                mode: "browser".into(),
+                engine: Some("firefox".into()),
+            })
+        );
         context.env.insert("SYMBROWSE_MODE".into(), "static".into());
         context
             .env
@@ -700,6 +752,18 @@ mod selection_tests {
                 .unwrap_err()
                 .to_string()
                 .contains("engine_not_allowed")
+        );
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "browser".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "unknown".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_browser_engine")
         );
         context
             .env

@@ -20,7 +20,10 @@ use base64::{
 use serde::Serialize;
 use symbrowse_core::{
     batch::{self, ItemOutput},
-    config::{FlagOverrides, LoadContext, load, render_show_text, render_show_yaml, show_fields},
+    config::{
+        FlagOverrides, LoadContext, SelectionView, explicit_selection, load, render_show_text,
+        render_show_yaml, show_fields,
+    },
     error::ErrorCode,
     flows,
     key_resolver::{KeyInitResult, KeyResolver},
@@ -141,6 +144,8 @@ struct ConfigSuccess<T> {
 #[derive(Serialize)]
 struct ConfigData {
     fields: std::collections::BTreeMap<String, symbrowse_core::config::Field>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    selection: Option<SelectionView>,
 }
 
 #[derive(Serialize)]
@@ -1223,6 +1228,7 @@ fn render_config_show(format: Format, flags: FlagOverrides) -> Result<String, St
             success: true,
             data: ConfigData {
                 fields: show_fields(&result),
+                selection: explicit_selection(&result),
             },
         };
         return match serde_json::to_string(&payload) {
@@ -1240,8 +1246,26 @@ fn write_config_error(format: Format, message: &str) -> ExitCode {
     if format == Format::Text {
         let _ = writeln!(io::stderr(), "{message}");
     } else {
-        let envelope_message = message.split_once(':').map_or(message, |(outer, _)| outer);
-        let envelope = Envelope::failure(ErrorCode::Config, envelope_message);
+        let selection_code = message.split(':').nth(1).map(str::trim).filter(|code| {
+            matches!(
+                *code,
+                "invalid_transport_mode"
+                    | "invalid_browser_engine"
+                    | "engine_not_allowed"
+                    | "browser_engine_required"
+            )
+        });
+        let envelope = if let Some(code) = selection_code {
+            let mut envelope =
+                Envelope::failure(ErrorCode::Validation, "invalid transport selection");
+            if let Some(error) = &mut envelope.error {
+                error.details = Some(serde_json::json!({"selection_code": code}));
+            }
+            envelope
+        } else {
+            let envelope_message = message.split_once(':').map_or(message, |(outer, _)| outer);
+            Envelope::failure(ErrorCode::Config, envelope_message)
+        };
         if let Ok(output) = envelope.render(format) {
             let _ = io::stdout().write_all(output.as_bytes());
         }
