@@ -1,132 +1,223 @@
-#![cfg(target_os = "macos")]
-
 use std::{
-    fs,
-    io::{BufRead, BufReader, Write},
-    os::unix::net::UnixStream,
-    path::Path,
+    io::{Read, Write},
+    net::{TcpListener, TcpStream},
+    path::PathBuf,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
     thread,
     time::Duration,
 };
 
-use serde_json::{Value, json};
-use symbrowse_daemon::{Frame, Server, ServerOptions, SessionSpec};
+use serde_json::json;
+use symbrowse_engine_firefox::{
+    FirefoxError, FirefoxSession, canonical_capabilities, resolve_firefox_executable,
+};
 
-fn request(socket: &Path, command: &str, args: Value) -> Value {
-    let mut stream = UnixStream::connect(socket).expect("connect daemon");
-    let frame = Frame {
-        cmd: command.into(),
-        args: Some(args),
-        session: "native-firefox".into(),
-        ..Default::default()
-    };
-    writeln!(
-        stream,
-        "{}",
-        serde_json::to_string(&frame).expect("encode frame")
-    )
-    .expect("write frame");
-    let mut response = String::new();
-    BufReader::new(stream)
-        .read_line(&mut response)
-        .expect("read response");
-    serde_json::from_str(&response).expect("decode response")
+struct FixtureServer {
+    address: std::net::SocketAddr,
+    stop: Arc<AtomicBool>,
+    thread: Option<thread::JoinHandle<()>>,
 }
 
-#[test]
-fn production_daemon_path_runs_firefox_capabilities_and_cleanup() {
-    if std::env::var_os("SYMBROWSE_E2E").as_deref() != Some(std::ffi::OsStr::new("1")) {
+impl FixtureServer {
+    fn start() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind Firefox fixture");
+        listener
+            .set_nonblocking(true)
+            .expect("make fixture listener nonblocking");
+        let address = listener.local_addr().expect("fixture address");
+        let stop = Arc::new(AtomicBool::new(false));
+        let thread_stop = Arc::clone(&stop);
+        let thread = thread::spawn(move || {
+            while !thread_stop.load(Ordering::Relaxed) {
+                match listener.accept() {
+                    Ok((mut stream, _)) => serve_fixture_request(&mut stream),
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+        Self {
+            address,
+            stop,
+            thread: Some(thread),
+        }
+    }
+
+    fn base_url(&self) -> String {
+        format!("http://{}", self.address)
+    }
+}
+
+impl Drop for FixtureServer {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Relaxed);
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+fn serve_fixture_request(stream: &mut TcpStream) {
+    let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+    let mut request = [0_u8; 4096];
+    let size = stream.read(&mut request).unwrap_or(0);
+    let request = String::from_utf8_lossy(&request[..size]);
+    if request.starts_with("GET /redirect ") {
+        let response = "HTTP/1.1 302 Found\r\nLocation: /page\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+        let _ = stream.write_all(response.as_bytes());
         return;
     }
-    let root =
-        std::env::temp_dir().join(format!("symbrowse-daemon-firefox-{}", std::process::id()));
-    let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(&root).expect("create isolated root");
-    let mut spec = SessionSpec::for_session("native-firefox");
-    spec.engine = "firefox".into();
-    spec.state_dir = root.join("state");
-    spec.cache_dir = root.join("cache");
-    spec.socket_path = root.join("daemon.sock");
-    spec.operation_timeout = Duration::from_secs(15);
-    spec.idle_timeout = Some(Duration::from_secs(30));
-    let profile = spec.user_data_dir();
-    let server = std::sync::Arc::new(
-        Server::new(ServerOptions {
-            session_spec: Some(spec.clone()),
-            operation_timeout: Duration::from_secs(15),
-            idle_timeout: Some(Duration::from_secs(30)),
-            ..Default::default()
-        })
-        .expect("create daemon"),
+    let body = br#"<!doctype html><title>Firefox fixture</title>
+<input id="name"><button id="go" onclick="document.title='clicked'">go</button>
+<script>localStorage.setItem('native','local');sessionStorage.setItem('native','session');</script>"#;
+    let header = format!(
+        "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/html; charset=utf-8\r\nConnection: close\r\n\r\n",
+        body.len()
     );
-    let socket = spec.socket_path.clone();
-    let serving = std::sync::Arc::clone(&server);
-    let thread = thread::spawn(move || serving.listen_and_serve().expect("serve daemon"));
-    for _ in 0..150 {
-        if socket.exists() {
-            break;
-        }
-        thread::sleep(Duration::from_millis(20));
+    let _ = stream.write_all(header.as_bytes());
+    let _ = stream.write_all(body);
+}
+
+async fn evaluate_string(session: &mut FirefoxSession, expression: &str) -> String {
+    session
+        .evaluate(expression)
+        .await
+        .expect("evaluate Firefox fixture")
+        .value
+        .and_then(|value| value.as_str().map(str::to_owned))
+        .expect("Firefox expression returned a string")
+}
+
+#[tokio::test]
+#[ignore = "native gate: set SYMBROWSE_E2E=1 and pass -- --ignored"]
+async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
+    assert_eq!(
+        std::env::var("SYMBROWSE_E2E").as_deref(),
+        Ok("1"),
+        "set SYMBROWSE_E2E=1 to execute the native Firefox gate"
+    );
+    let executable = resolve_firefox_executable(
+        std::env::var_os("SYMBROWSE_FIREFOX_EXECUTABLE")
+            .as_deref()
+            .map(PathBuf::from)
+            .as_deref(),
+    )
+    .expect("native Firefox must be installed or explicitly configured");
+    let capabilities = canonical_capabilities();
+    for interface in [
+        "CookieEngine",
+        "FrameManager",
+        "InspectionEngine",
+        "InteractionEngine",
+        "NavigationStateProvider",
+        "ScreenshotEngine",
+        "TabManager",
+    ] {
+        assert!(
+            capabilities.interfaces.iter().any(|item| item == interface),
+            "Firefox capability missing: {interface}"
+        );
     }
-    assert!(socket.exists(), "daemon socket did not appear");
+    for unsupported in ["downloads", "network.capture"] {
+        assert!(matches!(
+            FirefoxSession::unsupported(unsupported),
+            FirefoxError::Unsupported { .. }
+        ));
+    }
 
-    let capabilities = request(&socket, "capabilities", json!({}));
+    let temp = tempfile::tempdir().expect("create owned Firefox test directory");
+    let profile = temp.path().join("profile");
+    let fixture = FixtureServer::start();
+    let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(20))
+        .await
+        .expect("launch Firefox with the owned isolated profile");
+
+    session
+        .navigate(&format!("{}/redirect", fixture.base_url()))
+        .await
+        .expect("follow fixture redirect");
+    let url = evaluate_string(&mut session, "location.href").await;
+    assert_eq!(url, format!("{}/page", fixture.base_url()));
     assert_eq!(
-        capabilities["success"], true,
-        "capabilities: {capabilities}"
+        evaluate_string(&mut session, "document.title").await,
+        "Firefox fixture"
     );
-    let fixture = std::net::TcpListener::bind(("127.0.0.1", 0)).expect("bind fixture");
-    let fixture_url = format!("http://{}", fixture.local_addr().expect("fixture address"));
-    let fixture_thread = thread::spawn(move || {
-        if let Ok((mut stream, _)) = fixture.accept() {
-            let mut request = [0_u8; 4096];
-            let _ = std::io::Read::read(&mut stream, &mut request);
-            let body = b"<title>firefox</title><input id='name'><button id='go'>go</button>";
-            let header = format!(
-                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n",
-                body.len()
-            );
-            let _ = stream.write_all(header.as_bytes());
-            let _ = stream.write_all(body);
-        }
+
+    let stored = evaluate_string(
+        &mut session,
+        "JSON.stringify([localStorage.getItem('native'),sessionStorage.getItem('native')])",
+    )
+    .await;
+    assert_eq!(stored, r#"["local","session"]"#);
+    let cookie = json!({
+        "name": "native",
+        "value": {"type": "string", "value": "cookie"},
+        "domain": "127.0.0.1",
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "lax"
     });
-    let opened = request(&socket, "open", json!({"url":fixture_url}));
-    assert_eq!(opened["success"], true, "open: {opened}");
-    let storage = request(
-        &socket,
-        "storage.set",
-        json!({"local_storage":{"token":"ok"},"session_storage":{"step":"1"}}),
+    session
+        .set_cookie(cookie)
+        .await
+        .expect("set cookie through Firefox BiDi");
+    let cookies = session.cookies().await.expect("read cookies through BiDi");
+    assert!(
+        cookies["cookies"].as_array().is_some_and(|items| {
+            items
+                .iter()
+                .any(|item| item["cookie"]["name"] == "native" || item["name"] == "native")
+        }),
+        "Firefox cookie result did not contain the fixture cookie: {cookies}"
     );
-    assert_eq!(storage["success"], true, "storage.set: {storage}");
-    let storage = request(&socket, "storage.get", json!({}));
-    assert_eq!(
-        storage["data"]["local_storage"]["token"], "ok",
-        "storage.get: {storage}"
-    );
-    let typed = request(
-        &socket,
-        "fill",
-        json!({"selector":"#name","value":"native"}),
-    );
-    assert_eq!(typed["success"], true, "fill: {typed}");
-    let clicked = request(&socket, "click", json!({"selector":"#go"}));
-    assert_eq!(clicked["success"], true, "click: {clicked}");
-    let tabs = request(&socket, "tabs.list", json!({}));
-    assert_eq!(tabs["success"], true, "tabs: {tabs}");
-    let frames = request(&socket, "frames.list", json!({}));
-    assert_eq!(frames["success"], true, "frames: {frames}");
-    let screenshot = request(&socket, "screenshot", json!({"format":"png"}));
-    assert_eq!(screenshot["success"], true, "screenshot: {screenshot}");
-    let unsupported = request(&socket, "network.capture", json!({}));
-    assert_eq!(
-        unsupported["success"], false,
-        "network capture must remain typed unsupported"
-    );
-    assert_eq!(unsupported["error"]["code"], "unsupported");
 
-    let _ = fixture_thread.join();
-    server.stop();
-    let _ = thread.join();
-    assert!(profile.exists(), "configured session profile disappeared");
-    let _ = fs::remove_dir_all(root);
+    session
+        .interact("fill", "#name", Some("native"))
+        .await
+        .expect("fill fixture input");
+    assert_eq!(
+        evaluate_string(&mut session, "document.querySelector('#name').value").await,
+        "native"
+    );
+    session
+        .interact("click", "#go", None)
+        .await
+        .expect("click fixture button");
+    assert_eq!(
+        evaluate_string(&mut session, "document.title").await,
+        "clicked"
+    );
+    let contexts = session
+        .browsing_contexts()
+        .await
+        .expect("list Firefox browsing contexts");
+    assert!(
+        contexts["contexts"]
+            .as_array()
+            .is_some_and(|items| !items.is_empty())
+    );
+    let screenshot = session
+        .screenshot("png")
+        .await
+        .expect("capture Firefox viewport");
+    assert!(
+        screenshot["data"]
+            .as_str()
+            .is_some_and(|data| !data.is_empty())
+    );
+
+    session.close().await.expect("close owned Firefox process");
+    drop(fixture);
+    let temp_path = temp.path().to_owned();
+    drop(temp);
+    assert!(
+        !temp_path.exists(),
+        "owned Firefox temp root was not removed"
+    );
 }

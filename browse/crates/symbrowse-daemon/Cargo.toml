@@ -29,3 +29,6 @@ symbrowse-engine-safari = { path = "../symbrowse-engine-safari", version = "=0.0
 
 [target.'cfg(windows)'.dependencies]
 windows-sys.workspace = true
+
+[dev-dependencies]
+tempfile = "=3.27.0"

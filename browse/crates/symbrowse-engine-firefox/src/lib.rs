@@ -161,6 +161,8 @@ impl FirefoxSession {
         let mut child = Command::new(&executable)
             .args([
                 "--headless",
+                "--no-remote",
+                "--new-instance",
                 "--remote-debugging-port",
                 &port.to_string(),
                 "--profile",
@@ -373,8 +375,29 @@ mod tests {
     #[test]
     fn capabilities_are_truthful() {
         let c = canonical_capabilities();
-        assert!(c.interfaces.contains(&"NavigationStateProvider".into()));
-        assert!(c.interfaces.contains(&"ScreenshotEngine".into()));
+        let actual: std::collections::BTreeSet<_> = c.interfaces.into_iter().collect();
+        let expected = [
+            "CookieEngine",
+            "FrameManager",
+            "InspectionEngine",
+            "InteractionEngine",
+            "NavigationStateProvider",
+            "ScreenshotEngine",
+            "TabManager",
+        ]
+        .into_iter()
+        .map(str::to_owned)
+        .collect();
+        assert_eq!(actual, expected);
+    }
+    #[test]
+    fn unsupported_downloads_and_network_capture_are_typed() {
+        for operation in ["downloads", "network.capture"] {
+            assert!(matches!(
+                FirefoxSession::unsupported(operation),
+                FirefoxError::Unsupported { .. }
+            ));
+        }
     }
     #[test]
     fn invalid_explicit_path_is_typed() {

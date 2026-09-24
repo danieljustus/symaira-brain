@@ -1927,6 +1927,7 @@ dependencies = [
  "symbrowse-engine-firefox",
  "symbrowse-engine-safari",
  "symbrowse-fetch",
+ "tempfile",
  "time",
  "tokio",
  "widestring",
