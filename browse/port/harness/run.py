@@ -762,6 +762,7 @@ def main() -> int:
             "DMN-006-deadlines",
             "DMN-007-session-registry",
             "DMN-008-client-autostart",
+            "DMN-008-mcp-config-warnings",
         }
         cases = fixture.get("cases", [])
         if {case.get("id") for case in cases} != expected:
