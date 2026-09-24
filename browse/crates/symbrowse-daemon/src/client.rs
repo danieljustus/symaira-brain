@@ -117,22 +117,21 @@ impl Client {
             Err(error) if self.options.autostart && should_autostart(&error) => {
                 let mut child = self.start_daemon()?;
                 let deadline = Instant::now() + self.options.startup_timeout;
-                let mut last = error;
-                while Instant::now() < deadline {
-                    thread::sleep(Duration::from_millis(25));
-                    match self.checked_request(&frame) {
-                        Ok(response) => {
-                            // Dropping Child closes this client's process handle
-                            // without killing the detached daemon. Forgetting it
-                            // leaks the handle for every autostarted request.
-                            drop(child);
-                            return Ok(response);
-                        }
-                        Err(error) => last = error,
+                loop {
+                    if let Ok(response) = self.checked_request(&frame) {
+                        // Dropping Child closes this client's process handle
+                        // without killing the detached daemon. Forgetting it
+                        // leaks the handle for every autostarted request.
+                        drop(child);
+                        return Ok(response);
                     }
+                    let remaining = deadline.saturating_duration_since(Instant::now());
+                    if remaining.is_zero() {
+                        terminate_child(&mut child);
+                        return Err(self.startup_timeout_error());
+                    }
+                    thread::sleep(remaining.min(Duration::from_millis(25)));
                 }
-                terminate_child(&mut child);
-                Err(last)
             }
             Err(error) => Err(error),
         }
@@ -210,36 +209,63 @@ impl Client {
                 self.options.session.clone(),
             ],
         });
-        if let Some(parent) = start
-            .log_path
-            .parent()
-            .filter(|path| !path.as_os_str().is_empty())
-        {
-            fs::create_dir_all(parent)?;
-        }
-        let mut log_options = OpenOptions::new();
-        log_options.create(true).append(true);
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            log_options.mode(0o600);
-        }
-        let log = log_options.open(&start.log_path)?;
-        let stderr = log.try_clone()?;
-        let mut command = Command::new(&start.executable);
-        command
-            .args(&start.args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(log))
-            .stderr(Stdio::from(stderr));
-        detach_command(&mut command);
-        command.spawn().map_err(|error| {
-            ClientError::Transport(DaemonError {
-                code: codes::DAEMON_UNAVAILABLE.into(),
-                message: format!("failed to start daemon: {}", redact_str(&error.to_string())),
-                hint: "start daemon manually with `symbrowse daemon`".into(),
-                ..Default::default()
-            })
+        let result = (|| {
+            if let Some(parent) = start
+                .log_path
+                .parent()
+                .filter(|path| !path.as_os_str().is_empty())
+            {
+                fs::create_dir_all(parent)?;
+            }
+            let mut log_options = OpenOptions::new();
+            log_options.create(true).append(true);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::OpenOptionsExt;
+                log_options.mode(0o600);
+            }
+            let log = log_options.open(&start.log_path)?;
+            let stderr = log.try_clone()?;
+            let mut command = Command::new(&start.executable);
+            command
+                .args(&start.args)
+                .stdin(Stdio::null())
+                .stdout(Stdio::from(log))
+                .stderr(Stdio::from(stderr));
+            detach_command(&mut command);
+            command.spawn()
+        })();
+        result.map_err(|error| self.start_error(error))
+    }
+
+    fn start_error(&self, error: io::Error) -> ClientError {
+        self.daemon_unavailable_error(format!(
+            "failed to start daemon for session {:?}: {}",
+            self.options.session,
+            redact_str(&error.to_string())
+        ))
+    }
+
+    fn startup_timeout_error(&self) -> ClientError {
+        self.daemon_unavailable_error(format!(
+            "daemon did not become ready for session {:?}",
+            self.options.session
+        ))
+    }
+
+    fn daemon_unavailable_error(&self, message: String) -> ClientError {
+        ClientError::Transport(DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message,
+            hint: format!(
+                "start daemon manually with `symbrowse daemon --session {}`",
+                self.options.session
+            ),
+            details: Some(redact_json(&serde_json::json!({
+                "session": self.options.session,
+                "socket_path": self.options.socket_path,
+            }))),
+            ..Default::default()
         })
     }
 

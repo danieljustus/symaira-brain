@@ -87,6 +87,98 @@ mod unix {
     }
 
     #[test]
+    fn autostart_failures_report_stable_session_context() {
+        let root = root("autostart-failure");
+        fs::create_dir_all(&root).unwrap();
+        let socket = root.join("default.sock");
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "auto-fail".into(),
+            autostart: true,
+            start: Some(StartOptions {
+                executable: root.join("missing-daemon"),
+                log_path: root.join("daemon.log"),
+                args: vec!["daemon".into()],
+            }),
+            ..Default::default()
+        });
+
+        let error = client
+            .request(Frame {
+                cmd: "ping".into(),
+                ..Default::default()
+            })
+            .expect_err("missing daemon executable must fail");
+        let ClientError::Transport(error) = error else {
+            panic!("autostart failure = {error:?}");
+        };
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert!(
+            error
+                .message
+                .contains("failed to start daemon for session \"auto-fail\"")
+        );
+        assert!(error.hint.contains("symbrowse daemon --session auto-fail"));
+        let details = error.details.expect("session diagnostics");
+        assert_eq!(details["session"], "auto-fail");
+        assert_eq!(details["socket_path"], socket.to_string_lossy().as_ref());
+        assert!(
+            !error
+                .message
+                .contains(&socket.to_string_lossy().to_string())
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn autostart_timeout_reports_not_ready_and_stops_child() {
+        let root = root("autostart-timeout");
+        fs::create_dir_all(&root).unwrap();
+        let socket = root.join("default.sock");
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "timeout-sess".into(),
+            startup_timeout: Duration::from_millis(50),
+            autostart: true,
+            start: Some(StartOptions {
+                executable: PathBuf::from("/bin/sleep"),
+                log_path: root.join("daemon.log"),
+                args: vec!["2".into()],
+            }),
+            ..Default::default()
+        });
+
+        let started = Instant::now();
+        let error = client
+            .request(Frame {
+                cmd: "ping".into(),
+                ..Default::default()
+            })
+            .expect_err("a child that never publishes the socket must time out");
+        assert!(started.elapsed() < Duration::from_secs(1));
+        let ClientError::Transport(error) = error else {
+            panic!("autostart timeout = {error:?}");
+        };
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert!(error.message.contains("daemon did not become ready"));
+        assert!(error.message.contains("timeout-sess"));
+        assert!(
+            error
+                .hint
+                .contains("symbrowse daemon --session timeout-sess")
+        );
+        let details = error.details.expect("session diagnostics");
+        assert_eq!(details["session"], "timeout-sess");
+        assert_eq!(details["socket_path"], socket.to_string_lossy().as_ref());
+        assert!(
+            !error
+                .message
+                .contains(&socket.to_string_lossy().to_string())
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn status_failure_is_preserved_without_stopping_daemon() {
         let root = root("status-failure");
         fs::create_dir_all(&root).unwrap();
