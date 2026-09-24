@@ -28,6 +28,16 @@ fn cookie_partition_uses_bidi_context_tag() {
 }
 
 #[test]
+fn evaluation_preserves_bidi_exception_details() {
+    let result = super::evaluation_result(json!({
+        "type": "exception",
+        "exceptionDetails": {"text": "SecurityError: access denied"}
+    }));
+    assert_eq!(result.exception_text, "SecurityError: access denied");
+    assert!(result.value.is_none());
+}
+
+#[test]
 fn unsupported_downloads_and_network_capture_are_typed() {
     for operation in ["downloads", "network.capture"] {
         assert!(matches!(

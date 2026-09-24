@@ -382,6 +382,90 @@ mod unix {
     }
 
     #[test]
+    fn client_disconnect_does_not_cancel_blocked_handler_or_stop_daemon() {
+        let root = tempfile::Builder::new()
+            .prefix("sb-")
+            .tempdir_in(socket_temp_parent())
+            .expect("temporary disconnect root");
+        let socket = root.path().join("default.sock");
+        let (started_tx, started_rx) = mpsc::channel();
+        let (release_tx, release_rx) = mpsc::channel();
+        let release_rx = Arc::new(std::sync::Mutex::new(release_rx));
+        let (finished_tx, finished_rx) = mpsc::channel();
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: socket.clone(),
+                session: "default".into(),
+                idle_timeout: None,
+                operation_timeout: Duration::from_secs(1),
+                handler: Some(Arc::new(move |frame, operation| {
+                    if frame.cmd == "blocked" {
+                        started_tx
+                            .send(operation.clone())
+                            .expect("publish blocked operation context");
+                        release_rx
+                            .lock()
+                            .expect("lock release receiver")
+                            .recv_timeout(Duration::from_secs(2))
+                            .expect("release blocked handler");
+                        finished_tx.send(()).expect("publish handler completion");
+                    }
+                    Ok((Some(serde_json::json!({"pong": true})), Vec::new()))
+                })),
+                ..Default::default()
+            })
+            .expect("disconnect fixture server"),
+        );
+        let running = server.clone();
+        let server_thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&socket);
+
+        let mut stream = std::os::unix::net::UnixStream::connect(&socket).unwrap();
+        stream
+            .write_all(
+                format!(
+                    "{}\n",
+                    serde_json::to_string(&Frame {
+                        cmd: "blocked".into(),
+                        ..Default::default()
+                    })
+                    .unwrap()
+                )
+                .as_bytes(),
+            )
+            .unwrap();
+        let operation = started_rx
+            .recv_timeout(Duration::from_secs(1))
+            .expect("blocked handler started");
+        drop(stream);
+        thread::sleep(Duration::from_millis(40));
+        assert!(
+            !operation.is_cancelled(),
+            "client disconnect canceled the Rust handler"
+        );
+
+        release_tx.send(()).expect("release blocked handler");
+        finished_rx
+            .recv_timeout(Duration::from_secs(1))
+            .expect("blocked handler completed after release");
+        let response = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "default".into(),
+            autostart: false,
+            ..Default::default()
+        })
+        .request_without_autostart(Frame {
+            cmd: "daemon.ping".into(),
+            ..Default::default()
+        })
+        .expect("server remains usable after client disconnect");
+        assert!(response.success, "response = {response:?}");
+
+        server.stop();
+        assert!(server_thread.join().unwrap().is_ok());
+    }
+
+    #[test]
     fn production_runtime_cancellation_allows_same_process_restart() {
         let root = std::path::PathBuf::from(format!(
             "/tmp/symbrowse-pc-{}-{}",
@@ -508,11 +592,19 @@ mod unix {
     }
 
     fn root(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!(
+        // Unix-domain socket paths have a small platform limit. Keep these
+        // fixtures under the harness's short external runtime root.
+        socket_temp_parent().join(format!(
             "symbrowse-daemon-{name}-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)
         ))
+    }
+
+    fn socket_temp_parent() -> PathBuf {
+        std::env::var_os("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/tmp"))
     }
 
     fn shell_quote(path: &Path) -> String {

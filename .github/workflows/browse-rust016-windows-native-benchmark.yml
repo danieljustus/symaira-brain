@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          go build -o "$RUNNER_TEMP/symbrowse-go" ./cmd/symbrowse
+          go build -ldflags="-s -w" -o "$RUNNER_TEMP/symbrowse-go" ./cmd/symbrowse
           cargo build --release --locked --bin symbrowse
           cp target/release/symbrowse "$RUNNER_TEMP/symbrowse-rust"
           python3 port/bench/run.py \
@@ -110,7 +110,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          go build -o "$env:RUNNER_TEMP\symbrowse-go.exe" ./cmd/symbrowse
+          go build -ldflags="-s -w" -o "$env:RUNNER_TEMP\symbrowse-go.exe" ./cmd/symbrowse
           cargo build --release --locked --bin symbrowse
           Copy-Item "target\release\symbrowse.exe" "$env:RUNNER_TEMP\symbrowse-rust.exe"
 
@@ -119,6 +119,17 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
+          @'
+          import pathlib, socket, tempfile
+          with tempfile.TemporaryDirectory(prefix="sb-unix-") as directory:
+              path = pathlib.Path(directory, "probe.sock")
+              try:
+                  with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as listener:
+                      listener.bind(str(path))
+                  print("Windows AF_UNIX bind: pass")
+              except OSError as error:
+                  print(f"Windows AF_UNIX bind: unavailable ({error})")
+          '@ | python -
           python port/bench/run.py `
             --go "$env:RUNNER_TEMP\symbrowse-go.exe" `
             --rust "$env:RUNNER_TEMP\symbrowse-rust.exe" `

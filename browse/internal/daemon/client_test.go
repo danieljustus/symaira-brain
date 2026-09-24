@@ -236,11 +236,7 @@ func TestClientStartupTimeout(t *testing.T) {
 }
 
 func TestClientAutostartSuccessAfterRetries(t *testing.T) {
-	dir, err := os.MkdirTemp("", "sb-autostart-ok-")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	dir := shortSocketTempDir(t, "sb-autostart-ok-")
 	socketPath := filepath.Join(dir, "autostart-ok.sock")
 
 	var started atomic.Bool

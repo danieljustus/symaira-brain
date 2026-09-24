@@ -100,6 +100,15 @@ impl SafariRuntime {
             .and_then(Value::as_object)
             .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd)))?;
         match frame.cmd.as_str() {
+            "storage.list" => {
+                let kind = crate::runtime::storage_kind(args)?;
+                let captured = self
+                    .eval(&crate::runtime::storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                let data = crate::runtime::storage_list_response(kind, captured)?;
+                Ok((Some(data), Vec::new()))
+            }
             "open" | "goto" => {
                 let url = required(args, "url")?;
                 let result = self.navigate(url).await.map_err(runtime_error)?;

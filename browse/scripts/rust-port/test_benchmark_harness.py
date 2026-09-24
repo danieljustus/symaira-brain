@@ -83,7 +83,7 @@ class BenchmarkHarnessTests(unittest.TestCase):
     def test_windows_daemon_endpoint_matches_rust_daemon_contract(self) -> None:
         with patch.object(bench_run.os, "name", "nt"):
             self.assertEqual(
-                bench_run.daemon_endpoint("rust016", {"XDG_RUNTIME_DIR": "unused"}),
+                bench_run.daemon_endpoint("rust016", {"XDG_RUNTIME_DIR": "unused"}, static_mode=True),
                 r"\\.\pipe\symbrowse-rust016",
             )
 
@@ -103,6 +103,44 @@ class BenchmarkHarnessTests(unittest.TestCase):
         second = bench_run.probe_session("rust016")
         self.assertNotEqual(first, second)
         self.assertRegex(first, r"^rust016-[0-9a-f]{16}$")
+
+    def test_empty_benchmark_summary_is_a_reported_error(self) -> None:
+        self.assertEqual(
+            bench_run.summarize([]),
+            {
+                "status": "error",
+                "reason": "no benchmark samples were collected",
+                "samples": [],
+            },
+        )
+        self.assertEqual(
+            bench_run.summarize([
+                {"status": "pass", "duration_ns": 1},
+                {"status": "error", "reason": "startup failed"},
+            ])["status"],
+            "error",
+        )
+
+    def test_daemon_startup_failure_is_retained_in_both_phases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            process = Mock()
+            stderr_path = root / "startup.log"
+            stderr_path.touch()
+            failure = {"status": "error", "reason": "daemon endpoint did not appear: WSAENETDOWN"}
+            with patch.object(bench_run, "launch_daemon", return_value=(process, stderr_path)), \
+                 patch.object(bench_run, "endpoint_ready", return_value=False), \
+                patch.object(bench_run, "startup_failure", return_value=failure), \
+                patch.object(bench_run, "terminate_process_tree"):
+                result = bench_run.daemon_probe(
+                    Path("symbrowse"), {"HOME": str(root / "home")}, root, 1, static_mode=False
+                )
+
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["samples"], [failure])
+        steady = result["steady_state_100_frames"]
+        self.assertEqual(steady["status"], "error")
+        self.assertEqual(steady["samples"][0]["reason"], failure["reason"])
 
     def test_daemon_startup_retries_transient_refused_connection(self) -> None:
         process = Mock()
@@ -148,7 +186,7 @@ class BenchmarkHarnessTests(unittest.TestCase):
                 root = Path(tmp) / "long-worktree-name" / "benchmark"
                 root.mkdir(parents=True)
                 env = bench_run.base_env(root)
-                endpoint = bench_run.daemon_endpoint("rust016", env)
+                endpoint = bench_run.daemon_endpoint("rust016", env, static_mode=True)
                 self.assertTrue(str(env["HOME"]).startswith("/tmp/sb-bench-"))
                 self.assertEqual(Path(env["HOME"]).resolve(), (root / "home").resolve())
                 self.assertLess(len(os.fsencode(endpoint)), 104)

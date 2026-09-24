@@ -285,8 +285,11 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
         and isinstance((duration := item.get("duration_ns")), (int, float))
     ]
     statuses = [str(item.get("status")) for item in samples]
+    if not samples:
+        return {"status": "error", "reason": "no benchmark samples were collected", "samples": []}
     if len(passed) != len(samples):
-        return {"status": statuses[0] if statuses else "error", "samples": samples}
+        failure_status = next(status for status in statuses if status != "pass")
+        return {"status": failure_status, "samples": samples}
     ordered = sorted(passed)
     p95 = ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)]
     peak_rss = [
@@ -491,6 +494,11 @@ def daemon_ping_until_ready(endpoint: str | Path, session: str, process: subproc
 def daemon_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
+    if os.name == "nt" and not static_mode:
+        return {
+            "status": "unsupported",
+            "reason": "Go daemon binds Unix sockets; only the Rust candidate exposes the native Windows named pipe",
+        }
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
     results: list[dict[str, object]] = []
@@ -498,20 +506,28 @@ def daemon_probe(
     session = probe_session("r")
     endpoint = daemon_endpoint(session, env, static_mode=static_mode)
     for _ in range(runs):
-        process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
         started = time.perf_counter_ns()
+        process: subprocess.Popen[bytes] | None = None
+        stderr_path: Path | None = None
         try:
+            process, stderr_path = launch_daemon(
+                daemon_command(binary, session, static_mode=static_mode), root, env
+            )
             startup_deadline = time.monotonic() + 5
             while time.monotonic() < startup_deadline and not endpoint_ready(endpoint):
                 if process.poll() is not None:
                     break
                 time.sleep(0.02)
             if not endpoint_ready(endpoint):
-                results.append(startup_failure(process, "daemon endpoint did not appear", stderr_path))
+                failure = startup_failure(process, "daemon endpoint did not appear", stderr_path)
+                results.append(failure)
+                steady_results.append({**failure, "phase": "steady-state probe skipped after startup failure"})
                 continue
             response = daemon_ping_until_ready(endpoint, session, process, startup_deadline)
             if b'"success":true' not in response:
-                results.append({"status": "error", "reason": "daemon ping failed"})
+                failure = {"status": "error", "reason": "daemon ping failed"}
+                results.append(failure)
+                steady_results.append({**failure, "phase": "steady-state probe skipped after readiness failure"})
             else:
                 duration = time.perf_counter_ns() - started
                 steady_started = time.perf_counter_ns()
@@ -533,11 +549,14 @@ def daemon_probe(
             if b'"success":true' in response:
                 results.append({"status": "pass", "duration_ns": duration})
         except (OSError, subprocess.TimeoutExpired) as error:
-            results.append({"status": "error", "reason": str(error)})
-            steady_results.append({"status": "error", "reason": str(error)})
+            failure = {"status": "error", "reason": str(error)}
+            results.append(failure)
+            steady_results.append(failure)
         finally:
-            terminate_process_tree(process)
-            stderr_path.unlink(missing_ok=True)
+            if process is not None:
+                terminate_process_tree(process)
+            if stderr_path is not None:
+                stderr_path.unlink(missing_ok=True)
     result = summarize(results)
     result["steady_state_100_frames"] = summarize(steady_results)
     return result
@@ -789,15 +808,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         if isinstance(rust_result, dict):
             if isinstance(rust_result.get("identity"), dict) and isinstance(rust_result["identity"].get("size_bytes"), int):
                 report["candidate_size_bytes"] = rust_result["identity"]["size_bytes"]
-            rss_values = [
-                workload["median_peak_rss_bytes"]
-                for name, workload in rust_result.items()
-                if name in selected
-                and isinstance(workload, dict)
-                and isinstance(workload.get("median_peak_rss_bytes"), int)
-            ]
-            if rss_values:
-                report["candidate_median_peak_rss_bytes"] = int(statistics.median(rss_values))
         go_result = report["binaries"].get("go")
         if isinstance(go_result, dict) and isinstance(go_result.get("identity"), dict) and isinstance(go_result["identity"].get("size_bytes"), int):
             report["reference_size_bytes"] = go_result["identity"]["size_bytes"]

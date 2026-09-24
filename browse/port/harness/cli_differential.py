@@ -99,7 +99,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "back", "batch", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "scrollintoview", "select", "snapshot", "state", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
+        "read", "reload", "scrollintoview", "select", "set", "snapshot", "state", "storage", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -124,10 +124,10 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
         ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
-        ["frame", "tree"], ["eval"], ["flow", "list"],
+        ["frame", "tree"], ["set", "offline"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
-        ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
+        ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["storage"], ["storage", "get"], ["version"],
     ]
     for path in go_paths:
         argv = [*path, "--help"]
@@ -192,6 +192,10 @@ class UnixDaemonStub:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", "default")}
+                    elif frame.get("cmd") == "storage.list":
+                        args = frame.get("args") or {}
+                        data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
+                                "items": {"alpha": "one", "beta": "two"}}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -294,6 +298,10 @@ class WindowsNamedPipeStub:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", SESSION)}
+                    elif frame.get("cmd") == "storage.list":
+                        args = frame.get("args") or {}
+                        data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
+                                "items": {"alpha": "one", "beta": "two"}}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -396,6 +404,10 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             # Rust sends an empty object because its daemon validates object args.
             if result["cmd"] in {"dialog.status", "dialog.dismiss", "tab.list", "window.new", "frame.tree"} and result["args"] is None:
                 result["args"] = {}
+            # The Rust runtime exposes Go's set.offline operation through its
+            # existing network.offline route; the CLI payload remains identical.
+            if result["cmd"] == "network.offline":
+                result["cmd"] = "set.offline"
             return result
 
         def payload_raw(frame: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -491,6 +503,9 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["dialog", "accept", "prompt text", "--session", "default"], b"", True),
         ("CLI-002", ["dialog", "auto", "accept", "--session=default", "--output=json"], b"", True),
         ("CLI-002", ["dialog", "--session", "default", "status"], b"", True),
+        ("CLI-002", ["storage", "get", "local", "beta"], b"", True),
+        ("CLI-002", ["--output=json", "storage", "--session=default", "get", "session", "alpha"], b"", True),
+        ("CLI-002", ["storage", "--session", "default", "get", "local", "--json"], b"", True),
         ("CLI-003", ["dialog", "auto"], b"", False),
         ("CLI-003", ["dialog", "auto", "accept", "extra"], b"", False),
         ("CLI-003", ["dialog", "accept", "a", "b"], b"", False),
@@ -538,6 +553,11 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["frame", "--session", "default", "tree"], b"", True),
         ("CLI-003", ["frame", "tree", "extra"], b"", False),
         ("CLI-003", ["frame", "--session"], b"", False),
+        ("CLI-002", ["set", "offline"], b"", True),
+        ("CLI-002", ["set", "offline", "off", "--session", "default", "--json"], b"", True),
+        ("CLI-004", ["--output=json", "set", "offline", "on", "--json=false", "--output=yaml"], b"", True),
+        ("CLI-003", ["set", "offline", "maybe"], b"", False),
+        ("CLI-003", ["set", "offline", "on", "off"], b"", False),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:

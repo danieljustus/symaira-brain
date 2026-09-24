@@ -234,7 +234,7 @@ impl DispatchRuntime {
             | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept" | "dialog.dismiss"
             | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
             | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "storage.get" | "storage.set" | "download" => {
+            | "cookies.set" | "storage.get" | "storage.list" | "storage.set" | "download" => {
                 self.browser_command(&frame).await
             }
             "network.har" | "axe.audit" => Err(DaemonError {
@@ -611,6 +611,14 @@ impl DispatchRuntime {
         let page = self.ensure_browser().await?;
         let args = object_args(frame)?;
         let data = match frame.cmd.as_str() {
+            "storage.list" => {
+                let kind = storage_kind(args)?;
+                let captured = page
+                    .evaluate_script(&storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                storage_list_response(kind, captured)?
+            }
             "tabs.list" | "tab.list" => {
                 let (tabs, active_id) = {
                     let guard = self
@@ -1297,6 +1305,18 @@ impl DispatchRuntime {
                 let data = serde_json::from_str(&data).map_err(runtime_error)?;
                 Ok((Some(data), Vec::new()))
             }
+            "storage.list" => {
+                let kind = storage_kind(args)?;
+                let captured = session
+                    .evaluate(&storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                if !captured.exception_text.is_empty() {
+                    return Err(runtime_error(captured.exception_text));
+                }
+                let data = storage_list_response(kind, captured.value.unwrap_or(Value::Null))?;
+                Ok((Some(data), Vec::new()))
+            }
             "storage.set" => {
                 let local = args
                     .get("local_storage")
@@ -1687,6 +1707,58 @@ pub fn dispatch_once(spec: SessionSpec, frame: Frame) -> crate::Response {
             ..Default::default()
         },
     }
+}
+
+pub(crate) fn storage_kind(
+    args: &serde_json::Map<String, Value>,
+) -> Result<&'static str, DaemonError> {
+    match args.get("kind").and_then(Value::as_str).unwrap_or_default() {
+        "local" => Ok("local"),
+        "session" => Ok("session"),
+        other => Err(runtime_error(format!("invalid storage kind {other:?}"))),
+    }
+}
+
+pub(crate) fn storage_list_script(kind: &str) -> String {
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    format!(
+        "(function(){{ const s = window.{store}; const out = {{}}; for (let i = 0; i < s.length; i++) {{ const k = s.key(i); out[k] = s.getItem(k); }} return {{origin: location.origin, items: out}}; }})()"
+    )
+}
+
+pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value, DaemonError> {
+    let origin = captured
+        .get("origin")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    let items = match captured.get("items") {
+        None | Some(Value::Null) => serde_json::Map::new(),
+        Some(Value::Object(items)) => {
+            let mut items = items.clone();
+            let mut null_keys = Vec::new();
+            for (key, value) in &items {
+                match value {
+                    Value::Null => null_keys.push(key.clone()),
+                    Value::String(_) => {}
+                    _ => {
+                        return Err(runtime_error(format!(
+                            "storage item {key:?} is not a string"
+                        )));
+                    }
+                }
+            }
+            for key in null_keys {
+                items.insert(key, Value::String(String::new()));
+            }
+            items
+        }
+        Some(_) => return Err(runtime_error("storage items are not an object")),
+    };
+    Ok(json!({"origin":origin,"kind":kind,"items":items}))
 }
 
 fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String> {
@@ -2386,5 +2458,45 @@ mod tests {
         assert!(state.cookies[0].secure);
         assert!(state.cookies[0].http_only);
         assert!(!state.cookies[0].session);
+    }
+
+    #[test]
+    fn storage_list_uses_go_kinds_and_returns_origin_scoped_string_items() {
+        let args = json!({"kind": "session"}).as_object().unwrap().clone();
+        assert_eq!(storage_kind(&args).unwrap(), "session");
+        let script = storage_list_script("session");
+        assert!(script.contains("window.sessionStorage"));
+        assert!(script.contains("location.origin"));
+        assert!(!script.contains("window.localStorage"));
+
+        let data = storage_list_response(
+            "session",
+            json!({"origin":"https://example.test","items":{"step":"2","token":"redacted"}}),
+        )
+        .unwrap();
+        assert_eq!(data["origin"], "https://example.test");
+        assert_eq!(data["kind"], "session");
+        assert_eq!(data["items"]["step"], "2");
+        assert_eq!(data["items"]["token"], "redacted");
+    }
+
+    #[test]
+    fn storage_list_defaults_missing_items_and_rejects_invalid_values() {
+        let data =
+            storage_list_response("local", json!({"origin":"https://example.test"})).unwrap();
+        assert_eq!(data["items"], json!({}));
+        let null_value = storage_list_response("local", json!({"items":{"key":null}})).unwrap();
+        assert_eq!(null_value["items"]["key"], "");
+        let invalid = json!({"kind":"Local"}).as_object().unwrap().clone();
+        assert_eq!(
+            storage_kind(&invalid).unwrap_err().code,
+            codes::OPERATION_FAILED
+        );
+        assert_eq!(
+            storage_list_response("local", json!({"items":{"key":1}}))
+                .unwrap_err()
+                .code,
+            codes::OPERATION_FAILED
+        );
     }
 }

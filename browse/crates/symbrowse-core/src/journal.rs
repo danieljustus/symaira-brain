@@ -308,7 +308,9 @@ fn open_append(path: &Path) -> std::io::Result<File> {
 #[cfg(not(unix))]
 fn open_append(path: &Path) -> std::io::Result<File> {
     let mut options = OpenOptions::new();
-    options.create(true).append(true);
+    // Windows LockFileEx rejects an append-only handle; read access keeps
+    // atomic append semantics while allowing fs2's exclusive lock.
+    options.create(true).read(true).append(true);
     options.open(path)
 }
 

@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Sequence
 
 VALUE_SIZE_REDUCTION = 20.0
-VALUE_RSS_REDUCTION = 20.0
 MAX_P95_REGRESSION = 10.0
 REQUIRED_WORKLOADS = ("cli", "mcp", "daemon", "fetch")
 CLI_VARIANTS = ("help", "config")
@@ -126,26 +125,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             result["workloads"][name]["hard_gate"] = "<=10%"
         comparable.append(change)
 
-    baseline_release = baseline.get("release", {})
-    baseline_measurements = baseline.get("measurements", {})
-    baseline_size = baseline_release.get("v0_8_0_darwin_arm64_uncompressed_bytes") or baseline_release.get("current_build_uncompressed_bytes")
+    baseline_size = report.get("reference_size_bytes")
     candidate_size = report.get("candidate_size_bytes")
     size_reduction = None
     if isinstance(baseline_size, (int, float)) and isinstance(candidate_size, (int, float)) and baseline_size:
         size_reduction = (1.0 - candidate_size / baseline_size) * 100.0
         result["size_reduction_percent"] = size_reduction
 
-    baseline_rss = baseline_measurements.get("version_peak_rss", {}).get("median_bytes")
-    candidate_rss = report.get("candidate_median_peak_rss_bytes")
-    rss_reduction = None
-    if isinstance(baseline_rss, (int, float)) and isinstance(candidate_rss, (int, float)) and baseline_rss:
-        rss_reduction = (1.0 - candidate_rss / baseline_rss) * 100.0
-        result["rss_reduction_percent"] = rss_reduction
-
     p95_ok = len(comparable) == len(workload_pairs) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
-    value_ok = (size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION) or (
-        rss_reduction is not None and rss_reduction >= VALUE_RSS_REDUCTION
-    )
+    value_ok = size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION
     if not comparable:
         result["reasons"].append("no complete representative workload pair")
     elif len(comparable) != len(workload_pairs):
@@ -153,7 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not p95_ok:
         result["reasons"].append("p95 regression gate is missing or exceeds 10%")
     if not value_ok:
-        result["reasons"].append("neither the 20% size nor 20% median RSS gain is evidenced")
+        result["reasons"].append("20% binary size gain is not evidenced; this runner does not measure RSS")
     if not result["reasons"]:
         result["gate"] = "pass"
     print(json.dumps(result, indent=2))

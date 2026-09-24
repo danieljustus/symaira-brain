@@ -594,14 +594,25 @@ fn named_pipe_create_error(error: io::Error) -> ServerError {
 ))]
 fn peer_is_current_user(stream: &std::os::unix::net::UnixStream) -> io::Result<bool> {
     let (uid, _) = nix::unistd::getpeereid(stream).map_err(io::Error::other)?;
-    Ok(uid == nix::unistd::Uid::effective())
+    Ok(peer_uid_matches(
+        uid.as_raw(),
+        nix::unistd::Uid::effective().as_raw(),
+    ))
 }
 
 #[cfg(all(unix, any(target_os = "linux", target_os = "android")))]
 fn peer_is_current_user(stream: &std::os::unix::net::UnixStream) -> io::Result<bool> {
     use nix::sys::socket::{getsockopt, sockopt::PeerCredentials};
     let credentials = getsockopt(stream, PeerCredentials).map_err(io::Error::other)?;
-    Ok(credentials.uid() == nix::unistd::Uid::effective().as_raw())
+    Ok(peer_uid_matches(
+        credentials.uid(),
+        nix::unistd::Uid::effective().as_raw(),
+    ))
+}
+
+#[cfg(unix)]
+fn peer_uid_matches(peer_uid: u32, current_uid: u32) -> bool {
+    peer_uid == current_uid
 }
 
 #[cfg(all(
@@ -1359,6 +1370,13 @@ fn state_root() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(unix)]
+    #[test]
+    fn peer_uid_match_policy_accepts_only_the_current_uid() {
+        assert!(peer_uid_matches(501, 501));
+        assert!(!peer_uid_matches(502, 501));
+    }
 
     #[test]
     fn status_timestamps_use_rfc3339_nano() {

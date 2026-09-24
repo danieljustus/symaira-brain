@@ -17,6 +17,10 @@ import (
 )
 
 func startTestServer(t *testing.T, handler Handler) (*Server, string, context.CancelFunc) {
+	return startTestServerWithPeerValidator(t, handler, func(net.Conn) error { return nil })
+}
+
+func startTestServerWithPeerValidator(t *testing.T, handler Handler, peerValidator func(net.Conn) error) (*Server, string, context.CancelFunc) {
 	t.Helper()
 	dir, err := os.MkdirTemp("", "sb-")
 	if err != nil {
@@ -25,7 +29,7 @@ func startTestServer(t *testing.T, handler Handler) (*Server, string, context.Ca
 	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 	path := filepath.Join(dir, "default.sock")
 	ctx, cancel := context.WithCancel(context.Background())
-	server := NewServer(Options{SocketPath: path, Handler: handler, IdleTimeout: -1, OperationTimeout: 25 * time.Millisecond, PeerValidator: func(net.Conn) error { return nil }})
+	server := NewServer(Options{SocketPath: path, Handler: handler, IdleTimeout: -1, OperationTimeout: 25 * time.Millisecond, PeerValidator: peerValidator})
 	ready := make(chan error, 1)
 	go func() { ready <- server.ListenAndServe(ctx) }()
 	deadline := time.Now().Add(time.Second)
@@ -50,6 +54,22 @@ func startTestServer(t *testing.T, handler Handler) (*Server, string, context.Ca
 	}
 	t.Cleanup(func() { cancel(); _ = server.Close(); <-ready })
 	return server, path, cancel
+}
+
+func shortSocketTempDir(t *testing.T, prefix string) string {
+	t.Helper()
+	parent := os.Getenv("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+	if parent == "" {
+		// Native macOS socket paths have a small limit; keep local test sockets
+		// short when the external harness runtime root is not configured.
+		parent = "/tmp"
+	}
+	dir, err := os.MkdirTemp(parent, prefix)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	return dir
 }
 
 func TestDecodeFrameAndStableResponseSchema(t *testing.T) {
@@ -85,6 +105,24 @@ func TestSocketPathValidationAndMode(t *testing.T) {
 	// Windows has no POSIX mode bits (chmod only toggles read-only).
 	if runtime.GOOS != "windows" && info.Mode().Perm() != 0o600 {
 		t.Fatalf("socket mode = %o", info.Mode().Perm())
+	}
+	if runtime.GOOS != "windows" {
+		directory, err := os.Stat(filepath.Dir(path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if directory.Mode().Perm() != 0o700 {
+			t.Fatalf("socket directory mode = %o, want 700", directory.Mode().Perm())
+		}
+	}
+}
+
+func TestDefaultPeerUIDAcceptsCurrentUser(t *testing.T) {
+	_, path, _ := startTestServerWithPeerValidator(t, nil, nil)
+	client := NewClient(ClientOptions{SocketPath: path, Session: "default", StartDaemon: nil})
+	status, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.status"})
+	if err != nil || !status.Success {
+		t.Fatalf("same-user status = %#v, err = %v", status, err)
 	}
 }
 
@@ -126,8 +164,88 @@ func TestOperationTimeoutKeepsConnectionUsable(t *testing.T) {
 	}
 }
 
+func TestClientDisconnectDoesNotCancelBlockedHandlerOrStopDaemon(t *testing.T) {
+	// Keep the socket path short for macOS Unix-domain socket limits.
+	dir := shortSocketTempDir(t, "sb-disconnect-")
+	path := filepath.Join(dir, "default.sock")
+	started := make(chan context.Context, 1)
+	release := make(chan struct{})
+	finished := make(chan struct{}, 1)
+	server := NewServer(Options{
+		SocketPath:       path,
+		IdleTimeout:      -1,
+		OperationTimeout: time.Second,
+		PeerValidator:    func(net.Conn) error { return nil },
+		Handler: func(ctx context.Context, frame Frame) (any, []Warning, error) {
+			if frame.Cmd == "blocked" {
+				started <- ctx
+				<-release
+				finished <- struct{}{}
+			}
+			return map[string]any{"pong": true}, nil, nil
+		},
+	})
+	serverCtx, cancel := context.WithCancel(context.Background())
+	ready := make(chan error, 1)
+	go func() { ready <- server.ListenAndServe(serverCtx) }()
+	t.Cleanup(func() {
+		cancel()
+		_ = server.Close()
+		<-ready
+	})
+	deadline := time.Now().Add(time.Second)
+	for {
+		if _, err := os.Stat(path); err == nil {
+			break
+		}
+		select {
+		case err := <-ready:
+			t.Fatalf("test daemon stopped before ready: %v", err)
+		default:
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("test daemon did not create its socket")
+		}
+		time.Sleep(time.Millisecond)
+	}
+
+	conn, err := net.Dial("unix", path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.NewEncoder(conn).Encode(Frame{Cmd: "blocked"}); err != nil {
+		t.Fatal(err)
+	}
+	var operationCtx context.Context
+	select {
+	case operationCtx = <-started:
+	case <-time.After(time.Second):
+		t.Fatal("blocked handler did not start")
+	}
+	if err := conn.Close(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-operationCtx.Done():
+		t.Fatalf("client disconnect canceled the Go handler: %v", operationCtx.Err())
+	case <-time.After(40 * time.Millisecond):
+	}
+	close(release)
+	select {
+	case <-finished:
+	case <-time.After(time.Second):
+		t.Fatal("blocked handler did not finish after release")
+	}
+
+	client := NewClient(ClientOptions{SocketPath: path, Session: "default", StartDaemon: nil})
+	response, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.ping"})
+	if err != nil || !response.Success {
+		t.Fatalf("daemon after disconnected request = %#v, err = %v", response, err)
+	}
+}
+
 func TestStatusAndStop(t *testing.T) {
-	_, path, _ := startTestServer(t, func(context.Context, Frame) (any, []Warning, error) {
+	server, path, _ := startTestServer(t, func(context.Context, Frame) (any, []Warning, error) {
 		return nil, nil, errors.New("unexpected handler")
 	})
 	client := NewClient(ClientOptions{SocketPath: path, Session: "default", StartDaemon: nil})
@@ -135,12 +253,60 @@ func TestStatusAndStop(t *testing.T) {
 	if err != nil || !status.Success {
 		t.Fatalf("status = %#v, err = %v", status, err)
 	}
-	if data, ok := status.Data.(map[string]any); !ok || data["running"] != true {
+	data, ok := status.Data.(map[string]any)
+	if !ok || data["running"] != true {
 		t.Fatalf("status data = %#v", status.Data)
+	}
+	pid, hasPID := data["pid"].(float64)
+	if data["socket"] != path || !hasPID || pid <= 0 {
+		t.Fatalf("status identity fields = %#v", data)
+	}
+	for _, field := range []string{"started_at", "last_activity"} {
+		value, ok := data[field].(string)
+		if !ok {
+			t.Fatalf("status %s = %#v, want timestamp", field, data[field])
+		}
+		if _, err := time.Parse(time.RFC3339Nano, value); err != nil {
+			t.Fatalf("status %s = %q: %v", field, value, err)
+		}
 	}
 	stop, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.stop"})
 	if err != nil || !stop.Success {
 		t.Fatalf("stop = %#v, err = %v", stop, err)
+	}
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		if _, err := os.Stat(server.SocketPath()); errors.Is(err, os.ErrNotExist) {
+			return
+		}
+		time.Sleep(time.Millisecond)
+	}
+	t.Fatalf("daemon socket survived stop: %s", path)
+}
+
+func TestIdleTimeoutStopsServer(t *testing.T) {
+	dir := shortSocketTempDir(t, "sb-idle-")
+	path := filepath.Join(dir, "idle.sock")
+	server := NewServer(Options{
+		SocketPath:       path,
+		Session:          "idle",
+		IdleTimeout:      25 * time.Millisecond,
+		OperationTimeout: time.Second,
+		PeerValidator:    func(net.Conn) error { return nil },
+	})
+	finished := make(chan error, 1)
+	go func() { finished <- server.ListenAndServe(context.Background()) }()
+	select {
+	case err := <-finished:
+		if !errors.Is(err, ErrIdleTimeout) {
+			t.Fatalf("idle shutdown error = %v, want %v", err, ErrIdleTimeout)
+		}
+	case <-time.After(2 * time.Second):
+		_ = server.Close()
+		t.Fatal("daemon did not stop after idle timeout")
+	}
+	if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("idle shutdown socket stat error = %v, want not-exist", err)
 	}
 }
 
@@ -229,10 +395,11 @@ func TestConcurrentStartupYieldsOneOwner(t *testing.T) {
 		wg.Wait()
 	})
 
-	// Give the starters time to race, then verify exactly one socket serves.
+	// Require every loser to return before checking the one surviving endpoint.
 	deadline := time.After(10 * time.Second)
-	var losers int
-	for losers == 0 {
+	const expectedLosers = starters - 1
+	losers := 0
+	for losers < expectedLosers {
 		select {
 		case err := <-results:
 			if !errors.Is(err, ErrDaemonAlreadyRunning) {
@@ -279,10 +446,37 @@ func TestStaleSocketIsReplaced(t *testing.T) {
 	if _, err := os.Lstat(socketPath); err != nil {
 		t.Fatalf("stale socket file missing: %v", err)
 	}
-	if err := removeStaleSocket(socketPath); err != nil {
-		t.Fatalf("removeStaleSocket on a dead socket = %v, want nil", err)
+	server := NewServer(Options{
+		SocketPath:  socketPath,
+		Session:     "stale",
+		IdleTimeout: -1,
+		Handler: func(context.Context, Frame) (any, []Warning, error) {
+			return map[string]any{"pong": true}, nil, nil
+		},
+	})
+	ctx, cancel := context.WithCancel(context.Background())
+	ready := make(chan error, 1)
+	go func() { ready <- server.ListenAndServe(ctx) }()
+	t.Cleanup(func() {
+		cancel()
+		_ = server.Close()
+		<-ready
+	})
+	waitForSocket(t, socketPath, ready)
+	client := NewClient(ClientOptions{SocketPath: socketPath, Session: "stale", StartDaemon: nil})
+	deadline := time.Now().Add(2 * time.Second)
+	for {
+		response, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.ping"})
+		if err == nil && response.Success {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("request after stale-socket recovery = %#v, err = %v", response, err)
+		}
+		time.Sleep(time.Millisecond)
 	}
-	if _, err := os.Lstat(socketPath); !os.IsNotExist(err) {
-		t.Fatalf("stale socket was not removed: %v", err)
+	stop, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.stop"})
+	if err != nil || !stop.Success {
+		t.Fatalf("stop after stale-socket recovery = %#v, err = %v", stop, err)
 	}
 }

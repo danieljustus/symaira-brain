@@ -685,13 +685,53 @@ def main() -> int:
         if fixture.get("schema_version") != 1:
             raise ValueError("unsupported daemon-contracts fixture schema")
         expected = {
+            "DMN-003-peer-uid",
+            "DMN-003-socket-mode",
+            "DMN-004-startup-race",
+            "DMN-005-status-lifecycle",
             "DMN-006-deadlines",
             "DMN-007-session-registry",
             "DMN-008-client-autostart",
         }
         cases = fixture.get("cases", [])
         if {case.get("id") for case in cases} != expected:
-            raise ValueError("daemon-contracts fixture IDs do not match DMN-006..008")
+            raise ValueError("daemon-contracts fixture IDs do not match DMN-003..008")
+        uid_case = next(case for case in cases if case["id"] == "DMN-003-peer-uid")
+        if uid_case.get("coverage") != [
+            "same-uid-accepted",
+            "different-uid-rejected-by-policy",
+            "native-peer-credential-accepted",
+        ]:
+            raise ValueError("DMN-003 UID fixture omits same/different UID coverage")
+        mode_case = next(case for case in cases if case["id"] == "DMN-003-socket-mode")
+        if mode_case.get("coverage") != [
+            "socket-mode-0600",
+            "socket-directory-mode-0700",
+            "endpoint-cleanup",
+        ]:
+            raise ValueError("DMN-003 socket fixture omits mode or cleanup coverage")
+        startup_case = next(case for case in cases if case["id"] == "DMN-004-startup-race")
+        if startup_case.get("coverage") != [
+            "stale-socket-recovered-by-startup",
+            "live-socket-preserved",
+            "all-concurrent-losers-rejected",
+            "single-owner-endpoint-reusable",
+        ]:
+            raise ValueError("DMN-004 fixture omits stale/live/concurrent ownership coverage")
+        status_case = next(case for case in cases if case["id"] == "DMN-005-status-lifecycle")
+        if status_case.get("coverage") != [
+            "status-identity-and-timestamps",
+            "stop-removes-endpoint",
+            "idle-timeout-removes-endpoint",
+        ]:
+            raise ValueError("DMN-005 fixture omits status, stop or idle-timeout coverage")
+        deadline_case = next(case for case in cases if case["id"] == "DMN-006-deadlines")
+        if deadline_case.get("coverage") != [
+            "client-read-timeout",
+            "operation-timeout-keeps-connection-usable",
+            "client-disconnect-does-not-cancel-blocked-handler",
+        ]:
+            raise ValueError("DMN-006 fixture omits timeout, blocked-handler or disconnect coverage")
         platform = "windows" if os.name == "nt" else ("darwin" if sys.platform == "darwin" else "linux")
         for case in cases:
             if "all" not in case["platforms"] and platform not in case["platforms"]:

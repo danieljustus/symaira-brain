@@ -23,6 +23,35 @@ use tokio::{
 
 pub const ENGINE_KIND: &str = "firefox";
 
+fn evaluation_result(result: Value) -> EvaluationResult {
+    if result.get("type").and_then(Value::as_str) == Some("exception") {
+        return EvaluationResult {
+            exception_text: result
+                .get("exceptionDetails")
+                .and_then(|details| details.get("text"))
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_owned(),
+            ..EvaluationResult::default()
+        };
+    }
+    let remote = result.get("result").unwrap_or(&Value::Null);
+    EvaluationResult {
+        value: remote.get("value").cloned(),
+        value_type: remote
+            .get("type")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .into(),
+        description: remote
+            .get("description")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .into(),
+        exception_text: String::new(),
+    }
+}
+
 fn context_partition(context: &str) -> Value {
     // BiDi's partition descriptor is tagged; Firefox rejects a context-only
     // object even when the browsing-context id itself is valid.
@@ -263,21 +292,7 @@ impl FirefoxSession {
     }
     pub async fn evaluate(&mut self, expression: &str) -> Result<EvaluationResult, FirefoxError> {
         let result = self.bidi.command("script.evaluate", json!({"expression":expression,"target":{"context":self.context},"awaitPromise":true,"resultOwnership":"root"}), self.timeout).await?;
-        let remote = result.get("result").unwrap_or(&Value::Null);
-        Ok(EvaluationResult {
-            value: remote.get("value").cloned(),
-            value_type: remote
-                .get("type")
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .into(),
-            description: remote
-                .get("description")
-                .and_then(Value::as_str)
-                .unwrap_or_default()
-                .into(),
-            exception_text: String::new(),
-        })
+        Ok(evaluation_result(result))
     }
     /// Read cookies through the Firefox BiDi storage module.
     pub async fn cookies(&mut self) -> Result<Value, FirefoxError> {

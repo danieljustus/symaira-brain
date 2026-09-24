@@ -1098,6 +1098,9 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Exercise offline release verifier mutation controls
+        run: python3 scripts/dist-oracle/test_verify_release_bundle.py
+
       - name: goreleaser release --snapshot --clean
         id: snapshot
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
@@ -1142,6 +1145,7 @@ jobs:
           PY
           go run ./scripts/dist-oracle -candidate-sbom -version "$version" -assets "$candidate_dir"
           go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
+          go run ./scripts/dist-oracle -candidate-go-check -version "$version" -assets "$candidate_dir"
 
   coverage:
     needs: build-test

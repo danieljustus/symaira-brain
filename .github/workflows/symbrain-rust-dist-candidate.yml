@@ -120,8 +120,10 @@ jobs:
           if [[ "$TARGET_GOOS" == windows ]]; then
             export SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json"
             export SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli-tree-windows.json"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile-remove-oracle-windows.json"
             go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
             go run ./scripts/cli-oracle -go-binary "$RUNNER_TEMP/symbrain-go.exe" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
+            go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
           fi
           if [[ "$TARGET_GOOS" == windows ]]; then
             version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"

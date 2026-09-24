@@ -88,7 +88,8 @@ jobs:
             port/release/test_build_dual.py \
             port/release/test_binary_smoke.py \
             port/release/test_candidate.py \
-            port/release/test_launch_candidate.py
+            port/release/test_launch_candidate.py \
+            port/release/test_rollback_matrix.py
           version="0.0.0-${GITHUB_SHA:0:12}"
           python3 port/release/build_dual.py \
             --version "$version" \

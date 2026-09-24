@@ -106,6 +106,12 @@ enum Action {
         args: serde_json::Value,
         format: Format,
     },
+    StorageGet {
+        session: String,
+        kind: String,
+        key: Option<String>,
+        format: Format,
+    },
     Eval {
         session: String,
         expression: Option<String>,
@@ -212,6 +218,12 @@ fn main() -> ExitCode {
             args,
             format,
         }) => run_dispatch(session, command, args, format),
+        Ok(Action::StorageGet {
+            session,
+            kind,
+            key,
+            format,
+        }) => run_storage_get(session, kind, key, format),
         Ok(Action::Eval {
             session,
             expression,
@@ -267,6 +279,7 @@ fn run_dispatch(
         session: session.clone(),
         ..Frame::default()
     };
+    let is_network_offline = frame.cmd == "network.offline";
     let direct = if matches!(frame.cmd.as_str(), "fetch.url" | "fetch.batch") {
         LoadContext::from_process(FlagOverrides::default())
             .ok()
@@ -301,6 +314,9 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_network_offline && format == Format::Text {
+            return write_stdout("ok\n");
+        }
         let envelope = Envelope::ok(
             response.data.unwrap_or(serde_json::Value::Null),
             response
@@ -325,6 +341,81 @@ fn run_dispatch(
         let error = response.error.unwrap_or_default();
         render_dispatch_error(format, &error.code, error.message)
     }
+}
+
+fn run_storage_get(session: String, kind: String, key: Option<String>, format: Format) -> ExitCode {
+    let response = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    })
+    .request(Frame {
+        cmd: "storage.list".to_owned(),
+        args: Some(serde_json::json!({"kind": kind})),
+        session,
+        ..Frame::default()
+    });
+    let response = match response {
+        Ok(response) => response,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::DAEMON_UNAVAILABLE,
+                error.to_string(),
+            );
+        }
+    };
+    if !response.success {
+        let error = response.error.unwrap_or_default();
+        return render_dispatch_error(format, &error.code, error.message);
+    }
+    let data = response.data.unwrap_or(serde_json::Value::Null);
+    if format != Format::Text {
+        let envelope = Envelope::ok(
+            data,
+            response
+                .warnings
+                .into_iter()
+                .map(|warning| symbrowse_core::output::Warning {
+                    kind: warning.kind,
+                    severity: warning.severity,
+                    message: warning.message,
+                    r#ref: warning.r#ref,
+                    excerpt: warning.excerpt,
+                })
+                .collect(),
+        );
+        return match envelope.render(format) {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
+    let origin = data
+        .get("origin")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default();
+    let items = data.get("items").and_then(serde_json::Value::as_object);
+    if let Some(key) = key {
+        let Some(value) = items
+            .and_then(|items| items.get(&key))
+            .and_then(serde_json::Value::as_str)
+        else {
+            let _ = writeln!(
+                io::stderr(),
+                "key {key:?} not found in {kind} storage of {origin}"
+            );
+            return ExitCode::from(1);
+        };
+        return write_stdout(&(value.to_owned() + "\n"));
+    }
+    let output = items
+        .into_iter()
+        .flat_map(serde_json::Map::iter)
+        .filter_map(|(key, value)| value.as_str().map(|value| format!("{key}\t{value}\n")))
+        .collect::<String>();
+    write_stdout(&output)
 }
 
 fn parse_eval(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -1296,11 +1387,26 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             return Ok(Action::Help(root_help()));
         };
         let command = values[command_index].as_str();
-        let suffix = values[command_index + 1..help_index]
-            .iter()
-            .filter(|value| !value.starts_with('-'))
-            .map(String::as_str)
-            .collect::<Vec<_>>();
+        let suffix = if command == "storage" {
+            let mut suffix = Vec::new();
+            let mut skip_value = false;
+            for value in &values[command_index + 1..help_index] {
+                if skip_value {
+                    skip_value = false;
+                } else if value == "--session" {
+                    skip_value = true;
+                } else if !value.starts_with('-') {
+                    suffix.push(value.as_str());
+                }
+            }
+            suffix
+        } else {
+            values[command_index + 1..help_index]
+                .iter()
+                .filter(|value| !value.starts_with('-'))
+                .map(String::as_str)
+                .collect::<Vec<_>>()
+        };
         if let Some(text) = help_catalog::help(command, &suffix) {
             return Ok(Action::Help(text.to_owned()));
         }
@@ -1329,6 +1435,8 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "dialog" => parse_dialog(&values, command_index),
         "tab" => parse_tab(&values, command_index),
         "frame" => parse_frame(&values, command_index),
+        "storage" => parse_storage(&values, command_index),
+        "set" => parse_set(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -1348,7 +1456,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, snapshot, state, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, check, click, config, daemon, dblclick, dialog, eval, fetch, fill, find, flow, focus, forward, frame, get, goto, hover, is, mcp, open, press, profiles, read, reload, scrollintoview, select, set, snapshot, state, storage, tab, tools, type, uncheck, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1371,6 +1479,12 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("set", None) => Some(
+            "Apply supported session-wide emulation settings\n\nUsage:\n  symbrowse set [command]\n\nAvailable Commands:\n  offline     Emulate offline (default: on)\n\nFlags:\n  -h, --help             help for set\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse set [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("set", Some("offline")) => Some(
+            "Emulate offline (default: on)\n\nUsage:\n  symbrowse set offline [on|off] [flags]\n\nFlags:\n  -h, --help   help for offline\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned(),
+        ),
         ("version", None) => Some(plain(
             "Print the symbrowse version",
             "symbrowse version [flags]",
@@ -1449,6 +1563,15 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
                 session_global,
             ))
         }
+        ("storage", None) => Some(
+            "Inspect per-origin web storage\n\nUsage:\n  symbrowse storage [command]\n\nAvailable Commands:\n  get         Read web storage values for the current origin\n\nFlags:\n  -h, --help             help for storage\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse storage [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("storage", Some("get")) => Some(plain(
+            "Read web storage values for the current origin",
+            "symbrowse storage get <local|session> [key]",
+            "  -h, --help   help for get\n",
+            session_global,
+        )),
         ("flow", Some("list")) => Some(plain(
             "List discovered flows with their origin",
             "symbrowse flow list [flags]",
@@ -1915,6 +2038,72 @@ fn parse_tools(values: &[String], index: usize) -> Result<Action, ParseError> {
     Ok(Action::ToolList { profiles, format })
 }
 
+fn parse_storage(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand = None;
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "get" if subcommand.is_none() => subcommand = Some("get"),
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse storage\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(command_help("storage", &[]).unwrap()));
+    };
+    if subcommand != "get" {
+        unreachable!("storage only recognizes the get command");
+    }
+    if !(1..=2).contains(&positional.len()) {
+        return Err(ParseError {
+            message: format!(
+                "accepts between 1 and 2 arg(s), received {}",
+                positional.len()
+            ),
+            exit_code: 2,
+        });
+    }
+    Ok(Action::StorageGet {
+        session,
+        kind: positional[0].clone(),
+        key: positional.get(1).cloned(),
+        format,
+    })
+}
+
 fn parse_dialog(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
@@ -1975,6 +2164,7 @@ fn parse_dialog(values: &[String], command_index: usize) -> Result<Action, Parse
         match value.as_str() {
             "--" => positional_only = true,
             "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 format = parse_format(required_value(values, index, "--output")?)?;
@@ -2316,6 +2506,169 @@ fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseE
         args: serde_json::json!({}),
         format,
     })
+}
+
+#[cfg(test)]
+mod set_tests {
+    use super::{Action, Format, parse};
+    use std::ffi::OsString;
+
+    fn args(values: &[&str]) -> Vec<OsString> {
+        values.iter().map(OsString::from).collect()
+    }
+
+    #[test]
+    fn set_offline_maps_only_the_runtime_supported_setting() {
+        for (argv, offline, format, session) in [
+            (&["set", "offline"][..], true, Format::Text, "default"),
+            (&["set", "offline", "on"][..], true, Format::Text, "default"),
+            (
+                &["set", "offline", "off", "--json"][..],
+                false,
+                Format::Json,
+                "default",
+            ),
+            (
+                &["--output=yaml", "set", "offline", "off", "--session=x"][..],
+                false,
+                Format::Yaml,
+                "x",
+            ),
+            (
+                &["set", "offline", "on", "--json=false", "--output=yaml"][..],
+                true,
+                Format::Yaml,
+                "default",
+            ),
+        ] {
+            assert_eq!(
+                parse(&args(argv)),
+                Ok(Action::Dispatch {
+                    session: session.into(),
+                    command: "network.offline".into(),
+                    args: serde_json::json!({"offline": offline}),
+                    format,
+                }),
+                "argv={argv:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn set_offline_rejects_unknown_values_and_commands() {
+        for argv in [
+            &["set", "offline", "maybe"][..],
+            &["set", "offline", "on", "off"][..],
+            &["set", "viewport"][..],
+        ] {
+            assert!(parse(&args(argv)).is_err(), "argv={argv:?}");
+        }
+    }
+
+    #[test]
+    fn set_help_only_lists_the_runtime_supported_subcommand() {
+        let Ok(Action::Help(parent)) = parse(&args(&["set", "--help"])) else {
+            panic!("set parent help")
+        };
+        assert!(parent.contains("offline"));
+        for unsupported in ["device", "geo", "headers", "media", "viewport"] {
+            assert!(
+                !parent.contains(unsupported),
+                "help advertised {unsupported}"
+            );
+            assert!(parse(&args(&["set", unsupported, "--help"])).is_err());
+        }
+        let Ok(Action::Help(leaf)) = parse(&args(&["set", "offline", "--help"])) else {
+            panic!("set offline help")
+        };
+        assert!(leaf.contains("symbrowse set offline [on|off] [flags]"));
+    }
+}
+
+fn parse_set(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    if values.get(command_index + 1).map(String::as_str) != Some("offline") {
+        return Err(ParseError {
+            message: "unknown command for \"set\"".into(),
+            exit_code: 2,
+        });
+    }
+    let mut session = String::from("default");
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut offline = true;
+    let mut has_value = false;
+    let mut positional_count = 0usize;
+    let mut index = command_index + 2;
+    let mut positional_only = false;
+    while index < values.len() {
+        let value = &values[index];
+        if positional_only {
+            if has_value {
+                return Err(ParseError {
+                    message: format!(
+                        "accepts at most 1 arg(s), received {}",
+                        positional_count + 1
+                    ),
+                    exit_code: 2,
+                });
+            }
+            offline = parse_offline(value)?;
+            has_value = true;
+            positional_count += 1;
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if has_value => {
+                return Err(ParseError {
+                    message: format!(
+                        "accepts at most 1 arg(s), received {}",
+                        positional_count + 1
+                    ),
+                    exit_code: 2,
+                });
+            }
+            value => {
+                offline = parse_offline(value)?;
+                has_value = true;
+                positional_count += 1;
+            }
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Dispatch {
+        session,
+        command: "network.offline".into(),
+        args: serde_json::json!({"offline": offline}),
+        format,
+    })
+}
+
+fn parse_offline(value: &str) -> Result<bool, ParseError> {
+    match value.to_ascii_lowercase().as_str() {
+        "on" => Ok(true),
+        "off" => Ok(false),
+        _ => Err(ParseError {
+            message: format!("offline expects on or off, got {value:?}"),
+            exit_code: 2,
+        }),
+    }
 }
 
 fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
@@ -3250,6 +3603,51 @@ mod tests {
         assert!(matches!(parse(&args(&["dialog"])), Ok(Action::Help(_))));
         assert!(parse(&args(&["dialog", "auto"])).is_err());
         assert!(parse(&args(&["dialog", "status", "extra"])).is_err());
+    }
+
+    #[test]
+    fn storage_get_dispatches_read_only_origin_scoped_requests() {
+        assert_eq!(
+            parse(&args(&[
+                "--output",
+                "json",
+                "storage",
+                "--session=work",
+                "get",
+                "session",
+                "step"
+            ])),
+            Ok(Action::StorageGet {
+                session: "work".to_owned(),
+                kind: "session".to_owned(),
+                key: Some("step".to_owned()),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["storage", "get", "local", "--", "--json"])),
+            Ok(Action::StorageGet {
+                session: "default".to_owned(),
+                kind: "local".to_owned(),
+                key: Some("--json".to_owned()),
+                format: Format::Text,
+            })
+        );
+        assert!(parse(&args(&["storage", "get"])).is_err());
+        assert!(parse(&args(&["storage", "get", "local", "key", "extra"])).is_err());
+        assert!(parse(&args(&["storage", "clear", "local"])).is_err());
+        let Action::Help(help) = parse(&args(&["storage", "--help"])).unwrap() else {
+            panic!("storage help expected")
+        };
+        assert!(help.contains("get         Read web storage values"));
+        assert!(!help.contains("clear"));
+        assert!(!help.contains("set         Write"));
+        let Action::Help(get_help) =
+            parse(&args(&["storage", "--session", "work", "get", "--help"])).unwrap()
+        else {
+            panic!("storage get help after persistent flag expected")
+        };
+        assert!(get_help.contains("symbrowse storage get <local|session> [key]"));
     }
 
     #[test]

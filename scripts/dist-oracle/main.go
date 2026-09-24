@@ -345,6 +345,7 @@ func notRunLines() []string {
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	candidateGoCheck := flag.Bool("candidate-go-check", false, "verify GoReleaser candidate binaries' embedded target identities")
 	candidateSBOM := flag.Bool("candidate-sbom", false, "generate deterministic SPDX sidecars and checksums for an unpublished snapshot")
 	nativePackage := flag.Bool("native-package", false, "verify a native Rust symbrain binary and package its archive/checksum")
 	candidateMerge := flag.Bool("candidate-merge", false, "merge six native Rust packages and run the full candidate artifact check")
@@ -452,6 +453,30 @@ func main() {
 		}
 		fmt.Printf("candidate-artifacts: PASS %d archives, SPDX SBOMs, and checksum entries for %s (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
 		fmt.Println("not-run: release signatures/certificates, Homebrew metadata/install, DMG, and publication")
+		return
+	}
+
+	if *candidateGoCheck {
+		if *assetsDir == "" || *version == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-go-check requires -assets and -version")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := checkGoCandidateArtifacts(&cfg, *version, resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: Go candidate identity: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-go-identity: PASS %d Go binaries match their embedded OS/architecture and package identities (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH))
 		return
 	}
 

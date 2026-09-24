@@ -2,9 +2,38 @@
   "schema_version": 1,
   "cases": [
     {
+      "id": "DMN-003-peer-uid",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["same-uid-accepted", "different-uid-rejected-by-policy", "native-peer-credential-accepted"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestPeerUIDMatchPolicy|TestDefaultPeerUIDAcceptsCurrentUser", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "peer_uid_match_policy_accepts_only_the_current_uid", "--locked"]
+    },
+    {
+      "id": "DMN-003-socket-mode",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["socket-mode-0600", "socket-directory-mode-0700", "endpoint-cleanup"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestSocketPathValidationAndMode", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "socket_lifecycle_permissions_status_and_stop", "--locked"]
+    },
+    {
+      "id": "DMN-004-startup-race",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["stale-socket-recovered-by-startup", "live-socket-preserved", "all-concurrent-losers-rejected", "single-owner-endpoint-reusable"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestConcurrentStartupYieldsOneOwner|TestStaleSocketIsReplaced", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "--locked"]
+    },
+    {
+      "id": "DMN-005-status-lifecycle",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["status-identity-and-timestamps", "stop-removes-endpoint", "idle-timeout-removes-endpoint"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestStatusAndStop|TestIdleTimeoutStopsServer", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "socket_lifecycle_permissions_status_and_stop", "--locked"]
+    },
+    {
       "id": "DMN-006-deadlines",
       "platforms": ["darwin", "linux"],
-      "go": ["go", "test", "./internal/daemon", "-run", "Timeout|Deadline|Cancel", "-count=1"],
+      "coverage": ["client-read-timeout", "operation-timeout-keeps-connection-usable", "client-disconnect-does-not-cancel-blocked-handler"],
+      "go": ["go", "test", "./internal/daemon", "-run", "Timeout|Deadline|Cancel|Disconnect", "-count=1"],
       "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked"]
     },
     {
