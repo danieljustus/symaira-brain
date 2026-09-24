@@ -112,6 +112,7 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
     for key in ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "USER", "USERNAME"):
         if key in os.environ:
             env[key] = os.environ[key]
+    executable = launcher or chrome
     env.update({
         "HOME": str(home), "USERPROFILE": str(home),
         "XDG_CONFIG_HOME": str(home / ".config"),
@@ -121,7 +122,8 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         "XDG_RUNTIME_DIR": str(root / "runtime"),
         "TMPDIR": str(tmp), "TMP": str(tmp), "TEMP": str(tmp),
         "SYMBROWSE_MODE": "browser", "SYMBROWSE_ENGINE": "chrome",
-        "SYMBROWSE_CHROME_EXECUTABLE": str(chrome),
+        "SYMBROWSE_EXECUTABLE_PATH": str(executable),
+        "SYMBROWSE_CHROME_EXECUTABLE": str(executable),
         "SYMBROWSE_HEADLESS": "1",
         "SYMBROWSE_CHECK_UPDATES": "0", "SYMBROWSE_SYMGUARD": "off",
         "SYMBROWSE_ALLOW_PRIVATE": "true", "LANG": "C", "LC_ALL": "C", "TZ": "UTC",
@@ -136,14 +138,12 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_MODE"] = "browser"
     else:
         raise ValueError(f"unknown implementation: {implementation}")
-    if launcher:
-        env["SYMBROWSE_CHROME_EXECUTABLE"] = str(launcher)
     return env
 
 
 def command(binary: Path, args: list[str], session: str) -> list[str]:
-    if args[:2] == ["daemon", "stop"]:
-        return [str(binary), "--json", "daemon", "stop", "--session", session]
+    if args[:2] in (["daemon", "stop"], ["daemon", "status"]):
+        return [str(binary), "--json", "daemon", args[1], "--session", session, *args[2:]]
     return [str(binary), "--json", args[0], "--session", session, *args[1:]]
 
 

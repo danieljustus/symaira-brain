@@ -7,13 +7,33 @@ from pathlib import Path
 from unittest.mock import patch
 
 from chrome_pair import (
-    FIXTURE_TITLE, FIXTURE_TOKEN, native_target_matches, nearest_rank,
+    FIXTURE_TITLE, FIXTURE_TOKEN, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir,
     paired_gate_passes, validate_read_output, wait_for_daemon_exit,
 )
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_go_and_rust_use_the_same_verified_chrome_launcher(self):
+        chrome = Path("/verified/cft/chrome")
+        launcher = Path("/verified/cft/chrome-wrapper")
+        with tempfile.TemporaryDirectory() as temporary:
+            for implementation in ("go", "rust"):
+                env = make_env(Path(temporary) / implementation, implementation, chrome, launcher)
+                self.assertEqual(env["SYMBROWSE_EXECUTABLE_PATH"], str(launcher))
+                self.assertEqual(env["SYMBROWSE_CHROME_EXECUTABLE"], str(launcher))
+
+    def test_daemon_stop_and_status_keep_subcommand_before_session(self):
+        binary = Path("symbrowse")
+        self.assertEqual(
+            command(binary, ["daemon", "stop"], "session"),
+            ["symbrowse", "--json", "daemon", "stop", "--session", "session"],
+        )
+        self.assertEqual(
+            command(binary, ["daemon", "status"], "session"),
+            ["symbrowse", "--json", "daemon", "status", "--session", "session"],
+        )
+
     def test_read_requires_fixture_title_and_content_token(self):
         good = json.dumps({"success": True, "data": {"title": FIXTURE_TITLE, "markdown": FIXTURE_TOKEN}})
         self.assertTrue(validate_read_output(good))
