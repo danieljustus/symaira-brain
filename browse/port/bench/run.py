@@ -314,7 +314,7 @@ def startup_failure(process: subprocess.Popen[bytes], prefix: str, stderr_path: 
     detail = read_startup_diagnostic(stderr_path)
     if "password=" in detail.lower() or "token=" in detail.lower():
         detail = "secret-like startup diagnostic suppressed"
-    return {"status": "error", "reason": f"{prefix}: {detail[:256]}"}
+    return {"status": "error", "reason": f"{prefix}: {detail[-256:]}"}
 
 
 def launch_daemon(command: list[str], root: Path, env: dict[str, str]) -> tuple[subprocess.Popen[bytes], Path]:
