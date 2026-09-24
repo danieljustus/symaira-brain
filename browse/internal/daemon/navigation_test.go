@@ -332,7 +332,11 @@ func TestServiceSerializesColdSessionLaunches(t *testing.T) {
 	if _, err := registry.Ensure("cold"); err != nil {
 		t.Fatal(err)
 	}
-	runtime := NewNavigationRuntime(registry, "", NavigationRuntimeOptions{})
+	// The fake engine factory avoids launching a browser, but service() still
+	// resolves Chrome when executable is empty before consulting that factory.
+	// Supply a sentinel path so this concurrency test is independent of the
+	// host's installed browsers (including native ARM CI runners).
+	runtime := NewNavigationRuntime(registry, "fake-browser", NavigationRuntimeOptions{})
 	started := make(chan struct{})
 	release := make(chan struct{})
 	fake := &launchRaceEngine{started: started, release: release}
