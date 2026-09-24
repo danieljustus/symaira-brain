@@ -15,6 +15,17 @@ use decoder::{decode_request, warnings_empty};
 #[path = "external_json.rs"]
 mod json_syntax;
 
+/// Validates JSON syntax and formats errors like Go's `encoding/json`.
+///
+/// Callers that decode into a concrete type must still keep the type decoder's
+/// errors separate: this only establishes that the input is syntactically JSON.
+///
+/// # Errors
+/// Returns Go's JSON syntax diagnostic when the input is malformed.
+pub fn validate_go_json_syntax(input: &[u8]) -> Result<(), String> {
+    json_syntax::validate(input)
+}
+
 /// Maximum request size accepted by the external decision contract.
 pub const MAX_REQUEST_BYTES: usize = 64 * 1024;
 

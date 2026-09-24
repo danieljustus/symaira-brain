@@ -19,6 +19,18 @@
       "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   \\u003cos/arch\\u003e\\n\\n  binary           ok\\n  go runtime       ok\\n  config           error: config: parse \\u003croot\\u003e/config_error/home/.config/symguard/config.toml: toml: line 1: expected '.' or '=', but got '[' instead\\n  policy           not loaded (config error)\\n  audit log        not initialized (created on first 'symguard decide')\\n\\n2 issue(s) found. See details above.\\n\""
     },
     {
+      "id": "config_error_other_ascii",
+      "setup": "missing equals with a printable ASCII offender",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   \\u003cos/arch\\u003e\\n\\n  binary           ok\\n  go runtime       ok\\n  config           error: config: parse \\u003croot\\u003e/config_error_other_ascii/home/.config/symguard/config.toml: toml: line 1: expected '.' or '=', but got '!' instead\\n  policy           not loaded (config error)\\n  audit log        not initialized (created on first 'symguard decide')\\n\\n2 issue(s) found. See details above.\\n\""
+    },
+    {
+      "id": "config_error_later_line",
+      "setup": "missing equals on a later line",
+      "exit_code": 1,
+      "output_json": "\"symguard doctor\\n\\n  Version:   dev\\n  Go:        \\u003cgo\\u003e\\n  OS/Arch:   \\u003cos/arch\\u003e\\n\\n  binary           ok\\n  go runtime       ok\\n  config           error: config: parse \\u003croot\\u003e/config_error_later_line/home/.config/symguard/config.toml: toml: line 2: expected '.' or '=', but got '[' instead\\n  policy           not loaded (config error)\\n  audit log        not initialized (created on first 'symguard decide')\\n\\n2 issue(s) found. See details above.\\n\""
+    },
+    {
       "id": "audit_log_without_anchor",
       "setup": "audit log exists but no anchor file (expected pre-Phase-3 state)",
       "exit_code": 0,
