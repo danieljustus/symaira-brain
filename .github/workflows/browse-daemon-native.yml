@@ -58,11 +58,8 @@ jobs:
       - name: Verify Go daemon and session oracle
         if: runner.os != 'Windows'
         run: go test ./internal/daemon ./internal/sessionid ./cmd/symbrowse -run 'Timeout|Deadline|Cancel|Session|Registry|Autostart|Client|Engine' -count=1
-      - name: Exercise the native Go compat process from Rust
-        run: |
-          go_binary="$RUNNER_TEMP/symbrowse-go"
-          if [[ "$RUNNER_OS" == Windows ]]; then go_binary+=.exe; fi
-          SYMBROWSE_COMPAT_BINARY="$go_binary" cargo test -p symbrowse-compat --test go_sidecar --locked -- --ignored --exact production_go_sidecar_exchanges_versioned_requests
+      - name: Execute FETCH-011 compat protocol and lifecycle contracts
+        run: python3 port/harness/run.py --suite compat-sidecar
       - name: Retain CLI comparison evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
