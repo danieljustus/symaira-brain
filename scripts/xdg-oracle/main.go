@@ -25,7 +25,11 @@ type Suite struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output does not match existing file")
-	output := flag.String("output", "rust/symbrain-core/tests/fixtures/oracle_expectations.json", "output path")
+	defaultOutput := os.Getenv("SYMBRAIN_XDG_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-core/tests/fixtures/oracle_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "output path")
 	flag.Parse()
 
 	suite := Suite{Cases: buildCases()}
