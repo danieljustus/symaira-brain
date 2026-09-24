@@ -94,12 +94,20 @@ func packageNativeCandidate(cfg *goreleaserConfig, version, binaryPath, assetsDi
 	}
 	entries = append(entries, archiveEntry{name: binaryName, source: binaryPath})
 	archivePath := filepath.Join(assetsDir, archiveName)
+	sbomName, err := candidateSBOMName(cfg, archiveName)
+	if err != nil {
+		return "", err
+	}
+	sbomPath := filepath.Join(assetsDir, sbomName)
 	checksumPath := filepath.Join(assetsDir, cfg.Checksum.NameTemplate)
-	archiveCreated, checksumCreated, success := false, false, false
+	archiveCreated, sbomCreated, checksumCreated, success := false, false, false, false
 	defer func() {
 		if !success {
 			if checksumCreated {
 				os.Remove(checksumPath)
+			}
+			if sbomCreated {
+				os.Remove(sbomPath)
 			}
 			if archiveCreated {
 				os.Remove(archivePath)
@@ -125,7 +133,25 @@ func packageNativeCandidate(cfg *goreleaserConfig, version, binaryPath, assetsDi
 		return "", fmt.Errorf("read candidate archive: %w", err)
 	}
 	digest := sha256.Sum256(data)
-	checksum := fmt.Sprintf("%s  %s\n", hex.EncodeToString(digest[:]), archiveName)
+	archiveDigest := hex.EncodeToString(digest[:])
+	sbom, err := candidateSPDX(archivePath, archiveName, version, archiveDigest)
+	if err != nil {
+		return "", err
+	}
+	sbomFile, err := os.OpenFile(sbomPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("create candidate SPDX SBOM: %w", err)
+	}
+	sbomCreated = true
+	if _, err := sbomFile.Write(sbom); err != nil {
+		sbomFile.Close()
+		return "", fmt.Errorf("write candidate SPDX SBOM: %w", err)
+	}
+	if err := sbomFile.Close(); err != nil {
+		return "", fmt.Errorf("close candidate SPDX SBOM: %w", err)
+	}
+	sbomDigest := sha256.Sum256(sbom)
+	checksum := fmt.Sprintf("%s  %s\n%s  %s\n", archiveDigest, archiveName, hex.EncodeToString(sbomDigest[:]), sbomName)
 	checksumFile, err := os.OpenFile(checksumPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return "", fmt.Errorf("create candidate checksums: %w", err)

@@ -376,7 +376,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "dist-oracle: merge native candidates: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("candidate-merge: PASS %d native target archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		fmt.Printf("candidate-merge: PASS %d native targets for %s (archives, SPDX SBOMs, checksums; unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
 		return
 	}
 
@@ -401,7 +401,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "dist-oracle: native candidate: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("native-candidate: PASS %s %s/%s Rust symbrain %s\n", archive, runtime.GOOS, runtime.GOARCH, *version)
+		fmt.Printf("native-candidate: PASS %s and SPDX SBOM %s.sbom.json %s/%s Rust symbrain %s (unsigned)\n", archive, archive, runtime.GOOS, runtime.GOARCH, *version)
 		return
 	}
 
@@ -425,8 +425,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "dist-oracle: candidate artifacts: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("candidate-artifacts: PASS %d archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
-		fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
+		fmt.Printf("candidate-artifacts: PASS %d archives, SPDX SBOMs, and checksum entries for %s (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		fmt.Println("not-run: release signatures/certificates, Homebrew metadata/install, DMG, and publication")
 		return
 	}
 
