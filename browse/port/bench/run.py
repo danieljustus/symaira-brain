@@ -571,7 +571,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--runs must be between 1 and 100")
     selected = set(args.workload or WORKLOADS)
     output = external_output(args.output)
-    with tempfile.TemporaryDirectory(prefix="rust016-bench-", dir=temporary_parent()) as raw:
+    with tempfile.TemporaryDirectory(prefix="b-", dir=temporary_parent()) as raw:
         root = Path(raw)
         report: dict[str, Any] = {
             "schema_version": 2,
