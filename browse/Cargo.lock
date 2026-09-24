@@ -1877,6 +1877,7 @@ dependencies = [
  "base64",
  "serde",
  "serde_json",
+ "sha2",
  "symbrowse-core",
  "symbrowse-daemon",
  "symbrowse-mcp",
