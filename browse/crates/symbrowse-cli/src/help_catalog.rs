@@ -8,6 +8,89 @@ pub(super) fn help(command: &str, suffix: &[&str]) -> Option<&'static str> {
         .collect::<Vec<_>>()
         .join(" ");
     match path.as_str() {
+        "dialog" => Some(
+            r###"Handle JavaScript dialogs (accept, dismiss, status, auto)
+
+Usage:
+  symbrowse dialog [command]
+
+Available Commands:
+  accept      Accept the pending dialog (text for prompt dialogs)
+  auto        Configure automatic dialog handling (default: dismiss)
+  dismiss     Dismiss the pending dialog
+  status      Show the pending dialog state
+
+Flags:
+  -h, --help             help for dialog
+      --session string   daemon session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse dialog [command] --help" for more information about a command.
+"###,
+        ),
+        "dialog accept" => Some(
+            r###"Accept the pending dialog (text for prompt dialogs)
+
+Usage:
+  symbrowse dialog accept [text] [flags]
+
+Flags:
+  -h, --help   help for accept
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "dialog auto" => Some(
+            r###"Configure automatic dialog handling (default: dismiss)
+
+Usage:
+  symbrowse dialog auto <accept|dismiss|off> [flags]
+
+Flags:
+  -h, --help   help for auto
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "dialog dismiss" => Some(
+            r###"Dismiss the pending dialog
+
+Usage:
+  symbrowse dialog dismiss [flags]
+
+Flags:
+  -h, --help   help for dismiss
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "dialog status" => Some(
+            r###"Show the pending dialog state
+
+Usage:
+  symbrowse dialog status [flags]
+
+Flags:
+  -h, --help   help for status
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
         "click" => Some(
             r###"click performs the click interaction on the targeted element.
 

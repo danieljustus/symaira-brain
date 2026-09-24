@@ -1326,6 +1326,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "daemon" => parse_daemon(&values, command_index),
         "mcp" => parse_mcp(&values, command_index),
         "flow" | "workflow" => parse_flow(&values, command_index),
+        "dialog" => parse_dialog(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -1344,7 +1345,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, dialog, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1858,6 +1859,134 @@ fn parse_tools(values: &[String], index: usize) -> Result<Action, ParseError> {
         i += 1;
     }
     Ok(Action::ToolList { profiles, format })
+}
+
+fn parse_dialog(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand = None;
+    let mut subcommand_index = None;
+    let mut scan = command_index + 1;
+    while scan < values.len() {
+        match values[scan].as_str() {
+            "accept" | "auto" | "dismiss" | "status" => {
+                subcommand = Some(values[scan].as_str());
+                subcommand_index = Some(scan);
+                break;
+            }
+            "--session" => {
+                session = required_value(values, scan + 1, "--session")?.to_owned();
+                scan += 1;
+            }
+            "--output" => {
+                format = parse_format(required_value(values, scan + 1, "--output")?)?;
+                scan += 1;
+            }
+            "--json" => {}
+            value if value.starts_with("--json=") => {
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => {
+                format = parse_format(&value[9..])?;
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Ok(Action::Help(
+                    help_catalog::help("dialog", &[]).unwrap().to_owned(),
+                ));
+            }
+        }
+        scan += 1;
+    }
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(
+            help_catalog::help("dialog", &[]).unwrap().to_owned(),
+        ));
+    };
+    let mut positional = Vec::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        if Some(index) == subcommand_index {
+            index += 1;
+            continue;
+        }
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            value if value.starts_with("--json=") => {
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    let (command, args) = match subcommand {
+        "accept" if positional.len() <= 1 => (
+            "dialog.accept",
+            serde_json::json!({"text": positional.first().map(String::as_str).unwrap_or("")}),
+        ),
+        "accept" => {
+            return Err(ParseError {
+                message: format!("accepts at most 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        "auto" if positional.len() == 1 => {
+            ("dialog.auto", serde_json::json!({"mode": positional[0]}))
+        }
+        "auto" => {
+            return Err(ParseError {
+                message: format!("accepts 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        "dismiss" | "status" if positional.is_empty() => (
+            if subcommand == "dismiss" {
+                "dialog.dismiss"
+            } else {
+                "dialog.status"
+            },
+            serde_json::json!({}),
+        ),
+        "dismiss" | "status" => {
+            return Err(ParseError {
+                message: format!(
+                    "unknown command {:?} for \"symbrowse dialog {subcommand}\"",
+                    positional[0]
+                ),
+                exit_code: 2,
+            });
+        }
+        _ => unreachable!("subcommand is selected from the supported dialog list"),
+    };
+    Ok(Action::Dispatch {
+        session,
+        command: command.to_owned(),
+        args,
+        format,
+    })
 }
 
 fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
@@ -2738,6 +2867,60 @@ mod tests {
         };
         assert!(dry_run);
         assert_eq!(path, std::path::PathBuf::from("demo.yaml"));
+    }
+
+    #[test]
+    fn dialog_commands_dispatch_go_payloads_and_match_argument_rules() {
+        for (argv, expected_command, expected_args) in [
+            (
+                &["dialog", "status"][..],
+                "dialog.status",
+                serde_json::json!({}),
+            ),
+            (
+                &["dialog", "dismiss"][..],
+                "dialog.dismiss",
+                serde_json::json!({}),
+            ),
+            (
+                &["dialog", "accept", "prompt text"][..],
+                "dialog.accept",
+                serde_json::json!({"text": "prompt text"}),
+            ),
+            (
+                &["dialog", "auto", "accept"][..],
+                "dialog.auto",
+                serde_json::json!({"mode": "accept"}),
+            ),
+        ] {
+            let Action::Dispatch { command, args, .. } =
+                parse(&args(argv)).expect("dialog dispatch")
+            else {
+                panic!("wrong action for {argv:?}");
+            };
+            assert_eq!(command, expected_command, "argv={argv:?}");
+            assert_eq!(args, expected_args, "argv={argv:?}");
+        }
+
+        assert_eq!(
+            parse(&args(&["dialog", "--session", "work", "status"])),
+            Ok(Action::Dispatch {
+                session: "work".to_owned(),
+                command: "dialog.status".to_owned(),
+                args: serde_json::json!({}),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["dialog", "--session"])),
+            Err(ParseError {
+                message: "flag needs an argument: --session".to_owned(),
+                exit_code: 1,
+            })
+        );
+        assert!(matches!(parse(&args(&["dialog"])), Ok(Action::Help(_))));
+        assert!(parse(&args(&["dialog", "auto"])).is_err());
+        assert!(parse(&args(&["dialog", "status", "extra"])).is_err());
     }
 
     #[test]

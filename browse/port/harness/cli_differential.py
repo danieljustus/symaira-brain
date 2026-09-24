@@ -97,7 +97,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "back", "batch", "click", "config", "daemon", "eval", "fetch", "fill", "find",
+        "back", "batch", "click", "config", "daemon", "dialog", "eval", "fetch", "fill", "find",
         "flow", "forward", "get", "goto", "is", "mcp", "open", "press", "profiles",
         "read", "reload", "snapshot", "state", "tools", "type", "version", "wait", "workflow",
     }
@@ -117,7 +117,8 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
              "go_commands": sorted(go_commands), "rust_commands": sorted(advertised),
              "go": output_record(go_root), "rust": output_record(rust_root)}]
     go_paths = [
-        ["batch"], ["config"], ["config", "show"], ["eval"], ["flow", "list"],
+        ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"],
+        ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
@@ -384,9 +385,20 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
         def payload(frame: dict[str, Any] | None) -> dict[str, Any] | None:
             if frame is None:
                 return None
+            result = {key: frame.get(key) for key in ("cmd", "session", "args")}
+            # Go omits nil RawMessage args for these zero-argument wrappers;
+            # Rust sends an empty object because its daemon validates object args.
+            if result["cmd"] in {"dialog.status", "dialog.dismiss"} and result["args"] is None:
+                result["args"] = {}
+            return result
+
+        def payload_raw(frame: dict[str, Any] | None) -> dict[str, Any] | None:
+            if frame is None:
+                return None
             return {key: frame.get(key) for key in ("cmd", "session", "args")}
 
         row.update({"daemon_frames_match": go_frame == rust_frame,
+                    "daemon_payloads_raw_match": payload_raw(go_frame) == payload_raw(rust_frame),
                     "go_frame": go_frame, "rust_frame": rust_frame,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
@@ -467,6 +479,23 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-005", ["eval", "====", "--base64", "--json"], b"", False),
         ("CLI-005", ["eval", "--stdin", "--base64", "--json"], b"", True),
         ("CLI-005", ["eval", "AB==", "--base64", "--json"], b"", True),
+        ("CLI-002", ["dialog", "status", "--json"], b"", True),
+        ("CLI-002", ["dialog", "dismiss", "--output", "yaml"], b"", True),
+        ("CLI-002", ["dialog", "accept"], b"", True),
+        ("CLI-002", ["dialog", "accept", "prompt text", "--session", "default"], b"", True),
+        ("CLI-002", ["dialog", "auto", "accept", "--session=default", "--output=json"], b"", True),
+        ("CLI-002", ["dialog", "--session", "default", "status"], b"", True),
+        ("CLI-003", ["dialog", "auto"], b"", False),
+        ("CLI-003", ["dialog", "auto", "accept", "extra"], b"", False),
+        ("CLI-003", ["dialog", "accept", "a", "b"], b"", False),
+        ("CLI-003", ["dialog", "status", "extra"], b"", False),
+        ("CLI-003", ["dialog", "dismiss", "extra"], b"", False),
+        ("CLI-003", ["dialog", "--bad"], b"", False),
+        ("CLI-003", ["dialog", "--session"], b"", False),
+        ("CLI-003", ["dialog", "accept", "--text", "x"], b"", False),
+        ("CLI-004", ["--json", "dialog", "status"], b"", True),
+        ("CLI-004", ["dialog", "--json=false", "status", "--output=yaml"], b"", True),
+        ("CLI-004", ["dialog", "status", "--", "--json"], b"", False),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:
