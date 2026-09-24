@@ -1881,13 +1881,31 @@ mod tests {
     use std::{
         io::{Read, Write},
         net::TcpListener,
+        path::PathBuf,
         thread,
     };
 
+    fn unique_test_root(name: &str) -> PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
+
+        static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
+        for _ in 0..100 {
+            let root = std::env::temp_dir().join(format!(
+                "symbrowse-runtime-{name}-{}-{}",
+                std::process::id(),
+                NEXT_ROOT.fetch_add(1, Ordering::Relaxed)
+            ));
+            match std::fs::create_dir(&root) {
+                Ok(()) => return root,
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(error) => panic!("create isolated test root {}: {error}", root.display()),
+            }
+        }
+        panic!("could not allocate isolated test root for {name}");
+    }
+
     fn temp_spec(name: &str) -> SessionSpec {
-        let root =
-            std::env::temp_dir().join(format!("symbrowse-runtime-{name}-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&root);
+        let root = unique_test_root(name);
         let mut spec = SessionSpec::for_session(name);
         spec.state_dir = root.join("state");
         spec.cache_dir = root.join("cache");
@@ -1917,9 +1935,11 @@ mod tests {
         assert_eq!(
             data["interfaces"],
             json!([
-                "CookieEngine",
+                "FrameManager",
                 "InspectionEngine",
-                "NavigationStateProvider"
+                "NavigationStateProvider",
+                "NetworkPolicyReporter",
+                "TabManager"
             ])
         );
         assert!(
@@ -2088,11 +2108,10 @@ mod tests {
         use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
         use std::time::Duration;
 
-        let root =
-            std::env::temp_dir().join(format!("symbrowse-server-flow-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&root);
-        std::fs::create_dir_all(&root).expect("test root");
-        let mut spec = temp_spec("server-flow-cancel");
+        let root = unique_test_root("server-flow");
+        let mut spec = SessionSpec::for_session("server-flow-cancel");
+        spec.engine = "static".into();
+        spec.allow_private = true;
         #[cfg(unix)]
         {
             spec.socket_path = root.join("default.sock");
