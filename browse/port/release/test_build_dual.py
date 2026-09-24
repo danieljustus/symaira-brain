@@ -22,25 +22,33 @@ SPEC.loader.exec_module(build_dual)
 class CargoTargetDirTests(unittest.TestCase):
     def test_direct_macos_default_target_is_external(self) -> None:
         root = Path("/workspace/browse")
-        env: dict[str, str] = {}
-        with patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
-            target = build_dual._cargo_target_dir(root, env)
-        self.assertEqual(target, Path(env[build_dual.EXTERNAL_BASE_ENV]) / "cargo-target")
-        self.assertTrue(target.is_relative_to(build_dual.EXTERNAL_RUNTIME_ROOT))
-        self.assertTrue(Path(env["GOTELEMETRYDIR"]).is_relative_to(build_dual.EXTERNAL_RUNTIME_ROOT))
+        with tempfile.TemporaryDirectory() as temp:
+            runtime = Path(temp)
+            env = {build_dual.EXTERNAL_BASE_ENV: str(runtime / "builds" / "browse")}
+            with patch.object(build_dual, "EXTERNAL_RUNTIME_ROOT", runtime), patch.object(
+                build_dual.Path, "is_mount", return_value=True
+            ), patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
+                target = build_dual._cargo_target_dir(root, env)
+            self.assertEqual(target, Path(env[build_dual.EXTERNAL_BASE_ENV]) / "cargo-target")
+            self.assertTrue(target.is_relative_to(runtime.resolve()))
+            self.assertTrue(Path(env["GOTELEMETRYDIR"]).is_relative_to(runtime.resolve()))
 
     def test_direct_macos_output_rejects_local_absolute_path(self) -> None:
-        env: dict[str, str] = {}
-        with patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
-            build_dual.external_environment(env)
-            with self.assertRaisesRegex(RuntimeError, "--output must be under"):
-                build_dual.release_output(Path("/workspace/browse"), Path("/tmp/release"), env)
+        with tempfile.TemporaryDirectory() as temp:
+            runtime = Path(temp)
+            env = {build_dual.EXTERNAL_BASE_ENV: str(runtime / "builds" / "browse")}
+            with patch.object(build_dual, "EXTERNAL_RUNTIME_ROOT", runtime), patch.object(
+                build_dual.Path, "is_mount", return_value=True
+            ), patch.object(build_dual.sys, "platform", "darwin"), patch.dict(os.environ, {"CI": ""}, clear=False):
+                build_dual.external_environment(env)
+                with self.assertRaisesRegex(RuntimeError, "--output must be under"):
+                    build_dual.release_output(Path("/workspace/browse"), Path("/tmp/release"), env)
 
     def test_ci_output_remains_portable(self) -> None:
         root = Path("/workspace/browse")
         self.assertEqual(
             build_dual.release_output(root, Path("target/release"), {"CI": "1"}),
-            root / "target/release",
+            (root / "target/release").resolve(),
         )
 
     def test_ci_default_target_stays_in_browse_root(self) -> None:
