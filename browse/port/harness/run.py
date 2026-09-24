@@ -86,8 +86,13 @@ def external_environment(env: dict[str, str]) -> dict[str, str]:
 
 def temporary_parent(env: dict[str, str] | None = None) -> str | None:
     selected = os.environ if env is None else env
-    if sys.platform != "darwin" or selected.get("CI"):
+    if sys.platform != "darwin":
         return None
+    if selected.get("CI"):
+        # Hosted macOS runners expose TMPDIR through a long per-user path. The
+        # daemon's default socket path adds another fixed directory suffix,
+        # which can exceed sockaddr_un.sun_path even for a short test name.
+        return "/tmp"
     return external_environment(selected)[EXTERNAL_RUNTIME_ENV]
 
 
@@ -332,11 +337,37 @@ def race_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str, 
         status = request(socket_path, {"cmd": "daemon.status", "session": session})
         if not status.get("success"):
             raise AssertionError(f"race daemon did not become queryable: {status}")
-        request(socket_path, {"cmd": "daemon.stop", "session": session})
+        status_data = status.get("data")
+        owner_pid = status_data.get("pid") if isinstance(status_data, dict) else None
+        if not isinstance(owner_pid, int):
+            raise AssertionError(f"race daemon did not report its owner PID: {status}")
+        owner = next((process for process in processes if process.pid == owner_pid), None)
+        if owner is None:
+            raise AssertionError(
+                f"race daemon PID {owner_pid} is not one of the {starters} starters"
+            )
+
+        # Let every starter contend before stopping the winner. Stopping as soon
+        # as the socket appears allows a not-yet-scheduled starter to acquire
+        # the lock afterward and become a second, unexpected daemon.
+        deadline = time.monotonic() + 30.0
         for process in processes:
-            process.wait(timeout=10)
-        for process in processes:
+            if process is owner:
+                continue
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise AssertionError("daemon race starters did not settle within 30 seconds")
+            try:
+                process.wait(timeout=remaining)
+            except subprocess.TimeoutExpired as error:
+                raise AssertionError(
+                    f"daemon race starter PID {process.pid} remained active before shutdown"
+                ) from error
             assert_clean_process(process)
+
+        request(socket_path, {"cmd": "daemon.stop", "session": session})
+        owner.wait(timeout=10)
+        assert_clean_process(owner)
     finally:
         for process in processes:
             kill_tree(process)
