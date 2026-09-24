@@ -182,14 +182,15 @@ impl DaemonProxy {
             .get("session")
             .and_then(Value::as_str)
             .filter(|value| !value.is_empty())
-            .unwrap_or(&self.options.session);
+            .map(str::to_owned)
+            .unwrap_or_else(|| self.options.session.clone());
         let command = daemon_command(tool, arguments);
-        let endpoint = self.endpoint(session)?;
+        let endpoint = self.endpoint(&session)?;
         let max_tokens = requested_max_tokens(&command, arguments);
         let frame = DaemonFrame {
             cmd: command,
             args: daemon_args(tool, arguments),
-            session: session.to_owned(),
+            session: session.clone(),
             request_id: request_id(),
             max_tokens: (max_tokens > 0).then_some(max_tokens),
             retrieval_surface: Some("mcp".to_owned()),
@@ -198,7 +199,7 @@ impl DaemonProxy {
         match self.checked_request(&endpoint, &frame) {
             Ok(response) => response.into_result(),
             Err(CheckedRequestError::Autostart(first)) => {
-                let child = self.start_daemon(session).map_err(Box::new)?;
+                let child = self.start_daemon(&session).map_err(Box::new)?;
                 self.child = Some(child);
                 let deadline = Instant::now() + self.options.startup_timeout;
                 let mut last = first;
@@ -217,9 +218,9 @@ impl DaemonProxy {
                     code: "daemon_unavailable".to_owned(),
                     message: format!(
                         "daemon did not become ready for session {}",
-                        redact_str(session)
+                        redact_str(&session)
                     ),
-                    hint: Some(self.daemon_hint(session)),
+                    hint: Some(self.daemon_hint(&session)),
                     retryable: Some(true),
                     requires_user_confirmation: None,
                     resume_hint: None,
