@@ -439,6 +439,10 @@ mod tests {
             clean_native_path(&raw),
             PathBuf::from("parent").join("config.json")
         );
+        assert_eq!(
+            clean_native_path(Path::new("foo/../claude/config.json")),
+            PathBuf::from("claude").join("config.json")
+        );
     }
 
     #[cfg(windows)]
