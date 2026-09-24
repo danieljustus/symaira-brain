@@ -347,6 +347,13 @@ fn parse_eval(values: &[String], command_index: usize) -> Result<Action, ParseEr
             "--stdin" => from_stdin = true,
             "--base64" | "-b" => base64 = true,
             "--json" => json = true,
+            _ if value.starts_with("--stdin=") => {
+                from_stdin = parse_bool("--stdin", &value[8..])?;
+            }
+            _ if value.starts_with("--base64=") => {
+                base64 = parse_bool("--base64", &value[9..])?;
+            }
+            _ if value.starts_with("-b=") => base64 = parse_bool("--base64", &value[3..])?,
             _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
