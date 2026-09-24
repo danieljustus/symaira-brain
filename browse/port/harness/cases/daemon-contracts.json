@@ -2,6 +2,23 @@
   "schema_version": 1,
   "cases": [
     {
+      "id": "DMN-002-frame-limits",
+      "platforms": ["all"],
+      "coverage": ["malformed-json", "empty-cmd", "whitespace-cmd", "vertical-tab-tail", "one-mib-boundary", "oversized-line"],
+      "expected": {
+        "malformed_json": "malformed_request",
+        "empty_cmd": "malformed_request",
+        "whitespace_cmd": "accepted",
+        "vertical_tab_tail": "malformed_request",
+        "boundary": "accepted",
+        "oversized": "connection_close"
+      },
+      "go": ["go", "test", "./internal/daemon", "-run", "TestDecodeFrameAndStableResponseSchema|TestDecodeFrameValidation", "-count=1"],
+      "go_oracle": ["go", "run", "./port/harness/daemon_frame_limits_oracle.go"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "frame_line_ending_and_limit_match_go_scanner", "--locked"],
+      "rust_protocol": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "empty_command_and_one_mib_boundary_are_checked", "--locked"]
+    },
+    {
       "id": "DMN-003-peer-uid",
       "platforms": ["darwin", "linux"],
       "coverage": ["same-uid-accepted", "different-uid-rejected-by-policy", "native-peer-credential-accepted"],

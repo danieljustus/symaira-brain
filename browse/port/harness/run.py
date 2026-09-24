@@ -101,6 +101,25 @@ def run(command: list[str], root: Path, env: dict[str, str], *, timeout: int = 6
     subprocess.run(command, cwd=root, env=env, check=True, timeout=timeout)
 
 
+def run_daemon_frame_limit_case(case: dict, root: Path, env: dict[str, str]) -> None:
+    command = case["go_oracle"]
+    print("+", " ".join(command), flush=True)
+    result = subprocess.run(
+        command,
+        cwd=root,
+        env=env,
+        check=True,
+        timeout=600,
+        capture_output=True,
+        text=True,
+    )
+    actual = json.loads(result.stdout)
+    if actual != case["expected"]:
+        raise AssertionError(f"DMN-002 Go oracle output differs from fixture: {actual!r}")
+    for key in ("go", "rust", "rust_protocol"):
+        run(case[key], root, env)
+
+
 def wait_for_path(path: Path, timeout: float = 5.0) -> None:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -433,6 +452,7 @@ ALL_SUITES = (
     "fetch-render",
     "workflows",
     "daemon",
+    "daemon-frame-limits",
     "daemon-contracts",
     "chrome-spike",
     "chrome-full",
@@ -680,11 +700,18 @@ def main() -> int:
     elif args.suite == "daemon-races":
         daemon_suite(root, env, rounds=args.repeat, starters=50)
         return 0
+    elif args.suite == "daemon-frame-limits":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        case = next(case for case in fixture["cases"] if case["id"] == "DMN-002-frame-limits")
+        run_daemon_frame_limit_case(case, root, env)
+        print("DMN-002 frame-limit suite passed")
+        return 0
     elif args.suite == "daemon-contracts":
         fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
         if fixture.get("schema_version") != 1:
             raise ValueError("unsupported daemon-contracts fixture schema")
         expected = {
+            "DMN-002-frame-limits",
             "DMN-003-peer-uid",
             "DMN-003-socket-mode",
             "DMN-004-startup-race",
@@ -695,7 +722,17 @@ def main() -> int:
         }
         cases = fixture.get("cases", [])
         if {case.get("id") for case in cases} != expected:
-            raise ValueError("daemon-contracts fixture IDs do not match DMN-003..008")
+            raise ValueError("daemon-contracts fixture IDs do not match DMN-002..008")
+        frame_case = next(case for case in cases if case["id"] == "DMN-002-frame-limits")
+        if frame_case.get("coverage") != [
+            "malformed-json",
+            "empty-cmd",
+            "whitespace-cmd",
+            "vertical-tab-tail",
+            "one-mib-boundary",
+            "oversized-line",
+        ]:
+            raise ValueError("DMN-002 fixture omits frame decoding or size-boundary coverage")
         uid_case = next(case for case in cases if case["id"] == "DMN-003-peer-uid")
         if uid_case.get("coverage") != [
             "same-uid-accepted",
@@ -737,8 +774,14 @@ def main() -> int:
             if "all" not in case["platforms"] and platform not in case["platforms"]:
                 print(f"skip {case['id']} on {platform}", flush=True)
                 continue
+            if case["id"] == "DMN-002-frame-limits":
+                run_daemon_frame_limit_case(case, root, env)
+                print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
+                continue
             run(case["go"], root, env)
             run(case["rust"], root, env)
+            if case.get("rust_protocol"):
+                run(case["rust_protocol"], root, env)
             print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
         print("daemon-contracts suite passed", flush=True)
         return 0

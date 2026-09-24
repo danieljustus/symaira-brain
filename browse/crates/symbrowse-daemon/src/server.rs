@@ -828,7 +828,7 @@ fn serve_connection_parts<S>(
             Ok(_) => {}
         }
         last_activity.store(unix_nanos(), Ordering::Release);
-        let frame = match decode_frame(line.trim_ascii_end()) {
+        let frame = match decode_frame(trim_line_ending(&line)) {
             Ok(mut frame) => {
                 if frame.session.is_empty() {
                     frame.session = options.session.clone();
@@ -990,6 +990,11 @@ fn serve_connection_parts<S>(
             return;
         }
     }
+}
+
+fn trim_line_ending(line: &[u8]) -> &[u8] {
+    let line = line.strip_suffix(b"\n").unwrap_or(line);
+    line.strip_suffix(b"\r").unwrap_or(line)
 }
 
 fn operation_result_response(
@@ -1370,6 +1375,61 @@ fn state_root() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Cursor;
+
+    fn read_frame_for_test(raw: &[u8]) -> io::Result<Vec<u8>> {
+        let mut reader = BufReader::new(Cursor::new(raw));
+        let mut line = Vec::new();
+        #[cfg(not(windows))]
+        read_limited_line(&mut reader, &mut line, MAX_FRAME_BYTES)?;
+        #[cfg(windows)]
+        read_limited_line_windows(
+            &mut reader,
+            &mut line,
+            MAX_FRAME_BYTES,
+            Duration::from_secs(1),
+            &AtomicBool::new(false),
+        )?;
+        Ok(line)
+    }
+
+    #[test]
+    fn frame_line_ending_and_limit_match_go_scanner() {
+        assert_eq!(trim_line_ending(b"{\"cmd\":\"x\"}\n"), b"{\"cmd\":\"x\"}");
+        assert_eq!(trim_line_ending(b"{\"cmd\":\"x\"}\r\n"), b"{\"cmd\":\"x\"}");
+        assert_eq!(trim_line_ending(b"{\"cmd\":\"x\"}\r"), b"{\"cmd\":\"x\"}");
+
+        let vertical_tab = b"{\"cmd\":\"x\"}\x0b";
+        assert_eq!(trim_line_ending(vertical_tab), vertical_tab);
+        assert!(decode_frame(trim_line_ending(vertical_tab)).is_err());
+        assert_eq!(
+            decode_frame(trim_line_ending(b"{\"cmd\":\" \"}\n"))
+                .expect("whitespace command must reach command dispatch")
+                .cmd,
+            " "
+        );
+
+        let prefix = br#"{"cmd":"x","args":{"v":""#;
+        let suffix = b"\"}}";
+        let value_len = MAX_FRAME_BYTES - 1 - prefix.len() - suffix.len();
+        let mut boundary = Vec::with_capacity(MAX_FRAME_BYTES);
+        boundary.extend_from_slice(prefix);
+        boundary.resize(boundary.len() + value_len, b'x');
+        boundary.extend_from_slice(suffix);
+        boundary.push(b'\n');
+        assert_eq!(boundary.len(), MAX_FRAME_BYTES);
+        let accepted = read_frame_for_test(&boundary).expect("exact scanner limit accepted");
+        assert_eq!(accepted.len(), MAX_FRAME_BYTES);
+        assert!(decode_frame(trim_line_ending(&accepted)).is_ok());
+
+        let mut oversized = boundary;
+        oversized.insert(oversized.len() - 2, b'x');
+        assert_eq!(oversized.len(), MAX_FRAME_BYTES + 1);
+        assert_eq!(
+            read_frame_for_test(&oversized).unwrap_err().kind(),
+            io::ErrorKind::InvalidData
+        );
+    }
 
     #[cfg(unix)]
     #[test]

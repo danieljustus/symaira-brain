@@ -97,7 +97,7 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
         message: format!("decode frame: {e}"),
         ..Default::default()
     })?;
-    if frame.cmd.trim().is_empty() {
+    if frame.cmd.is_empty() {
         return Err(DaemonError {
             code: codes::MALFORMED_REQUEST.into(),
             message: "missing cmd".into(),
@@ -151,6 +151,15 @@ mod tests {
     fn empty_command_and_one_mib_boundary_are_checked() {
         assert_eq!(
             decode_frame(br#"{"session":"x"}"#).unwrap_err().code,
+            codes::MALFORMED_REQUEST
+        );
+        assert_eq!(
+            decode_frame(br#"{"cmd":" "}"#).unwrap().cmd,
+            " ",
+            "Go rejects only an empty command; whitespace reaches command dispatch"
+        );
+        assert_eq!(
+            decode_frame(b"{\"cmd\":\"x\"}\x0b").unwrap_err().code,
             codes::MALFORMED_REQUEST
         );
         let value = serde_json::json!({"cmd":"x","args": "x".repeat(crate::MAX_FRAME_BYTES)});
