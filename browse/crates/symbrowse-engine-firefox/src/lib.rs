@@ -23,6 +23,12 @@ use tokio::{
 
 pub const ENGINE_KIND: &str = "firefox";
 
+fn context_partition(context: &str) -> Value {
+    // BiDi's partition descriptor is tagged; Firefox rejects a context-only
+    // object even when the browsing-context id itself is valid.
+    json!({"type":"context","context":context})
+}
+
 #[derive(Debug)]
 pub enum FirefoxError {
     Unsupported {
@@ -278,7 +284,7 @@ impl FirefoxSession {
         self.bidi
             .command(
                 "storage.getCookies",
-                json!({"partition":{"context":self.context}}),
+                json!({"partition":context_partition(&self.context)}),
                 self.timeout,
             )
             .await
@@ -289,7 +295,7 @@ impl FirefoxSession {
         self.bidi
             .command(
                 "storage.setCookie",
-                json!({"cookie":cookie,"partition":{"context":self.context}}),
+                json!({"cookie":cookie,"partition":context_partition(&self.context)}),
                 self.timeout,
             )
             .await
@@ -370,40 +376,4 @@ impl Drop for FirefoxSession {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn capabilities_are_truthful() {
-        let c = canonical_capabilities();
-        let actual: std::collections::BTreeSet<_> = c.interfaces.into_iter().collect();
-        let expected = [
-            "CookieEngine",
-            "FrameManager",
-            "InspectionEngine",
-            "InteractionEngine",
-            "NavigationStateProvider",
-            "ScreenshotEngine",
-            "TabManager",
-        ]
-        .into_iter()
-        .map(str::to_owned)
-        .collect();
-        assert_eq!(actual, expected);
-    }
-    #[test]
-    fn unsupported_downloads_and_network_capture_are_typed() {
-        for operation in ["downloads", "network.capture"] {
-            assert!(matches!(
-                FirefoxSession::unsupported(operation),
-                FirefoxError::Unsupported { .. }
-            ));
-        }
-    }
-    #[test]
-    fn invalid_explicit_path_is_typed() {
-        assert!(matches!(
-            resolve_firefox_executable(Some(Path::new("/missing/firefox"))),
-            Err(FirefoxError::Driver(_))
-        ));
-    }
-}
+mod tests;
