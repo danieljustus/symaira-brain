@@ -43,6 +43,26 @@ jobs:
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: browse/go.mod
+      - name: Compare native Go and Rust Browse CLI cases
+        run: |
+          go_binary="$RUNNER_TEMP/symbrowse-go"
+          rust_binary=target/release/symbrowse
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            go_binary+=.exe
+            rust_binary+=.exe
+          fi
+          go build -o "$go_binary" ./cmd/symbrowse
+          python3 port/harness/cli_differential.py --skip-help-tree \
+            --go "$go_binary" --rust "$rust_binary" \
+            --report "$RUNNER_TEMP/cli-differential.json" --temp-root "$RUNNER_TEMP"
+      - name: Retain CLI comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-cli-${{ github.sha }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/cli-differential.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Test daemon contracts
         run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
       - name: Exercise daemon lifecycle and races
