@@ -15,7 +15,8 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, network, page},
+    cdp::browser_protocol::{accessibility, browser, dom, input, network, page},
+    layout::Point,
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -456,6 +457,39 @@ impl ChromePage {
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         self.element(selector).await?.scroll_into_view().await?;
+        Ok(result("scroll", selector))
+    }
+    pub async fn scroll(
+        &self,
+        selector: &str,
+        amount: i64,
+    ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
+        let target = self.element(selector).await?;
+        let element = target.scroll_into_view().await?;
+        element.focus().await?;
+        let bounds = self.inspect(selector, "box").await?;
+        let x = bounds["x"]
+            .as_f64()
+            .ok_or("element box has no x coordinate")?
+            + bounds["width"].as_f64().ok_or("element box has no width")? / 2.0;
+        let y = bounds["y"]
+            .as_f64()
+            .ok_or("element box has no y coordinate")?
+            + bounds["height"]
+                .as_f64()
+                .ok_or("element box has no height")?
+                / 2.0;
+        let amount = if amount == 0 { 480.0 } else { amount as f64 };
+        self.page.move_mouse(Point::new(x, y)).await?;
+        let event = input::DispatchMouseEventParams::builder()
+            .r#type(input::DispatchMouseEventType::MouseWheel)
+            .x(x)
+            .y(y)
+            .button(input::MouseButton::None)
+            .delta_x(0.0)
+            .delta_y(amount)
+            .build()?;
+        self.page.execute(event).await?;
         Ok(result("scroll", selector))
     }
     pub async fn type_text(

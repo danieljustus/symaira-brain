@@ -209,7 +209,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let opened = request(
         &client,
         "open",
-        json!({"url": "data:text/html,<title>daemon</title><h1>native</h1>"}),
+        json!({"url": "data:text/html,<title>daemon</title><h1>native</h1><div style='height:12000px'><div id='target' style='margin-top:8000px;height:100px'></div></div>"}),
     );
     assert_eq!(opened["success"], true, "open response: {opened}");
     let script = request(&client, "read", json!({}));
@@ -218,6 +218,49 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
             .as_str()
             .is_some_and(|text| text.contains("native")),
         "read response: {script}"
+    );
+    let into_view = request(&client, "scrollintoview", json!({"selector":"#target"}));
+    assert_eq!(into_view["success"], true, "scroll into view: {into_view}");
+    let scrolled_into_view = request(&client, "get.box", json!({"selector":"#target"}));
+    assert_eq!(
+        scrolled_into_view["success"], true,
+        "pre-scroll box: {scrolled_into_view}"
+    );
+    let scrolled = request(&client, "scroll", json!({"selector":"#target","amount":0}));
+    assert_eq!(
+        scrolled["success"], true,
+        "default scroll response: {scrolled}"
+    );
+    thread::sleep(Duration::from_millis(100));
+    let scrolled_down = request(&client, "get.box", json!({"selector":"#target"}));
+    assert_eq!(
+        scrolled_down["success"], true,
+        "post-scroll box: {scrolled_down}"
+    );
+    assert!(
+        scrolled_down["data"]["y"].as_f64().unwrap_or_default()
+            < scrolled_into_view["data"]["y"].as_f64().unwrap_or_default(),
+        "positive scroll did not move the target up: before={scrolled_into_view}, after={scrolled_down}"
+    );
+    thread::sleep(Duration::from_millis(100));
+    let scrolled_up = request(
+        &client,
+        "scroll",
+        json!({"selector":"#target","amount":-240}),
+    );
+    assert_eq!(
+        scrolled_up["success"], true,
+        "negative scroll: {scrolled_up}"
+    );
+    let scrolled_up_box = request(&client, "get.box", json!({"selector":"#target"}));
+    assert_eq!(
+        scrolled_up_box["success"], true,
+        "negative scroll box: {scrolled_up_box}"
+    );
+    assert!(
+        scrolled_up_box["data"]["y"].as_f64().unwrap_or_default()
+            > scrolled_down["data"]["y"].as_f64().unwrap_or_default(),
+        "negative scroll did not move the target down: before={scrolled_down}, after={scrolled_up_box}"
     );
     let tabs = request(&client, "tabs.list", json!({}));
     assert_eq!(tabs["success"], true, "tabs response: {tabs}");

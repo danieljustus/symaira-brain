@@ -2186,9 +2186,8 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "tools" => parse_tools(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
-        | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" | "a11y" | "screenshot" => {
-            parse_dispatch(&values, command_index)
-        }
+        | "focus" | "hover" | "select" | "uncheck" | "scroll" | "scrollintoview" | "a11y"
+        | "screenshot" => parse_dispatch(&values, command_index),
         command => Err(ParseError {
             message: format!("unknown command {command:?} for \"symbrowse\""),
             exit_code: 2,
@@ -2197,7 +2196,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  tools          List registered Browse tools for one or more profiles\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2208,7 +2207,14 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
     };
     if matches!(
         target,
-        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview"
+        "check"
+            | "dblclick"
+            | "focus"
+            | "hover"
+            | "select"
+            | "uncheck"
+            | "scroll"
+            | "scrollintoview"
     ) && first.is_none()
     {
         return Some(interaction_help(target));
@@ -2430,10 +2436,10 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
 }
 
 fn interaction_help(action: &str) -> String {
-    let value_help = if action == "select" {
-        "The value or label of the option to select from the drop-down."
-    } else {
-        "Not used for this interaction."
+    let value_help = match action {
+        "select" => "The value or label of the option to select from the drop-down.",
+        "scroll" => "The vertical scroll amount in pixels (positive for down, negative for up).",
+        _ => "Not used for this interaction.",
     };
     format!(
         "{action} performs the {action} interaction on the targeted element.\n\nAccepted selector forms:\n  - CSS selector (e.g. \"button.submit\", \"#username\", \"input[name='q']\")\n  - Stable @eN ref from snapshot (e.g. \"@e1\", \"@e2\")\n  - Role/name pair as supported by the engine (e.g. role and accessible name)\n\nOptional [value] argument:\n  {value_help}\n\nUsage:\n  symbrowse {action} <selector> [value] [flags]\n\nFlags:\n  -h, --help             help for {action}\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
@@ -2507,7 +2513,14 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
     };
     let interaction = matches!(
         name,
-        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview"
+        "check"
+            | "dblclick"
+            | "focus"
+            | "hover"
+            | "select"
+            | "uncheck"
+            | "scroll"
+            | "scrollintoview"
     );
     let mut session = "default".to_owned();
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
@@ -2722,7 +2735,7 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
             take_positional(&mut args, &mut positional, "url");
         }
         "click" | "fill" | "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck"
-        | "scrollintoview" => {
+        | "scroll" | "scrollintoview" => {
             take_positional(&mut args, &mut positional, "selector");
         }
         "press" => take_positional(&mut args, &mut positional, "key"),
@@ -2780,7 +2793,23 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         if name == "select" {
             take_positional(&mut args, &mut positional, "value");
         }
-        let max = if name == "select" { 2 } else { 1 };
+        if name == "scroll" {
+            if let Some(amount) = positional.first() {
+                let amount = amount.parse::<i64>().map_err(|_| ParseError {
+                    message: format!(
+                        "scroll amount: strconv.ParseInt: parsing {amount:?}: invalid syntax"
+                    ),
+                    exit_code: 2,
+                })?;
+                args.insert("amount".into(), serde_json::Value::from(amount));
+                positional.remove(0);
+            }
+        }
+        let max = if name == "select" || name == "scroll" {
+            2
+        } else {
+            1
+        };
         if supplied_positional_count == 0 || supplied_positional_count > max {
             return Err(ParseError {
                 message: format!("{name} requires a selector and optional value"),
@@ -2828,9 +2857,8 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         "get" | "is" => &["kind"][..],
         "find" => &["kind", "query"][..],
         "wait" => &["kind"][..],
-        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scrollintoview" => {
-            &["selector"][..]
-        }
+        "check" | "dblclick" | "focus" | "hover" | "select" | "uncheck" | "scroll"
+        | "scrollintoview" => &["selector"][..],
         _ => &[][..],
     };
     for required in required {
@@ -5121,6 +5149,11 @@ mod tests {
                 "scrollintoview",
                 serde_json::json!({"action": "scrollintoview", "selector": "#target"}),
             ),
+            (
+                &["scroll", "#target", "--", "-240"][..],
+                "scroll",
+                serde_json::json!({"action": "scroll", "selector": "#target", "amount": -240}),
+            ),
         ] {
             let Action::Dispatch {
                 command,
@@ -5238,6 +5271,7 @@ mod tests {
             "flow",
             "open",
             "screenshot",
+            "scroll",
             "state",
             "tab",
             "tools",
@@ -5253,7 +5287,7 @@ mod tests {
                 "root help advertised {implemented} without a Rust help/dispatch path"
             );
         }
-        for unsupported in ["scroll", "auth"] {
+        for unsupported in ["auth"] {
             assert!(
                 !root
                     .lines()

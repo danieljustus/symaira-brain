@@ -227,15 +227,17 @@ impl DispatchRuntime {
             }
             "open" | "goto" | "read" | "snapshot" | "click" | "dblclick" | "fill" | "type"
             | "press" | "focus" | "hover" | "select" | "check" | "uncheck" | "wait" | "back"
-            | "forward" | "reload" | "scrollintoview" | "get.text" | "get.html" | "get.title"
-            | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box" | "get.styles"
-            | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list" | "tab.list"
-            | "tab.new" | "tab.switch" | "tab.close" | "window.new" | "frames.list"
-            | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept" | "dialog.dismiss"
-            | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
-            | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get" | "storage.list"
-            | "storage.set" | "storage.clear" | "download" => self.browser_command(&frame).await,
+            | "forward" | "reload" | "scroll" | "scrollintoview" | "get.text" | "get.html"
+            | "get.title" | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box"
+            | "get.styles" | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list"
+            | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
+            | "frames.list" | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept"
+            | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
+            | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
+            | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
+            | "storage.list" | "storage.set" | "storage.clear" | "download" => {
+                self.browser_command(&frame).await
+            }
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -1067,6 +1069,15 @@ impl DispatchRuntime {
                 page.uncheck(required_string(args, "selector")?)
                     .await
                     .map_err(runtime_error)?,
+            )
+            .map_err(runtime_error)?,
+            "scroll" => serde_json::to_value(
+                page.scroll(
+                    required_string(args, "selector")?,
+                    args.get("amount").and_then(Value::as_i64).unwrap_or(0),
+                )
+                .await
+                .map_err(runtime_error)?,
             )
             .map_err(runtime_error)?,
             "get.text" | "get.html" | "get.title" | "get.url" | "get.count" | "get.value"

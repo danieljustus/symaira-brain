@@ -100,7 +100,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "hover", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "screenshot", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "type", "uncheck", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -137,7 +137,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["tab", "window"], ["tab", "window", "window"],
         ["session"], ["session", "id"], ["session", "list"], ["session", "info"],
         ["cache", "get"],
-        ["check"], ["dblclick"], ["focus"], ["hover"], ["select"], ["uncheck"], ["scrollintoview"],
+        ["check"], ["dblclick"], ["focus"], ["hover"], ["scroll"], ["select"], ["uncheck"], ["scrollintoview"],
         ["frame", "tree"], ["set", "offline"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
@@ -678,10 +678,14 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["select", "#country"], b"", True),
         ("CLI-002", ["uncheck", "#newsletter"], b"", True),
         ("CLI-002", ["scrollintoview", "#target", "--output=json"], b"", True),
+        ("CLI-002", ["scroll", "--output=json", "#target", "--", "-240"], b"", True),
+        ("CLI-002", ["scroll", "#target"], b"", True),
         ("CLI-003", ["check"], b"", False),
         ("CLI-003", ["check", "#agree", "extra"], b"", False),
         ("CLI-003", ["select", "#country", "DE", "extra"], b"", False),
         ("CLI-003", ["scrollintoview", "#target", "extra"], b"", False),
+        ("CLI-003", ["scroll", "#target", "bad-amount"], b"", False),
+        ("CLI-003", ["scroll", "#target", "1", "extra"], b"", False),
         ("CLI-003", ["check", "--selector", "#agree"], b"", False),
         ("CLI-003", ["check", "--", "--selector"], b"", True),
         ("CLI-002", ["frame", "tree", "--json"], b"", True),
