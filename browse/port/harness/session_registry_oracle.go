@@ -18,6 +18,7 @@ type sessionView struct {
 	PID                    int    `json:"pid"`
 	ActiveTabs             int    `json:"active_tabs"`
 	UserDataDirBasename    string `json:"user_data_dir_basename"`
+	UserDataPathIsClean    bool   `json:"user_data_path_is_clean"`
 	BrowserContextID       string `json:"browser_context_id"`
 	RefCount               int    `json:"ref_count"`
 	Scope                  string `json:"scope"`
@@ -47,6 +48,7 @@ func view(info daemon.SessionInfo) sessionView {
 		PID:                    info.PID,
 		ActiveTabs:             info.ActiveTabs,
 		UserDataDirBasename:    filepath.Base(info.UserDataDir),
+		UserDataPathIsClean:    filepath.Clean(info.UserDataDir) == info.UserDataDir,
 		BrowserContextID:       info.BrowserContextID,
 		RefCount:               info.RefCount,
 		Scope:                  info.Scope,
@@ -63,8 +65,9 @@ func main() {
 	}
 	defer os.RemoveAll(root)
 	now := time.Date(2026, 9, 24, 12, 30, 0, 123_000_000, time.UTC)
+	uncleanRoot := root + string(os.PathSeparator) + "unused" + string(os.PathSeparator) + ".."
 	registry := daemon.NewSessionRegistry(daemon.SessionRegistryOptions{
-		PID: 4242, UserDataRoot: root, Scope: "worktree", OriginPath: "/workspace/project",
+		PID: 4242, UserDataRoot: uncleanRoot, Scope: "worktree", OriginPath: "/workspace/project",
 		Now: func() time.Time { return now },
 	})
 	_, invalidName := registry.Ensure("../escape")

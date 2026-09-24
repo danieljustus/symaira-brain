@@ -103,3 +103,24 @@ fn registry_matches_go_lifecycle_and_stable_errors() {
     );
     assert!(root.path().join("sessions/beta").is_dir());
 }
+
+#[test]
+fn registry_cleans_profile_root_before_joining_session_names() {
+    let root = tempfile::tempdir().expect("temporary registry root");
+    let unclean_root = root.path().join("unused").join("..");
+    let registry = SessionRegistry::new(SessionRegistryOptions {
+        user_data_root: unclean_root,
+        ..Default::default()
+    });
+
+    assert_eq!(registry.user_data_root(), root.path());
+    let info = registry.ensure("alpha").expect("ensure alpha");
+    assert_eq!(Path::new(&info.user_data_dir), root.path().join("alpha"));
+    assert!(Path::new(&info.user_data_dir).is_dir());
+
+    let empty_root = SessionRegistry::new(SessionRegistryOptions {
+        user_data_root: Path::new("").to_owned(),
+        ..Default::default()
+    });
+    assert!(!empty_root.user_data_root().as_os_str().is_empty());
+}

@@ -83,8 +83,13 @@ pub struct SessionRegistry {
 
 impl SessionRegistry {
     pub fn new(options: SessionRegistryOptions) -> Self {
+        let user_data_root = if options.user_data_root.as_os_str().is_empty() {
+            default_user_data_root()
+        } else {
+            options.user_data_root
+        };
         Self {
-            user_data_root: options.user_data_root,
+            user_data_root: clean_path(&user_data_root),
             pid: if options.pid == 0 {
                 std::process::id()
             } else {
@@ -222,6 +227,27 @@ impl SessionRegistry {
             .expect("session registry poisoned")
             .clear();
     }
+}
+
+fn clean_path(path: &Path) -> PathBuf {
+    let mut cleaned = PathBuf::new();
+    for component in path.components() {
+        match component {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                if cleaned.file_name().is_some() {
+                    cleaned.pop();
+                } else if !cleaned.has_root() {
+                    cleaned.push("..");
+                }
+            }
+            component => cleaned.push(component.as_os_str()),
+        }
+    }
+    if cleaned.as_os_str().is_empty() {
+        cleaned.push(".");
+    }
+    cleaned
 }
 
 fn default_user_data_root() -> PathBuf {

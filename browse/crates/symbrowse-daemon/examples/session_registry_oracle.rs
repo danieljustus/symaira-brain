@@ -29,8 +29,9 @@ fn main() {
         std::process::id()
     ));
     fs::create_dir(&root).expect("create isolated registry root");
+    let unclean_root = root.join("unused").join("..");
     let registry = SessionRegistry::new(SessionRegistryOptions {
-        user_data_root: root.clone(),
+        user_data_root: unclean_root,
         pid: 4242,
         scope: "worktree".into(),
         origin_path: "/workspace/project".into(),
@@ -69,6 +70,8 @@ fn main() {
                 "active_tabs": info.active_tabs,
                 "user_data_dir_basename": PathBuf::from(&info.user_data_dir)
                     .file_name().and_then(|name| name.to_str()).unwrap_or_default(),
+                "user_data_path_is_clean": PathBuf::from(&info.user_data_dir)
+                    == registry.user_data_root().join(&info.name),
                 "browser_context_id": info.browser_context_id,
                 "ref_count": info.ref_count,
                 "scope": info.scope,
