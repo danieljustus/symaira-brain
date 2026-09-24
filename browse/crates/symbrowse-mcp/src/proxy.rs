@@ -1231,7 +1231,7 @@ mod tests {
                 &json!({"url":"https://example.com", "session":"test"}),
             )
             .expect("configuration mismatch must not stop or block daemon");
-        assert_eq!(result["data"]["ok"], Value::Bool(true));
+        assert_eq!(result["ok"], Value::Bool(true));
         server.join().expect("daemon fixture thread");
         let seen: Vec<_> = receive.try_iter().collect();
         assert_eq!(

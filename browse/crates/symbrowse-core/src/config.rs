@@ -233,10 +233,13 @@ impl std::error::Error for ConfigError {}
 impl LoadContext {
     /// Captures the process environment without reading configuration files.
     pub fn from_process(flags: FlagOverrides) -> std::result::Result<Self, ConfigError> {
-        let home = std::env::var_os("HOME")
-            .or_else(|| std::env::var_os("USERPROFILE"))
-            .map(PathBuf::from)
-            .ok_or_else(|| ConfigError("cannot determine home directory".to_owned()))?;
+        let home = home_for_platform(
+            std::env::var_os("HOME"),
+            std::env::var_os("USERPROFILE"),
+            cfg!(windows),
+        )
+        .map(PathBuf::from)
+        .ok_or_else(|| ConfigError("cannot determine home directory".to_owned()))?;
         let cwd = std::env::current_dir().map_err(|error| ConfigError(error.to_string()))?;
         Ok(Self {
             home,
@@ -248,6 +251,14 @@ impl LoadContext {
             flags,
         })
     }
+}
+
+fn home_for_platform(
+    home: Option<std::ffi::OsString>,
+    user_profile: Option<std::ffi::OsString>,
+    windows: bool,
+) -> Option<std::ffi::OsString> {
+    if windows { user_profile } else { home }
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -779,6 +790,26 @@ mod selection_tests {
     use super::*;
 
     #[test]
+    fn process_home_matches_go_platform_variable() {
+        let home = std::ffi::OsString::from("/unix/home");
+        let profile = std::ffi::OsString::from(r"C:\Users\agent");
+        assert_eq!(
+            home_for_platform(Some(home.clone()), Some(profile.clone()), true),
+            Some(profile)
+        );
+        assert_eq!(
+            home_for_platform(
+                Some(home.clone()),
+                Some(std::ffi::OsString::from("other")),
+                false
+            ),
+            Some(home)
+        );
+        assert_eq!(home_for_platform(Some("ignored".into()), None, true), None);
+        assert_eq!(home_for_platform(None, Some("ignored".into()), false), None);
+    }
+
+    #[test]
     fn transport_environment_is_validated_without_a_default_browser_conflict() {
         let root = std::env::temp_dir().join(format!("symbrowse-cfgsel-{}", std::process::id()));
         let mut context = LoadContext {
@@ -821,30 +852,36 @@ mod selection_tests {
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "chrome".into());
-        assert!(load(&context)
-            .unwrap_err()
-            .to_string()
-            .contains("engine_not_allowed"));
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("engine_not_allowed")
+        );
         context
             .env
             .insert("SYMBROWSE_MODE".into(), "browser".into());
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "unknown".into());
-        assert!(load(&context)
-            .unwrap_err()
-            .to_string()
-            .contains("invalid_browser_engine"));
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_browser_engine")
+        );
         context
             .env
             .insert("SYMBROWSE_ENGINE".into(), "static".into());
         context
             .env
             .insert("SYMBROWSE_MODE".into(), "unknown".into());
-        assert!(load(&context)
-            .unwrap_err()
-            .to_string()
-            .contains("invalid_transport_mode"));
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_transport_mode")
+        );
     }
 
     #[test]
