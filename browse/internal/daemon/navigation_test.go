@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -292,6 +293,17 @@ type launchRaceEngine struct {
 	fail     bool
 }
 
+type launchWaitContext struct {
+	context.Context
+	waiters chan<- struct{}
+	once    sync.Once
+}
+
+func (c *launchWaitContext) Done() <-chan struct{} {
+	c.once.Do(func() { c.waiters <- struct{}{} })
+	return c.Context.Done()
+}
+
 func (e *launchRaceEngine) Launch(context.Context) error {
 	e.launches.Add(1)
 	if e.started != nil {
@@ -328,18 +340,26 @@ func TestServiceSerializesColdSessionLaunches(t *testing.T) {
 
 	const callers = 12
 	errs := make(chan error, callers)
+	waiters := make(chan struct{}, callers)
 	for i := 0; i < callers; i++ {
 		go func() {
-			_, err := runtime.service(context.Background(), "cold")
+			ctx := &launchWaitContext{Context: context.Background(), waiters: waiters}
+			_, err := runtime.service(ctx, "cold")
 			errs <- err
 		}()
 	}
 	select {
 	case <-started:
-	case <-time.After(time.Second):
+	case <-time.After(15 * time.Second):
 		t.Fatal("timed out waiting for the first launch")
 	}
-	time.Sleep(20 * time.Millisecond)
+	for i := 0; i < callers-1; i++ {
+		select {
+		case <-waiters:
+		case <-time.After(15 * time.Second):
+			t.Fatalf("timed out waiting for caller %d to join the pending launch", i+1)
+		}
+	}
 	close(release)
 	for i := 0; i < callers; i++ {
 		if err := <-errs; err != nil {

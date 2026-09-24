@@ -1,5 +1,5 @@
 use std::{
-    io::{BufRead, BufReader, Write},
+    io::{self, BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
     sync::mpsc,
     thread,
@@ -28,14 +28,23 @@ fn read_request_line(stream: &mut TcpStream) -> String {
     first
 }
 
-fn write_response(stream: &mut TcpStream, body: &str) {
+fn write_response(stream: &mut TcpStream, body: &str) -> io::Result<()> {
     write!(
         stream,
         "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
         body.len(),
         body
     )
-    .expect("write loopback response");
+}
+
+fn is_expected_closed_peer(error: &io::Error) -> bool {
+    matches!(
+        error.kind(),
+        io::ErrorKind::BrokenPipe
+            | io::ErrorKind::ConnectionReset
+            | io::ErrorKind::ConnectionAborted
+            | io::ErrorKind::NotConnected
+    )
 }
 
 fn request(url: String, profile: &str) -> Request {
@@ -61,7 +70,7 @@ async fn production_go_sidecar_exchanges_versioned_requests() {
             let (mut stream, _) = listener.accept().expect("accept Go request");
             let line = read_request_line(&mut stream);
             assert!(line.starts_with("GET /compat HTTP/1.1"), "{line:?}");
-            write_response(&mut stream, "compat");
+            write_response(&mut stream, "compat").expect("write loopback response");
         }
     });
 
@@ -133,7 +142,14 @@ async fn exercise_timeout_restart() {
                 if index == 0 {
                     thread::sleep(Duration::from_secs(3));
                 }
-                write_response(&mut stream, if index == 0 { "late" } else { "fast" });
+                if let Err(error) =
+                    write_response(&mut stream, if index == 0 { "late" } else { "fast" })
+                {
+                    assert!(
+                        index == 0 && is_expected_closed_peer(&error),
+                        "unexpected loopback response write failure: {error}"
+                    );
+                }
             }));
         }
         for worker in workers {
