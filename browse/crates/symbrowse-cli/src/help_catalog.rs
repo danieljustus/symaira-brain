@@ -8,6 +8,126 @@ pub(super) fn help(command: &str, suffix: &[&str]) -> Option<&'static str> {
         .collect::<Vec<_>>()
         .join(" ");
     match path.as_str() {
+        "tab" => Some(
+            r###"Manage session tabs (list, new, switch, close)
+
+Usage:
+  symbrowse tab [command]
+
+Available Commands:
+  close       Close a tab (default: the active one)
+  list        List tabs of the session
+  new         Open a new tab, optionally at a URL
+  switch      Activate a tab by id or label (refs stay valid per tab)
+  window      Window operations
+
+Flags:
+  -h, --help             help for tab
+      --session string   daemon session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse tab [command] --help" for more information about a command.
+"###,
+        ),
+        "tab close" => Some(
+            r###"Close a tab (default: the active one)
+
+Usage:
+  symbrowse tab close [t1|label] [flags]
+
+Flags:
+  -h, --help   help for close
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "tab list" => Some(
+            r###"List tabs of the session
+
+Usage:
+  symbrowse tab list [flags]
+
+Flags:
+  -h, --help   help for list
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "tab new" => Some(
+            r###"Open a new tab, optionally at a URL
+
+Usage:
+  symbrowse tab new [url] [flags]
+
+Flags:
+  -h, --help           help for new
+      --label string   tab label for later switching
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "tab switch" => Some(
+            r###"Activate a tab by id or label (refs stay valid per tab)
+
+Usage:
+  symbrowse tab switch <t1|label> [flags]
+
+Flags:
+  -h, --help   help for switch
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "tab window" => Some(
+            r###"Window operations
+
+Usage:
+  symbrowse tab window [command]
+
+Available Commands:
+  window      Open a new window (new tab in a fresh browser context)
+
+Flags:
+  -h, --help   help for window
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+
+Use "symbrowse tab window [command] --help" for more information about a command.
+"###,
+        ),
+        "tab window window" => Some(
+            r###"Open a new window (new tab in a fresh browser context)
+
+Usage:
+  symbrowse tab window window new [flags]
+
+Flags:
+  -h, --help   help for window
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
         "dialog" => Some(
             r###"Handle JavaScript dialogs (accept, dismiss, status, auto)
 

@@ -99,7 +99,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "back", "batch", "click", "config", "daemon", "dialog", "eval", "fetch", "fill", "find",
         "flow", "forward", "get", "goto", "is", "mcp", "open", "press", "profiles",
-        "read", "reload", "snapshot", "state", "tools", "type", "version", "wait", "workflow",
+        "read", "reload", "snapshot", "state", "tab", "tools", "type", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -118,7 +118,9 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
              "go": output_record(go_root), "rust": output_record(rust_root)}]
     go_paths = [
         ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"],
-        ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"], ["eval"], ["flow", "list"],
+        ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
+        ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
+        ["tab", "window"], ["tab", "window", "window"], ["eval"], ["flow", "list"],
         ["flow", "run"], ["flow", "validate"], ["mcp"], ["profiles"], ["state"],
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"], ["version"],
@@ -388,7 +390,7 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             result = {key: frame.get(key) for key in ("cmd", "session", "args")}
             # Go omits nil RawMessage args for these zero-argument wrappers;
             # Rust sends an empty object because its daemon validates object args.
-            if result["cmd"] in {"dialog.status", "dialog.dismiss"} and result["args"] is None:
+            if result["cmd"] in {"dialog.status", "dialog.dismiss", "tab.list", "window.new"} and result["args"] is None:
                 result["args"] = {}
             return result
 
@@ -496,6 +498,24 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-004", ["--json", "dialog", "status"], b"", True),
         ("CLI-004", ["dialog", "--json=false", "status", "--output=yaml"], b"", True),
         ("CLI-004", ["dialog", "status", "--", "--json"], b"", False),
+        ("CLI-002", ["tab", "list", "--json"], b"", True),
+        ("CLI-002", ["tab", "new", "https://fixture.invalid", "--label", "fixture", "--session", "default"], b"", True),
+        ("CLI-002", ["tab", "switch", "t2", "--session=default", "--output=json"], b"", True),
+        ("CLI-002", ["tab", "close", "t2"], b"", True),
+        ("CLI-002", ["tab", "close"], b"", True),
+        ("CLI-002", ["tab", "window", "window", "--json"], b"", True),
+        ("CLI-002", ["tab", "--session", "default", "list"], b"", True),
+        ("CLI-003", ["tab", "nope"], b"", False),
+        ("CLI-003", ["tab", "list", "extra"], b"", False),
+        ("CLI-003", ["tab", "new", "a", "b"], b"", False),
+        ("CLI-003", ["tab", "switch"], b"", False),
+        ("CLI-003", ["tab", "switch", "a", "b"], b"", False),
+        ("CLI-003", ["tab", "close", "a", "b"], b"", False),
+        ("CLI-003", ["tab", "window", "window", "extra"], b"", False),
+        ("CLI-003", ["tab", "--bad"], b"", False),
+        ("CLI-003", ["tab", "--session"], b"", False),
+        ("CLI-003", ["tab", "list", "--label", "x"], b"", False),
+        ("CLI-003", ["tab", "new", "--label"], b"", False),
     ]
     comparisons = []
     for contract, argv, stdin, stub in cases:

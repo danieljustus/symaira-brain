@@ -1327,6 +1327,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "mcp" => parse_mcp(&values, command_index),
         "flow" | "workflow" => parse_flow(&values, command_index),
         "dialog" => parse_dialog(&values, command_index),
+        "tab" => parse_tab(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -1345,7 +1346,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_help() -> String {
-    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, dialog, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
+    "symbrowse is the Symaira Browse CLI.\n\nUsage:\n  symbrowse <command> [flags]\n\nImplemented Commands:\n  back, batch, click, config, daemon, dialog, eval, fetch, fill, find, flow, forward, get, goto, is, mcp, open, press, profiles, read, reload, snapshot, state, tab, tools, type, version, wait, workflow\n\nGlobal Flags:\n  -h, --help           Show help for a command\n      --json           Write structured output\n      --output string  Output format (text, json, yaml)\n"
         .to_owned()
 }
 
@@ -1980,6 +1981,191 @@ fn parse_dialog(values: &[String], command_index: usize) -> Result<Action, Parse
             });
         }
         _ => unreachable!("subcommand is selected from the supported dialog list"),
+    };
+    Ok(Action::Dispatch {
+        session,
+        command: command.to_owned(),
+        args,
+        format,
+    })
+}
+
+fn parse_tab(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand = None;
+    let mut subcommand_index = None;
+    let mut window_child_index = None;
+    let mut scan = command_index + 1;
+    while scan < values.len() {
+        let value = values[scan].as_str();
+        if subcommand.is_none() {
+            match value {
+                "list" | "new" | "switch" | "close" => {
+                    subcommand = Some(value);
+                    subcommand_index = Some(scan);
+                    break;
+                }
+                "window" => {
+                    subcommand = Some(value);
+                    subcommand_index = Some(scan);
+                }
+                "--session" => {
+                    session = required_value(values, scan + 1, "--session")?.to_owned();
+                    scan += 1;
+                }
+                "--output" => {
+                    format = parse_format(required_value(values, scan + 1, "--output")?)?;
+                    scan += 1;
+                }
+                "--json" => {}
+                value if value.starts_with("--json=") => {
+                    json = parse_bool("--json", &value[7..])?;
+                }
+                value if value.starts_with("--output=") => {
+                    format = parse_format(&value[9..])?;
+                }
+                value if value.starts_with("--session=") => session = value[10..].to_owned(),
+                value if value.starts_with('-') => return Err(unknown_flag(value)),
+                _ => {
+                    return Ok(Action::Help(
+                        help_catalog::help("tab", &[]).unwrap().to_owned(),
+                    ));
+                }
+            }
+        } else if subcommand == Some("window") && window_child_index.is_none() {
+            match value {
+                "window" => {
+                    window_child_index = Some(scan);
+                    break;
+                }
+                "--session" => {
+                    session = required_value(values, scan + 1, "--session")?.to_owned();
+                    scan += 1;
+                }
+                "--output" => {
+                    format = parse_format(required_value(values, scan + 1, "--output")?)?;
+                    scan += 1;
+                }
+                "--json" => {}
+                value if value.starts_with("--json=") => {
+                    json = parse_bool("--json", &value[7..])?;
+                }
+                value if value.starts_with("--output=") => {
+                    format = parse_format(&value[9..])?;
+                }
+                value if value.starts_with("--session=") => session = value[10..].to_owned(),
+                value if value.starts_with('-') => return Err(unknown_flag(value)),
+                _ => {
+                    return Ok(Action::Help(
+                        help_catalog::help("tab", &["window"]).unwrap().to_owned(),
+                    ));
+                }
+            }
+        }
+        scan += 1;
+    }
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(
+            help_catalog::help("tab", &[]).unwrap().to_owned(),
+        ));
+    };
+    if subcommand == "window" && window_child_index.is_none() {
+        return Ok(Action::Help(
+            help_catalog::help("tab", &["window"]).unwrap().to_owned(),
+        ));
+    }
+
+    let mut positional = Vec::new();
+    let mut label = String::new();
+    let mut positional_only = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        if Some(index) == subcommand_index || Some(index) == window_child_index {
+            index += 1;
+            continue;
+        }
+        let value = &values[index];
+        if positional_only {
+            positional.push(value.clone());
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--" => positional_only = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--label" if subcommand == "new" => {
+                index += 1;
+                label = required_value(values, index, "--label")?.to_owned();
+            }
+            value if value.starts_with("--json=") => {
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--label=") && subcommand == "new" => {
+                label = value[8..].to_owned();
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+
+    let (command, args) = match subcommand {
+        "list" if positional.is_empty() => ("tab.list", serde_json::json!({})),
+        "new" if positional.len() <= 1 => (
+            "tab.new",
+            serde_json::json!({
+                "label": label,
+                "url": positional.first().map(String::as_str).unwrap_or("")
+            }),
+        ),
+        "switch" if positional.len() == 1 => {
+            ("tab.switch", serde_json::json!({"tab": positional[0]}))
+        }
+        "close" if positional.len() <= 1 => (
+            "tab.close",
+            serde_json::json!({"tab": positional.first().map(String::as_str).unwrap_or("")}),
+        ),
+        "window" if window_child_index.is_some() && positional.is_empty() => {
+            ("window.new", serde_json::json!({}))
+        }
+        "list" | "window" => {
+            let target = if subcommand == "window" {
+                "symbrowse tab window window"
+            } else {
+                "symbrowse tab list"
+            };
+            return Err(ParseError {
+                message: format!("unknown command {:?} for {target:?}", positional[0]),
+                exit_code: 2,
+            });
+        }
+        "new" | "close" => {
+            return Err(ParseError {
+                message: format!("accepts at most 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        "switch" => {
+            return Err(ParseError {
+                message: format!("accepts 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        _ => unreachable!("subcommand is selected from the supported tab list"),
     };
     Ok(Action::Dispatch {
         session,
@@ -2921,6 +3107,61 @@ mod tests {
         assert!(matches!(parse(&args(&["dialog"])), Ok(Action::Help(_))));
         assert!(parse(&args(&["dialog", "auto"])).is_err());
         assert!(parse(&args(&["dialog", "status", "extra"])).is_err());
+    }
+
+    #[test]
+    fn tab_commands_dispatch_runtime_payloads_and_match_argument_rules() {
+        for (argv, expected_command, expected_args) in [
+            (&["tab", "list"][..], "tab.list", serde_json::json!({})),
+            (
+                &["tab", "new", "https://example.com", "--label", "docs"][..],
+                "tab.new",
+                serde_json::json!({"label": "docs", "url": "https://example.com"}),
+            ),
+            (
+                &["tab", "switch", "t2"][..],
+                "tab.switch",
+                serde_json::json!({"tab": "t2"}),
+            ),
+            (
+                &["tab", "close", "docs"][..],
+                "tab.close",
+                serde_json::json!({"tab": "docs"}),
+            ),
+            (
+                &["tab", "window", "window"][..],
+                "window.new",
+                serde_json::json!({}),
+            ),
+        ] {
+            let Action::Dispatch {
+                command,
+                args: payload,
+                ..
+            } = parse(&args(argv)).expect("tab dispatch")
+            else {
+                panic!("wrong action for {argv:?}");
+            };
+            assert_eq!(command, expected_command, "argv={argv:?}");
+            assert_eq!(payload, expected_args, "argv={argv:?}");
+        }
+
+        assert_eq!(
+            parse(&args(&["tab", "--session", "work", "list"])),
+            Ok(Action::Dispatch {
+                session: "work".to_owned(),
+                command: "tab.list".to_owned(),
+                args: serde_json::json!({}),
+                format: Format::Text,
+            })
+        );
+        assert!(matches!(parse(&args(&["tab"])), Ok(Action::Help(_))));
+        assert!(matches!(
+            parse(&args(&["tab", "window"])),
+            Ok(Action::Help(_))
+        ));
+        assert!(parse(&args(&["tab", "switch"])).is_err());
+        assert!(parse(&args(&["tab", "list", "extra"])).is_err());
     }
 
     #[test]
