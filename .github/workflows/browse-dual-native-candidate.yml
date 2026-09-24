@@ -1,0 +1,171 @@
+name: Browse dual native distribution candidate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "browse/**"
+      - ".github/workflows/browse-dual-native-candidate.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "browse/**"
+      - ".github/workflows/browse-dual-native-candidate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browse-dual-native-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-package:
+    name: Package ${{ matrix.target }} natively
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-amd64
+            runner: macos-15-intel
+            rust_target: x86_64-apple-darwin
+          - target: darwin-arm64
+            runner: macos-15
+            rust_target: aarch64-apple-darwin
+          - target: linux-amd64
+            runner: ubuntu-latest
+            rust_target: x86_64-unknown-linux-gnu
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+            rust_target: aarch64-unknown-linux-gnu
+          - target: windows-amd64
+            runner: windows-2025
+            rust_target: x86_64-pc-windows-msvc
+          - target: windows-arm64
+            runner: windows-11-arm
+            rust_target: aarch64-pc-windows-msvc
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    env:
+      BROWSE_TARGET: ${{ matrix.target }}
+      RUST_TARGET: ${{ matrix.rust_target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+          cache-dependency-path: browse/go.sum
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Check harness and compile native packages
+        working-directory: browse
+        shell: bash
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/browse-cargo-target
+        run: |
+          set -euo pipefail
+          case "${RUNNER_OS}/${RUNNER_ARCH}" in
+            macOS/X64) actual=darwin-amd64 ;;
+            macOS/ARM64) actual=darwin-arm64 ;;
+            Linux/X64) actual=linux-amd64 ;;
+            Linux/ARM64) actual=linux-arm64 ;;
+            Windows/X64) actual=windows-amd64 ;;
+            Windows/ARM64) actual=windows-arm64 ;;
+            *) echo "unsupported native runner: ${RUNNER_OS}/${RUNNER_ARCH}" >&2; exit 1 ;;
+          esac
+          test "$actual" = "$BROWSE_TARGET"
+          rustup show active-toolchain
+          rustup target add "$RUST_TARGET"
+          python3 -m unittest \
+            port/release/test_build_dual.py \
+            port/release/test_binary_smoke.py \
+            port/release/test_candidate.py
+          version="0.0.0-${GITHUB_SHA:0:12}"
+          python3 port/release/build_dual.py \
+            --version "$version" \
+            --target "$BROWSE_TARGET" \
+            --source-revision "$GITHUB_SHA" \
+            --strict \
+            --output "$RUNNER_TEMP/browse-dual-$BROWSE_TARGET"
+
+      - name: Upload native candidate package for this SHA
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-dual-${{ github.sha }}-${{ matrix.target }}
+          path: ${{ runner.temp }}/browse-dual-${{ matrix.target }}/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-and-check:
+    name: Merge and verify six unsigned native candidates
+    needs: native-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Download only this SHA's six native candidate packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: browse-dual-${{ github.sha }}-*
+          path: ${{ runner.temp }}/browse-dual-packages
+          merge-multiple: false
+
+      - name: Merge and check package, checksum, SBOM, and native evidence
+        working-directory: browse
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="0.0.0-${GITHUB_SHA:0:12}"
+          python3 port/release/candidate.py \
+            --merge \
+            --version "$version" \
+            --source-revision "$GITHUB_SHA" \
+            --packages "$RUNNER_TEMP/browse-dual-packages" \
+            --output "$RUNNER_TEMP/browse-dual-merged"
+          python3 port/release/candidate.py \
+            --check \
+            --version "$version" \
+            --source-revision "$GITHUB_SHA" \
+            --candidate "$RUNNER_TEMP/browse-dual-merged/dual"
+
+      - name: Retain unsigned candidate and evidence briefly
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-dual-merged-${{ github.sha }}
+          path: ${{ runner.temp }}/browse-dual-merged/*
+          if-no-files-found: error
+          retention-days: 1
+
+  six-native-candidate-required:
+    name: Require all six native candidate checks
+    if: always()
+    needs: [native-package, merge-and-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Keep distribution evidence red unless every prerequisite passed
+        env:
+          NATIVE_RESULT: ${{ needs.native-package.result }}
+          MERGE_RESULT: ${{ needs.merge-and-check.result }}
+        run: |
+          if [[ "$NATIVE_RESULT" != success || "$MERGE_RESULT" != success ]]; then
+            echo "Native candidate matrix: $NATIVE_RESULT; merge/check: $MERGE_RESULT" >&2
+            exit 1
+          fi
+          echo "Six native unsigned candidate packages and layout checks passed at $GITHUB_SHA. Signing, publication, and cutover were not performed."

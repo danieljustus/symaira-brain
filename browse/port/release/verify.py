@@ -26,7 +26,6 @@ import json
 import os
 import platform
 import re
-import shutil
 import stat
 import sys
 import tarfile
@@ -40,7 +39,8 @@ SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from external_env import ensure_external_environment
 
-ensure_external_environment(__file__)
+if __name__ == "__main__":
+    ensure_external_environment(__file__)
 
 IMPLEMENTATIONS = ("go", "rust")
 TARGETS = (
@@ -452,7 +452,7 @@ def package_dry_run(go_binary: Path, rust_binary: Path, output: Path, version: s
             raise GateError(f"{implementation} binary is missing or not executable: {binary}")
     output = _external_output(output)
     if output.exists():
-        shutil.rmtree(output)
+        raise GateError(f"refusing to overwrite existing package dry-run output: {output}")
     (output / "dual").mkdir(parents=True)
     archives = []
     signature_inputs: dict[str, list[dict[str, str]]] = {name: [] for name in IMPLEMENTATIONS}

@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -59,6 +60,20 @@ class CargoTargetDirTests(unittest.TestCase):
         root = Path("/workspace/browse")
         target = Path("/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/browse-target")
         self.assertEqual(build_dual._cargo_target_dir(root, {"CARGO_TARGET_DIR": str(target)}), target)
+
+    def test_existing_output_is_preserved_and_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "candidate"
+            output.mkdir()
+            sentinel = output / "keep.txt"
+            sentinel.write_text("preserve", encoding="utf-8")
+            with patch.object(build_dual, "external_environment", side_effect=lambda env: env), patch.object(
+                build_dual, "release_output", return_value=output
+            ):
+                with patch.object(sys, "argv", ["build_dual.py", "--source-revision", "a" * 40]):
+                    with self.assertRaisesRegex(RuntimeError, "refusing to overwrite"):
+                        build_dual.main()
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "preserve")
 
 
 if __name__ == "__main__":

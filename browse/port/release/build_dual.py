@@ -14,14 +14,18 @@ import hashlib
 import json
 import os
 import platform
-import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Sequence
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from binary_smoke import check_binary
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTERNAL_BASE_ENV = "SYMAIRA_EXTERNAL_BASE"
@@ -32,7 +36,7 @@ TARGETS: dict[str, tuple[str, str, str]] = {
     "darwin-arm64": ("darwin", "arm64", "aarch64-apple-darwin"),
     "linux-amd64": ("linux", "amd64", "x86_64-unknown-linux-gnu"),
     "linux-arm64": ("linux", "arm64", "aarch64-unknown-linux-gnu"),
-    "windows-amd64": ("windows", "amd64", "x86_64-pc-windows-gnu"),
+    "windows-amd64": ("windows", "amd64", "x86_64-pc-windows-msvc"),
     "windows-arm64": ("windows", "arm64", "aarch64-pc-windows-msvc"),
 }
 
@@ -303,6 +307,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("target/release-evidence/dual"))
     parser.add_argument("--target", action="append", choices=tuple(TARGETS))
     parser.add_argument("--all-targets", action="store_true")
+    parser.add_argument("--source-revision", required=True, help="integrated source commit SHA for candidate evidence")
     parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--go-binary", type=Path)
     parser.add_argument("--rust-binary", type=Path)
@@ -315,7 +320,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     external_environment(env)
     output = release_output(root, args.output, env)
     if output.exists():
-        shutil.rmtree(output)
+        raise RuntimeError(f"refusing to overwrite existing release output: {output}")
     (output / "dual").mkdir(parents=True)
     artifacts: dict[str, list[dict[str, str]]] = {"go": [], "rust": []}
     for implementation in artifacts:
@@ -341,6 +346,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if binary is None or not binary.is_file():
                     blocked.append(f"{implementation}/{target}: build unavailable")
                     continue
+                identity: dict[str, object] | None = None
+                if target == host:
+                    try:
+                        identity = check_binary(binary, version)
+                    except (OSError, ValueError, subprocess.SubprocessError) as error:
+                        blocked.append(f"{implementation}/{target}: native version smoke failed: {error}")
+                        continue
                 entry = package(binary, output / "dual" / implementation, target, implementation, version, root)
                 artifacts[implementation].append(entry)
                 proofs.append(
@@ -352,12 +364,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "mode": "native" if target == host else "cross",
                         "status": "native_verified" if target == host else "cross_built",
                         "native_runtime_proof": target == host,
+                        "version_smoke": identity is not None,
+                        "schema_version": identity["schema_version"] if identity else None,
+                        "source_revision": args.source_revision,
+                        "runner": f"{platform.system()}/{platform.machine()}",
                     }
                 )
     write_manifests(output, version, artifacts, proofs)
     report = {
         "schema_version": 1,
         "version": version,
+        "source_revision": args.source_revision,
         "targets_requested": targets,
         "artifacts": {name: len(entries) for name, entries in artifacts.items()},
         "blocked": blocked,
