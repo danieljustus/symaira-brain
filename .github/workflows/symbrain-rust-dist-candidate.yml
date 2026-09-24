@@ -124,6 +124,9 @@ jobs:
             go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
             go run ./scripts/cli-oracle -go-binary "$RUNNER_TEMP/symbrain-go.exe" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
             go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
+            export SYMBRAIN_SKILLS_ORACLE_FIXTURE="$RUNNER_TEMP/skills-oracle-windows.json"
+            go run ./scripts/skills-oracle -output "$SYMBRAIN_SKILLS_ORACLE_FIXTURE"
+            echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$SYMBRAIN_SKILLS_ORACLE_FIXTURE" >> "$GITHUB_ENV"
           fi
           if [[ "$TARGET_GOOS" == windows ]]; then
             version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
