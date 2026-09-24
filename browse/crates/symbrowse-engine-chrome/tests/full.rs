@@ -134,7 +134,12 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
         return;
     }
+    tokio::time::timeout(Duration::from_secs(180), exercise_full_chrome_surface())
+        .await
+        .expect("Chrome full-surface fixture exceeded its three-minute deadline");
+}
 
+async fn exercise_full_chrome_surface() {
     let server = TestServer::start();
     let profile = std::env::temp_dir().join(format!(
         "symbrowse-rust012-{}-{}",
@@ -164,6 +169,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
         .new_page(format!("{}/", server.base_url))
         .await
         .expect("create page");
+    eprintln!("chrome_full_stage=page-opened");
     assert!(!session.pages().await.expect("list tabs").is_empty());
 
     page.wait_for_selector("#text", true, Duration::from_secs(5))
@@ -205,6 +211,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
             }),
         "selector-scoped audit did not report #text: {scoped_audit}"
     );
+    eprintln!("chrome_full_stage=axe-complete");
     assert_eq!(page.inspect("#text", "count").await.expect("count"), 1);
     assert!(page.inspect("#text", "find").await.expect("find").as_bool() == Some(true));
     assert_eq!(
@@ -247,6 +254,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
         page.inspect("#check", "get").await.expect("check state")["checked"],
         false
     );
+    eprintln!("chrome_full_stage=interactions-complete");
 
     let frames = page.frames().await.expect("frame tree");
     assert_eq!(frames.len(), 1, "frame tree has one root");
@@ -315,6 +323,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     let pdf = page.pdf().await.expect("PDF");
     assert_eq!(pdf.mime_type, "application/pdf");
     assert!(pdf.bytes.starts_with(b"%PDF"));
+    eprintln!("chrome_full_stage=files-and-capture-complete");
 
     let wait_page = page.clone();
     let navigation =
@@ -382,6 +391,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
             .expect("auto handler"),
         1
     );
+    eprintln!("chrome_full_stage=dialogs-complete");
 
     assert!(
         matches!(page.har().await, Err(error) if error.downcast_ref::<UnsupportedOperation>().is_some())
