@@ -6949,6 +6949,7 @@ mod tests {
         render_cookie_list_json, render_cookie_list_text, render_cookie_list_yaml,
         render_session_id_json, render_state_key_init, session_id_info, snapshot_tree_diff,
     };
+    use crate::AuthLoginEnvelope;
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
 
