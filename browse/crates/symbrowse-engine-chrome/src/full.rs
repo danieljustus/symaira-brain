@@ -249,9 +249,11 @@ impl ChromeSession {
             .new_page("about:blank")
             .await
             .map_err(|error| std::io::Error::other(format!("create blank CDP target: {error}")))?;
-        let page = ChromePage::new(page).await.map_err(|error| {
-            std::io::Error::other(format!("initialize Chrome page listeners: {error}"))
-        })?;
+        let page = ChromePage::new(page, &self.browser)
+            .await
+            .map_err(|error| {
+                std::io::Error::other(format!("initialize Chrome page listeners: {error}"))
+            })?;
         if url != "about:blank" {
             page.open(&url).await.map_err(|error| {
                 std::io::Error::other(format!("navigate newly created Chrome page: {error}"))
@@ -263,7 +265,7 @@ impl ChromeSession {
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {
         let mut chrome_pages = Vec::new();
         for page in self.browser.pages().await? {
-            chrome_pages.push(ChromePage::new(page).await?);
+            chrome_pages.push(ChromePage::new(page, &self.browser).await?);
         }
         Ok(chrome_pages)
     }
@@ -288,6 +290,7 @@ pub struct ChromePage {
     dialogs: DialogMonitor,
     downloads: Arc<Mutex<DownloadRegistry>>,
     download_session: String,
+    download_frame: Arc<Mutex<String>>,
 }
 
 #[derive(Clone)]
@@ -303,7 +306,7 @@ struct DialogState {
 }
 
 impl ChromePage {
-    async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    async fn new(page: Page, browser: &Browser) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
@@ -339,10 +342,12 @@ impl ChromePage {
         });
         let download_session = page.target_id().inner().clone();
         let downloads = Arc::new(Mutex::new(DownloadRegistry::new()));
-        let mut begins = page
+        let download_frame = Arc::new(Mutex::new(String::new()));
+        let event_frame = Arc::clone(&download_frame);
+        let mut begins = browser
             .event_listener::<browser::EventDownloadWillBegin>()
             .await?;
-        let mut progress = page
+        let mut progress = browser
             .event_listener::<browser::EventDownloadProgress>()
             .await?;
         let event_downloads = Arc::clone(&downloads);
@@ -353,6 +358,9 @@ impl ChromePage {
                     biased;
                     event = begins.next() => {
                         let Some(event) = event else { break };
+                        if event.frame_id.inner() != event_frame.lock().await.as_str() {
+                            continue;
+                        }
                         event_downloads.lock().await.record_download_will_begin_now(
                             &event_session,
                             event.guid.clone(),
@@ -383,6 +391,7 @@ impl ChromePage {
             },
             downloads,
             download_session,
+            download_frame,
         })
     }
     pub fn target_id(&self) -> String {
@@ -1036,6 +1045,8 @@ impl ChromePage {
         directory: &str,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         let behavior = download_behavior(directory)?;
+        let frame = self.page.execute(page::GetFrameTreeParams {}).await?;
+        *self.download_frame.lock().await = frame.frame_tree.frame.id.inner().clone();
         let cdp_behavior = match behavior.behavior.as_str() {
             "allow" => browser::SetDownloadBehaviorBehavior::AllowAndName,
             _ => browser::SetDownloadBehaviorBehavior::Deny,
