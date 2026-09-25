@@ -22,8 +22,9 @@
     {
       "id": "CFG-005-engine-precedence",
       "platforms": ["all"],
+      "coverage": ["default", "global-toml", "project-toml", "environment", "flag", "unknown-engine"],
       "go": ["go", "test", "./cmd/symbrowse", "./internal/config", "-run", "Engine", "-count=1"],
-      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "transport_selection_obeys_toml_environment_and_flag_precedence", "--locked"]
+      "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "--locked"]
     },
     {
       "id": "CFG-006-transport-selection",
