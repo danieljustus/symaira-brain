@@ -1077,7 +1077,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert!(
         original["data"]
             .as_str()
-            .is_some_and(|text| text.contains("native")),
+            .is_some_and(|text| text.contains("managed tab fixture")),
         "switched tab read: {original}"
     );
     let closed = request(&client, "tab.close", json!({"tab":"second"}));
