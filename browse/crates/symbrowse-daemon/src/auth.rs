@@ -24,7 +24,7 @@ impl Credentials {
         entry: &str,
         operation: &OperationContext,
     ) -> Result<Self, DaemonError> {
-        let mut child = Command::new(program)
+        let child = Command::new(program)
             .arg("get")
             .arg(entry)
             .stdin(Stdio::null())
