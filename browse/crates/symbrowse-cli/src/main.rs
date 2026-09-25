@@ -781,31 +781,40 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
     let raw = match fs::read(&path) {
         Ok(raw) => raw,
         Err(error) => {
-            return render_dispatch_error(
-                format,
-                daemon_codes::OPERATION_FAILED,
-                format!("read trace: {error}"),
-            );
+            return render_dispatch_error(format, "internal", format!("read trace: {error}"));
         }
     };
     let file = match serde_json::from_slice::<trace::File>(&raw) {
         Ok(file) => file,
         Err(error) => {
-            return render_dispatch_error(
-                format,
-                daemon_codes::OPERATION_FAILED,
-                format!("parse trace: {error}"),
-            );
+            return render_dispatch_error(format, "internal", format!("parse trace: {error}"));
         }
     };
     if file.schema_version != trace::SCHEMA_VERSION {
         return render_dispatch_error(
             format,
-            daemon_codes::OPERATION_FAILED,
+            "internal",
             format!("unsupported trace schema version {}", file.schema_version),
         );
     }
     if file.steps.is_empty() {
+        let client = Client::new(ClientOptions {
+            socket_path: default_socket_path(&session),
+            session: session.clone(),
+            ..ClientOptions::default()
+        });
+        let response = match client.request(Frame {
+            cmd: "trace.replay".to_owned(),
+            args: Some(serde_json::json!({"steps": []})),
+            session,
+            ..Frame::default()
+        }) {
+            Ok(response) => response,
+            Err(error) => return render_client_error(format, error),
+        };
+        if !response.success {
+            return render_daemon_error(format, response.error.unwrap_or_default());
+        }
         return render_dispatch_error(
             format,
             daemon_codes::OPERATION_FAILED,
@@ -1906,6 +1915,7 @@ fn padded_group_end(input: &[u8], padding_index: usize) -> Option<usize> {
 
 fn error_code(code: &str) -> ErrorCode {
     match code {
+        "internal" => ErrorCode::Internal,
         "invalid_args" => ErrorCode::InvalidArgs,
         daemon_codes::MALFORMED_REQUEST => ErrorCode::MalformedRequest,
         daemon_codes::UNKNOWN_COMMAND => ErrorCode::UnknownCommand,

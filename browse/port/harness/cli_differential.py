@@ -67,9 +67,12 @@ def trace_replay_result(steps: list[dict[str, Any]]) -> dict[str, Any]:
         if command in ("open", "goto"):
             expected = step.get("expected_url", "")
             actual = step.get("url", "")
-            outcome.update({"expected_url": expected, "actual_url": actual,
-                            "matched": normalize_trace_fixture_url(actual)
-                            == normalize_trace_fixture_url(expected)})
+            if actual.endswith("/failed"):
+                outcome["error"] = "fixture navigation failed"
+            else:
+                outcome.update({"expected_url": expected, "actual_url": actual,
+                                "matched": normalize_trace_fixture_url(actual)
+                                == normalize_trace_fixture_url(expected)})
         elif command in TRACE_INTERACTIONS:
             outcome["matched"] = True
         elif command == "auth.login":
@@ -257,11 +260,18 @@ class UnixDaemonStub:
                     self.frames.append(frame)
                     if request_index == 0:
                         self.frame = frame
+                    response = None
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", "default")}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
-                        data = trace_replay_result(steps)
+                        if not steps:
+                            response = {"success": False, "error": {
+                                "code": "operation_failed",
+                                "message": "trace contains no replayable steps",
+                            }}
+                        else:
+                            data = trace_replay_result(steps)
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -308,7 +318,14 @@ class UnixDaemonStub:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
                                 "expression": args.get("expression", "")}
-                    response = {"success": True, "data": data, "warnings": []}
+                    if response is None:
+                        args = frame.get("args") or {}
+                        if frame.get("cmd") in ("open", "goto") and args.get("url", "").endswith("/failed"):
+                            response = {"success": False, "error": {
+                                "code": "operation_failed", "message": "fixture navigation failed",
+                            }}
+                        else:
+                            response = {"success": True, "data": data, "warnings": []}
                     connection.sendall(json.dumps(response, separators=(",", ":")).encode() + b"\n")
         except Exception as error:  # retained in the bounded report
             self.error = str(error)
@@ -431,11 +448,16 @@ class WindowsNamedPipeStub:
                     self.frames.append(frame)
                     if request_index == 0:
                         self.frame = frame
+                    response_error = None
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", SESSION)}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
-                        data = trace_replay_result(steps)
+                        if not steps:
+                            response_error = {"code": "operation_failed",
+                                              "message": "trace contains no replayable steps"}
+                        else:
+                            data = trace_replay_result(steps)
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -482,10 +504,14 @@ class WindowsNamedPipeStub:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
                                 "expression": args.get("expression", "")}
-                    response = json.dumps(
-                        {"success": True, "data": data, "warnings": []},
-                        separators=(",", ":"),
-                    ).encode() + b"\n"
+                    args = frame.get("args") or {}
+                    if response_error is None and frame.get("cmd") in ("open", "goto") and args.get("url", "").endswith("/failed"):
+                        response_error = {"code": "operation_failed",
+                                          "message": "fixture navigation failed"}
+                    response_payload = ({"success": False, "error": response_error}
+                                        if response_error is not None else
+                                        {"success": True, "data": data, "warnings": []})
+                    response = json.dumps(response_payload, separators=(",", ":")).encode() + b"\n"
                     written = wintypes.DWORD()
                     buffer = ctypes.create_string_buffer(response, len(response))
                     if not self.kernel.WriteFile(handle, buffer, len(response), ctypes.byref(written), None):
@@ -901,7 +927,17 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         row["case"] = contract
         comparisons.append(row)
     comparisons.append(compare_trace_export(go, rust, env))
-    comparisons.append(compare_trace_replay(go, rust, env))
+    comparisons.extend([
+        compare_trace_replay(go, rust, env, []),
+        compare_trace_replay(go, rust, env, ["--json"]),
+        compare_trace_replay(go, rust, env, ["--output=yaml"]),
+        compare_trace_replay_empty(go, rust, env, []),
+        compare_trace_replay_empty(go, rust, env, ["--json"]),
+        compare_trace_replay_empty(go, rust, env, ["--output=yaml"]),
+        compare_trace_schema_error(go, rust, env, []),
+        compare_trace_schema_error(go, rust, env, ["--json"]),
+        compare_trace_schema_error(go, rust, env, ["--output=yaml"]),
+    ])
     comparisons.extend([
         compare_diff_snapshot(go, rust, env, []),
         compare_diff_snapshot(go, rust, env, ["--json"]),
@@ -1020,7 +1056,8 @@ def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
     }
 
 
-def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
+def compare_trace_replay(go: Path, rust: Path, env: dict[str, str],
+                         output_args: list[str] | None = None) -> dict[str, Any]:
     fixture = Path(env["TMPDIR"]) / "trace-replay.json"
     url = "https://fixture.invalid/replay"
     next_url = "https://fixture.invalid/next"
@@ -1030,6 +1067,7 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
         "session": "fixture",
         "steps": [
             {"command": "open", "url": url, "expected_url": url + "#section"},
+            {"command": "open", "url": url + "/failed", "expected_url": url + "/failed"},
             {"command": "goto", "url": next_url, "expected_url": url},
             {"command": "click", "selector": "#button"},
             {"command": "dblclick", "selector": "#button"},
@@ -1047,7 +1085,8 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
             {"command": "not-replayable"},
         ],
     }
-    argv = ["trace", "replay", str(fixture), "--session", "fixture"]
+    output_args = output_args or []
+    argv = ["trace", "replay", str(fixture), "--session", "fixture", *output_args]
     try:
         fixture.write_text(json.dumps(document), encoding="utf-8")
 
@@ -1056,7 +1095,7 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
                 step["command"] in TRACE_INTERACTIONS | {"open", "goto"}
                 for step in document["steps"]
             )
-            count = 2 * rust_request_count if rust_client else 1
+            count = 2 * max(1, rust_request_count) if rust_client else 1
             if os.name == "nt":
                 with WindowsNamedPipeStub(
                     session="fixture", status_probe=rust_client, request_count=count
@@ -1110,7 +1149,7 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
         == expected_rust_requests
     )
     return {
-        "case": "CLI-001-trace-replay-actions",
+        "case": "CLI-001-trace-replay-actions" + ("-" + output_args[0].lstrip("-").replace("=", "-") if output_args else "-text"),
         "argv": argv,
         "matched": bool(
             same_output and go_result.get("returncode") == 0 and protocol_shape
@@ -1123,6 +1162,82 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
         "rust_request": rust_requests[0] if rust_requests else None,
         "go_stub_error": go_stub_error,
         "rust_stub_error": rust_stub_error,
+    }
+
+
+def compare_trace_replay_empty(go: Path, rust: Path, env: dict[str, str],
+                               output_args: list[str]) -> dict[str, Any]:
+    fixture = Path(env["TMPDIR"]) / "trace-replay-empty.json"
+    argv = ["trace", "replay", str(fixture), "--session", "fixture", *output_args]
+    document = {"schema_version": 1, "created_at": "2026-09-25T00:00:00Z",
+                "session": "fixture", "steps": []}
+    try:
+        fixture.write_text(json.dumps(document), encoding="utf-8")
+
+        def run(binary: Path, *, rust_client: bool) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
+            if os.name == "nt":
+                with WindowsNamedPipeStub(session="fixture", status_probe=rust_client,
+                                          request_count=2 if rust_client else 1) as daemon:
+                    result = run_process(binary, argv, env)
+            else:
+                with UnixDaemonStub(socket_path(env, "fixture"), status_probe=rust_client,
+                                    request_count=2 if rust_client else 1) as daemon:
+                    result = run_process(binary, argv, env)
+            return result, daemon.frames, daemon.error
+
+        go_result, go_frames, go_error = run(go, rust_client=False)
+        rust_result, rust_frames, rust_error = run(rust, rust_client=True)
+    except (OSError, RuntimeError) as error:
+        return {"case": "CLI-001-trace-replay-empty", "argv": argv,
+                "matched": False, "error": str(error)}
+    finally:
+        try:
+            fixture.unlink()
+        except FileNotFoundError:
+            pass
+
+    go_requests = [frame for frame in go_frames if frame.get("cmd") != "daemon.status"]
+    rust_requests = [frame for frame in rust_frames if frame.get("cmd") != "daemon.status"]
+    expected = {"cmd": "trace.replay", "session": "fixture", "args": {"steps": []}}
+    output_match = all(go_result.get(key) == rust_result.get(key)
+                       for key in ("returncode", "stdout", "stderr"))
+    return {
+        "case": "CLI-001-trace-replay-empty" + ("-" + output_args[0].lstrip("-").replace("=", "-") if output_args else "-text"),
+        "argv": argv,
+        "matched": bool(output_match and go_requests == [expected] and rust_requests == [expected]
+                        and not go_error and not rust_error),
+        "criterion": "empty trace reaches the daemon and preserves its failure envelope",
+        "go": output_record(go_result), "rust": output_record(rust_result),
+        "go_request": go_requests[0] if go_requests else None,
+        "rust_request": rust_requests[0] if rust_requests else None,
+        "go_stub_error": go_error, "rust_stub_error": rust_error,
+    }
+
+
+def compare_trace_schema_error(go: Path, rust: Path, env: dict[str, str],
+                               output_args: list[str]) -> dict[str, Any]:
+    fixture = Path(env["TMPDIR"]) / "trace-replay-schema.json"
+    argv = ["trace", "replay", str(fixture), "--session", "fixture", *output_args]
+    try:
+        fixture.write_text(json.dumps({"schema_version": 2, "created_at": "",
+                                       "session": "fixture", "steps": []}), encoding="utf-8")
+        go_result = run_process(go, argv, env)
+        rust_result = run_process(rust, argv, env)
+    except OSError as error:
+        return {"case": "CLI-001-trace-replay-schema", "argv": argv,
+                "matched": False, "error": str(error)}
+    finally:
+        try:
+            fixture.unlink()
+        except FileNotFoundError:
+            pass
+    matched = all(go_result.get(key) == rust_result.get(key)
+                  for key in ("returncode", "stdout", "stderr"))
+    return {
+        "case": "CLI-001-trace-replay-schema" + ("-" + output_args[0].lstrip("-").replace("=", "-") if output_args else "-text"),
+        "argv": argv, "matched": bool(matched),
+        "criterion": "unsupported schema uses the same internal error in text, JSON, and YAML",
+        "go": output_record(go_result), "rust": output_record(rust_result),
     }
 
 
