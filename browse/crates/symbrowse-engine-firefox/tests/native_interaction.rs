@@ -132,9 +132,13 @@ async fn firefox_login_uses_trusted_bidi_input_actions() {
     )
     .expect("enable BiDi for the isolated Firefox test profile");
     let fixture = LoginFixture::start();
-    let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(25))
+    // Windows x64 CI starts this isolated Nightly after the daemon contract
+    // gate has already launched Firefox; allow startup to settle, then restore
+    // the normal per-command budget for the interaction assertions.
+    let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(60))
         .await
         .expect("launch Firefox with isolated profile");
+    session.set_timeout(Duration::from_secs(25));
 
     let result = async {
         session.navigate(&fixture.url()).await?;
