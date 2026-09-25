@@ -216,9 +216,9 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "back", "batch", "cache", "check", "click", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
-        "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "watch", "workflow",
+        "a11y", "auth", "back", "batch", "cache", "check", "click", "completion", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "flow", "focus", "forward", "frame", "get", "goto", "handoff", "help", "hover", "is", "journal", "mcp", "oob", "open", "policy", "press", "profiles",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upgrade", "upload", "version", "wait", "watch", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
