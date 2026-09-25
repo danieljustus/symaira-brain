@@ -388,6 +388,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "open response: Rust={rust_open} Go={}",
         go_oracle["open"]
     );
+    assert_eq!(
+        rust_open["data"], go_oracle["open"]["data"],
+        "open result fields: Rust={rust_open} Go={}",
+        go_oracle["open"]
+    );
     let rust_open_fragment = request(
         &client,
         "open",
@@ -403,6 +408,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "same-document open URL: Rust={rust_open_fragment} Go={}",
         go_oracle["open_fragment"]
     );
+    assert_eq!(
+        rust_open_fragment["data"], go_oracle["open_fragment"]["data"],
+        "same-document open fields: Rust={rust_open_fragment} Go={}",
+        go_oracle["open_fragment"]
+    );
     let rust_open_relative = request(&client, "open", json!({"url":"relative-probe"}));
     assert_eq!(
         rust_open_relative["success"], go_oracle["open_relative"]["success"],
@@ -412,6 +422,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(
         rust_open_relative["data"]["url"], go_oracle["open_relative"]["data"]["url"],
         "relative open URL: Rust={rust_open_relative} Go={}",
+        go_oracle["open_relative"]
+    );
+    assert_eq!(
+        rust_open_relative["data"], go_oracle["open_relative"]["data"],
+        "relative open fields: Rust={rust_open_relative} Go={}",
         go_oracle["open_relative"]
     );
     let network_started = request(&client, "network.requests", json!({}));
@@ -786,6 +801,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "about:blank open URL: Rust={rust_open_blank} Go={}",
         go_oracle["open_blank"]
     );
+    assert_eq!(
+        rust_open_blank["data"], go_oracle["open_blank"]["data"],
+        "about:blank open fields: Rust={rust_open_blank} Go={}",
+        go_oracle["open_blank"]
+    );
     let opened = request(
         &client,
         "open",
@@ -799,6 +819,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(
         opened["data"]["url"], go_oracle["open_data"]["data"]["url"],
         "data: open URL: Rust={opened} Go={}",
+        go_oracle["open_data"]
+    );
+    assert_eq!(
+        opened["data"], go_oracle["open_data"]["data"],
+        "data: open fields: Rust={opened} Go={}",
         go_oracle["open_data"]
     );
     let script = request(&client, "read", json!({}));

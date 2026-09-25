@@ -561,20 +561,14 @@ impl ChromePage {
             // invalid-URL result without changing the document; NavigationService
             // then returns the still-current page state. Avoid chromiumoxide's
             // lifecycle timeout while preserving that observable outcome.
-            return Ok(serde_json::json!({
-                "url": self.page.url().await?.unwrap_or_default(),
-                "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
-            }));
+            return self.current_navigation_outcome().await;
         }
         if !uses_script_navigation(url) {
             // Keep CDP's URL handling for data:, about:, file:, and relative
             // inputs. In particular, Chrome permits Page.navigate to data:
             // where script-initiated top-level navigation is rejected.
             self.page.goto(url).await?;
-            return Ok(serde_json::json!({
-                "url": self.page.url().await?.unwrap_or_default(),
-                "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
-            }));
+            return self.current_navigation_outcome().await;
         }
 
         // chromiumoxide's Page::goto waits for its own Page.lifecycleEvent
@@ -636,21 +630,30 @@ impl ChromePage {
         loop {
             let state = self
                 .page
-                .evaluate(
-                    "({url: location.href, title: document.title, ready_state: document.readyState})",
-                )
+                .evaluate("({ready_state: document.readyState})")
                 .await;
             if let Ok(state) = state {
                 let state = state.into_value::<Value>()?;
                 if state.get("ready_state").and_then(Value::as_str) == Some("complete") {
-                    return Ok(serde_json::json!({
-                        "url": state.get("url").and_then(Value::as_str).unwrap_or_default(),
-                        "title": state.get("title").and_then(Value::as_str).unwrap_or_default(),
-                    }));
+                    return self.current_navigation_outcome().await;
                 }
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
         }
+    }
+
+    async fn current_navigation_outcome(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let state = self
+            .page
+            .evaluate(
+                "(() => { const nav = performance.getEntriesByType('navigation')[0]; return {url: location.href, http_status: nav && nav.responseStatus || 0}; })()",
+            )
+            .await?
+            .into_value::<Value>()?;
+        Ok(serde_json::json!({
+            "url": state.get("url").and_then(Value::as_str).unwrap_or_default(),
+            "http_status": state.get("http_status").and_then(Value::as_i64).unwrap_or_default(),
+        }))
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {

@@ -1194,10 +1194,17 @@ impl DispatchRuntime {
                     .map_err(runtime_error)?;
                 json!({"uploaded": checked.uploaded})
             }
-            "open" | "goto" => page
-                .open(required_string(args, "url")?)
-                .await
-                .map_err(runtime_error)?,
+            "open" | "goto" => {
+                let outcome = page
+                    .open(required_string(args, "url")?)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({
+                    "action": frame.cmd.as_str(),
+                    "url": outcome.get("url").and_then(Value::as_str).unwrap_or_default(),
+                    "http_status": outcome.get("http_status").and_then(Value::as_i64).unwrap_or_default(),
+                })
+            }
             "eval" => {
                 let expression = args.get("expression").and_then(Value::as_str).unwrap_or("");
                 if expression.trim().is_empty() {
