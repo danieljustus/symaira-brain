@@ -159,20 +159,14 @@ async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label:
             dom::GetDocumentParams::builder()
                 .depth(-1)
                 .pierce(true)
-                .build()
-                .expect("DOM getDocument params"),
+                .build(),
         )
         .await
         .expect("pierce overlay shadow root");
     let node_id = overlay_button_node(&document.root, label).expect("overlay button node");
     let model = page
         .raw()
-        .execute(
-            dom::GetBoxModelParams::builder()
-                .node_id(node_id)
-                .build()
-                .expect("box model params"),
-        )
+        .execute(dom::GetBoxModelParams::builder().node_id(node_id).build())
         .await
         .expect("overlay button box model")
         .model;
@@ -323,8 +317,9 @@ async fn exercise_full_chrome_surface() {
         .disable_scripts()
         .await
         .expect("disable JavaScript for probe page");
+    let script_url = format!("{}/", server.base_url);
     script_disabled
-        .open(format!("{}/", server.base_url))
+        .open(&script_url)
         .await
         .expect("open fixture with scripts disabled");
     assert_eq!(
