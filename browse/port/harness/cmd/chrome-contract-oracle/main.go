@@ -15,6 +15,9 @@ import (
 type contract struct {
 	Open                  daemon.Response `json:"open"`
 	OpenFragment          daemon.Response `json:"open_fragment"`
+	OpenRelative          daemon.Response `json:"open_relative"`
+	OpenBlank             daemon.Response `json:"open_blank"`
+	OpenData              daemon.Response `json:"open_data"`
 	ScrollIntoView        daemon.Response `json:"scroll_into_view"`
 	TabNew                daemon.Response `json:"tab_new"`
 	InspectText           daemon.Response `json:"inspect_text"`
@@ -102,6 +105,14 @@ func run() error {
 	})
 	if !result.OpenFragment.Success {
 		return fmt.Errorf("Go same-document open oracle failed: %s", responseJSON(result.OpenFragment))
+	}
+	result.OpenRelative = call(runtime, ctx, daemon.Frame{
+		Cmd:     "open",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": "relative-probe"}),
+	})
+	if !result.OpenRelative.Success {
+		return fmt.Errorf("Go relative open oracle failed: %s", responseJSON(result.OpenRelative))
 	}
 	// Go enables capture on the first network.requests call for an existing tab.
 	result.NetworkCapture = call(runtime, ctx, daemon.Frame{
@@ -387,6 +398,22 @@ func run() error {
 	})
 	if result.LastTabClose.Success {
 		return fmt.Errorf("Go last-tab close unexpectedly succeeded")
+	}
+	result.OpenBlank = call(runtime, ctx, daemon.Frame{
+		Cmd:     "open",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": "about:blank"}),
+	})
+	if !result.OpenBlank.Success {
+		return fmt.Errorf("Go about:blank open oracle failed: %s", responseJSON(result.OpenBlank))
+	}
+	result.OpenData = call(runtime, ctx, daemon.Frame{
+		Cmd:     "open",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": "data:text/html,<title>daemon</title><h1>native</h1><div style='height:12000px'><div id='target' style='margin-top:8000px;height:100px'></div></div>"}),
+	})
+	if !result.OpenData.Success {
+		return fmt.Errorf("Go data: open oracle failed: %s", responseJSON(result.OpenData))
 	}
 	return json.NewEncoder(os.Stdout).Encode(result)
 }

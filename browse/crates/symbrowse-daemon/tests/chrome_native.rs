@@ -403,6 +403,17 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "same-document open URL: Rust={rust_open_fragment} Go={}",
         go_oracle["open_fragment"]
     );
+    let rust_open_relative = request(&client, "open", json!({"url":"relative-probe"}));
+    assert_eq!(
+        rust_open_relative["success"], go_oracle["open_relative"]["success"],
+        "relative open response: Rust={rust_open_relative} Go={}",
+        go_oracle["open_relative"]
+    );
+    assert_eq!(
+        rust_open_relative["data"]["url"], go_oracle["open_relative"]["data"]["url"],
+        "relative open URL: Rust={rust_open_relative} Go={}",
+        go_oracle["open_relative"]
+    );
     let network_started = request(&client, "network.requests", json!({}));
     assert_eq!(
         network_started["success"], go_oracle["network_capture"]["success"],
@@ -764,12 +775,32 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         rust_last_tab_close["error"]["message"],
         go_oracle["last_tab_close"]["error"]["message"]
     );
+    let rust_open_blank = request(&client, "open", json!({"url":"about:blank"}));
+    assert_eq!(
+        rust_open_blank["success"], go_oracle["open_blank"]["success"],
+        "about:blank open response: Rust={rust_open_blank} Go={}",
+        go_oracle["open_blank"]
+    );
+    assert_eq!(
+        rust_open_blank["data"]["url"], go_oracle["open_blank"]["data"]["url"],
+        "about:blank open URL: Rust={rust_open_blank} Go={}",
+        go_oracle["open_blank"]
+    );
     let opened = request(
         &client,
         "open",
         json!({"url": "data:text/html,<title>daemon</title><h1>native</h1><div style='height:12000px'><div id='target' style='margin-top:8000px;height:100px'></div></div>"}),
     );
-    assert_eq!(opened["success"], true, "open response: {opened}");
+    assert_eq!(
+        opened["success"], go_oracle["open_data"]["success"],
+        "data: open response: Rust={opened} Go={}",
+        go_oracle["open_data"]
+    );
+    assert_eq!(
+        opened["data"]["url"], go_oracle["open_data"]["data"]["url"],
+        "data: open URL: Rust={opened} Go={}",
+        go_oracle["open_data"]
+    );
     let script = request(&client, "read", json!({}));
     assert!(
         script["data"]

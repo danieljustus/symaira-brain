@@ -51,6 +51,19 @@ fn uses_script_navigation(url: &str) -> bool {
             .is_some_and(|scheme| scheme.eq_ignore_ascii_case("https://"))
 }
 
+fn has_explicit_url_scheme(url: &str) -> bool {
+    let Some((scheme, _)) = url.split_once(':') else {
+        return false;
+    };
+    let mut chars = scheme.chars();
+    chars
+        .next()
+        .is_some_and(|first| first.is_ascii_alphabetic())
+        && chars.all(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, '+' | '.' | '-')
+        })
+}
+
 #[derive(Debug)]
 pub struct ClickObstructedError {
     pub message: String,
@@ -540,6 +553,19 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        if url.trim().is_empty() {
+            return Err("navigation URL is required".into());
+        }
+        if !has_explicit_url_scheme(url) {
+            // Go sends relative inputs to Page.navigate, which reports an
+            // invalid-URL result without changing the document; NavigationService
+            // then returns the still-current page state. Avoid chromiumoxide's
+            // lifecycle timeout while preserving that observable outcome.
+            return Ok(serde_json::json!({
+                "url": self.page.url().await?.unwrap_or_default(),
+                "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
+            }));
+        }
         if !uses_script_navigation(url) {
             // Keep CDP's URL handling for data:, about:, file:, and relative
             // inputs. In particular, Chrome permits Page.navigate to data:
@@ -1908,6 +1934,21 @@ mod tests {
             "#fragment",
         ] {
             assert!(!uses_script_navigation(url), "{url}");
+        }
+        for url in [
+            "/relative/path",
+            "relative/path",
+            "#fragment",
+            "//example.test/",
+        ] {
+            assert!(!has_explicit_url_scheme(url), "{url}");
+        }
+        for url in [
+            "http://example.test/",
+            "data:text/html,fixture",
+            "about:blank",
+        ] {
+            assert!(has_explicit_url_scheme(url), "{url}");
         }
     }
 }
