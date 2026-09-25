@@ -899,7 +899,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "tab.new",
         json!({
             "label": "popup-source",
-            "url": "data:text/html,%3Cbutton%20id%3Dpopup%20onclick%3D%22window.popup%3Dwindow.open%28%27about%3Ablank%27%2C%27symbrowse-popup%27%29%22%3EOpen%20popup%3C%2Fbutton%3E"
+            "url": format!("{}/popup", contract_server.base_url)
         }),
     );
     assert_eq!(
