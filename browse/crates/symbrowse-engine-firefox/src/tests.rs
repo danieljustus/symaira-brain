@@ -43,6 +43,39 @@ fn evaluation_preserves_bidi_exception_details() {
 }
 
 #[test]
+fn evaluation_decodes_nested_bidi_remote_values() {
+    let result = evaluation_result(json!({
+        "result": {
+            "type":"object",
+            "value":[
+                ["title", {"type":"string", "value":"Firefox fixture"}],
+                ["count", {"type":"number", "value":3}],
+                ["items", {"type":"array", "value":[
+                    {"type":"boolean", "value":true},
+                    {"type":"undefined"}
+                ]}],
+                ["nested", {"type":"object", "value":[
+                    ["url", {"type":"string", "value":"http://127.0.0.1/"}]
+                ]}]
+            ]
+        }
+    }));
+    assert_eq!(
+        result.value,
+        Some(json!({
+            "title":"Firefox fixture",
+            "count":3,
+            "items":[true, null],
+            "nested":{"url":"http://127.0.0.1/"}
+        }))
+    );
+    assert_eq!(
+        evaluation_result(json!({"result":{"type":"string","value":"title"}})).value,
+        Some(json!("title"))
+    );
+}
+
+#[test]
 fn unsupported_downloads_and_network_capture_are_typed() {
     for operation in ["downloads", "network.capture"] {
         assert!(matches!(

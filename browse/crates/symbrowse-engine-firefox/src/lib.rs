@@ -19,6 +19,38 @@ use symbrowse_engine::{
 
 pub const ENGINE_KIND: &str = "firefox";
 
+// BiDi represents object properties as [key, RemoteValue] pairs.
+fn decode_remote_value(remote: &Value) -> Value {
+    match remote.get("type").and_then(Value::as_str) {
+        Some("undefined" | "null") => Value::Null,
+        Some("object") => {
+            let Some(properties) = remote.get("value").and_then(Value::as_array) else {
+                return Value::Null;
+            };
+            let mut object = serde_json::Map::new();
+            for property in properties {
+                let Some(pair) = property.as_array() else {
+                    continue;
+                };
+                let (Some(key), Some(value)) = (pair.first().and_then(Value::as_str), pair.get(1))
+                else {
+                    continue;
+                };
+                object.insert(key.to_owned(), decode_remote_value(value));
+            }
+            Value::Object(object)
+        }
+        Some("array") => remote
+            .get("value")
+            .and_then(Value::as_array)
+            .map(|items| items.iter().map(decode_remote_value).collect())
+            .map(Value::Array)
+            .unwrap_or(Value::Null),
+        Some(_) => remote.get("value").cloned().unwrap_or(Value::Null),
+        None => Value::Null,
+    }
+}
+
 fn evaluation_result(result: Value) -> EvaluationResult {
     if result.get("type").and_then(Value::as_str) == Some("exception") {
         return EvaluationResult {
@@ -33,7 +65,7 @@ fn evaluation_result(result: Value) -> EvaluationResult {
     }
     let remote = result.get("result").unwrap_or(&Value::Null);
     EvaluationResult {
-        value: remote.get("value").cloned(),
+        value: Some(decode_remote_value(remote)),
         value_type: remote
             .get("type")
             .and_then(Value::as_str)
