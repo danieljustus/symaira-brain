@@ -70,6 +70,11 @@ enum Action {
         format: Format,
         fix: bool,
     },
+    Downloads {
+        session: String,
+        dir: Option<String>,
+        format: Format,
+    },
     Batch {
         format: Format,
         commands: Vec<String>,
@@ -266,6 +271,11 @@ fn main() -> ExitCode {
         Ok(Action::Version { structured: false }) => write_stdout(&render_version_text(VERSION)),
         Ok(Action::ConfigShow { format, flags }) => run_config_show(format, flags),
         Ok(Action::Doctor { format, fix }) => doctor::run(format, fix),
+        Ok(Action::Downloads {
+            session,
+            dir,
+            format,
+        }) => run_downloads(session, dir, format),
         Ok(Action::Batch {
             format,
             commands,
@@ -576,6 +586,95 @@ fn run_dispatch(
     } else {
         render_daemon_error(format, response.error.unwrap_or_default())
     }
+}
+
+fn run_downloads(session: String, dir: Option<String>, format: Format) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    if let Some(dir) = dir.filter(|dir| !dir.is_empty()) {
+        let response = match client.request(cli_frame(
+            "download.setdir",
+            &session,
+            Some(serde_json::json!({"dir": dir})),
+        )) {
+            Ok(response) => response,
+            Err(error) => return render_client_error(format, error),
+        };
+        if !response.success {
+            return render_daemon_error(format, response.error.unwrap_or_default());
+        }
+        if let Err(error) = writeln!(io::stdout(), "download directory set to {dir}") {
+            let _ = writeln!(io::stderr(), "{error}");
+            return ExitCode::from(1);
+        }
+    }
+
+    let response = match client.request(cli_frame("downloads.list", &session, None)) {
+        Ok(response) => response,
+        Err(error) => return render_client_error(format, error),
+    };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    if format != Format::Text {
+        return match Envelope::ok(
+            response.data.unwrap_or(serde_json::Value::Null),
+            response
+                .warnings
+                .into_iter()
+                .map(|warning| symbrowse_core::output::Warning {
+                    kind: warning.kind,
+                    severity: warning.severity,
+                    message: warning.message,
+                    r#ref: warning.r#ref,
+                    excerpt: warning.excerpt,
+                })
+                .collect(),
+        )
+        .render(format)
+        {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
+    let data = response.data.unwrap_or(serde_json::Value::Null);
+    let downloads = data
+        .get("downloads")
+        .and_then(serde_json::Value::as_array)
+        .into_iter()
+        .flatten();
+    for entry in downloads {
+        let state = entry
+            .get("state")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        let filename = entry
+            .get("filename")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        let url = entry
+            .get("url")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        let sha256 = entry
+            .get("sha256")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        let mut line = format!("[{state}] {filename} ({url})");
+        if state == "completed" && !sha256.is_empty() {
+            line.push_str(&format!(" sha256:{sha256}"));
+        }
+        if let Err(error) = writeln!(io::stdout(), "{line}") {
+            let _ = writeln!(io::stderr(), "{error}");
+            return ExitCode::from(1);
+        }
+    }
+    ExitCode::SUCCESS
 }
 
 fn run_network_requests(session: String, args: serde_json::Value, format: Format) -> ExitCode {
@@ -3054,6 +3153,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     match values[command_index].as_str() {
         "version" => parse_version(&values, command_index),
         "doctor" => parse_doctor(&values, command_index),
+        "downloads" => parse_downloads(&values, command_index),
         "eval" => parse_eval(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
@@ -3141,6 +3241,62 @@ fn parse_doctor(values: &[String], command_index: usize) -> Result<Action, Parse
     Ok(Action::Doctor { format, fix })
 }
 
+fn parse_downloads(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut dir = None;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" | "--dir" => {
+                let flag = value.clone();
+                index += 1;
+                let argument = required_value(values, index, &flag)?;
+                if flag == "--session" {
+                    session = argument.to_owned();
+                } else {
+                    dir = Some(argument.to_owned());
+                }
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--dir=") => dir = Some(value[6..].to_owned()),
+            "--" => {
+                if let Some(extra) = values.get(index + 1) {
+                    return Err(ParseError {
+                        message: format!("unknown command {extra:?} for \"symbrowse downloads\""),
+                        exit_code: 2,
+                    });
+                }
+                break;
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            extra => {
+                return Err(ParseError {
+                    message: format!("unknown command {extra:?} for \"symbrowse downloads\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Downloads {
+        session,
+        dir,
+        format,
+    })
+}
+
 fn parse_help(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let path = values[command_index + 1..]
         .iter()
@@ -3174,7 +3330,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -3243,6 +3399,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("network", None) => Some("Inspect captured page requests\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n  -h, --help            help for downloads\n      --dir string      set the download directory first\n      --session string  session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n  -h, --help            help for requests\n      --filter string   only URLs containing this substring\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string   only this HTTP method\n      --status int      only this HTTP status code\n      --type string     only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
@@ -6051,6 +6208,33 @@ mod tests {
             })
         );
         assert!(parse(&args(&["doctor", "extra"])).is_err());
+    }
+
+    #[test]
+    fn parses_downloads_session_directory_and_output() {
+        assert_eq!(
+            parse(&args(&[
+                "downloads",
+                "--dir",
+                "/tmp/downloads",
+                "--session=work",
+                "--output=json",
+            ])),
+            Ok(Action::Downloads {
+                session: "work".to_owned(),
+                dir: Some("/tmp/downloads".to_owned()),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["--json", "downloads"])),
+            Ok(Action::Downloads {
+                session: "default".to_owned(),
+                dir: None,
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["downloads", "extra"])).is_err());
     }
 
     #[test]

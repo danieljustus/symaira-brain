@@ -149,7 +149,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "doctor", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "doctor", "downloads", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "watch", "workflow",
     }
@@ -183,7 +183,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
                  "go": output_record(go_root), "rust": output_record(rust_root)})
     go_paths = [
         ["a11y"], ["batch"], ["config"], ["config", "show"], ["doctor"], ["dialog"], ["dialog", "accept"], ["screenshot"],
-        ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
+        ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"], ["downloads"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
         ["session"], ["session", "id"], ["session", "list"], ["session", "info"],
@@ -316,6 +316,13 @@ class UnixDaemonStub:
                         data = {"nodes": []}
                     elif frame.get("cmd") == "network.capture":
                         data = {"started": True}
+                    elif frame.get("cmd") == "download.setdir":
+                        data = {"download_dir": (frame.get("args") or {}).get("dir", "")}
+                    elif frame.get("cmd") == "downloads.list":
+                        data = {"downloads": [{
+                            "state": "completed", "filename": "report.csv",
+                            "url": "https://fixture.invalid/report.csv", "sha256": "a" * 64,
+                        }], "count": 1}
                     elif frame.get("cmd") == "network.requests":
                         data = {"requests": [
                             {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
@@ -511,6 +518,13 @@ class WindowsNamedPipeStub:
                         data = {"nodes": []}
                     elif frame.get("cmd") == "network.capture":
                         data = {"started": True}
+                    elif frame.get("cmd") == "download.setdir":
+                        data = {"download_dir": (frame.get("args") or {}).get("dir", "")}
+                    elif frame.get("cmd") == "downloads.list":
+                        data = {"downloads": [{
+                            "state": "completed", "filename": "report.csv",
+                            "url": "https://fixture.invalid/report.csv", "sha256": "a" * 64,
+                        }], "count": 1}
                     elif frame.get("cmd") == "network.requests":
                         data = {"requests": [
                             {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
@@ -634,11 +648,21 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                 value.startswith(("http://", "https://")) for value in argv[1:]))
             is_diff_url = argv[:2] == ["diff", "url"]
             is_network_requests = argv[:2] == ["network", "requests"]
-            go_count = 2 if has_a11y_url or is_diff_url else 1
+            is_downloads = argv[:1] == ["downloads"]
+            download_dir = None
+            if is_downloads:
+                for index, value in enumerate(argv):
+                    if value == "--dir" and index + 1 < len(argv):
+                        download_dir = argv[index + 1]
+                    elif value.startswith("--dir="):
+                        download_dir = value[6:]
+            go_count = 2 if has_a11y_url or is_diff_url or (is_downloads and download_dir) else 1
             # Client.request verifies daemon.status after each command frame.
             # diff url performs two reads, so the Rust stub must answer four
             # connections while the Go client sends only its two reads.
-            rust_count = 4 if has_a11y_url or is_diff_url or is_network_requests else 2
+            rust_count = (4 if download_dir else 2) if is_downloads else (
+                4 if has_a11y_url or is_diff_url or is_network_requests else 2
+            )
             if os.name == "nt":
                 with WindowsNamedPipeStub(session=session, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
@@ -702,6 +726,29 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if argv[:1] == ["downloads"]:
+            go_actual = [payload_raw(frame) for frame in go_frames]
+            rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
+            expected = ([{"cmd": "download.setdir", "session": session,
+                          "args": {"dir": download_dir}},
+                         {"cmd": "downloads.list", "session": session, "args": None}]
+                        if download_dir else
+                        [{"cmd": "downloads.list", "session": session, "args": None}])
+            sequence_match = go_actual == expected and rust_actual == expected
+            row["downloads_sequence_match"] = sequence_match
+            row["go_actual_frames"] = go_actual
+            row["rust_actual_frames"] = rust_actual
+            row["matched"] = bool(
+                all(go_result.get(key) == rust_result.get(key)
+                    for key in ("returncode", "stdout", "stderr"))
+                and sequence_match and not go_error and not rust_error
+            )
+            if os.name == "nt":
+                row["windows_pipe_response_flushes"] = {"go": go_flushed, "rust": rust_flushed}
+                row["windows_pipe_flush_verified"] = bool(
+                    go_flushed == go_count and rust_flushed == rust_count
+                )
+                row["matched"] = bool(row["matched"] and row["windows_pipe_flush_verified"])
         if os.name == "nt" and (argv[:1] == ["eval"] or argv[:2] == ["tab", "switch"]):
             row["windows_pipe_response_flushes"] = {"go": go_flushed, "rust": rust_flushed}
             row["windows_pipe_flush_verified"] = bool(
@@ -979,6 +1026,12 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["network", "requests", "--filter", "API", "--type", "xhr", "--method", "post", "--status", "201", "--json"], b"", True),
         ("CLI-002", ["network", "requests", "--output=yaml"], b"", True),
         ("CLI-003", ["network", "requests", "extra"], b"", False),
+        ("CLI-002", ["downloads", "--session", "fixture"], b"", True),
+        ("CLI-002", ["downloads", "--session", "fixture", "--json"], b"", True),
+        ("CLI-002", ["downloads", "--dir", "/tmp/symbrowse-downloads", "--session", "fixture"], b"", True),
+        ("CLI-002", ["downloads", "--dir=/tmp/symbrowse-downloads", "--session=fixture", "--output=json"], b"", True),
+        ("CLI-003", ["downloads", "extra"], b"", False),
+        ("CLI-003", ["downloads", "--dir"], b"", False),
         ("CLI-003", ["upload"], b"", False),
         ("CLI-003", ["upload", "input[type=file]"], b"", False),
         ("CLI-003", ["state", "save"], b"", False),
