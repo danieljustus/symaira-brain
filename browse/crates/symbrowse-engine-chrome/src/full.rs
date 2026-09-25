@@ -534,8 +534,22 @@ impl ChromePage {
                     biased;
                     event = begins.next() => {
                         let Some(event) = event else { break };
-                        if event.frame_id.inner() != event_frame.lock().await.as_str() {
+                        let expected_frame = event_frame.lock().await.clone();
+                        if event.frame_id.inner() != expected_frame.as_str() {
+                            if std::env::var_os("SYMBROWSE_E2E").is_some() {
+                                eprintln!(
+                                    "chrome_download_frame_mismatch event={} configured={}",
+                                    event.frame_id.inner(),
+                                    expected_frame,
+                                );
+                            }
                             continue;
+                        }
+                        if std::env::var_os("SYMBROWSE_E2E").is_some() {
+                            eprintln!(
+                                "chrome_download_frame_match event={}",
+                                event.frame_id.inner(),
+                            );
                         }
                         event_downloads.lock().await.record_download_will_begin_now(
                             &event_session,

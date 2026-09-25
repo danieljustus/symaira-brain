@@ -82,6 +82,8 @@ impl ChromeContractServer {
                                 .fetch_add(1, Ordering::Relaxed)
                                 + 1;
                             eprintln!("chrome_contract_fixture_policy_pixel_request={sequence}");
+                        } else if path == "/download" {
+                            eprintln!("chrome_contract_fixture_download_request=received");
                         }
                         let header_echo = if path == "/header-echo" {
                             request
