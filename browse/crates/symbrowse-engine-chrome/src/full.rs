@@ -359,7 +359,7 @@ pub fn capabilities() -> ChromeCapabilities {
 /// A connected browser plus one page. The handler is kept alive in a task so
 /// chromiumoxide can dispatch CDP events and page commands.
 pub struct ChromeSession {
-    browser: Arc<Browser>,
+    browser: Arc<Mutex<Browser>>,
     mode: ConnectionMode,
     _handler_task: tokio::task::JoinHandle<()>,
 }
@@ -370,7 +370,7 @@ impl ChromeSession {
         timeout: Duration,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let connection = launch::connect(&mode, timeout).await?;
-        let browser = Arc::new(connection.browser);
+        let browser = Arc::new(Mutex::new(connection.browser));
         let handler = connection.handler;
         let mode = connection.mode;
         let task = tokio::spawn(async move {
@@ -397,6 +397,8 @@ impl ChromeSession {
         // already set; open it after the blank target is attached to the handler.
         let page = self
             .browser
+            .lock()
+            .await
             .new_page("about:blank")
             .await
             .map_err(|error| std::io::Error::other(format!("create blank CDP target: {error}")))?;
@@ -414,20 +416,22 @@ impl ChromeSession {
     }
 
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {
+        let pages = self.browser.lock().await.pages().await?;
         let mut chrome_pages = Vec::new();
-        for page in self.browser.pages().await? {
+        for page in pages {
             chrome_pages.push(ChromePage::new(page, Arc::clone(&self.browser)).await?);
         }
         Ok(chrome_pages)
     }
 
-    pub async fn close(mut self) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn close(self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut browser = self.browser.lock().await;
         let close_result = if self.mode == ConnectionMode::Launch {
-            self.browser.close().await.map(|_| ())
+            browser.close().await.map(|_| ())
         } else {
             Ok(())
         };
-        let wait_result = self.browser.wait().await;
+        let wait_result = browser.wait().await;
         self._handler_task.abort();
         close_result?;
         wait_result?;
@@ -438,7 +442,7 @@ impl ChromeSession {
 #[derive(Clone)]
 pub struct ChromePage {
     page: Page,
-    browser: Arc<Browser>,
+    browser: Arc<Mutex<Browser>>,
     dialogs: DialogMonitor,
     downloads: Arc<Mutex<DownloadRegistry>>,
     download_session: String,
@@ -460,7 +464,10 @@ struct DialogState {
 }
 
 impl ChromePage {
-    async fn new(page: Page, browser: Arc<Browser>) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    async fn new(
+        page: Page,
+        browser: Arc<Mutex<Browser>>,
+    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
@@ -500,20 +507,25 @@ impl ChromePage {
         let event_frame = Arc::clone(&download_frame);
         // Chrome routes Browser.download* through either the target session
         // or the browser connection, depending on the platform/CDP session.
-        let mut begins = futures::stream::select(
-            page.event_listener::<browser::EventDownloadWillBegin>()
-                .await?,
-            browser
-                .event_listener::<browser::EventDownloadWillBegin>()
-                .await?,
-        );
-        let mut progress = futures::stream::select(
-            page.event_listener::<browser::EventDownloadProgress>()
-                .await?,
-            browser
-                .event_listener::<browser::EventDownloadProgress>()
-                .await?,
-        );
+        let page_begins = page
+            .event_listener::<browser::EventDownloadWillBegin>()
+            .await?;
+        let page_progress = page
+            .event_listener::<browser::EventDownloadProgress>()
+            .await?;
+        let (browser_begins, browser_progress) = {
+            let browser = browser.lock().await;
+            (
+                browser
+                    .event_listener::<browser::EventDownloadWillBegin>()
+                    .await?,
+                browser
+                    .event_listener::<browser::EventDownloadProgress>()
+                    .await?,
+            )
+        };
+        let mut begins = futures::stream::select(page_begins, browser_begins);
+        let mut progress = futures::stream::select(page_progress, browser_progress);
         let event_downloads = Arc::clone(&downloads);
         let event_session = download_session.clone();
         tokio::spawn(async move {
@@ -1654,6 +1666,8 @@ impl ChromePage {
         };
         let path = (!behavior.download_path.is_empty()).then(|| behavior.download_path.clone());
         self.browser
+            .lock()
+            .await
             .execute(browser_set_download_behavior(cdp_behavior, path)?)
             .await
             .map_err(|error| std::io::Error::other(format!("set download behavior: {error}")))?;
