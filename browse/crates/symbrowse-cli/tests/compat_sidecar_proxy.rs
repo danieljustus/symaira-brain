@@ -1,15 +1,11 @@
-#![cfg(unix)]
-
 use std::{
-    fs,
     io::Write,
-    os::unix::fs::PermissionsExt,
     path::Path,
-    process::{Command, Stdio},
+    process::{Command, Output, Stdio},
 };
 use tempfile::tempdir;
 
-fn run(binary: &Path, helper: Option<&Path>, input: &[u8]) -> std::process::Output {
+fn run(binary: &Path, helper: Option<&Path>, input: &[u8]) -> Output {
     let mut command = Command::new(binary);
     command.arg("compat-sidecar");
     if let Some(helper) = helper {
@@ -33,28 +29,26 @@ fn run(binary: &Path, helper: Option<&Path>, input: &[u8]) -> std::process::Outp
 }
 
 #[test]
-fn compat_sidecar_forwards_protocol_stdio_to_retained_helper() {
-    let temp = tempdir().expect("temporary helper dir");
-    let helper = temp.path().join("go-sidecar-stub");
-    fs::write(
-        &helper,
-        "#!/bin/sh\n[ \"$1\" = compat-sidecar ] || exit 73\ncat\n",
-    )
-    .expect("write helper stub");
-    fs::set_permissions(&helper, fs::Permissions::from_mode(0o700))
-        .expect("make helper executable");
-
-    let input = b"{\"type\":\"handshake\",\"protocol\":1}\n";
+#[ignore = "requires SYMBROWSE_COMPAT_BINARY to point at the native Go oracle"]
+fn compat_sidecar_forwards_real_go_handshake_on_native_platform() {
+    let helper = std::env::var_os("SYMBROWSE_COMPAT_BINARY").expect("native Go helper path");
+    let helper = std::path::PathBuf::from(helper);
+    assert!(helper.is_absolute(), "Go helper path must be absolute");
+    let input = b"{\"type\":\"handshake\",\"protocol\":1,\"component\":\"symbrowse-rust\",\"oracle\":\"go-azuretls-v0.8.0\"}\n";
     let output = run(
         Path::new(env!("CARGO_BIN_EXE_symbrowse")),
         Some(&helper),
         input,
     );
     assert_eq!(output.status.code(), Some(0));
-    assert_eq!(output.stdout, input);
+    assert_eq!(
+        output.stdout,
+        b"{\"type\":\"handshake_ack\",\"protocol\":1,\"component\":\"symbrowse-go\",\"oracle\":\"go-azuretls-v0.8.0\"}\n"
+    );
     assert!(output.stderr.is_empty());
 }
 
+#[cfg(unix)]
 #[test]
 fn compat_sidecar_fails_closed_without_helper_or_on_self_recursion() {
     let binary = Path::new(env!("CARGO_BIN_EXE_symbrowse"));
@@ -82,4 +76,30 @@ fn compat_sidecar_fails_closed_without_helper_or_on_self_recursion() {
         self_helper.stderr,
         b"compat-sidecar cannot use the symbrowse Rust executable as its helper\n"
     );
+}
+
+#[cfg(unix)]
+#[test]
+fn compat_sidecar_forwards_stdio_and_child_exit_code() {
+    use std::{fs, os::unix::fs::PermissionsExt};
+
+    let temp = tempdir().expect("temporary helper dir");
+    let helper = temp.path().join("go-sidecar-stub");
+    fs::write(
+        &helper,
+        "#!/bin/sh\n[ \"$1\" = compat-sidecar ] || exit 73\ncat\nexit 23\n",
+    )
+    .expect("write helper stub");
+    fs::set_permissions(&helper, fs::Permissions::from_mode(0o700))
+        .expect("make helper executable");
+
+    let input = b"{\"type\":\"handshake\",\"protocol\":1}\n";
+    let output = run(
+        Path::new(env!("CARGO_BIN_EXE_symbrowse")),
+        Some(&helper),
+        input,
+    );
+    assert_eq!(output.status.code(), Some(23));
+    assert_eq!(output.stdout, input);
+    assert!(output.stderr.is_empty());
 }
