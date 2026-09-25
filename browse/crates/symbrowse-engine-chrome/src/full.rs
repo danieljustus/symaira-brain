@@ -417,7 +417,7 @@ impl ChromePage {
             .build()
             .map_err(std::io::Error::other)?;
         let response = self.page.execute(params).await?;
-        let result = response.result;
+        let result = response.result.result;
         let exception_text = response
             .exception_details
             .map(|exception| exception.text)
