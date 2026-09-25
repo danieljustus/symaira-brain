@@ -8,8 +8,8 @@ use std::{
 
 use serde::Deserialize;
 use symbrowse_core::config::{
-    explicit_selection, load, render_show_yaml, resolve_selection, FlagOverrides, LoadContext,
-    TransportMode,
+    FlagOverrides, LoadContext, TransportMode, explicit_selection, load, render_show_yaml,
+    resolve_selection,
 };
 
 static NEXT_ROOT: AtomicU64 = AtomicU64::new(1);
