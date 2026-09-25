@@ -3458,7 +3458,7 @@ mod tests {
                     .block_on(runtime.dispatch(
                         Frame {
                             cmd: cmd.into(),
-                            args: Some(json!({"url":"data:text/html,fixture"})),
+                            args: Some(json!({"url":"https://example.com/fixture"})),
                             ..Frame::default()
                         },
                         OperationContext::for_test(),
