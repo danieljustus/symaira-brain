@@ -330,6 +330,10 @@ fn needs_yaml_quotes(value: &str) -> bool {
     if value.is_empty() || value.contains(['\n', '\r', '\t']) || value.contains(": ") {
         return true;
     }
+    // Go's yaml.v3 quotes strings that would otherwise decode as timestamps.
+    if time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339).is_ok() {
+        return true;
+    }
     matches!(
         value.to_ascii_lowercase().as_str(),
         "y" | "yes" | "n" | "no" | "true" | "false" | "on" | "off" | "null" | "~"
@@ -863,6 +867,17 @@ mod tests {
         assert_eq!(
             envelope.render(Format::Yaml).unwrap(),
             "success: true\ndata:\n    refs: {}\n    tree: |\n        shared\n        after\nwarnings: []\nerror: null\n"
+        );
+    }
+
+    #[test]
+    fn yaml_quotes_rfc3339_strings_like_go() {
+        let envelope = Envelope::ok(json!({"started_at": "2026-01-01T00:00:00Z"}), Vec::new());
+        assert!(
+            envelope
+                .render(Format::Yaml)
+                .unwrap()
+                .contains("started_at: \"2026-01-01T00:00:00Z\"\n")
         );
     }
 
