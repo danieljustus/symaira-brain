@@ -166,6 +166,9 @@ enum Action {
     CacheClear {
         format: Format,
     },
+    CacheList {
+        format: Format,
+    },
     SessionId {
         scope: String,
         prefix: String,
@@ -374,6 +377,7 @@ fn main() -> ExitCode {
         Ok(Action::CookieImport { session, path }) => run_cookie_import(session, path),
         Ok(Action::CacheGet { id, range, format }) => run_cache_get(id, range, format),
         Ok(Action::CacheClear { format }) => run_cache_clear(format),
+        Ok(Action::CacheList { format }) => run_cache_list(format),
         Ok(Action::SessionId {
             scope,
             prefix,
@@ -2276,6 +2280,92 @@ fn run_cache_clear(format: Format) -> ExitCode {
     }
 }
 
+#[derive(serde::Serialize)]
+struct CacheListEntry {
+    id: String,
+    kind: String,
+    bytes: u64,
+    created_at: String,
+    expires_at: String,
+    expired: bool,
+}
+
+fn run_cache_list(format: Format) -> ExitCode {
+    let context = match LoadContext::from_process(FlagOverrides::default()) {
+        Ok(context) => context,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let config = match load(&context) {
+        Ok(result) => result.config,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let root = PathBuf::from(config.cache_dir);
+    let output_cache = Cache::new(root.join("out"), Duration::ZERO);
+    let fetch_ttl = Duration::from_secs(
+        u64::try_from(config.cache_ttl_hours.max(0))
+            .unwrap_or(u64::MAX)
+            .saturating_mul(3_600),
+    );
+    let entries = match cache_list_entries(&output_cache, &root.join("fetch"), fetch_ttl) {
+        Ok(entries) => entries,
+        Err(error) => return write_cache_get_error(error, format),
+    };
+    if format == Format::Text {
+        if entries.is_empty() {
+            return write_stdout("cache is empty\n");
+        }
+        let now = time::OffsetDateTime::now_utc();
+        let mut output = String::new();
+        for entry in entries {
+            let created_at = time::OffsetDateTime::parse(
+                &entry.created_at,
+                &time::format_description::well_known::Rfc3339,
+            );
+            let age = created_at
+                .map(|created_at| go_duration_seconds((now - created_at).whole_seconds()))
+                .unwrap_or_else(|_| "0s".to_owned());
+            let expiry = time::OffsetDateTime::parse(
+                &entry.expires_at,
+                &time::format_description::well_known::Rfc3339,
+            )
+            .ok()
+            .filter(|expires_at| expires_at.year() != 1)
+            .map(|expires_at| {
+                format!(
+                    "{} left",
+                    go_duration_seconds((expires_at - now).whole_seconds())
+                )
+            })
+            .unwrap_or_else(|| "never".to_owned());
+            output.push_str(&format!(
+                "{}\t{}\t{} bytes\t{} old\t{}\n",
+                entry.id, entry.kind, entry.bytes, age, expiry
+            ));
+        }
+        return write_stdout(&output);
+    }
+    match Envelope::ok(serde_json::json!({"entries": entries}), Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => write_cache_get_error(error.to_string(), format),
+    }
+}
+
+fn go_duration_seconds(seconds: i64) -> String {
+    let negative = seconds < 0;
+    let seconds = seconds.unsigned_abs();
+    let hours = seconds / 3_600;
+    let minutes = (seconds % 3_600) / 60;
+    let seconds = seconds % 60;
+    let value = if hours > 0 {
+        format!("{hours}h{minutes}m{seconds}s")
+    } else if minutes > 0 {
+        format!("{minutes}m{seconds}s")
+    } else {
+        format!("{seconds}s")
+    };
+    if negative { format!("-{value}") } else { value }
+}
+
 fn clear_cache_entries(
     output_cache: &Cache,
     fetch_cache: &symbrowse_fetch::cache::ResponseCache,
@@ -2292,13 +2382,47 @@ fn clear_cache_entries(
 }
 
 fn fetch_cache_entry_count(root: &Path, default_ttl: Duration) -> Result<usize, String> {
+    Ok(fetch_cache_entries(root, default_ttl)?.len())
+}
+
+fn cache_list_entries(
+    output_cache: &Cache,
+    fetch_root: &Path,
+    default_ttl: Duration,
+) -> Result<Vec<CacheListEntry>, String> {
+    let mut entries = output_cache
+        .list()
+        .map_err(|error| error.to_string())?
+        .into_iter()
+        .map(|entry| CacheListEntry {
+            id: entry.id,
+            kind: "output".to_owned(),
+            bytes: entry.bytes,
+            created_at: entry.created_at,
+            expires_at: entry.expires_at,
+            expired: entry.expired,
+        })
+        .collect::<Vec<_>>();
+    entries.extend(fetch_cache_entries(fetch_root, default_ttl)?);
+    entries.sort_by(|left, right| {
+        let parse_time = |value: &str| {
+            time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339).ok()
+        };
+        parse_time(&left.created_at)
+            .cmp(&parse_time(&right.created_at))
+            .then_with(|| left.id.cmp(&right.id))
+    });
+    Ok(entries)
+}
+
+fn fetch_cache_entries(root: &Path, default_ttl: Duration) -> Result<Vec<CacheListEntry>, String> {
     let directories = match fs::read_dir(root) {
         Ok(directories) => directories,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(0),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
         Err(error) => return Err(error.to_string()),
     };
     let now = time::OffsetDateTime::now_utc();
-    let mut count = 0;
+    let mut entries = Vec::new();
     for directory in directories.flatten().filter_map(|entry| {
         entry
             .file_type()
@@ -2329,9 +2453,11 @@ fn fetch_cache_entry_count(root: &Path, default_ttl: Duration) -> Result<usize, 
             {
                 continue;
             }
-            if fs::metadata(metadata_path.with_file_name(format!("{key}.body"))).is_err() {
+            let Ok(body_metadata) =
+                fs::metadata(metadata_path.with_file_name(format!("{key}.body")))
+            else {
                 continue;
-            }
+            };
             let Ok(raw) = fs::read(&metadata_path) else {
                 continue;
             };
@@ -2347,23 +2473,39 @@ fn fetch_cache_entry_count(root: &Path, default_ttl: Duration) -> Result<usize, 
                 Some(serde_json::Value::Null) | None => None,
                 _ => continue,
             };
-            let ttl = match metadata.get("ttl") {
-                Some(serde_json::Value::Number(value)) => value
-                    .as_i64()
-                    .filter(|nanos| *nanos > 0)
-                    .map(|nanos| Duration::from_nanos(nanos as u64))
-                    .unwrap_or(default_ttl),
-                Some(serde_json::Value::Null) | None => default_ttl,
-                _ => continue,
-            };
+            // Go's Entries view uses the currently configured cache TTL,
+            // matching the Rust fetch cache's load-time default.
+            let ttl = default_ttl;
             let Some(stored_at) = stored_at else { continue };
             let age = (now - stored_at).whole_nanoseconds();
             if ttl.is_zero() || age <= ttl.as_nanos().min(i128::MAX as u128) as i128 {
-                count += 1;
+                let expires_at = if ttl.is_zero() {
+                    "0001-01-01T00:00:00Z".to_owned()
+                } else {
+                    let ttl_nanos = i64::try_from(ttl.as_nanos()).unwrap_or(i64::MAX);
+                    stored_at
+                        .checked_add(time::Duration::nanoseconds(ttl_nanos))
+                        .and_then(|expires| {
+                            expires
+                                .format(&time::format_description::well_known::Rfc3339)
+                                .ok()
+                        })
+                        .unwrap_or_else(|| "0001-01-01T00:00:00Z".to_owned())
+                };
+                entries.push(CacheListEntry {
+                    id: format!("fetch:{key}"),
+                    kind: "fetch-response".to_owned(),
+                    bytes: body_metadata.len(),
+                    created_at: stored_at
+                        .format(&time::format_description::well_known::Rfc3339)
+                        .unwrap_or_else(|_| "0001-01-01T00:00:00Z".to_owned()),
+                    expires_at,
+                    expired: false,
+                });
             }
         }
     }
-    Ok(count)
+    Ok(entries)
 }
 
 fn parse_cache_range(spec: &str) -> Result<(usize, usize), String> {
@@ -4528,7 +4670,7 @@ Use "symbrowse errors [command] --help" for more information about a command.
             global,
         )),
         ("cache", None) => Some(
-            "Inspect the truncate-and-store output cache\n\nUsage:\n  symbrowse cache [command]\n\nAvailable Commands:\n  clear       Remove all cache entries\n  get         Print a cached output (optionally one line range)\n\nFlags:\n  -h, --help   help for cache\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cache [command] --help\" for more information about a command.\n".to_owned(),
+            "Inspect the truncate-and-store output cache\n\nUsage:\n  symbrowse cache [command]\n\nAvailable Commands:\n  clear       Remove all cache entries\n  get         Print a cached output (optionally one line range)\n  list        List cache entries with size, age and expiry\n\nFlags:\n  -h, --help   help for cache\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cache [command] --help\" for more information about a command.\n".to_owned(),
         ),
         ("cache", Some("clear")) => Some(plain(
             "Remove all cache entries",
@@ -4540,6 +4682,12 @@ Use "symbrowse errors [command] --help" for more information about a command.
             "Print a cached output (optionally one line range)",
             "symbrowse cache get <id> [flags]",
             "  -h, --help           help for get\n      --range string   1-indexed inclusive line range a-b (e.g. 40-120)\n",
+            global,
+        )),
+        ("cache", Some("list")) => Some(plain(
+            "List cache entries with size, age and expiry",
+            "symbrowse cache list [flags]",
+            "  -h, --help   help for list\n",
             global,
         )),
         ("state", None) => Some(
@@ -6191,6 +6339,7 @@ fn parse_cache(values: &[String], command_index: usize) -> Result<Action, ParseE
             "--" => positional_only = true,
             "get" if subcommand.is_none() => subcommand = Some("get"),
             "clear" if subcommand.is_none() => subcommand = Some("clear"),
+            "list" if subcommand.is_none() => subcommand = Some("list"),
             "--json" => json = true,
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
@@ -6227,6 +6376,16 @@ fn parse_cache(values: &[String], command_index: usize) -> Result<Action, ParseE
         Some("clear") => Err(ParseError {
             message: format!(
                 "unknown command {:?} for \"symbrowse cache clear\"",
+                positional.first().map(String::as_str).unwrap_or("--range")
+            ),
+            exit_code: 2,
+        }),
+        Some("list") if positional.is_empty() && range.is_none() => {
+            Ok(Action::CacheList { format })
+        }
+        Some("list") => Err(ParseError {
+            message: format!(
+                "unknown command {:?} for \"symbrowse cache list\"",
                 positional.first().map(String::as_str).unwrap_or("--range")
             ),
             exit_code: 2,
@@ -8458,6 +8617,12 @@ mod tests {
                 format: Format::Json,
             })
         );
+        assert_eq!(
+            parse(&args(&["cache", "list"])),
+            Ok(Action::CacheList {
+                format: Format::Text,
+            })
+        );
         assert!(parse(&args(&["cache", "clear", "extra"])).is_err());
     }
 
@@ -8481,6 +8646,26 @@ mod tests {
                 }),
             )
             .expect("store fetch entry");
+        let expired_key = "b".repeat(64);
+        fetch
+            .put(
+                &expired_key,
+                b"expired response",
+                &serde_json::json!({"stored_at": "2000-01-01T00:00:00Z", "ttl": 1}),
+            )
+            .expect("store expired fetch entry");
+
+        let entries = super::cache_list_entries(
+            &output,
+            &root.path().join("fetch"),
+            Duration::from_secs(3600),
+        )
+        .expect("list both cache roots");
+        assert_eq!(entries.len(), 2, "expired fetch entries are omitted");
+        assert_eq!(entries[0].kind, "output");
+        assert_eq!(entries[1].id, format!("fetch:{key}"));
+        assert_eq!(entries[1].kind, "fetch-response");
+        assert_eq!(entries[1].bytes, b"response body".len() as u64);
 
         assert_eq!(
             super::clear_cache_entries(&output, &fetch, Duration::from_secs(3600)),
