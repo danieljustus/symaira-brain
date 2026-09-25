@@ -1,0 +1,41 @@
+{
+  "source_commit": "9f15c98f9f5514ebe5910ba37d0322992d62938b",
+  "oracle": "native Go symbrowse completion <shell>",
+  "go_module": "github.com/spf13/cobra v1.10.2",
+  "workflow_run": 36084605296,
+  "artifacts": [
+    10842563863,
+    10842524060
+  ],
+  "targets_verified": [
+    "ubuntu-24.04",
+    "ubuntu-24.04-arm"
+  ],
+  "protocol": "Cobra V2 shell scripts call symbrowse __complete at runtime; fixtures contain no command inventory.",
+  "files": {
+    "bash": {
+      "file": "bash.txt",
+      "bytes": 16333,
+      "sha256": "d8aebb6e8b7b8ff15197dfadec7802ac0b5d7e624ae87e7c767ba2e0d3b81240"
+    },
+    "zsh": {
+      "file": "zsh.txt",
+      "bytes": 7856,
+      "sha256": "17788f31f6b6703aca7bdeac9c904fec2f5cb510e047c19958b60df8f52b4359"
+    },
+    "fish": {
+      "file": "fish.txt",
+      "bytes": 9969,
+      "sha256": "d8e10e9dca934eef57a548953c9bf7e428b23eb786ad2e764a9b1626928f10d8"
+    },
+    "powershell": {
+      "file": "powershell.txt",
+      "bytes": 10904,
+      "sha256": "c81fe9adbc6e5e4901b089e22b265737ad424aad258c68286f56ca57ce5cc0d3"
+    }
+  },
+  "oracle_binary_sha256": {
+    "ubuntu-24.04": "02aefb911d73d6814ad616f22b8923266043514346a7bd1f1927312f1bd0c82c",
+    "ubuntu-24.04-arm": "b2365df58ac8af779290c61127ea0917c75ff883bd469e1faa97d47d19f5ff22"
+  }
+}

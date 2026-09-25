@@ -121,15 +121,31 @@ class CliDifferentialSessionTests(unittest.TestCase):
             return {"returncode": 0, "stdout": outputs[argv[1]], "stderr": b""}
 
         with patch.object(cli_differential, "run_process", side_effect=fake_run_process):
-            rows = cli_differential.completion_oracle_cases(Path("go"), {})
+            rows = cli_differential.completion_oracle_cases(Path("go"), Path("rust"), {})
 
         self.assertEqual([row["shell"] for row in rows], ["bash", "zsh", "fish", "powershell"])
         for row in rows:
             payload = outputs[row["shell"]]
             self.assertTrue(row["matched"])
             self.assertEqual(base64.b64decode(row["stdout_base64"]), payload)
+            self.assertEqual(base64.b64decode(row["rust_stdout_base64"]), payload)
             self.assertEqual(row["stdout_bytes"], len(payload))
             self.assertEqual(row["stdout_sha256"], hashlib.sha256(payload).hexdigest())
+
+    def test_completion_candidate_cases_compare_rust_and_go_protocol_frames(self) -> None:
+        calls = []
+
+        def fake_run_process(binary: Path, argv: list[str], _env: dict[str, str]) -> dict[str, object]:
+            calls.append((str(binary), argv))
+            return {"returncode": 0, "stdout": b"clear\tDelete one cookie\nlist\tList cookies\nset\tSet a cookie\n:4\n", "stderr": b""}
+
+        with patch.object(cli_differential, "run_process", side_effect=fake_run_process):
+            rows = cli_differential.completion_candidate_cases(Path("go"), Path("rust"), {})
+
+        self.assertEqual([row["name"] for row in rows], ["cookies-child-commands", "cookies-list-flags"])
+        self.assertTrue(all(row["matched"] for row in rows))
+        self.assertTrue(all(base64.b64decode(row["go_stdout_base64"]) == base64.b64decode(row["rust_stdout_base64"]) for row in rows))
+        self.assertEqual(len(calls), 4)
 
 
 class CompatSidecarHarnessTests(unittest.TestCase):

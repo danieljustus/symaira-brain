@@ -61,26 +61,61 @@ def output_record(result: dict[str, Any]) -> dict[str, Any]:
     return record
 
 
-def completion_oracle_cases(go: Path, env: dict[str, str]) -> list[dict[str, Any]]:
-    """Retain complete native Go Cobra completion scripts as migration oracles."""
+def completion_oracle_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    """Compare complete native Go Cobra scripts with Rust output on each runner."""
     rows = []
     for shell in ("bash", "zsh", "fish", "powershell"):
         argv = ["completion", shell]
-        result = run_process(go, argv, env)
-        stdout = result["stdout"]
-        stderr = result["stderr"]
+        go_result = run_process(go, argv, env)
+        rust_result = run_process(rust, argv, env)
+        stdout = go_result["stdout"]
+        rust_stdout = rust_result["stdout"]
         rows.append({
             "case": "CLI-completion-oracle",
             "shell": shell,
             "argv": argv,
-            "matched": result.get("returncode") == 0 and not result.get("error") and not stderr,
-            "criterion": "native Go completion generation succeeds; complete script bytes are retained",
-            "returncode": result.get("returncode"),
-            "error": result.get("error"),
+            "matched": (go_result.get("returncode") == rust_result.get("returncode") == 0
+                        and not go_result.get("error") and not rust_result.get("error")
+                        and stdout == rust_stdout and not go_result["stderr"] and not rust_result["stderr"]),
+            "criterion": "exact script bytes match the native Go Cobra oracle",
+            "returncode": go_result.get("returncode"),
+            "rust_returncode": rust_result.get("returncode"),
+            "error": go_result.get("error"),
+            "rust_error": rust_result.get("error"),
             "stdout_bytes": len(stdout),
             "stdout_sha256": sha256(stdout),
             "stdout_base64": base64.b64encode(stdout).decode("ascii"),
-            "stderr": output_record(result)["stderr"],
+            "rust_stdout_bytes": len(rust_stdout),
+            "rust_stdout_sha256": sha256(rust_stdout),
+            "rust_stdout_base64": base64.b64encode(rust_stdout).decode("ascii"),
+            "stderr": output_record(go_result)["stderr"],
+            "rust_stderr": output_record(rust_result)["stderr"],
+        })
+    return rows
+
+
+def completion_candidate_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    """Exercise implemented Rust command and flag completion via Cobra's hidden protocol."""
+    cases = [
+        ("cookies-child-commands", ["__complete", "cookies", ""]),
+        ("cookies-list-flags", ["__complete", "cookies", "list", "--"]),
+    ]
+    rows = []
+    for name, argv in cases:
+        go_result = run_process(go, argv, env)
+        rust_result = run_process(rust, argv, env)
+        rows.append({
+            "case": "CLI-completion-candidates",
+            "name": name,
+            "argv": argv,
+            "matched": (go_result.get("returncode") == rust_result.get("returncode") == 0
+                        and not go_result.get("error") and not rust_result.get("error")
+                        and go_result["stdout"] == rust_result["stdout"]),
+            "criterion": "implemented subtree candidate bytes match Go __complete output",
+            "go": output_record(go_result),
+            "go_stdout_base64": base64.b64encode(go_result["stdout"]).decode("ascii"),
+            "rust": output_record(rust_result),
+            "rust_stdout_base64": base64.b64encode(rust_result["stdout"]).decode("ascii"),
         })
     return rows
 
@@ -1770,7 +1805,8 @@ def main() -> int:
             )
     rows = [] if args.skip_help_tree else help_tree(args.go.resolve(), args.rust.resolve(), env)
     rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
-    rows.extend(completion_oracle_cases(args.go.resolve(), env))
+    rows.extend(completion_oracle_cases(args.go.resolve(), args.rust.resolve(), env))
+    rows.extend(completion_candidate_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_batch_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_watch_cases(args.go.resolve(), args.rust.resolve(), env))
