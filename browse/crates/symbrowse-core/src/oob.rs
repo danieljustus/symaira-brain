@@ -85,6 +85,22 @@ impl Manager {
     pub fn get(&self, id: &str) -> Option<Prompt> {
         self.state.lock().ok()?.prompts.get(id).cloned()
     }
+    pub fn active(&self) -> Option<Prompt> {
+        self.state
+            .lock()
+            .ok()?
+            .prompts
+            .values()
+            .filter(|prompt| prompt.status == Status::Pending)
+            .max_by_key(|prompt| {
+                prompt
+                    .id
+                    .strip_prefix("oob-")
+                    .and_then(|number| number.parse::<u64>().ok())
+                    .unwrap_or(0)
+            })
+            .cloned()
+    }
     pub fn complete(&self, id: &str, result: Option<serde_json::Value>) -> Option<Prompt> {
         self.finish(id, Status::Completed, result)
     }
@@ -214,6 +230,23 @@ mod tests {
             .unwrap();
         assert!(!allowed);
         assert_eq!(result.status, Status::Timeout);
+    }
+    #[test]
+    fn active_returns_newest_pending_prompt() {
+        let manager = Manager::new();
+        let first = manager.create(Kind::Handoff, "First", "", Duration::from_secs(1), "fixed");
+        let second = manager.create(
+            Kind::Approval,
+            "Second",
+            "",
+            Duration::from_secs(1),
+            "fixed",
+        );
+        assert_eq!(manager.active().unwrap().id, second.id);
+        manager.complete(&second.id, None);
+        assert_eq!(manager.active().unwrap().id, first.id);
+        manager.cancel(&first.id, "done");
+        assert!(manager.active().is_none());
     }
     #[test]
     fn notification_argv_contains_no_secret_marker() {
