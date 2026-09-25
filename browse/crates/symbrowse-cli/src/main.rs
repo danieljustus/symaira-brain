@@ -4311,7 +4311,7 @@ fn completion_shell_help(shell: &str) -> String {
     };
     let usage_suffix = if shell == "bash" { "" } else { " [flags]" };
     format!(
-        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n      --no-descriptions   disable completion descriptions\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
     )
 }
 
@@ -9045,6 +9045,17 @@ mod tests {
             .unwrap();
         assert!(dir < usage && usage < session);
         assert_eq!(help.len(), 521);
+    }
+
+    #[test]
+    fn completion_shell_help_lists_registered_flag_for_each_shell() {
+        for shell in ["bash", "fish", "powershell", "zsh"] {
+            let help = super::completion_shell_help(shell);
+            assert!(
+                help.contains("\n      --no-descriptions   disable completion descriptions\n"),
+                "missing no-descriptions flag for {shell} help"
+            );
+        }
     }
 
     #[test]
