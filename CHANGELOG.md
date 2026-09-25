@@ -9,6 +9,18 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+## [v0.12.1] - 2026-09-24
+
+### Security
+- Confine versioned skill archive extraction to its destination root, including
+  writes through pre-existing symlinks (#686).
+
+### Fixed
+- Build the macOS GUI release with Xcode 26 so Icon Composer assets compile
+  (#683).
+- Allow an existing release tag to resume GUI and Homebrew publication without
+  republishing CLI archives, and authenticate the release lookup (#684, #685).
+
 ## [v0.12.0] - 2026-09-24
 
 ### Added
