@@ -2375,10 +2375,40 @@ fn clear_cache_entries(
         .list()
         .map_err(|error| error.to_string())?
         .len();
-    let fetch_count = fetch_cache_entry_count(fetch_cache.root.as_path(), fetch_ttl)?;
+    let fetch_root = fetch_cache.root.as_path();
+    let fetch_count = fetch_cache_entry_count(fetch_root, fetch_ttl)?;
     output_cache.clear().map_err(|error| error.to_string())?;
-    fetch_cache.clear().map_err(|error| error.to_string())?;
+    clear_fetch_cache(fetch_root)?;
     Ok(output_count + fetch_count)
+}
+
+fn clear_fetch_cache(root: &Path) -> Result<(), String> {
+    let directories = match fs::read_dir(root) {
+        Ok(directories) => directories,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error.to_string()),
+    };
+    for directory in directories.flatten().filter_map(|entry| {
+        entry
+            .file_type()
+            .ok()
+            .filter(|kind| kind.is_dir())
+            .map(|_| entry.path())
+    }) {
+        let files = match fs::read_dir(directory) {
+            Ok(files) => files,
+            Err(error) => return Err(error.to_string()),
+        };
+        for path in files.flatten().map(|entry| entry.path()) {
+            let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+                continue;
+            };
+            if name.ends_with(".body") || name.ends_with(".meta.json") || name.ends_with(".tmp") {
+                fs::remove_file(path).map_err(|error| error.to_string())?;
+            }
+        }
+    }
+    Ok(())
 }
 
 fn fetch_cache_entry_count(root: &Path, default_ttl: Duration) -> Result<usize, String> {
@@ -2430,11 +2460,11 @@ fn fetch_cache_entries(root: &Path, default_ttl: Duration) -> Result<Vec<CacheLi
             .filter(|kind| kind.is_dir())
             .map(|_| entry.path())
     }) {
-        let entries = match fs::read_dir(directory) {
-            Ok(entries) => entries,
+        let files = match fs::read_dir(directory) {
+            Ok(files) => files,
             Err(_) => continue,
         };
-        for metadata_path in entries.flatten().map(|entry| entry.path()).filter(|path| {
+        for metadata_path in files.flatten().map(|entry| entry.path()).filter(|path| {
             path.file_name()
                 .and_then(|name| name.to_str())
                 .is_some_and(|name| name.ends_with(".meta.json"))
