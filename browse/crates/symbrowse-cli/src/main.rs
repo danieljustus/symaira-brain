@@ -4297,7 +4297,7 @@ fn completion_shell_help(shell: &str) -> String {
         ),
         "zsh" => (
             "Generate the autocompletion script for the zsh shell",
-            "If shell completion is not already enabled in your environment you will need\nto enable it. You can execute the following once:\n\n\techo \"autoload -U compinit; compinit\" >> ~/.zshrc\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion zsh)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion zsh > \"${fpath[1]}/_symbrowse\"\n\n#### macOS:\n\n\tsymbrowse completion zsh > $(brew --prefix)/share/zsh/site-functions/_symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+            "If shell completion is not already enabled in your environment you will need\nto enable it.  You can execute the following once:\n\n\techo \"autoload -U compinit; compinit\" >> ~/.zshrc\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion zsh)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion zsh > \"${fpath[1]}/_symbrowse\"\n\n#### macOS:\n\n\tsymbrowse completion zsh > $(brew --prefix)/share/zsh/site-functions/_symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
         ),
         "fish" => (
             "Generate the autocompletion script for the fish shell",
@@ -4309,8 +4309,9 @@ fn completion_shell_help(shell: &str) -> String {
         ),
         _ => return completion_help().to_owned(),
     };
+    let usage_suffix = if shell == "bash" { "" } else { " [flags]" };
     format!(
-        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}\n\nFlags:\n      --no-descriptions   disable completion descriptions\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
     )
 }
 
