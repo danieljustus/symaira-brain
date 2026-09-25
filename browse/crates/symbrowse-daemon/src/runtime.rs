@@ -69,6 +69,20 @@ struct FlowExecutor<'a> {
     operation: OperationContext,
 }
 
+fn build_runtime_for_mode(mode: &str) -> std::io::Result<Runtime> {
+    if mode == "static" {
+        // Static mode has no persistent browser event tasks. Driving async work
+        // on the daemon's existing request workers avoids starting a Tokio
+        // worker pool on every short-lived static daemon process.
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+    } else {
+        // Browser engines retain background CDP/event tasks between requests.
+        Runtime::new()
+    }
+}
+
 impl AsyncExecutor for FlowExecutor<'_> {
     fn execute<'a>(
         &'a mut self,
@@ -129,7 +143,7 @@ impl DispatchRuntime {
         })?;
         let allowlist = allowlist.active().then_some(allowlist);
         let fetch = FetchClient::honest().map_err(runtime_error)?;
-        let runtime = Runtime::new().map_err(runtime_error)?;
+        let runtime = build_runtime_for_mode(&spec.mode).map_err(runtime_error)?;
         let output_cache = OutputCache::new(
             spec.output_cache_dir(),
             Some(std::time::Duration::from_secs(24 * 60 * 60)),
@@ -2632,6 +2646,28 @@ mod tests {
         path::PathBuf,
         thread,
     };
+
+    #[test]
+    fn static_mode_uses_caller_driven_runtime_and_browser_keeps_workers() {
+        let static_runtime = build_runtime_for_mode("static").expect("static runtime");
+        assert_eq!(
+            static_runtime.handle().runtime_flavor(),
+            tokio::runtime::RuntimeFlavor::CurrentThread
+        );
+        assert_eq!(
+            static_runtime.block_on(async {
+                tokio::time::sleep(std::time::Duration::from_millis(1)).await;
+                7
+            }),
+            7
+        );
+
+        let browser_runtime = build_runtime_for_mode("browser").expect("browser runtime");
+        assert_eq!(
+            browser_runtime.handle().runtime_flavor(),
+            tokio::runtime::RuntimeFlavor::MultiThread
+        );
+    }
 
     fn unique_test_root(name: &str) -> PathBuf {
         use std::sync::atomic::{AtomicU64, Ordering};
