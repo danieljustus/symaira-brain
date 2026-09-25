@@ -325,6 +325,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         rust_popup_click["success"],
         go_oracle["popup_click"]["success"]
     );
+    assert_eq!(rust_popup_click["data"], go_oracle["popup_click"]["data"]);
     let rust_popup_open = request(
         &client,
         "eval",
