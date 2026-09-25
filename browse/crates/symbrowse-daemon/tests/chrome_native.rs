@@ -219,6 +219,41 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
             .is_some_and(|text| text.contains("native")),
         "read response: {script}"
     );
+    let popup_source = request(
+        &client,
+        "tab.new",
+        json!({
+            "label": "popup-source",
+            "url": "data:text/html,%3Cbutton%20id%3Dpopup%20onclick%3D%22window.popup%3Dwindow.open%28%27about%3Ablank%27%2C%27symbrowse-popup%27%29%22%3EOpen%20popup%3C%2Fbutton%3E"
+        }),
+    );
+    assert_eq!(
+        popup_source["success"], true,
+        "popup source: {popup_source}"
+    );
+    assert_eq!(popup_source["data"]["tab"], "t2");
+    let popup_click = request(&client, "click", json!({"selector":"#popup"}));
+    assert_eq!(popup_click["success"], true, "popup click: {popup_click}");
+    let popup_open = request(
+        &client,
+        "eval",
+        json!({"expression":"Boolean(window.popup && !window.popup.closed)"}),
+    );
+    assert_eq!(popup_open["success"], true, "popup eval: {popup_open}");
+    assert_eq!(
+        popup_open["data"]["value"], true,
+        "popup eval: {popup_open}"
+    );
+    let popup_tabs = request(&client, "tab.list", json!({}));
+    assert_eq!(popup_tabs["success"], true, "popup tab list: {popup_tabs}");
+    assert_eq!(popup_tabs["data"]["tabs"].as_array().map(Vec::len), Some(2));
+    assert_eq!(popup_tabs["data"]["active"], "t2");
+    let popup_closed = request(&client, "tab.close", json!({"tab":"popup-source"}));
+    assert_eq!(
+        popup_closed["success"], true,
+        "close popup source: {popup_closed}"
+    );
+    assert_eq!(popup_closed["data"]["active"], "t1");
     let into_view = request(&client, "scrollintoview", json!({"selector":"#target"}));
     assert_eq!(into_view["success"], true, "scroll into view: {into_view}");
     let scrolled_into_view = request(&client, "get.box", json!({"selector":"#target"}));

@@ -81,6 +81,67 @@ func TestTabsKeepRefsPerTabEndToEnd(t *testing.T) {
 	}
 }
 
+// TestTabsExcludeWindowOpenPopupsEndToEnd pins the daemon boundary: tabs are
+// the session-managed tabs opened through tab.new, while page-created popup
+// targets remain outside that logical tab registry.
+func TestTabsExcludeWindowOpenPopupsEndToEnd(t *testing.T) {
+	executable := chromeExecutable(t)
+	if executable == "" {
+		t.Skip("no chrome executable found; set SYMBROWSE_EXECUTABLE_PATH")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	defer cancel()
+
+	registry := daemon.NewSessionRegistry(daemon.SessionRegistryOptions{UserDataRoot: freshUserDataRoot(t)})
+	if _, err := registry.Ensure("e2e-popup-tabs"); err != nil {
+		t.Fatalf("Ensure session: %v", err)
+	}
+	runtime := daemon.NewNavigationRuntime(registry, executable, e2eRuntimeOptions())
+	defer func() { _ = runtime.Close() }()
+	executor := runtimeExecutor(runtime)
+
+	const popupPage = "data:text/html,%3Cbutton%20id%3Dpopup%20onclick%3D%22window.popup%3Dwindow.open%28%27about%3Ablank%27%2C%27symbrowse-popup%27%29%22%3EOpen%20popup%3C%2Fbutton%3E"
+	if _, err := executor(ctx, frame("tab.new", map[string]any{"label": "popup-source", "url": popupPage}, "e2e-popup-tabs")); err != nil {
+		t.Fatalf("tab.new popup source: %v", err)
+	}
+	if _, err := executor(ctx, frame("click", map[string]any{"selector": "#popup"}, "e2e-popup-tabs")); err != nil {
+		t.Fatalf("click popup opener: %v", err)
+	}
+	opened, err := executor(ctx, frame("eval", map[string]any{"expression": "Boolean(window.popup && !window.popup.closed)"}, "e2e-popup-tabs"))
+	if err != nil {
+		t.Fatalf("verify popup opened: %v", err)
+	}
+	openedJSON, err := json.Marshal(opened.Data)
+	if err != nil {
+		t.Fatalf("marshal popup verification: %v", err)
+	}
+	var popupState struct {
+		Value bool `json:"value"`
+	}
+	if err := json.Unmarshal(openedJSON, &popupState); err != nil || !popupState.Value {
+		t.Fatalf("window.open did not create a popup: %s (decode error: %v)", openedJSON, err)
+	}
+
+	listed, err := executor(ctx, frame("tab.list", nil, "e2e-popup-tabs"))
+	if err != nil {
+		t.Fatalf("tab.list after popup: %v", err)
+	}
+	var tabs struct {
+		Tabs   []engine.TabInfo `json:"tabs"`
+		Active string           `json:"active"`
+	}
+	raw, err := json.Marshal(listed.Data)
+	if err != nil {
+		t.Fatalf("marshal tab.list: %v", err)
+	}
+	if err := json.Unmarshal(raw, &tabs); err != nil {
+		t.Fatalf("decode tab.list: %v", err)
+	}
+	if len(tabs.Tabs) != 2 || tabs.Active != "t2" || !tabs.Tabs[1].Active {
+		t.Fatalf("popup changed the managed tab list or active tab: %+v", tabs)
+	}
+}
+
 // TestFramesNestedIframesEndToEnd verifies nested iframes are addressable.
 func TestFramesNestedIframesEndToEnd(t *testing.T) {
 	executable := chromeExecutable(t)
