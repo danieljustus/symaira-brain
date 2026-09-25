@@ -6528,18 +6528,24 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
     if subcommand == "key" {
         return parse_state(values, state_index);
     }
+    let (mut format, mut json) = root_output_flags(&values[..state_index])?;
     let mut session = "default".to_owned();
-    let mut output = "text".to_owned();
-    let mut json = false;
     let mut names = Vec::new();
     let mut older_than = None;
     let mut index = state_index + 2;
+    let mut positional_only = false;
     while index < values.len() {
+        if positional_only {
+            names.push(values[index].clone());
+            index += 1;
+            continue;
+        }
         match values[index].as_str() {
+            "--" => positional_only = true,
             "--json" => json = true,
             "--output" => {
                 index += 1;
-                output = required_value(values, index, "--output")?.to_owned();
+                format = parse_format(required_value(values, index, "--output")?)?;
             }
             "--session" => {
                 index += 1;
@@ -6557,7 +6563,7 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
                 );
             }
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
-            value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value if value.starts_with('-') => {
                 return Err(unknown_flag(value));
@@ -6566,11 +6572,9 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
         }
         index += 1;
     }
-    let format = if json {
-        Format::Json
-    } else {
-        parse_format(&output)?
-    };
+    if json {
+        format = Format::Json;
+    }
     let command = match subcommand {
         "save" | "load" | "show" | "clear" | "list" | "clean" => format!("state.{subcommand}"),
         _ => {
@@ -7065,6 +7069,47 @@ mod tests {
         assert_eq!(
             render_state_key_init(Format::Yaml, &result).unwrap(),
             "success: true\ndata:\n    action: already_configured\n    configured: true\n    keysource: symvault\n    instruction: \"\"\nwarnings: []\nerror: null\n"
+        );
+    }
+
+    #[test]
+    fn state_inherits_root_output_flags_and_obeys_argument_separator() {
+        assert_eq!(
+            parse(&args(&["--json", "state", "save", "named"])),
+            Ok(Action::StateOperation {
+                session: "default".to_owned(),
+                command: "state.save".to_owned(),
+                name: Some("named".to_owned()),
+                older_than: None,
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["--output=yaml", "state", "save", "named"])),
+            Ok(Action::StateOperation {
+                session: "default".to_owned(),
+                command: "state.save".to_owned(),
+                name: Some("named".to_owned()),
+                older_than: None,
+                format: Format::Yaml,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["state", "save", "--", "--json"])),
+            Ok(Action::StateOperation {
+                session: "default".to_owned(),
+                command: "state.save".to_owned(),
+                name: Some("--json".to_owned()),
+                older_than: None,
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["state", "save", "--", "one", "two"])),
+            Err(ParseError {
+                message: "accepts 1 arg(s), received 2".to_owned(),
+                exit_code: 2,
+            })
         );
     }
 
