@@ -1128,6 +1128,14 @@ impl DispatchRuntime {
                     .close()
                     .await
                     .map_err(runtime_error)?;
+                // Closing a foreground popup can leave Chrome focused on an
+                // unmanaged popup target. Make the logical next managed tab
+                // foreground before subsequent input.dispatchMouseEvent calls.
+                next.page
+                    .raw()
+                    .bring_to_front()
+                    .await
+                    .map_err(runtime_error)?;
                 let mut guard = self
                     .browser
                     .lock()
