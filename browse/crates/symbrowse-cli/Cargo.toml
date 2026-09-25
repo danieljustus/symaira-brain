@@ -16,6 +16,8 @@ base64 = "=0.22.1"
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
+reqwest.workspace = true
+symbrowse-engine-chrome = { path = "../symbrowse-engine-chrome", version = "=0.0.0" }
 symbrowse-core = { path = "../symbrowse-core", version = "=0.0.0" }
 symbrowse-daemon = { path = "../symbrowse-daemon", version = "=0.0.0" }
 symbrowse-fetch = { path = "../symbrowse-fetch", version = "=0.0.0" }

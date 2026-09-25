@@ -1875,11 +1875,13 @@ name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
  "base64",
+ "reqwest",
  "serde",
  "serde_json",
  "sha2",
  "symbrowse-core",
  "symbrowse-daemon",
+ "symbrowse-engine-chrome",
  "symbrowse-fetch",
  "symbrowse-mcp",
  "symbrowse-protocol",

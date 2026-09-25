@@ -149,7 +149,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "doctor", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "watch", "workflow",
     }
@@ -182,7 +182,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
                  "rust_only_root_commands": sorted(advertised - go_commands),
                  "go": output_record(go_root), "rust": output_record(rust_root)})
     go_paths = [
-        ["a11y"], ["batch"], ["config"], ["config", "show"], ["dialog"], ["dialog", "accept"], ["screenshot"],
+        ["a11y"], ["batch"], ["config"], ["config", "show"], ["doctor"], ["dialog"], ["dialog", "accept"], ["screenshot"],
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"],
         ["tab"], ["tab", "list"], ["tab", "new"], ["tab", "switch"], ["tab", "close"],
         ["tab", "window"], ["tab", "window", "window"],
@@ -1163,6 +1163,25 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         compare_diff_snapshot(go, rust, env, ["--json"]),
         compare_diff_url(go, rust, env),
     ])
+    doctor_env = dict(env)
+    isolated_path = Path(env["TMPDIR"]) / "doctor-empty-path"
+    isolated_path.mkdir(exist_ok=True)
+    doctor_env["PATH"] = str(isolated_path)
+    doctor_env["SYMBROWSE_EXECUTABLE_PATH"] = sys.executable
+    doctor_env["SYMBROWSE_ENCRYPTION_KEY"] = "0" * 64
+    doctor_env["SYMBROWSE_SYMGUARD"] = "off"
+    doctor_args = ["doctor", "--fix", "--json"]
+    go_doctor = run_process(go, doctor_args, doctor_env)
+    rust_doctor = run_process(rust, doctor_args, doctor_env)
+    comparisons.append({
+        "case": "CLI-doctor-json-fix",
+        "argv": doctor_args,
+        "matched": all(go_doctor.get(key) == rust_doctor.get(key)
+                       for key in ("returncode", "stdout", "stderr")),
+        "criterion": "bounded doctor report, no provider lookup outside the disposable PATH, and Go-identical envelope/exit",
+        "go": output_record(go_doctor),
+        "rust": output_record(rust_doctor),
+    })
     return comparisons
 
 

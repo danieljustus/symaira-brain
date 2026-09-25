@@ -1,6 +1,7 @@
 #![deny(unsafe_code)]
 
 mod browser_profiles;
+mod doctor;
 mod help_catalog;
 
 use std::{
@@ -64,6 +65,10 @@ enum Action {
     ConfigShow {
         format: Format,
         flags: FlagOverrides,
+    },
+    Doctor {
+        format: Format,
+        fix: bool,
     },
     Batch {
         format: Format,
@@ -260,6 +265,7 @@ fn main() -> ExitCode {
         },
         Ok(Action::Version { structured: false }) => write_stdout(&render_version_text(VERSION)),
         Ok(Action::ConfigShow { format, flags }) => run_config_show(format, flags),
+        Ok(Action::Doctor { format, fix }) => doctor::run(format, fix),
         Ok(Action::Batch {
             format,
             commands,
@@ -3047,6 +3053,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     };
     match values[command_index].as_str() {
         "version" => parse_version(&values, command_index),
+        "doctor" => parse_doctor(&values, command_index),
         "eval" => parse_eval(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
@@ -3086,6 +3093,54 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     }
 }
 
+fn parse_doctor(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let mut format = Format::Text;
+    let mut fix = false;
+    let mut index = 0;
+    while index < values.len() {
+        let value = &values[index];
+        if index == command_index {
+            index += 1;
+            continue;
+        }
+        match value.as_str() {
+            "--fix" => fix = true,
+            value if value.starts_with("--fix=") => fix = parse_bool("--fix", &value[6..])?,
+            "--json" => format = Format::Json,
+            value if value.starts_with("--json=") => {
+                if parse_bool("--json", &value[7..])? {
+                    format = Format::Json;
+                }
+            }
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => {
+                format = parse_format(&value[9..])?;
+            }
+            "--" => {
+                if let Some(extra) = values.get(index + 1) {
+                    return Err(ParseError {
+                        message: format!("unknown command {extra:?} for \"symbrowse doctor\""),
+                        exit_code: 2,
+                    });
+                }
+                break;
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            extra => {
+                return Err(ParseError {
+                    message: format!("unknown command {extra:?} for \"symbrowse doctor\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    Ok(Action::Doctor { format, fix })
+}
+
 fn parse_help(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let path = values[command_index + 1..]
         .iter()
@@ -3119,7 +3174,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -3148,6 +3203,12 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("doctor", None) => Some(plain(
+            "Check browser discovery and local runtime prerequisites",
+            "symbrowse doctor [flags]",
+            "      --fix    print non-mutating, copyable remediation guidance\n  -h, --help   help for doctor\n",
+            global,
+        )),
         ("cookies", None) => Some("Inspect and manage cookies of the current page origin\n\nUsage:\n  symbrowse cookies [command]\n\nAvailable Commands:\n  clear       Delete one cookie by name\n  list        List cookies visible to the current page\n  set         Set a cookie (or import cookies from a curl cookie jar with --curl)\n\nFlags:\n  -h, --help             help for cookies\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cookies [command] --help\" for more information about a command.\n".to_owned()),
         ("cookies", Some("list")) => Some(plain(
             "List cookies visible to the current page", "symbrowse cookies list [flags]",
@@ -5971,6 +6032,25 @@ mod tests {
         };
         assert_eq!(format, Format::Json);
         assert_eq!(flags.state_dir.as_deref(), Some("state"));
+    }
+
+    #[test]
+    fn parses_doctor_formats_and_fix_without_arguments() {
+        assert_eq!(
+            parse(&args(&["doctor", "--fix", "--output=yaml"])),
+            Ok(Action::Doctor {
+                format: Format::Yaml,
+                fix: true,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["--json", "doctor"])),
+            Ok(Action::Doctor {
+                format: Format::Json,
+                fix: false,
+            })
+        );
+        assert!(parse(&args(&["doctor", "extra"])).is_err());
     }
 
     #[test]
