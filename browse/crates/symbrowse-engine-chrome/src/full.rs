@@ -532,11 +532,57 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        self.page.goto(url).await?;
-        Ok(serde_json::json!({
-            "url": self.page.url().await?.unwrap_or_default(),
-            "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
-        }))
+        // chromiumoxide's Page::goto waits for its own Page.lifecycleEvent
+        // watcher, which has a fixed 30-second timeout. The Go engine sends
+        // Page.navigate and then polls document.readyState instead. Trigger
+        // the same navigation from the page context and use the same observable
+        // load-complete condition so Windows does not depend on that internal
+        // lifecycle watcher.
+        let mut navigated = self
+            .page
+            .event_listener::<page::EventFrameNavigated>()
+            .await?;
+        let url_literal = serde_json::to_string(url)?;
+        let dispatch = self
+            .evaluate(&format!(
+                "setTimeout(() => location.assign({url_literal}), 0); 'scheduled'"
+            ))
+            .await?;
+        if let Some(error) = dispatch
+            .get("exception_text")
+            .and_then(Value::as_str)
+            .filter(|error| !error.is_empty())
+        {
+            return Err(error.to_owned().into());
+        }
+
+        loop {
+            let Some(event) = navigated.next().await else {
+                return Err("Chrome navigation event stream closed".into());
+            };
+            if event.frame.parent_id.is_none() {
+                break;
+            }
+        }
+
+        loop {
+            let state = self
+                .page
+                .evaluate(
+                    "({url: location.href, title: document.title, ready_state: document.readyState})",
+                )
+                .await;
+            if let Ok(state) = state {
+                let state = state.into_value::<Value>()?;
+                if state.get("ready_state").and_then(Value::as_str) == Some("complete") {
+                    return Ok(serde_json::json!({
+                        "url": state.get("url").and_then(Value::as_str).unwrap_or_default(),
+                        "title": state.get("title").and_then(Value::as_str).unwrap_or_default(),
+                    }));
+                }
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
