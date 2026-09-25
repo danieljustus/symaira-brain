@@ -109,7 +109,7 @@ func run() error {
 	if !result.Open.Success {
 		return fmt.Errorf("Go open oracle failed: %s", responseJSON(result.Open))
 	}
-	controlProbe := fmt.Sprintf("Promise.race([fetch('%s/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])", os.Args[2])
+	controlProbe := fmt.Sprintf("Promise.race([fetch('%s/policy-pixel').then(() => 'loaded', error => 'blocked:'+error.name+':'+error.message), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])", os.Args[2])
 	result.SubresourceAllowed = call(runtime, ctx, daemon.Frame{
 		Cmd: "eval", Session: "chrome-contract", Args: mustJSON(map[string]string{"expression": controlProbe}),
 	})
