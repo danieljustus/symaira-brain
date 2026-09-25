@@ -210,6 +210,7 @@ impl DispatchRuntime {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
         match frame.cmd.as_str() {
+            "auth.login" => self.auth_login(&frame, &operation).await,
             "console.list" | "console.clear" | "errors.list" | "errors.clear" => {
                 self.chrome_runtime_events_command(&frame).await
             }
@@ -382,6 +383,36 @@ impl DispatchRuntime {
                 "tls_profile": Value::Null,
             });
         }
+        Ok((Some(data), Vec::new()))
+    }
+
+    async fn auth_login(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
+        if self.spec.mode != "browser" || self.spec.engine != "chrome" {
+            return Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!(
+                    "auth.login is not supported by the {:?} engine",
+                    self.spec.engine
+                ),
+                hint: "credential entry is only available with the Chrome engine".into(),
+                ..Default::default()
+            });
+        }
+        let args = object_args(frame)?;
+        let entry = required_string(args, "entry")?;
+        let url = match args.get("url") {
+            None | Some(Value::Null) => "",
+            Some(Value::String(url)) => url,
+            Some(_) => return Err(malformed("auth.login url must be a string")),
+        };
+        if !url.is_empty() {
+            self.guard_navigation_url(url).await?;
+        }
+        let mut credentials =
+            crate::auth::Credentials::resolve(std::path::Path::new("symvault"), entry, operation)
+                .await?;
+        let page = self.ensure_browser().await?;
+        let data = crate::auth::login(&page, url, &mut credentials).await?;
         Ok((Some(data), Vec::new()))
     }
 
@@ -2863,6 +2894,31 @@ mod tests {
             .expect_err("private navigation must be denied before engine startup");
         assert_eq!(error.code, codes::OPERATION_FAILED);
         assert!(error.message.contains("blocked by the SSRF guard"));
+        assert!(runtime.browser.lock().expect("browser lock").is_none());
+    }
+
+    #[test]
+    fn auth_login_guards_url_before_vault_access_or_browser_start() {
+        let mut spec = temp_spec("auth-navigation-admission");
+        spec.engine = "chrome".into();
+        spec.mode = "browser".into();
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+        let frame = Frame {
+            cmd: "auth.login".into(),
+            args: Some(json!({
+                "entry":"fixture-entry",
+                "url":"file:///private/credential-fixture"
+            })),
+            session: "auth-navigation-admission".into(),
+            ..Frame::default()
+        };
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(frame, OperationContext::for_test()))
+            .expect_err("unsafe auth target must be denied");
+        assert_eq!(error.code, codes::OPERATION_FAILED);
+        assert!(error.message.contains("http/https URL required"));
         assert!(runtime.browser.lock().expect("browser lock").is_none());
     }
 

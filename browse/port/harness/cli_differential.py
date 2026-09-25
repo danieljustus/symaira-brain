@@ -337,6 +337,9 @@ class UnixDaemonStub:
                         data = {
                             "action": frame["cmd"], "url": args.get("url", ""), "http_status": 200,
                         }
+                    elif frame.get("cmd") == "auth.login":
+                        data = {"status": "logged_in", "url": "https://fixture.invalid",
+                                "username_set": True, "password_set": True}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
                         if not steps:
@@ -566,6 +569,9 @@ class WindowsNamedPipeStub:
                         data = {
                             "action": frame["cmd"], "url": args.get("url", ""), "http_status": 200,
                         }
+                    elif frame.get("cmd") == "auth.login":
+                        data = {"status": "logged_in", "url": "https://fixture.invalid",
+                                "username_set": True, "password_set": True}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
                         if not steps:
@@ -1158,6 +1164,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("OUT-003", ["open", "https://fixture.invalid", "--session", "fixture", "--output=yaml"], b"", True),
         ("OUT-003", ["snapshot", "--session", "fixture"], b"", True),
         ("OUT-003", ["snapshot", "--session", "fixture", "--output=yaml"], b"", True),
+        ("CLI-002", ["auth", "login", "fixture-entry", "--session", "fixture"], b"", True),
+        ("CLI-002", ["auth", "login", "fixture-entry", "--url", "https://fixture.invalid/login", "--session", "fixture", "--json"], b"", True),
+        ("CLI-003", ["auth", "login"], b"", False),
+        ("CLI-003", ["auth", "login", "fixture-entry", "extra"], b"", False),
         ("OUT-003", ["tab", "list", "--session", "fixture"], b"", True),
         ("OUT-003", ["tab", "list", "--session", "fixture", "--output=yaml"], b"", True),
         ("OUT-003", ["cookies", "list", "--session", "fixture", "--output=yaml"], b"", True),

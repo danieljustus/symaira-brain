@@ -56,6 +56,24 @@ const GO_STANDARD_BASE64: GeneralPurpose = GeneralPurpose::new(
 );
 static CLI_REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
+#[derive(Serialize)]
+struct AuthLoginOutput {
+    status: String,
+    url: String,
+    username_set: bool,
+    password_set: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hint: Option<String>,
+}
+
+#[derive(Serialize)]
+struct AuthLoginEnvelope<'a> {
+    success: bool,
+    data: &'a AuthLoginOutput,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    warnings: Vec<symbrowse_core::output::Warning>,
+}
+
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
     Help(String),
@@ -456,6 +474,7 @@ fn run_dispatch(
         .then_some(args),
     );
     let is_network_offline = frame.cmd == "network.offline";
+    let is_auth_login = frame.cmd == "auth.login";
     let is_network_request = frame.cmd == "network.request";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
@@ -511,6 +530,72 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_auth_login && format == Format::Text {
+            return write_stdout("credentials entered; press enter or submit the form to log in\n");
+        }
+        if is_auth_login {
+            let data = response.data.unwrap_or(serde_json::Value::Null);
+            let output = AuthLoginOutput {
+                status: data
+                    .get("status")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default()
+                    .to_owned(),
+                url: data
+                    .get("url")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default()
+                    .to_owned(),
+                username_set: data
+                    .get("username_set")
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false),
+                password_set: data
+                    .get("password_set")
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false),
+                hint: data
+                    .get("hint")
+                    .and_then(serde_json::Value::as_str)
+                    .filter(|value| !value.is_empty())
+                    .map(str::to_owned),
+            };
+            let warnings = response
+                .warnings
+                .into_iter()
+                .map(|warning| symbrowse_core::output::Warning {
+                    kind: warning.kind,
+                    severity: warning.severity,
+                    message: warning.message,
+                    r#ref: warning.r#ref,
+                    excerpt: warning.excerpt,
+                })
+                .collect();
+            let rendered = if format == Format::Json {
+                serde_json::to_string(&AuthLoginEnvelope {
+                    success: true,
+                    data: &output,
+                    warnings,
+                })
+                .map(|mut rendered| {
+                    rendered.push('\n');
+                    rendered
+                })
+                .map_err(|error| error.to_string())
+            } else {
+                serde_json::to_value(output)
+                    .map_err(|error| error.to_string())
+                    .and_then(|data| {
+                        Envelope::ok(data, warnings)
+                            .render(format)
+                            .map_err(|error| error.to_string())
+                    })
+            };
+            return match rendered {
+                Ok(output) => write_stdout(&output),
+                Err(error) => render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error),
+            };
+        }
         if is_screenshot && format == Format::Text {
             let data = response.data.unwrap_or(serde_json::Value::Null);
             let path = data
@@ -3396,6 +3481,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         });
     };
     match values[command_index].as_str() {
+        "auth" => parse_auth(&values, command_index),
         "version" => parse_version(&values, command_index),
         "doctor" => parse_doctor(&values, command_index),
         "downloads" => parse_downloads(&values, command_index),
@@ -3678,7 +3764,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  auth           Credential management through symvault (no plaintext)\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -3707,6 +3793,15 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("auth", None) => Some(
+            "Credential management through symvault (no plaintext)\n\nUsage:\n  symbrowse auth [command]\n\nAvailable Commands:\n  login       Resolve a vault entry and type the credentials into the detected login form\n\nFlags:\n  -h, --help             help for auth\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse auth [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("auth", Some("login")) => Some(plain(
+            "Resolve a vault entry and type the credentials into the detected login form",
+            "symbrowse auth login <vault-entry> [flags]",
+            "  -h, --help         help for login\n      --url string   navigate to this URL before detecting the login form\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n",
+        )),
         ("completion", None) => Some(completion_help().to_owned()),
         ("doctor", None) => Some(plain(
             "Check browser discovery and local runtime prerequisites",
@@ -4658,6 +4753,84 @@ fn render_journal_text(data: &serde_json::Value) -> String {
             )
         })
         .collect()
+}
+
+fn parse_auth(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut entry = None;
+    let mut url = None;
+    let mut login_seen = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "login" if !login_seen => login_seen = true,
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--url" if login_seen => {
+                index += 1;
+                url = Some(required_value(values, index, "--url")?.to_owned());
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--url=") && login_seen => url = Some(value[6..].to_owned()),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            value if !login_seen => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse auth\""),
+                    exit_code: 2,
+                });
+            }
+            value if entry.is_none() => entry = Some(value.to_owned()),
+            _ => {
+                return Err(ParseError {
+                    message: format!(
+                        "accepts 1 arg(s), received {}",
+                        values[command_index + 2..]
+                            .iter()
+                            .filter(|value| !value.starts_with('-'))
+                            .count()
+                    ),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if !login_seen {
+        return Ok(Action::Help(
+            command_help("auth", &[]).expect("auth help is defined"),
+        ));
+    }
+    let Some(entry) = entry else {
+        return Err(ParseError {
+            message: "accepts 1 arg(s), received 0".into(),
+            exit_code: 2,
+        });
+    };
+    if json {
+        format = Format::Json;
+    }
+    let mut args = serde_json::Map::new();
+    args.insert("entry".into(), serde_json::Value::String(entry));
+    if let Some(url) = url {
+        args.insert("url".into(), serde_json::Value::String(url));
+    }
+    Ok(Action::Dispatch {
+        session,
+        command: "auth.login".into(),
+        args: serde_json::Value::Object(args),
+        format,
+    })
 }
 
 fn parse_journal(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -7382,6 +7555,7 @@ mod tests {
             panic!("root help action")
         };
         for implemented in [
+            "auth",
             "eval",
             "cookies",
             "flow",
@@ -7406,17 +7580,8 @@ mod tests {
                 "root help advertised {implemented} without a Rust help/dispatch path"
             );
         }
-        for unsupported in ["auth"] {
-            assert!(
-                !root
-                    .lines()
-                    .any(|line| line.starts_with(&format!("  {unsupported} "))),
-                "root help advertised {unsupported}"
-            );
-            assert!(parse(&args(&[unsupported, "--help"])).is_err());
-        }
-
         for path in [
+            &["auth", "login", "--help"][..],
             &["flow", "--help"][..],
             &["flow", "validate", "--help"][..],
             &["state", "key", "init", "--help"][..],
@@ -7429,6 +7594,34 @@ mod tests {
                 "{path:?}"
             );
         }
+    }
+
+    #[test]
+    fn auth_login_sends_only_vault_reference_and_navigation_target() {
+        assert_eq!(
+            parse(&args(&[
+                "auth",
+                "login",
+                "fixture-entry",
+                "--url",
+                "https://fixture.invalid/login",
+                "--session",
+                "fixture",
+                "--json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "fixture".into(),
+                command: "auth.login".into(),
+                args: serde_json::json!({
+                    "entry": "fixture-entry",
+                    "url": "https://fixture.invalid/login"
+                }),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["auth", "login"])).is_err());
+        assert!(parse(&args(&["auth", "login", "one", "two"])).is_err());
+        assert!(parse(&args(&["auth", "login", "fixture", "--password", "leak"])).is_err());
     }
 
     #[test]

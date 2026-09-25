@@ -3,6 +3,7 @@
 
 //! Local daemon IPC, lifecycle and redaction contracts for `symbrowse`.
 
+mod auth;
 mod client;
 mod protocol;
 mod redaction;
