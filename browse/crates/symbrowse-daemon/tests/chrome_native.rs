@@ -154,6 +154,36 @@ fn normalize_captured_request(mut request: Value) -> Value {
     request
 }
 
+fn normalize_runtime_event_response(mut data: Value) -> Value {
+    if let Some(entries) = data.get_mut("entries").and_then(Value::as_array_mut) {
+        for entry in entries {
+            if let Some(entry) = entry.as_object_mut() {
+                entry.insert("timestamp".into(), Value::String("<timestamp>".into()));
+            }
+        }
+    }
+    data
+}
+
+fn wait_for_runtime_entries(client: &Client, command: &str, count: usize) -> Value {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    loop {
+        let response = request(client, command, json!({}));
+        assert_eq!(response["success"], true, "{command}: {response}");
+        if response["data"]["entries"]
+            .as_array()
+            .is_some_and(|entries| entries.len() >= count)
+        {
+            return response;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "{command} did not capture {count} entries: {response}"
+        );
+        thread::sleep(Duration::from_millis(10));
+    }
+}
+
 fn accept_fixture_request(
     listener: &TcpListener,
     timeout: Duration,
@@ -353,7 +383,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "open",
         json!({"url":format!("{}/page", contract_server.base_url)}),
     );
-    assert_eq!(rust_open["success"], go_oracle["open"]["success"]);
+    assert_eq!(
+        rust_open["success"], go_oracle["open"]["success"],
+        "open response: Rust={rust_open} Go={}",
+        go_oracle["open"]
+    );
     let network_started = request(&client, "network.requests", json!({}));
     assert_eq!(
         network_started["success"], go_oracle["network_capture"]["success"],
@@ -467,6 +501,86 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(
         rust_missing_request["error"]["message"],
         go_oracle["network_missing_request"]["error"]["message"]
+    );
+    let rust_console_initial = request(&client, "console.list", json!({}));
+    assert_eq!(
+        rust_console_initial["success"],
+        go_oracle["runtime_console_initial"]["success"]
+    );
+    assert_eq!(
+        normalize_runtime_event_response(rust_console_initial["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_console_initial"]["data"].clone()),
+        "initial console.list"
+    );
+    let rust_console_emit = request(
+        &client,
+        "eval",
+        json!({"expression":"console.warn('symbrowse runtime console probe')"}),
+    );
+    assert_eq!(
+        rust_console_emit["success"], go_oracle["runtime_console_emit"]["success"],
+        "console probe eval: {rust_console_emit}"
+    );
+    let rust_console_list = wait_for_runtime_entries(&client, "console.list", 1);
+    assert_eq!(
+        normalize_runtime_event_response(rust_console_list["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_console_list"]["data"].clone()),
+        "console.list emitted entry"
+    );
+    let rust_console_clear = request(&client, "console.clear", json!({}));
+    assert_eq!(
+        rust_console_clear["success"],
+        go_oracle["runtime_console_clear"]["success"]
+    );
+    assert_eq!(
+        rust_console_clear["data"],
+        go_oracle["runtime_console_clear"]["data"]
+    );
+    let rust_console_cleared = request(&client, "console.list", json!({}));
+    assert_eq!(
+        normalize_runtime_event_response(rust_console_cleared["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_console_cleared"]["data"].clone()),
+        "console.list after clear"
+    );
+    let rust_errors_initial = request(&client, "errors.list", json!({}));
+    assert_eq!(
+        rust_errors_initial["success"],
+        go_oracle["runtime_errors_initial"]["success"]
+    );
+    assert_eq!(
+        normalize_runtime_event_response(rust_errors_initial["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_errors_initial"]["data"].clone()),
+        "initial errors.list"
+    );
+    let rust_exception_emit = request(
+        &client,
+        "eval",
+        json!({"expression":"setTimeout(() => { throw new Error('symbrowse uncaught runtime probe') }, 0)"}),
+    );
+    assert_eq!(
+        rust_exception_emit["success"], go_oracle["runtime_exception_emit"]["success"],
+        "uncaught exception eval: {rust_exception_emit}"
+    );
+    let rust_errors_list = wait_for_runtime_entries(&client, "errors.list", 1);
+    assert_eq!(
+        normalize_runtime_event_response(rust_errors_list["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_errors_list"]["data"].clone()),
+        "errors.list emitted entry"
+    );
+    let rust_errors_clear = request(&client, "errors.clear", json!({}));
+    assert_eq!(
+        rust_errors_clear["success"],
+        go_oracle["runtime_errors_clear"]["success"]
+    );
+    assert_eq!(
+        rust_errors_clear["data"],
+        go_oracle["runtime_errors_clear"]["data"]
+    );
+    let rust_errors_cleared = request(&client, "errors.list", json!({}));
+    assert_eq!(
+        normalize_runtime_event_response(rust_errors_cleared["data"].clone()),
+        normalize_runtime_event_response(go_oracle["runtime_errors_cleared"]["data"].clone()),
+        "errors.list after clear"
     );
     let rust_tab_new = request(
         &client,

@@ -196,6 +196,9 @@ impl DispatchRuntime {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
         match frame.cmd.as_str() {
+            "console.list" | "console.clear" | "errors.list" | "errors.clear" => {
+                self.chrome_runtime_events_command(&frame).await
+            }
             "fetch.url" => self.fetch_url(&frame).await,
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
@@ -666,6 +669,55 @@ impl DispatchRuntime {
             })
             .collect::<Vec<_>>();
         Ok((Some(Value::Array(entries)), Vec::new()))
+    }
+
+    async fn chrome_runtime_events_command(&self, frame: &Frame) -> HandlerResult {
+        let page = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        let Some(page) = page else {
+            return Ok((Some(empty_runtime_events_payload(&frame.cmd)), Vec::new()));
+        };
+        if self.spec.engine != "chrome" {
+            return Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!("{} is not supported by the selected engine", frame.cmd),
+                hint: "runtime console capture requires Chrome".into(),
+                ..Default::default()
+            });
+        }
+        let data = match frame.cmd.as_str() {
+            "console.list" => {
+                page.enable_runtime_events().await.map_err(runtime_error)?;
+                let entries = page.runtime_console_events().await;
+                let count = entries.as_array().map_or(0, Vec::len);
+                json!({"entries": entries, "count": count})
+            }
+            "console.clear" => {
+                page.clear_runtime_console().await;
+                json!({"cleared": true})
+            }
+            "errors.list" => {
+                page.enable_runtime_events().await.map_err(runtime_error)?;
+                let entries = page.runtime_error_events().await;
+                let count = entries.as_array().map_or(0, Vec::len);
+                json!({"entries": entries, "count": count})
+            }
+            "errors.clear" => {
+                page.clear_runtime_errors().await;
+                json!({"cleared": true})
+            }
+            _ => {
+                return Err(runtime_error(format!(
+                    "unknown runtime events command {:?}",
+                    frame.cmd
+                )));
+            }
+        };
+        Ok((Some(data), Vec::new()))
     }
 
     async fn browser_command(&self, frame: &Frame) -> HandlerResult {
@@ -2487,6 +2539,13 @@ fn malformed(message: impl Into<String>) -> DaemonError {
     }
 }
 
+fn empty_runtime_events_payload(command: &str) -> Value {
+    match command {
+        "console.list" | "errors.list" => json!({"entries": [], "count": 0}),
+        _ => json!({"cleared": true}),
+    }
+}
+
 fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
@@ -3207,6 +3266,29 @@ mod tests {
             ))
             .expect_err("unknown command must fail");
         assert_eq!(error.code, codes::UNKNOWN_COMMAND);
+    }
+
+    #[test]
+    fn runtime_event_commands_without_an_active_browser_match_go_empty_shape() {
+        let runtime = DispatchRuntime::new(temp_spec("empty-runtime-events")).expect("runtime");
+        for (command, expected) in [
+            ("console.list", json!({"entries": [], "count": 0})),
+            ("errors.list", json!({"entries": [], "count": 0})),
+            ("console.clear", json!({"cleared": true})),
+            ("errors.clear", json!({"cleared": true})),
+        ] {
+            let (data, _) = runtime
+                .runtime
+                .block_on(runtime.dispatch(
+                    Frame {
+                        cmd: command.into(),
+                        ..Frame::default()
+                    },
+                    OperationContext::for_test(),
+                ))
+                .unwrap_or_else(|error| panic!("{command} failed: {error}"));
+            assert_eq!(data.expect("runtime event data"), expected, "{command}");
+        }
     }
 
     #[test]

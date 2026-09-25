@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/danieljustus/symaira-browse/internal/daemon"
@@ -39,6 +40,16 @@ type contract struct {
 	NetworkRequests       daemon.Response `json:"network_requests"`
 	NetworkRequest        daemon.Response `json:"network_request"`
 	NetworkMissingRequest daemon.Response `json:"network_missing_request"`
+	RuntimeConsoleInitial daemon.Response `json:"runtime_console_initial"`
+	RuntimeConsoleEmit    daemon.Response `json:"runtime_console_emit"`
+	RuntimeConsoleList    daemon.Response `json:"runtime_console_list"`
+	RuntimeConsoleClear   daemon.Response `json:"runtime_console_clear"`
+	RuntimeConsoleCleared daemon.Response `json:"runtime_console_cleared"`
+	RuntimeErrorsInitial  daemon.Response `json:"runtime_errors_initial"`
+	RuntimeExceptionEmit  daemon.Response `json:"runtime_exception_emit"`
+	RuntimeErrorsList     daemon.Response `json:"runtime_errors_list"`
+	RuntimeErrorsClear    daemon.Response `json:"runtime_errors_clear"`
+	RuntimeErrorsCleared  daemon.Response `json:"runtime_errors_cleared"`
 }
 
 func main() {
@@ -139,6 +150,61 @@ func run() error {
 	})
 	if result.NetworkMissingRequest.Success || result.NetworkMissingRequest.Error == nil || result.NetworkMissingRequest.Error.Code != "network_request_not_found" {
 		return fmt.Errorf("Go missing network.request oracle was unexpected: %s", responseJSON(result.NetworkMissingRequest))
+	}
+	result.RuntimeConsoleInitial = call(runtime, ctx, daemon.Frame{
+		Cmd: "console.list", Session: "chrome-contract",
+	})
+	if !result.RuntimeConsoleInitial.Success || runtimeEntryCount(result.RuntimeConsoleInitial) != 0 {
+		return fmt.Errorf("Go initial console.list oracle was unexpected: %s", responseJSON(result.RuntimeConsoleInitial))
+	}
+	result.RuntimeConsoleEmit = call(runtime, ctx, daemon.Frame{
+		Cmd: "eval", Session: "chrome-contract",
+		Args: mustJSON(map[string]string{"expression": "console.warn('symbrowse runtime console probe')"}),
+	})
+	if !result.RuntimeConsoleEmit.Success {
+		return fmt.Errorf("Go console event script failed: %s", responseJSON(result.RuntimeConsoleEmit))
+	}
+	result.RuntimeConsoleList, err = waitRuntimeEntryCount(runtime, ctx, "console.list", 1)
+	if err != nil {
+		return err
+	}
+	if !runtimeEntriesContain(result.RuntimeConsoleList, "symbrowse runtime console probe") {
+		return fmt.Errorf("Go console.list omitted emitted probe: %s", responseJSON(result.RuntimeConsoleList))
+	}
+	result.RuntimeConsoleClear = call(runtime, ctx, daemon.Frame{
+		Cmd: "console.clear", Session: "chrome-contract",
+	})
+	result.RuntimeConsoleCleared = call(runtime, ctx, daemon.Frame{
+		Cmd: "console.list", Session: "chrome-contract",
+	})
+	if !result.RuntimeConsoleClear.Success || runtimeEntryCount(result.RuntimeConsoleCleared) != 0 {
+		return fmt.Errorf("Go console.clear oracle was unexpected: clear=%s list=%s", responseJSON(result.RuntimeConsoleClear), responseJSON(result.RuntimeConsoleCleared))
+	}
+	result.RuntimeErrorsInitial = call(runtime, ctx, daemon.Frame{
+		Cmd: "errors.list", Session: "chrome-contract",
+	})
+	if !result.RuntimeErrorsInitial.Success || runtimeEntryCount(result.RuntimeErrorsInitial) != 0 {
+		return fmt.Errorf("Go initial errors.list oracle was unexpected: %s", responseJSON(result.RuntimeErrorsInitial))
+	}
+	result.RuntimeExceptionEmit = call(runtime, ctx, daemon.Frame{
+		Cmd: "eval", Session: "chrome-contract",
+		Args: mustJSON(map[string]string{"expression": "setTimeout(() => { throw new Error('symbrowse uncaught runtime probe') }, 0)"}),
+	})
+	if !result.RuntimeExceptionEmit.Success {
+		return fmt.Errorf("Go uncaught exception script failed: %s", responseJSON(result.RuntimeExceptionEmit))
+	}
+	result.RuntimeErrorsList, err = waitRuntimeEntryCount(runtime, ctx, "errors.list", 1)
+	if err != nil {
+		return err
+	}
+	result.RuntimeErrorsClear = call(runtime, ctx, daemon.Frame{
+		Cmd: "errors.clear", Session: "chrome-contract",
+	})
+	result.RuntimeErrorsCleared = call(runtime, ctx, daemon.Frame{
+		Cmd: "errors.list", Session: "chrome-contract",
+	})
+	if !result.RuntimeErrorsClear.Success || runtimeEntryCount(result.RuntimeErrorsCleared) != 0 {
+		return fmt.Errorf("Go errors.clear oracle was unexpected: clear=%s list=%s", responseJSON(result.RuntimeErrorsClear), responseJSON(result.RuntimeErrorsCleared))
 	}
 	result.TabNew = call(runtime, ctx, daemon.Frame{
 		Cmd:     "tab.new",
@@ -320,6 +386,51 @@ func call(runtime *daemon.NavigationRuntime, ctx context.Context, frame daemon.F
 		}
 	}
 	return daemon.SuccessResponse(data, warnings)
+}
+
+func waitRuntimeEntryCount(runtime *daemon.NavigationRuntime, ctx context.Context, command string, want int) (daemon.Response, error) {
+	deadline := time.Now().Add(5 * time.Second)
+	var last daemon.Response
+	for time.Now().Before(deadline) {
+		last = call(runtime, ctx, daemon.Frame{Cmd: command, Session: "chrome-contract"})
+		if !last.Success {
+			return last, fmt.Errorf("Go %s failed while waiting for event: %s", command, responseJSON(last))
+		}
+		if runtimeEntryCount(last) >= want {
+			return last, nil
+		}
+		select {
+		case <-ctx.Done():
+			return last, fmt.Errorf("Go %s timed out while waiting for runtime event: %w", command, ctx.Err())
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+	return last, fmt.Errorf("Go %s did not capture %d runtime entries: %s", command, want, responseJSON(last))
+}
+
+func runtimeEntryCount(response daemon.Response) int {
+	data, ok := response.Data.(map[string]any)
+	if !ok {
+		return 0
+	}
+	entries, _ := data["entries"].([]any)
+	return len(entries)
+}
+
+func runtimeEntriesContain(response daemon.Response, text string) bool {
+	data, ok := response.Data.(map[string]any)
+	if !ok {
+		return false
+	}
+	entries, _ := data["entries"].([]any)
+	for _, raw := range entries {
+		entry, _ := raw.(map[string]any)
+		value, _ := entry["text"].(string)
+		if strings.Contains(value, text) {
+			return true
+		}
+	}
+	return false
 }
 
 func responseJSON(response daemon.Response) string {

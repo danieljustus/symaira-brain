@@ -17,12 +17,13 @@ use std::{
 use chromiumoxide::{
     Browser, Element, Page,
     cdp::browser_protocol::{accessibility, browser, dom, input, network, page},
-    cdp::js_protocol::runtime::EvaluateParams,
+    cdp::js_protocol::runtime::{self, EvaluateParams},
     layout::Point,
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use time::{OffsetDateTime, format_description::well_known::Rfc3339};
 use tokio::sync::Mutex;
 
 use symbrowse_engine::files::{DownloadEvent, DownloadRegistry, download_behavior};
@@ -141,6 +142,37 @@ pub struct CapturedRequest {
     pub request_headers: BTreeMap<String, String>,
     pub response_headers: BTreeMap<String, String>,
     pub encoded_body_size: i64,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ConsoleEntry {
+    #[serde(rename = "type")]
+    kind: String,
+    text: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    url: String,
+    #[serde(skip_serializing_if = "is_zero")]
+    line: i64,
+    timestamp: String,
+}
+
+#[derive(Clone, Debug, Serialize)]
+struct ErrorEntry {
+    text: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
+    url: String,
+    #[serde(skip_serializing_if = "is_zero")]
+    line: i64,
+    #[serde(rename = "stacktrace", skip_serializing_if = "Vec::is_empty")]
+    stack_trace: Vec<String>,
+    timestamp: String,
+}
+
+#[derive(Default)]
+struct RuntimeEventState {
+    enabled: bool,
+    console: Vec<ConsoleEntry>,
+    errors: Vec<ErrorEntry>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -291,6 +323,7 @@ pub struct ChromePage {
     downloads: Arc<Mutex<DownloadRegistry>>,
     download_session: String,
     download_frame: Arc<Mutex<String>>,
+    runtime_events: Arc<Mutex<RuntimeEventState>>,
 }
 
 #[derive(Clone)]
@@ -402,8 +435,95 @@ impl ChromePage {
             downloads,
             download_session,
             download_frame,
+            runtime_events: Arc::new(Mutex::new(RuntimeEventState::default())),
         })
     }
+
+    /// Enable per-page console and uncaught-exception capture, matching the
+    /// lazy `Runtime.enable` behavior of the Go RuntimeEvents capability.
+    pub async fn enable_runtime_events(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut state = self.runtime_events.lock().await;
+        if state.enabled {
+            return Ok(());
+        }
+        let mut console = self
+            .page
+            .event_listener::<runtime::EventConsoleApiCalled>()
+            .await?;
+        let mut exceptions = self
+            .page
+            .event_listener::<runtime::EventExceptionThrown>()
+            .await?;
+        self.page.execute(runtime::EnableParams::default()).await?;
+        state.enabled = true;
+        let events = Arc::clone(&self.runtime_events);
+        tokio::spawn(async move {
+            loop {
+                tokio::select! {
+                    event = console.next() => {
+                        let Some(event) = event else { break };
+                        let text = render_console_args(&event.args);
+                        if text.is_empty() {
+                            continue;
+                        }
+                        let entry = ConsoleEntry {
+                            kind: event.r#type.as_ref().to_owned(),
+                            text: truncate_runtime_text(&text),
+                            url: String::new(),
+                            line: 1,
+                            timestamp: runtime_timestamp(),
+                        };
+                        let mut state = events.lock().await;
+                        append_bounded(&mut state.console, entry);
+                    }
+                    event = exceptions.next() => {
+                        let Some(event) = event else { break };
+                        let details = event.exception_details;
+                        let stack_trace = details.stack_trace
+                            .as_ref()
+                            .map(|trace| trace.call_frames.iter().map(|frame| {
+                                let function = if frame.function_name.is_empty() {
+                                    "(anonymous)"
+                                } else {
+                                    &frame.function_name
+                                };
+                                format!("{function} ({}:{}:{})", frame.url, frame.line_number + 1, frame.column_number + 1)
+                            }).collect())
+                            .unwrap_or_default();
+                        let entry = ErrorEntry {
+                            text: truncate_runtime_text(&details.text),
+                            url: details.url.unwrap_or_default(),
+                            line: details.line_number + 1,
+                            stack_trace,
+                            timestamp: runtime_timestamp(),
+                        };
+                        let mut state = events.lock().await;
+                        append_bounded(&mut state.errors, entry);
+                    }
+                }
+            }
+        });
+        Ok(())
+    }
+
+    pub async fn runtime_console_events(&self) -> Value {
+        let state = self.runtime_events.lock().await;
+        serde_json::to_value(&state.console).unwrap_or_else(|_| Value::Array(Vec::new()))
+    }
+
+    pub async fn runtime_error_events(&self) -> Value {
+        let state = self.runtime_events.lock().await;
+        serde_json::to_value(&state.errors).unwrap_or_else(|_| Value::Array(Vec::new()))
+    }
+
+    pub async fn clear_runtime_console(&self) {
+        self.runtime_events.lock().await.console.clear();
+    }
+
+    pub async fn clear_runtime_errors(&self) {
+        self.runtime_events.lock().await.errors.clear();
+    }
+
     pub fn target_id(&self) -> String {
         self.page.target_id().inner().clone()
     }
@@ -1444,6 +1564,59 @@ fn download_bytes(value: f64) -> i64 {
     }
 }
 
+fn is_zero(value: &i64) -> bool {
+    *value == 0
+}
+
+fn runtime_timestamp() -> String {
+    OffsetDateTime::now_utc()
+        .format(&Rfc3339)
+        .unwrap_or_default()
+}
+
+fn truncate_runtime_text(text: &str) -> String {
+    const MAX_ENTRY_BYTES: usize = 4096;
+    if text.len() <= MAX_ENTRY_BYTES {
+        return text.to_owned();
+    }
+    format!(
+        "{}…",
+        String::from_utf8_lossy(&text.as_bytes()[..MAX_ENTRY_BYTES])
+    )
+}
+
+fn append_bounded<T>(entries: &mut Vec<T>, entry: T) {
+    const MAX_ENTRIES: usize = 500;
+    if entries.len() >= MAX_ENTRIES {
+        let excess = entries.len() - MAX_ENTRIES + 1;
+        entries.drain(..excess);
+    }
+    entries.push(entry);
+}
+
+fn render_console_args(args: &[runtime::RemoteObject]) -> String {
+    args.iter()
+        .filter_map(|arg| {
+            if arg.r#type.as_ref() == "string" {
+                return arg.value.as_ref().map(|value| {
+                    value
+                        .as_str()
+                        .map(str::to_owned)
+                        .unwrap_or_else(|| value.to_string())
+                });
+            }
+            if let Some(description) = arg.description.as_ref().filter(|value| !value.is_empty()) {
+                return Some(description.clone());
+            }
+            arg.value
+                .as_ref()
+                .filter(|value| !value.is_null())
+                .map(Value::to_string)
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1460,15 +1633,10 @@ mod tests {
                 .interfaces
                 .contains(&"ClickDiagnosticEngine".to_owned())
         );
-        assert_eq!(value.interfaces.len(), 15);
+        assert_eq!(value.interfaces.len(), 16);
         assert_eq!(
             value.unsupported,
-            vec![
-                "OverlayHost",
-                "RuntimeEvents",
-                "ScriptDisabler",
-                "SettingsEngine"
-            ]
+            vec!["OverlayHost", "ScriptDisabler", "SettingsEngine"]
         );
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
@@ -1480,6 +1648,48 @@ mod tests {
         assert!(value.inspection.contains(&"axe-audit".to_owned()));
         assert!(value.artifacts.contains(&"pdf".to_owned()));
         assert_eq!(value.unsupported, vec!["har-export"]);
+    }
+
+    #[test]
+    fn runtime_console_text_matches_go_argument_rendering() {
+        let args: Vec<runtime::RemoteObject> = serde_json::from_value(json!([
+            {"type":"string", "value":"message"},
+            {"type":"number", "value":42, "description":"42"},
+            {"type":"object", "description":"Object"}
+        ]))
+        .unwrap();
+        assert_eq!(render_console_args(&args), "message 42 Object");
+    }
+
+    #[test]
+    fn runtime_event_entries_use_go_json_field_names_and_bounds() {
+        let console = ConsoleEntry {
+            kind: "warning".into(),
+            text: "warning".into(),
+            url: String::new(),
+            line: 1,
+            timestamp: "2026-09-25T12:00:00Z".into(),
+        };
+        assert_eq!(
+            serde_json::to_value(console).unwrap(),
+            json!({
+                "type":"warning",
+                "text":"warning",
+                "line":1,
+                "timestamp":"2026-09-25T12:00:00Z"
+            })
+        );
+        let mut entries = Vec::new();
+        for index in 0..501 {
+            append_bounded(&mut entries, index);
+        }
+        assert_eq!(entries.len(), 500);
+        assert_eq!(entries.first(), Some(&1));
+        assert_eq!(entries.last(), Some(&500));
+        assert_eq!(
+            truncate_runtime_text(&"x".repeat(4097)).len(),
+            4096 + "…".len()
+        );
     }
 
     #[test]
