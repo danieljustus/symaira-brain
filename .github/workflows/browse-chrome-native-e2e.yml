@@ -60,6 +60,9 @@ jobs:
       - name: Run Go engine contract oracles
         run: go test ./internal/engine ./internal/engine/chrome ./internal/engine/doctor ./internal/flows ./cmd/symbrowse -run 'Launch|Attach|Discover|Timeout|Interaction|Inspection|Find|Wait|Tab|Frame|Dialog|Network|Upload|Download|Screenshot|A11y'
 
+      - name: Verify Go Symvault auth behavior
+        run: go test ./internal/daemon -run '^TestAuthLogin(EndToEnd|RejectsUnsafeURLBeforeVaultAccess|RedactsErrors)$' -count=1
+
       - name: Fetch official Chrome for Testing artifact
         id: cft
         run: python3 port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/symbrowse-cft"
@@ -78,6 +81,7 @@ jobs:
             export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
           fi
           cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --nocapture
           cargo test --locked -p symbrowse-engine-chrome --test full -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
         env:
           SYMBROWSE_E2E: '1'
