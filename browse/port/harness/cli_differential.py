@@ -23,6 +23,10 @@ from ctypes import wintypes
 MAX_CAPTURE_BYTES = 1 << 20
 PREVIEW_BYTES = 256
 SESSION = "default"
+TRACE_INTERACTIONS = {
+    "click", "dblclick", "hover", "focus", "check", "uncheck", "scrollintoview",
+    "scroll", "fill", "type", "select", "press",
+}
 
 
 def sha256(data: bytes) -> str:
@@ -52,6 +56,40 @@ def output_record(result: dict[str, Any]) -> dict[str, Any]:
         record[field] = {"bytes": len(value), "sha256": sha256(value),
                          "preview": value[:PREVIEW_BYTES].decode("utf-8", "backslashreplace")}
     return record
+
+
+def trace_replay_result(steps: list[dict[str, Any]]) -> dict[str, Any]:
+    outcomes: list[dict[str, Any]] = []
+    matched = failed = deviated = 0
+    for index, step in enumerate(steps):
+        command = step.get("command", "")
+        outcome: dict[str, Any] = {"index": index, "command": command, "matched": False}
+        if command in ("open", "goto"):
+            expected = step.get("expected_url", "")
+            actual = step.get("url", "")
+            outcome.update({"expected_url": expected, "actual_url": actual,
+                            "matched": normalize_trace_fixture_url(actual)
+                            == normalize_trace_fixture_url(expected)})
+        elif command in TRACE_INTERACTIONS:
+            outcome["matched"] = True
+        elif command == "auth.login":
+            outcome["error"] = "credential step requires symvault re-resolution; replay it with auth login"
+        else:
+            outcome["error"] = f'step command "{command}" is not replayable'
+        if outcome.get("error"):
+            failed += 1
+        elif outcome["matched"]:
+            matched += 1
+        else:
+            deviated += 1
+        outcomes.append(outcome)
+    return {"total": len(steps), "matched": matched, "deviated": deviated,
+            "failed": failed, "outcomes": outcomes}
+
+
+def normalize_trace_fixture_url(value: str) -> str:
+    value = value.split("#", 1)[0]
+    return value[:-1] if value.endswith("/") else value
 
 
 def command_names(help_bytes: bytes, *, root: bool) -> list[str]:
@@ -223,12 +261,7 @@ class UnixDaemonStub:
                         data = {"session": frame.get("session", "default")}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
-                        outcomes = [{"index": index, "command": step.get("command", ""),
-                                     "matched": True, "expected_url": step.get("expected_url", ""),
-                                     "actual_url": step.get("url", "")}
-                                    for index, step in enumerate(steps)]
-                        data = {"total": len(steps), "matched": len(steps), "deviated": 0,
-                                "failed": 0, "outcomes": outcomes}
+                        data = trace_replay_result(steps)
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -402,12 +435,7 @@ class WindowsNamedPipeStub:
                         data = {"session": frame.get("session", SESSION)}
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
-                        outcomes = [{"index": index, "command": step.get("command", ""),
-                                     "matched": True, "expected_url": step.get("expected_url", ""),
-                                     "actual_url": step.get("url", "")}
-                                    for index, step in enumerate(steps)]
-                        data = {"total": len(steps), "matched": len(steps), "deviated": 0,
-                                "failed": 0, "outcomes": outcomes}
+                        data = trace_replay_result(steps)
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -995,18 +1023,40 @@ def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
 def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
     fixture = Path(env["TMPDIR"]) / "trace-replay.json"
     url = "https://fixture.invalid/replay"
+    next_url = "https://fixture.invalid/next"
     document = {
         "schema_version": 1,
         "created_at": "2026-09-25T00:00:00Z",
         "session": "fixture",
-        "steps": [{"command": "open", "url": url, "expected_url": url}],
+        "steps": [
+            {"command": "open", "url": url, "expected_url": url + "#section"},
+            {"command": "goto", "url": next_url, "expected_url": url},
+            {"command": "click", "selector": "#button"},
+            {"command": "dblclick", "selector": "#button"},
+            {"command": "hover", "selector": "#button"},
+            {"command": "focus", "selector": "#input"},
+            {"command": "check", "selector": "#check"},
+            {"command": "uncheck", "selector": "#check"},
+            {"command": "scrollintoview", "selector": "#target"},
+            {"command": "scroll", "selector": "body"},
+            {"command": "fill", "selector": "#input", "value": "fixture"},
+            {"command": "type", "selector": "#input", "value": "text"},
+            {"command": "select", "selector": "#select", "value": "option"},
+            {"command": "press", "key": "Enter"},
+            {"command": "auth.login", "value": "fixture-entry"},
+            {"command": "not-replayable"},
+        ],
     }
     argv = ["trace", "replay", str(fixture), "--session", "fixture"]
     try:
         fixture.write_text(json.dumps(document), encoding="utf-8")
 
         def run(binary: Path, *, rust_client: bool) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
-            count = 2 if rust_client else 1
+            rust_request_count = sum(
+                step["command"] in TRACE_INTERACTIONS | {"open", "goto"}
+                for step in document["steps"]
+            )
+            count = 2 * rust_request_count if rust_client else 1
             if os.name == "nt":
                 with WindowsNamedPipeStub(
                     session="fixture", status_probe=rust_client, request_count=count
@@ -1036,21 +1086,37 @@ def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
         go_result.get(key) == rust_result.get(key)
         for key in ("returncode", "stdout", "stderr")
     )
+    expected_rust_requests = []
+    for step in document["steps"]:
+        command = step["command"]
+        if command in ("auth.login", "not-replayable"):
+            continue
+        if command in ("open", "goto"):
+            args = {"url": step["url"]}
+        elif command == "press":
+            args = {"action": command, "selector": "body", "key": step["key"]}
+        elif command == "scroll":
+            args = {"action": command, "selector": step["selector"], "amount": 1}
+        elif command in ("fill", "type", "select"):
+            args = {"action": command, "selector": step["selector"], "value": step["value"]}
+        else:
+            args = {"action": command, "selector": step["selector"]}
+        expected_rust_requests.append({"cmd": command, "session": "fixture", "args": args})
     protocol_shape = (
-        len(go_requests) == len(rust_requests) == 1
+        len(go_requests) == 1
         and go_requests[0].get("cmd") == "trace.replay"
         and (go_requests[0].get("args") or {}).get("steps") == document["steps"]
-        and rust_requests[0].get("cmd") == "open"
-        and (rust_requests[0].get("args") or {}).get("url") == url
+        and [{key: frame.get(key) for key in ("cmd", "session", "args")} for frame in rust_requests]
+        == expected_rust_requests
     )
     return {
-        "case": "CLI-001-trace-replay-open",
+        "case": "CLI-001-trace-replay-actions",
         "argv": argv,
         "matched": bool(
             same_output and go_result.get("returncode") == 0 and protocol_shape
             and not go_stub_error and not rust_stub_error
         ),
-        "criterion": "one open-step replay returns the same Go outcome while Rust uses its existing navigation frame",
+        "criterion": "all replayable action frames and credential/unknown outcomes match Go semantics",
         "go": output_record(go_result),
         "rust": output_record(rust_result),
         "go_request": go_requests[0] if go_requests else None,

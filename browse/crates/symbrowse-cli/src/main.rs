@@ -812,37 +812,70 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
             "trace contains no replayable steps".to_owned(),
         );
     }
-    if file.steps.len() != 1 || !matches!(file.steps[0].command.as_str(), "open" | "goto") {
-        return render_dispatch_error(
-            format,
-            daemon_codes::OPERATION_FAILED,
-            "this trace replay route currently supports one open or goto step".to_owned(),
-        );
-    }
-
-    let step = &file.steps[0];
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
         ..ClientOptions::default()
     });
-    let actual = match client.request(Frame {
-        cmd: step.command.clone(),
-        args: Some(serde_json::json!({"url": step.url})),
-        session,
-        ..Frame::default()
-    }) {
-        Ok(response) if response.success => Ok(response
-            .data
-            .as_ref()
-            .and_then(|data| data.get("url"))
-            .and_then(serde_json::Value::as_str)
-            .unwrap_or_default()
-            .to_owned()),
-        Ok(response) => Err(response.error.unwrap_or_default().message),
-        Err(error) => return render_client_error(format, error),
+    let mut result = trace::ReplayResult {
+        total: file.steps.len(),
+        matched: 0,
+        deviated: 0,
+        failed: 0,
+        outcomes: Vec::with_capacity(file.steps.len()),
     };
-    let result = trace::compare_urls(&file, &[actual]);
+    for (index, step) in file.steps.iter().enumerate() {
+        let mut outcome = trace::ReplayOutcome {
+            index,
+            command: step.command.clone(),
+            matched: false,
+            expected_url: String::new(),
+            actual_url: String::new(),
+            error: String::new(),
+        };
+        if step.command == "auth.login" {
+            outcome.error =
+                "credential step requires symvault re-resolution; replay it with auth login".into();
+        } else if let Some((command, args)) = replay_step_frame(step) {
+            let response = match client.request(Frame {
+                cmd: command,
+                args: Some(args),
+                session: session.clone(),
+                ..Frame::default()
+            }) {
+                Ok(response) => response,
+                Err(error) => return render_client_error(format, error),
+            };
+            if response.success {
+                if matches!(step.command.as_str(), "open" | "goto") {
+                    outcome.expected_url = step.expected_url.clone();
+                    outcome.actual_url = response
+                        .data
+                        .as_ref()
+                        .and_then(|data| data.get("url"))
+                        .and_then(serde_json::Value::as_str)
+                        .unwrap_or_default()
+                        .to_owned();
+                    outcome.matched = normalize_trace_url(&outcome.actual_url)
+                        == normalize_trace_url(&outcome.expected_url);
+                } else {
+                    outcome.matched = true;
+                }
+            } else {
+                outcome.error = response.error.unwrap_or_default().message;
+            }
+        } else {
+            outcome.error = format!("step command {:?} is not replayable", step.command);
+        }
+        if !outcome.error.is_empty() {
+            result.failed += 1;
+        } else if outcome.matched {
+            result.matched += 1;
+        } else {
+            result.deviated += 1;
+        }
+        result.outcomes.push(outcome);
+    }
     let mut data = match serde_json::to_value(result) {
         Ok(data) => data,
         Err(error) => {
@@ -885,6 +918,42 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
             render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
         }
     }
+}
+
+fn replay_step_frame(step: &trace::Step) -> Option<(String, serde_json::Value)> {
+    let command = step.command.as_str();
+    let action_args = |selector: &str| serde_json::json!({"action": command, "selector": selector});
+    let args = match command {
+        "open" | "goto" => serde_json::json!({"url": step.url}),
+        "click" | "dblclick" | "hover" | "focus" | "check" | "uncheck" | "scrollintoview" => {
+            action_args(&step.selector)
+        }
+        "scroll" => serde_json::json!({
+            "action": command,
+            "selector": step.selector,
+            "amount": 1,
+        }),
+        "fill" | "type" | "select" => serde_json::json!({
+            "action": command,
+            "selector": step.selector,
+            "value": step.value,
+        }),
+        "press" => serde_json::json!({
+            "action": command,
+            "selector": "body",
+            "key": step.key,
+        }),
+        _ => return None,
+    };
+    Some((command.to_owned(), args))
+}
+
+fn normalize_trace_url(url: &str) -> String {
+    url.split('#')
+        .next()
+        .unwrap_or(url)
+        .trim_end_matches('/')
+        .to_owned()
 }
 
 fn run_diff_snapshot(session: String, baseline: Option<PathBuf>, format: Format) -> ExitCode {
