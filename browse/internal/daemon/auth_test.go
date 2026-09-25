@@ -164,6 +164,23 @@ func TestAuthLoginEndToEnd(t *testing.T) {
 	}
 }
 
+func TestAuthLoginRejectsUnsafeURLBeforeVaultAccess(t *testing.T) {
+	called := false
+	auth := NewAuthRuntime(&NavigationRuntime{}, &VaultResolver{
+		LookPath: func(string) (string, error) {
+			called = true
+			return "/bin/symvault", nil
+		},
+	})
+	_, err := auth.Login(context.Background(), "default", "entry", "data:text/html,unsafe")
+	if err == nil || !strings.Contains(err.Error(), "navigation URL policy: unsupported target") {
+		t.Fatalf("unsafe login URL: %v", err)
+	}
+	if called {
+		t.Fatal("vault was accessed before URL policy accepted the target")
+	}
+}
+
 // TestAuthLoginRedactsErrors ensures interaction failures never carry the
 // secret back to the caller.
 func TestAuthLoginRedactsErrors(t *testing.T) {

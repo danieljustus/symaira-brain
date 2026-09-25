@@ -36,6 +36,11 @@ type LoginResult struct {
 // detects the login form and types the credentials. Errors are redacted so
 // the password never reaches the caller, the journal or the log.
 func (r *AuthRuntime) Login(ctx context.Context, session, entry, url string) (LoginResult, error) {
+	if url != "" {
+		if err := r.nav.guardTarget(url); err != nil {
+			return LoginResult{}, err
+		}
+	}
 	creds, err := r.vault.Resolve(ctx, entry)
 	if err != nil {
 		if errors.Is(err, ErrVaultUnavailable) {
