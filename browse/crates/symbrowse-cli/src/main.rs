@@ -3383,6 +3383,68 @@ fn execute_batch_daemon_lifecycle(session: String, command: String, format: Form
     }
 }
 
+fn execute_batch_state_clear(session: String, name: String, format: Format) -> ItemOutput {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response = match client.request(Frame {
+        cmd: "state.clear".to_owned(),
+        args: Some(serde_json::json!({"name": name.clone()})),
+        session,
+        ..Frame::default()
+    }) {
+        Ok(response) => response,
+        Err(error) => {
+            return ItemOutput {
+                stdout: String::new(),
+                error: Some(error.to_string()),
+            };
+        }
+    };
+    if !response.success {
+        return ItemOutput {
+            stdout: String::new(),
+            error: Some(
+                response
+                    .error
+                    .map_or_else(|| "state request failed".to_owned(), |error| error.message),
+            ),
+        };
+    }
+    let stdout = if format == Format::Text {
+        format!("cleared state {name:?}\n")
+    } else {
+        let warnings = response
+            .warnings
+            .into_iter()
+            .map(|warning| symbrowse_core::output::Warning {
+                kind: warning.kind,
+                severity: warning.severity,
+                message: warning.message,
+                r#ref: warning.r#ref,
+                excerpt: warning.excerpt,
+            })
+            .collect();
+        match Envelope::ok(response.data.unwrap_or(serde_json::Value::Null), warnings)
+            .render(format)
+        {
+            Ok(output) => output,
+            Err(error) => {
+                return ItemOutput {
+                    stdout: String::new(),
+                    error: Some(error.to_string()),
+                };
+            }
+        }
+    };
+    ItemOutput {
+        stdout,
+        error: None,
+    }
+}
+
 fn execute_batch_item(argv: &[String]) -> ItemOutput {
     let args: Vec<OsString> = argv.iter().map(OsString::from).collect();
     match parse(&args) {
@@ -3442,6 +3504,13 @@ fn execute_batch_item(argv: &[String]) -> ItemOutput {
             command,
             format,
         }) => execute_batch_daemon_lifecycle(session, command, format),
+        Ok(Action::StateOperation {
+            session,
+            command,
+            name: Some(name),
+            format,
+            ..
+        }) if command == "state.clear" => execute_batch_state_clear(session, name, format),
         Ok(_) => ItemOutput {
             stdout: String::new(),
             error: Some(format!("batch item {:?} is not available yet", argv[0])),
