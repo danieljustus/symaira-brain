@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -69,6 +70,7 @@ func main() {
 }
 
 func run() error {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 	if len(os.Args) != 3 || os.Args[1] == "" || os.Args[2] == "" {
 		return fmt.Errorf("usage: chrome-contract-oracle CHROME_EXECUTABLE FIXTURE_BASE_URL")
 	}
