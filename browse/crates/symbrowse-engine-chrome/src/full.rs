@@ -667,13 +667,30 @@ impl ChromePage {
         Ok(self.page.find_element(selector).await?)
     }
 
+    async fn scroll_element_into_view(
+        &self,
+        element: &Element,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        // Match Go's DOM.scrollIntoViewIfNeeded call. chromiumoxide's helper
+        // waits for an IntersectionObserver promise before scrolling, which
+        // can remain pending for an off-screen target in headless Chromium.
+        self.page
+            .execute(
+                dom::ScrollIntoViewIfNeededParams::builder()
+                    .backend_node_id(element.backend_node_id)
+                    .build(),
+            )
+            .await?;
+        Ok(())
+    }
+
     async fn click_target(
         &self,
         selector: &str,
         action: &str,
     ) -> Result<Element, Box<dyn Error + Send + Sync>> {
         let element = self.element(selector).await?;
-        element.scroll_into_view().await?;
+        self.scroll_element_into_view(&element).await?;
         let point = element.clickable_point().await?;
         let hit = self
             .page
@@ -751,7 +768,8 @@ impl ChromePage {
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.element(selector).await?.scroll_into_view().await?;
+        let element = self.element(selector).await?;
+        self.scroll_element_into_view(&element).await?;
         Ok(result("scroll", selector))
     }
     pub async fn scroll(
@@ -760,7 +778,8 @@ impl ChromePage {
         amount: i64,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let target = self.element(selector).await?;
-        let element = target.scroll_into_view().await?;
+        self.scroll_element_into_view(&target).await?;
+        let element = target;
         element.focus().await?;
         let bounds = self.inspect(selector, "box").await?;
         let x = bounds["x"]

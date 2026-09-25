@@ -91,7 +91,7 @@ impl ChromeContractServer {
                             (
                                 "text/html; charset=utf-8",
                                 "",
-                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a>",
+                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a><div style='height:12000px'><div id=target style='margin-top:8000px;height:100px'></div></div>",
                             )
                         };
                         let response = format!(
@@ -393,6 +393,17 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         network_started["success"], go_oracle["network_capture"]["success"],
         "network.requests capture start: rust={network_started}, go={}",
         go_oracle["network_capture"]
+    );
+    let rust_fixture_scroll = request(&client, "scrollintoview", json!({"selector":"#target"}));
+    assert_eq!(
+        rust_fixture_scroll["success"], go_oracle["scroll_into_view"]["success"],
+        "scrollintoview success: Rust={rust_fixture_scroll} Go={}",
+        go_oracle["scroll_into_view"]
+    );
+    assert_eq!(
+        rust_fixture_scroll["data"], go_oracle["scroll_into_view"]["data"],
+        "scrollintoview result: Rust={rust_fixture_scroll} Go={}",
+        go_oracle["scroll_into_view"]
     );
     let reloaded = request(&client, "reload", json!({}));
     assert_eq!(

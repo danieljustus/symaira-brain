@@ -14,6 +14,7 @@ import (
 
 type contract struct {
 	Open                  daemon.Response `json:"open"`
+	ScrollIntoView        daemon.Response `json:"scroll_into_view"`
 	TabNew                daemon.Response `json:"tab_new"`
 	InspectText           daemon.Response `json:"inspect_text"`
 	InspectHTML           daemon.Response `json:"inspect_html"`
@@ -100,6 +101,14 @@ func run() error {
 	})
 	if !result.NetworkCapture.Success {
 		return fmt.Errorf("Go network.requests capture start failed: %s", responseJSON(result.NetworkCapture))
+	}
+	result.ScrollIntoView = call(runtime, ctx, daemon.Frame{
+		Cmd:     "scrollintoview",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#target"}),
+	})
+	if !result.ScrollIntoView.Success {
+		return fmt.Errorf("Go scrollintoview oracle failed: %s", responseJSON(result.ScrollIntoView))
 	}
 	reloaded := call(runtime, ctx, daemon.Frame{Cmd: "reload", Session: "chrome-contract"})
 	if !reloaded.Success {
