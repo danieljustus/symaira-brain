@@ -1409,11 +1409,15 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "set.headers",
         json!({"headers":{"Authorization":"must-not-be-applied"}}),
     );
-    assert_eq!(credential_header["success"], false);
+    assert_eq!(
+        credential_header["success"], false,
+        "credential header response: {credential_header}"
+    );
     assert!(
         credential_header["error"]["message"]
             .as_str()
-            .is_some_and(|message| message.contains("credential risk class"))
+            .is_some_and(|message| message.contains("credential risk class")),
+        "credential header response: {credential_header}"
     );
     let header_effect = request(
         &client,
