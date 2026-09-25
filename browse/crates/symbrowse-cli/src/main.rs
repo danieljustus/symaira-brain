@@ -1538,7 +1538,7 @@ fn render_trace_error_envelope(envelope: Envelope, format: Format) {
             .unwrap_or_default()
             .to_owned();
         if let Ok(output) = envelope.render(format) {
-            let mut output = if message.contains(": ") {
+            let output = if message.contains(": ") {
                 output
                     .lines()
                     .map(|line| {
@@ -2539,7 +2539,7 @@ fn run_eval(
         Vec::new()
     };
     let expression = match resolve_eval_expression(expression, from_stdin, &stdin_bytes) {
-        Ok(expression) => expression,
+        Some(expression) => expression,
         None => {
             return render_dispatch_error(
                 format,
@@ -3247,15 +3247,18 @@ fn run_batch(format: Format, mut commands: Vec<String>, bail: bool, dry_run: boo
         };
     }
     if format == Format::Text {
-        return match serde_json::to_string_pretty(&report) {
-            Ok(mut output) => {
-                output.push('\n');
-                write_stdout(&output)
-            }
+        return match render_batch_text(&report) {
+            Ok(output) => write_stdout(&output),
             Err(_) => ExitCode::from(1),
         };
     }
     write_stdout(&batch::render_yaml(&report))
+}
+
+fn render_batch_text(report: &batch::Report) -> Result<String, serde_json::Error> {
+    let mut output = go_json_html_escape(serde_json::to_string_pretty(report)?);
+    output.push('\n');
+    Ok(output)
 }
 
 fn decode_batch_commands(input: &str) -> Result<Vec<String>, String> {
@@ -7042,6 +7045,19 @@ mod tests {
                 dry_run: true,
             })
         );
+    }
+
+    #[test]
+    fn batch_text_fallback_uses_go_json_html_escaping() {
+        let commands = vec!["snapshot".to_owned()];
+        let report = super::batch::run(&commands, false, false, |_| super::batch::ItemOutput {
+            stdout: "<&>\u{2028}\u{2029}\n".to_owned(),
+            error: None,
+        });
+        let rendered = super::render_batch_text(&report).expect("render batch text");
+        assert!(rendered.contains("\\u003c\\u0026\\u003e\\u2028\\u2029"));
+        assert!(!rendered.contains("<&>"));
+        assert!(rendered.ends_with('\n'));
     }
 
     #[test]
