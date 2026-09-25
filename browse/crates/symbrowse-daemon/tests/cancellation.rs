@@ -29,12 +29,15 @@ mod unix {
     fn dmn006_active_handler_survives_idle_deadline() {
         let root = tempfile::tempdir().expect("temporary daemon root");
         let socket = root.path().join("active.sock");
+        let mut spec = SessionSpec::for_session("active");
+        spec.socket_path = socket.clone();
+        spec.state_dir = root.path().join("state");
+        spec.cache_dir = root.path().join("cache");
+        spec.idle_timeout = Some(Duration::from_millis(100));
+        spec.operation_timeout = Duration::from_millis(700);
         let server = Arc::new(
             Server::new(ServerOptions {
-                socket_path: socket.clone(),
-                session: "active".into(),
-                idle_timeout: Some(Duration::from_millis(100)),
-                operation_timeout: Duration::from_millis(700),
+                session_spec: Some(spec),
                 handler: Some(Arc::new(|_, _| {
                     thread::sleep(Duration::from_millis(300));
                     Ok((Some(serde_json::json!({"done": true})), Vec::new()))
