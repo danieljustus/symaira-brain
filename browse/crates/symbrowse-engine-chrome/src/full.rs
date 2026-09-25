@@ -627,17 +627,34 @@ impl ChromePage {
                 })
                 .await
                 .unwrap_or(false);
+                let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
+                if diagnostics {
+                    eprintln!(
+                        "chrome_network_guard_decision={}",
+                        if allowed { "continue" } else { "block" },
+                    );
+                }
                 if allowed {
-                    let _ = page
+                    if let Err(error) = page
                         .execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
-                        .await;
+                        .await
+                    {
+                        if diagnostics {
+                            eprintln!("chrome_network_guard_continue_failed={error}");
+                        }
+                    }
                 } else {
-                    let _ = page
+                    if let Err(error) = page
                         .execute(fetch::FailRequestParams::new(
                             event.request_id.clone(),
                             network::ErrorReason::BlockedByClient,
                         ))
-                        .await;
+                        .await
+                    {
+                        if diagnostics {
+                            eprintln!("chrome_network_guard_fail_failed={error}");
+                        }
+                    }
                 }
             }
         });
