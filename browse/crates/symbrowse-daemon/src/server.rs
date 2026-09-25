@@ -34,10 +34,27 @@ pub type DaemonHandler =
     Arc<dyn Fn(Frame, OperationContext) -> HandlerResult + Send + Sync + 'static>;
 
 // Connections can stay open for several request frames. Bound the number of
-// connection threads so short-lived CLI requests do not create one OS thread
-// per daemon round trip, while retaining enough workers for concurrent clients.
+// connection threads to a small multiple of available CPU capacity so short-
+// lived clients do not wake a large pool for every daemon round trip.
 #[cfg(any(unix, windows))]
-const CONNECTION_WORKERS: usize = 32;
+const MAX_CONNECTION_WORKERS: usize = 32;
+
+#[cfg(any(unix, windows))]
+fn bounded_connection_workers(parallelism: Option<usize>) -> usize {
+    parallelism
+        .unwrap_or(4)
+        .saturating_mul(2)
+        .clamp(4, MAX_CONNECTION_WORKERS)
+}
+
+#[cfg(any(unix, windows))]
+fn connection_worker_count() -> usize {
+    bounded_connection_workers(
+        std::thread::available_parallelism()
+            .ok()
+            .map(|value| value.get()),
+    )
+}
 
 #[derive(Clone, Debug)]
 pub struct OperationContext {
@@ -333,9 +350,10 @@ impl Server {
         listener: std::os::unix::net::UnixListener,
         handler: DaemonHandler,
     ) -> Result<(), ServerError> {
+        let worker_count = connection_worker_count();
         let (sender, receiver) = mpsc::channel();
         let receiver = Arc::new(std::sync::Mutex::new(receiver));
-        for _ in 0..CONNECTION_WORKERS {
+        for _ in 0..worker_count {
             let receiver = receiver.clone();
             let handler = handler.clone();
             let options = self.options.clone();
@@ -473,12 +491,13 @@ fn listen_windows(server: &Server) -> Result<(), ServerError> {
         .handler
         .clone()
         .unwrap_or_else(|| Arc::new(|frame, _| builtin_handler(frame)));
+    let worker_count = connection_worker_count();
     let (sender, receiver) = mpsc::sync_channel::<
         interprocess::os::windows::named_pipe::DuplexPipeStream<pipe_mode::Bytes>,
-    >(CONNECTION_WORKERS);
+    >(worker_count);
     let receiver = Arc::new(std::sync::Mutex::new(receiver));
-    let mut workers = Vec::with_capacity(CONNECTION_WORKERS);
-    for _ in 0..CONNECTION_WORKERS {
+    let mut workers = Vec::with_capacity(worker_count);
+    for _ in 0..worker_count {
         let receiver = receiver.clone();
         let handler = handler.clone();
         let state = server.last_activity.clone();
@@ -870,15 +889,12 @@ fn serve_connection_parts<S>(
             continue;
         }
         if frame.cmd == "session.list" {
-            if write_response(
-                reader.get_mut(),
-                success_response(
-                    Some(serde_json::to_value(registry.list_data()).unwrap_or(Value::Null)),
-                    Vec::new(),
-                ),
-            )
-            .is_err()
-            {
+            let response = success_response(
+                Some(serde_json::to_value(registry.list_data()).unwrap_or(Value::Null)),
+                Vec::new(),
+            );
+            drop(_dispatch);
+            if write_response(reader.get_mut(), response).is_err() {
                 return;
             }
             continue;
@@ -894,6 +910,7 @@ fn serve_connection_parts<S>(
                 },
                 Err(error) => session_error_response(error),
             };
+            drop(_dispatch);
             if write_response(reader.get_mut(), response).is_err() {
                 return;
             }
@@ -909,6 +926,7 @@ fn serve_connection_parts<S>(
         let cmd = frame.cmd.clone();
         if cmd == "daemon.status" {
             let data = json!({"running":true,"pid":std::process::id(),"session":options.session,"socket":crate::redact_str(&options.socket_path.to_string_lossy()),"started_at":format_time(started_at),"last_activity":format_time(last_activity.load(Ordering::Acquire)),"policy":options.policy,"engine":options.engine,"mode":options.mode});
+            drop(_dispatch);
             if write_response(reader.get_mut(), success_response(Some(data), Vec::new())).is_err() {
                 return;
             }
@@ -929,6 +947,11 @@ fn serve_connection_parts<S>(
             return;
         }
         if cmd == "daemon.ping" {
+            // The gate protects the dispatch decision and registry update
+            // against stop(); writing a fast-path reply does not need to hold
+            // it. Releasing here avoids serializing unrelated ping clients on
+            // response I/O while preserving the stop transition.
+            drop(_dispatch);
             if write_response(
                 reader.get_mut(),
                 success_response(Some(json!({"pong":true})), Vec::new()),
@@ -1378,7 +1401,87 @@ fn state_root() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Cursor;
+    use std::io::{Cursor, Read};
+    use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
+
+    #[test]
+    fn connection_worker_pool_scales_with_cpu_and_stays_bounded() {
+        assert_eq!(bounded_connection_workers(None), 8);
+        assert_eq!(bounded_connection_workers(Some(1)), 4);
+        assert_eq!(bounded_connection_workers(Some(2)), 4);
+        assert_eq!(bounded_connection_workers(Some(4)), 8);
+        assert_eq!(bounded_connection_workers(Some(16)), 32);
+        assert_eq!(bounded_connection_workers(Some(128)), 32);
+    }
+
+    struct BlockingResponseStream {
+        input: Cursor<Vec<u8>>,
+        started: Option<SyncSender<()>>,
+        release: Receiver<()>,
+    }
+
+    impl io::Read for BlockingResponseStream {
+        fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+            self.input.read(buffer)
+        }
+    }
+
+    impl io::Write for BlockingResponseStream {
+        fn write(&mut self, buffer: &[u8]) -> io::Result<usize> {
+            if let Some(started) = self.started.take() {
+                let _ = started.send(());
+                self.release.recv().map_err(io::Error::other)?;
+            }
+            Ok(buffer.len())
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn ping_response_io_does_not_hold_the_stop_dispatch_gate() {
+        let temp = tempfile::tempdir().expect("temporary registry root");
+        let registry = Arc::new(crate::SessionRegistry::new(crate::SessionRegistryOptions {
+            user_data_root: temp.path().to_path_buf(),
+            ..Default::default()
+        }));
+        let dispatch_gate = Arc::new(std::sync::Mutex::new(()));
+        let (started_tx, started_rx) = sync_channel(1);
+        let (release_tx, release_rx) = sync_channel(1);
+        let stream = BlockingResponseStream {
+            input: Cursor::new(b"{\"cmd\":\"daemon.ping\"}\n".to_vec()),
+            started: Some(started_tx),
+            release: release_rx,
+        };
+        let handler: DaemonHandler = Arc::new(|_, _| Ok((None, Vec::new())));
+        let worker_gate = dispatch_gate.clone();
+        let worker = thread::spawn(move || {
+            let now = unix_nanos();
+            serve_connection_parts(
+                stream,
+                handler,
+                ServerOptions::default(),
+                Arc::new(AtomicI64::new(now)),
+                Arc::new(AtomicBool::new(false)),
+                now,
+                registry,
+                worker_gate,
+            );
+        });
+
+        started_rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("ping response started");
+        let gate_available = dispatch_gate.try_lock().is_ok();
+        release_tx.send(()).expect("release response write");
+        worker.join().expect("ping worker exits after input EOF");
+        assert!(
+            gate_available,
+            "ping response I/O held the global dispatch gate"
+        );
+    }
 
     fn read_frame_for_test(raw: &[u8]) -> io::Result<Vec<u8>> {
         let mut reader = BufReader::new(Cursor::new(raw));
