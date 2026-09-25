@@ -770,7 +770,7 @@ impl ChromePage {
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let element = self.element(selector).await?;
         self.scroll_element_into_view(&element).await?;
-        Ok(result("scroll", selector))
+        Ok(result("scrollintoview", selector))
     }
     pub async fn scroll(
         &self,
