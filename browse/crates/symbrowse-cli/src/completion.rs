@@ -52,8 +52,9 @@ pub(super) fn complete(args: &[String]) -> String {
 
 /// Implements Cobra's `__completeNoDesc` hidden request protocol.
 pub(super) fn complete_no_descriptions(args: &[String]) -> String {
+    let candidates = complete(args);
     let mut output = String::new();
-    for line in complete(args).lines() {
+    for line in candidates.lines() {
         if line.starts_with(':') {
             output.push_str(line);
         } else {
