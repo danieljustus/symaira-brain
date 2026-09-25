@@ -350,11 +350,14 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let capabilities = request(&client, "capabilities", json!({}));
     assert_eq!(capabilities["success"], true);
     if expect_unavailable {
-        let opened = request(
+        let denied = request(
             &client,
             "open",
             json!({"url": "data:text/html,<title>must-not-fallback</title>"}),
         );
+        assert_eq!(denied["success"], false, "URL guard: {denied}");
+        assert_eq!(denied["error"]["code"], "operation_failed");
+        let opened = request(&client, "open", json!({"url": "https://example.invalid/"}));
         assert_eq!(opened["success"], false, "open response: {opened}");
         assert!(
             matches!(
