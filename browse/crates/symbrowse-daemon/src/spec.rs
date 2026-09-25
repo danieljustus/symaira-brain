@@ -333,4 +333,46 @@ mod tests {
             spec.validate_selection().expect("non-browser transport");
         }
     }
+
+    #[test]
+    fn configured_browser_engine_is_preserved_in_session_spec() {
+        let root =
+            std::env::temp_dir().join(format!("symbrowse-engine-spec-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.join("home"),
+            cwd: root.join("project"),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        std::fs::create_dir_all(&context.home).expect("create fixture home");
+        std::fs::create_dir_all(&context.cwd).expect("create fixture project");
+
+        for (source, engine) in [
+            ("default", "chrome"),
+            ("environment", "firefox"),
+            ("flag", "safari-bidi"),
+        ] {
+            context.env.remove("SYMBROWSE_ENGINE");
+            context.flags.engine = None;
+            match source {
+                "default" => {}
+                "environment" => {
+                    context.env.insert("SYMBROWSE_ENGINE".into(), engine.into());
+                }
+                "flag" => context.flags.engine = Some(engine.into()),
+                _ => unreachable!("test selection source"),
+            }
+            let config = load(&context).expect("load selected browser engine").config;
+            let spec = SessionSpec::from_config(&config, "selection-test");
+            assert_eq!(spec.mode, "browser", "source={source}");
+            assert_eq!(spec.engine, engine, "source={source}");
+            spec.validate_selection()
+                .unwrap_or_else(|error| panic!("source={source}: {error}"));
+        }
+
+        std::fs::remove_dir_all(root).expect("remove unique engine fixture root");
+    }
 }
