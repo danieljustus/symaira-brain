@@ -103,6 +103,15 @@ class CliDifferentialSessionTests(unittest.TestCase):
             "fixture",
         )
 
+    def test_empty_trace_compares_metadata_and_expected_request_independently(self) -> None:
+        go = {"cmd": "trace.replay", "session": "fixture", "args": {"steps": []},
+              "request_id": "1", "retrieval_surface": "cli"}
+        rust = dict(go)
+        expected = {"cmd": "trace.replay", "session": "fixture", "args": {"steps": []}}
+        self.assertTrue(cli_differential.trace_frames_match([go], [rust], expected))
+        self.assertFalse(cli_differential.trace_frames_match([go], [rust], {**expected, "args": {"steps": ["unexpected"]}}))
+        self.assertFalse(cli_differential.trace_frames_match([go], [{**rust, "request_id": "2"}], expected))
+
 
 class CompatSidecarHarnessTests(unittest.TestCase):
     def test_fixture_covers_executable_fetch_002_and_fetch_011_cases(self) -> None:

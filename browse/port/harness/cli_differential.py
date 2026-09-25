@@ -1424,7 +1424,7 @@ def compare_trace_replay_empty(go: Path, rust: Path, env: dict[str, str],
     return {
         "case": "CLI-001-trace-replay-empty" + ("-" + output_args[0].lstrip("-").replace("=", "-") if output_args else "-text"),
         "argv": argv,
-        "matched": bool(output_match and go_requests == [expected] and rust_requests == [expected]
+        "matched": bool(output_match and trace_frames_match(go_requests, rust_requests, expected)
                         and not go_error and not rust_error),
         "criterion": "empty trace reaches the daemon and preserves its failure envelope",
         "go": output_record(go_result), "rust": output_record(rust_result),
@@ -1432,6 +1432,17 @@ def compare_trace_replay_empty(go: Path, rust: Path, env: dict[str, str],
         "rust_request": rust_requests[0] if rust_requests else None,
         "go_stub_error": go_error, "rust_stub_error": rust_error,
     }
+
+
+def trace_frames_match(go_frames: list[dict[str, Any]], rust_frames: list[dict[str, Any]],
+                       expected: dict[str, Any]) -> bool:
+    """Compare full request metadata while checking the expected trace payload."""
+    if len(go_frames) != 1 or len(rust_frames) != 1 or go_frames != rust_frames:
+        return False
+    frame = go_frames[0]
+    return (all(frame.get(key) == value for key, value in expected.items())
+            and frame.get("request_id") == "1"
+            and frame.get("retrieval_surface") == "cli")
 
 
 def compare_trace_schema_error(go: Path, rust: Path, env: dict[str, str],
