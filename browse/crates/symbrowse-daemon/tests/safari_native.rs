@@ -70,6 +70,19 @@ fn production_daemon_path_runs_safari_bidi_and_reaps_owned_driver() {
     }
     assert!(socket.exists(), "daemon socket did not appear");
 
+    let capabilities = request(&socket, "capabilities", json!({}));
+    assert_eq!(
+        capabilities["success"], true,
+        "capabilities: {capabilities}"
+    );
+    assert_eq!(capabilities["data"]["kind"], "safari-bidi");
+    assert_eq!(capabilities["data"]["launch_mode"], "launch");
+    assert!(
+        capabilities["data"]["unsupported"]
+            .as_array()
+            .is_some_and(|items| items.iter().any(|item| item == "InteractionEngine"))
+    );
+
     let fixture = std::net::TcpListener::bind(("127.0.0.1", 0)).expect("bind fixture");
     let fixture_url = format!("http://{}", fixture.local_addr().expect("fixture address"));
     let fixture_thread = thread::spawn(move || {
