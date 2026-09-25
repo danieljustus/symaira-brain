@@ -16,7 +16,7 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, fetch, input, network, page},
+    cdp::browser_protocol::{accessibility, browser, dom, emulation, fetch, input, network, page},
     cdp::js_protocol::runtime::{self, EvaluateParams},
     layout::Point,
 };
@@ -515,6 +515,15 @@ impl ChromePage {
                 }
             }
         });
+        Ok(())
+    }
+
+    /// Disable page JavaScript execution for an isolated engine-hint probe.
+    pub async fn disable_scripts(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        self.page
+            .execute(emulation::SetScriptExecutionDisabledParams::new(true))
+            .await
+            .map_err(|error| std::io::Error::other(format!("disable script execution: {error}")))?;
         Ok(())
     }
 
@@ -1840,11 +1849,8 @@ mod tests {
                 .interfaces
                 .contains(&"ClickDiagnosticEngine".to_owned())
         );
-        assert_eq!(value.interfaces.len(), 16);
-        assert_eq!(
-            value.unsupported,
-            vec!["OverlayHost", "ScriptDisabler", "SettingsEngine"]
-        );
+        assert_eq!(value.interfaces.len(), 17);
+        assert_eq!(value.unsupported, vec!["OverlayHost", "SettingsEngine"]);
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
 

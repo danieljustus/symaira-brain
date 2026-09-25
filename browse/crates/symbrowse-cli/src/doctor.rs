@@ -246,7 +246,7 @@ mod tests {
     use super::check_engine;
 
     #[test]
-    fn doctor_reports_default_launch_mode_without_widening_interfaces() {
+    fn doctor_reports_default_launch_mode_and_real_script_disabler() {
         let check = check_engine();
         let details = check.details.expect("engine details");
         let capabilities = symbrowse_engine_chrome::canonical_capabilities();
@@ -258,6 +258,18 @@ mod tests {
         assert_eq!(
             details.get("interfaces").map(String::as_str),
             Some(capabilities.interfaces.join(",").as_str())
+        );
+        assert!(
+            capabilities
+                .interfaces
+                .iter()
+                .any(|name| name == "ScriptDisabler")
+        );
+        assert!(
+            !capabilities
+                .unsupported
+                .iter()
+                .any(|name| name == "ScriptDisabler")
         );
         assert_eq!(
             details.get("unsupported").map(String::as_str),

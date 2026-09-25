@@ -180,6 +180,43 @@ async fn exercise_full_chrome_surface() {
     page.wait_for_selector("#text", true, Duration::from_secs(5))
         .await
         .expect("wait for initial page");
+    assert_eq!(
+        page.evaluate("Boolean(window.assetLoaded)")
+            .await
+            .expect("inspect script-enabled fixture")["value"],
+        true,
+        "the fixture's external script did not execute on the control page"
+    );
+
+    let script_disabled = session
+        .new_page("about:blank")
+        .await
+        .expect("create script-disabled probe page");
+    script_disabled
+        .disable_scripts()
+        .await
+        .expect("disable JavaScript for probe page");
+    script_disabled
+        .open(format!("{}/", server.base_url))
+        .await
+        .expect("open fixture with scripts disabled");
+    assert_eq!(
+        script_disabled
+            .evaluate("Boolean(window.assetLoaded)")
+            .await
+            .expect("inspect disabled script effect")["value"],
+        false,
+        "the fixture's external script executed despite DisableScripts"
+    );
+    assert_eq!(
+        script_disabled
+            .inspect("#text", "get")
+            .await
+            .expect("inspect static fixture without scripts")["value"],
+        "initial",
+        "disabling scripts must retain server-rendered page content"
+    );
+
     let audit = page
         .axe_audit(&["wcag2a".to_owned()], "")
         .await
