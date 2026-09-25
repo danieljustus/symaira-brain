@@ -206,30 +206,95 @@ impl Installer {
     }
 
     fn download_file(&self, url: &str, destination: &Path) -> Result<u64, ManagedError> {
-        let mut response = self
-            .client
-            .get(url)
-            .header("Accept", "application/octet-stream")
-            .call()
-            .map_err(|error| match error {
-                ureq::Error::StatusCode(404) => {
-                    ManagedError::DownloadNotFound(format!("{url}: HTTP 404"))
+        // Go's default HTTP transport retries idempotent requests after a stale
+        // pooled connection is closed between its liveness probe and the next
+        // read. Retry that same narrow unexpected-EOF case here so release
+        // setup behaves the same when the server closes an otherwise valid
+        // response connection.
+        for attempt in 0..=1 {
+            let mut response = match self
+                .client
+                .get(url)
+                .header("Accept", "application/octet-stream")
+                .call()
+            {
+                Ok(response) => response,
+                Err(ureq::Error::Io(error))
+                    if attempt == 0 && error.kind() == std::io::ErrorKind::UnexpectedEof =>
+                {
+                    continue;
                 }
-                ureq::Error::StatusCode(code) => {
-                    ManagedError::Download(format!("{url}: HTTP {code}"))
+                Err(error) => {
+                    return Err(match error {
+                        ureq::Error::StatusCode(404) => {
+                            ManagedError::DownloadNotFound(format!("{url}: HTTP 404"))
+                        }
+                        ureq::Error::StatusCode(code) => {
+                            ManagedError::Download(format!("{url}: HTTP {code}"))
+                        }
+                        other => ManagedError::Download(format!("{url}: {other}")),
+                    });
                 }
-                other => ManagedError::Download(format!("{url}: {other}")),
-            })?;
+            };
 
-        let mut file = File::create(destination).map_err(|error| {
-            ManagedError::Download(format!("create {}: {error}", destination.display()))
-        })?;
-        let copied =
-            std::io::copy(&mut response.body_mut().as_reader(), &mut file).map_err(|error| {
-                let _ = fs::remove_file(destination);
-                ManagedError::Download(format!("write {}: {error}", destination.display()))
+            let mut file = File::create(destination).map_err(|error| {
+                ManagedError::Download(format!("create {}: {error}", destination.display()))
             })?;
-        Ok(copied)
+            match std::io::copy(&mut response.body_mut().as_reader(), &mut file) {
+                Ok(copied) => return Ok(copied),
+                Err(error) => {
+                    drop(file);
+                    let _ = fs::remove_file(destination);
+                    if attempt == 0 && error.kind() == std::io::ErrorKind::UnexpectedEof {
+                        continue;
+                    }
+                    return Err(ManagedError::Download(format!(
+                        "write {}: {error}",
+                        destination.display()
+                    )));
+                }
+            }
+        }
+        unreachable!("unexpected EOF retry loop returns or retries once")
+    }
+}
+
+#[cfg(test)]
+mod download_retry_tests {
+    use super::*;
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+
+    #[test]
+    fn retries_an_unexpected_eof_without_leaving_partial_download() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = thread::spawn(move || {
+            for attempt in 0..2 {
+                let (mut stream, _) = listener.accept().unwrap();
+                let mut request = [0; 1024];
+                let _ = stream.read(&mut request).unwrap();
+                let body: &[u8] = if attempt == 0 { b"bad" } else { b"complete" };
+                write!(
+                    stream,
+                    "HTTP/1.1 200 OK\r\nContent-Length: 8\r\nConnection: close\r\n\r\n"
+                )
+                .unwrap();
+                stream.write_all(body).unwrap();
+            }
+        });
+
+        let temp = tempfile::tempdir().unwrap();
+        let destination = temp.path().join("asset");
+        let installer =
+            Installer::with_base_url(temp.path(), false, format!("http://{address}")).unwrap();
+        let bytes = installer
+            .download_file(&format!("http://{address}/asset"), &destination)
+            .unwrap();
+
+        assert_eq!(bytes, 8);
+        assert_eq!(fs::read(destination).unwrap(), b"complete");
+        server.join().unwrap();
     }
 }
 
