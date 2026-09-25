@@ -101,6 +101,100 @@ mod unix {
     }
 
     #[test]
+    fn concurrent_clients_autostart_one_shared_daemon() {
+        const CLIENTS: usize = 4;
+        let root = root("concurrent-client-autostart");
+        fs::create_dir_all(&root).expect("create concurrent autostart root");
+        let socket = root.join("race.sock");
+        let test_binary = std::env::current_exe().expect("current test executable");
+        let barrier = Arc::new(std::sync::Barrier::new(CLIENTS));
+        let mut clients = Vec::with_capacity(CLIENTS);
+
+        for index in 0..CLIENTS {
+            let barrier = barrier.clone();
+            let socket_for_client = socket.clone();
+            let root_for_client = root.clone();
+            let binary_for_client = test_binary.clone();
+            clients.push(thread::spawn(move || {
+                let launched = root_for_client.join(format!("launched-{index}"));
+                let completed = root_for_client.join(format!("completed-{index}"));
+                let command = format!(
+                    "touch {}; sleep 0.25; export SYMBROWSE_DMN008_SOCKET={}; export SYMBROWSE_DMN008_SESSION=client-race; {} --ignored --exact unix::autostart_daemon_child --nocapture; result=$?; touch {}; exit $result",
+                    shell_quote(&launched),
+                    shell_quote(&socket_for_client),
+                    shell_quote(&binary_for_client),
+                    shell_quote(&completed),
+                );
+                let client = Client::new(ClientOptions {
+                    socket_path: socket_for_client,
+                    session: "client-race".into(),
+                    startup_timeout: Duration::from_secs(4),
+                    autostart: true,
+                    start: Some(StartOptions {
+                        executable: PathBuf::from("/bin/sh"),
+                        log_path: root_for_client.join(format!("daemon-{index}.log")),
+                        args: vec!["-c".into(), command],
+                    }),
+                    ..Default::default()
+                });
+
+                barrier.wait();
+                let response = client.request(Frame {
+                    cmd: "daemon.status".into(),
+                    ..Default::default()
+                });
+                (response, launched, completed)
+            }));
+        }
+
+        let results: Vec<_> = clients
+            .into_iter()
+            .map(|client| client.join().expect("join concurrent client"))
+            .collect();
+        let launched_count = results
+            .iter()
+            .filter(|(_, launched, _)| launched.exists())
+            .count();
+
+        if socket.exists() {
+            let stopper = Client::new(ClientOptions {
+                socket_path: socket.clone(),
+                session: "client-race".into(),
+                autostart: false,
+                ..Default::default()
+            });
+            let stopped = stopper
+                .request_without_autostart(Frame {
+                    cmd: "daemon.stop".into(),
+                    ..Default::default()
+                })
+                .expect("stop the shared autostarted daemon");
+            assert!(stopped.success, "stop response = {stopped:?}");
+        }
+
+        for (response, _, _) in &results {
+            let response = response.as_ref().expect("concurrent client request");
+            assert!(response.success, "status response = {response:?}");
+        }
+        assert!(
+            launched_count >= 2,
+            "expected overlapping autostart attempts, observed {launched_count}"
+        );
+
+        let deadline = Instant::now() + Duration::from_secs(3);
+        while Instant::now() < deadline
+            && results.iter().any(|(_, _, completed)| !completed.exists())
+        {
+            thread::sleep(Duration::from_millis(10));
+        }
+        assert!(
+            results.iter().all(|(_, _, completed)| completed.exists()),
+            "all competing daemon launcher processes must exit after stop"
+        );
+        fs::remove_dir_all(root).expect("remove concurrent autostart root");
+    }
+
+    #[test]
     fn dmn006_client_read_timeout_has_operation_timeout_code_and_diagnostics() {
         let root = root("client-timeout");
         let socket = root.join("default.sock");
