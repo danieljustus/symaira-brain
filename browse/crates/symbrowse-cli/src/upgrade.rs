@@ -80,7 +80,7 @@ struct CacheEntry {
     release: Option<Release>,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 struct StableVersion(u64, u64, u64);
 
 pub fn run(format: Format, binary_version: &str) -> ExitCode {
@@ -149,7 +149,7 @@ fn version_string(binary_version: &str) -> String {
 
 fn upgrade_hint(current: &str, latest: &str) -> String {
     format!(
-        "symbrowse {latest} is available (current: {current}); run `symbrowse upgrade` to apply it"
+        "symbrowse {latest} is available (current: {current}); this build can check for updates but cannot apply them"
     )
 }
 

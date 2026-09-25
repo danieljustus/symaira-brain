@@ -20,6 +20,14 @@ fn stable_versions_and_major_zero_guard_match_go() {
 }
 
 #[test]
+fn update_hint_does_not_recommend_unimplemented_apply() {
+    let hint = upgrade_hint("v0.8.0", "v0.9.0");
+    assert!(hint.contains("v0.9.0 is available (current: v0.8.0)"));
+    assert!(hint.contains("cannot apply them"));
+    assert!(!hint.contains("run `symbrowse upgrade`"));
+}
+
+#[test]
 fn local_fake_release_is_fetched_then_reused_from_go_compatible_cache() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let endpoint = format!("http://{}/releases/latest", listener.local_addr().unwrap());

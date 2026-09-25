@@ -2525,7 +2525,7 @@ fn run_eval(
     base64_encoded: bool,
     format: Format,
 ) -> ExitCode {
-    let expression = if from_stdin {
+    let stdin_bytes = if from_stdin {
         let mut bytes = Vec::new();
         if let Err(error) = io::stdin().read_to_end(&mut bytes) {
             return render_dispatch_error(
@@ -2534,15 +2534,19 @@ fn run_eval(
                 format!("read expression from stdin: {error}"),
             );
         }
-        String::from_utf8_lossy(&bytes).into_owned()
-    } else if let Some(expression) = expression {
-        expression
+        bytes
     } else {
-        return render_dispatch_error(
-            format,
-            "invalid_args",
-            "eval requires an expression argument (or --stdin)".into(),
-        );
+        Vec::new()
+    };
+    let expression = match resolve_eval_expression(expression, from_stdin, &stdin_bytes) {
+        Ok(expression) => expression,
+        None => {
+            return render_dispatch_error(
+                format,
+                "invalid_args",
+                "eval requires an expression argument (or --stdin)".into(),
+            );
+        }
     };
     let expression = if base64_encoded {
         match decode_standard_base64(&expression) {
@@ -2612,6 +2616,18 @@ fn run_eval(
     };
     let _ = writeln!(io::stdout(), "{output}");
     ExitCode::SUCCESS
+}
+
+fn resolve_eval_expression(
+    expression: Option<String>,
+    from_stdin: bool,
+    stdin_bytes: &[u8],
+) -> Option<String> {
+    if from_stdin {
+        Some(String::from_utf8_lossy(stdin_bytes).into_owned())
+    } else {
+        expression
+    }
 }
 
 fn decode_standard_base64(input: &str) -> Result<Vec<u8>, usize> {
@@ -7725,6 +7741,36 @@ mod tests {
         };
         assert_eq!(expression.as_deref(), Some("x"));
         assert_eq!(format, Format::Text);
+    }
+
+    #[test]
+    fn eval_input_resolution_matches_go_stdin_precedence_and_validation() {
+        assert_eq!(
+            super::resolve_eval_expression(Some("1+1".into()), false, b"ignored"),
+            Some("1+1".into())
+        );
+        assert_eq!(
+            super::resolve_eval_expression(Some("argv expression".into()), true, b"1+1"),
+            Some("1+1".into())
+        );
+        assert_eq!(
+            super::resolve_eval_expression(Some("argv expression".into()), true, b""),
+            Some("".into())
+        );
+        assert_eq!(
+            super::resolve_eval_expression(None, false, b"ignored"),
+            None
+        );
+
+        // Go resolves stdin before --base64 decoding, even when argv is also
+        // present; the Rust dispatch must feed that selected value onward.
+        let selected =
+            super::resolve_eval_expression(Some("YXJndg==".into()), true, b"ZG9jdW1lbnQudGl0bGU=")
+                .expect("stdin expression");
+        assert_eq!(
+            super::decode_standard_base64(&selected),
+            Ok(b"document.title".to_vec())
+        );
     }
 
     #[test]
