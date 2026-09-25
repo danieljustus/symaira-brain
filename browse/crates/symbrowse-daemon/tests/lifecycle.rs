@@ -31,6 +31,7 @@ mod unix {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                mode: "browser".to_owned(),
                 engine: "firefox".to_owned(),
                 policy: PolicyStatus {
                     allowed_domains: vec!["example.test".to_owned()],
@@ -74,6 +75,9 @@ mod unix {
         assert_eq!(data["running"], true);
         assert!(data["pid"].as_u64().is_some_and(|pid| pid > 0));
         assert_eq!(data["socket"], socket.display().to_string());
+        // CFG-006 adds transport mode as a new machine-readable status field;
+        // the Go status contract has no transport-mode field to compare yet.
+        assert_eq!(data["mode"], "browser");
         assert_eq!(data["engine"], "firefox");
         assert_eq!(data["policy"]["allowed_domains"][0], "example.test");
         assert_eq!(data["policy"]["ssrf_enabled"], true);
