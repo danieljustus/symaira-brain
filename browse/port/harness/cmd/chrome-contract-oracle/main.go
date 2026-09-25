@@ -114,7 +114,8 @@ func run() error {
 		Cmd: "eval", Session: "chrome-contract", Args: mustJSON(map[string]string{"expression": controlProbe}),
 	})
 	if !result.SubresourceAllowed.Success || responseValue(result.SubresourceAllowed) != "loaded" {
-		return fmt.Errorf("Go allowed subresource control failed: %s", responseJSON(result.SubresourceAllowed))
+		requests := call(runtime, ctx, daemon.Frame{Cmd: "network.requests", Session: "chrome-contract"})
+		return fmt.Errorf("Go allowed subresource control failed: %s; captured requests: %s", responseJSON(result.SubresourceAllowed), responseJSON(requests))
 	}
 	policyProbe := fmt.Sprintf("Promise.race([fetch('http://localhost:%s/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])", fixture.Port())
 	result.SubresourcePolicy = call(runtime, ctx, daemon.Frame{
