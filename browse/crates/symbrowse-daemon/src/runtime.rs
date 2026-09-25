@@ -1219,6 +1219,22 @@ impl DispatchRuntime {
                 } else {
                     None
                 };
+                let properties = if kind == "styles" {
+                    match args.get("properties") {
+                        Some(Value::Array(values)) => values
+                            .iter()
+                            .map(|value| {
+                                value.as_str().map(str::to_owned).ok_or_else(|| {
+                                    malformed("get.styles properties must contain strings")
+                                })
+                            })
+                            .collect::<Result<Vec<_>, _>>()?,
+                        None | Some(Value::Null) => Vec::new(),
+                        _ => return Err(malformed("get.styles properties must be an array")),
+                    }
+                } else {
+                    Vec::new()
+                };
                 let inspected = if kind == "html" && selector.is_empty() {
                     page.evaluate_script("document.documentElement.outerHTML")
                         .await
@@ -1247,7 +1263,9 @@ impl DispatchRuntime {
                     }
                     value
                 } else {
-                    page.inspect(selector, kind).await.map_err(runtime_error)?
+                    page.inspect_with_properties(selector, kind, &properties)
+                        .await
+                        .map_err(runtime_error)?
                 };
                 let value = if let Some(attribute) = attribute {
                     inspected.get(attribute).cloned().unwrap_or(Value::Null)

@@ -575,24 +575,35 @@ impl ChromePage {
         selector: &str,
         kind: &str,
     ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        self.inspect_with_properties(selector, kind, &[]).await
+    }
+
+    /// Inspect a selector, optionally limiting computed styles to named properties.
+    pub async fn inspect_with_properties(
+        &self,
+        selector: &str,
+        kind: &str,
+        properties: &[String],
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
         let s = serde_json::to_string(selector)?;
+        let wanted = serde_json::to_string(properties)?;
         let expression = match kind {
             "text" => format!(
-                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return e.innerText ?? ''; }})()"
+                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return e.innerText || e.textContent || ''; }})()"
             ),
             "html" => format!(
                 "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return e.innerHTML ?? ''; }})()"
             ),
             "value" => format!(
-                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return e.value ?? null; }})()"
+                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return e.value === undefined ? '' : e.value; }})()"
             ),
             "title" => "document.title".to_owned(),
             "url" => "location.href".to_owned(),
             "box" => format!(
-                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); const r=e.getBoundingClientRect(); return {{x:r.x,y:r.y,width:r.width,height:r.height}}; }})()"
+                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); const r=e.getBoundingClientRect(); return {{x:r.x,y:r.y,width:r.width,height:r.height,top:r.top,right:r.right,bottom:r.bottom,left:r.left}}; }})()"
             ),
             "styles" => format!(
-                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); const c=getComputedStyle(e); return {{display:c.display,visibility:c.visibility,opacity:c.opacity,color:c.color,backgroundColor:c.backgroundColor}}; }})()"
+                "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); const c=getComputedStyle(e),o={{}},wanted={wanted}; if(wanted.length){{wanted.forEach(k=>o[k]=c.getPropertyValue(k));}}else{{for(let i=0;i<c.length;i++){{const k=c[i];o[k]=c.getPropertyValue(k);}}}} return o; }})()"
             ),
             "attr" => format!(
                 "(() => {{ const e=document.querySelector({s}); if (!e) throw new Error('selector did not match'); return Object.fromEntries([...e.attributes].map(a=>[a.name,a.value])); }})()"

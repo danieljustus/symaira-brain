@@ -20,6 +20,11 @@ type contract struct {
 	InspectURL            daemon.Response `json:"inspect_url"`
 	InspectSelectedTitle  daemon.Response `json:"inspect_selected_title"`
 	InspectSelectedURL    daemon.Response `json:"inspect_selected_url"`
+	InspectValue          daemon.Response `json:"inspect_value"`
+	InspectHiddenText     daemon.Response `json:"inspect_hidden_text"`
+	InspectBox            daemon.Response `json:"inspect_box"`
+	InspectStyles         daemon.Response `json:"inspect_styles"`
+	InspectStylesWanted   daemon.Response `json:"inspect_styles_wanted"`
 	InspectVisible        daemon.Response `json:"inspect_visible"`
 	InspectError          daemon.Response `json:"inspect_error"`
 	InspectMissingElement daemon.Response `json:"inspect_missing_element"`
@@ -113,6 +118,34 @@ func run() error {
 		Session: "chrome-contract",
 		Args:    mustJSON(map[string]string{"selector": "#link"}),
 	})
+	result.InspectValue = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.value",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#plain"}),
+	})
+	result.InspectHiddenText = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.text",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#hidden"}),
+	})
+	result.InspectBox = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.box",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#popup"}),
+	})
+	result.InspectStyles = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.styles",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#popup"}),
+	})
+	result.InspectStylesWanted = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.styles",
+		Session: "chrome-contract",
+		Args: mustJSON(map[string]any{
+			"selector":   "#popup",
+			"properties": []string{"display", "visibility", "color"},
+		}),
+	})
 	result.InspectVisible = call(runtime, ctx, daemon.Frame{
 		Cmd:     "is.visible",
 		Session: "chrome-contract",
@@ -127,6 +160,11 @@ func run() error {
 		{"get.url", result.InspectURL},
 		{"get.title selector", result.InspectSelectedTitle},
 		{"get.url selector", result.InspectSelectedURL},
+		{"get.value", result.InspectValue},
+		{"get.text hidden", result.InspectHiddenText},
+		{"get.box", result.InspectBox},
+		{"get.styles", result.InspectStyles},
+		{"get.styles properties", result.InspectStylesWanted},
 		{"is.visible", result.InspectVisible},
 	} {
 		if !inspection.response.Success {

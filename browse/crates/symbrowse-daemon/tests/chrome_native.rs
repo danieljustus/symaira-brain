@@ -65,7 +65,7 @@ impl ChromeContractServer {
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
                         let body = if path == "/popup" {
-                            "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a>"
+                            "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>"
                         } else {
                             "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p>"
                         };
@@ -334,6 +334,19 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
             "get.url",
             "inspect_selected_url",
             json!({"selector":"#link"}),
+        ),
+        ("get.value", "inspect_value", json!({"selector":"#plain"})),
+        (
+            "get.text",
+            "inspect_hidden_text",
+            json!({"selector":"#hidden"}),
+        ),
+        ("get.box", "inspect_box", json!({"selector":"#popup"})),
+        ("get.styles", "inspect_styles", json!({"selector":"#popup"})),
+        (
+            "get.styles",
+            "inspect_styles_wanted",
+            json!({"selector":"#popup","properties":["display","visibility","color"]}),
         ),
         (
             "is.visible",
