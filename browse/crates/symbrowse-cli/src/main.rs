@@ -163,6 +163,9 @@ enum Action {
         range: Option<String>,
         format: Format,
     },
+    CacheClear {
+        format: Format,
+    },
     SessionId {
         scope: String,
         prefix: String,
@@ -370,6 +373,7 @@ fn main() -> ExitCode {
         }) => run_dispatch(session, command, args, format),
         Ok(Action::CookieImport { session, path }) => run_cookie_import(session, path),
         Ok(Action::CacheGet { id, range, format }) => run_cache_get(id, range, format),
+        Ok(Action::CacheClear { format }) => run_cache_clear(format),
         Ok(Action::SessionId {
             scope,
             prefix,
@@ -2238,6 +2242,128 @@ fn run_cache_get(id: String, range: Option<String>, format: Format) -> ExitCode 
         Ok(output) => write_stdout(&output),
         Err(error) => write_cache_get_error(error.to_string(), format),
     }
+}
+
+fn run_cache_clear(format: Format) -> ExitCode {
+    let context = match LoadContext::from_process(FlagOverrides::default()) {
+        Ok(context) => context,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let config = match load(&context) {
+        Ok(result) => result.config,
+        Err(error) => return write_cache_get_error(error.to_string(), format),
+    };
+    let root = PathBuf::from(&config.cache_dir);
+    let output_cache = Cache::new(root.join("out"), Duration::ZERO);
+    let fetch_ttl = Duration::from_secs(
+        u64::try_from(config.cache_ttl_hours.max(0))
+            .unwrap_or(u64::MAX)
+            .saturating_mul(3_600),
+    );
+    let fetch_cache =
+        symbrowse_fetch::cache::ResponseCache::new(root.join("fetch")).with_ttl(fetch_ttl);
+    let cleared = match clear_cache_entries(&output_cache, &fetch_cache, fetch_ttl) {
+        Ok(count) => count,
+        Err(error) => return write_cache_get_error(error, format),
+    };
+    if format == Format::Text {
+        let suffix = if cleared == 1 { "y" } else { "ies" };
+        return write_stdout(&format!("cleared {cleared} cache entr{suffix}\n"));
+    }
+    match Envelope::ok(serde_json::json!({"cleared": cleared}), Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => write_cache_get_error(error.to_string(), format),
+    }
+}
+
+fn clear_cache_entries(
+    output_cache: &Cache,
+    fetch_cache: &symbrowse_fetch::cache::ResponseCache,
+    fetch_ttl: Duration,
+) -> Result<usize, String> {
+    let output_count = output_cache
+        .list()
+        .map_err(|error| error.to_string())?
+        .len();
+    let fetch_count = fetch_cache_entry_count(fetch_cache.root.as_path(), fetch_ttl)?;
+    output_cache.clear().map_err(|error| error.to_string())?;
+    fetch_cache.clear().map_err(|error| error.to_string())?;
+    Ok(output_count + fetch_count)
+}
+
+fn fetch_cache_entry_count(root: &Path, default_ttl: Duration) -> Result<usize, String> {
+    let directories = match fs::read_dir(root) {
+        Ok(directories) => directories,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(0),
+        Err(error) => return Err(error.to_string()),
+    };
+    let now = time::OffsetDateTime::now_utc();
+    let mut count = 0;
+    for directory in directories.flatten().filter_map(|entry| {
+        entry
+            .file_type()
+            .ok()
+            .filter(|kind| kind.is_dir())
+            .map(|_| entry.path())
+    }) {
+        let entries = match fs::read_dir(directory) {
+            Ok(entries) => entries,
+            Err(_) => continue,
+        };
+        for metadata_path in entries.flatten().map(|entry| entry.path()).filter(|path| {
+            path.file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.ends_with(".meta.json"))
+        }) {
+            let Some(key) = metadata_path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .and_then(|name| name.strip_suffix(".meta.json"))
+            else {
+                continue;
+            };
+            if key.len() != 64
+                || !key
+                    .bytes()
+                    .all(|byte| byte.is_ascii_hexdigit() && !byte.is_ascii_uppercase())
+            {
+                continue;
+            }
+            if fs::metadata(metadata_path.with_file_name(format!("{key}.body"))).is_err() {
+                continue;
+            }
+            let Ok(raw) = fs::read(&metadata_path) else {
+                continue;
+            };
+            let Ok(metadata) = serde_json::from_slice::<serde_json::Value>(&raw) else {
+                continue;
+            };
+            let stored_at = match metadata.get("stored_at") {
+                Some(serde_json::Value::String(value)) => time::OffsetDateTime::parse(
+                    value,
+                    &time::format_description::well_known::Rfc3339,
+                )
+                .ok(),
+                Some(serde_json::Value::Null) | None => None,
+                _ => continue,
+            };
+            let ttl = match metadata.get("ttl") {
+                Some(serde_json::Value::Number(value)) => value
+                    .as_i64()
+                    .filter(|nanos| *nanos > 0)
+                    .map(|nanos| Duration::from_nanos(nanos as u64))
+                    .unwrap_or(default_ttl),
+                Some(serde_json::Value::Null) | None => default_ttl,
+                _ => continue,
+            };
+            let Some(stored_at) = stored_at else { continue };
+            let age = (now - stored_at).whole_nanoseconds();
+            if ttl.is_zero() || age <= ttl.as_nanos().min(i128::MAX as u128) as i128 {
+                count += 1;
+            }
+        }
+    }
+    Ok(count)
 }
 
 fn parse_cache_range(spec: &str) -> Result<(usize, usize), String> {
@@ -4402,8 +4528,14 @@ Use "symbrowse errors [command] --help" for more information about a command.
             global,
         )),
         ("cache", None) => Some(
-            "Inspect the truncate-and-store output cache\n\nUsage:\n  symbrowse cache [command]\n\nAvailable Commands:\n  get         Print a cached output (optionally one line range)\n\nFlags:\n  -h, --help   help for cache\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cache [command] --help\" for more information about a command.\n".to_owned(),
+            "Inspect the truncate-and-store output cache\n\nUsage:\n  symbrowse cache [command]\n\nAvailable Commands:\n  clear       Remove all cache entries\n  get         Print a cached output (optionally one line range)\n\nFlags:\n  -h, --help   help for cache\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cache [command] --help\" for more information about a command.\n".to_owned(),
         ),
+        ("cache", Some("clear")) => Some(plain(
+            "Remove all cache entries",
+            "symbrowse cache clear [flags]",
+            "  -h, --help   help for clear\n",
+            global,
+        )),
         ("cache", Some("get")) => Some(plain(
             "Print a cached output (optionally one line range)",
             "symbrowse cache get <id> [flags]",
@@ -6058,6 +6190,7 @@ fn parse_cache(values: &[String], command_index: usize) -> Result<Action, ParseE
         match value.as_str() {
             "--" => positional_only = true,
             "get" if subcommand.is_none() => subcommand = Some("get"),
+            "clear" if subcommand.is_none() => subcommand = Some("clear"),
             "--json" => json = true,
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
@@ -6088,6 +6221,16 @@ fn parse_cache(values: &[String], command_index: usize) -> Result<Action, ParseE
         None => Ok(Action::Help(
             command_help("cache", &[]).expect("cache help is defined"),
         )),
+        Some("clear") if positional.is_empty() && range.is_none() => {
+            Ok(Action::CacheClear { format })
+        }
+        Some("clear") => Err(ParseError {
+            message: format!(
+                "unknown command {:?} for \"symbrowse cache clear\"",
+                positional.first().map(String::as_str).unwrap_or("--range")
+            ),
+            exit_code: 2,
+        }),
         Some("get") if positional.len() == 1 => Ok(Action::CacheGet {
             id: positional.remove(0),
             range,
@@ -7607,6 +7750,8 @@ mod tests {
     use crate::AuthLoginEnvelope;
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
+    use std::time::Duration;
+    use symbrowse_core::cache::Cache;
 
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
@@ -8307,6 +8452,45 @@ mod tests {
             parse_cache_range("0-3"),
             Err("invalid range \"0-3\": start must be a positive line number".to_owned())
         );
+        assert_eq!(
+            parse(&args(&["cache", "clear", "--output=json"])),
+            Ok(Action::CacheClear {
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["cache", "clear", "extra"])).is_err());
+    }
+
+    #[test]
+    fn cache_clear_counts_and_removes_entries_from_both_cache_roots() {
+        let root = tempfile::tempdir().expect("temp cache root");
+        let output = Cache::new(root.path().join("out"), Duration::ZERO);
+        output
+            .store(b"truncated output")
+            .expect("store output entry");
+        let fetch = symbrowse_fetch::cache::ResponseCache::new(root.path().join("fetch"))
+            .with_ttl(Duration::from_secs(3600));
+        let key = "a".repeat(64);
+        fetch
+            .put(
+                &key,
+                b"response body",
+                &serde_json::json!({
+                    "stored_at": time::OffsetDateTime::now_utc().format(&time::format_description::well_known::Rfc3339).unwrap(),
+                    "ttl": 3_600_000_000_000_i64
+                }),
+            )
+            .expect("store fetch entry");
+
+        assert_eq!(
+            super::clear_cache_entries(&output, &fetch, Duration::from_secs(3600)),
+            Ok(2)
+        );
+        assert!(output.list().expect("output cache list").is_empty());
+        assert!(matches!(
+            fetch.get(&key),
+            Err(symbrowse_fetch::cache::CacheError::NotFound(_))
+        ));
     }
 
     #[test]
