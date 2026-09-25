@@ -75,7 +75,7 @@ impl ChromeContractServer {
                             (
                                 "text/html; charset=utf-8",
                                 "",
-                                "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>",
+                                "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><button id=covered style='position:fixed;left:10px;top:100px;width:160px;height:50px'>Covered</button><div id=cover aria-label='cover' style='position:fixed;z-index:2;left:10px;top:100px;width:160px;height:50px'></div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>",
                             )
                         } else {
                             (
@@ -465,6 +465,24 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         rust_missing_element["error"]["message"],
         go_oracle["inspect_missing_element"]["error"]["message"]
     );
+    let rust_click_obstructed = request(&client, "click", json!({"selector":"#covered"}));
+    assert_eq!(
+        rust_click_obstructed["success"], go_oracle["click_obstructed"]["success"],
+        "click obstruction success differs: Rust={rust_click_obstructed} Go={}",
+        go_oracle["click_obstructed"]
+    );
+    assert_eq!(
+        rust_click_obstructed["error"]["code"],
+        go_oracle["click_obstructed"]["error"]["code"]
+    );
+    assert_eq!(
+        rust_click_obstructed["error"]["message"],
+        go_oracle["click_obstructed"]["error"]["message"]
+    );
+    assert_eq!(
+        rust_click_obstructed["error"]["hint"],
+        go_oracle["click_obstructed"]["error"]["hint"]
+    );
     let rust_popup_click = request(&client, "click", json!({"selector":"#popup"}));
     assert_eq!(
         rust_popup_click["success"],
@@ -488,6 +506,20 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(
         rust_popup_open["data"]["value"],
         go_oracle["popup_open"]["data"]["value"]
+    );
+    let rust_eval_exception = request(
+        &client,
+        "eval",
+        json!({"expression":"(() => { throw new Error('native eval failure') })()"}),
+    );
+    assert_eq!(
+        rust_eval_exception["success"], go_oracle["eval_exception"]["success"],
+        "eval exception success differs: Rust={rust_eval_exception} Go={}",
+        go_oracle["eval_exception"]
+    );
+    assert_eq!(
+        rust_eval_exception["data"], go_oracle["eval_exception"]["data"],
+        "eval exception result differs"
     );
     let rust_tab_list = request(&client, "tab.list", json!({}));
     assert_eq!(rust_tab_list["success"], go_oracle["tab_list"]["success"]);

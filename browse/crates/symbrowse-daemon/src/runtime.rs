@@ -243,7 +243,7 @@ impl DispatchRuntime {
             | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
             | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
             | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
-            | "downloads.list" => self.browser_command(&frame).await,
+            | "downloads.list" | "eval" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -1080,6 +1080,13 @@ impl DispatchRuntime {
                 .open(required_string(args, "url")?)
                 .await
                 .map_err(runtime_error)?,
+            "eval" => {
+                let expression = args.get("expression").and_then(Value::as_str).unwrap_or("");
+                if expression.trim().is_empty() {
+                    return Err(runtime_error("eval requires a non-empty expression"));
+                }
+                page.evaluate(expression).await.map_err(runtime_error)?
+            }
             "read" => {
                 if let Some(url) = args
                     .get("url")
@@ -1094,13 +1101,13 @@ impl DispatchRuntime {
             "click" => serde_json::to_value(
                 page.click(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "dblclick" => serde_json::to_value(
                 page.double_click(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "fill" => serde_json::to_value(
@@ -1158,13 +1165,13 @@ impl DispatchRuntime {
             "check" => serde_json::to_value(
                 page.check(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "uncheck" => serde_json::to_value(
                 page.uncheck(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "scroll" => serde_json::to_value(
@@ -2433,6 +2440,19 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
         message: redact_str(&error.to_string()),
         ..Default::default()
     }
+}
+
+fn chrome_click_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {
+    if let Some(obstructed) = error.downcast_ref::<symbrowse_engine_chrome::ClickObstructedError>()
+    {
+        return DaemonError {
+            code: "click_obstructed".into(),
+            message: redact_str(&obstructed.message),
+            hint: redact_str(&obstructed.hint),
+            ..Default::default()
+        };
+    }
+    runtime_error(error)
 }
 
 fn fetch_error(error: symbrowse_fetch::FetchError) -> DaemonError {

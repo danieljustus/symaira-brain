@@ -16,6 +16,7 @@ use std::{
 use chromiumoxide::{
     Browser, Element, Page,
     cdp::browser_protocol::{accessibility, browser, dom, input, network, page},
+    cdp::js_protocol::runtime::EvaluateParams,
     layout::Point,
 };
 use futures::StreamExt;
@@ -39,6 +40,20 @@ impl fmt::Display for UnsupportedOperation {
     }
 }
 impl Error for UnsupportedOperation {}
+
+#[derive(Debug)]
+pub struct ClickObstructedError {
+    pub message: String,
+    pub hint: String,
+}
+
+impl fmt::Display for ClickObstructedError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl Error for ClickObstructedError {}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InteractionResult {
@@ -392,6 +407,29 @@ impl ChromePage {
             .into_value::<Value>()?)
     }
 
+    /// Evaluate a user expression and preserve JavaScript exceptions as data,
+    /// matching the daemon's protocol-neutral `eval` result.
+    pub async fn evaluate(&self, expression: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let params = EvaluateParams::builder()
+            .expression(expression)
+            .return_by_value(true)
+            .await_promise(true)
+            .build()
+            .map_err(std::io::Error::other)?;
+        let response = self.page.execute(params).await?;
+        let result = response.result;
+        let exception_text = response
+            .exception_details
+            .map(|exception| exception.text)
+            .unwrap_or_default();
+        Ok(serde_json::json!({
+            "type": result.r#type.as_ref().to_owned(),
+            "value": result.value.unwrap_or(Value::Null),
+            "description": result.description.unwrap_or_default(),
+            "exception_text": exception_text,
+        }))
+    }
+
     /// Read complete cookie metadata through Chrome's Network domain.
     pub async fn cookies(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
         self.cookies_for_urls(&[]).await
@@ -470,18 +508,63 @@ impl ChromePage {
         Ok(self.page.find_element(selector).await?)
     }
 
+    async fn click_target(
+        &self,
+        selector: &str,
+        action: &str,
+    ) -> Result<Element, Box<dyn Error + Send + Sync>> {
+        let element = self.element(selector).await?;
+        element.scroll_into_view().await?;
+        let point = element.clickable_point().await?;
+        let hit = self
+            .page
+            .execute(dom::GetNodeForLocationParams::new(
+                point.x as i64,
+                point.y as i64,
+            ))
+            .await?;
+        if hit.backend_node_id != element.backend_node_id {
+            let mut role = String::new();
+            let mut name = String::new();
+            if let Some(node_id) = hit.node_id {
+                if let Ok(node) = self.page.describe_node(node_id).await {
+                    role = node.node_name;
+                    let attributes = node.attributes.as_deref().unwrap_or_default();
+                    name = attribute_value(attributes, "aria-label");
+                    if name.is_empty() {
+                        name = attribute_value(attributes, "id");
+                    }
+                }
+            }
+            if role.is_empty() {
+                role = "element".into();
+            }
+            if name.is_empty() {
+                name = "unnamed".into();
+            }
+            return Err(Box::new(ClickObstructedError {
+                message: format!(
+                    "{action} {selector:?} was obstructed by {role} {name:?} (ref=unavailable)"
+                ),
+                hint: "close the covering element and retry the click".into(),
+            }));
+        }
+        Ok(element)
+    }
+
     pub async fn click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.element(selector).await?.click().await?;
+        let element = self.click_target(selector, "click").await?;
+        element.click().await?;
         Ok(result("click", selector))
     }
     pub async fn double_click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.element(selector)
+        self.click_target(selector, "dblclick")
             .await?
             .click_with(
                 chromiumoxide::types::ClickOptions::builder()
@@ -595,12 +678,14 @@ impl ChromePage {
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
+        self.click_target(selector, "check").await?;
         self.set_checked(selector, true).await
     }
     pub async fn uncheck(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
+        self.click_target(selector, "uncheck").await?;
         self.set_checked(selector, false).await
     }
     async fn set_checked(
@@ -1178,6 +1263,14 @@ fn result(action: &str, selector: &str) -> InteractionResult {
     }
 }
 
+fn attribute_value(attributes: &[String], name: &str) -> String {
+    attributes
+        .chunks_exact(2)
+        .find(|pair| pair[0] == name)
+        .map(|pair| pair[1].clone())
+        .unwrap_or_default()
+}
+
 fn frame_info(tree: &page::FrameTree) -> FrameInfo {
     FrameInfo {
         id: tree.frame.id.inner().clone(),
@@ -1233,7 +1326,21 @@ mod tests {
         assert!(value.interfaces.contains(&"TabManager".to_owned()));
         assert!(value.interfaces.contains(&"FileTransfer".to_owned()));
         assert!(value.interfaces.contains(&"A11yAuditor".to_owned()));
-        assert!(value.unsupported.contains(&"SettingsEngine".to_owned()));
+        assert!(
+            value
+                .interfaces
+                .contains(&"ClickDiagnosticEngine".to_owned())
+        );
+        assert_eq!(value.interfaces.len(), 15);
+        assert_eq!(
+            value.unsupported,
+            vec![
+                "OverlayHost",
+                "RuntimeEvents",
+                "ScriptDisabler",
+                "SettingsEngine"
+            ]
+        );
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
 

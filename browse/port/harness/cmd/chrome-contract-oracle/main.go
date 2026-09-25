@@ -28,8 +28,10 @@ type contract struct {
 	InspectVisible        daemon.Response `json:"inspect_visible"`
 	InspectError          daemon.Response `json:"inspect_error"`
 	InspectMissingElement daemon.Response `json:"inspect_missing_element"`
+	ClickObstructed       daemon.Response `json:"click_obstructed"`
 	PopupClick            daemon.Response `json:"popup_click"`
 	PopupOpen             daemon.Response `json:"popup_open"`
+	EvalException         daemon.Response `json:"eval_exception"`
 	TabList               daemon.Response `json:"tab_list"`
 	TabClose              daemon.Response `json:"tab_close"`
 	LastTabClose          daemon.Response `json:"last_tab_close"`
@@ -187,6 +189,14 @@ func run() error {
 	if result.InspectMissingElement.Success {
 		return fmt.Errorf("Go get.title for a missing element unexpectedly succeeded")
 	}
+	result.ClickObstructed = call(runtime, ctx, daemon.Frame{
+		Cmd:     "click",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#covered"}),
+	})
+	if result.ClickObstructed.Success || result.ClickObstructed.Error == nil || result.ClickObstructed.Error.Code != "click_obstructed" {
+		return fmt.Errorf("Go click obstruction oracle was unexpected: %s", responseJSON(result.ClickObstructed))
+	}
 	result.PopupClick = call(runtime, ctx, daemon.Frame{
 		Cmd:     "click",
 		Session: "chrome-contract",
@@ -202,6 +212,14 @@ func run() error {
 	})
 	if !result.PopupOpen.Success {
 		return fmt.Errorf("Go popup verification oracle failed: %s", responseJSON(result.PopupOpen))
+	}
+	result.EvalException = call(runtime, ctx, daemon.Frame{
+		Cmd:     "eval",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"expression": "(() => { throw new Error('native eval failure') })()"}),
+	})
+	if !result.EvalException.Success {
+		return fmt.Errorf("Go eval exception oracle failed: %s", responseJSON(result.EvalException))
 	}
 	result.TabList = call(runtime, ctx, daemon.Frame{
 		Cmd:     "tab.list",
