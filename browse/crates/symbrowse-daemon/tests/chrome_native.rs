@@ -3,6 +3,11 @@ use std::{
     io::{self, Read, Write},
     net::{TcpListener, TcpStream},
     path::PathBuf,
+    process::Command,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
@@ -25,6 +30,95 @@ fn request(client: &Client, command: &str, args: Value) -> Value {
         .request(frame)
         .unwrap_or_else(|error| panic!("request {command}: {error}"));
     serde_json::to_value(response).expect("encode response")
+}
+
+struct ChromeContractServer {
+    base_url: String,
+    stop: Arc<AtomicBool>,
+    thread: Option<thread::JoinHandle<()>>,
+}
+
+impl ChromeContractServer {
+    fn start() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind Chrome contract fixture");
+        let address = listener
+            .local_addr()
+            .expect("Chrome contract fixture address");
+        listener
+            .set_nonblocking(true)
+            .expect("set Chrome contract fixture nonblocking");
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_for_thread = Arc::clone(&stop);
+        let thread = thread::spawn(move || {
+            while !stop_for_thread.load(Ordering::Relaxed) {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        stream
+                            .set_read_timeout(Some(Duration::from_secs(2)))
+                            .expect("bound Chrome contract fixture read");
+                        let mut request = [0_u8; 2048];
+                        let length = stream.read(&mut request).unwrap_or_default();
+                        let request = String::from_utf8_lossy(&request[..length]);
+                        let path = request
+                            .lines()
+                            .next()
+                            .and_then(|line| line.split_whitespace().nth(1))
+                            .unwrap_or("/");
+                        let body = if path == "/popup" {
+                            "<!doctype html><button id=popup onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button>"
+                        } else {
+                            "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p>"
+                        };
+                        let response = format!(
+                            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                            body.len()
+                        );
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(2));
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+        Self {
+            base_url: format!("http://{address}"),
+            stop,
+            thread: Some(thread),
+        }
+    }
+}
+
+impl Drop for ChromeContractServer {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Relaxed);
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+fn go_chrome_tab_oracle(executable: &str, fixture_url: &str) -> Value {
+    let browse_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let output = Command::new("go")
+        .args([
+            "run",
+            "./port/harness/cmd/chrome-contract-oracle",
+            executable,
+            fixture_url,
+        ])
+        .current_dir(browse_root)
+        .env("SYMBROWSE_HEADLESS", "1")
+        .output()
+        .expect("run source-bound Go Chrome tab oracle");
+    assert!(
+        output.status.success(),
+        "Go Chrome tab oracle failed: {}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    serde_json::from_slice(&output.stdout).expect("decode Go Chrome tab oracle JSON")
 }
 
 fn accept_fixture_request(
@@ -206,6 +300,67 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         fs::remove_dir_all(root).expect("remove isolated root");
         return;
     }
+    let chrome_executable = std::env::var("SYMBROWSE_CHROME_EXECUTABLE")
+        .expect("set SYMBROWSE_CHROME_EXECUTABLE to the tested CfT binary");
+    let contract_server = ChromeContractServer::start();
+    let go_oracle = go_chrome_tab_oracle(&chrome_executable, &contract_server.base_url);
+    let rust_open = request(
+        &client,
+        "open",
+        json!({"url":format!("{}/page", contract_server.base_url)}),
+    );
+    assert_eq!(rust_open["success"], go_oracle["open"]["success"]);
+    let rust_tab_new = request(
+        &client,
+        "tab.new",
+        json!({
+            "label":"second",
+            "url":format!("{}/popup", contract_server.base_url)
+        }),
+    );
+    assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
+    assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
+    let rust_popup_click = request(&client, "click", json!({"selector":"#popup"}));
+    assert_eq!(
+        rust_popup_click["success"],
+        go_oracle["popup_click"]["success"]
+    );
+    let rust_popup_open = request(
+        &client,
+        "eval",
+        json!({"expression":"Boolean(window.popup && !window.popup.closed)"}),
+    );
+    assert_eq!(
+        rust_popup_open["success"],
+        go_oracle["popup_open"]["success"]
+    );
+    assert_eq!(
+        rust_popup_open["data"]["type"],
+        go_oracle["popup_open"]["data"]["type"]
+    );
+    assert_eq!(
+        rust_popup_open["data"]["value"],
+        go_oracle["popup_open"]["data"]["value"]
+    );
+    let rust_tab_list = request(&client, "tab.list", json!({}));
+    assert_eq!(rust_tab_list["success"], go_oracle["tab_list"]["success"]);
+    assert_eq!(rust_tab_list["data"], go_oracle["tab_list"]["data"]);
+    let rust_tab_close = request(&client, "tab.close", json!({"tab":"second"}));
+    assert_eq!(rust_tab_close["success"], go_oracle["tab_close"]["success"]);
+    assert_eq!(rust_tab_close["data"], go_oracle["tab_close"]["data"]);
+    let rust_last_tab_close = request(&client, "tab.close", json!({}));
+    assert_eq!(
+        rust_last_tab_close["success"],
+        go_oracle["last_tab_close"]["success"]
+    );
+    assert_eq!(
+        rust_last_tab_close["error"]["code"],
+        go_oracle["last_tab_close"]["error"]["code"]
+    );
+    assert_eq!(
+        rust_last_tab_close["error"]["message"],
+        go_oracle["last_tab_close"]["error"]["message"]
+    );
     let opened = request(
         &client,
         "open",
