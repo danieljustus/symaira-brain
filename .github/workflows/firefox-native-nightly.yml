@@ -96,7 +96,9 @@ jobs:
         env:
           SYMBROWSE_E2E: "1"
           CARGO_TARGET_DIR: ${{ runner.temp }}/cargo-target
-        run: cargo test --locked -p symbrowse-daemon --test firefox_native -- --ignored --exact native_firefox_bidi_fixture_checks_supported_capabilities
+        run: |
+          cargo test --locked -p symbrowse-daemon --test firefox_native -- --ignored --exact native_firefox_bidi_fixture_checks_supported_capabilities
+          cargo test --locked -p symbrowse-engine-firefox --test native_interaction -- --ignored --exact firefox_login_uses_trusted_bidi_input_actions
 
   six-native-targets-required:
     name: Require all six native Firefox gates
