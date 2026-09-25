@@ -405,12 +405,20 @@ fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
             .iter()
             .any(|name| name == "NetworkEvents")
     );
-    runner
+    let test_window_id = runner
         .run(
-            "tell application \"Safari\" to make new document",
+            "tell application \"Safari\"\nmake new document\nreturn id of front window\nend tell",
             Duration::from_secs(10),
         )
-        .expect("ask Safari to open a test window");
+        .expect("ask Safari to open a test window")
+        .trim()
+        .parse::<i64>()
+        .expect("Safari returned the new test window ID");
+    let owned_window = OwnedSafariWindow {
+        runner: runner.clone(),
+        id: test_window_id,
+        close_on_drop: true,
+    };
 
     let fixture = LoopbackFixture::start();
     let context = engine.new_context().expect("attach context");
@@ -431,6 +439,9 @@ fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
             .expect("close only the named test tab");
     }
     engine.close().expect("detach without quitting Safari");
+    owned_window
+        .close()
+        .expect("close only the test-owned window");
     drop(fixture);
     let (url, title) = outcome.expect("Safari attach E2E");
     assert!(url.starts_with("http://127.0.0.1:"), "{url}");
@@ -438,6 +449,38 @@ fn real_safari_attach_uses_and_closes_only_its_named_loopback_tab() {
         title,
         serde_json::Value::String("Symaira ENG-008 fixture".into())
     );
+}
+
+struct OwnedSafariWindow {
+    runner: OsascriptRunner,
+    id: i64,
+    close_on_drop: bool,
+}
+
+impl OwnedSafariWindow {
+    fn close(mut self) -> Result<(), AttachError> {
+        self.runner
+            .run(&self.close_script(), Duration::from_secs(10))?;
+        self.close_on_drop = false;
+        Ok(())
+    }
+
+    fn close_script(&self) -> String {
+        format!(
+            "tell application \"Safari\"\nif exists (window id {}) then close (window id {})\nend tell",
+            self.id, self.id
+        )
+    }
+}
+
+impl Drop for OwnedSafariWindow {
+    fn drop(&mut self) {
+        if self.close_on_drop {
+            let _ = self
+                .runner
+                .run(&self.close_script(), Duration::from_secs(10));
+        }
+    }
 }
 
 struct LoopbackFixture {
