@@ -605,8 +605,7 @@ mod unix {
     fn dmn006_operation_deadline_cancels_handler_and_keeps_connection_usable() {
         let root = root("late-response");
         let socket = root.join("default.sock");
-        let cancelled_after_deadline = Arc::new(AtomicBool::new(false));
-        let handler_cancelled = cancelled_after_deadline.clone();
+        let (cancelled_tx, cancelled_rx) = mpsc::channel();
         let server = Arc::new(
             Server::new(ServerOptions {
                 socket_path: socket.clone(),
@@ -616,7 +615,7 @@ mod unix {
                 handler: Some(Arc::new(move |frame, operation| {
                     if frame.cmd == "slow" {
                         thread::sleep(Duration::from_millis(50));
-                        handler_cancelled.store(operation.is_cancelled(), Ordering::Release);
+                        let _ = cancelled_tx.send(operation.is_cancelled());
                     }
                     Ok((Some(serde_json::json!({"pong": true})), Vec::new()))
                 })),
@@ -649,9 +648,10 @@ mod unix {
         );
         assert_eq!(second["data"]["pong"], true);
 
-        thread::sleep(Duration::from_millis(75));
         assert!(
-            cancelled_after_deadline.load(Ordering::Acquire),
+            cancelled_rx
+                .recv_timeout(Duration::from_secs(1))
+                .expect("handler did not report cancellation within one second"),
             "operation deadline did not cancel the handler context"
         );
         let mut late = String::new();
