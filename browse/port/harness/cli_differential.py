@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import ctypes
 import hashlib
 import json
@@ -58,6 +59,37 @@ def output_record(result: dict[str, Any]) -> dict[str, Any]:
         record[field] = {"bytes": len(value), "sha256": sha256(value),
                          "preview": value[:PREVIEW_BYTES].decode("utf-8", "backslashreplace")}
     return record
+
+
+def completion_oracle_cases(go: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    """Retain complete native Go Cobra completion scripts as migration oracles."""
+    rows = []
+    for shell in ("bash", "zsh", "fish", "powershell"):
+        argv = ["completion", shell]
+        result = run_process(go, argv, env)
+        stdout = result["stdout"]
+        stderr = result["stderr"]
+        rows.append({
+            "case": "CLI-completion-oracle",
+            "shell": shell,
+            "argv": argv,
+            "matched": result.get("returncode") == 0 and not result.get("error") and not stderr,
+            "criterion": "native Go completion generation succeeds; complete script bytes are retained",
+            "returncode": result.get("returncode"),
+            "error": result.get("error"),
+            "stdout_bytes": len(stdout),
+            "stdout_sha256": sha256(stdout),
+            "stdout_base64": base64.b64encode(stdout).decode("ascii"),
+            "stderr": output_record(result)["stderr"],
+        })
+    return rows
+
+
+def json_payload(result: dict[str, Any]) -> tuple[Any, str | None]:
+    try:
+        return json.loads(result["stdout"]), None
+    except (json.JSONDecodeError, UnicodeDecodeError) as error:
+        return None, str(error)
 
 
 def trace_replay_result(steps: list[dict[str, Any]]) -> dict[str, Any]:
@@ -1226,6 +1258,8 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
     doctor_args = ["doctor", "--fix", "--json"]
     go_doctor = run_process(go, doctor_args, doctor_env)
     rust_doctor = run_process(rust, doctor_args, doctor_env)
+    go_doctor_payload, go_doctor_payload_error = json_payload(go_doctor)
+    rust_doctor_payload, rust_doctor_payload_error = json_payload(rust_doctor)
     comparisons.append({
         "case": "CLI-doctor-json-fix",
         "argv": doctor_args,
@@ -1234,6 +1268,12 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         "criterion": "bounded doctor report, no provider lookup outside the disposable PATH, and Go-identical envelope/exit",
         "go": output_record(go_doctor),
         "rust": output_record(rust_doctor),
+        "go_payload": go_doctor_payload,
+        "go_payload_raw": go_doctor["stdout"].decode("utf-8", "replace"),
+        "go_payload_error": go_doctor_payload_error,
+        "rust_payload": rust_doctor_payload,
+        "rust_payload_raw": rust_doctor["stdout"].decode("utf-8", "replace"),
+        "rust_payload_error": rust_doctor_payload_error,
     })
     return comparisons
 
@@ -1700,6 +1740,7 @@ def main() -> int:
             )
     rows = [] if args.skip_help_tree else help_tree(args.go.resolve(), args.rust.resolve(), env)
     rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
+    rows.extend(completion_oracle_cases(args.go.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_batch_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_watch_cases(args.go.resolve(), args.rust.resolve(), env))

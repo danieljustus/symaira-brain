@@ -2,6 +2,8 @@
 """Focused tests for the Browse harness path resolution."""
 from __future__ import annotations
 
+import base64
+import hashlib
 import importlib.util
 import json
 import os
@@ -111,6 +113,23 @@ class CliDifferentialSessionTests(unittest.TestCase):
         self.assertTrue(cli_differential.trace_frames_match([go], [rust], expected))
         self.assertFalse(cli_differential.trace_frames_match([go], [rust], {**expected, "args": {"steps": ["unexpected"]}}))
         self.assertFalse(cli_differential.trace_frames_match([go], [{**rust, "request_id": "2"}], expected))
+
+    def test_completion_oracles_keep_full_native_script_bytes(self) -> None:
+        outputs = {shell: f"# {shell}\n".encode() for shell in ("bash", "zsh", "fish", "powershell")}
+
+        def fake_run_process(_binary: Path, argv: list[str], _env: dict[str, str]) -> dict[str, object]:
+            return {"returncode": 0, "stdout": outputs[argv[1]], "stderr": b""}
+
+        with patch.object(cli_differential, "run_process", side_effect=fake_run_process):
+            rows = cli_differential.completion_oracle_cases(Path("go"), {})
+
+        self.assertEqual([row["shell"] for row in rows], ["bash", "zsh", "fish", "powershell"])
+        for row in rows:
+            payload = outputs[row["shell"]]
+            self.assertTrue(row["matched"])
+            self.assertEqual(base64.b64decode(row["stdout_base64"]), payload)
+            self.assertEqual(row["stdout_bytes"], len(payload))
+            self.assertEqual(row["stdout_sha256"], hashlib.sha256(payload).hexdigest())
 
 
 class CompatSidecarHarnessTests(unittest.TestCase):

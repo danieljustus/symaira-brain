@@ -179,6 +179,25 @@ fn write_report(report: &Report, format: Format) -> Result<(), String> {
         }
         return Ok(());
     }
+    if format == Format::Json {
+        // Keep the Go envelope and report field order. Serializing through
+        // serde_json::Value sorts object keys and changes the CLI bytes.
+        #[derive(Serialize)]
+        struct DoctorJson<'a> {
+            success: bool,
+            data: &'a Report,
+        }
+
+        let mut output = serde_json::to_string(&DoctorJson {
+            success: true,
+            data: report,
+        })
+        .map_err(|error| error.to_string())?;
+        output.push('\n');
+        return io::stdout()
+            .write_all(output.as_bytes())
+            .map_err(|error| error.to_string());
+    }
     let data = serde_json::to_value(report).map_err(|error| error.to_string())?;
     let output = Envelope::ok(data, Vec::new())
         .render(format)
