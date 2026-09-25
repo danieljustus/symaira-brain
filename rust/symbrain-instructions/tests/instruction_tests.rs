@@ -44,12 +44,15 @@ struct Case {
     global_present: bool,
     #[serde(default)]
     project_present: bool,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_global_path: String,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_project_path: String,
     #[serde(default)]
     xdg_config_home: String,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_xdg_global_path: String,
     #[serde(default)]
