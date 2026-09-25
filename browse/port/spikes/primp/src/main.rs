@@ -117,7 +117,7 @@ fn server_config() -> Result<Arc<ServerConfig>, Box<dyn Error>> {
     let _ = rustls::crypto::ring::default_provider().install_default();
     let generated = generate_simple_self_signed(vec!["localhost".to_owned()])?;
     let cert: CertificateDer<'static> = generated.cert.der().clone();
-    let key = PrivateKeyDer::try_from(generated.key_pair.serialize_der())?;
+    let key = PrivateKeyDer::try_from(generated.signing_key.serialize_der())?;
     let mut config = ServerConfig::builder()
         .with_no_client_auth()
         .with_single_cert(vec![cert], key)?;
@@ -330,7 +330,9 @@ async fn run_capture(
         .join()
         .map_err(|_| io::Error::other("loopback capture server panicked"))??;
     let mut decoder = hpack::Decoder::new();
-    let decoded = decoder.decode(&wire.header_block)?;
+    let decoded = decoder
+        .decode(&wire.header_block)
+        .map_err(|error| io::Error::other(format!("decode captured HTTP/2 headers: {error:?}")))?;
     let header_names = decoded
         .into_iter()
         .map(|(name, _value)| String::from_utf8(name))
