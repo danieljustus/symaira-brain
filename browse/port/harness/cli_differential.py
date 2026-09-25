@@ -1899,8 +1899,10 @@ def main() -> int:
                     "mismatched": sum(row.get("matched") is False for row in rows),
                     "unsupported": sum(row.get("case") == "unsupported" for row in rows),
                     "harness_errors": sum(row.get("case") == "harness_error" for row in rows)},
-        "parity_established": False,
     }
+    report["parity_established"] = not args.skip_help_tree and all(
+        report["summary"][key] == 0 for key in ("mismatched", "unsupported", "harness_errors")
+    )
     args.report.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     for link in short_path_links:

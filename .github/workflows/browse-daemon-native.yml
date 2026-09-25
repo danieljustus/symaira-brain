@@ -58,7 +58,7 @@ jobs:
             rust_binary+=.exe
           fi
           go build -o "$go_binary" ./cmd/symbrowse
-          python3 port/harness/cli_differential.py --skip-help-tree \
+          python3 port/harness/cli_differential.py \
             --go "$go_binary" --rust "$rust_binary" \
             --report "$RUNNER_TEMP/cli-differential.json" --temp-root "$RUNNER_TEMP"
       - name: Verify native CLI compat sidecar proxy
