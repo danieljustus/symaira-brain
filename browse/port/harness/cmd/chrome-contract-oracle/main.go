@@ -418,28 +418,33 @@ func waitRuntimeEntryCount(runtime *daemon.NavigationRuntime, ctx context.Contex
 }
 
 func runtimeEntryCount(response daemon.Response) int {
-	data, ok := response.Data.(map[string]any)
-	if !ok {
-		return 0
-	}
-	entries, _ := data["entries"].([]any)
-	return len(entries)
+	return len(runtimeEntries(response))
 }
 
 func runtimeEntriesContain(response daemon.Response, text string) bool {
-	data, ok := response.Data.(map[string]any)
-	if !ok {
-		return false
-	}
-	entries, _ := data["entries"].([]any)
-	for _, raw := range entries {
-		entry, _ := raw.(map[string]any)
-		value, _ := entry["text"].(string)
-		if strings.Contains(value, text) {
+	for _, raw := range runtimeEntries(response) {
+		var entry struct {
+			Text string `json:"text"`
+		}
+		if json.Unmarshal(raw, &entry) == nil && strings.Contains(entry.Text, text) {
 			return true
 		}
 	}
 	return false
+}
+
+func runtimeEntries(response daemon.Response) []json.RawMessage {
+	encoded, err := json.Marshal(response.Data)
+	if err != nil {
+		return nil
+	}
+	var data struct {
+		Entries []json.RawMessage `json:"entries"`
+	}
+	if json.Unmarshal(encoded, &data) != nil {
+		return nil
+	}
+	return data.Entries
 }
 
 func responseJSON(response daemon.Response) string {
