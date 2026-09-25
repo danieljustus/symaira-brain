@@ -106,13 +106,16 @@ func main() {
 	_, missingGet := registry.Get("missing")
 	missingTouch := registry.Touch("missing")
 	emptyRef := registry.SetRef("alpha", "", "value")
+	registry.Clear()
 	profileExists := true
 	for _, name := range []string{"alpha", "beta"} {
 		if _, err := os.Stat(filepath.Join(root, name)); err != nil {
 			profileExists = false
 		}
 	}
-	registry.Clear()
+	if !profileExists {
+		panic("session registry clear removed profile directories")
+	}
 	result := output{
 		SchemaVersion: data.SchemaVersion, Sessions: views,
 		InvalidNameError: invalidName.Error(),

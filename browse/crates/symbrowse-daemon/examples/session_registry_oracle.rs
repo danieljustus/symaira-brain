@@ -87,8 +87,12 @@ fn main() {
         .set_ref("alpha", "", "value")
         .unwrap_err()
         .to_string();
-    let profiles_preserved = root.join("alpha").is_dir() && root.join("beta").is_dir();
     registry.clear();
+    let profiles_preserved = root.join("alpha").is_dir() && root.join("beta").is_dir();
+    assert!(
+        profiles_preserved,
+        "registry clear must preserve browser profile directories"
+    );
     let result = serde_json::json!({
         "schema_version": data.schema_version,
         "sessions": sessions,
