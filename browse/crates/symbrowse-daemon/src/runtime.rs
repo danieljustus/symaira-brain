@@ -1422,7 +1422,11 @@ impl DispatchRuntime {
                 (!self.spec.executable_path.as_os_str().is_empty())
                     .then_some(self.spec.executable_path.as_path()),
             )
-            .map_err(runtime_error)?;
+            .map_err(|error| DaemonError {
+                code: codes::DAEMON_UNAVAILABLE.into(),
+                message: redact_str(&error.to_string()),
+                ..Default::default()
+            })?;
             let session = FirefoxSession::launch(
                 executable,
                 self.spec.user_data_dir(),
@@ -2526,6 +2530,28 @@ mod tests {
             ))
             .expect_err("missing explicit Chrome must fail");
         assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+    }
+
+    #[test]
+    fn missing_selected_firefox_is_typed_unavailable_without_fallback() {
+        let mut spec = temp_spec("missing-firefox");
+        spec.engine = "firefox".into();
+        spec.mode = "browser".into();
+        spec.executable_path = spec.state_dir.join("missing-firefox-executable");
+        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "open".into(),
+                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect_err("missing explicit Firefox must fail");
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert!(error.message.contains("Firefox executable not found"));
     }
 
     #[cfg(not(target_os = "macos"))]
