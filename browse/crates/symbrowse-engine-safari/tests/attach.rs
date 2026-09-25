@@ -159,7 +159,7 @@ fn attach_tab_manager_lists_opens_and_closes_the_pinned_tab() {
     assert_eq!(tabs[0].url, "https://example.test/docs");
     assert!(!tabs[0].active);
 
-    let runner = FakeRunner::with_answer("Research");
+    let runner = FakeRunner::with_answer("44721\t3");
     let mut engine = AttachEngine::new(runner.clone());
     let context = engine.new_context().unwrap();
     let page = engine
@@ -169,9 +169,40 @@ fn attach_tab_manager_lists_opens_and_closes_the_pinned_tab() {
     let calls = runner.calls();
     assert!(calls[0].contains("make new tab"));
     assert!(calls[0].contains("https://example.test/research"));
-    assert!(calls[0].contains("Research"));
+    assert!(calls[0].contains("set targetWindow to window 1"));
+    assert!(calls[0].contains("id of targetWindow"));
+    assert!(calls[0].contains("count of tabs of targetWindow"));
+    assert!(calls[0].contains(r#"& "\t" &"#));
+    assert!(!calls[0].contains("set name of newTab"));
     engine.tab_close(&page).expect("close pinned tab");
-    assert!(runner.calls()[1].contains("tab \"Research\" of window 1"));
+    assert!(runner.calls()[1].contains("tab 3 of window id 44721"));
+    assert!(matches!(
+        engine.tab_close(&page),
+        Err(AttachError::Prerequisite {
+            check: symbrowse_engine_safari::SafariPrerequisite::TabUnavailable,
+            ..
+        })
+    ));
+    assert_eq!(
+        runner.calls().len(),
+        2,
+        "closed pin must not target a reused index"
+    );
+}
+
+#[test]
+fn attach_tab_new_rejects_invalid_window_or_index_without_pinning() {
+    for answer in ["missing-separator", "0\t2", "44721\t0", "44721\t2\textra"] {
+        let runner = FakeRunner::with_answer(answer);
+        let mut engine = AttachEngine::new(runner);
+        let context = engine.new_context().expect("context");
+        assert!(
+            engine
+                .tab_new(&context, "Research", "https://example.test/research")
+                .is_err(),
+            "accepted malformed Safari pin {answer:?}"
+        );
+    }
 }
 
 #[test]
