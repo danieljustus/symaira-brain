@@ -3318,6 +3318,10 @@ fn json_type_name(value: &serde_json::Value) -> &'static str {
 fn execute_batch_item(argv: &[String]) -> ItemOutput {
     let args: Vec<OsString> = argv.iter().map(OsString::from).collect();
     match parse(&args) {
+        Ok(Action::Help(stdout)) => ItemOutput {
+            stdout,
+            error: None,
+        },
         Ok(Action::RootVersion) => ItemOutput {
             stdout: render_root_version(VERSION),
             error: None,
@@ -7058,6 +7062,50 @@ mod tests {
         assert!(rendered.contains("\\u003c\\u0026\\u003e\\u2028\\u2029"));
         assert!(!rendered.contains("<&>"));
         assert!(rendered.ends_with('\n'));
+    }
+
+    #[test]
+    fn batch_executes_help_and_preserves_item_status_and_order() {
+        let commands = vec![
+            "help".to_owned(),
+            "version --json".to_owned(),
+            "version extra".to_owned(),
+        ];
+        let report = super::batch::run(&commands, false, false, |argv| {
+            let result = super::execute_batch_item(argv);
+            super::batch::ItemOutput {
+                stdout: result.stdout,
+                error: result.error,
+            }
+        });
+
+        assert_eq!(report.results.len(), 3);
+        assert_eq!(report.results[0].command, "help");
+        assert!(report.results[0].success);
+        assert!(
+            report.results[0]
+                .data
+                .as_ref()
+                .and_then(serde_json::Value::as_str)
+                .is_some_and(
+                    |help| help.starts_with("symbrowse is the standalone command-line entrypoint")
+                )
+        );
+        assert_eq!(report.results[1].command, "version --json");
+        assert_eq!(
+            report.results[1]
+                .data
+                .as_ref()
+                .and_then(|value| value.get("tool")),
+            Some(&serde_json::json!("symbrowse"))
+        );
+        assert_eq!(report.results[2].command, "version extra");
+        assert!(!report.results[2].success);
+        assert_eq!(
+            report.results[2].error.as_deref(),
+            Some("unknown command \"extra\" for \"symbrowse version\"")
+        );
+        assert!(!report.bailed);
     }
 
     #[test]

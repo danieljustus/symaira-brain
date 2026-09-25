@@ -1080,11 +1080,25 @@ impl ChromePage {
         selector: &str,
         amount: i64,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        let target = self.element(selector).await?;
-        self.scroll_element_into_view(&target).await?;
-        let element = target;
-        element.focus().await?;
-        let bounds = self.inspect(selector, "box").await?;
+        // Keep phase context on failures: native Chrome occasionally stalls a
+        // CDP command after a tab switch, and the outer daemon timeout alone
+        // does not identify which part of the interaction stopped progressing.
+        let target = self
+            .element(selector)
+            .await
+            .map_err(|error| std::io::Error::other(format!("scroll locate target: {error}")))?;
+        self.scroll_element_into_view(&target)
+            .await
+            .map_err(|error| {
+                std::io::Error::other(format!("scroll bring target into view: {error}"))
+            })?;
+        target
+            .focus()
+            .await
+            .map_err(|error| std::io::Error::other(format!("scroll focus target: {error}")))?;
+        let bounds = self.inspect(selector, "box").await.map_err(|error| {
+            std::io::Error::other(format!("scroll inspect target box: {error}"))
+        })?;
         let x = bounds["x"]
             .as_f64()
             .ok_or("element box has no x coordinate")?
@@ -1097,7 +1111,10 @@ impl ChromePage {
                 .ok_or("element box has no height")?
                 / 2.0;
         let amount = if amount == 0 { 480.0 } else { amount as f64 };
-        self.page.move_mouse(Point::new(x, y)).await?;
+        self.page
+            .move_mouse(Point::new(x, y))
+            .await
+            .map_err(|error| std::io::Error::other(format!("scroll move pointer: {error}")))?;
         let event = input::DispatchMouseEventParams::builder()
             .r#type(input::DispatchMouseEventType::MouseWheel)
             .x(x)
@@ -1106,7 +1123,10 @@ impl ChromePage {
             .delta_x(0.0)
             .delta_y(amount)
             .build()?;
-        self.page.execute(event).await?;
+        self.page
+            .execute(event)
+            .await
+            .map_err(|error| std::io::Error::other(format!("scroll dispatch wheel: {error}")))?;
         Ok(result("scroll", selector))
     }
     pub async fn type_text(
