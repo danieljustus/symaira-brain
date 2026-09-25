@@ -18,6 +18,10 @@ use tokio::{
     time::{sleep, timeout},
 };
 
+fn key_action(kind: &str, value: &str) -> Value {
+    json!({"type":kind,"value":value})
+}
+
 pub(super) struct Bidi {
     socket: async_tungstenite::WebSocketStream<async_tungstenite::tokio::ConnectStream>,
     next: u64,
@@ -275,22 +279,112 @@ impl FirefoxSession {
     ) -> Result<Value, FirefoxError> {
         let selector = serde_json::to_string(selector)
             .map_err(|error| FirefoxError::Driver(error.to_string()))?;
-        let value = serde_json::to_string(value.unwrap_or_default())
-            .map_err(|error| FirefoxError::Driver(error.to_string()))?;
-        let expression = match operation {
-            "click" => format!(
-                "(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.click(); return {{action:'click'}}; }})()"
-            ),
-            "type" | "fill" => format!(
-                "(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.focus(); e.value={value}; e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return {{action:'{operation}',value:e.value}}; }})()"
-            ),
-            _ => return Err(Self::unsupported(operation)),
-        };
-        Ok(self
-            .evaluate(&expression)
-            .await?
+        match operation {
+            "click" => {
+                let center = self.interaction_target_center(&selector).await?;
+                self.perform_actions(
+                    "pointer",
+                    "symbrowse-mouse",
+                    vec![
+                        json!({"type":"pointerMove","x":center[0],"y":center[1],"origin":"viewport"}),
+                        json!({"type":"pointerDown","button":0}),
+                        json!({"type":"pointerUp","button":0}),
+                    ],
+                )
+                .await?;
+                Ok(json!({"action":"click"}))
+            }
+            "type" | "fill" => {
+                let expression = format!(
+                    "(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); if (!(e instanceof HTMLInputElement || e instanceof HTMLTextAreaElement || e.isContentEditable)) throw new Error('selector is not editable'); e.focus(); if (document.activeElement !== e) throw new Error('selector could not be focused'); return {{action:'{operation}'}}; }})()"
+                );
+                self.interaction_value(&expression).await?;
+                let mut actions = Vec::new();
+                if operation == "fill" {
+                    let modifier = if cfg!(target_os = "macos") {
+                        "\u{e03d}"
+                    } else {
+                        "\u{e009}"
+                    };
+                    actions.extend([
+                        key_action("keyDown", modifier),
+                        key_action("keyDown", "a"),
+                        key_action("keyUp", "a"),
+                        key_action("keyUp", modifier),
+                        key_action("keyDown", "\u{e003}"),
+                        key_action("keyUp", "\u{e003}"),
+                    ]);
+                }
+                for character in value.unwrap_or_default().chars() {
+                    let key = match character {
+                        '\n' => "\u{e007}".to_owned(),
+                        '\t' => "\u{e004}".to_owned(),
+                        '\u{8}' => "\u{e003}".to_owned(),
+                        character => character.to_string(),
+                    };
+                    actions.push(key_action("keyDown", &key));
+                    actions.push(key_action("keyUp", &key));
+                }
+                self.perform_actions("key", "symbrowse-keyboard", actions)
+                    .await?;
+                Ok(json!({"action":operation}))
+            }
+            _ => Err(Self::unsupported(operation)),
+        }
+    }
+
+    async fn interaction_target_center(
+        &mut self,
+        selector: &str,
+    ) -> Result<[f64; 2], FirefoxError> {
+        let expression = format!(
+            "(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.scrollIntoView({{block:'center',inline:'center'}}); const r=e.getBoundingClientRect(); if (r.width <= 0 || r.height <= 0) throw new Error('selector target is not visible'); const x=r.left+r.width/2, y=r.top+r.height/2, hit=document.elementFromPoint(x,y); if (!hit || (hit !== e && !e.contains(hit))) throw new Error('selector target is obstructed'); return {{x,y}}; }})()"
+        );
+        let value = self.interaction_value(&expression).await?;
+        let x = value.get("x").and_then(Value::as_f64).ok_or_else(|| {
+            FirefoxError::Driver("Firefox returned no interaction x coordinate".into())
+        })?;
+        let y = value.get("y").and_then(Value::as_f64).ok_or_else(|| {
+            FirefoxError::Driver("Firefox returned no interaction y coordinate".into())
+        })?;
+        Ok([x, y])
+    }
+
+    async fn interaction_value(&mut self, expression: &str) -> Result<Value, FirefoxError> {
+        let result = self.evaluate(expression).await?;
+        if !result.exception_text.is_empty() {
+            return Err(FirefoxError::Driver(result.exception_text));
+        }
+        result
             .value
-            .unwrap_or(Value::Null))
+            .ok_or_else(|| FirefoxError::Driver("Firefox interaction returned no value".into()))
+    }
+
+    async fn perform_actions(
+        &mut self,
+        source_type: &str,
+        source_id: &str,
+        actions: Vec<Value>,
+    ) -> Result<(), FirefoxError> {
+        let result = self
+            .bidi
+            .command(
+                "input.performActions",
+                json!({"context":self.context,"actions":[{"type":source_type,"id":source_id,"actions":actions}]}),
+                self.timeout,
+            )
+            .await;
+        let release = self
+            .bidi
+            .command(
+                "input.releaseActions",
+                json!({"context":self.context}),
+                self.timeout,
+            )
+            .await;
+        result?;
+        release?;
+        Ok(())
     }
 
     pub async fn browsing_contexts(&mut self) -> Result<Value, FirefoxError> {
