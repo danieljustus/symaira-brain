@@ -1422,15 +1422,7 @@ impl NetworkCapture {
             tokio::select! {
                 event = self.requests.next() => if let Some(event) = event {
                     let id: String = event.request_id.clone().into();
-                    if !self.requests_by_id.contains_key(&id) {
-                        if self.request_order.len() >= 2_000 {
-                            let oldest = self.request_order.remove(0);
-                            self.requests_by_id.remove(&oldest);
-                        }
-                        self.request_order.push(id.clone());
-                        self.requests_by_id.insert(id.clone(), CapturedRequest::default());
-                    }
-                    let request = self.requests_by_id.get_mut(&id).expect("inserted request");
+                    let request = ensure_captured_request(&mut self.request_order, &mut self.requests_by_id, &id);
                     request.id = id.clone();
                     request.url = event.request.url.clone();
                     request.method = event.request.method.clone();
@@ -1441,28 +1433,25 @@ impl NetworkCapture {
                 },
                 event = self.responses.next() => if let Some(event) = event {
                     let id: String = event.request_id.clone().into();
-                    if let Some(request) = self.requests_by_id.get_mut(&id) {
-                        request.status = event.response.status;
-                        request.status_text = event.response.status_text.clone();
-                        request.mime_type = event.response.mime_type.clone();
-                        request.response_headers = masked_headers(event.response.headers.inner());
-                        request.encoded_body_size = event.response.encoded_data_length as i64;
-                    }
+                    let request = ensure_captured_request(&mut self.request_order, &mut self.requests_by_id, &id);
+                    request.status = event.response.status;
+                    request.status_text = event.response.status_text.clone();
+                    request.mime_type = event.response.mime_type.clone();
+                    request.response_headers = masked_headers(event.response.headers.inner());
+                    request.encoded_body_size = event.response.encoded_data_length as i64;
                     events.push(NetworkEvent { kind: "response".to_owned(), id, url: event.response.url.clone(), status: event.response.status as u16, mime_type: event.response.mime_type.clone(), ..Default::default() });
                 },
                 event = self.failed.next() => if let Some(event) = event {
                     let id: String = event.request_id.clone().into();
-                    if let Some(request) = self.requests_by_id.get_mut(&id) {
-                        request.failed = event.error_text.clone();
-                        request.finished = true;
-                    }
+                    let request = ensure_captured_request(&mut self.request_order, &mut self.requests_by_id, &id);
+                    request.failed = event.error_text.clone();
+                    request.finished = true;
                     events.push(NetworkEvent { kind: "failed".to_owned(), id, error_text: event.error_text.clone(), ..Default::default() });
                 },
                 event = self.finished.next() => if let Some(event) = event {
                     let id: String = event.request_id.clone().into();
-                    if let Some(request) = self.requests_by_id.get_mut(&id) {
-                        request.finished = true;
-                    }
+                    let request = ensure_captured_request(&mut self.request_order, &mut self.requests_by_id, &id);
+                    request.finished = true;
                 },
                 _ = tokio::time::sleep(remaining) => break,
             }
@@ -1476,6 +1465,30 @@ impl NetworkCapture {
             .filter_map(|id| self.requests_by_id.get(id).cloned())
             .collect()
     }
+}
+
+fn ensure_captured_request<'a>(
+    request_order: &'a mut Vec<String>,
+    requests_by_id: &'a mut HashMap<String, CapturedRequest>,
+    id: &str,
+) -> &'a mut CapturedRequest {
+    if !requests_by_id.contains_key(id) {
+        if request_order.len() >= 2_000 {
+            let oldest = request_order.remove(0);
+            requests_by_id.remove(&oldest);
+        }
+        request_order.push(id.to_owned());
+        requests_by_id.insert(
+            id.to_owned(),
+            CapturedRequest {
+                id: id.to_owned(),
+                ..CapturedRequest::default()
+            },
+        );
+    }
+    requests_by_id
+        .get_mut(id)
+        .expect("request entry inserted or existed")
 }
 
 fn masked_headers(headers: &Value) -> BTreeMap<String, String> {
@@ -1690,6 +1703,37 @@ mod tests {
             truncate_runtime_text(&"x".repeat(4097)).len(),
             4096 + "…".len()
         );
+    }
+
+    #[test]
+    fn network_capture_merges_response_and_finish_before_request_metadata() {
+        let mut request_order = Vec::new();
+        let mut requests_by_id = HashMap::new();
+        let response =
+            ensure_captured_request(&mut request_order, &mut requests_by_id, "request-1");
+        response.status = 200;
+        response.status_text = "OK".into();
+        response.mime_type = "text/html".into();
+        response
+            .response_headers
+            .insert("content-length".into(), "115".into());
+        response.encoded_body_size = 99;
+        response.finished = true;
+
+        let request = ensure_captured_request(&mut request_order, &mut requests_by_id, "request-1");
+        request.url = "http://127.0.0.1/page".into();
+        request.method = "GET".into();
+
+        assert_eq!(request_order, vec!["request-1".to_owned()]);
+        let merged = &requests_by_id["request-1"];
+        assert_eq!(merged.url, "http://127.0.0.1/page");
+        assert_eq!(merged.method, "GET");
+        assert_eq!(merged.status, 200);
+        assert_eq!(merged.status_text, "OK");
+        assert_eq!(merged.mime_type, "text/html");
+        assert_eq!(merged.response_headers["content-length"], "115");
+        assert_eq!(merged.encoded_body_size, 99);
+        assert!(merged.finished);
     }
 
     #[test]
