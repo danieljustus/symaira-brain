@@ -26,6 +26,44 @@ mod unix {
     static NEXT: AtomicU64 = AtomicU64::new(1);
 
     #[test]
+    fn dmn006_active_handler_survives_idle_deadline() {
+        let root = tempfile::tempdir().expect("temporary daemon root");
+        let socket = root.path().join("active.sock");
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: socket.clone(),
+                session: "active".into(),
+                idle_timeout: Some(Duration::from_millis(100)),
+                operation_timeout: Duration::from_millis(700),
+                handler: Some(Arc::new(|_, _| {
+                    thread::sleep(Duration::from_millis(300));
+                    Ok((Some(serde_json::json!({"done": true})), Vec::new()))
+                })),
+                ..Default::default()
+            })
+            .expect("create daemon"),
+        );
+        let running = server.clone();
+        let thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&socket);
+        let client = Client::new(ClientOptions {
+            socket_path: socket,
+            session: "active".into(),
+            autostart: false,
+            ..Default::default()
+        });
+        let response = client
+            .request(Frame {
+                cmd: "slow".into(),
+                ..Default::default()
+            })
+            .expect("active handler keeps daemon available");
+        assert!(response.success, "active request response = {response:?}");
+        server.stop();
+        assert!(thread.join().expect("join daemon").is_ok());
+    }
+
+    #[test]
     fn autostart_retries_until_the_daemon_is_ready() {
         let root = tempfile::tempdir().expect("temporary autostart root");
         let socket = root.path().join("retry.sock");
