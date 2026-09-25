@@ -3,6 +3,7 @@ package safari
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/danieljustus/symaira-browse/internal/engine"
@@ -47,27 +48,39 @@ func (e *Engine) TabList(_ context.Context, _ engine.Context) ([]engine.TabInfo,
 	return tabs, nil
 }
 
-// TabNew opens a new named tab in window 1 and navigates it to url. The new tab
-// becomes the pinned tab for subsequent operations when PinnedTabName matches.
-func (e *Engine) TabNew(_ context.Context, _ engine.Context, label, url string) (engine.Page, error) {
+// TabNew opens a tab in window 1 and pins subsequent operations to its window
+// and index. Safari's tab name is read-only, so a caller label cannot name it.
+func (e *Engine) TabNew(ctx context.Context, _ engine.Context, _ string, url string) (engine.Page, error) {
 	e.mu.Lock()
 	closed := e.closed
 	e.mu.Unlock()
 	if closed {
 		return engine.Page{}, fmt.Errorf("safari engine: engine is closed")
 	}
+	if err := e.guardTarget(url); err != nil {
+		return engine.Page{}, err
+	}
 	tell := fmt.Sprintf(`tell application "Safari"
-	  set newTab to make new tab with properties {URL:%q} at end of tabs of window 1
-	  set name of newTab to %q
-	  return name of newTab
-	end tell`, url, label)
-	out, err := e.runner.Run(context.Background(), tell)
+	  set targetWindow to window 1
+	  make new tab with properties {URL:%q} at end of tabs of targetWindow
+	  return (id of targetWindow as text) & "\t" & (count of tabs of targetWindow as text)
+	end tell`, url)
+	out, err := e.runner.Run(ctx, tell)
 	if err != nil {
 		return engine.Page{}, err
 	}
-	name := strings.Trim(strings.TrimSpace(out), `"`)
+	parts := strings.Split(strings.TrimSpace(out), "\t")
+	if len(parts) != 2 {
+		return engine.Page{}, fmt.Errorf("safari engine: invalid new-tab reference %q", out)
+	}
+	windowID, windowErr := strconv.Atoi(parts[0])
+	tabIndex, tabErr := strconv.Atoi(parts[1])
+	if windowErr != nil || tabErr != nil || windowID <= 0 || tabIndex <= 0 {
+		return engine.Page{}, fmt.Errorf("safari engine: invalid new-tab reference %q", out)
+	}
 	e.mu.Lock()
-	e.PinnedTabName = name
+	e.pinnedWindowID = windowID
+	e.pinnedTabIndex = tabIndex
 	e.mu.Unlock()
 	return engine.Page{ID: "safari-live"}, nil
 }
@@ -86,5 +99,11 @@ func (e *Engine) TabClose(_ context.Context, _ engine.Page) error {
 	  close %s
 	end tell`, tabRef)
 	_, err := e.runner.Run(context.Background(), script)
+	if err == nil {
+		e.mu.Lock()
+		e.pinnedWindowID = 0
+		e.pinnedTabIndex = 0
+		e.mu.Unlock()
+	}
 	return err
 }

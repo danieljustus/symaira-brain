@@ -88,6 +88,9 @@ type Engine struct {
 	// "current tab of window 1" to whatever window the human last touched, so
 	// the engine never uses that reference — it addresses a named tab only.
 	PinnedTabName string
+	// A tab created by TabNew is pinned to its original window and position.
+	pinnedWindowID int
+	pinnedTabIndex int
 
 	// PollInterval is how often the engine re-checks the URL while waiting for
 	// a navigation to settle. Defaults to defaultPollInterval.
@@ -115,11 +118,13 @@ func NewWithRunner(runner Runner) *Engine {
 
 const defaultPollInterval = 250 * time.Millisecond
 
-// pinnedTabRef returns the AppleScript reference for the pinned tab. The engine
-// only ever addresses a tab by name; it never resolves "window 1" because that
-// reference has been measured to point at an unrelated window during a live
-// session.
+// pinnedTabRef returns the AppleScript reference for the pinned tab. A tab
+// created by this engine uses its original window ID and index; configured
+// attachments retain their explicit name reference.
 func (e *Engine) pinnedTabRef() string {
+	if e.pinnedWindowID > 0 && e.pinnedTabIndex > 0 {
+		return fmt.Sprintf("tab %d of window id %d", e.pinnedTabIndex, e.pinnedWindowID)
+	}
 	name := e.PinnedTabName
 	if name == "" {
 		name = "Symaira"
