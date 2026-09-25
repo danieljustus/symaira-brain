@@ -216,19 +216,16 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "auth", "back", "batch", "cache", "check", "click", "compat-sidecar", "completion", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "auth", "back", "batch", "cache", "check", "click", "compat-sidecar", "completion", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "handoff", "help", "hover", "is", "journal", "mcp", "oob", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upgrade", "upload", "version", "wait", "watch", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "trace", "diff", "network", "type", "uncheck", "upgrade", "upload", "version", "wait", "watch",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
     go_commands = set(command_names(go_root["stdout"], root=True))
-    rust_help = rust_root["stdout"].decode("utf-8", "replace")
     match = go_root["returncode"] == 0 and rust_root["returncode"] == 0
-    advertised: set[str] = set()
     advertised = set(command_names(rust_root["stdout"], root=True))
-    go_visible = advertised - {"fetch", "tools", "workflow"}
-    match = match and advertised == expected and go_visible <= go_commands
+    match = match and advertised == expected and advertised <= go_commands
     rows = [{"case": "CLI-001-supported", "argv": ["--help"], "matched": match,
              "criterion": "Rust root help lists its real command/help routes; shared advertised commands exist in Go",
              "go_commands": sorted(go_commands), "rust_commands": sorted(advertised),
