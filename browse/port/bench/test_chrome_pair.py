@@ -4,16 +4,39 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir,
-    paired_gate_passes, validate_read_output, wait_for_daemon_exit,
+    paired_gate_passes, validate_read_output, wait_for_daemon_exit, flow, measure,
 )
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_failed_open_records_code_and_stops_unusable_benchmark(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "symbrowse"
+            chrome = root / "chrome"
+            for path in (binary, chrome):
+                path.write_bytes(b"fixture")
+                path.chmod(0o700)
+            response = json.dumps({"success": False, "error": {"code": "navigation", "message": "fixture unavailable"}})
+            with patch("chrome_pair.run_cli", side_effect=[(1, response, ""), (0, "", ""), (1, "", "")]):
+                result = flow(binary, "go", chrome, None, "http://127.0.0.1/", root, 0)
+            self.assertEqual((result["error_code"], result["error_message"]), ("navigation", "fixture unavailable"))
+
+            args = SimpleNamespace(target="linux-amd64", repo=Path(__file__).resolve().parents[3],
+                                   expected_source_revision=None, go=binary, rust=binary, chrome=chrome,
+                                   chrome_version="fixture", chrome_archive_sha256="a" * 64,
+                                   chrome_launcher=None, runs=30)
+            with patch("chrome_pair.native_target_matches", return_value=True), patch("chrome_pair.flow", return_value=result) as run_flow:
+                report = measure(args)
+            self.assertEqual(run_flow.call_count, 2)
+            self.assertEqual(report["gate"], "blocked")
+
     def test_go_and_rust_use_the_same_verified_chrome_launcher(self):
         chrome = Path("/verified/cft/chrome")
         launcher = Path("/verified/cft/chrome-wrapper")

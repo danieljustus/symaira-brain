@@ -224,6 +224,13 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
                        "stdout_sha256": hashlib.sha256(opened[1].encode()).hexdigest(),
                        "stderr_sha256": hashlib.sha256(opened[2].encode()).hexdigest()}
+            try:
+                error = json.loads(opened[1]).get("error", {})
+                if isinstance(error, dict):
+                    outcome["error_code"] = str(error.get("code", ""))[:128]
+                    outcome["error_message"] = str(error.get("message", ""))[:256]
+            except (json.JSONDecodeError, AttributeError):
+                pass
         else:
             read = run_cli(binary, ["read"], session, env, root)
             elapsed = time.perf_counter_ns() - started
@@ -313,6 +320,8 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                     )
                 finally:
                     remove_owned_tempdir(temp)
+            if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
+                break
     finally:
         server.shutdown()
         thread.join(timeout=3)
