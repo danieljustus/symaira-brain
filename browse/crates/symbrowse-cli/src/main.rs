@@ -218,6 +218,9 @@ enum Action {
     },
     Watch {
         session: String,
+        take_over: bool,
+        reason: String,
+        format: Format,
     },
 }
 
@@ -415,7 +418,12 @@ fn main() -> ExitCode {
             second_url,
             format,
         }) => run_diff_url(session, first_url, second_url, format),
-        Ok(Action::Watch { session }) => run_watch(session),
+        Ok(Action::Watch {
+            session,
+            take_over,
+            reason,
+            format,
+        }) => run_watch(session, take_over, reason, format),
         Err(error) => {
             let _ = writeln!(io::stderr(), "{}", error.message);
             ExitCode::from(error.exit_code)
@@ -1208,7 +1216,47 @@ fn cli_frame(cmd: &str, session: &str, args: Option<serde_json::Value>) -> Frame
     }
 }
 
-fn run_watch(session: String) -> ExitCode {
+fn run_watch(session: String, take_over: bool, reason: String, format: Format) -> ExitCode {
+    if take_over {
+        let args = serde_json::json!({"reason": reason, "timeout": "5m"});
+        if format != Format::Text {
+            return run_dispatch(session, "handoff".into(), args, format);
+        }
+        let client = Client::new(ClientOptions {
+            socket_path: default_socket_path(&session),
+            session: session.clone(),
+            ..ClientOptions::default()
+        });
+        let response = match client.request(cli_frame("handoff", &session, Some(args))) {
+            Ok(response) => response,
+            Err(error) => return render_client_error(format, error),
+        };
+        if !response.success {
+            return render_daemon_error(format, response.error.unwrap_or_default());
+        }
+        let data = response.data.unwrap_or(serde_json::Value::Null);
+        let status = data
+            .get("status")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        let prompt_id = data
+            .get("prompt_id")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or("");
+        if !status.is_empty() {
+            return if prompt_id.is_empty() {
+                write_stdout(&format!("handoff {status}\n"))
+            } else {
+                write_stdout(&format!("handoff {status} (prompt {prompt_id})\n"))
+            };
+        }
+        return match serde_json::to_string_pretty(&data) {
+            Ok(output) => write_stdout(&format!("{output}\n")),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
     let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
     if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
         return ExitCode::from(1);
@@ -4317,7 +4365,7 @@ Use "symbrowse errors [command] --help" for more information about a command.
         ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n  replay      Replay a trace file step by step and report deviations\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
         ("trace", Some("export")) => Some("Convert the session journal into a repeatable trace file\n\nUsage:\n  symbrowse trace export [flags]\n\nFlags:\n  -h, --help         help for export\n      --out string   trace file to write (default \"trace.json\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("trace", Some("replay")) => Some("Replay a trace file step by step and report deviations\n\nUsage:\n  symbrowse trace replay <file> [flags]\n\nFlags:\n  -h, --help   help for replay\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("watch", None) => Some("Watch an agent session: stream the action journal live (read-only)\n\nUsage:\n  symbrowse watch [flags]\n\nFlags:\n  -h, --help          help for watch\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
+        ("watch", None) => Some("Watch an agent session: stream the action journal live (read-only)\n\nUsage:\n  symbrowse watch [flags]\n\nFlags:\n  -h, --help             help for watch\n      --reason string    handoff reason (required with --take-over)\n      --session string   session name (default \"default\")\n      --take-over        switch into a regular handoff instead of watching\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
         ("policy", Some("explain")) => Some("Show the effective decision for a command against a URL\n\nUsage:\n  symbrowse policy explain <command> [flags]\n\nFlags:\n  -h, --help          help for explain\n      --mode string   policy mode: mcp or tty (default: daemon mode)\n      --url string    URL whose host the rule is evaluated against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("version", None) => Some(plain(
@@ -5394,27 +5442,40 @@ fn parse_journal(values: &[String], command_index: usize) -> Result<Action, Pars
 }
 
 fn parse_watch(values: &[String], command_index: usize) -> Result<Action, ParseError> {
-    let _ = root_output_flags(&values[..command_index])?;
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
+    let mut take_over = false;
+    let mut reason = String::new();
     let mut index = command_index + 1;
     while index < values.len() {
         let value = &values[index];
         match value.as_str() {
-            "--json" => {}
+            "--json" => json = true,
             "--session" => {
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
             }
+            "--take-over" => take_over = true,
+            value if value.starts_with("--take-over=") => {
+                take_over = parse_bool("--take-over", &value[12..])?;
+            }
+            "--reason" => {
+                index += 1;
+                reason = required_value(values, index, "--reason")?.to_owned();
+            }
             "--output" => {
                 index += 1;
-                let _ = parse_format(required_value(values, index, "--output")?)?;
+                format = parse_format(required_value(values, index, "--output")?)?;
             }
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value if value.starts_with("--json=") => {
-                let _ = parse_bool("--json", &value[7..])?;
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--reason=") => {
+                reason = value[9..].to_owned();
             }
             value if value.starts_with("--output=") => {
-                let _ = parse_format(&value[9..])?;
+                format = parse_format(&value[9..])?;
             }
             value if value.starts_with('-') => return Err(unknown_flag(value)),
             _ => {
@@ -5426,7 +5487,21 @@ fn parse_watch(values: &[String], command_index: usize) -> Result<Action, ParseE
         }
         index += 1;
     }
-    Ok(Action::Watch { session })
+    if take_over && reason.is_empty() {
+        return Err(ParseError {
+            message: "watch --take-over requires --reason".into(),
+            exit_code: 2,
+        });
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Watch {
+        session,
+        take_over,
+        reason,
+        format,
+    })
 }
 
 fn parse_trace(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -7603,6 +7678,19 @@ mod tests {
             })
         );
         assert_eq!(
+            parse(&args(&[
+                "watch",
+                "--take-over=false",
+                "--reason=ignored while watching",
+            ])),
+            Ok(Action::Watch {
+                session: "default".to_owned(),
+                take_over: false,
+                reason: "ignored while watching".to_owned(),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
             parse(&args(&["--json", "downloads"])),
             Ok(Action::Downloads {
                 session: "default".to_owned(),
@@ -8664,15 +8752,35 @@ mod tests {
     }
 
     #[test]
-    fn watch_cli_parses_read_only_stream_and_session() {
+    fn watch_cli_parses_read_only_stream_and_takeover() {
         assert_eq!(
             parse(&args(&["watch", "--session=agent", "--json"])),
             Ok(Action::Watch {
                 session: "agent".to_owned(),
+                take_over: false,
+                reason: String::new(),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&[
+                "watch",
+                "--take-over",
+                "--reason",
+                "operator review",
+                "--output=yaml",
+                "--session=agent",
+            ])),
+            Ok(Action::Watch {
+                session: "agent".to_owned(),
+                take_over: true,
+                reason: "operator review".to_owned(),
+                format: Format::Yaml,
             })
         );
         assert!(parse(&args(&["watch", "extra"])).is_err());
         assert!(parse(&args(&["watch", "--take-over"])).is_err());
+        assert!(parse(&args(&["watch", "--take-over", "--reason="])).is_err());
     }
 
     #[test]
