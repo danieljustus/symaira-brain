@@ -218,23 +218,52 @@ fn write_failure(format: Format, code: ErrorCode, message: &str) -> ExitCode {
 
 fn check_engine() -> Check {
     let caps = symbrowse_engine_chrome::canonical_capabilities();
+    // The Go doctor constructs the default Chrome engine in launch mode.
+    // Rust reports only interfaces backed by implemented daemon routes, but
+    // its doctor must still describe the same default engine mode.
+    let launch_mode = "launch";
     Check::new(
         "engine",
         PASS,
         format!(
             "engine {:?} ({}): {} optional interface(s) implemented, {} unsupported",
             caps.kind,
-            caps.launch_mode,
+            launch_mode,
             caps.interfaces.len(),
             caps.unsupported.len()
         ),
     )
     .details([
         ("kind".to_owned(), caps.kind),
-        ("launch_mode".to_owned(), caps.launch_mode),
+        ("launch_mode".to_owned(), launch_mode.to_owned()),
         ("interfaces".to_owned(), caps.interfaces.join(",")),
         ("unsupported".to_owned(), caps.unsupported.join(",")),
     ])
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check_engine;
+
+    #[test]
+    fn doctor_reports_default_launch_mode_without_widening_interfaces() {
+        let check = check_engine();
+        let details = check.details.expect("engine details");
+        let capabilities = symbrowse_engine_chrome::canonical_capabilities();
+
+        assert_eq!(
+            details.get("launch_mode").map(String::as_str),
+            Some("launch")
+        );
+        assert_eq!(
+            details.get("interfaces").map(String::as_str),
+            Some(capabilities.interfaces.join(",").as_str())
+        );
+        assert_eq!(
+            details.get("unsupported").map(String::as_str),
+            Some(capabilities.unsupported.join(",").as_str())
+        );
+    }
 }
 
 fn check_browser(override_path: &str) -> (Check, Option<PathBuf>) {
