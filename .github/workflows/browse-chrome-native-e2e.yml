@@ -81,7 +81,7 @@ jobs:
             export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
           fi
           cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
-          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --nocapture
+          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --test-threads=1 --nocapture
           cargo test --locked -p symbrowse-engine-chrome --test full -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
         env:
           SYMBROWSE_E2E: '1'
@@ -94,6 +94,7 @@ jobs:
           echo "No official Chrome for Testing Windows ARM64 asset is published at ${{ steps.cft.outputs.metadata }}."
           echo "Testing that an explicitly selected but unavailable Chrome returns a typed error without engine substitution."
           cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --test-threads=1 --nocapture
         env:
           SYMBROWSE_E2E: '1'
           SYMBROWSE_E2E_EXPECT_CHROME_UNAVAILABLE: '1'

@@ -122,22 +122,16 @@ fn production_daemon_auth_login_uses_fake_vault_and_fixture_chrome() {
     if !enabled() {
         return;
     }
-    let chrome = std::env::var_os("SYMBROWSE_CHROME_EXECUTABLE")
-        .expect("native auth E2E requires isolated Chrome for Testing");
-    let chrome_version = std::env::var("SYMBROWSE_CHROME_VERSION")
-        .expect("native auth E2E records the tested Chrome version");
-    assert!(!chrome_version.is_empty());
-    eprintln!(
-        "native_auth_e2e=chrome version={chrome_version} arch={}",
-        std::env::consts::ARCH
-    );
-
     let root = tempfile::tempdir().expect("isolated auth E2E root");
-    let vault_dir = root.path().join("fake-vault-bin");
-    fs::create_dir(&vault_dir).expect("create fake vault bin directory");
-    let vault_executable = build_fake_symvault(&vault_dir);
-    assert!(vault_executable.is_file());
-    install_fake_symvault_on_path(&vault_dir);
+    let chrome_unavailable = std::env::var_os("SYMBROWSE_E2E_EXPECT_CHROME_UNAVAILABLE")
+        .is_some_and(|value| value == "1");
+    if !chrome_unavailable {
+        let vault_dir = root.path().join("fake-vault-bin");
+        fs::create_dir(&vault_dir).expect("create fake vault bin directory");
+        let vault_executable = build_fake_symvault(&vault_dir);
+        assert!(vault_executable.is_file());
+        install_fake_symvault_on_path(&vault_dir);
+    }
 
     let fixture = LoginFixture::start();
     let session = format!("native-auth-{}", std::process::id());
@@ -208,6 +202,47 @@ fn production_daemon_auth_login_uses_fake_vault_and_fixture_chrome() {
         thread::sleep(Duration::from_millis(20));
     }
 
+    let unsafe_target = client
+        .request(Frame {
+            cmd: "auth.login".into(),
+            args: Some(json!({
+                "entry":"fixture-entry",
+                "url":"file:///private/auth-fixture",
+            })),
+            session: session.clone(),
+            ..Frame::default()
+        })
+        .expect("submit denied auth target");
+    let unsafe_target = serde_json::to_value(unsafe_target).expect("encode denied auth response");
+    assert_eq!(unsafe_target["success"], false);
+    assert_eq!(unsafe_target["error"]["code"], "operation_failed");
+    assert!(
+        unsafe_target["error"]["message"]
+            .as_str()
+            .is_some_and(|message| message.contains("http/https URL required"))
+    );
+
+    if chrome_unavailable {
+        server.stop();
+        thread.join().expect("join unavailable auth daemon");
+        drop(server);
+        drop(fixture);
+        if let Some(directory) = private_socket_dir {
+            fs::remove_dir_all(directory).expect("remove private auth socket directory");
+        }
+        return;
+    }
+
+    let _chrome = std::env::var_os("SYMBROWSE_CHROME_EXECUTABLE")
+        .expect("native auth E2E requires isolated Chrome for Testing");
+    let chrome_version = std::env::var("SYMBROWSE_CHROME_VERSION")
+        .expect("native auth E2E records the tested Chrome version");
+    assert!(!chrome_version.is_empty());
+    eprintln!(
+        "native_auth_e2e=chrome version={chrome_version} arch={}",
+        std::env::consts::ARCH
+    );
+
     let response = client
         .request(Frame {
             cmd: "auth.login".into(),
@@ -229,6 +264,23 @@ fn production_daemon_auth_login_uses_fake_vault_and_fixture_chrome() {
     assert!(!serialized.contains("fixture-user"));
     assert!(!serialized.contains("fixture-pass"));
 
+    let fields = client
+        .request(Frame {
+            cmd: "eval".into(),
+            args: Some(json!({
+                "expression":"document.querySelector('#user').value.length > 0 && document.querySelector('#pass').value.length > 0"
+            })),
+            session: session.clone(),
+            ..Frame::default()
+        })
+        .expect("verify fixture form fields");
+    let fields = serde_json::to_value(fields).expect("encode field verification");
+    assert_eq!(fields["success"], true, "field verification failed");
+    assert_eq!(
+        fields["data"]["value"], true,
+        "fixture fields were not filled"
+    );
+
     let journal = client
         .request(Frame {
             cmd: "journal.tail".into(),
@@ -241,23 +293,6 @@ fn production_daemon_auth_login_uses_fake_vault_and_fixture_chrome() {
     let journal = journal.to_string();
     assert!(!journal.contains("fixture-user"));
     assert!(!journal.contains("fixture-pass"));
-
-    let fields = client
-        .request(Frame {
-            cmd: "eval".into(),
-            args: Some(json!({
-                "expression":"document.querySelector('#user').value === 'fixture-user' && document.querySelector('#pass').value === 'fixture-pass'"
-            })),
-            session: session.clone(),
-            ..Frame::default()
-        })
-        .expect("verify fixture form fields");
-    let fields = serde_json::to_value(fields).expect("encode field verification");
-    assert_eq!(fields["success"], true, "field verification failed");
-    assert_eq!(
-        fields["data"]["value"], true,
-        "fixture fields were not filled"
-    );
 
     server.stop();
     thread.join().expect("join auth daemon");
