@@ -12,6 +12,12 @@ pub(super) fn script(shell: &str) -> Option<&'static str> {
     }
 }
 
+/// The Cobra `--no-descriptions` generator changes the shell-compgen request
+/// protocol while leaving the rest of the checked-in template unchanged.
+pub(super) fn script_without_descriptions(shell: &str) -> Option<String> {
+    script(shell).map(|script| script.replace("__complete", "__completeNoDesc"))
+}
+
 /// Implements the hidden request used by the generated Cobra V2 shell scripts.
 pub(super) fn complete(args: &[String]) -> String {
     let Some(prefix) = args.last() else {
@@ -41,6 +47,20 @@ pub(super) fn complete(args: &[String]) -> String {
         output.push('\n');
     }
     output.push_str(if no_file_completion { ":4\n" } else { ":0\n" });
+    output
+}
+
+/// Implements Cobra's `__completeNoDesc` hidden request protocol.
+pub(super) fn complete_no_descriptions(args: &[String]) -> String {
+    let mut output = String::new();
+    for line in complete(args).lines() {
+        if line.starts_with(':') {
+            output.push_str(line);
+        } else {
+            output.push_str(line.split_once('\t').map_or(line, |(name, _)| name));
+        }
+        output.push('\n');
+    }
     output
 }
 
@@ -216,6 +236,18 @@ mod tests {
     }
 
     #[test]
+    fn no_description_script_uses_cobra_no_desc_request_protocol() {
+        for shell in ["bash", "zsh", "fish", "powershell"] {
+            let regular = script(shell).expect("known shell");
+            let without_descriptions = script_without_descriptions(shell).expect("known shell");
+            assert!(regular.contains(" __complete "));
+            assert!(without_descriptions.contains(" __completeNoDesc "));
+            assert!(!without_descriptions.contains(" __complete "));
+        }
+        assert!(script_without_descriptions("unknown").is_none());
+    }
+
+    #[test]
     fn hidden_completion_uses_only_the_implemented_command_tree() {
         let root = complete(&[String::new()]);
         assert!(root.contains("doctor\tCheck browser discovery"));
@@ -236,11 +268,23 @@ mod tests {
     }
 
     #[test]
+    fn no_description_protocol_drops_candidate_descriptions_only() {
+        assert_eq!(
+            complete_no_descriptions(&["cookies".into(), "list".into(), "--".into()]),
+            "--json\n--output\n--reveal\n--session\n--help\n:4\n"
+        );
+        assert_eq!(
+            complete_no_descriptions(&["cookies".into(), "".into()]),
+            "clear\nlist\nset\n:4\n"
+        );
+    }
+
+    #[test]
     fn parser_exposes_only_supported_shell_generators_and_hidden_protocol() {
         for shell in ["bash", "zsh", "fish", "powershell"] {
             let args = [OsString::from("completion"), OsString::from(shell)];
             assert!(
-                matches!(parse(&args), Ok(Action::Completion { shell: actual }) if actual == shell)
+                matches!(parse(&args), Ok(Action::Completion { shell: actual, no_descriptions: false }) if actual == shell)
             );
         }
         let request = [
@@ -249,8 +293,26 @@ mod tests {
             OsString::new(),
         ];
         assert!(
-            matches!(parse(&request), Ok(Action::CompletionRequest { args }) if args == vec!["cookies".to_owned(), String::new()])
+            matches!(parse(&request), Ok(Action::CompletionRequest { args, no_descriptions: false }) if args == vec!["cookies".to_owned(), String::new()])
         );
+        let no_desc_request = [
+            OsString::from("__completeNoDesc"),
+            OsString::from("cookies"),
+            OsString::new(),
+        ];
+        assert!(matches!(
+            parse(&no_desc_request),
+            Ok(Action::CompletionRequest { args, no_descriptions: true })
+                if args == vec!["cookies".to_owned(), String::new()]
+        ));
+        assert!(matches!(
+            parse(&[OsString::from("completion"), OsString::from("bash"), OsString::from("--no-descriptions")]),
+            Ok(Action::Completion { shell, no_descriptions: true }) if shell == "bash"
+        ));
+        assert!(matches!(
+            parse(&[OsString::from("completion"), OsString::from("bash"), OsString::from("--help")]),
+            Ok(Action::Help(help)) if help.contains("--no-descriptions") && help.contains("completion bash")
+        ));
         assert!(parse(&[OsString::from("completion"), OsString::from("auth")]).is_err());
     }
 }

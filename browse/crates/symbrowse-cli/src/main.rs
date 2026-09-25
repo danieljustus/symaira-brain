@@ -73,9 +73,11 @@ enum Action {
     CompatSidecar,
     Completion {
         shell: String,
+        no_descriptions: bool,
     },
     CompletionRequest {
         args: Vec<String>,
+        no_descriptions: bool,
     },
     RootVersion,
     Version {
@@ -304,14 +306,26 @@ fn main() -> ExitCode {
     match parse(&args) {
         Ok(Action::Help(text)) => write_stdout(&text),
         Ok(Action::CompatSidecar) => run_compat_sidecar(),
-        Ok(Action::Completion { shell }) => match completion::script(&shell) {
+        Ok(Action::Completion {
+            shell,
+            no_descriptions,
+        }) => match completion::script(&shell) {
+            Some(_) if no_descriptions => completion::script_without_descriptions(&shell)
+                .map_or_else(|| ExitCode::from(2), |script| write_stdout(&script)),
             Some(script) => write_stdout(script),
             None => {
                 let _ = writeln!(io::stderr(), "unsupported shell {:?}", shell);
                 ExitCode::from(2)
             }
         },
-        Ok(Action::CompletionRequest { args }) => write_stdout(&completion::complete(&args)),
+        Ok(Action::CompletionRequest {
+            args,
+            no_descriptions,
+        }) => write_stdout(&if no_descriptions {
+            completion::complete_no_descriptions(&args)
+        } else {
+            completion::complete(&args)
+        }),
         Ok(Action::RootVersion) => write_stdout(&render_root_version(VERSION)),
         Ok(Action::Version { structured: true }) => match render_version_json(VERSION) {
             Ok(output) => write_stdout(&output),
@@ -4041,9 +4055,13 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         .iter()
         .map(|value| value.to_string_lossy().into_owned())
         .collect();
-    if values.first().is_some_and(|value| value == "__complete") {
+    if values
+        .first()
+        .is_some_and(|value| matches!(value.as_str(), "__complete" | "__completeNoDesc"))
+    {
         return Ok(Action::CompletionRequest {
             args: values[1..].to_vec(),
+            no_descriptions: values[0] == "__completeNoDesc",
         });
     }
     if values.first().is_some_and(|value| value == "completion") {
@@ -4225,28 +4243,75 @@ fn run_compat_sidecar() -> ExitCode {
 
 fn parse_completion(values: &[String]) -> Result<Action, ParseError> {
     if values
-        .iter()
-        .skip(1)
-        .any(|value| matches!(value.as_str(), "-h" | "--help"))
+        .get(1)
+        .is_some_and(|value| matches!(value.as_str(), "-h" | "--help"))
     {
         return Ok(Action::Help(completion_help().to_owned()));
     }
-    if values.len() != 2 {
+    let Some(shell) = values.get(1).map(String::as_str) else {
         return Err(ParseError {
             message: "completion requires one shell: bash, zsh, fish or powershell".to_owned(),
             exit_code: 2,
         });
-    }
-    let shell = values[1].as_str();
+    };
     if completion::script(shell).is_none() {
         return Err(ParseError {
             message: format!("unsupported shell {shell:?}; choose bash, zsh, fish or powershell"),
             exit_code: 2,
         });
     }
+    if values
+        .iter()
+        .skip(2)
+        .any(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        return Ok(Action::Help(completion_shell_help(shell).to_owned()));
+    }
+    let mut no_descriptions = false;
+    for value in values.iter().skip(2) {
+        match value.as_str() {
+            "--no-descriptions" => no_descriptions = true,
+            value if value.starts_with("--no-descriptions=") => {
+                no_descriptions = parse_bool("--no-descriptions", &value[18..])?;
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Err(ParseError {
+                    message: format!("unknown argument {value:?}"),
+                    exit_code: 2,
+                });
+            }
+        }
+    }
     Ok(Action::Completion {
         shell: shell.to_owned(),
+        no_descriptions,
     })
+}
+
+fn completion_shell_help(shell: &str) -> String {
+    let (description, long) = match shell {
+        "bash" => (
+            "Generate the autocompletion script for the bash shell",
+            "This script depends on the 'bash-completion' package.\nIf it is not installed already, you can install it via your OS's package manager.\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion bash)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion bash > /etc/bash_completion.d/symbrowse\n\n#### macOS:\n\n\tsymbrowse completion bash > $(brew --prefix)/etc/bash_completion.d/symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "zsh" => (
+            "Generate the autocompletion script for the zsh shell",
+            "If shell completion is not already enabled in your environment you will need\nto enable it. You can execute the following once:\n\n\techo \"autoload -U compinit; compinit\" >> ~/.zshrc\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion zsh)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion zsh > \"${fpath[1]}/_symbrowse\"\n\n#### macOS:\n\n\tsymbrowse completion zsh > $(brew --prefix)/share/zsh/site-functions/_symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "fish" => (
+            "Generate the autocompletion script for the fish shell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion fish | source\n\nTo load completions for every new session, execute once:\n\n\tsymbrowse completion fish > ~/.config/fish/completions/symbrowse.fish\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "powershell" => (
+            "Generate the autocompletion script for powershell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion powershell | Out-String | Invoke-Expression\n\nTo load completions for every new session, add the output of the above command\nto your powershell profile.",
+        ),
+        _ => return completion_help().to_owned(),
+    };
+    format!(
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}\n\nFlags:\n      --no-descriptions   disable completion descriptions\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+    )
 }
 
 fn completion_help() -> &'static str {
