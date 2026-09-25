@@ -405,7 +405,7 @@ func (e *Engine) answerPausedRequest(ctx context.Context, sessionID, requestID, 
 		_ = e.call(ctx, sessionID, cdproto.CommandFetchFailRequest, struct {
 			RequestID   string `json:"requestId"`
 			ErrorReason string `json:"errorReason"`
-		}{requestID, "BlockedByClient"}, &result)
+		}{requestID, cdpBlockedByClient}, &result)
 		return
 	}
 	body := ""

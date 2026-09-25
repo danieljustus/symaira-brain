@@ -22,6 +22,7 @@ const (
 	cdpCommandFetchFail        = "Fetch.failRequest"
 	cdpCommandTargetAutoAttach = "Target.setAutoAttach"
 	cdpCommandNetworkEnable    = "Network.enable"
+	cdpBlockedByClient         = "BlockedByClient"
 )
 
 // fetchEnableParams is the Fetch.enable payload. The catch-all pattern with
@@ -70,7 +71,7 @@ type targetAttachedToTargetParams struct {
 
 // networkPolicy enforces the domain allowlist on the CDP network path. It is
 // deny-by-default: every request that is not explicitly allowed is failed
-// with "blockedByClient" and counted for the warnings[] report.
+// with CDP's "BlockedByClient" reason and counted for the warnings[] report.
 type networkPolicy struct {
 	allowlist *policy.Allowlist
 	ssrf      *policy.SSRFGuard
@@ -181,7 +182,7 @@ func (p *networkPolicy) handleRequestPaused(sessionID string, params json.RawMes
 func (p *networkPolicy) respondBlocked(sessionID, requestID, rawURL, resourceType, reason string) {
 	p.record(rawURL, resourceType, reason)
 	ctx := context.Background()
-	if err := p.call(ctx, sessionID, cdpCommandFetchFail, fetchFailParams{RequestID: requestID, ErrorReason: "blockedByClient"}, nil); err != nil {
+	if err := p.call(ctx, sessionID, cdpCommandFetchFail, fetchFailParams{RequestID: requestID, ErrorReason: cdpBlockedByClient}, nil); err != nil {
 		slog.Debug("network policy: failRequest failed", "error", err)
 	}
 }
