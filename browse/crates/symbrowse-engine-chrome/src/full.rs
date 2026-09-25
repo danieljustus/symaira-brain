@@ -16,7 +16,7 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, input, network, page},
+    cdp::browser_protocol::{accessibility, browser, dom, fetch, input, network, page},
     cdp::js_protocol::runtime::{self, EvaluateParams},
     layout::Point,
 };
@@ -345,6 +345,7 @@ pub struct ChromePage {
     download_session: String,
     download_frame: Arc<Mutex<String>>,
     runtime_events: Arc<Mutex<RuntimeEventState>>,
+    network_guard_enabled: Arc<Mutex<bool>>,
 }
 
 #[derive(Clone)]
@@ -457,7 +458,64 @@ impl ChromePage {
             download_session,
             download_frame,
             runtime_events: Arc::new(Mutex::new(RuntimeEventState::default())),
+            network_guard_enabled: Arc::new(Mutex::new(false)),
         })
+    }
+
+    /// Enforce daemon URL policy on this page's redirects and subresources.
+    pub async fn enable_network_guard(
+        &self,
+        allowed_domains: Vec<String>,
+        ssrf_enabled: bool,
+        allow_private: bool,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let allowlist = symbrowse_core::policy::Allowlist::parse(&allowed_domains)?;
+        if !allowlist.active() && !ssrf_enabled {
+            return Ok(());
+        }
+        let mut enabled = self.network_guard_enabled.lock().await;
+        if *enabled {
+            return Ok(());
+        }
+        let mut paused = self
+            .page
+            .event_listener::<fetch::EventRequestPaused>()
+            .await?;
+        self.page.execute(fetch::EnableParams::default()).await?;
+        *enabled = true;
+        drop(enabled);
+
+        let page = self.page.clone();
+        tokio::spawn(async move {
+            while let Some(event) = paused.next().await {
+                let target = event.request.url.clone();
+                let allowlist = allowlist.clone();
+                let allowed = tokio::task::spawn_blocking(move || {
+                    if !allowlist.allows_url(&target) {
+                        return false;
+                    }
+                    !ssrf_enabled
+                        || symbrowse_core::policy::SsrfGuard::new(allow_private)
+                            .allows_url(&target)
+                            .is_ok()
+                })
+                .await
+                .unwrap_or(false);
+                if allowed {
+                    let _ = page
+                        .execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
+                        .await;
+                } else {
+                    let _ = page
+                        .execute(fetch::FailRequestParams::new(
+                            event.request_id.clone(),
+                            network::ErrorReason::BlockedByClient,
+                        ))
+                        .await;
+                }
+            }
+        });
+        Ok(())
     }
 
     /// Enable per-page console and uncaught-exception capture, matching the

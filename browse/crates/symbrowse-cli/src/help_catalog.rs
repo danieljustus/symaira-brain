@@ -802,6 +802,57 @@ Global Flags:
       --session string   daemon session name (default "default")
 "###,
         ),
+        "handoff" => Some(
+            r###"Hand the session over to the human without losing it (2FA, CAPTCHA, approval)
+
+Usage:
+  symbrowse handoff --reason <text> [flags]
+
+Flags:
+  -h, --help             help for handoff
+      --session string   session name (default "default")
+      --timeout string   maximum wait before the handoff times out (default "5m")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+"###,
+        ),
+        "oob" => Some(
+            r###"Inspect the out-of-band human channel
+
+Usage:
+  symbrowse oob [command]
+
+Available Commands:
+  status      Show whether an out-of-band prompt is pending
+
+Flags:
+  -h, --help             help for oob
+      --session string   session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse oob [command] --help" for more information about a command.
+"###,
+        ),
+        "oob status" => Some(
+            r###"Show whether an out-of-band prompt is pending
+
+Usage:
+  symbrowse oob status [flags]
+
+Flags:
+  -h, --help   help for status
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   session name (default "default")
+"###,
+        ),
         _ => None,
     }
 }

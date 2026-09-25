@@ -10,7 +10,7 @@ use symbrowse_core::{
         Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
         Store as JournalStore,
     },
-    policy::{Allowlist, Mode as PolicyMode, Policy, classify, policy_host},
+    policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
     state::{Cookie, OriginState},
@@ -735,6 +735,7 @@ impl DispatchRuntime {
     }
 
     async fn browser_command(&self, frame: &Frame) -> HandlerResult {
+        self.guard_navigation_target(frame).await?;
         if self.spec.mode == "browser" && self.spec.engine == "firefox" {
             return self.firefox_command(frame).await;
         }
@@ -856,7 +857,20 @@ impl DispatchRuntime {
                     .get("url")
                     .and_then(Value::as_str)
                     .unwrap_or("about:blank");
-                let page = session.new_page(url).await.map_err(runtime_error)?;
+                let page = session
+                    .new_page("about:blank")
+                    .await
+                    .map_err(runtime_error)?;
+                page.enable_network_guard(
+                    self.spec.allowed_domains.clone(),
+                    self.spec.ssrf_enabled,
+                    self.spec.allow_private,
+                )
+                .await
+                .map_err(runtime_error)?;
+                if url != "about:blank" {
+                    page.open(url).await.map_err(runtime_error)?;
+                }
                 let label = args.get("label").and_then(Value::as_str).unwrap_or("");
                 let mut guard = self
                     .browser
@@ -1592,6 +1606,91 @@ impl DispatchRuntime {
         Ok((Some(data), Vec::new()))
     }
 
+    async fn guard_navigation_target(&self, frame: &Frame) -> Result<(), DaemonError> {
+        let target = match frame.cmd.as_str() {
+            "open" | "goto" => {
+                let args = object_args(frame)?;
+                Some(match args.get("url") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(target)) => target,
+                    Some(_) => return Err(malformed("navigation url must be a string")),
+                })
+            }
+            "tab.new" => {
+                let args = object_args(frame)?;
+                let target = match args.get("url") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(target)) => target,
+                    Some(_) => return Err(malformed("tab.new url must be a string")),
+                };
+                (!target.trim().is_empty()).then_some(target)
+            }
+            "read" => {
+                let args = object_args(frame)?;
+                match args.get("url") {
+                    None | Some(Value::Null) => None,
+                    Some(Value::String(target)) if !target.trim().is_empty() => {
+                        Some(target.as_str())
+                    }
+                    Some(Value::String(_)) => None,
+                    Some(_) => return Err(malformed("read url must be a string")),
+                }
+            }
+            _ => None,
+        };
+        let Some(target) = target else {
+            return Ok(());
+        };
+        self.guard_navigation_url(target).await
+    }
+
+    pub(super) async fn guard_navigation_url(&self, target: &str) -> Result<(), DaemonError> {
+        let parsed = match url::Url::parse(target.trim()) {
+            Ok(parsed) => parsed,
+            Err(url::ParseError::RelativeUrlWithoutBase) => {
+                return Err(runtime_error(format!(
+                    "navigation URL policy: unsupported target {target:?} (http/https URL required)"
+                )));
+            }
+            Err(error) => {
+                return Err(runtime_error(format!(
+                    "navigation URL policy: invalid URL {target:?}: {error}"
+                )));
+            }
+        };
+        if !matches!(parsed.scheme(), "http" | "https") || parsed.host_str().is_none() {
+            return Err(runtime_error(format!(
+                "navigation URL policy: unsupported target {target:?} (http/https URL required)"
+            )));
+        }
+        let normalized_url = parsed.as_str();
+        if self
+            .allowlist
+            .as_ref()
+            .is_some_and(|allowlist| !allowlist.allows_url(normalized_url))
+        {
+            return Err(runtime_error(format!(
+                "navigation URL policy: target {target:?} is blocked by the domain allowlist"
+            )));
+        }
+        if self.spec.ssrf_enabled {
+            let original_target = target.to_owned();
+            let normalized_url = normalized_url.to_owned();
+            let allow_private = self.spec.allow_private;
+            let result = tokio::task::spawn_blocking(move || {
+                SsrfGuard::new(allow_private).allows_url(&normalized_url)
+            })
+            .await
+            .map_err(runtime_error)?;
+            result.map_err(|error| {
+                runtime_error(format!(
+                    "navigation URL policy: target {original_target:?} is blocked by the SSRF guard: {error}"
+                ))
+            })?;
+        }
+        Ok(())
+    }
+
     async fn flow_run(&self, frame: &Frame, operation: OperationContext) -> HandlerResult {
         let args = object_args(frame)?;
         let source = required_string(args, "yaml")?;
@@ -1927,6 +2026,13 @@ impl DispatchRuntime {
             .new_page("about:blank")
             .await
             .map_err(runtime_error)?;
+        page.enable_network_guard(
+            self.spec.allowed_domains.clone(),
+            self.spec.ssrf_enabled,
+            self.spec.allow_private,
+        )
+        .await
+        .map_err(runtime_error)?;
         let result = page.clone();
         let mut guard = self
             .browser
@@ -2682,6 +2788,82 @@ mod tests {
             browser_runtime.handle().runtime_flavor(),
             tokio::runtime::RuntimeFlavor::MultiThread
         );
+    }
+
+    #[test]
+    fn browser_navigation_admission_runs_before_engine_access() {
+        let mut spec = temp_spec("navigation-admission");
+        spec.engine = "firefox".into();
+        spec.mode = "browser".into();
+        spec.allowed_domains = vec!["allowed.example".into()];
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+
+        for (command, url, expected) in [
+            (
+                "open",
+                "relative-probe",
+                "navigation URL policy: unsupported target \"relative-probe\" (http/https URL required)",
+            ),
+            (
+                "goto",
+                "data:text/html,unsafe",
+                "navigation URL policy: unsupported target \"data:text/html,unsafe\" (http/https URL required)",
+            ),
+            (
+                "tab.new",
+                "about:blank",
+                "navigation URL policy: unsupported target \"about:blank\" (http/https URL required)",
+            ),
+            (
+                "read",
+                "relative-probe",
+                "navigation URL policy: unsupported target \"relative-probe\" (http/https URL required)",
+            ),
+            (
+                "open",
+                "https://blocked.example/path",
+                "navigation URL policy: target \"https://blocked.example/path\" is blocked by the domain allowlist",
+            ),
+        ] {
+            let frame = Frame {
+                cmd: command.into(),
+                args: Some(json!({"url":url})),
+                session: "navigation-admission".into(),
+                ..Frame::default()
+            };
+            let error = runtime
+                .runtime
+                .block_on(runtime.browser_command(&frame))
+                .expect_err("navigation must be denied before engine startup");
+            assert_eq!(error.code, codes::OPERATION_FAILED, "{command} {url}");
+            assert_eq!(error.message, expected, "{command} {url}");
+            assert!(
+                runtime.browser.lock().expect("browser lock").is_none(),
+                "denied {command} {url} touched the browser"
+            );
+        }
+
+        let mut spec = temp_spec("navigation-ssrf-admission");
+        spec.engine = "chrome".into();
+        spec.mode = "browser".into();
+        spec.ssrf_enabled = true;
+        spec.allow_private = false;
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+        let frame = Frame {
+            cmd: "open".into(),
+            args: Some(json!({"url":"http://127.0.0.1:8080/private"})),
+            session: "navigation-ssrf-admission".into(),
+            ..Frame::default()
+        };
+        let error = runtime
+            .runtime
+            .block_on(runtime.browser_command(&frame))
+            .expect_err("private navigation must be denied before engine startup");
+        assert_eq!(error.code, codes::OPERATION_FAILED);
+        assert!(error.message.contains("blocked by the SSRF guard"));
+        assert!(runtime.browser.lock().expect("browser lock").is_none());
     }
 
     fn unique_test_root(name: &str) -> PathBuf {

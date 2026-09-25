@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,12 +15,14 @@ import (
 
 type contract struct {
 	Open                  daemon.Response `json:"open"`
+	SubresourcePolicy     daemon.Response `json:"subresource_policy"`
 	OpenFragment          daemon.Response `json:"open_fragment"`
 	OpenRelative          daemon.Response `json:"open_relative"`
 	OpenBlank             daemon.Response `json:"open_blank"`
 	OpenData              daemon.Response `json:"open_data"`
 	ScrollIntoView        daemon.Response `json:"scroll_into_view"`
 	TabNew                daemon.Response `json:"tab_new"`
+	TabNewRelative        daemon.Response `json:"tab_new_relative"`
 	InspectText           daemon.Response `json:"inspect_text"`
 	InspectHTML           daemon.Response `json:"inspect_html"`
 	InspectTitle          daemon.Response `json:"inspect_title"`
@@ -80,8 +83,13 @@ func run() error {
 	if _, err := registry.Ensure("chrome-contract"); err != nil {
 		return fmt.Errorf("ensure oracle session: %w", err)
 	}
+	fixture, err := url.Parse(os.Args[2])
+	if err != nil || fixture.Hostname() == "" {
+		return fmt.Errorf("parse fixture URL for domain policy: %q", os.Args[2])
+	}
 	runtime := daemon.NewNavigationRuntime(registry, os.Args[1], daemon.NavigationRuntimeOptions{
 		Headless:       true,
+		AllowedDomains: []string{fixture.Hostname()},
 		RequestTimeout: 45 * time.Second,
 	})
 	defer func() { _ = runtime.Close() }()
@@ -98,6 +106,13 @@ func run() error {
 	if !result.Open.Success {
 		return fmt.Errorf("Go open oracle failed: %s", responseJSON(result.Open))
 	}
+	policyProbe := fmt.Sprintf("new Promise(resolve => { const image = new Image(); image.onload = () => resolve('loaded'); image.onerror = () => resolve('blocked'); image.src = 'http://localhost:%s/policy-pixel'; })", fixture.Port())
+	result.SubresourcePolicy = call(runtime, ctx, daemon.Frame{
+		Cmd: "eval", Session: "chrome-contract", Args: mustJSON(map[string]string{"expression": policyProbe}),
+	})
+	if !result.SubresourcePolicy.Success || result.SubresourcePolicy.Data == nil {
+		return fmt.Errorf("Go subresource policy oracle failed: %s", responseJSON(result.SubresourcePolicy))
+	}
 	result.OpenFragment = call(runtime, ctx, daemon.Frame{
 		Cmd:     "open",
 		Session: "chrome-contract",
@@ -111,8 +126,8 @@ func run() error {
 		Session: "chrome-contract",
 		Args:    mustJSON(map[string]string{"url": "relative-probe"}),
 	})
-	if !result.OpenRelative.Success {
-		return fmt.Errorf("Go relative open oracle failed: %s", responseJSON(result.OpenRelative))
+	if result.OpenRelative.Success {
+		return fmt.Errorf("Go relative open unexpectedly succeeded: %s", responseJSON(result.OpenRelative))
 	}
 	// Go enables capture on the first network.requests call for an existing tab.
 	result.NetworkCapture = call(runtime, ctx, daemon.Frame{
@@ -242,6 +257,14 @@ func run() error {
 	})
 	if !result.TabNew.Success {
 		return fmt.Errorf("Go tab.new oracle failed: %s", responseJSON(result.TabNew))
+	}
+	result.TabNewRelative = call(runtime, ctx, daemon.Frame{
+		Cmd:     "tab.new",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": "relative-probe"}),
+	})
+	if result.TabNewRelative.Success {
+		return fmt.Errorf("Go relative tab.new unexpectedly succeeded: %s", responseJSON(result.TabNewRelative))
 	}
 	result.InspectText = call(runtime, ctx, daemon.Frame{
 		Cmd:     "get.text",
@@ -404,16 +427,16 @@ func run() error {
 		Session: "chrome-contract",
 		Args:    mustJSON(map[string]string{"url": "about:blank"}),
 	})
-	if !result.OpenBlank.Success {
-		return fmt.Errorf("Go about:blank open oracle failed: %s", responseJSON(result.OpenBlank))
+	if result.OpenBlank.Success {
+		return fmt.Errorf("Go about:blank open unexpectedly succeeded: %s", responseJSON(result.OpenBlank))
 	}
 	result.OpenData = call(runtime, ctx, daemon.Frame{
 		Cmd:     "open",
 		Session: "chrome-contract",
 		Args:    mustJSON(map[string]string{"url": "data:text/html,<title>daemon</title><h1>native</h1><div style='height:12000px'><div id='target' style='margin-top:8000px;height:100px'></div></div>"}),
 	})
-	if !result.OpenData.Success {
-		return fmt.Errorf("Go data: open oracle failed: %s", responseJSON(result.OpenData))
+	if result.OpenData.Success {
+		return fmt.Errorf("Go data: open unexpectedly succeeded: %s", responseJSON(result.OpenData))
 	}
 	return json.NewEncoder(os.Stdout).Encode(result)
 }

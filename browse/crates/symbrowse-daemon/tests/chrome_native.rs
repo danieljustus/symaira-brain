@@ -75,7 +75,13 @@ impl ChromeContractServer {
                             .next()
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
-                        let (content_type, extra_headers, body) = if path == "/download" {
+                        let (content_type, extra_headers, body) = if path == "/policy-pixel" {
+                            (
+                                "image/svg+xml; charset=utf-8",
+                                "",
+                                "<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'><rect width='1' height='1'/></svg>",
+                            )
+                        } else if path == "/download" {
                             (
                                 "application/octet-stream",
                                 "Content-Disposition: attachment; filename=\"fixture.txt\"\r\n",
@@ -296,6 +302,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         let chrome_executable = std::env::var("SYMBROWSE_CHROME_EXECUTABLE")
             .expect("set SYMBROWSE_CHROME_EXECUTABLE to the tested CfT binary");
         let contract_server = ChromeContractServer::start();
+        spec.allowed_domains = vec!["127.0.0.1".into()];
         let go_oracle = go_chrome_tab_oracle(&chrome_executable, &contract_server.base_url);
         (Some(contract_server), Some(go_oracle))
     };
@@ -393,6 +400,29 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "open result fields: Rust={rust_open} Go={}",
         go_oracle["open"]
     );
+    let fixture_port = contract_server
+        .base_url
+        .rsplit(':')
+        .next()
+        .expect("fixture port");
+    let policy_probe = format!(
+        "new Promise(resolve => {{ const image = new Image(); image.onload = () => resolve('loaded'); image.onerror = () => resolve('blocked'); image.src = 'http://localhost:{fixture_port}/policy-pixel'; }})"
+    );
+    let rust_subresource_policy = request(&client, "eval", json!({"expression":policy_probe}));
+    assert_eq!(
+        rust_subresource_policy["success"], go_oracle["subresource_policy"]["success"],
+        "subresource policy eval: Rust={rust_subresource_policy} Go={}",
+        go_oracle["subresource_policy"]
+    );
+    assert_eq!(
+        rust_subresource_policy["data"]["value"], go_oracle["subresource_policy"]["data"]["value"],
+        "subresource policy: Rust={rust_subresource_policy} Go={}",
+        go_oracle["subresource_policy"]
+    );
+    assert_eq!(
+        rust_subresource_policy["data"]["value"], "blocked",
+        "allowlist did not block the loopback alias: {rust_subresource_policy}"
+    );
     let rust_open_fragment = request(
         &client,
         "open",
@@ -420,13 +450,13 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         go_oracle["open_relative"]
     );
     assert_eq!(
-        rust_open_relative["data"]["url"], go_oracle["open_relative"]["data"]["url"],
-        "relative open URL: Rust={rust_open_relative} Go={}",
+        rust_open_relative["error"]["code"], go_oracle["open_relative"]["error"]["code"],
+        "relative open error code: Rust={rust_open_relative} Go={}",
         go_oracle["open_relative"]
     );
     assert_eq!(
-        rust_open_relative["data"], go_oracle["open_relative"]["data"],
-        "relative open fields: Rust={rust_open_relative} Go={}",
+        rust_open_relative["error"]["message"], go_oracle["open_relative"]["error"]["message"],
+        "relative open error: Rust={rust_open_relative} Go={}",
         go_oracle["open_relative"]
     );
     let network_started = request(&client, "network.requests", json!({}));
@@ -644,6 +674,23 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     );
     assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
     assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
+    let rust_tab_new_relative = request(&client, "tab.new", json!({"url":"relative-probe"}));
+    assert_eq!(
+        rust_tab_new_relative["success"], go_oracle["tab_new_relative"]["success"],
+        "relative tab.new: Rust={rust_tab_new_relative} Go={}",
+        go_oracle["tab_new_relative"]
+    );
+    assert_eq!(
+        rust_tab_new_relative["error"]["code"], go_oracle["tab_new_relative"]["error"]["code"],
+        "relative tab.new error code: Rust={rust_tab_new_relative} Go={}",
+        go_oracle["tab_new_relative"]
+    );
+    assert_eq!(
+        rust_tab_new_relative["error"]["message"],
+        go_oracle["tab_new_relative"]["error"]["message"],
+        "relative tab.new error: Rust={rust_tab_new_relative} Go={}",
+        go_oracle["tab_new_relative"]
+    );
     for (command, oracle_key, args) in [
         ("get.text", "inspect_text", json!({"selector":"#popup"})),
         ("get.html", "inspect_html", json!({})),
@@ -797,13 +844,13 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         go_oracle["open_blank"]
     );
     assert_eq!(
-        rust_open_blank["data"]["url"], go_oracle["open_blank"]["data"]["url"],
-        "about:blank open URL: Rust={rust_open_blank} Go={}",
+        rust_open_blank["error"]["code"], go_oracle["open_blank"]["error"]["code"],
+        "about:blank open error code: Rust={rust_open_blank} Go={}",
         go_oracle["open_blank"]
     );
     assert_eq!(
-        rust_open_blank["data"], go_oracle["open_blank"]["data"],
-        "about:blank open fields: Rust={rust_open_blank} Go={}",
+        rust_open_blank["error"]["message"], go_oracle["open_blank"]["error"]["message"],
+        "about:blank open error: Rust={rust_open_blank} Go={}",
         go_oracle["open_blank"]
     );
     let opened = request(
@@ -817,20 +864,20 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         go_oracle["open_data"]
     );
     assert_eq!(
-        opened["data"]["url"], go_oracle["open_data"]["data"]["url"],
-        "data: open URL: Rust={opened} Go={}",
+        opened["error"]["code"], go_oracle["open_data"]["error"]["code"],
+        "data: open error code: Rust={opened} Go={}",
         go_oracle["open_data"]
     );
     assert_eq!(
-        opened["data"], go_oracle["open_data"]["data"],
-        "data: open fields: Rust={opened} Go={}",
+        opened["error"]["message"], go_oracle["open_data"]["error"]["message"],
+        "data: open error: Rust={opened} Go={}",
         go_oracle["open_data"]
     );
     let script = request(&client, "read", json!({}));
     assert!(
         script["data"]
             .as_str()
-            .is_some_and(|text| text.contains("native")),
+            .is_some_and(|text| text.contains("managed tab fixture")),
         "read response: {script}"
     );
     let popup_source = request(
