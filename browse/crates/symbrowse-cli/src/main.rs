@@ -379,6 +379,9 @@ fn run_dispatch(
     mut args: serde_json::Value,
     format: Format,
 ) -> ExitCode {
+    if command == "network.requests" {
+        return run_network_requests(session, args, format);
+    }
     let cookie_reveal = if command == "cookies.list" {
         args.as_object_mut()
             .and_then(|args| args.remove("reveal"))
@@ -563,6 +566,127 @@ fn run_dispatch(
     } else {
         render_daemon_error(format, response.error.unwrap_or_default())
     }
+}
+
+fn run_network_requests(session: String, args: serde_json::Value, format: Format) -> ExitCode {
+    let filter = args
+        .get("filter")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_lowercase();
+    let request_type = args
+        .get("type")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_lowercase();
+    let method = args
+        .get("method")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_lowercase();
+    let status = args
+        .get("status")
+        .and_then(serde_json::Value::as_i64)
+        .filter(|status| *status > 0);
+    let max_tokens = args
+        .get("max_tokens")
+        .and_then(serde_json::Value::as_i64)
+        .filter(|value| *value > 0);
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    for cmd in ["network.capture", "network.requests"] {
+        let response = match client.request(Frame {
+            cmd: cmd.to_owned(),
+            session: session.clone(),
+            max_tokens: if cmd == "network.requests" {
+                max_tokens
+            } else {
+                None
+            },
+            retrieval_surface: if cmd == "network.requests" { "cli" } else { "" }.into(),
+            ..Frame::default()
+        }) {
+            Ok(response) => response,
+            Err(error) => return render_client_error(format, error),
+        };
+        if !response.success {
+            return render_daemon_error(format, response.error.unwrap_or_default());
+        }
+        if cmd == "network.requests" {
+            let requests = response
+                .data
+                .as_ref()
+                .and_then(|data| data.get("requests"))
+                .and_then(serde_json::Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            let filtered = requests
+                .into_iter()
+                .filter(|entry| {
+                    let field = |name: &str| {
+                        entry
+                            .get(name)
+                            .and_then(serde_json::Value::as_str)
+                            .unwrap_or_default()
+                    };
+                    let status_matches = status.is_none_or(|expected| {
+                        entry
+                            .get("status")
+                            .and_then(serde_json::Value::as_f64)
+                            .is_some_and(|actual| actual as i64 == expected)
+                    });
+                    (filter.is_empty() || field("url").to_lowercase().contains(&filter))
+                        && (request_type.is_empty() || field("type").to_lowercase() == request_type)
+                        && (method.is_empty() || field("method").to_lowercase() == method)
+                        && status_matches
+                })
+                .collect::<Vec<_>>();
+            if format == Format::Text {
+                let mut output = String::new();
+                for entry in &filtered {
+                    let field = |name: &str| {
+                        entry
+                            .get(name)
+                            .and_then(serde_json::Value::as_str)
+                            .unwrap_or_default()
+                    };
+                    output.push_str(&format!(
+                        "{} {} {}\n",
+                        field("method"),
+                        field("url"),
+                        field("type")
+                    ));
+                }
+                return write_stdout(&output);
+            }
+            let list = if filtered.is_empty() {
+                serde_json::Value::Null
+            } else {
+                serde_json::Value::Array(filtered.clone())
+            };
+            let output = match serde_json::to_string_pretty(&serde_json::json!({
+                "requests": list,
+                "count": filtered.len(),
+            })) {
+                Ok(mut output) => {
+                    output.push('\n');
+                    output
+                }
+                Err(error) => {
+                    return render_dispatch_error(
+                        format,
+                        daemon_codes::OPERATION_FAILED,
+                        error.to_string(),
+                    );
+                }
+            };
+            return write_stdout(&output);
+        }
+    }
+    ExitCode::SUCCESS
 }
 
 fn run_cookie_import(session: String, path: PathBuf) -> ExitCode {
@@ -781,19 +905,18 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
     let raw = match fs::read(&path) {
         Ok(raw) => raw,
         Err(error) => {
-            return render_dispatch_error(format, "internal", format!("read trace: {error}"));
+            return render_trace_input_error(format, format!("read trace: {error}"));
         }
     };
     let file = match serde_json::from_slice::<trace::File>(&raw) {
         Ok(file) => file,
         Err(error) => {
-            return render_dispatch_error(format, "internal", format!("parse trace: {error}"));
+            return render_trace_input_error(format, format!("parse trace: {error}"));
         }
     };
     if file.schema_version != trace::SCHEMA_VERSION {
-        return render_dispatch_error(
+        return render_trace_input_error(
             format,
-            "internal",
             format!("unsupported trace schema version {}", file.schema_version),
         );
     }
@@ -813,13 +936,9 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
             Err(error) => return render_client_error(format, error),
         };
         if !response.success {
-            return render_daemon_error(format, response.error.unwrap_or_default());
+            return render_trace_daemon_error(format, response.error.unwrap_or_default());
         }
-        return render_dispatch_error(
-            format,
-            daemon_codes::OPERATION_FAILED,
-            "trace contains no replayable steps".to_owned(),
-        );
+        return render_trace_input_error(format, "trace contains no replayable steps".to_owned());
     }
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
@@ -926,6 +1045,55 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
         Err(error) => {
             render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
         }
+    }
+}
+
+fn render_trace_input_error(format: Format, message: String) -> ExitCode {
+    let envelope = Envelope::failure(ErrorCode::Internal, message);
+    if format == Format::Text {
+        if let Some(error) = envelope.error.as_ref() {
+            let _ = writeln!(io::stderr(), "{}", error.message);
+        }
+    } else {
+        render_trace_error_envelope(envelope, format);
+    }
+    // The Go CLI maps unclassified trace file errors to ExitSoftware (1).
+    ExitCode::from(1)
+}
+
+fn render_trace_daemon_error(format: Format, error: DaemonError) -> ExitCode {
+    let mapped = error_code(&error.code);
+    let message = format!("{message}: {message}", message = error.message);
+    if format == Format::Text {
+        let _ = writeln!(io::stderr(), "{message}");
+    } else {
+        let mut envelope = Envelope::failure(mapped, message);
+        if let Some(payload) = envelope.error.as_mut() {
+            payload.hint = error.hint;
+            payload.details = error.details;
+            payload.retryable = error.retryable;
+            payload.requires_user_confirmation = error.requires_user_confirmation;
+            payload.resume_hint = error.resume_hint;
+        }
+        render_trace_error_envelope(envelope, format);
+    }
+    ExitCode::from(mapped.exit_code())
+}
+
+fn render_trace_error_envelope(envelope: Envelope, format: Format) {
+    if format == Format::Yaml {
+        if let Ok(output) = envelope.render(format) {
+            let output = if output.contains("    hint:") {
+                output
+            } else {
+                output.replace("    details:", "    hint: \"\"\n    details:")
+            };
+            let _ = write_stdout(&output);
+        } else {
+            let _ = writeln!(io::stderr(), "dispatch failed");
+        }
+    } else {
+        render_envelope_error(envelope, format);
     }
 }
 
@@ -2777,6 +2945,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "journal" => parse_journal(&values, command_index),
         "trace" => parse_trace(&values, command_index),
         "diff" => parse_diff(&values, command_index),
+        "network" => parse_network(&values, command_index),
         "profiles" => {
             let mut arguments = values;
             arguments.remove(command_index);
@@ -2828,7 +2997,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -2890,6 +3059,8 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("network", None) => Some("Inspect captured page requests\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n  -h, --help            help for requests\n      --filter string   only URLs containing this substring\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string   only this HTTP method\n      --status int      only this HTTP status code\n      --type string     only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("diff", Some("url")) => Some("Open two URLs and diff their extracted content\n\nUsage:\n  symbrowse diff url <url1> <url2> [flags]\n\nFlags:\n  -h, --help   help for url\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
@@ -3938,6 +4109,91 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
             exit_code: 2,
         }),
         _ => unreachable!("diff subcommand selected from supported names"),
+    }
+}
+
+fn parse_network(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut subcommand = None;
+    let mut args = serde_json::Map::new();
+    let mut positional = Vec::new();
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "requests" if subcommand.is_none() => subcommand = Some("requests"),
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--filter" | "--type" | "--method" | "--status" | "--max-tokens" => {
+                let name = value.as_str();
+                index += 1;
+                let argument = required_value(values, index, name)?;
+                if name == "--status" || name == "--max-tokens" {
+                    let number = argument.parse::<i64>().map_err(|_| ParseError {
+                        message: format!("invalid value {argument:?} for {name}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                } else {
+                    args.insert(name[2..].into(), argument.into());
+                }
+            }
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value
+                if value.starts_with("--filter=")
+                    || value.starts_with("--type=")
+                    || value.starts_with("--method=")
+                    || value.starts_with("--status=")
+                    || value.starts_with("--max-tokens=") =>
+            {
+                let (name, argument) = value.split_once('=').expect("equals flag");
+                if name == "--status" || name == "--max-tokens" {
+                    let number = argument.parse::<i64>().map_err(|_| ParseError {
+                        message: format!("invalid value {argument:?} for {name}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                } else {
+                    args.insert(name[2..].into(), argument.into());
+                }
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ if subcommand.is_none() => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse network\""),
+                    exit_code: 2,
+                });
+            }
+            _ => positional.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    match subcommand {
+        None => Ok(Action::Help(command_help("network", &[]).unwrap())),
+        Some("requests") if positional.is_empty() => Ok(Action::Dispatch {
+            session,
+            command: "network.requests".into(),
+            args: serde_json::Value::Object(args),
+            format,
+        }),
+        Some("requests") => Err(ParseError {
+            message: format!("unknown argument {:?}", positional[0]),
+            exit_code: 2,
+        }),
+        _ => unreachable!("network subcommand selected from supported names"),
     }
 }
 

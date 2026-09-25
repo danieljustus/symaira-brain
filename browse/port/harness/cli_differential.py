@@ -149,7 +149,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "type", "uncheck", "upload", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -312,6 +312,13 @@ class UnixDaemonStub:
                         data = {"name": frame.get("session", "default"), "active_tabs": 0}
                     elif frame.get("cmd") == "a11y":
                         data = {"nodes": []}
+                    elif frame.get("cmd") == "network.capture":
+                        data = {"started": True}
+                    elif frame.get("cmd") == "network.requests":
+                        data = {"requests": [
+                            {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
+                            {"id": "r2", "method": "GET", "url": "https://fixture.invalid/app.js", "type": "Script", "status": 200},
+                        ], "count": 2}
                     elif frame.get("cmd") == "snapshot":
                         data = {"tree": "shared\nafter\n", "refs": {}}
                     else:
@@ -498,6 +505,13 @@ class WindowsNamedPipeStub:
                         data = {"name": frame.get("session", SESSION), "active_tabs": 0}
                     elif frame.get("cmd") == "a11y":
                         data = {"nodes": []}
+                    elif frame.get("cmd") == "network.capture":
+                        data = {"started": True}
+                    elif frame.get("cmd") == "network.requests":
+                        data = {"requests": [
+                            {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
+                            {"id": "r2", "method": "GET", "url": "https://fixture.invalid/app.js", "type": "Script", "status": 200},
+                        ], "count": 2}
                     elif frame.get("cmd") == "snapshot":
                         data = {"tree": "shared\nafter\n", "refs": {}}
                     else:
@@ -612,11 +626,12 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             has_a11y_url = (argv[:1] == ["a11y"] and any(
                 value.startswith(("http://", "https://")) for value in argv[1:]))
             is_diff_url = argv[:2] == ["diff", "url"]
+            is_network_requests = argv[:2] == ["network", "requests"]
             go_count = 2 if has_a11y_url or is_diff_url else 1
             # Client.request verifies daemon.status after each command frame.
             # diff url performs two reads, so the Rust stub must answer four
             # connections while the Go client sends only its two reads.
-            rust_count = 4 if has_a11y_url or is_diff_url else 2
+            rust_count = 4 if has_a11y_url or is_diff_url or is_network_requests else 2
             if os.name == "nt":
                 with WindowsNamedPipeStub(session=session, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
@@ -677,6 +692,23 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if argv[:2] == ["network", "requests"]:
+            go_actual = [payload_raw(frame) for frame in go_frames if frame.get("cmd") != "daemon.status"]
+            rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
+            sequence_match = (
+                len(go_actual) == 1 and go_actual[0] is not None
+                and go_actual[0].get("cmd") == "network.requests"
+                and len(rust_actual) == 2 and rust_actual[0] is not None and rust_actual[1] is not None
+                and [frame.get("cmd") for frame in rust_actual] == ["network.capture", "network.requests"]
+                and all(frame.get("session") == session for frame in go_actual + rust_actual if frame is not None)
+                and all(frame.get("args") is None for frame in go_actual + rust_actual if frame is not None)
+            )
+            row["network_capture_sequence_match"] = sequence_match
+            row["go_actual_frames"] = go_actual
+            row["rust_actual_frames"] = rust_actual
+            output_match = all(go_result.get(key) == rust_result.get(key)
+                               for key in ("returncode", "stdout", "stderr"))
+            row["matched"] = bool(output_match and sequence_match and not go_error and not rust_error)
         if argv[:2] == ["diff", "url"]:
             go_actual = [payload_raw(frame) for frame in go_frames if frame.get("cmd") != "daemon.status"]
             rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
@@ -759,6 +791,10 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["policy", "explain", "snapshot", "extra"], b"", False),
         ("CLI-002", ["upload", "input[type=file]", "one.txt", "two.txt"], b"", True),
         ("CLI-002", ["upload", "@e2", "--json", "--", "-leading-dash.txt"], b"", True),
+        ("CLI-002", ["network", "requests"], b"", True),
+        ("CLI-002", ["network", "requests", "--filter", "API", "--type", "xhr", "--method", "post", "--status", "201", "--json"], b"", True),
+        ("CLI-002", ["network", "requests", "--output=yaml"], b"", True),
+        ("CLI-003", ["network", "requests", "extra"], b"", False),
         ("CLI-003", ["upload"], b"", False),
         ("CLI-003", ["upload", "input[type=file]"], b"", False),
         ("CLI-003", ["state", "save"], b"", False),
