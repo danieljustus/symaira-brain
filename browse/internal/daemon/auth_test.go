@@ -72,6 +72,19 @@ func TestVaultResolverDelegates(t *testing.T) {
 	}
 }
 
+func TestVaultResolverErrorsDoNotExposeEntryHandle(t *testing.T) {
+	resolver := &VaultResolver{
+		LookPath: func(string) (string, error) { return "/bin/symvault", nil },
+		Run: func(context.Context, string, ...string) ([]byte, error) {
+			return nil, errors.New("lookup failed")
+		},
+	}
+	_, err := resolver.Resolve(context.Background(), "synthetic-private-handle")
+	if err == nil || strings.Contains(err.Error(), "synthetic-private-handle") {
+		t.Fatalf("entry handle leaked in resolver error: %v", err)
+	}
+}
+
 func TestRedactSecrets(t *testing.T) {
 	redacted := redactSecrets("failed to fill field with p@ssw0rd for ada", "p@ssw0rd", "ada")
 	if strings.Contains(redacted, "p@ssw0rd") || strings.Contains(redacted, "ada") {

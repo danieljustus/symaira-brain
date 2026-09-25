@@ -45,11 +45,11 @@ func (r *VaultResolver) Resolve(ctx context.Context, entry string) (VaultCredent
 		return VaultCredentials{}, ErrVaultUnavailable
 	}
 	if err != nil {
-		return VaultCredentials{}, fmt.Errorf("symvault could not resolve entry %q: %w", entry, err)
+		return VaultCredentials{}, fmt.Errorf("symvault could not resolve entry: %w", err)
 	}
 	creds, err := parseVaultOutput(string(out))
 	if err != nil {
-		return VaultCredentials{}, fmt.Errorf("symvault entry %q: %w", entry, err)
+		return VaultCredentials{}, fmt.Errorf("symvault entry: %w", err)
 	}
 	return creds, nil
 }
