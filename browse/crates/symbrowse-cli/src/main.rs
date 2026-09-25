@@ -3399,7 +3399,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("network", None) => Some("Inspect captured page requests\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
-        ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n  -h, --help            help for downloads\n      --dir string      set the download directory first\n      --session string  session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
+        ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n      --dir string       set the download directory first\n  -h, --help             help for downloads\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n  -h, --help            help for requests\n      --filter string   only URLs containing this substring\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string   only this HTTP method\n      --status int      only this HTTP status code\n      --type string     only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
@@ -6922,6 +6922,22 @@ mod tests {
         assert_eq!(super::decode_standard_base64("YQ==x"), Err(4));
         assert_eq!(super::decode_standard_base64("YQ=\n"), Err(4));
         assert_eq!(super::decode_standard_base64("AA==\nA"), Err(5));
+    }
+
+    #[test]
+    fn downloads_help_matches_cobra_flag_order_and_padding() {
+        let help = command_help("downloads", &[]).expect("downloads help");
+        let dir = help
+            .find("      --dir string       set the download directory first")
+            .unwrap();
+        let usage = help
+            .find("  -h, --help             help for downloads")
+            .unwrap();
+        let session = help
+            .find("      --session string   session name (default \"default\")")
+            .unwrap();
+        assert!(dir < usage && usage < session);
+        assert_eq!(help.len(), 521);
     }
 
     #[test]
