@@ -253,6 +253,23 @@ fn xdg_home_fallbacks_and_relative_values_match_go_path_joining() {
         home.join(".local/state/symbrowse")
     );
 
+    context.xdg_config_home = Some(PathBuf::new());
+    context.xdg_cache_home = Some(PathBuf::new());
+    context.xdg_state_home = Some(PathBuf::new());
+    let result = load(&context).expect("load with empty XDG values");
+    assert_eq!(
+        PathBuf::from(result.config.config_dir),
+        home.join(".config/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.cache_dir),
+        home.join(".cache/symbrowse")
+    );
+    assert_eq!(
+        PathBuf::from(result.config.state_dir),
+        home.join(".local/state/symbrowse")
+    );
+
     context.xdg_config_home = Some(PathBuf::from("relative/config"));
     context.xdg_cache_home = Some(PathBuf::from("relative/cache"));
     context.xdg_state_home = Some(PathBuf::from("relative/state"));

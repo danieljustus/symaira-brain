@@ -297,15 +297,21 @@ struct PartialConfig {
 pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     let config_home = context
         .xdg_config_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".config"));
     let cache_home = context
         .xdg_cache_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".cache"));
     let state_home = context
         .xdg_state_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".local").join("state"));
     let mut config = Config {
         log_level: "warn".to_owned(),
