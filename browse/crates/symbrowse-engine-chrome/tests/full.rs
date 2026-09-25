@@ -164,12 +164,12 @@ async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label:
         .await
         .expect("pierce overlay shadow root");
     let node_id = overlay_button_node(&document.root, label).expect("overlay button node");
-    let model = page
+    let response = page
         .raw()
         .execute(dom::GetBoxModelParams::builder().node_id(node_id).build())
         .await
-        .expect("overlay button box model")
-        .model;
+        .expect("overlay button box model");
+    let model = response.result.model;
     let quad = model.content.inner();
     let x = [quad[0], quad[2], quad[4], quad[6]].iter().sum::<f64>() / 4.0;
     let y = [quad[1], quad[3], quad[5], quad[7]].iter().sum::<f64>() / 4.0;
