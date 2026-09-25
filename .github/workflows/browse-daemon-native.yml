@@ -66,6 +66,7 @@ jobs:
           go_binary="$RUNNER_TEMP/symbrowse-go"
           if [[ "$RUNNER_OS" == Windows ]]; then go_binary+=.exe; fi
           SYMBROWSE_COMPAT_BINARY="$go_binary" cargo test --locked -p symbrowse-cli --test compat_sidecar_proxy
+          SYMBROWSE_COMPAT_BINARY="$go_binary" cargo test --locked -p symbrowse-cli --test compat_sidecar_proxy -- --ignored --exact compat_sidecar_forwards_real_go_handshake_on_native_platform
       - name: Run SEC-007 redaction corpus on native runner
         run: |
           cargo test --locked -p symbrowse-cli --test redaction_corpus
