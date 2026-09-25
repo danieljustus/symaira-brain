@@ -150,7 +150,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["policy"], ["policy", "explain"], ["trace", "export"], ["diff", "snapshot"],
+        ["policy"], ["policy", "explain"], ["trace", "export"], ["diff", "snapshot"], ["diff", "url"],
         ["journal"], ["journal", "tail"], ["journal", "show"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
@@ -240,6 +240,9 @@ class UnixDaemonStub:
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
+                    elif frame.get("cmd") == "read":
+                        url = (frame.get("args") or {}).get("url", "")
+                        data = {"title": "Fixture", "html": f"<p>{url.rsplit('/', 1)[-1]}</p>"}
                     elif frame.get("cmd") == "policy.explain":
                         data = {"explanation": "fixture policy explanation", "source": "built-in",
                                 "decider": "policy", "guard_active": False}
@@ -408,6 +411,9 @@ class WindowsNamedPipeStub:
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
+                    elif frame.get("cmd") == "read":
+                        url = (frame.get("args") or {}).get("url", "")
+                        data = {"title": "Fixture", "html": f"<p>{url.rsplit('/', 1)[-1]}</p>"}
                     elif frame.get("cmd") == "policy.explain":
                         data = {"explanation": "fixture policy explanation", "source": "built-in",
                                 "decider": "policy", "guard_active": False}
@@ -534,8 +540,9 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
         try:
             has_a11y_url = (argv[:1] == ["a11y"] and any(
                 value.startswith(("http://", "https://")) for value in argv[1:]))
-            go_count = 2 if has_a11y_url else 1
-            rust_count = 4 if has_a11y_url else 2
+            is_diff_url = argv[:2] == ["diff", "url"]
+            go_count = 2 if has_a11y_url or is_diff_url else 1
+            rust_count = 4 if has_a11y_url else (3 if is_diff_url else 2)
             if os.name == "nt":
                 with WindowsNamedPipeStub(session=session, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
@@ -606,7 +613,7 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             row["rust_actual_frames"] = rust_actual
             row["daemon_actual_frames_match"] = go_actual == rust_actual
             row["matched"] = bool(row["matched"] and row["daemon_actual_frames_match"])
-        if argv[:2] == ["diff", "snapshot"]:
+        if argv[:1] == ["diff"]:
             def actual_frames(frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 return [payload_raw(frame) for frame in frames if frame.get("cmd") != "daemon.status"]
 
@@ -839,6 +846,7 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
     comparisons.extend([
         compare_diff_snapshot(go, rust, env, []),
         compare_diff_snapshot(go, rust, env, ["--json"]),
+        compare_diff_url(go, rust, env),
     ])
     return comparisons
 
@@ -866,6 +874,15 @@ def compare_diff_snapshot(go: Path, rust: Path, env: dict[str, str],
             baseline_path.unlink()
         except FileNotFoundError:
             pass
+
+
+def compare_diff_url(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
+    argv = ["diff", "url", "https://fixture.invalid/before", "https://fixture.invalid/after",
+            "--session", "fixture"]
+    row = compare_processes(go, rust, argv, b"", env, stub=True)
+    row["case"] = "CLI-001-diff-url"
+    row["criterion"] = "both ordered read requests and the URL diff output match Go"
+    return row
 
 
 def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:

@@ -162,6 +162,12 @@ enum Action {
         baseline: Option<PathBuf>,
         format: Format,
     },
+    DiffUrl {
+        session: String,
+        first_url: String,
+        second_url: String,
+        format: Format,
+    },
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -324,6 +330,12 @@ fn main() -> ExitCode {
             baseline,
             format,
         }) => run_diff_snapshot(session, baseline, format),
+        Ok(Action::DiffUrl {
+            session,
+            first_url,
+            second_url,
+            format,
+        }) => run_diff_url(session, first_url, second_url, format),
         Err(error) => {
             let _ = writeln!(io::stderr(), "{}", error.message);
             ExitCode::from(error.exit_code)
@@ -757,6 +769,38 @@ fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode 
 
 fn run_diff_snapshot(session: String, baseline: Option<PathBuf>, format: Format) -> ExitCode {
     let has_baseline = baseline.is_some();
+    let before = if let Some(path) = baseline.as_ref() {
+        let raw = match fs::read(path) {
+            Ok(raw) => raw,
+            Err(error) => {
+                let _ = writeln!(io::stderr(), "read baseline {:?}: {error}", path);
+                return ExitCode::from(1);
+            }
+        };
+        let stored = match serde_json::from_slice::<serde_json::Value>(&raw) {
+            Ok(stored) => stored,
+            Err(error) => {
+                let _ = writeln!(io::stderr(), "decode baseline {:?}: {error}", path);
+                return ExitCode::from(1);
+            }
+        };
+        match stored.get("tree") {
+            None => Some(String::new()),
+            Some(tree) => match tree.as_str() {
+                Some(tree) => Some(tree.to_owned()),
+                None => {
+                    let _ = writeln!(
+                        io::stderr(),
+                        "decode baseline {:?}: tree must be a string",
+                        path
+                    );
+                    return ExitCode::from(1);
+                }
+            },
+        }
+    } else {
+        None
+    };
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
@@ -778,25 +822,7 @@ fn run_diff_snapshot(session: String, baseline: Option<PathBuf>, format: Format)
     if !response.success {
         return render_daemon_error(format, response.error.unwrap_or_default());
     }
-    let data = if let Some(path) = baseline {
-        let raw = match fs::read(&path) {
-            Ok(raw) => raw,
-            Err(error) => {
-                let _ = writeln!(io::stderr(), "read baseline {:?}: {error}", path);
-                return ExitCode::from(1);
-            }
-        };
-        let stored = match serde_json::from_slice::<serde_json::Value>(&raw) {
-            Ok(stored) => stored,
-            Err(error) => {
-                let _ = writeln!(io::stderr(), "decode baseline {:?}: {error}", path);
-                return ExitCode::from(1);
-            }
-        };
-        let before = stored
-            .get("tree")
-            .and_then(serde_json::Value::as_str)
-            .unwrap_or_default();
+    let data = if let Some(before) = before.as_deref() {
         let after = response
             .data
             .as_ref()
@@ -849,6 +875,54 @@ fn snapshot_tree_diff(before: &str, after: &str) -> serde_json::Value {
 
 fn snapshot_lines(value: &str) -> Vec<&str> {
     value.split('\n').filter(|line| !line.is_empty()).collect()
+}
+
+fn run_diff_url(
+    session: String,
+    first_url: String,
+    second_url: String,
+    format: Format,
+) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let mut contents = Vec::with_capacity(2);
+    for url in [first_url, second_url] {
+        let response = match client.request(Frame {
+            cmd: "read".into(),
+            args: Some(serde_json::json!({"url": url})),
+            session: session.clone(),
+            ..Frame::default()
+        }) {
+            Ok(response) => response,
+            Err(error) => return render_client_error(format, error),
+        };
+        if !response.success {
+            return render_daemon_error(format, response.error.unwrap_or_default());
+        }
+        let title = response
+            .data
+            .as_ref()
+            .and_then(|data| data.get("title"))
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default();
+        let html = response
+            .data
+            .as_ref()
+            .and_then(|data| data.get("html"))
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default();
+        contents.push(format!("{title}\n{html}"));
+    }
+    let data = snapshot_tree_diff(&contents[0], &contents[1]);
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => {
+            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+        }
+    }
 }
 
 fn go_json_html_escape(json: String) -> String {
@@ -2607,8 +2681,9 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
+        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n  -h, --help             help for snapshot\n      --baseline string   baseline snapshot JSON file to compare against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
+        ("diff", Some("url")) => Some("Open two URLs and diff their extracted content\n\nUsage:\n  symbrowse diff url <url1> <url2> [flags]\n\nFlags:\n  -h, --help   help for url\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
         ("trace", Some("export")) => Some("Convert the session journal into a repeatable trace file\n\nUsage:\n  symbrowse trace export [flags]\n\nFlags:\n  -h, --help         help for export\n      --out string   trace file to write (default \"trace.json\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
@@ -3580,6 +3655,7 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
         let value = &values[index];
         match value.as_str() {
             "snapshot" if subcommand.is_none() => subcommand = Some("snapshot"),
+            "url" if subcommand.is_none() => subcommand = Some("url"),
             "--json" => json = true,
             "--output" => {
                 index += 1;
@@ -3629,6 +3705,16 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
                 "unknown command {:?} for \"symbrowse diff snapshot\"",
                 positional[0]
             ),
+            exit_code: 2,
+        }),
+        Some("url") if positional.len() == 2 => Ok(Action::DiffUrl {
+            session,
+            first_url: positional[0].clone(),
+            second_url: positional[1].clone(),
+            format,
+        }),
+        Some("url") => Err(ParseError {
+            message: format!("requires 2 arg(s), only received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("diff subcommand selected from supported names"),
@@ -6119,6 +6205,48 @@ mod tests {
             })
         );
         assert!(parse(&args(&["diff", "snapshot", "extra"])).is_err());
+    }
+
+    #[test]
+    fn diff_url_cli_requires_two_targets_and_preserves_format() {
+        assert_eq!(
+            parse(&args(&[
+                "diff",
+                "url",
+                "https://before.invalid",
+                "https://after.invalid",
+                "--session=fixture",
+                "--json",
+            ])),
+            Ok(Action::DiffUrl {
+                session: "fixture".into(),
+                first_url: "https://before.invalid".into(),
+                second_url: "https://after.invalid".into(),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["diff", "url", "https://only.invalid"])).is_err());
+    }
+
+    #[test]
+    fn diff_url_cli_requires_two_targets_and_preserves_format() {
+        assert_eq!(
+            parse(&args(&[
+                "diff",
+                "url",
+                "https://before.invalid",
+                "https://after.invalid",
+                "--session=fixture",
+                "--json",
+            ])),
+            Ok(Action::DiffUrl {
+                session: "fixture".into(),
+                first_url: "https://before.invalid".into(),
+                second_url: "https://after.invalid".into(),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["diff", "url", "https://only.invalid"])).is_err());
     }
 
     #[test]
