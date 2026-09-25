@@ -344,12 +344,22 @@ impl ChromePage {
         let downloads = Arc::new(Mutex::new(DownloadRegistry::new()));
         let download_frame = Arc::new(Mutex::new(String::new()));
         let event_frame = Arc::clone(&download_frame);
-        let mut begins = browser
-            .event_listener::<browser::EventDownloadWillBegin>()
-            .await?;
-        let mut progress = browser
-            .event_listener::<browser::EventDownloadProgress>()
-            .await?;
+        // Chrome routes Browser.download* through either the target session
+        // or the browser connection, depending on the platform/CDP session.
+        let mut begins = futures::stream::select(
+            page.event_listener::<browser::EventDownloadWillBegin>()
+                .await?,
+            browser
+                .event_listener::<browser::EventDownloadWillBegin>()
+                .await?,
+        );
+        let mut progress = futures::stream::select(
+            page.event_listener::<browser::EventDownloadProgress>()
+                .await?,
+            browser
+                .event_listener::<browser::EventDownloadProgress>()
+                .await?,
+        );
         let event_downloads = Arc::clone(&downloads);
         let event_session = download_session.clone();
         tokio::spawn(async move {
