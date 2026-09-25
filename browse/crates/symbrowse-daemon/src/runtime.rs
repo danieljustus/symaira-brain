@@ -706,7 +706,7 @@ impl DispatchRuntime {
         let data = match frame.cmd.as_str() {
             "console.list" => {
                 page.enable_runtime_events().await.map_err(runtime_error)?;
-                let entries = page.runtime_console_events().await;
+                let entries = go_runtime_entries(page.runtime_console_events().await);
                 let count = entries.as_array().map_or(0, Vec::len);
                 json!({"entries": entries, "count": count})
             }
@@ -716,7 +716,7 @@ impl DispatchRuntime {
             }
             "errors.list" => {
                 page.enable_runtime_events().await.map_err(runtime_error)?;
-                let entries = page.runtime_error_events().await;
+                let entries = go_runtime_entries(page.runtime_error_events().await);
                 let count = entries.as_array().map_or(0, Vec::len);
                 json!({"entries": entries, "count": count})
             }
@@ -2560,6 +2560,14 @@ fn empty_runtime_events_payload(command: &str) -> Value {
     }
 }
 
+fn go_runtime_entries(entries: Value) -> Value {
+    if entries.as_array().is_some_and(Vec::is_empty) {
+        Value::Null
+    } else {
+        entries
+    }
+}
+
 fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
@@ -3325,6 +3333,14 @@ mod tests {
                 .unwrap_or_else(|error| panic!("{command} failed: {error}"));
             assert_eq!(data.expect("runtime event data"), expected, "{command}");
         }
+    }
+
+    #[test]
+    fn active_runtime_event_lists_encode_empty_go_slices_as_null() {
+        assert_eq!(go_runtime_entries(json!([])), Value::Null);
+        let populated = json!([{"type":"warning","text":"message"}]);
+        assert_eq!(go_runtime_entries(populated.clone()), populated);
+        assert_eq!(go_runtime_entries(Value::Null), Value::Null);
     }
 
     #[test]
