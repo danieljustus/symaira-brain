@@ -69,10 +69,8 @@ pub fn redact_str(input: &str) -> String {
             {
                 separator += 1;
             }
-            let had_space = separator != start + key.len();
             let value_start = match output.as_bytes().get(separator) {
                 Some(b'=' | b':') => separator + 1,
-                Some(_) if had_space => separator,
                 _ => {
                     cursor = start + key.len();
                     continue;
@@ -261,5 +259,10 @@ mod tests {
         let header = redact_str("Authorization: Bearer fixture-secret\nstatus: 401");
         assert!(!header.contains("fixture-secret"), "{header}");
         assert!(header.contains("status: 401"));
+
+        let risk_error = "header \"Authorization\" requires the credential risk class";
+        assert_eq!(redact_str(risk_error), risk_error);
+        let credential = redact_str("credential=fixture-secret");
+        assert!(!credential.contains("fixture-secret"), "{credential}");
     }
 }
