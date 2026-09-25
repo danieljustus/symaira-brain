@@ -21,6 +21,15 @@ func startTestServer(t *testing.T, handler Handler) (*Server, string, context.Ca
 }
 
 func startTestServerWithPeerValidator(t *testing.T, handler Handler, peerValidator func(net.Conn) error) (*Server, string, context.CancelFunc) {
+	return startTestServerWithOptions(t, Options{
+		Handler:          handler,
+		IdleTimeout:      -1,
+		OperationTimeout: 25 * time.Millisecond,
+		PeerValidator:    peerValidator,
+	})
+}
+
+func startTestServerWithOptions(t *testing.T, options Options) (*Server, string, context.CancelFunc) {
 	t.Helper()
 	dir, err := os.MkdirTemp("", "sb-")
 	if err != nil {
@@ -29,7 +38,8 @@ func startTestServerWithPeerValidator(t *testing.T, handler Handler, peerValidat
 	t.Cleanup(func() { _ = os.RemoveAll(dir) })
 	path := filepath.Join(dir, "default.sock")
 	ctx, cancel := context.WithCancel(context.Background())
-	server := NewServer(Options{SocketPath: path, Handler: handler, IdleTimeout: -1, OperationTimeout: 25 * time.Millisecond, PeerValidator: peerValidator})
+	options.SocketPath = path
+	server := NewServer(options)
 	ready := make(chan error, 1)
 	go func() { ready <- server.ListenAndServe(ctx) }()
 	deadline := time.Now().Add(time.Second)
@@ -245,8 +255,19 @@ func TestClientDisconnectDoesNotCancelBlockedHandlerOrStopDaemon(t *testing.T) {
 }
 
 func TestStatusAndStop(t *testing.T) {
-	server, path, _ := startTestServer(t, func(context.Context, Frame) (any, []Warning, error) {
-		return nil, nil, errors.New("unexpected handler")
+	server, path, _ := startTestServerWithOptions(t, Options{
+		Handler: func(context.Context, Frame) (any, []Warning, error) {
+			return nil, nil, errors.New("unexpected handler")
+		},
+		IdleTimeout:      -1,
+		OperationTimeout: 25 * time.Millisecond,
+		Engine:           "firefox",
+		Policy: PolicyStatus{
+			AllowedDomains:   []string{"example.test"},
+			SSRFEnabled:      true,
+			FetchSSRFEnabled: true,
+			AllowPrivate:     false,
+		},
 	})
 	client := NewClient(ClientOptions{SocketPath: path, Session: "default", StartDaemon: nil})
 	status, err := client.RequestWithoutAutostart(context.Background(), Frame{Cmd: "daemon.status"})
@@ -260,6 +281,16 @@ func TestStatusAndStop(t *testing.T) {
 	pid, hasPID := data["pid"].(float64)
 	if data["socket"] != path || !hasPID || pid <= 0 {
 		t.Fatalf("status identity fields = %#v", data)
+	}
+	if data["engine"] != "firefox" {
+		t.Fatalf("status engine = %#v, want firefox", data["engine"])
+	}
+	policy, ok := data["policy"].(map[string]any)
+	if !ok || policy["ssrf_enabled"] != true || policy["fetch_ssrf_enabled"] != true || policy["allow_private"] != false {
+		t.Fatalf("status policy = %#v", data["policy"])
+	}
+	if domains, ok := policy["allowed_domains"].([]any); !ok || len(domains) != 1 || domains[0] != "example.test" {
+		t.Fatalf("status allowed domains = %#v", policy["allowed_domains"])
 	}
 	for _, field := range []string{"started_at", "last_activity"} {
 		value, ok := data[field].(string)

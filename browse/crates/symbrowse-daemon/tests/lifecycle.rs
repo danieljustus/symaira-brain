@@ -16,8 +16,8 @@ mod unix {
     };
 
     use symbrowse_daemon::{
-        Client, ClientOptions, Frame, Response, Server, ServerError, ServerOptions, codes,
-        connect_unix,
+        Client, ClientOptions, Frame, PolicyStatus, Response, Server, ServerError, ServerOptions,
+        codes, connect_unix,
     };
 
     static NEXT: AtomicU64 = AtomicU64::new(1);
@@ -31,6 +31,13 @@ mod unix {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                engine: "firefox".to_owned(),
+                policy: PolicyStatus {
+                    allowed_domains: vec!["example.test".to_owned()],
+                    ssrf_enabled: true,
+                    fetch_ssrf_enabled: true,
+                    allow_private: false,
+                },
                 ..Default::default()
             })
             .unwrap(),
@@ -67,6 +74,11 @@ mod unix {
         assert_eq!(data["running"], true);
         assert!(data["pid"].as_u64().is_some_and(|pid| pid > 0));
         assert_eq!(data["socket"], socket.display().to_string());
+        assert_eq!(data["engine"], "firefox");
+        assert_eq!(data["policy"]["allowed_domains"][0], "example.test");
+        assert_eq!(data["policy"]["ssrf_enabled"], true);
+        assert_eq!(data["policy"]["fetch_ssrf_enabled"], true);
+        assert_eq!(data["policy"]["allow_private"], false);
         for field in ["started_at", "last_activity"] {
             let value = data[field]
                 .as_str()
