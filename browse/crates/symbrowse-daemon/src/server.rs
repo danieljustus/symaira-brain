@@ -1007,7 +1007,11 @@ fn serve_connection_parts<S>(
                         "daemon operation exceeded its timeout",
                     );
                 }
-                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => continue,
+                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                    // An in-flight operation is activity even when its browser call is slow.
+                    last_activity.store(unix_nanos(), Ordering::Release);
+                    continue;
+                }
             }
         };
         if write_response(reader.get_mut(), result).is_err() {
