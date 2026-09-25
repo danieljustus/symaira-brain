@@ -800,7 +800,8 @@ impl ChromePage {
         // Page.navigate and then polls document.readyState instead. Trigger
         // the same navigation from the page context and use the same observable
         // load-complete condition so Windows does not depend on that internal
-        // lifecycle watcher.
+        // lifecycle watcher. Dispatch synchronously: an extra zero-delay timer
+        // can remain queued indefinitely on a background Windows target.
         let mut navigated = self
             .page
             .event_listener::<page::EventFrameNavigated>()
@@ -821,9 +822,7 @@ impl ChromePage {
             eprintln!("chrome_open_stage=dispatch-evaluate-start");
         }
         let dispatch = self
-            .evaluate(&format!(
-                "setTimeout(() => location.assign({url_literal}), 0); 'scheduled'"
-            ))
+            .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
             .await?;
         if diagnostics {
             eprintln!("chrome_open_stage=dispatch-evaluate-complete");
