@@ -365,7 +365,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
             .is_some_and(|event| {
                 event["state"] == "completed"
                     && event["sha256"]
-                        == "f09d9996c8c8fbc22833637dffb028568c1f4519a18634c691412a50103dd8c8"
+                        == "4a47af0e5370e54cdf18a00ec82c4b235927baee89437ffa6a67ae7e85c5290c"
             })
         {
             break listed["data"]["downloads"].clone();
