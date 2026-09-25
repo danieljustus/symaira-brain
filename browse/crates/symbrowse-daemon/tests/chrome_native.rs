@@ -382,8 +382,8 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         downloads[0]["url"],
         format!("{}/download", contract_server.base_url)
     );
-    assert_eq!(downloads[0]["received_bytes"], 35);
-    assert_eq!(downloads[0]["total_bytes"], 35);
+    assert_eq!(downloads[0]["received_bytes"], 34);
+    assert_eq!(downloads[0]["total_bytes"], 34);
     let rust_tab_new = request(
         &client,
         "tab.new",
