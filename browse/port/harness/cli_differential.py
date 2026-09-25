@@ -216,7 +216,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "doctor", "downloads", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "back", "batch", "cache", "check", "click", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "watch", "workflow",
     }
@@ -364,6 +364,12 @@ class UnixDaemonStub:
                         data = {"cleared": (frame.get("args") or {}).get("name", "")}
                     elif frame.get("cmd") == "cookies.set":
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
+                    elif frame.get("cmd") == "console.list":
+                        data = {"entries": [{"type": "log", "text": "fixture console"}], "count": 1}
+                    elif frame.get("cmd") == "errors.list":
+                        data = {"entries": [{"text": "fixture exception", "stacktrace": ["fixture.js:1"]}], "count": 1}
+                    elif frame.get("cmd") in ("console.clear", "errors.clear"):
+                        data = {"cleared": True}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
                     elif frame.get("cmd") == "read":
@@ -577,6 +583,12 @@ class WindowsNamedPipeStub:
                         data = {"cleared": (frame.get("args") or {}).get("name", "")}
                     elif frame.get("cmd") == "cookies.set":
                         data = {"set": ((frame.get("args") or {}).get("cookie") or {}).get("name", "")}
+                    elif frame.get("cmd") == "console.list":
+                        data = {"entries": [{"type": "log", "text": "fixture console"}], "count": 1}
+                    elif frame.get("cmd") == "errors.list":
+                        data = {"entries": [{"text": "fixture exception", "stacktrace": ["fixture.js:1"]}], "count": 1}
+                    elif frame.get("cmd") in ("console.clear", "errors.clear"):
+                        data = {"cleared": True}
                     elif frame.get("cmd") == "upload":
                         data = {"uploaded": (frame.get("args") or {}).get("files", [])}
                     elif frame.get("cmd") == "read":
@@ -823,6 +835,22 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if argv[:1] in (["console"], ["errors"]) and argv[1:2] == ["list"]:
+            expected_budget = None
+            for index, value in enumerate(argv):
+                if value == "--max-tokens" and index + 1 < len(argv):
+                    parsed = int(argv[index + 1])
+                    expected_budget = parsed if parsed > 0 else None
+                elif value.startswith("--max-tokens="):
+                    parsed = int(value.split("=", 1)[1])
+                    expected_budget = parsed if parsed > 0 else None
+            budget_match = (
+                go_frame is not None and rust_frame is not None
+                and go_frame.get("max_tokens") == expected_budget
+                and rust_frame.get("max_tokens") == expected_budget
+            )
+            row["max_tokens_frame_match"] = budget_match
+            row["matched"] = bool(row["matched"] and budget_match)
         if argv[:1] == ["downloads"]:
             go_actual = [payload_raw(frame) for frame in go_frames]
             rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
@@ -1117,6 +1145,17 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("OUT-003", ["tab", "list", "--session", "fixture"], b"", True),
         ("OUT-003", ["tab", "list", "--session", "fixture", "--output=yaml"], b"", True),
         ("OUT-003", ["cookies", "list", "--session", "fixture", "--output=yaml"], b"", True),
+        ("CLI-002", ["console", "list", "--session", "fixture"], b"", True),
+        ("CLI-002", ["console", "list", "--session", "fixture", "--json"], b"", True),
+        ("CLI-002", ["console", "list", "--session", "fixture", "--max-tokens", "12", "--json"], b"", True),
+        ("CLI-002", ["console", "list", "--session", "fixture", "--max-tokens=0", "--json"], b"", True),
+        ("CLI-002", ["errors", "list", "--session", "fixture", "--max-tokens", "-1", "--json"], b"", True),
+        ("CLI-002", ["console", "clear", "--session", "fixture"], b"", True),
+        ("CLI-002", ["console", "clear", "--session", "fixture", "--json"], b"", True),
+        ("CLI-002", ["errors", "list", "--session", "fixture"], b"", True),
+        ("CLI-002", ["errors", "list", "--session", "fixture", "--json"], b"", True),
+        ("CLI-002", ["errors", "clear", "--session", "fixture"], b"", True),
+        ("CLI-002", ["errors", "clear", "--session", "fixture", "--json"], b"", True),
         ("CLI-002", ["journal", "tail", "--lines", "1", "--session", "fixture"], b"", True),
         ("CLI-002", ["journal", "show", "--session", "fixture", "--json"], b"", True),
         ("CLI-003", ["journal", "tail", "extra"], b"", False),

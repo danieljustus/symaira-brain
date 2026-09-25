@@ -82,6 +82,12 @@ enum Action {
         dir: Option<String>,
         format: Format,
     },
+    RuntimeEvents {
+        session: String,
+        command: String,
+        max_tokens: Option<i64>,
+        format: Format,
+    },
     Batch {
         format: Format,
         commands: Vec<String>,
@@ -291,6 +297,12 @@ fn main() -> ExitCode {
             dir,
             format,
         }) => run_downloads(session, dir, format),
+        Ok(Action::RuntimeEvents {
+            session,
+            command,
+            max_tokens,
+            format,
+        }) => run_runtime_events(session, command, max_tokens, format),
         Ok(Action::Batch {
             format,
             commands,
@@ -708,6 +720,92 @@ fn run_downloads(session: String, dir: Option<String>, format: Format) -> ExitCo
         }
     }
     ExitCode::SUCCESS
+}
+
+fn run_runtime_events(
+    session: String,
+    command: String,
+    max_tokens: Option<i64>,
+    format: Format,
+) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let mut frame = cli_frame(&command, &session, None);
+    frame.max_tokens = max_tokens;
+    let response = match client.request(frame) {
+        Ok(response) => response,
+        Err(error) => return render_client_error(format, error),
+    };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let data = response.data.unwrap_or(serde_json::Value::Null);
+    if command.ends_with(".clear") {
+        if format == Format::Text {
+            return write_stdout(if command == "console.clear" {
+                "console cleared\n"
+            } else {
+                "errors cleared\n"
+            });
+        }
+    } else if format == Format::Text {
+        let entries = data
+            .get("entries")
+            .and_then(serde_json::Value::as_array)
+            .into_iter()
+            .flatten();
+        let mut output = String::new();
+        for entry in entries {
+            let text = entry
+                .get("text")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or_default();
+            if command == "console.list" {
+                let kind = entry
+                    .get("type")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default();
+                output.push_str(&format!("[{kind}] {text}\n"));
+            } else {
+                output.push_str(text);
+                output.push('\n');
+                if let Some(frames) = entry
+                    .get("stacktrace")
+                    .and_then(serde_json::Value::as_array)
+                {
+                    for frame in frames {
+                        let rendered = frame
+                            .as_str()
+                            .map_or_else(|| frame.to_string(), str::to_owned);
+                        output.push_str("    at ");
+                        output.push_str(&rendered);
+                        output.push('\n');
+                    }
+                }
+            }
+        }
+        return write_stdout(&output);
+    }
+    let warnings = response
+        .warnings
+        .into_iter()
+        .map(|warning| symbrowse_core::output::Warning {
+            kind: warning.kind,
+            severity: warning.severity,
+            message: warning.message,
+            r#ref: warning.r#ref,
+            excerpt: warning.excerpt,
+        })
+        .collect();
+    match Envelope::ok(data, warnings).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => {
+            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+        }
+    }
 }
 
 fn run_network_requests(session: String, args: serde_json::Value, format: Format) -> ExitCode {
@@ -3289,6 +3387,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "version" => parse_version(&values, command_index),
         "doctor" => parse_doctor(&values, command_index),
         "downloads" => parse_downloads(&values, command_index),
+        "console" | "errors" => parse_runtime_events(&values, command_index),
         "eval" => parse_eval(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
@@ -3462,6 +3561,78 @@ fn parse_downloads(values: &[String], command_index: usize) -> Result<Action, Pa
     })
 }
 
+fn parse_runtime_events(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let resource = values[command_index].as_str();
+    let command = values
+        .get(command_index + 1)
+        .map(String::as_str)
+        .unwrap_or("");
+    if !matches!(command, "list" | "clear") {
+        return Err(ParseError {
+            message: format!("{resource} requires list or clear"),
+            exit_code: 2,
+        });
+    }
+    let mut session = "default".to_owned();
+    let mut max_tokens = None;
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut index = command_index + 2;
+    while index < values.len() {
+        match values[index].as_str() {
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--max-tokens" if command == "list" => {
+                index += 1;
+                let value = required_value(values, index, "--max-tokens")?
+                    .parse::<i64>()
+                    .map_err(|_| ParseError {
+                        message: "invalid max-tokens value".to_owned(),
+                        exit_code: 2,
+                    })?;
+                max_tokens = (value > 0).then_some(value);
+            }
+            value if value.starts_with("--json=") => {
+                json = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => {
+                format = parse_format(&value[9..])?;
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--max-tokens=") && command == "list" => {
+                let parsed = value[13..].parse::<i64>().map_err(|_| ParseError {
+                    message: "invalid max-tokens value".to_owned(),
+                    exit_code: 2,
+                })?;
+                max_tokens = (parsed > 0).then_some(parsed);
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            value => {
+                return Err(ParseError {
+                    message: format!("unknown argument {value:?}"),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::RuntimeEvents {
+        session,
+        command: format!("{resource}.{command}"),
+        max_tokens,
+        format,
+    })
+}
+
 fn parse_help(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let path = values[command_index + 1..]
         .iter()
@@ -3495,7 +3666,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -3530,6 +3701,72 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             "symbrowse doctor [flags]",
             "      --fix    print non-mutating, copyable remediation guidance\n  -h, --help   help for doctor\n",
             global,
+        )),
+        ("console", None) => Some(
+            r#"Show or clear the page console buffer
+
+Usage:
+  symbrowse console [command]
+
+Available Commands:
+  clear       Clear the console buffer
+  list        List captured console messages
+
+Flags:
+  -h, --help             help for console
+      --session string   session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse console [command] --help" for more information about a command.
+"#.to_owned(),
+        ),
+        ("console", Some("list")) => Some(plain(
+            "List captured console messages",
+            "symbrowse console list [flags]",
+            "  -h, --help            help for list\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n",
+        )),
+        ("console", Some("clear")) => Some(plain(
+            "Clear the console buffer",
+            "symbrowse console clear [flags]",
+            "  -h, --help   help for clear\n",
+            session_global,
+        )),
+        ("errors", None) => Some(
+            r#"Show or clear uncaught page errors
+
+Usage:
+  symbrowse errors [command]
+
+Available Commands:
+  clear       Clear the error buffer
+  list        List uncaught exceptions with stack traces
+
+Flags:
+  -h, --help             help for errors
+      --session string   session name (default "default")
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+
+Use "symbrowse errors [command] --help" for more information about a command.
+"#.to_owned(),
+        ),
+        ("errors", Some("list")) => Some(plain(
+            "List uncaught exceptions with stack traces",
+            "symbrowse errors list [flags]",
+            "  -h, --help            help for list\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n",
+        )),
+        ("errors", Some("clear")) => Some(plain(
+            "Clear the error buffer",
+            "symbrowse errors clear [flags]",
+            "  -h, --help   help for clear\n",
+            session_global,
         )),
         ("cookies", None) => Some("Inspect and manage cookies of the current page origin\n\nUsage:\n  symbrowse cookies [command]\n\nAvailable Commands:\n  clear       Delete one cookie by name\n  list        List cookies visible to the current page\n  set         Set a cookie (or import cookies from a curl cookie jar with --curl)\n\nFlags:\n  -h, --help             help for cookies\n      --reveal string    show cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse cookies [command] --help\" for more information about a command.\n".to_owned()),
         ("cookies", Some("list")) => Some(plain(
@@ -7610,6 +7847,36 @@ mod tests {
         assert_eq!(
             render_cookie_list_yaml(&yaml_data, Vec::new()).unwrap(),
             "success: true\ndata:\n    origin: https://fixture.invalid\n    cookies:\n        - name: sid\n          value: 0123••••cdef\n          domain: fixture.invalid\n          path: /\n          expires: -1\n          size: 20\n          httponly: true\n          secure: true\n          session: true\n          samesite: Lax\nwarnings: []\nerror: null\n"
+        );
+    }
+
+    #[test]
+    fn runtime_event_commands_preserve_session_budget_and_format() {
+        assert_eq!(
+            parse(&args(&[
+                "console",
+                "list",
+                "--session",
+                "fixture",
+                "--max-tokens",
+                "12",
+                "--json",
+            ])),
+            Ok(Action::RuntimeEvents {
+                session: "fixture".to_owned(),
+                command: "console.list".to_owned(),
+                max_tokens: Some(12),
+                format: Format::Json,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["errors", "clear", "--session=fixture"])),
+            Ok(Action::RuntimeEvents {
+                session: "fixture".to_owned(),
+                command: "errors.clear".to_owned(),
+                max_tokens: None,
+                format: Format::Text,
+            })
         );
     }
 }
