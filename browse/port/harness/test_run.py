@@ -95,6 +95,17 @@ class CargoTargetRootTests(unittest.TestCase):
 
 
 class CliDifferentialSessionTests(unittest.TestCase):
+    def test_help_tree_mismatch_retains_exact_bytes_for_repair(self) -> None:
+        def fake_run_process(binary: Path, _argv: list[str], _env: dict[str, str]) -> dict[str, object]:
+            return {"returncode": 0, "stdout": b"Go\n" if binary == Path("go") else b"Rust\n", "stderr": b""}
+
+        with patch.object(cli_differential, "run_process", side_effect=fake_run_process):
+            row = cli_differential.help_tree(Path("go"), Path("rust"), {})[0]
+
+        self.assertFalse(row["matched"])
+        self.assertEqual(base64.b64decode(row["go_stdout_base64"]), b"Go\n")
+        self.assertEqual(base64.b64decode(row["rust_stdout_base64"]), b"Rust\n")
+
     def test_stub_session_matches_both_flag_forms(self) -> None:
         self.assertEqual(
             cli_differential.session_from_argv(["journal", "show", "--session", "fixture"]),

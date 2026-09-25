@@ -199,8 +199,14 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
         go_result = run_process(go, args, env)
         rust_result = run_process(rust, args, env)
         matched = all(go_result.get(k) == rust_result.get(k) for k in ("returncode", "stdout", "stderr"))
-        comparisons.append({"case": "CLI-001", "argv": args, "matched": matched,
-                            "go": output_record(go_result), "rust": output_record(rust_result)})
+        row = {"case": "CLI-001", "argv": args, "matched": matched,
+               "go": output_record(go_result), "rust": output_record(rust_result)}
+        if not matched:
+            row["go_stdout_base64"] = base64.b64encode(go_result["stdout"]).decode("ascii")
+            row["rust_stdout_base64"] = base64.b64encode(rust_result["stdout"]).decode("ascii")
+            row["go_stderr_base64"] = base64.b64encode(go_result["stderr"]).decode("ascii")
+            row["rust_stderr_base64"] = base64.b64encode(rust_result["stderr"]).decode("ascii")
+        comparisons.append(row)
         if go_result["returncode"] == 0:
             children = command_names(go_result["stdout"], root=not path)
             pending.extend((*path, name) for name in children if name not in {"help"})
