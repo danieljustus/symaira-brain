@@ -239,6 +239,19 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         );
     }
 
+    // The Go oracle launches and exercises its own browser. Run it before the
+    // Rust daemon starts so slow Windows startup cannot exceed the daemon's
+    // 30-second idle timeout before the first Rust request.
+    let (contract_server, go_oracle) = if expect_unavailable {
+        (None, None)
+    } else {
+        let chrome_executable = std::env::var("SYMBROWSE_CHROME_EXECUTABLE")
+            .expect("set SYMBROWSE_CHROME_EXECUTABLE to the tested CfT binary");
+        let contract_server = ChromeContractServer::start();
+        let go_oracle = go_chrome_tab_oracle(&chrome_executable, &contract_server.base_url);
+        (Some(contract_server), Some(go_oracle))
+    };
+
     let server = std::sync::Arc::new(
         Server::new(ServerOptions {
             session_spec: Some(spec.clone()),
@@ -315,10 +328,8 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         fs::remove_dir_all(root).expect("remove isolated root");
         return;
     }
-    let chrome_executable = std::env::var("SYMBROWSE_CHROME_EXECUTABLE")
-        .expect("set SYMBROWSE_CHROME_EXECUTABLE to the tested CfT binary");
-    let contract_server = ChromeContractServer::start();
-    let go_oracle = go_chrome_tab_oracle(&chrome_executable, &contract_server.base_url);
+    let contract_server = contract_server.expect("create Chrome contract fixture");
+    let go_oracle = go_oracle.expect("run Go Chrome oracle");
     let rust_open = request(
         &client,
         "open",
