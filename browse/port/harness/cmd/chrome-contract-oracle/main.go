@@ -12,13 +12,19 @@ import (
 )
 
 type contract struct {
-	Open         daemon.Response `json:"open"`
-	TabNew       daemon.Response `json:"tab_new"`
-	PopupClick   daemon.Response `json:"popup_click"`
-	PopupOpen    daemon.Response `json:"popup_open"`
-	TabList      daemon.Response `json:"tab_list"`
-	TabClose     daemon.Response `json:"tab_close"`
-	LastTabClose daemon.Response `json:"last_tab_close"`
+	Open           daemon.Response `json:"open"`
+	TabNew         daemon.Response `json:"tab_new"`
+	InspectText    daemon.Response `json:"inspect_text"`
+	InspectHTML    daemon.Response `json:"inspect_html"`
+	InspectTitle   daemon.Response `json:"inspect_title"`
+	InspectURL     daemon.Response `json:"inspect_url"`
+	InspectVisible daemon.Response `json:"inspect_visible"`
+	InspectError   daemon.Response `json:"inspect_error"`
+	PopupClick     daemon.Response `json:"popup_click"`
+	PopupOpen      daemon.Response `json:"popup_open"`
+	TabList        daemon.Response `json:"tab_list"`
+	TabClose       daemon.Response `json:"tab_close"`
+	LastTabClose   daemon.Response `json:"last_tab_close"`
 }
 
 func main() {
@@ -70,6 +76,55 @@ func run() error {
 	}
 	if !result.TabNew.Success {
 		return fmt.Errorf("Go tab.new oracle failed: %s", responseJSON(result.TabNew))
+	}
+	result.InspectText = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.text",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#popup"}),
+	})
+	if !result.InspectText.Success {
+		return fmt.Errorf("Go get.text oracle failed: %s", responseJSON(result.InspectText))
+	}
+	result.InspectHTML = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.html",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{}),
+	})
+	result.InspectTitle = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.title",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{}),
+	})
+	result.InspectURL = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.url",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{}),
+	})
+	result.InspectVisible = call(runtime, ctx, daemon.Frame{
+		Cmd:     "is.visible",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#popup"}),
+	})
+	for _, inspection := range []struct {
+		command  string
+		response daemon.Response
+	}{
+		{"get.html", result.InspectHTML},
+		{"get.title", result.InspectTitle},
+		{"get.url", result.InspectURL},
+		{"is.visible", result.InspectVisible},
+	} {
+		if !inspection.response.Success {
+			return fmt.Errorf("Go %s oracle failed: %s", inspection.command, responseJSON(inspection.response))
+		}
+	}
+	result.InspectError = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.text",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{}),
+	})
+	if result.InspectError.Success {
+		return fmt.Errorf("Go get.text without selector unexpectedly succeeded")
 	}
 	result.PopupClick = call(runtime, ctx, daemon.Frame{
 		Cmd:     "click",

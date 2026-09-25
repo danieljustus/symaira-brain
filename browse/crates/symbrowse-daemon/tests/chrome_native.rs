@@ -320,6 +320,41 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     );
     assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
     assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
+    for (command, oracle_key, args) in [
+        ("get.text", "inspect_text", json!({"selector":"#popup"})),
+        ("get.html", "inspect_html", json!({})),
+        ("get.title", "inspect_title", json!({})),
+        ("get.url", "inspect_url", json!({})),
+        (
+            "is.visible",
+            "inspect_visible",
+            json!({"selector":"#popup"}),
+        ),
+    ] {
+        let inspected = request(&client, command, args);
+        assert_eq!(
+            inspected["success"], go_oracle[oracle_key]["success"],
+            "{command} success differs: Rust={inspected} Go={}",
+            go_oracle[oracle_key]
+        );
+        assert_eq!(
+            inspected["data"], go_oracle[oracle_key]["data"],
+            "{command} data differs"
+        );
+    }
+    let rust_inspect_error = request(&client, "get.text", json!({}));
+    assert_eq!(
+        rust_inspect_error["success"],
+        go_oracle["inspect_error"]["success"]
+    );
+    assert_eq!(
+        rust_inspect_error["error"]["code"],
+        go_oracle["inspect_error"]["error"]["code"]
+    );
+    assert_eq!(
+        rust_inspect_error["error"]["message"],
+        go_oracle["inspect_error"]["error"]["message"]
+    );
     let rust_popup_click = request(&client, "click", json!({"selector":"#popup"}));
     assert_eq!(
         rust_popup_click["success"],

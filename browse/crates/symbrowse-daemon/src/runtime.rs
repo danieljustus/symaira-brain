@@ -1163,22 +1163,81 @@ impl DispatchRuntime {
             "get.text" | "get.html" | "get.title" | "get.url" | "get.count" | "get.value"
             | "get.attr" | "get.box" | "get.styles" | "is.visible" | "is.enabled"
             | "is.checked" => {
-                let selector = args
-                    .get("selector")
-                    .and_then(Value::as_str)
-                    .unwrap_or("body");
-                let kind = frame
+                let command_kind = frame
                     .cmd
                     .strip_prefix("get.")
                     .or_else(|| frame.cmd.strip_prefix("is."))
                     .unwrap_or("text");
-                let value = page.inspect(selector, kind).await.map_err(runtime_error)?;
-                if frame.cmd == "get.attr" {
-                    let attribute = required_string(args, "attribute")?;
-                    value.get(attribute).cloned().unwrap_or(Value::Null)
-                } else {
-                    value
+                let kind = args
+                    .get("kind")
+                    .and_then(Value::as_str)
+                    .filter(|kind| !kind.is_empty())
+                    .unwrap_or(command_kind);
+                if !matches!(
+                    kind,
+                    "text"
+                        | "html"
+                        | "value"
+                        | "attr"
+                        | "title"
+                        | "url"
+                        | "count"
+                        | "box"
+                        | "styles"
+                        | "visible"
+                        | "enabled"
+                        | "checked"
+                ) {
+                    return Err(DaemonError {
+                        code: "invalid_inspection".into(),
+                        message: format!("unsupported inspection kind {kind:?}"),
+                        ..Default::default()
+                    });
                 }
+                let selector = args
+                    .get("selector")
+                    .and_then(Value::as_str)
+                    .unwrap_or("")
+                    .trim();
+                if selector.is_empty() && !matches!(kind, "html" | "title" | "url") {
+                    return Err(DaemonError {
+                        code: "invalid_inspection".into(),
+                        message: format!("get {kind} requires a selector"),
+                        ..Default::default()
+                    });
+                }
+                let attribute = if kind == "attr" {
+                    let attribute = args.get("attribute").and_then(Value::as_str).unwrap_or("");
+                    if attribute.trim().is_empty() {
+                        return Err(DaemonError {
+                            code: "invalid_inspection".into(),
+                            message: "get attr requires an attribute name".into(),
+                            ..Default::default()
+                        });
+                    }
+                    Some(attribute)
+                } else {
+                    None
+                };
+                let inspected = if kind == "html" && selector.is_empty() {
+                    page.evaluate_script("document.documentElement.outerHTML")
+                        .await
+                        .map_err(runtime_error)?
+                } else {
+                    page.inspect(selector, kind).await.map_err(runtime_error)?
+                };
+                let value = if let Some(attribute) = attribute {
+                    inspected.get(attribute).cloned().unwrap_or(Value::Null)
+                } else {
+                    inspected
+                };
+                let mut result = serde_json::Map::new();
+                result.insert("kind".into(), Value::String(kind.into()));
+                if !selector.is_empty() {
+                    result.insert("selector".into(), Value::String(selector.into()));
+                }
+                result.insert("value".into(), value);
+                Value::Object(result)
             }
             "find" => {
                 let kind = args.get("kind").and_then(Value::as_str).unwrap_or("text");
