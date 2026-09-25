@@ -91,7 +91,7 @@ impl ChromeContractServer {
                             (
                                 "text/html; charset=utf-8",
                                 "",
-                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a><div style='height:12000px'><div id=target style='margin-top:8000px;height:100px'></div></div>",
+                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a><div style='height:12000px'><div id=target tabindex=0 style='margin-top:8000px;height:100px'></div></div>",
                             )
                         };
                         let response = format!(
