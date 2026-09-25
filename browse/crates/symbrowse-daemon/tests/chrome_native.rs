@@ -6,7 +6,7 @@ use std::{
     process::Command,
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     thread,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
@@ -60,6 +60,8 @@ impl ChromeContractServer {
             .expect("set Chrome contract fixture nonblocking");
         let stop = Arc::new(AtomicBool::new(false));
         let stop_for_thread = Arc::clone(&stop);
+        let policy_pixel_requests = Arc::new(AtomicUsize::new(0));
+        let policy_pixel_requests_for_thread = Arc::clone(&policy_pixel_requests);
         let thread = thread::spawn(move || {
             while !stop_for_thread.load(Ordering::Relaxed) {
                 match listener.accept() {
@@ -75,6 +77,12 @@ impl ChromeContractServer {
                             .next()
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
+                        if path == "/policy-pixel" {
+                            let sequence = policy_pixel_requests_for_thread
+                                .fetch_add(1, Ordering::Relaxed)
+                                + 1;
+                            eprintln!("chrome_contract_fixture_policy_pixel_request={sequence}");
+                        }
                         let header_echo = if path == "/header-echo" {
                             request
                                 .lines()
