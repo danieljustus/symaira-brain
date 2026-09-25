@@ -209,9 +209,18 @@ impl ChromeSession {
         let url = url.into();
         // Windows can stall when chromiumoxide creates a target with its URL
         // already set; open it after the blank target is attached to the handler.
-        let page = ChromePage::new(self.browser.new_page("about:blank").await?).await?;
+        let page = self
+            .browser
+            .new_page("about:blank")
+            .await
+            .map_err(|error| std::io::Error::other(format!("create blank CDP target: {error}")))?;
+        let page = ChromePage::new(page).await.map_err(|error| {
+            std::io::Error::other(format!("initialize Chrome page listeners: {error}"))
+        })?;
         if url != "about:blank" {
-            page.open(&url).await?;
+            page.open(&url).await.map_err(|error| {
+                std::io::Error::other(format!("navigate newly created Chrome page: {error}"))
+            })?;
         }
         Ok(page)
     }

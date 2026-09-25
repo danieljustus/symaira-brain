@@ -162,7 +162,9 @@ async fn exercise_full_chrome_surface() {
             user_data_dir: profile.clone(),
             headless: true,
         },
-        Duration::from_secs(20),
+        // Match the production daemon's native E2E operation budget; Windows
+        // Chrome target initialization can exceed the old 20-second test cap.
+        Duration::from_secs(45),
     )
     .await
     .expect("launch Chrome");
