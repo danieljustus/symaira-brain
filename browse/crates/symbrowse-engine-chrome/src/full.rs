@@ -1080,7 +1080,7 @@ impl ChromePage {
         let point = element.clickable_point().await?;
         if trace_geometry {
             eprintln!(
-                "chrome_download_click_point=x{} y{} backend_node_id={}",
+                "chrome_download_click_point=x{} y{} backend_node_id={:?}",
                 point.x, point.y, element.backend_node_id
             );
         }
