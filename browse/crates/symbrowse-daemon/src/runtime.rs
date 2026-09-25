@@ -345,6 +345,27 @@ impl DispatchRuntime {
             timeout,
             created_at,
         );
+        let page = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        let overlay_page = if let Some(page) = page {
+            // Match Go's notification-only fallback when no browser page is
+            // ready or when the engine cannot host the overlay.
+            if page
+                .install_overlay(&prompt.id, &prompt.title, &prompt.reason, 0)
+                .await
+                .is_ok()
+            {
+                Some(page)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
         #[cfg(target_os = "macos")]
         {
             let notice = symbrowse_core::oob::notification_command(&prompt);
@@ -362,11 +383,27 @@ impl DispatchRuntime {
             if operation.is_cancelled() || operation.remaining().is_zero() {
                 self.oob
                     .cancel(&prompt.id, "daemon operation was cancelled");
+                if let Some(page) = overlay_page.as_ref() {
+                    let _ = page.remove_overlay().await;
+                }
                 return Err(DaemonError {
                     code: codes::OPERATION_TIMEOUT.into(),
                     message: "daemon operation was cancelled".into(),
                     ..Default::default()
                 });
+            }
+            if let Some(page) = overlay_page.as_ref() {
+                if let Ok(decision) = page.overlay_result().await {
+                    match decision.as_str() {
+                        "completed" => {
+                            self.oob.complete(&prompt.id, None);
+                        }
+                        "cancelled" => {
+                            self.oob.cancel(&prompt.id, "cancelled by human");
+                        }
+                        _ => {}
+                    }
+                }
             }
             let current = self.oob.get(&prompt.id).expect("created prompt exists");
             if current.status != OobStatus::Pending || started.elapsed() >= timeout {
@@ -375,6 +412,9 @@ impl DispatchRuntime {
                 } else {
                     current
                 };
+                if let Some(page) = overlay_page.as_ref() {
+                    let _ = page.remove_overlay().await;
+                }
                 if result.status == OobStatus::Timeout {
                     return Err(DaemonError {
                         code: codes::HANDOFF_TIMEOUT.into(),

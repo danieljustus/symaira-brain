@@ -35,6 +35,7 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
             "NavigationStateProvider",
             "NetworkEvents",
             "NetworkPolicyReporter",
+            "OverlayHost",
             "RuntimeEvents",
             "ScreenshotEngine",
             "ScreenshotOptionsEngine",

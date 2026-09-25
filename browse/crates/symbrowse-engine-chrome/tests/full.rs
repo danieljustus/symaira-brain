@@ -11,6 +11,7 @@ use std::{
     time::Duration,
 };
 
+use chromiumoxide::cdp::browser_protocol::{dom, input};
 use symbrowse_engine_chrome::{
     BrowserMode, ChromeSession, ScreenshotOptions, UnsupportedOperation, capabilities,
 };
@@ -129,6 +130,84 @@ fn serve(mut stream: TcpStream) {
     let _ = stream.write_all(response.as_bytes());
 }
 
+fn overlay_button_node(node: &dom::Node, label: &str) -> Option<dom::NodeId> {
+    if node.local_name == "button"
+        && node
+            .children
+            .as_ref()
+            .is_some_and(|children| children.iter().any(|child| child.node_value == label))
+    {
+        return Some(node.node_id);
+    }
+    for child in node
+        .children
+        .iter()
+        .flatten()
+        .chain(node.shadow_roots.iter().flatten())
+    {
+        if let Some(found) = overlay_button_node(child, label) {
+            return Some(found);
+        }
+    }
+    None
+}
+
+async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label: &str) {
+    let document = page
+        .raw()
+        .execute(
+            dom::GetDocumentParams::builder()
+                .depth(-1)
+                .pierce(true)
+                .build()
+                .expect("DOM getDocument params"),
+        )
+        .await
+        .expect("pierce overlay shadow root");
+    let node_id = overlay_button_node(&document.root, label).expect("overlay button node");
+    let model = page
+        .raw()
+        .execute(
+            dom::GetBoxModelParams::builder()
+                .node_id(node_id)
+                .build()
+                .expect("box model params"),
+        )
+        .await
+        .expect("overlay button box model")
+        .model;
+    let quad = model.content.inner();
+    let x = [quad[0], quad[2], quad[4], quad[6]].iter().sum::<f64>() / 4.0;
+    let y = [quad[1], quad[3], quad[5], quad[7]].iter().sum::<f64>() / 4.0;
+    for (event_type, button, buttons) in [
+        (
+            input::DispatchMouseEventType::MousePressed,
+            input::MouseButton::Left,
+            1,
+        ),
+        (
+            input::DispatchMouseEventType::MouseReleased,
+            input::MouseButton::Left,
+            0,
+        ),
+    ] {
+        page.raw()
+            .execute(
+                input::DispatchMouseEventParams::builder()
+                    .r#type(event_type)
+                    .x(x)
+                    .y(y)
+                    .button(button)
+                    .buttons(buttons)
+                    .click_count(1)
+                    .build()
+                    .expect("mouse event params"),
+            )
+            .await
+            .expect("dispatch overlay button click");
+    }
+}
+
 #[tokio::test]
 async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
@@ -180,6 +259,54 @@ async fn exercise_full_chrome_surface() {
     page.wait_for_selector("#text", true, Duration::from_secs(5))
         .await
         .expect("wait for initial page");
+    page.install_overlay("oob-positive", "Waiting", "Approve this action", 0)
+        .await
+        .expect("install handoff overlay");
+    assert_eq!(
+        page.overlay_result().await.expect("pending decision"),
+        "pending"
+    );
+    page.evaluate_script("document.getElementById('symbrowse-oob-host').remove()")
+        .await
+        .expect("simulate hostile page removal");
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert!(
+        page.evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("overlay reattached")
+            .as_bool()
+            .unwrap_or(false)
+    );
+    click_overlay_button(&page, "Fertig").await;
+    assert_eq!(
+        page.overlay_result().await.expect("positive decision"),
+        "completed"
+    );
+    assert!(
+        !page
+            .evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("completed overlay removed")
+            .as_bool()
+            .unwrap_or(true)
+    );
+    page.install_overlay("oob-negative", "Waiting", "Reject this action", 0)
+        .await
+        .expect("install second overlay");
+    click_overlay_button(&page, "Abbrechen").await;
+    assert_eq!(
+        page.overlay_result().await.expect("negative decision"),
+        "cancelled"
+    );
+    assert!(
+        !page
+            .evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("cancelled overlay removed")
+            .as_bool()
+            .unwrap_or(true)
+    );
+    page.remove_overlay().await.expect("remove handoff overlay");
     assert_eq!(
         page.evaluate("Boolean(window.assetLoaded)")
             .await
