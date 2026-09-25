@@ -1243,25 +1243,27 @@ impl DispatchRuntime {
                     let selector_json = serde_json::to_string(selector).map_err(runtime_error)?;
                     let expression = if kind == "title" {
                         format!(
-                            "(() => {{ const e=document.querySelector({selector_json}); return e ? (e.title || '') : null; }})()"
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? {{found:true,value:e.title || ''}} : {{found:false}}; }})()"
                         )
                     } else {
                         format!(
-                            "(() => {{ const e=document.querySelector({selector_json}); return e ? (e.href || e.getAttribute('href') || '') : null; }})()"
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? {{found:true,value:e.href || e.getAttribute('href') || ''}} : {{found:false}}; }})()"
                         )
                     };
-                    let value = page
+                    let result = page
                         .evaluate_script(&expression)
                         .await
                         .map_err(runtime_error)?;
-                    if value.is_null() {
+                    if result.get("found") != Some(&Value::Bool(true)) {
                         return Err(DaemonError {
                             code: codes::OPERATION_FAILED.into(),
-                            message: format!("selector {selector_json} did not match an element"),
+                            // Go's inspection path returns Chrome's ExceptionDetails.Text
+                            // for this selector error, which is the protocol string "Uncaught".
+                            message: "Uncaught".into(),
                             ..Default::default()
                         });
                     }
-                    value
+                    result.get("value").cloned().unwrap_or(Value::Null)
                 } else {
                     page.inspect_with_properties(selector, kind, &properties)
                         .await
