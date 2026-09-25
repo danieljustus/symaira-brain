@@ -195,25 +195,38 @@ impl FirefoxSession {
             timeout: limit,
             endpoint,
         };
-        let result = session.bidi.command("session.new", json!({"capabilities":{"alwaysMatch":{"browserName":"firefox","webSocketUrl":true}}}), limit).await?;
-        session.context = result
-            .get("capabilities")
-            .and_then(|v| v.get("webSocketUrl"))
-            .and_then(Value::as_str)
-            .unwrap_or_default()
-            .to_owned();
-        let tree = session
+        if let Err(error) = session
+            .bidi
+            .command("session.new", json!({"capabilities":{"alwaysMatch":{"browserName":"firefox","webSocketUrl":true}}}), limit)
+            .await
+        {
+            let _ = session.stop_owned_process().await;
+            return Err(error);
+        }
+        let tree = match session
             .bidi
             .command("browsingContext.getTree", json!({}), limit)
-            .await?;
-        session.context = tree
+            .await
+        {
+            Ok(tree) => tree,
+            Err(error) => {
+                let _ = session.stop_owned_process().await;
+                return Err(error);
+            }
+        };
+        let Some(context) = tree
             .get("contexts")
             .and_then(Value::as_array)
             .and_then(|v| v.first())
             .and_then(|v| v.get("context"))
             .and_then(Value::as_str)
-            .ok_or_else(|| FirefoxError::Driver("Firefox returned no browsing context".into()))?
-            .into();
+        else {
+            let _ = session.stop_owned_process().await;
+            return Err(FirefoxError::Driver(
+                "Firefox returned no browsing context".into(),
+            ));
+        };
+        session.context = context.to_owned();
         Ok(session)
     }
     pub async fn navigate(&mut self, target: &str) -> Result<NavigationResult, FirefoxError> {
@@ -413,6 +426,11 @@ impl FirefoxSession {
             .bidi
             .command("session.end", json!({}), self.timeout)
             .await;
+        self.stop_owned_process().await?;
+        Ok(())
+    }
+
+    async fn stop_owned_process(&mut self) -> Result<(), FirefoxError> {
         if let Some(mut child) = self.child.take() {
             terminate_process(&mut child).await?;
         }
