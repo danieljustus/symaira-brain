@@ -11,7 +11,7 @@ mod unix {
         path::{Path, PathBuf},
         sync::{
             Arc,
-            atomic::{AtomicBool, AtomicU64, Ordering},
+            atomic::{AtomicU64, Ordering},
             mpsc,
         },
         thread,
