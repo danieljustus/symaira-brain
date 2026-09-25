@@ -297,6 +297,11 @@ class UnixDaemonStub:
                     response = None
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", "default")}
+                    elif frame.get("cmd") in ("open", "goto"):
+                        args = frame.get("args") or {}
+                        data = {
+                            "action": frame["cmd"], "url": args.get("url", ""), "http_status": 200,
+                        }
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
                         if not steps:
@@ -362,6 +367,12 @@ class UnixDaemonStub:
                         ], "count": 2}
                     elif frame.get("cmd") == "snapshot":
                         data = {"tree": "shared\nafter\n", "refs": {}}
+                    elif frame.get("cmd") in ("tabs.list", "tab.list"):
+                        data = {"active": "t1", "tabs": [
+                            {"id": "t1", "label": "research",
+                             "url": "https://fixture.invalid/", "active": True},
+                            {"id": "t2", "url": "about:blank", "active": False},
+                        ]}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -501,6 +512,11 @@ class WindowsNamedPipeStub:
                     response_error = None
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", SESSION)}
+                    elif frame.get("cmd") in ("open", "goto"):
+                        args = frame.get("args") or {}
+                        data = {
+                            "action": frame["cmd"], "url": args.get("url", ""), "http_status": 200,
+                        }
                     elif frame.get("cmd") == "trace.replay":
                         steps = (frame.get("args") or {}).get("steps", [])
                         if not steps:
@@ -564,6 +580,12 @@ class WindowsNamedPipeStub:
                         ], "count": 2}
                     elif frame.get("cmd") == "snapshot":
                         data = {"tree": "shared\nafter\n", "refs": {}}
+                    elif frame.get("cmd") in ("tabs.list", "tab.list"):
+                        data = {"active": "t1", "tabs": [
+                            {"id": "t1", "label": "research",
+                             "url": "https://fixture.invalid/", "active": True},
+                            {"id": "t2", "url": "about:blank", "active": False},
+                        ]}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -1045,6 +1067,13 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-003", ["screenshot", "one", "two"], b"", False),
         ("CLI-002", ["goto", "https://fixture.invalid", "--json"], b"", True),
         ("CLI-002", ["open", "https://fixture.invalid", "--json"], b"", True),
+        ("OUT-003", ["open", "https://fixture.invalid", "--session", "fixture"], b"", True),
+        ("OUT-003", ["open", "https://fixture.invalid", "--session", "fixture", "--output=yaml"], b"", True),
+        ("OUT-003", ["snapshot", "--session", "fixture"], b"", True),
+        ("OUT-003", ["snapshot", "--session", "fixture", "--output=yaml"], b"", True),
+        ("OUT-003", ["tab", "list", "--session", "fixture"], b"", True),
+        ("OUT-003", ["tab", "list", "--session", "fixture", "--output=yaml"], b"", True),
+        ("OUT-003", ["cookies", "list", "--session", "fixture", "--output=yaml"], b"", True),
         ("CLI-002", ["journal", "tail", "--lines", "1", "--session", "fixture"], b"", True),
         ("CLI-002", ["journal", "show", "--session", "fixture", "--json"], b"", True),
         ("CLI-003", ["journal", "tail", "extra"], b"", False),
@@ -1656,8 +1685,9 @@ def run_batch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
                                    and all(isinstance(item, dict) for item in plan)
                                    and not report.get("results")
                                    and [item.get("command") for item in plan] ==
-                                   ["open https://fixture.invalid", "version --json"])
-                row["criterion"] = "dry-run returns a plan and does not run command items"
+                                   ["open https://fixture.invalid", "version --json"]
+                                   and [item.get("risk_class") for item in plan] == ["navigate", "unknown"])
+                row["criterion"] = "dry-run returns ordered risk plan and no command results or side effects"
     yaml_cases = [
         ("OUT-003", ["batch", "--output=yaml", "--dry-run",
                      "open https://fixture.invalid", "version --json"]),
