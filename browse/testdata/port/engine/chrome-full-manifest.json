@@ -1,15 +1,15 @@
 {
   "fixture": "testdata/port/engine/chrome-full.json",
   "fixture_sha256": "a5152307c4e3d972ba494644ebae9467b0b742dfca8a9294ad666fb8febb9874",
-  "generator_sha256": "8adf3dc5f70434bde5ccb32dd21d558f7c237048256efffe4f83bd184829896a",
-  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
+  "generator_sha256": "0c95050f2734adff36f2590ecf98eb6a9fae6a07138e79e400a2f6e85ef4b808",
+  "oracle_commit": "2ddbda51ef059181b99171ce7f87b6f6d8044c92",
   "schema_version": 1,
   "source_files": {
     "internal/engine/chrome/chrome.go": "e69467075e2ff7411ea9cf4ef839270c7a706e2524b46d0a405762faf5ca7958",
     "internal/engine/chrome/files.go": "28cd94faf5306f4ce6fce8ef76f7bf1066b4e83f57dbb22a035239950b9524db",
     "internal/engine/chrome/inspection.go": "c90c226faec01e000bed6742dd2256ff4b2e49aee658d1f2cbcc5baf258e1ff1",
     "internal/engine/chrome/interaction.go": "534a11d956f9f597cdf7c72fbbe7840d1460e6a7e9bb47420b3f3867a2c6e19e",
-    "internal/engine/chrome/network.go": "a5daa085ca08f913ce9d9e6624a93138aa8e3abb6c5d7c688d4e38228b929e4c",
+    "internal/engine/chrome/network.go": "38e64cd56ec0ceef1d187703f05c565a52c2136e5285f5b6a3496c138c4c2dc4",
     "internal/engine/chrome/tabs.go": "0bb7321b1cf62c41155fce2fd903e6dc3cd7da2d600aaffb69e3e38a223cea4a",
     "internal/engine/engine.go": "df9cbf5107cdd84f2828787ee8bff3ab954b05dcfa204791d3acd85cc6ada7c9"
   }

@@ -1,18 +1,18 @@
 {
   "fixture": "testdata/port/engine/safari.json",
   "fixture_sha256": "e37ec84092aec919573a3b466f005b9160a3558ae6eb41350babfe5dbf663af6",
-  "generator_sha256": "8adf3dc5f70434bde5ccb32dd21d558f7c237048256efffe4f83bd184829896a",
+  "generator_sha256": "0c95050f2734adff36f2590ecf98eb6a9fae6a07138e79e400a2f6e85ef4b808",
   "native_gate": {
     "reason": "isolated safaridriver execution is a native CI/manual gate; the neutral suite never launches or quits Safari",
     "status": "manual-gate"
   },
-  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
+  "oracle_commit": "2ddbda51ef059181b99171ce7f87b6f6d8044c92",
   "schema_version": 1,
   "source_files": {
     "internal/engine/engine.go": "df9cbf5107cdd84f2828787ee8bff3ab954b05dcfa204791d3acd85cc6ada7c9",
     "internal/engine/safari/interaction.go": "6c6dab519540706fb027f00c90311cd8bcff5ca16add50dc24a334a2ccc3154a",
-    "internal/engine/safari/safari.go": "05921395ec96cdfaf81657b202097a10c6062b610b1f6ab29f2c591d70bd17d0",
-    "internal/engine/safari/tabs.go": "c24cd16c23bb3c94547ebf661a43ed98076647c8bd040c2ce66c1d16ec65a274",
+    "internal/engine/safari/safari.go": "06576a079055e6b3b46c4613b53136d4d8a02b0c312cbd9386fc7461b8ed7b72",
+    "internal/engine/safari/tabs.go": "0872b6b2c29b76bf92ea4e84ff2aa4f833eeaeefa1dbdab7ce1f11db5030b3e6",
     "internal/engine/safaribidi/connect.go": "d6aff9449da3dccd4c27b88fc4ab64e86e34d5334c7e3a8a98f59adcdcb94001",
     "internal/engine/safaribidi/driver.go": "011ecedf206395338e962b52cf8dba5bba21c00943146d1f3a57bdf21c4c4971",
     "internal/engine/safaribidi/safaribidi.go": "6af2931e7eeccaaa8816b5f16e3dd617e82d65aefd365d56e5a479ffd6efb821",

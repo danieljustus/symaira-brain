@@ -27,7 +27,7 @@ from external_env import ensure_external_environment
 
 ensure_external_environment(__file__)
 
-ORACLE_COMMIT = "dc9c54e41beccf131fbe70e3f45bfff98871e709"
+ORACLE_COMMIT = "2ddbda51ef059181b99171ce7f87b6f6d8044c92"
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = ROOT / "testdata/port/engine"
 CHROME_FIXTURE = FIXTURE_DIR / "chrome-full.json"
