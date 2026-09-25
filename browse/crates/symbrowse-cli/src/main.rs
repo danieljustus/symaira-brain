@@ -456,6 +456,7 @@ fn run_dispatch(
         .then_some(args),
     );
     let is_network_offline = frame.cmd == "network.offline";
+    let is_network_request = frame.cmd == "network.request";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let is_cookie_clear = frame.cmd == "cookies.clear";
@@ -545,6 +546,17 @@ fn run_dispatch(
             return write_stdout("ok\n");
         }
         let response_data = response.data.unwrap_or(serde_json::Value::Null);
+        if is_network_request && format == Format::Text {
+            return match serde_json::to_string_pretty(&response_data) {
+                Ok(mut output) => {
+                    output.push('\n');
+                    write_stdout(&output)
+                }
+                Err(error) => {
+                    render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+                }
+            };
+        }
         if is_journal_read && format == Format::Text {
             return write_stdout(&render_journal_text(&response_data));
         }
@@ -3801,7 +3813,13 @@ Use "symbrowse errors [command] --help" for more information about a command.
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("network", None) => Some("Inspect captured page requests\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", None) => Some("Inspect, mock and export page network activity\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  request     Show one captured request by id\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", Some("request")) => Some(plain(
+            "Show one captured request by id",
+            "symbrowse network request <id> [flags]",
+            "  -h, --help   help for request\n",
+            "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n",
+        )),
         ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n      --dir string       set the download directory first\n  -h, --help             help for downloads\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n  -h, --help            help for requests\n      --filter string   only URLs containing this substring\n      --max-tokens int  token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string   only this HTTP method\n      --status int      only this HTTP status code\n      --type string     only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
@@ -4903,6 +4921,7 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
         let value = &values[index];
         match value.as_str() {
             "requests" if subcommand.is_none() => subcommand = Some("requests"),
+            "request" if subcommand.is_none() => subcommand = Some("request"),
             "--json" => json = true,
             "--output" => {
                 index += 1;
@@ -4974,6 +4993,20 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                 "unknown command {:?} for \"symbrowse network requests\"",
                 positional[0]
             ),
+            exit_code: 2,
+        }),
+        Some("request") if positional.len() == 1 => Ok(Action::Dispatch {
+            session,
+            command: "network.request".into(),
+            args: serde_json::json!({"id": positional[0]}),
+            format,
+        }),
+        Some("request") if positional.is_empty() => Err(ParseError {
+            message: "accepts 1 arg(s), received 0".to_owned(),
+            exit_code: 2,
+        }),
+        Some("request") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("network subcommand selected from supported names"),
@@ -7484,6 +7517,26 @@ mod tests {
             Err(ParseError {
                 message: "unknown command \"extra\" for \"symbrowse network requests\"".to_owned(),
                 exit_code: 2,
+            })
+        );
+    }
+
+    #[test]
+    fn network_request_routes_id_and_output_format() {
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "request",
+                "fixture-1",
+                "--session",
+                "fixture",
+                "--json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "fixture".to_owned(),
+                command: "network.request".to_owned(),
+                args: serde_json::json!({"id": "fixture-1"}),
+                format: Format::Json,
             })
         );
     }

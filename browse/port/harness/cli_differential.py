@@ -401,6 +401,14 @@ class UnixDaemonStub:
                             "state": "completed", "filename": "report.csv",
                             "url": "https://fixture.invalid/report.csv", "sha256": "a" * 64,
                         }], "count": 1}
+                    elif frame.get("cmd") == "network.request":
+                        data = {"request": {
+                            "id": ((frame.get("args") or {}).get("id", "fixture-1")),
+                            "url": "https://fixture.invalid/data.json",
+                            "method": "GET", "type": "xhr", "status": 200,
+                            "started_at": "2026-01-01T00:00:00Z", "finished": True,
+                            "mime_type": "application/json",
+                        }}
                     elif frame.get("cmd") == "network.requests":
                         data = {"requests": [
                             {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
@@ -620,6 +628,14 @@ class WindowsNamedPipeStub:
                             "state": "completed", "filename": "report.csv",
                             "url": "https://fixture.invalid/report.csv", "sha256": "a" * 64,
                         }], "count": 1}
+                    elif frame.get("cmd") == "network.request":
+                        data = {"request": {
+                            "id": ((frame.get("args") or {}).get("id", "fixture-1")),
+                            "url": "https://fixture.invalid/data.json",
+                            "method": "GET", "type": "xhr", "status": 200,
+                            "started_at": "2026-01-01T00:00:00Z", "finished": True,
+                            "mime_type": "application/json",
+                        }}
                     elif frame.get("cmd") == "network.requests":
                         data = {"requests": [
                             {"id": "r1", "method": "POST", "url": "https://fixture.invalid/api", "type": "XHR", "status": 201},
@@ -1168,6 +1184,11 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-002", ["network", "requests"], b"", True),
         ("CLI-002", ["network", "requests", "--filter", "API", "--type", "xhr", "--method", "post", "--status", "201", "--json"], b"", True),
         ("CLI-002", ["network", "requests", "--output=yaml"], b"", True),
+        ("CLI-002", ["network", "request", "fixture-1"], b"", True),
+        ("CLI-002", ["network", "request", "fixture-1", "--session", "fixture", "--json"], b"", True),
+        ("OUT-003", ["network", "request", "fixture-1", "--session", "fixture", "--output=yaml"], b"", True),
+        ("CLI-003", ["network", "request"], b"", False),
+        ("CLI-003", ["network", "request", "one", "two"], b"", False),
         ("CLI-003", ["network", "requests", "extra"], b"", False),
         ("CLI-002", ["downloads", "--session", "fixture"], b"", True),
         ("CLI-002", ["downloads", "--session", "fixture", "--json"], b"", True),
