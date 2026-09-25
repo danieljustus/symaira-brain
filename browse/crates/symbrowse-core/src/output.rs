@@ -2,7 +2,7 @@
 
 //! Unified JSON, YAML and human output envelope contracts.
 
-use icu_properties::{props::GeneralCategory, CodePointMapData};
+use icu_properties::{CodePointMapData, props::GeneralCategory};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -210,6 +210,10 @@ pub(crate) fn write_yaml_field(output: &mut String, key: &str, value: &Value, in
         }
         Value::Object(_) => output.push_str(" {}\n"),
         Value::Array(_) => output.push_str(" []\n"),
+        Value::String(value) if value.contains('\n') => {
+            output.push(' ');
+            write_yaml_multiline(output, value, indent + 4);
+        }
         _ => {
             output.push(' ');
             output.push_str(&yaml_scalar(value));
@@ -241,11 +245,40 @@ pub(crate) fn write_yaml_sequence_item(output: &mut String, value: &Value, inden
                 write_yaml_field(output, key, child, indent + 2);
             }
         }
+        Value::String(text) if text.contains('\n') => {
+            output.push(' ');
+            write_yaml_multiline(output, text, indent + 4);
+        }
         _ => {
             output.push(' ');
             output.push_str(&yaml_scalar(value));
             output.push('\n');
         }
+    }
+}
+
+fn write_yaml_multiline(output: &mut String, value: &str, indent: usize) {
+    let trailing_newlines = value
+        .bytes()
+        .rev()
+        .take_while(|byte| *byte == b'\n')
+        .count();
+    output.push_str(match trailing_newlines {
+        0 => "|-\n",
+        1 => "|\n",
+        _ => "|+\n",
+    });
+    let content = value.trim_end_matches('\n');
+    if !content.is_empty() {
+        for line in content.split('\n') {
+            output.push_str(&" ".repeat(indent));
+            output.push_str(line);
+            output.push('\n');
+        }
+    }
+    for _ in 1..trailing_newlines {
+        output.push_str(&" ".repeat(indent));
+        output.push('\n');
     }
 }
 
@@ -593,12 +626,14 @@ fn cookie_text(cookie: &Value) -> String {
     let Some(fields) = cookie.as_object() else {
         return human_scalar(cookie);
     };
-    let mut parts = vec![fields
-        .get("name")
-        .and_then(Value::as_str)
-        .filter(|s| !s.is_empty())
-        .unwrap_or("cookie")
-        .to_owned()];
+    let mut parts = vec![
+        fields
+            .get("name")
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty())
+            .unwrap_or("cookie")
+            .to_owned(),
+    ];
     for (key, label) in [
         ("domain", "domain"),
         ("path", "path"),
@@ -820,6 +855,15 @@ mod tests {
         for (data, expected) in cases {
             assert_eq!(human(data), expected);
         }
+    }
+
+    #[test]
+    fn yaml_multiline_snapshot_uses_go_literal_block_style() {
+        let envelope = Envelope::ok(json!({"refs": {}, "tree": "shared\nafter\n"}), Vec::new());
+        assert_eq!(
+            envelope.render(Format::Yaml).unwrap(),
+            "success: true\ndata:\n    refs: {}\n    tree: |\n        shared\n        after\nwarnings: []\nerror: null\n"
+        );
     }
 
     #[test]

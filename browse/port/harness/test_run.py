@@ -147,6 +147,28 @@ class CliDifferentialSessionTests(unittest.TestCase):
         self.assertTrue(all(base64.b64decode(row["go_stdout_base64"]) == base64.b64decode(row["rust_stdout_base64"]) for row in rows))
         self.assertEqual(len(calls), 4)
 
+    def test_out_003_yaml_rows_retain_full_comparison_bytes(self) -> None:
+        for argv in (
+            ["snapshot", "--session", "fixture", "--output=yaml"],
+            ["cookies", "list", "--session", "fixture", "--output=yaml"],
+        ):
+            with self.subTest(argv=argv):
+                outputs = [b"go yaml\n", b"rust yaml\n"]
+                with patch.object(
+                    cli_differential,
+                    "run_process",
+                    side_effect=[
+                        {"returncode": 0, "stdout": outputs[0], "stderr": b""},
+                        {"returncode": 0, "stdout": outputs[1], "stderr": b""},
+                    ],
+                ):
+                    row = cli_differential.compare_processes(
+                        Path("go"), Path("rust"), argv, b"", {}, stub=False,
+                    )
+
+                self.assertEqual(base64.b64decode(row["go_stdout_base64"]), outputs[0])
+                self.assertEqual(base64.b64decode(row["rust_stdout_base64"]), outputs[1])
+
 
 class CompatSidecarHarnessTests(unittest.TestCase):
     def test_fixture_covers_executable_fetch_002_and_fetch_011_cases(self) -> None:

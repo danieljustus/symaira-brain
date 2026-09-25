@@ -1,6 +1,6 @@
 //! Cobra-compatible shell scripts backed by the Rust CLI's implemented help tree.
 
-use std::collections::BTreeSet;
+use std::collections::HashSet;
 
 pub(super) fn script(shell: &str) -> Option<&'static str> {
     match shell {
@@ -89,7 +89,9 @@ fn command_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
 
 fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
     let mut in_flags = false;
-    let mut candidates = BTreeSet::new();
+    let mut candidates = Vec::new();
+    let mut seen = HashSet::new();
+    let mut help_candidates = Vec::new();
     for line in help.lines() {
         let trimmed = line.trim();
         if trimmed == "Flags:" || trimmed == "Global Flags:" {
@@ -141,16 +143,26 @@ fn flag_candidates(help: &str, prefix: &str) -> Vec<(String, String)> {
         };
         for name in names {
             if name.starts_with(prefix) {
-                let candidate = if name.starts_with("--") && value_type {
-                    format!("{name}=")
-                } else {
-                    name.to_owned()
-                };
-                candidates.insert((candidate, description.to_owned()));
+                let candidate = name.to_owned();
+                // Cobra appends the help flag after inherited/global flags;
+                // its completion protocol does not append '=' to value flags.
+                let mut description = description.to_owned();
+                if let Some((before_default, _)) = description.split_once(" (default ") {
+                    description = before_default.to_owned();
+                }
+                let item = (candidate.clone(), description);
+                if seen.insert(candidate) {
+                    if item.0 == "--help" {
+                        help_candidates.push(item);
+                    } else {
+                        candidates.push(item);
+                    }
+                }
             }
         }
     }
-    candidates.into_iter().collect()
+    candidates.extend(help_candidates);
+    candidates
 }
 
 fn split_name_description(value: &str) -> Option<(&str, &str)> {
@@ -213,6 +225,14 @@ mod tests {
         assert!(children.contains("clear\tDelete one cookie"));
         assert!(children.contains("list\tList cookies"));
         assert!(children.contains("set\tSet a cookie"));
+    }
+
+    #[test]
+    fn hidden_completion_matches_cobra_flag_candidates_and_order() {
+        assert_eq!(
+            complete(&["cookies".into(), "list".into(), "--".into()]),
+            "--json\tprint the unified machine-readable output envelope (shorthand for --output json)\n--output\toutput format: text, json or yaml (--json is shorthand for --output json)\n--reveal\tshow cookie values (default: masked); accepts a comma-separated allowlist of cookie names or \"all\"\n--session\tsession name\n--help\thelp for list\n:4\n"
+        );
     }
 
     #[test]

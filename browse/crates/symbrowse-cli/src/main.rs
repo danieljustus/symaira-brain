@@ -573,6 +573,24 @@ fn run_dispatch(
                 Err(error) => render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error),
             };
         }
+        if is_cookie_list && format == Format::Yaml {
+            let warnings = response
+                .warnings
+                .into_iter()
+                .map(|warning| symbrowse_core::output::Warning {
+                    kind: warning.kind,
+                    severity: warning.severity,
+                    message: warning.message,
+                    r#ref: warning.r#ref,
+                    excerpt: warning.excerpt,
+                })
+                .collect();
+            let data = mask_cookie_list(response_data, &cookie_reveal);
+            return match render_cookie_list_yaml(&data, warnings) {
+                Ok(output) => write_stdout(&output),
+                Err(error) => render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error),
+            };
+        }
         let response_data = if is_cookie_list {
             mask_cookie_list(response_data, &cookie_reveal)
         } else {
@@ -1727,6 +1745,100 @@ fn render_cookie_list_json(
             output
         })
         .map_err(|error| error.to_string())
+}
+
+fn render_cookie_list_yaml(
+    data: &serde_json::Value,
+    warnings: Vec<symbrowse_core::output::Warning>,
+) -> Result<String, String> {
+    let origin = data
+        .get("origin")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| "cookie response has no origin".to_owned())?;
+    let cookies = data
+        .get("cookies")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(|| "cookie response has no cookies array".to_owned())?;
+
+    let mut output = format!(
+        "success: true\ndata:\n    origin: {}\n",
+        yaml_cli_string(origin)
+    );
+    if cookies.is_empty() {
+        output.push_str("    cookies: []\n");
+    } else {
+        output.push_str("    cookies:\n");
+        for cookie in cookies {
+            let string = |key: &str| {
+                cookie
+                    .get(key)
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+            };
+            let number = |key: &str| {
+                cookie
+                    .get(key)
+                    .and_then(serde_json::Value::as_f64)
+                    .map_or_else(|| "0".to_owned(), |value| value.to_string())
+            };
+            let integer = |key: &str| {
+                cookie
+                    .get(key)
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0)
+            };
+            let boolean = |key: &str| {
+                cookie
+                    .get(key)
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(false)
+            };
+            output.push_str("        - name: ");
+            output.push_str(&yaml_cli_string(string("name")));
+            output.push('\n');
+            for (key, value) in [
+                ("value", yaml_cli_string(string("value"))),
+                ("domain", yaml_cli_string(string("domain"))),
+                ("path", yaml_cli_string(string("path"))),
+                ("expires", number("expires")),
+                ("size", integer("size").to_string()),
+                ("httponly", boolean("http_only").to_string()),
+                ("secure", boolean("secure").to_string()),
+                ("session", boolean("session").to_string()),
+                ("samesite", yaml_cli_string(string("same_site"))),
+            ] {
+                output.push_str("          ");
+                output.push_str(key);
+                output.push_str(": ");
+                output.push_str(&value);
+                output.push('\n');
+            }
+        }
+    }
+
+    let suffix = Envelope::ok(serde_json::Value::Null, warnings)
+        .render(Format::Yaml)
+        .map_err(|error| error.to_string())?;
+    let suffix = suffix
+        .strip_prefix("success: true\ndata: null\n")
+        .ok_or_else(|| "could not render cookie YAML envelope suffix".to_owned())?;
+    output.push_str(suffix);
+    Ok(output)
+}
+
+fn yaml_cli_string(value: &str) -> String {
+    if value.is_empty()
+        || value.contains(['\n', '\r', '\t'])
+        || value.contains(": ")
+        || matches!(
+            value.to_ascii_lowercase().as_str(),
+            "y" | "yes" | "n" | "no" | "true" | "false" | "on" | "off" | "null" | "~"
+        )
+    {
+        serde_json::to_string(value).expect("string serialization cannot fail")
+    } else {
+        value.to_owned()
+    }
 }
 
 fn run_session_id(scope: &str, prefix: &str, format: Format) -> ExitCode {
@@ -6205,8 +6317,8 @@ mod tests {
     use super::{
         Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_html_escape,
         go_json_string, mask_cookie_list, parse, parse_cache_range, parse_curl_cookie_line,
-        render_cookie_list_json, render_cookie_list_text, render_session_id_json,
-        render_state_key_init, session_id_info, snapshot_tree_diff,
+        render_cookie_list_json, render_cookie_list_text, render_cookie_list_yaml,
+        render_session_id_json, render_state_key_init, session_id_info, snapshot_tree_diff,
     };
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
@@ -7486,6 +7598,18 @@ mod tests {
         assert_eq!(
             render_cookie_list_json(&data, "", Vec::new()).unwrap(),
             "{\"success\":true,\"data\":{\"origin\":\"https://example.test\",\"cookies\":[{\"name\":\"sid\",\"value\":\"0123••••cdef\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false},{\"name\":\"short\",\"value\":\"••••\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false},{\"name\":\"empty\",\"value\":\"\",\"domain\":\"\",\"path\":\"\",\"expires\":0,\"size\":0,\"http_only\":false,\"secure\":false,\"session\":false}]}}\n"
+        );
+        let yaml_data = serde_json::json!({
+            "origin": "https://fixture.invalid",
+            "cookies": [{
+                "name": "sid", "value": "0123••••cdef", "domain": "fixture.invalid",
+                "path": "/", "expires": -1, "size": 20, "http_only": true,
+                "secure": true, "session": true, "same_site": "Lax"
+            }]
+        });
+        assert_eq!(
+            render_cookie_list_yaml(&yaml_data, Vec::new()).unwrap(),
+            "success: true\ndata:\n    origin: https://fixture.invalid\n    cookies:\n        - name: sid\n          value: 0123••••cdef\n          domain: fixture.invalid\n          path: /\n          expires: -1\n          size: 20\n          httponly: true\n          secure: true\n          session: true\n          samesite: Lax\nwarnings: []\nerror: null\n"
         );
     }
 }

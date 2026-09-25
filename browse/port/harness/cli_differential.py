@@ -789,6 +789,14 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
     matched = all(go_result.get(k) == rust_result.get(k) for k in ("returncode", "stdout", "stderr"))
     row = {"argv": argv, "matched": matched, "go": output_record(go_result),
            "rust": output_record(rust_result)}
+    if argv in (
+        ["snapshot", "--session", "fixture", "--output=yaml"],
+        ["cookies", "list", "--session", "fixture", "--output=yaml"],
+    ):
+        # Keep complete, disposable-fixture YAML bytes in the artifact so
+        # ordering and multiline scalar differences are inspectable.
+        row["go_stdout_base64"] = base64.b64encode(go_result["stdout"]).decode("ascii")
+        row["rust_stdout_base64"] = base64.b64encode(rust_result["stdout"]).decode("ascii")
     if stub:
         def payload(frame: dict[str, Any] | None) -> dict[str, Any] | None:
             if frame is None:
