@@ -28,7 +28,7 @@ fn daemon_request(client: &Client, command: &str, args: serde_json::Value) -> se
     serde_json::to_value(response).expect("serialize Firefox daemon response")
 }
 
-async fn production_daemon_uses_the_selected_firefox(executable: PathBuf, fixture_url: &str) {
+fn production_daemon_uses_the_selected_firefox(executable: PathBuf, fixture_url: &str) {
     let root = tempfile::tempdir().expect("create Firefox daemon root");
     let session = format!("native-firefox-{}", std::process::id());
     let mut spec = SessionSpec::for_session(&session);
@@ -425,7 +425,12 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
     let endpoint = session.remote_endpoint();
     session.close().await.expect("close owned Firefox process");
     wait_for_endpoint_closed(endpoint).await;
-    production_daemon_uses_the_selected_firefox(executable, &fixture.base_url()).await;
+    let fixture_url = fixture.base_url();
+    tokio::task::spawn_blocking(move || {
+        production_daemon_uses_the_selected_firefox(executable, &fixture_url)
+    })
+    .await
+    .expect("join Firefox production-daemon fixture");
     drop(fixture);
     drop(temp);
 }
