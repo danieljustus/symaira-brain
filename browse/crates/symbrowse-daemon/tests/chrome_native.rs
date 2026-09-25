@@ -65,7 +65,7 @@ impl ChromeContractServer {
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
                         let body = if path == "/popup" {
-                            "<!doctype html><button id=popup onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button>"
+                            "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a>"
                         } else {
                             "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p>"
                         };
@@ -326,6 +326,16 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         ("get.title", "inspect_title", json!({})),
         ("get.url", "inspect_url", json!({})),
         (
+            "get.title",
+            "inspect_selected_title",
+            json!({"selector":"#popup"}),
+        ),
+        (
+            "get.url",
+            "inspect_selected_url",
+            json!({"selector":"#link"}),
+        ),
+        (
             "is.visible",
             "inspect_visible",
             json!({"selector":"#popup"}),
@@ -354,6 +364,19 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(
         rust_inspect_error["error"]["message"],
         go_oracle["inspect_error"]["error"]["message"]
+    );
+    let rust_missing_element = request(&client, "get.title", json!({"selector":"#missing"}));
+    assert_eq!(
+        rust_missing_element["success"],
+        go_oracle["inspect_missing_element"]["success"]
+    );
+    assert_eq!(
+        rust_missing_element["error"]["code"],
+        go_oracle["inspect_missing_element"]["error"]["code"]
+    );
+    assert_eq!(
+        rust_missing_element["error"]["message"],
+        go_oracle["inspect_missing_element"]["error"]["message"]
     );
     let rust_popup_click = request(&client, "click", json!({"selector":"#popup"}));
     assert_eq!(

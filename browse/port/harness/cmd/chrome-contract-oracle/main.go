@@ -12,19 +12,22 @@ import (
 )
 
 type contract struct {
-	Open           daemon.Response `json:"open"`
-	TabNew         daemon.Response `json:"tab_new"`
-	InspectText    daemon.Response `json:"inspect_text"`
-	InspectHTML    daemon.Response `json:"inspect_html"`
-	InspectTitle   daemon.Response `json:"inspect_title"`
-	InspectURL     daemon.Response `json:"inspect_url"`
-	InspectVisible daemon.Response `json:"inspect_visible"`
-	InspectError   daemon.Response `json:"inspect_error"`
-	PopupClick     daemon.Response `json:"popup_click"`
-	PopupOpen      daemon.Response `json:"popup_open"`
-	TabList        daemon.Response `json:"tab_list"`
-	TabClose       daemon.Response `json:"tab_close"`
-	LastTabClose   daemon.Response `json:"last_tab_close"`
+	Open                  daemon.Response `json:"open"`
+	TabNew                daemon.Response `json:"tab_new"`
+	InspectText           daemon.Response `json:"inspect_text"`
+	InspectHTML           daemon.Response `json:"inspect_html"`
+	InspectTitle          daemon.Response `json:"inspect_title"`
+	InspectURL            daemon.Response `json:"inspect_url"`
+	InspectSelectedTitle  daemon.Response `json:"inspect_selected_title"`
+	InspectSelectedURL    daemon.Response `json:"inspect_selected_url"`
+	InspectVisible        daemon.Response `json:"inspect_visible"`
+	InspectError          daemon.Response `json:"inspect_error"`
+	InspectMissingElement daemon.Response `json:"inspect_missing_element"`
+	PopupClick            daemon.Response `json:"popup_click"`
+	PopupOpen             daemon.Response `json:"popup_open"`
+	TabList               daemon.Response `json:"tab_list"`
+	TabClose              daemon.Response `json:"tab_close"`
+	LastTabClose          daemon.Response `json:"last_tab_close"`
 }
 
 func main() {
@@ -100,6 +103,16 @@ func run() error {
 		Session: "chrome-contract",
 		Args:    mustJSON(map[string]string{}),
 	})
+	result.InspectSelectedTitle = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.title",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#popup"}),
+	})
+	result.InspectSelectedURL = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.url",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#link"}),
+	})
 	result.InspectVisible = call(runtime, ctx, daemon.Frame{
 		Cmd:     "is.visible",
 		Session: "chrome-contract",
@@ -112,6 +125,8 @@ func run() error {
 		{"get.html", result.InspectHTML},
 		{"get.title", result.InspectTitle},
 		{"get.url", result.InspectURL},
+		{"get.title selector", result.InspectSelectedTitle},
+		{"get.url selector", result.InspectSelectedURL},
 		{"is.visible", result.InspectVisible},
 	} {
 		if !inspection.response.Success {
@@ -125,6 +140,14 @@ func run() error {
 	})
 	if result.InspectError.Success {
 		return fmt.Errorf("Go get.text without selector unexpectedly succeeded")
+	}
+	result.InspectMissingElement = call(runtime, ctx, daemon.Frame{
+		Cmd:     "get.title",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"selector": "#missing"}),
+	})
+	if result.InspectMissingElement.Success {
+		return fmt.Errorf("Go get.title for a missing element unexpectedly succeeded")
 	}
 	result.PopupClick = call(runtime, ctx, daemon.Frame{
 		Cmd:     "click",

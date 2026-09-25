@@ -1223,6 +1223,29 @@ impl DispatchRuntime {
                     page.evaluate_script("document.documentElement.outerHTML")
                         .await
                         .map_err(runtime_error)?
+                } else if matches!(kind, "title" | "url") && !selector.is_empty() {
+                    let selector_json = serde_json::to_string(selector).map_err(runtime_error)?;
+                    let expression = if kind == "title" {
+                        format!(
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? (e.title || '') : null; }})()"
+                        )
+                    } else {
+                        format!(
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? (e.href || e.getAttribute('href') || '') : null; }})()"
+                        )
+                    };
+                    let value = page
+                        .evaluate_script(&expression)
+                        .await
+                        .map_err(runtime_error)?;
+                    if value.is_null() {
+                        return Err(DaemonError {
+                            code: codes::OPERATION_FAILED.into(),
+                            message: format!("selector {selector_json} did not match an element"),
+                            ..Default::default()
+                        });
+                    }
+                    value
                 } else {
                     page.inspect(selector, kind).await.map_err(runtime_error)?
                 };
