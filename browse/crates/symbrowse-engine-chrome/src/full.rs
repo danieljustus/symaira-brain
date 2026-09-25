@@ -417,11 +417,13 @@ impl ChromePage {
             .build()
             .map_err(std::io::Error::other)?;
         let response = self.page.execute(params).await?;
-        let result = response.result.result;
+        let response = response.result;
         let exception_text = response
             .exception_details
-            .map(|exception| exception.text)
+            .as_ref()
+            .map(|exception| exception.text.clone())
             .unwrap_or_default();
+        let result = response.result;
         Ok(serde_json::json!({
             "type": result.r#type.as_ref().to_owned(),
             "value": result.value.unwrap_or(Value::Null),
