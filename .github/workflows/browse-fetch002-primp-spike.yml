@@ -78,7 +78,7 @@ jobs:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: fetch002-primp-lock-${{ github.sha }}
-          path: port/spikes/primp
+          path: browse/port/spikes/primp
       - name: Restore the resolved Cargo lock
         run: cp port/spikes/primp/primp-Cargo.lock port/spikes/primp/Cargo.lock
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
