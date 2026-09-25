@@ -595,21 +595,34 @@ impl ChromePage {
         ssrf_enabled: bool,
         allow_private: bool,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         let allowlist = symbrowse_core::policy::Allowlist::parse(&allowed_domains)?;
         if !allowlist.active() && !ssrf_enabled {
+            if diagnostics {
+                eprintln!("chrome_network_guard_stage=inactive");
+            }
             return Ok(());
         }
         let mut enabled = self.network_guard_enabled.lock().await;
         if *enabled {
+            if diagnostics {
+                eprintln!("chrome_network_guard_stage=already-enabled");
+            }
             return Ok(());
         }
         let mut paused = self
             .page
             .event_listener::<fetch::EventRequestPaused>()
             .await?;
+        if diagnostics {
+            eprintln!("chrome_network_guard_stage=request-paused-listener-ready");
+        }
         self.page.execute(fetch::EnableParams::default()).await?;
         *enabled = true;
         drop(enabled);
+        if diagnostics {
+            eprintln!("chrome_network_guard_stage=fetch-enabled");
+        }
 
         let page = self.page.clone();
         tokio::spawn(async move {
@@ -763,6 +776,7 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         if url.trim().is_empty() {
             return Err("navigation URL is required".into());
         }
@@ -795,13 +809,25 @@ impl ChromePage {
             .page
             .event_listener::<page::EventNavigatedWithinDocument>()
             .await?;
+        if diagnostics {
+            eprintln!("chrome_open_stage=navigation-listeners-ready");
+        }
         let main_frame = self.page.mainframe().await?;
+        if diagnostics {
+            eprintln!("chrome_open_stage=main-frame-resolved");
+        }
         let url_literal = serde_json::to_string(url)?;
+        if diagnostics {
+            eprintln!("chrome_open_stage=dispatch-evaluate-start");
+        }
         let dispatch = self
             .evaluate(&format!(
                 "setTimeout(() => location.assign({url_literal}), 0); 'scheduled'"
             ))
             .await?;
+        if diagnostics {
+            eprintln!("chrome_open_stage=dispatch-evaluate-complete");
+        }
         if let Some(error) = dispatch
             .get("exception_text")
             .and_then(Value::as_str)
@@ -813,11 +839,19 @@ impl ChromePage {
         let mut frame_events_open = true;
         let mut same_document_events_open = true;
         let mut navigation_observed = false;
+        if diagnostics {
+            eprintln!("chrome_open_stage=navigation-event-wait-start");
+        }
         while !navigation_observed && (frame_events_open || same_document_events_open) {
             tokio::select! {
                 event = navigated.next(), if frame_events_open => {
                     match event {
-                        Some(event) if event.frame.parent_id.is_none() => navigation_observed = true,
+                        Some(event) if event.frame.parent_id.is_none() => {
+                            navigation_observed = true;
+                            if diagnostics {
+                                eprintln!("chrome_open_stage=main-frame-navigation-observed");
+                            }
+                        }
                         Some(_) => {},
                         None => frame_events_open = false,
                     }
@@ -826,6 +860,9 @@ impl ChromePage {
                     match event {
                         Some(event) if main_frame.as_ref().is_none_or(|id| id == &event.frame_id) => {
                             navigation_observed = true;
+                            if diagnostics {
+                                eprintln!("chrome_open_stage=same-document-navigation-observed");
+                            }
                         }
                         Some(_) => {},
                         None => same_document_events_open = false,
@@ -845,6 +882,9 @@ impl ChromePage {
             if let Ok(state) = state {
                 let state = state.into_value::<Value>()?;
                 if state.get("ready_state").and_then(Value::as_str) == Some("complete") {
+                    if diagnostics {
+                        eprintln!("chrome_open_stage=document-complete");
+                    }
                     return self.current_navigation_outcome().await;
                 }
             }
