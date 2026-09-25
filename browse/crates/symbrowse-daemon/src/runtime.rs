@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use symbrowse_compat::{CompatClient, Request as CompatRequest};
 use symbrowse_core::{
@@ -281,6 +282,8 @@ impl DispatchRuntime {
             | "storage.clear" | "download" | "download.setdir" | "downloads.list" | "eval" => {
                 self.browser_command(&frame).await
             }
+            "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
+            | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -963,14 +966,115 @@ impl DispatchRuntime {
         }
         let page = self.ensure_browser().await?;
         let empty_args = serde_json::Map::new();
-        let args = if matches!(frame.cmd.as_str(), "cookies.list" | "downloads.list")
-            && frame.args.is_none()
+        let args = if (matches!(frame.cmd.as_str(), "cookies.list" | "downloads.list")
+            && frame.args.is_none())
+            || frame.cmd == "set.offline"
         {
             &empty_args
         } else {
             object_args(frame)?
         };
         let data = match frame.cmd.as_str() {
+            "set.viewport" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    width: i64,
+                    height: i64,
+                    scale: f64,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_viewport(request.width, request.height, request.scale, false)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"viewport": [request.width, request.height]})
+            }
+            "set.device" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    name: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.apply_device(&request.name)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"device": request.name})
+            }
+            "set.geo" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    latitude: f64,
+                    longitude: f64,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_geolocation(request.latitude, request.longitude)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"geo": [request.latitude, request.longitude]})
+            }
+            "set.offline" => {
+                let offline = frame
+                    .args
+                    .as_ref()
+                    .and_then(Value::as_object)
+                    .and_then(|args| {
+                        args.iter()
+                            .find(|(name, _)| name.eq_ignore_ascii_case("offline"))
+                            .map(|(_, value)| value)
+                    })
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false);
+                page.set_offline(offline).await.map_err(runtime_error)?;
+                json!({"offline": offline})
+            }
+            "set.headers" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    headers: Option<std::collections::BTreeMap<String, String>>,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                let headers = request.headers.unwrap_or_default();
+                let count = headers.len();
+                let headers = headers
+                    .into_iter()
+                    .map(|(name, value)| (name, Value::String(value)))
+                    .collect();
+                page.set_extra_headers(headers)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"headers_set": count})
+            }
+            "set.media" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    dark: bool,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_media(request.dark).await.map_err(runtime_error)?;
+                json!({"media": if request.dark { "dark" } else { "light" }})
+            }
+            "set.user-agent" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    user_agent: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_user_agent(&request.user_agent)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"user_agent_set": true})
+            }
             "download.setdir" => {
                 let directory = match args.get("dir") {
                     None | Some(Value::Null) => "",
@@ -3309,7 +3413,7 @@ mod tests {
             .block_on(runtime.dispatch(
                 Frame {
                     cmd: "open".into(),
-                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    args: Some(json!({"url":"https://example.invalid/fixture"})),
                     ..Frame::default()
                 },
                 OperationContext::for_test(),

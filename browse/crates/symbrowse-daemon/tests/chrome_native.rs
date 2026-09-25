@@ -75,6 +75,18 @@ impl ChromeContractServer {
                             .next()
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
+                        let header_echo = if path == "/header-echo" {
+                            request
+                                .lines()
+                                .find_map(|line| {
+                                    let (name, value) = line.split_once(':')?;
+                                    name.eq_ignore_ascii_case("x-symbrowse-contract")
+                                        .then(|| value.trim().to_owned())
+                                })
+                                .unwrap_or_else(|| "missing".into())
+                        } else {
+                            String::new()
+                        };
                         let (content_type, extra_headers, body) = if path == "/policy-pixel" {
                             (
                                 "image/svg+xml; charset=utf-8",
@@ -87,18 +99,55 @@ impl ChromeContractServer {
                                 "Content-Disposition: attachment; filename=\"fixture.txt\"\r\n",
                                 "symbrowse native download fixture\n",
                             )
+                        } else if path == "/header-echo" {
+                            ("text/plain; charset=utf-8", "", "")
                         } else if path == "/popup" {
                             (
                                 "text/html; charset=utf-8",
                                 "",
                                 "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><button id=covered style='position:fixed;left:10px;top:100px;width:160px;height:50px'>Covered</button><div id=cover aria-label='cover' style='position:fixed;z-index:2;left:10px;top:100px;width:160px;height:50px'></div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>",
                             )
+                        } else if path == "/frames" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                r#"<!doctype html><iframe id='outer' name='outer' srcdoc="<iframe id='inner' name='inner' srcdoc='nested'></iframe>"></iframe>"#,
+                            )
+                        } else if path == "/interactions" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                r#"<!doctype html><input id='text' onfocus="this.dataset.focused='yes'"><select id='choice'><option value='one'>One</option><option value='two'>Two</option></select><input id='check' type='checkbox'><div id='dbl' ondblclick="this.dataset.doubled='yes'">Double</div><div id='hover' onmouseenter="this.dataset.hovered='yes'">Hover</div>"#,
+                            )
+                        } else if path == "/prompt" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                "<!doctype html><script>setTimeout(() => prompt('native prompt','seed'), 100)</script>",
+                            )
+                        } else if path == "/alert" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                "<!doctype html><script>setTimeout(() => alert('native alert'), 100)</script>",
+                            )
+                        } else if path == "/auto-alert" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                "<!doctype html><script>setTimeout(() => alert('auto dismiss'), 100)</script>",
+                            )
                         } else {
                             (
                                 "text/html; charset=utf-8",
                                 "",
-                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a><div style='height:12000px'><div id=target tabindex=0 style='margin-top:8000px;height:100px'></div></div>",
+                                "<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a><div style='height:12000px'><div id=target tabindex=0 style='margin-top:8000px;height:100px'></div></div>",
                             )
+                        };
+                        let body = if path == "/header-echo" {
+                            header_echo
+                        } else {
+                            body.to_owned()
                         };
                         let response = format!(
                             "HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\n{extra_headers}Content-Length: {}\r\nConnection: close\r\n\r\n{body}",
@@ -349,6 +398,12 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
 
     let capabilities = request(&client, "capabilities", json!({}));
     assert_eq!(capabilities["success"], true);
+    assert!(
+        capabilities["data"]["interfaces"]
+            .as_array()
+            .is_some_and(|interfaces| interfaces.iter().any(|value| value == "SettingsEngine")),
+        "Chrome settings capability is missing: {capabilities}"
+    );
     if expect_unavailable {
         let denied = request(
             &client,
@@ -993,7 +1048,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let created = request(
         &client,
         "tab.new",
-        json!({"label":"second","url":"data:text/html,<h1>second</h1>"}),
+        json!({"label":"second","url":format!("{}/page", contract_server.base_url)}),
     );
     assert_eq!(created["success"], true, "tab.new response: {created}");
     assert_eq!(created["data"]["tab"], "t2");
@@ -1145,7 +1200,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let framed = request(
         &client,
         "open",
-        json!({"url": "data:text/html,<iframe id='outer' srcdoc=\"<iframe id='inner' srcdoc='nested'></iframe>\"></iframe>"}),
+        json!({"url": format!("{}/frames", contract_server.base_url)}),
     );
     assert_eq!(framed["success"], true, "frame page: {framed}");
     let frames = request(&client, "frame.tree", json!({}));
@@ -1177,7 +1232,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let interactions = request(
         &client,
         "open",
-        json!({"url": "data:text/html,%3Cinput%20id%3D%27text%27%20onfocus%3D%22this.dataset.focused%3D%27yes%27%22%3E%3Cselect%20id%3D%27choice%27%3E%3Coption%20value%3D%27one%27%3EOne%3C%2Foption%3E%3Coption%20value%3D%27two%27%3ETwo%3C%2Foption%3E%3C%2Fselect%3E%3Cinput%20id%3D%27check%27%20type%3D%27checkbox%27%3E%3Cdiv%20id%3D%27dbl%27%20ondblclick%3D%22this.dataset.doubled%3D%27yes%27%22%3EDouble%3C%2Fdiv%3E%3Cdiv%20id%3D%27hover%27%20onmouseenter%3D%22this.dataset.hovered%3D%27yes%27%22%3EHover%3C%2Fdiv%3E"}),
+        json!({"url": format!("{}/interactions", contract_server.base_url)}),
     );
     assert_eq!(
         interactions["success"], true,
@@ -1233,7 +1288,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let prompt_page = request(
         &client,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Eprompt('native%20prompt'%2C'seed')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":format!("{}/prompt", contract_server.base_url)}),
     );
     assert_eq!(prompt_page["success"], true, "prompt page: {prompt_page}");
     thread::sleep(Duration::from_millis(250));
@@ -1258,7 +1313,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let alert_page = request(
         &client,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('native%20alert')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":format!("{}/alert", contract_server.base_url)}),
     );
     assert_eq!(alert_page["success"], true, "alert page: {alert_page}");
     thread::sleep(Duration::from_millis(250));
@@ -1280,7 +1335,7 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let auto_alert = request(
         &client,
         "open",
-        json!({"url":"data:text/html,%3Cscript%3EsetTimeout(()%3D%3Ealert('auto%20dismiss')%2C100)%3C%2Fscript%3E"}),
+        json!({"url":format!("{}/auto-alert", contract_server.base_url)}),
     );
     assert_eq!(auto_alert["success"], true, "auto alert page: {auto_alert}");
     thread::sleep(Duration::from_millis(250));
@@ -1295,6 +1350,128 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     let unsupported = request(&client, "network.har", json!({}));
     assert_eq!(unsupported["success"], false);
     assert_eq!(unsupported["error"]["code"], "unsupported");
+
+    let settings_page = request(
+        &client,
+        "open",
+        json!({"url":format!("{}/page", contract_server.base_url)}),
+    );
+    assert_eq!(
+        settings_page["success"], true,
+        "settings page: {settings_page}"
+    );
+    let viewport = request(
+        &client,
+        "set.viewport",
+        json!({"width":800,"height":600,"scale":1.25}),
+    );
+    assert_eq!(viewport["success"], true, "set viewport: {viewport}");
+    assert_eq!(viewport["data"], json!({"viewport":[800,600]}));
+    let viewport_effect = request(
+        &client,
+        "eval",
+        json!({"expression":"({width:innerWidth,height:innerHeight,scale:devicePixelRatio})"}),
+    );
+    assert_eq!(viewport_effect["data"]["value"]["width"], 800);
+    assert_eq!(viewport_effect["data"]["value"]["height"], 600);
+    assert_eq!(viewport_effect["data"]["value"]["scale"], 1.25);
+
+    let geo = request(
+        &client,
+        "set.geo",
+        json!({"latitude":37.7749,"longitude":-122.4194}),
+    );
+    assert_eq!(geo["success"], true, "set geo: {geo}");
+    assert_eq!(geo["data"], json!({"geo":[37.7749,-122.4194]}));
+
+    let headers = request(
+        &client,
+        "set.headers",
+        json!({"headers":{"X-Symbrowse-Contract":"header-applied"}}),
+    );
+    assert_eq!(headers["success"], true, "set headers: {headers}");
+    assert_eq!(headers["data"], json!({"headers_set":1}));
+    let credential_header = request(
+        &client,
+        "set.headers",
+        json!({"headers":{"Authorization":"must-not-be-applied"}}),
+    );
+    assert_eq!(credential_header["success"], false);
+    assert!(
+        credential_header["error"]["message"]
+            .as_str()
+            .is_some_and(|message| message.contains("credential risk class"))
+    );
+    let header_effect = request(
+        &client,
+        "eval",
+        json!({"expression":format!("fetch('{}/header-echo').then(r=>r.text())", contract_server.base_url)}),
+    );
+    assert_eq!(
+        header_effect["data"]["value"], "header-applied",
+        "extra request header was not persistent: {header_effect}"
+    );
+
+    let media = request(&client, "set.media", json!({"dark":true}));
+    assert_eq!(media["success"], true, "set media: {media}");
+    let media_effect = request(
+        &client,
+        "eval",
+        json!({"expression":"matchMedia('(prefers-color-scheme: dark)').matches"}),
+    );
+    assert_eq!(media_effect["data"]["value"], true);
+
+    let user_agent = request(
+        &client,
+        "set.user-agent",
+        json!({"user_agent":"Symbrowse Contract Test/1.0"}),
+    );
+    assert_eq!(user_agent["success"], true, "set user agent: {user_agent}");
+    let user_agent_effect = request(&client, "eval", json!({"expression":"navigator.userAgent"}));
+    assert_eq!(
+        user_agent_effect["data"]["value"],
+        "Symbrowse Contract Test/1.0"
+    );
+
+    let device = request(&client, "set.device", json!({"name":"iPhone SE"}));
+    assert_eq!(device["success"], true, "set device: {device}");
+    assert_eq!(device["data"], json!({"device":"iPhone SE"}));
+    let device_effect = request(
+        &client,
+        "eval",
+        json!({"expression":"({width:innerWidth,height:innerHeight,scale:devicePixelRatio,touch:navigator.maxTouchPoints,ua:navigator.userAgent})"}),
+    );
+    assert_eq!(device_effect["data"]["value"]["width"], 375);
+    assert_eq!(device_effect["data"]["value"]["height"], 667);
+    assert_eq!(device_effect["data"]["value"]["scale"], 2);
+    assert!(
+        device_effect["data"]["value"]["touch"]
+            .as_u64()
+            .unwrap_or(0)
+            > 0
+    );
+    assert!(
+        device_effect["data"]["value"]["ua"]
+            .as_str()
+            .is_some_and(|value| value.contains("iPhone"))
+    );
+
+    let offline = request(&client, "set.offline", json!({"offline":true}));
+    assert_eq!(offline["success"], true, "set offline: {offline}");
+    let offline_effect = request(
+        &client,
+        "eval",
+        json!({"expression":format!("Promise.race([fetch('{}/header-echo').then(()=> 'loaded',()=> 'offline'),new Promise(resolve=>setTimeout(()=>resolve('timed_out'),3000))])", contract_server.base_url)}),
+    );
+    assert_eq!(offline_effect["data"]["value"], "offline");
+    let online = request(&client, "set.offline", json!({"offline":false}));
+    assert_eq!(online["success"], true, "restore online: {online}");
+    let online_effect = request(
+        &client,
+        "eval",
+        json!({"expression":format!("fetch('{}/header-echo').then(()=> 'loaded',()=> 'offline')", contract_server.base_url)}),
+    );
+    assert_eq!(online_effect["data"]["value"], "loaded");
 
     // Stop the production accept loop before removing this test's private state.
     server.stop();

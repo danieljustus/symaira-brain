@@ -114,6 +114,19 @@ const OOB_OVERLAY_SCRIPT: &str = r#"(() => {
 
 // Keep the Rust audit offline and tied to the Go oracle's vendored axe-core.
 const AXE_CORE_SOURCE: &str = include_str!("../../../internal/engine/axe/assets/axe.min.js");
+const DEVICE_PROFILES: &str = include_str!("../../../internal/engine/devices.json");
+
+#[derive(Deserialize)]
+struct DeviceProfile {
+    name: String,
+    width: i64,
+    height: i64,
+    scale: f64,
+    mobile: bool,
+    touch: bool,
+    #[serde(default)]
+    user_agent: String,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnsupportedOperation(pub &'static str);
@@ -1486,15 +1499,114 @@ impl ChromePage {
     #[allow(deprecated)]
     pub async fn set_offline(&self, offline: bool) -> Result<(), Box<dyn Error + Send + Sync>> {
         self.page
-            .execute(
-                network::EmulateNetworkConditionsParams::builder()
-                    .offline(offline)
-                    .latency(0)
-                    .download_throughput(-1)
-                    .upload_throughput(-1)
-                    .build()?,
-            )
+            .execute(network::EmulateNetworkConditionsByRuleParams::new(
+                offline,
+                vec![network::NetworkConditions::new(
+                    "",
+                    0.0,
+                    if offline { -1.0 } else { 0.0 },
+                    if offline { -1.0 } else { 0.0 },
+                )],
+            ))
             .await?;
+        Ok(())
+    }
+
+    pub async fn set_viewport(
+        &self,
+        width: i64,
+        height: i64,
+        scale: f64,
+        mobile: bool,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if width <= 0 || height <= 0 {
+            return Err(format!("viewport dimensions must be positive: {width}x{height}").into());
+        }
+        let scale = if scale <= 0.0 { 1.0 } else { scale };
+        self.page
+            .execute(emulation::SetDeviceMetricsOverrideParams::new(
+                width, height, scale, mobile,
+            ))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn set_geolocation(
+        &self,
+        latitude: f64,
+        longitude: f64,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if !(-90.0..=90.0).contains(&latitude) || !(-180.0..=180.0).contains(&longitude) {
+            return Err(format!("invalid coordinates: {latitude:.6}, {longitude:.6}").into());
+        }
+        let params = emulation::SetGeolocationOverrideParams::builder()
+            .latitude(latitude)
+            .longitude(longitude)
+            .build();
+        self.page.execute(params).await?;
+        Ok(())
+    }
+
+    pub async fn set_extra_headers(
+        &self,
+        headers: serde_json::Map<String, Value>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        for name in headers.keys() {
+            if ["authorization", "proxy-authorization", "cookie"]
+                .iter()
+                .any(|secret| name.eq_ignore_ascii_case(secret))
+            {
+                return Err(format!("header {name:?} requires the credential risk class").into());
+            }
+        }
+        let params: network::SetExtraHttpHeadersParams =
+            serde_json::from_value(serde_json::json!({"headers": headers}))?;
+        self.page.execute(params).await?;
+        Ok(())
+    }
+
+    pub async fn set_media(&self, dark: bool) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let value = if dark { "dark" } else { "light" };
+        let params: emulation::SetEmulatedMediaParams =
+            serde_json::from_value(serde_json::json!({
+                "features": [{"name": "prefers-color-scheme", "value": value}]
+            }))?;
+        self.page.execute(params).await?;
+        Ok(())
+    }
+
+    pub async fn set_user_agent(
+        &self,
+        user_agent: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if user_agent.trim().is_empty() {
+            return Err("user agent must not be empty".into());
+        }
+        let params = emulation::SetUserAgentOverrideParams::new(user_agent);
+        self.page.execute(params).await?;
+        Ok(())
+    }
+
+    pub async fn apply_device(&self, name: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let devices: Vec<DeviceProfile> = serde_json::from_str(DEVICE_PROFILES)?;
+        let device = devices
+            .into_iter()
+            .find(|device| device.name == name)
+            .ok_or_else(|| format!("unknown device {name:?}"))?;
+        self.set_viewport(device.width, device.height, device.scale, false)
+            .await?;
+        if device.mobile {
+            self.set_viewport(device.width, device.height, device.scale, true)
+                .await?;
+        }
+        if !device.user_agent.is_empty() {
+            self.set_user_agent(&device.user_agent).await?;
+        }
+        if device.touch {
+            let params: emulation::SetTouchEmulationEnabledParams =
+                serde_json::from_value(serde_json::json!({"enabled": true, "maxTouchPoints": 5}))?;
+            self.page.execute(params).await?;
+        }
         Ok(())
     }
 
@@ -2007,8 +2119,9 @@ mod tests {
                 .interfaces
                 .contains(&"ClickDiagnosticEngine".to_owned())
         );
-        assert_eq!(value.interfaces.len(), 17);
-        assert_eq!(value.unsupported, vec!["OverlayHost", "SettingsEngine"]);
+        assert!(value.interfaces.contains(&"SettingsEngine".to_owned()));
+        assert_eq!(value.interfaces.len(), 19);
+        assert!(value.unsupported.is_empty());
         assert!(!value.interfaces.iter().any(|name| name == "HAR"));
     }
 

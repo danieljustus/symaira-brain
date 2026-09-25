@@ -40,6 +40,7 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
             "ScreenshotEngine",
             "ScreenshotOptionsEngine",
             "ScriptDisabler",
+            "SettingsEngine",
             "TabManager",
         ],
     )
