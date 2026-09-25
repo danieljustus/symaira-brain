@@ -3383,15 +3383,26 @@ fn execute_batch_daemon_lifecycle(session: String, command: String, format: Form
     }
 }
 
-fn execute_batch_state_clear(session: String, name: String, format: Format) -> ItemOutput {
+fn execute_batch_state_operation(
+    session: String,
+    command: String,
+    name: Option<String>,
+    older_than: Option<i64>,
+    format: Format,
+) -> ItemOutput {
+    let args = match (name.as_deref(), older_than) {
+        (Some(name), _) => Some(serde_json::json!({"name": name})),
+        (None, Some(days)) => Some(serde_json::json!({"older_than_days": days})),
+        (None, None) => None,
+    };
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
         ..ClientOptions::default()
     });
     let response = match client.request(Frame {
-        cmd: "state.clear".to_owned(),
-        args: Some(serde_json::json!({"name": name.clone()})),
+        cmd: command.clone(),
+        args,
         session,
         ..Frame::default()
     }) {
@@ -3414,7 +3425,45 @@ fn execute_batch_state_clear(session: String, name: String, format: Format) -> I
         };
     }
     let stdout = if format == Format::Text {
-        format!("cleared state {name:?}\n")
+        let data = response.data.unwrap_or(serde_json::Value::Null);
+        match command.as_str() {
+            "state.save" => format!(
+                "saved state {:?}\n",
+                data.get("name")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+            ),
+            "state.load" => format!(
+                "loaded state {:?}\n",
+                data.get("name")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+            ),
+            "state.clear" => format!(
+                "cleared state {:?}\n",
+                data.get("name")
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or("")
+            ),
+            "state.list" => data
+                .get("states")
+                .and_then(serde_json::Value::as_array)
+                .map(|states| {
+                    states
+                        .iter()
+                        .filter_map(serde_json::Value::as_str)
+                        .map(|state| format!("{state}\n"))
+                        .collect()
+                })
+                .unwrap_or_default(),
+            "state.clean" => format!(
+                "removed {} expired state(s)\n",
+                data.get("removed")
+                    .and_then(serde_json::Value::as_array)
+                    .map_or(0, Vec::len)
+            ),
+            _ => serde_json::to_string_pretty(&data).unwrap_or_default() + "\n",
+        }
     } else {
         let warnings = response
             .warnings
@@ -3507,10 +3556,10 @@ fn execute_batch_item(argv: &[String]) -> ItemOutput {
         Ok(Action::StateOperation {
             session,
             command,
-            name: Some(name),
+            name,
+            older_than,
             format,
-            ..
-        }) if command == "state.clear" => execute_batch_state_clear(session, name, format),
+        }) => execute_batch_state_operation(session, command, name, older_than, format),
         Ok(_) => ItemOutput {
             stdout: String::new(),
             error: Some(format!("batch item {:?} is not available yet", argv[0])),

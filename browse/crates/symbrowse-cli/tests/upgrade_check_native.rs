@@ -48,11 +48,9 @@ fn native_upgrade_check_reads_fixture_cache_without_applying_or_networking() {
     assert_eq!(envelope["data"]["up_to_date"], false);
     assert_eq!(envelope["data"]["current"], "0.0.0");
     assert_eq!(envelope["data"]["latest"], "v0.0.1");
-    assert!(
-        envelope["data"]["hint"]
-            .as_str()
-            .unwrap()
-            .contains("symbrowse upgrade")
+    assert_eq!(
+        envelope["data"]["hint"],
+        "symbrowse v0.0.1 is available (current: 0.0.0); this build can check for updates but cannot apply them"
     );
     assert_eq!(
         fs::read(&cache).expect("check leaves cache intact"),
