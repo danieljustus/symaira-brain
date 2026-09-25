@@ -20,15 +20,16 @@ fn enabled() -> bool {
 }
 
 fn request(client: &Client, command: &str, args: Value) -> Value {
+    let diagnostic_args = args.clone();
     let frame = Frame {
         cmd: command.to_owned(),
         args: Some(args),
         session: client.options().session.clone(),
         ..Frame::default()
     };
-    let response = client
-        .request(frame)
-        .unwrap_or_else(|error| panic!("request {command}: {error}"));
+    let response = client.request(frame).unwrap_or_else(|error| {
+        panic!("request {command} args={diagnostic_args}: daemon request failed: {error}")
+    });
     serde_json::to_value(response).expect("encode response")
 }
 
@@ -64,14 +65,28 @@ impl ChromeContractServer {
                             .next()
                             .and_then(|line| line.split_whitespace().nth(1))
                             .unwrap_or("/");
-                        let body = if path == "/popup" {
-                            "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>"
+                        let (content_type, extra_headers, body) = if path == "/download" {
+                            (
+                                "application/octet-stream",
+                                "Content-Disposition: attachment; filename=\"fixture.txt\"\r\n",
+                                "symbrowse native download fixture\n",
+                            )
+                        } else if path == "/popup" {
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                "<!doctype html><button id=popup title='popup opener' onclick=\"window.popup=window.open('/popup-child','symbrowse-popup')\">Open popup</button><a id=link href='/destination'>Destination</a><div id=plain>Plain element</div><div id=hidden>fallback text</div><script>Object.defineProperty(document.querySelector('#hidden'),'innerText',{get(){return ''}})</script>",
+                            )
                         } else {
-                            "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p>"
+                            (
+                                "text/html; charset=utf-8",
+                                "",
+                                "<!doctype html><title>Chrome contract</title><p>managed tab fixture</p><a id=download href='/download'>download</a>",
+                            )
                         };
                         let response = format!(
-                            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
-                            body.len()
+                            "HTTP/1.1 200 OK\r\nContent-Type: {content_type}\r\n{extra_headers}Content-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                            body.len(),
                         );
                         let _ = stream.write_all(response.as_bytes());
                     }
@@ -310,6 +325,54 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         json!({"url":format!("{}/page", contract_server.base_url)}),
     );
     assert_eq!(rust_open["success"], go_oracle["open"]["success"]);
+    let download_dir = root.join("downloads");
+    let set_download_dir = request(
+        &client,
+        "download.setdir",
+        json!({"dir":download_dir.to_string_lossy()}),
+    );
+    assert_eq!(
+        set_download_dir["success"], true,
+        "set download dir: {set_download_dir}"
+    );
+    assert_eq!(
+        set_download_dir["data"]["download_dir"],
+        download_dir.to_string_lossy().as_ref()
+    );
+    let download_click = request(&client, "click", json!({"selector":"#download"}));
+    assert_eq!(
+        download_click["success"], true,
+        "download click: {download_click}"
+    );
+    let downloads_deadline = Instant::now() + Duration::from_secs(10);
+    let downloads = loop {
+        let listed = request(&client, "downloads.list", json!({}));
+        assert_eq!(listed["success"], true, "downloads.list: {listed}");
+        let events = listed["data"]["downloads"].as_array();
+        if events
+            .and_then(|events| events.last())
+            .is_some_and(|event| {
+                event["state"] == "completed"
+                    && event["sha256"]
+                        == "f09d9996c8c8fbc22833637dffb028568c1f4519a18634c691412a50103dd8c8"
+            })
+        {
+            break listed["data"]["downloads"].clone();
+        }
+        assert!(
+            Instant::now() < downloads_deadline,
+            "download did not complete with a GUID-file checksum: {listed}"
+        );
+        thread::sleep(Duration::from_millis(25));
+    };
+    assert_eq!(downloads.as_array().map(Vec::len), Some(1));
+    assert_eq!(downloads[0]["filename"], "fixture.txt");
+    assert_eq!(
+        downloads[0]["url"],
+        format!("{}/download", contract_server.base_url)
+    );
+    assert_eq!(downloads[0]["received_bytes"], 35);
+    assert_eq!(downloads[0]["total_bytes"], 35);
     let rust_tab_new = request(
         &client,
         "tab.new",
@@ -403,8 +466,9 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         json!({"expression":"Boolean(window.popup && !window.popup.closed)"}),
     );
     assert_eq!(
-        rust_popup_open["success"],
-        go_oracle["popup_open"]["success"]
+        rust_popup_open["success"], go_oracle["popup_open"]["success"],
+        "popup evaluation differs: Rust={rust_popup_open} Go={}",
+        go_oracle["popup_open"]
     );
     assert_eq!(
         rust_popup_open["data"]["type"],

@@ -345,11 +345,18 @@ impl DownloadRegistry {
         directory: &str,
     ) -> Result<DownloadBehavior, DownloadError> {
         let behavior = download_behavior(directory)?;
+        self.remember_download_behavior(session_id, behavior.clone());
+        Ok(behavior)
+    }
+
+    /// Remember a behavior after the browser accepted its protocol command.
+    /// Adapters use this to keep failed CDP updates from changing checksum
+    /// lookup state.
+    pub fn remember_download_behavior(&mut self, session_id: &str, behavior: DownloadBehavior) {
         self.directories.insert(
             session_id.to_owned(),
             PathBuf::from(&behavior.download_path),
         );
-        Ok(behavior)
     }
 
     pub fn record_download_will_begin(
@@ -481,6 +488,29 @@ mod tests {
             "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
         );
         let _ = fs::remove_dir_all(directory);
+    }
+
+    #[test]
+    fn downloads_preserve_order_update_session_locally_and_stay_bounded() {
+        let mut registry = DownloadRegistry::new();
+        for index in 0..=MAX_DOWNLOAD_EVENTS {
+            registry.record_download_will_begin(
+                "session-a",
+                format!("guid-{index}"),
+                format!("https://example.test/{index}"),
+                format!("file-{index}"),
+                format!("time-{index}"),
+            );
+        }
+        registry.record_download_progress("session-a", "guid-500", "completed", 12, 12);
+
+        let downloads = registry.events("session-a");
+        assert_eq!(downloads.len(), MAX_DOWNLOAD_EVENTS);
+        assert_eq!(downloads.first().unwrap().guid, "guid-1");
+        assert_eq!(downloads.last().unwrap().guid, "guid-500");
+        assert_eq!(downloads.last().unwrap().state, "completed");
+        assert_eq!(downloads.last().unwrap().received_bytes, 12);
+        assert!(registry.events("session-b").is_empty());
     }
 
     #[test]

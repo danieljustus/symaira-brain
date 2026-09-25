@@ -242,9 +242,8 @@ impl DispatchRuntime {
             | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
             | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
             | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
-            | "storage.list" | "storage.set" | "storage.clear" | "download" => {
-                self.browser_command(&frame).await
-            }
+            | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
+            | "downloads.list" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -706,12 +705,29 @@ impl DispatchRuntime {
         }
         let page = self.ensure_browser().await?;
         let empty_args = serde_json::Map::new();
-        let args = if frame.cmd == "cookies.list" && frame.args.is_none() {
+        let args = if matches!(frame.cmd.as_str(), "cookies.list" | "downloads.list")
+            && frame.args.is_none()
+        {
             &empty_args
         } else {
             object_args(frame)?
         };
         let data = match frame.cmd.as_str() {
+            "download.setdir" => {
+                let directory = match args.get("dir") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(directory)) => directory,
+                    Some(_) => return Err(malformed("download.setdir dir must be a string")),
+                };
+                page.configure_downloads(directory)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"download_dir":directory})
+            }
+            "downloads.list" => {
+                let downloads = page.download_events().await;
+                json!({"downloads":downloads,"count":downloads.len()})
+            }
             "storage.list" => {
                 let kind = storage_kind(args)?;
                 let captured = page
@@ -1671,6 +1687,12 @@ impl DispatchRuntime {
                 ))
             }
             "network.capture" | "download" | "network.har" => Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!("Firefox does not implement {:?}", frame.cmd),
+                hint: "the operation is explicitly unsupported by this engine".into(),
+                ..Default::default()
+            }),
+            "download.setdir" | "downloads.list" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Firefox does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),

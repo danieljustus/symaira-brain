@@ -23,6 +23,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tokio::sync::Mutex;
 
+use symbrowse_engine::files::{DownloadEvent, DownloadRegistry, download_behavior};
+
 use crate::{BrowserMode, ConnectionMode, launch};
 
 // Keep the Rust audit offline and tied to the Go oracle's vendored axe-core.
@@ -251,6 +253,8 @@ impl ChromeSession {
 pub struct ChromePage {
     page: Page,
     dialogs: DialogMonitor,
+    downloads: Arc<Mutex<DownloadRegistry>>,
+    download_session: String,
 }
 
 #[derive(Clone)]
@@ -300,12 +304,52 @@ impl ChromePage {
                 }
             }
         });
+        let download_session = page.target_id().inner().clone();
+        let downloads = Arc::new(Mutex::new(DownloadRegistry::new()));
+        let mut begins = page
+            .event_listener::<browser::EventDownloadWillBegin>()
+            .await?;
+        let mut progress = page
+            .event_listener::<browser::EventDownloadProgress>()
+            .await?;
+        let event_downloads = Arc::clone(&downloads);
+        let event_session = download_session.clone();
+        tokio::spawn(async move {
+            loop {
+                tokio::select! {
+                    biased;
+                    event = begins.next() => {
+                        let Some(event) = event else { break };
+                        event_downloads.lock().await.record_download_will_begin_now(
+                            &event_session,
+                            event.guid.clone(),
+                            event.url.clone(),
+                            event.suggested_filename.clone(),
+                        );
+                    }
+                    event = progress.next() => {
+                        let Some(event) = event else { break };
+                        let received = download_bytes(event.received_bytes);
+                        let total = download_bytes(event.total_bytes);
+                        event_downloads.lock().await.record_download_progress(
+                            &event_session,
+                            &event.guid,
+                            event.state.as_ref(),
+                            received,
+                            total,
+                        );
+                    }
+                }
+            }
+        });
         Ok(Self {
             page,
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
             },
+            downloads,
+            download_session,
         })
     }
     pub fn target_id(&self) -> String {
@@ -872,17 +916,33 @@ impl ChromePage {
         &self,
         directory: Option<&Path>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let (behavior, path) = match directory {
-            Some(path) => (
-                browser::SetDownloadBehaviorBehavior::AllowAndName,
-                Some(path.to_string_lossy().into_owned()),
-            ),
-            None => (browser::SetDownloadBehaviorBehavior::Deny, None),
+        let directory = directory.map_or_else(String::new, |path| path.to_string_lossy().into());
+        self.configure_downloads(&directory).await
+    }
+
+    pub async fn configure_downloads(
+        &self,
+        directory: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let behavior = download_behavior(directory)?;
+        let cdp_behavior = match behavior.behavior.as_str() {
+            "allow" => browser::SetDownloadBehaviorBehavior::AllowAndName,
+            _ => browser::SetDownloadBehaviorBehavior::Deny,
         };
+        let path = (!behavior.download_path.is_empty()).then(|| behavior.download_path.clone());
         self.page
-            .execute(browser_set_download_behavior(behavior, path)?)
-            .await?;
+            .execute(browser_set_download_behavior(cdp_behavior, path)?)
+            .await
+            .map_err(|error| std::io::Error::other(format!("set download behavior: {error}")))?;
+        self.downloads
+            .lock()
+            .await
+            .remember_download_behavior(&self.download_session, behavior);
         Ok(())
+    }
+
+    pub async fn download_events(&self) -> Vec<DownloadEvent> {
+        self.downloads.lock().await.events(&self.download_session)
     }
 
     pub async fn upload_files(
@@ -1152,6 +1212,16 @@ fn browser_set_download_behavior(
     builder.build()
 }
 
+fn download_bytes(value: f64) -> i64 {
+    if !value.is_finite() || value <= 0.0 {
+        0
+    } else if value >= i64::MAX as f64 {
+        i64::MAX
+    } else {
+        value as i64
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1193,6 +1263,15 @@ mod tests {
             ..Default::default()
         };
         assert!(options.format != "png");
+    }
+
+    #[test]
+    fn download_bytes_rejects_invalid_and_saturates_large_values() {
+        assert_eq!(download_bytes(f64::NAN), 0);
+        assert_eq!(download_bytes(f64::INFINITY), 0);
+        assert_eq!(download_bytes(-1.0), 0);
+        assert_eq!(download_bytes(12.9), 12);
+        assert_eq!(download_bytes(f64::MAX), i64::MAX);
     }
 
     #[test]
