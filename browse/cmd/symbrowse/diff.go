@@ -39,7 +39,10 @@ func newDiffSnapshotCommand(session *string) *cobra.Command {
 		Short: "Diff the current snapshot against a baseline file or the previous snapshot",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			client := daemon.NewClient(daemon.ClientOptions{Session: *session})
+			client, err := newDiffClient(*session)
+			if err != nil {
+				return err
+			}
 			options := engine.SnapshotOptions{Diff: true}
 			if baseline != "" {
 				// Compare against a stored snapshot baseline file.
@@ -170,7 +173,10 @@ func newDiffScreenshotCommand(session *string) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("read baseline %q: %w", baseline, err)
 			}
-			client := daemon.NewClient(daemon.ClientOptions{Session: *session})
+			client, err := newDiffClient(*session)
+			if err != nil {
+				return err
+			}
 			response, err := client.Request(cmd.Context(), daemon.Frame{
 				Cmd: "screenshot", Args: marshalArgs(map[string]any{}), Session: *session,
 			})
@@ -237,7 +243,10 @@ func newDiffURLCommand(session *string) *cobra.Command {
 		Short: "Open two URLs and diff their extracted content",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := daemon.NewClient(daemon.ClientOptions{Session: *session})
+			client, err := newDiffClient(*session)
+			if err != nil {
+				return err
+			}
 			read := func(target string) (string, error) {
 				response, err := client.Request(cmd.Context(), daemon.Frame{
 					Cmd: "read", Args: marshalArgs(map[string]any{"url": target}), Session: *session,
@@ -271,4 +280,12 @@ func newDiffURLCommand(session *string) *cobra.Command {
 		},
 	}
 	return command
+}
+
+func newDiffClient(session string) (*daemon.Client, error) {
+	path, err := daemon.SocketPath(session)
+	if err != nil {
+		return nil, err
+	}
+	return daemon.NewClient(daemon.ClientOptions{SocketPath: path, Session: session}), nil
 }

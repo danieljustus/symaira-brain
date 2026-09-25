@@ -542,7 +542,10 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                 value.startswith(("http://", "https://")) for value in argv[1:]))
             is_diff_url = argv[:2] == ["diff", "url"]
             go_count = 2 if has_a11y_url or is_diff_url else 1
-            rust_count = 4 if has_a11y_url else (3 if is_diff_url else 2)
+            # Client.request verifies daemon.status after each command frame.
+            # diff url performs two reads, so the Rust stub must answer four
+            # connections while the Go client sends only its two reads.
+            rust_count = 4 if has_a11y_url or is_diff_url else 2
             if os.name == "nt":
                 with WindowsNamedPipeStub(session=session, status_probe=False, request_count=go_count) as go_stub:
                     go_result = run_process(go, argv, env, stdin)
@@ -603,6 +606,16 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if argv[:2] == ["diff", "url"]:
+            go_actual = [payload_raw(frame) for frame in go_frames if frame.get("cmd") != "daemon.status"]
+            rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
+            ordered_reads_match = (
+                len(go_actual) == len(rust_actual) == 2
+                and all(frame is not None and frame.get("cmd") == "read" for frame in go_actual)
+                and go_actual == rust_actual
+            )
+            row["ordered_diff_reads_match"] = ordered_reads_match
+            row["matched"] = bool(row["matched"] and ordered_reads_match)
         if argv[:1] == ["a11y"]:
             def actual_frames(frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 return [payload_raw(frame) for frame in frames if frame.get("cmd") != "daemon.status"]
