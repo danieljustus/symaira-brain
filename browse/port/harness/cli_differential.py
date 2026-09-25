@@ -1902,7 +1902,7 @@ def main() -> int:
     }
     report["parity_established"] = not args.skip_help_tree and all(
         report["summary"][key] == 0 for key in ("mismatched", "unsupported", "harness_errors")
-    )
+    ) and report["summary"]["matched"] == report["summary"]["cases"]
     args.report.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     for link in short_path_links:
