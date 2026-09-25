@@ -478,7 +478,7 @@ impl ChromePage {
                     }
                     event = exceptions.next() => {
                         let Some(event) = event else { break };
-                        let details = event.exception_details;
+                        let details = &event.exception_details;
                         let stack_trace = details.stack_trace
                             .as_ref()
                             .map(|trace| trace.call_frames.iter().map(|frame| {
@@ -492,7 +492,7 @@ impl ChromePage {
                             .unwrap_or_default();
                         let entry = ErrorEntry {
                             text: truncate_runtime_text(&details.text),
-                            url: details.url.unwrap_or_default(),
+                            url: details.url.clone().unwrap_or_default(),
                             line: details.line_number + 1,
                             stack_trace,
                             timestamp: runtime_timestamp(),
