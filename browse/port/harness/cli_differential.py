@@ -248,6 +248,9 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
                  "go_only_root_commands": sorted(go_commands - advertised),
                  "rust_only_root_commands": sorted(advertised - go_commands),
                  "go": output_record(go_root), "rust": output_record(rust_root)})
+    if not full_root_match:
+        rows[-1]["go_stdout_base64"] = base64.b64encode(go_root["stdout"]).decode("ascii")
+        rows[-1]["rust_stdout_base64"] = base64.b64encode(rust_root["stdout"]).decode("ascii")
     go_paths = [
         ["a11y"], ["batch"], ["config"], ["config", "show"], ["doctor"], ["dialog"], ["dialog", "accept"], ["screenshot"],
         ["dialog", "auto"], ["dialog", "dismiss"], ["dialog", "status"], ["downloads"],
