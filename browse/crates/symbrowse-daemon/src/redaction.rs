@@ -54,33 +54,49 @@ impl Redactor {
 pub fn redact_str(input: &str) -> String {
     let mut output = input.to_owned();
     for key in SECRET_KEYS {
-        for separator in ["=", ":", " "] {
-            let mut cursor = 0;
-            while let Some(relative) = output[cursor..]
-                .to_ascii_lowercase()
-                .find(&format!("{key}{separator}"))
+        let mut cursor = 0;
+        loop {
+            let lowercase = output.to_ascii_lowercase();
+            let Some(relative) = lowercase[cursor..].find(key) else {
+                break;
+            };
+            let start = cursor + relative;
+            let mut separator = start + key.len();
+            while output
+                .as_bytes()
+                .get(separator)
+                .is_some_and(|byte| matches!(byte, b' ' | b'\t'))
             {
-                let start = cursor + relative;
-                let mut value_start = start + key.len() + separator.len();
-                while output
-                    .as_bytes()
-                    .get(value_start)
-                    .is_some_and(u8::is_ascii_whitespace)
-                {
-                    value_start += 1;
-                }
-                let end = value_end(
-                    &output,
-                    value_start,
-                    !matches!(*key, "auth" | "authorization"),
-                );
-                if end <= value_start {
-                    cursor = value_start;
+                separator += 1;
+            }
+            let had_space = separator != start + key.len();
+            let value_start = match output.as_bytes().get(separator) {
+                Some(b'=' | b':') => separator + 1,
+                Some(_) if had_space => separator,
+                _ => {
+                    cursor = start + key.len();
                     continue;
                 }
-                output.replace_range(value_start..end, REDACTED);
-                cursor = value_start + REDACTED.len();
+            };
+            let mut value_start = value_start;
+            while output
+                .as_bytes()
+                .get(value_start)
+                .is_some_and(u8::is_ascii_whitespace)
+            {
+                value_start += 1;
             }
+            let end = value_end(
+                &output,
+                value_start,
+                !matches!(*key, "auth" | "authorization"),
+            );
+            if end <= value_start {
+                cursor = start + key.len();
+                continue;
+            }
+            output.replace_range(value_start..end, REDACTED);
+            cursor = value_start + REDACTED.len();
         }
     }
     redact_url_credentials(&output)

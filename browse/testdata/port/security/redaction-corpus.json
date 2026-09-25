@@ -11,7 +11,7 @@
     "synthetic-secret-private-key-hyphen-d811",
     "synthetic-secret-encryption-key-hyphen-980c"
   ],
-  "text": "login failed: password=synthetic-secret-password-7e71 token: synthetic-secret-token-44a2 api-key=synthetic-secret-api-key-hyphen-6a21 access-key: synthetic-secret-access-key-hyphen-2b35 private-key=synthetic-secret-private-key-hyphen-d811 encryption-key=synthetic-secret-encryption-key-hyphen-980c\nAuthorization: Bearer synthetic-secret-api-key-19c8\nstatus: 401 https://user:synthetic-secret-url-password-a533@example.test/socket",
+  "text": "login failed: password=synthetic-secret-password-7e71 token: synthetic-secret-token-44a2 api-key=synthetic-secret-api-key-hyphen-6a21 access-key: synthetic-secret-access-key-hyphen-2b35 private-key=synthetic-secret-private-key-hyphen-d811 encryption-key=synthetic-secret-encryption-key-hyphen-980c api-key = synthetic-secret-api-key-hyphen-6a21 access-key : synthetic-secret-access-key-hyphen-2b35\nAuthorization: Bearer synthetic-secret-api-key-19c8\nstatus: 401 https://user:synthetic-secret-url-password-a533@example.test/socket",
   "args": [
     "symbrowse",
     "--token",
