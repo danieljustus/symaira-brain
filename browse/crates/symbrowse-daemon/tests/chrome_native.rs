@@ -21,6 +21,7 @@ fn enabled() -> bool {
 
 fn request(client: &Client, command: &str, args: Value) -> Value {
     let diagnostic_args = args.clone();
+    let started = Instant::now();
     let frame = Frame {
         cmd: command.to_owned(),
         args: Some(args),
@@ -28,8 +29,17 @@ fn request(client: &Client, command: &str, args: Value) -> Value {
         ..Frame::default()
     };
     let response = client.request(frame).unwrap_or_else(|error| {
-        panic!("request {command} args={diagnostic_args}: daemon request failed: {error}")
+        panic!(
+            "request {command} args={diagnostic_args}: daemon request failed after {:?}: {error}",
+            started.elapsed()
+        )
     });
+    if started.elapsed() >= Duration::from_secs(2) {
+        eprintln!(
+            "chrome_native_slow_command={command} elapsed={:?}",
+            started.elapsed()
+        );
+    }
     serde_json::to_value(response).expect("encode response")
 }
 
@@ -134,6 +144,14 @@ fn go_chrome_tab_oracle(executable: &str, fixture_url: &str) -> Value {
         String::from_utf8_lossy(&output.stderr)
     );
     serde_json::from_slice(&output.stdout).expect("decode Go Chrome tab oracle JSON")
+}
+
+fn normalize_captured_request(mut request: Value) -> Value {
+    if let Some(object) = request.as_object_mut() {
+        object.remove("id");
+        object.remove("started_at");
+    }
+    request
 }
 
 fn accept_fixture_request(
@@ -330,6 +348,16 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     }
     let contract_server = contract_server.expect("create Chrome contract fixture");
     let go_oracle = go_oracle.expect("run Go Chrome oracle");
+    let network_started = request(&client, "network.capture", json!({}));
+    assert_eq!(
+        network_started["success"], go_oracle["network_capture"]["success"],
+        "network.capture result: rust={network_started}, go={}",
+        go_oracle["network_capture"]
+    );
+    assert_eq!(
+        network_started["data"],
+        go_oracle["network_capture"]["data"]
+    );
     let rust_open = request(
         &client,
         "open",
@@ -394,6 +422,61 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     );
     assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
     assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
+    let rust_network_requests = request(&client, "network.requests", json!({}));
+    assert_eq!(
+        rust_network_requests["success"], go_oracle["network_requests"]["success"],
+        "network.requests result: rust={rust_network_requests}, go={}",
+        go_oracle["network_requests"]
+    );
+    let page_url = format!("{}/page", contract_server.base_url);
+    let rust_page_request = rust_network_requests["data"]["requests"]
+        .as_array()
+        .and_then(|requests| requests.iter().find(|request| request["url"] == page_url))
+        .cloned()
+        .expect("Rust network.requests captured page request");
+    let go_page_request = go_oracle["network_requests"]["data"]["requests"]
+        .as_array()
+        .and_then(|requests| requests.iter().find(|request| request["url"] == page_url))
+        .cloned()
+        .expect("Go network.requests captured page request");
+    assert_eq!(
+        normalize_captured_request(rust_page_request.clone()),
+        normalize_captured_request(go_page_request.clone()),
+        "network.requests page record"
+    );
+    let rust_network_request = request(
+        &client,
+        "network.request",
+        json!({"id":rust_page_request["id"]}),
+    );
+    assert_eq!(
+        rust_network_request["success"], go_oracle["network_request"]["success"],
+        "network.request result: rust={rust_network_request}, go={}",
+        go_oracle["network_request"]
+    );
+    assert_eq!(
+        normalize_captured_request(rust_network_request["data"]["request"].clone()),
+        normalize_captured_request(go_oracle["network_request"]["data"]["request"].clone()),
+        "network.request record"
+    );
+    let rust_missing_request = request(
+        &client,
+        "network.request",
+        json!({"id":"missing-network-request"}),
+    );
+    assert_eq!(
+        rust_missing_request["success"], go_oracle["network_missing_request"]["success"],
+        "missing network.request result: rust={rust_missing_request}, go={}",
+        go_oracle["network_missing_request"]
+    );
+    assert_eq!(
+        rust_missing_request["error"]["code"],
+        go_oracle["network_missing_request"]["error"]["code"]
+    );
+    assert_eq!(
+        rust_missing_request["error"]["message"],
+        go_oracle["network_missing_request"]["error"]["message"]
+    );
     for (command, oracle_key, args) in [
         ("get.text", "inspect_text", json!({"selector":"#popup"})),
         ("get.html", "inspect_html", json!({})),
@@ -607,8 +690,12 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "post-scroll box: {scrolled_down}"
     );
     assert!(
-        scrolled_down["data"]["y"].as_f64().unwrap_or_default()
-            < scrolled_into_view["data"]["y"].as_f64().unwrap_or_default(),
+        scrolled_down["data"]["value"]["y"]
+            .as_f64()
+            .unwrap_or_default()
+            < scrolled_into_view["data"]["value"]["y"]
+                .as_f64()
+                .unwrap_or_default(),
         "positive scroll did not move the target up: before={scrolled_into_view}, after={scrolled_down}"
     );
     thread::sleep(Duration::from_millis(100));
@@ -627,8 +714,12 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "negative scroll box: {scrolled_up_box}"
     );
     assert!(
-        scrolled_up_box["data"]["y"].as_f64().unwrap_or_default()
-            > scrolled_down["data"]["y"].as_f64().unwrap_or_default(),
+        scrolled_up_box["data"]["value"]["y"]
+            .as_f64()
+            .unwrap_or_default()
+            > scrolled_down["data"]["value"]["y"]
+                .as_f64()
+                .unwrap_or_default(),
         "negative scroll did not move the target down: before={scrolled_down}, after={scrolled_up_box}"
     );
     let tabs = request(&client, "tabs.list", json!({}));

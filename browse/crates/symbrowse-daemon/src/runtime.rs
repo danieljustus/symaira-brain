@@ -16,6 +16,7 @@ use symbrowse_core::{
     state::{Cookie, OriginState},
     state_store::Store,
 };
+use symbrowse_engine_chrome::CapturedRequest;
 use symbrowse_engine_chrome::{
     BrowserMode, ChromePage, ChromeSession, NetworkCapture, resolve_chrome_executable,
 };
@@ -54,6 +55,7 @@ struct BrowserState {
     page: ChromePage,
     tabs: Vec<BrowserTab>,
     network_capture: Option<NetworkCapture>,
+    network_requests: Vec<CapturedRequest>,
 }
 
 #[derive(Clone)]
@@ -240,10 +242,12 @@ impl DispatchRuntime {
             | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
             | "frames.list" | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept"
             | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
-            | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
-            | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
-            | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
-            | "downloads.list" | "eval" => self.browser_command(&frame).await,
+            | "network.request" | "network.offline" | "network.block" | "screenshot" | "pdf"
+            | "upload" | "a11y" | "cookies.get" | "cookies.set" | "cookies.list"
+            | "cookies.clear" | "storage.get" | "storage.list" | "storage.set"
+            | "storage.clear" | "download" | "download.setdir" | "downloads.list" | "eval" => {
+                self.browser_command(&frame).await
+            }
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -947,13 +951,24 @@ impl DispatchRuntime {
                 json!({"auto_mode": mode})
             }
             "network.capture" => {
-                let capture = page.start_network_capture().await.map_err(runtime_error)?;
-                self.browser
+                let already_capturing = self
+                    .browser
                     .lock()
                     .map_err(|_| runtime_error("browser lock poisoned"))?
+                    .as_ref()
+                    .is_some_and(|state| state.network_capture.is_some());
+                if already_capturing {
+                    return Ok((Some(json!({"started": true})), Vec::new()));
+                }
+                let capture = page.start_network_capture().await.map_err(runtime_error)?;
+                let mut browser = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?;
+                let state = browser
                     .as_mut()
-                    .ok_or_else(|| runtime_error("browser was not initialized"))?
-                    .network_capture = Some(capture);
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                state.network_capture = Some(capture);
                 json!({"started": true})
             }
             "network.requests" => {
@@ -964,10 +979,47 @@ impl DispatchRuntime {
                     .as_mut()
                     .ok_or_else(|| runtime_error("browser was not initialized"))?
                     .network_capture
-                    .take()
-                    .ok_or_else(|| runtime_error("network capture was not started"))?;
-                let events = capture.collect(std::time::Duration::from_millis(100)).await;
-                json!({"requests": events, "count": events.len()})
+                    .take();
+                let mut capture = match capture {
+                    Some(capture) => capture,
+                    None => page.start_network_capture().await.map_err(runtime_error)?,
+                };
+                let _events = capture
+                    .collect_retaining_requests(std::time::Duration::from_millis(100))
+                    .await;
+                let requests = capture.requests();
+                let mut browser = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?;
+                let state = browser
+                    .as_mut()
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                state.network_capture = Some(capture);
+                state.network_requests = requests.clone();
+                let requests: Vec<Value> = requests.iter().map(network_request_value).collect();
+                json!({"requests": requests, "count": requests.len()})
+            }
+            "network.request" => {
+                let id = args.get("id").and_then(Value::as_str).unwrap_or("");
+                let request = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?
+                    .as_ref()
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?
+                    .network_requests
+                    .iter()
+                    .find(|request| request.id == id)
+                    .cloned();
+                let Some(request) = request else {
+                    return Err(DaemonError {
+                        code: "network_request_not_found".into(),
+                        message: format!("no captured request with id {id:?}"),
+                        ..Default::default()
+                    });
+                };
+                json!({"request": network_request_value(&request)})
             }
             "network.offline" => {
                 page.set_offline(args.get("offline").and_then(Value::as_bool).unwrap_or(true))
@@ -1818,6 +1870,7 @@ impl DispatchRuntime {
                 page,
             }],
             network_capture: None,
+            network_requests: Vec::new(),
         });
         Ok(result)
     }
@@ -2440,6 +2493,46 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
         message: redact_str(&error.to_string()),
         ..Default::default()
     }
+}
+
+fn network_request_value(request: &CapturedRequest) -> Value {
+    let started_at = time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
+        .ok()
+        .and_then(|value| {
+            value
+                .format(&time::format_description::well_known::Rfc3339)
+                .ok()
+        })
+        .unwrap_or_default();
+    let mut value = json!({
+        "id": request.id,
+        "url": request.url,
+        "method": request.method,
+        "type": request.request_type,
+        "status": request.status,
+        "started_at": started_at,
+        "finished": request.finished,
+    });
+    let object = value.as_object_mut().expect("network request is an object");
+    if !request.status_text.is_empty() {
+        object.insert("status_text".into(), json!(request.status_text));
+    }
+    if !request.mime_type.is_empty() {
+        object.insert("mime_type".into(), json!(request.mime_type));
+    }
+    if !request.failed.is_empty() {
+        object.insert("failed".into(), json!(request.failed));
+    }
+    if !request.request_headers.is_empty() {
+        object.insert("request_headers".into(), json!(request.request_headers));
+    }
+    if !request.response_headers.is_empty() {
+        object.insert("response_headers".into(), json!(request.response_headers));
+    }
+    if request.encoded_body_size != 0 {
+        object.insert("encoded_body_size".into(), json!(request.encoded_body_size));
+    }
+    value
 }
 
 fn chrome_click_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {

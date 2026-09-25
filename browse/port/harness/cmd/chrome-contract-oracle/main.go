@@ -35,6 +35,10 @@ type contract struct {
 	TabList               daemon.Response `json:"tab_list"`
 	TabClose              daemon.Response `json:"tab_close"`
 	LastTabClose          daemon.Response `json:"last_tab_close"`
+	NetworkCapture        daemon.Response `json:"network_capture"`
+	NetworkRequests       daemon.Response `json:"network_requests"`
+	NetworkRequest        daemon.Response `json:"network_request"`
+	NetworkMissingRequest daemon.Response `json:"network_missing_request"`
 }
 
 func main() {
@@ -69,7 +73,16 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
-	result := contract{
+	var result contract
+	result.NetworkCapture = call(runtime, ctx, daemon.Frame{
+		Cmd:     "network.capture",
+		Session: "chrome-contract",
+	})
+	if !result.NetworkCapture.Success {
+		return fmt.Errorf("Go network.capture oracle failed: %s", responseJSON(result.NetworkCapture))
+	}
+	result = contract{
+		NetworkCapture: result.NetworkCapture,
 		Open: call(runtime, ctx, daemon.Frame{
 			Cmd:     "open",
 			Session: "chrome-contract",
@@ -86,6 +99,52 @@ func run() error {
 	}
 	if !result.TabNew.Success {
 		return fmt.Errorf("Go tab.new oracle failed: %s", responseJSON(result.TabNew))
+	}
+	result.NetworkRequests = call(runtime, ctx, daemon.Frame{
+		Cmd:     "network.requests",
+		Session: "chrome-contract",
+	})
+	if !result.NetworkRequests.Success {
+		return fmt.Errorf("Go network.requests oracle failed: %s", responseJSON(result.NetworkRequests))
+	}
+	var requests struct {
+		Requests []struct {
+			ID  string `json:"id"`
+			URL string `json:"url"`
+		} `json:"requests"`
+	}
+	requestBytes, err := json.Marshal(result.NetworkRequests.Data)
+	if err != nil {
+		return fmt.Errorf("encode Go network.requests data: %w", err)
+	}
+	if err := json.Unmarshal(requestBytes, &requests); err != nil {
+		return fmt.Errorf("decode Go network.requests data: %w", err)
+	}
+	var pageRequestID string
+	for _, request := range requests.Requests {
+		if request.URL == os.Args[2]+"/page" {
+			pageRequestID = request.ID
+			break
+		}
+	}
+	if pageRequestID == "" {
+		return fmt.Errorf("Go network.requests did not capture %q", os.Args[2]+"/page")
+	}
+	result.NetworkRequest = call(runtime, ctx, daemon.Frame{
+		Cmd:     "network.request",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"id": pageRequestID}),
+	})
+	if !result.NetworkRequest.Success {
+		return fmt.Errorf("Go network.request oracle failed: %s", responseJSON(result.NetworkRequest))
+	}
+	result.NetworkMissingRequest = call(runtime, ctx, daemon.Frame{
+		Cmd:     "network.request",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"id": "missing-network-request"}),
+	})
+	if result.NetworkMissingRequest.Success || result.NetworkMissingRequest.Error == nil || result.NetworkMissingRequest.Error.Code != "network_request_not_found" {
+		return fmt.Errorf("Go missing network.request oracle was unexpected: %s", responseJSON(result.NetworkMissingRequest))
 	}
 	result.InspectText = call(runtime, ctx, daemon.Frame{
 		Cmd:     "get.text",

@@ -6,6 +6,7 @@
 //! error rather than a best-effort implementation.
 
 use std::{
+    collections::{BTreeMap, HashMap},
     error::Error,
     fmt,
     path::Path,
@@ -123,6 +124,23 @@ pub struct NetworkEvent {
     pub mime_type: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub error_text: String,
+}
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct CapturedRequest {
+    pub id: String,
+    pub url: String,
+    pub method: String,
+    pub request_type: String,
+    pub status: i64,
+    pub status_text: String,
+    pub mime_type: String,
+    pub started_at_unix_seconds: i64,
+    pub finished: bool,
+    pub failed: String,
+    pub request_headers: BTreeMap<String, String>,
+    pub response_headers: BTreeMap<String, String>,
+    pub encoded_body_size: i64,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -963,6 +981,12 @@ impl ChromePage {
                 .page
                 .event_listener::<network::EventLoadingFailed>()
                 .await?,
+            finished: self
+                .page
+                .event_listener::<network::EventLoadingFinished>()
+                .await?,
+            request_order: Vec::new(),
+            requests_by_id: HashMap::new(),
         })
     }
 
@@ -1239,23 +1263,105 @@ pub struct NetworkCapture {
     requests: chromiumoxide::listeners::EventStream<network::EventRequestWillBeSent>,
     responses: chromiumoxide::listeners::EventStream<network::EventResponseReceived>,
     failed: chromiumoxide::listeners::EventStream<network::EventLoadingFailed>,
+    finished: chromiumoxide::listeners::EventStream<network::EventLoadingFinished>,
+    request_order: Vec<String>,
+    requests_by_id: HashMap<String, CapturedRequest>,
 }
 
 impl NetworkCapture {
     pub async fn collect(mut self, timeout: Duration) -> Vec<NetworkEvent> {
+        self.collect_retaining_requests(timeout).await
+    }
+
+    pub async fn collect_retaining_requests(&mut self, timeout: Duration) -> Vec<NetworkEvent> {
         let deadline = Instant::now() + timeout;
         let mut events = Vec::new();
         while Instant::now() < deadline {
             let remaining = deadline.saturating_duration_since(Instant::now());
             tokio::select! {
-                event = self.requests.next() => if let Some(event) = event { events.push(NetworkEvent { kind: "request".to_owned(), id: event.request_id.clone().into(), url: event.request.url.clone(), ..Default::default() }); },
-                event = self.responses.next() => if let Some(event) = event { events.push(NetworkEvent { kind: "response".to_owned(), id: event.request_id.clone().into(), url: event.response.url.clone(), status: event.response.status as u16, mime_type: event.response.mime_type.clone(), ..Default::default() }); },
-                event = self.failed.next() => if let Some(event) = event { events.push(NetworkEvent { kind: "failed".to_owned(), id: event.request_id.clone().into(), error_text: event.error_text.clone(), ..Default::default() }); },
+                event = self.requests.next() => if let Some(event) = event {
+                    let id: String = event.request_id.clone().into();
+                    if !self.requests_by_id.contains_key(&id) {
+                        if self.request_order.len() >= 2_000 {
+                            let oldest = self.request_order.remove(0);
+                            self.requests_by_id.remove(&oldest);
+                        }
+                        self.request_order.push(id.clone());
+                        self.requests_by_id.insert(id.clone(), CapturedRequest::default());
+                    }
+                    let request = self.requests_by_id.get_mut(&id).expect("inserted request");
+                    request.id = id.clone();
+                    request.url = event.request.url.clone();
+                    request.method = event.request.method.clone();
+                    request.request_type = event.r#type.as_ref().map_or_else(String::new, |kind| kind.as_ref().to_owned());
+                    request.started_at_unix_seconds = *event.wall_time.inner() as i64;
+                    request.request_headers = masked_headers(event.request.headers.inner());
+                    events.push(NetworkEvent { kind: "request".to_owned(), id, url: event.request.url.clone(), ..Default::default() });
+                },
+                event = self.responses.next() => if let Some(event) = event {
+                    let id: String = event.request_id.clone().into();
+                    if let Some(request) = self.requests_by_id.get_mut(&id) {
+                        request.status = event.response.status;
+                        request.status_text = event.response.status_text.clone();
+                        request.mime_type = event.response.mime_type.clone();
+                        request.response_headers = masked_headers(event.response.headers.inner());
+                        request.encoded_body_size = event.response.encoded_data_length as i64;
+                    }
+                    events.push(NetworkEvent { kind: "response".to_owned(), id, url: event.response.url.clone(), status: event.response.status as u16, mime_type: event.response.mime_type.clone(), ..Default::default() });
+                },
+                event = self.failed.next() => if let Some(event) = event {
+                    let id: String = event.request_id.clone().into();
+                    if let Some(request) = self.requests_by_id.get_mut(&id) {
+                        request.failed = event.error_text.clone();
+                        request.finished = true;
+                    }
+                    events.push(NetworkEvent { kind: "failed".to_owned(), id, error_text: event.error_text.clone(), ..Default::default() });
+                },
+                event = self.finished.next() => if let Some(event) = event {
+                    let id: String = event.request_id.clone().into();
+                    if let Some(request) = self.requests_by_id.get_mut(&id) {
+                        request.finished = true;
+                    }
+                },
                 _ = tokio::time::sleep(remaining) => break,
             }
         }
         events
     }
+
+    pub fn requests(&self) -> Vec<CapturedRequest> {
+        self.request_order
+            .iter()
+            .filter_map(|id| self.requests_by_id.get(id).cloned())
+            .collect()
+    }
+}
+
+fn masked_headers(headers: &Value) -> BTreeMap<String, String> {
+    let Some(headers) = headers.as_object() else {
+        return BTreeMap::new();
+    };
+    headers
+        .iter()
+        .map(|(name, value)| {
+            let value = if [
+                "authorization",
+                "proxy-authorization",
+                "cookie",
+                "set-cookie",
+            ]
+            .iter()
+            .any(|secret| name.eq_ignore_ascii_case(secret))
+            {
+                "[redacted]".to_owned()
+            } else if let Some(value) = value.as_str() {
+                value.to_owned()
+            } else {
+                value.to_string()
+            };
+            (name.clone(), value)
+        })
+        .collect()
 }
 
 fn result(action: &str, selector: &str) -> InteractionResult {
