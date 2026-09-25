@@ -1083,22 +1083,30 @@ impl ChromePage {
         // Keep phase context on failures: native Chrome occasionally stalls a
         // CDP command after a tab switch, and the outer daemon timeout alone
         // does not identify which part of the interaction stopped progressing.
+        scroll_stage("locate:start");
         let target = self
             .element(selector)
             .await
             .map_err(|error| std::io::Error::other(format!("scroll locate target: {error}")))?;
+        scroll_stage("locate:done");
+        scroll_stage("into_view:start");
         self.scroll_element_into_view(&target)
             .await
             .map_err(|error| {
                 std::io::Error::other(format!("scroll bring target into view: {error}"))
             })?;
+        scroll_stage("into_view:done");
+        scroll_stage("focus:start");
         target
             .focus()
             .await
             .map_err(|error| std::io::Error::other(format!("scroll focus target: {error}")))?;
+        scroll_stage("focus:done");
+        scroll_stage("inspect_box:start");
         let bounds = self.inspect(selector, "box").await.map_err(|error| {
             std::io::Error::other(format!("scroll inspect target box: {error}"))
         })?;
+        scroll_stage("inspect_box:done");
         let x = bounds["x"]
             .as_f64()
             .ok_or("element box has no x coordinate")?
@@ -1111,10 +1119,12 @@ impl ChromePage {
                 .ok_or("element box has no height")?
                 / 2.0;
         let amount = if amount == 0 { 480.0 } else { amount as f64 };
+        scroll_stage("move_pointer:start");
         self.page
             .move_mouse(Point::new(x, y))
             .await
             .map_err(|error| std::io::Error::other(format!("scroll move pointer: {error}")))?;
+        scroll_stage("move_pointer:done");
         let event = input::DispatchMouseEventParams::builder()
             .r#type(input::DispatchMouseEventType::MouseWheel)
             .x(x)
@@ -1123,10 +1133,12 @@ impl ChromePage {
             .delta_x(0.0)
             .delta_y(amount)
             .build()?;
+        scroll_stage("dispatch_wheel:start");
         self.page
             .execute(event)
             .await
             .map_err(|error| std::io::Error::other(format!("scroll dispatch wheel: {error}")))?;
+        scroll_stage("dispatch_wheel:done");
         Ok(result("scroll", selector))
     }
     pub async fn type_text(
@@ -1864,6 +1876,12 @@ fn result(action: &str, selector: &str) -> InteractionResult {
     InteractionResult {
         action: action.to_owned(),
         selector: selector.to_owned(),
+    }
+}
+
+fn scroll_stage(stage: &str) {
+    if std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1")) {
+        eprintln!("chrome_scroll_stage={stage}");
     }
 }
 

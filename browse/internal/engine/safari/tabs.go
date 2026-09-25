@@ -81,6 +81,7 @@ func (e *Engine) TabNew(ctx context.Context, _ engine.Context, _ string, url str
 	e.mu.Lock()
 	e.pinnedWindowID = windowID
 	e.pinnedTabIndex = tabIndex
+	e.pinClosed = false
 	e.mu.Unlock()
 	return engine.Page{ID: "safari-live"}, nil
 }
@@ -90,10 +91,14 @@ func (e *Engine) TabNew(ctx context.Context, _ engine.Context, _ string, url str
 func (e *Engine) TabClose(_ context.Context, _ engine.Page) error {
 	e.mu.Lock()
 	closed := e.closed
+	pinClosed := e.pinClosed
 	tabRef := e.pinnedTabRef()
 	e.mu.Unlock()
 	if closed {
 		return fmt.Errorf("safari engine: engine is closed")
+	}
+	if pinClosed {
+		return fmt.Errorf("safari engine: pinned tab is closed")
 	}
 	script := fmt.Sprintf(`tell application "Safari"
 	  close %s
@@ -103,6 +108,7 @@ func (e *Engine) TabClose(_ context.Context, _ engine.Page) error {
 		e.mu.Lock()
 		e.pinnedWindowID = 0
 		e.pinnedTabIndex = 0
+		e.pinClosed = true
 		e.mu.Unlock()
 	}
 	return err

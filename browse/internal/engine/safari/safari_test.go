@@ -170,6 +170,18 @@ func TestTabNewPinsCreatedWindowAndIndexWithoutRenaming(t *testing.T) {
 	if !strings.Contains(fake.calls[2], "close tab 3 of window id 42") {
 		t.Fatalf("tab close addressed another tab: %s", fake.calls[2])
 	}
+	if err := e.TabClose(context.Background(), engine.Page{}); err == nil {
+		t.Fatal("second close must not address an unrelated tab")
+	}
+	if _, err := e.evaluateTab(context.Background(), "1+1"); err == nil {
+		t.Fatal("evaluation after close must not address an unrelated tab")
+	}
+	if _, err := e.Navigate(context.Background(), engine.Page{}, "https://example.com/"); err == nil {
+		t.Fatal("navigation after close must not address an unrelated tab")
+	}
+	if len(fake.calls) != 3 {
+		t.Fatalf("closed pin reached Safari again: %#v", fake.calls)
+	}
 }
 
 func TestTabNewRejectsUnsafeURLBeforeAppleScript(t *testing.T) {

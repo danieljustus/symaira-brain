@@ -91,6 +91,7 @@ type Engine struct {
 	// A tab created by TabNew is pinned to its original window and position.
 	pinnedWindowID int
 	pinnedTabIndex int
+	pinClosed      bool
 
 	// PollInterval is how often the engine re-checks the URL while waiting for
 	// a navigation to settle. Defaults to defaultPollInterval.
@@ -149,10 +150,14 @@ func (e *Engine) NewPage(context.Context, engine.Context, string) (engine.Page, 
 func (e *Engine) evaluateTab(ctx context.Context, expr string) (string, error) {
 	e.mu.Lock()
 	closed := e.closed
+	pinClosed := e.pinClosed
 	tabRef := e.pinnedTabRef()
 	e.mu.Unlock()
 	if closed {
 		return "", errors.New("safari engine: engine is closed")
+	}
+	if pinClosed {
+		return "", errors.New("safari engine: pinned tab is closed")
 	}
 	script := fmt.Sprintf("tell application %q\ntell %s\ndo JavaScript %q\nend tell\nend tell",
 		"Safari", tabRef, expr)
@@ -169,11 +174,15 @@ func (e *Engine) evaluateTab(ctx context.Context, expr string) (string, error) {
 func (e *Engine) Navigate(ctx context.Context, _ engine.Page, target string) (engine.NavigationResult, error) {
 	e.mu.Lock()
 	closed := e.closed
+	pinClosed := e.pinClosed
 	tabRef := e.pinnedTabRef()
 	poll := e.PollInterval
 	e.mu.Unlock()
 	if closed {
 		return engine.NavigationResult{}, errors.New("safari engine: engine is closed")
+	}
+	if pinClosed {
+		return engine.NavigationResult{}, errors.New("safari engine: pinned tab is closed")
 	}
 	if err := e.guardTarget(target); err != nil {
 		return engine.NavigationResult{}, err
