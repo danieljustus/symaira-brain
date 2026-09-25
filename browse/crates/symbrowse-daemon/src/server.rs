@@ -1418,7 +1418,7 @@ fn state_root() -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::{Cursor, Read};
+    use std::io::Cursor;
     use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 
     #[test]
