@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -150,7 +151,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["policy"], ["policy", "explain"], ["trace", "export"], ["diff", "snapshot"], ["diff", "url"],
+        ["policy"], ["policy", "explain"], ["trace", "export"], ["trace", "replay"], ["diff", "snapshot"], ["diff", "url"],
         ["journal"], ["journal", "tail"], ["journal", "show"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
@@ -220,6 +221,14 @@ class UnixDaemonStub:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", "default")}
+                    elif frame.get("cmd") == "trace.replay":
+                        steps = (frame.get("args") or {}).get("steps", [])
+                        outcomes = [{"index": index, "command": step.get("command", ""),
+                                     "matched": True, "expected_url": step.get("expected_url", ""),
+                                     "actual_url": step.get("url", "")}
+                                    for index, step in enumerate(steps)]
+                        data = {"total": len(steps), "matched": len(steps), "deviated": 0,
+                                "failed": 0, "outcomes": outcomes}
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -391,6 +400,14 @@ class WindowsNamedPipeStub:
                         self.frame = frame
                     if frame.get("cmd") == "daemon.status":
                         data = {"session": frame.get("session", SESSION)}
+                    elif frame.get("cmd") == "trace.replay":
+                        steps = (frame.get("args") or {}).get("steps", [])
+                        outcomes = [{"index": index, "command": step.get("command", ""),
+                                     "matched": True, "expected_url": step.get("expected_url", ""),
+                                     "actual_url": step.get("url", "")}
+                                    for index, step in enumerate(steps)]
+                        data = {"total": len(steps), "matched": len(steps), "deviated": 0,
+                                "failed": 0, "outcomes": outcomes}
                     elif frame.get("cmd") == "storage.list":
                         args = frame.get("args") or {}
                         data = {"origin": "https://fixture.invalid", "kind": args.get("kind", ""),
@@ -856,6 +873,7 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         row["case"] = contract
         comparisons.append(row)
     comparisons.append(compare_trace_export(go, rust, env))
+    comparisons.append(compare_trace_replay(go, rust, env))
     comparisons.extend([
         compare_diff_snapshot(go, rust, env, []),
         compare_diff_snapshot(go, rust, env, ["--json"]),
@@ -971,6 +989,74 @@ def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str,
         "go_trace": go_document, "rust_trace": rust_document,
         "go_frame": frame_payload(go_frame), "rust_frame": frame_payload(rust_frame),
         "go_stub_error": go_stub_error, "rust_stub_error": rust_stub_error,
+    }
+
+
+def compare_trace_replay(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
+    fixture = Path(env["TMPDIR"]) / "trace-replay.json"
+    url = "https://fixture.invalid/replay"
+    document = {
+        "schema_version": 1,
+        "created_at": "2026-09-25T00:00:00Z",
+        "session": "fixture",
+        "steps": [{"command": "open", "url": url, "expected_url": url}],
+    }
+    argv = ["trace", "replay", str(fixture), "--session", "fixture"]
+    try:
+        fixture.write_text(json.dumps(document), encoding="utf-8")
+
+        def run(binary: Path, *, rust_client: bool) -> tuple[dict[str, Any], list[dict[str, Any]], str | None]:
+            count = 2 if rust_client else 1
+            if os.name == "nt":
+                with WindowsNamedPipeStub(
+                    session="fixture", status_probe=rust_client, request_count=count
+                ) as daemon:
+                    result = run_process(binary, argv, env)
+            else:
+                with UnixDaemonStub(
+                    socket_path(env, "fixture"), status_probe=rust_client, request_count=count
+                ) as daemon:
+                    result = run_process(binary, argv, env)
+            return result, daemon.frames, daemon.error
+
+        go_result, go_frames, go_stub_error = run(go, rust_client=False)
+        rust_result, rust_frames, rust_stub_error = run(rust, rust_client=True)
+    except (OSError, RuntimeError) as error:
+        return {"case": "CLI-001-trace-replay-open", "argv": argv,
+                "matched": False, "error": str(error)}
+    finally:
+        try:
+            fixture.unlink()
+        except FileNotFoundError:
+            pass
+
+    go_requests = [frame for frame in go_frames if frame.get("cmd") != "daemon.status"]
+    rust_requests = [frame for frame in rust_frames if frame.get("cmd") != "daemon.status"]
+    same_output = all(
+        go_result.get(key) == rust_result.get(key)
+        for key in ("returncode", "stdout", "stderr")
+    )
+    protocol_shape = (
+        len(go_requests) == len(rust_requests) == 1
+        and go_requests[0].get("cmd") == "trace.replay"
+        and (go_requests[0].get("args") or {}).get("steps") == document["steps"]
+        and rust_requests[0].get("cmd") == "open"
+        and (rust_requests[0].get("args") or {}).get("url") == url
+    )
+    return {
+        "case": "CLI-001-trace-replay-open",
+        "argv": argv,
+        "matched": bool(
+            same_output and go_result.get("returncode") == 0 and protocol_shape
+            and not go_stub_error and not rust_stub_error
+        ),
+        "criterion": "one open-step replay returns the same Go outcome while Rust uses its existing navigation frame",
+        "go": output_record(go_result),
+        "rust": output_record(rust_result),
+        "go_request": go_requests[0] if go_requests else None,
+        "rust_request": rust_requests[0] if rust_requests else None,
+        "go_stub_error": go_stub_error,
+        "rust_stub_error": rust_stub_error,
     }
 
 

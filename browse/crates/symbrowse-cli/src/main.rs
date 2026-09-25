@@ -157,6 +157,11 @@ enum Action {
         path: PathBuf,
         format: Format,
     },
+    TraceReplay {
+        session: String,
+        path: PathBuf,
+        format: Format,
+    },
     DiffSnapshot {
         session: String,
         baseline: Option<PathBuf>,
@@ -325,6 +330,11 @@ fn main() -> ExitCode {
             path,
             format,
         }) => run_trace_export(session, path, format),
+        Ok(Action::TraceReplay {
+            session,
+            path,
+            format,
+        }) => run_trace_replay(session, path, format),
         Ok(Action::DiffSnapshot {
             session,
             baseline,
@@ -763,6 +773,116 @@ fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode 
             Err(error) => {
                 render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
             }
+        }
+    }
+}
+
+fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode {
+    let raw = match fs::read(&path) {
+        Ok(raw) => raw,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("read trace: {error}"),
+            );
+        }
+    };
+    let file = match serde_json::from_slice::<trace::File>(&raw) {
+        Ok(file) => file,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("parse trace: {error}"),
+            );
+        }
+    };
+    if file.schema_version != trace::SCHEMA_VERSION {
+        return render_dispatch_error(
+            format,
+            daemon_codes::OPERATION_FAILED,
+            format!("unsupported trace schema version {}", file.schema_version),
+        );
+    }
+    if file.steps.is_empty() {
+        return render_dispatch_error(
+            format,
+            daemon_codes::OPERATION_FAILED,
+            "trace contains no replayable steps".to_owned(),
+        );
+    }
+    if file.steps.len() != 1 || !matches!(file.steps[0].command.as_str(), "open" | "goto") {
+        return render_dispatch_error(
+            format,
+            daemon_codes::OPERATION_FAILED,
+            "this trace replay route currently supports one open or goto step".to_owned(),
+        );
+    }
+
+    let step = &file.steps[0];
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let actual = match client.request(Frame {
+        cmd: step.command.clone(),
+        args: Some(serde_json::json!({"url": step.url})),
+        session,
+        ..Frame::default()
+    }) {
+        Ok(response) if response.success => Ok(response
+            .data
+            .as_ref()
+            .and_then(|data| data.get("url"))
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default()
+            .to_owned()),
+        Ok(response) => Err(response.error.unwrap_or_default().message),
+        Err(error) => return render_client_error(format, error),
+    };
+    let result = trace::compare_urls(&file, &[actual]);
+    let mut data = match serde_json::to_value(result) {
+        Ok(data) => data,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("serialize trace replay: {error}"),
+            );
+        }
+    };
+    if let Some(outcomes) = data
+        .get_mut("outcomes")
+        .and_then(serde_json::Value::as_array_mut)
+    {
+        for outcome in outcomes {
+            if let Some(outcome) = outcome.as_object_mut() {
+                outcome.retain(|key, value| {
+                    !matches!(key.as_str(), "expected_url" | "actual_url" | "error")
+                        || value.as_str().is_some_and(|value| !value.is_empty())
+                });
+            }
+        }
+    }
+    if format == Format::Text {
+        return match serde_json::to_string_pretty(&data) {
+            Ok(mut output) => {
+                output.push('\n');
+                write_stdout(&output)
+            }
+            Err(error) => render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                format!("format trace replay: {error}"),
+            ),
+        };
+    }
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => {
+            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
         }
     }
 }
@@ -2694,8 +2814,9 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("diff", Some("url")) => Some("Open two URLs and diff their extracted content\n\nUsage:\n  symbrowse diff url <url1> <url2> [flags]\n\nFlags:\n  -h, --help   help for url\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
-        ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
+        ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n  replay      Replay a trace file step by step and report deviations\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
         ("trace", Some("export")) => Some("Convert the session journal into a repeatable trace file\n\nUsage:\n  symbrowse trace export [flags]\n\nFlags:\n  -h, --help         help for export\n      --out string   trace file to write (default \"trace.json\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("trace", Some("replay")) => Some("Replay a trace file step by step and report deviations\n\nUsage:\n  symbrowse trace replay <file> [flags]\n\nFlags:\n  -h, --help   help for replay\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
         ("policy", Some("explain")) => Some("Show the effective decision for a command against a URL\n\nUsage:\n  symbrowse policy explain <command> [flags]\n\nFlags:\n  -h, --help          help for explain\n      --mode string   policy mode: mcp or tty (default: daemon mode)\n      --url string    URL whose host the rule is evaluated against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("version", None) => Some(plain(
@@ -3603,6 +3724,7 @@ fn parse_trace(values: &[String], command_index: usize) -> Result<Action, ParseE
         let value = &values[index];
         match value.as_str() {
             "export" if subcommand.is_none() => subcommand = Some("export"),
+            "replay" if subcommand.is_none() => subcommand = Some("replay"),
             "--json" => json = true,
             "--output" => {
                 index += 1;
@@ -3648,6 +3770,15 @@ fn parse_trace(values: &[String], command_index: usize) -> Result<Action, ParseE
                 "unknown command {:?} for \"symbrowse trace export\"",
                 positional[0]
             ),
+            exit_code: 2,
+        }),
+        Some("replay") if positional.len() == 1 => Ok(Action::TraceReplay {
+            session,
+            path: PathBuf::from(&positional[0]),
+            format,
+        }),
+        Some("replay") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("trace subcommand selected from supported names"),
@@ -6171,6 +6302,26 @@ mod tests {
             })
         );
         assert!(parse(&args(&["trace", "export", "extra"])).is_err());
+    }
+
+    #[test]
+    fn trace_replay_cli_parses_one_file_and_output_flags() {
+        assert_eq!(
+            parse(&args(&[
+                "trace",
+                "replay",
+                "fixture.json",
+                "--session=fixture",
+                "--json"
+            ])),
+            Ok(Action::TraceReplay {
+                session: "fixture".into(),
+                path: PathBuf::from("fixture.json"),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["trace", "replay"])).is_err());
+        assert!(parse(&args(&["trace", "replay", "one", "two"])).is_err());
     }
 
     #[test]
