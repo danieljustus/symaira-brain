@@ -11,9 +11,104 @@ use std::{
 };
 
 use serde_json::json;
+use symbrowse_daemon::{Client, ClientOptions, Frame, Server, ServerOptions, SessionSpec};
 use symbrowse_engine_firefox::{
     FirefoxError, FirefoxSession, canonical_capabilities, resolve_firefox_executable,
 };
+
+fn daemon_request(client: &Client, command: &str, args: serde_json::Value) -> serde_json::Value {
+    let response = client
+        .request(Frame {
+            cmd: command.into(),
+            args: Some(args),
+            session: client.options().session.clone(),
+            ..Frame::default()
+        })
+        .unwrap_or_else(|error| panic!("Firefox daemon request {command}: {error}"));
+    serde_json::to_value(response).expect("serialize Firefox daemon response")
+}
+
+async fn production_daemon_uses_the_selected_firefox(executable: PathBuf, fixture_url: &str) {
+    let root = tempfile::tempdir().expect("create Firefox daemon root");
+    let session = format!("native-firefox-{}", std::process::id());
+    let mut spec = SessionSpec::for_session(&session);
+    spec.engine = "firefox".into();
+    spec.mode = "browser".into();
+    spec.executable_path = executable;
+    spec.state_dir = root.path().join("state");
+    spec.cache_dir = root.path().join("cache");
+    spec.daemon_log = root.path().join("daemon.log");
+    #[cfg(target_os = "macos")]
+    let socket_dir = tempfile::Builder::new()
+        .prefix("sbfox-")
+        .tempdir_in("/private/tmp")
+        .expect("create private short socket directory");
+    #[cfg(target_os = "macos")]
+    {
+        spec.socket_path = socket_dir.path().join("daemon.sock");
+    }
+    #[cfg(all(unix, not(target_os = "macos")))]
+    {
+        spec.socket_path = root.path().join("daemon.sock");
+    }
+
+    let socket = spec.socket_path.clone();
+    let server = std::sync::Arc::new(
+        Server::new(ServerOptions {
+            session_spec: Some(spec),
+            ..ServerOptions::default()
+        })
+        .expect("create Firefox daemon"),
+    );
+    let serving = std::sync::Arc::clone(&server);
+    let thread = thread::spawn(move || serving.listen_and_serve().expect("serve Firefox daemon"));
+    let client = Client::new(ClientOptions {
+        socket_path: socket,
+        session: session.clone(),
+        read_timeout: Duration::from_secs(45),
+        startup_timeout: Duration::from_secs(5),
+        autostart: false,
+        expected_engine: Some("firefox".into()),
+        ..ClientOptions::default()
+    });
+    let deadline = std::time::Instant::now() + Duration::from_secs(10);
+    loop {
+        if client
+            .request(Frame {
+                cmd: "daemon.status".into(),
+                session: session.clone(),
+                ..Frame::default()
+            })
+            .is_ok()
+        {
+            break;
+        }
+        assert!(
+            std::time::Instant::now() < deadline,
+            "Firefox daemon endpoint did not become ready"
+        );
+        thread::sleep(Duration::from_millis(20));
+    }
+
+    let capabilities = daemon_request(&client, "capabilities", json!({}));
+    assert_eq!(
+        capabilities["success"], true,
+        "capabilities: {capabilities}"
+    );
+    assert_eq!(capabilities["data"]["kind"], "firefox");
+    let opened = daemon_request(&client, "open", json!({"url":fixture_url}));
+    assert_eq!(opened["success"], true, "open: {opened}");
+    assert_eq!(opened["data"]["title"], "Firefox fixture");
+    let evaluated = daemon_request(&client, "eval", json!({"expression":"document.title"}));
+    assert_eq!(evaluated["success"], true, "eval: {evaluated}");
+    assert_eq!(evaluated["data"]["value"], "Firefox fixture");
+    let unsupported = daemon_request(&client, "download", json!({}));
+    assert_eq!(unsupported["success"], false, "download: {unsupported}");
+    assert_eq!(unsupported["error"]["code"], "unsupported");
+
+    server.stop();
+    thread.join().expect("join Firefox daemon");
+}
 
 struct FixtureServer {
     address: std::net::SocketAddr,
@@ -201,7 +296,7 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
     .expect("enable Nightly-only BiDi network and download features in isolated profile");
     std::fs::create_dir(&download_dir).expect("create owned download directory");
     let fixture = FixtureServer::start();
-    let mut session = FirefoxSession::launch(executable, profile, Duration::from_secs(20))
+    let mut session = FirefoxSession::launch(executable.clone(), profile, Duration::from_secs(20))
         .await
         .expect("launch Firefox with the owned isolated profile");
     session
@@ -330,6 +425,7 @@ async fn native_firefox_bidi_fixture_checks_supported_capabilities() {
     let endpoint = session.remote_endpoint();
     session.close().await.expect("close owned Firefox process");
     wait_for_endpoint_closed(endpoint).await;
+    production_daemon_uses_the_selected_firefox(executable, &fixture.base_url()).await;
     drop(fixture);
     drop(temp);
 }
