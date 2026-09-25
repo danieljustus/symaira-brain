@@ -10,6 +10,7 @@ use symbrowse_core::{
         Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
         Store as JournalStore,
     },
+    oob::Manager as OobManager,
     policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
@@ -46,6 +47,7 @@ pub struct DispatchRuntime {
     compat: AsyncMutex<Option<CompatClient>>,
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
+    oob: OobManager,
     #[cfg(target_os = "macos")]
     safari: AsyncMutex<Option<SafariRuntime>>,
 }
@@ -158,6 +160,7 @@ impl DispatchRuntime {
             compat: AsyncMutex::new(None),
             browser: Mutex::new(None),
             firefox: AsyncMutex::new(None),
+            oob: OobManager::new(),
             #[cfg(target_os = "macos")]
             safari: AsyncMutex::new(None),
         }))
@@ -210,6 +213,34 @@ impl DispatchRuntime {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
         match frame.cmd.as_str() {
+            "oob.status" => Ok((
+                Some(match self.oob.active() {
+                    Some(prompt) => json!({"active": true, "prompt": prompt}),
+                    None => json!({"active": false}),
+                }),
+                Vec::new(),
+            )),
+            "oob.complete" | "oob.cancel" => {
+                let args = object_args(&frame)?;
+                let id = required_string(args, "id")?;
+                let prompt = if frame.cmd == "oob.complete" {
+                    self.oob.complete(id, None)
+                } else {
+                    self.oob.cancel(
+                        id,
+                        args.get("reason")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default(),
+                    )
+                }
+                .ok_or_else(|| {
+                    malformed(format!("oob prompt {id:?} not found or already resolved"))
+                })?;
+                Ok((
+                    Some(serde_json::to_value(prompt).map_err(runtime_error)?),
+                    Vec::new(),
+                ))
+            }
             "auth.login" => self.auth_login(&frame, &operation).await,
             "console.list" | "console.clear" | "errors.list" | "errors.clear" => {
                 self.chrome_runtime_events_command(&frame).await
@@ -3576,6 +3607,39 @@ mod tests {
             ))
             .expect_err("unknown command must fail");
         assert_eq!(error.code, codes::UNKNOWN_COMMAND);
+    }
+
+    #[test]
+    fn oob_status_and_completion_share_the_daemon_prompt_manager() {
+        let runtime = DispatchRuntime::new(temp_spec("oob-status")).expect("runtime");
+        let prompt = runtime.oob.create(
+            symbrowse_core::oob::Kind::Handoff,
+            "Handoff",
+            "2FA",
+            std::time::Duration::from_secs(1),
+            "fixed",
+        );
+        let send = |cmd: &str, args: Option<Value>| {
+            runtime
+                .runtime
+                .block_on(runtime.dispatch(
+                    Frame {
+                        cmd: cmd.into(),
+                        args,
+                        ..Frame::default()
+                    },
+                    OperationContext::for_test(),
+                ))
+                .expect("OOB request")
+                .0
+                .expect("OOB data")
+        };
+        assert_eq!(send("oob.status", None)["prompt"]["id"], prompt.id);
+        assert_eq!(
+            send("oob.complete", Some(json!({"id": prompt.id})))["status"],
+            "completed"
+        );
+        assert_eq!(send("oob.status", None), json!({"active": false}));
     }
 
     #[test]

@@ -475,6 +475,7 @@ fn run_dispatch(
     );
     let is_network_offline = frame.cmd == "network.offline";
     let is_auth_login = frame.cmd == "auth.login";
+    let is_oob_status = frame.cmd == "oob.status";
     let is_network_request = frame.cmd == "network.request";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
@@ -530,6 +531,19 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_oob_status && format == Format::Text {
+            let data = response.data.unwrap_or_default();
+            if data.get("active").and_then(serde_json::Value::as_bool) != Some(true) {
+                return write_stdout("no pending oob prompt\n");
+            }
+            let prompt = &data["prompt"];
+            return write_stdout(&format!(
+                "{}\t{}\t{}\n",
+                prompt["id"].as_str().unwrap_or_default(),
+                prompt["kind"].as_str().unwrap_or_default(),
+                prompt["reason"].as_str().unwrap_or_default(),
+            ));
+        }
         if is_auth_login && format == Format::Text {
             return write_stdout("credentials entered; press enter or submit the form to log in\n");
         }
@@ -3481,6 +3495,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         });
     };
     match values[command_index].as_str() {
+        "oob" => parse_oob(&values, command_index),
         "auth" => parse_auth(&values, command_index),
         "version" => parse_version(&values, command_index),
         "doctor" => parse_doctor(&values, command_index),
@@ -4753,6 +4768,55 @@ fn render_journal_text(data: &serde_json::Value) -> String {
             )
         })
         .collect()
+}
+
+fn parse_oob(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut status = false;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "status" if !status => status = true,
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse oob\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if !status {
+        return Ok(Action::Help(
+            help_catalog::help("oob", &[])
+                .unwrap_or_default()
+                .to_owned(),
+        ));
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Dispatch {
+        session,
+        command: "oob.status".into(),
+        args: serde_json::json!({}),
+        format,
+    })
 }
 
 fn parse_auth(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -6911,6 +6975,19 @@ mod tests {
                 engine: "static".to_owned(),
                 ssrf: Some(true),
                 allow_private: None,
+            })
+        );
+    }
+
+    #[test]
+    fn oob_status_routes_to_the_daemon_with_global_flags() {
+        assert_eq!(
+            parse(&args(&["--json", "oob", "status", "--session", "fixture"])),
+            Ok(Action::Dispatch {
+                session: "fixture".into(),
+                command: "oob.status".into(),
+                args: serde_json::json!({}),
+                format: Format::Json,
             })
         );
     }
