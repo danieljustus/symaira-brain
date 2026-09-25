@@ -884,10 +884,7 @@ impl DispatchRuntime {
             }
             "tab.new" | "window.new" => {
                 let session = self.chrome_session()?;
-                let url = args
-                    .get("url")
-                    .and_then(Value::as_str)
-                    .unwrap_or("about:blank");
+                let url = tab_navigation_url(frame.cmd.as_str(), args);
                 let page = session
                     .new_page("about:blank")
                     .await
@@ -1635,6 +1632,16 @@ impl DispatchRuntime {
             }
         };
         Ok((Some(data), Vec::new()))
+    }
+
+    fn tab_navigation_url<'a>(command: &str, args: &'a serde_json::Map<String, Value>) -> &'a str {
+        if command == "window.new" {
+            "about:blank"
+        } else {
+            args.get("url")
+                .and_then(Value::as_str)
+                .unwrap_or("about:blank")
+        }
     }
 
     async fn guard_navigation_target(&self, frame: &Frame) -> Result<(), DaemonError> {
@@ -2818,6 +2825,20 @@ mod tests {
         assert_eq!(
             browser_runtime.handle().runtime_flavor(),
             tokio::runtime::RuntimeFlavor::MultiThread
+        );
+    }
+
+    #[test]
+    fn window_new_uses_only_the_internal_blank_target() {
+        let args = json!({"url":"https://untrusted.example/path"});
+        let args = args.as_object().expect("object args");
+        assert_eq!(
+            DispatchRuntime::tab_navigation_url("window.new", args),
+            "about:blank"
+        );
+        assert_eq!(
+            DispatchRuntime::tab_navigation_url("tab.new", args),
+            "https://untrusted.example/path"
         );
     }
 
