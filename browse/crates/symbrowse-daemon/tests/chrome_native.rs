@@ -1265,11 +1265,11 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
                 "get.attr",
                 json!({"selector":"#text","attribute":"data-focused"}),
             );
-            assert_eq!(focused["data"], "yes", "focus state: {focused}");
+            assert_eq!(focused["data"]["value"], "yes", "focus state: {focused}");
         }
         if command == "check" {
             let checked = request(&client, "is.checked", json!({"selector":"#check"}));
-            assert_eq!(checked["data"], true, "check state: {checked}");
+            assert_eq!(checked["data"]["value"], true, "check state: {checked}");
         }
     }
     let doubled = request(
@@ -1277,17 +1277,20 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "get.attr",
         json!({"selector":"#dbl","attribute":"data-doubled"}),
     );
-    assert_eq!(doubled["data"], "yes", "double-click state: {doubled}");
+    assert_eq!(
+        doubled["data"]["value"], "yes",
+        "double-click state: {doubled}"
+    );
     let hovered = request(
         &client,
         "get.attr",
         json!({"selector":"#hover","attribute":"data-hovered"}),
     );
-    assert_eq!(hovered["data"], "yes", "hover state: {hovered}");
+    assert_eq!(hovered["data"]["value"], "yes", "hover state: {hovered}");
     let selected = request(&client, "get.value", json!({"selector":"#choice"}));
-    assert_eq!(selected["data"], "two", "select state: {selected}");
+    assert_eq!(selected["data"]["value"], "two", "select state: {selected}");
     let checked = request(&client, "is.checked", json!({"selector":"#check"}));
-    assert_eq!(checked["data"], false, "uncheck state: {checked}");
+    assert_eq!(checked["data"]["value"], false, "uncheck state: {checked}");
 
     let no_dialog = request(&client, "dialog.status", json!({}));
     assert_eq!(
