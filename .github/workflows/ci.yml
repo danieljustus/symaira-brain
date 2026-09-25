@@ -305,6 +305,114 @@ jobs:
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
+  # Run the complete root Rust workspace and Go-derived fixture gates on the
+  # native Windows target. The parity-smoke comparators receive explicit .exe
+  # paths because the Makefile's convenience target uses Unix binary names.
+  rust-migration-windows:
+    runs-on: windows-2025
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Install GNU Make
+        run: choco install make --version=4.4.1 --yes --no-progress
+
+      - name: Cache Rust quality dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/.crates.toml
+            ~/.cargo/.crates2.json
+            ~/.cargo/bin/cargo-audit.exe
+            ~/.cargo/bin/cargo-deny.exe
+          key: rust-quality-install-meta-v2-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}-audit-0.22.2-deny-0.20.2
+
+      - name: Install pinned Rust audit tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          audit_version="$(cargo-audit --version 2>/dev/null || true)"
+          if [ "$audit_version" != "cargo-audit 0.22.2" ]; then
+            cargo install cargo-audit --version 0.22.2 --locked
+          fi
+          deny_version="$(cargo-deny --version 2>/dev/null || true)"
+          if [ "$deny_version" != "cargo-deny 0.20.2" ]; then
+            cargo install cargo-deny --version 0.20.2 --locked
+          fi
+
+      - name: Generate native Windows oracle fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          xdg_fixture="$RUNNER_TEMP/xdg-oracle-windows.json"
+          doctor_fixture="$RUNNER_TEMP/guard-doctor-oracle-windows.json"
+          instructions_fixture="$RUNNER_TEMP/instructions-oracle-windows.json"
+          cli_fixture="$RUNNER_TEMP/cli-tree-oracle-windows.json"
+          profile_remove_fixture="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+          skills_fixture="$RUNNER_TEMP/skills-oracle-windows.json"
+          skills_install_fixture="$RUNNER_TEMP/skills-install-oracle-windows.json"
+          cli_go_binary="$PWD/target/go/symbrain-go.exe"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$xdg_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./guard/scripts/guard-doctor-oracle -output "$doctor_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"
+          mkdir -p "$(dirname "$cli_go_binary")"
+          ./scripts/run-go-oracle.sh HEAD build -ldflags "-X main.version=dev" -o "$cli_go_binary" ./cmd/symbrain
+          go_toolchain="$(awk '$1 == "go" { print "go" $2; exit }' go.mod)"
+          GOTOOLCHAIN="$go_toolchain" CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$cli_go_binary" -output "$cli_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-oracle -output "$skills_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-install-oracle -output "$skills_install_fixture"
+          scan_fixture="$RUNNER_TEMP/guard-scan-oracle-windows.json"
+          SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE="$scan_fixture" ./guard/scripts/guard-scan-oracle/run.sh write
+          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$skills_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$skills_install_fixture" >> "$GITHUB_ENV"
+          echo "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture" >> "$GITHUB_ENV"
+
+      - name: Rust workspace and Go fixture gates on native Windows
+        shell: bash
+        run: make rust-check
+
+      - name: Go/Rust executable parity on native Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          CGO_ENABLED=0 go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
+          SYMBRAIN_VERSION=dev cargo build --workspace --locked
+          ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
+          python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Rust MCP stdio subprocess tests on native Windows
+        shell: bash
+        run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Go/Rust MCP executable differential on native Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          CGO_ENABLED=0 go build -o "$RUNNER_TEMP/symbrain-go-mcp.exe" ./cmd/symbrain
+          cargo build -p symbrain-cli --bin symbrain --locked
+          python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp.exe" target/debug/symbrain.exe
+
   rust-mcp-fuzz-smoke:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30

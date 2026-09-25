@@ -57,7 +57,11 @@ type Case struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs from the fixture")
-	output := flag.String("output", "rust/symbrain-instructions/tests/fixtures/oracle_expectations.json", "fixture path")
+	defaultOutput := os.Getenv("SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-instructions/tests/fixtures/oracle_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "fixture path")
 	flag.Parse()
 
 	root := repositoryRoot()

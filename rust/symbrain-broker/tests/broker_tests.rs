@@ -6,7 +6,9 @@ use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use symbrain_broker::{BrokerError, Client, Config, ManagedServer, Options, State};
+use symbrain_broker::{BrokerError, Config, ManagedServer, State};
+#[cfg(unix)]
+use symbrain_broker::{Client, Options};
 
 #[derive(Deserialize)]
 struct Oracle {

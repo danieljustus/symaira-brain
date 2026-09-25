@@ -475,7 +475,11 @@ func errorText(err error) string {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
-	output := flag.String("output", "rust/symbrain-skills/tests/fixtures/oracle_expectations.json", "output path")
+	defaultOutput := os.Getenv("SYMBRAIN_SKILLS_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-skills/tests/fixtures/oracle_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "output path")
 	flag.Parse()
 	generated, err := generate()
 	if err != nil {
