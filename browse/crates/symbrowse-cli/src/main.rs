@@ -10,6 +10,7 @@ use std::{
     io::{self, Read, Write},
     path::{Path, PathBuf},
     process::{Command, ExitCode},
+    sync::atomic::{AtomicU64, Ordering},
     time::Duration,
 };
 
@@ -51,6 +52,7 @@ const GO_STANDARD_BASE64: GeneralPurpose = GeneralPurpose::new(
     &alphabet::STANDARD,
     GeneralPurposeConfig::new().with_decode_allow_trailing_bits(true),
 );
+static CLI_REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
@@ -172,6 +174,9 @@ enum Action {
         first_url: String,
         second_url: String,
         format: Format,
+    },
+    Watch {
+        session: String,
     },
 }
 
@@ -346,6 +351,7 @@ fn main() -> ExitCode {
             second_url,
             format,
         }) => run_diff_url(session, first_url, second_url, format),
+        Ok(Action::Watch { session }) => run_watch(session),
         Err(error) => {
             let _ = writeln!(io::stderr(), "{}", error.message);
             ExitCode::from(error.exit_code)
@@ -397,16 +403,15 @@ fn run_dispatch(
     } else {
         None
     };
-    let frame = Frame {
-        args: (!matches!(
+    let frame = cli_frame(
+        &command,
+        &session,
+        (!matches!(
             command.as_str(),
             "session.list" | "session.info" | "cookies.list"
         ))
         .then_some(args),
-        cmd: command,
-        session: session.clone(),
-        ..Frame::default()
-    };
+    );
     let is_network_offline = frame.cmd == "network.offline";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
@@ -436,12 +441,11 @@ fn run_dispatch(
         ..ClientOptions::default()
     });
     if let Some(url) = a11y_url {
-        let open_response = match client.request(Frame {
-            cmd: "open".into(),
-            args: Some(serde_json::json!({"url": url})),
-            session: session.clone(),
-            ..Frame::default()
-        }) {
+        let open_response = match client.request(cli_frame(
+            "open",
+            &session,
+            Some(serde_json::json!({"url": url})),
+        )) {
             Ok(response) => response,
             Err(error) => {
                 return render_client_error(format, error);
@@ -598,17 +602,13 @@ fn run_network_requests(session: String, args: serde_json::Value, format: Format
         ..ClientOptions::default()
     });
     for cmd in ["network.capture", "network.requests"] {
-        let response = match client.request(Frame {
-            cmd: cmd.to_owned(),
-            session: session.clone(),
-            max_tokens: if cmd == "network.requests" {
-                max_tokens
-            } else {
-                None
-            },
-            retrieval_surface: if cmd == "network.requests" { "cli" } else { "" }.into(),
-            ..Frame::default()
-        }) {
+        let mut frame = cli_frame(cmd, &session, None);
+        frame.max_tokens = if cmd == "network.requests" {
+            max_tokens
+        } else {
+            None
+        };
+        let response = match client.request(frame) {
             Ok(response) => response,
             Err(error) => return render_client_error(format, error),
         };
@@ -801,6 +801,109 @@ fn mask_cookie_list(mut data: serde_json::Value, reveal: &str) -> serde_json::Va
     data
 }
 
+fn cli_frame(cmd: &str, session: &str, args: Option<serde_json::Value>) -> Frame {
+    Frame {
+        cmd: cmd.to_owned(),
+        args,
+        session: session.to_owned(),
+        request_id: CLI_REQUEST_ID
+            .fetch_add(1, Ordering::Relaxed)
+            .saturating_add(1)
+            .to_string(),
+        retrieval_surface: "cli".to_owned(),
+        ..Frame::default()
+    }
+}
+
+fn run_watch(session: String) -> ExitCode {
+    let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
+    if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
+        return ExitCode::from(1);
+    }
+    let runtime = match tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    {
+        Ok(runtime) => runtime,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "start watch runtime: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    runtime.block_on(watch_session(session))
+}
+
+async fn watch_session(session: String) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let mut seen = 0;
+    let shutdown = wait_watch_shutdown();
+    tokio::pin!(shutdown);
+    loop {
+        let response = client.request(cli_frame("journal.show", &session, None));
+        let delay = match response {
+            Ok(response) if !response.success => {
+                return render_daemon_error(Format::Text, response.error.unwrap_or_default());
+            }
+            Ok(response) => {
+                let entries = response
+                    .data
+                    .as_ref()
+                    .and_then(|data| data.get("entries"))
+                    .and_then(serde_json::Value::as_array)
+                    .map(Vec::as_slice)
+                    .unwrap_or_default();
+                for entry in entries.iter().skip(seen) {
+                    let field = |name| {
+                        entry
+                            .get(name)
+                            .and_then(serde_json::Value::as_str)
+                            .unwrap_or("")
+                    };
+                    let line = format!(
+                        "{}\t{}\tclass={}\tdecider={}\t{}\n",
+                        field("timestamp"),
+                        field("command"),
+                        field("risk_class"),
+                        field("decider"),
+                        field("result")
+                    );
+                    if io::stdout().write_all(line.as_bytes()).is_err()
+                        || io::stdout().flush().is_err()
+                    {
+                        return ExitCode::from(1);
+                    }
+                }
+                seen = entries.len();
+                Duration::from_millis(500)
+            }
+            Err(_) => Duration::from_secs(1),
+        };
+        tokio::select! {
+            _ = &mut shutdown => return ExitCode::SUCCESS,
+            _ = tokio::time::sleep(delay) => {}
+        }
+    }
+}
+
+#[cfg(unix)]
+async fn wait_watch_shutdown() {
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+        .expect("register SIGTERM handler");
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => {},
+        _ = terminate.recv() => {},
+    }
+}
+
+#[cfg(not(unix))]
+async fn wait_watch_shutdown() {
+    let _ = tokio::signal::ctrl_c().await;
+}
+
 fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode {
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
@@ -926,12 +1029,11 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
             session: session.clone(),
             ..ClientOptions::default()
         });
-        let response = match client.request(Frame {
-            cmd: "trace.replay".to_owned(),
-            args: Some(serde_json::json!({"steps": []})),
-            session,
-            ..Frame::default()
-        }) {
+        let response = match client.request(cli_frame(
+            "trace.replay",
+            &session,
+            Some(serde_json::json!({"steps": []})),
+        )) {
             Ok(response) => response,
             Err(error) => return render_client_error(format, error),
         };
@@ -965,12 +1067,7 @@ fn run_trace_replay(session: String, path: PathBuf, format: Format) -> ExitCode 
             outcome.error =
                 "credential step requires symvault re-resolution; replay it with auth login".into();
         } else if let Some((command, args)) = replay_step_frame(step) {
-            let response = match client.request(Frame {
-                cmd: command,
-                args: Some(args),
-                session: session.clone(),
-                ..Frame::default()
-            }) {
+            let response = match client.request(cli_frame(&command, &session, Some(args))) {
                 Ok(response) => response,
                 Err(error) => return render_client_error(format, error),
             };
@@ -1082,7 +1179,27 @@ fn render_trace_daemon_error(format: Format, error: DaemonError) -> ExitCode {
 
 fn render_trace_error_envelope(envelope: Envelope, format: Format) {
     if format == Format::Yaml {
+        let message = envelope
+            .error
+            .as_ref()
+            .map(|error| error.message.as_str())
+            .unwrap_or_default()
+            .to_owned();
         if let Ok(output) = envelope.render(format) {
+            let mut output = if message.contains(": ") {
+                output
+                    .lines()
+                    .map(|line| {
+                        if line.starts_with("    message: ") {
+                            format!("    message: {}\n", yaml_single_quote(message))
+                        } else {
+                            format!("{line}\n")
+                        }
+                    })
+                    .collect::<String>()
+            } else {
+                output
+            };
             let output = if output.contains("    hint:") {
                 output
             } else {
@@ -1095,6 +1212,10 @@ fn render_trace_error_envelope(envelope: Envelope, format: Format) {
     } else {
         render_envelope_error(envelope, format);
     }
+}
+
+fn yaml_single_quote(value: &str) -> String {
+    format!("'{}'", value.replace('\'', "''"))
 }
 
 fn replay_step_frame(step: &trace::Step) -> Option<(String, serde_json::Value)> {
@@ -2943,6 +3064,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "set" => parse_set(&values, command_index),
         "policy" => parse_policy(&values, command_index),
         "journal" => parse_journal(&values, command_index),
+        "watch" => parse_watch(&values, command_index),
         "trace" => parse_trace(&values, command_index),
         "diff" => parse_diff(&values, command_index),
         "network" => parse_network(&values, command_index),
@@ -2997,7 +3119,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -3067,6 +3189,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n  replay      Replay a trace file step by step and report deviations\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
         ("trace", Some("export")) => Some("Convert the session journal into a repeatable trace file\n\nUsage:\n  symbrowse trace export [flags]\n\nFlags:\n  -h, --help         help for export\n      --out string   trace file to write (default \"trace.json\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("trace", Some("replay")) => Some("Replay a trace file step by step and report deviations\n\nUsage:\n  symbrowse trace replay <file> [flags]\n\nFlags:\n  -h, --help   help for replay\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("watch", None) => Some("Watch an agent session: stream the action journal live (read-only)\n\nUsage:\n  symbrowse watch [flags]\n\nFlags:\n  -h, --help          help for watch\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("policy", None) => Some("Inspect the local risk policy\n\nUsage:\n  symbrowse policy [command]\n\nAvailable Commands:\n  explain     Show the effective decision for a command against a URL\n\nFlags:\n  -h, --help             help for policy\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse policy [command] --help\" for more information about a command.\n".to_owned()),
         ("policy", Some("explain")) => Some("Show the effective decision for a command against a URL\n\nUsage:\n  symbrowse policy explain <command> [flags]\n\nFlags:\n  -h, --help          help for explain\n      --mode string   policy mode: mcp or tty (default: daemon mode)\n      --url string    URL whose host the rule is evaluated against\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("version", None) => Some(plain(
@@ -3963,6 +4086,42 @@ fn parse_journal(values: &[String], command_index: usize) -> Result<Action, Pars
     }
 }
 
+fn parse_watch(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let _ = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "--json" => {}
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--output" => {
+                index += 1;
+                let _ = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--json=") => {
+                let _ = parse_bool("--json", &value[7..])?;
+            }
+            value if value.starts_with("--output=") => {
+                let _ = parse_format(&value[9..])?;
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Err(ParseError {
+                    message: format!("unknown argument {value:?}"),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    Ok(Action::Watch { session })
+}
+
 fn parse_trace(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
@@ -4190,7 +4349,10 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
             format,
         }),
         Some("requests") => Err(ParseError {
-            message: format!("unknown argument {:?}", positional[0]),
+            message: format!(
+                "unknown command {:?} for \"symbrowse network requests\"",
+                positional[0]
+            ),
             exit_code: 2,
         }),
         _ => unreachable!("network subcommand selected from supported names"),
@@ -6516,6 +6678,7 @@ mod tests {
             "trace",
             "upload",
             "version",
+            "watch",
             "workflow",
         ] {
             assert!(
@@ -6617,6 +6780,46 @@ mod tests {
             "t\tsnapshot\tread\tpolicy\tok\n"
         );
         assert!(parse(&args(&["journal", "tail", "extra"])).is_err());
+    }
+
+    #[test]
+    fn watch_cli_parses_read_only_stream_and_session() {
+        assert_eq!(
+            parse(&args(&["watch", "--session=agent", "--json"])),
+            Ok(Action::Watch {
+                session: "agent".to_owned(),
+            })
+        );
+        assert!(parse(&args(&["watch", "extra"])).is_err());
+        assert!(parse(&args(&["watch", "--take-over"])).is_err());
+    }
+
+    #[test]
+    fn network_requests_rejects_extra_argument_as_unknown_subcommand() {
+        assert_eq!(
+            parse(&args(&["network", "requests", "extra"])),
+            Err(ParseError {
+                message: "unknown command \"extra\" for \"symbrowse network requests\"".to_owned(),
+                exit_code: 2,
+            })
+        );
+    }
+
+    #[test]
+    fn cli_daemon_frames_carry_request_metadata() {
+        let frame = super::cli_frame(
+            "trace.replay",
+            "default",
+            Some(serde_json::json!({"steps":[]})),
+        );
+        assert_eq!(frame.cmd, "trace.replay");
+        assert!(!frame.request_id.is_empty());
+        assert_eq!(frame.retrieval_surface, "cli");
+    }
+
+    #[test]
+    fn trace_yaml_single_quote_escapes_quote_characters() {
+        assert_eq!(super::yaml_single_quote("a: it's"), "'a: it''s'");
     }
 
     #[test]

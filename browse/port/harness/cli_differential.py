@@ -8,6 +8,8 @@ import hashlib
 import json
 import os
 import re
+import selectors
+import signal
 import socket
 import subprocess
 import sys
@@ -149,7 +151,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upload", "version", "wait", "watch", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -373,6 +375,7 @@ class WindowsNamedPipeStub:
         self.error: str | None = None
         self.status_probe = status_probe
         self.request_count = request_count
+        self.flushed_responses = 0
         self.thread: threading.Thread | None = None
         self.ready = threading.Event()
         self.pipe_ready = threading.Event()
@@ -396,6 +399,7 @@ class WindowsNamedPipeStub:
         ]
         self.kernel.WriteFile.restype = wintypes.BOOL
         self.kernel.FlushFileBuffers.argtypes = [wintypes.HANDLE]
+        self.kernel.FlushFileBuffers.restype = wintypes.BOOL
         self.kernel.DisconnectNamedPipe.argtypes = [wintypes.HANDLE]
         self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
         self.kernel.CreateFileW.argtypes = [
@@ -532,6 +536,9 @@ class WindowsNamedPipeStub:
                         raise self._win_error("WriteFile")
                     if written.value != len(response):
                         raise RuntimeError("short write to Windows daemon pipe")
+                    if not self.kernel.FlushFileBuffers(handle):
+                        raise self._win_error("FlushFileBuffers(response)")
+                    self.flushed_responses += 1
                 finally:
                     self.kernel.DisconnectNamedPipe(handle)
                     self.kernel.CloseHandle(handle)
@@ -638,11 +645,13 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                 go_frame = go_stub.frame
                 go_frames = go_stub.frames
                 go_error = go_stub.error
+                go_flushed = go_stub.flushed_responses
                 with WindowsNamedPipeStub(session=session, status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
                 rust_frame = rust_stub.frame
                 rust_frames = rust_stub.frames
                 rust_error = rust_stub.error
+                rust_flushed = rust_stub.flushed_responses
             else:
                 go_path = socket_path(env, session)
                 with UnixDaemonStub(go_path, status_probe=False, request_count=go_count) as go_stub:
@@ -650,6 +659,7 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                 go_frame = go_stub.frame
                 go_frames = go_stub.frames
                 go_error = go_stub.error
+                go_flushed = rust_flushed = None
                 rust_path = socket_path(env, session)
                 with UnixDaemonStub(rust_path, status_probe=True, request_count=rust_count) as rust_stub:
                     rust_result = run_process(rust, argv, env, stdin)
@@ -692,6 +702,12 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                     "go_stub_error": go_error, "rust_stub_error": rust_error})
         row["daemon_payloads_match"] = payload(go_frame) == payload(rust_frame)
         row["matched"] = bool(row["matched"] and row["daemon_payloads_match"] and not go_error and not rust_error)
+        if os.name == "nt" and (argv[:1] == ["eval"] or argv[:2] == ["tab", "switch"]):
+            row["windows_pipe_response_flushes"] = {"go": go_flushed, "rust": rust_flushed}
+            row["windows_pipe_flush_verified"] = bool(
+                go_flushed and rust_flushed and not go_error and not rust_error
+            )
+            row["matched"] = bool(row["matched"] and row["windows_pipe_flush_verified"])
         if argv[:2] == ["network", "requests"]:
             go_actual = [payload_raw(frame) for frame in go_frames if frame.get("cmd") != "daemon.status"]
             rust_actual = [payload_raw(frame) for frame in rust_frames if frame.get("cmd") != "daemon.status"]
@@ -745,6 +761,174 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
                 and row["daemon_actual_frames_match"] and not go_error and not rust_error
             )
     return row
+
+
+def compare_watch_signal(go: Path, rust: Path, env: dict[str, str], argv: list[str],
+                         sig: signal.Signals) -> dict[str, Any]:
+    if os.name != "posix":
+        return {"case": "CLI-watch-signal", "argv": argv, "signal": sig.name,
+                "matched": None, "skipped": "graceful signal delivery is tested on POSIX targets"}
+
+    marker = b"2026-09-25T12:00:00Z\topen\tclass=read\tdecider=policy\tok\n"
+
+    def run_one(binary: Path, *, status_probe: bool, request_count: int) -> dict[str, Any]:
+        with UnixDaemonStub(socket_path(env, SESSION), status_probe=status_probe,
+                            request_count=request_count) as stub:
+            process = subprocess.Popen(
+                [str(binary), *argv], stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
+            )
+            captured = bytearray()
+            deadline = time.monotonic() + 8
+            try:
+                assert process.stdout is not None
+                with selectors.DefaultSelector() as selector:
+                    selector.register(process.stdout, selectors.EVENT_READ)
+                    while marker not in captured and time.monotonic() < deadline:
+                        events = selector.select(timeout=max(0, deadline - time.monotonic()))
+                        if not events:
+                            break
+                        chunk = os.read(process.stdout.fileno(), 4096)
+                        if not chunk:
+                            break
+                        captured.extend(chunk)
+                if marker not in captured:
+                    process.kill()
+                    process.wait(timeout=3)
+                    tail, error = process.communicate(timeout=3)
+                    return {"error": "watch did not emit the fixture journal row before timeout",
+                            "stdout": bytes(captured) + tail, "stderr": error,
+                            "returncode": process.returncode, "frames": stub.frames,
+                            "stub_error": stub.error}
+                process.send_signal(sig)
+                process.wait(timeout=5)
+                tail, error = process.communicate(timeout=3)
+                return {"returncode": process.returncode, "stdout": bytes(captured) + tail,
+                        "stderr": error, "frames": stub.frames, "stub_error": stub.error}
+            except (OSError, subprocess.TimeoutExpired) as error:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=3)
+                tail, stderr = process.communicate(timeout=3)
+                return {"error": str(error), "returncode": process.returncode,
+                        "stdout": bytes(captured) + tail, "stderr": stderr,
+                        "frames": stub.frames, "stub_error": stub.error}
+
+    go_result = run_one(go, status_probe=False, request_count=1)
+    rust_result = run_one(rust, status_probe=True, request_count=2)
+    expected_go = ["journal.show"]
+    expected_rust = ["journal.show", "daemon.status"]
+
+    def actual_commands(result: dict[str, Any]) -> list[str]:
+        return [frame.get("cmd", "") for frame in result.get("frames", [])]
+
+    go_frame = go_result.get("frames", [{}])[0]
+    rust_frame = rust_result.get("frames", [{}])[0]
+    metadata_match = all(
+        frame.get(key) == expected
+        for frame, expected in ((go_frame, "1"), (rust_frame, "1"))
+        for key in ("request_id",)
+    ) and all(
+        frame.get(key) == expected
+        for frame, expected in ((go_frame, "cli"), (rust_frame, "cli"))
+        for key in ("retrieval_surface",)
+    )
+    frames_match = (actual_commands(go_result) == expected_go
+                    and actual_commands(rust_result) == expected_rust and metadata_match)
+    matched = (
+        go_result.get("returncode") == rust_result.get("returncode") == 0
+        and go_result.get("stdout") == rust_result.get("stdout")
+        and go_result.get("stderr") == rust_result.get("stderr")
+        and frames_match
+        and not go_result.get("stub_error")
+        and not rust_result.get("stub_error")
+        and not go_result.get("error")
+        and not rust_result.get("error")
+    )
+    return {"case": "CLI-watch-signal", "argv": argv, "signal": sig.name,
+            "matched": matched, "bounded_shutdown_seconds": 5,
+            "go": output_record(go_result), "rust": output_record(rust_result),
+            "go_frames": go_result.get("frames"), "rust_frames": rust_result.get("frames"),
+            "cli_frame_metadata_match": metadata_match,
+            "go_stub_error": go_result.get("stub_error"),
+            "rust_stub_error": rust_result.get("stub_error"),
+            "go_error": go_result.get("error"), "rust_error": rust_result.get("error")}
+
+
+def run_watch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
+    if os.name == "nt":
+        return [
+            compare_watch_windows_output(go, rust, env, argv)
+            for argv in (["watch"], ["watch", "--json"])
+        ] + [{"case": "CLI-watch-signal", "argv": ["watch"], "signal": "CTRL_C/SIGTERM",
+              "matched": None,
+              "evidence_gap": "the harness cannot safely broadcast CTRL_C_EVENT to only the child process; Windows graceful shutdown remains unverified"}]
+    return [
+        compare_watch_signal(go, rust, env, argv, sig)
+        for argv in (["watch"], ["watch", "--json"])
+        for sig in (signal.SIGINT, signal.SIGTERM)
+    ]
+
+
+def compare_watch_windows_output(go: Path, rust: Path, env: dict[str, str],
+                                 argv: list[str]) -> dict[str, Any]:
+    marker = b"2026-09-25T12:00:00Z\topen\tclass=read\tdecider=policy\tok\n"
+
+    def run_one(binary: Path, *, status_probe: bool, request_count: int) -> dict[str, Any]:
+        with WindowsNamedPipeStub(status_probe=status_probe, request_count=request_count) as stub:
+            process = subprocess.Popen(
+                [str(binary), *argv], stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            )
+            captured = bytearray()
+            emitted = threading.Event()
+
+            def collect() -> None:
+                assert process.stdout is not None
+                for line in iter(process.stdout.readline, b""):
+                    captured.extend(line)
+                    if marker in captured:
+                        emitted.set()
+
+            reader = threading.Thread(target=collect, daemon=True)
+            reader.start()
+            if not emitted.wait(timeout=8):
+                process.kill()
+                process.wait(timeout=3)
+                reader.join(timeout=3)
+                stderr = process.stderr.read() if process.stderr is not None else b""
+                return {"error": "watch did not emit the fixture journal row before timeout",
+                        "returncode": process.returncode, "stdout": bytes(captured),
+                        "stderr": stderr, "frames": stub.frames, "stub_error": stub.error}
+            process.terminate()
+            process.wait(timeout=3)
+            reader.join(timeout=3)
+            stderr = process.stderr.read() if process.stderr is not None else b""
+            return {"returncode": process.returncode, "stdout": bytes(captured),
+                    "stderr": stderr, "frames": stub.frames, "stub_error": stub.error}
+
+    go_result = run_one(go, status_probe=False, request_count=1)
+    rust_result = run_one(rust, status_probe=True, request_count=2)
+    go_frame = go_result.get("frames", [{}])[0]
+    rust_frame = rust_result.get("frames", [{}])[0]
+    matched = (
+        marker in go_result.get("stdout", b"") and marker in rust_result.get("stdout", b"")
+        and go_result.get("stdout") == rust_result.get("stdout")
+        and go_frame.get("cmd") == rust_frame.get("cmd") == "journal.show"
+        and go_frame.get("request_id") == rust_frame.get("request_id") == "1"
+        and go_frame.get("retrieval_surface") == rust_frame.get("retrieval_surface") == "cli"
+        and not go_result.get("error") and not rust_result.get("error")
+        and not go_result.get("stub_error") and not rust_result.get("stub_error")
+    )
+    return {"case": "CLI-watch-output-windows", "argv": argv, "matched": matched,
+            "criterion": "text/JSON-flag output and journal request match before bounded process termination",
+            "graceful_signal_evidence": "not covered by this output case",
+            "go": output_record(go_result), "rust": output_record(rust_result),
+            "go_frames": go_result.get("frames"), "rust_frames": rust_result.get("frames"),
+            "go_stub_error": go_result.get("stub_error"),
+            "rust_stub_error": rust_result.get("stub_error"),
+            "go_error": go_result.get("error"), "rust_error": rust_result.get("error")}
 
 
 def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
@@ -1435,6 +1619,7 @@ def main() -> int:
     rows.extend(implemented_help(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_fixed_cases(args.go.resolve(), args.rust.resolve(), env))
     rows.extend(run_batch_cases(args.go.resolve(), args.rust.resolve(), env))
+    rows.extend(run_watch_cases(args.go.resolve(), args.rust.resolve(), env))
     report = {
         "schema_version": 1,
         "source_head": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),

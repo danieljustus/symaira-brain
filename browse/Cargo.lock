@@ -1885,6 +1885,7 @@ dependencies = [
  "symbrowse-protocol",
  "tempfile",
  "time",
+ "tokio",
 ]
 
 [[package]]
