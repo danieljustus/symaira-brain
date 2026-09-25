@@ -1,6 +1,6 @@
 //! Cobra-compatible shell scripts backed by the Rust CLI's implemented help tree.
 
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 pub(super) fn script(shell: &str) -> Option<&'static str> {
     match shell {
