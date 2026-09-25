@@ -195,7 +195,7 @@ fn split_name_description(value: &str) -> Option<(&str, &str)> {
 
 #[cfg(test)]
 mod tests {
-    use super::{complete, script};
+    use super::{complete, complete_no_descriptions, script, script_without_descriptions};
     use crate::{Action, parse};
     use sha2::{Digest, Sha256};
     use std::ffi::OsString;
