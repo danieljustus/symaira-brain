@@ -12,7 +12,7 @@ use std::{
     fs,
     io::{self, Read, Write},
     path::{Path, PathBuf},
-    process::{Command, ExitCode},
+    process::{Command, ExitCode, Stdio},
     sync::atomic::{AtomicU64, Ordering},
     time::Duration,
 };
@@ -69,6 +69,7 @@ struct AuthLoginEnvelope<'a> {
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
     Help(String),
+    CompatSidecar,
     Completion {
         shell: String,
     },
@@ -289,6 +290,7 @@ fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     match parse(&args) {
         Ok(Action::Help(text)) => write_stdout(&text),
+        Ok(Action::CompatSidecar) => run_compat_sidecar(),
         Ok(Action::Completion { shell }) => match completion::script(&shell) {
             Some(script) => write_stdout(script),
             None => {
@@ -3750,6 +3752,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         }
         "tools" => parse_tools(&values, command_index),
         "help" => parse_help(&values, command_index),
+        "compat-sidecar" => parse_compat_sidecar(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
         | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "check" | "dblclick"
         | "focus" | "hover" | "select" | "uncheck" | "scroll" | "scrollintoview" | "a11y"
@@ -3758,6 +3761,80 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             message: format!("unknown command {command:?} for \"symbrowse\""),
             exit_code: 2,
         }),
+    }
+}
+
+fn parse_compat_sidecar(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let _ = root_output_flags(&values[..command_index])?;
+    let mut index = command_index + 1;
+    while index < values.len() {
+        match values[index].as_str() {
+            "--json" => {}
+            value if value.starts_with("--json=") => {
+                parse_bool("--json", &value[7..])?;
+            }
+            "--output" => {
+                index += 1;
+                parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => {
+                parse_format(&value[9..])?;
+            }
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            extra => {
+                return Err(ParseError {
+                    message: format!("unknown command {extra:?} for \"symbrowse compat-sidecar\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    Ok(Action::CompatSidecar)
+}
+
+fn run_compat_sidecar() -> ExitCode {
+    let Some(binary) = std::env::var_os("SYMBROWSE_COMPAT_BINARY") else {
+        let _ = writeln!(
+            io::stderr(),
+            "compat-sidecar requires SYMBROWSE_COMPAT_BINARY to name the retained Go helper"
+        );
+        return ExitCode::from(1);
+    };
+    let binary = PathBuf::from(binary);
+    if !binary.is_absolute() {
+        let _ = writeln!(
+            io::stderr(),
+            "compat-sidecar requires SYMBROWSE_COMPAT_BINARY to be an absolute path"
+        );
+        return ExitCode::from(1);
+    }
+    if let (Ok(current), Ok(helper)) = (
+        std::env::current_exe().and_then(fs::canonicalize),
+        fs::canonicalize(&binary),
+    ) && current == helper
+    {
+        let _ = writeln!(
+            io::stderr(),
+            "compat-sidecar cannot use the symbrowse Rust executable as its helper"
+        );
+        return ExitCode::from(1);
+    }
+    let status = Command::new(binary)
+        .arg("compat-sidecar")
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
+    match status {
+        Ok(status) => status
+            .code()
+            .and_then(|code| u8::try_from(code).ok())
+            .map_or_else(|| ExitCode::from(1), ExitCode::from),
+        Err(_) => {
+            let _ = writeln!(io::stderr(), "compat-sidecar helper could not be started");
+            ExitCode::from(1)
+        }
     }
 }
 
@@ -4000,7 +4077,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  auth           Credential management through symvault (no plaintext)\n  cookies        Inspect and manage cookies of the current page origin\n  handoff        Hand the session over to the human without losing it (2FA, CAPTCHA, approval)\n  journal        Inspect the append-only action journal\n  oob            Inspect the out-of-band human channel\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  upgrade        Check for and apply symbrowse updates\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  auth           Credential management through symvault (no plaintext)\n  cookies        Inspect and manage cookies of the current page origin\n  handoff        Hand the session over to the human without losing it (2FA, CAPTCHA, approval)\n  journal        Inspect the append-only action journal\n  oob            Inspect the out-of-band human channel\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session: stream the action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect, mock and export page network activity\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  compat-sidecar Run the pinned Go/AzureTLS compatibility sidecar\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  diff           Compare snapshots, screenshots and URLs\n  doctor         Check browser discovery and local runtime prerequisites\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  trace          Export and replay repeatable action traces\n  upgrade        Check for and apply symbrowse updates\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  help           Help about any command\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -4039,6 +4116,12 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
             "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n",
         )),
         ("completion", None) => Some(completion_help().to_owned()),
+        ("compat-sidecar", None) => Some(plain(
+            "Run the pinned Go/AzureTLS compatibility sidecar",
+            "symbrowse compat-sidecar [flags]",
+            "  -h, --help   help for compat-sidecar\n",
+            global,
+        )),
         ("doctor", None) => Some(plain(
             "Check browser discovery and local runtime prerequisites",
             "symbrowse doctor [flags]",
@@ -8114,6 +8197,7 @@ mod tests {
             "auth",
             "eval",
             "cookies",
+            "compat-sidecar",
             "flow",
             "handoff",
             "open",
