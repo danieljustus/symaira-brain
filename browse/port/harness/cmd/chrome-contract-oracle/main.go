@@ -74,31 +74,25 @@ func run() error {
 	defer cancel()
 
 	var result contract
-	result.NetworkCapture = call(runtime, ctx, daemon.Frame{
-		Cmd:     "network.capture",
+	result.Open = call(runtime, ctx, daemon.Frame{
+		Cmd:     "open",
 		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": os.Args[2] + "/page"}),
 	})
-	if !result.NetworkCapture.Success {
-		return fmt.Errorf("Go network.capture oracle failed: %s", responseJSON(result.NetworkCapture))
-	}
-	result = contract{
-		NetworkCapture: result.NetworkCapture,
-		Open: call(runtime, ctx, daemon.Frame{
-			Cmd:     "open",
-			Session: "chrome-contract",
-			Args:    mustJSON(map[string]string{"url": os.Args[2] + "/page"}),
-		}),
-		TabNew: call(runtime, ctx, daemon.Frame{
-			Cmd:     "tab.new",
-			Session: "chrome-contract",
-			Args:    mustJSON(map[string]string{"label": "second", "url": os.Args[2] + "/popup"}),
-		}),
-	}
 	if !result.Open.Success {
 		return fmt.Errorf("Go open oracle failed: %s", responseJSON(result.Open))
 	}
-	if !result.TabNew.Success {
-		return fmt.Errorf("Go tab.new oracle failed: %s", responseJSON(result.TabNew))
+	// Go enables capture on the first network.requests call for an existing tab.
+	result.NetworkCapture = call(runtime, ctx, daemon.Frame{
+		Cmd:     "network.requests",
+		Session: "chrome-contract",
+	})
+	if !result.NetworkCapture.Success {
+		return fmt.Errorf("Go network.requests capture start failed: %s", responseJSON(result.NetworkCapture))
+	}
+	reloaded := call(runtime, ctx, daemon.Frame{Cmd: "reload", Session: "chrome-contract"})
+	if !reloaded.Success {
+		return fmt.Errorf("Go reload after capture start failed: %s", responseJSON(reloaded))
 	}
 	result.NetworkRequests = call(runtime, ctx, daemon.Frame{
 		Cmd:     "network.requests",
@@ -145,6 +139,14 @@ func run() error {
 	})
 	if result.NetworkMissingRequest.Success || result.NetworkMissingRequest.Error == nil || result.NetworkMissingRequest.Error.Code != "network_request_not_found" {
 		return fmt.Errorf("Go missing network.request oracle was unexpected: %s", responseJSON(result.NetworkMissingRequest))
+	}
+	result.TabNew = call(runtime, ctx, daemon.Frame{
+		Cmd:     "tab.new",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"label": "second", "url": os.Args[2] + "/popup"}),
+	})
+	if !result.TabNew.Success {
+		return fmt.Errorf("Go tab.new oracle failed: %s", responseJSON(result.TabNew))
 	}
 	result.InspectText = call(runtime, ctx, daemon.Frame{
 		Cmd:     "get.text",

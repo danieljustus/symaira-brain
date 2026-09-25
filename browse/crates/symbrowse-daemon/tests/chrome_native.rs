@@ -348,22 +348,23 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     }
     let contract_server = contract_server.expect("create Chrome contract fixture");
     let go_oracle = go_oracle.expect("run Go Chrome oracle");
-    let network_started = request(&client, "network.capture", json!({}));
-    assert_eq!(
-        network_started["success"], go_oracle["network_capture"]["success"],
-        "network.capture result: rust={network_started}, go={}",
-        go_oracle["network_capture"]
-    );
-    assert_eq!(
-        network_started["data"],
-        go_oracle["network_capture"]["data"]
-    );
     let rust_open = request(
         &client,
         "open",
         json!({"url":format!("{}/page", contract_server.base_url)}),
     );
     assert_eq!(rust_open["success"], go_oracle["open"]["success"]);
+    let network_started = request(&client, "network.requests", json!({}));
+    assert_eq!(
+        network_started["success"], go_oracle["network_capture"]["success"],
+        "network.requests capture start: rust={network_started}, go={}",
+        go_oracle["network_capture"]
+    );
+    let reloaded = request(&client, "reload", json!({}));
+    assert_eq!(
+        reloaded["success"], true,
+        "reload after capture start: {reloaded}"
+    );
     let download_dir = root.join("downloads");
     let set_download_dir = request(
         &client,
@@ -412,16 +413,6 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     );
     assert_eq!(downloads[0]["received_bytes"], 34);
     assert_eq!(downloads[0]["total_bytes"], 34);
-    let rust_tab_new = request(
-        &client,
-        "tab.new",
-        json!({
-            "label":"second",
-            "url":format!("{}/popup", contract_server.base_url)
-        }),
-    );
-    assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
-    assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
     let rust_network_requests = request(&client, "network.requests", json!({}));
     assert_eq!(
         rust_network_requests["success"], go_oracle["network_requests"]["success"],
@@ -477,6 +468,16 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         rust_missing_request["error"]["message"],
         go_oracle["network_missing_request"]["error"]["message"]
     );
+    let rust_tab_new = request(
+        &client,
+        "tab.new",
+        json!({
+            "label":"second",
+            "url":format!("{}/popup", contract_server.base_url)
+        }),
+    );
+    assert_eq!(rust_tab_new["success"], go_oracle["tab_new"]["success"]);
+    assert_eq!(rust_tab_new["data"], go_oracle["tab_new"]["data"]);
     for (command, oracle_key, args) in [
         ("get.text", "inspect_text", json!({"selector":"#popup"})),
         ("get.html", "inspect_html", json!({})),
