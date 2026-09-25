@@ -14,6 +14,7 @@ import (
 
 type contract struct {
 	Open                  daemon.Response `json:"open"`
+	OpenFragment          daemon.Response `json:"open_fragment"`
 	ScrollIntoView        daemon.Response `json:"scroll_into_view"`
 	TabNew                daemon.Response `json:"tab_new"`
 	InspectText           daemon.Response `json:"inspect_text"`
@@ -93,6 +94,14 @@ func run() error {
 	})
 	if !result.Open.Success {
 		return fmt.Errorf("Go open oracle failed: %s", responseJSON(result.Open))
+	}
+	result.OpenFragment = call(runtime, ctx, daemon.Frame{
+		Cmd:     "open",
+		Session: "chrome-contract",
+		Args:    mustJSON(map[string]string{"url": os.Args[2] + "/page#same-document"}),
+	})
+	if !result.OpenFragment.Success {
+		return fmt.Errorf("Go same-document open oracle failed: %s", responseJSON(result.OpenFragment))
 	}
 	// Go enables capture on the first network.requests call for an existing tab.
 	result.NetworkCapture = call(runtime, ctx, daemon.Frame{

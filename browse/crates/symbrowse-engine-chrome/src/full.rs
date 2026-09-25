@@ -43,6 +43,14 @@ impl fmt::Display for UnsupportedOperation {
 }
 impl Error for UnsupportedOperation {}
 
+fn uses_script_navigation(url: &str) -> bool {
+    url.get(..7)
+        .is_some_and(|scheme| scheme.eq_ignore_ascii_case("http://"))
+        || url
+            .get(..8)
+            .is_some_and(|scheme| scheme.eq_ignore_ascii_case("https://"))
+}
+
 #[derive(Debug)]
 pub struct ClickObstructedError {
     pub message: String,
@@ -532,6 +540,17 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        if !uses_script_navigation(url) {
+            // Keep CDP's URL handling for data:, about:, file:, and relative
+            // inputs. In particular, Chrome permits Page.navigate to data:
+            // where script-initiated top-level navigation is rejected.
+            self.page.goto(url).await?;
+            return Ok(serde_json::json!({
+                "url": self.page.url().await?.unwrap_or_default(),
+                "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
+            }));
+        }
+
         // chromiumoxide's Page::goto waits for its own Page.lifecycleEvent
         // watcher, which has a fixed 30-second timeout. The Go engine sends
         // Page.navigate and then polls document.readyState instead. Trigger
@@ -542,6 +561,11 @@ impl ChromePage {
             .page
             .event_listener::<page::EventFrameNavigated>()
             .await?;
+        let mut navigated_within_document = self
+            .page
+            .event_listener::<page::EventNavigatedWithinDocument>()
+            .await?;
+        let main_frame = self.page.mainframe().await?;
         let url_literal = serde_json::to_string(url)?;
         let dispatch = self
             .evaluate(&format!(
@@ -556,13 +580,31 @@ impl ChromePage {
             return Err(error.to_owned().into());
         }
 
-        loop {
-            let Some(event) = navigated.next().await else {
-                return Err("Chrome navigation event stream closed".into());
-            };
-            if event.frame.parent_id.is_none() {
-                break;
+        let mut frame_events_open = true;
+        let mut same_document_events_open = true;
+        let mut navigation_observed = false;
+        while !navigation_observed && (frame_events_open || same_document_events_open) {
+            tokio::select! {
+                event = navigated.next(), if frame_events_open => {
+                    match event {
+                        Some(event) if event.frame.parent_id.is_none() => navigation_observed = true,
+                        Some(_) => {},
+                        None => frame_events_open = false,
+                    }
+                }
+                event = navigated_within_document.next(), if same_document_events_open => {
+                    match event {
+                        Some(event) if main_frame.as_ref().is_none_or(|id| id == &event.frame_id) => {
+                            navigation_observed = true;
+                        }
+                        Some(_) => {},
+                        None => same_document_events_open = false,
+                    }
+                }
             }
+        }
+        if !navigation_observed {
+            return Err("Chrome navigation event streams closed".into());
         }
 
         loop {
@@ -1850,5 +1892,22 @@ mod tests {
         assert!(summary.get("helpUrl").is_none());
         assert_eq!(summary["nodes"][0]["target"], json!(["#email"]));
         assert!(summary["nodes"][0].get("failureSummary").is_none());
+    }
+
+    #[test]
+    fn script_navigation_is_limited_to_absolute_web_urls() {
+        for url in ["http://example.test/", "HTTPS://example.test/"] {
+            assert!(uses_script_navigation(url), "{url}");
+        }
+        for url in [
+            "data:text/html,fixture",
+            "about:blank",
+            "file:///tmp/page.html",
+            "/relative/path",
+            "relative/path",
+            "#fragment",
+        ] {
+            assert!(!uses_script_navigation(url), "{url}");
+        }
     }
 }

@@ -388,6 +388,21 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         "open response: Rust={rust_open} Go={}",
         go_oracle["open"]
     );
+    let rust_open_fragment = request(
+        &client,
+        "open",
+        json!({"url":format!("{}/page#same-document", contract_server.base_url)}),
+    );
+    assert_eq!(
+        rust_open_fragment["success"], go_oracle["open_fragment"]["success"],
+        "same-document open response: Rust={rust_open_fragment} Go={}",
+        go_oracle["open_fragment"]
+    );
+    assert_eq!(
+        rust_open_fragment["data"]["url"], go_oracle["open_fragment"]["data"]["url"],
+        "same-document open URL: Rust={rust_open_fragment} Go={}",
+        go_oracle["open_fragment"]
+    );
     let network_started = request(&client, "network.requests", json!({}));
     assert_eq!(
         network_started["success"], go_oracle["network_capture"]["success"],
