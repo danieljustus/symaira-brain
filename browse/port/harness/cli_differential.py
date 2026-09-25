@@ -107,7 +107,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     expected = {
         "a11y", "back", "batch", "cache", "check", "click", "config", "daemon", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "help", "hover", "is", "journal", "mcp", "open", "policy", "press", "profiles",
-        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "type", "uncheck", "upload", "version", "wait", "workflow",
+        "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "type", "uncheck", "upload", "version", "wait", "workflow",
     }
     go_root = run_process(go, ["--help"], env)
     rust_root = run_process(rust, ["--help"], env)
@@ -150,7 +150,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
         ["state", "clean"], ["state", "clear"], ["state", "key"], ["state", "key", "init"],
         ["state", "list"], ["state", "load"], ["state", "save"], ["state", "show"],
         ["storage"], ["storage", "clear"], ["storage", "get"], ["storage", "set"],
-        ["policy"], ["policy", "explain"], ["trace", "export"],
+        ["policy"], ["policy", "explain"], ["trace", "export"], ["diff", "snapshot"],
         ["journal"], ["journal", "tail"], ["journal", "show"],
         ["cookies"], ["cookies", "list"], ["cookies", "clear"], ["cookies", "set"], ["help"], ["upload"], ["version"],
     ]
@@ -257,6 +257,8 @@ class UnixDaemonStub:
                         data = {"name": frame.get("session", "default"), "active_tabs": 0}
                     elif frame.get("cmd") == "a11y":
                         data = {"nodes": []}
+                    elif frame.get("cmd") == "snapshot":
+                        data = {"tree": "shared\nafter\n", "refs": {}}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -423,6 +425,8 @@ class WindowsNamedPipeStub:
                         data = {"name": frame.get("session", SESSION), "active_tabs": 0}
                     elif frame.get("cmd") == "a11y":
                         data = {"nodes": []}
+                    elif frame.get("cmd") == "snapshot":
+                        data = {"tree": "shared\nafter\n", "refs": {}}
                     else:
                         args = frame.get("args") or {}
                         data = {"url": args.get("url", ""), "value": 2,
@@ -602,6 +606,21 @@ def compare_processes(go: Path, rust: Path, argv: list[str], stdin: bytes,
             row["rust_actual_frames"] = rust_actual
             row["daemon_actual_frames_match"] = go_actual == rust_actual
             row["matched"] = bool(row["matched"] and row["daemon_actual_frames_match"])
+        if argv[:2] == ["diff", "snapshot"]:
+            def actual_frames(frames: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                return [payload_raw(frame) for frame in frames if frame.get("cmd") != "daemon.status"]
+
+            go_actual = actual_frames(go_frames)
+            rust_actual = actual_frames(rust_frames)
+            row["go_actual_frames"] = go_actual
+            row["rust_actual_frames"] = rust_actual
+            row["daemon_actual_frames_match"] = go_actual == rust_actual
+            row["matched"] = bool(
+                go_result.get("returncode") == rust_result.get("returncode")
+                and go_result.get("stdout") == rust_result.get("stdout")
+                and go_result.get("stderr") == rust_result.get("stderr")
+                and row["daemon_actual_frames_match"] and not go_error and not rust_error
+            )
     return row
 
 
@@ -817,7 +836,36 @@ def run_fixed_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         row["case"] = contract
         comparisons.append(row)
     comparisons.append(compare_trace_export(go, rust, env))
+    comparisons.extend([
+        compare_diff_snapshot(go, rust, env, []),
+        compare_diff_snapshot(go, rust, env, ["--json"]),
+    ])
     return comparisons
+
+
+def compare_diff_snapshot(go: Path, rust: Path, env: dict[str, str],
+                          output_args: list[str]) -> dict[str, Any]:
+    baseline_path = Path(env["TMPDIR"]) / "diff-baseline.json"
+    try:
+        baseline_path.write_text(json.dumps({"tree": "before\nshared\n", "refs": {}}))
+        row = compare_processes(
+            go, rust,
+            ["diff", "snapshot", "--baseline", str(baseline_path), "--session", "fixture", *output_args],
+            b"", env, stub=True,
+        )
+        mode = "json" if "--json" in output_args else "text"
+        row["case"] = f"CLI-001-diff-snapshot-baseline-{mode}"
+        row["criterion"] = "baseline diff output and daemon frame match the Go command"
+        return row
+    except (OSError, RuntimeError) as error:
+        mode = "json" if "--json" in output_args else "text"
+        return {"case": f"CLI-001-diff-snapshot-baseline-{mode}", "matched": False,
+                "error": str(error)}
+    finally:
+        try:
+            baseline_path.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def compare_trace_export(go: Path, rust: Path, env: dict[str, str]) -> dict[str, Any]:
