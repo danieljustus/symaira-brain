@@ -167,15 +167,15 @@ def normalize_trace_fixture_url(value: str) -> str:
 def command_names(help_bytes: bytes, *, root: bool) -> list[str]:
     text = help_bytes.decode("utf-8", "replace")
     names: list[str] = []
-    in_commands = root
+    in_commands = False
     for line in text.splitlines():
-        if line.strip() == "Available Commands:":
+        if line.strip() == "Available Commands:" or (root and line.endswith(" Commands:")):
             in_commands = True
             continue
         if not root and in_commands and line and not line.startswith(" "):
             break
         if in_commands:
-            match = re.match(r"^\s{2}([A-Za-z0-9][A-Za-z0-9_-]*)\s{2,}\S", line)
+            match = re.match(r"^  ([A-Za-z0-9][A-Za-z0-9_-]*)\s+\S", line)
             if match:
                 names.append(match.group(1))
         if line.strip() in {"Flags:", "Global Flags:", "Use \"symbrowse [command] --help\" for more information about a command."}:
@@ -216,7 +216,7 @@ def help_tree(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]
 
 def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str, Any]]:
     expected = {
-        "a11y", "auth", "back", "batch", "cache", "check", "click", "completion", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
+        "a11y", "auth", "back", "batch", "cache", "check", "click", "compat-sidecar", "completion", "config", "console", "daemon", "doctor", "downloads", "errors", "dblclick", "dialog", "eval", "fetch", "fill", "find",
         "flow", "focus", "forward", "frame", "get", "goto", "handoff", "help", "hover", "is", "journal", "mcp", "oob", "open", "policy", "press", "profiles",
         "read", "reload", "screenshot", "scroll", "scrollintoview", "select", "session", "set", "snapshot", "state", "storage", "cookies", "tab", "tools", "trace", "diff", "network", "type", "uncheck", "upgrade", "upload", "version", "wait", "watch", "workflow",
     }
@@ -227,9 +227,7 @@ def implemented_help(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str
     match = go_root["returncode"] == 0 and rust_root["returncode"] == 0
     advertised: set[str] = set()
     advertised = set(command_names(rust_root["stdout"], root=True))
-    # scrollintoview is a runnable Go command with exact help, but Cobra omits
-    # it from the grouped root listing in the current Go binary.
-    go_visible = advertised - {"fetch", "tools", "workflow", "scrollintoview"}
+    go_visible = advertised - {"fetch", "tools", "workflow"}
     match = match and advertised == expected and go_visible <= go_commands
     rows = [{"case": "CLI-001-supported", "argv": ["--help"], "matched": match,
              "criterion": "Rust root help lists its real command/help routes; shared advertised commands exist in Go",
