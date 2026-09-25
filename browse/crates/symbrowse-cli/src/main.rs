@@ -51,6 +51,7 @@ const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
     Some(version) => version,
     None => "dev",
 };
+const DEVICE_PROFILES: &str = include_str!("../../../internal/engine/devices.json");
 
 const GO_STANDARD_BASE64: GeneralPurpose = GeneralPurpose::new(
     &alphabet::STANDARD,
@@ -94,6 +95,9 @@ enum Action {
     Downloads {
         session: String,
         dir: Option<String>,
+        format: Format,
+    },
+    SetDeviceList {
         format: Format,
     },
     RuntimeEvents {
@@ -313,6 +317,7 @@ fn main() -> ExitCode {
             dir,
             format,
         }) => run_downloads(session, dir, format),
+        Ok(Action::SetDeviceList { format }) => run_set_device_list(format),
         Ok(Action::RuntimeEvents {
             session,
             command,
@@ -472,6 +477,10 @@ fn run_dispatch(
         .then_some(args),
     );
     let is_network_offline = frame.cmd == "network.offline";
+    let is_set_mutation = matches!(
+        frame.cmd.as_str(),
+        "set.viewport" | "set.device" | "set.geo" | "set.headers" | "set.media" | "set.user-agent"
+    );
     let is_auth_login = frame.cmd == "auth.login";
     let is_oob_status = frame.cmd == "oob.status";
     let is_handoff = frame.cmd == "handoff";
@@ -643,6 +652,9 @@ fn run_dispatch(
             return write_stdout("ok\n");
         }
         if is_network_offline && format == Format::Text {
+            return write_stdout("ok\n");
+        }
+        if is_set_mutation && format == Format::Text {
             return write_stdout("ok\n");
         }
         if is_cookie_clear && format == Format::Text {
@@ -838,6 +850,33 @@ fn run_downloads(session: String, dir: Option<String>, format: Format) -> ExitCo
         }
     }
     ExitCode::SUCCESS
+}
+
+fn run_set_device_list(format: Format) -> ExitCode {
+    let names = match device_profile_names() {
+        Ok(names) => names,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "decode device list: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    if format == Format::Text {
+        return write_stdout(&format!("{}\n", names.join("\n")));
+    }
+    match Envelope::ok(serde_json::json!({"devices": names}), Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(_) => ExitCode::from(1),
+    }
+}
+
+fn device_profile_names() -> Result<Vec<String>, serde_json::Error> {
+    #[derive(serde::Deserialize)]
+    struct DeviceName {
+        name: String,
+    }
+    let mut devices: Vec<DeviceName> = serde_json::from_str(DEVICE_PROFILES)?;
+    devices.sort_by(|left, right| left.name.cmp(&right.name));
+    Ok(devices.into_iter().map(|device| device.name).collect())
 }
 
 fn run_runtime_events(
@@ -4219,8 +4258,44 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("screenshot", None) => Some("Capture the page (viewport, --full page, or --selector element)\n\nUsage:\n  symbrowse screenshot [path] [flags]\n\nFlags:\n      --format string           image format: png or jpeg (default \"png\")\n      --full                    capture the whole page, not just the viewport\n  -h, --help                    help for screenshot\n      --quality int             jpeg quality 0-100 (jpeg only)\n      --screenshot-dir string   allow writing the screenshot into this directory (default: the cache out directory)\n      --selector string         capture the element matched by a CSS selector or @ref\n      --session string          session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("set", None) => Some(
-            "Apply supported session-wide emulation settings\n\nUsage:\n  symbrowse set [command]\n\nAvailable Commands:\n  offline     Emulate offline (default: on)\n\nFlags:\n  -h, --help             help for set\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse set [command] --help\" for more information about a command.\n".to_owned(),
+            "Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n\nUsage:\n  symbrowse set [command]\n\nAvailable Commands:\n  device      Apply a named device profile (run `set device --list` for the data table)\n  geo         Override the geolocation\n  headers     Override per-request headers (Authorization/Cookie headers are rejected)\n  media       Emulate the prefers-color-scheme media feature\n  offline     Emulate offline (default: on)\n  user-agent  Override the user agent string\n  viewport    Override the viewport size and device scale factor\n\nFlags:\n  -h, --help             help for set\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse set [command] --help\" for more information about a command.\n".to_owned(),
         ),
+        ("set", Some("device")) => Some(plain(
+            "Apply a named device profile (run `set device --list` for the data table)",
+            "symbrowse set device <name> [flags]",
+            "  -h, --help   help for device\n      --list   list available device names\n",
+            session_global,
+        )),
+        ("set", Some("geo")) => Some(plain(
+            "Override the geolocation",
+            "symbrowse set geo <latitude> <longitude> [flags]",
+            "  -h, --help   help for geo\n",
+            session_global,
+        )),
+        ("set", Some("headers")) => Some(plain(
+            "Override per-request headers (Authorization/Cookie headers are rejected)",
+            "symbrowse set headers <json> [flags]",
+            "  -h, --help   help for headers\n",
+            session_global,
+        )),
+        ("set", Some("media")) => Some(plain(
+            "Emulate the prefers-color-scheme media feature",
+            "symbrowse set media <dark|light> [flags]",
+            "  -h, --help   help for media\n",
+            session_global,
+        )),
+        ("set", Some("user-agent")) => Some(plain(
+            "Override the user agent string",
+            "symbrowse set user-agent <value> [flags]",
+            "  -h, --help   help for user-agent\n",
+            session_global,
+        )),
+        ("set", Some("viewport")) => Some(plain(
+            "Override the viewport size and device scale factor",
+            "symbrowse set viewport <width> <height> [scale] [flags]",
+            "  -h, --help   help for viewport\n",
+            session_global,
+        )),
         ("set", Some("offline")) => Some(
             "Emulate offline (default: on)\n\nUsage:\n  symbrowse set offline [on|off] [flags]\n\nFlags:\n  -h, --help   help for offline\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned(),
         ),
@@ -6413,31 +6488,124 @@ mod set_tests {
     }
 
     #[test]
-    fn set_help_only_lists_the_runtime_supported_subcommand() {
+    fn set_help_lists_supported_emulation_subcommands() {
         let Ok(Action::Help(parent)) = parse(&args(&["set", "--help"])) else {
             panic!("set parent help")
         };
-        assert!(parent.contains("offline"));
-        for unsupported in ["device", "geo", "headers", "media", "viewport"] {
-            assert!(
-                !parent.contains(unsupported),
-                "help advertised {unsupported}"
-            );
-            assert!(parse(&args(&["set", unsupported, "--help"])).is_err());
+        for supported in [
+            "device",
+            "geo",
+            "headers",
+            "media",
+            "offline",
+            "user-agent",
+            "viewport",
+        ] {
+            assert!(parent.contains(supported), "help omitted {supported}");
+            assert!(matches!(
+                parse(&args(&["set", supported, "--help"])),
+                Ok(Action::Help(_))
+            ));
         }
         let Ok(Action::Help(leaf)) = parse(&args(&["set", "offline", "--help"])) else {
             panic!("set offline help")
         };
         assert!(leaf.contains("symbrowse set offline [on|off] [flags]"));
     }
+
+    #[test]
+    fn set_supported_emulation_commands_build_daemon_frames() {
+        for (argv, command, expected_args) in [
+            (
+                &[
+                    "--output=yaml",
+                    "set",
+                    "viewport",
+                    "1280",
+                    "720",
+                    "2",
+                    "--session=work",
+                ][..],
+                "set.viewport",
+                serde_json::json!({"width":1280,"height":720,"scale":2.0}),
+            ),
+            (
+                &["set", "device", "iPhone SE"][..],
+                "set.device",
+                serde_json::json!({"name":"iPhone SE"}),
+            ),
+            (
+                &["set", "geo", "52.5", "13.4"][..],
+                "set.geo",
+                serde_json::json!({"latitude":52.5,"longitude":13.4}),
+            ),
+            (
+                &["set", "headers", r#"{"x-test":"ok"}"#][..],
+                "set.headers",
+                serde_json::json!({"headers":{"x-test":"ok"}}),
+            ),
+            (
+                &["set", "media", "dark"][..],
+                "set.media",
+                serde_json::json!({"dark":true}),
+            ),
+            (
+                &["set", "user-agent", "fixture-agent"][..],
+                "set.user-agent",
+                serde_json::json!({"user_agent":"fixture-agent"}),
+            ),
+        ] {
+            let Ok(Action::Dispatch {
+                command: actual_command,
+                args,
+                ..
+            }) = parse(&args(argv))
+            else {
+                panic!("expected dispatch for {argv:?}")
+            };
+            assert_eq!(actual_command, command, "argv={argv:?}");
+            assert_eq!(args, expected_args, "argv={argv:?}");
+        }
+    }
+
+    #[test]
+    fn set_supported_emulation_commands_reject_invalid_payloads() {
+        for argv in [
+            &["set", "viewport", "wide", "720"][..],
+            &["set", "geo", "north", "east"][..],
+            &["set", "headers", "[]"][..],
+            &["set", "headers", "{}"][..],
+            &["set", "media", "auto"][..],
+        ] {
+            assert!(parse(&args(argv)).is_err(), "argv={argv:?}");
+        }
+    }
+
+    #[test]
+    fn set_device_list_uses_embedded_sorted_profile_names() {
+        let Ok(Action::SetDeviceList { format }) = parse(&args(&["set", "device", "--list"]))
+        else {
+            panic!("device list action")
+        };
+        assert_eq!(format, Format::Text);
+        let names = super::device_profile_names().expect("embedded profiles parse");
+        assert_eq!(names.len(), 8);
+        assert!(names.windows(2).all(|pair| pair[0] < pair[1]));
+        assert!(names.contains(&"iPhone SE".to_owned()));
+    }
 }
 
 fn parse_set(values: &[String], command_index: usize) -> Result<Action, ParseError> {
-    if values.get(command_index + 1).map(String::as_str) != Some("offline") {
-        return Err(ParseError {
-            message: "unknown command for \"set\"".into(),
-            exit_code: 2,
-        });
+    let subcommand = values.get(command_index + 1).map(String::as_str);
+    if subcommand != Some("offline") {
+        return parse_set_dispatch(
+            values,
+            command_index,
+            subcommand.ok_or_else(|| ParseError {
+                message: "unknown command for \"set\"".into(),
+                exit_code: 2,
+            })?,
+        );
     }
     let mut session = String::from("default");
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
@@ -6504,6 +6672,144 @@ fn parse_set(values: &[String], command_index: usize) -> Result<Action, ParseErr
         command: "network.offline".into(),
         args: serde_json::json!({"offline": offline}),
         format,
+    })
+}
+
+fn parse_set_dispatch(
+    values: &[String],
+    command_index: usize,
+    subcommand: &str,
+) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut positionals = Vec::new();
+    let mut list_devices = false;
+    let mut index = command_index + 2;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "--json" => json = true,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            "--session" => {
+                index += 1;
+                session = required_value(values, index, "--session")?.to_owned();
+            }
+            "--list" if subcommand == "device" => list_devices = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => positionals.push(value.clone()),
+        }
+        index += 1;
+    }
+    if json {
+        format = Format::Json;
+    }
+    if list_devices {
+        if !positionals.is_empty() {
+            return Err(ParseError {
+                message: "set device --list accepts no device name".into(),
+                exit_code: 2,
+            });
+        }
+        return Ok(Action::SetDeviceList { format });
+    }
+    let (command, args) = match subcommand {
+        "device" if positionals.len() == 1 => (
+            "set.device",
+            serde_json::json!({"name": positionals.remove(0)}),
+        ),
+        "viewport" if (2..=3).contains(&positionals.len()) => {
+            let width = parse_set_number("width", &positionals[0])?;
+            let height = parse_set_number("height", &positionals[1])?;
+            let scale = positionals
+                .get(2)
+                .map_or(Ok(0.0), |value| parse_set_float("scale", value))?;
+            (
+                "set.viewport",
+                serde_json::json!({"width": width, "height": height, "scale": scale}),
+            )
+        }
+        "geo" if positionals.len() == 2 => (
+            "set.geo",
+            serde_json::json!({
+                "latitude": parse_set_float("latitude", &positionals[0])?,
+                "longitude": parse_set_float("longitude", &positionals[1])?
+            }),
+        ),
+        "headers" if positionals.len() == 1 => {
+            let parsed: serde_json::Value =
+                serde_json::from_str(&positionals[0]).map_err(|e| ParseError {
+                    message: format!("headers must be a JSON object: {e}"),
+                    exit_code: 2,
+                })?;
+            let Some(map) = parsed.as_object() else {
+                return Err(ParseError {
+                    message: "headers must be a JSON object".into(),
+                    exit_code: 2,
+                });
+            };
+            if map.is_empty() || map.values().any(|value| !value.is_string()) {
+                return Err(ParseError {
+                    message: "headers object must contain string values".into(),
+                    exit_code: 2,
+                });
+            }
+            ("set.headers", serde_json::json!({"headers": parsed}))
+        }
+        "media" if positionals.len() == 1 => {
+            let dark = match positionals[0].to_ascii_lowercase().as_str() {
+                "dark" => true,
+                "light" => false,
+                _ => {
+                    return Err(ParseError {
+                        message: format!("media expects dark or light, got {:?}", positionals[0]),
+                        exit_code: 2,
+                    });
+                }
+            };
+            ("set.media", serde_json::json!({"dark": dark}))
+        }
+        "user-agent" if positionals.len() == 1 => (
+            "set.user-agent",
+            serde_json::json!({"user_agent": positionals.remove(0)}),
+        ),
+        known @ ("device" | "viewport" | "geo" | "headers" | "media" | "user-agent") => {
+            return Err(ParseError {
+                message: format!("invalid arguments for set {known}"),
+                exit_code: 2,
+            });
+        }
+        _ => {
+            return Err(ParseError {
+                message: format!("unknown command {subcommand:?} for \"symbrowse set\""),
+                exit_code: 2,
+            });
+        }
+    };
+    Ok(Action::Dispatch {
+        session,
+        command: command.into(),
+        args,
+        format,
+    })
+}
+
+fn parse_set_number(name: &str, value: &str) -> Result<i64, ParseError> {
+    value.parse().map_err(|error| ParseError {
+        message: format!("{name}: {error}"),
+        exit_code: 2,
+    })
+}
+
+fn parse_set_float(name: &str, value: &str) -> Result<f64, ParseError> {
+    value.parse().map_err(|error| ParseError {
+        message: format!("{name}: {error}"),
+        exit_code: 2,
     })
 }
 
