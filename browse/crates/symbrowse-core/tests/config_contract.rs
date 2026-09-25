@@ -73,6 +73,127 @@ fn config_precedence_matches_go() {
 }
 
 #[test]
+fn remaining_environment_settings_override_global_toml_like_go() {
+    let root = test_root("environment-settings");
+    let mut context = context(&root);
+    let global = context
+        .xdg_config_home
+        .as_ref()
+        .unwrap()
+        .join("symbrowse/config.toml");
+    fs::create_dir_all(global.parent().unwrap()).expect("create global config directory");
+    fs::write(
+        global,
+        "cache_ttl_hours = 9\nfetch_robots = false\nfetch_user_agent = \"toml-agent/1\"\nfetch_no_cache = true\nidle_timeout = 60\noperation_timeout = 35\nread_timeout = 70\nstate_expire_days = 28\nautosave = \"auto\"\nautosave_interval = 12\nautosave_key = \"global-key\"\nupload_dirs = [\"/global/uploads\"]\ndaemon_log = \"global-daemon.log\"\napproval_timeout = 45\n",
+    )
+    .expect("write lower-precedence config");
+    context.env.extend([
+        ("SYMBROWSE_CACHE_TTL_HOURS".into(), "7".into()),
+        ("SYMBROWSE_FETCH_ROBOTS".into(), "".into()),
+        ("SYMBROWSE_FETCH_USER_AGENT".into(), "env-agent/2".into()),
+        ("SYMBROWSE_FETCH_NO_CACHE".into(), "".into()),
+        ("SYMBROWSE_IDLE_TIMEOUT".into(), "120".into()),
+        ("SYMBROWSE_OPERATION_TIMEOUT".into(), "44".into()),
+        ("SYMBROWSE_READ_TIMEOUT".into(), "90".into()),
+        ("SYMBROWSE_STATE_EXPIRE_DAYS".into(), "14".into()),
+        ("SYMBROWSE_AUTOSAVE".into(), "always".into()),
+        ("SYMBROWSE_AUTOSAVE_INTERVAL".into(), "7".into()),
+        ("SYMBROWSE_AUTOSAVE_KEY".into(), "env-key".into()),
+        (
+            "SYMBROWSE_UPLOAD_DIRS".into(),
+            "/tmp/uploads, /tmp/second".into(),
+        ),
+        (
+            "SYMBROWSE_DAEMON_LOG".into(),
+            root.join("env-daemon.log").display().to_string(),
+        ),
+        ("SYMBROWSE_APPROVAL_TIMEOUT".into(), "12".into()),
+    ]);
+
+    let result = load(&context).expect("load environment-overridden config");
+    let fields = show_fields(&result);
+    for (name, value) in [
+        ("cache_ttl_hours", "7"),
+        ("fetch_robots", "false"),
+        ("fetch_user_agent", "env-agent/2"),
+        ("fetch_no_cache", "true"),
+        ("idle_timeout", "120"),
+        ("operation_timeout", "44"),
+        ("read_timeout", "90"),
+        ("state_expire_days", "14"),
+        ("autosave", "always"),
+        ("autosave_interval", "7"),
+        ("autosave_key", "env-key"),
+        ("upload_dirs", "/tmp/uploads,/tmp/second"),
+        ("daemon_log", root.join("env-daemon.log").to_str().unwrap()),
+        ("approval_timeout", "12"),
+    ] {
+        assert_eq!(fields[name].value, value, "value for {name}");
+        let source = if matches!(name, "fetch_robots" | "fetch_no_cache") {
+            "global"
+        } else {
+            "env"
+        };
+        assert_eq!(fields[name].source, source, "source for {name}");
+    }
+    fs::remove_dir_all(root).expect("remove environment settings fixture root");
+}
+
+#[test]
+fn supported_flags_override_environment_project_and_global_config() {
+    let root = test_root("flag-precedence");
+    let mut context = context(&root);
+    let global = context
+        .xdg_config_home
+        .as_ref()
+        .unwrap()
+        .join("symbrowse/config.toml");
+    fs::create_dir_all(global.parent().unwrap()).expect("create global config directory");
+    fs::write(
+        global,
+        "log_level = \"info\"\nlog_format = \"text\"\nconfig_dir = \"global-config\"\ncache_dir = \"global-cache\"\nstate_dir = \"global-state\"\nexecutable_path = \"global-browser\"\n",
+    )
+    .expect("write global config");
+    fs::write(
+        context.cwd.join(".symbrowse.toml"),
+        "log_level = \"debug\"\nlog_format = \"json\"\nconfig_dir = \"project-config\"\ncache_dir = \"project-cache\"\nstate_dir = \"project-state\"\nexecutable_path = \"project-browser\"\n",
+    )
+    .expect("write project config");
+    context.env.extend([
+        ("SYMBROWSE_LOG_LEVEL".into(), "warn".into()),
+        ("SYMBROWSE_LOG_FORMAT".into(), "text".into()),
+        ("SYMBROWSE_CONFIG_DIR".into(), "env-config".into()),
+        ("SYMBROWSE_CACHE_DIR".into(), "env-cache".into()),
+        ("SYMBROWSE_STATE_DIR".into(), "env-state".into()),
+        ("SYMBROWSE_EXECUTABLE_PATH".into(), "env-browser".into()),
+    ]);
+    context.flags = FlagOverrides {
+        log_level: Some("trace".into()),
+        log_format: Some("json".into()),
+        config_dir: Some("flag-config".into()),
+        cache_dir: Some("flag-cache".into()),
+        state_dir: Some("flag-state".into()),
+        executable_path: Some("flag-browser".into()),
+        ..FlagOverrides::default()
+    };
+
+    let result = load(&context).expect("load config with all supported flags");
+    let fields = show_fields(&result);
+    for (name, value) in [
+        ("log_level", "trace"),
+        ("log_format", "json"),
+        ("config_dir", "flag-config"),
+        ("cache_dir", "flag-cache"),
+        ("state_dir", "flag-state"),
+        ("executable_path", "flag-browser"),
+    ] {
+        assert_eq!(fields[name].value, value, "value for {name}");
+        assert_eq!(fields[name].source, "flag", "source for {name}");
+    }
+    fs::remove_dir_all(root).expect("remove flag precedence fixture root");
+}
+
+#[test]
 fn config_validation_errors_match_go() {
     for expected in fixture().invalid {
         let root = test_root(&expected.name);

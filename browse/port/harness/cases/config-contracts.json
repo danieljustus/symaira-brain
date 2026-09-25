@@ -4,7 +4,7 @@
     {
       "id": "CFG-001-config-precedence",
       "platforms": ["all"],
-      "go": ["go", "test", "./internal/config", "-run", "Contract|Precedence|Override", "-count=1"],
+      "go": ["go", "test", "./internal/config", "-run", "Contract|Precedence|Override|FetchSettings", "-count=1"],
       "rust": ["cargo", "test", "-p", "symbrowse-core", "--test", "config_contract", "--locked"]
     },
     {
