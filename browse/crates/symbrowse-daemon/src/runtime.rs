@@ -964,7 +964,14 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=ensure-browser-start");
+        }
         let page = self.ensure_browser().await?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=ensure-browser-ready");
+        }
         let empty_args = serde_json::Map::new();
         let args = if (matches!(frame.cmd.as_str(), "cookies.list" | "downloads.list")
             && frame.args.is_none())
@@ -1505,10 +1512,16 @@ impl DispatchRuntime {
                 json!({"uploaded": checked.uploaded})
             }
             "open" | "goto" => {
+                if diagnostics {
+                    eprintln!("chrome_daemon_stage=open-engine-start");
+                }
                 let outcome = page
                     .open(required_string(args, "url")?)
                     .await
                     .map_err(runtime_error)?;
+                if diagnostics {
+                    eprintln!("chrome_daemon_stage=open-engine-complete");
+                }
                 json!({
                     "action": frame.cmd.as_str(),
                     "url": outcome.get("url").and_then(Value::as_str).unwrap_or_default(),
@@ -2300,6 +2313,7 @@ impl DispatchRuntime {
     }
 
     async fn ensure_browser(&self) -> Result<ChromePage, DaemonError> {
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         {
             let guard = self
                 .browser
@@ -2318,6 +2332,9 @@ impl DispatchRuntime {
             message: redact_str(&error),
             ..Default::default()
         })?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-connect-start");
+        }
         let session = ChromeSession::connect(
             BrowserMode::Launch {
                 executable,
@@ -2328,10 +2345,16 @@ impl DispatchRuntime {
         )
         .await
         .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-connect-ready");
+        }
         let page = session
             .new_page("about:blank")
             .await
             .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-blank-page-ready");
+        }
         page.enable_network_guard(
             self.spec.allowed_domains.clone(),
             self.spec.ssrf_enabled,
@@ -2339,6 +2362,9 @@ impl DispatchRuntime {
         )
         .await
         .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-network-guard-ready");
+        }
         let result = page.clone();
         let mut guard = self
             .browser
