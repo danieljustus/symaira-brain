@@ -1191,7 +1191,7 @@ fn render_trace_error_envelope(envelope: Envelope, format: Format) {
                     .lines()
                     .map(|line| {
                         if line.starts_with("    message: ") {
-                            format!("    message: {}\n", yaml_single_quote(message))
+                            format!("    message: {}\n", yaml_single_quote(&message))
                         } else {
                             format!("{line}\n")
                         }
