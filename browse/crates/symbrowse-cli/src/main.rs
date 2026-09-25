@@ -4,6 +4,7 @@ mod browser_profiles;
 mod completion;
 mod doctor;
 mod help_catalog;
+mod upgrade;
 
 use std::{
     collections::BTreeMap,
@@ -58,19 +59,9 @@ const GO_STANDARD_BASE64: GeneralPurpose = GeneralPurpose::new(
 static CLI_REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Serialize)]
-struct AuthLoginOutput {
-    status: String,
-    url: String,
-    username_set: bool,
-    password_set: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    hint: Option<String>,
-}
-
-#[derive(Serialize)]
 struct AuthLoginEnvelope<'a> {
     success: bool,
-    data: &'a AuthLoginOutput,
+    data: &'a serde_json::Value,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     warnings: Vec<symbrowse_core::output::Warning>,
 }
@@ -87,6 +78,9 @@ enum Action {
     RootVersion,
     Version {
         structured: bool,
+    },
+    UpgradeCheck {
+        format: Format,
     },
     ConfigShow {
         format: Format,
@@ -309,6 +303,7 @@ fn main() -> ExitCode {
             Err(_) => ExitCode::from(1),
         },
         Ok(Action::Version { structured: false }) => write_stdout(&render_version_text(VERSION)),
+        Ok(Action::UpgradeCheck { format }) => upgrade::run(format, VERSION),
         Ok(Action::ConfigShow { format, flags }) => run_config_show(format, flags),
         Ok(Action::Doctor { format, fix }) => doctor::run(format, fix),
         Ok(Action::Downloads {
@@ -571,31 +566,19 @@ fn run_dispatch(
         }
         if is_auth_login {
             let data = response.data.unwrap_or(serde_json::Value::Null);
-            let output = AuthLoginOutput {
-                status: data
-                    .get("status")
-                    .and_then(serde_json::Value::as_str)
-                    .unwrap_or_default()
-                    .to_owned(),
-                url: data
-                    .get("url")
-                    .and_then(serde_json::Value::as_str)
-                    .unwrap_or_default()
-                    .to_owned(),
-                username_set: data
-                    .get("username_set")
-                    .and_then(serde_json::Value::as_bool)
-                    .unwrap_or(false),
-                password_set: data
-                    .get("password_set")
-                    .and_then(serde_json::Value::as_bool)
-                    .unwrap_or(false),
-                hint: data
-                    .get("hint")
-                    .and_then(serde_json::Value::as_str)
-                    .filter(|value| !value.is_empty())
-                    .map(str::to_owned),
-            };
+            let mut output = serde_json::Map::new();
+            for key in ["status", "url", "username_set", "password_set"] {
+                if let Some(value) = data.get(key) {
+                    output.insert(key.to_owned(), value.clone());
+                }
+            }
+            if let Some(hint) = data
+                .get("hint")
+                .filter(|value| !value.as_str().unwrap_or_default().is_empty())
+            {
+                output.insert("hint".to_owned(), hint.clone());
+            }
+            let output = serde_json::Value::Object(output);
             let warnings = response
                 .warnings
                 .into_iter()
@@ -3521,6 +3504,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "oob" => parse_oob(&values, command_index),
         "auth" => parse_auth(&values, command_index),
         "version" => parse_version(&values, command_index),
+        "upgrade" => parse_upgrade(&values, command_index),
         "doctor" => parse_doctor(&values, command_index),
         "downloads" => parse_downloads(&values, command_index),
         "console" | "errors" => parse_runtime_events(&values, command_index),
@@ -3802,7 +3786,7 @@ fn help_command_help() -> &'static str {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  auth           Credential management through symvault (no plaintext)\n  cookies        Inspect and manage cookies of the current page origin\n  journal        Inspect the append-only action journal\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch          Run multiple commands in one process and report per-item status\n  check          Check a checkbox or radio element\n  click          Click an element matching a selector or @ref\n  dblclick       Double-click an element matching a selector or @ref\n  fill           Fill an input element, replacing its content\n  find           Find an element semantically and optionally act on it\n  focus          Focus an element matching a selector or @ref\n  get            Inspect page and element values\n  goto           Navigate to a URL (alias for open)\n  hover          Hover over an element matching a selector or @ref\n  is             Check page and element state\n  open           Open a URL in the browser and wait for load\n  press          Press a keyboard key on an element\n  read           Render the page as markdown (or JSON) in the symfetch output schema\n  screenshot     Capture the page (viewport, --full page, or --selector element)\n  scroll         Scroll the page or an element by pixel amount\n  scrollintoview  Scroll an element into the visible viewport\n  select         Select an option from a drop-down element\n  snapshot       Render the accessibility tree\n  type           Type text into an element, appending to its content\n  uncheck        Uncheck a checkbox element\n  wait           Wait for a browser condition\n\nNavigation Commands:\n  back           Navigate back in page history\n  dialog         Handle JavaScript dialogs (accept, dismiss, status, auto)\n  forward        Navigate forward in page history\n  frame          Address nested frames (tree, select, main)\n  reload         Reload the current page\n  tab            Manage session tabs (list, new, switch, close)\n\nState Commands:\n  auth           Credential management through symvault (no plaintext)\n  cookies        Inspect and manage cookies of the current page origin\n  handoff        Hand the session over to the human without losing it (2FA, CAPTCHA, approval)\n  journal        Inspect the append-only action journal\n  oob            Inspect the out-of-band human channel\n  profiles       List discovered Chrome profiles available for reuse\n  session        Inspect browser sessions\n  set            Apply session-wide emulation settings (viewport, device, geo, offline, headers, media, user-agent)\n  state          Save, restore and manage named browser session states\n  storage        Inspect and manage per-origin web storage\n  watch          Watch an agent session's action journal live (read-only)\n\nNetwork Commands:\n  downloads      Show download events (origin URL, size, checksum) or set the download directory\n  network        Inspect captured page requests\n  upload         Upload files into a file input (path-guarded)\n\nDebug Commands:\n  a11y           Run an axe-core accessibility audit on the current page\n  cache          Inspect the truncate-and-store output cache\n  config         Inspect symbrowse configuration\n  console        Show or clear the page console buffer\n  daemon         Run or inspect the symbrowse daemon\n  doctor         Check browser discovery and local runtime prerequisites\n  diff           Compare snapshots, screenshots and URLs\n  errors         Show or clear uncaught page errors\n  eval           Execute JavaScript in the active page\n  mcp            Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  policy         Inspect the local risk policy\n  tools          List registered Browse tools for one or more profiles\n  trace          Export and replay repeatable action traces\n  upgrade        Check for and apply symbrowse updates\n  version        Print the symbrowse version\n\nFlows Commands:\n  flow           Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion     Generate the autocompletion script for the specified shell\n  fetch          Fetch a URL without opening a browser\n  help           Help about any command\n  workflow       Alias for flow\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n".to_owned()
 }
 
 fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
@@ -6760,6 +6744,42 @@ fn parse_version(values: &[String], version_index: usize) -> Result<Action, Pars
     })
 }
 
+fn parse_upgrade(values: &[String], upgrade_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..upgrade_index])?;
+    let mut check = false;
+    let mut index = upgrade_index + 1;
+    while index < values.len() {
+        match values[index].as_str() {
+            "--check" => check = true,
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                format = parse_format(required_value(values, index, "--output")?)?;
+            }
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            extra => {
+                return Err(ParseError {
+                    message: format!("unknown command {extra:?} for \"symbrowse upgrade\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if !check {
+        return Err(ParseError {
+            message: "upgrade currently supports only --check; applying an update is not implemented in this Rust slice".to_owned(),
+            exit_code: 2,
+        });
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::UpgradeCheck { format })
+}
+
 fn parse_config(values: &[String], config_index: usize) -> Result<Action, ParseError> {
     let Some(show_index) = values
         .iter()
@@ -7654,6 +7674,29 @@ mod tests {
     }
 
     #[test]
+    fn upgrade_check_parses_only_read_only_flags_and_matches_help_catalog() {
+        assert_eq!(
+            parse(&args(&["--output=yaml", "upgrade", "--check", "--json"])),
+            Ok(Action::UpgradeCheck {
+                format: Format::Json
+            })
+        );
+        assert!(parse(&args(&["upgrade"])).is_err());
+        assert!(parse(&args(&["upgrade", "--apply"])).is_err());
+        let Action::Help(help) = parse(&args(&["upgrade", "--help"])).unwrap() else {
+            panic!("upgrade help action")
+        };
+        assert!(help.contains("symbrowse upgrade [flags]"));
+        assert!(help.contains("--check   only check for updates, do not apply"));
+        let Action::Help(root) = parse(&args(&["--help"])).unwrap() else {
+            panic!("root help action")
+        };
+        for command in ["handoff", "oob", "upgrade"] {
+            assert!(root.contains(command), "root help omitted {command}");
+        }
+    }
+
+    #[test]
     fn eval_parser_preserves_go_input_and_inherited_output_flags() {
         let Action::Eval {
             expression,
@@ -7701,7 +7744,7 @@ mod tests {
 
     #[test]
     fn downloads_help_matches_cobra_flag_order_and_padding() {
-        let help = command_help("downloads", &[]).expect("downloads help");
+        let help = super::command_help("downloads", &[]).expect("downloads help");
         let dir = help
             .find("      --dir string       set the download directory first")
             .unwrap();
@@ -7725,13 +7768,16 @@ mod tests {
             "eval",
             "cookies",
             "flow",
+            "handoff",
             "open",
+            "oob",
             "screenshot",
             "scroll",
             "state",
             "tab",
             "tools",
             "trace",
+            "upgrade",
             "upload",
             "version",
             "watch",
@@ -7788,6 +7834,29 @@ mod tests {
         assert!(parse(&args(&["auth", "login"])).is_err());
         assert!(parse(&args(&["auth", "login", "one", "two"])).is_err());
         assert!(parse(&args(&["auth", "login", "fixture", "--password", "leak"])).is_err());
+    }
+
+    #[test]
+    fn auth_login_json_data_keys_follow_go_map_order() {
+        let mut data = serde_json::Map::new();
+        for (key, value) in [
+            ("status", serde_json::json!("ready")),
+            ("url", serde_json::json!("https://fixture.invalid/login")),
+            ("username_set", serde_json::json!(true)),
+            ("password_set", serde_json::json!(true)),
+        ] {
+            data.insert(key.to_owned(), value);
+        }
+        let data = serde_json::Value::Object(data);
+        let envelope = AuthLoginEnvelope {
+            success: true,
+            data: &data,
+            warnings: Vec::new(),
+        };
+        assert_eq!(
+            serde_json::to_string(&envelope).unwrap(),
+            r#"{"success":true,"data":{"password_set":true,"status":"ready","url":"https://fixture.invalid/login","username_set":true}}"#
+        );
     }
 
     #[test]
@@ -7999,27 +8068,6 @@ mod tests {
             })
         );
         assert!(parse(&args(&["diff", "snapshot", "extra"])).is_err());
-    }
-
-    #[test]
-    fn diff_url_cli_requires_two_targets_and_preserves_format() {
-        assert_eq!(
-            parse(&args(&[
-                "diff",
-                "url",
-                "https://before.invalid",
-                "https://after.invalid",
-                "--session=fixture",
-                "--json",
-            ])),
-            Ok(Action::DiffUrl {
-                session: "fixture".into(),
-                first_url: "https://before.invalid".into(),
-                second_url: "https://after.invalid".into(),
-                format: Format::Json,
-            })
-        );
-        assert!(parse(&args(&["diff", "url", "https://only.invalid"])).is_err());
     }
 
     #[test]

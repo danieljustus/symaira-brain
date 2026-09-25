@@ -102,6 +102,17 @@ jobs:
           python3 port/release/launch_candidate.py --candidate "$candidate" --version "$version" --target "$BROWSE_TARGET" -- version --json >/dev/null
           SYMBROWSE_IMPL=rust python3 port/release/launch_candidate.py --candidate "$candidate" --version "$version" --target "$BROWSE_TARGET" -- version --json >/dev/null
 
+      - name: Verify native read-only upgrade check with local fixtures
+        working-directory: browse
+        shell: bash
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/browse-cargo-target
+          SYMBROWSE_VERSION: dev
+        run: |
+          set -euo pipefail
+          cargo test -p symbrowse-cli --bin symbrowse --locked upgrade::tests::local_fake_release_is_fetched_then_reused_from_go_compatible_cache
+          cargo test -p symbrowse-cli --test upgrade_check_native --locked
+
       - name: Rehearse temporary Homebrew formula and clean-prefix upgrade
         if: startsWith(matrix.target, 'darwin-')
         working-directory: browse

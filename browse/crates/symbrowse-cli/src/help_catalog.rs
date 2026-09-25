@@ -851,6 +851,21 @@ Global Flags:
       --json             print the unified machine-readable output envelope (shorthand for --output json)
       --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
       --session string   session name (default "default")
+        "###,
+        ),
+        "upgrade" => Some(
+            r###"upgrade checks GitHub for a newer release (cached for 24h), verifies the asset checksum (and cosign signature when available), and atomically replaces the running binary with backup and rollback. Homebrew installations are not replaced — the command prints the brew upgrade hint instead.
+
+Usage:
+  symbrowse upgrade [flags]
+
+Flags:
+      --check   only check for updates, do not apply
+  -h, --help    help for upgrade
+
+Global Flags:
+      --json            print the unified machine-readable output envelope (shorthand for --output json)
+      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
 "###,
         ),
         _ => None,
