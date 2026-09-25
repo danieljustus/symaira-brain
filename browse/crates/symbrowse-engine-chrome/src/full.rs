@@ -1054,8 +1054,36 @@ impl ChromePage {
         action: &str,
     ) -> Result<Element, Box<dyn Error + Send + Sync>> {
         let element = self.element(selector).await?;
+        let trace_geometry = std::env::var_os("SYMBROWSE_E2E").is_some() && selector == "#download";
+        let selector_json = serde_json::to_string(selector)?;
+        if trace_geometry {
+            let before = self
+                .page
+                .evaluate(format!(
+                    "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
+                ))
+                .await?
+                .into_value::<Value>()?;
+            eprintln!("chrome_download_click_geometry_before={before}");
+        }
         self.scroll_element_into_view(&element).await?;
+        if trace_geometry {
+            let after = self
+                .page
+                .evaluate(format!(
+                    "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
+                ))
+                .await?
+                .into_value::<Value>()?;
+            eprintln!("chrome_download_click_geometry_after_scroll={after}");
+        }
         let point = element.clickable_point().await?;
+        if trace_geometry {
+            eprintln!(
+                "chrome_download_click_point=x{} y{} backend_node_id={}",
+                point.x, point.y, element.backend_node_id
+            );
+        }
         let hit = self
             .page
             .execute(dom::GetNodeForLocationParams::new(
@@ -1063,6 +1091,12 @@ impl ChromePage {
                 point.y as i64,
             ))
             .await?;
+        if trace_geometry {
+            eprintln!(
+                "chrome_download_click_hit_matches={}",
+                hit.backend_node_id == element.backend_node_id
+            );
+        }
         if hit.backend_node_id != element.backend_node_id {
             let mut role = String::new();
             let mut name = String::new();
