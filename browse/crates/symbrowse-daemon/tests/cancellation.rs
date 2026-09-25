@@ -227,6 +227,52 @@ mod unix {
     }
 
     #[test]
+    fn missing_daemon_with_autostart_disabled_does_not_spawn_child() {
+        let root = tempfile::tempdir().expect("temporary no-autostart root");
+        let socket = root.path().join("missing.sock");
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "no-auto".into(),
+            autostart: false,
+            start: Some(StartOptions {
+                // If the client accidentally attempts to autostart, this
+                // deliberately missing executable changes the returned error.
+                executable: root.path().join("must-not-run"),
+                log_path: root.path().join("daemon.log"),
+                args: vec!["daemon".into()],
+            }),
+            ..Default::default()
+        });
+
+        let error = client
+            .request(Frame {
+                cmd: "ping".into(),
+                ..Default::default()
+            })
+            .expect_err("missing daemon must fail while autostart is disabled");
+        let ClientError::Transport(error) = error else {
+            panic!("missing-daemon error = {error:?}");
+        };
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            error.message,
+            "daemon is unavailable for session \"no-auto\""
+        );
+        assert!(
+            error
+                .hint
+                .contains("autostart disabled via SYMBROWSE_NO_AUTOSTART")
+        );
+        let details = error.details.expect("missing-daemon diagnostics");
+        assert_eq!(details["session"], "no-auto");
+        assert_eq!(details["socket_path"], socket.to_string_lossy().as_ref());
+        assert!(
+            !root.path().join("daemon.log").exists(),
+            "disabled autostart must not create a daemon log"
+        );
+    }
+
+    #[test]
     fn autostart_timeout_reports_not_ready_and_stops_child() {
         let root = root("autostart-timeout");
         fs::create_dir_all(&root).unwrap();
