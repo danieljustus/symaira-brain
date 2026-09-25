@@ -41,7 +41,7 @@ jobs:
       - name: Record unsafe-code inventory
         run: |
           cargo install cargo-geiger --version 0.13.0 --locked
-          cargo geiger --manifest-path port/spikes/primp/Cargo.toml --locked --output-format Json > "$RUNNER_TEMP/geiger.json"
+          cargo geiger --manifest-path "$PWD/port/spikes/primp/Cargo.toml" --locked --output-format Json > "$RUNNER_TEMP/geiger.json"
       - name: Retain the shared lock and dependency audit
         run: cp port/spikes/primp/Cargo.lock "$RUNNER_TEMP/primp-Cargo.lock"
       - name: Upload the shared lock and unsafe-code report
