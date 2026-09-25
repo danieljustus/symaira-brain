@@ -15,6 +15,7 @@ import (
 
 type contract struct {
 	Open                  daemon.Response `json:"open"`
+	SubresourceAllowed    daemon.Response `json:"subresource_allowed"`
 	SubresourcePolicy     daemon.Response `json:"subresource_policy"`
 	OpenFragment          daemon.Response `json:"open_fragment"`
 	OpenRelative          daemon.Response `json:"open_relative"`
@@ -106,12 +107,22 @@ func run() error {
 	if !result.Open.Success {
 		return fmt.Errorf("Go open oracle failed: %s", responseJSON(result.Open))
 	}
-	policyProbe := fmt.Sprintf("new Promise(resolve => { const image = new Image(); image.onload = () => resolve('loaded'); image.onerror = () => resolve('blocked'); image.src = 'http://localhost:%s/policy-pixel'; })", fixture.Port())
+	controlProbe := fmt.Sprintf("Promise.race([fetch('%s/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])", os.Args[2])
+	result.SubresourceAllowed = call(runtime, ctx, daemon.Frame{
+		Cmd: "eval", Session: "chrome-contract", Args: mustJSON(map[string]string{"expression": controlProbe}),
+	})
+	if !result.SubresourceAllowed.Success || responseValue(result.SubresourceAllowed) != "loaded" {
+		return fmt.Errorf("Go allowed subresource control failed: %s", responseJSON(result.SubresourceAllowed))
+	}
+	policyProbe := fmt.Sprintf("Promise.race([fetch('http://localhost:%s/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])", fixture.Port())
 	result.SubresourcePolicy = call(runtime, ctx, daemon.Frame{
 		Cmd: "eval", Session: "chrome-contract", Args: mustJSON(map[string]string{"expression": policyProbe}),
 	})
 	if !result.SubresourcePolicy.Success || result.SubresourcePolicy.Data == nil {
 		return fmt.Errorf("Go subresource policy oracle failed: %s", responseJSON(result.SubresourcePolicy))
+	}
+	if responseValue(result.SubresourcePolicy) != "blocked" {
+		return fmt.Errorf("Go subresource policy was not blocked: %s", responseJSON(result.SubresourcePolicy))
 	}
 	result.OpenFragment = call(runtime, ctx, daemon.Frame{
 		Cmd:     "open",
@@ -454,6 +465,20 @@ func call(runtime *daemon.NavigationRuntime, ctx context.Context, frame daemon.F
 		}
 	}
 	return daemon.SuccessResponse(data, warnings)
+}
+
+func responseValue(response daemon.Response) string {
+	raw, err := json.Marshal(response.Data)
+	if err != nil {
+		return ""
+	}
+	var data struct {
+		Value string `json:"value"`
+	}
+	if json.Unmarshal(raw, &data) != nil {
+		return ""
+	}
+	return data.Value
 }
 
 func waitRuntimeEntryCount(runtime *daemon.NavigationRuntime, ctx context.Context, command string, want int) (daemon.Response, error) {

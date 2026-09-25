@@ -78,7 +78,7 @@ impl ChromeContractServer {
                         let (content_type, extra_headers, body) = if path == "/policy-pixel" {
                             (
                                 "image/svg+xml; charset=utf-8",
-                                "",
+                                "Access-Control-Allow-Origin: *\r\n",
                                 "<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'><rect width='1' height='1'/></svg>",
                             )
                         } else if path == "/download" {
@@ -405,8 +405,19 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
         .rsplit(':')
         .next()
         .expect("fixture port");
+    let allowed_probe = format!(
+        "Promise.race([fetch('{}/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])",
+        contract_server.base_url
+    );
+    let rust_allowed = request(&client, "eval", json!({"expression":allowed_probe}));
+    assert_eq!(
+        rust_allowed["data"]["value"], go_oracle["subresource_allowed"]["data"]["value"],
+        "allowed subresource control: Rust={rust_allowed} Go={}",
+        go_oracle["subresource_allowed"]
+    );
+    assert_eq!(rust_allowed["data"]["value"], "loaded");
     let policy_probe = format!(
-        "new Promise(resolve => {{ const image = new Image(); image.onload = () => resolve('loaded'); image.onerror = () => resolve('blocked'); image.src = 'http://localhost:{fixture_port}/policy-pixel'; }})"
+        "Promise.race([fetch('http://localhost:{fixture_port}/policy-pixel').then(() => 'loaded', () => 'blocked'), new Promise(resolve => setTimeout(() => resolve('timed_out'), 3000))])"
     );
     let rust_subresource_policy = request(&client, "eval", json!({"expression":policy_probe}));
     assert_eq!(
