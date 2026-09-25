@@ -22,6 +22,40 @@ pub enum Status {
     Cancelled,
     Timeout,
 }
+
+/// Parse the positive Go-style duration accepted by the handoff command.
+#[must_use]
+pub fn parse_timeout(input: &str) -> Option<Duration> {
+    let mut rest = input;
+    let mut total = Duration::ZERO;
+    while !rest.is_empty() {
+        let number_len = rest
+            .bytes()
+            .take_while(|byte| byte.is_ascii_digit() || *byte == b'.')
+            .count();
+        let number = rest.get(..number_len)?.parse::<f64>().ok()?;
+        rest = rest.get(number_len..)?;
+        let (unit, seconds) = [
+            ("ms", 0.001),
+            ("us", 0.000_001),
+            ("µs", 0.000_001),
+            ("ns", 0.000_000_001),
+            ("h", 3600.0),
+            ("m", 60.0),
+            ("s", 1.0),
+        ]
+        .into_iter()
+        .find(|(unit, _)| rest.starts_with(unit))?;
+        let part = number * seconds;
+        if !part.is_finite() || part < 0.0 || part > 86_400.0 {
+            return None;
+        }
+        total = total.checked_add(Duration::from_secs_f64(part))?;
+        rest = rest.get(unit.len()..)?;
+    }
+    // ponytail: cap human waits at one day; lift only with a durable prompt store.
+    (!total.is_zero() && total <= Duration::from_secs(86_400)).then_some(total)
+}
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Prompt {
     pub id: String,
@@ -230,6 +264,15 @@ mod tests {
             .unwrap();
         assert!(!allowed);
         assert_eq!(result.status, Status::Timeout);
+    }
+    #[test]
+    fn handoff_timeout_accepts_go_duration_components() {
+        assert_eq!(
+            parse_timeout("1m30.5s"),
+            Some(Duration::from_millis(90_500))
+        );
+        assert!(parse_timeout("forever").is_none());
+        assert!(parse_timeout("0s").is_none());
     }
     #[test]
     fn active_returns_newest_pending_prompt() {

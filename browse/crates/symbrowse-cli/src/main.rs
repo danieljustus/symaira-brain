@@ -34,6 +34,7 @@ use symbrowse_core::{
     journal::Entry as JournalEntry,
     key_resolver::{KeyInitResult, KeyResolver},
     key_sources::SystemKeySources,
+    oob::parse_timeout,
     output::{Envelope, Format},
     trace,
 };
@@ -476,6 +477,7 @@ fn run_dispatch(
     let is_network_offline = frame.cmd == "network.offline";
     let is_auth_login = frame.cmd == "auth.login";
     let is_oob_status = frame.cmd == "oob.status";
+    let is_handoff = frame.cmd == "handoff";
     let is_network_request = frame.cmd == "network.request";
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
@@ -499,9 +501,20 @@ fn run_dispatch(
     } else {
         None
     };
+    let handoff_read_timeout = is_handoff.then(|| {
+        frame
+            .args
+            .as_ref()
+            .and_then(|args| args.get("timeout"))
+            .and_then(serde_json::Value::as_str)
+            .and_then(parse_timeout)
+            .unwrap_or(Duration::from_secs(300))
+            + Duration::from_secs(2)
+    });
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
+        read_timeout: handoff_read_timeout.unwrap_or(Duration::ZERO),
         ..ClientOptions::default()
     });
     if let Some(url) = a11y_url {
@@ -531,6 +544,15 @@ fn run_dispatch(
         }
     };
     if response.success {
+        if is_handoff && format == Format::Text {
+            let data = response.data.unwrap_or_default();
+            return match serde_json::to_string_pretty(&data) {
+                Ok(output) => write_stdout(&format!("{output}\n")),
+                Err(error) => {
+                    render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+                }
+            };
+        }
         if is_oob_status && format == Format::Text {
             let data = response.data.unwrap_or_default();
             if data.get("active").and_then(serde_json::Value::as_bool) != Some(true) {
@@ -3495,6 +3517,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         });
     };
     match values[command_index].as_str() {
+        "handoff" => parse_handoff(&values, command_index),
         "oob" => parse_oob(&values, command_index),
         "auth" => parse_auth(&values, command_index),
         "version" => parse_version(&values, command_index),
@@ -4768,6 +4791,58 @@ fn render_journal_text(data: &serde_json::Value) -> String {
             )
         })
         .collect()
+}
+
+fn parse_handoff(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let (mut format, mut json) = root_output_flags(&values[..command_index])?;
+    let mut session = String::from("default");
+    let mut reason = String::new();
+    let mut timeout = String::from("5m");
+    let mut index = command_index + 1;
+    while index < values.len() {
+        let value = &values[index];
+        match value.as_str() {
+            "--reason" | "--timeout" | "--session" | "--output" => {
+                index += 1;
+                let supplied = required_value(values, index, value)?;
+                match value.as_str() {
+                    "--reason" => reason = supplied.to_owned(),
+                    "--timeout" => timeout = supplied.to_owned(),
+                    "--session" => session = supplied.to_owned(),
+                    _ => format = parse_format(supplied)?,
+                }
+            }
+            "--json" => json = true,
+            value if value.starts_with("--reason=") => reason = value[9..].to_owned(),
+            value if value.starts_with("--timeout=") => timeout = value[10..].to_owned(),
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with('-') => return Err(unknown_flag(value)),
+            _ => {
+                return Err(ParseError {
+                    message: "accepts 0 arg(s), received 1".into(),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if reason.is_empty() {
+        return Err(ParseError {
+            message: "handoff requires --reason".into(),
+            exit_code: 2,
+        });
+    }
+    if json {
+        format = Format::Json;
+    }
+    Ok(Action::Dispatch {
+        session,
+        command: "handoff".into(),
+        args: serde_json::json!({"reason": reason, "timeout": timeout}),
+        format,
+    })
 }
 
 fn parse_oob(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -6990,6 +7065,20 @@ mod tests {
                 format: Format::Json,
             })
         );
+    }
+
+    #[test]
+    fn handoff_requires_reason_and_forwards_the_timeout() {
+        assert_eq!(
+            parse(&args(&["handoff", "--reason", "2FA", "--timeout", "1m"])),
+            Ok(Action::Dispatch {
+                session: "default".into(),
+                command: "handoff".into(),
+                args: serde_json::json!({"reason":"2FA", "timeout":"1m"}),
+                format: Format::Text,
+            })
+        );
+        assert!(parse(&args(&["handoff"])).is_err());
     }
 
     #[test]

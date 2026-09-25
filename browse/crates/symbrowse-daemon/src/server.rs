@@ -966,7 +966,20 @@ fn serve_connection_parts<S>(
         let (tx, rx) = std::sync::mpsc::sync_channel(1);
         let handler_clone = handler.clone();
         let frame_clone = frame.clone();
-        let timeout = options.operation_timeout;
+        let timeout = if frame.cmd == "handoff" {
+            let requested = frame
+                .args
+                .as_ref()
+                .and_then(|args| args.get("timeout"))
+                .and_then(serde_json::Value::as_str)
+                .and_then(symbrowse_core::oob::parse_timeout)
+                .unwrap_or(Duration::from_secs(300));
+            options
+                .operation_timeout
+                .max(requested + Duration::from_secs(1))
+        } else {
+            options.operation_timeout
+        };
         let operation = OperationContext {
             cancelled: Arc::new(AtomicBool::new(false)),
             shutdown: stopping.clone(),

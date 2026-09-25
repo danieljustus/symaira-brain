@@ -81,6 +81,12 @@ jobs:
           retention-days: 14
       - name: Test daemon contracts
         run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --test session_registry --locked
+      - name: Exercise OOB status and handoff on native daemon
+        run: |
+          cargo test --locked -p symbrowse-daemon --lib oob_status_and_completion_share_the_daemon_prompt_manager
+          cargo test --locked -p symbrowse-daemon --lib handoff_waits_for_explicit_completion_and_times_out_closed
+          cargo test --locked -p symbrowse-cli --bin symbrowse handoff_requires_reason_and_forwards_the_timeout
+          cargo test --locked -p symbrowse-cli --bin symbrowse oob_status_routes_to_the_daemon_with_global_flags
       - name: Compare daemon deadline, registry and autostart contracts
         run: python3 port/harness/run.py --suite daemon-contracts
       - name: Compare configuration and transport selection contracts

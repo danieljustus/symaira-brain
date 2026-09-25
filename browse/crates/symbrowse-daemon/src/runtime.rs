@@ -10,7 +10,7 @@ use symbrowse_core::{
         Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
         Store as JournalStore,
     },
-    oob::Manager as OobManager,
+    oob::{Kind as OobKind, Manager as OobManager, Status as OobStatus, parse_timeout},
     policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
@@ -174,6 +174,16 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
+        if frame.cmd == "handoff" {
+            // The handoff loop resolves its prompt when the transport cancels.
+            return self.runtime.block_on(self.dispatch(frame, operation));
+        }
+        if matches!(
+            frame.cmd.as_str(),
+            "oob.status" | "oob.complete" | "oob.cancel"
+        ) {
+            return self.oob_command(&frame);
+        }
         self.runtime.block_on(async {
             tokio::select! {
                 result = self.dispatch(frame, operation.clone()) => result,
@@ -213,34 +223,8 @@ impl DispatchRuntime {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
         match frame.cmd.as_str() {
-            "oob.status" => Ok((
-                Some(match self.oob.active() {
-                    Some(prompt) => json!({"active": true, "prompt": prompt}),
-                    None => json!({"active": false}),
-                }),
-                Vec::new(),
-            )),
-            "oob.complete" | "oob.cancel" => {
-                let args = object_args(&frame)?;
-                let id = required_string(args, "id")?;
-                let prompt = if frame.cmd == "oob.complete" {
-                    self.oob.complete(id, None)
-                } else {
-                    self.oob.cancel(
-                        id,
-                        args.get("reason")
-                            .and_then(Value::as_str)
-                            .unwrap_or_default(),
-                    )
-                }
-                .ok_or_else(|| {
-                    malformed(format!("oob prompt {id:?} not found or already resolved"))
-                })?;
-                Ok((
-                    Some(serde_json::to_value(prompt).map_err(runtime_error)?),
-                    Vec::new(),
-                ))
-            }
+            "handoff" => self.handoff(&frame, &operation).await,
+            "oob.status" | "oob.complete" | "oob.cancel" => self.oob_command(&frame),
             "auth.login" => self.auth_login(&frame, &operation).await,
             "console.list" | "console.clear" | "errors.list" | "errors.clear" => {
                 self.chrome_runtime_events_command(&frame).await
@@ -316,6 +300,107 @@ impl DispatchRuntime {
                 hint: "use a registered MCP tool or daemon command".into(),
                 ..Default::default()
             }),
+        }
+    }
+
+    fn oob_command(&self, frame: &Frame) -> HandlerResult {
+        if frame.cmd == "oob.status" {
+            return Ok((
+                Some(match self.oob.active() {
+                    Some(prompt) => json!({"active": true, "prompt": go_oob_prompt(&prompt)}),
+                    None => json!({"active": false}),
+                }),
+                Vec::new(),
+            ));
+        }
+        let args = object_args(frame)?;
+        let id = required_string(args, "id")?;
+        let prompt = if frame.cmd == "oob.complete" {
+            self.oob.complete(id, None)
+        } else {
+            self.oob.cancel(
+                id,
+                args.get("reason")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+            )
+        }
+        .ok_or_else(|| malformed(format!("oob prompt {id:?} not found or already resolved")))?;
+        Ok((Some(go_oob_prompt(&prompt)), Vec::new()))
+    }
+
+    async fn handoff(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
+        let args = object_args(frame)?;
+        let reason = required_string(args, "reason")?;
+        let raw_timeout = args.get("timeout").and_then(Value::as_str).unwrap_or("5m");
+        let timeout = parse_timeout(raw_timeout)
+            .ok_or_else(|| malformed(format!("invalid timeout {raw_timeout:?}")))?;
+        let created_at = time::OffsetDateTime::now_utc()
+            .format(&time::format_description::well_known::Rfc3339)
+            .map_err(runtime_error)?;
+        let prompt = self.oob.create(
+            OobKind::Handoff,
+            "Symaira Browse: der Agent wartet",
+            reason,
+            timeout,
+            created_at,
+        );
+        #[cfg(target_os = "macos")]
+        {
+            let notice = symbrowse_core::oob::notification_command(&prompt);
+            let _ = tokio::time::timeout(
+                std::time::Duration::from_secs(2),
+                tokio::process::Command::new(&notice.program)
+                    .args(&notice.args)
+                    .kill_on_drop(true)
+                    .status(),
+            )
+            .await;
+        }
+        let started = std::time::Instant::now();
+        loop {
+            if operation.is_cancelled() || operation.remaining().is_zero() {
+                self.oob
+                    .cancel(&prompt.id, "daemon operation was cancelled");
+                return Err(DaemonError {
+                    code: codes::OPERATION_TIMEOUT.into(),
+                    message: "daemon operation was cancelled".into(),
+                    ..Default::default()
+                });
+            }
+            let current = self.oob.get(&prompt.id).expect("created prompt exists");
+            if current.status != OobStatus::Pending || started.elapsed() >= timeout {
+                let result = if current.status == OobStatus::Pending {
+                    self.oob.expire(&prompt.id).unwrap_or(current)
+                } else {
+                    current
+                };
+                if result.status == OobStatus::Timeout {
+                    return Err(DaemonError {
+                        code: codes::HANDOFF_TIMEOUT.into(),
+                        message: format!(
+                            "handoff for session {:?} timed out and was denied",
+                            self.spec.session
+                        ),
+                        retryable: Some(false),
+                        requires_user_confirmation: Some(true),
+                        resume_hint: "start a new handoff after explicit human confirmation".into(),
+                        ..Default::default()
+                    });
+                }
+                let mut data = json!({
+                    "status": result.status,
+                    "prompt_id": result.id,
+                    "duration_ms": started.elapsed().as_millis() as u64,
+                });
+                if let Some(extra) = result.result.as_ref().and_then(Value::as_object) {
+                    data.as_object_mut()
+                        .expect("handoff object")
+                        .extend(extra.clone());
+                }
+                return Ok((Some(data), Vec::new()));
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
         }
     }
 
@@ -915,7 +1000,7 @@ impl DispatchRuntime {
             }
             "tab.new" | "window.new" => {
                 let session = self.chrome_session()?;
-                let url = tab_navigation_url(frame.cmd.as_str(), args);
+                let url = Self::tab_navigation_url(frame.cmd.as_str(), args);
                 let page = session
                     .new_page("about:blank")
                     .await
@@ -2690,6 +2775,22 @@ fn object_args(frame: &Frame) -> Result<&serde_json::Map<String, Value>, DaemonE
         .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd)))
 }
 
+fn go_oob_prompt(prompt: &symbrowse_core::oob::Prompt) -> Value {
+    let mut data = json!({
+        "id": prompt.id,
+        "kind": prompt.kind,
+        "title": prompt.title,
+        "reason": prompt.reason,
+        "status": prompt.status,
+        "created_at": prompt.created_at,
+        "timeout": prompt.timeout_ms.saturating_mul(1_000_000),
+    });
+    if let Some(result) = &prompt.result {
+        data["result"] = result.clone();
+    }
+    data
+}
+
 fn required_string<'a>(
     args: &'a serde_json::Map<String, Value>,
     name: &str,
@@ -3636,10 +3737,55 @@ mod tests {
         };
         assert_eq!(send("oob.status", None)["prompt"]["id"], prompt.id);
         assert_eq!(
+            send("oob.status", None)["prompt"]["timeout"],
+            1_000_000_000_u64
+        );
+        assert_eq!(
             send("oob.complete", Some(json!({"id": prompt.id})))["status"],
             "completed"
         );
         assert_eq!(send("oob.status", None), json!({"active": false}));
+    }
+
+    #[test]
+    fn handoff_waits_for_explicit_completion_and_times_out_closed() {
+        let runtime = DispatchRuntime::new(temp_spec("handoff")).expect("runtime");
+        let responder = Arc::clone(&runtime);
+        let thread = thread::spawn(move || {
+            for _ in 0..100 {
+                if let Some(prompt) = responder.oob.active() {
+                    responder
+                        .handle(
+                            Frame {
+                                cmd: "oob.complete".into(),
+                                args: Some(json!({"id": prompt.id})),
+                                ..Frame::default()
+                            },
+                            OperationContext::for_test(),
+                        )
+                        .expect("complete prompt through daemon");
+                    return;
+                }
+                thread::sleep(std::time::Duration::from_millis(1));
+            }
+            panic!("handoff prompt did not appear");
+        });
+        let frame = |timeout: &str| Frame {
+            cmd: "handoff".into(),
+            args: Some(json!({"reason":"2FA", "timeout":timeout})),
+            ..Frame::default()
+        };
+        let (data, _) = runtime
+            .handle(frame("1s"), OperationContext::for_test())
+            .expect("completed handoff");
+        thread.join().expect("responder");
+        assert_eq!(data.expect("data")["status"], "completed");
+        let error = runtime
+            .handle(frame("1ms"), OperationContext::for_test())
+            .expect_err("handoff timeout must deny");
+        assert_eq!(error.code, codes::HANDOFF_TIMEOUT);
+        assert_eq!(error.retryable, Some(false));
+        assert_eq!(error.requires_user_confirmation, Some(true));
     }
 
     #[test]
