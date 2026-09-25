@@ -6,9 +6,12 @@ import importlib.util
 import os
 import sys
 import tempfile
+import tarfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+import zipfile
+from io import BytesIO
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -20,6 +23,42 @@ SPEC.loader.exec_module(build_dual)
 
 
 class CargoTargetDirTests(unittest.TestCase):
+    def test_native_archive_includes_required_repo_and_product_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            checkout = Path(temp)
+            root = checkout / "browse"
+            root.mkdir()
+            (checkout / "LICENSE").write_bytes(b"license")
+            (checkout / "AGENTS.md").write_bytes(b"agents")
+            (root / "README.md").write_bytes(b"browse readme")
+            binary = root / "symbrowse"
+            binary.write_bytes(b"binary")
+
+            for windows in (False, True):
+                payload = build_dual.archive_bytes(binary, binary_name="symbrowse", root=root, windows=windows)
+                if windows:
+                    with zipfile.ZipFile(BytesIO(payload)) as archive:
+                        self.assertEqual(set(archive.namelist()), {"symbrowse", "LICENSE", "README.md", "AGENTS.md"})
+                        self.assertEqual(archive.read("LICENSE"), b"license")
+                        self.assertEqual(archive.read("README.md"), b"browse readme")
+                        self.assertEqual(archive.read("AGENTS.md"), b"agents")
+                else:
+                    with tarfile.open(fileobj=BytesIO(payload), mode="r:gz") as archive:
+                        self.assertEqual(set(archive.getnames()), {"symbrowse", "LICENSE", "README.md", "AGENTS.md"})
+                        self.assertEqual(archive.extractfile("LICENSE").read(), b"license")
+                        self.assertEqual(archive.extractfile("README.md").read(), b"browse readme")
+                        self.assertEqual(archive.extractfile("AGENTS.md").read(), b"agents")
+
+    def test_native_archive_fails_closed_when_required_metadata_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp) / "browse"
+            root.mkdir()
+            binary = root / "symbrowse"
+            binary.write_bytes(b"binary")
+            (root / "README.md").write_bytes(b"browse readme")
+            with self.assertRaisesRegex(RuntimeError, "required release archive input is missing"):
+                build_dual.archive_bytes(binary, binary_name="symbrowse", root=root, windows=False)
+
     def test_direct_macos_default_target_is_external(self) -> None:
         root = Path("/workspace/browse")
         with tempfile.TemporaryDirectory() as temp:

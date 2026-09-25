@@ -177,10 +177,15 @@ def rust_binary(root: Path, staging: Path, target: str, version: str, env: dict[
 
 def archive_bytes(binary: Path, *, binary_name: str, root: Path, windows: bool) -> bytes:
     files: list[tuple[str, bytes, int]] = [(binary_name, binary.read_bytes(), 0o755)]
-    for name in ("LICENSE", "README.md", "AGENTS.md"):
-        source = root / name
-        if source.is_file():
-            files.append((name, source.read_bytes(), 0o644))
+    sources = {
+        "LICENSE": root.parent / "LICENSE",
+        "README.md": root / "README.md",
+        "AGENTS.md": root.parent / "AGENTS.md",
+    }
+    for name, source in sources.items():
+        if not source.is_file():
+            raise RuntimeError(f"required release archive input is missing: {source}")
+        files.append((name, source.read_bytes(), 0o644))
     if windows:
         from io import BytesIO
 
