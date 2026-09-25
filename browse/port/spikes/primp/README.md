@@ -67,10 +67,26 @@ The Go Chrome/Edge/Opera header order is
 `:method, :authority, :scheme, :path, accept-encoding, user-agent`; Go Firefox
 uses `:method, :path, :authority, :scheme, accept-encoding, user-agent`; Go
 iOS/Safari use `:method, :scheme, :authority, :path, accept-encoding,
-user-agent`. Each primp candidate adds browser-like fields absent from the Go
-capture, and none has the same ordered names. The raw HPACK block is retained;
-the comparison uses the names decoded from that exact block by the spike's
-Rust HPACK decoder because the shared independent validator cannot decode all
+user-agent`. The corresponding primp orders are:
+
+- Chrome/Edge: `:method, :authority, :scheme, :path,
+  upgrade-insecure-requests, user-agent, accept, sec-fetch-site, sec-fetch-mode,
+  sec-fetch-user, sec-fetch-dest, sec-ch-ua, sec-ch-ua-mobile,
+  sec-ch-ua-platform, accept-encoding, accept-language, priority`.
+- Firefox: `:method, :path, :authority, :scheme, user-agent, accept,
+  accept-language, accept-encoding, dnt, sec-gpc, upgrade-insecure-requests,
+  sec-fetch-dest, sec-fetch-mode, sec-fetch-site, sec-fetch-user, priority, te`.
+- iOS/Safari: `:method, :scheme, :authority, :path, accept, accept-language,
+  accept-encoding, sec-fetch-dest, sec-fetch-mode, sec-fetch-site, priority,
+  user-agent`.
+- Opera: `:method, :authority, :scheme, :path, sec-ch-ua, sec-ch-ua-mobile,
+  sec-ch-ua-platform, upgrade-insecure-requests, user-agent, accept,
+  sec-fetch-site, sec-fetch-mode, sec-fetch-user, sec-fetch-dest,
+  accept-encoding, accept-language, priority`.
+
+None has the same ordered names. The raw HPACK block is retained; the
+comparison uses the names decoded from that exact block by the spike's Rust
+HPACK decoder because the shared independent validator cannot decode all
 Huffman strings. Thus header comparison is disclosed but is not an independent
 second decode.
 
