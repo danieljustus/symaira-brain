@@ -1171,10 +1171,12 @@ fn prepare_socket(path: &Path) -> Result<(), ServerError> {
                 {
                     remove_owned_socket(path, owner)?;
                 }
-                Err(error) if error.kind() == io::ErrorKind::TimedOut => {
+                // Match Go's socketIsLive: only NotFound and ConnectionRefused
+                // prove that the old endpoint is stale. Permission and other
+                // ambiguous probe failures must preserve the existing socket.
+                Err(_) => {
                     return Err(ServerError::AlreadyRunning);
                 }
-                Err(error) => return Err(ServerError::Io(error)),
             }
         }
         Err(error) if error.kind() == io::ErrorKind::NotFound => {}
@@ -1437,6 +1439,26 @@ mod tests {
     fn peer_uid_match_policy_accepts_only_the_current_uid() {
         assert!(peer_uid_matches(501, 501));
         assert!(!peer_uid_matches(502, 501));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn socket_probe_errors_other_than_refused_preserve_existing_socket() {
+        use std::os::unix::net::UnixListener;
+
+        let directory = tempfile::tempdir().unwrap();
+        let socket = directory.path().join("private.sock");
+        let listener = UnixListener::bind(&socket).unwrap();
+        set_mode(&socket, 0o000).unwrap();
+
+        let result = prepare_socket(&socket);
+
+        if socket.exists() {
+            set_mode(&socket, 0o600).unwrap();
+        }
+        assert!(matches!(result, Err(ServerError::AlreadyRunning)));
+        assert!(socket.exists(), "ambiguous probe removed a live socket");
+        drop(listener);
     }
 
     #[test]
