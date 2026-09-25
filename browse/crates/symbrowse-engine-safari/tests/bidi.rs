@@ -390,6 +390,11 @@ async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
             .expect("evaluate document.title in Safari")
             .value
             .expect("Safari returned a title value");
+        // Safari 26.6.1 returns a JSON-encoded string inside the BiDi value;
+        // the Go engine passes those raw value bytes through as well.
+        let title: String =
+            serde_json::from_str(title.as_str().expect("Safari returned a string BiDi value"))
+                .expect("Safari BiDi string value contains JSON text");
         assert_eq!(title, "Symaira ENG-008 fixture");
         let capabilities = engine.capabilities();
         assert_eq!(capabilities.kind, "safari-bidi");
