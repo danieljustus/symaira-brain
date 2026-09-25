@@ -260,7 +260,7 @@ async fn exercise_full_chrome_surface() {
         page.overlay_result().await.expect("pending decision"),
         "pending"
     );
-    page.evaluate_script("document.getElementById('symbrowse-oob-host').remove()")
+    page.evaluate_script("document.getElementById('symbrowse-oob-host').remove(); true")
         .await
         .expect("simulate hostile page removal");
     tokio::time::sleep(Duration::from_millis(50)).await;
