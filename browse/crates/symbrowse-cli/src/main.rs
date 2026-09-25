@@ -836,7 +836,17 @@ fn run_diff_snapshot(session: String, baseline: Option<PathBuf>, format: Format)
     let warnings = if has_baseline {
         Vec::new()
     } else {
-        response.warnings
+        response
+            .warnings
+            .into_iter()
+            .map(|warning| symbrowse_core::output::Warning {
+                kind: warning.kind,
+                severity: warning.severity,
+                message: warning.message,
+                r#ref: warning.r#ref,
+                excerpt: warning.excerpt,
+            })
+            .collect()
     };
     match Envelope::ok(data, warnings).render(format) {
         Ok(output) => write_stdout(&output),
