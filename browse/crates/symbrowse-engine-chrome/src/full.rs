@@ -985,8 +985,15 @@ impl ChromePage {
             eprintln!("chrome_open_stage=dispatch-start");
         }
         if cfg!(windows) && !same_document {
-            let dispatch = self.page.execute(page::NavigateParams::new(url)).await?;
-            if let Some(error) = dispatch.result.error_text {
+            // Chrome can navigate while leaving this command response pending.
+            // The event and document checks below remain the completion proof.
+            if let Ok(dispatch) = tokio::time::timeout(
+                Duration::from_secs(1),
+                self.page.execute(page::NavigateParams::new(url)),
+            )
+            .await
+                && let Some(error) = dispatch?.result.error_text
+            {
                 return Err(error.into());
             }
         } else {
