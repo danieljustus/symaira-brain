@@ -1041,6 +1041,28 @@ def setup_activity_profile(root: Path, env: dict[str, str]) -> None:
     )
 
 
+def setup_activity_db_override(root: Path, env: dict[str, str]) -> None:
+    setup_activity_profile(root, env)
+    database = root / "data/symbrain/memory/activity-override.db"
+    database.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [env["SYMBRAIN_GO_BINARY"], "activity", "status", "--profile", "reader",
+         "--max-tokens", "100", "--db", str(database)],
+        env=env, cwd=env["PROJECT"], input=b"", stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=True, timeout=60,
+    )
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            "INSERT INTO activity_segments"
+            "(id, source, granularity, started_at, ended_at, applications,"
+            " redacted_summary, raw_ref, prior_segment_ids, superseded_by, expires_at)"
+            " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            ("override-segment", "fixture", "10min", "2026-01-01T00:00:00Z",
+             "2026-01-01T00:10:00Z", "[]", "override activity", "", "[]", "",
+             "2099-01-01T00:00:00Z"),
+        )
+
+
 def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
     for name in ("demo", "second"):
         write_library_skill(root, name)
@@ -2335,6 +2357,21 @@ CASES = (
         setup=setup_activity_profile,
     ),
     Case(
+        "activity_status_db_override",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "100", "--db", "ACTIVITY_DB"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
+        "activity_get_db_override",
+        ("activity", "get", "--profile", "reader", "--max-tokens", "100", "--db", "ACTIVITY_DB", "override-segment"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
+        "activity_search_db_override",
+        ("activity", "search", "--profile", "reader", "--from", "2026-01-01T00:00:00Z", "--to", "2026-01-02T00:00:00Z", "--limit", "5", "--max-tokens", "100", "--db", "ACTIVITY_DB", "override"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
         "activity_status_missing_budget",
         ("activity", "status", "--profile", "reader"),
         setup=setup_activity_profile,
@@ -2749,6 +2786,7 @@ def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | b
     replacements = {
         "PROJECT": root / "project",
         "MEMORY_DB": root / "data/symbrain/memory/default.db",
+        "ACTIVITY_DB": root / "data/symbrain/memory/activity-override.db",
     }
     return tuple(
         str(replacements[arg]) if isinstance(arg, str) and arg in replacements else arg
