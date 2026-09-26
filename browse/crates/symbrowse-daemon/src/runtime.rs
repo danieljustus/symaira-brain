@@ -167,6 +167,33 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    fn shutdown(&self) {
+        self.fetch.close();
+        let browser = self.browser.lock().ok().and_then(|mut state| state.take());
+        self.runtime.block_on(async {
+            if let Some(browser) = browser
+                && !matches!(
+                    tokio::time::timeout(
+                        std::time::Duration::from_secs(3),
+                        browser.session.close()
+                    )
+                    .await,
+                    Ok(Ok(()))
+                )
+            {
+                let _ = tokio::time::timeout(
+                    std::time::Duration::from_secs(3),
+                    browser.session.force_kill(),
+                )
+                .await;
+            }
+            if let Some(mut firefox) = self.firefox.lock().await.take() {
+                let _ =
+                    tokio::time::timeout(std::time::Duration::from_secs(3), firefox.close()).await;
+            }
+        });
+    }
+
     pub fn new(spec: SessionSpec) -> Result<Arc<Self>, DaemonError> {
         Self::new_with_wayback_url(spec, "https://web.archive.org/cdx/search/cdx")
     }
@@ -2908,11 +2935,15 @@ impl DispatchRuntime {
     }
 }
 
-pub fn handler(spec: SessionSpec) -> Result<crate::DaemonHandler, DaemonError> {
+pub fn handler(
+    spec: SessionSpec,
+) -> Result<(crate::DaemonHandler, crate::server::DaemonShutdown), DaemonError> {
     let runtime = DispatchRuntime::new(spec)?;
-    Ok(Arc::new(move |frame, operation| {
-        runtime.handle(frame, operation)
-    }))
+    let serving = Arc::clone(&runtime);
+    Ok((
+        Arc::new(move |frame, operation| serving.handle(frame, operation)),
+        Arc::new(move || runtime.shutdown()),
+    ))
 }
 
 /// Execute one command in-process through the same typed runtime used by the daemon.
@@ -3901,13 +3932,13 @@ mod tests {
             .block_on(runtime.dispatch(
                 Frame {
                     cmd: "open".into(),
-                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    args: Some(json!({"url":"https://example.com/fixture"})),
                     ..Frame::default()
                 },
                 OperationContext::for_test(),
             ))
             .expect_err("missing explicit Firefox must fail");
-        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE, "{error:?}");
         assert!(error.message.contains("Firefox executable not found"));
     }
 
@@ -4161,6 +4192,7 @@ mod tests {
         let address = listener.local_addr().expect("endpoint address");
         let endpoint_closed = Arc::new(AtomicBool::new(false));
         let closed = endpoint_closed.clone();
+        let (accepted, endpoint_ready) = std::sync::mpsc::sync_channel(1);
         let endpoint_thread = thread::spawn(move || {
             let deadline = std::time::Instant::now() + Duration::from_secs(2);
             while std::time::Instant::now() < deadline {
@@ -4169,7 +4201,10 @@ mod tests {
                         let _ = stream.set_nonblocking(false);
                         let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
                         let mut request = [0_u8; 4096];
-                        let _ = stream.read(&mut request);
+                        if !matches!(stream.read(&mut request), Ok(size) if size > 0) {
+                            return;
+                        }
+                        let _ = accepted.send(());
                         let _ = stream.write_all(
                             b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\nConnection: keep-alive\r\n\r\n",
                         );
@@ -4196,7 +4231,7 @@ mod tests {
             }
         });
 
-        let production = handler(spec.clone()).expect("production handler");
+        let (production, on_shutdown) = handler(spec.clone()).expect("production handler");
         let followups = Arc::new(AtomicUsize::new(0));
         let observed = followups.clone();
         let wrapped = Arc::new(move |frame: Frame, operation: OperationContext| {
@@ -4209,6 +4244,7 @@ mod tests {
             crate::Server::new(crate::ServerOptions {
                 session_spec: Some(spec.clone()),
                 handler: Some(wrapped),
+                on_shutdown: Some(on_shutdown),
                 ..Default::default()
             })
             .expect("server"),
@@ -4257,7 +4293,9 @@ mod tests {
                 ..Default::default()
             })
         });
-        thread::sleep(Duration::from_millis(50));
+        endpoint_ready
+            .recv_timeout(Duration::from_secs(2))
+            .expect("flow did not reach blocked endpoint");
         server.stop();
         assert!(server_thread.join().unwrap().is_ok());
         let request_result = request.join().expect("flow request");
@@ -4274,6 +4312,7 @@ mod tests {
             )),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }
+        drop(server);
         endpoint_thread.join().expect("endpoint join");
         assert!(
             endpoint_closed.load(Ordering::Acquire),

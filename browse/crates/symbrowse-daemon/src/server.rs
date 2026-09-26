@@ -32,6 +32,7 @@ use symbrowse_core::state_store::Store;
 pub type HandlerResult = Result<(Option<Value>, Vec<Warning>), DaemonError>;
 pub type DaemonHandler =
     Arc<dyn Fn(Frame, OperationContext) -> HandlerResult + Send + Sync + 'static>;
+pub type DaemonShutdown = Arc<dyn Fn() + Send + Sync + 'static>;
 
 // Connections can stay open for several request frames. Bound the number of
 // connection threads to a small multiple of available CPU capacity so short-
@@ -137,6 +138,7 @@ pub struct ServerOptions {
     pub operation_timeout: Duration,
     pub read_timeout: Duration,
     pub handler: Option<DaemonHandler>,
+    pub on_shutdown: Option<DaemonShutdown>,
     pub registry: Option<Arc<crate::SessionRegistry>>,
     pub session_spec: Option<crate::SessionSpec>,
     pub policy: PolicyStatus,
@@ -152,6 +154,7 @@ impl Default for ServerOptions {
             operation_timeout: Duration::from_millis(crate::DEFAULT_OPERATION_TIMEOUT_MS),
             read_timeout: Duration::from_millis(crate::DEFAULT_READ_TIMEOUT_MS),
             handler: None,
+            on_shutdown: None,
             registry: None,
             session_spec: None,
             policy: PolicyStatus::default(),
@@ -257,10 +260,10 @@ impl Server {
             }))
         });
         if options.handler.is_none() {
-            options.handler = Some(
-                crate::runtime::handler(spec)
-                    .map_err(|error| ServerError::Io(io::Error::other(error.message)))?,
-            );
+            let (handler, on_shutdown) = crate::runtime::handler(spec)
+                .map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
+            options.handler = Some(handler);
+            options.on_shutdown = Some(on_shutdown);
         }
         Ok(Self {
             options,
@@ -285,18 +288,24 @@ impl Server {
     }
 
     pub fn listen_and_serve(&self) -> Result<(), ServerError> {
-        #[cfg(unix)]
-        {
-            self.listen_unix()
+        let result = {
+            #[cfg(unix)]
+            {
+                self.listen_unix()
+            }
+            #[cfg(windows)]
+            {
+                listen_windows(self)
+            }
+            #[cfg(not(any(unix, windows)))]
+            {
+                Err(ServerError::Unsupported)
+            }
+        };
+        if let Some(on_shutdown) = &self.options.on_shutdown {
+            on_shutdown();
         }
-        #[cfg(windows)]
-        {
-            listen_windows(self)
-        }
-        #[cfg(not(any(unix, windows)))]
-        {
-            Err(ServerError::Unsupported)
-        }
+        result
     }
 
     #[cfg(unix)]
@@ -1420,6 +1429,28 @@ mod tests {
     use super::*;
     use std::io::Cursor;
     use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
+
+    #[cfg(unix)]
+    #[test]
+    fn listener_shutdown_runs_runtime_cleanup() {
+        use std::sync::atomic::AtomicUsize;
+
+        let temp = tempfile::tempdir().expect("socket root");
+        let calls = Arc::new(AtomicUsize::new(0));
+        let observed = Arc::clone(&calls);
+        let server = Server::new(ServerOptions {
+            socket_path: temp.path().join("daemon.sock"),
+            handler: Some(Arc::new(|frame, _| builtin_handler(frame))),
+            on_shutdown: Some(Arc::new(move || {
+                observed.fetch_add(1, Ordering::SeqCst);
+            })),
+            ..Default::default()
+        })
+        .expect("server");
+        server.stop();
+        server.listen_and_serve().expect("stopped listener");
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
 
     #[test]
     fn connection_worker_pool_scales_with_cpu_and_stays_bounded() {

@@ -458,7 +458,7 @@ impl ChromeSession {
         Ok(chrome_pages)
     }
 
-    pub async fn close(self) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn close(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
         let mut browser = self.browser.lock().await;
         let close_result = if self.mode == ConnectionMode::Launch {
             browser.close().await.map(|_| ())
@@ -470,6 +470,14 @@ impl ChromeSession {
         close_result?;
         wait_result?;
         Ok(())
+    }
+
+    pub async fn force_kill(&self) {
+        let mut browser = self.browser.lock().await;
+        if self.mode == ConnectionMode::Launch {
+            let _ = browser.kill().await;
+        }
+        self._handler_task.abort();
     }
 }
 
@@ -942,13 +950,9 @@ impl ChromePage {
             return self.current_navigation_outcome().await;
         }
 
-        // chromiumoxide's Page::goto waits for its own Page.lifecycleEvent
-        // watcher, which has a fixed 30-second timeout. The Go engine sends
-        // Page.navigate and then polls document.readyState instead. Trigger
-        // the same navigation from the page context and use the same observable
-        // load-complete condition so Windows does not depend on that internal
-        // lifecycle watcher. Dispatch synchronously: an extra zero-delay timer
-        // can remain queued indefinitely on a background Windows target.
+        // chromiumoxide's Page::goto waits for its own lifecycle watcher,
+        // which can time out on Windows. Send Page.navigate directly as Go
+        // does, then observe the document completion ourselves.
         let mut navigated = self
             .page
             .event_listener::<page::EventFrameNavigated>()
@@ -969,22 +973,15 @@ impl ChromePage {
         if diagnostics {
             eprintln!("chrome_open_stage=main-frame-resolved");
         }
-        let url_literal = serde_json::to_string(url)?;
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-evaluate-start");
+            eprintln!("chrome_open_stage=dispatch-navigate-start");
         }
-        let dispatch = self
-            .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
-            .await?;
+        let dispatch = self.page.execute(page::NavigateParams::new(url)).await?;
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-evaluate-complete");
+            eprintln!("chrome_open_stage=dispatch-navigate-complete");
         }
-        if let Some(error) = dispatch
-            .get("exception_text")
-            .and_then(Value::as_str)
-            .filter(|error| !error.is_empty())
-        {
-            return Err(error.to_owned().into());
+        if let Some(error) = dispatch.result.error_text {
+            return Err(error.into());
         }
 
         let mut frame_events_open = true;

@@ -70,7 +70,7 @@ fn main() {
                 "active_tabs": info.active_tabs,
                 "user_data_dir_basename": PathBuf::from(&info.user_data_dir)
                     .file_name().and_then(|name| name.to_str()).unwrap_or_default(),
-                "user_data_path_is_clean": PathBuf::from(&info.user_data_dir)
+                "user_data_path_is_clean": std::path::Path::new(&info.user_data_dir)
                     == registry.user_data_root().join(&info.name),
                 "browser_context_id": info.browser_context_id,
                 "ref_count": info.ref_count,
