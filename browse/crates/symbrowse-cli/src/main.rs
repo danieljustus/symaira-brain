@@ -1503,9 +1503,14 @@ fn wait_watch_shutdown() -> impl std::future::Future<Output = ()> {
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
 async fn wait_watch_shutdown() {
-    let _ = tokio::signal::ctrl_c().await;
+    let mut interrupt = tokio::signal::windows::ctrl_c().expect("register CTRL_C handler");
+    let mut terminate = tokio::signal::windows::ctrl_break().expect("register CTRL_BREAK handler");
+    tokio::select! {
+        _ = interrupt.recv() => {},
+        _ = terminate.recv() => {},
+    }
 }
 
 fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode {
