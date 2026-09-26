@@ -5320,17 +5320,17 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         if name == "select" {
             take_positional(&mut args, &mut positional, "value");
         }
-        if name == "scroll" {
-            if let Some(amount) = positional.first() {
-                let amount = amount.parse::<i64>().map_err(|_| ParseError {
-                    message: format!(
-                        "scroll amount: strconv.ParseInt: parsing {amount:?}: invalid syntax"
-                    ),
-                    exit_code: 2,
-                })?;
-                args.insert("amount".into(), serde_json::Value::from(amount));
-                positional.remove(0);
-            }
+        if name == "scroll"
+            && let Some(amount) = positional.first()
+        {
+            let amount = amount.parse::<i64>().map_err(|_| ParseError {
+                message: format!(
+                    "scroll amount: strconv.ParseInt: parsing {amount:?}: invalid syntax"
+                ),
+                exit_code: 2,
+            })?;
+            args.insert("amount".into(), serde_json::Value::from(amount));
+            positional.remove(0);
         }
         let max = if name == "select" || name == "scroll" {
             2
@@ -6063,7 +6063,7 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         message: format!("invalid value {argument:?} for {name}"),
                         exit_code: 2,
                     })?;
-                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                    args.insert(name[2..].replace('-', "_"), number.into());
                 } else {
                     args.insert(name[2..].into(), argument.into());
                 }
@@ -6084,7 +6084,7 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         message: format!("invalid value {argument:?} for {name}"),
                         exit_code: 2,
                     })?;
-                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                    args.insert(name[2..].replace('-', "_"), number.into());
                 } else {
                     args.insert(name[2..].into(), argument.into());
                 }

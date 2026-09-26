@@ -203,16 +203,15 @@ async fn check_release_async(
     latest_url: &str,
     cache_path: &Path,
 ) -> Result<Option<Release>, String> {
-    if let Some(entry) = read_cache(cache_path) {
-        if cache_is_fresh(&entry.timestamp) {
-            if let Some(release) = entry.release {
-                if release_is_newer(&release, current_version) {
-                    return Ok(Some(release));
-                }
-                if parse_stable_version(&release.tag_name).is_some() {
-                    return Ok(None);
-                }
-            }
+    if let Some(entry) = read_cache(cache_path)
+        && cache_is_fresh(&entry.timestamp)
+        && let Some(release) = entry.release
+    {
+        if release_is_newer(&release, current_version) {
+            return Ok(Some(release));
+        }
+        if parse_stable_version(&release.tag_name).is_some() {
+            return Ok(None);
         }
     }
 

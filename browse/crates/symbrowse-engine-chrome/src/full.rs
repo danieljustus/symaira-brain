@@ -651,10 +651,9 @@ impl ChromePage {
                     if let Err(error) = page
                         .execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
                         .await
+                        && diagnostics
                     {
-                        if diagnostics {
-                            eprintln!("chrome_network_guard_continue_failed={error}");
-                        }
+                        eprintln!("chrome_network_guard_continue_failed={error}");
                     }
                 } else {
                     if let Err(error) = page
@@ -663,10 +662,9 @@ impl ChromePage {
                             network::ErrorReason::BlockedByClient,
                         ))
                         .await
+                        && diagnostics
                     {
-                        if diagnostics {
-                            eprintln!("chrome_network_guard_fail_failed={error}");
-                        }
+                        eprintln!("chrome_network_guard_fail_failed={error}");
                     }
                 }
             }
@@ -1139,14 +1137,14 @@ impl ChromePage {
         if hit.backend_node_id != element.backend_node_id {
             let mut role = String::new();
             let mut name = String::new();
-            if let Some(node_id) = hit.node_id {
-                if let Ok(node) = self.page.describe_node(node_id).await {
-                    role = node.node_name;
-                    let attributes = node.attributes.as_deref().unwrap_or_default();
-                    name = attribute_value(attributes, "aria-label");
-                    if name.is_empty() {
-                        name = attribute_value(attributes, "id");
-                    }
+            if let Some(node_id) = hit.node_id
+                && let Ok(node) = self.page.describe_node(node_id).await
+            {
+                role = node.node_name;
+                let attributes = node.attributes.as_deref().unwrap_or_default();
+                name = attribute_value(attributes, "aria-label");
+                if name.is_empty() {
+                    name = attribute_value(attributes, "id");
                 }
             }
             if role.is_empty() {
@@ -2122,7 +2120,9 @@ fn scroll_stage(stage: &str) {
 
 fn attribute_value(attributes: &[String], name: &str) -> String {
     attributes
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .find(|pair| pair[0] == name)
         .map(|pair| pair[1].clone())
         .unwrap_or_default()

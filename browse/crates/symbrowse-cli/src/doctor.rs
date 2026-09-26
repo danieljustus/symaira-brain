@@ -241,43 +241,6 @@ fn check_engine() -> Check {
     ])
 }
 
-#[cfg(test)]
-mod tests {
-    use super::check_engine;
-
-    #[test]
-    fn doctor_reports_default_launch_mode_and_real_script_disabler() {
-        let check = check_engine();
-        let details = check.details.expect("engine details");
-        let capabilities = symbrowse_engine_chrome::canonical_capabilities();
-
-        assert_eq!(
-            details.get("launch_mode").map(String::as_str),
-            Some("launch")
-        );
-        assert_eq!(
-            details.get("interfaces").map(String::as_str),
-            Some(capabilities.interfaces.join(",").as_str())
-        );
-        assert!(
-            capabilities
-                .interfaces
-                .iter()
-                .any(|name| name == "ScriptDisabler")
-        );
-        assert!(
-            !capabilities
-                .unsupported
-                .iter()
-                .any(|name| name == "ScriptDisabler")
-        );
-        assert_eq!(
-            details.get("unsupported").map(String::as_str),
-            Some(capabilities.unsupported.join(",").as_str())
-        );
-    }
-}
-
 fn check_browser(override_path: &str) -> (Check, Option<PathBuf>) {
     let paths = browser_paths();
     let search = search_paths(&paths);
@@ -329,18 +292,16 @@ fn check_browser(override_path: &str) -> (Check, Option<PathBuf>) {
         }
     }
     for name in browser_names() {
-        if let Some(path) = find_in_path(name) {
-            if usable_executable(&path) {
-                return (
-                    Check::new("chrome", PASS, format!("using {} (PATH)", path.display())).details(
-                        [
-                            ("path".to_owned(), path.display().to_string()),
-                            ("source".to_owned(), "PATH".to_owned()),
-                        ],
-                    ),
-                    Some(path),
-                );
-            }
+        if let Some(path) = find_in_path(name)
+            && usable_executable(&path)
+        {
+            return (
+                Check::new("chrome", PASS, format!("using {} (PATH)", path.display())).details([
+                    ("path".to_owned(), path.display().to_string()),
+                    ("source".to_owned(), "PATH".to_owned()),
+                ]),
+                Some(path),
+            );
         }
     }
     (
@@ -572,10 +533,7 @@ fn run_bounded(
 fn read_probe_output(reader: &mut impl Read) -> Vec<u8> {
     let mut retained = Vec::new();
     let mut buffer = [0_u8; 8192];
-    loop {
-        let Ok(count) = reader.read(&mut buffer) else {
-            break;
-        };
+    while let Ok(count) = reader.read(&mut buffer) {
         if count == 0 {
             break;
         }
@@ -707,7 +665,7 @@ fn check_writable(name: &str, path: &Path) -> Check {
 fn socket_dir() -> PathBuf {
     if cfg!(target_os = "macos") {
         env::var_os("HOME")
-            .map_or_else(|| env::temp_dir(), PathBuf::from)
+            .map_or_else(env::temp_dir, PathBuf::from)
             .join("Library/Caches/symbrowse/run")
     } else if cfg!(windows) {
         let base = env::var_os("LOCALAPPDATA")
@@ -808,4 +766,41 @@ fn fixes(executable: &str) -> Vec<String> {
 
 fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\\"'\\\"'"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check_engine;
+
+    #[test]
+    fn doctor_reports_default_launch_mode_and_real_script_disabler() {
+        let check = check_engine();
+        let details = check.details.expect("engine details");
+        let capabilities = symbrowse_engine_chrome::canonical_capabilities();
+
+        assert_eq!(
+            details.get("launch_mode").map(String::as_str),
+            Some("launch")
+        );
+        assert_eq!(
+            details.get("interfaces").map(String::as_str),
+            Some(capabilities.interfaces.join(",").as_str())
+        );
+        assert!(
+            capabilities
+                .interfaces
+                .iter()
+                .any(|name| name == "ScriptDisabler")
+        );
+        assert!(
+            !capabilities
+                .unsupported
+                .iter()
+                .any(|name| name == "ScriptDisabler")
+        );
+        assert_eq!(
+            details.get("unsupported").map(String::as_str),
+            Some(capabilities.unsupported.join(",").as_str())
+        );
+    }
 }

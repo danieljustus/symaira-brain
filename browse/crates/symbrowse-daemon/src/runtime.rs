@@ -395,17 +395,17 @@ impl DispatchRuntime {
                     ..Default::default()
                 });
             }
-            if let Some(page) = overlay_page.as_ref() {
-                if let Ok(decision) = page.overlay_result().await {
-                    match decision.as_str() {
-                        "completed" => {
-                            self.oob.complete(&prompt.id, None);
-                        }
-                        "cancelled" => {
-                            self.oob.cancel(&prompt.id, "cancelled by human");
-                        }
-                        _ => {}
+            if let Some(page) = overlay_page.as_ref()
+                && let Ok(decision) = page.overlay_result().await
+            {
+                match decision.as_str() {
+                    "completed" => {
+                        self.oob.complete(&prompt.id, None);
                     }
+                    "cancelled" => {
+                        self.oob.cancel(&prompt.id, "cancelled by human");
+                    }
+                    _ => {}
                 }
             }
             let current = self.oob.get(&prompt.id).expect("created prompt exists");
@@ -743,10 +743,10 @@ impl DispatchRuntime {
             .filter(|value| !value.is_empty())
             .unwrap_or(&frame.session);
         let path = self.spec.state_dir.join("journal");
-        if let Ok(metadata) = std::fs::symlink_metadata(&path) {
-            if metadata.file_type().is_symlink() || !metadata.is_dir() {
-                return Err(runtime_error("journal directory must be a real directory"));
-            }
+        if let Ok(metadata) = std::fs::symlink_metadata(&path)
+            && (metadata.file_type().is_symlink() || !metadata.is_dir())
+        {
+            return Err(runtime_error("journal directory must be a real directory"));
         }
         let store = JournalStore::new(&path, session, JournalRedactor::standard(), "")
             .map_err(runtime_error)?;
