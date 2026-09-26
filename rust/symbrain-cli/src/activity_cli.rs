@@ -22,6 +22,7 @@ Usage:
 
 Every command requires --profile, an explicit bounded response budget, and (for search) an explicit RFC3339 window and result limit.
 ";
+const MAX_ACTIVITY_BUDGET: usize = 4000;
 
 fn resolve_db_path() -> PathBuf {
     if let Some(path) = std::env::var_os("SYMBRAIN_MEMORY_DB_PATH") {
@@ -71,7 +72,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     // A granting profile: `status` and `get` run natively, `search` still
     // needs the shipped budget/window/page semantics.
     match verb.as_str() {
-        "status" => false,
+        "status" => !status_args_are_supported(&args[1..]),
         // The shipped flag set stops at the first bare argument, so a flag
         // after the identifier is a usage error there; only the documented
         // `get <flags> <id>` order is reproducible natively.
@@ -167,6 +168,39 @@ fn flags_before_positional(args: &[OsString]) -> bool {
         index += 1;
     }
     positionals == 1
+}
+
+/// Keep unsupported status syntax on Go, where flag parser errors are exact.
+fn status_args_are_supported(args: &[OsString]) -> bool {
+    let flags = [
+        "--profile",
+        "-profile",
+        "--max-tokens",
+        "-max-tokens",
+        "--db",
+        "-db",
+    ];
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if !flags.contains(&name) || (inline.is_none() && index + 1 >= args.len()) {
+            return false;
+        }
+        if inline.is_none() {
+            index += 1;
+        }
+        index += 1;
+    }
+    true
+}
+
+fn budget_is_valid(args: &[OsString]) -> bool {
+    flag_value(args, &["--max-tokens", "-max-tokens"])
+        .and_then(|value| value.parse::<usize>().ok())
+        .is_some_and(|value| (1..=MAX_ACTIVITY_BUDGET).contains(&value))
 }
 
 /// Runs `symbrain activity`.
@@ -360,11 +394,30 @@ fn run_search(
 }
 
 fn run_status(
-    _args: &[OsString],
+    args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    if !budget_is_valid(args)
+        || positional_count(
+            args,
+            &[
+                "--profile",
+                "-profile",
+                "--max-tokens",
+                "-max-tokens",
+                "--db",
+                "-db",
+            ],
+        ) != 0
+    {
+        let _ = writeln!(
+            stderr,
+            "usage: symbrain activity status --profile <name> --max-tokens <N> [--db <path>]"
+        );
+        return exit::USAGE;
+    }
     let store = match open_store(stderr, "status") {
         Ok(store) => store,
         Err(code) => return code,
@@ -407,8 +460,6 @@ fn run_get(
         "--db",
         "-db",
     ];
-    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
-        .and_then(|value| value.parse::<usize>().ok());
     let Some(id) = positional_argument(args, &flags) else {
         let _ = writeln!(
             stderr,
@@ -416,6 +467,15 @@ fn run_get(
         );
         return exit::USAGE;
     };
+    if !budget_is_valid(args) || positional_count(args, &flags) != 1 {
+        let _ = writeln!(
+            stderr,
+            "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]"
+        );
+        return exit::USAGE;
+    }
+    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
+        .and_then(|value| value.parse::<usize>().ok());
     let store = match open_store(stderr, "get") {
         Ok(store) => store,
         Err(code) => return code,
@@ -498,4 +558,82 @@ fn positional_argument(args: &[OsString], flags: &[&str]) -> Option<String> {
         index += 1;
     }
     None
+}
+
+fn positional_count(args: &[OsString], flags: &[&str]) -> usize {
+    let mut count = 0;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        if flags.contains(&name) {
+            if inline.is_none() {
+                index += 1;
+            }
+        } else if !arg.starts_with('-') {
+            count += 1;
+        }
+        index += 1;
+    }
+    count
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{run_get, run_status, status_args_are_supported};
+    use std::ffi::OsString;
+    use symbrain_core::exit;
+    use symbrain_core::output::OutputFormat;
+
+    fn args(values: &[&str]) -> Vec<OsString> {
+        values.iter().map(OsString::from).collect()
+    }
+
+    #[test]
+    fn invalid_get_and_status_budgets_match_usage_before_opening_database() {
+        let usage = [
+            (
+                "get",
+                "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]\n",
+            ),
+            (
+                "status",
+                "usage: symbrain activity status --profile <name> --max-tokens <N> [--db <path>]\n",
+            ),
+        ];
+        for budget in [None, Some("--max-tokens=0"), Some("--max-tokens=4001")] {
+            for (command, expected) in usage {
+                let mut argv = vec!["--profile=default", "--db=/no/such/database"];
+                if let Some(value) = budget {
+                    argv.push(value);
+                }
+                if command == "get" {
+                    argv.push("item-id");
+                }
+                let argv = args(&argv);
+                let mut stdout = Vec::new();
+                let mut stderr = Vec::new();
+                let code = if command == "get" {
+                    run_get(&argv, &mut stdout, &mut stderr, OutputFormat::Table)
+                } else {
+                    run_status(&argv, &mut stdout, &mut stderr, OutputFormat::Table)
+                };
+                assert_eq!(code, exit::USAGE);
+                assert!(stdout.is_empty());
+                assert_eq!(stderr, expected.as_bytes());
+            }
+        }
+    }
+
+    #[test]
+    fn status_falls_back_for_unhandled_argument_shapes() {
+        assert!(status_args_are_supported(&args(&[
+            "--profile=default",
+            "--max-tokens=10"
+        ])));
+        assert!(!status_args_are_supported(&args(&["--unknown"])));
+        assert!(!status_args_are_supported(&args(&["stray"])));
+    }
 }
