@@ -1128,7 +1128,7 @@ impl ChromePage {
         &self,
         selector: &str,
         action: &str,
-    ) -> Result<Element, Box<dyn Error + Send + Sync>> {
+    ) -> Result<Point, Box<dyn Error + Send + Sync>> {
         let element = self.element(selector).await?;
         let trace_geometry = std::env::var_os("SYMBROWSE_E2E").is_some() && selector == "#download";
         let selector_json = serde_json::to_string(selector)?;
@@ -1143,6 +1143,12 @@ impl ChromePage {
             eprintln!("chrome_download_click_geometry_before={before}");
         }
         self.scroll_element_into_view(&element).await?;
+        element
+            .call_js_fn(
+                "function() { this.scrollIntoView({block:'center', inline:'center'}); }",
+                false,
+            )
+            .await?;
         if trace_geometry {
             let after = self
                 .page
@@ -1160,13 +1166,36 @@ impl ChromePage {
                 point.x, point.y, element.backend_node_id
             );
         }
-        let hit = self
+        let hit = match self
             .page
             .execute(dom::GetNodeForLocationParams::new(
                 point.x as i64,
                 point.y as i64,
             ))
-            .await?;
+            .await
+        {
+            Ok(hit) => hit,
+            Err(error) => {
+                let same_target = element
+                    .call_js_fn(
+                        format!(
+                            "function() {{ return this === document.elementFromPoint({}, {}); }}",
+                            point.x, point.y
+                        ),
+                        false,
+                    )
+                    .await?
+                    .result
+                    .value
+                    .as_ref()
+                    .and_then(Value::as_bool)
+                    == Some(true);
+                if same_target {
+                    return Ok(point);
+                }
+                return Err(error.into());
+            }
+        };
         if trace_geometry {
             eprintln!(
                 "chrome_download_click_hit_matches={}",
@@ -1199,24 +1228,25 @@ impl ChromePage {
                 hint: "close the covering element and retry the click".into(),
             }));
         }
-        Ok(element)
+        Ok(point)
     }
 
     pub async fn click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        let element = self.click_target(selector, "click").await?;
-        element.click().await?;
+        let point = self.click_target(selector, "click").await?;
+        self.page.click(point).await?;
         Ok(result("click", selector))
     }
     pub async fn double_click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.click_target(selector, "dblclick")
-            .await?
+        let point = self.click_target(selector, "dblclick").await?;
+        self.page
             .click_with(
+                point,
                 chromiumoxide::types::ClickOptions::builder()
                     .click_count(2)
                     .build(),
@@ -1235,7 +1265,11 @@ impl ChromePage {
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.element(selector).await?.hover().await?;
+        let element = self.element(selector).await?;
+        self.scroll_element_into_view(&element).await?;
+        self.page
+            .move_mouse(element.clickable_point().await?)
+            .await?;
         Ok(result("hover", selector))
     }
     pub async fn scroll_into_view(
@@ -1527,7 +1561,7 @@ impl ChromePage {
             .expression(expression.to_owned())
             .return_by_value(true)
             .await_promise(true);
-        if let Some(context) = self.active_frame_context.lock().await.clone() {
+        if let Some(context) = *self.active_frame_context.lock().await {
             builder = builder.context_id(context);
         }
         builder.build().map_err(std::io::Error::other)

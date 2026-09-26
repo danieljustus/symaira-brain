@@ -1,6 +1,6 @@
 use std::{
     fs,
-    io::{Read, Write},
+    io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     sync::{
@@ -91,16 +91,20 @@ impl Drop for TestServer {
 
 fn serve(mut stream: TcpStream) {
     stream
+        .set_nonblocking(false)
+        .expect("blocking fixture request");
+    stream
         .set_read_timeout(Some(Duration::from_secs(2)))
         .expect("set read timeout");
-    let mut request = [0_u8; 4096];
-    let size = stream.read(&mut request).unwrap_or(0);
-    let request = String::from_utf8_lossy(&request[..size]);
-    let path = request
-        .lines()
-        .next()
-        .and_then(|line| line.split_whitespace().nth(1))
-        .unwrap_or("/");
+    let mut request_line = String::new();
+    if BufReader::new(&stream)
+        .read_line(&mut request_line)
+        .is_err()
+        || request_line.is_empty()
+    {
+        return;
+    }
+    let path = request_line.split_whitespace().nth(1).unwrap_or("/");
     let (status, content_type, body) = match path {
         "/asset.js" => (
             "200 OK",
