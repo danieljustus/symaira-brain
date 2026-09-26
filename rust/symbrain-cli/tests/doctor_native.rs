@@ -112,6 +112,55 @@ fn doctor_json_reports_static_config_and_registered_harness_natively() {
 }
 
 #[test]
+fn doctor_vault_probe_does_not_expose_child_stderr() {
+    const SECRET: &str = "credential=SENTINEL_SECRET_473";
+    let root = TempDir::new().unwrap();
+    let vault_dir = root.path().join("fake-vault-bin");
+    fs::create_dir_all(&vault_dir).unwrap();
+    let vault = vault_dir.join("symvault");
+    fs::write(
+        &vault,
+        format!("#!/bin/sh\nprintf '%s\\n' '{SECRET}' >&2\nexit 42\n"),
+    )
+    .unwrap();
+    fs::set_permissions(&vault, fs::Permissions::from_mode(0o755)).unwrap();
+
+    for args in [&["doctor"][..], &["doctor", "--json"][..]] {
+        let output = command(&root, args)
+            .env("PATH", &vault_dir)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            !stdout.contains(SECRET),
+            "doctor stdout leaked child stderr: {stdout}"
+        );
+        assert!(
+            !stderr.contains(SECRET),
+            "doctor stderr leaked child stderr: {stderr}"
+        );
+        assert!(output.stderr.is_empty(), "unexpected stderr: {stderr}");
+
+        if args.len() == 2 {
+            let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+            let vault_link = report["links"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|link| link["name"] == "vault: reachable")
+                .unwrap();
+            assert_eq!(vault_link["status"], "fail");
+            assert_eq!(
+                vault_link["detail"],
+                "symvault probe failed: exit status 42"
+            );
+        }
+    }
+}
+
+#[test]
 fn doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary() {
     let root = TempDir::new().unwrap();
     let output = command(&root, &["doctor", "--vault-agent", "agent"])
