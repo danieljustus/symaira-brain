@@ -383,18 +383,23 @@ async fn exercise_full_chrome_surface() {
         "initial"
     );
     assert!(page.inspect("#text", "is").await.expect("is").as_bool() == Some(true));
+    eprintln!("chrome_full_stage=inspect-complete");
 
     page.click("#button").await.expect("click");
+    eprintln!("chrome_full_stage=click-complete");
     page.double_click("#dbl").await.expect("double click");
     page.focus("#text").await.expect("focus");
     page.hover("#hover").await.expect("hover");
+    eprintln!("chrome_full_stage=pointer-complete");
     page.scroll_into_view("#scroll").await.expect("scroll");
     page.type_text("#text", " typed").await.expect("type");
     page.fill("#text", "filled").await.expect("fill");
     page.press("#text", "End").await.expect("press");
+    eprintln!("chrome_full_stage=text-complete");
     page.select("#choice", "two").await.expect("select");
     page.check("#check").await.expect("check");
     page.uncheck("#check").await.expect("uncheck");
+    eprintln!("chrome_full_stage=form-complete");
     page.wait_for_selector("#status", true, Duration::from_secs(1))
         .await
         .expect("wait for status");
