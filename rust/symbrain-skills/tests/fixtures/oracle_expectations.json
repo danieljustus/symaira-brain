@@ -486,6 +486,23 @@
       "error": "target opencode: destination path \"opencode/security-skill\" is a symlink"
     }
   ],
+  "relative_root": {
+    "root_is_absolute": true,
+    "issues": [
+      {
+        "code": "name_dir_mismatch",
+        "severity": "error",
+        "message": "frontmatter name \"another-name\" must match the parent directory name \"relative-root\"",
+        "path": "SKILL.md"
+      },
+      {
+        "code": "category_required",
+        "severity": "warning",
+        "message": "frontmatter category is required; reuse an existing category when possible",
+        "path": "SKILL.md"
+      }
+    ]
+  },
   "hash_case": {
     "initial": "444afe33aa8b0b1bce0ba26c59ec442817648493a812857b5c6d339ae10f60e1",
     "after_content": "e2aff1dbcdbd0c5ff70fe9a63e6be43224787a55ad57b3cee429236b9b178bdf",

@@ -76,6 +76,11 @@ type securityCase struct {
 	Error    string `json:"error,omitempty"`
 }
 
+type relativeRootCase struct {
+	RootIsAbsolute bool          `json:"root_is_absolute"`
+	Issues         []skill.Issue `json:"issues"`
+}
+
 type hashCase struct {
 	Initial        string `json:"initial"`
 	AfterContent   string `json:"after_content"`
@@ -90,6 +95,7 @@ type suite struct {
 	Diagnostics   []diagnosticCase `json:"diagnostics"`
 	RenderCases   []renderGolden   `json:"render_cases"`
 	SecurityCases []securityCase   `json:"security_cases"`
+	RelativeRoot  relativeRootCase `json:"relative_root"`
 	HashCase      hashCase         `json:"hash_case"`
 }
 
@@ -178,6 +184,10 @@ func generate() (suite, error) {
 	result.Diagnostics = append(result.Diagnostics, toDiagnostics("unknown_term_reference", problems))
 	_, problems = variant.Apply("{{term:no_default}}\n", variant.Options{Target: "hermes", Terms: map[string]map[string]string{"no_default": {"claude": "value"}}})
 	result.Diagnostics = append(result.Diagnostics, toDiagnostics("missing_term_default", problems))
+	result.RelativeRoot, err = relativeRootCaseFromGo()
+	if err != nil {
+		return suite{}, err
+	}
 
 	for _, id := range []string{"source", "variant-source", "oracle-edge"} {
 		bundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", id))
@@ -199,6 +209,23 @@ func generate() (suite, error) {
 		return suite{}, err
 	}
 	return result, nil
+}
+
+func relativeRootCaseFromGo() (relativeRootCase, error) {
+	root := filepath.Join("scripts", "skills-oracle", "fixtures", "relative-root")
+	oldWorkingDirectory, err := os.Getwd()
+	if err != nil {
+		return relativeRootCase{}, err
+	}
+	if err := os.Chdir(root); err != nil {
+		return relativeRootCase{}, err
+	}
+	defer func() { _ = os.Chdir(oldWorkingDirectory) }()
+	bundle, err := skill.LoadBundle(".")
+	if err != nil {
+		return relativeRootCase{}, err
+	}
+	return relativeRootCase{RootIsAbsolute: filepath.IsAbs(bundle.Root), Issues: skill.Validate(bundle)}, nil
 }
 
 func renderAndManifest(bundle *skill.Bundle, id string) (renderGolden, error) {
