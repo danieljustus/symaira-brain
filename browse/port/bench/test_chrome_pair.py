@@ -82,8 +82,9 @@ class ChromePairTests(unittest.TestCase):
                 if args == ["daemon", "stop"]:
                     (root / "daemon.log").write_text(
                         "warning contains a secret\n"
-                        "chrome_open_stage=dispatch-start\n"
-                        "chrome_open_stage=dispatch-response status=timeout\n"
+                        "chrome_open_stage=main-frame status=missing\n"
+                        "chrome_open_stage=navigation-future-start\n"
+                        "chrome_open_stage=navigation-future status=timeout\n"
                         "chrome_open_stage=unknown-secret\n"
                         "chrome_open_stage=document-probe status=timeout\n"
                         "chrome_open_stage=navigation-event-wait-start\n",
@@ -98,7 +99,8 @@ class ChromePairTests(unittest.TestCase):
 
         self.assertEqual(result["error_code"], "operation_timeout")
         self.assertEqual(result["chrome_open_stages"], [
-            "dispatch-start", "dispatch-response status=timeout",
+            "main-frame status=missing", "navigation-future-start",
+            "navigation-future status=timeout",
             "document-probe status=timeout", "navigation-event-wait-start",
         ])
 

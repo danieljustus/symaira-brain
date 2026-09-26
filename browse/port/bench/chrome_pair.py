@@ -31,10 +31,12 @@ MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
 MAX_STAGE_LOG_BYTES = 64 << 10
 MAX_OPEN_STAGES = 32
 CHROME_OPEN_STAGES = {
-    "navigation-listeners-ready", "main-frame-resolved", "dispatch-start",
-    "dispatch-complete", "dispatch-response status=received error_text=false",
-    "dispatch-response status=received error_text=true",
-    "dispatch-response status=timeout", "navigation-event-wait-start",
+    "navigation-listeners-ready", "main-frame status=present",
+    "main-frame status=missing", "main-frame status=error",
+    "navigation-future-start", "navigation-future-finish",
+    "navigation-future status=completed error_text=false",
+    "navigation-future status=completed error_text=true",
+    "navigation-future status=timeout", "navigation-event-wait-start",
     "document-probe status=responsive", "document-probe status=error",
     "document-probe status=timeout",
     "main-frame-navigation-observed", "same-document-navigation-observed",
