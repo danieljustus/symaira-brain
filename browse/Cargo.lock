@@ -1940,9 +1940,9 @@ dependencies = [
  "time",
  "tokio",
  "url",
- "zeroize",
  "widestring",
  "windows-sys 0.61.2",
+ "zeroize",
 ]
 
 [[package]]
@@ -1959,6 +1959,7 @@ dependencies = [
 name = "symbrowse-engine-chrome"
 version = "0.0.0"
 dependencies = [
+ "base64",
  "chromiumoxide",
  "futures",
  "serde",

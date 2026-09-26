@@ -525,6 +525,37 @@ fn run_dispatch(
     let is_oob_status = frame.cmd == "oob.status";
     let is_handoff = frame.cmd == "handoff";
     let is_network_request = frame.cmd == "network.request";
+    let is_network_har = frame.cmd == "network.har";
+    let is_network_route = frame.cmd == "network.route";
+    let is_network_unroute = frame.cmd == "network.unroute";
+    let network_route_action = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("action"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("mock")
+        .to_owned();
+    let network_route_pattern = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("pattern"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_owned();
+    let network_har_action = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("action"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_owned();
+    let network_har_output = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("output"))
+        .and_then(serde_json::Value::as_str)
+        .filter(|path| !path.is_empty())
+        .map(str::to_owned);
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let is_cookie_clear = frame.cmd == "cookies.clear";
@@ -714,6 +745,73 @@ fn run_dispatch(
                     render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
                 }
             };
+        }
+        if is_network_har {
+            if network_har_action == "start" && format == Format::Text {
+                return write_stdout("HAR capture started\n");
+            }
+            let har = response_data
+                .get("har")
+                .cloned()
+                .unwrap_or(serde_json::Value::Null);
+            if network_har_action == "stop"
+                && let Some(path) = network_har_output.as_deref()
+            {
+                let output = match serde_json::to_vec_pretty(&har) {
+                    Ok(output) => output,
+                    Err(error) => {
+                        return render_dispatch_error(
+                            format,
+                            daemon_codes::OPERATION_FAILED,
+                            error.to_string(),
+                        );
+                    }
+                };
+                let mut options = fs::OpenOptions::new();
+                options.write(true).create(true).truncate(true);
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::OpenOptionsExt;
+                    options.mode(0o600);
+                }
+                if let Err(error) = options
+                    .open(path)
+                    .and_then(|mut file| file.write_all(&output))
+                {
+                    return render_dispatch_error(
+                        format,
+                        "operation_failed",
+                        format!("write HAR: {error}"),
+                    );
+                }
+                return if format == Format::Text {
+                    write_stdout(&format!("HAR saved to {path}\n"))
+                } else {
+                    write_stdout("")
+                };
+            }
+            if network_har_action == "stop" && format == Format::Text {
+                let mut output = match serde_json::to_string_pretty(&har) {
+                    Ok(output) => output,
+                    Err(error) => {
+                        return render_dispatch_error(
+                            format,
+                            daemon_codes::OPERATION_FAILED,
+                            error.to_string(),
+                        );
+                    }
+                };
+                output.push('\n');
+                return write_stdout(&output);
+            }
+        }
+        if is_network_route && format == Format::Text {
+            return write_stdout(&format!(
+                "routed {network_route_pattern} ({network_route_action})\n"
+            ));
+        }
+        if is_network_unroute && format == Format::Text {
+            return write_stdout("unrouted\n");
         }
         if is_journal_read && format == Format::Text {
             return write_stdout(&render_journal_text(&response_data));
@@ -4819,7 +4917,10 @@ Use "symbrowse errors [command] --help" for more information about a command.
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("network", None) => Some("Inspect, mock and export page network activity\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  request     Show one captured request by id\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", None) => Some("Inspect, mock and export page network activity\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  har         Start or stop HAR capture\n  request     Show one captured request by id\n  requests    List captured requests (sensitive headers masked)\n  route       Mock or abort matching requests\n  unroute     Remove one route or all routes\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", Some("route")) => Some("Mock or abort matching requests\n\nUsage:\n  symbrowse network route <url> [flags]\n\nFlags:\n      --abort              abort matching requests instead of mocking them\n      --body string        JSON response body for the mock\n      --content-type string response content type\n  -h, --help               help for route\n      --session string     session name (default \"default\")\n      --status int         HTTP status for the mock (default 200)\n\nGlobal Flags:\n      --json               print the unified machine-readable output envelope (shorthand for --output json)\n      --output string      output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
+        ("network", Some("unroute")) => Some("Remove one route (or all routes without a pattern)\n\nUsage:\n  symbrowse network unroute [pattern] [flags]\n\nFlags:\n  -h, --help             help for unroute\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
+        ("network", Some("har")) => Some("Start or stop HAR capture; stop prints the HAR 1.2 document\n\nUsage:\n  symbrowse network har start|stop [flags]\n\nFlags:\n      --content string    response body capture: all or none (default \"none\")\n  -h, --help              help for har\n      --output string     output format or HAR file path\n      --session string    session name (default \"default\")\n\nGlobal Flags:\n      --json              print the unified machine-readable output envelope (shorthand for --output json)\n      --output string     output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("request")) => Some(plain(
             "Show one captured request by id",
             "symbrowse network request <id> [flags]",
@@ -6152,16 +6253,30 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
         match value.as_str() {
             "requests" if subcommand.is_none() => subcommand = Some("requests"),
             "request" if subcommand.is_none() => subcommand = Some("request"),
+            "har" if subcommand.is_none() => subcommand = Some("har"),
+            "route" if subcommand.is_none() => subcommand = Some("route"),
+            "unroute" if subcommand.is_none() => subcommand = Some("unroute"),
+            "--abort" => {
+                args.insert("action".into(), "abort".into());
+            }
             "--json" => json = true,
             "--output" => {
                 index += 1;
-                format = parse_format(required_value(values, index, "--output")?)?;
+                let value = required_value(values, index, "--output")?;
+                match parse_format(value) {
+                    Ok(parsed) => format = parsed,
+                    Err(_) if subcommand == Some("har") => {
+                        args.insert("output".into(), value.into());
+                    }
+                    Err(error) => return Err(error),
+                }
             }
             "--session" => {
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
             }
-            "--filter" | "--type" | "--method" | "--status" | "--max-tokens" => {
+            "--filter" | "--type" | "--method" | "--status" | "--max-tokens" | "--content"
+            | "--content-type" | "--body" => {
                 let name = value.as_str();
                 index += 1;
                 let argument = required_value(values, index, name)?;
@@ -6171,19 +6286,39 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         exit_code: 2,
                     })?;
                     args.insert(name[2..].replace('-', "_"), number.into());
+                } else if name == "--body" {
+                    let body = serde_json::from_str(argument).map_err(|error| ParseError {
+                        message: format!("invalid JSON body: {error}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert("body".into(), body);
                 } else {
-                    args.insert(name[2..].into(), argument.into());
+                    let key = if name == "--content-type" {
+                        "content_type"
+                    } else {
+                        &name[2..]
+                    };
+                    args.insert(key.into(), argument.into());
                 }
             }
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--output=") => match parse_format(&value[9..]) {
+                Ok(parsed) => format = parsed,
+                Err(_) if subcommand == Some("har") => {
+                    args.insert("output".into(), value[9..].into());
+                }
+                Err(error) => return Err(error),
+            },
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value
                 if value.starts_with("--filter=")
                     || value.starts_with("--type=")
                     || value.starts_with("--method=")
                     || value.starts_with("--status=")
-                    || value.starts_with("--max-tokens=") =>
+                    || value.starts_with("--max-tokens=")
+                    || value.starts_with("--content=")
+                    || value.starts_with("--content-type=")
+                    || value.starts_with("--body=") =>
             {
                 let (name, argument) = value.split_once('=').expect("equals flag");
                 if name == "--status" || name == "--max-tokens" {
@@ -6192,8 +6327,19 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         exit_code: 2,
                     })?;
                     args.insert(name[2..].replace('-', "_"), number.into());
+                } else if name == "--body" {
+                    let body = serde_json::from_str(argument).map_err(|error| ParseError {
+                        message: format!("invalid JSON body: {error}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert("body".into(), body);
                 } else {
-                    args.insert(name[2..].into(), argument.into());
+                    let key = if name == "--content-type" {
+                        "content_type"
+                    } else {
+                        &name[2..]
+                    };
+                    args.insert(key.into(), argument.into());
                 }
             }
             value if value.starts_with('-') => return Err(unknown_flag(value)),
@@ -6237,6 +6383,59 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
         }),
         Some("request") => Err(ParseError {
             message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        Some("har")
+            if positional.len() == 1 && matches!(positional[0].as_str(), "start" | "stop") =>
+        {
+            args.insert("action".into(), positional[0].clone().into());
+            Ok(Action::Dispatch {
+                session,
+                command: "network.har".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("har") if positional.is_empty() => Err(ParseError {
+            message: "accepts 1 arg(s), received 0".to_owned(),
+            exit_code: 2,
+        }),
+        Some("har") => Err(ParseError {
+            message: "network har action must be \"start\" or \"stop\"".to_owned(),
+            exit_code: 2,
+        }),
+        Some("route") if positional.len() == 1 => {
+            args.insert("pattern".into(), positional[0].clone().into());
+            if !args.contains_key("action") {
+                args.insert("action".into(), "mock".into());
+            }
+            if args.get("action").and_then(serde_json::Value::as_str) == Some("mock") {
+                args.entry("status").or_insert(200.into());
+            }
+            Ok(Action::Dispatch {
+                session,
+                command: "network.route".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("route") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        Some("unroute") if positional.len() <= 1 => {
+            if let Some(pattern) = positional.first() {
+                args.insert("pattern".into(), pattern.clone().into());
+            }
+            Ok(Action::Dispatch {
+                session,
+                command: "network.unroute".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("unroute") => Err(ParseError {
+            message: format!("accepts at most 1 arg(s), received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("network subcommand selected from supported names"),
@@ -9470,6 +9669,90 @@ mod tests {
                 command: "network.request".to_owned(),
                 args: serde_json::json!({"id": "fixture-1"}),
                 format: Format::Json,
+            })
+        );
+    }
+
+    #[test]
+    fn network_har_routes_action_content_path_and_session() {
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "har",
+                "stop",
+                "--content",
+                "all",
+                "--output",
+                "capture.har",
+                "--session",
+                "fixture",
+                "--json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "fixture".to_owned(),
+                command: "network.har".to_owned(),
+                args: serde_json::json!({
+                    "action": "stop",
+                    "content": "all",
+                    "output": "capture.har",
+                }),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["network", "har", "pause"])).is_err());
+    }
+
+    #[test]
+    fn network_route_and_unroute_build_daemon_payloads() {
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "route",
+                "https://example.test/*",
+                "--body",
+                "{\"ok\":true}",
+                "--status",
+                "201",
+                "--content-type",
+                "application/json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.route".to_owned(),
+                args: serde_json::json!({
+                    "pattern": "https://example.test/*",
+                    "action": "mock",
+                    "body": {"ok": true},
+                    "status": 201,
+                    "content_type": "application/json",
+                }),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "route",
+                "https://example.test",
+                "--abort"
+            ])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.route".to_owned(),
+                args: serde_json::json!({
+                    "pattern": "https://example.test",
+                    "action": "abort",
+                }),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["network", "unroute"])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.unroute".to_owned(),
+                args: serde_json::json!({}),
+                format: Format::Text,
             })
         );
     }

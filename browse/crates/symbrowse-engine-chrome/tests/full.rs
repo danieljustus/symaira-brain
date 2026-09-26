@@ -13,7 +13,7 @@ use std::{
 
 use chromiumoxide::cdp::browser_protocol::{dom, input};
 use symbrowse_engine_chrome::{
-    BrowserMode, ChromeSession, ScreenshotOptions, UnsupportedOperation, capabilities,
+    BrowserMode, ChromeSession, NetworkRoute, ScreenshotOptions, UnsupportedOperation, capabilities,
 };
 
 fn e2e_enabled() -> bool {
@@ -274,6 +274,56 @@ async fn selected_frame_scopes_eval_and_main_restores_it() {
             .expect("evaluate main frame")["value"],
         "rust012"
     );
+    session.close().await.expect("close Chrome");
+}
+
+#[tokio::test]
+async fn network_route_mock_and_unroute_are_real_and_opt_in() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-network-route-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile.clone(),
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session.new_page("about:blank").await.expect("new page");
+    page.enable_network_guard(Vec::new(), false, true)
+        .await
+        .expect("start interception listener");
+    let asset_url = format!("{}/asset.js", server.base_url);
+    page.route_requests(NetworkRoute {
+        pattern: asset_url,
+        action: "mock".into(),
+        status: 200,
+        body: Some(b"window.assetLoaded = false;".to_vec()),
+        content_type: "application/javascript".into(),
+    })
+    .await
+    .expect("install mock route");
+    page.open(&server.base_url).await.expect("open routed page");
+    assert_eq!(
+        page.evaluate_script("window.assetLoaded")
+            .await
+            .expect("read mocked asset"),
+        serde_json::Value::Bool(false)
+    );
+    assert!(page.unroute_requests("").await.expect("remove route"));
     session.close().await.expect("close Chrome");
 }
 

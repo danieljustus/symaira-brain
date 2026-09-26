@@ -23,7 +23,7 @@ use symbrowse_core::{
 };
 use symbrowse_engine_chrome::CapturedRequest;
 use symbrowse_engine_chrome::{
-    BrowserMode, ChromePage, ChromeSession, NetworkCapture, resolve_chrome_executable,
+    BrowserMode, ChromePage, ChromeSession, NetworkCapture, NetworkRoute, resolve_chrome_executable,
 };
 use symbrowse_engine_firefox::{FirefoxSession, resolve_firefox_executable};
 use symbrowse_fetch::{
@@ -390,6 +390,10 @@ impl DispatchRuntime {
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
+            "network.route" | "network.unroute" => {
+                self.authorize_network_mock(&frame)?;
+                self.browser_command(&frame).await
+            }
             "policy.explain" => self.policy_explain(&frame),
             "journal.tail" | "journal.show" => self.journal_read(&frame),
             "flow.run" => self.flow_run(&frame, operation.clone()).await,
@@ -432,14 +436,14 @@ impl DispatchRuntime {
             | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
             | "frames.list" | "frame.tree" | "frame.main" | "frame.select" | "dialog"
             | "dialog.status" | "dialog.accept" | "dialog.dismiss" | "dialog.auto"
-            | "network.capture" | "network.requests" | "network.request" | "network.offline"
-            | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get" | "storage.list"
-            | "storage.set" | "storage.clear" | "download" | "download.setdir"
+            | "network.capture" | "network.requests" | "network.request" | "network.har"
+            | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
+            | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
+            | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
             | "downloads.list" | "eval" => self.browser_command(&frame).await,
             "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
             | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
-            "network.har" | "axe.audit" => Err(DaemonError {
+            "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),
@@ -976,6 +980,52 @@ impl DispatchRuntime {
             })),
             Vec::new(),
         ))
+    }
+
+    fn authorize_network_mock(&self, frame: &Frame) -> Result<(), DaemonError> {
+        let args = object_args(frame)?;
+        let pattern = args.get("pattern").and_then(Value::as_str).unwrap_or("");
+        let target = pattern.trim_end_matches('*');
+        let host = policy_host(target);
+        let class = classify(&frame.cmd).map_err(runtime_error)?;
+        let mode = if std::env::var("SYMBROWSE_MCP").as_deref() == Ok("1") {
+            PolicyMode::Mcp
+        } else {
+            PolicyMode::Tty
+        };
+        let policy_path = self.spec.state_dir.join("policy.toml");
+        let policy = Policy::load(&policy_path).unwrap_or_else(|_| Policy {
+            source: policy_path.display().to_string(),
+            ..Policy::default()
+        });
+        let decision = if let Some(guard) = Guard::detect() {
+            guard
+                .decide(&GuardInput {
+                    command: frame.cmd.clone(),
+                    class,
+                    domain: host,
+                    warnings: Vec::new(),
+                })
+                .map_err(runtime_error)?
+                .decision
+        } else {
+            policy.decide(class, &host, mode).0
+        };
+        match decision {
+            symbrowse_core::policy::Decision::Allow => Ok(()),
+            symbrowse_core::policy::Decision::Deny => Err(DaemonError {
+                code: "policy_denied".into(),
+                message: format!("policy decision deny for {}", frame.cmd),
+                ..Default::default()
+            }),
+            symbrowse_core::policy::Decision::Confirm => Err(DaemonError {
+                code: "approval_required".into(),
+                message: format!("{} requires an explicit policy approval", frame.cmd),
+                requires_user_confirmation: Some(true),
+                resume_hint: "approve this operation in policy.toml, then retry".into(),
+                ..Default::default()
+            }),
+        }
     }
 
     async fn wayback_snapshots(&self, frame: &Frame) -> HandlerResult {
@@ -1525,6 +1575,108 @@ impl DispatchRuntime {
                     .ok_or_else(|| runtime_error("browser was not initialized"))?;
                 state.network_capture = Some(capture);
                 json!({"started": true})
+            }
+            "network.route" => {
+                let pattern = required_string(args, "pattern")?;
+                let action = args.get("action").and_then(Value::as_str).unwrap_or("mock");
+                let body = args
+                    .get("body")
+                    .map(serde_json::to_vec)
+                    .transpose()
+                    .map_err(runtime_error)?;
+                let route = NetworkRoute {
+                    pattern: pattern.to_owned(),
+                    action: action.to_owned(),
+                    status: args.get("status").and_then(Value::as_i64).unwrap_or(200),
+                    body,
+                    content_type: args
+                        .get("content_type")
+                        .and_then(Value::as_str)
+                        .unwrap_or("")
+                        .to_owned(),
+                };
+                page.route_requests(route.clone())
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"routed": route.pattern, "action": route.action})
+            }
+            "network.unroute" => {
+                let pattern = args.get("pattern").and_then(Value::as_str).unwrap_or("");
+                let removed = page
+                    .unroute_requests(pattern)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"removed": removed})
+            }
+            "network.har" => {
+                let action = args.get("action").and_then(Value::as_str).unwrap_or("");
+                match action {
+                    "start" => {
+                        let already_capturing = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?
+                            .as_ref()
+                            .is_some_and(|state| state.network_capture.is_some());
+                        if !already_capturing {
+                            let capture =
+                                page.start_network_capture().await.map_err(runtime_error)?;
+                            let mut browser = self
+                                .browser
+                                .lock()
+                                .map_err(|_| runtime_error("browser lock poisoned"))?;
+                            browser
+                                .as_mut()
+                                .ok_or_else(|| runtime_error("browser was not initialized"))?
+                                .network_capture = Some(capture);
+                        }
+                        json!({"started": true})
+                    }
+                    "stop" => {
+                        let content = args
+                            .get("content")
+                            .and_then(Value::as_str)
+                            .unwrap_or("none");
+                        if !matches!(content, "none" | "all") {
+                            return Err(malformed("HAR content must be \"all\" or \"none\""));
+                        }
+                        let capture = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?
+                            .as_mut()
+                            .ok_or_else(|| runtime_error("browser was not initialized"))?
+                            .network_capture
+                            .take();
+                        let mut capture = match capture {
+                            Some(capture) => capture,
+                            None => page.start_network_capture().await.map_err(runtime_error)?,
+                        };
+                        let _ = capture
+                            .collect_retaining_requests(std::time::Duration::from_millis(100))
+                            .await;
+                        let requests = capture.requests();
+                        let entries = requests.len();
+                        let har = har_document(&requests);
+                        let mut browser = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?;
+                        let state = browser
+                            .as_mut()
+                            .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                        state.network_requests = requests;
+                        state.network_capture = Some(capture);
+                        json!({"har": har, "entries": entries})
+                    }
+                    _ => {
+                        return Err(DaemonError {
+                            code: "invalid_har_action".into(),
+                            message: "network har action must be \"start\" or \"stop\"".into(),
+                            ..Default::default()
+                        });
+                    }
+                }
             }
             "network.requests" => {
                 let capture = self
@@ -3209,6 +3361,71 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     }
 }
 
+fn har_document(requests: &[CapturedRequest]) -> Value {
+    let entries = requests
+        .iter()
+        .map(|request| {
+            let started =
+                time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
+                    .ok()
+                    .and_then(|value| {
+                        value
+                            .format(&time::format_description::well_known::Rfc3339)
+                            .ok()
+                    })
+                    .unwrap_or_default();
+            let headers = |headers: &std::collections::BTreeMap<String, String>| {
+                headers
+                    .iter()
+                    .map(|(name, value)| json!({"name": name, "value": value}))
+                    .collect::<Vec<_>>()
+            };
+            let response_content = json!({
+                "size": request.encoded_body_size,
+                "mimeType": request.mime_type,
+            });
+            // The Go network recorder currently retains no bodies in production;
+            // both content modes therefore expose the same metadata today.
+            json!({
+                "startedDateTime": started,
+                "time": 0,
+                "request": {
+                    "method": request.method,
+                    "url": request.url,
+                    "httpVersion": "HTTP/1.1",
+                    "headers": headers(&request.request_headers),
+                    "queryString": [],
+                    "cookies": [],
+                    "headersSize": -1,
+                    "bodySize": -1,
+                },
+                "response": {
+                    "status": request.status,
+                    "statusText": request.status_text,
+                    "httpVersion": "HTTP/1.1",
+                    "headers": headers(&request.response_headers),
+                    "cookies": [],
+                    "content": response_content,
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": request.encoded_body_size,
+                },
+                "cache": {},
+                "timings": {"send": 0, "wait": 0, "receive": 0},
+            })
+        })
+        .collect::<Vec<_>>();
+    let started = time::OffsetDateTime::now_utc()
+        .format(&time::format_description::well_known::Rfc3339)
+        .unwrap_or_default();
+    json!({"log": {
+        "version": "1.2",
+        "creator": {"name": "symbrowse", "version": "0.1.0"},
+        "pages": [{"startedDateTime": started, "id": "page_1", "title": "", "pageTimings": {}}],
+        "entries": entries,
+    }})
+}
+
 fn network_request_value(request: &CapturedRequest) -> Value {
     let started_at = time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
         .ok()
@@ -4385,5 +4602,39 @@ mod tests {
             storage_set_request(&bad_args).unwrap_err().message,
             "storage key is required"
         );
+    }
+
+    #[test]
+    fn har_document_projects_captured_requests_with_masked_headers() {
+        let request = CapturedRequest {
+            id: "req-1".into(),
+            url: "https://example.test/path?q=1".into(),
+            method: "GET".into(),
+            status: 200,
+            status_text: "OK".into(),
+            mime_type: "text/html".into(),
+            started_at_unix_seconds: 1_700_000_000,
+            finished: true,
+            request_headers: [("authorization".into(), "[redacted]".into())]
+                .into_iter()
+                .collect(),
+            response_headers: [("content-type".into(), "text/html".into())]
+                .into_iter()
+                .collect(),
+            encoded_body_size: 17,
+            ..CapturedRequest::default()
+        };
+        let har = har_document(&[request]);
+        assert_eq!(har["log"]["version"], "1.2");
+        assert_eq!(har["log"]["entries"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            har["log"]["entries"][0]["request"]["url"],
+            "https://example.test/path?q=1"
+        );
+        assert_eq!(
+            har["log"]["entries"][0]["request"]["headers"][0]["value"],
+            "[redacted]"
+        );
+        assert_eq!(har["log"]["entries"][0]["response"]["content"]["size"], 17);
     }
 }

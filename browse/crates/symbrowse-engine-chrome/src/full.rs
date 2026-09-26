@@ -466,7 +466,32 @@ pub struct ChromePage {
     download_session: String,
     download_frame: Arc<Mutex<String>>,
     runtime_events: Arc<Mutex<RuntimeEventState>>,
-    network_guard_enabled: Arc<Mutex<bool>>,
+    network_interception: Arc<Mutex<NetworkInterception>>,
+}
+
+#[derive(Clone, Default)]
+struct NetworkInterception {
+    listener_started: bool,
+    fetch_enabled: bool,
+    routes: BTreeMap<String, NetworkRoute>,
+    allowlist: Option<symbrowse_core::policy::Allowlist>,
+    ssrf_enabled: bool,
+    allow_private: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct NetworkRoute {
+    pub pattern: String,
+    pub action: String,
+    pub status: i64,
+    pub body: Option<Vec<u8>>,
+    pub content_type: String,
+}
+
+fn route_matches(pattern: &str, url: &str) -> bool {
+    pattern
+        .strip_suffix('*')
+        .map_or(url == pattern, |prefix| url.starts_with(prefix))
 }
 
 #[derive(Clone)]
@@ -603,7 +628,7 @@ impl ChromePage {
             download_session,
             download_frame,
             runtime_events: Arc::new(Mutex::new(RuntimeEventState::default())),
-            network_guard_enabled: Arc::new(Mutex::new(false)),
+            network_interception: Arc::new(Mutex::new(NetworkInterception::default())),
         })
     }
 
@@ -614,81 +639,169 @@ impl ChromePage {
         ssrf_enabled: bool,
         allow_private: bool,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         let allowlist = symbrowse_core::policy::Allowlist::parse(&allowed_domains)?;
-        if !allowlist.active() && !ssrf_enabled {
-            if diagnostics {
-                eprintln!("chrome_network_guard_stage=inactive");
-            }
-            return Ok(());
+        let policy_active = allowlist.active() || ssrf_enabled;
+        {
+            let mut interception = self.network_interception.lock().await;
+            interception.allowlist = Some(allowlist);
+            interception.ssrf_enabled = ssrf_enabled;
+            interception.allow_private = allow_private;
         }
-        let mut enabled = self.network_guard_enabled.lock().await;
-        if *enabled {
-            if diagnostics {
-                eprintln!("chrome_network_guard_stage=already-enabled");
-            }
+        self.ensure_interception_listener().await?;
+        if policy_active {
+            self.enable_fetch_interception().await?;
+        }
+        Ok(())
+    }
+
+    async fn ensure_interception_listener(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        if interception.listener_started {
             return Ok(());
         }
         let mut paused = self
             .page
             .event_listener::<fetch::EventRequestPaused>()
             .await?;
-        if diagnostics {
-            eprintln!("chrome_network_guard_stage=request-paused-listener-ready");
-        }
-        self.page.execute(fetch::EnableParams::default()).await?;
-        *enabled = true;
-        drop(enabled);
-        if diagnostics {
-            eprintln!("chrome_network_guard_stage=fetch-enabled");
-        }
-
+        interception.listener_started = true;
+        drop(interception);
         let page = self.page.clone();
+        let state = Arc::clone(&self.network_interception);
         tokio::spawn(async move {
             while let Some(event) = paused.next().await {
-                let target = event.request.url.clone();
-                let allowlist = allowlist.clone();
-                let allowed = tokio::task::spawn_blocking(move || {
-                    if !allowlist.allows_url(&target) {
-                        return false;
-                    }
-                    !ssrf_enabled
+                let (route, allowlist, ssrf_enabled, allow_private) = {
+                    let state = state.lock().await;
+                    let route = state
+                        .routes
+                        .values()
+                        .find(|route| route_matches(&route.pattern, &event.request.url))
+                        .cloned();
+                    (
+                        route,
+                        state.allowlist.clone(),
+                        state.ssrf_enabled,
+                        state.allow_private,
+                    )
+                };
+                let allowed = allowlist
+                    .as_ref()
+                    .is_none_or(|list| list.allows_url(&event.request.url))
+                    && (!ssrf_enabled
                         || symbrowse_core::policy::SsrfGuard::new(allow_private)
-                            .allows_url(&target)
-                            .is_ok()
-                })
-                .await
-                .unwrap_or(false);
-                let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
-                if diagnostics {
-                    eprintln!(
-                        "chrome_network_guard_decision={}",
-                        if allowed { "continue" } else { "block" },
-                    );
-                }
-                if allowed {
-                    if let Err(error) = page
-                        .execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
-                        .await
-                        && diagnostics
-                    {
-                        eprintln!("chrome_network_guard_continue_failed={error}");
+                            .allows_url(&event.request.url)
+                            .is_ok());
+                let result = if !allowed {
+                    page.execute(fetch::FailRequestParams::new(
+                        event.request_id.clone(),
+                        network::ErrorReason::BlockedByClient,
+                    ))
+                    .await
+                    .map(|_| ())
+                } else if let Some(route) = route {
+                    match route.action.as_str() {
+                        "abort" => page
+                            .execute(fetch::FailRequestParams::new(
+                                event.request_id.clone(),
+                                network::ErrorReason::BlockedByClient,
+                            ))
+                            .await
+                            .map(|_| ()),
+                        _ => {
+                            let mut response = fetch::FulfillRequestParams::builder()
+                                .request_id(event.request_id.clone())
+                                .response_code(if route.status == 0 { 200 } else { route.status });
+                            if let Some(body) = route.body {
+                                use base64::Engine as _;
+                                response = response
+                                    .body(base64::engine::general_purpose::STANDARD.encode(body));
+                            }
+                            if !route.content_type.is_empty() {
+                                response = response.response_header(fetch::HeaderEntry::new(
+                                    "Content-Type",
+                                    route.content_type,
+                                ));
+                            }
+                            match response.build() {
+                                Ok(response) => page.execute(response).await.map(|_| ()),
+                                Err(error) => {
+                                    eprintln!("chrome_network_interception_build_failed={error}");
+                                    page.execute(fetch::ContinueRequestParams::new(
+                                        event.request_id.clone(),
+                                    ))
+                                    .await
+                                    .map(|_| ())
+                                }
+                            }
+                        }
                     }
                 } else {
-                    if let Err(error) = page
-                        .execute(fetch::FailRequestParams::new(
-                            event.request_id.clone(),
-                            network::ErrorReason::BlockedByClient,
-                        ))
+                    page.execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
                         .await
-                        && diagnostics
-                    {
-                        eprintln!("chrome_network_guard_fail_failed={error}");
-                    }
+                        .map(|_| ())
+                };
+                if let Err(error) = result
+                    && std::env::var_os("SYMBROWSE_E2E").is_some()
+                {
+                    eprintln!("chrome_network_interception_answer_failed={error}");
                 }
             }
         });
         Ok(())
+    }
+
+    async fn enable_fetch_interception(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        if interception.fetch_enabled {
+            return Ok(());
+        }
+        self.page.execute(fetch::EnableParams::default()).await?;
+        interception.fetch_enabled = true;
+        Ok(())
+    }
+
+    pub async fn route_requests(
+        &self,
+        route: NetworkRoute,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if route.pattern.trim().is_empty() {
+            return Err("route pattern is required".into());
+        }
+        if route.action != "abort" && route.action != "mock" {
+            return Err("route action must be \"abort\" or \"mock\"".into());
+        }
+        self.ensure_interception_listener().await?;
+        self.network_interception
+            .lock()
+            .await
+            .routes
+            .insert(route.pattern.clone(), route);
+        self.enable_fetch_interception().await
+    }
+
+    pub async fn unroute_requests(
+        &self,
+        pattern: &str,
+    ) -> Result<bool, Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        let removed = if pattern.is_empty() {
+            let removed = !interception.routes.is_empty();
+            interception.routes.clear();
+            removed
+        } else {
+            interception.routes.remove(pattern).is_some()
+        };
+        if interception.routes.is_empty()
+            && interception.fetch_enabled
+            && !interception.ssrf_enabled
+            && interception
+                .allowlist
+                .as_ref()
+                .is_none_or(|list| !list.active())
+        {
+            self.page.execute(fetch::DisableParams::default()).await?;
+            interception.fetch_enabled = false;
+        }
+        Ok(removed)
     }
 
     /// Disable page JavaScript execution for an isolated engine-hint probe.
@@ -2533,6 +2646,26 @@ mod tests {
         assert!(navigation_completed(
             &before,
             &json!({"url": "https://example.test/#section", "time_origin": 1, "ready_state": "complete"})
+        ));
+    }
+
+    #[test]
+    fn network_route_patterns_match_exact_url_or_prefix_glob() {
+        assert!(route_matches(
+            "https://example.test",
+            "https://example.test"
+        ));
+        assert!(!route_matches(
+            "https://example.test",
+            "https://example.test/path"
+        ));
+        assert!(route_matches(
+            "https://example.test/*",
+            "https://example.test/path"
+        ));
+        assert!(!route_matches(
+            "https://example.test/*",
+            "https://other.test/path"
         ));
     }
 }
