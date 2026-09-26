@@ -1777,6 +1777,7 @@ def run_batch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         ("CLI-006", ["batch", "version --json", "version extra", "version --json"]),
         ("CLI-006", ["batch", "--bail", "version extra", "version --json"]),
         ("CLI-006", ["batch", "--dry-run", "open https://fixture.invalid", "version --json"]),
+        ("CLI-006", ["batch", "mcp --list-profiles"]),
     ]
     comparisons = [compare_json_semantic(go, rust, argv, env, case=contract)
                    for contract, argv in cases]
@@ -1803,6 +1804,16 @@ def run_batch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
                                    and results[0].get("success") is False
                                    and report.get("bailed") is True)
                 row["criterion"] = "--bail stops after the first failed command"
+            elif row["argv"][1] == "mcp --list-profiles":
+                row["matched"] = (
+                    isinstance(results, list) and len(results) == 1
+                    and isinstance(results[0], dict)
+                    and results[0].get("command") == "mcp --list-profiles"
+                    and results[0].get("success") is True
+                    and isinstance(results[0].get("data"), str)
+                    and "core" in results[0]["data"]
+                )
+                row["criterion"] = "batch captures the existing MCP profile list"
             else:
                 plan = report.get("plan", [])
                 row["matched"] = (isinstance(plan, list) and len(plan) == 2
