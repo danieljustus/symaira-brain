@@ -962,6 +962,10 @@ impl ChromePage {
             .page
             .event_listener::<page::EventNavigatedWithinDocument>()
             .await?;
+        let mut load_events = self
+            .page
+            .event_listener::<page::EventLoadEventFired>()
+            .await?;
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-listeners-ready");
         }
@@ -1015,12 +1019,16 @@ impl ChromePage {
 
         let mut frame_events_open = true;
         let mut same_document_events_open = true;
+        let mut load_events_open = true;
         let mut navigation_observed = false;
+        let mut load_event_observed = false;
         let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
         }
-        while !navigation_observed && (frame_events_open || same_document_events_open) {
+        while !navigation_observed
+            && (frame_events_open || same_document_events_open || load_events_open)
+        {
             tokio::select! {
                 _ = tokio::time::sleep_until(deadline) => {
                     return Err("Chrome navigation timed out".into());
@@ -1028,8 +1036,15 @@ impl ChromePage {
                 _ = tokio::time::sleep(Duration::from_millis(25)) => {
                     // Chromiumoxide can miss the main-frame event on Windows.
                     // A changed document or same-document URL is the observable
-                    // navigation signal when the event stream stays silent.
-                    if let Ok(state) = self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})").await {
+                    // navigation signal when the event stream stays silent. Keep
+                    // each CDP probe bounded so one stalled evaluation cannot
+                    // bypass the navigation deadline or starve event handling.
+                    let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+                    let probe_timeout = remaining.min(Duration::from_millis(250));
+                    if let Ok(Ok(state)) = tokio::time::timeout(
+                        probe_timeout,
+                        self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})"),
+                    ).await {
                         let state = state.into_value::<Value>()?;
                         if navigation_completed(&before, &state) {
                             navigation_observed = true;
@@ -1060,21 +1075,40 @@ impl ChromePage {
                         None => same_document_events_open = false,
                     }
                 }
+                event = load_events.next(), if load_events_open => {
+                    match event {
+                        Some(_) => {
+                            navigation_observed = true;
+                            load_event_observed = true;
+                            if diagnostics {
+                                eprintln!("chrome_open_stage=load-event-observed");
+                            }
+                        }
+                        None => load_events_open = false,
+                    }
+                }
             }
         }
         if !navigation_observed {
             return Err("Chrome navigation event streams closed".into());
         }
 
+        if load_event_observed {
+            let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+            return tokio::time::timeout(remaining, self.current_navigation_outcome()).await?;
+        }
+
         loop {
             if tokio::time::Instant::now() >= deadline {
                 return Err("Chrome navigation timed out waiting for document completion".into());
             }
-            let state = self
-                .page
-                .evaluate("({ready_state: document.readyState})")
-                .await;
-            if let Ok(state) = state {
+            let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+            let state = tokio::time::timeout(
+                remaining.min(Duration::from_millis(250)),
+                self.page.evaluate("({ready_state: document.readyState})"),
+            )
+            .await;
+            if let Ok(Ok(state)) = state {
                 let state = state.into_value::<Value>()?;
                 if state.get("ready_state").and_then(Value::as_str) == Some("complete") {
                     if diagnostics {
