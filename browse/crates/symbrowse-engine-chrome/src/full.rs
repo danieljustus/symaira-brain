@@ -991,25 +991,14 @@ impl ChromePage {
         if cfg!(windows) && !same_document {
             // Chrome can navigate while leaving this command response pending.
             // The event and document checks below remain the completion proof.
-            match tokio::time::timeout(
+            if let Ok(dispatch) = tokio::time::timeout(
                 Duration::from_secs(1),
                 self.page.execute(page::NavigateParams::new(url)),
             )
             .await
+                && let Some(error) = dispatch?.result.error_text
             {
-                Ok(dispatch) => {
-                    let dispatch = dispatch?;
-                    if diagnostics {
-                        eprintln!("chrome_open_stage=navigation-dispatch-response-received");
-                    }
-                    if let Some(error) = dispatch.result.error_text {
-                        return Err(error.into());
-                    }
-                }
-                Err(_) if diagnostics => {
-                    eprintln!("chrome_open_stage=navigation-dispatch-response-timeout");
-                }
-                Err(_) => {}
+                return Err(error.into());
             }
         } else {
             let url_literal = serde_json::to_string(url)?;
@@ -1033,7 +1022,6 @@ impl ChromePage {
         let mut load_events_open = true;
         let mut navigation_observed = false;
         let mut load_event_observed = false;
-        let mut document_probe_completed = false;
         let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
@@ -1043,9 +1031,6 @@ impl ChromePage {
         {
             tokio::select! {
                 _ = tokio::time::sleep_until(deadline) => {
-                    if diagnostics {
-                        eprintln!("chrome_open_stage=navigation-timeout document_probe_completed={document_probe_completed}");
-                    }
                     return Err("Chrome navigation timed out".into());
                 }
                 _ = tokio::time::sleep(Duration::from_millis(25)) => {
@@ -1061,12 +1046,8 @@ impl ChromePage {
                         self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})"),
                     ).await {
                         let state = state.into_value::<Value>()?;
-                        document_probe_completed = true;
                         if navigation_completed(&before, &state) {
                             navigation_observed = true;
-                            if diagnostics {
-                                eprintln!("chrome_open_stage=document-navigation-observed");
-                            }
                         }
                     }
                 }
