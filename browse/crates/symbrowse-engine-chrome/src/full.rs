@@ -992,7 +992,15 @@ impl ChromePage {
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-listeners-ready");
         }
-        let main_frame = self.page.mainframe().await?;
+        let main_frame = match self.page.mainframe().await {
+            Ok(main_frame) => main_frame,
+            Err(error) => {
+                if cfg!(windows) && diagnostics {
+                    eprintln!("chrome_open_stage=main-frame status=error");
+                }
+                return Err(error.into());
+            }
+        };
         let before = self
             .page
             .evaluate("({url: location.href, time_origin: performance.timeOrigin})")
@@ -1006,14 +1014,22 @@ impl ChromePage {
             return self.current_navigation_outcome().await;
         }
         if diagnostics {
-            eprintln!("chrome_open_stage=main-frame-resolved");
-        }
-        if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-start");
+            eprintln!("chrome_open_stage=navigation-future-start");
         }
         if cfg!(windows) && !same_document {
-            // Chrome can navigate while leaving this command response pending.
-            // The event and document checks below remain the completion proof.
+            if diagnostics {
+                eprintln!(
+                    "chrome_open_stage=main-frame status={}",
+                    if main_frame.is_some() {
+                        "present"
+                    } else {
+                        "missing"
+                    }
+                );
+            }
+            // Chromiumoxide keeps Page.navigate pending through page load.
+            // Bound it because Windows may omit lifecycle events; the event
+            // and document checks below remain the completion proof.
             match tokio::time::timeout(
                 Duration::from_secs(1),
                 self.page.execute(page::NavigateParams::new(url)),
@@ -1024,7 +1040,7 @@ impl ChromePage {
                     let dispatch = dispatch?;
                     if diagnostics {
                         eprintln!(
-                            "chrome_open_stage=dispatch-response status=received error_text={}",
+                            "chrome_open_stage=navigation-future status=completed error_text={}",
                             dispatch.result.error_text.is_some()
                         );
                     }
@@ -1034,7 +1050,7 @@ impl ChromePage {
                 }
                 Err(_) => {
                     if diagnostics {
-                        eprintln!("chrome_open_stage=dispatch-response status=timeout");
+                        eprintln!("chrome_open_stage=navigation-future status=timeout");
                     }
                 }
             }
@@ -1052,7 +1068,7 @@ impl ChromePage {
             }
         }
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-complete");
+            eprintln!("chrome_open_stage=navigation-future-finish");
         }
 
         let mut frame_events_open = true;
