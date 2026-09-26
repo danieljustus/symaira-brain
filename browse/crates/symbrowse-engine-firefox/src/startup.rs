@@ -8,10 +8,7 @@ where
     R: tokio::io::AsyncRead + Unpin,
 {
     let mut chunk = [0_u8; 1024];
-    loop {
-        let Ok(size) = reader.read(&mut chunk).await else {
-            break;
-        };
+    while let Ok(size) = reader.read(&mut chunk).await {
         if size == 0 {
             break;
         }

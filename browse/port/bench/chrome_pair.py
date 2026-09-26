@@ -89,6 +89,22 @@ def nearest_rank(samples: list[int]) -> int:
     return ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)]
 
 
+def summarize_stage(samples: list[dict[str, Any]], field: str) -> dict[str, int | str]:
+    values = [
+        int(sample[field])
+        for sample in samples
+        if sample.get("status") == "pass" and isinstance(sample.get(field), int)
+    ]
+    if not values:
+        return {"status": "incomplete", "samples": 0}
+    return {
+        "status": "complete" if len(values) == len(samples) else "incomplete",
+        "samples": len(values),
+        "median_duration_ns": int(statistics.median(values)),
+        "p95_duration_ns": nearest_rank(values),
+    }
+
+
 def paired_gate_passes(go_samples: list[int], rust_samples: list[int], required: int) -> bool:
     return (
         len(go_samples) == required
@@ -219,9 +235,12 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
     started = time.perf_counter_ns()
     outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
     try:
+        open_started = time.perf_counter_ns()
         opened = run_cli(binary, ["open", url], session, env, root)
+        open_duration = time.perf_counter_ns() - open_started
         if opened[0] != 0:
             outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
+                       "open_cli_duration_ns": open_duration,
                        "stdout_sha256": hashlib.sha256(opened[1].encode()).hexdigest(),
                        "stderr_sha256": hashlib.sha256(opened[2].encode()).hexdigest()}
             try:
@@ -232,26 +251,36 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             except (json.JSONDecodeError, AttributeError):
                 pass
         else:
+            read_started = time.perf_counter_ns()
             read = run_cli(binary, ["read"], session, env, root)
+            read_duration = time.perf_counter_ns() - read_started
             elapsed = time.perf_counter_ns() - started
             if read[0] != 0 or not validate_read_output(read[1]):
                 outcome = {"status": "error", "phase": "read", "exit_code": read[0],
                            "semantic_contract": "local fixture title/token must appear in JSON read output",
                            "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
-                           "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed}
+                           "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
+                           "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
             else:
-                outcome = {"status": "pass", "duration_ns": elapsed}
+                outcome = {"status": "pass", "duration_ns": elapsed,
+                           "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
     except (OSError, subprocess.TimeoutExpired) as error:
         outcome = {"status": "error", "reason": type(error).__name__, "duration_ns": time.perf_counter_ns() - started}
     finally:
         try:
             run_cli(binary, ["daemon", "stop"], session, env, root)
             if not wait_for_daemon_exit(binary, session, env, root):
-                outcome = {"status": "error", "phase": "daemon-stop",
-                           "reason": "daemon did not exit within 10 seconds after stop"}
+                if outcome["status"] == "pass":
+                    outcome = {"status": "error", "phase": "daemon-stop",
+                               "reason": "daemon did not exit within 10 seconds after stop"}
+                else:
+                    outcome["cleanup_error"] = "daemon did not exit within 10 seconds after stop"
         except (OSError, subprocess.TimeoutExpired):
-            outcome = {"status": "error", "phase": "daemon-stop",
-                       "reason": "daemon shutdown could not be confirmed"}
+            if outcome["status"] == "pass":
+                outcome = {"status": "error", "phase": "daemon-stop",
+                           "reason": "daemon shutdown could not be confirmed"}
+            else:
+                outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
     return outcome
 
 
@@ -313,7 +342,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 order.reverse()
             for implementation in order:
                 binary = args.go if implementation == "go" else args.rust
-                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-"))
+                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-", dir="/tmp" if sys.platform == "darwin" else None))
                 try:
                     samples[implementation].append(
                         flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)
@@ -334,6 +363,10 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             "samples": samples[implementation], "sample_count": len(passing),
             "p95_duration_ns": nearest_rank(passing) if passing else None,
             "median_duration_ns": int(statistics.median(passing)) if passing else None,
+            "stages": {
+                "open_cli": summarize_stage(samples[implementation], "open_cli_duration_ns"),
+                "read_cli": summarize_stage(samples[implementation], "read_cli_duration_ns"),
+            },
         }
     go_p95 = report["binaries"]["go"]["chrome_flow"]["p95_duration_ns"]
     rust_p95 = report["binaries"]["rust"]["chrome_flow"]["p95_duration_ns"]

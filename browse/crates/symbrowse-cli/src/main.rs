@@ -67,7 +67,7 @@ struct AuthLoginEnvelope<'a> {
     warnings: Vec<symbrowse_core::output::Warning>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, PartialEq)]
 enum Action {
     Help(String),
     CompatSidecar,
@@ -203,6 +203,11 @@ enum Action {
         dry_run: bool,
         format: Format,
     },
+    FlowRecord {
+        session: String,
+        command: String,
+        format: Format,
+    },
     TraceExport {
         session: String,
         path: PathBuf,
@@ -216,6 +221,13 @@ enum Action {
     DiffSnapshot {
         session: String,
         baseline: Option<PathBuf>,
+        format: Format,
+    },
+    DiffScreenshot {
+        session: String,
+        baseline: PathBuf,
+        threshold: f64,
+        out: Option<PathBuf>,
         format: Format,
     },
     DiffUrl {
@@ -419,6 +431,11 @@ fn main() -> ExitCode {
             dry_run,
             format,
         }) => run_flow(session, path, inputs, dry_run, format),
+        Ok(Action::FlowRecord {
+            session,
+            command,
+            format,
+        }) => run_flow_record(session, command, format),
         Ok(Action::TraceExport {
             session,
             path,
@@ -434,6 +451,13 @@ fn main() -> ExitCode {
             baseline,
             format,
         }) => run_diff_snapshot(session, baseline, format),
+        Ok(Action::DiffScreenshot {
+            session,
+            baseline,
+            threshold,
+            out,
+            format,
+        }) => run_diff_screenshot(session, baseline, threshold, out, format),
         Ok(Action::DiffUrl {
             session,
             first_url,
@@ -515,6 +539,37 @@ fn run_dispatch(
     let is_oob_status = frame.cmd == "oob.status";
     let is_handoff = frame.cmd == "handoff";
     let is_network_request = frame.cmd == "network.request";
+    let is_network_har = frame.cmd == "network.har";
+    let is_network_route = frame.cmd == "network.route";
+    let is_network_unroute = frame.cmd == "network.unroute";
+    let network_route_action = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("action"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("mock")
+        .to_owned();
+    let network_route_pattern = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("pattern"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_owned();
+    let network_har_action = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("action"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default()
+        .to_owned();
+    let network_har_output = frame
+        .args
+        .as_ref()
+        .and_then(|args| args.get("output"))
+        .and_then(serde_json::Value::as_str)
+        .filter(|path| !path.is_empty())
+        .map(str::to_owned);
     let is_screenshot = frame.cmd == "screenshot";
     let is_storage_mutation = matches!(frame.cmd.as_str(), "storage.set" | "storage.clear");
     let is_cookie_clear = frame.cmd == "cookies.clear";
@@ -704,6 +759,73 @@ fn run_dispatch(
                     render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
                 }
             };
+        }
+        if is_network_har {
+            if network_har_action == "start" && format == Format::Text {
+                return write_stdout("HAR capture started\n");
+            }
+            let har = response_data
+                .get("har")
+                .cloned()
+                .unwrap_or(serde_json::Value::Null);
+            if network_har_action == "stop"
+                && let Some(path) = network_har_output.as_deref()
+            {
+                let output = match serde_json::to_vec_pretty(&har) {
+                    Ok(output) => output,
+                    Err(error) => {
+                        return render_dispatch_error(
+                            format,
+                            daemon_codes::OPERATION_FAILED,
+                            error.to_string(),
+                        );
+                    }
+                };
+                let mut options = fs::OpenOptions::new();
+                options.write(true).create(true).truncate(true);
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::OpenOptionsExt;
+                    options.mode(0o600);
+                }
+                if let Err(error) = options
+                    .open(path)
+                    .and_then(|mut file| file.write_all(&output))
+                {
+                    return render_dispatch_error(
+                        format,
+                        "operation_failed",
+                        format!("write HAR: {error}"),
+                    );
+                }
+                return if format == Format::Text {
+                    write_stdout(&format!("HAR saved to {path}\n"))
+                } else {
+                    write_stdout("")
+                };
+            }
+            if network_har_action == "stop" && format == Format::Text {
+                let mut output = match serde_json::to_string_pretty(&har) {
+                    Ok(output) => output,
+                    Err(error) => {
+                        return render_dispatch_error(
+                            format,
+                            daemon_codes::OPERATION_FAILED,
+                            error.to_string(),
+                        );
+                    }
+                };
+                output.push('\n');
+                return write_stdout(&output);
+            }
+        }
+        if is_network_route && format == Format::Text {
+            return write_stdout(&format!(
+                "routed {network_route_pattern} ({network_route_action})\n"
+            ));
+        }
+        if is_network_unroute && format == Format::Text {
+            return write_stdout("unrouted\n");
         }
         if is_journal_read && format == Format::Text {
             return write_stdout(&render_journal_text(&response_data));
@@ -1279,10 +1401,6 @@ fn run_watch(session: String, take_over: bool, reason: String, format: Format) -
             }
         };
     }
-    let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
-    if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
-        return ExitCode::from(1);
-    }
     let runtime = match tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -1297,16 +1415,35 @@ fn run_watch(session: String, take_over: bool, reason: String, format: Format) -
 }
 
 async fn watch_session(session: String) -> ExitCode {
-    let client = Client::new(ClientOptions {
+    let options = ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
         ..ClientOptions::default()
-    });
+    };
     let mut seen = 0;
     let shutdown = wait_watch_shutdown();
     tokio::pin!(shutdown);
+    let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
+    if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
+        return ExitCode::from(1);
+    }
     loop {
-        let response = client.request(cli_frame("journal.show", &session, None));
+        let client = Client::new(options.clone());
+        let frame = cli_frame("journal.show", &session, None);
+        let response = match tokio::task::spawn_blocking(move || {
+            client.request(frame).map_err(|_| ())
+        })
+        .await
+        {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    Format::Text,
+                    daemon_codes::OPERATION_FAILED,
+                    error.to_string(),
+                );
+            }
+        };
         let delay = match response {
             Ok(response) if !response.success => {
                 return render_daemon_error(Format::Text, response.error.unwrap_or_default());
@@ -1353,18 +1490,27 @@ async fn watch_session(session: String) -> ExitCode {
 }
 
 #[cfg(unix)]
-async fn wait_watch_shutdown() {
+fn wait_watch_shutdown() -> impl std::future::Future<Output = ()> {
+    let mut interrupt = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())
+        .expect("register SIGINT handler");
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
         .expect("register SIGTERM handler");
-    tokio::select! {
-        _ = tokio::signal::ctrl_c() => {},
-        _ = terminate.recv() => {},
+    async move {
+        tokio::select! {
+            _ = interrupt.recv() => {},
+            _ = terminate.recv() => {},
+        }
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
 async fn wait_watch_shutdown() {
-    let _ = tokio::signal::ctrl_c().await;
+    let mut interrupt = tokio::signal::windows::ctrl_c().expect("register CTRL_C handler");
+    let mut terminate = tokio::signal::windows::ctrl_break().expect("register CTRL_BREAK handler");
+    tokio::select! {
+        _ = interrupt.recv() => {},
+        _ = terminate.recv() => {},
+    }
 }
 
 fn run_trace_export(session: String, path: PathBuf, format: Format) -> ExitCode {
@@ -1835,6 +1981,264 @@ fn snapshot_tree_diff(before: &str, after: &str) -> serde_json::Value {
 
 fn snapshot_lines(value: &str) -> Vec<&str> {
     value.split('\n').filter(|line| !line.is_empty()).collect()
+}
+
+fn run_diff_screenshot(
+    session: String,
+    baseline: PathBuf,
+    threshold: f64,
+    out: Option<PathBuf>,
+    format: Format,
+) -> ExitCode {
+    let baseline_data = match fs::read(&baseline) {
+        Ok(data) => data,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "read baseline {baseline:?}: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response = match client.request(Frame {
+        cmd: "screenshot".into(),
+        args: Some(serde_json::json!({})),
+        session,
+        ..Frame::default()
+    }) {
+        Ok(response) => response,
+        Err(error) => return render_client_error(format, error),
+    };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let path = response
+        .data
+        .as_ref()
+        .and_then(|data| data.get("path"))
+        .and_then(serde_json::Value::as_str)
+        .filter(|path| !path.is_empty());
+    let Some(path) = path else {
+        let _ = writeln!(
+            io::stderr(),
+            "screenshot response did not include a file path"
+        );
+        return ExitCode::from(1);
+    };
+    let captured = match fs::read(path) {
+        Ok(data) => data,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "read captured screenshot {path:?}: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    let result = match compare_screenshots(&baseline_data, &captured, threshold) {
+        Ok(result) => result,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "{error}");
+            return ExitCode::from(1);
+        }
+    };
+    let mut data = serde_json::json!({
+        "width": result.width,
+        "height": result.height,
+        "different_px": result.different_px,
+        "total_px": result.total_px,
+        "deviation": result.deviation,
+        "deviation_pct": result.deviation_pct,
+        "threshold": result.threshold,
+        "passed": result.passed,
+    });
+    if let Some(path) = out {
+        let mut options = fs::OpenOptions::new();
+        options.write(true).create(true).truncate(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let write_result = options
+            .open(&path)
+            .and_then(|mut file| file.write_all(&result.diff_image_png));
+        if let Err(error) = write_result {
+            let _ = writeln!(io::stderr(), "write diff image {path:?}: {error}");
+            return ExitCode::from(1);
+        }
+        data["diff_image"] = serde_json::Value::String(path.to_string_lossy().into_owned());
+    }
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => {
+            if write_stdout(&output) != ExitCode::SUCCESS {
+                return ExitCode::from(1);
+            }
+        }
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    }
+    if result.passed {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(8) // Go's exitcodes.ExitData.
+    }
+}
+
+struct ScreenshotDiff {
+    width: u32,
+    height: u32,
+    different_px: usize,
+    total_px: usize,
+    deviation: f64,
+    deviation_pct: f64,
+    threshold: f64,
+    passed: bool,
+    diff_image_png: Vec<u8>,
+}
+
+fn compare_screenshots(
+    baseline: &[u8],
+    current: &[u8],
+    threshold: f64,
+) -> Result<ScreenshotDiff, String> {
+    let (width, height, baseline) =
+        decode_png(baseline).map_err(|error| format!("baseline: {error}"))?;
+    let (current_width, current_height, current) =
+        decode_png(current).map_err(|error| format!("current: {error}"))?;
+    if current_width != width || current_height != height {
+        return Err(format!(
+            "dimension mismatch: baseline (0,0)-({width},{height}) vs current (0,0)-({current_width},{current_height})"
+        ));
+    }
+    let threshold = if threshold <= 0.0 { 0.001 } else { threshold };
+    let total_px = usize::try_from(width)
+        .ok()
+        .and_then(|width| {
+            usize::try_from(height)
+                .ok()
+                .and_then(|height| width.checked_mul(height))
+        })
+        .ok_or_else(|| "image dimensions overflow".to_owned())?;
+    let mut different_px = 0;
+    let diff_bytes = total_px
+        .checked_mul(4)
+        .ok_or_else(|| "image dimensions overflow".to_owned())?;
+    let mut diff = Vec::new();
+    diff.try_reserve_exact(diff_bytes)
+        .map_err(|error| format!("allocate diff image: {error}"))?;
+    for (base, current) in baseline
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .zip(current.as_chunks::<4>().0.iter())
+    {
+        if !same_pixel(base, current) {
+            different_px += 1;
+            diff.extend_from_slice(&[255, 0, 255, 255]);
+        } else {
+            diff.extend_from_slice(&[base[0] / 4, base[1] / 4, base[2] / 4, base[3]]);
+        }
+    }
+    let mut diff_image_png = Vec::new();
+    {
+        let mut encoder = png::Encoder::new(&mut diff_image_png, width, height);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder
+            .write_header()
+            .map_err(|error| format!("encode diff image: {error}"))?;
+        writer
+            .write_image_data(&diff)
+            .map_err(|error| format!("encode diff image: {error}"))?;
+    }
+    let deviation = if total_px == 0 {
+        0.0
+    } else {
+        different_px as f64 / total_px as f64
+    };
+    Ok(ScreenshotDiff {
+        width,
+        height,
+        different_px,
+        total_px,
+        deviation,
+        deviation_pct: deviation * 100.0,
+        threshold,
+        passed: deviation <= threshold,
+        diff_image_png,
+    })
+}
+
+fn decode_png(data: &[u8]) -> Result<(u32, u32, Vec<u8>), String> {
+    let mut decoder = png::Decoder::new(std::io::Cursor::new(data));
+    decoder.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
+    let mut reader = decoder
+        .read_info()
+        .map_err(|error| format!("decode png: {error}"))?;
+    let buffer_size = reader
+        .output_buffer_size()
+        .ok_or("invalid png dimensions")?;
+    let mut buffer = Vec::new();
+    buffer
+        .try_reserve_exact(buffer_size)
+        .map_err(|error| format!("allocate png decode buffer: {error}"))?;
+    buffer.resize(buffer_size, 0);
+    let info = reader
+        .next_frame(&mut buffer)
+        .map_err(|error| format!("decode png: {error}"))?;
+    let rgba_bytes = usize::try_from(info.width)
+        .ok()
+        .and_then(|width| {
+            usize::try_from(info.height)
+                .ok()
+                .and_then(|height| width.checked_mul(height))
+        })
+        .and_then(|pixels| pixels.checked_mul(4))
+        .ok_or("invalid png dimensions")?;
+    let mut rgba = Vec::new();
+    rgba.try_reserve_exact(rgba_bytes)
+        .map_err(|error| format!("allocate png pixels: {error}"))?;
+    match info.color_type {
+        png::ColorType::Rgba => rgba.extend_from_slice(&buffer[..info.buffer_size()]),
+        png::ColorType::Rgb => {
+            for pixel in buffer[..info.buffer_size()].as_chunks::<3>().0 {
+                rgba.extend_from_slice(&[pixel[0], pixel[1], pixel[2], 255]);
+            }
+        }
+        png::ColorType::Grayscale => {
+            for gray in &buffer[..info.buffer_size()] {
+                rgba.extend_from_slice(&[*gray, *gray, *gray, 255]);
+            }
+        }
+        png::ColorType::GrayscaleAlpha => {
+            for pixel in buffer[..info.buffer_size()].as_chunks::<2>().0 {
+                rgba.extend_from_slice(&[pixel[0], pixel[0], pixel[0], pixel[1]]);
+            }
+        }
+        png::ColorType::Indexed => return Err("decode png: indexed output was not expanded".into()),
+    }
+    Ok((info.width, info.height, rgba))
+}
+
+fn same_pixel(a: &[u8], b: &[u8]) -> bool {
+    (0..4).all(|index| {
+        let a = if index == 3 {
+            u32::from(a[index]) * 257
+        } else {
+            u32::from(a[index]) * 257 * u32::from(a[3]) / 255
+        };
+        let b = if index == 3 {
+            u32::from(b[index]) * 257
+        } else {
+            u32::from(b[index]) * 257 * u32::from(b[3]) / 255
+        };
+        a.abs_diff(b) <= 8000
+    })
 }
 
 fn run_diff_url(
@@ -3238,6 +3642,97 @@ fn run_flow(
     }
 }
 
+fn run_flow_record(session: String, command: String, format: Format) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response =
+        match client.request(cli_frame(&format!("flow.record.{command}"), &session, None)) {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::DAEMON_UNAVAILABLE,
+                    error.to_string(),
+                );
+            }
+        };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let data = response.data.unwrap_or_default();
+    if command != "stop" {
+        return match Envelope::ok(data, Vec::new()).render(format) {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
+    let actions = match data.get("actions").cloned().unwrap_or_default() {
+        serde_json::Value::Array(actions) => match serde_json::from_value::<
+            Vec<flows::RecordedAction>,
+        >(serde_json::Value::Array(actions))
+        {
+            Ok(actions) => actions,
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::MALFORMED_REQUEST,
+                    error.to_string(),
+                );
+            }
+        },
+        _ => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::MALFORMED_REQUEST,
+                "flow.record.stop returned invalid actions".into(),
+            );
+        }
+    };
+    let draft = match flows::generate_draft(&actions) {
+        Ok(draft) => draft,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    };
+    let yaml = match draft.render_yaml() {
+        Ok(yaml) => yaml,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    };
+    if format == Format::Text {
+        return write_stdout(&yaml);
+    }
+    let data = serde_json::json!({
+        "recording": false,
+        "name": draft.name,
+        "inputs": draft.inputs,
+        "domains": draft.domains,
+        "secret_refs": draft.secret_refs,
+        "steps": draft.steps.len(),
+        "draft": yaml,
+    });
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => {
+            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+        }
+    }
+}
+
 fn run_mcp(
     session: String,
     profiles: String,
@@ -4311,7 +4806,7 @@ fn completion_shell_help(shell: &str) -> String {
     };
     let usage_suffix = if shell == "bash" { "" } else { " [flags]" };
     format!(
-        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n      --no-descriptions   disable completion descriptions\n  -h, --help              help for {shell}\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n  -h, --help              help for {shell}\n      --no-descriptions   disable completion descriptions\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
     )
 }
 
@@ -4714,7 +5209,10 @@ Use "symbrowse errors [command] --help" for more information about a command.
         ("journal", None) => Some("Inspect the append-only action journal\n\nUsage:\n  symbrowse journal [command]\n\nAvailable Commands:\n  show        Show the full journal of a session\n  tail        Show the last journal entries of a session\n\nFlags:\n  -h, --help             help for journal\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse journal [command] --help\" for more information about a command.\n".to_owned()),
         ("journal", Some("tail")) => Some("Show the last journal entries of a session\n\nUsage:\n  symbrowse journal tail [flags]\n\nFlags:\n  -h, --help        help for tail\n      --lines int   number of entries to show (default 10)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("journal", Some("show")) => Some("Show the full journal of a session\n\nUsage:\n  symbrowse journal show [flags]\n\nFlags:\n  -h, --help   help for show\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("network", None) => Some("Inspect, mock and export page network activity\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  request     Show one captured request by id\n  requests    List captured requests (sensitive headers masked)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", None) => Some("Inspect, mock and export page network activity\n\nUsage:\n  symbrowse network [command]\n\nAvailable Commands:\n  har         Start or stop HAR capture; stop prints the HAR document\n  request     Show one captured request by id\n  requests    List captured requests (sensitive headers masked)\n  route       Mock or abort requests matching a URL (policy-gated, MCP default deny)\n  unroute     Remove one route (or all routes without a pattern)\n\nFlags:\n  -h, --help             help for network\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse network [command] --help\" for more information about a command.\n".to_owned()),
+        ("network", Some("route")) => Some("Mock or abort requests matching a URL (policy-gated, MCP default deny)\n\nUsage:\n  symbrowse network route <url> [flags]\n\nFlags:\n      --abort         abort matching requests instead of mocking them\n      --body string   JSON response body for the mock\n  -h, --help          help for route\n      --status int    HTTP status for the mock (default 200)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("network", Some("unroute")) => Some("Remove one route (or all routes without a pattern)\n\nUsage:\n  symbrowse network unroute [pattern] [flags]\n\nFlags:\n  -h, --help   help for unroute\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
+        ("network", Some("har")) => Some("Start or stop HAR capture; stop prints the HAR document\n\nUsage:\n  symbrowse network har start|stop [flags]\n\nFlags:\n      --content string   response body capture: all or none (default \"none\")\n  -h, --help             help for har\n      --output string    write the HAR document to this file\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --session string   session name (default \"default\")\n".to_owned()),
         ("network", Some("request")) => Some(plain(
             "Show one captured request by id",
             "symbrowse network request <id> [flags]",
@@ -4723,7 +5221,8 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n      --dir string       set the download directory first\n  -h, --help             help for downloads\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n      --filter string    only URLs containing this substring\n  -h, --help             help for requests\n      --max-tokens int   token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string    only this HTTP method\n      --status int       only this HTTP status code\n      --type string      only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
+        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  screenshot  Compare the current screenshot against a baseline PNG\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
+        ("diff", Some("screenshot")) => Some("Compare the current screenshot against a baseline PNG\n\nUsage:\n  symbrowse diff screenshot [flags]\n\nFlags:\n      --baseline string   baseline PNG file to compare against (required)\n  -h, --help              help for screenshot\n      --out string        write the diff image to this file\n      --threshold float   allowed deviation fraction (0..1) (default 0.001)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("diff", Some("url")) => Some("Open two URLs and diff their extracted content\n\nUsage:\n  symbrowse diff url <url1> <url2> [flags]\n\nFlags:\n  -h, --help   help for url\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n  replay      Replay a trace file step by step and report deviations\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
@@ -4892,6 +5391,12 @@ Use "symbrowse errors [command] --help" for more information about a command.
             "      --dry-run             print the execution plan with risk classes without executing\n  -h, --help                help for run\n      --input stringArray   flow input as k=v (repeatable)\n      --session string      daemon session name (default \"default\")\n",
             global,
         )),
+        ("flow", Some("record")) => Some(plain(
+            "flow record start|stop captures the actions of a session and generates a flow draft: concrete values become {{input_N}} references, secret-looking values become op://… placeholders, session refs are converted to semantic selectors, and observed end states become assert steps. The draft is printed for human review.",
+            "symbrowse flow record <start|stop|status> [flags]",
+            "  -h, --help             help for record\n      --session string   daemon session name (default \"default\")\n",
+            global,
+        )),
         ("mcp", None) => Some(
             "mcp runs the Model Context Protocol stdio server. Tools proxy to the local symbrowse daemon; every tool accepts an optional session argument. No byte is written to stdout except JSON-RPC frames (zero stdout pollution); all logging goes to stderr.\n\nTool profiles select the registered tools (--tools core|nav|state|network|debug|flows|all, comma-separated combinations allowed; default core).\n\nSecurity defaults in MCP mode: the daemon is started with the SSRF guard enabled, so private and loopback targets are denied. Pass --allow-private to permit them explicitly. The domain allowlist stays configurable through the daemon flags and config.toml.\n\nThe browser engine is selected with --engine, or persistently through the engine key in config.toml (the flag wins). The selected engine is passed to the daemon this server starts.\n\nUsage:\n  symbrowse mcp [flags]\n\nFlags:\n      --allow-private    allow private and loopback targets (SSRF opt-out; MCP mode denies them by default)\n      --engine string    engine implementation: chrome (default), static (JS-free HTML reader), safari-attach (live Safari session via Apple Events), or safari-bidi (isolated Safari via safaridriver --bidi) (default \"chrome\")\n  -h, --help             help for mcp\n      --list-profiles    describe every tool profile and its tool count, then exit\n      --session string   default session for tool calls without a session argument (default \"default\")\n      --tools string     tool profiles to register: core|nav|state|network|debug|flows|all (comma-separated combinations allowed) (default \"core\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned(),
         ),
@@ -4910,7 +5415,7 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("daemon", None | Some("run")) => Some("Run or inspect the symbrowse daemon\n\nUsage:\n  symbrowse daemon [flags]\n".to_owned()),
         ("flow", None) => Some(
-            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
+            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  record      Record a session into a flow draft\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
         ),
         ("config", Some(_)) | ("state", Some(_)) | ("flow", Some(_)) | ("tools", Some(_)) => None,
         ("open" | "goto" | "fetch", None) => {
@@ -5316,17 +5821,17 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         if name == "select" {
             take_positional(&mut args, &mut positional, "value");
         }
-        if name == "scroll" {
-            if let Some(amount) = positional.first() {
-                let amount = amount.parse::<i64>().map_err(|_| ParseError {
-                    message: format!(
-                        "scroll amount: strconv.ParseInt: parsing {amount:?}: invalid syntax"
-                    ),
-                    exit_code: 2,
-                })?;
-                args.insert("amount".into(), serde_json::Value::from(amount));
-                positional.remove(0);
-            }
+        if name == "scroll"
+            && let Some(amount) = positional.first()
+        {
+            let amount = amount.parse::<i64>().map_err(|_| ParseError {
+                message: format!(
+                    "scroll amount: strconv.ParseInt: parsing {amount:?}: invalid syntax"
+                ),
+                exit_code: 2,
+            })?;
+            args.insert("amount".into(), serde_json::Value::from(amount));
+            positional.remove(0);
         }
         let max = if name == "select" || name == "scroll" {
             2
@@ -5956,6 +6461,8 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
     let mut baseline = None;
+    let mut threshold = 0.001;
+    let mut out = None;
     let mut subcommand = None;
     let mut positional = Vec::new();
     let mut index = command_index + 1;
@@ -5963,6 +6470,7 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
         let value = &values[index];
         match value.as_str() {
             "snapshot" if subcommand.is_none() => subcommand = Some("snapshot"),
+            "screenshot" if subcommand.is_none() => subcommand = Some("screenshot"),
             "url" if subcommand.is_none() => subcommand = Some("url"),
             "--json" => json = true,
             "--output" => {
@@ -5973,9 +6481,17 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
             }
-            "--baseline" if subcommand == Some("snapshot") => {
+            "--baseline" if matches!(subcommand, Some("snapshot" | "screenshot")) => {
                 index += 1;
                 baseline = Some(PathBuf::from(required_value(values, index, "--baseline")?));
+            }
+            "--threshold" if subcommand == Some("screenshot") => {
+                index += 1;
+                threshold = parse_diff_threshold(required_value(values, index, "--threshold")?)?;
+            }
+            "--out" if subcommand == Some("screenshot") => {
+                index += 1;
+                out = Some(PathBuf::from(required_value(values, index, "--out")?));
             }
             value if value.starts_with("--json=") => {
                 json = parse_bool("--json", &value[7..])?;
@@ -5984,8 +6500,17 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
                 format = parse_format(&value[9..])?;
             }
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
-            value if value.starts_with("--baseline=") && subcommand == Some("snapshot") => {
+            value
+                if value.starts_with("--baseline=")
+                    && matches!(subcommand, Some("snapshot" | "screenshot")) =>
+            {
                 baseline = Some(PathBuf::from(&value[11..]));
+            }
+            value if value.starts_with("--threshold=") && subcommand == Some("screenshot") => {
+                threshold = parse_diff_threshold(&value[12..])?;
+            }
+            value if value.starts_with("--out=") && subcommand == Some("screenshot") => {
+                out = Some(PathBuf::from(&value[6..]));
             }
             value if value.starts_with('-') => return Err(unknown_flag(value)),
             value if subcommand.is_none() => {
@@ -6015,6 +6540,26 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
             ),
             exit_code: 2,
         }),
+        Some("screenshot") if positional.is_empty() => match baseline {
+            Some(baseline) => Ok(Action::DiffScreenshot {
+                session,
+                baseline,
+                threshold,
+                out,
+                format,
+            }),
+            None => Err(ParseError {
+                message: "--baseline <png> is required".into(),
+                exit_code: 2,
+            }),
+        },
+        Some("screenshot") => Err(ParseError {
+            message: format!(
+                "unknown command {:?} for \"symbrowse diff screenshot\"",
+                positional[0]
+            ),
+            exit_code: 2,
+        }),
         Some("url") if positional.len() == 2 => Ok(Action::DiffUrl {
             session,
             first_url: positional[0].clone(),
@@ -6029,6 +6574,13 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
     }
 }
 
+fn parse_diff_threshold(value: &str) -> Result<f64, ParseError> {
+    value.parse::<f64>().map_err(|error| ParseError {
+        message: format!("invalid value for --threshold: {error}"),
+        exit_code: 2,
+    })
+}
+
 fn parse_network(values: &[String], command_index: usize) -> Result<Action, ParseError> {
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
@@ -6041,16 +6593,30 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
         match value.as_str() {
             "requests" if subcommand.is_none() => subcommand = Some("requests"),
             "request" if subcommand.is_none() => subcommand = Some("request"),
+            "har" if subcommand.is_none() => subcommand = Some("har"),
+            "route" if subcommand.is_none() => subcommand = Some("route"),
+            "unroute" if subcommand.is_none() => subcommand = Some("unroute"),
+            "--abort" => {
+                args.insert("action".into(), "abort".into());
+            }
             "--json" => json = true,
             "--output" => {
                 index += 1;
-                format = parse_format(required_value(values, index, "--output")?)?;
+                let value = required_value(values, index, "--output")?;
+                match parse_format(value) {
+                    Ok(parsed) => format = parsed,
+                    Err(_) if subcommand == Some("har") => {
+                        args.insert("output".into(), value.into());
+                    }
+                    Err(error) => return Err(error),
+                }
             }
             "--session" => {
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
             }
-            "--filter" | "--type" | "--method" | "--status" | "--max-tokens" => {
+            "--filter" | "--type" | "--method" | "--status" | "--max-tokens" | "--content"
+            | "--content-type" | "--body" => {
                 let name = value.as_str();
                 index += 1;
                 let argument = required_value(values, index, name)?;
@@ -6059,20 +6625,40 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         message: format!("invalid value {argument:?} for {name}"),
                         exit_code: 2,
                     })?;
-                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                    args.insert(name[2..].replace('-', "_"), number.into());
+                } else if name == "--body" {
+                    let body = serde_json::from_str(argument).map_err(|error| ParseError {
+                        message: format!("invalid JSON body: {error}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert("body".into(), body);
                 } else {
-                    args.insert(name[2..].into(), argument.into());
+                    let key = if name == "--content-type" {
+                        "content_type"
+                    } else {
+                        &name[2..]
+                    };
+                    args.insert(key.into(), argument.into());
                 }
             }
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--output=") => match parse_format(&value[9..]) {
+                Ok(parsed) => format = parsed,
+                Err(_) if subcommand == Some("har") => {
+                    args.insert("output".into(), value[9..].into());
+                }
+                Err(error) => return Err(error),
+            },
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
             value
                 if value.starts_with("--filter=")
                     || value.starts_with("--type=")
                     || value.starts_with("--method=")
                     || value.starts_with("--status=")
-                    || value.starts_with("--max-tokens=") =>
+                    || value.starts_with("--max-tokens=")
+                    || value.starts_with("--content=")
+                    || value.starts_with("--content-type=")
+                    || value.starts_with("--body=") =>
             {
                 let (name, argument) = value.split_once('=').expect("equals flag");
                 if name == "--status" || name == "--max-tokens" {
@@ -6080,9 +6666,20 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
                         message: format!("invalid value {argument:?} for {name}"),
                         exit_code: 2,
                     })?;
-                    args.insert(name[2..].replace('-', "_").into(), number.into());
+                    args.insert(name[2..].replace('-', "_"), number.into());
+                } else if name == "--body" {
+                    let body = serde_json::from_str(argument).map_err(|error| ParseError {
+                        message: format!("invalid JSON body: {error}"),
+                        exit_code: 2,
+                    })?;
+                    args.insert("body".into(), body);
                 } else {
-                    args.insert(name[2..].into(), argument.into());
+                    let key = if name == "--content-type" {
+                        "content_type"
+                    } else {
+                        &name[2..]
+                    };
+                    args.insert(key.into(), argument.into());
                 }
             }
             value if value.starts_with('-') => return Err(unknown_flag(value)),
@@ -6126,6 +6723,59 @@ fn parse_network(values: &[String], command_index: usize) -> Result<Action, Pars
         }),
         Some("request") => Err(ParseError {
             message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        Some("har")
+            if positional.len() == 1 && matches!(positional[0].as_str(), "start" | "stop") =>
+        {
+            args.insert("action".into(), positional[0].clone().into());
+            Ok(Action::Dispatch {
+                session,
+                command: "network.har".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("har") if positional.is_empty() => Err(ParseError {
+            message: "accepts 1 arg(s), received 0".to_owned(),
+            exit_code: 2,
+        }),
+        Some("har") => Err(ParseError {
+            message: "network har action must be \"start\" or \"stop\"".to_owned(),
+            exit_code: 2,
+        }),
+        Some("route") if positional.len() == 1 => {
+            args.insert("pattern".into(), positional[0].clone().into());
+            if !args.contains_key("action") {
+                args.insert("action".into(), "mock".into());
+            }
+            if args.get("action").and_then(serde_json::Value::as_str) == Some("mock") {
+                args.entry("status").or_insert(200.into());
+            }
+            Ok(Action::Dispatch {
+                session,
+                command: "network.route".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("route") => Err(ParseError {
+            message: format!("accepts 1 arg(s), received {}", positional.len()),
+            exit_code: 2,
+        }),
+        Some("unroute") if positional.len() <= 1 => {
+            if let Some(pattern) = positional.first() {
+                args.insert("pattern".into(), pattern.clone().into());
+            }
+            Ok(Action::Dispatch {
+                session,
+                command: "network.unroute".into(),
+                args: serde_json::Value::Object(args),
+                format,
+            })
+        }
+        Some("unroute") => Err(ParseError {
+            message: format!("accepts at most 1 arg(s), received {}", positional.len()),
             exit_code: 2,
         }),
         _ => unreachable!("network subcommand selected from supported names"),
@@ -6820,7 +7470,7 @@ fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseE
     let mut scan = command_index + 1;
     while scan < values.len() {
         match values[scan].as_str() {
-            "tree" => {
+            "tree" | "main" | "select" => {
                 subcommand_index = Some(scan);
                 break;
             }
@@ -6889,16 +7539,34 @@ fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseE
     if json {
         format = Format::Json;
     }
-    if let Some(value) = positional.first() {
-        return Err(ParseError {
-            message: format!("unknown command {value:?} for \"symbrowse frame tree\""),
-            exit_code: 2,
-        });
-    }
+    let subcommand = values[subcommand_index].as_str();
+    let (command, args) = match subcommand {
+        "tree" if positional.is_empty() => ("frame.tree", serde_json::json!({})),
+        "main" if positional.is_empty() => ("frame.main", serde_json::json!({})),
+        "select" if positional.len() == 1 => {
+            ("frame.select", serde_json::json!({"frame": positional[0]}))
+        }
+        "tree" | "main" => {
+            return Err(ParseError {
+                message: format!(
+                    "unknown command {:?} for \"symbrowse frame {subcommand}\"",
+                    positional[0]
+                ),
+                exit_code: 2,
+            });
+        }
+        "select" => {
+            return Err(ParseError {
+                message: format!("accepts 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        _ => unreachable!("subcommand is selected from supported frame commands"),
+    };
     Ok(Action::Dispatch {
         session,
-        command: "frame.tree".to_owned(),
-        args: serde_json::json!({}),
+        command: command.to_owned(),
+        args,
         format,
     })
 }
@@ -7310,7 +7978,7 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
     let mut scan = index + 1;
     while scan < values.len() {
         match values[scan].as_str() {
-            "list" | "run" | "validate" => {
+            "list" | "run" | "validate" | "record" => {
                 subcommand = values[scan].as_str();
                 subcommand_index = Some(scan);
                 break;
@@ -7332,6 +8000,7 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
         scan += 1;
     }
     let mut path = None;
+    let mut record_command = None;
     let mut session = "default".to_owned();
     let mut dry_run = false;
     let mut inputs = BTreeMap::new();
@@ -7385,6 +8054,9 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
             value if value.starts_with('-') => {
                 return Err(unknown_flag(value));
             }
+            value if subcommand == "record" && record_command.is_none() => {
+                record_command = Some(value.to_owned())
+            }
             value if path.is_none() => path = Some(PathBuf::from(value)),
             value => {
                 return Err(ParseError {
@@ -7420,6 +8092,21 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
                 message: "flow run requires a path".into(),
                 exit_code: 2,
             }),
+        "record" => match record_command.as_deref() {
+            Some(command @ ("start" | "stop" | "status")) => Ok(Action::FlowRecord {
+                session,
+                command: command.to_owned(),
+                format,
+            }),
+            Some(command) => Err(ParseError {
+                message: format!("unknown command {command:?} for \"symbrowse flow record\""),
+                exit_code: 2,
+            }),
+            None => Err(ParseError {
+                message: "flow record requires start, stop or status".into(),
+                exit_code: 2,
+            }),
+        },
         other => Err(ParseError {
             message: format!("unknown command {other:?} for flow"),
             exit_code: 2,
@@ -7997,10 +8684,12 @@ fn write_stdout(value: &str) -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::{
-        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_html_escape,
-        go_json_string, mask_cookie_list, parse, parse_cache_range, parse_curl_cookie_line,
-        render_cookie_list_json, render_cookie_list_text, render_cookie_list_yaml,
-        render_session_id_json, render_state_key_init, session_id_info, snapshot_tree_diff,
+        Action, ExitCode, Format, KeyInitResult, ParseError, SessionIdInfo, compare_screenshots,
+        decode_png, go_json_html_escape, go_json_string, mask_cookie_list, parse,
+        parse_cache_range, parse_curl_cookie_line, render_cookie_list_json,
+        render_cookie_list_text, render_cookie_list_yaml, render_session_id_json,
+        render_state_key_init, run_diff_screenshot, same_pixel, session_id_info,
+        snapshot_tree_diff,
     };
     use crate::AuthLoginEnvelope;
     use std::ffi::OsString;
@@ -8408,6 +9097,23 @@ mod tests {
         };
         assert!(dry_run);
         assert_eq!(path, std::path::PathBuf::from("demo.yaml"));
+
+        assert_eq!(
+            parse(&args(&[
+                "flow",
+                "record",
+                "start",
+                "--session",
+                "work",
+                "--json"
+            ])),
+            Ok(Action::FlowRecord {
+                session: "work".into(),
+                command: "start".into(),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["flow", "record", "pause"])).is_err());
     }
 
     #[test]
@@ -8568,7 +9274,10 @@ mod tests {
                 format: Format::Text,
             })
         );
-        assert!(parse(&args(&["session", "--scope=repo", "id"])).is_err());
+        assert!(matches!(
+            parse(&args(&["session", "--scope=repo", "id"])),
+            Ok(Action::SessionId { scope, .. }) if scope == "repo"
+        ));
         let hashed = session_id_info("repo", "agent", Path::new("/tmp/origin"), false);
         assert_eq!(hashed.id, "agent-28a1676df0916386");
         assert_eq!(hashed.origin_path, "/tmp/origin");
@@ -8902,7 +9611,7 @@ mod tests {
     }
 
     #[test]
-    fn frame_tree_is_the_only_advertised_frame_operation() {
+    fn frame_commands_dispatch_and_validate_arguments() {
         assert_eq!(
             parse(&args(&["frame", "tree", "--session", "work"])),
             Ok(Action::Dispatch {
@@ -8912,13 +9621,34 @@ mod tests {
                 format: Format::Text,
             })
         );
+        for (argv, command, expected_args) in [
+            (&["frame", "main"][..], "frame.main", serde_json::json!({})),
+            (
+                &["frame", "select", "frame-1"][..],
+                "frame.select",
+                serde_json::json!({"frame": "frame-1"}),
+            ),
+        ] {
+            let Action::Dispatch {
+                command: got_command,
+                args: got_args,
+                ..
+            } = parse(&args(argv)).expect("frame dispatch")
+            else {
+                panic!("wrong action for {argv:?}");
+            };
+            assert_eq!(got_command, command);
+            assert_eq!(got_args, expected_args);
+        }
         let Action::Help(parent) = parse(&args(&["frame"])).expect("frame help") else {
             panic!("wrong action");
         };
         assert!(parent.contains("tree        Show the nested frame tree"));
-        assert!(!parent.contains("main        Address the main frame"));
-        assert!(!parent.contains("select      Address a nested frame"));
-        assert!(parse(&args(&["frame", "main"])).is_err());
+        assert!(parent.contains("main        Address the main frame"));
+        assert!(parent.contains("select      Address a nested frame"));
+        assert!(parse(&args(&["frame", "select"])).is_err());
+        assert!(parse(&args(&["frame", "select", "f1", "extra"])).is_err());
+        assert!(parse(&args(&["frame", "main", "extra"])).is_err());
         assert!(parse(&args(&["frame", "tree", "extra"])).is_err());
     }
 
@@ -9052,7 +9782,7 @@ mod tests {
         for shell in ["bash", "fish", "powershell", "zsh"] {
             let help = super::completion_shell_help(shell);
             assert!(
-                help.contains("\n      --no-descriptions   disable completion descriptions\n"),
+                help.contains(&format!("\n  -h, --help              help for {shell}\n      --no-descriptions   disable completion descriptions\n")),
                 "missing no-descriptions flag for {shell} help"
             );
         }
@@ -9076,13 +9806,11 @@ mod tests {
             "scroll",
             "state",
             "tab",
-            "tools",
             "trace",
             "upgrade",
             "upload",
             "version",
             "watch",
-            "workflow",
         ] {
             assert!(
                 root.contains(implemented),
@@ -9291,6 +10019,90 @@ mod tests {
     }
 
     #[test]
+    fn network_har_routes_action_content_path_and_session() {
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "har",
+                "stop",
+                "--content",
+                "all",
+                "--output",
+                "capture.har",
+                "--session",
+                "fixture",
+                "--json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "fixture".to_owned(),
+                command: "network.har".to_owned(),
+                args: serde_json::json!({
+                    "action": "stop",
+                    "content": "all",
+                    "output": "capture.har",
+                }),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["network", "har", "pause"])).is_err());
+    }
+
+    #[test]
+    fn network_route_and_unroute_build_daemon_payloads() {
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "route",
+                "https://example.test/*",
+                "--body",
+                "{\"ok\":true}",
+                "--status",
+                "201",
+                "--content-type",
+                "application/json",
+            ])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.route".to_owned(),
+                args: serde_json::json!({
+                    "pattern": "https://example.test/*",
+                    "action": "mock",
+                    "body": {"ok": true},
+                    "status": 201,
+                    "content_type": "application/json",
+                }),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&[
+                "network",
+                "route",
+                "https://example.test",
+                "--abort"
+            ])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.route".to_owned(),
+                args: serde_json::json!({
+                    "pattern": "https://example.test",
+                    "action": "abort",
+                }),
+                format: Format::Text,
+            })
+        );
+        assert_eq!(
+            parse(&args(&["network", "unroute"])),
+            Ok(Action::Dispatch {
+                session: "default".to_owned(),
+                command: "network.unroute".to_owned(),
+                args: serde_json::json!({}),
+                format: Format::Text,
+            })
+        );
+    }
+
+    #[test]
     fn cli_daemon_frames_carry_request_metadata() {
         let frame = super::cli_frame(
             "trace.replay",
@@ -9410,6 +10222,163 @@ mod tests {
             })
         );
         assert!(parse(&args(&["diff", "url", "https://only.invalid"])).is_err());
+    }
+
+    #[test]
+    fn diff_screenshot_cli_parses_flags_and_requires_baseline() {
+        assert_eq!(
+            parse(&args(&[
+                "diff",
+                "screenshot",
+                "--baseline=before.png",
+                "--threshold",
+                "0.05",
+                "--out",
+                "diff.png",
+                "--session=fixture",
+                "--json",
+            ])),
+            Ok(Action::DiffScreenshot {
+                session: "fixture".into(),
+                baseline: PathBuf::from("before.png"),
+                threshold: 0.05,
+                out: Some(PathBuf::from("diff.png")),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["diff", "screenshot", "--json"])).is_err());
+        assert!(
+            parse(&args(&[
+                "diff",
+                "screenshot",
+                "--baseline",
+                "before.png",
+                "--threshold",
+                "bad",
+            ]))
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn screenshot_diff_matches_pixels_and_emits_png() {
+        let png = |color: [u8; 4]| {
+            let mut output = Vec::new();
+            let mut encoder = png::Encoder::new(&mut output, 1, 1);
+            encoder.set_color(png::ColorType::Rgba);
+            encoder.set_depth(png::BitDepth::Eight);
+            let mut writer = encoder.write_header().unwrap();
+            writer.write_image_data(&color).unwrap();
+            drop(writer);
+            output
+        };
+        let baseline = png([255, 255, 255, 255]);
+        let identical = compare_screenshots(&baseline, &baseline, 0.0).unwrap();
+        assert_eq!(identical.different_px, 0);
+        assert!(identical.passed);
+        assert_eq!(identical.threshold, 0.001);
+
+        let changed = compare_screenshots(&baseline, &png([0, 0, 0, 255]), 0.0).unwrap();
+        assert_eq!(changed.different_px, 1);
+        assert_eq!(changed.deviation, 1.0);
+        assert!(!changed.passed);
+        assert_eq!(decode_png(&changed.diff_image_png).unwrap().0, 1);
+        assert_eq!(
+            &decode_png(&changed.diff_image_png).unwrap().2[..4],
+            &[255, 0, 255, 255]
+        );
+        assert!(same_pixel(&[100, 100, 100, 255], &[130, 100, 100, 255]));
+        assert!(!same_pixel(&[100, 100, 100, 255], &[132, 100, 100, 255]));
+        assert!(compare_screenshots(&baseline, b"invalid", 0.0).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    #[allow(clippy::result_large_err)]
+    fn diff_screenshot_requests_daemon_capture_and_writes_diff() {
+        use std::{
+            fs,
+            path::PathBuf,
+            sync::{
+                Arc,
+                atomic::{AtomicBool, Ordering},
+            },
+            thread,
+            time::{Duration, Instant},
+        };
+        use symbrowse_daemon::{DaemonHandler, Server, ServerOptions, SessionSpec};
+
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let root = std::env::temp_dir().join(format!(
+            "symbrowse-diff-screenshot-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir_all(&root).unwrap();
+        let image = |color: [u8; 4], path: PathBuf| {
+            let mut bytes = Vec::new();
+            let mut encoder = png::Encoder::new(&mut bytes, 1, 1);
+            encoder.set_color(png::ColorType::Rgba);
+            encoder.set_depth(png::BitDepth::Eight);
+            let mut writer = encoder.write_header().unwrap();
+            writer.write_image_data(&color).unwrap();
+            drop(writer);
+            fs::write(path, bytes).unwrap();
+        };
+        let baseline = root.join("baseline.png");
+        let capture = root.join("capture.png");
+        let output = root.join("diff.png");
+        image([255, 255, 255, 255], baseline.clone());
+        image([0, 0, 0, 255], capture.clone());
+
+        let session = format!("diff-shot-{}", NEXT.fetch_add(1, Ordering::Relaxed));
+        let mut spec = SessionSpec::for_session(&session);
+        spec.state_dir = root.join("state");
+        spec.cache_dir = root.join("cache");
+        spec.daemon_log = root.join("daemon.log");
+        let received_screenshot = Arc::new(AtomicBool::new(false));
+        let got_command = Arc::clone(&received_screenshot);
+        let capture_path = capture.to_string_lossy().into_owned();
+        let handler: DaemonHandler = Arc::new(move |frame, _| {
+            assert_eq!(frame.cmd, "screenshot");
+            assert_eq!(frame.args, Some(serde_json::json!({})));
+            got_command.store(true, Ordering::Release);
+            Ok((Some(serde_json::json!({"path": capture_path})), Vec::new()))
+        });
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                session_spec: Some(spec),
+                handler: Some(handler),
+                idle_timeout: None,
+                ..ServerOptions::default()
+            })
+            .unwrap(),
+        );
+        let socket = server.options().socket_path.clone();
+        let running = Arc::clone(&server);
+        let server_thread = thread::spawn(move || running.listen_and_serve().unwrap());
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !socket.exists() {
+            assert!(Instant::now() < deadline, "daemon socket did not appear");
+            thread::sleep(Duration::from_millis(10));
+        }
+
+        let status =
+            run_diff_screenshot(session, baseline, 0.001, Some(output.clone()), Format::Json);
+        server.stop();
+        server_thread.join().unwrap();
+        assert_eq!(status, ExitCode::from(8));
+        assert!(received_screenshot.load(Ordering::Acquire));
+        assert!(decode_png(&fs::read(&output).unwrap()).is_ok());
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                fs::metadata(&output).unwrap().permissions().mode() & 0o777,
+                0o600
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

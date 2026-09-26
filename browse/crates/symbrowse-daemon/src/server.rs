@@ -32,6 +32,7 @@ use symbrowse_core::state_store::Store;
 pub type HandlerResult = Result<(Option<Value>, Vec<Warning>), DaemonError>;
 pub type DaemonHandler =
     Arc<dyn Fn(Frame, OperationContext) -> HandlerResult + Send + Sync + 'static>;
+pub type DaemonShutdown = Arc<dyn Fn() + Send + Sync + 'static>;
 
 // Connections can stay open for several request frames. Bound the number of
 // connection threads to a small multiple of available CPU capacity so short-
@@ -137,6 +138,7 @@ pub struct ServerOptions {
     pub operation_timeout: Duration,
     pub read_timeout: Duration,
     pub handler: Option<DaemonHandler>,
+    pub on_shutdown: Option<DaemonShutdown>,
     pub registry: Option<Arc<crate::SessionRegistry>>,
     pub session_spec: Option<crate::SessionSpec>,
     pub policy: PolicyStatus,
@@ -152,6 +154,7 @@ impl Default for ServerOptions {
             operation_timeout: Duration::from_millis(crate::DEFAULT_OPERATION_TIMEOUT_MS),
             read_timeout: Duration::from_millis(crate::DEFAULT_READ_TIMEOUT_MS),
             handler: None,
+            on_shutdown: None,
             registry: None,
             session_spec: None,
             policy: PolicyStatus::default(),
@@ -249,7 +252,7 @@ impl Server {
                 user_data_root: if configured_spec.is_some() {
                     spec.state_dir.join("sessions")
                 } else {
-                    default_user_data_root()
+                    crate::session::default_user_data_root()
                 },
                 pid: std::process::id(),
                 scope: String::new(),
@@ -257,10 +260,10 @@ impl Server {
             }))
         });
         if options.handler.is_none() {
-            options.handler = Some(
-                crate::runtime::handler(spec)
-                    .map_err(|error| ServerError::Io(io::Error::other(error.message)))?,
-            );
+            let (handler, on_shutdown) = crate::runtime::handler(spec)
+                .map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
+            options.handler = Some(handler);
+            options.on_shutdown = Some(on_shutdown);
         }
         Ok(Self {
             options,
@@ -285,18 +288,24 @@ impl Server {
     }
 
     pub fn listen_and_serve(&self) -> Result<(), ServerError> {
-        #[cfg(unix)]
-        {
-            self.listen_unix()
+        let result = {
+            #[cfg(unix)]
+            {
+                self.listen_unix()
+            }
+            #[cfg(windows)]
+            {
+                listen_windows(self)
+            }
+            #[cfg(not(any(unix, windows)))]
+            {
+                Err(ServerError::Unsupported)
+            }
+        };
+        if let Some(on_shutdown) = &self.options.on_shutdown {
+            on_shutdown();
         }
-        #[cfg(windows)]
-        {
-            listen_windows(self)
-        }
-        #[cfg(not(any(unix, windows)))]
-        {
-            Err(ServerError::Unsupported)
-        }
+        result
     }
 
     #[cfg(unix)]
@@ -1259,29 +1268,6 @@ fn format_time(nanos: i64) -> String {
         .unwrap_or_else(|_| "1970-01-01T00:00:00Z".into())
 }
 
-fn default_user_data_root() -> PathBuf {
-    if let Ok(path) = std::env::var("SYMBROWSE_USER_DATA_DIR") {
-        return PathBuf::from(path);
-    }
-    if cfg!(target_os = "macos")
-        && let Ok(home) = std::env::var("HOME")
-    {
-        return PathBuf::from(home).join("Library/Caches/symbrowse/sessions");
-    }
-    if cfg!(windows)
-        && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
-    {
-        return PathBuf::from(local_app_data).join("symbrowse/sessions");
-    }
-    if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(path).join("symbrowse/sessions");
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache/symbrowse/sessions");
-    }
-    std::env::temp_dir().join("symbrowse/sessions")
-}
-
 pub fn validate_session(session: &str) -> bool {
     !session.is_empty()
         && session.len() <= 64
@@ -1421,6 +1407,28 @@ mod tests {
     use std::io::Cursor;
     use std::sync::mpsc::{Receiver, SyncSender, sync_channel};
 
+    #[cfg(unix)]
+    #[test]
+    fn listener_shutdown_runs_runtime_cleanup() {
+        use std::sync::atomic::AtomicUsize;
+
+        let temp = tempfile::tempdir().expect("socket root");
+        let calls = Arc::new(AtomicUsize::new(0));
+        let observed = Arc::clone(&calls);
+        let server = Server::new(ServerOptions {
+            socket_path: temp.path().join("daemon.sock"),
+            handler: Some(Arc::new(|frame, _| builtin_handler(frame))),
+            on_shutdown: Some(Arc::new(move || {
+                observed.fetch_add(1, Ordering::SeqCst);
+            })),
+            ..Default::default()
+        })
+        .expect("server");
+        server.stop();
+        server.listen_and_serve().expect("stopped listener");
+        assert_eq!(calls.load(Ordering::SeqCst), 1);
+    }
+
     #[test]
     fn connection_worker_pool_scales_with_cpu_and_stays_bounded() {
         assert_eq!(bounded_connection_workers(None), 8);
@@ -1429,6 +1437,23 @@ mod tests {
         assert_eq!(bounded_connection_workers(Some(4)), 8);
         assert_eq!(bounded_connection_workers(Some(16)), 32);
         assert_eq!(bounded_connection_workers(Some(128)), 32);
+    }
+
+    #[test]
+    fn default_server_registry_uses_go_compatible_profile_root() {
+        let temp = tempfile::tempdir().expect("temporary socket root");
+        let server = Server::new(ServerOptions {
+            session: "default-root".into(),
+            socket_path: temp.path().join("daemon.sock"),
+            handler: Some(Arc::new(|frame, _| builtin_handler(frame))),
+            ..Default::default()
+        })
+        .expect("server");
+
+        assert_eq!(
+            server.registry.user_data_root(),
+            crate::session::default_user_data_root()
+        );
     }
 
     struct BlockingResponseStream {

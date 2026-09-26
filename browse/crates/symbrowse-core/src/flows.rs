@@ -7,7 +7,7 @@
 use std::{collections::BTreeMap, fmt, fs, path::Path};
 
 use serde::{Deserialize, Serialize};
-use yaml_rust2::{Yaml, YamlLoader};
+use yaml_rust2::{Yaml, YamlEmitter, YamlLoader};
 
 pub const SCHEMA_VERSION: i64 = 1;
 const MAX_DOCUMENT_BYTES: usize = 1024 * 1024;
@@ -760,7 +760,8 @@ fn risk_class(action: &str) -> &str {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct RecordedAction {
     pub index: usize,
     pub command: String,
@@ -781,6 +782,49 @@ pub struct Draft {
     pub steps: Vec<Step>,
     pub comments: Vec<String>,
     pub secret_refs: Vec<String>,
+}
+
+impl Draft {
+    /// Render the review notes and flow document without exposing secret values.
+    pub fn render_yaml(&self) -> Result<String, FlowError> {
+        let mut root = yaml_rust2::yaml::Hash::new();
+        root.insert(Yaml::String("name".into()), Yaml::String(self.name.clone()));
+        root.insert(Yaml::String("version".into()), Yaml::Integer(self.version));
+        root.insert(
+            Yaml::String("domains".into()),
+            Yaml::Array(self.domains.iter().cloned().map(Yaml::String).collect()),
+        );
+        root.insert(
+            Yaml::String("inputs".into()),
+            Yaml::Array(self.inputs.iter().cloned().map(Yaml::String).collect()),
+        );
+        let steps = self
+            .steps
+            .iter()
+            .map(|step| {
+                let fields = step
+                    .fields
+                    .iter()
+                    .map(|(key, value)| (Yaml::String(key.clone()), Yaml::String(value.clone())))
+                    .collect();
+                let mut action = yaml_rust2::yaml::Hash::new();
+                action.insert(Yaml::String(step.action.clone()), Yaml::Hash(fields));
+                Yaml::Hash(action)
+            })
+            .collect();
+        root.insert(Yaml::String("steps".into()), Yaml::Array(steps));
+        let mut document = String::from("# Flow draft recorded from a symbrowse session\n");
+        for comment in &self.comments {
+            document.push_str("# ");
+            document.push_str(&comment.replace('\n', " "));
+            document.push('\n');
+        }
+        YamlEmitter::new(&mut document)
+            .dump(&Yaml::Hash(root))
+            .map_err(|emit_error| error("recording", &emit_error.to_string(), 0))?;
+        document.push('\n');
+        Ok(document)
+    }
 }
 
 /// Convert a recording to a reviewable draft. Values are never emitted as
@@ -976,5 +1020,39 @@ mod tests {
             "errors: {:?}",
             error.errors
         );
+    }
+
+    #[test]
+    fn recorded_draft_redacts_secrets_and_renders_yaml() {
+        let draft = generate_draft(&[
+            RecordedAction {
+                index: 0,
+                command: "open".into(),
+                selector: "https://example.com/login".into(),
+                value: String::new(),
+                url: String::new(),
+                role: String::new(),
+                name: String::new(),
+                input_type: String::new(),
+                autocomplete: String::new(),
+            },
+            RecordedAction {
+                index: 1,
+                command: "fill".into(),
+                selector: "@e1".into(),
+                value: "fixture-secret-123".into(),
+                url: String::new(),
+                role: "textbox".into(),
+                name: "Password".into(),
+                input_type: "password".into(),
+                autocomplete: "current-password".into(),
+            },
+        ])
+        .unwrap();
+        let yaml = draft.render_yaml().unwrap();
+        assert!(yaml.contains("op://recording/secret-1"));
+        assert!(!yaml.contains("fixture-secret-123"));
+        assert!(yaml.contains("name: recorded-flow"));
+        assert_eq!(parse(yaml.as_bytes(), "recorded").unwrap().steps.len(), 2);
     }
 }

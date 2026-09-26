@@ -14,7 +14,7 @@ mod launch;
 pub use full::{
     Artifact, CapturedRequest, ChromeCapabilities, ChromePage, ChromeSession, ClickObstructedError,
     DialogInfo, FindOptions, FrameInfo, InteractionResult, NetworkCapture, NetworkEvent,
-    ScreenshotOptions, UnsupportedOperation, capabilities,
+    NetworkRoute, ScreenshotOptions, UnsupportedOperation, capabilities,
 };
 
 /// Canonical capability partition used by the daemon handshake. Only names

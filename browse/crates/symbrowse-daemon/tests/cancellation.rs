@@ -147,6 +147,7 @@ mod unix {
         let root = root("concurrent-client-autostart");
         fs::create_dir_all(&root).expect("create concurrent autostart root");
         let socket = root.join("race.sock");
+        let launch_gate = root.join("launch-gate");
         let test_binary = std::env::current_exe().expect("current test executable");
         let barrier = Arc::new(std::sync::Barrier::new(CLIENTS));
         let mut clients = Vec::with_capacity(CLIENTS);
@@ -155,13 +156,15 @@ mod unix {
             let barrier = barrier.clone();
             let socket_for_client = socket.clone();
             let root_for_client = root.clone();
+            let gate_for_client = launch_gate.clone();
             let binary_for_client = test_binary.clone();
             clients.push(thread::spawn(move || {
                 let launched = root_for_client.join(format!("launched-{index}"));
                 let completed = root_for_client.join(format!("completed-{index}"));
                 let command = format!(
-                    "touch {}; sleep 0.25; export SYMBROWSE_DMN008_SOCKET={}; export SYMBROWSE_DMN008_SESSION=client-race; {} --ignored --exact unix::autostart_daemon_child --nocapture; result=$?; touch {}; exit $result",
+                    "touch {}; while [ ! -f {} ]; do sleep 0.01; done; export SYMBROWSE_DMN008_SOCKET={}; export SYMBROWSE_DMN008_SESSION=client-race; {} --ignored --exact unix::autostart_daemon_child --nocapture; result=$?; touch {}; exit $result",
                     shell_quote(&launched),
+                    shell_quote(&gate_for_client),
                     shell_quote(&socket_for_client),
                     shell_quote(&binary_for_client),
                     shell_quote(&completed),
@@ -169,7 +172,7 @@ mod unix {
                 let client = Client::new(ClientOptions {
                     socket_path: socket_for_client,
                     session: "client-race".into(),
-                    startup_timeout: Duration::from_secs(4),
+                    startup_timeout: Duration::from_secs(8),
                     autostart: true,
                     start: Some(StartOptions {
                         executable: PathBuf::from("/bin/sh"),
@@ -188,6 +191,22 @@ mod unix {
             }));
         }
 
+        let marker_count = |prefix: &str| {
+            (0..CLIENTS)
+                .filter(|index| root.join(format!("{prefix}-{index}")).exists())
+                .count()
+        };
+        let launch_deadline = Instant::now() + Duration::from_secs(5);
+        while Instant::now() < launch_deadline && marker_count("launched") < CLIENTS {
+            thread::sleep(Duration::from_millis(10));
+        }
+        fs::write(&launch_gate, b"go").expect("release competing daemon launchers");
+        assert_eq!(
+            marker_count("launched"),
+            CLIENTS,
+            "all clients must autostart"
+        );
+
         let results: Vec<_> = clients
             .into_iter()
             .map(|client| client.join().expect("join concurrent client"))
@@ -196,6 +215,12 @@ mod unix {
             .iter()
             .filter(|(_, launched, _)| launched.exists())
             .count();
+
+        let losing_deadline = Instant::now() + Duration::from_secs(3);
+        while Instant::now() < losing_deadline && marker_count("completed") < CLIENTS - 1 {
+            thread::sleep(Duration::from_millis(10));
+        }
+        let losers_completed = marker_count("completed");
 
         if socket.exists() {
             let stopper = Client::new(ClientOptions {
@@ -218,8 +243,13 @@ mod unix {
             assert!(response.success, "status response = {response:?}");
         }
         assert!(
-            launched_count >= 2,
-            "expected overlapping autostart attempts, observed {launched_count}"
+            launched_count == CLIENTS,
+            "expected all competing autostart attempts, observed {launched_count}"
+        );
+        assert_eq!(
+            losers_completed,
+            CLIENTS - 1,
+            "losing launchers must exit before stop"
         );
 
         let deadline = Instant::now() + Duration::from_secs(3);

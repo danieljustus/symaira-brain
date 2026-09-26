@@ -250,27 +250,76 @@ fn clean_path(path: &Path) -> PathBuf {
     cleaned
 }
 
-fn default_user_data_root() -> PathBuf {
-    if let Ok(path) = std::env::var("SYMBROWSE_USER_DATA_DIR") {
-        return PathBuf::from(path);
+pub(crate) fn default_user_data_root() -> PathBuf {
+    default_user_data_root_for(
+        native_cache_platform(),
+        &|key: &str| std::env::var_os(key),
+        &std::env::temp_dir(),
+    )
+}
+
+#[derive(Clone, Copy)]
+enum CachePlatform {
+    #[cfg(any(test, target_os = "windows"))]
+    Windows,
+    #[cfg(any(test, target_os = "macos", target_os = "ios"))]
+    Darwin,
+    #[cfg(any(
+        test,
+        not(any(target_os = "windows", target_os = "macos", target_os = "ios"))
+    ))]
+    Unix,
+}
+
+#[cfg(target_os = "windows")]
+fn native_cache_platform() -> CachePlatform {
+    CachePlatform::Windows
+}
+#[cfg(any(target_os = "macos", target_os = "ios"))]
+fn native_cache_platform() -> CachePlatform {
+    CachePlatform::Darwin
+}
+#[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))]
+fn native_cache_platform() -> CachePlatform {
+    CachePlatform::Unix
+}
+
+fn default_user_data_root_for(
+    platform: CachePlatform,
+    env: &impl Fn(&str) -> Option<std::ffi::OsString>,
+    temp_dir: &Path,
+) -> PathBuf {
+    user_cache_dir(platform, env)
+        .unwrap_or_else(|| temp_dir.to_path_buf())
+        .join("symbrowse")
+        .join("sessions")
+}
+
+fn user_cache_dir(
+    platform: CachePlatform,
+    env: &impl Fn(&str) -> Option<std::ffi::OsString>,
+) -> Option<PathBuf> {
+    let value = |key| env(key).filter(|value| !value.is_empty());
+    match platform {
+        #[cfg(any(test, target_os = "windows"))]
+        CachePlatform::Windows => value("LOCALAPPDATA").map(PathBuf::from),
+        #[cfg(any(test, target_os = "macos", target_os = "ios"))]
+        CachePlatform::Darwin => {
+            value("HOME").map(|home| PathBuf::from(home).join("Library/Caches"))
+        }
+        #[cfg(any(
+            test,
+            not(any(target_os = "windows", target_os = "macos", target_os = "ios"))
+        ))]
+        CachePlatform::Unix => {
+            if let Some(cache) = value("XDG_CACHE_HOME") {
+                let cache = PathBuf::from(cache);
+                cache.is_absolute().then_some(cache)
+            } else {
+                value("HOME").map(|home| PathBuf::from(home).join(".cache"))
+            }
+        }
     }
-    if cfg!(target_os = "macos")
-        && let Ok(home) = std::env::var("HOME")
-    {
-        return PathBuf::from(home).join("Library/Caches/symbrowse/sessions");
-    }
-    if cfg!(windows)
-        && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
-    {
-        return PathBuf::from(local_app_data).join("symbrowse/sessions");
-    }
-    if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(path).join("symbrowse/sessions");
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache/symbrowse/sessions");
-    }
-    std::env::temp_dir().join("symbrowse/sessions")
 }
 
 #[cfg(unix)]
@@ -292,6 +341,57 @@ fn timestamp_now() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn env<'a>(
+        values: &'a [(&'a str, &'a str)],
+    ) -> impl Fn(&str) -> Option<std::ffi::OsString> + 'a {
+        move |key| {
+            values
+                .iter()
+                .find_map(|(name, value)| (*name == key).then(|| (*value).into()))
+        }
+    }
+
+    #[test]
+    fn default_profile_root_follows_go_user_cache_rules() {
+        let temp = Path::new("/temporary");
+        let mac = default_user_data_root_for(
+            CachePlatform::Darwin,
+            &env(&[("HOME", "/users/test"), ("XDG_CACHE_HOME", "/xdg")]),
+            temp,
+        );
+        assert_eq!(
+            mac,
+            Path::new("/users/test/Library/Caches/symbrowse/sessions")
+        );
+
+        let unix = default_user_data_root_for(
+            CachePlatform::Unix,
+            &env(&[("HOME", "/users/test"), ("XDG_CACHE_HOME", "/xdg")]),
+            temp,
+        );
+        assert_eq!(unix, Path::new("/xdg/symbrowse/sessions"));
+
+        let relative_xdg = default_user_data_root_for(
+            CachePlatform::Unix,
+            &env(&[("HOME", "/users/test"), ("XDG_CACHE_HOME", "relative")]),
+            temp,
+        );
+        assert_eq!(relative_xdg, Path::new("/temporary/symbrowse/sessions"));
+
+        let windows = default_user_data_root_for(
+            CachePlatform::Windows,
+            &env(&[
+                ("LOCALAPPDATA", "local-app-data"),
+                ("XDG_CACHE_HOME", "/xdg"),
+            ]),
+            temp,
+        );
+        assert_eq!(windows, Path::new("local-app-data/symbrowse/sessions"));
+
+        let missing = default_user_data_root_for(CachePlatform::Windows, &env(&[]), temp);
+        assert_eq!(missing, Path::new("/temporary/symbrowse/sessions"));
+    }
 
     #[test]
     fn registry_isolates_profiles_and_orders_sessions() {

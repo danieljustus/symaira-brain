@@ -1,4 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Mutex},
+};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
@@ -11,16 +14,18 @@ use symbrowse_core::{
         Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
         Store as JournalStore,
     },
+    key_resolver::{KeyResolver, KeySources},
+    key_sources::SystemKeySources,
     oob::{Kind as OobKind, Manager as OobManager, Status as OobStatus, parse_timeout},
     policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
-    state::{Cookie, OriginState},
-    state_store::Store,
+    state::{Cookie, OriginState, SCHEMA_VERSION as STATE_SCHEMA_VERSION, StateError},
+    state_store::{Store, StoreError},
 };
 use symbrowse_engine_chrome::CapturedRequest;
 use symbrowse_engine_chrome::{
-    BrowserMode, ChromePage, ChromeSession, NetworkCapture, resolve_chrome_executable,
+    BrowserMode, ChromePage, ChromeSession, NetworkCapture, NetworkRoute, resolve_chrome_executable,
 };
 use symbrowse_engine_firefox::{FirefoxSession, resolve_firefox_executable};
 use symbrowse_fetch::{
@@ -45,12 +50,51 @@ pub struct DispatchRuntime {
     output_cache: OutputCache,
     wayback_cdx_url: String,
     runtime: Runtime,
+    state_keys: KeyResolver<SystemKeySources>,
     compat: AsyncMutex<Option<CompatClient>>,
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
     oob: OobManager,
+    recorders: Mutex<BTreeMap<String, FlowRecorder>>,
     #[cfg(target_os = "macos")]
     safari: AsyncMutex<Option<SafariRuntime>>,
+}
+
+#[derive(Default)]
+struct FlowRecorder {
+    active: bool,
+    actions: Vec<flows::RecordedAction>,
+    refs: BTreeMap<String, RecordedRef>,
+}
+
+#[derive(Clone, Default)]
+struct RecordedRef {
+    role: String,
+    name: String,
+    input_type: String,
+    autocomplete: String,
+}
+
+fn is_recordable_command(command: &str) -> bool {
+    matches!(
+        command,
+        "open"
+            | "goto"
+            | "click"
+            | "dblclick"
+            | "fill"
+            | "type"
+            | "press"
+            | "hover"
+            | "focus"
+            | "select"
+            | "check"
+            | "uncheck"
+            | "wait"
+            | "snapshot"
+            | "scroll"
+            | "scrollintoview"
+    )
 }
 
 struct BrowserState {
@@ -126,6 +170,33 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    fn shutdown(&self) {
+        self.fetch.close();
+        let browser = self.browser.lock().ok().and_then(|mut state| state.take());
+        self.runtime.block_on(async {
+            if let Some(browser) = browser
+                && !matches!(
+                    tokio::time::timeout(
+                        std::time::Duration::from_secs(3),
+                        browser.session.close()
+                    )
+                    .await,
+                    Ok(Ok(()))
+                )
+            {
+                let _ = tokio::time::timeout(
+                    std::time::Duration::from_secs(3),
+                    browser.session.force_kill(),
+                )
+                .await;
+            }
+            if let Some(mut firefox) = self.firefox.lock().await.take() {
+                let _ =
+                    tokio::time::timeout(std::time::Duration::from_secs(3), firefox.close()).await;
+            }
+        });
+    }
+
     pub fn new(spec: SessionSpec) -> Result<Arc<Self>, DaemonError> {
         Self::new_with_wayback_url(spec, "https://web.archive.org/cdx/search/cdx")
     }
@@ -158,10 +229,12 @@ impl DispatchRuntime {
             output_cache,
             wayback_cdx_url: wayback_cdx_url.into(),
             runtime,
+            state_keys: KeyResolver::new(SystemKeySources::default()),
             compat: AsyncMutex::new(None),
             browser: Mutex::new(None),
             firefox: AsyncMutex::new(None),
             oob: OobManager::new(),
+            recorders: Mutex::new(BTreeMap::new()),
             #[cfg(target_os = "macos")]
             safari: AsyncMutex::new(None),
         }))
@@ -175,6 +248,9 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
+        if frame.cmd.starts_with("flow.record.") {
+            return self.flow_record(&frame);
+        }
         if frame.cmd == "handoff" {
             // The handoff loop resolves its prompt when the transport cancels.
             return self.runtime.block_on(self.dispatch(frame, operation));
@@ -185,7 +261,8 @@ impl DispatchRuntime {
         ) {
             return self.oob_command(&frame);
         }
-        self.runtime.block_on(async {
+        let captured = frame.clone();
+        let result = self.runtime.block_on(async {
             tokio::select! {
                 result = self.dispatch(frame, operation.clone()) => result,
                 _ = Self::wait_for_cancellation(operation.clone()) => Err(DaemonError {
@@ -194,7 +271,117 @@ impl DispatchRuntime {
                     ..Default::default()
                 }),
             }
-        })
+        });
+        if let Ok((Some(data), _)) = &result {
+            self.record_frame(&captured, data);
+        }
+        result
+    }
+
+    fn flow_record(&self, frame: &Frame) -> HandlerResult {
+        let mut recorders = self
+            .recorders
+            .lock()
+            .map_err(|_| runtime_error("flow recorder lock poisoned"))?;
+        let state = recorders.entry(frame.session.clone()).or_default();
+        let data = match frame.cmd.as_str() {
+            "flow.record.start" => {
+                state.actions.clear();
+                state.active = true;
+                json!({"recording": true, "session": frame.session})
+            }
+            "flow.record.stop" => {
+                state.active = false;
+                json!({"recording": false, "session": frame.session, "actions": state.actions})
+            }
+            "flow.record.status" => {
+                json!({"recording": state.active, "session": frame.session, "actions": state.actions.len()})
+            }
+            _ => {
+                return Err(DaemonError {
+                    code: codes::UNKNOWN_COMMAND.into(),
+                    message: format!("unknown recording command {:?}", frame.cmd),
+                    ..Default::default()
+                });
+            }
+        };
+        Ok((Some(data), Vec::new()))
+    }
+
+    fn record_frame(&self, frame: &Frame, data: &Value) {
+        if frame.cmd == "find" {
+            let Some(reference) = data.get("ref").and_then(Value::as_str) else {
+                return;
+            };
+            if let Ok(mut recorders) = self.recorders.lock() {
+                let state = recorders.entry(frame.session.clone()).or_default();
+                state.refs.insert(
+                    reference.to_owned(),
+                    RecordedRef {
+                        role: data
+                            .get("role")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        name: data
+                            .get("name")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        input_type: data
+                            .get("input_type")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        autocomplete: data
+                            .get("autocomplete")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                    },
+                );
+            }
+            return;
+        }
+        // ponytail: resolve refs returned by find; extend this cache when the engine snapshot API exposes stable ref metadata.
+        if !is_recordable_command(&frame.cmd) {
+            return;
+        }
+        let Some(args) = frame.args.as_ref() else {
+            return;
+        };
+        let selector = args
+            .get("url")
+            .and_then(Value::as_str)
+            .filter(|url| !url.is_empty())
+            .or_else(|| args.get("selector").and_then(Value::as_str))
+            .unwrap_or_default()
+            .to_owned();
+        let value = args
+            .get("value")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        if let Ok(mut recorders) = self.recorders.lock() {
+            let state = recorders.entry(frame.session.clone()).or_default();
+            if !state.active {
+                return;
+            }
+            let reference = selector.strip_prefix('@').unwrap_or_default();
+            let resolved = state.refs.get(reference).cloned().unwrap_or_default();
+            let index = state.actions.len();
+            state.actions.push(flows::RecordedAction {
+                index,
+                command: frame.cmd.clone(),
+                selector,
+                value,
+                url: String::new(),
+                role: resolved.role,
+                name: resolved.name,
+                input_type: resolved.input_type,
+                autocomplete: resolved.autocomplete,
+            });
+        }
     }
 
     async fn wait_for_cancellation(operation: OperationContext) {
@@ -234,6 +421,10 @@ impl DispatchRuntime {
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
+            "network.route" | "network.unroute" => {
+                self.authorize_network_mock(&frame)?;
+                self.browser_command(&frame).await
+            }
             "policy.explain" => self.policy_explain(&frame),
             "journal.tail" | "journal.show" => self.journal_read(&frame),
             "flow.run" => self.flow_run(&frame, operation.clone()).await,
@@ -274,17 +465,16 @@ impl DispatchRuntime {
             | "get.title" | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box"
             | "get.styles" | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list"
             | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
-            | "frames.list" | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept"
-            | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
-            | "network.request" | "network.offline" | "network.block" | "screenshot" | "pdf"
-            | "upload" | "a11y" | "cookies.get" | "cookies.set" | "cookies.list"
-            | "cookies.clear" | "storage.get" | "storage.list" | "storage.set"
-            | "storage.clear" | "download" | "download.setdir" | "downloads.list" | "eval" => {
-                self.browser_command(&frame).await
-            }
+            | "frames.list" | "frame.tree" | "frame.main" | "frame.select" | "dialog"
+            | "dialog.status" | "dialog.accept" | "dialog.dismiss" | "dialog.auto"
+            | "network.capture" | "network.requests" | "network.request" | "network.har"
+            | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
+            | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
+            | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
+            | "downloads.list" | "eval" => self.browser_command(&frame).await,
             "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
             | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
-            "network.har" | "axe.audit" => Err(DaemonError {
+            "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),
@@ -395,17 +585,17 @@ impl DispatchRuntime {
                     ..Default::default()
                 });
             }
-            if let Some(page) = overlay_page.as_ref() {
-                if let Ok(decision) = page.overlay_result().await {
-                    match decision.as_str() {
-                        "completed" => {
-                            self.oob.complete(&prompt.id, None);
-                        }
-                        "cancelled" => {
-                            self.oob.cancel(&prompt.id, "cancelled by human");
-                        }
-                        _ => {}
+            if let Some(page) = overlay_page.as_ref()
+                && let Ok(decision) = page.overlay_result().await
+            {
+                match decision.as_str() {
+                    "completed" => {
+                        self.oob.complete(&prompt.id, None);
                     }
+                    "cancelled" => {
+                        self.oob.cancel(&prompt.id, "cancelled by human");
+                    }
+                    _ => {}
                 }
             }
             let current = self.oob.get(&prompt.id).expect("created prompt exists");
@@ -743,10 +933,10 @@ impl DispatchRuntime {
             .filter(|value| !value.is_empty())
             .unwrap_or(&frame.session);
         let path = self.spec.state_dir.join("journal");
-        if let Ok(metadata) = std::fs::symlink_metadata(&path) {
-            if metadata.file_type().is_symlink() || !metadata.is_dir() {
-                return Err(runtime_error("journal directory must be a real directory"));
-            }
+        if let Ok(metadata) = std::fs::symlink_metadata(&path)
+            && (metadata.file_type().is_symlink() || !metadata.is_dir())
+        {
+            return Err(runtime_error("journal directory must be a real directory"));
         }
         let store = JournalStore::new(&path, session, JournalRedactor::standard(), "")
             .map_err(runtime_error)?;
@@ -821,6 +1011,52 @@ impl DispatchRuntime {
             })),
             Vec::new(),
         ))
+    }
+
+    fn authorize_network_mock(&self, frame: &Frame) -> Result<(), DaemonError> {
+        let args = object_args(frame)?;
+        let pattern = args.get("pattern").and_then(Value::as_str).unwrap_or("");
+        let target = pattern.trim_end_matches('*');
+        let host = policy_host(target);
+        let class = classify(&frame.cmd).map_err(runtime_error)?;
+        let mode = if std::env::var("SYMBROWSE_MCP").as_deref() == Ok("1") {
+            PolicyMode::Mcp
+        } else {
+            PolicyMode::Tty
+        };
+        let policy_path = self.spec.state_dir.join("policy.toml");
+        let policy = Policy::load(&policy_path).unwrap_or_else(|_| Policy {
+            source: policy_path.display().to_string(),
+            ..Policy::default()
+        });
+        let decision = if let Some(guard) = Guard::detect() {
+            guard
+                .decide(&GuardInput {
+                    command: frame.cmd.clone(),
+                    class,
+                    domain: host,
+                    warnings: Vec::new(),
+                })
+                .map_err(runtime_error)?
+                .decision
+        } else {
+            policy.decide(class, &host, mode).0
+        };
+        match decision {
+            symbrowse_core::policy::Decision::Allow => Ok(()),
+            symbrowse_core::policy::Decision::Deny => Err(DaemonError {
+                code: "policy_denied".into(),
+                message: format!("policy decision deny for {}", frame.cmd),
+                ..Default::default()
+            }),
+            symbrowse_core::policy::Decision::Confirm => Err(DaemonError {
+                code: "approval_required".into(),
+                message: format!("{} requires an explicit policy approval", frame.cmd),
+                requires_user_confirmation: Some(true),
+                resume_hint: "approve this operation in policy.toml, then retry".into(),
+                ..Default::default()
+            }),
+        }
     }
 
     async fn wayback_snapshots(&self, frame: &Frame) -> HandlerResult {
@@ -1280,6 +1516,23 @@ impl DispatchRuntime {
                 }
                 json!({"frames": frames})
             }
+            "frame.main" => {
+                page.set_active_frame("").await.map_err(runtime_error)?;
+                json!({"frame": "main"})
+            }
+            "frame.select" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    frame: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_active_frame(&request.frame)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"frame": request.frame})
+            }
             "a11y" => {
                 let tags = args.get("tags").cloned().unwrap_or_else(|| json!([]));
                 let tags: Vec<String> = serde_json::from_value(tags).map_err(runtime_error)?;
@@ -1353,6 +1606,108 @@ impl DispatchRuntime {
                     .ok_or_else(|| runtime_error("browser was not initialized"))?;
                 state.network_capture = Some(capture);
                 json!({"started": true})
+            }
+            "network.route" => {
+                let pattern = required_string(args, "pattern")?;
+                let action = args.get("action").and_then(Value::as_str).unwrap_or("mock");
+                let body = args
+                    .get("body")
+                    .map(serde_json::to_vec)
+                    .transpose()
+                    .map_err(runtime_error)?;
+                let route = NetworkRoute {
+                    pattern: pattern.to_owned(),
+                    action: action.to_owned(),
+                    status: args.get("status").and_then(Value::as_i64).unwrap_or(200),
+                    body,
+                    content_type: args
+                        .get("content_type")
+                        .and_then(Value::as_str)
+                        .unwrap_or("")
+                        .to_owned(),
+                };
+                page.route_requests(route.clone())
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"routed": route.pattern, "action": route.action})
+            }
+            "network.unroute" => {
+                let pattern = args.get("pattern").and_then(Value::as_str).unwrap_or("");
+                let removed = page
+                    .unroute_requests(pattern)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"removed": removed})
+            }
+            "network.har" => {
+                let action = args.get("action").and_then(Value::as_str).unwrap_or("");
+                match action {
+                    "start" => {
+                        let already_capturing = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?
+                            .as_ref()
+                            .is_some_and(|state| state.network_capture.is_some());
+                        if !already_capturing {
+                            let capture =
+                                page.start_network_capture().await.map_err(runtime_error)?;
+                            let mut browser = self
+                                .browser
+                                .lock()
+                                .map_err(|_| runtime_error("browser lock poisoned"))?;
+                            browser
+                                .as_mut()
+                                .ok_or_else(|| runtime_error("browser was not initialized"))?
+                                .network_capture = Some(capture);
+                        }
+                        json!({"started": true})
+                    }
+                    "stop" => {
+                        let content = args
+                            .get("content")
+                            .and_then(Value::as_str)
+                            .unwrap_or("none");
+                        if !matches!(content, "none" | "all") {
+                            return Err(malformed("HAR content must be \"all\" or \"none\""));
+                        }
+                        let capture = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?
+                            .as_mut()
+                            .ok_or_else(|| runtime_error("browser was not initialized"))?
+                            .network_capture
+                            .take();
+                        let mut capture = match capture {
+                            Some(capture) => capture,
+                            None => page.start_network_capture().await.map_err(runtime_error)?,
+                        };
+                        let _ = capture
+                            .collect_retaining_requests(std::time::Duration::from_millis(100))
+                            .await;
+                        let requests = capture.requests();
+                        let entries = requests.len();
+                        let har = har_document(&requests);
+                        let mut browser = self
+                            .browser
+                            .lock()
+                            .map_err(|_| runtime_error("browser lock poisoned"))?;
+                        let state = browser
+                            .as_mut()
+                            .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                        state.network_requests = requests;
+                        state.network_capture = Some(capture);
+                        json!({"har": har, "entries": entries})
+                    }
+                    _ => {
+                        return Err(DaemonError {
+                            code: "invalid_har_action".into(),
+                            message: "network har action must be \"start\" or \"stop\"".into(),
+                            ..Default::default()
+                        });
+                    }
+                }
             }
             "network.requests" => {
                 let capture = self
@@ -2389,12 +2744,7 @@ impl DispatchRuntime {
     async fn state_browser_command(&self, frame: &Frame) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = state_store(&self.spec, &self.state_keys, frame.cmd == "state.save")?;
         match frame.cmd.as_str() {
             "state.save" => {
                 let mut captured = if self.spec.engine == "static" {
@@ -2441,7 +2791,7 @@ impl DispatchRuntime {
                     name: name.to_owned(),
                     saved_at: String::new(),
                     expires_at: String::new(),
-                    key_source: "none".to_owned(),
+                    key_source: String::new(),
                     origins: std::iter::once((origin, entry)).collect(),
                 };
                 store
@@ -2532,16 +2882,13 @@ impl DispatchRuntime {
     }
 
     fn state_command(&self, frame: &Frame) -> HandlerResult {
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = state_store(&self.spec, &self.state_keys, false)?;
         let args = frame.args.as_ref().and_then(Value::as_object);
         match frame.cmd.as_str() {
             "state.list" => Ok((
-                Some(json!({"schema_version":1,"states":store.list().map_err(runtime_error)?})),
+                Some(
+                    json!({"schema_version":STATE_SCHEMA_VERSION,"states":store.list().map_err(runtime_error)?}),
+                ),
                 Vec::new(),
             )),
             "state.show" => {
@@ -2584,11 +2931,15 @@ impl DispatchRuntime {
     }
 }
 
-pub fn handler(spec: SessionSpec) -> Result<crate::DaemonHandler, DaemonError> {
+pub fn handler(
+    spec: SessionSpec,
+) -> Result<(crate::DaemonHandler, crate::server::DaemonShutdown), DaemonError> {
     let runtime = DispatchRuntime::new(spec)?;
-    Ok(Arc::new(move |frame, operation| {
-        runtime.handle(frame, operation)
-    }))
+    let serving = Arc::clone(&runtime);
+    Ok((
+        Arc::new(move |frame, operation| serving.handle(frame, operation)),
+        Arc::new(move || runtime.shutdown()),
+    ))
 }
 
 /// Execute one command in-process through the same typed runtime used by the daemon.
@@ -2876,12 +3227,11 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             }
         }
     }
-    if cookies.is_empty()
-        && let Some(items) = value.get("bidi_cookies").and_then(|raw| {
-            raw.as_array()
-                .or_else(|| raw.get("cookies").and_then(Value::as_array))
-        })
-    {
+    if let Some(items) = value.get("bidi_cookies").and_then(|raw| {
+        raw.as_array()
+            .or_else(|| raw.get("cookies").and_then(Value::as_array))
+    }) {
+        let mut complete_cookies = Vec::with_capacity(items.len());
         for item in items {
             let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
             let cookie_value = item
@@ -2895,7 +3245,7 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             if name.is_empty() {
                 continue;
             }
-            cookies.push(Cookie {
+            complete_cookies.push(Cookie {
                 name: name.to_owned(),
                 value: cookie_value.to_owned(),
                 domain: item
@@ -2926,6 +3276,9 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
                     .to_owned(),
             });
         }
+        if !complete_cookies.is_empty() {
+            cookies = complete_cookies;
+        }
     }
     Ok((
         origin,
@@ -2935,6 +3288,34 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             session_storage: object_map("session_storage"),
         },
     ))
+}
+
+fn state_store<S: KeySources>(
+    spec: &SessionSpec,
+    keys: &KeyResolver<S>,
+    refuse_encryption_downgrade: bool,
+) -> Result<Store, DaemonError> {
+    let key = keys.resolve().map_err(runtime_error)?;
+    let has_key = key.is_some();
+    let store = Store::new(
+        spec.state_store_dir(),
+        time::Duration::days(spec.state_expire_days),
+        key,
+    )
+    .map_err(runtime_error)?;
+    if refuse_encryption_downgrade && !has_key {
+        for name in store.list().map_err(runtime_error)? {
+            if matches!(
+                store.load(&name),
+                Err(StoreError::State(StateError::KeyRequired))
+            ) {
+                return Err(runtime_error(
+                    "state encryption key is unavailable; refusing an unencrypted save",
+                ));
+            }
+        }
+    }
+    Ok(store)
 }
 
 fn origin_host(origin: &str) -> String {
@@ -3037,6 +3418,71 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     }
 }
 
+fn har_document(requests: &[CapturedRequest]) -> Value {
+    let entries = requests
+        .iter()
+        .map(|request| {
+            let started =
+                time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
+                    .ok()
+                    .and_then(|value| {
+                        value
+                            .format(&time::format_description::well_known::Rfc3339)
+                            .ok()
+                    })
+                    .unwrap_or_default();
+            let headers = |headers: &std::collections::BTreeMap<String, String>| {
+                headers
+                    .iter()
+                    .map(|(name, value)| json!({"name": name, "value": value}))
+                    .collect::<Vec<_>>()
+            };
+            let response_content = json!({
+                "size": request.encoded_body_size,
+                "mimeType": request.mime_type,
+            });
+            // The Go network recorder currently retains no bodies in production;
+            // both content modes therefore expose the same metadata today.
+            json!({
+                "startedDateTime": started,
+                "time": 0,
+                "request": {
+                    "method": request.method,
+                    "url": request.url,
+                    "httpVersion": "HTTP/1.1",
+                    "headers": headers(&request.request_headers),
+                    "queryString": [],
+                    "cookies": [],
+                    "headersSize": -1,
+                    "bodySize": -1,
+                },
+                "response": {
+                    "status": request.status,
+                    "statusText": request.status_text,
+                    "httpVersion": "HTTP/1.1",
+                    "headers": headers(&request.response_headers),
+                    "cookies": [],
+                    "content": response_content,
+                    "redirectURL": "",
+                    "headersSize": -1,
+                    "bodySize": request.encoded_body_size,
+                },
+                "cache": {},
+                "timings": {"send": 0, "wait": 0, "receive": 0},
+            })
+        })
+        .collect::<Vec<_>>();
+    let started = time::OffsetDateTime::now_utc()
+        .format(&time::format_description::well_known::Rfc3339)
+        .unwrap_or_default();
+    json!({"log": {
+        "version": "1.2",
+        "creator": {"name": "symbrowse", "version": "0.1.0"},
+        "pages": [{"startedDateTime": started, "id": "page_1", "title": "", "pageTimings": {}}],
+        "entries": entries,
+    }})
+}
+
 fn network_request_value(request: &CapturedRequest) -> Value {
     let started_at = time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
         .ok()
@@ -3115,6 +3561,7 @@ mod tests {
         path::PathBuf,
         thread,
     };
+    use symbrowse_core::key_resolver::{MissingReason, ProbeError};
 
     #[test]
     fn static_mode_uses_caller_driven_runtime_and_browser_keeps_workers() {
@@ -3282,6 +3729,142 @@ mod tests {
         spec.engine = "static".into();
         spec.mode = "static".into();
         spec
+    }
+
+    struct FixedKeySources(Option<Vec<u8>>);
+
+    impl KeySources for FixedKeySources {
+        fn vault(&self, _entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            match &self.0 {
+                Some(value) => Ok(Some(value.clone())),
+                None => Err(ProbeError::Missing(MissingReason::NotFound)),
+            }
+        }
+
+        fn keychain(&self, _service: &str, _account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Ok(None)
+        }
+
+        fn environment(&self, _name: &str) -> Option<String> {
+            None
+        }
+    }
+
+    struct FailingKeySources;
+
+    impl KeySources for FailingKeySources {
+        fn vault(&self, _entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Err(ProbeError::Failed("vault lookup failed".to_owned()))
+        }
+
+        fn keychain(&self, _service: &str, _account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Ok(None)
+        }
+
+        fn environment(&self, _name: &str) -> Option<String> {
+            None
+        }
+    }
+
+    #[test]
+    fn state_store_uses_resolved_key_and_refuses_encryption_downgrade() {
+        let spec = temp_spec("state-key");
+        let key = KeyResolver::new(FixedKeySources(Some("ab".repeat(32).into_bytes())));
+        let store = state_store(&spec, &key, true).expect("state store with resolved key");
+        let mut state = symbrowse_core::state::State {
+            schema_version: STATE_SCHEMA_VERSION,
+            name: "login".into(),
+            saved_at: String::new(),
+            expires_at: String::new(),
+            key_source: String::new(),
+            origins: BTreeMap::from([(
+                "https://example.test".into(),
+                OriginState {
+                    cookies: Vec::new(),
+                    local_storage: BTreeMap::from([("token".into(), "fixture-secret".into())]),
+                    session_storage: BTreeMap::new(),
+                },
+            )]),
+        };
+        store
+            .save_at(&mut state, time::OffsetDateTime::now_utc())
+            .expect("encrypted state save");
+        let raw = std::fs::read(store.dir().join("login.json")).expect("read encrypted state");
+        assert!(!String::from_utf8_lossy(&raw).contains("fixture-secret"));
+        assert_eq!(
+            store.load("login").expect("decrypt state").key_source,
+            "symvault"
+        );
+
+        let unavailable = KeyResolver::new(FixedKeySources(None));
+        let error = match state_store(&spec, &unavailable, true) {
+            Err(error) => error,
+            Ok(_) => panic!("missing key must not downgrade an existing encrypted store"),
+        };
+        assert!(error.message.contains("refusing an unencrypted save"));
+    }
+
+    #[test]
+    fn state_store_fails_closed_when_configured_key_provider_fails() {
+        let spec = temp_spec("state-key-provider-failure");
+        let keys = KeyResolver::new(FailingKeySources);
+        let error = match state_store(&spec, &keys, true) {
+            Err(error) => error,
+            Ok(_) => panic!("provider failure must fail closed"),
+        };
+        assert!(error.message.contains("vault lookup failed"));
+    }
+
+    #[test]
+    fn flow_record_lifecycle_captures_whitelisted_actions_and_resolves_refs() {
+        let runtime = DispatchRuntime::new(temp_spec("flow-record")).expect("runtime");
+        let request = |cmd: &str| Frame {
+            cmd: cmd.into(),
+            session: "flow-record".into(),
+            ..Frame::default()
+        };
+        let started = runtime
+            .handle(request("flow.record.start"), OperationContext::for_test())
+            .expect("start recording");
+        assert_eq!(started.0.unwrap()["recording"], true);
+        runtime.record_frame(
+            &Frame {
+                cmd: "find".into(),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({"ref":"e7","role":"textbox","name":"Email","input_type":"email","autocomplete":"email"}),
+        );
+        runtime.record_frame(
+            &Frame {
+                cmd: "click".into(),
+                args: Some(json!({"selector":"@e7"})),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({}),
+        );
+        runtime.record_frame(
+            &Frame {
+                cmd: "get.url".into(),
+                args: Some(json!({})),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({"url":"https://example.com"}),
+        );
+        let status = runtime
+            .handle(request("flow.record.status"), OperationContext::for_test())
+            .expect("recording status");
+        assert_eq!(status.0.unwrap()["actions"], 1);
+        let stopped = runtime
+            .handle(request("flow.record.stop"), OperationContext::for_test())
+            .expect("stop recording");
+        let action = &stopped.0.unwrap()["actions"][0];
+        assert_eq!(action["selector"], "@e7");
+        assert_eq!(action["role"], "textbox");
+        assert_eq!(action["name"], "Email");
+        assert_eq!(action["input_type"], "email");
     }
 
     #[test]
@@ -3460,13 +4043,13 @@ mod tests {
             .block_on(runtime.dispatch(
                 Frame {
                     cmd: "open".into(),
-                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    args: Some(json!({"url":"https://example.com/fixture"})),
                     ..Frame::default()
                 },
                 OperationContext::for_test(),
             ))
             .expect_err("missing explicit Firefox must fail");
-        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE, "{error:?}");
         assert!(error.message.contains("Firefox executable not found"));
     }
 
@@ -3720,6 +4303,7 @@ mod tests {
         let address = listener.local_addr().expect("endpoint address");
         let endpoint_closed = Arc::new(AtomicBool::new(false));
         let closed = endpoint_closed.clone();
+        let (accepted, endpoint_ready) = std::sync::mpsc::sync_channel(1);
         let endpoint_thread = thread::spawn(move || {
             let deadline = std::time::Instant::now() + Duration::from_secs(2);
             while std::time::Instant::now() < deadline {
@@ -3728,7 +4312,10 @@ mod tests {
                         let _ = stream.set_nonblocking(false);
                         let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
                         let mut request = [0_u8; 4096];
-                        let _ = stream.read(&mut request);
+                        if !matches!(stream.read(&mut request), Ok(size) if size > 0) {
+                            return;
+                        }
+                        let _ = accepted.send(());
                         let _ = stream.write_all(
                             b"HTTP/1.1 200 OK\r\nContent-Length: 100\r\nConnection: keep-alive\r\n\r\n",
                         );
@@ -3755,7 +4342,7 @@ mod tests {
             }
         });
 
-        let production = handler(spec.clone()).expect("production handler");
+        let (production, on_shutdown) = handler(spec.clone()).expect("production handler");
         let followups = Arc::new(AtomicUsize::new(0));
         let observed = followups.clone();
         let wrapped = Arc::new(move |frame: Frame, operation: OperationContext| {
@@ -3768,6 +4355,7 @@ mod tests {
             crate::Server::new(crate::ServerOptions {
                 session_spec: Some(spec.clone()),
                 handler: Some(wrapped),
+                on_shutdown: Some(on_shutdown),
                 ..Default::default()
             })
             .expect("server"),
@@ -3816,7 +4404,9 @@ mod tests {
                 ..Default::default()
             })
         });
-        thread::sleep(Duration::from_millis(50));
+        endpoint_ready
+            .recv_timeout(Duration::from_secs(2))
+            .expect("flow did not reach blocked endpoint");
         server.stop();
         assert!(server_thread.join().unwrap().is_ok());
         let request_result = request.join().expect("flow request");
@@ -3833,6 +4423,7 @@ mod tests {
             )),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }
+        drop(server);
         endpoint_thread.join().expect("endpoint join");
         assert!(
             endpoint_closed.load(Ordering::Acquire),
@@ -3998,32 +4589,47 @@ mod tests {
     }
 
     #[test]
-    fn state_capture_preserves_storage_and_bidi_cookie_fields() {
+    fn state_capture_prefers_complete_bidi_cookies_over_document_cookie() {
         let value = json!({
             "origin": "https://example.test:8443/app",
             "local_storage": {"token": "redacted"},
             "session_storage": {"step": "2"},
-            "cookies": "",
-            "bidi_cookies": [{
-                "name": "sid",
-                "value": {"type": "string", "value": "abc"},
-                "domain": "example.test",
-                "path": "/app",
-                "secure": true,
-                "httpOnly": true,
-                "session": false,
-                "sameSite": "lax"
-            }]
+            "cookies": "visible=script-value",
+            "bidi_cookies": [
+                {
+                    "name": "visible",
+                    "value": {"type": "string", "value": "complete-value"},
+                    "domain": "example.test",
+                    "path": "/",
+                    "secure": true,
+                    "httpOnly": false,
+                    "session": true,
+                    "sameSite": "lax"
+                },
+                {
+                    "name": "sid",
+                    "value": {"type": "string", "value": "abc"},
+                    "domain": "example.test",
+                    "path": "/app",
+                    "secure": true,
+                    "httpOnly": true,
+                    "session": false,
+                    "sameSite": "lax"
+                }
+            ]
         });
         let (origin, state) = captured_origin_state(&value).expect("capture parse");
         assert_eq!(origin, "https://example.test:8443/app");
         assert_eq!(state.local_storage["token"], "redacted");
         assert_eq!(state.session_storage["step"], "2");
-        assert_eq!(state.cookies[0].name, "sid");
-        assert_eq!(state.cookies[0].value, "abc");
-        assert!(state.cookies[0].secure);
-        assert!(state.cookies[0].http_only);
-        assert!(!state.cookies[0].session);
+        assert_eq!(state.cookies.len(), 2);
+        assert_eq!(state.cookies[0].name, "visible");
+        assert_eq!(state.cookies[0].value, "complete-value");
+        assert_eq!(state.cookies[1].name, "sid");
+        assert_eq!(state.cookies[1].value, "abc");
+        assert!(state.cookies[1].secure);
+        assert!(state.cookies[1].http_only);
+        assert!(!state.cookies[1].session);
     }
 
     #[test]
@@ -4161,5 +4767,39 @@ mod tests {
             storage_set_request(&bad_args).unwrap_err().message,
             "storage key is required"
         );
+    }
+
+    #[test]
+    fn har_document_projects_captured_requests_with_masked_headers() {
+        let request = CapturedRequest {
+            id: "req-1".into(),
+            url: "https://example.test/path?q=1".into(),
+            method: "GET".into(),
+            status: 200,
+            status_text: "OK".into(),
+            mime_type: "text/html".into(),
+            started_at_unix_seconds: 1_700_000_000,
+            finished: true,
+            request_headers: [("authorization".into(), "[redacted]".into())]
+                .into_iter()
+                .collect(),
+            response_headers: [("content-type".into(), "text/html".into())]
+                .into_iter()
+                .collect(),
+            encoded_body_size: 17,
+            ..CapturedRequest::default()
+        };
+        let har = har_document(&[request]);
+        assert_eq!(har["log"]["version"], "1.2");
+        assert_eq!(har["log"]["entries"].as_array().unwrap().len(), 1);
+        assert_eq!(
+            har["log"]["entries"][0]["request"]["url"],
+            "https://example.test/path?q=1"
+        );
+        assert_eq!(
+            har["log"]["entries"][0]["request"]["headers"][0]["value"],
+            "[redacted]"
+        );
+        assert_eq!(har["log"]["entries"][0]["response"]["content"]["size"], 17);
     }
 }

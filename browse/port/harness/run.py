@@ -447,9 +447,9 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
     # without silently putting runner state on the local system volume.
     with tempfile.TemporaryDirectory(prefix="sb-", dir=temporary_parent(env)) as directory:
         base = Path(directory)
-        data = base / "data"
         home = base / "home"
-        for path in (data, home):
+        cache = base / "cache"
+        for path in (cache, home):
             path.mkdir(mode=0o700)
         runtime = (
             home / "Library" / "Caches" / "symbrowse" / "run"
@@ -460,8 +460,9 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
         scoped = dict(
             env,
             HOME=str(home),
+            XDG_CACHE_HOME=str(cache),
+            LOCALAPPDATA=str(cache),
             XDG_RUNTIME_DIR=str(runtime),
-            SYMBROWSE_USER_DATA_DIR=str(data),
             SYMBROWSE_NO_AUTOSTART="1",
         )
         lifecycle_once(binary, scoped, runtime, suffix="one")

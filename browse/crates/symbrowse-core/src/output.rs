@@ -359,10 +359,10 @@ fn render_human(envelope: &Envelope) -> String {
             marker.head, marker.tokens_returned, marker.tokens_total, marker.foot, marker.hint
         );
     }
-    if let Some(fields) = envelope.data.as_object() {
-        if let Some(rendered) = render_human_payload(fields) {
-            return rendered;
-        }
+    if let Some(fields) = envelope.data.as_object()
+        && let Some(rendered) = render_human_payload(fields)
+    {
+        return rendered;
     }
     let mut output = serde_json::to_string_pretty(&envelope.data)
         .expect("serde_json::Value serialization cannot fail");
@@ -542,10 +542,10 @@ fn render_state_payload(fields: &serde_json::Map<String, Value>) -> Option<Strin
     ] {
         if let Some(name) = fields.get(field).and_then(Value::as_str) {
             let mut output = format!("{operation}: {name}\n");
-            if operation != "cleared" {
-                if let Some(metadata) = fields.get("metadata").and_then(Value::as_object) {
-                    output.push_str(&render_state_metadata(metadata, "metadata:"));
-                }
+            if operation != "cleared"
+                && let Some(metadata) = fields.get("metadata").and_then(Value::as_object)
+            {
+                output.push_str(&render_state_metadata(metadata, "metadata:"));
             }
             return Some(output);
         }

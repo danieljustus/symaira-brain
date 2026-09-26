@@ -124,3 +124,30 @@ fn registry_cleans_profile_root_before_joining_session_names() {
     });
     assert!(!empty_root.user_data_root().as_os_str().is_empty());
 }
+
+#[test]
+fn registry_name_validation_matches_go_boundaries_without_side_effects() {
+    let root = tempfile::tempdir().expect("temporary registry root");
+    let profiles = root.path().join("profiles");
+    let registry = SessionRegistry::new(SessionRegistryOptions {
+        user_data_root: profiles.clone(),
+        pid: 99,
+        ..Default::default()
+    });
+
+    for name in ["", &"x".repeat(65), "../escape", "ümlaut", "has space"] {
+        assert!(
+            registry.ensure(name).is_err(),
+            "accepted invalid name {name:?}"
+        );
+    }
+    assert!(
+        !profiles.exists(),
+        "invalid names created a session profile root"
+    );
+    for name in ["a", &"x".repeat(64)] {
+        registry
+            .ensure(name)
+            .unwrap_or_else(|error| panic!("rejected valid boundary name {name:?}: {error}"));
+    }
+}

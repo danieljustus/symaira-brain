@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Sequence
+from urllib.parse import parse_qs, urlsplit
 
 scripts_directory = Path(__file__).resolve().parents[3] / "scripts"
 if str(scripts_directory) not in sys.path:
@@ -93,12 +94,17 @@ class Probe:
 
 class FixtureHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 - stdlib callback name
+        arrived_ns = time.perf_counter_ns()
         body = b"<html><head><title>RUST-016</title></head><body><main><p>fixture</p></main></body></html>\n"
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+        run_id = parse_qs(urlsplit(self.path).query).get("run", [""])[0]
+        if run_id:
+            with self.server.fetch_timing_lock:
+                self.server.fetch_timings[run_id] = (arrived_ns, time.perf_counter_ns())
 
     def log_message(self, format: str, *args: object) -> None:
         return
@@ -352,6 +358,16 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
                 "duration_ns": item.get("duration_ns"),
                 "peak_rss_bytes": item.get("peak_rss_bytes"),
                 "peak_rss_method": item.get("peak_rss_method"),
+                **{
+                    key: item[key]
+                    for key in (
+                        "fixture_observed",
+                        "pre_fixture_ns",
+                        "fixture_response_ns",
+                        "post_fixture_ns",
+                    )
+                    if key in item
+                },
             }
             for item in samples
         ],
@@ -365,7 +381,38 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
         summary["median_peak_rss_bytes"] = int(statistics.median(peak_rss))
     else:
         summary["peak_rss_status"] = "incomplete"
+    for stage in ("pre_fixture_ns", "fixture_response_ns", "post_fixture_ns"):
+        values = sorted(
+            int(item[stage])
+            for item in samples
+            if isinstance(item.get(stage), (int, float))
+        )
+        if len(values) == len(samples):
+            summary[f"median_{stage}"] = int(statistics.median(values))
+            summary[f"p95_{stage}"] = values[max(0, (len(values) * 95 + 99) // 100 - 1)]
     return summary
+
+
+def fetch_stage_timings(
+    started_ns: int, finished_ns: int, fixture_timing: tuple[int, int] | None
+) -> dict[str, int | bool]:
+    """Split fetch round-trip around the local fixture's response handler.
+
+    Pre-fixture includes daemon IPC, request handling, connection setup, and
+    dispatch to the local HTTP server. Post-fixture includes response transfer,
+    decoding, parsing/rendering, serialization, and daemon IPC. This is
+    diagnostic attribution only; the existing end-to-end duration remains the
+    gated measurement.
+    """
+    if fixture_timing is None:
+        return {"fixture_observed": False}
+    arrived_ns, responded_ns = fixture_timing
+    return {
+        "fixture_observed": True,
+        "pre_fixture_ns": max(0, arrived_ns - started_ns),
+        "fixture_response_ns": max(0, responded_ns - arrived_ns),
+        "post_fixture_ns": max(0, finished_ns - responded_ns),
+    }
 
 
 def daemon_command(binary: Path, session: str, *, static_mode: bool) -> list[str]:
@@ -700,6 +747,8 @@ def fetch_probe(
     if os.name != "posix" and os.name != "nt":
         return {"status": "unsupported", "reason": "fetch daemon probe requires Unix sockets or Windows named pipes"}
     server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
+    server.fetch_timings = {}
+    server.fetch_timing_lock = threading.Lock()
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     session = probe_session("f")
@@ -730,17 +779,24 @@ def fetch_probe(
             }
             try:
                 response = daemon_exchange(endpoint, frame, 15)
-                duration = time.perf_counter_ns() - started
+                finished = time.perf_counter_ns()
+                duration = finished - started
+                stages = fetch_stage_timings(
+                    started,
+                    finished,
+                    server.fetch_timings.get(str(index)),
+                )
                 if len(response) > MAX_OUTPUT:
-                    samples.append({"status": "error", "reason": "output limit exceeded"})
+                    samples.append({"status": "error", "reason": "output limit exceeded", **stages})
                 elif b'"success":true' not in response:
-                    samples.append({"status": "error", "reason": "fetch daemon request failed"})
+                    samples.append({"status": "error", "reason": "fetch daemon request failed", **stages})
                 else:
                     semantic_pass, reason = fetch_semantics(response, frame["args"]["url"])
                     samples.append({
                         "status": "pass" if semantic_pass else "error",
                         "duration_ns": duration,
                         "semantic_check": reason,
+                        **stages,
                     })
             except OSError as error:
                 samples.append({"status": "error", "reason": str(error)})

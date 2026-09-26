@@ -1,6 +1,6 @@
 use std::{
     fs,
-    io::{Read, Write},
+    io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
     path::{Path, PathBuf},
     sync::{
@@ -13,7 +13,8 @@ use std::{
 
 use chromiumoxide::cdp::browser_protocol::{dom, input};
 use symbrowse_engine_chrome::{
-    BrowserMode, ChromeSession, ScreenshotOptions, UnsupportedOperation, capabilities,
+    BrowserMode, ChromeSession, FindOptions, NetworkRoute, ScreenshotOptions, UnsupportedOperation,
+    capabilities,
 };
 
 fn e2e_enabled() -> bool {
@@ -64,7 +65,9 @@ impl TestServer {
         let thread = thread::spawn(move || {
             while !stop_for_thread.load(Ordering::Relaxed) {
                 match listener.accept() {
-                    Ok((stream, _)) => serve(stream),
+                    Ok((stream, _)) => {
+                        thread::spawn(move || serve(stream));
+                    }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                         thread::sleep(Duration::from_millis(2));
                     }
@@ -91,16 +94,20 @@ impl Drop for TestServer {
 
 fn serve(mut stream: TcpStream) {
     stream
+        .set_nonblocking(false)
+        .expect("blocking fixture request");
+    stream
         .set_read_timeout(Some(Duration::from_secs(2)))
         .expect("set read timeout");
-    let mut request = [0_u8; 4096];
-    let size = stream.read(&mut request).unwrap_or(0);
-    let request = String::from_utf8_lossy(&request[..size]);
-    let path = request
-        .lines()
-        .next()
-        .and_then(|line| line.split_whitespace().nth(1))
-        .unwrap_or("/");
+    let mut request_line = String::new();
+    if BufReader::new(&stream)
+        .read_line(&mut request_line)
+        .is_err()
+        || request_line.is_empty()
+    {
+        return;
+    }
+    let path = request_line.split_whitespace().nth(1).unwrap_or("/");
     let (status, content_type, body) = match path {
         "/asset.js" => (
             "200 OK",
@@ -119,7 +126,7 @@ fn serve(mut stream: TcpStream) {
 <div id="dbl" ondblclick="this.dataset.doubled='yes'">Double</div><div id="hover" onmouseenter="this.dataset.hovered='yes'">Hover</div>
 <div id="status"></div><div id="scroll"></div>
 <input id="file" type="file"><a id="download" download="rust012.txt" href="/download.txt">download</a>
-<iframe id="frame" srcdoc="<!doctype html><title>child</title><p>frame</p>"></iframe>
+<iframe id="frame" srcdoc="<!doctype html><title>child</title><p>child-frame-only</p>"></iframe>
 <script src="/asset.js"></script>"#,
         ),
     };
@@ -203,6 +210,43 @@ async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label:
 }
 
 #[tokio::test]
+async fn chrome_screenshot_capture_returns_png_artifact() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-screenshot-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page(format!("{}/", server.base_url))
+        .await
+        .expect("open screenshot fixture");
+    let screenshot = page
+        .screenshot(ScreenshotOptions::default())
+        .await
+        .expect("capture screenshot");
+    assert_eq!(screenshot.mime_type, "image/png");
+    assert!(screenshot.bytes.starts_with(&[0x89, b'P', b'N', b'G']));
+}
+
+#[tokio::test]
 async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
         return;
@@ -210,6 +254,159 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     tokio::time::timeout(Duration::from_secs(180), exercise_full_chrome_surface())
         .await
         .expect("Chrome full-surface fixture exceeded its three-minute deadline");
+}
+
+#[tokio::test]
+async fn selected_frame_scopes_eval_and_main_restores_it() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-frame-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile.clone(),
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page(format!("{}/", server.base_url))
+        .await
+        .expect("create page");
+    page.wait_for_selector("#frame", true, Duration::from_secs(5))
+        .await
+        .expect("wait for iframe");
+    let frames = page.frames().await.expect("frame tree");
+    let child = frames[0]
+        .children
+        .iter()
+        .find(|frame| frame.url.starts_with("about:srcdoc"))
+        .expect("nested frame");
+    assert!(
+        page.set_active_frame("missing-frame-id").await.is_err(),
+        "unknown frame selection must fail"
+    );
+    page.set_active_frame(&child.id)
+        .await
+        .expect("select nested frame");
+    assert_eq!(
+        page.read().await.expect("read nested frame").as_str(),
+        Some("child-frame-only")
+    );
+    assert_eq!(
+        page.inspect("p", "text")
+            .await
+            .expect("inspect nested frame"),
+        "child-frame-only"
+    );
+    let found = page
+        .find(FindOptions {
+            kind: "text".into(),
+            query: "child-frame-only".into(),
+            action: "ref".into(),
+            ..FindOptions::default()
+        })
+        .await
+        .expect("find nested frame text");
+    assert_eq!(found["matches"][0]["text"], "child-frame-only");
+    assert_eq!(
+        page.evaluate("location.href")
+            .await
+            .expect("evaluate nested frame")["value"],
+        "about:srcdoc"
+    );
+    page.set_active_frame("").await.expect("select main frame");
+    let main_read = page.read().await.expect("read main frame");
+    assert!(
+        !main_read
+            .as_str()
+            .is_some_and(|text| text.contains("child-frame-only")),
+        "main-frame read included nested-frame text: {main_read}"
+    );
+    assert!(
+        page.inspect("p", "text").await.is_err(),
+        "main-frame inspection unexpectedly found nested-frame paragraph"
+    );
+    assert!(
+        page.find(FindOptions {
+            kind: "text".into(),
+            query: "child-frame-only".into(),
+            action: "ref".into(),
+            ..FindOptions::default()
+        })
+        .await
+        .is_err(),
+        "main-frame find unexpectedly found nested-frame text"
+    );
+    assert_eq!(
+        page.evaluate("document.title")
+            .await
+            .expect("evaluate main frame")["value"],
+        "rust012"
+    );
+    session.close().await.expect("close Chrome");
+}
+
+#[tokio::test]
+async fn network_route_mock_and_unroute_are_real_and_opt_in() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-network-route-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile.clone(),
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session.new_page("about:blank").await.expect("new page");
+    page.enable_network_guard(Vec::new(), false, true)
+        .await
+        .expect("start interception listener");
+    let asset_url = format!("{}/asset.js", server.base_url);
+    page.route_requests(NetworkRoute {
+        pattern: asset_url,
+        action: "mock".into(),
+        status: 200,
+        body: Some(b"window.assetLoaded = false;".to_vec()),
+        content_type: "application/javascript".into(),
+    })
+    .await
+    .expect("install mock route");
+    page.open(&server.base_url).await.expect("open routed page");
+    assert_eq!(
+        page.evaluate_script("window.assetLoaded")
+            .await
+            .expect("read mocked asset"),
+        serde_json::Value::Bool(false)
+    );
+    assert!(page.unroute_requests("").await.expect("remove route"));
+    session.close().await.expect("close Chrome");
 }
 
 async fn exercise_full_chrome_surface() {
@@ -383,18 +580,23 @@ async fn exercise_full_chrome_surface() {
         "initial"
     );
     assert!(page.inspect("#text", "is").await.expect("is").as_bool() == Some(true));
+    eprintln!("chrome_full_stage=inspect-complete");
 
     page.click("#button").await.expect("click");
+    eprintln!("chrome_full_stage=click-complete");
     page.double_click("#dbl").await.expect("double click");
     page.focus("#text").await.expect("focus");
     page.hover("#hover").await.expect("hover");
+    eprintln!("chrome_full_stage=pointer-complete");
     page.scroll_into_view("#scroll").await.expect("scroll");
     page.type_text("#text", " typed").await.expect("type");
     page.fill("#text", "filled").await.expect("fill");
     page.press("#text", "End").await.expect("press");
+    eprintln!("chrome_full_stage=text-complete");
     page.select("#choice", "two").await.expect("select");
     page.check("#check").await.expect("check");
     page.uncheck("#check").await.expect("uncheck");
+    eprintln!("chrome_full_stage=form-complete");
     page.wait_for_selector("#status", true, Duration::from_secs(1))
         .await
         .expect("wait for status");

@@ -142,7 +142,20 @@ impl KeySources for SystemKeySources {
             self.timeout,
         ) {
             Ok(output) => output,
-            Err(ProbeError::Missing(MissingReason::Unavailable)) => return Ok(None),
+            Err(ProbeError::Missing(MissingReason::Unavailable)) => {
+                let error = if self.security.components().count() == 1 {
+                    format!(
+                        "exec: {:?}: executable file not found in $PATH",
+                        self.security.to_string_lossy()
+                    )
+                } else {
+                    format!(
+                        "fork/exec {}: no such file or directory",
+                        self.security.display()
+                    )
+                };
+                return Err(ProbeError::Failed(format!("keychain lookup: {error}")));
+            }
             Err(error) => return Err(error),
         };
         match output.status.code() {

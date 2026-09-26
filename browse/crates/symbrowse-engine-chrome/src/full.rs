@@ -16,8 +16,11 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, emulation, fetch, input, network, page},
+    cdp::browser_protocol::{
+        accessibility, browser, dom, emulation, fetch, input, network, page, target,
+    },
     cdp::js_protocol::runtime::{self, EvaluateParams},
+    error::CdpError,
     layout::Point,
 };
 use futures::StreamExt;
@@ -144,6 +147,24 @@ fn uses_script_navigation(url: &str) -> bool {
         || url
             .get(..8)
             .is_some_and(|scheme| scheme.eq_ignore_ascii_case("https://"))
+}
+
+fn navigation_state_changed(before: &Value, state: &Value) -> bool {
+    // Go treats Page.navigate as the navigation signal, then independently
+    // waits for LoadComplete. Keep the polling fallback on that same boundary:
+    // a changed document may still be loading when Chromiumoxide misses its
+    // frame event (notably on Windows).
+    let new_document = state.get("time_origin") != before.get("time_origin");
+    let same_document_url_changed = state.get("url") != before.get("url")
+        && state
+            .get("url")
+            .and_then(Value::as_str)
+            .and_then(|url| url.split('#').next())
+            == before
+                .get("url")
+                .and_then(Value::as_str)
+                .and_then(|url| url.split('#').next());
+    new_document || same_document_url_changed
 }
 
 fn has_explicit_url_scheme(url: &str) -> bool {
@@ -393,15 +414,29 @@ impl ChromeSession {
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
         let url = url.into();
-        // Windows can stall when chromiumoxide creates a target with its URL
-        // already set; open it after the blank target is attached to the handler.
-        let page = self
-            .browser
-            .lock()
-            .await
-            .new_page("about:blank")
-            .await
-            .map_err(|error| std::io::Error::other(format!("create blank CDP target: {error}")))?;
+        // Browser::new_page waits for the target to become idle. A fresh
+        // browser profile can keep that wait pending even after Chrome has
+        // created the target, so use the direct CDP response and attach it.
+        let browser = self.browser.lock().await;
+        let target_id = browser
+            .execute(target::CreateTargetParams::new("about:blank"))
+            .await?
+            .result
+            .target_id;
+        let page = tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                match browser.get_page(target_id.clone()).await {
+                    Ok(page) => return Ok(page),
+                    Err(CdpError::NotFound) => tokio::time::sleep(Duration::from_millis(10)).await,
+                    Err(error) => return Err(error),
+                }
+            }
+        })
+        .await
+        .map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::TimedOut, "attach blank CDP target")
+        })??;
+        drop(browser);
         let page = ChromePage::new(page, Arc::clone(&self.browser))
             .await
             .map_err(|error| {
@@ -424,7 +459,7 @@ impl ChromeSession {
         Ok(chrome_pages)
     }
 
-    pub async fn close(self) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn close(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
         let mut browser = self.browser.lock().await;
         let close_result = if self.mode == ConnectionMode::Launch {
             browser.close().await.map(|_| ())
@@ -437,18 +472,52 @@ impl ChromeSession {
         wait_result?;
         Ok(())
     }
+
+    pub async fn force_kill(&self) {
+        let mut browser = self.browser.lock().await;
+        if self.mode == ConnectionMode::Launch {
+            let _ = browser.kill().await;
+        }
+        self._handler_task.abort();
+    }
 }
 
 #[derive(Clone)]
 pub struct ChromePage {
     page: Page,
     browser: Arc<Mutex<Browser>>,
+    active_frame_context: Arc<Mutex<Option<runtime::ExecutionContextId>>>,
     dialogs: DialogMonitor,
     downloads: Arc<Mutex<DownloadRegistry>>,
     download_session: String,
     download_frame: Arc<Mutex<String>>,
     runtime_events: Arc<Mutex<RuntimeEventState>>,
-    network_guard_enabled: Arc<Mutex<bool>>,
+    network_interception: Arc<Mutex<NetworkInterception>>,
+}
+
+#[derive(Clone, Default)]
+struct NetworkInterception {
+    listener_started: bool,
+    fetch_enabled: bool,
+    routes: BTreeMap<String, NetworkRoute>,
+    allowlist: Option<symbrowse_core::policy::Allowlist>,
+    ssrf_enabled: bool,
+    allow_private: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct NetworkRoute {
+    pub pattern: String,
+    pub action: String,
+    pub status: i64,
+    pub body: Option<Vec<u8>>,
+    pub content_type: String,
+}
+
+fn route_matches(pattern: &str, url: &str) -> bool {
+    pattern
+        .strip_suffix('*')
+        .map_or(url == pattern, |prefix| url.starts_with(prefix))
 }
 
 #[derive(Clone)]
@@ -576,6 +645,7 @@ impl ChromePage {
         Ok(Self {
             page,
             browser,
+            active_frame_context: Arc::new(Mutex::new(None)),
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
@@ -584,7 +654,7 @@ impl ChromePage {
             download_session,
             download_frame,
             runtime_events: Arc::new(Mutex::new(RuntimeEventState::default())),
-            network_guard_enabled: Arc::new(Mutex::new(false)),
+            network_interception: Arc::new(Mutex::new(NetworkInterception::default())),
         })
     }
 
@@ -595,83 +665,169 @@ impl ChromePage {
         ssrf_enabled: bool,
         allow_private: bool,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         let allowlist = symbrowse_core::policy::Allowlist::parse(&allowed_domains)?;
-        if !allowlist.active() && !ssrf_enabled {
-            if diagnostics {
-                eprintln!("chrome_network_guard_stage=inactive");
-            }
-            return Ok(());
+        let policy_active = allowlist.active() || ssrf_enabled;
+        {
+            let mut interception = self.network_interception.lock().await;
+            interception.allowlist = Some(allowlist);
+            interception.ssrf_enabled = ssrf_enabled;
+            interception.allow_private = allow_private;
         }
-        let mut enabled = self.network_guard_enabled.lock().await;
-        if *enabled {
-            if diagnostics {
-                eprintln!("chrome_network_guard_stage=already-enabled");
-            }
+        self.ensure_interception_listener().await?;
+        if policy_active {
+            self.enable_fetch_interception().await?;
+        }
+        Ok(())
+    }
+
+    async fn ensure_interception_listener(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        if interception.listener_started {
             return Ok(());
         }
         let mut paused = self
             .page
             .event_listener::<fetch::EventRequestPaused>()
             .await?;
-        if diagnostics {
-            eprintln!("chrome_network_guard_stage=request-paused-listener-ready");
-        }
-        self.page.execute(fetch::EnableParams::default()).await?;
-        *enabled = true;
-        drop(enabled);
-        if diagnostics {
-            eprintln!("chrome_network_guard_stage=fetch-enabled");
-        }
-
+        interception.listener_started = true;
+        drop(interception);
         let page = self.page.clone();
+        let state = Arc::clone(&self.network_interception);
         tokio::spawn(async move {
             while let Some(event) = paused.next().await {
-                let target = event.request.url.clone();
-                let allowlist = allowlist.clone();
-                let allowed = tokio::task::spawn_blocking(move || {
-                    if !allowlist.allows_url(&target) {
-                        return false;
-                    }
-                    !ssrf_enabled
+                let (route, allowlist, ssrf_enabled, allow_private) = {
+                    let state = state.lock().await;
+                    let route = state
+                        .routes
+                        .values()
+                        .find(|route| route_matches(&route.pattern, &event.request.url))
+                        .cloned();
+                    (
+                        route,
+                        state.allowlist.clone(),
+                        state.ssrf_enabled,
+                        state.allow_private,
+                    )
+                };
+                let allowed = allowlist
+                    .as_ref()
+                    .is_none_or(|list| list.allows_url(&event.request.url))
+                    && (!ssrf_enabled
                         || symbrowse_core::policy::SsrfGuard::new(allow_private)
-                            .allows_url(&target)
-                            .is_ok()
-                })
-                .await
-                .unwrap_or(false);
-                let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
-                if diagnostics {
-                    eprintln!(
-                        "chrome_network_guard_decision={}",
-                        if allowed { "continue" } else { "block" },
-                    );
-                }
-                if allowed {
-                    if let Err(error) = page
-                        .execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
-                        .await
-                    {
-                        if diagnostics {
-                            eprintln!("chrome_network_guard_continue_failed={error}");
+                            .allows_url(&event.request.url)
+                            .is_ok());
+                let result = if !allowed {
+                    page.execute(fetch::FailRequestParams::new(
+                        event.request_id.clone(),
+                        network::ErrorReason::BlockedByClient,
+                    ))
+                    .await
+                    .map(|_| ())
+                } else if let Some(route) = route {
+                    match route.action.as_str() {
+                        "abort" => page
+                            .execute(fetch::FailRequestParams::new(
+                                event.request_id.clone(),
+                                network::ErrorReason::BlockedByClient,
+                            ))
+                            .await
+                            .map(|_| ()),
+                        _ => {
+                            let mut response = fetch::FulfillRequestParams::builder()
+                                .request_id(event.request_id.clone())
+                                .response_code(if route.status == 0 { 200 } else { route.status });
+                            if let Some(body) = route.body {
+                                use base64::Engine as _;
+                                response = response
+                                    .body(base64::engine::general_purpose::STANDARD.encode(body));
+                            }
+                            if !route.content_type.is_empty() {
+                                response = response.response_header(fetch::HeaderEntry::new(
+                                    "Content-Type",
+                                    route.content_type,
+                                ));
+                            }
+                            match response.build() {
+                                Ok(response) => page.execute(response).await.map(|_| ()),
+                                Err(error) => {
+                                    eprintln!("chrome_network_interception_build_failed={error}");
+                                    page.execute(fetch::ContinueRequestParams::new(
+                                        event.request_id.clone(),
+                                    ))
+                                    .await
+                                    .map(|_| ())
+                                }
+                            }
                         }
                     }
                 } else {
-                    if let Err(error) = page
-                        .execute(fetch::FailRequestParams::new(
-                            event.request_id.clone(),
-                            network::ErrorReason::BlockedByClient,
-                        ))
+                    page.execute(fetch::ContinueRequestParams::new(event.request_id.clone()))
                         .await
-                    {
-                        if diagnostics {
-                            eprintln!("chrome_network_guard_fail_failed={error}");
-                        }
-                    }
+                        .map(|_| ())
+                };
+                if let Err(error) = result
+                    && std::env::var_os("SYMBROWSE_E2E").is_some()
+                {
+                    eprintln!("chrome_network_interception_answer_failed={error}");
                 }
             }
         });
         Ok(())
+    }
+
+    async fn enable_fetch_interception(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        if interception.fetch_enabled {
+            return Ok(());
+        }
+        self.page.execute(fetch::EnableParams::default()).await?;
+        interception.fetch_enabled = true;
+        Ok(())
+    }
+
+    pub async fn route_requests(
+        &self,
+        route: NetworkRoute,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if route.pattern.trim().is_empty() {
+            return Err("route pattern is required".into());
+        }
+        if route.action != "abort" && route.action != "mock" {
+            return Err("route action must be \"abort\" or \"mock\"".into());
+        }
+        self.ensure_interception_listener().await?;
+        self.network_interception
+            .lock()
+            .await
+            .routes
+            .insert(route.pattern.clone(), route);
+        self.enable_fetch_interception().await
+    }
+
+    pub async fn unroute_requests(
+        &self,
+        pattern: &str,
+    ) -> Result<bool, Box<dyn Error + Send + Sync>> {
+        let mut interception = self.network_interception.lock().await;
+        let removed = if pattern.is_empty() {
+            let removed = !interception.routes.is_empty();
+            interception.routes.clear();
+            removed
+        } else {
+            interception.routes.remove(pattern).is_some()
+        };
+        if interception.routes.is_empty()
+            && interception.fetch_enabled
+            && !interception.ssrf_enabled
+            && interception
+                .allowlist
+                .as_ref()
+                .is_none_or(|list| !list.active())
+        {
+            self.page.execute(fetch::DisableParams::default()).await?;
+            interception.fetch_enabled = false;
+        }
+        Ok(removed)
     }
 
     /// Disable page JavaScript execution for an isolated engine-hint probe.
@@ -795,13 +951,10 @@ impl ChromePage {
             return self.current_navigation_outcome().await;
         }
 
-        // chromiumoxide's Page::goto waits for its own Page.lifecycleEvent
-        // watcher, which has a fixed 30-second timeout. The Go engine sends
-        // Page.navigate and then polls document.readyState instead. Trigger
-        // the same navigation from the page context and use the same observable
-        // load-complete condition so Windows does not depend on that internal
-        // lifecycle watcher. Dispatch synchronously: an extra zero-delay timer
-        // can remain queued indefinitely on a background Windows target.
+        // chromiumoxide's Page::goto waits for its own lifecycle watcher.
+        // Linux Chrome can stall on a direct Page.navigate response, while
+        // Windows can stall on script navigation to a new document. Use the
+        // responsive dispatch path, then observe document completion ourselves.
         let mut navigated = self
             .page
             .event_listener::<page::EventFrameNavigated>()
@@ -810,39 +963,95 @@ impl ChromePage {
             .page
             .event_listener::<page::EventNavigatedWithinDocument>()
             .await?;
+        let mut load_events = self
+            .page
+            .event_listener::<page::EventLoadEventFired>()
+            .await?;
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-listeners-ready");
         }
         let main_frame = self.page.mainframe().await?;
+        let before = self
+            .page
+            .evaluate("({url: location.href, time_origin: performance.timeOrigin})")
+            .await?
+            .into_value::<Value>()?;
+        let same_document = before
+            .get("url")
+            .and_then(Value::as_str)
+            .is_some_and(|current| current.split('#').next() == url.split('#').next());
+        if before.get("url").and_then(Value::as_str) == Some(url) {
+            return self.current_navigation_outcome().await;
+        }
         if diagnostics {
             eprintln!("chrome_open_stage=main-frame-resolved");
         }
-        let url_literal = serde_json::to_string(url)?;
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-evaluate-start");
+            eprintln!("chrome_open_stage=dispatch-start");
         }
-        let dispatch = self
-            .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
-            .await?;
+        if cfg!(windows) && !same_document {
+            // Chrome can navigate while leaving this command response pending.
+            // The event and document checks below remain the completion proof.
+            if let Ok(dispatch) = tokio::time::timeout(
+                Duration::from_secs(1),
+                self.page.execute(page::NavigateParams::new(url)),
+            )
+            .await
+                && let Some(error) = dispatch?.result.error_text
+            {
+                return Err(error.into());
+            }
+        } else {
+            let url_literal = serde_json::to_string(url)?;
+            let dispatch = self
+                .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
+                .await?;
+            if let Some(error) = dispatch
+                .get("exception_text")
+                .and_then(Value::as_str)
+                .filter(|error| !error.is_empty())
+            {
+                return Err(error.to_owned().into());
+            }
+        }
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-evaluate-complete");
-        }
-        if let Some(error) = dispatch
-            .get("exception_text")
-            .and_then(Value::as_str)
-            .filter(|error| !error.is_empty())
-        {
-            return Err(error.to_owned().into());
+            eprintln!("chrome_open_stage=dispatch-complete");
         }
 
         let mut frame_events_open = true;
         let mut same_document_events_open = true;
+        let mut load_events_open = true;
         let mut navigation_observed = false;
+        let mut load_event_observed = false;
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
         }
-        while !navigation_observed && (frame_events_open || same_document_events_open) {
+        while !navigation_observed
+            && (frame_events_open || same_document_events_open || load_events_open)
+        {
             tokio::select! {
+                _ = tokio::time::sleep_until(deadline) => {
+                    return Err("Chrome navigation timed out".into());
+                }
+                _ = tokio::time::sleep(Duration::from_millis(25)) => {
+                    // Chromiumoxide can miss the main-frame event on Windows.
+                    // A changed document or same-document URL is the observable
+                    // navigation signal when the event stream stays silent. Keep
+                    // each CDP probe bounded so one stalled evaluation cannot
+                    // bypass the navigation deadline or starve event handling.
+                    let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+                    let probe_timeout = remaining.min(Duration::from_millis(250));
+                    if let Ok(Ok(state)) = tokio::time::timeout(
+                        probe_timeout,
+                        self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})"),
+                    ).await {
+                        let state = state.into_value::<Value>()?;
+                        if navigation_state_changed(&before, &state) {
+                            navigation_observed = true;
+                        }
+                    }
+                }
                 event = navigated.next(), if frame_events_open => {
                     match event {
                         Some(event) if event.frame.parent_id.is_none() => {
@@ -867,18 +1076,40 @@ impl ChromePage {
                         None => same_document_events_open = false,
                     }
                 }
+                event = load_events.next(), if load_events_open => {
+                    match event {
+                        Some(_) => {
+                            navigation_observed = true;
+                            load_event_observed = true;
+                            if diagnostics {
+                                eprintln!("chrome_open_stage=load-event-observed");
+                            }
+                        }
+                        None => load_events_open = false,
+                    }
+                }
             }
         }
         if !navigation_observed {
             return Err("Chrome navigation event streams closed".into());
         }
 
+        if load_event_observed {
+            let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+            return tokio::time::timeout(remaining, self.current_navigation_outcome()).await?;
+        }
+
         loop {
-            let state = self
-                .page
-                .evaluate("({ready_state: document.readyState})")
-                .await;
-            if let Ok(state) = state {
+            if tokio::time::Instant::now() >= deadline {
+                return Err("Chrome navigation timed out waiting for document completion".into());
+            }
+            let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
+            let state = tokio::time::timeout(
+                remaining.min(Duration::from_millis(250)),
+                self.page.evaluate("({ready_state: document.readyState})"),
+            )
+            .await;
+            if let Ok(Ok(state)) = state {
                 let state = state.into_value::<Value>()?;
                 if state.get("ready_state").and_then(Value::as_str) == Some("complete") {
                     if diagnostics {
@@ -906,12 +1137,7 @@ impl ChromePage {
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .page
-            .evaluate("document.body?.innerText ?? ''")
-            .await?
-            .into_value::<String>()?
-            .into())
+        self.evaluate_value("document.body?.innerText ?? ''").await
     }
 
     /// Evaluate a bounded JSON-producing script for shared browser state
@@ -970,14 +1196,11 @@ impl ChromePage {
     /// Evaluate a user expression and preserve JavaScript exceptions as data,
     /// matching the daemon's protocol-neutral `eval` result.
     pub async fn evaluate(&self, expression: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        let params = EvaluateParams::builder()
-            .expression(expression)
-            .return_by_value(true)
-            .await_promise(true)
-            .build()
-            .map_err(std::io::Error::other)?;
-        let response = self.page.execute(params).await?;
-        let response = response.result;
+        let response = self
+            .page
+            .execute(self.evaluate_params(expression).await?)
+            .await?
+            .result;
         let exception_text = response
             .exception_details
             .as_ref()
@@ -990,6 +1213,20 @@ impl ChromePage {
             "description": result.description.unwrap_or_default(),
             "exception_text": exception_text,
         }))
+    }
+
+    async fn evaluate_value(
+        &self,
+        expression: &str,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let response = self
+            .page
+            .execute(self.evaluate_params(expression).await?)
+            .await?;
+        if let Some(exception) = response.result.exception_details {
+            return Err(CdpError::JavascriptException(Box::new(exception)).into());
+        }
+        Ok(response.result.result.value.unwrap_or(Value::Null))
     }
 
     /// Read complete cookie metadata through Chrome's Network domain.
@@ -1091,29 +1328,31 @@ impl ChromePage {
         &self,
         selector: &str,
         action: &str,
-    ) -> Result<Element, Box<dyn Error + Send + Sync>> {
+    ) -> Result<Point, Box<dyn Error + Send + Sync>> {
         let element = self.element(selector).await?;
         let trace_geometry = std::env::var_os("SYMBROWSE_E2E").is_some() && selector == "#download";
         let selector_json = serde_json::to_string(selector)?;
         if trace_geometry {
             let before = self
-                .page
-                .evaluate(format!(
+                .evaluate_value(&format!(
                     "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
                 ))
-                .await?
-                .into_value::<Value>()?;
+                .await?;
             eprintln!("chrome_download_click_geometry_before={before}");
         }
         self.scroll_element_into_view(&element).await?;
+        element
+            .call_js_fn(
+                "function() { this.scrollIntoView({block:'center', inline:'center'}); }",
+                false,
+            )
+            .await?;
         if trace_geometry {
             let after = self
-                .page
-                .evaluate(format!(
+                .evaluate_value(&format!(
                     "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
                 ))
-                .await?
-                .into_value::<Value>()?;
+                .await?;
             eprintln!("chrome_download_click_geometry_after_scroll={after}");
         }
         let point = element.clickable_point().await?;
@@ -1123,13 +1362,36 @@ impl ChromePage {
                 point.x, point.y, element.backend_node_id
             );
         }
-        let hit = self
+        let hit = match self
             .page
             .execute(dom::GetNodeForLocationParams::new(
                 point.x as i64,
                 point.y as i64,
             ))
-            .await?;
+            .await
+        {
+            Ok(hit) => hit,
+            Err(error) => {
+                let same_target = element
+                    .call_js_fn(
+                        format!(
+                            "function() {{ return this === document.elementFromPoint({}, {}); }}",
+                            point.x, point.y
+                        ),
+                        false,
+                    )
+                    .await?
+                    .result
+                    .value
+                    .as_ref()
+                    .and_then(Value::as_bool)
+                    == Some(true);
+                if same_target {
+                    return Ok(point);
+                }
+                return Err(error.into());
+            }
+        };
         if trace_geometry {
             eprintln!(
                 "chrome_download_click_hit_matches={}",
@@ -1139,14 +1401,14 @@ impl ChromePage {
         if hit.backend_node_id != element.backend_node_id {
             let mut role = String::new();
             let mut name = String::new();
-            if let Some(node_id) = hit.node_id {
-                if let Ok(node) = self.page.describe_node(node_id).await {
-                    role = node.node_name;
-                    let attributes = node.attributes.as_deref().unwrap_or_default();
-                    name = attribute_value(attributes, "aria-label");
-                    if name.is_empty() {
-                        name = attribute_value(attributes, "id");
-                    }
+            if let Some(node_id) = hit.node_id
+                && let Ok(node) = self.page.describe_node(node_id).await
+            {
+                role = node.node_name;
+                let attributes = node.attributes.as_deref().unwrap_or_default();
+                name = attribute_value(attributes, "aria-label");
+                if name.is_empty() {
+                    name = attribute_value(attributes, "id");
                 }
             }
             if role.is_empty() {
@@ -1162,24 +1424,25 @@ impl ChromePage {
                 hint: "close the covering element and retry the click".into(),
             }));
         }
-        Ok(element)
+        Ok(point)
     }
 
     pub async fn click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        let element = self.click_target(selector, "click").await?;
-        element.click().await?;
+        let point = self.click_target(selector, "click").await?;
+        self.page.click(point).await?;
         Ok(result("click", selector))
     }
     pub async fn double_click(
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.click_target(selector, "dblclick")
-            .await?
+        let point = self.click_target(selector, "dblclick").await?;
+        self.page
             .click_with(
+                point,
                 chromiumoxide::types::ClickOptions::builder()
                     .click_count(2)
                     .build(),
@@ -1198,7 +1461,11 @@ impl ChromePage {
         &self,
         selector: &str,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
-        self.element(selector).await?.hover().await?;
+        let element = self.element(selector).await?;
+        self.scroll_element_into_view(&element).await?;
+        self.page
+            .move_mouse(element.clickable_point().await?)
+            .await?;
         Ok(result("hover", selector))
     }
     pub async fn scroll_into_view(
@@ -1308,7 +1575,7 @@ impl ChromePage {
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let value = serde_json::to_string(text)?;
         let selector = serde_json::to_string(selector)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.focus(); const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set || Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')?.set; if (setter) setter.call(e,{value}); else e.value={value}; e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.focus(); const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set || Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')?.set; if (setter) setter.call(e,{value}); else e.value={value}; e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
         Ok(result("fill", selector.trim_matches('"')))
     }
     pub async fn select(
@@ -1318,7 +1585,7 @@ impl ChromePage {
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let selector_json = serde_json::to_string(selector)?;
         let value_json = serde_json::to_string(value)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({selector_json}); if (!e || e.tagName !== 'SELECT') throw new Error('select requires a SELECT element'); const wanted={value_json}; let hit=false; for (const o of e.options) {{ const yes=o.value===wanted || o.text===wanted; o.selected=yes; hit ||= yes; }} if (!hit) throw new Error('option did not match'); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({selector_json}); if (!e || e.tagName !== 'SELECT') throw new Error('select requires a SELECT element'); const wanted={value_json}; let hit=false; for (const o of e.options) {{ const yes=o.value===wanted || o.text===wanted; o.selected=yes; hit ||= yes; }} if (!hit) throw new Error('option did not match'); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
         Ok(result("select", selector))
     }
     pub async fn check(
@@ -1341,7 +1608,7 @@ impl ChromePage {
         checked: bool,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let s = serde_json::to_string(selector)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({s}); if (!e || e.type !== 'checkbox') throw new Error('check requires a checkbox'); if (e.checked !== {checked}) e.click(); return e.checked; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({s}); if (!e || e.type !== 'checkbox') throw new Error('check requires a checkbox'); if (e.checked !== {checked}) e.click(); return e.checked; }})()" )).await?;
         Ok(result(if checked { "check" } else { "uncheck" }, selector))
     }
 
@@ -1397,11 +1664,7 @@ impl ChromePage {
             ),
             _ => return Err(format!("unsupported inspection kind {kind:?}").into()),
         };
-        Ok(self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?)
+        self.evaluate_value(&expression).await
     }
 
     /// Find an element by the semantic selectors used by the public command
@@ -1420,13 +1683,9 @@ impl ChromePage {
             .index
             .map_or_else(|| "null".to_owned(), |index| index.to_string());
         let expression = format!(
-            "(() => {{ const kind={kind}, query={query}, action={action}, name={name}, exact={exact}, wantedIndex={index}, value={value}; const text=e=>(e.innerText||e.textContent||'').trim(); const implicit=e=>{{ const tag=e.tagName.toLowerCase(); return tag==='button'?'button':tag==='a'?'link':tag==='input'?(e.type==='checkbox'?'checkbox':e.type==='radio'?'radio':'textbox'):tag==='textarea'?'textbox':tag==='select'?'combobox':''; }}; const candidate=e=>{{ switch(kind) {{ case 'role': return e.getAttribute('role')||implicit(e); case 'text': return text(e); case 'label': return e.getAttribute('aria-label')||text(document.querySelector(`label[for='${{CSS.escape(e.id||'')}}']` )||e); case 'placeholder': return e.getAttribute('placeholder')||''; case 'alt': return e.getAttribute('alt')||''; case 'title': return e.getAttribute('title')||''; case 'testid': return e.getAttribute('data-testid')||''; case 'css': return e.matches(query)?query:''; case 'ref': return e.getAttribute('data-symbrowse-ref')||''; default: return ''; }} }}; const matchesText=(got)=>exact?got===query:got.toLowerCase().includes(query.toLowerCase()); let nodes=[...document.querySelectorAll('*')]; let matches=nodes.filter(e=>kind==='ref'?candidate(e)===query.replace(/^@/,''):matchesText(candidate(e))); if (kind==='text') matches=matches.filter(e=>!matches.some(other=>other!==e&&e.contains(other))); if (name) matches=matches.filter(e=>{{ const got=e.getAttribute('aria-label')||e.getAttribute('name')||''; return exact?got===name:got.toLowerCase().includes(name.toLowerCase()); }}); if (!matches.length) throw new Error(`find ${{kind}} ${{query}} matched no elements`); if (wantedIndex!==null) matches=[matches[wantedIndex]].filter(Boolean); if (!matches.length) throw new Error(`find ${{kind}} index ${{wantedIndex}} is out of range`); if (wantedIndex===null&&matches.length>1&&['first','last','nth'].indexOf(action)<0) throw new Error(`find ${{kind}} ${{query}} matched ${{matches.length}} elements; use index`); let selected=action==='last'?matches[matches.length-1]:matches[0]; let next=1; for (const e of nodes) {{ if (!e.getAttribute('data-symbrowse-ref')) e.setAttribute('data-symbrowse-ref',`e${{next++}}`); }} const ref=selected.getAttribute('data-symbrowse-ref'); if (action==='click') selected.click(); else if (action==='focus') selected.focus(); else if (action==='fill') {{ selected.focus(); selected.value=value; selected.dispatchEvent(new Event('input',{{bubbles:true}})); selected.dispatchEvent(new Event('change',{{bubbles:true}})); }} else if (action==='text') return {{kind,query,action,ref,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}})),value:text(selected)}}; return {{kind,query,action,ref,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}}))}}; }})()"
+            "(() => {{ const kind={kind}, query={query}, action={action}, name={name}, exact={exact}, wantedIndex={index}, value={value}; const text=e=>(e.innerText||e.textContent||'').trim(); const implicit=e=>{{ const tag=e.tagName.toLowerCase(); return tag==='button'?'button':tag==='a'?'link':tag==='input'?(e.type==='checkbox'?'checkbox':e.type==='radio'?'radio':'textbox'):tag==='textarea'?'textbox':tag==='select'?'combobox':''; }}; const candidate=e=>{{ switch(kind) {{ case 'role': return e.getAttribute('role')||implicit(e); case 'text': return text(e); case 'label': return e.getAttribute('aria-label')||text(document.querySelector(`label[for='${{CSS.escape(e.id||'')}}']` )||e); case 'placeholder': return e.getAttribute('placeholder')||''; case 'alt': return e.getAttribute('alt')||''; case 'title': return e.getAttribute('title')||''; case 'testid': return e.getAttribute('data-testid')||''; case 'css': return e.matches(query)?query:''; case 'ref': return e.getAttribute('data-symbrowse-ref')||''; default: return ''; }} }}; const matchesText=(got)=>exact?got===query:got.toLowerCase().includes(query.toLowerCase()); let nodes=[...document.querySelectorAll('*')]; let matches=nodes.filter(e=>kind==='ref'?candidate(e)===query.replace(/^@/,''):matchesText(candidate(e))); if (kind==='text') matches=matches.filter(e=>!matches.some(other=>other!==e&&e.contains(other))); if (name) matches=matches.filter(e=>{{ const got=e.getAttribute('aria-label')||e.getAttribute('name')||''; return exact?got===name:got.toLowerCase().includes(name.toLowerCase()); }}); if (!matches.length) throw new Error(`find ${{kind}} ${{query}} matched no elements`); if (wantedIndex!==null) matches=[matches[wantedIndex]].filter(Boolean); if (!matches.length) throw new Error(`find ${{kind}} index ${{wantedIndex}} is out of range`); if (wantedIndex===null&&matches.length>1&&['first','last','nth'].indexOf(action)<0) throw new Error(`find ${{kind}} ${{query}} matched ${{matches.length}} elements; use index`); let selected=action==='last'?matches[matches.length-1]:matches[0]; let next=1; for (const e of nodes) {{ if (!e.getAttribute('data-symbrowse-ref')) e.setAttribute('data-symbrowse-ref',`e${{next++}}`); }} const ref=selected.getAttribute('data-symbrowse-ref'), role=selected.getAttribute('role')||implicit(selected), accessibleName=selected.getAttribute('aria-label')||selected.getAttribute('name')||text(selected), inputType=selected.getAttribute('type')||'', autocomplete=selected.getAttribute('autocomplete')||''; if (action==='click') selected.click(); else if (action==='focus') selected.focus(); else if (action==='fill') {{ selected.focus(); selected.value=value; selected.dispatchEvent(new Event('input',{{bubbles:true}})); selected.dispatchEvent(new Event('change',{{bubbles:true}})); }} else if (action==='text') return {{kind,query,action,ref,role,name:accessibleName,input_type:inputType,autocomplete,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}})),value:text(selected)}}; return {{kind,query,action,ref,role,name:accessibleName,input_type:inputType,autocomplete,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}}))}}; }})()"
         );
-        Ok(self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?)
+        self.evaluate_value(&expression).await
     }
 
     pub async fn wait_for_selector(
@@ -1465,6 +1724,40 @@ impl ChromePage {
             .frame_tree
             .clone();
         Ok(vec![frame_info(&tree)])
+    }
+
+    pub async fn set_active_frame(
+        &self,
+        frame_id: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let context = if frame_id.is_empty() {
+            None
+        } else {
+            Some(
+                self.page
+                    .execute(page::CreateIsolatedWorldParams::new(frame_id.to_owned()))
+                    .await?
+                    .execution_context_id,
+            )
+        };
+        *self.active_frame_context.lock().await = context;
+        Ok(())
+    }
+
+    async fn evaluate_params(
+        &self,
+        expression: &str,
+    ) -> Result<EvaluateParams, Box<dyn Error + Send + Sync>> {
+        let mut builder = EvaluateParams::builder()
+            .expression(expression.to_owned())
+            .return_by_value(true)
+            .await_promise(true);
+        if let Some(context) = *self.active_frame_context.lock().await {
+            builder = builder.context_id(context);
+        }
+        builder
+            .build()
+            .map_err(|error| std::io::Error::other(error).into())
     }
 
     pub async fn accessibility_tree(&self) -> Result<Vec<Value>, Box<dyn Error + Send + Sync>> {
@@ -1895,11 +2188,7 @@ impl ChromePage {
         let expression = format!(
             "(()=>{{if(!(window.axe&&window.axe.run)){{(0,eval)({source});}}return window.axe.run({root},{options}).then(results=>({{axe_version:window.axe.version,results}}));}})()"
         );
-        let raw = self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?;
+        let raw = self.evaluate_value(&expression).await?;
         let results = raw.get("results").ok_or("axe-core returned no result")?;
         let violations = results
             .get("violations")
@@ -2122,7 +2411,9 @@ fn scroll_stage(stage: &str) {
 
 fn attribute_value(attributes: &[String], name: &str) -> String {
     attributes
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .find(|pair| pair[0] == name)
         .map(|pair| pair[1].clone())
         .unwrap_or_default()
@@ -2411,5 +2702,46 @@ mod tests {
         ] {
             assert!(has_explicit_url_scheme(url), "{url}");
         }
+    }
+
+    #[test]
+    fn navigation_fallback_observes_document_change_before_load_completion() {
+        let before = json!({"url": "https://example.test/", "time_origin": 1});
+        assert!(!navigation_state_changed(
+            &before,
+            &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "complete"})
+        ));
+        assert!(navigation_state_changed(
+            &before,
+            &json!({"url": "https://example.test/next", "time_origin": 2, "ready_state": "loading"})
+        ));
+        assert!(navigation_state_changed(
+            &before,
+            &json!({"url": "https://example.test/#section", "time_origin": 1, "ready_state": "loading"})
+        ));
+        assert!(!navigation_state_changed(
+            &before,
+            &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "loading"})
+        ));
+    }
+
+    #[test]
+    fn network_route_patterns_match_exact_url_or_prefix_glob() {
+        assert!(route_matches(
+            "https://example.test",
+            "https://example.test"
+        ));
+        assert!(!route_matches(
+            "https://example.test",
+            "https://example.test/path"
+        ));
+        assert!(route_matches(
+            "https://example.test/*",
+            "https://example.test/path"
+        ));
+        assert!(!route_matches(
+            "https://example.test/*",
+            "https://other.test/path"
+        ));
     }
 }

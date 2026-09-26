@@ -28,6 +28,9 @@ fn run(binary: &Path, root: &Path, args: &[String]) -> Output {
 
 #[test]
 fn batch_state_clear_deletes_only_the_isolated_named_state_and_stops_its_daemon() {
+    #[cfg(target_os = "macos")]
+    let root = tempfile::tempdir_in("/tmp").expect("short isolated socket root");
+    #[cfg(not(target_os = "macos"))]
     let root = tempfile::tempdir().expect("isolated CLI and daemon roots");
     let binary = Path::new(env!("CARGO_BIN_EXE_symbrowse"));
     let name = "obsolete";
@@ -80,7 +83,7 @@ fn batch_state_clear_deletes_only_the_isolated_named_state_and_stops_its_daemon(
     assert_eq!(results.len(), 2);
     assert_eq!(results[0]["success"], true);
     assert_eq!(results[0]["data"]["success"], true);
-    assert_eq!(results[0]["data"]["data"]["name"], name);
+    assert_eq!(results[0]["data"]["data"]["cleared"], name);
     assert_eq!(results[1]["success"], true);
     assert_eq!(results[1]["data"]["success"], true);
 }

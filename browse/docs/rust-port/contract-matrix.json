@@ -331,13 +331,13 @@
       "id": "DMN-007",
       "seam": "session registry",
       "fixture": "valid/invalid IDs, ensure/list/info/touch/clear",
-      "go_oracle": "go test ./internal/daemon ./internal/sessionid -run 'Session|Registry'",
+      "go_oracle": "go test ./internal/daemon ./internal/sessionid -run 'Session|Registry|Scope|Invalid'",
       "expected": "defaulting, order, timestamps and stable errors match",
       "comparison": "json-semantic",
       "platforms": [
         "all"
       ],
-      "status": "todo"
+      "status": "fixture-ready"
     },
     {
       "id": "DMN-008",

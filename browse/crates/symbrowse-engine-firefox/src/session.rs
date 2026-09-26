@@ -468,19 +468,16 @@ async fn terminate_process(child: &mut Child) -> Result<(), FirefoxError> {
         #[cfg(not(windows))]
         let tree_stopped = false;
 
-        if !tree_stopped {
-            if let Err(error) = child.start_kill()
-                && child
-                    .try_wait()
-                    .map_err(|check| {
-                        FirefoxError::Driver(format!("check Firefox process: {check}"))
-                    })?
-                    .is_none()
-            {
-                return Err(FirefoxError::Driver(format!(
-                    "stop Firefox process: {error}"
-                )));
-            }
+        if !tree_stopped
+            && let Err(error) = child.start_kill()
+            && child
+                .try_wait()
+                .map_err(|check| FirefoxError::Driver(format!("check Firefox process: {check}")))?
+                .is_none()
+        {
+            return Err(FirefoxError::Driver(format!(
+                "stop Firefox process: {error}"
+            )));
         }
     }
     child

@@ -252,7 +252,7 @@ mod tests {
     fn hidden_completion_uses_only_the_implemented_command_tree() {
         let root = complete(&[String::new()]);
         assert!(root.contains("doctor\tCheck browser discovery"));
-        assert!(!root.contains("auth\t"));
+        assert!(root.contains("auth\tCredential management"));
 
         let children = complete(&["cookies".into(), String::new()]);
         assert!(children.contains("clear\tDelete one cookie"));

@@ -9,12 +9,14 @@ pub(super) fn help(command: &str, suffix: &[&str]) -> Option<&'static str> {
         .join(" ");
     match path.as_str() {
         "frame" => Some(
-            r###"Inspect the nested frame tree
+            r###"Address nested frames (tree, select, main)
 
 Usage:
   symbrowse frame [command]
 
 Available Commands:
+  main        Address the main frame again
+  select      Address a nested frame by its frame id
   tree        Show the nested frame tree of the active tab
 
 Flags:
@@ -26,6 +28,36 @@ Global Flags:
       --output string   output format: text, json or yaml (--json is shorthand for --output json) (default "text")
 
 Use "symbrowse frame [command] --help" for more information about a command.
+"###,
+        ),
+        "frame main" => Some(
+            r###"Address the main frame again
+
+Usage:
+  symbrowse frame main [flags]
+
+Flags:
+  -h, --help   help for main
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
+"###,
+        ),
+        "frame select" => Some(
+            r###"Address a nested frame by its frame id
+
+Usage:
+  symbrowse frame select <frame-id> [flags]
+
+Flags:
+  -h, --help   help for select
+
+Global Flags:
+      --json             print the unified machine-readable output envelope (shorthand for --output json)
+      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default "text")
+      --session string   daemon session name (default "default")
 "###,
         ),
         "frame tree" => Some(

@@ -12,7 +12,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use serde_json::{Value, json};
+use serde_json::json;
 use symbrowse_daemon::{Client, ClientOptions, Frame, Server, ServerOptions, SessionSpec};
 
 fn enabled() -> bool {
@@ -37,7 +37,12 @@ impl LoginFixture {
         let thread = thread::spawn(move || {
             while !stop_for_thread.load(Ordering::Relaxed) {
                 match listener.accept() {
-                    Ok((mut stream, _)) => respond(&mut stream),
+                    Ok((mut stream, _)) => {
+                        stream
+                            .set_nonblocking(false)
+                            .expect("use blocking auth fixture socket");
+                        thread::spawn(move || respond(&mut stream));
+                    }
                     Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
                         thread::sleep(Duration::from_millis(2));
                     }
@@ -66,8 +71,20 @@ fn respond(stream: &mut TcpStream) {
     stream
         .set_read_timeout(Some(Duration::from_secs(2)))
         .expect("set auth fixture read timeout");
-    let mut request = [0_u8; 2048];
-    let _ = stream.read(&mut request);
+    let mut request = Vec::new();
+    let mut chunk = [0_u8; 1024];
+    while request.len() < 8192 && !request.windows(4).any(|part| part == b"\r\n\r\n") {
+        let Ok(read) = stream.read(&mut chunk) else {
+            return;
+        };
+        if read == 0 {
+            return;
+        }
+        request.extend_from_slice(&chunk[..read]);
+    }
+    if !request.windows(4).any(|part| part == b"\r\n\r\n") {
+        return;
+    }
     let body = "<!doctype html><form><input id='user' type='email'><input id='pass' type='password'></form>";
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",

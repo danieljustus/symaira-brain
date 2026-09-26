@@ -20,6 +20,10 @@ fn timestamp_state(started_at: &str, last_activity: &str) -> (bool, bool) {
 }
 
 fn main() {
+    let default_profile_root = SessionRegistry::new(SessionRegistryOptions::default())
+        .user_data_root()
+        .display()
+        .to_string();
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("system time after epoch")
@@ -55,7 +59,28 @@ fn main() {
         .set_ref("alpha", "selector", "@element-1")
         .expect("set ref");
     let reference = registry.reference("alpha", "selector").expect("read ref");
+    let before_touch = registry.get("alpha").expect("read alpha before touch");
+    std::thread::sleep(std::time::Duration::from_millis(2));
     registry.touch("alpha").expect("touch alpha");
+    let after_touch = registry.get("alpha").expect("read alpha after touch");
+
+    let validation_registry = SessionRegistry::new(SessionRegistryOptions {
+        user_data_root: root.join("validation"),
+        ..Default::default()
+    });
+    let mut validation = Vec::new();
+    for name in ["", &"x".repeat(65), "../escape", "ümlaut", "has space"] {
+        validation.push(serde_json::json!({
+            "name": name,
+            "accepted": validation_registry.ensure(name).is_ok(),
+        }));
+    }
+    for name in ["a", &"x".repeat(64)] {
+        validation.push(serde_json::json!({
+            "name": name,
+            "accepted": validation_registry.ensure(name).is_ok(),
+        }));
+    }
 
     let data = registry.list_data();
     let sessions: Vec<_> = data
@@ -70,7 +95,7 @@ fn main() {
                 "active_tabs": info.active_tabs,
                 "user_data_dir_basename": PathBuf::from(&info.user_data_dir)
                     .file_name().and_then(|name| name.to_str()).unwrap_or_default(),
-                "user_data_path_is_clean": PathBuf::from(&info.user_data_dir)
+                "user_data_path_is_clean": std::path::Path::new(&info.user_data_dir)
                     == registry.user_data_root().join(&info.name),
                 "browser_context_id": info.browser_context_id,
                 "ref_count": info.ref_count,
@@ -95,6 +120,7 @@ fn main() {
     );
     let result = serde_json::json!({
         "schema_version": data.schema_version,
+        "default_profile_root": default_profile_root,
         "sessions": sessions,
         "invalid_name_error": invalid_name_error,
         "missing_get_error": missing_get_error,
@@ -102,6 +128,8 @@ fn main() {
         "empty_ref_error": empty_ref_error,
         "reference": reference,
         "ensure_idempotent": ensure_idempotent,
+        "validation": validation,
+        "touch_advanced": after_touch.last_activity != before_touch.last_activity,
         "cleared_entries": registry.list().len(),
         "profiles_preserved": profiles_preserved,
     });
