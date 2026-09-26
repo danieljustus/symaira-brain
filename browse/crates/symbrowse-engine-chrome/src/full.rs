@@ -1014,14 +1014,29 @@ impl ChromePage {
         if cfg!(windows) && !same_document {
             // Chrome can navigate while leaving this command response pending.
             // The event and document checks below remain the completion proof.
-            if let Ok(dispatch) = tokio::time::timeout(
+            match tokio::time::timeout(
                 Duration::from_secs(1),
                 self.page.execute(page::NavigateParams::new(url)),
             )
             .await
-                && let Some(error) = dispatch?.result.error_text
             {
-                return Err(error.into());
+                Ok(dispatch) => {
+                    let dispatch = dispatch?;
+                    if diagnostics {
+                        eprintln!(
+                            "chrome_open_stage=dispatch-response status=received error_text={}",
+                            dispatch.result.error_text.is_some()
+                        );
+                    }
+                    if let Some(error) = dispatch.result.error_text {
+                        return Err(error.into());
+                    }
+                }
+                Err(_) => {
+                    if diagnostics {
+                        eprintln!("chrome_open_stage=dispatch-response status=timeout");
+                    }
+                }
             }
         } else {
             let url_literal = serde_json::to_string(url)?;
@@ -1045,6 +1060,9 @@ impl ChromePage {
         let mut load_events_open = true;
         let mut navigation_observed = false;
         let mut load_event_observed = false;
+        let mut probe_responded = false;
+        let mut probe_failed = false;
+        let mut probe_timed_out = false;
         let deadline = tokio::time::Instant::now() + timeout;
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
@@ -1064,13 +1082,31 @@ impl ChromePage {
                     // bypass the navigation deadline or starve event handling.
                     let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
                     let probe_timeout = remaining.min(Duration::from_millis(250));
-                    if let Ok(Ok(state)) = tokio::time::timeout(
+                    match tokio::time::timeout(
                         probe_timeout,
                         self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})"),
                     ).await {
-                        let state = state.into_value::<Value>()?;
-                        if navigation_state_changed(&before, &state) {
-                            navigation_observed = true;
+                        Ok(Ok(state)) => {
+                            if diagnostics && !probe_responded {
+                                eprintln!("chrome_open_stage=document-probe status=responsive");
+                                probe_responded = true;
+                            }
+                            let state = state.into_value::<Value>()?;
+                            if navigation_state_changed(&before, &state) {
+                                navigation_observed = true;
+                            }
+                        }
+                        Ok(Err(_)) => {
+                            if diagnostics && !probe_failed {
+                                eprintln!("chrome_open_stage=document-probe status=error");
+                                probe_failed = true;
+                            }
+                        }
+                        Err(_) => {
+                            if diagnostics && !probe_timed_out {
+                                eprintln!("chrome_open_stage=document-probe status=timeout");
+                                probe_timed_out = true;
+                            }
                         }
                     }
                 }
