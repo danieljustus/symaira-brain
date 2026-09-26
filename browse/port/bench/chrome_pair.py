@@ -247,11 +247,17 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
         try:
             run_cli(binary, ["daemon", "stop"], session, env, root)
             if not wait_for_daemon_exit(binary, session, env, root):
-                outcome = {"status": "error", "phase": "daemon-stop",
-                           "reason": "daemon did not exit within 10 seconds after stop"}
+                if outcome["status"] == "pass":
+                    outcome = {"status": "error", "phase": "daemon-stop",
+                               "reason": "daemon did not exit within 10 seconds after stop"}
+                else:
+                    outcome["cleanup_error"] = "daemon did not exit within 10 seconds after stop"
         except (OSError, subprocess.TimeoutExpired):
-            outcome = {"status": "error", "phase": "daemon-stop",
-                       "reason": "daemon shutdown could not be confirmed"}
+            if outcome["status"] == "pass":
+                outcome = {"status": "error", "phase": "daemon-stop",
+                           "reason": "daemon shutdown could not be confirmed"}
+            else:
+                outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
     return outcome
 
 

@@ -1,6 +1,7 @@
 import json
 import errno
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,6 +16,19 @@ from chrome_pair import (
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_cleanup_failure_preserves_the_primary_open_error(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"error": {"code": "operation_timeout"}})
+            with patch("chrome_pair.run_cli", side_effect=[
+                (1, response, ""), subprocess.TimeoutExpired("daemon stop", 45),
+            ]):
+                result = flow(root / "symbrowse", "rust", root / "chrome", None,
+                              "http://127.0.0.1/", root, 0)
+            self.assertEqual(result["phase"], "open")
+            self.assertEqual(result["error_code"], "operation_timeout")
+            self.assertIn("cleanup_error", result)
+
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

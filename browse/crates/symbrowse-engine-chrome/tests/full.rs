@@ -65,7 +65,9 @@ impl TestServer {
         let thread = thread::spawn(move || {
             while !stop_for_thread.load(Ordering::Relaxed) {
                 match listener.accept() {
-                    Ok((stream, _)) => serve(stream),
+                    Ok((stream, _)) => {
+                        thread::spawn(move || serve(stream));
+                    }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                         thread::sleep(Duration::from_millis(2));
                     }
