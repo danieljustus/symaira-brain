@@ -205,10 +205,10 @@ pub(super) fn check_vault_reachable() -> LinkCheck {
             detail: "probe timed out".to_string(),
             remedy: String::new(),
         },
-        Err(error) => LinkCheck {
+        Err(_) => LinkCheck {
             name,
             status: "fail".to_string(),
-            detail: format!("symvault probe failed: {error}"),
+            detail: "symvault probe failed".to_string(),
             remedy: "run `symvault doctor` to diagnose".to_string(),
         },
     }
