@@ -2361,17 +2361,17 @@ CASES = (
     ),
     Case(
         "activity_get_missing_budget",
-        ("activity", "get", "--profile", "reader", "missing-id"),
+        ("activity", "get", "--profile=reader", "missing-id"),
         setup=setup_activity_profile,
     ),
     Case(
         "activity_get_zero_budget",
-        ("activity", "get", "--profile", "reader", "--max-tokens", "0", "missing-id"),
+        ("activity", "get", "--profile=reader", "--max-tokens=0", "missing-id"),
         setup=setup_activity_profile,
     ),
     Case(
         "activity_get_excess_budget",
-        ("activity", "get", "--profile", "reader", "--max-tokens", "4001", "missing-id"),
+        ("activity", "get", "--profile=reader", "--max-tokens=4001", "missing-id"),
         setup=setup_activity_profile,
     ),
     Case(
