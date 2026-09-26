@@ -67,7 +67,7 @@ struct AuthLoginEnvelope<'a> {
     warnings: Vec<symbrowse_core::output::Warning>,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, PartialEq)]
 enum Action {
     Help(String),
     CompatSidecar,
@@ -221,6 +221,13 @@ enum Action {
     DiffSnapshot {
         session: String,
         baseline: Option<PathBuf>,
+        format: Format,
+    },
+    DiffScreenshot {
+        session: String,
+        baseline: PathBuf,
+        threshold: f64,
+        out: Option<PathBuf>,
         format: Format,
     },
     DiffUrl {
@@ -444,6 +451,13 @@ fn main() -> ExitCode {
             baseline,
             format,
         }) => run_diff_snapshot(session, baseline, format),
+        Ok(Action::DiffScreenshot {
+            session,
+            baseline,
+            threshold,
+            out,
+            format,
+        }) => run_diff_screenshot(session, baseline, threshold, out, format),
         Ok(Action::DiffUrl {
             session,
             first_url,
@@ -1947,6 +1961,264 @@ fn snapshot_tree_diff(before: &str, after: &str) -> serde_json::Value {
 
 fn snapshot_lines(value: &str) -> Vec<&str> {
     value.split('\n').filter(|line| !line.is_empty()).collect()
+}
+
+fn run_diff_screenshot(
+    session: String,
+    baseline: PathBuf,
+    threshold: f64,
+    out: Option<PathBuf>,
+    format: Format,
+) -> ExitCode {
+    let baseline_data = match fs::read(&baseline) {
+        Ok(data) => data,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "read baseline {baseline:?}: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response = match client.request(Frame {
+        cmd: "screenshot".into(),
+        args: Some(serde_json::json!({})),
+        session,
+        ..Frame::default()
+    }) {
+        Ok(response) => response,
+        Err(error) => return render_client_error(format, error),
+    };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let path = response
+        .data
+        .as_ref()
+        .and_then(|data| data.get("path"))
+        .and_then(serde_json::Value::as_str)
+        .filter(|path| !path.is_empty());
+    let Some(path) = path else {
+        let _ = writeln!(
+            io::stderr(),
+            "screenshot response did not include a file path"
+        );
+        return ExitCode::from(1);
+    };
+    let captured = match fs::read(path) {
+        Ok(data) => data,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "read captured screenshot {path:?}: {error}");
+            return ExitCode::from(1);
+        }
+    };
+    let result = match compare_screenshots(&baseline_data, &captured, threshold) {
+        Ok(result) => result,
+        Err(error) => {
+            let _ = writeln!(io::stderr(), "{error}");
+            return ExitCode::from(1);
+        }
+    };
+    let mut data = serde_json::json!({
+        "width": result.width,
+        "height": result.height,
+        "different_px": result.different_px,
+        "total_px": result.total_px,
+        "deviation": result.deviation,
+        "deviation_pct": result.deviation_pct,
+        "threshold": result.threshold,
+        "passed": result.passed,
+    });
+    if let Some(path) = out {
+        let mut options = fs::OpenOptions::new();
+        options.write(true).create(true).truncate(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.mode(0o600);
+        }
+        let write_result = options
+            .open(&path)
+            .and_then(|mut file| file.write_all(&result.diff_image_png));
+        if let Err(error) = write_result {
+            let _ = writeln!(io::stderr(), "write diff image {path:?}: {error}");
+            return ExitCode::from(1);
+        }
+        data["diff_image"] = serde_json::Value::String(path.to_string_lossy().into_owned());
+    }
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => {
+            if write_stdout(&output) != ExitCode::SUCCESS {
+                return ExitCode::from(1);
+            }
+        }
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    }
+    if result.passed {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(8) // Go's exitcodes.ExitData.
+    }
+}
+
+struct ScreenshotDiff {
+    width: u32,
+    height: u32,
+    different_px: usize,
+    total_px: usize,
+    deviation: f64,
+    deviation_pct: f64,
+    threshold: f64,
+    passed: bool,
+    diff_image_png: Vec<u8>,
+}
+
+fn compare_screenshots(
+    baseline: &[u8],
+    current: &[u8],
+    threshold: f64,
+) -> Result<ScreenshotDiff, String> {
+    let (width, height, baseline) =
+        decode_png(baseline).map_err(|error| format!("baseline: {error}"))?;
+    let (current_width, current_height, current) =
+        decode_png(current).map_err(|error| format!("current: {error}"))?;
+    if current_width != width || current_height != height {
+        return Err(format!(
+            "dimension mismatch: baseline (0,0)-({width},{height}) vs current (0,0)-({current_width},{current_height})"
+        ));
+    }
+    let threshold = if threshold <= 0.0 { 0.001 } else { threshold };
+    let total_px = usize::try_from(width)
+        .ok()
+        .and_then(|width| {
+            usize::try_from(height)
+                .ok()
+                .and_then(|height| width.checked_mul(height))
+        })
+        .ok_or_else(|| "image dimensions overflow".to_owned())?;
+    let mut different_px = 0;
+    let diff_bytes = total_px
+        .checked_mul(4)
+        .ok_or_else(|| "image dimensions overflow".to_owned())?;
+    let mut diff = Vec::new();
+    diff.try_reserve_exact(diff_bytes)
+        .map_err(|error| format!("allocate diff image: {error}"))?;
+    for (base, current) in baseline
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .zip(current.as_chunks::<4>().0.iter())
+    {
+        if !same_pixel(base, current) {
+            different_px += 1;
+            diff.extend_from_slice(&[255, 0, 255, 255]);
+        } else {
+            diff.extend_from_slice(&[base[0] / 4, base[1] / 4, base[2] / 4, base[3]]);
+        }
+    }
+    let mut diff_image_png = Vec::new();
+    {
+        let mut encoder = png::Encoder::new(&mut diff_image_png, width, height);
+        encoder.set_color(png::ColorType::Rgba);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder
+            .write_header()
+            .map_err(|error| format!("encode diff image: {error}"))?;
+        writer
+            .write_image_data(&diff)
+            .map_err(|error| format!("encode diff image: {error}"))?;
+    }
+    let deviation = if total_px == 0 {
+        0.0
+    } else {
+        different_px as f64 / total_px as f64
+    };
+    Ok(ScreenshotDiff {
+        width,
+        height,
+        different_px,
+        total_px,
+        deviation,
+        deviation_pct: deviation * 100.0,
+        threshold,
+        passed: deviation <= threshold,
+        diff_image_png,
+    })
+}
+
+fn decode_png(data: &[u8]) -> Result<(u32, u32, Vec<u8>), String> {
+    let mut decoder = png::Decoder::new(std::io::Cursor::new(data));
+    decoder.set_transformations(png::Transformations::EXPAND | png::Transformations::STRIP_16);
+    let mut reader = decoder
+        .read_info()
+        .map_err(|error| format!("decode png: {error}"))?;
+    let buffer_size = reader
+        .output_buffer_size()
+        .ok_or("invalid png dimensions")?;
+    let mut buffer = Vec::new();
+    buffer
+        .try_reserve_exact(buffer_size)
+        .map_err(|error| format!("allocate png decode buffer: {error}"))?;
+    buffer.resize(buffer_size, 0);
+    let info = reader
+        .next_frame(&mut buffer)
+        .map_err(|error| format!("decode png: {error}"))?;
+    let rgba_bytes = usize::try_from(info.width)
+        .ok()
+        .and_then(|width| {
+            usize::try_from(info.height)
+                .ok()
+                .and_then(|height| width.checked_mul(height))
+        })
+        .and_then(|pixels| pixels.checked_mul(4))
+        .ok_or("invalid png dimensions")?;
+    let mut rgba = Vec::new();
+    rgba.try_reserve_exact(rgba_bytes)
+        .map_err(|error| format!("allocate png pixels: {error}"))?;
+    match info.color_type {
+        png::ColorType::Rgba => rgba.extend_from_slice(&buffer[..info.buffer_size()]),
+        png::ColorType::Rgb => {
+            for pixel in buffer[..info.buffer_size()].as_chunks::<3>().0 {
+                rgba.extend_from_slice(&[pixel[0], pixel[1], pixel[2], 255]);
+            }
+        }
+        png::ColorType::Grayscale => {
+            for gray in &buffer[..info.buffer_size()] {
+                rgba.extend_from_slice(&[*gray, *gray, *gray, 255]);
+            }
+        }
+        png::ColorType::GrayscaleAlpha => {
+            for pixel in buffer[..info.buffer_size()].as_chunks::<2>().0 {
+                rgba.extend_from_slice(&[pixel[0], pixel[0], pixel[0], pixel[1]]);
+            }
+        }
+        png::ColorType::Indexed => return Err("decode png: indexed output was not expanded".into()),
+    }
+    Ok((info.width, info.height, rgba))
+}
+
+fn same_pixel(a: &[u8], b: &[u8]) -> bool {
+    (0..4).all(|index| {
+        let a = if index == 3 {
+            u32::from(a[index]) * 257
+        } else {
+            u32::from(a[index]) * 257 * u32::from(a[3]) / 255
+        };
+        let b = if index == 3 {
+            u32::from(b[index]) * 257
+        } else {
+            u32::from(b[index]) * 257 * u32::from(b[3]) / 255
+        };
+        a.abs_diff(b) <= 8000
+    })
 }
 
 fn run_diff_url(
@@ -4929,7 +5201,8 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("downloads", None) => Some("Show download events (origin URL, size, checksum) or set the download directory\n\nUsage:\n  symbrowse downloads [flags]\n\nFlags:\n      --dir string       set the download directory first\n  -h, --help             help for downloads\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned()),
         ("network", Some("requests")) => Some("List captured requests (sensitive headers masked)\n\nUsage:\n  symbrowse network requests [flags]\n\nFlags:\n      --filter string    only URLs containing this substring\n  -h, --help             help for requests\n      --max-tokens int   token budget for the payload; oversized output is truncated and stored in the cache (0 = no limit)\n      --method string    only this HTTP method\n      --status int       only this HTTP status code\n      --type string      only this resource type (document, xhr, script, ...)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
-        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
+        ("diff", None) => Some("Compare snapshots, screenshots and URLs\n\nUsage:\n  symbrowse diff [command]\n\nAvailable Commands:\n  screenshot  Compare the current screenshot against a baseline PNG\n  snapshot    Diff the current snapshot against a baseline file or the previous snapshot\n  url         Open two URLs and diff their extracted content\n\nFlags:\n  -h, --help             help for diff\n      --session string   daemon session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse diff [command] --help\" for more information about a command.\n".to_owned()),
+        ("diff", Some("screenshot")) => Some("Compare the current screenshot against a baseline PNG\n\nUsage:\n  symbrowse diff screenshot [flags]\n\nFlags:\n      --baseline string   baseline PNG file to compare against (required)\n  -h, --help              help for screenshot\n      --out string        write the diff image to this file\n      --threshold float   allowed deviation fraction (0..1) (default 0.001)\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n".to_owned()),
         ("diff", Some("snapshot")) => Some("Diff the current snapshot against a baseline file or the previous snapshot\n\nUsage:\n  symbrowse diff snapshot [flags]\n\nFlags:\n      --baseline string   baseline snapshot JSON file to compare against\n  -h, --help              help for snapshot\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("diff", Some("url")) => Some("Open two URLs and diff their extracted content\n\nUsage:\n  symbrowse diff url <url1> <url2> [flags]\n\nFlags:\n  -h, --help   help for url\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   daemon session name (default \"default\")\n".to_owned()),
         ("trace", None) => Some("Export and replay repeatable action traces\n\nUsage:\n  symbrowse trace [command]\n\nAvailable Commands:\n  export      Convert the session journal into a repeatable trace file\n  replay      Replay a trace file step by step and report deviations\n\nFlags:\n  -h, --help             help for trace\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse trace [command] --help\" for more information about a command.\n".to_owned()),
@@ -6168,6 +6441,8 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
     let (mut format, mut json) = root_output_flags(&values[..command_index])?;
     let mut session = String::from("default");
     let mut baseline = None;
+    let mut threshold = 0.001;
+    let mut out = None;
     let mut subcommand = None;
     let mut positional = Vec::new();
     let mut index = command_index + 1;
@@ -6175,6 +6450,7 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
         let value = &values[index];
         match value.as_str() {
             "snapshot" if subcommand.is_none() => subcommand = Some("snapshot"),
+            "screenshot" if subcommand.is_none() => subcommand = Some("screenshot"),
             "url" if subcommand.is_none() => subcommand = Some("url"),
             "--json" => json = true,
             "--output" => {
@@ -6185,9 +6461,17 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
                 index += 1;
                 session = required_value(values, index, "--session")?.to_owned();
             }
-            "--baseline" if subcommand == Some("snapshot") => {
+            "--baseline" if matches!(subcommand, Some("snapshot" | "screenshot")) => {
                 index += 1;
                 baseline = Some(PathBuf::from(required_value(values, index, "--baseline")?));
+            }
+            "--threshold" if subcommand == Some("screenshot") => {
+                index += 1;
+                threshold = parse_diff_threshold(required_value(values, index, "--threshold")?)?;
+            }
+            "--out" if subcommand == Some("screenshot") => {
+                index += 1;
+                out = Some(PathBuf::from(required_value(values, index, "--out")?));
             }
             value if value.starts_with("--json=") => {
                 json = parse_bool("--json", &value[7..])?;
@@ -6196,8 +6480,17 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
                 format = parse_format(&value[9..])?;
             }
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
-            value if value.starts_with("--baseline=") && subcommand == Some("snapshot") => {
+            value
+                if value.starts_with("--baseline=")
+                    && matches!(subcommand, Some("snapshot" | "screenshot")) =>
+            {
                 baseline = Some(PathBuf::from(&value[11..]));
+            }
+            value if value.starts_with("--threshold=") && subcommand == Some("screenshot") => {
+                threshold = parse_diff_threshold(&value[12..])?;
+            }
+            value if value.starts_with("--out=") && subcommand == Some("screenshot") => {
+                out = Some(PathBuf::from(&value[6..]));
             }
             value if value.starts_with('-') => return Err(unknown_flag(value)),
             value if subcommand.is_none() => {
@@ -6227,6 +6520,26 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
             ),
             exit_code: 2,
         }),
+        Some("screenshot") if positional.is_empty() => match baseline {
+            Some(baseline) => Ok(Action::DiffScreenshot {
+                session,
+                baseline,
+                threshold,
+                out,
+                format,
+            }),
+            None => Err(ParseError {
+                message: "--baseline <png> is required".into(),
+                exit_code: 2,
+            }),
+        },
+        Some("screenshot") => Err(ParseError {
+            message: format!(
+                "unknown command {:?} for \"symbrowse diff screenshot\"",
+                positional[0]
+            ),
+            exit_code: 2,
+        }),
         Some("url") if positional.len() == 2 => Ok(Action::DiffUrl {
             session,
             first_url: positional[0].clone(),
@@ -6239,6 +6552,13 @@ fn parse_diff(values: &[String], command_index: usize) -> Result<Action, ParseEr
         }),
         _ => unreachable!("diff subcommand selected from supported names"),
     }
+}
+
+fn parse_diff_threshold(value: &str) -> Result<f64, ParseError> {
+    value.parse::<f64>().map_err(|error| ParseError {
+        message: format!("invalid value for --threshold: {error}"),
+        exit_code: 2,
+    })
 }
 
 fn parse_network(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -8341,10 +8661,12 @@ fn write_stdout(value: &str) -> ExitCode {
 #[cfg(test)]
 mod tests {
     use super::{
-        Action, Format, KeyInitResult, ParseError, SessionIdInfo, go_json_html_escape,
-        go_json_string, mask_cookie_list, parse, parse_cache_range, parse_curl_cookie_line,
-        render_cookie_list_json, render_cookie_list_text, render_cookie_list_yaml,
-        render_session_id_json, render_state_key_init, session_id_info, snapshot_tree_diff,
+        Action, ExitCode, Format, KeyInitResult, ParseError, SessionIdInfo, compare_screenshots,
+        decode_png, go_json_html_escape, go_json_string, mask_cookie_list, parse,
+        parse_cache_range, parse_curl_cookie_line, render_cookie_list_json,
+        render_cookie_list_text, render_cookie_list_yaml, render_session_id_json,
+        render_state_key_init, run_diff_screenshot, same_pixel, session_id_info,
+        snapshot_tree_diff,
     };
     use crate::AuthLoginEnvelope;
     use std::ffi::OsString;
@@ -9877,6 +10199,163 @@ mod tests {
             })
         );
         assert!(parse(&args(&["diff", "url", "https://only.invalid"])).is_err());
+    }
+
+    #[test]
+    fn diff_screenshot_cli_parses_flags_and_requires_baseline() {
+        assert_eq!(
+            parse(&args(&[
+                "diff",
+                "screenshot",
+                "--baseline=before.png",
+                "--threshold",
+                "0.05",
+                "--out",
+                "diff.png",
+                "--session=fixture",
+                "--json",
+            ])),
+            Ok(Action::DiffScreenshot {
+                session: "fixture".into(),
+                baseline: PathBuf::from("before.png"),
+                threshold: 0.05,
+                out: Some(PathBuf::from("diff.png")),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["diff", "screenshot", "--json"])).is_err());
+        assert!(
+            parse(&args(&[
+                "diff",
+                "screenshot",
+                "--baseline",
+                "before.png",
+                "--threshold",
+                "bad",
+            ]))
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn screenshot_diff_matches_pixels_and_emits_png() {
+        let png = |color: [u8; 4]| {
+            let mut output = Vec::new();
+            let mut encoder = png::Encoder::new(&mut output, 1, 1);
+            encoder.set_color(png::ColorType::Rgba);
+            encoder.set_depth(png::BitDepth::Eight);
+            let mut writer = encoder.write_header().unwrap();
+            writer.write_image_data(&color).unwrap();
+            drop(writer);
+            output
+        };
+        let baseline = png([255, 255, 255, 255]);
+        let identical = compare_screenshots(&baseline, &baseline, 0.0).unwrap();
+        assert_eq!(identical.different_px, 0);
+        assert!(identical.passed);
+        assert_eq!(identical.threshold, 0.001);
+
+        let changed = compare_screenshots(&baseline, &png([0, 0, 0, 255]), 0.0).unwrap();
+        assert_eq!(changed.different_px, 1);
+        assert_eq!(changed.deviation, 1.0);
+        assert!(!changed.passed);
+        assert_eq!(decode_png(&changed.diff_image_png).unwrap().0, 1);
+        assert_eq!(
+            &decode_png(&changed.diff_image_png).unwrap().2[..4],
+            &[255, 0, 255, 255]
+        );
+        assert!(same_pixel(&[100, 100, 100, 255], &[130, 100, 100, 255]));
+        assert!(!same_pixel(&[100, 100, 100, 255], &[132, 100, 100, 255]));
+        assert!(compare_screenshots(&baseline, b"invalid", 0.0).is_err());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    #[allow(clippy::result_large_err)]
+    fn diff_screenshot_requests_daemon_capture_and_writes_diff() {
+        use std::{
+            fs,
+            path::PathBuf,
+            sync::{
+                Arc,
+                atomic::{AtomicBool, Ordering},
+            },
+            thread,
+            time::{Duration, Instant},
+        };
+        use symbrowse_daemon::{DaemonHandler, Server, ServerOptions, SessionSpec};
+
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let root = std::env::temp_dir().join(format!(
+            "symbrowse-diff-screenshot-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        fs::create_dir_all(&root).unwrap();
+        let image = |color: [u8; 4], path: PathBuf| {
+            let mut bytes = Vec::new();
+            let mut encoder = png::Encoder::new(&mut bytes, 1, 1);
+            encoder.set_color(png::ColorType::Rgba);
+            encoder.set_depth(png::BitDepth::Eight);
+            let mut writer = encoder.write_header().unwrap();
+            writer.write_image_data(&color).unwrap();
+            drop(writer);
+            fs::write(path, bytes).unwrap();
+        };
+        let baseline = root.join("baseline.png");
+        let capture = root.join("capture.png");
+        let output = root.join("diff.png");
+        image([255, 255, 255, 255], baseline.clone());
+        image([0, 0, 0, 255], capture.clone());
+
+        let session = format!("diff-shot-{}", NEXT.fetch_add(1, Ordering::Relaxed));
+        let mut spec = SessionSpec::for_session(&session);
+        spec.state_dir = root.join("state");
+        spec.cache_dir = root.join("cache");
+        spec.daemon_log = root.join("daemon.log");
+        let received_screenshot = Arc::new(AtomicBool::new(false));
+        let got_command = Arc::clone(&received_screenshot);
+        let capture_path = capture.to_string_lossy().into_owned();
+        let handler: DaemonHandler = Arc::new(move |frame, _| {
+            assert_eq!(frame.cmd, "screenshot");
+            assert_eq!(frame.args, Some(serde_json::json!({})));
+            got_command.store(true, Ordering::Release);
+            Ok((Some(serde_json::json!({"path": capture_path})), Vec::new()))
+        });
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                session_spec: Some(spec),
+                handler: Some(handler),
+                idle_timeout: None,
+                ..ServerOptions::default()
+            })
+            .unwrap(),
+        );
+        let socket = server.options().socket_path.clone();
+        let running = Arc::clone(&server);
+        let server_thread = thread::spawn(move || running.listen_and_serve().unwrap());
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !socket.exists() {
+            assert!(Instant::now() < deadline, "daemon socket did not appear");
+            thread::sleep(Duration::from_millis(10));
+        }
+
+        let status =
+            run_diff_screenshot(session, baseline, 0.001, Some(output.clone()), Format::Json);
+        server.stop();
+        server_thread.join().unwrap();
+        assert_eq!(status, ExitCode::from(8));
+        assert!(received_screenshot.load(Ordering::Acquire));
+        assert!(decode_png(&fs::read(&output).unwrap()).is_ok());
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(
+                fs::metadata(&output).unwrap().permissions().mode() & 0o777,
+                0o600
+            );
+        }
+        fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

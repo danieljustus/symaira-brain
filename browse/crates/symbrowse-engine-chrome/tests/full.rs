@@ -207,6 +207,43 @@ async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label:
 }
 
 #[tokio::test]
+async fn chrome_screenshot_capture_returns_png_artifact() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-screenshot-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page(format!("{}/", server.base_url))
+        .await
+        .expect("open screenshot fixture");
+    let screenshot = page
+        .screenshot(ScreenshotOptions::default())
+        .await
+        .expect("capture screenshot");
+    assert_eq!(screenshot.mime_type, "image/png");
+    assert!(screenshot.bytes.starts_with(&[0x89, b'P', b'N', b'G']));
+}
+
+#[tokio::test]
 async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
         return;
