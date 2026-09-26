@@ -126,6 +126,33 @@ class ChromePairTests(unittest.TestCase):
             self.assertEqual(run_flow.call_count, 2)
             self.assertEqual(report["gate"], "blocked")
 
+    def test_measure_reports_cleanup_failure_without_losing_open_error(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "symbrowse"
+            chrome = root / "chrome"
+            for path in (binary, chrome):
+                path.write_bytes(b"fixture")
+                path.chmod(0o700)
+            sample = {"status": "error", "phase": "open", "error_code": "operation_timeout"}
+            args = SimpleNamespace(target="windows-amd64", repo=Path(__file__).resolve().parents[3],
+                                   expected_source_revision=None, go=binary, rust=binary, chrome=chrome,
+                                   chrome_version="fixture", chrome_archive_sha256="a" * 64,
+                                   chrome_launcher=None, runs=30)
+            with patch("chrome_pair.native_target_matches", return_value=True), \
+                 patch("chrome_pair.flow", return_value=sample), \
+                 patch("chrome_pair.remove_owned_tempdir", side_effect=PermissionError(errno.EACCES, "sharing violation")) as cleanup:
+                report = measure(args)
+
+        self.assertEqual(report["status"], "error")
+        self.assertEqual(report["reason"], "owned Chrome profile cleanup failed; see sample cleanup_error")
+        self.assertEqual(cleanup.call_args.kwargs["timeout"], 30.0)
+        samples = [item for binary_report in report["binaries"].values()
+                   for item in binary_report["chrome_flow"]["samples"]]
+        self.assertEqual(len(samples), 1)
+        self.assertEqual(samples[0]["error_code"], "operation_timeout")
+        self.assertIn("cleanup_error", samples[0])
+
     def test_go_and_rust_use_the_same_verified_chrome_launcher(self):
         chrome = Path("/verified/cft/chrome")
         launcher = Path("/verified/cft/chrome-wrapper")

@@ -429,6 +429,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
     url = f"http://127.0.0.1:{server.server_port}/fixture.html"
     samples: dict[str, list[dict[str, Any]]] = {"go": [], "rust": []}
     chooser = random.Random(int(revision[:12], 16))
+    cleanup_failed = False
     try:
         for index in range(args.runs):
             order = ["go", "rust"]
@@ -438,11 +439,29 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 binary = args.go if implementation == "go" else args.rust
                 temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-", dir="/tmp" if sys.platform == "darwin" else None))
                 try:
-                    samples[implementation].append(
-                        flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)
-                    )
-                finally:
-                    remove_owned_tempdir(temp)
+                    sample = flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)
+                except BaseException as primary:
+                    try:
+                        remove_owned_tempdir(temp, timeout=30.0 if args.target.startswith("windows-") else 5.0)
+                    except OSError as cleanup:
+                        if hasattr(primary, "add_note"):
+                            primary.add_note(f"owned Chrome profile cleanup also failed: {cleanup}")
+                        else:
+                            primary.cleanup_error = str(cleanup)
+                    raise
+                try:
+                    remove_owned_tempdir(temp, timeout=30.0 if args.target.startswith("windows-") else 5.0)
+                except OSError as error:
+                    sample["cleanup_error"] = f"{type(error).__name__}: {error.strerror or 'profile cleanup failed'}"
+                    if sample["status"] == "pass":
+                        sample["measurement_status"] = "pass"
+                        sample.update(status="error", phase="cleanup")
+                    cleanup_failed = True
+                samples[implementation].append(sample)
+                if cleanup_failed:
+                    break
+            if cleanup_failed:
+                break
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
                 break
     finally:
@@ -470,7 +489,10 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
         args.runs,
     ) else "blocked"
     report["status"] = "measured" if go_p95 is not None and rust_p95 is not None else "error"
-    if report["gate"] != "pass":
+    if cleanup_failed:
+        report["status"] = "error"
+        report["reason"] = "owned Chrome profile cleanup failed; see sample cleanup_error"
+    elif report["gate"] != "pass":
         report["reason"] = "paired Chrome flow failed or Rust p95 exceeds 110% of Go"
     return report
 
