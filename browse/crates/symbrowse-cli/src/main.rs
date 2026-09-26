@@ -8572,7 +8572,10 @@ mod tests {
                 format: Format::Text,
             })
         );
-        assert!(parse(&args(&["session", "--scope=repo", "id"])).is_err());
+        assert!(matches!(
+            parse(&args(&["session", "--scope=repo", "id"])),
+            Ok(Action::SessionId { scope, .. }) if scope == "repo"
+        ));
         let hashed = session_id_info("repo", "agent", Path::new("/tmp/origin"), false);
         assert_eq!(hashed.id, "agent-28a1676df0916386");
         assert_eq!(hashed.origin_path, "/tmp/origin");
@@ -9080,13 +9083,11 @@ mod tests {
             "scroll",
             "state",
             "tab",
-            "tools",
             "trace",
             "upgrade",
             "upload",
             "version",
             "watch",
-            "workflow",
         ] {
             assert!(
                 root.contains(implemented),

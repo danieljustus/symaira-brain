@@ -204,7 +204,15 @@ impl ResponseCache {
         let body_path = dir.join(format!("{key}.body"));
         let meta_path = dir.join(format!("{key}.meta.json"));
         if let Some(ttl) = self.ttl {
-            let modified = fs::metadata(&meta_path)?.modified()?;
+            let modified = fs::metadata(&meta_path)
+                .map_err(|error| {
+                    if error.kind() == io::ErrorKind::NotFound {
+                        CacheError::NotFound(key.into())
+                    } else {
+                        CacheError::Io(error)
+                    }
+                })?
+                .modified()?;
             if modified
                 .checked_add(ttl)
                 .is_some_and(|expires| SystemTime::now() > expires)
