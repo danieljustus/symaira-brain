@@ -160,7 +160,7 @@ fn malformed_json_inventory_is_native_without_go_fallback() {
     let stdout = String::from_utf8(table.stdout).unwrap();
     assert!(stdout.contains("\tinvalid\tservers=(none)\n"));
     assert!(stdout.contains(
-        "error: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\n"
+        "error: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\n"
     ));
 
     let mut json_command = command(&root, &["harness", "list", "--json"]);
@@ -171,7 +171,7 @@ fn malformed_json_inventory_is_native_without_go_fallback() {
     let value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
     assert_eq!(
         value["harnesses"][0]["global"]["error"],
-        "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')"
+        "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'"
     );
 }
 

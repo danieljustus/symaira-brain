@@ -147,7 +147,7 @@ fn go_json_inventory_error(error: &str) -> bool {
         && error.contains(
             " config is not valid json; refusing to edit a config symbrain cannot parse: parse json: ",
         )
-        && error.ends_with("invalid character 'o' in literal null (expecting 'u')")
+        && error.ends_with("invalid character 'n'")
 }
 
 fn render_inventory_table(
