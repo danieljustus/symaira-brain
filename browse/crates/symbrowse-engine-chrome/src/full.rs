@@ -950,9 +950,10 @@ impl ChromePage {
             return self.current_navigation_outcome().await;
         }
 
-        // chromiumoxide's Page::goto waits for its own lifecycle watcher,
-        // which can time out on Windows. Send Page.navigate directly as Go
-        // does, then observe the document completion ourselves.
+        // chromiumoxide's Page::goto waits for its own lifecycle watcher.
+        // Linux Chrome can stall on a direct Page.navigate response, while
+        // Windows can stall on script navigation to a new document. Use the
+        // responsive dispatch path, then observe document completion ourselves.
         let mut navigated = self
             .page
             .event_listener::<page::EventFrameNavigated>()
@@ -970,18 +971,39 @@ impl ChromePage {
             .evaluate("({url: location.href, time_origin: performance.timeOrigin})")
             .await?
             .into_value::<Value>()?;
+        let same_document = before
+            .get("url")
+            .and_then(Value::as_str)
+            .is_some_and(|current| current.split('#').next() == url.split('#').next());
+        if before.get("url").and_then(Value::as_str) == Some(url) {
+            return self.current_navigation_outcome().await;
+        }
         if diagnostics {
             eprintln!("chrome_open_stage=main-frame-resolved");
         }
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-navigate-start");
+            eprintln!("chrome_open_stage=dispatch-start");
         }
-        let dispatch = self.page.execute(page::NavigateParams::new(url)).await?;
+        if cfg!(windows) && !same_document {
+            let dispatch = self.page.execute(page::NavigateParams::new(url)).await?;
+            if let Some(error) = dispatch.result.error_text {
+                return Err(error.into());
+            }
+        } else {
+            let url_literal = serde_json::to_string(url)?;
+            let dispatch = self
+                .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
+                .await?;
+            if let Some(error) = dispatch
+                .get("exception_text")
+                .and_then(Value::as_str)
+                .filter(|error| !error.is_empty())
+            {
+                return Err(error.to_owned().into());
+            }
+        }
         if diagnostics {
-            eprintln!("chrome_open_stage=dispatch-navigate-complete");
-        }
-        if let Some(error) = dispatch.result.error_text {
-            return Err(error.into());
+            eprintln!("chrome_open_stage=dispatch-complete");
         }
 
         let mut frame_events_open = true;
