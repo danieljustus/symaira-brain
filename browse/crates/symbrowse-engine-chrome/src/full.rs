@@ -149,10 +149,11 @@ fn uses_script_navigation(url: &str) -> bool {
             .is_some_and(|scheme| scheme.eq_ignore_ascii_case("https://"))
 }
 
-fn navigation_completed(before: &Value, state: &Value) -> bool {
-    if state.get("ready_state").and_then(Value::as_str) != Some("complete") {
-        return false;
-    }
+fn navigation_state_changed(before: &Value, state: &Value) -> bool {
+    // Go treats Page.navigate as the navigation signal, then independently
+    // waits for LoadComplete. Keep the polling fallback on that same boundary:
+    // a changed document may still be loading when Chromiumoxide misses its
+    // frame event (notably on Windows).
     let new_document = state.get("time_origin") != before.get("time_origin");
     let same_document_url_changed = state.get("url") != before.get("url")
         && state
@@ -1046,7 +1047,7 @@ impl ChromePage {
                         self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})"),
                     ).await {
                         let state = state.into_value::<Value>()?;
-                        if navigation_completed(&before, &state) {
+                        if navigation_state_changed(&before, &state) {
                             navigation_observed = true;
                         }
                     }
@@ -2704,23 +2705,23 @@ mod tests {
     }
 
     #[test]
-    fn navigation_fallback_requires_a_completed_document_change() {
+    fn navigation_fallback_observes_document_change_before_load_completion() {
         let before = json!({"url": "https://example.test/", "time_origin": 1});
-        assert!(!navigation_completed(
+        assert!(!navigation_state_changed(
             &before,
             &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "complete"})
         ));
-        assert!(!navigation_completed(
+        assert!(navigation_state_changed(
             &before,
             &json!({"url": "https://example.test/next", "time_origin": 2, "ready_state": "loading"})
         ));
-        assert!(navigation_completed(
+        assert!(navigation_state_changed(
             &before,
-            &json!({"url": "https://example.test/next", "time_origin": 2, "ready_state": "complete"})
+            &json!({"url": "https://example.test/#section", "time_origin": 1, "ready_state": "loading"})
         ));
-        assert!(navigation_completed(
+        assert!(!navigation_state_changed(
             &before,
-            &json!({"url": "https://example.test/#section", "time_origin": 1, "ready_state": "complete"})
+            &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "loading"})
         ));
     }
 
