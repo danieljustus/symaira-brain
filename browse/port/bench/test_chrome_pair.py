@@ -83,7 +83,9 @@ class ChromePairTests(unittest.TestCase):
                     (root / "daemon.log").write_text(
                         "warning contains a secret\n"
                         "chrome_open_stage=dispatch-start\n"
+                        "chrome_open_stage=dispatch-response status=timeout\n"
                         "chrome_open_stage=unknown-secret\n"
+                        "chrome_open_stage=document-probe status=timeout\n"
                         "chrome_open_stage=navigation-event-wait-start\n",
                         encoding="utf-8",
                     )
@@ -95,7 +97,10 @@ class ChromePairTests(unittest.TestCase):
                               "http://127.0.0.1/", root, 0)
 
         self.assertEqual(result["error_code"], "operation_timeout")
-        self.assertEqual(result["chrome_open_stages"], ["dispatch-start", "navigation-event-wait-start"])
+        self.assertEqual(result["chrome_open_stages"], [
+            "dispatch-start", "dispatch-response status=timeout",
+            "document-probe status=timeout", "navigation-event-wait-start",
+        ])
 
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
