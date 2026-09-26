@@ -1,6 +1,8 @@
 use std::{
     collections::BTreeMap,
+    future::Future,
     sync::{Arc, Mutex},
+    time::Duration,
 };
 
 #[cfg(target_os = "macos")]
@@ -170,6 +172,15 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    async fn within_operation_deadline<T>(
+        timeout: Duration,
+        future: impl Future<Output = Result<T, DaemonError>>,
+    ) -> Result<T, DaemonError> {
+        tokio::time::timeout(timeout, future)
+            .await
+            .map_err(|_| operation_timeout_error())?
+    }
+
     async fn open_chrome_page(
         page: &ChromePage,
         url: &str,
@@ -770,7 +781,7 @@ impl DispatchRuntime {
         let mut credentials =
             crate::auth::Credentials::resolve(std::path::Path::new("symvault"), entry, operation)
                 .await?;
-        let page = self.ensure_browser().await?;
+        let page = self.ensure_browser(operation).await?;
         let data = crate::auth::login(&page, url, &mut credentials, operation).await?;
         Ok((Some(data), Vec::new()))
     }
@@ -1214,7 +1225,7 @@ impl DispatchRuntime {
         if diagnostics {
             eprintln!("chrome_daemon_stage=ensure-browser-start");
         }
-        let page = self.ensure_browser().await?;
+        let page = self.ensure_browser(operation).await?;
         if diagnostics {
             eprintln!("chrome_daemon_stage=ensure-browser-ready");
         }
@@ -2675,7 +2686,19 @@ impl DispatchRuntime {
             .ok_or_else(|| runtime_error("active tab is not tracked"))
     }
 
-    async fn ensure_browser(&self) -> Result<ChromePage, DaemonError> {
+    async fn ensure_browser(
+        &self,
+        operation: &OperationContext,
+    ) -> Result<ChromePage, DaemonError> {
+        let timeout = operation.remaining().saturating_sub(Duration::from_secs(1));
+        if timeout.is_zero() {
+            return Err(operation_timeout_error());
+        }
+        Self::within_operation_deadline(timeout, self.ensure_browser_setup(operation.remaining()))
+            .await
+    }
+
+    async fn ensure_browser_setup(&self, timeout: Duration) -> Result<ChromePage, DaemonError> {
         let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         {
             let guard = self
@@ -2704,7 +2727,7 @@ impl DispatchRuntime {
                 user_data_dir: self.spec.user_data_dir(),
                 headless: true,
             },
-            self.spec.operation_timeout,
+            timeout,
         )
         .await
         .map_err(runtime_error)?;
@@ -2784,15 +2807,14 @@ impl DispatchRuntime {
                         unreachable!()
                     }
                 } else {
-                    self.ensure_browser().await?.evaluate_script(
+                    self.ensure_browser(operation).await?.evaluate_script(
                         "(() => ({origin: location.origin, local_storage: Object.fromEntries(Object.entries(localStorage)), session_storage: Object.fromEntries(Object.entries(sessionStorage)), cookies: document.cookie}))()",
                     ).await.map_err(runtime_error)?
                 };
                 if self.spec.engine == "chrome" {
                     captured["bidi_cookies"] = self
-                        .ensure_browser()
-                        .await
-                        .map_err(runtime_error)?
+                        .ensure_browser(operation)
+                        .await?
                         .cookies()
                         .await
                         .map_err(runtime_error)?;
@@ -2844,7 +2866,7 @@ impl DispatchRuntime {
                             unreachable!()
                         }
                     } else {
-                        let page = self.ensure_browser().await.map_err(runtime_error)?;
+                        let page = self.ensure_browser(operation).await?;
                         Self::open_chrome_page(&page, origin, operation).await?;
                         for cookie in &entry.cookies {
                             let cookie_value =
@@ -3427,13 +3449,17 @@ pub(crate) fn navigation_error(error: Box<dyn std::error::Error + Send + Sync>) 
         .downcast_ref::<tokio::time::error::Elapsed>()
         .is_some()
     {
-        return DaemonError {
-            code: codes::OPERATION_TIMEOUT.into(),
-            message: "daemon operation exceeded its timeout".into(),
-            ..Default::default()
-        };
+        return operation_timeout_error();
     }
     runtime_error(error)
+}
+
+fn operation_timeout_error() -> DaemonError {
+    DaemonError {
+        code: codes::OPERATION_TIMEOUT.into(),
+        message: "daemon operation exceeded its timeout".into(),
+        ..Default::default()
+    }
 }
 
 fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
@@ -3595,6 +3621,18 @@ mod tests {
             .await
             .expect_err("pending operation must expire");
         let error = navigation_error(Box::new(elapsed));
+        assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(error.message, "daemon operation exceeded its timeout");
+    }
+
+    #[tokio::test]
+    async fn browser_setup_deadline_returns_daemon_operation_timeout() {
+        let error = DispatchRuntime::within_operation_deadline(
+            std::time::Duration::from_millis(10),
+            std::future::pending::<Result<(), DaemonError>>(),
+        )
+        .await
+        .expect_err("pending Chrome setup must be bounded");
         assert_eq!(error.code, codes::OPERATION_TIMEOUT);
         assert_eq!(error.message, "daemon operation exceeded its timeout");
     }
