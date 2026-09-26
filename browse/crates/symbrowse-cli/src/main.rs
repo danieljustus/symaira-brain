@@ -1415,11 +1415,11 @@ fn run_watch(session: String, take_over: bool, reason: String, format: Format) -
 }
 
 async fn watch_session(session: String) -> ExitCode {
-    let client = Client::new(ClientOptions {
+    let options = ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
         ..ClientOptions::default()
-    });
+    };
     let mut seen = 0;
     let shutdown = wait_watch_shutdown();
     tokio::pin!(shutdown);
@@ -1428,7 +1428,22 @@ async fn watch_session(session: String) -> ExitCode {
         return ExitCode::from(1);
     }
     loop {
-        let response = client.request(cli_frame("journal.show", &session, None));
+        let client = Client::new(options.clone());
+        let frame = cli_frame("journal.show", &session, None);
+        let response = match tokio::task::spawn_blocking(move || {
+            client.request(frame).map_err(|_| ())
+        })
+        .await
+        {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    Format::Text,
+                    daemon_codes::OPERATION_FAILED,
+                    error.to_string(),
+                );
+            }
+        };
         let delay = match response {
             Ok(response) if !response.success => {
                 return render_daemon_error(Format::Text, response.error.unwrap_or_default());

@@ -672,10 +672,10 @@ fn socket_dir() -> PathBuf {
             .map(PathBuf::from)
             .unwrap_or_else(|| {
                 env::var_os("USERPROFILE").map_or_else(env::temp_dir, |home| {
-                    PathBuf::from(home).join("AppData/Local")
+                    PathBuf::from(home).join("AppData").join("Local")
                 })
             });
-        base.join("symbrowse/run")
+        base.join("symbrowse").join("run")
     } else {
         env::var_os("XDG_RUNTIME_DIR")
             .map(PathBuf::from)
