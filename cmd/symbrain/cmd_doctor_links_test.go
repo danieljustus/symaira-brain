@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -91,6 +93,56 @@ func TestCheckVaultReachable_UnexpectedErrorIsFail(t *testing.T) {
 	}
 	if got.Detail != "symvault probe failed: exit status 1" {
 		t.Errorf("Detail = %q, want generic exit status", got.Detail)
+	}
+}
+
+func TestDoctorVaultProbeDoesNotExposeChildStderr(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("fake shell binary not supported on windows")
+	}
+	const secret = "credential=SENTINEL_SECRET_473"
+	dir := t.TempDir()
+	script := "#!/bin/sh\nprintf '%s\\n' '" + secret + "' >&2\nexit 42\n"
+	if err := os.WriteFile(filepath.Join(dir, "symvault"), []byte(script), 0o755); err != nil {
+		t.Fatalf("write fake symvault: %v", err)
+	}
+	home := t.TempDir()
+	t.Setenv("PATH", dir)
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, "config"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(home, "data"))
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, "cache"))
+
+	for _, args := range [][]string{{"--json"}, nil} {
+		var stdout, stderr bytes.Buffer
+		if code := cmdDoctor(args, &stdout, &stderr); code != 0 {
+			t.Fatalf("cmdDoctor(%v) = %d, stderr=%q", args, code, stderr.String())
+		}
+		if strings.Contains(stdout.String(), secret) || strings.Contains(stderr.String(), secret) {
+			t.Fatalf("doctor exposed child stderr for args %v: stdout=%q stderr=%q", args, stdout.String(), stderr.String())
+		}
+		if stderr.Len() != 0 {
+			t.Fatalf("doctor wrote unexpected stderr for args %v: %q", args, stderr.String())
+		}
+		if len(args) != 0 {
+			var report doctorReport
+			if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+				t.Fatalf("decode doctor JSON: %v", err)
+			}
+			var found bool
+			for _, link := range report.Links {
+				if link.Name == "vault: reachable" {
+					found = true
+					if link.Status != linkFail || link.Detail != "symvault probe failed: exit status 42" {
+						t.Fatalf("vault link = %+v, want generic bounded failure", link)
+					}
+				}
+			}
+			if !found {
+				t.Fatal("doctor JSON omitted vault reachability link")
+			}
+		}
 	}
 }
 
