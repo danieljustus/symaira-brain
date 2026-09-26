@@ -4415,6 +4415,10 @@ fn execute_batch_item(argv: &[String]) -> ItemOutput {
             stdout: render_version_text(VERSION),
             error: None,
         },
+        Ok(Action::McpListProfiles) => ItemOutput {
+            stdout: MCP_PROFILE_LIST.to_owned(),
+            error: None,
+        },
         Ok(Action::ConfigShow { format, flags }) => match render_config_show(format, flags) {
             Ok(stdout) => ItemOutput {
                 stdout,
@@ -8820,6 +8824,27 @@ mod tests {
         assert!(rendered.contains("\\u003c\\u0026\\u003e\\u2028\\u2029"));
         assert!(!rendered.contains("<&>"));
         assert!(rendered.ends_with('\n'));
+    }
+
+    #[test]
+    fn batch_mcp_list_profiles_returns_profile_table() {
+        let commands = vec!["mcp --list-profiles".to_owned()];
+        let report = super::batch::run(&commands, false, false, |argv| {
+            let result = super::execute_batch_item(argv);
+            super::batch::ItemOutput {
+                stdout: result.stdout,
+                error: result.error,
+            }
+        });
+
+        assert!(report.results[0].success);
+        assert_eq!(
+            report.results[0]
+                .data
+                .as_ref()
+                .and_then(serde_json::Value::as_str),
+            Some(super::MCP_PROFILE_LIST.trim_end_matches('\n'))
+        );
     }
 
     #[test]
