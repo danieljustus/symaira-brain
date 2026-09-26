@@ -1058,9 +1058,7 @@ def run_watch_cases(go: Path, rust: Path, env: dict[str, str]) -> list[dict[str,
         return [
             compare_watch_windows_output(go, rust, env, argv)
             for argv in (["watch"], ["watch", "--json"])
-        ] + [{"case": "CLI-watch-signal", "argv": ["watch"], "signal": "CTRL_C/SIGTERM",
-              "matched": None,
-              "evidence_gap": "the harness cannot safely broadcast CTRL_C_EVENT to only the child process; Windows graceful shutdown remains unverified"}]
+        ]
     return [
         compare_watch_signal(go, rust, env, argv, sig)
         for argv in (["watch"], ["watch", "--json"])
@@ -1099,8 +1097,17 @@ def compare_watch_windows_output(go: Path, rust: Path, env: dict[str, str],
                 return {"error": "watch did not emit the fixture journal row before timeout",
                         "returncode": process.returncode, "stdout": bytes(captured),
                         "stderr": stderr, "frames": stub.frames, "stub_error": stub.error}
-            process.terminate()
-            process.wait(timeout=3)
+            try:
+                process.send_signal(signal.CTRL_BREAK_EVENT)
+                process.wait(timeout=5)
+            except (OSError, subprocess.TimeoutExpired) as error:
+                process.kill()
+                process.wait(timeout=3)
+                reader.join(timeout=3)
+                stderr = process.stderr.read() if process.stderr is not None else b""
+                return {"error": str(error), "returncode": process.returncode,
+                        "stdout": bytes(captured), "stderr": stderr,
+                        "frames": stub.frames, "stub_error": stub.error}
             reader.join(timeout=3)
             stderr = process.stderr.read() if process.stderr is not None else b""
             return {"returncode": process.returncode, "stdout": bytes(captured),
@@ -1112,16 +1119,17 @@ def compare_watch_windows_output(go: Path, rust: Path, env: dict[str, str],
     rust_frame = (rust_result.get("frames") or [{}])[0]
     matched = (
         marker in go_result.get("stdout", b"") and marker in rust_result.get("stdout", b"")
+        and go_result.get("returncode") == rust_result.get("returncode") == 0
         and go_result.get("stdout") == rust_result.get("stdout")
+        and go_result.get("stderr") == rust_result.get("stderr")
         and go_frame.get("cmd") == rust_frame.get("cmd") == "journal.show"
         and go_frame.get("request_id") == rust_frame.get("request_id") == "1"
         and go_frame.get("retrieval_surface") == rust_frame.get("retrieval_surface") == "cli"
         and not go_result.get("error") and not rust_result.get("error")
         and not go_result.get("stub_error") and not rust_result.get("stub_error")
     )
-    return {"case": "CLI-watch-output-windows", "argv": argv, "matched": matched,
-            "criterion": "text/JSON-flag output and journal request match before bounded process termination",
-            "graceful_signal_evidence": "not covered by this output case",
+    return {"case": "CLI-watch-signal", "argv": argv, "matched": matched,
+            "signal": "CTRL_BREAK_EVENT", "bounded_shutdown_seconds": 5,
             "go": output_record(go_result), "rust": output_record(rust_result),
             "go_frames": go_result.get("frames"), "rust_frames": rust_result.get("frames"),
             "go_stub_error": go_result.get("stub_error"),
