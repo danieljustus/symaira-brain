@@ -55,7 +55,28 @@ fn main() {
         .set_ref("alpha", "selector", "@element-1")
         .expect("set ref");
     let reference = registry.reference("alpha", "selector").expect("read ref");
+    let before_touch = registry.get("alpha").expect("read alpha before touch");
+    std::thread::sleep(std::time::Duration::from_millis(2));
     registry.touch("alpha").expect("touch alpha");
+    let after_touch = registry.get("alpha").expect("read alpha after touch");
+
+    let validation_registry = SessionRegistry::new(SessionRegistryOptions {
+        user_data_root: root.join("validation"),
+        ..Default::default()
+    });
+    let mut validation = Vec::new();
+    for name in ["", &"x".repeat(65), "../escape", "ümlaut", "has space"] {
+        validation.push(serde_json::json!({
+            "name": name,
+            "accepted": validation_registry.ensure(name).is_ok(),
+        }));
+    }
+    for name in ["a", &"x".repeat(64)] {
+        validation.push(serde_json::json!({
+            "name": name,
+            "accepted": validation_registry.ensure(name).is_ok(),
+        }));
+    }
 
     let data = registry.list_data();
     let sessions: Vec<_> = data
@@ -102,6 +123,8 @@ fn main() {
         "empty_ref_error": empty_ref_error,
         "reference": reference,
         "ensure_idempotent": ensure_idempotent,
+        "validation": validation,
+        "touch_advanced": after_touch.last_activity != before_touch.last_activity,
         "cleared_entries": registry.list().len(),
         "profiles_preserved": profiles_preserved,
     });

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -94,5 +95,23 @@ func TestSessionCommandResponsesHaveStableData(t *testing.T) {
 	}
 	if _, ok := info.Data.(SessionInfo); !ok {
 		t.Fatalf("info payload = %#v", info.Data)
+	}
+}
+
+func TestSessionRegistryNameValidationBoundaries(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "profiles")
+	registry := NewSessionRegistry(SessionRegistryOptions{UserDataRoot: root, PID: 99})
+	for _, name := range []string{"", strings.Repeat("x", 65), "../escape", "ümlaut", "has space"} {
+		if _, err := registry.Ensure(name); err == nil {
+			t.Errorf("Ensure(%q) accepted an invalid name", name)
+		}
+	}
+	if _, err := os.Stat(root); !os.IsNotExist(err) {
+		t.Fatalf("invalid names created profile root: stat error = %v", err)
+	}
+	for _, name := range []string{"a", strings.Repeat("x", 64)} {
+		if _, err := registry.Ensure(name); err != nil {
+			t.Errorf("Ensure(%q) rejected a valid boundary name: %v", name, err)
+		}
 	}
 }

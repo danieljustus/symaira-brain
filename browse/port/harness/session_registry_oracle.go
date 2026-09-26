@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/danieljustus/symaira-browse/internal/daemon"
@@ -28,16 +29,23 @@ type sessionView struct {
 }
 
 type output struct {
-	SchemaVersion     int           `json:"schema_version"`
-	Sessions          []sessionView `json:"sessions"`
-	InvalidNameError  string        `json:"invalid_name_error"`
-	MissingGetError   string        `json:"missing_get_error"`
-	MissingTouchError string        `json:"missing_touch_error"`
-	EmptyRefError     string        `json:"empty_ref_error"`
-	Reference         string        `json:"reference"`
-	EnsureIdempotent  bool          `json:"ensure_idempotent"`
-	ClearedEntries    int           `json:"cleared_entries"`
-	ProfilesPreserved bool          `json:"profiles_preserved"`
+	SchemaVersion     int            `json:"schema_version"`
+	Sessions          []sessionView  `json:"sessions"`
+	InvalidNameError  string         `json:"invalid_name_error"`
+	MissingGetError   string         `json:"missing_get_error"`
+	MissingTouchError string         `json:"missing_touch_error"`
+	EmptyRefError     string         `json:"empty_ref_error"`
+	Reference         string         `json:"reference"`
+	EnsureIdempotent  bool           `json:"ensure_idempotent"`
+	Validation        []idValidation `json:"validation"`
+	TouchAdvanced     bool           `json:"touch_advanced"`
+	ClearedEntries    int            `json:"cleared_entries"`
+	ProfilesPreserved bool           `json:"profiles_preserved"`
+}
+
+type idValidation struct {
+	Name     string `json:"name"`
+	Accepted bool   `json:"accepted"`
 }
 
 func view(info daemon.SessionInfo) sessionView {
@@ -64,11 +72,9 @@ func main() {
 		panic(err)
 	}
 	defer os.RemoveAll(root)
-	now := time.Date(2026, 9, 24, 12, 30, 0, 123_000_000, time.UTC)
 	uncleanRoot := root + string(os.PathSeparator) + "unused" + string(os.PathSeparator) + ".."
 	registry := daemon.NewSessionRegistry(daemon.SessionRegistryOptions{
 		PID: 4242, UserDataRoot: uncleanRoot, Scope: "worktree", OriginPath: "/workspace/project",
-		Now: func() time.Time { return now },
 	})
 	_, invalidName := registry.Ensure("../escape")
 	if invalidName == nil {
@@ -95,8 +101,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	beforeTouch, err := registry.Get("alpha")
+	if err != nil {
+		panic(err)
+	}
+	time.Sleep(2 * time.Millisecond)
 	if err := registry.Touch("alpha"); err != nil {
 		panic(err)
+	}
+	afterTouch, err := registry.Get("alpha")
+	if err != nil {
+		panic(err)
+	}
+
+	validationRegistry := daemon.NewSessionRegistry(daemon.SessionRegistryOptions{UserDataRoot: filepath.Join(root, "validation")})
+	validation := make([]idValidation, 0, 7)
+	for _, name := range []string{"", strings.Repeat("x", 65), "../escape", "ümlaut", "has space"} {
+		_, err := validationRegistry.Ensure(name)
+		validation = append(validation, idValidation{Name: name, Accepted: err == nil})
+	}
+	for _, name := range []string{"a", strings.Repeat("x", 64)} {
+		_, err := validationRegistry.Ensure(name)
+		validation = append(validation, idValidation{Name: name, Accepted: err == nil})
 	}
 	data := registry.ListData()
 	views := make([]sessionView, 0, len(data.Sessions))
@@ -121,6 +147,7 @@ func main() {
 		InvalidNameError: invalidName.Error(),
 		MissingGetError:  missingGet.Error(), MissingTouchError: missingTouch.Error(),
 		EmptyRefError: emptyRef.Error(), Reference: ref, EnsureIdempotent: again == alpha,
+		Validation: validation, TouchAdvanced: afterTouch.LastActivity != beforeTouch.LastActivity,
 		ClearedEntries: len(registry.List()), ProfilesPreserved: profileExists,
 	}
 	if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
