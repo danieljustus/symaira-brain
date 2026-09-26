@@ -84,7 +84,7 @@ fn explicit_engine_without_mode_reports_the_effective_selection() {
         std::process::id(),
         NEXT_ROOT.fetch_add(1, Ordering::Relaxed)
     ));
-    let mut context = LoadContext {
+    let context = LoadContext {
         home: root.join("home"),
         cwd: root.join("project"),
         xdg_config_home: Some(root.join("xdg-config")),
