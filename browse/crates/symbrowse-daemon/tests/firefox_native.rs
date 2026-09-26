@@ -158,6 +158,9 @@ impl Drop for FixtureServer {
 }
 
 fn serve_fixture_request(stream: &mut TcpStream) {
+    stream
+        .set_nonblocking(false)
+        .expect("make accepted Firefox fixture connection blocking");
     let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
     let mut request_line = String::new();
     let _ = BufReader::new(&mut *stream).read_line(&mut request_line);
@@ -186,6 +189,49 @@ fn serve_fixture_request(stream: &mut TcpStream) {
     );
     let _ = stream.write_all(header.as_bytes());
     let _ = stream.write_all(body);
+}
+
+#[test]
+fn firefox_fixture_handles_a_fragmented_redirect_request_line() {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("bind Firefox fixture test");
+    listener
+        .set_nonblocking(true)
+        .expect("make Firefox fixture test listener nonblocking");
+    let endpoint = listener.local_addr().expect("fixture test address");
+    let serving = thread::spawn(move || {
+        let (mut stream, _) = loop {
+            match listener.accept() {
+                Ok(connection) => break connection,
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    thread::sleep(Duration::from_millis(10));
+                }
+                Err(error) => panic!("accept fixture test request: {error}"),
+            }
+        };
+        serve_fixture_request(&mut stream);
+    });
+
+    let mut stream = TcpStream::connect(endpoint).expect("connect Firefox fixture test");
+    stream
+        .set_read_timeout(Some(Duration::from_secs(2)))
+        .expect("set fixture test read timeout");
+    stream
+        .write_all(b"GET /redirect ")
+        .expect("write partial redirect request line");
+    thread::sleep(Duration::from_millis(50));
+    stream
+        .write_all(b"HTTP/1.1\r\nHost: localhost\r\n\r\n")
+        .expect("finish redirect request line");
+
+    let mut response = String::new();
+    std::io::Read::read_to_string(&mut stream, &mut response)
+        .expect("read fixture redirect response");
+    serving.join().expect("join Firefox fixture test server");
+    assert!(
+        response.starts_with("HTTP/1.1 302 Found\r\n"),
+        "fragmented redirect request received unexpected response: {response:?}"
+    );
+    assert!(response.contains("Location: /page\r\n"));
 }
 
 async fn evaluate_string(session: &mut FirefoxSession, expression: &str) -> String {
