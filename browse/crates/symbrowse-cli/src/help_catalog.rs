@@ -9,15 +9,15 @@ pub(super) fn help(command: &str, suffix: &[&str]) -> Option<&'static str> {
         .join(" ");
     match path.as_str() {
         "frame" => Some(
-            r###"Address nested frames
+            r###"Address nested frames (tree, select, main)
 
 Usage:
   symbrowse frame [command]
 
 Available Commands:
-  tree        Show the nested frame tree of the active tab
   main        Address the main frame again
   select      Address a nested frame by its frame id
+  tree        Show the nested frame tree of the active tab
 
 Flags:
   -h, --help             help for frame
