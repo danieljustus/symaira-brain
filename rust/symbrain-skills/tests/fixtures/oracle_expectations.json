@@ -261,7 +261,35 @@
       ]
     },
     {
+      "id": "unknown_override_order",
+      "problems": [
+        {
+          "code": "block_override_unknown",
+          "severity": "error",
+          "message": "overlay claude/blocks/alpha.md overrides block \"alpha\", which no SKILL.md or markdown reference in this skill defines",
+          "line": 0
+        },
+        {
+          "code": "block_override_unknown",
+          "severity": "error",
+          "message": "overlay claude/blocks/zed.md overrides block \"zed\", which no SKILL.md or markdown reference in this skill defines",
+          "line": 0
+        }
+      ]
+    },
+    {
       "id": "term_without_default",
+      "problems": [
+        {
+          "code": "term_default_required",
+          "severity": "error",
+          "message": "term \"report_dir\" needs a \"default\" value; it is the harness-neutral text the canonical source states",
+          "line": 0
+        }
+      ]
+    },
+    {
+      "id": "term_without_default_empty_known",
       "problems": [
         {
           "code": "term_default_required",

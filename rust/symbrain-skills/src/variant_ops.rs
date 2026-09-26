@@ -210,7 +210,9 @@ pub fn check_overrides(
     let known = source_ids.iter().collect::<BTreeSet<_>>();
     let mut problems = Vec::new();
     for (target, ids) in overrides {
-        for id in ids {
+        let mut sorted_ids = ids.iter().collect::<Vec<_>>();
+        sorted_ids.sort();
+        for id in sorted_ids {
             if !known.contains(id) {
                 problems.push(Problem { code: CODE_OVERRIDE_UNKNOWN.into(), severity: SEVERITY_ERROR.into(), message: format!("overlay {target}/{BLOCKS_DIR}/{id}.md overrides block {id:?}, which no SKILL.md or markdown reference in this skill defines"), line: 0 });
             }
@@ -276,7 +278,7 @@ pub fn check_terms(
             });
         }
         for key in values.keys() {
-            if key != DEFAULT_KEY && !known.contains(key) {
+            if !known.is_empty() && key != DEFAULT_KEY && !known.contains(key) {
                 problems.push(Problem {
                     code: CODE_TARGET_UNKNOWN.into(),
                     severity: SEVERITY_WARNING.into(),

@@ -167,7 +167,9 @@ func generate() (suite, error) {
 	result.Diagnostics = []diagnosticCase{
 		toDiagnostics("unknown_region_target", variant.CheckRegionTargets([]variant.Region{{Kind: variant.KindOnly, Targets: []string{"hermez"}, Line: 4}}, known)),
 		toDiagnostics("unknown_override", variant.CheckOverrides([]string{"worker"}, map[string][]string{"claude": {"invented"}})),
+		toDiagnostics("unknown_override_order", variant.CheckOverrides(nil, map[string][]string{"claude": {"zed", "alpha"}})),
 		toDiagnostics("term_without_default", variant.CheckTerms(map[string]map[string]string{"report_dir": {"hermes": "value"}}, known)),
+		toDiagnostics("term_without_default_empty_known", variant.CheckTerms(map[string]map[string]string{"report_dir": {"hermez": "value"}}, nil)),
 		toDiagnostics("term_unknown_target", variant.CheckTerms(map[string]map[string]string{"report_dir": {variant.DefaultKey: "value", "hermez": "value"}}, known)),
 	}
 	_, problems := variant.Apply("{{term:Bad Name}}\n", variant.Options{Target: "hermes"})
