@@ -67,6 +67,9 @@ impl ChromeContractServer {
                 match listener.accept() {
                     Ok((mut stream, _)) => {
                         stream
+                            .set_nonblocking(false)
+                            .expect("use blocking Chrome contract fixture socket");
+                        stream
                             .set_read_timeout(Some(Duration::from_secs(2)))
                             .expect("bound Chrome contract fixture read");
                         let mut request = [0_u8; 2048];
@@ -1360,9 +1363,9 @@ fn production_daemon_path_runs_chrome_over_platform_transport() {
     assert_eq!(auto_off["success"], true, "dialog auto off: {auto_off}");
     assert_eq!(auto_off["data"], json!({"auto_mode":"off"}));
 
-    let unsupported = request(&client, "network.har", json!({}));
-    assert_eq!(unsupported["success"], false);
-    assert_eq!(unsupported["error"]["code"], "unsupported");
+    let invalid_har = request(&client, "network.har", json!({}));
+    assert_eq!(invalid_har["success"], false);
+    assert_eq!(invalid_har["error"]["code"], "invalid_har_action");
 
     let settings_page = request(
         &client,

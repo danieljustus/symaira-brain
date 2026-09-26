@@ -1020,8 +1020,8 @@ def compare_watch_signal(go: Path, rust: Path, env: dict[str, str], argv: list[s
     def actual_commands(result: dict[str, Any]) -> list[str]:
         return [frame.get("cmd", "") for frame in result.get("frames", [])]
 
-    go_frame = go_result.get("frames", [{}])[0]
-    rust_frame = rust_result.get("frames", [{}])[0]
+    go_frame = (go_result.get("frames") or [{}])[0]
+    rust_frame = (rust_result.get("frames") or [{}])[0]
     metadata_match = all(
         frame.get(key) == expected
         for frame, expected in ((go_frame, "1"), (rust_frame, "1"))
@@ -1108,8 +1108,8 @@ def compare_watch_windows_output(go: Path, rust: Path, env: dict[str, str],
 
     go_result = run_one(go, status_probe=False, request_count=1)
     rust_result = run_one(rust, status_probe=True, request_count=2)
-    go_frame = go_result.get("frames", [{}])[0]
-    rust_frame = rust_result.get("frames", [{}])[0]
+    go_frame = (go_result.get("frames") or [{}])[0]
+    rust_frame = (rust_result.get("frames") or [{}])[0]
     matched = (
         marker in go_result.get("stdout", b"") and marker in rust_result.get("stdout", b"")
         and go_result.get("stdout") == rust_result.get("stdout")

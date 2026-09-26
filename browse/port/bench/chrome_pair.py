@@ -313,7 +313,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 order.reverse()
             for implementation in order:
                 binary = args.go if implementation == "go" else args.rust
-                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-"))
+                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-", dir="/tmp" if sys.platform == "darwin" else None))
                 try:
                     samples[implementation].append(
                         flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)

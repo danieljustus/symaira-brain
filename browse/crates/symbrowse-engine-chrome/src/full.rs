@@ -16,7 +16,9 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, emulation, fetch, input, network, page},
+    cdp::browser_protocol::{
+        accessibility, browser, dom, emulation, fetch, input, network, page, target,
+    },
     cdp::js_protocol::runtime::{self, EvaluateParams},
     error::CdpError,
     layout::Point,
@@ -411,15 +413,29 @@ impl ChromeSession {
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
         let url = url.into();
-        // Windows can stall when chromiumoxide creates a target with its URL
-        // already set; open it after the blank target is attached to the handler.
-        let page = self
-            .browser
-            .lock()
-            .await
-            .new_page("about:blank")
-            .await
-            .map_err(|error| std::io::Error::other(format!("create blank CDP target: {error}")))?;
+        // Browser::new_page waits for the target to become idle. A fresh
+        // browser profile can keep that wait pending even after Chrome has
+        // created the target, so use the direct CDP response and attach it.
+        let browser = self.browser.lock().await;
+        let target_id = browser
+            .execute(target::CreateTargetParams::new("about:blank"))
+            .await?
+            .result
+            .target_id;
+        let page = tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                match browser.get_page(target_id.clone()).await {
+                    Ok(page) => return Ok(page),
+                    Err(CdpError::NotFound) => tokio::time::sleep(Duration::from_millis(10)).await,
+                    Err(error) => return Err(error),
+                }
+            }
+        })
+        .await
+        .map_err(|_| {
+            std::io::Error::new(std::io::ErrorKind::TimedOut, "attach blank CDP target")
+        })??;
+        drop(browser);
         let page = ChromePage::new(page, Arc::clone(&self.browser))
             .await
             .map_err(|error| {
