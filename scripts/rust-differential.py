@@ -2335,6 +2335,21 @@ CASES = (
         setup=setup_activity_profile,
     ),
     Case(
+        "activity_status_missing_budget",
+        ("activity", "status", "--profile", "reader"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_status_zero_budget",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "0"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_status_excess_budget",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "4001"),
+        setup=setup_activity_profile,
+    ),
+    Case(
         "activity_get_missing_row",
         ("activity", "get", "--profile", "reader", "--max-tokens", "100", "--json", "missing-id"),
         setup=setup_activity_profile,
@@ -2342,6 +2357,21 @@ CASES = (
     Case(
         "activity_get_missing_row_table",
         ("activity", "get", "--profile", "reader", "--max-tokens", "100", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_missing_budget",
+        ("activity", "get", "--profile", "reader", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_zero_budget",
+        ("activity", "get", "--profile", "reader", "--max-tokens", "0", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_excess_budget",
+        ("activity", "get", "--profile", "reader", "--max-tokens", "4001", "missing-id"),
         setup=setup_activity_profile,
     ),
     Case(
