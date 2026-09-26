@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, command, make_env, native_target_matches, nearest_rank,
-    remove_owned_tempdir,
+    remove_owned_tempdir, summarize_stage,
     paired_gate_passes, validate_read_output, wait_for_daemon_exit, flow, measure,
 )
 
@@ -79,6 +79,38 @@ class ChromePairTests(unittest.TestCase):
 
     def test_nearest_rank_matches_contract(self):
         self.assertEqual(nearest_rank(list(range(1, 31))), 29)
+
+    def test_flow_reports_open_and_read_cli_stage_durations(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"success": True, "data": {"title": FIXTURE_TITLE, "markdown": FIXTURE_TOKEN}})
+            with patch("chrome_pair.run_cli", side_effect=[
+                (0, "{}", ""), (0, response, ""), (0, "", ""), (1, "", ""),
+            ]), patch("chrome_pair.time.perf_counter_ns", side_effect=[100, 110, 160, 165, 200, 205]):
+                result = flow(root / "symbrowse", "go", root / "chrome", None,
+                              "http://127.0.0.1/fixture.html", root, 0)
+
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["duration_ns"], 105)
+        self.assertEqual(result["open_cli_duration_ns"], 50)
+        self.assertEqual(result["read_cli_duration_ns"], 35)
+
+    def test_stage_summary_is_diagnostic_and_uses_same_nearest_rank(self):
+        samples = [
+            {"status": "pass", "open_cli_duration_ns": duration}
+            for duration in range(1, 31)
+        ]
+        self.assertEqual(
+            summarize_stage(samples, "open_cli_duration_ns"),
+            {"status": "complete", "samples": 30, "median_duration_ns": 15,
+             "p95_duration_ns": 29},
+        )
+        samples[-1] = {"status": "error", "open_cli_duration_ns": 100}
+        self.assertEqual(
+            summarize_stage(samples, "open_cli_duration_ns"),
+            {"status": "incomplete", "samples": 29, "median_duration_ns": 15,
+             "p95_duration_ns": 28},
+        )
 
     def test_paired_gate_needs_complete_samples_and_limits_regression(self):
         go = list(range(100, 130))
