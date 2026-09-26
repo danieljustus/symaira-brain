@@ -82,6 +82,14 @@ fn respond(stream: &mut TcpStream) {
     if !request.windows(4).any(|part| part == b"\r\n\r\n") {
         return;
     }
+    if enabled() {
+        let request_line = request
+            .split(|byte| *byte == b'\n')
+            .next()
+            .map(String::from_utf8_lossy)
+            .unwrap_or_default();
+        eprintln!("auth_fixture_request={}", request_line.trim());
+    }
     let body = "<!doctype html><form><input id='user' type='email'><input id='pass' type='password'></form>";
     let response = format!(
         "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
