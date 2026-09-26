@@ -29,18 +29,19 @@ type sessionView struct {
 }
 
 type output struct {
-	SchemaVersion     int            `json:"schema_version"`
-	Sessions          []sessionView  `json:"sessions"`
-	InvalidNameError  string         `json:"invalid_name_error"`
-	MissingGetError   string         `json:"missing_get_error"`
-	MissingTouchError string         `json:"missing_touch_error"`
-	EmptyRefError     string         `json:"empty_ref_error"`
-	Reference         string         `json:"reference"`
-	EnsureIdempotent  bool           `json:"ensure_idempotent"`
-	Validation        []idValidation `json:"validation"`
-	TouchAdvanced     bool           `json:"touch_advanced"`
-	ClearedEntries    int            `json:"cleared_entries"`
-	ProfilesPreserved bool           `json:"profiles_preserved"`
+	SchemaVersion      int            `json:"schema_version"`
+	DefaultProfileRoot string         `json:"default_profile_root"`
+	Sessions           []sessionView  `json:"sessions"`
+	InvalidNameError   string         `json:"invalid_name_error"`
+	MissingGetError    string         `json:"missing_get_error"`
+	MissingTouchError  string         `json:"missing_touch_error"`
+	EmptyRefError      string         `json:"empty_ref_error"`
+	Reference          string         `json:"reference"`
+	EnsureIdempotent   bool           `json:"ensure_idempotent"`
+	Validation         []idValidation `json:"validation"`
+	TouchAdvanced      bool           `json:"touch_advanced"`
+	ClearedEntries     int            `json:"cleared_entries"`
+	ProfilesPreserved  bool           `json:"profiles_preserved"`
 }
 
 type idValidation struct {
@@ -67,6 +68,7 @@ func view(info daemon.SessionInfo) sessionView {
 }
 
 func main() {
+	defaultRegistry := daemon.NewSessionRegistry(daemon.SessionRegistryOptions{})
 	root, err := os.MkdirTemp("", "symbrowse-session-oracle-")
 	if err != nil {
 		panic(err)
@@ -143,7 +145,7 @@ func main() {
 		panic("session registry clear removed profile directories")
 	}
 	result := output{
-		SchemaVersion: data.SchemaVersion, Sessions: views,
+		SchemaVersion: data.SchemaVersion, DefaultProfileRoot: defaultRegistry.UserDataRoot(), Sessions: views,
 		InvalidNameError: invalidName.Error(),
 		MissingGetError:  missingGet.Error(), MissingTouchError: missingTouch.Error(),
 		EmptyRefError: emptyRef.Error(), Reference: ref, EnsureIdempotent: again == alpha,

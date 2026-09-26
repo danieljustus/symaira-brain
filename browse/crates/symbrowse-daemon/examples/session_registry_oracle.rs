@@ -20,6 +20,10 @@ fn timestamp_state(started_at: &str, last_activity: &str) -> (bool, bool) {
 }
 
 fn main() {
+    let default_profile_root = SessionRegistry::new(SessionRegistryOptions::default())
+        .user_data_root()
+        .display()
+        .to_string();
     let nonce = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("system time after epoch")
@@ -116,6 +120,7 @@ fn main() {
     );
     let result = serde_json::json!({
         "schema_version": data.schema_version,
+        "default_profile_root": default_profile_root,
         "sessions": sessions,
         "invalid_name_error": invalid_name_error,
         "missing_get_error": missing_get_error,

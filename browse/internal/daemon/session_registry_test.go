@@ -75,6 +75,18 @@ func TestSessionRegistryIsolatesProfilesAndReferences(t *testing.T) {
 	}
 }
 
+func TestDefaultSessionProfileRootMatchesGoUserCacheDir(t *testing.T) {
+	cache, err := os.UserCacheDir()
+	if err != nil || cache == "" {
+		cache = os.TempDir()
+	}
+	want := filepath.Join(cache, "symbrowse", "sessions")
+	registry := NewSessionRegistry(SessionRegistryOptions{})
+	if got := registry.UserDataRoot(); got != filepath.Clean(want) {
+		t.Fatalf("default profile root = %q, want %q", got, filepath.Clean(want))
+	}
+}
+
 func TestSessionCommandResponsesHaveStableData(t *testing.T) {
 	registry := NewSessionRegistry(SessionRegistryOptions{UserDataRoot: t.TempDir(), PID: 99})
 	if _, err := registry.Ensure("default"); err != nil {

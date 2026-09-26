@@ -94,7 +94,7 @@
     {
       "id": "DMN-007-session-registry",
       "platforms": ["all"],
-      "coverage": ["session-name-validation-boundaries", "sorted-list", "metadata-shape", "idempotent-ensure", "stable-errors", "reference-count", "touch-advances-last-activity", "clear-preserves-profiles", "timestamp-format", "cleans-user-data-root"],
+      "coverage": ["default-user-cache-root", "session-name-validation-boundaries", "sorted-list", "metadata-shape", "idempotent-ensure", "stable-errors", "reference-count", "touch-advances-last-activity", "clear-preserves-profiles", "timestamp-format", "cleans-user-data-root"],
       "go": ["go", "test", "./internal/daemon", "./internal/sessionid", "-run", "Session|Registry|Scope|Invalid", "-count=1"],
       "go_oracle": ["go", "run", "./port/harness/session_registry_oracle.go"],
       "rust_oracle": ["cargo", "run", "--quiet", "-p", "symbrowse-daemon", "--example", "session_registry_oracle", "--locked"],

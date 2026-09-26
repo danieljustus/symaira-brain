@@ -740,13 +740,12 @@ def make_env(root: Path) -> dict[str, str]:
         "USERPROFILE": str(home), "XDG_RUNTIME_DIR": str(runtime),
         "XDG_CONFIG_HOME": str(config), "XDG_CACHE_HOME": str(cache),
         "XDG_STATE_HOME": str(state), "TMPDIR": str(temp),
+        "LOCALAPPDATA": str(cache),
         "SYMBROWSE_CONFIG_DIR": str(config / "symbrowse"),
         "SYMBROWSE_STATE_DIR": str(state / "symbrowse"),
         "SYMBROWSE_CACHE_DIR": str(cache / "symbrowse"),
-        "SYMBROWSE_USER_DATA_DIR": str(root / "user-data"),
         "SYMBROWSE_NO_AUTOSTART": "1",
     }
-    (root / "user-data").mkdir(mode=0o700, exist_ok=True)
     return env
 
 

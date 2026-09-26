@@ -252,7 +252,7 @@ impl Server {
                 user_data_root: if configured_spec.is_some() {
                     spec.state_dir.join("sessions")
                 } else {
-                    default_user_data_root()
+                    crate::session::default_user_data_root()
                 },
                 pid: std::process::id(),
                 scope: String::new(),
@@ -1268,29 +1268,6 @@ fn format_time(nanos: i64) -> String {
         .unwrap_or_else(|_| "1970-01-01T00:00:00Z".into())
 }
 
-fn default_user_data_root() -> PathBuf {
-    if let Ok(path) = std::env::var("SYMBROWSE_USER_DATA_DIR") {
-        return PathBuf::from(path);
-    }
-    if cfg!(target_os = "macos")
-        && let Ok(home) = std::env::var("HOME")
-    {
-        return PathBuf::from(home).join("Library/Caches/symbrowse/sessions");
-    }
-    if cfg!(windows)
-        && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
-    {
-        return PathBuf::from(local_app_data).join("symbrowse/sessions");
-    }
-    if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(path).join("symbrowse/sessions");
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache/symbrowse/sessions");
-    }
-    std::env::temp_dir().join("symbrowse/sessions")
-}
-
 pub fn validate_session(session: &str) -> bool {
     !session.is_empty()
         && session.len() <= 64
@@ -1460,6 +1437,23 @@ mod tests {
         assert_eq!(bounded_connection_workers(Some(4)), 8);
         assert_eq!(bounded_connection_workers(Some(16)), 32);
         assert_eq!(bounded_connection_workers(Some(128)), 32);
+    }
+
+    #[test]
+    fn default_server_registry_uses_go_compatible_profile_root() {
+        let temp = tempfile::tempdir().expect("temporary socket root");
+        let server = Server::new(ServerOptions {
+            session: "default-root".into(),
+            socket_path: temp.path().join("daemon.sock"),
+            handler: Some(Arc::new(|frame, _| builtin_handler(frame))),
+            ..Default::default()
+        })
+        .expect("server");
+
+        assert_eq!(
+            server.registry.user_data_root(),
+            crate::session::default_user_data_root()
+        );
     }
 
     struct BlockingResponseStream {
