@@ -247,6 +247,45 @@ async fn chrome_screenshot_capture_returns_png_artifact() {
 }
 
 #[tokio::test]
+async fn chrome_open_observes_consecutive_document_navigations() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-open-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session.new_page("about:blank").await.expect("create page");
+
+    for path in ["/first", "/second"] {
+        let url = format!("{}{}", server.base_url, path);
+        let opened = page
+            .open_with_timeout(&url, Duration::from_secs(20))
+            .await
+            .expect("open fixture page");
+        assert_eq!(opened["url"], url);
+        assert_eq!(opened["http_status"], 200);
+    }
+    session.close().await.expect("close Chrome");
+}
+
+#[tokio::test]
 async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
         return;

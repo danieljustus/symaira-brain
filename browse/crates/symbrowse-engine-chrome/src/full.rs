@@ -1026,19 +1026,20 @@ impl ChromePage {
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-future-start");
         }
-        // Keep the CDP command alive while observing the page. Timing out
-        // execute() alone can cancel its queued send before Chrome receives it.
+        // chromiumoxide treats Page.navigate as a page-load wait. Dispatch
+        // script navigation instead and let our document probes prove progress.
+        let navigation_expression = format!(
+            "location.assign({}); 'scheduled'",
+            serde_json::to_string(url)?
+        );
         let mut navigation_dispatch = if cfg!(windows) && !same_document {
-            Some(Box::pin(self.page.execute(page::NavigateParams::new(url))))
+            Some(Box::pin(self.evaluate(&navigation_expression)))
         } else {
             None
         };
         let mut navigation_dispatch_open = cfg!(windows) && !same_document;
         if !navigation_dispatch_open {
-            let url_literal = serde_json::to_string(url)?;
-            let dispatch = self
-                .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
-                .await?;
+            let dispatch = self.evaluate(&navigation_expression).await?;
             if let Some(error) = dispatch
                 .get("exception_text")
                 .and_then(Value::as_str)
@@ -1072,15 +1073,19 @@ impl ChromePage {
                 }, if navigation_dispatch_open => {
                     navigation_dispatch_open = false;
                     let dispatch = dispatch?;
+                    let error = dispatch
+                        .get("exception_text")
+                        .and_then(Value::as_str)
+                        .filter(|error| !error.is_empty());
                     if diagnostics {
                         eprintln!(
                             "chrome_open_stage=navigation-future status=completed error_text={}",
-                            dispatch.result.error_text.is_some()
+                            error.is_some()
                         );
                         eprintln!("chrome_open_stage=navigation-future-finish");
                     }
-                    if let Some(error) = dispatch.result.error_text {
-                        return Err(error.into());
+                    if let Some(error) = error {
+                        return Err(error.to_owned().into());
                     }
                 }
                 _ = tokio::time::sleep_until(deadline) => {
