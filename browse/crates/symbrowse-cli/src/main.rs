@@ -1279,10 +1279,6 @@ fn run_watch(session: String, take_over: bool, reason: String, format: Format) -
             }
         };
     }
-    let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
-    if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
-        return ExitCode::from(1);
-    }
     let runtime = match tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -1305,6 +1301,10 @@ async fn watch_session(session: String) -> ExitCode {
     let mut seen = 0;
     let shutdown = wait_watch_shutdown();
     tokio::pin!(shutdown);
+    let banner = format!("watching session {session:?} (read-only; Ctrl-C to stop)\n");
+    if io::stdout().write_all(banner.as_bytes()).is_err() || io::stdout().flush().is_err() {
+        return ExitCode::from(1);
+    }
     loop {
         let response = client.request(cli_frame("journal.show", &session, None));
         let delay = match response {
@@ -1353,12 +1353,16 @@ async fn watch_session(session: String) -> ExitCode {
 }
 
 #[cfg(unix)]
-async fn wait_watch_shutdown() {
+fn wait_watch_shutdown() -> impl std::future::Future<Output = ()> {
+    let mut interrupt = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::interrupt())
+        .expect("register SIGINT handler");
     let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
         .expect("register SIGTERM handler");
-    tokio::select! {
-        _ = tokio::signal::ctrl_c() => {},
-        _ = terminate.recv() => {},
+    async move {
+        tokio::select! {
+            _ = interrupt.recv() => {},
+            _ = terminate.recv() => {},
+        }
     }
 }
 
