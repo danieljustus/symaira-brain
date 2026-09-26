@@ -4998,9 +4998,9 @@ Use "symbrowse errors [command] --help" for more information about a command.
             global,
         )),
         ("flow", Some("record")) => Some(plain(
-            "Record browser actions into a reviewable flow draft\n\nRun find before using @eN selectors so the draft can resolve their semantic metadata.",
+            "flow record start|stop captures the actions of a session and generates a flow draft: concrete values become {{input_N}} references, secret-looking values become op://… placeholders, session refs are converted to semantic selectors, and observed end states become assert steps. The draft is printed for human review.",
             "symbrowse flow record <start|stop|status> [flags]",
-            "  -h, --help                help for record\n      --session string   daemon session name (default \"default\")\n",
+            "  -h, --help             help for record\n      --session string   daemon session name (default \"default\")\n",
             global,
         )),
         ("mcp", None) => Some(
@@ -5021,7 +5021,7 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("daemon", None | Some("run")) => Some("Run or inspect the symbrowse daemon\n\nUsage:\n  symbrowse daemon [flags]\n".to_owned()),
         ("flow", None) => Some(
-            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  record      Record browser actions into a reviewable flow draft\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
+            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  record      Record a session into a flow draft\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
         ),
         ("config", Some(_)) | ("state", Some(_)) | ("flow", Some(_)) | ("tools", Some(_)) => None,
         ("open" | "goto" | "fetch", None) => {
