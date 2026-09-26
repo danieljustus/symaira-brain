@@ -1,5 +1,5 @@
 use std::{
-    io::{Read, Write},
+    io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
     path::PathBuf,
     sync::{
@@ -159,15 +159,15 @@ impl Drop for FixtureServer {
 
 fn serve_fixture_request(stream: &mut TcpStream) {
     let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
-    let mut request = [0_u8; 4096];
-    let size = stream.read(&mut request).unwrap_or(0);
-    let request = String::from_utf8_lossy(&request[..size]);
-    if request.starts_with("GET /redirect ") {
+    let mut request_line = String::new();
+    let _ = BufReader::new(&mut *stream).read_line(&mut request_line);
+    eprintln!("firefox_fixture_request={}", request_line.trim_end());
+    if request_line.starts_with("GET /redirect ") {
         let response = "HTTP/1.1 302 Found\r\nLocation: /page\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
         let _ = stream.write_all(response.as_bytes());
         return;
     }
-    if request.starts_with("GET /download ") {
+    if request_line.starts_with("GET /download ") {
         let body = b"Firefox native download fixture";
         let header = format!(
             "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=fixture.txt\r\nConnection: close\r\n\r\n",
