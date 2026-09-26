@@ -99,7 +99,11 @@ fn go_format(value: &Value) -> String {
     match value {
         Value::Null => "<nil>".to_string(),
         Value::Bool(value) => value.to_string(),
-        Value::Number(value) => value.to_string(),
+        // Go's json.Unmarshal decodes every JSON number as float64 before
+        // fmt.Sprintf("%v", value), including integer-looking numbers.
+        Value::Number(value) => value
+            .as_f64()
+            .map_or_else(|| value.to_string(), go_format_float),
         Value::String(value) => value.clone(),
         Value::Array(values) => format!(
             "[{}]",
@@ -118,6 +122,49 @@ fn go_format(value: &Value) -> String {
             )
         }
     }
+}
+
+fn go_format_float(value: f64) -> String {
+    let rendered = value.to_string();
+    let (sign, rendered) = rendered
+        .strip_prefix('-')
+        .map_or(("", rendered.as_str()), |unsigned| ("-", unsigned));
+    let (integer, fraction) = rendered.split_once('.').unwrap_or((rendered, ""));
+    let decimal_position = integer.len().cast_signed();
+    let digits = format!("{integer}{fraction}");
+    let first = digits.bytes().position(|digit| digit != b'0');
+    let Some(first) = first else {
+        return format!("{sign}0");
+    };
+    let significant = digits[first..].trim_end_matches('0');
+    let exponent = decimal_position - first.cast_signed() - 1;
+
+    if !(-4..6).contains(&exponent) {
+        let mantissa = if significant.len() == 1 {
+            significant.to_string()
+        } else {
+            format!("{}.{}", &significant[..1], &significant[1..])
+        };
+        return format!("{sign}{mantissa}e{exponent:+03}");
+    }
+
+    let decimal_position = exponent + 1;
+    let fixed = if decimal_position <= 0 {
+        format!(
+            "0.{}{significant}",
+            "0".repeat((-decimal_position).cast_unsigned())
+        )
+    } else if decimal_position.cast_unsigned() >= significant.len() {
+        format!(
+            "{}{}",
+            significant,
+            "0".repeat(decimal_position.cast_unsigned() - significant.len())
+        )
+    } else {
+        let position = decimal_position.cast_unsigned();
+        format!("{}.{}", &significant[..position], &significant[position..])
+    };
+    format!("{sign}{fixed}")
 }
 
 fn truncate_go_bytes(value: &str, max: usize) -> String {
@@ -174,6 +221,20 @@ mod tests {
             "api_key=[redacted],items=[map[TOKEN:[redacted]]],query=x"
         );
         assert!(!values.contains("secret"));
+    }
+
+    #[test]
+    fn verbose_numbers_match_go_float64_formatting() {
+        let (_, values) = redact_args(
+            "foreign",
+            "call",
+            br#"{"fixed_low":1e-4,"fixed_high":1e6,"large":1e20,"lossy":9007199254740993,"negative_zero":-0,"nested":[1.0,2],"one":1.0,"small":1e-5}"#,
+            true,
+        );
+        assert_eq!(
+            values,
+            "fixed_high=1e+06,fixed_low=0.0001,large=1e+20,lossy=9.007199254740992e+15,negative_zero=-0,nested=[1 2],one=1,small=1e-05"
+        );
     }
 
     #[test]
