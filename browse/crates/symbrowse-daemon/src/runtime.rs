@@ -14,12 +14,14 @@ use symbrowse_core::{
         Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
         Store as JournalStore,
     },
+    key_resolver::{KeyResolver, KeySources},
+    key_sources::SystemKeySources,
     oob::{Kind as OobKind, Manager as OobManager, Status as OobStatus, parse_timeout},
     policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
     policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
-    state::{Cookie, OriginState},
-    state_store::Store,
+    state::{Cookie, OriginState, SCHEMA_VERSION as STATE_SCHEMA_VERSION, StateError},
+    state_store::{Store, StoreError},
 };
 use symbrowse_engine_chrome::CapturedRequest;
 use symbrowse_engine_chrome::{
@@ -48,6 +50,7 @@ pub struct DispatchRuntime {
     output_cache: OutputCache,
     wayback_cdx_url: String,
     runtime: Runtime,
+    state_keys: KeyResolver<SystemKeySources>,
     compat: AsyncMutex<Option<CompatClient>>,
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
@@ -226,6 +229,7 @@ impl DispatchRuntime {
             output_cache,
             wayback_cdx_url: wayback_cdx_url.into(),
             runtime,
+            state_keys: KeyResolver::new(SystemKeySources::default()),
             compat: AsyncMutex::new(None),
             browser: Mutex::new(None),
             firefox: AsyncMutex::new(None),
@@ -2740,12 +2744,7 @@ impl DispatchRuntime {
     async fn state_browser_command(&self, frame: &Frame) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = state_store(&self.spec, &self.state_keys, frame.cmd == "state.save")?;
         match frame.cmd.as_str() {
             "state.save" => {
                 let mut captured = if self.spec.engine == "static" {
@@ -2792,7 +2791,7 @@ impl DispatchRuntime {
                     name: name.to_owned(),
                     saved_at: String::new(),
                     expires_at: String::new(),
-                    key_source: "none".to_owned(),
+                    key_source: String::new(),
                     origins: std::iter::once((origin, entry)).collect(),
                 };
                 store
@@ -2883,16 +2882,13 @@ impl DispatchRuntime {
     }
 
     fn state_command(&self, frame: &Frame) -> HandlerResult {
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = state_store(&self.spec, &self.state_keys, false)?;
         let args = frame.args.as_ref().and_then(Value::as_object);
         match frame.cmd.as_str() {
             "state.list" => Ok((
-                Some(json!({"schema_version":1,"states":store.list().map_err(runtime_error)?})),
+                Some(
+                    json!({"schema_version":STATE_SCHEMA_VERSION,"states":store.list().map_err(runtime_error)?}),
+                ),
                 Vec::new(),
             )),
             "state.show" => {
@@ -3231,12 +3227,11 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             }
         }
     }
-    if cookies.is_empty()
-        && let Some(items) = value.get("bidi_cookies").and_then(|raw| {
-            raw.as_array()
-                .or_else(|| raw.get("cookies").and_then(Value::as_array))
-        })
-    {
+    if let Some(items) = value.get("bidi_cookies").and_then(|raw| {
+        raw.as_array()
+            .or_else(|| raw.get("cookies").and_then(Value::as_array))
+    }) {
+        let mut complete_cookies = Vec::with_capacity(items.len());
         for item in items {
             let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
             let cookie_value = item
@@ -3250,7 +3245,7 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             if name.is_empty() {
                 continue;
             }
-            cookies.push(Cookie {
+            complete_cookies.push(Cookie {
                 name: name.to_owned(),
                 value: cookie_value.to_owned(),
                 domain: item
@@ -3281,6 +3276,9 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
                     .to_owned(),
             });
         }
+        if !complete_cookies.is_empty() {
+            cookies = complete_cookies;
+        }
     }
     Ok((
         origin,
@@ -3290,6 +3288,34 @@ fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String>
             session_storage: object_map("session_storage"),
         },
     ))
+}
+
+fn state_store<S: KeySources>(
+    spec: &SessionSpec,
+    keys: &KeyResolver<S>,
+    refuse_encryption_downgrade: bool,
+) -> Result<Store, DaemonError> {
+    let key = keys.resolve().map_err(runtime_error)?;
+    let has_key = key.is_some();
+    let store = Store::new(
+        spec.state_store_dir(),
+        time::Duration::days(spec.state_expire_days),
+        key,
+    )
+    .map_err(runtime_error)?;
+    if refuse_encryption_downgrade && !has_key {
+        for name in store.list().map_err(runtime_error)? {
+            if matches!(
+                store.load(&name),
+                Err(StoreError::State(StateError::KeyRequired))
+            ) {
+                return Err(runtime_error(
+                    "state encryption key is unavailable; refusing an unencrypted save",
+                ));
+            }
+        }
+    }
+    Ok(store)
 }
 
 fn origin_host(origin: &str) -> String {
@@ -3535,6 +3561,7 @@ mod tests {
         path::PathBuf,
         thread,
     };
+    use symbrowse_core::key_resolver::{MissingReason, ProbeError};
 
     #[test]
     fn static_mode_uses_caller_driven_runtime_and_browser_keeps_workers() {
@@ -3702,6 +3729,90 @@ mod tests {
         spec.engine = "static".into();
         spec.mode = "static".into();
         spec
+    }
+
+    struct FixedKeySources(Option<Vec<u8>>);
+
+    impl KeySources for FixedKeySources {
+        fn vault(&self, _entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            match &self.0 {
+                Some(value) => Ok(Some(value.clone())),
+                None => Err(ProbeError::Missing(MissingReason::NotFound)),
+            }
+        }
+
+        fn keychain(&self, _service: &str, _account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Ok(None)
+        }
+
+        fn environment(&self, _name: &str) -> Option<String> {
+            None
+        }
+    }
+
+    struct FailingKeySources;
+
+    impl KeySources for FailingKeySources {
+        fn vault(&self, _entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Err(ProbeError::Failed("vault lookup failed".to_owned()))
+        }
+
+        fn keychain(&self, _service: &str, _account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
+            Ok(None)
+        }
+
+        fn environment(&self, _name: &str) -> Option<String> {
+            None
+        }
+    }
+
+    #[test]
+    fn state_store_uses_resolved_key_and_refuses_encryption_downgrade() {
+        let spec = temp_spec("state-key");
+        let key = KeyResolver::new(FixedKeySources(Some("ab".repeat(32).into_bytes())));
+        let store = state_store(&spec, &key, true).expect("state store with resolved key");
+        let mut state = symbrowse_core::state::State {
+            schema_version: STATE_SCHEMA_VERSION,
+            name: "login".into(),
+            saved_at: String::new(),
+            expires_at: String::new(),
+            key_source: String::new(),
+            origins: BTreeMap::from([(
+                "https://example.test".into(),
+                OriginState {
+                    cookies: Vec::new(),
+                    local_storage: BTreeMap::from([("token".into(), "fixture-secret".into())]),
+                    session_storage: BTreeMap::new(),
+                },
+            )]),
+        };
+        store
+            .save_at(&mut state, time::OffsetDateTime::now_utc())
+            .expect("encrypted state save");
+        let raw = std::fs::read(store.dir().join("login.json")).expect("read encrypted state");
+        assert!(!String::from_utf8_lossy(&raw).contains("fixture-secret"));
+        assert_eq!(
+            store.load("login").expect("decrypt state").key_source,
+            "symvault"
+        );
+
+        let unavailable = KeyResolver::new(FixedKeySources(None));
+        let error = match state_store(&spec, &unavailable, true) {
+            Err(error) => error,
+            Ok(_) => panic!("missing key must not downgrade an existing encrypted store"),
+        };
+        assert!(error.message.contains("refusing an unencrypted save"));
+    }
+
+    #[test]
+    fn state_store_fails_closed_when_configured_key_provider_fails() {
+        let spec = temp_spec("state-key-provider-failure");
+        let keys = KeyResolver::new(FailingKeySources);
+        let error = match state_store(&spec, &keys, true) {
+            Err(error) => error,
+            Ok(_) => panic!("provider failure must fail closed"),
+        };
+        assert!(error.message.contains("vault lookup failed"));
     }
 
     #[test]
@@ -4478,32 +4589,47 @@ mod tests {
     }
 
     #[test]
-    fn state_capture_preserves_storage_and_bidi_cookie_fields() {
+    fn state_capture_prefers_complete_bidi_cookies_over_document_cookie() {
         let value = json!({
             "origin": "https://example.test:8443/app",
             "local_storage": {"token": "redacted"},
             "session_storage": {"step": "2"},
-            "cookies": "",
-            "bidi_cookies": [{
-                "name": "sid",
-                "value": {"type": "string", "value": "abc"},
-                "domain": "example.test",
-                "path": "/app",
-                "secure": true,
-                "httpOnly": true,
-                "session": false,
-                "sameSite": "lax"
-            }]
+            "cookies": "visible=script-value",
+            "bidi_cookies": [
+                {
+                    "name": "visible",
+                    "value": {"type": "string", "value": "complete-value"},
+                    "domain": "example.test",
+                    "path": "/",
+                    "secure": true,
+                    "httpOnly": false,
+                    "session": true,
+                    "sameSite": "lax"
+                },
+                {
+                    "name": "sid",
+                    "value": {"type": "string", "value": "abc"},
+                    "domain": "example.test",
+                    "path": "/app",
+                    "secure": true,
+                    "httpOnly": true,
+                    "session": false,
+                    "sameSite": "lax"
+                }
+            ]
         });
         let (origin, state) = captured_origin_state(&value).expect("capture parse");
         assert_eq!(origin, "https://example.test:8443/app");
         assert_eq!(state.local_storage["token"], "redacted");
         assert_eq!(state.session_storage["step"], "2");
-        assert_eq!(state.cookies[0].name, "sid");
-        assert_eq!(state.cookies[0].value, "abc");
-        assert!(state.cookies[0].secure);
-        assert!(state.cookies[0].http_only);
-        assert!(!state.cookies[0].session);
+        assert_eq!(state.cookies.len(), 2);
+        assert_eq!(state.cookies[0].name, "visible");
+        assert_eq!(state.cookies[0].value, "complete-value");
+        assert_eq!(state.cookies[1].name, "sid");
+        assert_eq!(state.cookies[1].value, "abc");
+        assert!(state.cookies[1].secure);
+        assert!(state.cookies[1].http_only);
+        assert!(!state.cookies[1].session);
     }
 
     #[test]
