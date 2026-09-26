@@ -13,7 +13,8 @@ use std::{
 
 use chromiumoxide::cdp::browser_protocol::{dom, input};
 use symbrowse_engine_chrome::{
-    BrowserMode, ChromeSession, NetworkRoute, ScreenshotOptions, UnsupportedOperation, capabilities,
+    BrowserMode, ChromeSession, FindOptions, NetworkRoute, ScreenshotOptions, UnsupportedOperation,
+    capabilities,
 };
 
 fn e2e_enabled() -> bool {
@@ -123,7 +124,7 @@ fn serve(mut stream: TcpStream) {
 <div id="dbl" ondblclick="this.dataset.doubled='yes'">Double</div><div id="hover" onmouseenter="this.dataset.hovered='yes'">Hover</div>
 <div id="status"></div><div id="scroll"></div>
 <input id="file" type="file"><a id="download" download="rust012.txt" href="/download.txt">download</a>
-<iframe id="frame" srcdoc="<!doctype html><title>child</title><p>frame</p>"></iframe>
+<iframe id="frame" srcdoc="<!doctype html><title>child</title><p>child-frame-only</p>"></iframe>
 <script src="/asset.js"></script>"#,
         ),
     };
@@ -299,12 +300,54 @@ async fn selected_frame_scopes_eval_and_main_restores_it() {
         .await
         .expect("select nested frame");
     assert_eq!(
+        page.read().await.expect("read nested frame").as_str(),
+        Some("child-frame-only")
+    );
+    assert_eq!(
+        page.inspect("p", "text")
+            .await
+            .expect("inspect nested frame"),
+        "child-frame-only"
+    );
+    let found = page
+        .find(FindOptions {
+            kind: "text".into(),
+            query: "child-frame-only".into(),
+            action: "ref".into(),
+            ..FindOptions::default()
+        })
+        .await
+        .expect("find nested frame text");
+    assert_eq!(found["matches"][0]["text"], "child-frame-only");
+    assert_eq!(
         page.evaluate("location.href")
             .await
             .expect("evaluate nested frame")["value"],
         "about:srcdoc"
     );
     page.set_active_frame("").await.expect("select main frame");
+    let main_read = page.read().await.expect("read main frame");
+    assert!(
+        !main_read
+            .as_str()
+            .is_some_and(|text| text.contains("child-frame-only")),
+        "main-frame read included nested-frame text: {main_read}"
+    );
+    assert!(
+        page.inspect("p", "text").await.is_err(),
+        "main-frame inspection unexpectedly found nested-frame paragraph"
+    );
+    assert!(
+        page.find(FindOptions {
+            kind: "text".into(),
+            query: "child-frame-only".into(),
+            action: "ref".into(),
+            ..FindOptions::default()
+        })
+        .await
+        .is_err(),
+        "main-frame find unexpectedly found nested-frame text"
+    );
     assert_eq!(
         page.evaluate("document.title")
             .await

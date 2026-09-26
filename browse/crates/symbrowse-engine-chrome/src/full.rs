@@ -18,6 +18,7 @@ use chromiumoxide::{
     Browser, Element, Page,
     cdp::browser_protocol::{accessibility, browser, dom, emulation, fetch, input, network, page},
     cdp::js_protocol::runtime::{self, EvaluateParams},
+    error::CdpError,
     layout::Point,
 };
 use futures::StreamExt;
@@ -1059,12 +1060,7 @@ impl ChromePage {
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        Ok(self
-            .page
-            .evaluate("document.body?.innerText ?? ''")
-            .await?
-            .into_value::<String>()?
-            .into())
+        self.evaluate_value("document.body?.innerText ?? ''").await
     }
 
     /// Evaluate a bounded JSON-producing script for shared browser state
@@ -1140,6 +1136,20 @@ impl ChromePage {
             "description": result.description.unwrap_or_default(),
             "exception_text": exception_text,
         }))
+    }
+
+    async fn evaluate_value(
+        &self,
+        expression: &str,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let response = self
+            .page
+            .execute(self.evaluate_params(expression).await?)
+            .await?;
+        if let Some(exception) = response.result.exception_details {
+            return Err(CdpError::JavascriptException(Box::new(exception)).into());
+        }
+        Ok(response.result.result.value.unwrap_or(Value::Null))
     }
 
     /// Read complete cookie metadata through Chrome's Network domain.
@@ -1247,12 +1257,10 @@ impl ChromePage {
         let selector_json = serde_json::to_string(selector)?;
         if trace_geometry {
             let before = self
-                .page
-                .evaluate(format!(
+                .evaluate_value(&format!(
                     "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
                 ))
-                .await?
-                .into_value::<Value>()?;
+                .await?;
             eprintln!("chrome_download_click_geometry_before={before}");
         }
         self.scroll_element_into_view(&element).await?;
@@ -1264,12 +1272,10 @@ impl ChromePage {
             .await?;
         if trace_geometry {
             let after = self
-                .page
-                .evaluate(format!(
+                .evaluate_value(&format!(
                     "(() => {{ const e=document.querySelector({selector_json}); const r=e?.getBoundingClientRect(); return {{scroll_y:window.scrollY, top:r?.top ?? null, bottom:r?.bottom ?? null, height:innerHeight}}; }})()"
                 ))
-                .await?
-                .into_value::<Value>()?;
+                .await?;
             eprintln!("chrome_download_click_geometry_after_scroll={after}");
         }
         let point = element.clickable_point().await?;
@@ -1492,7 +1498,7 @@ impl ChromePage {
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let value = serde_json::to_string(text)?;
         let selector = serde_json::to_string(selector)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.focus(); const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set || Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')?.set; if (setter) setter.call(e,{value}); else e.value={value}; e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({selector}); if (!e) throw new Error('selector did not match'); e.focus(); const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set || Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')?.set; if (setter) setter.call(e,{value}); else e.value={value}; e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
         Ok(result("fill", selector.trim_matches('"')))
     }
     pub async fn select(
@@ -1502,7 +1508,7 @@ impl ChromePage {
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let selector_json = serde_json::to_string(selector)?;
         let value_json = serde_json::to_string(value)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({selector_json}); if (!e || e.tagName !== 'SELECT') throw new Error('select requires a SELECT element'); const wanted={value_json}; let hit=false; for (const o of e.options) {{ const yes=o.value===wanted || o.text===wanted; o.selected=yes; hit ||= yes; }} if (!hit) throw new Error('option did not match'); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({selector_json}); if (!e || e.tagName !== 'SELECT') throw new Error('select requires a SELECT element'); const wanted={value_json}; let hit=false; for (const o of e.options) {{ const yes=o.value===wanted || o.text===wanted; o.selected=yes; hit ||= yes; }} if (!hit) throw new Error('option did not match'); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return e.value; }})()" )).await?;
         Ok(result("select", selector))
     }
     pub async fn check(
@@ -1525,7 +1531,7 @@ impl ChromePage {
         checked: bool,
     ) -> Result<InteractionResult, Box<dyn Error + Send + Sync>> {
         let s = serde_json::to_string(selector)?;
-        self.page.evaluate(format!("(() => {{ const e=document.querySelector({s}); if (!e || e.type !== 'checkbox') throw new Error('check requires a checkbox'); if (e.checked !== {checked}) e.click(); return e.checked; }})()" )).await?;
+        self.evaluate_value(&format!("(() => {{ const e=document.querySelector({s}); if (!e || e.type !== 'checkbox') throw new Error('check requires a checkbox'); if (e.checked !== {checked}) e.click(); return e.checked; }})()" )).await?;
         Ok(result(if checked { "check" } else { "uncheck" }, selector))
     }
 
@@ -1581,11 +1587,7 @@ impl ChromePage {
             ),
             _ => return Err(format!("unsupported inspection kind {kind:?}").into()),
         };
-        Ok(self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?)
+        self.evaluate_value(&expression).await
     }
 
     /// Find an element by the semantic selectors used by the public command
@@ -1606,11 +1608,7 @@ impl ChromePage {
         let expression = format!(
             "(() => {{ const kind={kind}, query={query}, action={action}, name={name}, exact={exact}, wantedIndex={index}, value={value}; const text=e=>(e.innerText||e.textContent||'').trim(); const implicit=e=>{{ const tag=e.tagName.toLowerCase(); return tag==='button'?'button':tag==='a'?'link':tag==='input'?(e.type==='checkbox'?'checkbox':e.type==='radio'?'radio':'textbox'):tag==='textarea'?'textbox':tag==='select'?'combobox':''; }}; const candidate=e=>{{ switch(kind) {{ case 'role': return e.getAttribute('role')||implicit(e); case 'text': return text(e); case 'label': return e.getAttribute('aria-label')||text(document.querySelector(`label[for='${{CSS.escape(e.id||'')}}']` )||e); case 'placeholder': return e.getAttribute('placeholder')||''; case 'alt': return e.getAttribute('alt')||''; case 'title': return e.getAttribute('title')||''; case 'testid': return e.getAttribute('data-testid')||''; case 'css': return e.matches(query)?query:''; case 'ref': return e.getAttribute('data-symbrowse-ref')||''; default: return ''; }} }}; const matchesText=(got)=>exact?got===query:got.toLowerCase().includes(query.toLowerCase()); let nodes=[...document.querySelectorAll('*')]; let matches=nodes.filter(e=>kind==='ref'?candidate(e)===query.replace(/^@/,''):matchesText(candidate(e))); if (kind==='text') matches=matches.filter(e=>!matches.some(other=>other!==e&&e.contains(other))); if (name) matches=matches.filter(e=>{{ const got=e.getAttribute('aria-label')||e.getAttribute('name')||''; return exact?got===name:got.toLowerCase().includes(name.toLowerCase()); }}); if (!matches.length) throw new Error(`find ${{kind}} ${{query}} matched no elements`); if (wantedIndex!==null) matches=[matches[wantedIndex]].filter(Boolean); if (!matches.length) throw new Error(`find ${{kind}} index ${{wantedIndex}} is out of range`); if (wantedIndex===null&&matches.length>1&&['first','last','nth'].indexOf(action)<0) throw new Error(`find ${{kind}} ${{query}} matched ${{matches.length}} elements; use index`); let selected=action==='last'?matches[matches.length-1]:matches[0]; let next=1; for (const e of nodes) {{ if (!e.getAttribute('data-symbrowse-ref')) e.setAttribute('data-symbrowse-ref',`e${{next++}}`); }} const ref=selected.getAttribute('data-symbrowse-ref'), role=selected.getAttribute('role')||implicit(selected), accessibleName=selected.getAttribute('aria-label')||selected.getAttribute('name')||text(selected), inputType=selected.getAttribute('type')||'', autocomplete=selected.getAttribute('autocomplete')||''; if (action==='click') selected.click(); else if (action==='focus') selected.focus(); else if (action==='fill') {{ selected.focus(); selected.value=value; selected.dispatchEvent(new Event('input',{{bubbles:true}})); selected.dispatchEvent(new Event('change',{{bubbles:true}})); }} else if (action==='text') return {{kind,query,action,ref,role,name:accessibleName,input_type:inputType,autocomplete,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}})),value:text(selected)}}; return {{kind,query,action,ref,role,name:accessibleName,input_type:inputType,autocomplete,matches:matches.map(e=>({{ref:e.getAttribute('data-symbrowse-ref'),text:text(e),tag:e.tagName.toLowerCase()}}))}}; }})()"
         );
-        Ok(self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?)
+        self.evaluate_value(&expression).await
     }
 
     pub async fn wait_for_selector(
@@ -1669,7 +1667,10 @@ impl ChromePage {
         Ok(())
     }
 
-    async fn evaluate_params(&self, expression: &str) -> Result<EvaluateParams, std::io::Error> {
+    async fn evaluate_params(
+        &self,
+        expression: &str,
+    ) -> Result<EvaluateParams, Box<dyn Error + Send + Sync>> {
         let mut builder = EvaluateParams::builder()
             .expression(expression.to_owned())
             .return_by_value(true)
@@ -1677,7 +1678,9 @@ impl ChromePage {
         if let Some(context) = *self.active_frame_context.lock().await {
             builder = builder.context_id(context);
         }
-        builder.build().map_err(std::io::Error::other)
+        builder
+            .build()
+            .map_err(|error| std::io::Error::other(error).into())
     }
 
     pub async fn accessibility_tree(&self) -> Result<Vec<Value>, Box<dyn Error + Send + Sync>> {
@@ -2108,11 +2111,7 @@ impl ChromePage {
         let expression = format!(
             "(()=>{{if(!(window.axe&&window.axe.run)){{(0,eval)({source});}}return window.axe.run({root},{options}).then(results=>({{axe_version:window.axe.version,results}}));}})()"
         );
-        let raw = self
-            .page
-            .evaluate(expression)
-            .await?
-            .into_value::<Value>()?;
+        let raw = self.evaluate_value(&expression).await?;
         let results = raw.get("results").ok_or("axe-core returned no result")?;
         let violations = results
             .get("violations")
