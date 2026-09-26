@@ -1,4 +1,7 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, Mutex},
+};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
@@ -49,8 +52,46 @@ pub struct DispatchRuntime {
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
     oob: OobManager,
+    recorders: Mutex<BTreeMap<String, FlowRecorder>>,
     #[cfg(target_os = "macos")]
     safari: AsyncMutex<Option<SafariRuntime>>,
+}
+
+#[derive(Default)]
+struct FlowRecorder {
+    active: bool,
+    actions: Vec<flows::RecordedAction>,
+    refs: BTreeMap<String, RecordedRef>,
+}
+
+#[derive(Clone, Default)]
+struct RecordedRef {
+    role: String,
+    name: String,
+    input_type: String,
+    autocomplete: String,
+}
+
+fn is_recordable_command(command: &str) -> bool {
+    matches!(
+        command,
+        "open"
+            | "goto"
+            | "click"
+            | "dblclick"
+            | "fill"
+            | "type"
+            | "press"
+            | "hover"
+            | "focus"
+            | "select"
+            | "check"
+            | "uncheck"
+            | "wait"
+            | "snapshot"
+            | "scroll"
+            | "scrollintoview"
+    )
 }
 
 struct BrowserState {
@@ -162,6 +203,7 @@ impl DispatchRuntime {
             browser: Mutex::new(None),
             firefox: AsyncMutex::new(None),
             oob: OobManager::new(),
+            recorders: Mutex::new(BTreeMap::new()),
             #[cfg(target_os = "macos")]
             safari: AsyncMutex::new(None),
         }))
@@ -175,6 +217,9 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
+        if frame.cmd.starts_with("flow.record.") {
+            return self.flow_record(&frame);
+        }
         if frame.cmd == "handoff" {
             // The handoff loop resolves its prompt when the transport cancels.
             return self.runtime.block_on(self.dispatch(frame, operation));
@@ -185,7 +230,8 @@ impl DispatchRuntime {
         ) {
             return self.oob_command(&frame);
         }
-        self.runtime.block_on(async {
+        let captured = frame.clone();
+        let result = self.runtime.block_on(async {
             tokio::select! {
                 result = self.dispatch(frame, operation.clone()) => result,
                 _ = Self::wait_for_cancellation(operation.clone()) => Err(DaemonError {
@@ -194,7 +240,117 @@ impl DispatchRuntime {
                     ..Default::default()
                 }),
             }
-        })
+        });
+        if let Ok((Some(data), _)) = &result {
+            self.record_frame(&captured, data);
+        }
+        result
+    }
+
+    fn flow_record(&self, frame: &Frame) -> HandlerResult {
+        let mut recorders = self
+            .recorders
+            .lock()
+            .map_err(|_| runtime_error("flow recorder lock poisoned"))?;
+        let state = recorders.entry(frame.session.clone()).or_default();
+        let data = match frame.cmd.as_str() {
+            "flow.record.start" => {
+                state.actions.clear();
+                state.active = true;
+                json!({"recording": true, "session": frame.session})
+            }
+            "flow.record.stop" => {
+                state.active = false;
+                json!({"recording": false, "session": frame.session, "actions": state.actions})
+            }
+            "flow.record.status" => {
+                json!({"recording": state.active, "session": frame.session, "actions": state.actions.len()})
+            }
+            _ => {
+                return Err(DaemonError {
+                    code: codes::UNKNOWN_COMMAND.into(),
+                    message: format!("unknown recording command {:?}", frame.cmd),
+                    ..Default::default()
+                });
+            }
+        };
+        Ok((Some(data), Vec::new()))
+    }
+
+    fn record_frame(&self, frame: &Frame, data: &Value) {
+        if frame.cmd == "find" {
+            let Some(reference) = data.get("ref").and_then(Value::as_str) else {
+                return;
+            };
+            if let Ok(mut recorders) = self.recorders.lock() {
+                let state = recorders.entry(frame.session.clone()).or_default();
+                state.refs.insert(
+                    reference.to_owned(),
+                    RecordedRef {
+                        role: data
+                            .get("role")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        name: data
+                            .get("name")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        input_type: data
+                            .get("input_type")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                        autocomplete: data
+                            .get("autocomplete")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_owned(),
+                    },
+                );
+            }
+            return;
+        }
+        // ponytail: resolve refs returned by find; extend this cache when the engine snapshot API exposes stable ref metadata.
+        if !is_recordable_command(&frame.cmd) {
+            return;
+        }
+        let Some(args) = frame.args.as_ref() else {
+            return;
+        };
+        let selector = args
+            .get("url")
+            .and_then(Value::as_str)
+            .filter(|url| !url.is_empty())
+            .or_else(|| args.get("selector").and_then(Value::as_str))
+            .unwrap_or_default()
+            .to_owned();
+        let value = args
+            .get("value")
+            .and_then(Value::as_str)
+            .unwrap_or_default()
+            .to_owned();
+        if let Ok(mut recorders) = self.recorders.lock() {
+            let state = recorders.entry(frame.session.clone()).or_default();
+            if !state.active {
+                return;
+            }
+            let reference = selector.strip_prefix('@').unwrap_or_default();
+            let resolved = state.refs.get(reference).cloned().unwrap_or_default();
+            let index = state.actions.len();
+            state.actions.push(flows::RecordedAction {
+                index,
+                command: frame.cmd.clone(),
+                selector,
+                value,
+                url: String::new(),
+                role: resolved.role,
+                name: resolved.name,
+                input_type: resolved.input_type,
+                autocomplete: resolved.autocomplete,
+            });
+        }
     }
 
     async fn wait_for_cancellation(operation: OperationContext) {
@@ -3282,6 +3438,58 @@ mod tests {
         spec.engine = "static".into();
         spec.mode = "static".into();
         spec
+    }
+
+    #[test]
+    fn flow_record_lifecycle_captures_whitelisted_actions_and_resolves_refs() {
+        let runtime = DispatchRuntime::new(temp_spec("flow-record")).expect("runtime");
+        let request = |cmd: &str| Frame {
+            cmd: cmd.into(),
+            session: "flow-record".into(),
+            ..Frame::default()
+        };
+        let started = runtime
+            .handle(request("flow.record.start"), OperationContext::for_test())
+            .expect("start recording");
+        assert_eq!(started.0.unwrap()["recording"], true);
+        runtime.record_frame(
+            &Frame {
+                cmd: "find".into(),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({"ref":"e7","role":"textbox","name":"Email","input_type":"email","autocomplete":"email"}),
+        );
+        runtime.record_frame(
+            &Frame {
+                cmd: "click".into(),
+                args: Some(json!({"selector":"@e7"})),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({}),
+        );
+        runtime.record_frame(
+            &Frame {
+                cmd: "get.url".into(),
+                args: Some(json!({})),
+                session: "flow-record".into(),
+                ..Frame::default()
+            },
+            &json!({"url":"https://example.com"}),
+        );
+        let status = runtime
+            .handle(request("flow.record.status"), OperationContext::for_test())
+            .expect("recording status");
+        assert_eq!(status.0.unwrap()["actions"], 1);
+        let stopped = runtime
+            .handle(request("flow.record.stop"), OperationContext::for_test())
+            .expect("stop recording");
+        let action = &stopped.0.unwrap()["actions"][0];
+        assert_eq!(action["selector"], "@e7");
+        assert_eq!(action["role"], "textbox");
+        assert_eq!(action["name"], "Email");
+        assert_eq!(action["input_type"], "email");
     }
 
     #[test]

@@ -203,6 +203,11 @@ enum Action {
         dry_run: bool,
         format: Format,
     },
+    FlowRecord {
+        session: String,
+        command: String,
+        format: Format,
+    },
     TraceExport {
         session: String,
         path: PathBuf,
@@ -419,6 +424,11 @@ fn main() -> ExitCode {
             dry_run,
             format,
         }) => run_flow(session, path, inputs, dry_run, format),
+        Ok(Action::FlowRecord {
+            session,
+            command,
+            format,
+        }) => run_flow_record(session, command, format),
         Ok(Action::TraceExport {
             session,
             path,
@@ -3242,6 +3252,97 @@ fn run_flow(
     }
 }
 
+fn run_flow_record(session: String, command: String, format: Format) -> ExitCode {
+    let client = Client::new(ClientOptions {
+        socket_path: default_socket_path(&session),
+        session: session.clone(),
+        ..ClientOptions::default()
+    });
+    let response =
+        match client.request(cli_frame(&format!("flow.record.{command}"), &session, None)) {
+            Ok(response) => response,
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::DAEMON_UNAVAILABLE,
+                    error.to_string(),
+                );
+            }
+        };
+    if !response.success {
+        return render_daemon_error(format, response.error.unwrap_or_default());
+    }
+    let data = response.data.unwrap_or_default();
+    if command != "stop" {
+        return match Envelope::ok(data, Vec::new()).render(format) {
+            Ok(output) => write_stdout(&output),
+            Err(error) => {
+                render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+            }
+        };
+    }
+    let actions = match data.get("actions").cloned().unwrap_or_default() {
+        serde_json::Value::Array(actions) => match serde_json::from_value::<
+            Vec<flows::RecordedAction>,
+        >(serde_json::Value::Array(actions))
+        {
+            Ok(actions) => actions,
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::MALFORMED_REQUEST,
+                    error.to_string(),
+                );
+            }
+        },
+        _ => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::MALFORMED_REQUEST,
+                "flow.record.stop returned invalid actions".into(),
+            );
+        }
+    };
+    let draft = match flows::generate_draft(&actions) {
+        Ok(draft) => draft,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    };
+    let yaml = match draft.render_yaml() {
+        Ok(yaml) => yaml,
+        Err(error) => {
+            return render_dispatch_error(
+                format,
+                daemon_codes::OPERATION_FAILED,
+                error.to_string(),
+            );
+        }
+    };
+    if format == Format::Text {
+        return write_stdout(&yaml);
+    }
+    let data = serde_json::json!({
+        "recording": false,
+        "name": draft.name,
+        "inputs": draft.inputs,
+        "domains": draft.domains,
+        "secret_refs": draft.secret_refs,
+        "steps": draft.steps.len(),
+        "draft": yaml,
+    });
+    match Envelope::ok(data, Vec::new()).render(format) {
+        Ok(output) => write_stdout(&output),
+        Err(error) => {
+            render_dispatch_error(format, daemon_codes::OPERATION_FAILED, error.to_string())
+        }
+    }
+}
+
 fn run_mcp(
     session: String,
     profiles: String,
@@ -4896,6 +4997,12 @@ Use "symbrowse errors [command] --help" for more information about a command.
             "      --dry-run             print the execution plan with risk classes without executing\n  -h, --help                help for run\n      --input stringArray   flow input as k=v (repeatable)\n      --session string      daemon session name (default \"default\")\n",
             global,
         )),
+        ("flow", Some("record")) => Some(plain(
+            "Record browser actions into a reviewable flow draft\n\nRun find before using @eN selectors so the draft can resolve their semantic metadata.",
+            "symbrowse flow record <start|stop|status> [flags]",
+            "  -h, --help                help for record\n      --session string   daemon session name (default \"default\")\n",
+            global,
+        )),
         ("mcp", None) => Some(
             "mcp runs the Model Context Protocol stdio server. Tools proxy to the local symbrowse daemon; every tool accepts an optional session argument. No byte is written to stdout except JSON-RPC frames (zero stdout pollution); all logging goes to stderr.\n\nTool profiles select the registered tools (--tools core|nav|state|network|debug|flows|all, comma-separated combinations allowed; default core).\n\nSecurity defaults in MCP mode: the daemon is started with the SSRF guard enabled, so private and loopback targets are denied. Pass --allow-private to permit them explicitly. The domain allowlist stays configurable through the daemon flags and config.toml.\n\nThe browser engine is selected with --engine, or persistently through the engine key in config.toml (the flag wins). The selected engine is passed to the daemon this server starts.\n\nUsage:\n  symbrowse mcp [flags]\n\nFlags:\n      --allow-private    allow private and loopback targets (SSRF opt-out; MCP mode denies them by default)\n      --engine string    engine implementation: chrome (default), static (JS-free HTML reader), safari-attach (live Safari session via Apple Events), or safari-bidi (isolated Safari via safaridriver --bidi) (default \"chrome\")\n  -h, --help             help for mcp\n      --list-profiles    describe every tool profile and its tool count, then exit\n      --session string   default session for tool calls without a session argument (default \"default\")\n      --tools string     tool profiles to register: core|nav|state|network|debug|flows|all (comma-separated combinations allowed) (default \"core\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned(),
         ),
@@ -4914,7 +5021,7 @@ Use "symbrowse errors [command] --help" for more information about a command.
         )),
         ("daemon", None | Some("run")) => Some("Run or inspect the symbrowse daemon\n\nUsage:\n  symbrowse daemon [flags]\n".to_owned()),
         ("flow", None) => Some(
-            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
+            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  record      Record browser actions into a reviewable flow draft\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
         ),
         ("config", Some(_)) | ("state", Some(_)) | ("flow", Some(_)) | ("tools", Some(_)) => None,
         ("open" | "goto" | "fetch", None) => {
@@ -7314,7 +7421,7 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
     let mut scan = index + 1;
     while scan < values.len() {
         match values[scan].as_str() {
-            "list" | "run" | "validate" => {
+            "list" | "run" | "validate" | "record" => {
                 subcommand = values[scan].as_str();
                 subcommand_index = Some(scan);
                 break;
@@ -7336,6 +7443,7 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
         scan += 1;
     }
     let mut path = None;
+    let mut record_command = None;
     let mut session = "default".to_owned();
     let mut dry_run = false;
     let mut inputs = BTreeMap::new();
@@ -7389,6 +7497,9 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
             value if value.starts_with('-') => {
                 return Err(unknown_flag(value));
             }
+            value if subcommand == "record" && record_command.is_none() => {
+                record_command = Some(value.to_owned())
+            }
             value if path.is_none() => path = Some(PathBuf::from(value)),
             value => {
                 return Err(ParseError {
@@ -7424,6 +7535,21 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
                 message: "flow run requires a path".into(),
                 exit_code: 2,
             }),
+        "record" => match record_command.as_deref() {
+            Some(command @ ("start" | "stop" | "status")) => Ok(Action::FlowRecord {
+                session,
+                command: command.to_owned(),
+                format,
+            }),
+            Some(command) => Err(ParseError {
+                message: format!("unknown command {command:?} for \"symbrowse flow record\""),
+                exit_code: 2,
+            }),
+            None => Err(ParseError {
+                message: "flow record requires start, stop or status".into(),
+                exit_code: 2,
+            }),
+        },
         other => Err(ParseError {
             message: format!("unknown command {other:?} for flow"),
             exit_code: 2,
@@ -8412,6 +8538,23 @@ mod tests {
         };
         assert!(dry_run);
         assert_eq!(path, std::path::PathBuf::from("demo.yaml"));
+
+        assert_eq!(
+            parse(&args(&[
+                "flow",
+                "record",
+                "start",
+                "--session",
+                "work",
+                "--json"
+            ])),
+            Ok(Action::FlowRecord {
+                session: "work".into(),
+                command: "start".into(),
+                format: Format::Json,
+            })
+        );
+        assert!(parse(&args(&["flow", "record", "pause"])).is_err());
     }
 
     #[test]
