@@ -146,6 +146,23 @@ fn uses_script_navigation(url: &str) -> bool {
             .is_some_and(|scheme| scheme.eq_ignore_ascii_case("https://"))
 }
 
+fn navigation_completed(before: &Value, state: &Value) -> bool {
+    if state.get("ready_state").and_then(Value::as_str) != Some("complete") {
+        return false;
+    }
+    let new_document = state.get("time_origin") != before.get("time_origin");
+    let same_document_url_changed = state.get("url") != before.get("url")
+        && state
+            .get("url")
+            .and_then(Value::as_str)
+            .and_then(|url| url.split('#').next())
+            == before
+                .get("url")
+                .and_then(Value::as_str)
+                .and_then(|url| url.split('#').next());
+    new_document || same_document_url_changed
+}
+
 fn has_explicit_url_scheme(url: &str) -> bool {
     let Some((scheme, _)) = url.split_once(':') else {
         return false;
@@ -812,6 +829,11 @@ impl ChromePage {
             eprintln!("chrome_open_stage=navigation-listeners-ready");
         }
         let main_frame = self.page.mainframe().await?;
+        let before = self
+            .page
+            .evaluate("({url: location.href, time_origin: performance.timeOrigin})")
+            .await?
+            .into_value::<Value>()?;
         if diagnostics {
             eprintln!("chrome_open_stage=main-frame-resolved");
         }
@@ -836,11 +858,26 @@ impl ChromePage {
         let mut frame_events_open = true;
         let mut same_document_events_open = true;
         let mut navigation_observed = false;
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
         }
         while !navigation_observed && (frame_events_open || same_document_events_open) {
             tokio::select! {
+                _ = tokio::time::sleep_until(deadline) => {
+                    return Err("Chrome navigation timed out".into());
+                }
+                _ = tokio::time::sleep(Duration::from_millis(25)) => {
+                    // Chromiumoxide can miss the main-frame event on Windows.
+                    // A changed document or same-document URL is the observable
+                    // navigation signal when the event stream stays silent.
+                    if let Ok(state) = self.page.evaluate("({url: location.href, ready_state: document.readyState, time_origin: performance.timeOrigin})").await {
+                        let state = state.into_value::<Value>()?;
+                        if navigation_completed(&before, &state) {
+                            navigation_observed = true;
+                        }
+                    }
+                }
                 event = navigated.next(), if frame_events_open => {
                     match event {
                         Some(event) if event.frame.parent_id.is_none() => {
@@ -872,6 +909,9 @@ impl ChromePage {
         }
 
         loop {
+            if tokio::time::Instant::now() >= deadline {
+                return Err("Chrome navigation timed out waiting for document completion".into());
+            }
             let state = self
                 .page
                 .evaluate("({ready_state: document.readyState})")
@@ -2411,5 +2451,26 @@ mod tests {
         ] {
             assert!(has_explicit_url_scheme(url), "{url}");
         }
+    }
+
+    #[test]
+    fn navigation_fallback_requires_a_completed_document_change() {
+        let before = json!({"url": "https://example.test/", "time_origin": 1});
+        assert!(!navigation_completed(
+            &before,
+            &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "complete"})
+        ));
+        assert!(!navigation_completed(
+            &before,
+            &json!({"url": "https://example.test/next", "time_origin": 2, "ready_state": "loading"})
+        ));
+        assert!(navigation_completed(
+            &before,
+            &json!({"url": "https://example.test/next", "time_origin": 2, "ready_state": "complete"})
+        ));
+        assert!(navigation_completed(
+            &before,
+            &json!({"url": "https://example.test/#section", "time_origin": 1, "ready_state": "complete"})
+        ));
     }
 }
