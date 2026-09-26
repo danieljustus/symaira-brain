@@ -430,14 +430,13 @@ impl DispatchRuntime {
             | "get.title" | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box"
             | "get.styles" | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list"
             | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
-            | "frames.list" | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept"
-            | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
-            | "network.request" | "network.offline" | "network.block" | "screenshot" | "pdf"
-            | "upload" | "a11y" | "cookies.get" | "cookies.set" | "cookies.list"
-            | "cookies.clear" | "storage.get" | "storage.list" | "storage.set"
-            | "storage.clear" | "download" | "download.setdir" | "downloads.list" | "eval" => {
-                self.browser_command(&frame).await
-            }
+            | "frames.list" | "frame.tree" | "frame.main" | "frame.select" | "dialog"
+            | "dialog.status" | "dialog.accept" | "dialog.dismiss" | "dialog.auto"
+            | "network.capture" | "network.requests" | "network.request" | "network.offline"
+            | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
+            | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get" | "storage.list"
+            | "storage.set" | "storage.clear" | "download" | "download.setdir"
+            | "downloads.list" | "eval" => self.browser_command(&frame).await,
             "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
             | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
@@ -1435,6 +1434,23 @@ impl DispatchRuntime {
                     }
                 }
                 json!({"frames": frames})
+            }
+            "frame.main" => {
+                page.set_active_frame("").await.map_err(runtime_error)?;
+                json!({"frame": "main"})
+            }
+            "frame.select" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    frame: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_active_frame(&request.frame)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"frame": request.frame})
             }
             "a11y" => {
                 let tags = args.get("tags").cloned().unwrap_or_else(|| json!([]));

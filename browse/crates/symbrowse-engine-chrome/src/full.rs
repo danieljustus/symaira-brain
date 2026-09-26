@@ -460,6 +460,7 @@ impl ChromeSession {
 pub struct ChromePage {
     page: Page,
     browser: Arc<Mutex<Browser>>,
+    active_frame_context: Arc<Mutex<Option<runtime::ExecutionContextId>>>,
     dialogs: DialogMonitor,
     downloads: Arc<Mutex<DownloadRegistry>>,
     download_session: String,
@@ -593,6 +594,7 @@ impl ChromePage {
         Ok(Self {
             page,
             browser,
+            active_frame_context: Arc::new(Mutex::new(None)),
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
@@ -1008,14 +1010,11 @@ impl ChromePage {
     /// Evaluate a user expression and preserve JavaScript exceptions as data,
     /// matching the daemon's protocol-neutral `eval` result.
     pub async fn evaluate(&self, expression: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        let params = EvaluateParams::builder()
-            .expression(expression)
-            .return_by_value(true)
-            .await_promise(true)
-            .build()
-            .map_err(std::io::Error::other)?;
-        let response = self.page.execute(params).await?;
-        let response = response.result;
+        let response = self
+            .page
+            .execute(self.evaluate_params(expression).await?)
+            .await?
+            .result;
         let exception_text = response
             .exception_details
             .as_ref()
@@ -1503,6 +1502,35 @@ impl ChromePage {
             .frame_tree
             .clone();
         Ok(vec![frame_info(&tree)])
+    }
+
+    pub async fn set_active_frame(
+        &self,
+        frame_id: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let context = if frame_id.is_empty() {
+            None
+        } else {
+            Some(
+                self.page
+                    .execute(page::CreateIsolatedWorldParams::new(frame_id.to_owned()))
+                    .await?
+                    .execution_context_id,
+            )
+        };
+        *self.active_frame_context.lock().await = context;
+        Ok(())
+    }
+
+    async fn evaluate_params(&self, expression: &str) -> Result<EvaluateParams, std::io::Error> {
+        let mut builder = EvaluateParams::builder()
+            .expression(expression.to_owned())
+            .return_by_value(true)
+            .await_promise(true);
+        if let Some(context) = self.active_frame_context.lock().await.clone() {
+            builder = builder.context_id(context);
+        }
+        builder.build().map_err(std::io::Error::other)
     }
 
     pub async fn accessibility_tree(&self) -> Result<Vec<Value>, Box<dyn Error + Send + Sync>> {

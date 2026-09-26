@@ -212,6 +212,67 @@ async fn full_chrome_surface_is_real_and_opt_in() {
         .expect("Chrome full-surface fixture exceeded its three-minute deadline");
 }
 
+#[tokio::test]
+async fn selected_frame_scopes_eval_and_main_restores_it() {
+    if !e2e_enabled() {
+        return;
+    }
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-frame-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile.clone(),
+            headless: true,
+        },
+        Duration::from_secs(45),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page(format!("{}/", server.base_url))
+        .await
+        .expect("create page");
+    page.wait_for_selector("#frame", true, Duration::from_secs(5))
+        .await
+        .expect("wait for iframe");
+    let frames = page.frames().await.expect("frame tree");
+    let child = frames[0]
+        .children
+        .iter()
+        .find(|frame| frame.url.starts_with("about:srcdoc"))
+        .expect("nested frame");
+    assert!(
+        page.set_active_frame("missing-frame-id").await.is_err(),
+        "unknown frame selection must fail"
+    );
+    page.set_active_frame(&child.id)
+        .await
+        .expect("select nested frame");
+    assert_eq!(
+        page.evaluate("location.href")
+            .await
+            .expect("evaluate nested frame")["value"],
+        "about:srcdoc"
+    );
+    page.set_active_frame("").await.expect("select main frame");
+    assert_eq!(
+        page.evaluate("document.title")
+            .await
+            .expect("evaluate main frame")["value"],
+        "rust012"
+    );
+    session.close().await.expect("close Chrome");
+}
+
 async fn exercise_full_chrome_surface() {
     let server = TestServer::start();
     let profile = std::env::temp_dir().join(format!(

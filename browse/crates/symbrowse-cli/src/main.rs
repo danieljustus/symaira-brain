@@ -6931,7 +6931,7 @@ fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseE
     let mut scan = command_index + 1;
     while scan < values.len() {
         match values[scan].as_str() {
-            "tree" => {
+            "tree" | "main" | "select" => {
                 subcommand_index = Some(scan);
                 break;
             }
@@ -7000,16 +7000,31 @@ fn parse_frame(values: &[String], command_index: usize) -> Result<Action, ParseE
     if json {
         format = Format::Json;
     }
-    if let Some(value) = positional.first() {
-        return Err(ParseError {
-            message: format!("unknown command {value:?} for \"symbrowse frame tree\""),
-            exit_code: 2,
-        });
-    }
+    let subcommand = values[subcommand_index].as_str();
+    let (command, args) = match subcommand {
+        "tree" if positional.is_empty() => ("frame.tree", serde_json::json!({})),
+        "main" if positional.is_empty() => ("frame.main", serde_json::json!({})),
+        "select" if positional.len() == 1 => {
+            ("frame.select", serde_json::json!({"frame": positional[0]}))
+        }
+        "tree" | "main" => {
+            return Err(ParseError {
+                message: format!("accepts no arguments, received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        "select" => {
+            return Err(ParseError {
+                message: format!("accepts 1 arg(s), received {}", positional.len()),
+                exit_code: 2,
+            });
+        }
+        _ => unreachable!("subcommand is selected from supported frame commands"),
+    };
     Ok(Action::Dispatch {
         session,
-        command: "frame.tree".to_owned(),
-        args: serde_json::json!({}),
+        command: command.to_owned(),
+        args,
         format,
     })
 }
@@ -9052,7 +9067,7 @@ mod tests {
     }
 
     #[test]
-    fn frame_tree_is_the_only_advertised_frame_operation() {
+    fn frame_commands_dispatch_and_validate_arguments() {
         assert_eq!(
             parse(&args(&["frame", "tree", "--session", "work"])),
             Ok(Action::Dispatch {
@@ -9062,13 +9077,34 @@ mod tests {
                 format: Format::Text,
             })
         );
+        for (argv, command, expected_args) in [
+            (&["frame", "main"][..], "frame.main", serde_json::json!({})),
+            (
+                &["frame", "select", "frame-1"][..],
+                "frame.select",
+                serde_json::json!({"frame": "frame-1"}),
+            ),
+        ] {
+            let Action::Dispatch {
+                command: got_command,
+                args: got_args,
+                ..
+            } = parse(&args(argv)).expect("frame dispatch")
+            else {
+                panic!("wrong action for {argv:?}");
+            };
+            assert_eq!(got_command, command);
+            assert_eq!(got_args, expected_args);
+        }
         let Action::Help(parent) = parse(&args(&["frame"])).expect("frame help") else {
             panic!("wrong action");
         };
         assert!(parent.contains("tree        Show the nested frame tree"));
-        assert!(!parent.contains("main        Address the main frame"));
-        assert!(!parent.contains("select      Address a nested frame"));
-        assert!(parse(&args(&["frame", "main"])).is_err());
+        assert!(parent.contains("main        Address the main frame"));
+        assert!(parent.contains("select      Address a nested frame"));
+        assert!(parse(&args(&["frame", "select"])).is_err());
+        assert!(parse(&args(&["frame", "select", "f1", "extra"])).is_err());
+        assert!(parse(&args(&["frame", "main", "extra"])).is_err());
         assert!(parse(&args(&["frame", "tree", "extra"])).is_err());
     }
 
