@@ -131,6 +131,23 @@ mod unix {
 
     #[cfg(target_os = "macos")]
     #[test]
+    fn missing_security_binary_fails_closed() {
+        let sources = SystemKeySources::with_programs(
+            "/missing/symvault",
+            "/missing/security",
+            Duration::from_secs(1),
+        );
+        assert_eq!(
+            sources.keychain("symbrowse", "encryption-key"),
+            Err(ProbeError::Failed(
+                "keychain lookup: fork/exec /missing/security: no such file or directory"
+                    .to_owned()
+            ))
+        );
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
     fn keychain_set_prompts_and_receives_key_only_on_stdin() {
         let root = root("keychain-set");
         let input_path = root.join("input");
