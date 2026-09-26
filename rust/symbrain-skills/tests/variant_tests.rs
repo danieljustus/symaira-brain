@@ -229,6 +229,12 @@ fn diagnostic_messages_match_go_oracle() {
                     .into_iter()
                     .collect(),
             ),
+            "unknown_override_order" => check_overrides(
+                &[],
+                &[("claude".into(), vec!["zed".into(), "alpha".into()])]
+                    .into_iter()
+                    .collect(),
+            ),
             "term_without_default" => check_terms(
                 &[(
                     "report_dir".into(),
@@ -237,6 +243,15 @@ fn diagnostic_messages_match_go_oracle() {
                 .into_iter()
                 .collect(),
                 &known,
+            ),
+            "term_without_default_empty_known" => check_terms(
+                &[(
+                    "report_dir".into(),
+                    [("hermez".into(), "value".into())].into_iter().collect(),
+                )]
+                .into_iter()
+                .collect(),
+                &[],
             ),
             "term_unknown_target" => check_terms(
                 &[(
