@@ -280,7 +280,7 @@ fn assert_native_fixture() {
 #[allow(clippy::too_many_lines)]
 fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
-    assert_eq!(cases.len(), 81, "fixture must contain 81 cases");
+    assert_eq!(cases.len(), 83, "fixture must contain 83 cases");
 
     #[cfg(windows)]
     assert_native_fixture();
@@ -311,8 +311,15 @@ fn cli_tree_fixture_matches_native_binary() {
             continue;
         }
 
+        if case.id.starts_with("go harness list malformed JSON") {
+            fs::write(real_root(&root).join("home/.claude.json"), b"{not-json").unwrap();
+        }
+
         let args: Vec<&str> = case.args.iter().map(String::as_str).collect();
         let output = run_case(&root, &args, &cwd);
+        if case.id == "go harness list malformed JSON response" {
+            fs::remove_file(real_root(&root).join("home/.claude.json")).unwrap();
+        }
 
         // Exit code
         let actual_exit = output.status.code().unwrap_or(-1);

@@ -310,6 +310,19 @@ func buildCases(goBinary string) ([]TestCase, error) {
 	// harness
 	cases = append(cases, runCase(bin, []string{"harness"}, "harness missing subcommand"))
 	cases = append(cases, runCase(bin, []string{"harness", "list"}, "harness list"))
+	malformedHarness := filepath.Join(oracleRoot, "home", ".claude.json")
+	if err := os.WriteFile(malformedHarness, []byte("{not-json"), 0o600); err != nil {
+		return nil, err
+	}
+	malformedTable := runCase(bin, []string{"harness", "list"}, "harness list malformed JSON table")
+	malformedTable.ID = "go harness list malformed JSON table"
+	cases = append(cases, malformedTable)
+	malformedJSON := runCase(bin, []string{"harness", "list", "--json"}, "harness list malformed JSON response")
+	malformedJSON.ID = "go harness list malformed JSON response"
+	cases = append(cases, malformedJSON)
+	if err := os.Remove(malformedHarness); err != nil {
+		return nil, err
+	}
 	cases = append(cases, runCase(bin, []string{"harness", "health"}, "harness health"))
 
 	// usage

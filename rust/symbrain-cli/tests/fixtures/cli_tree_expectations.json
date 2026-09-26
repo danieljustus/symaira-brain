@@ -431,6 +431,29 @@
     "description": "harness list"
   },
   {
+    "id": "go harness list malformed JSON table",
+    "args": [
+      "harness",
+      "list"
+    ],
+    "exit_code": 0,
+    "stdout": "claude\tClaude Code\n  global\t\u003croot\u003e/home/.claude.json\tinvalid\tservers=(none)\n    error: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\n\nclaude-desktop\tClaude Desktop\n  global\t\u003croot\u003e/home/\u003cclaude-desktop-dir\u003e/claude_desktop_config.json\tmissing\tservers=(none)\n\ncursor\tCursor\n  global\t\u003croot\u003e/home/.cursor/mcp.json\tmissing\tservers=(none)\n\nopencode\tOpenCode\n  global\t\u003croot\u003e/home/.config/opencode/config.json\tmissing\tservers=(none)\n\ncodex\tCodex CLI\n  global\t\u003croot\u003e/home/.codex/config.toml\tmissing\tservers=(none)\n\nantigravity\tAntigravity\n  global\t\u003croot\u003e/home/.gemini/config/mcp_config.json\tmissing\tservers=(none)\n\n",
+    "stderr": "",
+    "description": "harness list malformed JSON table"
+  },
+  {
+    "id": "go harness list malformed JSON response",
+    "args": [
+      "harness",
+      "list",
+      "--json"
+    ],
+    "exit_code": 0,
+    "stdout": "{\"schema_version\":2,\"harnesses\":[{\"name\":\"claude\",\"display_name\":\"Claude Code\",\"global\":{\"path\":\"\u003croot\u003e/home/.claude.json\",\"exists\":true,\"parsed\":false,\"error\":\"harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\",\"servers\":[]}},{\"name\":\"claude-desktop\",\"display_name\":\"Claude Desktop\",\"global\":{\"path\":\"\u003croot\u003e/home/\u003cclaude-desktop-dir\u003e/claude_desktop_config.json\",\"exists\":false,\"parsed\":false,\"servers\":[]}},{\"name\":\"cursor\",\"display_name\":\"Cursor\",\"global\":{\"path\":\"\u003croot\u003e/home/.cursor/mcp.json\",\"exists\":false,\"parsed\":false,\"servers\":[]}},{\"name\":\"opencode\",\"display_name\":\"OpenCode\",\"global\":{\"path\":\"\u003croot\u003e/home/.config/opencode/config.json\",\"exists\":false,\"parsed\":false,\"servers\":[]}},{\"name\":\"codex\",\"display_name\":\"Codex CLI\",\"global\":{\"path\":\"\u003croot\u003e/home/.codex/config.toml\",\"exists\":false,\"parsed\":false,\"servers\":[]}},{\"name\":\"antigravity\",\"display_name\":\"Antigravity\",\"global\":{\"path\":\"\u003croot\u003e/home/.gemini/config/mcp_config.json\",\"exists\":false,\"parsed\":false,\"servers\":[]}}]}\n",
+    "stderr": "",
+    "description": "harness list malformed JSON response"
+  },
+  {
     "id": "go harness health",
     "args": [
       "harness",
