@@ -71,6 +71,32 @@ class ChromePairTests(unittest.TestCase):
             self.assertEqual(result["error_code"], "operation_timeout")
             self.assertIn("cleanup_error", result)
 
+    def test_rust_open_failure_reports_only_known_stages_from_daemon_log(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"error": {"code": "operation_timeout"}})
+
+            def run(binary, args, session, env, cwd, **kwargs):
+                if args == ["open", "http://127.0.0.1/"]:
+                    return 1, response, ""
+                if args == ["daemon", "stop"]:
+                    (root / "daemon.log").write_text(
+                        "warning contains a secret\n"
+                        "chrome_open_stage=dispatch-start\n"
+                        "chrome_open_stage=unknown-secret\n"
+                        "chrome_open_stage=navigation-event-wait-start\n",
+                        encoding="utf-8",
+                    )
+                    return 0, "", ""
+                return 1, "", "daemon stopped"
+
+            with patch("chrome_pair.run_cli", side_effect=run):
+                result = flow(Path("symbrowse"), "rust", Path("chrome"), None,
+                              "http://127.0.0.1/", root, 0)
+
+        self.assertEqual(result["error_code"], "operation_timeout")
+        self.assertEqual(result["chrome_open_stages"], ["dispatch-start", "navigation-event-wait-start"])
+
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -101,6 +127,9 @@ class ChromePairTests(unittest.TestCase):
                 env = make_env(Path(temporary) / implementation, implementation, chrome, launcher)
                 self.assertEqual(env["SYMBROWSE_EXECUTABLE_PATH"], str(launcher))
                 self.assertEqual(env["SYMBROWSE_CHROME_EXECUTABLE"], str(launcher))
+                if implementation == "rust":
+                    self.assertEqual(env["SYMBROWSE_E2E"], "1")
+                    self.assertEqual(env["SYMBROWSE_DAEMON_LOG"], str(Path(temporary) / implementation / "daemon.log"))
 
     def test_daemon_stop_and_status_keep_subcommand_before_session(self):
         binary = Path("symbrowse")

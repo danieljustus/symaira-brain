@@ -28,6 +28,14 @@ MAX_OUTPUT = 1 << 20
 # UTF-8 uses at most four bytes per output character. This bounds temporary
 # capture files while keeping the public limit in decoded text characters.
 MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
+MAX_STAGE_LOG_BYTES = 64 << 10
+MAX_OPEN_STAGES = 32
+CHROME_OPEN_STAGES = {
+    "navigation-listeners-ready", "main-frame-resolved", "dispatch-start",
+    "dispatch-complete", "navigation-event-wait-start",
+    "main-frame-navigation-observed", "same-document-navigation-observed",
+    "load-event-observed", "document-complete",
+}
 METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 TARGETS = {
     "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
@@ -156,9 +164,30 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_ENGINE"] = "chrome"
     elif implementation == "rust":
         env["SYMBROWSE_MODE"] = "browser"
+        env["SYMBROWSE_E2E"] = "1"
+        env["SYMBROWSE_DAEMON_LOG"] = str(root / "daemon.log")
     else:
         raise ValueError(f"unknown implementation: {implementation}")
     return env
+
+
+def chrome_open_stages(log_path: Path) -> list[str]:
+    """Return only known Chrome-open stage names from a bounded log tail."""
+    try:
+        with log_path.open("rb") as log:
+            log.seek(0, os.SEEK_END)
+            size = log.tell()
+            log.seek(max(0, size - MAX_STAGE_LOG_BYTES))
+            lines = log.read(MAX_STAGE_LOG_BYTES).decode("utf-8", errors="ignore").splitlines()
+    except OSError:
+        return []
+    stages = [
+        value for line in lines
+        if line.startswith("chrome_open_stage=")
+        for value in (line.removeprefix("chrome_open_stage=").strip(),)
+        if value in CHROME_OPEN_STAGES
+    ]
+    return stages[-MAX_OPEN_STAGES:]
 
 
 def command(binary: Path, args: list[str], session: str) -> list[str]:
@@ -336,6 +365,10 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
+        if implementation == "rust" and outcome.get("phase") == "open":
+            stages = chrome_open_stages(root / "daemon.log")
+            if stages:
+                outcome["chrome_open_stages"] = stages
     return outcome
 
 
