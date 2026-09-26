@@ -419,7 +419,7 @@ mod tests {
     #[test]
     fn fixture_loads_and_has_correct_count() {
         let cases = load_fixture();
-        assert_eq!(cases.len(), 81);
+        assert_eq!(cases.len(), 83);
     }
 
     #[test]
