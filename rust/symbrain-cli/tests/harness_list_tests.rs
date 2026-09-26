@@ -146,13 +146,45 @@ fn invalid_and_extra_arguments_keep_go_exit_and_diagnostics() {
     );
 }
 
-#[cfg(unix)]
 #[test]
-fn malformed_inventory_falls_back_before_native_output() {
-    use std::os::unix::fs::PermissionsExt;
-
+fn malformed_json_inventory_is_native_without_go_fallback() {
     let root = TempDir::new().unwrap();
     write_claude_config(&root, b"{not-json");
+    let missing_go = root.path().join("missing-go-fallback");
+    let mut table_command = command(&root, &["harness", "list"]);
+    table_command.env("SYMBRAIN_GO_BINARY", &missing_go);
+    let table = table_command.output().unwrap();
+
+    assert!(table.status.success(), "stderr: {:?}", table.stderr);
+    assert!(table.stderr.is_empty());
+    let stdout = String::from_utf8(table.stdout).unwrap();
+    assert!(stdout.contains("\tinvalid\tservers=(none)\n"));
+    assert!(stdout.contains(
+        "error: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')\n"
+    ));
+
+    let mut json_command = command(&root, &["harness", "list", "--json"]);
+    json_command.env("SYMBRAIN_GO_BINARY", &missing_go);
+    let json = json_command.output().unwrap();
+    assert!(json.status.success(), "stderr: {:?}", json.stderr);
+    assert!(json.stderr.is_empty());
+    let value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    assert_eq!(
+        value["harnesses"][0]["global"]["error"],
+        "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'o' in literal null (expecting 'u')"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
+    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::symlink;
+
+    let root = TempDir::new().unwrap();
+    let codex = root.path().join("home/.codex");
+    std::fs::create_dir_all(&codex).unwrap();
+    std::fs::write(codex.join("config.toml"), b"mcp_servers = [\n").unwrap();
     let fallback = root.path().join("go-fallback");
     std::fs::write(
         &fallback,
@@ -171,11 +203,24 @@ fn malformed_inventory_falls_back_before_native_output() {
     assert_eq!(output.stdout, b"fallback-stdout\n");
     assert_eq!(output.stderr, b"fallback-stderr\n");
 
+    write_claude_config(&root, b"[]");
+    let mut json_command = command(&root, &["harness", "list", "--json"]);
+    json_command.env("SYMBRAIN_GO_BINARY", &fallback);
+    let json_output = json_command.output().unwrap();
+    assert_eq!(json_output.status.code(), Some(17));
+    assert_eq!(json_output.stdout, b"fallback-stdout\n");
+    assert_eq!(json_output.stderr, b"fallback-stderr\n");
+
     write_claude_config(
         &root,
         br#"{"mcpServers":{"global":{"command":"global-cmd"}}}"#,
     );
-    std::fs::write(root.path().join("project/.mcp.json"), b"{not-json").unwrap();
+    std::fs::write(root.path().join("unsafe.json"), b"{}").unwrap();
+    symlink(
+        root.path().join("unsafe.json"),
+        root.path().join("project/.mcp.json"),
+    )
+    .unwrap();
     let mut project_command = command(
         &root,
         &[

@@ -120,11 +120,11 @@ fn run_list(
 
     let inventory = list(project_dir.as_deref());
     if inventory.harnesses.iter().any(|harness| {
-        harness.global.error.is_some()
-            || harness
-                .project
-                .as_ref()
-                .is_some_and(|project| project.error.is_some())
+        [Some(&harness.global), harness.project.as_ref()]
+            .into_iter()
+            .flatten()
+            .filter_map(|config| config.error.as_deref())
+            .any(|error| !go_json_inventory_error(error))
     }) {
         return None;
     }
@@ -139,6 +139,15 @@ fn run_list(
     }
 
     Some(exit::OK)
+}
+
+fn go_json_inventory_error(error: &str) -> bool {
+    // ponytail: only this oracle-frozen JSON diagnostic is native; add other parser messages with exact Go fixture evidence.
+    error.starts_with("harness: ")
+        && error.contains(
+            " config is not valid json; refusing to edit a config symbrain cannot parse: parse json: ",
+        )
+        && error.ends_with("invalid character 'o' in literal null (expecting 'u')")
 }
 
 fn render_inventory_table(

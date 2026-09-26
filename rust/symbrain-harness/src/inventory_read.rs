@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::{AtomicFile, ConfigInventory, Harness, parse};
+use crate::{AtomicFile, ConfigInventory, Format, Harness, parse};
 
 pub(super) fn inspect(
     harness: &Harness,
@@ -71,11 +71,16 @@ pub(super) fn inspect(
     let document = match parse(harness, &snapshot.bytes) {
         Ok(document) => document,
         Err(error) => {
+            let error = if harness.format == Format::Json {
+                crate::inventory::format_parse_error(harness, &snapshot.bytes, &error)
+            } else {
+                error.to_string()
+            };
             return ConfigInventory {
                 path: path_string,
                 exists: true,
                 parsed: false,
-                error: Some(error.to_string()),
+                error: Some(error),
                 servers: Vec::new(),
             };
         }
