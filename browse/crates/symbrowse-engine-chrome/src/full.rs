@@ -1013,48 +1013,28 @@ impl ChromePage {
         if before.get("url").and_then(Value::as_str) == Some(url) {
             return self.current_navigation_outcome().await;
         }
+        if cfg!(windows) && diagnostics {
+            eprintln!(
+                "chrome_open_stage=main-frame status={}",
+                if main_frame.is_some() {
+                    "present"
+                } else {
+                    "missing"
+                }
+            );
+        }
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-future-start");
         }
-        if cfg!(windows) && !same_document {
-            if diagnostics {
-                eprintln!(
-                    "chrome_open_stage=main-frame status={}",
-                    if main_frame.is_some() {
-                        "present"
-                    } else {
-                        "missing"
-                    }
-                );
-            }
-            // Chromiumoxide keeps Page.navigate pending through page load.
-            // Bound it because Windows may omit lifecycle events; the event
-            // and document checks below remain the completion proof.
-            match tokio::time::timeout(
-                Duration::from_secs(1),
-                self.page.execute(page::NavigateParams::new(url)),
-            )
-            .await
-            {
-                Ok(dispatch) => {
-                    let dispatch = dispatch?;
-                    if diagnostics {
-                        eprintln!(
-                            "chrome_open_stage=navigation-future status=completed error_text={}",
-                            dispatch.result.error_text.is_some()
-                        );
-                    }
-                    if let Some(error) = dispatch.result.error_text {
-                        return Err(error.into());
-                    }
-                }
-                Err(_) => {
-                    if diagnostics {
-                        eprintln!("chrome_open_stage=navigation-future status=timeout");
-                    }
-                }
-            }
+        // Keep the CDP command alive while observing the page. Timing out
+        // execute() alone can cancel its queued send before Chrome receives it.
+        let mut navigation_dispatch = if cfg!(windows) && !same_document {
+            Some(Box::pin(self.page.execute(page::NavigateParams::new(url))))
         } else {
+            None
+        };
+        let mut navigation_dispatch_open = cfg!(windows) && !same_document;
+        if !navigation_dispatch_open {
             let url_literal = serde_json::to_string(url)?;
             let dispatch = self
                 .evaluate(&format!("location.assign({url_literal}); 'scheduled'"))
@@ -1066,9 +1046,9 @@ impl ChromePage {
             {
                 return Err(error.to_owned().into());
             }
-        }
-        if diagnostics {
-            eprintln!("chrome_open_stage=navigation-future-finish");
+            if diagnostics {
+                eprintln!("chrome_open_stage=navigation-future-finish");
+            }
         }
 
         let mut frame_events_open = true;
@@ -1087,7 +1067,26 @@ impl ChromePage {
             && (frame_events_open || same_document_events_open || load_events_open)
         {
             tokio::select! {
+                dispatch = async {
+                    navigation_dispatch.as_mut().expect("dispatch is open").as_mut().await
+                }, if navigation_dispatch_open => {
+                    navigation_dispatch_open = false;
+                    let dispatch = dispatch?;
+                    if diagnostics {
+                        eprintln!(
+                            "chrome_open_stage=navigation-future status=completed error_text={}",
+                            dispatch.result.error_text.is_some()
+                        );
+                        eprintln!("chrome_open_stage=navigation-future-finish");
+                    }
+                    if let Some(error) = dispatch.result.error_text {
+                        return Err(error.into());
+                    }
+                }
                 _ = tokio::time::sleep_until(deadline) => {
+                    if navigation_dispatch_open && diagnostics {
+                        eprintln!("chrome_open_stage=navigation-future status=timeout");
+                    }
                     return Err("Chrome navigation timed out".into());
                 }
                 _ = tokio::time::sleep(Duration::from_millis(25)) => {
