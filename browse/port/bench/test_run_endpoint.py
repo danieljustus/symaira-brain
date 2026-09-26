@@ -43,6 +43,29 @@ class EndpointTest(unittest.TestCase):
         self.assertEqual(b"".join(written_chunks), payload)
         self.assertGreater(len(written_chunks), 1)
 
+    def test_fetch_stage_diagnostics_split_at_local_fixture_without_changing_gate(self):
+        stages = run.fetch_stage_timings(100, 500, (180, 220))
+        self.assertEqual(
+            stages,
+            {
+                "fixture_observed": True,
+                "pre_fixture_ns": 80,
+                "fixture_response_ns": 40,
+                "post_fixture_ns": 280,
+            },
+        )
+        self.assertFalse(run.fetch_stage_timings(100, 500, None)["fixture_observed"])
+
+        report = run.summarize([
+            {"status": "pass", "duration_ns": 400, **stages},
+            {"status": "pass", "duration_ns": 600, **stages},
+        ])
+        self.assertEqual(report["status"], "pass")
+        self.assertEqual(report["p95_duration_ns"], 600)
+        self.assertEqual(report["p95_pre_fixture_ns"], 80)
+        self.assertEqual(report["p95_fixture_response_ns"], 40)
+        self.assertEqual(report["p95_post_fixture_ns"], 280)
+
 
 if __name__ == "__main__":
     unittest.main()
