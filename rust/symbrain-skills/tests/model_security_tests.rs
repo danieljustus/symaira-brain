@@ -1,12 +1,41 @@
 use std::fs;
+use std::path::Path;
 use symbrain_skills::{MAX_RESOURCE_SIZE, load_bundle};
+
+#[path = "common/mod.rs"]
+mod common;
+
+fn oracle_bundle(name: &str) -> serde_json::Value {
+    let oracle: serde_json::Value =
+        serde_json::from_slice(&common::skills_oracle()).expect("Go skills oracle");
+    oracle["cases"]
+        .as_array()
+        .and_then(|cases| cases.iter().find(|case| case["id"] == name))
+        .unwrap_or_else(|| panic!("missing Go oracle bundle {name}"))
+        .clone()
+}
+
+fn oracle_security_case(name: &str) -> serde_json::Value {
+    let oracle: serde_json::Value =
+        serde_json::from_slice(&common::skills_oracle()).expect("Go skills oracle");
+    oracle["security_cases"]
+        .as_array()
+        .and_then(|cases| cases.iter().find(|case| case["id"] == name))
+        .unwrap_or_else(|| panic!("missing Go oracle security case {name}"))
+        .clone()
+}
+
+fn inline_manifest_fixture() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../internal/skills/render/testdata/inline-manifest")
+}
 
 #[test]
 fn manifest_root_types_are_errors() {
-    for root in [
-        "skill = \"wrong\"",
-        "targets = \"wrong\"",
-        "terms = \"wrong\"",
+    for (root, case) in [
+        ("skill = \"wrong\"", "scalar_skill_root"),
+        ("targets = \"wrong\"", "scalar_targets_root"),
+        ("terms = \"wrong\"", "scalar_terms_root"),
     ] {
         let temp = tempfile::tempdir().expect("tempdir");
         let root_path = temp.path().join("typed-skill");
@@ -18,29 +47,20 @@ fn manifest_root_types_are_errors() {
         .expect("skill");
         fs::write(root_path.join("symskills.toml"), root).expect("manifest");
         let error = load_bundle(&root_path).expect_err("manifest root type");
+        let expected = oracle_security_case(case);
+        assert!(expected["rejected"].as_bool().unwrap());
         assert!(error.to_string().contains("expected a table"), "{error}");
     }
 }
 
 #[test]
-fn manifest_inline_tables_load_like_go() {
-    let temp = tempfile::tempdir().expect("tempdir");
-    let root = temp.path().join("inline-skill");
-    fs::create_dir_all(&root).expect("root");
-    fs::write(
-        root.join("SKILL.md"),
-        "---\nname: inline-skill\ndescription: test\n---\nBody\n",
-    )
-    .expect("skill");
-    fs::write(
-        root.join("symskills.toml"),
-        "skill = { name = \"inline-skill\", version = \"1\" }\ntargets = { hermes = { enabled = true } }\nterms = { report_dir = { default = \"reports\" } }\n",
-    )
-    .expect("manifest");
-    let bundle = load_bundle(&root).expect("inline manifest");
-    assert_eq!(bundle.manifest.skill.version, "1");
-    assert!(bundle.manifest.targets["hermes"].enabled);
-    assert_eq!(bundle.manifest.terms["report_dir"]["default"], "reports");
+fn manifest_inline_tables_match_go_oracle() {
+    let bundle = load_bundle(&inline_manifest_fixture()).expect("inline manifest");
+    let expected = oracle_bundle("inline-manifest");
+    assert_eq!(
+        serde_json::to_value(bundle.manifest).expect("serialize Rust manifest"),
+        expected["manifest"],
+    );
 }
 
 #[test]
