@@ -932,6 +932,28 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        self.open_with_timeout(url, Duration::from_secs(30)).await
+    }
+
+    /// Open a URL while keeping every navigation setup and completion await
+    /// inside the caller's remaining operation budget.
+    pub async fn open_with_timeout(
+        &self,
+        url: &str,
+        timeout: Duration,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let timeout = timeout.saturating_sub(Duration::from_secs(1));
+        match with_navigation_timeout(timeout, self.open_inner(url, timeout)).await {
+            Ok(result) => result,
+            Err(error) => Err(Box::new(error)),
+        }
+    }
+
+    async fn open_inner(
+        &self,
+        url: &str,
+        timeout: Duration,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
         let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         if url.trim().is_empty() {
             return Err("navigation URL is required".into());
@@ -1023,7 +1045,7 @@ impl ChromePage {
         let mut load_events_open = true;
         let mut navigation_observed = false;
         let mut load_event_observed = false;
-        let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
+        let deadline = tokio::time::Instant::now() + timeout;
         if diagnostics {
             eprintln!("chrome_open_stage=navigation-event-wait-start");
         }
@@ -2211,6 +2233,13 @@ impl ChromePage {
     }
 }
 
+async fn with_navigation_timeout<T>(
+    timeout: Duration,
+    future: impl std::future::Future<Output = T>,
+) -> Result<T, tokio::time::error::Elapsed> {
+    tokio::time::timeout(timeout, future).await
+}
+
 fn summarize_violation(violation: &Value) -> Value {
     let mut summary = serde_json::Map::new();
     for field in ["id", "impact", "description"] {
@@ -2520,6 +2549,13 @@ fn render_console_args(args: &[runtime::RemoteObject]) -> String {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[tokio::test]
+    async fn navigation_deadline_bounds_a_stalled_setup_or_completion_await() {
+        let result =
+            with_navigation_timeout(Duration::from_millis(1), std::future::pending::<()>()).await;
+        assert!(result.is_err());
+    }
 
     #[test]
     fn canonical_capabilities_partition_matches_daemon_commands() {

@@ -83,11 +83,19 @@ pub(crate) async fn login(
     page: &ChromePage,
     url: &str,
     credentials: &mut Credentials,
+    operation: &OperationContext,
 ) -> Result<Value, DaemonError> {
     if !url.is_empty() {
-        page.open(url)
+        page.open_with_timeout(url, operation.remaining())
             .await
-            .map_err(|error| runtime_error(redact(&error.to_string(), credentials)))?;
+            .map_err(|error| {
+                let error = crate::runtime::navigation_error(error);
+                if error.code == codes::OPERATION_TIMEOUT {
+                    error
+                } else {
+                    runtime_error(redact(&error.message, credentials))
+                }
+            })?;
     }
 
     let fields = page

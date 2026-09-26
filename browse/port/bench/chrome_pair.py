@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import errno
 import hashlib
+import io
 import json
 import os
 import platform
@@ -24,6 +25,9 @@ FIXTURE_TITLE = "PERF-003 Chrome fixture"
 FIXTURE_TOKEN = "chrome-fixture-token-9281"
 P95_LIMIT = 1.10
 MAX_OUTPUT = 1 << 20
+# UTF-8 uses at most four bytes per output character. This bounds temporary
+# capture files while keeping the public limit in decoded text characters.
+MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
 METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 TARGETS = {
     "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
@@ -172,13 +176,64 @@ def run_cli(
     *,
     timeout: float = 45,
 ) -> tuple[int, str, str]:
-    result = subprocess.run(
-        command(binary, args, session), cwd=cwd, env=env, capture_output=True,
-        text=True, timeout=timeout, check=False,
-    )
-    if len(result.stdout) > MAX_OUTPUT or len(result.stderr) > MAX_OUTPUT:
-        return result.returncode or 1, "", "output limit exceeded"
-    return result.returncode, result.stdout, result.stderr
+    argv = command(binary, args, session)
+    with (
+        tempfile.TemporaryFile(mode="w+b") as stdout_file,
+        tempfile.TemporaryFile(mode="w+b") as stderr_file,
+    ):
+        process = subprocess.Popen(
+            argv,
+            cwd=cwd,
+            env=env,
+            stdout=stdout_file,
+            stderr=stderr_file,
+            close_fds=True,
+        )
+        deadline = time.monotonic() + timeout
+        timed_out = False
+        output_limited = False
+        while process.poll() is None:
+            stdout_size = os.fstat(stdout_file.fileno()).st_size
+            stderr_size = os.fstat(stderr_file.fileno()).st_size
+            if max(stdout_size, stderr_size) > MAX_CAPTURE_BYTES:
+                output_limited = True
+                process.kill()
+                break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                timed_out = True
+                process.kill()
+                break
+            time.sleep(min(0.01, remaining))
+        try:
+            process.wait(timeout=1.0)
+        except subprocess.TimeoutExpired:
+            # Killing the CLI must not make capture cleanup depend on a
+            # detached daemon or other descendant releasing inherited pipes.
+            process.kill()
+            try:
+                process.wait(timeout=1.0)
+            except subprocess.TimeoutExpired:
+                raise subprocess.TimeoutExpired(argv, timeout)
+        if timed_out:
+            raise subprocess.TimeoutExpired(argv, timeout)
+        if output_limited:
+            return process.returncode or 1, "", "output limit exceeded"
+
+        stdout = _read_capture_text(stdout_file)
+        stderr = _read_capture_text(stderr_file)
+    if len(stdout) > MAX_OUTPUT or len(stderr) > MAX_OUTPUT:
+        return process.returncode or 1, "", "output limit exceeded"
+    return process.returncode, stdout, stderr
+
+
+def _read_capture_text(capture: io.BufferedRandom) -> str:
+    """Read one bounded file-backed CLI stream with subprocess text semantics."""
+    with io.open(
+        os.dup(capture.fileno()), "r", encoding=None, errors=None, newline=None
+    ) as stream:
+        stream.seek(0)
+        return stream.read(MAX_OUTPUT + 1)
 
 
 def validate_read_output(output: str) -> bool:

@@ -1,21 +1,63 @@
 import json
 import errno
+import os
 import shutil
+import signal
 import subprocess
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from chrome_pair import (
-    FIXTURE_TITLE, FIXTURE_TOKEN, command, make_env, native_target_matches, nearest_rank,
+    FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
-    paired_gate_passes, validate_read_output, wait_for_daemon_exit, flow, measure,
+    paired_gate_passes, validate_read_output, wait_for_daemon_exit, flow, measure, run_cli,
 )
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_run_cli_keeps_the_decoded_output_limit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with patch("chrome_pair.command", return_value=[
+                sys.executable, "-c", "import sys; sys.stdout.write('x' * (1 << 20) + '!')"
+            ]):
+                result = run_cli(Path("unused"), ["open", "http://127.0.0.1/"], "s", {}, Path(temporary))
+        self.assertEqual(result, (1, "", "output limit exceeded"))
+
+    def test_run_cli_preserves_text_output_and_exit_status(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            script = "import sys; sys.stdout.write('line\\r\\n'); sys.stderr.write('warning\\r\\n'); sys.exit(7)"
+            with patch("chrome_pair.command", return_value=[sys.executable, "-c", script]):
+                result = run_cli(Path("unused"), ["open", "http://127.0.0.1/"], "s", {}, Path(temporary))
+        self.assertEqual(result, (7, "line\n", "warning\n"))
+
+    def test_timeout_does_not_wait_for_descendant_inheriting_capture_handles(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            pid_file = root / "descendant.pid"
+            parent = (
+                "import pathlib,subprocess,sys,time; "
+                "child=subprocess.Popen([sys.executable,'-c','import time;time.sleep(8)']); "
+                "pathlib.Path(sys.argv[1]).write_text(str(child.pid)); time.sleep(30)"
+            )
+            started = time.monotonic()
+            try:
+                with patch("chrome_pair.command", return_value=[sys.executable, "-c", parent, str(pid_file)]):
+                    with self.assertRaises(subprocess.TimeoutExpired):
+                        run_cli(Path("unused"), ["open", "http://127.0.0.1/"], "s", {}, root, timeout=0.5)
+                self.assertLess(time.monotonic() - started, 3.0)
+                self.assertTrue(pid_file.is_file(), "the fixture descendant must be started before timeout")
+            finally:
+                if pid_file.is_file():
+                    try:
+                        os.kill(int(pid_file.read_text(encoding="ascii")), signal.SIGTERM)
+                    except (OSError, ValueError):
+                        pass
+
     def test_cleanup_failure_preserves_the_primary_open_error(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

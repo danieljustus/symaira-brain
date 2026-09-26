@@ -170,6 +170,16 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    async fn open_chrome_page(
+        page: &ChromePage,
+        url: &str,
+        operation: &OperationContext,
+    ) -> Result<Value, DaemonError> {
+        page.open_with_timeout(url, operation.remaining())
+            .await
+            .map_err(navigation_error)
+    }
+
     fn shutdown(&self) {
         self.fetch.close();
         let browser = self.browser.lock().ok().and_then(|mut state| state.take());
@@ -423,7 +433,7 @@ impl DispatchRuntime {
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
             "network.route" | "network.unroute" => {
                 self.authorize_network_mock(&frame)?;
-                self.browser_command(&frame).await
+                self.browser_command(&frame, &operation).await
             }
             "policy.explain" => self.policy_explain(&frame),
             "journal.tail" | "journal.show" => self.journal_read(&frame),
@@ -471,16 +481,16 @@ impl DispatchRuntime {
             | "network.offline" | "network.block" | "screenshot" | "pdf" | "upload" | "a11y"
             | "cookies.get" | "cookies.set" | "cookies.list" | "cookies.clear" | "storage.get"
             | "storage.list" | "storage.set" | "storage.clear" | "download" | "download.setdir"
-            | "downloads.list" | "eval" => self.browser_command(&frame).await,
+            | "downloads.list" | "eval" => self.browser_command(&frame, &operation).await,
             "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
-            | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
+            | "set.media" | "set.user-agent" => self.browser_command(&frame, &operation).await,
             "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),
                 ..Default::default()
             }),
-            "state.save" | "state.load" => self.state_browser_command(&frame).await,
+            "state.save" | "state.load" => self.state_browser_command(&frame, &operation).await,
             "state.list" | "state.show" | "state.clear" | "state.clean" => {
                 self.state_command(&frame)
             }
@@ -761,7 +771,7 @@ impl DispatchRuntime {
             crate::auth::Credentials::resolve(std::path::Path::new("symvault"), entry, operation)
                 .await?;
         let page = self.ensure_browser().await?;
-        let data = crate::auth::login(&page, url, &mut credentials).await?;
+        let data = crate::auth::login(&page, url, &mut credentials, operation).await?;
         Ok((Some(data), Vec::new()))
     }
 
@@ -1160,7 +1170,7 @@ impl DispatchRuntime {
         Ok((Some(data), Vec::new()))
     }
 
-    async fn browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn browser_command(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
         self.guard_navigation_target(frame).await?;
         if self.spec.mode == "browser" && self.spec.engine == "firefox" {
             return self.firefox_command(frame).await;
@@ -1400,7 +1410,7 @@ impl DispatchRuntime {
                 .await
                 .map_err(runtime_error)?;
                 if url != "about:blank" {
-                    page.open(url).await.map_err(runtime_error)?;
+                    Self::open_chrome_page(&page, url, operation).await?;
                 }
                 let label = args.get("label").and_then(Value::as_str).unwrap_or("");
                 let mut guard = self
@@ -1870,10 +1880,8 @@ impl DispatchRuntime {
                 if diagnostics {
                     eprintln!("chrome_daemon_stage=open-engine-start");
                 }
-                let outcome = page
-                    .open(required_string(args, "url")?)
-                    .await
-                    .map_err(runtime_error)?;
+                let outcome =
+                    Self::open_chrome_page(&page, required_string(args, "url")?, operation).await?;
                 if diagnostics {
                     eprintln!("chrome_daemon_stage=open-engine-complete");
                 }
@@ -1896,7 +1904,7 @@ impl DispatchRuntime {
                     .and_then(Value::as_str)
                     .filter(|url| !url.is_empty())
                 {
-                    page.open(url).await.map_err(runtime_error)?;
+                    Self::open_chrome_page(&page, url, operation).await?;
                 }
                 page.read().await.map_err(runtime_error)?
             }
@@ -2741,7 +2749,11 @@ impl DispatchRuntime {
         Ok(result)
     }
 
-    async fn state_browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn state_browser_command(
+        &self,
+        frame: &Frame,
+        operation: &OperationContext,
+    ) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
         let store = state_store(&self.spec, &self.state_keys, frame.cmd == "state.save")?;
@@ -2833,7 +2845,7 @@ impl DispatchRuntime {
                         }
                     } else {
                         let page = self.ensure_browser().await.map_err(runtime_error)?;
-                        page.open(origin).await.map_err(runtime_error)?;
+                        Self::open_chrome_page(&page, origin, operation).await?;
                         for cookie in &entry.cookies {
                             let cookie_value =
                                 serde_json::to_value(cookie).map_err(runtime_error)?;
@@ -3410,6 +3422,20 @@ fn go_runtime_entries(entries: Value) -> Value {
     }
 }
 
+pub(crate) fn navigation_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {
+    if error
+        .downcast_ref::<tokio::time::error::Elapsed>()
+        .is_some()
+    {
+        return DaemonError {
+            code: codes::OPERATION_TIMEOUT.into(),
+            message: "daemon operation exceeded its timeout".into(),
+            ..Default::default()
+        };
+    }
+    runtime_error(error)
+}
+
 fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
@@ -3563,6 +3589,16 @@ mod tests {
     };
     use symbrowse_core::key_resolver::{MissingReason, ProbeError};
 
+    #[tokio::test]
+    async fn navigation_deadline_keeps_daemon_timeout_error_semantics() {
+        let elapsed = tokio::time::timeout(std::time::Duration::ZERO, std::future::pending::<()>())
+            .await
+            .expect_err("pending operation must expire");
+        let error = navigation_error(Box::new(elapsed));
+        assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(error.message, "daemon operation exceeded its timeout");
+    }
+
     #[test]
     fn static_mode_uses_caller_driven_runtime_and_browser_keeps_workers() {
         let static_runtime = build_runtime_for_mode("static").expect("static runtime");
@@ -3643,7 +3679,7 @@ mod tests {
             };
             let error = runtime
                 .runtime
-                .block_on(runtime.browser_command(&frame))
+                .block_on(runtime.browser_command(&frame, &OperationContext::for_test()))
                 .expect_err("navigation must be denied before engine startup");
             assert_eq!(error.code, codes::OPERATION_FAILED, "{command} {url}");
             assert_eq!(error.message, expected, "{command} {url}");
@@ -3668,7 +3704,7 @@ mod tests {
         };
         let error = runtime
             .runtime
-            .block_on(runtime.browser_command(&frame))
+            .block_on(runtime.browser_command(&frame, &OperationContext::for_test()))
             .expect_err("private navigation must be denied before engine startup");
         assert_eq!(error.code, codes::OPERATION_FAILED);
         assert!(error.message.contains("blocked by the SSRF guard"));
