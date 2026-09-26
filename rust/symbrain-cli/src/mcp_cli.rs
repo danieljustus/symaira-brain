@@ -364,7 +364,7 @@ fn build_backends(
         if !config.url.is_empty() && config.command.is_empty() {
             let _ = writeln!(
                 stderr,
-                "symbrain mcp: {alias}: URL MCP transport is not ported; skipping (no Go fallback)"
+                "symbrain mcp: {alias}: url-only foreign server (no stdio transport yet); skipping"
             );
             continue;
         }
@@ -521,5 +521,33 @@ mod tests {
             .parse()
             .expect("valid config");
         assert_eq!(configured_module_path_from(&empty, SERVER_OPERATE), None);
+    }
+
+    #[test]
+    fn url_only_foreign_server_matches_go_warning_and_is_skipped() {
+        let profile = symbrain_policy::profile::parse::parse(
+            "url-only",
+            r#"
+[profile]
+name = "url-only"
+
+[servers.remote]
+enabled = true
+url = "https://mcp.example.com"
+"#,
+        )
+        .expect("valid profile");
+        let mut stderr = Vec::new();
+        let mut managed = Vec::new();
+        let mut backends = BTreeMap::new();
+
+        build_backends(&profile, None, &mut stderr, &mut managed, &mut backends);
+
+        assert_eq!(
+            String::from_utf8(stderr).expect("UTF-8 warning"),
+            "symbrain mcp: remote: url-only foreign server (no stdio transport yet); skipping\n"
+        );
+        assert!(managed.is_empty());
+        assert!(backends.is_empty());
     }
 }
