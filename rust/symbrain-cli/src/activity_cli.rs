@@ -24,7 +24,10 @@ Every command requires --profile, an explicit bounded response budget, and (for 
 ";
 const MAX_ACTIVITY_BUDGET: usize = 4000;
 
-fn resolve_db_path() -> PathBuf {
+fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
+    if let Some(path) = override_path.filter(|path| !path.is_empty()) {
+        return PathBuf::from(path);
+    }
     if let Some(path) = std::env::var_os("SYMBRAIN_MEMORY_DB_PATH") {
         return PathBuf::from(path);
     }
@@ -280,8 +283,12 @@ fn extract_flag(args: &[OsString], flag: &str) -> Option<String> {
 
 #[allow(clippy::too_many_lines)]
 /// Opens the activity store, reporting the shipped per-subcommand message.
-fn open_store(stderr: &mut dyn Write, subcommand: &str) -> Result<Store, u8> {
-    let db_path = resolve_db_path();
+fn open_store(
+    stderr: &mut dyn Write,
+    subcommand: &str,
+    db_override: Option<&str>,
+) -> Result<Store, u8> {
+    let db_path = resolve_db_path(db_override);
     match Store::open(&db_path) {
         Ok(store) => Ok(store),
         Err(err) => {
@@ -329,7 +336,8 @@ fn run_search(
         .and_then(|value| value.parse::<usize>().ok())
         .unwrap_or(1000);
 
-    let store = match open_store(stderr, "search") {
+    let db_override = flag_value(args, &["--db", "-db"]);
+    let store = match open_store(stderr, "search", db_override.as_deref()) {
         Ok(store) => store,
         Err(code) => return code,
     };
@@ -418,7 +426,8 @@ fn run_status(
         );
         return exit::USAGE;
     }
-    let store = match open_store(stderr, "status") {
+    let db_override = flag_value(args, &["--db", "-db"]);
+    let store = match open_store(stderr, "status", db_override.as_deref()) {
         Ok(store) => store,
         Err(code) => return code,
     };
@@ -476,7 +485,8 @@ fn run_get(
     }
     let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
         .and_then(|value| value.parse::<usize>().ok());
-    let store = match open_store(stderr, "get") {
+    let db_override = flag_value(args, &["--db", "-db"]);
+    let store = match open_store(stderr, "get", db_override.as_deref()) {
         Ok(store) => store,
         Err(code) => return code,
     };
@@ -582,10 +592,11 @@ fn positional_count(args: &[OsString], flags: &[&str]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::{run_get, run_status, status_args_are_supported};
+    use super::{run_get, run_search, run_status, status_args_are_supported};
     use std::ffi::OsString;
     use symbrain_core::exit;
     use symbrain_core::output::OutputFormat;
+    use tempfile::tempdir;
 
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
@@ -635,5 +646,51 @@ mod tests {
         ])));
         assert!(!status_args_are_supported(&args(&["--unknown"])));
         assert!(!status_args_are_supported(&args(&["stray"])));
+    }
+
+    #[test]
+    fn db_override_is_used_by_each_activity_read_command() {
+        let directory = tempdir().expect("temporary directory");
+        let db_path = directory.path().join("invalid.db");
+        std::fs::write(&db_path, b"not a sqlite database").expect("invalid database fixture");
+        let db_path = db_path.to_string_lossy().into_owned();
+
+        for command in ["search", "get", "status"] {
+            let mut argv = vec![OsString::from("--profile=default")];
+            if command == "get" {
+                argv.push(OsString::from(format!("--db={db_path}")));
+            } else {
+                argv.extend([OsString::from("--db"), OsString::from(&db_path)]);
+            }
+            argv.push(OsString::from("--max-tokens=100"));
+            match command {
+                "search" => argv.extend([
+                    OsString::from("--from=2026-09-01T00:00:00Z"),
+                    OsString::from("--to=2026-09-02T00:00:00Z"),
+                    OsString::from("--limit=1"),
+                    OsString::from("query"),
+                ]),
+                "get" => argv.push(OsString::from("item-id")),
+                "status" => {}
+                _ => unreachable!(),
+            }
+
+            let mut stdout = Vec::new();
+            let mut stderr = Vec::new();
+            let code = match command {
+                "search" => run_search(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
+                "get" => run_get(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
+                "status" => run_status(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
+                _ => unreachable!(),
+            };
+            assert_eq!(code, exit::GENERIC, "{command}");
+            assert!(stdout.is_empty(), "{command}");
+            assert!(
+                String::from_utf8(stderr)
+                    .expect("UTF-8 error")
+                    .starts_with(&format!("symbrain activity {command}: open database:")),
+                "{command}"
+            );
+        }
     }
 }
