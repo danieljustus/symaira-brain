@@ -121,6 +121,64 @@
       "target_names": [
         "hermes"
       ]
+    },
+    {
+      "id": "inline-manifest",
+      "name": "inline-manifest",
+      "description": "Go oracle for inline TOML manifest tables",
+      "category": "",
+      "version": "2.1",
+      "body": "# Inline manifest\n\n{{term:report_dir}}\n",
+      "resources": [
+        {
+          "path": "symskills.toml",
+          "size": 411,
+          "mode": "0644",
+          "executable": false
+        }
+      ],
+      "markdown_paths": [],
+      "override_paths": {},
+      "manifest": {
+        "skill": {
+          "name": "inline-manifest",
+          "version": "3.2",
+          "source": "fixture",
+          "allow_executable": true,
+          "requires": [
+            "subagents"
+          ]
+        },
+        "targets": {
+          "opencode": {
+            "enabled": true,
+            "alias": "inline",
+            "description": "inline target",
+            "scope": "project",
+            "category": "test",
+            "prepend": "intro.md",
+            "append": "outro.md",
+            "metadata": {
+              "model": "small"
+            }
+          }
+        },
+        "terms": {
+          "report_dir": {
+            "default": "reports",
+            "opencode": "reports/opencode"
+          }
+        }
+      },
+      "manifest_terms": {
+        "report_dir": {
+          "default": "reports",
+          "opencode": "reports/opencode"
+        }
+      },
+      "target_names": [
+        "opencode"
+      ]
     }
   ],
   "variant_cases": [
@@ -353,6 +411,21 @@
       "id": "duplicate_block_id_across_files",
       "rejected": true,
       "error": "validation error: block id \"shared\" is already defined in SKILL.md; ids address a block across the whole skill and must be unique"
+    },
+    {
+      "id": "scalar_skill_root",
+      "rejected": true,
+      "error": "parse symskills.toml: toml: line 1 (last key \"skill\"): type mismatch for skill.ManifestSkill: expected table but found string"
+    },
+    {
+      "id": "scalar_targets_root",
+      "rejected": true,
+      "error": "expected a table for targets"
+    },
+    {
+      "id": "scalar_terms_root",
+      "rejected": true,
+      "error": "expected a table for terms"
     },
     {
       "id": "unknown_target",

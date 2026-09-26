@@ -27,6 +27,7 @@ type expectedBundle struct {
 	Resources     []skill.Resource             `json:"resources"`
 	MarkdownPaths []string                     `json:"markdown_paths"`
 	OverridePaths map[string][]string          `json:"override_paths"`
+	Manifest      *skill.Manifest              `json:"manifest,omitempty"`
 	ManifestTerms map[string]map[string]string `json:"manifest_terms"`
 	TargetNames   []string                     `json:"target_names"`
 }
@@ -93,7 +94,7 @@ type suite struct {
 }
 
 func generate() (suite, error) {
-	ids := []string{"source", "variant-source", "oracle-edge"}
+	ids := []string{"source", "variant-source", "oracle-edge", "inline-manifest"}
 	result := suite{Cases: make([]expectedBundle, 0, len(ids))}
 	for _, id := range ids {
 		bundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", id))
@@ -123,12 +124,16 @@ func generate() (suite, error) {
 		if terms == nil {
 			terms = map[string]map[string]string{}
 		}
-		result.Cases = append(result.Cases, expectedBundle{
+		caseResult := expectedBundle{
 			ID: id, Name: bundle.Frontmatter.Name, Description: bundle.Frontmatter.Description,
 			Category: bundle.Frontmatter.Category, Version: bundle.Frontmatter.Version,
 			Body: bundle.Body, Resources: bundle.Resources, MarkdownPaths: markdown,
 			OverridePaths: overrides, ManifestTerms: terms, TargetNames: targets,
-		})
+		}
+		if id == "inline-manifest" {
+			caseResult.Manifest = &bundle.Manifest
+		}
+		result.Cases = append(result.Cases, caseResult)
 	}
 	variantBundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", "variant-source"))
 	if err != nil {
@@ -257,6 +262,27 @@ func securityCases() ([]securityCase, error) {
 	result, err := renderValidationCases()
 	if err != nil {
 		return nil, err
+	}
+	for _, item := range []struct{ id, manifest string }{
+		{"scalar_skill_root", `skill = "wrong"`},
+		{"scalar_targets_root", `targets = "wrong"`},
+		{"scalar_terms_root", `terms = "wrong"`},
+	} {
+		root, err := os.MkdirTemp("", "skills-oracle-scalar-root-")
+		if err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(root, "SKILL.md"), []byte("---\nname: security-skill\ndescription: security fixture\n---\nBody.\n"), 0o644); err != nil {
+			_ = os.RemoveAll(root)
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(root, "symskills.toml"), []byte(item.manifest), 0o644); err != nil {
+			_ = os.RemoveAll(root)
+			return nil, err
+		}
+		_, loadErr := skill.LoadBundle(root)
+		_ = os.RemoveAll(root)
+		result = append(result, securityCase{ID: item.id, Rejected: loadErr != nil, Error: errorText(loadErr)})
 	}
 	unknownRoot, err := os.MkdirTemp("", "skills-oracle-unknown-target-")
 	if err != nil {
