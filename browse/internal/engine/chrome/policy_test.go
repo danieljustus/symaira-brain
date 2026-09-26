@@ -260,8 +260,8 @@ func TestNetworkPolicyArmsInterceptionAndCountsBlockedRequests(t *testing.T) {
 	if err := json.Unmarshal(failed.params, &failParams); err != nil {
 		t.Fatal(err)
 	}
-	if failParams.RequestID != "req-foreign" || failParams.ErrorReason != "blockedByClient" {
-		t.Errorf("failRequest = %+v, want req-foreign blockedByClient", failParams)
+	if failParams.RequestID != "req-foreign" || failParams.ErrorReason != "BlockedByClient" {
+		t.Errorf("failRequest = %+v, want req-foreign BlockedByClient", failParams)
 	}
 
 	waitFor(t, "blocked count", func() bool { return len(eng.BlockedRequests()) == 1 })
@@ -525,8 +525,8 @@ func TestSSRFGuardBlocksPrivateSubresource(t *testing.T) {
 	if err := json.Unmarshal(failed.params, &failParams); err != nil {
 		t.Fatal(err)
 	}
-	if failParams.RequestID != "req-private" || failParams.ErrorReason != "blockedByClient" {
-		t.Errorf("failRequest = %+v, want req-private blockedByClient", failParams)
+	if failParams.RequestID != "req-private" || failParams.ErrorReason != "BlockedByClient" {
+		t.Errorf("failRequest = %+v, want req-private BlockedByClient", failParams)
 	}
 	blocked := eng.BlockedRequests()
 	if len(blocked) != 1 || blocked[0].URL != "http://169.254.169.254/latest/meta-data" {

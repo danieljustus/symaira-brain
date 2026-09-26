@@ -9,7 +9,7 @@ fn pinned_go_fixture_covers_requested_contracts_without_secrets() {
     let root: Value = serde_json::from_str(FIXTURE).unwrap();
     assert_eq!(
         root["oracle_commit"],
-        "652453d1595fc302bd69c328e7da8a21dbee28b9"
+        "dc9c54e41beccf131fbe70e3f45bfff98871e709"
     );
     assert_eq!(root["generated_by"], "scripts/rust-port/cmd/workflowgen");
     assert_eq!(root["fixture_families"].as_array().unwrap().len(), 8);

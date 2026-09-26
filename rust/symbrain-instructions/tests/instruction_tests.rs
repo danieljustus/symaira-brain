@@ -44,12 +44,15 @@ struct Case {
     global_present: bool,
     #[serde(default)]
     project_present: bool,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_global_path: String,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_project_path: String,
     #[serde(default)]
     xdg_config_home: String,
+    #[cfg(not(windows))]
     #[serde(default)]
     expected_xdg_global_path: String,
     #[serde(default)]
@@ -368,18 +371,28 @@ fn source_paths_follow_xdg_and_project_layout() {
     );
     let suite = oracle();
     let item = case(&suite, "source_paths");
+    // The committed oracle was generated on Unix; Windows paths are checked
+    // against the native layout above instead of its Unix path literals.
+    #[cfg(not(windows))]
     assert_eq!(
         source.project_path.unwrap(),
         PathBuf::from(&item.expected_project_path)
     );
+    #[cfg(not(windows))]
     assert_eq!(
         source.global_path,
         PathBuf::from(&item.expected_global_path)
     );
     assert_eq!(item.xdg_config_home, "/oracle-config");
+    #[cfg(not(windows))]
     assert_eq!(
         resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(&home)),
         PathBuf::from(&item.expected_xdg_global_path)
+    );
+    #[cfg(windows)]
+    assert_eq!(
+        resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(&home)),
+        home.join(".config/symbrain/instructions.md")
     );
 }
 

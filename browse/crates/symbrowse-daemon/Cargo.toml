@@ -19,6 +19,8 @@ symbrowse-engine-firefox = { path = "../symbrowse-engine-firefox", version = "=0
 symbrowse-fetch = { path = "../symbrowse-fetch", version = "=0.0.0" }
 time.workspace = true
 tokio.workspace = true
+zeroize.workspace = true
+url.workspace = true
 widestring.workspace = true
 
 [target.'cfg(unix)'.dependencies]
@@ -29,3 +31,6 @@ symbrowse-engine-safari = { path = "../symbrowse-engine-safari", version = "=0.0
 
 [target.'cfg(windows)'.dependencies]
 windows-sys.workspace = true
+
+[dev-dependencies]
+tempfile = "=3.27.0"

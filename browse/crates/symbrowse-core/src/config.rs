@@ -9,6 +9,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 const APP_NAME: &str = "symbrowse";
 const FIELDS: [&str; 26] = [
@@ -162,6 +163,33 @@ pub struct Result {
     pub sources: BTreeMap<String, String>,
 }
 
+/// The effective transport exposed when a mode was explicitly selected.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct SelectionView {
+    pub mode: String,
+    pub engine: Option<String>,
+}
+
+#[must_use]
+pub fn explicit_selection(result: &Result) -> Option<SelectionView> {
+    let mode_was_selected = result.sources["mode"] != "default";
+    let engine_was_selected = result.sources["engine"] != "default";
+    (mode_was_selected || engine_was_selected).then(|| {
+        // `engine = "static"` is the legacy Go spelling of the static
+        // transport. When no mode is configured, report the effective
+        // selection rather than the config struct's browser default.
+        let mode = if !mode_was_selected && result.config.engine == "static" {
+            "static"
+        } else {
+            result.config.mode.as_str()
+        };
+        SelectionView {
+            mode: mode.to_owned(),
+            engine: (mode == "browser").then(|| result.config.engine.clone()),
+        }
+    })
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct FlagOverrides {
     pub log_level: Option<String>,
@@ -205,10 +233,13 @@ impl std::error::Error for ConfigError {}
 impl LoadContext {
     /// Captures the process environment without reading configuration files.
     pub fn from_process(flags: FlagOverrides) -> std::result::Result<Self, ConfigError> {
-        let home = std::env::var_os("HOME")
-            .or_else(|| std::env::var_os("USERPROFILE"))
-            .map(PathBuf::from)
-            .ok_or_else(|| ConfigError("cannot determine home directory".to_owned()))?;
+        let home = home_for_platform(
+            std::env::var_os("HOME"),
+            std::env::var_os("USERPROFILE"),
+            cfg!(windows),
+        )
+        .map(PathBuf::from)
+        .ok_or_else(|| ConfigError("cannot determine home directory".to_owned()))?;
         let cwd = std::env::current_dir().map_err(|error| ConfigError(error.to_string()))?;
         Ok(Self {
             home,
@@ -220,6 +251,15 @@ impl LoadContext {
             flags,
         })
     }
+}
+
+fn home_for_platform(
+    home: Option<std::ffi::OsString>,
+    user_profile: Option<std::ffi::OsString>,
+    windows: bool,
+) -> Option<std::ffi::OsString> {
+    let selected = if windows { user_profile } else { home };
+    selected.filter(|path| !path.is_empty())
 }
 
 #[derive(Clone, Debug, Default, Deserialize)]
@@ -257,15 +297,21 @@ struct PartialConfig {
 pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     let config_home = context
         .xdg_config_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".config"));
     let cache_home = context
         .xdg_cache_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".cache"));
     let state_home = context
         .xdg_state_home
-        .clone()
+        .as_ref()
+        .filter(|path| !path.as_os_str().is_empty())
+        .cloned()
         .unwrap_or_else(|| context.home.join(".local").join("state"));
     let mut config = Config {
         log_level: "warn".to_owned(),
@@ -296,10 +342,11 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
         daemon_log: display(state_home.join(APP_NAME).join("daemon.log")),
         approval_timeout: 60,
     };
-    let mut sources = FIELDS
+    let mut sources: BTreeMap<String, String> = FIELDS
         .iter()
         .map(|field| ((*field).to_owned(), "default".to_owned()))
         .collect();
+    sources.insert("mode".to_owned(), "default".to_owned());
     apply_file(
         &mut config,
         &mut sources,
@@ -321,7 +368,8 @@ pub fn load(context: &LoadContext) -> std::result::Result<Result, ConfigError> {
     if sources["daemon_log"] == "default" {
         config.daemon_log = display(Path::new(&config.state_dir).join("daemon.log"));
     }
-    validate(&config).map_err(|error| ConfigError(format!("invalid configuration: {error}")))?;
+    validate(&config, &sources)
+        .map_err(|error| ConfigError(format!("invalid configuration: {error}")))?;
     Ok(Result { config, sources })
 }
 
@@ -338,7 +386,7 @@ pub fn show_fields(result: &Result) -> BTreeMap<String, Field> {
         ("autosave_key", config.autosave_key.clone()),
         ("cache_dir", config.cache_dir.clone()),
         ("cache_ttl_hours", config.cache_ttl_hours.to_string()),
-        ("cdp_endpoint", config.cdp_endpoint.clone()),
+        ("cdp_endpoint", redact_cdp_endpoint(&config.cdp_endpoint)),
         ("config_dir", config.config_dir.clone()),
         ("daemon_log", config.daemon_log.clone()),
         ("engine", config.engine.clone()),
@@ -371,6 +419,67 @@ pub fn show_fields(result: &Result) -> BTreeMap<String, Field> {
         .collect()
 }
 
+fn redact_cdp_endpoint(endpoint: &str) -> String {
+    let Ok(mut url) = Url::parse(endpoint) else {
+        return if endpoint.is_empty() {
+            String::new()
+        } else {
+            "[REDACTED]".to_owned()
+        };
+    };
+    if url.host_str().is_none() {
+        return "[REDACTED]".to_owned();
+    }
+    let mut changed = false;
+    if !url.username().is_empty() || url.password().is_some() {
+        let _ = url.set_password(None);
+        let _ = url.set_username("");
+        changed = true;
+    }
+    let mut pairs: Vec<(String, String)> = url
+        .query_pairs()
+        .map(|(key, value)| (key.into_owned(), value.into_owned()))
+        .collect();
+    for (key, value) in &mut pairs {
+        if secret_endpoint_key(key) {
+            *value = "[REDACTED]".to_owned();
+            changed = true;
+        }
+    }
+    if !changed {
+        return endpoint.to_owned();
+    }
+    if url.query().is_some() {
+        url.set_query(None);
+        url.query_pairs_mut().extend_pairs(pairs);
+    }
+    url.to_string()
+}
+
+fn secret_endpoint_key(key: &str) -> bool {
+    let normalized: String = key
+        .chars()
+        .filter(|character| *character != '_' && *character != '-')
+        .flat_map(char::to_lowercase)
+        .collect();
+    [
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "authorization",
+        "auth",
+        "cookie",
+        "credential",
+        "apikey",
+        "accesskey",
+        "privatekey",
+        "encryptionkey",
+    ]
+    .iter()
+    .any(|secret| normalized.contains(secret))
+}
+
 /// Renders `config show` text in stable lexical field order.
 #[must_use]
 pub fn render_show_text(result: &Result) -> String {
@@ -393,6 +502,16 @@ pub fn render_show_yaml(result: &Result) -> String {
             "        {name}:\n            value: {}\n            source: {}\n",
             yaml_config_string(&field.value),
             yaml_config_string(&field.source)
+        ));
+    }
+    if let Some(selection) = explicit_selection(result) {
+        output.push_str(&format!(
+            "    selection:\n        mode: {}\n        engine: {}\n",
+            yaml_config_string(&selection.mode),
+            selection
+                .engine
+                .as_deref()
+                .map_or("null".to_owned(), yaml_config_string)
         ));
     }
     output.push_str("warnings: []\nerror: null\n");
@@ -588,7 +707,14 @@ fn apply_flags(config: &mut Config, sources: &mut BTreeMap<String, String>, flag
     flag!(engine);
 }
 
-fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
+fn validate(
+    config: &Config,
+    sources: &BTreeMap<String, String>,
+) -> std::result::Result<(), ConfigError> {
+    if !matches!(config.mode.as_str(), "static" | "browser" | "compat") {
+        let error = resolve_selection(Some(&config.mode), None).unwrap_err();
+        return Err(ConfigError(format!("{}: {}", error.code, error.message)));
+    }
     if config.idle_timeout < 0
         || config.operation_timeout <= 0
         || config.read_timeout <= 0
@@ -604,19 +730,31 @@ fn validate(config: &Config) -> std::result::Result<(), ConfigError> {
             config.autosave
         )));
     }
-    if config.engine == "static" {
+    if config.engine == "static" && config.mode == "browser" && sources["mode"] == "default" {
+        return Ok(());
+    }
+    if config.engine == "static" && config.mode == "static" {
         return Ok(());
     }
     if !matches!(
         config.engine.as_str(),
         "" | "chrome" | "safari" | "safari-attach" | "safari-bidi" | "firefox"
     ) {
+        if sources["mode"] != "default" {
+            let error = resolve_selection(Some(&config.mode), Some(&config.engine)).unwrap_err();
+            return Err(ConfigError(format!("{}: {}", error.code, error.message)));
+        }
         return Err(ConfigError(format!(
             "invalid engine {:?}: use one of chrome, static, safari-attach, safari-bidi",
             config.engine
         )));
     }
-    resolve_selection(Some(&config.mode), Some(&config.engine))
+    let selected_engine = if config.mode != "browser" && sources["engine"] == "default" {
+        None
+    } else {
+        Some(config.engine.as_str())
+    };
+    resolve_selection(Some(&config.mode), selected_engine)
         .map_err(|error| ConfigError(format!("{}: {}", error.code, error.message)))?;
     Ok(())
 }
@@ -657,6 +795,109 @@ fn display(path: impl AsRef<Path>) -> String {
 #[cfg(test)]
 mod selection_tests {
     use super::*;
+
+    #[test]
+    fn process_home_matches_go_platform_variable() {
+        let home = std::ffi::OsString::from("/unix/home");
+        let profile = std::ffi::OsString::from(r"C:\Users\agent");
+        assert_eq!(
+            home_for_platform(Some(home.clone()), Some(profile.clone()), true),
+            Some(profile)
+        );
+        assert_eq!(
+            home_for_platform(
+                Some(home.clone()),
+                Some(std::ffi::OsString::from("other")),
+                false
+            ),
+            Some(home)
+        );
+        assert_eq!(home_for_platform(Some("ignored".into()), None, true), None);
+        assert_eq!(home_for_platform(None, Some("ignored".into()), false), None);
+        assert_eq!(
+            home_for_platform(Some("/unix/home".into()), Some("".into()), true),
+            None
+        );
+        assert_eq!(
+            home_for_platform(Some("".into()), Some("C:\\Users\\agent".into()), false),
+            None
+        );
+    }
+
+    #[test]
+    fn transport_environment_is_validated_without_a_default_browser_conflict() {
+        let root = std::env::temp_dir().join(format!("symbrowse-cfgsel-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: HashMap::new(),
+            flags: FlagOverrides::default(),
+        };
+        assert!(explicit_selection(&load(&context).expect("default")).is_none());
+        for mode in ["static", "compat"] {
+            context.env.insert("SYMBROWSE_MODE".into(), mode.into());
+            let result = load(&context).expect("mode selection");
+            assert_eq!(result.config.mode, mode);
+            assert_eq!(
+                explicit_selection(&result),
+                Some(SelectionView {
+                    mode: mode.into(),
+                    engine: None,
+                })
+            );
+            assert!(render_show_yaml(&result).contains("engine: null"));
+        }
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "browser".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "firefox".into());
+        assert_eq!(
+            explicit_selection(&load(&context).expect("browser selection")),
+            Some(SelectionView {
+                mode: "browser".into(),
+                engine: Some("firefox".into()),
+            })
+        );
+        context.env.insert("SYMBROWSE_MODE".into(), "static".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "chrome".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("engine_not_allowed")
+        );
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "browser".into());
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "unknown".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_browser_engine")
+        );
+        context
+            .env
+            .insert("SYMBROWSE_ENGINE".into(), "static".into());
+        context
+            .env
+            .insert("SYMBROWSE_MODE".into(), "unknown".into());
+        assert!(
+            load(&context)
+                .unwrap_err()
+                .to_string()
+                .contains("invalid_transport_mode")
+        );
+    }
 
     #[test]
     fn selection_is_exhaustive_and_never_falls_back() {

@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use serde::Deserialize;
-use symbrowse_fetch::{BackoffConfig, Profile, is_transient_status, parse_retry_after_millis};
+use symbrowse_fetch::{
+    BackoffConfig, ClientOptions, FetchClient, FetchError, Profile, is_transient_status,
+    parse_retry_after_millis,
+};
 
 #[derive(Deserialize)]
 struct Fixture {
@@ -83,7 +86,7 @@ fn pinned_go_control_fixture_has_provenance_and_full_boundaries() {
     let fixture = fixture();
     assert_eq!(
         fixture.oracle_commit,
-        "652453d1595fc302bd69c328e7da8a21dbee28b9"
+        "dc9c54e41beccf131fbe70e3f45bfff98871e709"
     );
     assert_eq!(
         fixture.generated_by,
@@ -114,6 +117,16 @@ fn static_selection_is_explicit_and_never_claims_browser_identity() {
         assert!(matches!(case.input.as_str(), "browser" | "compat"));
         assert_eq!(case.result, "typed_unavailable");
     }
+}
+
+#[test]
+fn chrome_identity_profile_fails_closed_before_any_transport_exists() {
+    let error = FetchClient::new(Profile::Chrome, ClientOptions::default())
+        .expect_err("the honest reqwest transport must not claim Chrome TLS identity");
+    assert!(matches!(
+        error,
+        FetchError::UnsupportedProfile(Profile::Chrome)
+    ));
 }
 
 #[test]

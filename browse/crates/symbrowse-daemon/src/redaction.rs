@@ -9,15 +9,20 @@ const SECRET_KEYS: &[&str] = &[
     "secret",
     "token",
     "api_key",
+    "api-key",
     "apikey",
     "access_key",
+    "access-key",
     "auth",
     "authorization",
     "cookie",
     "set-cookie",
     "client_secret",
+    "client-secret",
     "private_key",
+    "private-key",
     "encryption_key",
+    "encryption-key",
     "credential",
     "credentials",
 ];
@@ -49,35 +54,53 @@ impl Redactor {
 pub fn redact_str(input: &str) -> String {
     let mut output = input.to_owned();
     for key in SECRET_KEYS {
-        for separator in ["=", ":", " "] {
-            let mut cursor = 0;
-            while let Some(relative) = output[cursor..]
-                .to_ascii_lowercase()
-                .find(&format!("{key}{separator}"))
+        let mut cursor = 0;
+        loop {
+            let lowercase = output.to_ascii_lowercase();
+            let Some(relative) = lowercase[cursor..].find(key) else {
+                break;
+            };
+            let start = cursor + relative;
+            let mut separator = start + key.len();
+            while output
+                .as_bytes()
+                .get(separator)
+                .is_some_and(|byte| matches!(byte, b' ' | b'\t'))
             {
-                let start = cursor + relative;
-                let mut value_start = start + key.len() + separator.len();
-                while output
-                    .as_bytes()
-                    .get(value_start)
-                    .is_some_and(u8::is_ascii_whitespace)
-                {
-                    value_start += 1;
-                }
-                let end = value_end(&output, value_start);
-                if end <= value_start {
-                    cursor = value_start;
+                separator += 1;
+            }
+            let value_start = match output.as_bytes().get(separator) {
+                Some(b'=' | b':') => separator + 1,
+                _ => {
+                    cursor = start + key.len();
                     continue;
                 }
-                output.replace_range(value_start..end, REDACTED);
-                cursor = value_start + REDACTED.len();
+            };
+            let mut value_start = value_start;
+            while output
+                .as_bytes()
+                .get(value_start)
+                .is_some_and(u8::is_ascii_whitespace)
+            {
+                value_start += 1;
             }
+            let end = value_end(
+                &output,
+                value_start,
+                !matches!(*key, "auth" | "authorization"),
+            );
+            if end <= value_start {
+                cursor = start + key.len();
+                continue;
+            }
+            output.replace_range(value_start..end, REDACTED);
+            cursor = value_start + REDACTED.len();
         }
     }
     redact_url_credentials(&output)
 }
 
-fn value_end(text: &str, start: usize) -> usize {
+fn value_end(text: &str, start: usize, stop_on_space: bool) -> usize {
     let bytes = text.as_bytes();
     let mut end = start;
     let quoted = bytes
@@ -94,10 +117,8 @@ fn value_end(text: &str, start: usize) -> usize {
             return end + 1;
         }
         if !quoted
-            && matches!(
-                byte,
-                b' ' | b'\t' | b'\r' | b'\n' | b',' | b'}' | b']' | b';'
-            )
+            && (matches!(byte, b'\r' | b'\n' | b',' | b'}' | b']' | b';')
+                || (stop_on_space && matches!(byte, b' ' | b'\t')))
         {
             break;
         }
@@ -138,22 +159,26 @@ pub fn redact_args(args: &[String]) -> Vec<String> {
         if redact_next {
             output.push(REDACTED.to_owned());
             redact_next = false;
-        } else if SECRET_KEYS
-            .iter()
-            .any(|key| lower == format!("--{key}") || lower == format!("-{key}"))
-        {
+        } else if let Some((name, _)) = lower.split_once('=') {
+            if secret_option_name(name) {
+                let split = arg.find('=').unwrap_or(arg.len());
+                output.push(format!("{}={REDACTED}", &arg[..split]));
+            } else {
+                output.push(redact_str(arg));
+            }
+        } else if secret_option_name(&lower) {
             output.push(arg.clone());
             redact_next = true;
-        } else if SECRET_KEYS.iter().any(|key| {
-            lower.starts_with(&format!("--{key}=")) || lower.starts_with(&format!("{key}="))
-        }) {
-            let split = arg.find('=').unwrap_or(arg.len());
-            output.push(format!("{}={REDACTED}", &arg[..split]));
         } else {
             output.push(redact_str(arg));
         }
     }
     output
+}
+
+fn secret_option_name(name: &str) -> bool {
+    let name = name.trim_start_matches('-').replace('-', "_");
+    SECRET_KEYS.contains(&name.as_str())
 }
 
 #[must_use]
@@ -231,5 +256,13 @@ mod tests {
         );
         assert!(!json.to_string().contains("abc"));
         assert!(!json.to_string().contains("xyz"));
+        let header = redact_str("Authorization: Bearer fixture-secret\nstatus: 401");
+        assert!(!header.contains("fixture-secret"), "{header}");
+        assert!(header.contains("status: 401"));
+
+        let risk_error = "header \"Authorization\" requires the credential risk class";
+        assert_eq!(redact_str(risk_error), risk_error);
+        let credential = redact_str("credential=fixture-secret");
+        assert!(!credential.contains("fixture-secret"), "{credential}");
     }
 }

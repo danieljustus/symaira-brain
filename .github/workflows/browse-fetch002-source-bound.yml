@@ -1,0 +1,73 @@
+name: Browse FETCH-002 source-bound Go capture
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/internal/fetch/fetch/**'
+      - 'browse/port/harness/fetch_fingerprints*'
+      - 'browse/crates/symbrowse-fetch/**'
+      - 'browse/Cargo.toml'
+      - 'browse/Cargo.lock'
+      - '.github/workflows/browse-fetch002-source-bound.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/internal/fetch/fetch/**'
+      - 'browse/port/harness/fetch_fingerprints*'
+      - 'browse/crates/symbrowse-fetch/**'
+      - 'browse/Cargo.toml'
+      - 'browse/Cargo.lock'
+      - '.github/workflows/browse-fetch002-source-bound.yml'
+
+jobs:
+  capture:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      GOWORK: off
+      GOFLAGS: -mod=readonly
+      CGO_ENABLED: '0'
+      GOTOOLCHAIN: local
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+      - name: Build and execute the production Go transport capture
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/fetch002-source-bound"
+          mkdir -p "$evidence_dir"
+          chmod 700 "$evidence_dir" 2>/dev/null || true
+          test_binary="$evidence_dir/fetch-fingerprints-capture.test"
+          if [[ "$RUNNER_OS" == Windows ]]; then test_binary+=.exe; fi
+          go test -p=2 -c -o "$test_binary" ./internal/fetch/fetch
+          SYMBROWSE_FETCH_FINGERPRINTS_OUT="$evidence_dir/capture.json" \
+            "$test_binary" -test.run '^TestGenerateFetchFingerprintsCapture$' -test.v -test.timeout=90s
+          python3 port/harness/fetch_fingerprints_validate.py \
+            --capture "$evidence_dir/capture.json" \
+            --verify-source-bound-capture \
+            --report "$evidence_dir/validation.json"
+      - name: Negative control for Rust browser identity claims
+        run: cargo test --locked -p symbrowse-fetch --test control_contract chrome_identity_profile_fails_closed_before_any_transport_exists -- --exact
+      - name: Retain source-bound capture and executable
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fetch002-source-bound-${{ github.sha }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/fetch002-source-bound/
+          if-no-files-found: warn
+          retention-days: 14

@@ -30,6 +30,8 @@ repository = "https://github.com/danieljustus/symaira-brain"
 
 [workspace.dependencies]
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "serde", "std"] }
+chrono-tz = "0.10.4"
+iana-time-zone = "0.1.64"
 cap-std = "=4.0.3"
 cap-fs-ext = "=4.0.3"
 fs2 = "=0.4.3"

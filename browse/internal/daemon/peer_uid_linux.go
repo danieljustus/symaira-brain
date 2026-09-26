@@ -33,7 +33,7 @@ func validatePeerUID(conn net.Conn) error {
 	if controlErr != nil {
 		return fmt.Errorf("inspect peer credentials: %w", controlErr)
 	}
-	if peerUID != uint32(os.Getuid()) {
+	if !peerUIDMatches(peerUID, uint32(os.Getuid())) {
 		return fmt.Errorf("peer uid %d does not match daemon uid %d", peerUID, os.Getuid())
 	}
 	return nil

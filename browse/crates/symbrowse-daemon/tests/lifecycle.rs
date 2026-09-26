@@ -16,21 +16,29 @@ mod unix {
     };
 
     use symbrowse_daemon::{
-        Client, ClientOptions, Frame, Response, Server, ServerError, ServerOptions, codes,
-        connect_unix,
+        Client, ClientOptions, Frame, PolicyStatus, Response, Server, ServerError, ServerOptions,
+        codes, connect_unix,
     };
 
     static NEXT: AtomicU64 = AtomicU64::new(1);
 
     #[test]
     fn socket_lifecycle_permissions_status_and_stop() {
-        let root = root("lifecycle");
-        let socket = root.join("run/default.sock");
+        let lifecycle_root = root("lifecycle");
+        let socket = lifecycle_root.join("run/default.sock");
         let server = Arc::new(
             Server::new(ServerOptions {
                 socket_path: socket.clone(),
                 session: "default".to_owned(),
                 idle_timeout: None,
+                mode: "browser".to_owned(),
+                engine: "firefox".to_owned(),
+                policy: PolicyStatus {
+                    allowed_domains: vec!["example.test".to_owned()],
+                    ssrf_enabled: true,
+                    fetch_ssrf_enabled: true,
+                    allow_private: false,
+                },
                 ..Default::default()
             })
             .unwrap(),
@@ -63,7 +71,27 @@ mod unix {
             })
             .unwrap();
         assert!(status.success);
-        assert_eq!(status.data.as_ref().unwrap()["running"], true);
+        let data = status.data.as_ref().unwrap();
+        assert_eq!(data["running"], true);
+        assert!(data["pid"].as_u64().is_some_and(|pid| pid > 0));
+        assert_eq!(data["socket"], socket.display().to_string());
+        // CFG-006 adds transport mode as a new machine-readable status field;
+        // the Go status contract has no transport-mode field to compare yet.
+        assert_eq!(data["mode"], "browser");
+        assert_eq!(data["engine"], "firefox");
+        assert_eq!(data["policy"]["allowed_domains"][0], "example.test");
+        assert_eq!(data["policy"]["ssrf_enabled"], true);
+        assert_eq!(data["policy"]["fetch_ssrf_enabled"], true);
+        assert_eq!(data["policy"]["allow_private"], false);
+        for field in ["started_at", "last_activity"] {
+            let value = data[field]
+                .as_str()
+                .unwrap_or_else(|| panic!("status {field} is not a string: {}", data[field]));
+            assert!(
+                value.contains('T') && value.ends_with('Z'),
+                "{field} = {value}"
+            );
+        }
 
         let mut stream = std::os::unix::net::UnixStream::connect(&socket).unwrap();
         stream
@@ -87,7 +115,26 @@ mod unix {
         assert!(stop.success);
         assert!(thread.join().unwrap().is_ok());
         assert!(!socket.exists());
-        fs::remove_dir_all(root).unwrap();
+        fs::remove_dir_all(lifecycle_root).unwrap();
+        let idle_root = root("idle-timeout");
+        let idle_socket = idle_root.join("idle.sock");
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: idle_socket.clone(),
+                session: "idle".to_owned(),
+                idle_timeout: Some(Duration::from_millis(50)),
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = server.clone();
+        let thread = thread::spawn(move || running.listen_and_serve());
+        assert!(thread.join().unwrap().is_ok(), "idle shutdown failed");
+        assert!(
+            !idle_socket.exists(),
+            "idle shutdown left its socket behind"
+        );
+        fs::remove_dir_all(idle_root).unwrap();
     }
 
     #[test]

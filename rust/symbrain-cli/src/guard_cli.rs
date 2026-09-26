@@ -28,6 +28,8 @@ Commands:
   help      Show this help message
 
 Run 'symbrain guard <command> --help' for details on a specific command.";
+// Go's absorbed guard is not assigned the parent symbrain release version.
+const GUARD_VERSION: &str = "dev";
 
 #[path = "guard_doctor.rs"]
 mod guard_doctor;
@@ -52,7 +54,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
             // reproduces it verbatim instead of inventing a timestamp). The
             // toolchain row names Rust honestly; the frozen expectation
             // tokenizes that row, because no runner can pin a toolchain.
-            let version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
+            let version = GUARD_VERSION;
             let info = version::VersionInfo::new("symguard", version);
             if args[1..].iter().any(|arg| arg == "--json") {
                 let _ = writeln!(

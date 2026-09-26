@@ -2,7 +2,7 @@ use serde::Deserialize;
 use serde_json::Value;
 use std::{fs, path::PathBuf};
 
-const ORACLE_COMMIT: &str = "652453d1595fc302bd69c328e7da8a21dbee28b9";
+const ORACLE_COMMIT: &str = "2ddbda51ef059181b99171ce7f87b6f6d8044c92";
 
 #[derive(Debug, Deserialize)]
 struct Fixture {
@@ -51,7 +51,7 @@ fn chrome_fixture_is_pinned_and_covers_eng_005_to_007() {
             .expect("screenshot error")
             .contains("png or jpeg")
     );
-    assert_eq!(fixture.unsupported, ["har-export", "axe-core-audit"]);
+    assert_eq!(fixture.unsupported, ["har-export"]);
     assert_eq!(fixture.cleanup["owned_process_killed"], true);
     assert_eq!(fixture.cleanup["owned_process_reaped"], true);
     assert_eq!(fixture.cleanup["private_profile_removed"], true);

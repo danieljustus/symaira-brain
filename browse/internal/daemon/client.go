@@ -246,8 +246,7 @@ func (c *Client) requestOnce(ctx context.Context, frame Frame) (Response, error)
 	if err := ctx.Err(); err != nil {
 		return Response{}, err
 	}
-	dialer := net.Dialer{}
-	conn, err := dialer.DialContext(ctx, "unix", c.options.SocketPath)
+	conn, err := dialEndpoint(ctx, c.options.SocketPath)
 	if err != nil {
 		hint := c.daemonHint(session, false)
 		if c.options.StartDaemon == nil || os.Getenv("SYMBROWSE_NO_AUTOSTART") == "1" {

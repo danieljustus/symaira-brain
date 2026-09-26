@@ -1,8 +1,15 @@
 #![cfg(target_os = "macos")]
 
 use std::{
+    io::{Read, Write},
+    net::TcpListener,
     path::Path,
-    sync::{Arc, Mutex},
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
+    },
+    thread,
+    time::Duration,
 };
 
 use serde_json::{Value, json};
@@ -11,8 +18,8 @@ use symbrowse_engine::capabilities::OPTIONAL_INTERFACE_NAMES;
 use symbrowse_engine::{EvaluationResult, Page};
 use symbrowse_engine_safari::{
     BIDI_ENGINE_KIND, BidiEngine, BidiError, BidiTransport, BoxFuture, DriverOptions,
-    NavigationPolicy, ProcessAdapter, ProcessHandle, TransportConnector, parse_session_response,
-    require_loopback, session_request,
+    NavigationPolicy, ProcessAdapter, ProcessHandle, SafariBlockedRequest, TransportConnector,
+    parse_session_response, require_loopback, session_request,
 };
 
 #[derive(Clone, Default)]
@@ -55,11 +62,14 @@ fn bidi_capabilities_partition_excludes_unsupported_interactions() {
     assert_eq!(
         caps.interfaces,
         [
-            "CookieEngine",
+            "FrameManager",
             "InspectionEngine",
-            "NavigationStateProvider"
+            "NavigationStateProvider",
+            "NetworkPolicyReporter",
+            "TabManager",
         ]
     );
+    assert!(caps.unsupported.iter().any(|name| name == "CookieEngine"));
     assert!(
         caps.unsupported
             .iter()
@@ -132,14 +142,25 @@ async fn bidi_policy_denies_before_transport() {
     let mut engine =
         BidiEngine::from_transport(Box::new(fake.clone()), "page-1").with_navigation_policy(policy);
     let page = engine.new_page().expect("page");
-    let error = engine
-        .navigate(&page, "https://blocked.example/")
-        .await
-        .expect_err("blocked navigation");
-    assert!(
-        matches!(error, BidiError::InvalidTarget { reason, .. } if reason.contains("allowlist"))
-    );
+    for _ in 0..2 {
+        let error = engine
+            .navigate(&page, "https://blocked.example/")
+            .await
+            .expect_err("blocked navigation");
+        assert!(
+            matches!(error, BidiError::InvalidTarget { reason, .. } if reason.contains("allowlist"))
+        );
+    }
     assert!(fake.calls().is_empty(), "denied URL reached BidiTransport");
+    assert_eq!(
+        engine.blocked_requests(),
+        [SafariBlockedRequest {
+            url: "https://blocked.example/".to_owned(),
+            resource_type: "document".to_owned(),
+            count: 2,
+            reason: "domain allowlist".to_owned(),
+        }]
+    );
 
     let fake = FakeTransport::default();
     let ssrf = SsrfGuard::with_lookup(false, |_host| Ok(vec!["127.0.0.1".to_owned()]));
@@ -178,14 +199,14 @@ async fn bidi_navigation_evaluation_and_cleanup_use_injected_transport() {
             .capabilities()
             .interfaces
             .iter()
-            .any(|name| name == "CookieEngine")
+            .any(|name| name == "FrameManager")
     );
     assert!(
         engine
             .capabilities()
             .unsupported
             .iter()
-            .any(|name| name == "FrameManager" || name == "TabManager" || name == "NetworkEvents")
+            .any(|name| name == "NetworkEvents" || name == "CookieEngine")
     );
     assert!(engine.screenshot().is_err());
     engine.close().await.expect("close");
@@ -333,6 +354,13 @@ async fn bidi_protocol_errors_remain_typed() {
 async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
     let native =
         std::env::var_os("SYMBROWSE_NATIVE_TARGETS").as_deref() == Some(std::ffi::OsStr::new("1"));
+    if native {
+        assert_eq!(
+            std::env::var("GITHUB_ACTIONS").as_deref(),
+            Ok("true"),
+            "real Safari BiDi runs only on the isolated native CI runner"
+        );
+    }
     let options = if native {
         DriverOptions::default()
     } else {
@@ -349,19 +377,102 @@ async fn real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate() {
     let result = BidiEngine::launch(options).await;
     if native {
         let mut engine = result.expect("launch isolated safaridriver BiDi session");
+        let fixture = LoopbackFixture::start();
         let page = engine.new_page().expect("initial Safari automation page");
+        let navigation = engine
+            .navigate(&page, &fixture.url)
+            .await
+            .expect("navigate Safari to the loopback fixture");
+        assert_eq!(navigation.url, fixture.url);
         let title = engine
             .evaluate(&page, "document.title")
             .await
             .expect("evaluate document.title in Safari")
             .value
             .expect("Safari returned a title value");
-        assert_eq!(title, "");
+        // Safari 26.6.1 returns a JSON-encoded string inside the BiDi value;
+        // the Go engine passes those raw value bytes through as well.
+        let title: String =
+            serde_json::from_str(title.as_str().expect("Safari returned a string BiDi value"))
+                .expect("Safari BiDi string value contains JSON text");
+        assert_eq!(title, "Symaira ENG-008 fixture");
+        let capabilities = engine.capabilities();
+        assert_eq!(capabilities.kind, "safari-bidi");
+        assert!(
+            capabilities
+                .interfaces
+                .iter()
+                .any(|name| name == "InspectionEngine")
+        );
+        assert!(
+            capabilities
+                .unsupported
+                .iter()
+                .any(|name| name == "NetworkEvents")
+        );
+        assert!(matches!(
+            engine.screenshot(),
+            Err(BidiError::Unsupported { operation }) if operation == "screenshot"
+        ));
         engine.close().await.expect("close isolated Safari session");
     } else {
         assert!(
             matches!(result, Err(BidiError::Prerequisite { .. })),
             "native gate must be typed, not skipped"
         );
+    }
+}
+
+struct LoopbackFixture {
+    url: String,
+    stop: Arc<AtomicBool>,
+    thread: Option<thread::JoinHandle<()>>,
+}
+
+impl LoopbackFixture {
+    fn start() -> Self {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind Safari loopback fixture");
+        let address = listener.local_addr().expect("fixture address");
+        listener
+            .set_nonblocking(true)
+            .expect("nonblocking fixture listener");
+        let stop = Arc::new(AtomicBool::new(false));
+        let stop_thread = Arc::clone(&stop);
+        let fixture = thread::spawn(move || {
+            while !stop_thread.load(Ordering::Acquire) {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let _ = stream.set_read_timeout(Some(Duration::from_secs(2)));
+                        let mut request = [0_u8; 4096];
+                        let _ = stream.read(&mut request);
+                        let body = "<!doctype html><title>Symaira ENG-008 fixture</title>";
+                        let response = format!(
+                            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                            body.len(),
+                            body
+                        );
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(_) => break,
+                }
+            }
+        });
+        Self {
+            url: format!("http://{address}/eng-008"),
+            stop,
+            thread: Some(fixture),
+        }
+    }
+}
+
+impl Drop for LoopbackFixture {
+    fn drop(&mut self) {
+        self.stop.store(true, Ordering::Release);
+        if let Some(thread) = self.thread.take() {
+            thread.join().expect("Safari fixture thread");
+        }
     }
 }

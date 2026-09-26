@@ -3,13 +3,16 @@
   "protocol": 1,
   "oracle": "go-azuretls-v0.8.0",
   "cases": [
-    {"id":"compat-handshake", "request_type":"handshake", "expected":"handshake_ack"},
-    {"id":"compat-request-id", "request_id":42, "expected":"response.id=42"},
-    {"id":"compat-bounded-frame", "max_frame_bytes":1048576, "expected":"typed frame_too_large"},
-    {"id":"compat-integrity-error", "expected_error":"compat_integrity_error", "fallback":"forbidden"},
-    {"id":"compat-sidecar-unavailable", "expected_error":"compat_unavailable", "fallback":"forbidden"},
-    {"id":"compat-crash-restart", "expected":"second request succeeds after child exit"},
-    {"id":"compat-private-endpoint", "directory_mode":"0700", "endpoint_mode":"0600"},
-    {"id":"compat-rollback-go", "build":"CGO_ENABLED=0 go build -trimpath -o dist/symbrowse-compat ./cmd/symbrowse", "entrypoint":"compat-sidecar"}
+    {"id":"compat-handshake", "protocol":1, "expected":"handshake_ack", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"},
+    {"id":"compat-pinned-identity", "component":"symbrowse-go", "oracle":"go-azuretls-v0.8.0", "fallback":"forbidden", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"},
+    {"id":"compat-six-profiles", "profiles":["chrome","edge","firefox","ios","opera","safari"], "fixture":"loopback-http", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"},
+    {"id":"compat-request-id", "request_ids":[1,2,3,4,5,6,7], "expected":"monotonic across clean sidecar restart", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"},
+    {"id":"compat-bounded-frame", "max_frame_bytes":1048576, "expected":"both Go and Rust reject oversized inbound frames; Rust also rejects oversized newline-terminated output", "tests":["compat_sidecar_bounds_inbound_ndjson_frames","ndjson_reader_bounds_frames_before_unbounded_growth","outbound_frames_are_bounded_including_the_newline"]},
+    {"id":"compat-integrity-error", "expected_errors":["compat_protocol_mismatch","compat_identity_mismatch"], "fallback":"forbidden", "tests":["handshake_pins_protocol_component_and_oracle","compat_sidecar_rejects_unpinned_handshake_identity"]},
+    {"id":"compat-typed-fetch-error", "expected_error":"compat_fetch_failed", "retryable":false, "test":"production_go_sidecar_returns_a_typed_fetch_error"},
+    {"id":"compat-timeout-restart", "expected":"late response is discarded and next request succeeds", "test":"production_go_sidecar_discards_late_response_after_timeout_restart"},
+    {"id":"compat-clean-exit", "expected":"stdin EOF exits sidecar and client can restart it", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"},
+    {"id":"compat-private-endpoint", "transport":"child-private stdio pipes; no filesystem endpoint is created", "unix_runtime_directory_mode":"0700", "tests":["private_runtime_directory_schema_and_unix_mode","production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"]},
+    {"id":"compat-rollback-go", "build":"CGO_ENABLED=0 go build -trimpath -o target/compat-sidecar/symbrowse-compat ./cmd/symbrowse", "entrypoint":"compat-sidecar", "test":"production_go_sidecar_exchanges_six_profiles_and_restarts_after_eof"}
   ]
 }

@@ -1,5 +1,6 @@
 //! Byte-oriented TOML encoding and table tree manipulation matching BurntSushi/toml.
 
+use chrono::{Datelike, Duration, NaiveDate, Timelike};
 use std::collections::BTreeMap;
 use toml_edit::{Array, DocumentMut, InlineTable, Item, Table, Value};
 
@@ -180,8 +181,66 @@ pub fn format_toml_float(f: f64) -> String {
 }
 
 pub fn format_toml_datetime(dt: &toml_edit::Datetime) -> String {
+    format_toml_datetime_with_offset(dt, format::local_offset_seconds())
+}
+
+fn format_toml_datetime_with_offset(dt: &toml_edit::Datetime, local_offset: i32) -> String {
     let date_str = dt.date.map(format::format_date_str);
     let time_str = dt.time.as_ref().map(format::format_time_str);
+
+    if dt.offset.is_none() {
+        // BurntSushi/toml stores local values at the process's current fixed
+        // offset, then emits their UTC clock fields when re-encoding a map.
+        let date = dt.date.unwrap_or(toml_edit::Date {
+            year: 0,
+            month: 1,
+            day: 1,
+        });
+        let time = dt.time.unwrap_or(toml_edit::Time {
+            hour: 0,
+            minute: 0,
+            second: Some(0),
+            nanosecond: None,
+        });
+        if let Some(shifted) = NaiveDate::from_ymd_opt(
+            i32::from(date.year),
+            u32::from(date.month),
+            u32::from(date.day),
+        )
+        .and_then(|d| {
+            d.and_hms_nano_opt(
+                u32::from(time.hour),
+                u32::from(time.minute),
+                u32::from(time.second.unwrap_or(0)),
+                time.nanosecond.unwrap_or(0),
+            )
+        })
+        .and_then(|d| d.checked_sub_signed(Duration::seconds(i64::from(local_offset))))
+        {
+            let shifted_date = format!(
+                "{:04}-{:02}-{:02}",
+                shifted.year(),
+                shifted.month(),
+                shifted.day()
+            );
+            let suffix = time_str
+                .as_deref()
+                .and_then(|value| value.get(8..))
+                .unwrap_or("");
+            let shifted_time = format!(
+                "{:02}:{:02}:{:02}{suffix}",
+                shifted.hour(),
+                shifted.minute(),
+                shifted.second()
+            );
+            return match (dt.date, dt.time) {
+                (Some(_), Some(_)) => format!("{shifted_date}T{shifted_time}"),
+                (Some(_), None) => shifted_date,
+                (None, Some(_)) => shifted_time,
+                (None, None) => String::new(),
+            };
+        }
+    }
 
     match (date_str, time_str) {
         (Some(d), Some(t)) => {
@@ -347,4 +406,22 @@ pub fn encode_document(table: &ConfigTable) -> Vec<u8> {
     let mut out = Vec::new();
     emit_table_recursive(table, &[], &mut out);
     out
+}
+
+#[cfg(test)]
+mod datetime_offset_tests {
+    use super::format_toml_datetime_with_offset;
+
+    #[test]
+    fn local_toml_values_follow_go_fixed_offset_round_trip() {
+        for (input, offset, expected) in [
+            ("1979-05-27T07:32:00", -7 * 3600, "1979-05-27T14:32:00"),
+            ("07:32:00.120000", -7 * 3600, "14:32:00.12"),
+            ("1979-05-27", 2 * 3600, "1979-05-26"),
+            ("1979-05-27T07:32:00Z", -7 * 3600, "1979-05-27T07:32:00Z"),
+        ] {
+            let parsed = input.parse().expect("TOML datetime");
+            assert_eq!(format_toml_datetime_with_offset(&parsed, offset), expected);
+        }
+    }
 }

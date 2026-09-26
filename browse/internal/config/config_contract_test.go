@@ -28,6 +28,43 @@ func TestDefaultPathsHonorsXDGHomeOverrides(t *testing.T) {
 	}
 }
 
+func TestDefaultPathsFallsBackToHomeAndPreservesRelativeOverrides(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	for _, name := range []string{"XDG_CONFIG_HOME", "XDG_CACHE_HOME", "XDG_STATE_HOME"} {
+		t.Setenv(name, "")
+	}
+	paths, err := DefaultPaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantHome := Paths{
+		ConfigDir: filepath.Join(home, ".config", appName),
+		CacheDir:  filepath.Join(home, ".cache", appName),
+		StateDir:  filepath.Join(home, ".local", "state", appName),
+	}
+	if !reflect.DeepEqual(paths, wantHome) {
+		t.Fatalf("unset XDG paths = %#v, want %#v", paths, wantHome)
+	}
+
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join("relative", "config"))
+	t.Setenv("XDG_CACHE_HOME", filepath.Join("relative", "cache"))
+	t.Setenv("XDG_STATE_HOME", filepath.Join("relative", "state"))
+	paths, err = DefaultPaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantRelative := Paths{
+		ConfigDir: filepath.Join("relative", "config", appName),
+		CacheDir:  filepath.Join("relative", "cache", appName),
+		StateDir:  filepath.Join("relative", "state", appName),
+	}
+	if !reflect.DeepEqual(paths, wantRelative) {
+		t.Fatalf("relative XDG paths = %#v, want %#v", paths, wantRelative)
+	}
+}
+
 func TestLoadWithOverridesIncludesStableEnvironmentSettings(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
@@ -100,5 +137,53 @@ func TestLoadWithOverridesReadsXDGGlobalConfiguration(t *testing.T) {
 	}
 	if result.Sources["state_dir"] != "global" || result.Sources["read_timeout"] != "global" {
 		t.Fatalf("sources = %#v", result.Sources)
+	}
+}
+
+func TestEngineEnvironmentOverridesTOMLAndRejectsUnknownValues(t *testing.T) {
+	home := t.TempDir()
+	project := t.TempDir()
+	xdgConfig := filepath.Join(home, "config")
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", xdgConfig)
+	t.Setenv("XDG_CACHE_HOME", filepath.Join(home, "cache"))
+	t.Setenv("XDG_STATE_HOME", filepath.Join(home, "state"))
+	t.Chdir(project)
+	for _, name := range []string{
+		"SYMBROWSE_ENGINE", "SYMBROWSE_IDLE_TIMEOUT", "SYMBROWSE_OPERATION_TIMEOUT",
+		"SYMBROWSE_READ_TIMEOUT", "SYMBROWSE_STATE_EXPIRE_DAYS", "SYMBROWSE_AUTOSAVE",
+		"SYMBROWSE_AUTOSAVE_INTERVAL", "SYMBROWSE_APPROVAL_TIMEOUT",
+	} {
+		t.Setenv(name, "")
+	}
+	t.Setenv("SYMBROWSE_ENGINE", "safari-bidi")
+
+	global := filepath.Join(xdgConfig, appName, "config.toml")
+	if err := os.MkdirAll(filepath.Dir(global), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(global, []byte("engine = \"chrome\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(project, ".symbrowse.toml"), []byte("engine = \"safari-attach\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := LoadWithOverrides(FlagOverrides{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Config.Engine != "safari-bidi" || result.Sources["engine"] != "env" {
+		t.Fatalf("engine = %q, source = %q; want environment safari-bidi", result.Config.Engine, result.Sources["engine"])
+	}
+
+	t.Setenv("SYMBROWSE_ENGINE", "netscape")
+	_, err = LoadWithOverrides(FlagOverrides{})
+	if err == nil {
+		t.Fatal("unknown environment engine must fail validation")
+	}
+	const want = "invalid configuration: invalid engine \"netscape\": use one of chrome, static, safari-attach, safari-bidi"
+	if err.Error() != want {
+		t.Fatalf("unknown engine error = %q, want %q", err, want)
 	}
 }

@@ -1,8 +1,8 @@
 {
   "fixture": "testdata/port/engine/engine-neutral.json",
-  "generator_sha256": "cb388c1f51ee5dbcfc4d7d2a37091f09b0e8362594f64690deb85d3465b13efa",
+  "generator_sha256": "9f99c46c36503e9b6a33f0fddd3609a5ceedd0c089d68d18dcc6e91261c4021a",
   "normalization": "route tree strings omitted; refs/diffs preserved pending issue #401",
-  "oracle_commit": "652453d1595fc302bd69c328e7da8a21dbee28b9",
+  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
   "route_count": 17,
   "schema_version": 1,
   "source_files": {

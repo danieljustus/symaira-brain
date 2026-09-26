@@ -1,0 +1,124 @@
+name: Browse FETCH-002 primp wire spike (diagnostic)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/internal/fetch/fetch/**'
+      - 'browse/port/harness/fetch_fingerprints*'
+      - 'browse/port/spikes/primp/**'
+      - '.github/workflows/browse-fetch002-primp-spike.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/internal/fetch/fetch/**'
+      - 'browse/port/harness/fetch_fingerprints*'
+      - 'browse/port/spikes/primp/**'
+      - '.github/workflows/browse-fetch002-primp-spike.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-lock-and-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: browse
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Resolve one Cargo lock for every native target
+        run: cargo generate-lockfile --manifest-path port/spikes/primp/Cargo.toml
+      - name: Check dependency licenses and sources
+        run: |
+          cargo install cargo-deny --version 0.20.2 --locked
+          cargo deny --manifest-path port/spikes/primp/Cargo.toml --config ../deny.toml check licenses sources
+      - name: Record unsafe-code inventory
+        run: |
+          cargo install cargo-geiger --version 0.13.0 --locked
+          cargo geiger --manifest-path "$PWD/port/spikes/primp/Cargo.toml" --locked --output-format Json > "$RUNNER_TEMP/geiger.json"
+      - name: Retain the shared lock and dependency audit
+        run: cp port/spikes/primp/Cargo.lock "$RUNNER_TEMP/primp-Cargo.lock"
+      - name: Upload the shared lock and unsafe-code report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fetch002-primp-lock-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/primp-Cargo.lock
+            ${{ runner.temp }}/geiger.json
+          if-no-files-found: error
+          retention-days: 14
+
+  native-wire-capture:
+    needs: resolve-lock-and-audit
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 50
+    env:
+      GOWORK: off
+      GOFLAGS: -mod=readonly
+      CGO_ENABLED: '0'
+      GOTOOLCHAIN: local
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: fetch002-primp-lock-${{ github.sha }}
+          path: browse/port/spikes/primp
+      - name: Restore the resolved Cargo lock
+        run: cp port/spikes/primp/primp-Cargo.lock port/spikes/primp/Cargo.lock
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Build and capture the source-bound production Go profiles
+        run: |
+          set -euo pipefail
+          evidence_dir="$RUNNER_TEMP/fetch002-primp"
+          mkdir -p "$evidence_dir"
+          test_binary="$evidence_dir/go-fetch-capture.test"
+          if [[ "$RUNNER_OS" == Windows ]]; then test_binary+=.exe; fi
+          go test -p=2 -c -o "$test_binary" ./internal/fetch/fetch
+          SYMBROWSE_FETCH_FINGERPRINTS_OUT="$evidence_dir/go-capture.json" \
+            "$test_binary" -test.run '^TestGenerateFetchFingerprintsCapture$' -test.v -test.timeout=90s
+          python3 port/harness/fetch_fingerprints_validate.py \
+            --capture "$evidence_dir/go-capture.json" \
+            --verify-source-bound-capture \
+            --report "$evidence_dir/go-validation.json"
+      - name: Capture primp 2.0.1 raw loopback wire observations
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/cargo-target
+          SYMBROWSE_SPIKE_SHA: ${{ github.sha }}
+        run: |
+          cargo run --locked --manifest-path port/spikes/primp/Cargo.toml -- \
+            "$RUNNER_TEMP/fetch002-primp/primp-capture.json"
+      - name: Compare raw ClientHello, ordered SETTINGS, and ordered headers
+        run: |
+          python3 port/spikes/primp/compare.py \
+            --go-capture "$RUNNER_TEMP/fetch002-primp/go-capture.json" \
+            --primp-capture "$RUNNER_TEMP/fetch002-primp/primp-capture.json" \
+            --sha "$GITHUB_SHA" \
+            --report "$RUNNER_TEMP/fetch002-primp/comparison.json"
+      - name: Retain raw evidence and comparison for this exact SHA and target
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fetch002-primp-${{ github.sha }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/fetch002-primp/
+          if-no-files-found: warn
+          retention-days: 14

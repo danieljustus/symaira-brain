@@ -269,12 +269,8 @@ fn shutdown_kills_descendant_process_group() {
         marker.to_str().expect("utf8 path"),
     )]));
     let _ = server.list_tools().expect("list tools");
-    wait_until(|| marker.exists());
-    let pid = std::fs::read_to_string(&marker)
-        .expect("read marker")
-        .trim()
-        .parse::<u32>()
-        .expect("parse pid");
+    wait_until(|| read_pids(&marker).len() == 1);
+    let pid = read_pids(&marker)[0];
     assert!(
         process_alive(pid),
         "descendant should be alive before shutdown"

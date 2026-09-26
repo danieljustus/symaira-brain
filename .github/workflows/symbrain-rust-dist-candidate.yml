@@ -1,0 +1,181 @@
+name: Rust native distribution candidate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: symbrain-rust-dist-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-package:
+    name: Package ${{ matrix.goos }}/${{ matrix.goarch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: darwin
+            goarch: amd64
+            target: x86_64-apple-darwin
+            runner: macos-15-intel
+          - goos: darwin
+            goarch: arm64
+            target: aarch64-apple-darwin
+            runner: macos-15
+          - goos: linux
+            goarch: amd64
+            target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+          - goos: linux
+            goarch: arm64
+            target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
+          - goos: windows
+            goarch: amd64
+            target: x86_64-pc-windows-msvc
+            runner: windows-2025
+          - goos: windows
+            goarch: arm64
+            target: aarch64-pc-windows-msvc
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      TARGET: ${{ matrix.target }}
+      TARGET_GOOS: ${{ matrix.goos }}
+      TARGET_GOARCH: ${{ matrix.goarch }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Set up Go distribution oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Verify native runner and build candidate package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "${RUNNER_OS}/${RUNNER_ARCH}" in
+            macOS/X64) native=darwin/amd64; target=x86_64-apple-darwin ;;
+            macOS/ARM64) native=darwin/arm64; target=aarch64-apple-darwin ;;
+            Linux/X64) native=linux/amd64; target=x86_64-unknown-linux-gnu ;;
+            Linux/ARM64) native=linux/arm64; target=aarch64-unknown-linux-gnu ;;
+            Windows/X64) native=windows/amd64; target=x86_64-pc-windows-msvc ;;
+            Windows/ARM64) native=windows/arm64; target=aarch64-pc-windows-msvc ;;
+            *) echo "unsupported native runner: ${RUNNER_OS}/${RUNNER_ARCH}" >&2; exit 1 ;;
+          esac
+          if [[ "$native" != "${TARGET_GOOS}/${TARGET_GOARCH}" ]]; then
+            echo "runner ${native} does not match requested ${TARGET_GOOS}/${TARGET_GOARCH}" >&2
+            exit 1
+          fi
+          if [[ "$target" != "$TARGET" ]]; then
+            echo "native runner target ${target} does not match requested ${TARGET}" >&2
+            exit 1
+          fi
+
+          rustup show active-toolchain
+          rustup target add "$TARGET"
+          version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+          SYMBRAIN_VERSION="$version" cargo build --locked --release -p symbrain-cli --bin symbrain --target "$TARGET"
+
+          executable=target/$TARGET/release/symbrain
+          if [[ "$TARGET_GOOS" == windows ]]; then executable+=".exe"; fi
+          package="$RUNNER_TEMP/symbrain-native-package"
+          mkdir -p "$package"
+          go run ./scripts/dist-oracle \
+            -native-package \
+            -version "$version" \
+            -binary "$executable" \
+            -assets "$package"
+
+      - name: Compare native Go and Rust CLI and MCP contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+          go_binary="$RUNNER_TEMP/symbrain-go"
+          rust_binary="target/$TARGET/release/symbrain"
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            go_binary+=.exe
+            rust_binary+=.exe
+          fi
+          go build -ldflags "-X main.version=$version" -o "$go_binary" ./cmd/symbrain
+          python3 scripts/rust-differential.py "$go_binary" "$rust_binary"
+          python3 scripts/mcp-differential.py "$go_binary" "$rust_binary"
+
+      - name: Test all Rust migration crates on this native target
+        shell: bash
+        run: |
+          git fetch --no-tags --depth=1 origin 0b585d52915a824664e1377d0a995dff3f5405cd
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            export SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json"
+            export SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli-tree-windows.json"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+            go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
+            go run ./scripts/cli-oracle -go-binary "$RUNNER_TEMP/symbrain-go.exe" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
+            go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
+            export SYMBRAIN_SKILLS_ORACLE_FIXTURE="$RUNNER_TEMP/skills-oracle-windows.json"
+            go run ./scripts/skills-oracle -output "$SYMBRAIN_SKILLS_ORACLE_FIXTURE"
+            echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$SYMBRAIN_SKILLS_ORACLE_FIXTURE" >> "$GITHUB_ENV"
+          fi
+          if [[ "$TARGET_GOOS" == windows ]]; then
+            version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+            SYMBRAIN_VERSION="$version" cargo test --workspace --all-features --locked
+          else
+            cargo test --workspace --all-features --locked
+          fi
+
+      - name: Upload target package for same-SHA merge
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: symbrain-rust-candidate-${{ github.sha }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ${{ runner.temp }}/symbrain-native-package/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-and-check:
+    name: Merge and check all six native packages
+    needs: native-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+
+      - name: Set up Go distribution oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Download only this SHA's six native packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: symbrain-rust-candidate-${{ github.sha }}-*
+          path: ${{ runner.temp }}/symbrain-native-packages
+          merge-multiple: false
+
+      - name: Merge and run candidate artifact checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(cargo metadata --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "symbrain-cli") | .version')"
+          go run ./scripts/dist-oracle \
+            -candidate-merge \
+            -version "$version" \
+            -packages "$RUNNER_TEMP/symbrain-native-packages" \
+            -assets "$RUNNER_TEMP/symbrain-candidate"
+          go run ./scripts/dist-oracle \
+            -candidate-check \
+            -version "$version" \
+            -assets "$RUNNER_TEMP/symbrain-candidate"

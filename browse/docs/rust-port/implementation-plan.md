@@ -271,6 +271,14 @@ compatibility transport. It is neither the static Rust transport nor evidence
 of a current Chrome, Safari or Firefox identity. See
 `rust009-tls-feasibility.md` and the retained per-profile evidence file.
 
+The Go-only capture generator and source-bound validator are now implemented
+in `internal/fetch/fetch/fetch_fingerprints_capture_test.go` and
+`port/harness/fetch_fingerprints_validate.py`. They retain and re-derive raw
+TLS ClientHello and HTTP/2 evidence for six profiles, but deliberately do not
+establish oracle trust or native Rust parity. The earlier missing-capture-suite
+blocker is resolved; FETCH-002 remains blocked on an accepted oracle and a
+Rust transport that passes raw-wire comparison within the dependency gates.
+
 **Files:**
 
 - Create: `crates/symbrowse-fetch/src/impersonated.rs`
@@ -374,9 +382,19 @@ allowlist/SSRF checks run before navigation side effects; AppleScript travels
 through stdin; subprocess trees, input/output, BiDi commands and cleanup are
 bounded; and BiDi endpoints must be loopback `ws`/`wss` URLs without userinfo.
 Injected tests cover lifecycle, policy, capabilities, protocol errors and
-descendant cleanup. A real macOS Safari BiDi session now exercises navigation,
-evaluation, bounded cleanup, and the production daemon socket path without any
-Chrome fallback. A real Safari attach session, Go-generated frame fixtures, and
+descendant cleanup. The daemon-path BiDi smoke is gated by the Safari native
+harness, which must set `SYMBROWSE_E2E=1` and run the `safari_native` daemon
+test; it launches an isolated session against a localhost fixture. The
+`browse-daemon-native.yml` workflow runs BiDi, Apple Events attach and daemon
+smokes on x64 and arm64 macOS runners, retaining per-architecture logs. It
+reports the SafariDriver version but does not enable Remote Automation or grant
+Automation permission; those remain explicit native-gate prerequisites. The
+local native gate is not run when an existing Safari session could be affected.
+The Go fixture files are
+present, current Go sources match their recorded source hashes, and direct Go
+fixture-generator tests reproduce the checked-in fixture byte for byte. The
+source-bound checker now pins to reachable commit
+`dc9c54e41beccf131fbe70e3f45bfff98871e709`. A real Safari attach session and
 native amd64 macOS execution remain, so ENG-008 stays `todo` and this item is
 not complete.
 

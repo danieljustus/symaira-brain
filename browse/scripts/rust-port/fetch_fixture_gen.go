@@ -20,9 +20,10 @@ import (
 	"github.com/danieljustus/symaira-browse/internal/fetch/relevance"
 	"github.com/danieljustus/symaira-browse/internal/fetch/render"
 	"github.com/danieljustus/symaira-browse/internal/fetch/semantic"
+	"github.com/danieljustus/symaira-browse/scripts/rust-port/internal/sourcepin"
 )
 
-const oracleCommit = "652453d1595fc302bd69c328e7da8a21dbee28b9"
+const oracleCommit = "dc9c54e41beccf131fbe70e3f45bfff98871e709"
 
 var sourceFiles = []string{
 	"internal/fetch/agentdom/builder.go", "internal/fetch/agentdom/document.go",
@@ -174,6 +175,9 @@ func trackedPipelineInputs() []struct {
 }
 
 func sourceDigest() string {
+	if err := sourcepin.Verify(oracleCommit, sourceFiles); err != nil {
+		panic(err)
+	}
 	hash := sha256.New()
 	for _, path := range sourceFiles {
 		data, err := os.ReadFile(path)

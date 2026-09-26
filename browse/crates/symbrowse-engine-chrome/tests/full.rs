@@ -11,6 +11,7 @@ use std::{
     time::Duration,
 };
 
+use chromiumoxide::cdp::browser_protocol::{dom, input};
 use symbrowse_engine_chrome::{
     BrowserMode, ChromeSession, ScreenshotOptions, UnsupportedOperation, capabilities,
 };
@@ -129,12 +130,89 @@ fn serve(mut stream: TcpStream) {
     let _ = stream.write_all(response.as_bytes());
 }
 
+fn overlay_button_node(node: &dom::Node, label: &str) -> Option<dom::NodeId> {
+    if node.local_name == "button"
+        && node
+            .children
+            .as_ref()
+            .is_some_and(|children| children.iter().any(|child| child.node_value == label))
+    {
+        return Some(node.node_id);
+    }
+    for child in node
+        .children
+        .iter()
+        .flatten()
+        .chain(node.shadow_roots.iter().flatten())
+    {
+        if let Some(found) = overlay_button_node(child, label) {
+            return Some(found);
+        }
+    }
+    None
+}
+
+async fn click_overlay_button(page: &symbrowse_engine_chrome::ChromePage, label: &str) {
+    let document = page
+        .raw()
+        .execute(
+            dom::GetDocumentParams::builder()
+                .depth(-1)
+                .pierce(true)
+                .build(),
+        )
+        .await
+        .expect("pierce overlay shadow root");
+    let node_id = overlay_button_node(&document.root, label).expect("overlay button node");
+    let response = page
+        .raw()
+        .execute(dom::GetBoxModelParams::builder().node_id(node_id).build())
+        .await
+        .expect("overlay button box model");
+    let model = response.result.model;
+    let quad = model.content.inner();
+    let x = [quad[0], quad[2], quad[4], quad[6]].iter().sum::<f64>() / 4.0;
+    let y = [quad[1], quad[3], quad[5], quad[7]].iter().sum::<f64>() / 4.0;
+    for (event_type, button, buttons) in [
+        (
+            input::DispatchMouseEventType::MousePressed,
+            input::MouseButton::Left,
+            1,
+        ),
+        (
+            input::DispatchMouseEventType::MouseReleased,
+            input::MouseButton::Left,
+            0,
+        ),
+    ] {
+        page.raw()
+            .execute(
+                input::DispatchMouseEventParams::builder()
+                    .r#type(event_type)
+                    .x(x)
+                    .y(y)
+                    .button(button)
+                    .buttons(buttons)
+                    .click_count(1)
+                    .build()
+                    .expect("mouse event params"),
+            )
+            .await
+            .expect("dispatch overlay button click");
+    }
+}
+
 #[tokio::test]
 async fn full_chrome_surface_is_real_and_opt_in() {
     if !e2e_enabled() {
         return;
     }
+    tokio::time::timeout(Duration::from_secs(180), exercise_full_chrome_surface())
+        .await
+        .expect("Chrome full-surface fixture exceeded its three-minute deadline");
+}
 
+async fn exercise_full_chrome_surface() {
     let server = TestServer::start();
     let profile = std::env::temp_dir().join(format!(
         "symbrowse-rust012-{}-{}",
@@ -150,25 +228,154 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     let upload = profile.join("upload.txt");
     fs::write(&upload, "uploaded-by-rust012").expect("write upload fixture");
 
+    eprintln!("chrome_full_stage=launch-start");
     let session = ChromeSession::connect(
         BrowserMode::Launch {
             executable: chrome_executable(),
             user_data_dir: profile.clone(),
             headless: true,
         },
-        Duration::from_secs(20),
+        // Match the production daemon's native E2E operation budget; Windows
+        // Chrome target initialization can exceed the old 20-second test cap.
+        Duration::from_secs(45),
     )
     .await
     .expect("launch Chrome");
+    eprintln!("chrome_full_stage=launch-complete");
+    eprintln!("chrome_full_stage=new-page-start");
     let page = session
         .new_page(format!("{}/", server.base_url))
         .await
         .expect("create page");
+    eprintln!("chrome_full_stage=page-opened");
     assert!(!session.pages().await.expect("list tabs").is_empty());
 
     page.wait_for_selector("#text", true, Duration::from_secs(5))
         .await
         .expect("wait for initial page");
+    page.install_overlay("oob-positive", "Waiting", "Approve this action", 0)
+        .await
+        .expect("install handoff overlay");
+    assert_eq!(
+        page.overlay_result().await.expect("pending decision"),
+        "pending"
+    );
+    page.evaluate_script("document.getElementById('symbrowse-oob-host').remove(); true")
+        .await
+        .expect("simulate hostile page removal");
+    tokio::time::sleep(Duration::from_millis(50)).await;
+    assert!(
+        page.evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("overlay reattached")
+            .as_bool()
+            .unwrap_or(false)
+    );
+    click_overlay_button(&page, "Fertig").await;
+    assert_eq!(
+        page.overlay_result().await.expect("positive decision"),
+        "completed"
+    );
+    assert!(
+        !page
+            .evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("completed overlay removed")
+            .as_bool()
+            .unwrap_or(true)
+    );
+    page.install_overlay("oob-negative", "Waiting", "Reject this action", 0)
+        .await
+        .expect("install second overlay");
+    click_overlay_button(&page, "Abbrechen").await;
+    assert_eq!(
+        page.overlay_result().await.expect("negative decision"),
+        "cancelled"
+    );
+    assert!(
+        !page
+            .evaluate_script("!!document.getElementById('symbrowse-oob-host')")
+            .await
+            .expect("cancelled overlay removed")
+            .as_bool()
+            .unwrap_or(true)
+    );
+    page.remove_overlay().await.expect("remove handoff overlay");
+    assert_eq!(
+        page.evaluate("Boolean(window.assetLoaded)")
+            .await
+            .expect("inspect script-enabled fixture")["value"],
+        true,
+        "the fixture's external script did not execute on the control page"
+    );
+
+    let script_disabled = session
+        .new_page("about:blank")
+        .await
+        .expect("create script-disabled probe page");
+    script_disabled
+        .disable_scripts()
+        .await
+        .expect("disable JavaScript for probe page");
+    let script_url = format!("{}/", server.base_url);
+    script_disabled
+        .open(&script_url)
+        .await
+        .expect("open fixture with scripts disabled");
+    assert_eq!(
+        script_disabled
+            .evaluate("Boolean(window.assetLoaded)")
+            .await
+            .expect("inspect disabled script effect")["value"],
+        false,
+        "the fixture's external script executed despite DisableScripts"
+    );
+    assert_eq!(
+        script_disabled
+            .inspect("#text", "get")
+            .await
+            .expect("inspect static fixture without scripts")["value"],
+        "initial",
+        "disabling scripts must retain server-rendered page content"
+    );
+
+    let audit = page
+        .axe_audit(&["wcag2a".to_owned()], "")
+        .await
+        .expect("axe-core audit");
+    assert_eq!(audit["axe_version"], "4.10.2", "audit: {audit}");
+    assert_eq!(audit["url"], format!("{}/", server.base_url));
+    assert!(audit["violation_count"].as_u64().unwrap_or_default() > 0);
+    assert!(
+        audit["violations"].as_array().is_some_and(|violations| {
+            violations
+                .iter()
+                .any(|violation| violation["id"] == "label")
+        }),
+        "expected axe label violation, got {audit}"
+    );
+    assert!(audit["passes"].as_u64().is_some());
+    assert!(audit["incomplete"].as_u64().is_some());
+    let scoped_audit = page
+        .axe_audit(&["wcag2a".to_owned()], "#text")
+        .await
+        .expect("selector-scoped axe-core audit");
+    assert!(
+        scoped_audit["violations"]
+            .as_array()
+            .is_some_and(|violations| {
+                violations
+                    .iter()
+                    .flat_map(|violation| violation["nodes"].as_array().into_iter().flatten())
+                    .any(|node| {
+                        node["target"]
+                            .as_array()
+                            .is_some_and(|targets| targets.iter().any(|target| target == "#text"))
+                    })
+            }),
+        "selector-scoped audit did not report #text: {scoped_audit}"
+    );
+    eprintln!("chrome_full_stage=axe-complete");
     assert_eq!(page.inspect("#text", "count").await.expect("count"), 1);
     assert!(page.inspect("#text", "find").await.expect("find").as_bool() == Some(true));
     assert_eq!(
@@ -211,10 +418,13 @@ async fn full_chrome_surface_is_real_and_opt_in() {
         page.inspect("#check", "get").await.expect("check state")["checked"],
         false
     );
+    eprintln!("chrome_full_stage=interactions-complete");
 
     let frames = page.frames().await.expect("frame tree");
+    assert_eq!(frames.len(), 1, "frame tree has one root");
     assert!(
-        frames
+        frames[0]
+            .children
             .iter()
             .any(|frame| frame.url.starts_with("about:srcdoc"))
     );
@@ -277,6 +487,7 @@ async fn full_chrome_surface_is_real_and_opt_in() {
     let pdf = page.pdf().await.expect("PDF");
     assert_eq!(pdf.mime_type, "application/pdf");
     assert!(pdf.bytes.starts_with(b"%PDF"));
+    eprintln!("chrome_full_stage=files-and-capture-complete");
 
     let wait_page = page.clone();
     let navigation =
@@ -344,17 +555,12 @@ async fn full_chrome_surface_is_real_and_opt_in() {
             .expect("auto handler"),
         1
     );
+    eprintln!("chrome_full_stage=dialogs-complete");
 
     assert!(
         matches!(page.har().await, Err(error) if error.downcast_ref::<UnsupportedOperation>().is_some())
     );
-    assert!(
-        matches!(page.axe_audit().await, Err(error) if error.downcast_ref::<UnsupportedOperation>().is_some())
-    );
-    assert_eq!(
-        capabilities().unsupported,
-        vec!["har-export", "axe-core-audit"]
-    );
+    assert_eq!(capabilities().unsupported, vec!["har-export"]);
 
     session.close().await.expect("close Chrome");
     cleanup_profile(&profile);

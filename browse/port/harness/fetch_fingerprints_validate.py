@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-"""Run the source-bound FETCH-002 end-to-end comparison.
+"""Validate source-bound FETCH-002 Go captures and retain full diagnostics.
 
-The retained same-package Go capture is independently validated and compared
-with the pinned historical Go/AzureTLS oracle for diagnostics. The historical
-oracle is invalidated evidence, so this command deliberately cannot establish
-FETCH-002 acceptance. With supplied retained artifacts it executes only the
-bounded Rust daemon path and a test-only Go sidecar; the release Go compat
-artifact is provenance-checked but is not used as the loopback wire producer.
-This command never builds or creates capture evidence; it consumes only
-retained artifacts. CLI use requires an independently reviewed capture
-digest, the retained executable, and matching Go build metadata. Producing
-a hash from an unreviewed input at acceptance time is not independent
-approval.
+The `--verify-source-bound-capture` mode checks a freshly generated, same-package
+Go production-client capture against the current checkout, executable build
+metadata, compiler input closure, and independently reparsed wire fields. It
+does not establish a current oracle or Rust parity. The full diagnostic mode
+also compares against the pinned historical Go/AzureTLS oracle, whose verdict
+is invalidated, and therefore cannot establish FETCH-002 acceptance. That
+mode consumes retained artifacts and requires an independently reviewed
+capture digest; deriving a hash from an unreviewed input is not approval.
 
 - recorded sources: the manifest's go-list-derived compiler-input closure is
   checked against the live working tree, including dependency source files.
@@ -45,6 +42,7 @@ import sys
 import tempfile
 import threading
 import time
+from collections import Counter
 from pathlib import Path
 from typing import NoReturn
 
@@ -106,6 +104,7 @@ HISTORICAL_ORACLE_SOURCE_COMMIT = "e86c1db46ad758d89372640473a5311525e3edf1"
 HISTORICAL_ORACLE_FIXTURE_BLOB = "ebd2bec169b4c1aebc546672ae2fbcb8693a3e1c"
 HISTORICAL_ORACLE_IDENTITY = "Go azuretls-client v1.13.2"
 HISTORICAL_AZURETLS_MODULE = "v1.13.2"
+AZURETLS_MODULE_PATH = "github.com/Noooste/azuretls-client"
 EXPECTED_GO_MODULE = "github.com/danieljustus/symaira-browse"
 ORACLE_COMPARISON_FIELDS = (
     ("protocol", "protocol"),
@@ -116,6 +115,10 @@ ORACLE_COMPARISON_FIELDS = (
     ("header_names", "header_names"),
 )
 FETCH_PROFILES = ("chrome", "edge", "firefox", "ios", "opera", "safari")
+# AzureTLS v1.13.2 maps chrome, edge, and opera to uTLS's
+# ShuffleChromeTLSExtensions. Their extension order is randomized for every
+# ClientHello; only membership can be compared with a single historical capture.
+SHUFFLED_EXTENSION_PROFILES = frozenset({"chrome", "edge", "opera"})
 EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
 ACCEPTANCE_BLOCKERS = (
     "historical oracle verdict is INVALIDATED; matching fields are diagnostic only",
@@ -510,22 +513,60 @@ def git_blob_at_head(repo_root: Path, repo_rel_path: str) -> str | None:
 
 
 def verified_external_go_environment() -> dict[str, str]:
-    """Require the task's Go caches to remain on the encrypted NVMe volume."""
-    nvme_root = Path("/Volumes/1TB_NVMe_SN850X").resolve()
+    """Use runner caches in CI; require verified NVMe caches for local runs."""
     environment = os.environ.copy()
-    for name in ("FETCH_GO_CACHE", "FETCH_GO_MODCACHE"):
-        value = environment.get(name)
-        if not value:
-            _fail(f"{name} is required and must name a verified NVMe cache path")
-        path = Path(value).expanduser().resolve()
-        if not path.is_dir() or not path.is_relative_to(nvme_root):
-            _fail(f"{name} must be an existing directory under {nvme_root}")
-        environment["GOCACHE" if name == "FETCH_GO_CACHE" else "GOMODCACHE"] = str(path)
+    if not environment.get("CI"):
+        nvme_root = Path("/Volumes/1TB_NVMe_SN850X").resolve()
+        for name in ("FETCH_GO_CACHE", "FETCH_GO_MODCACHE"):
+            value = environment.get(name)
+            if not value:
+                _fail(f"{name} is required and must name a verified NVMe cache path")
+            path = Path(value).expanduser().resolve()
+            if not path.is_dir() or not path.is_relative_to(nvme_root):
+                _fail(f"{name} must be an existing directory under {nvme_root}")
+            environment["GOCACHE" if name == "FETCH_GO_CACHE" else "GOMODCACHE"] = str(path)
     environment.update({
         "CGO_ENABLED": "0", "GOTOOLCHAIN": "local", "GOWORK": "off",
         "GOPROXY": "off", "GOFLAGS": "-mod=readonly", "GOMAXPROCS": "2",
     })
     return environment
+
+
+def source_bound_capture_report(capture: dict[str, object], raw: bytes) -> dict[str, object]:
+    """Describe a current Go capture without promoting it to a parity oracle."""
+    if capture.get("capture_kind") != "loopback_hermetic_production_client":
+        _fail("source-bound gate requires a loopback_hermetic_production_client capture")
+    profiles = capture["profiles"]
+    return {
+        "schema_version": 1,
+        "gate": "FETCH-002 source-bound Go capture",
+        "capture_sha256_self_measured": hashlib.sha256(raw).hexdigest(),
+        "source_provenance": {
+            "status": "verified_against_current_checkout_and_executable",
+            "worktree_head": capture["worktree_head"],
+            "compiler": capture["compiler"],
+            "executable_sha256": capture["executable_sha256"],
+            "compiler_input_count": len(capture["build_inputs"]),
+            "capture_kind": capture["capture_kind"],
+            "azuretls_module": {
+                "path": AZURETLS_MODULE_PATH,
+                "version": HISTORICAL_AZURETLS_MODULE,
+                "binding": "current browse/go.mod and source closure",
+            },
+        },
+        "wire_validation": {
+            "status": "raw_fields_reparsed_and_internally_consistent",
+            "profiles": [row["profile"] for row in profiles],
+        },
+        "historical_oracle_status": "INVALIDATED",
+        "current_source_bound_oracle_established": False,
+        "native_rust_parity_compared": False,
+        "acceptance_blockers": [
+            "historical oracle verdict is INVALIDATED; no current source-bound oracle independently established",
+            "this gate validates the pinned Go transport capture only; no native Rust parity comparison performed",
+            "capture digest is self-measured for artifact identification, not independently trusted",
+        ],
+    }
 
 
 @functools.lru_cache(maxsize=4)
@@ -536,7 +577,7 @@ def compiler_input_closure(repo_root_string: str, go: str = "go") -> frozenset[s
         result = subprocess.run(
             [go, "list", "-deps", "-test", "-json", "./internal/fetch/fetch"],
             cwd=repo_root / "browse", env=verified_external_go_environment(),
-            capture_output=True, text=True, check=False, timeout=60,
+            capture_output=True, text=True, encoding="utf-8", check=False, timeout=60,
         )
     except (OSError, subprocess.TimeoutExpired) as error:
         _fail(f"cannot resolve Go compiler input closure: {error}")
@@ -612,6 +653,11 @@ def validate_capture(capture: object, *, repo_root: Path, go: str = "go") -> Non
             "stale capture: worktree_head does not match the current repository HEAD "
             f"(capture claims {worktree_head}, HEAD is {current_head})"
         )
+
+    go_mod = (repo_root / "browse/go.mod").read_text()
+    azuretls_pin = re.search(rf"(?m)^\s*{re.escape(AZURETLS_MODULE_PATH)}\s+(\S+)", go_mod)
+    if azuretls_pin is None or azuretls_pin.group(1) != HISTORICAL_AZURETLS_MODULE:
+        _fail("current browse/go.mod is not pinned to AzureTLS v1.13.2")
 
     compiler = capture["compiler"]
     if not isinstance(compiler, dict) or not {"go_version", "goos", "goarch"} <= compiler.keys():
@@ -824,7 +870,14 @@ def git_object_hash(repo_root: Path, repo_rel_path: str) -> str:
 
 
 def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, object]) -> dict[str, object]:
-    """Compare current Go-client wire fields; never normalize ordering."""
+    """Compare fields using the Go oracle's deterministic ordering contract.
+
+    Chrome, Edge, and Opera use AzureTLS's randomized Chrome extension shuffle,
+    so their historical extension order is diagnostic only; preserve the raw
+    capture but compare that field as a multiset. All other ordered fields stay
+    byte/order sensitive. This diagnostic comparator cannot validate an oracle
+    whose verdict is INVALIDATED.
+    """
     current = {row["profile"]: row for row in capture["profiles"]}
     historical_rows = {row["profile"]: row["oracle"] for row in historical["profiles"]}
     mismatches = []
@@ -838,8 +891,17 @@ def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, ob
         for current_field, historical_field in ORACLE_COMPARISON_FIELDS:
             actual = candidate.get(current_field)
             expected = oracle.get(historical_field)
-            equal = actual == expected
-            fields.append({"field": current_field, "equal": equal})
+            shuffled_extensions = (
+                current_field == "extensions_no_grease" and profile in SHUFFLED_EXTENSION_PROFILES
+            )
+            equal = Counter(actual) == Counter(expected) if shuffled_extensions else actual == expected
+            field_result = {"field": current_field, "equal": equal}
+            if shuffled_extensions:
+                field_result.update({
+                    "comparison": "unordered_multiset",
+                    "wire_order_equal": actual == expected,
+                })
+            fields.append(field_result)
             if not equal:
                 mismatches.append({
                     "profile": profile,
@@ -851,6 +913,7 @@ def compare_capture_to_historical_oracle(capture: dict, historical: dict[str, ob
     return {
         "oracle_identity": historical["identity"],
         "oracle_source_commit": historical["source_commit"],
+        "extension_order_relaxed_profiles": sorted(SHUFFLED_EXTENSION_PROFILES),
         "profiles": profile_results,
         "mismatches": mismatches,
         "passed": not mismatches,
@@ -1188,11 +1251,17 @@ def verify_artifacts(capture: dict, *, evidence_root: Path, go: str) -> None:
     if not lines or ": " not in lines[0]:
         _fail("executable has no Go version identity")
     settings = {}
+    main_package = None
     for line in lines[1:]:
         fields = line.strip().split("\t")
+        if len(fields) == 2 and fields[0] == "path":
+            main_package = fields[1]
         if len(fields) == 2 and fields[0] == "build" and "=" in fields[1]:
             key, value = fields[1].split("=", 1)
             settings[key] = value
+    expected_package = f"{EXPECTED_GO_MODULE}/internal/fetch/fetch.test"
+    if main_package != expected_package:
+        _fail(f"capture executable is not the pinned FETCH-002 Go test package: {main_package!r}")
     actual = {"go_version": lines[0].rsplit(": ", 1)[1],
               "goos": settings.get("GOOS"), "goarch": settings.get("GOARCH")}
     if capture["compiler"] != actual:
@@ -1202,8 +1271,12 @@ def verify_artifacts(capture: dict, *, evidence_root: Path, go: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture", required=True, type=Path, help="path to the capture JSON file")
-    parser.add_argument("--trusted-sha256", required=True,
-                        help="independently reviewed digest; never derive it from this input at acceptance time")
+    parser.add_argument("--trusted-sha256",
+                        help="independently reviewed digest required by the full diagnostic comparison")
+    parser.add_argument(
+        "--verify-source-bound-capture", action="store_true",
+        help="validate a freshly executed production Go loopback capture; does not establish oracle trust or Rust parity",
+    )
     parser.add_argument("--go", default="go", help="Go tool used to read binary build metadata")
     parser.add_argument("--historical-oracle", type=Path,
                         help="pinned historical FETCH-002 oracle (defaults to the tracked overlay)")
@@ -1228,13 +1301,28 @@ def main() -> int:
         return 1
     if (args.rust is None) != (args.compat is None):
         parser.error("--rust and --compat must be supplied together")
+    if args.verify_source_bound_capture and (args.trusted_sha256 or args.rust or args.compat):
+        parser.error("--verify-source-bound-capture cannot be combined with trusted digest or Rust/compat comparison")
+    if not args.verify_source_bound_capture and not args.trusted_sha256:
+        parser.error("--trusted-sha256 is required unless --verify-source-bound-capture is selected")
     try:
-        if not SHA256_RE.fullmatch(args.trusted_sha256):
-            _fail("trusted-sha256 must be exactly 64 lowercase hex characters")
         raw = args.capture.read_bytes()
         capture = json.loads(raw)
         validate_capture(capture, repo_root=args.repo_root, go=args.go)
         verify_artifacts(capture, evidence_root=args.capture.parent, go=args.go)
+        if args.verify_source_bound_capture:
+            if capture["capture_kind"] != "loopback_hermetic_production_client":
+                _fail("source-bound gate requires a loopback_hermetic_production_client capture")
+            report = source_bound_capture_report(capture, raw)
+            if args.report:
+                args.report.parent.mkdir(parents=True, exist_ok=True)
+                args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+            print("FETCH-002 Go source-bound capture validated; Rust parity and oracle trust remain unestablished")
+            if args.report:
+                print(f"report: {args.report}")
+            return 0
+        if not SHA256_RE.fullmatch(args.trusted_sha256):
+            _fail("trusted-sha256 must be exactly 64 lowercase hex characters")
         if hashlib.sha256(raw).hexdigest() != args.trusted_sha256:
             _fail("capture does not match the independently trusted sha256")
         historical_path = args.historical_oracle or (args.repo_root / HISTORICAL_ORACLE_REL_PATH)

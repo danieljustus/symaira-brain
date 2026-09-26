@@ -75,8 +75,7 @@
     "timeout": "bounded by request timeout"
   },
   "unsupported": [
-    "har-export",
-    "axe-core-audit"
+    "har-export"
   ],
   "cleanup": {
     "close_is_idempotent": true,

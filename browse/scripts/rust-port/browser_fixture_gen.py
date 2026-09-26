@@ -27,7 +27,7 @@ from external_env import ensure_external_environment
 
 ensure_external_environment(__file__)
 
-ORACLE_COMMIT = "652453d1595fc302bd69c328e7da8a21dbee28b9"
+ORACLE_COMMIT = "2ddbda51ef059181b99171ce7f87b6f6d8044c92"
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURE_DIR = ROOT / "testdata/port/engine"
 CHROME_FIXTURE = FIXTURE_DIR / "chrome-full.json"
@@ -61,7 +61,9 @@ def source_hashes(paths: tuple[str, ...]) -> dict[str, str]:
     result: dict[str, str] = {}
     for relative in paths:
         current = (ROOT / relative).read_bytes()
-        pinned = subprocess.check_output(["git", "show", f"{ORACLE_COMMIT}:{relative}"], cwd=ROOT)
+        pinned = subprocess.check_output(
+            ["git", "show", f"{ORACLE_COMMIT}:browse/{relative}"], cwd=ROOT
+        )
         if current != pinned:
             raise SystemExit(f"oracle source differs from pinned commit: {relative}")
         result[relative] = sha256(current)
@@ -119,7 +121,7 @@ def validate_shape(suite: str, fixture: Path) -> None:
         missing = required - data.keys()
         if missing:
             raise SystemExit(f"chrome-full: missing fixture fields: {sorted(missing)}")
-        if data["unsupported"] != ["har-export", "axe-core-audit"]:
+        if data["unsupported"] != ["har-export"]:
             raise SystemExit("chrome-full: unsupported capability boundary drifted")
         if not data["cleanup"]["owned_process_killed"] or not data["cleanup"]["private_profile_removed"]:
             raise SystemExit("chrome-full: cleanup proof is incomplete")
@@ -256,7 +258,7 @@ def native_gate(suite: str) -> dict[str, Any]:
         return evidence
 
     env = os.environ.copy()
-    env["SYMBROWSE_E2E"] = "1" if suite == "chrome-full" else env.get("SYMBROWSE_E2E", "0")
+    env["SYMBROWSE_E2E"] = "1" if suite in {"chrome-full", "safari"} else env.get("SYMBROWSE_E2E", "0")
     env["SYMBROWSE_NATIVE_TARGETS"] = "1"
     if suite == "chrome-full":
         command = [
@@ -275,10 +277,13 @@ def native_gate(suite: str) -> dict[str, Any]:
             "cargo",
             "test",
             "-p",
-            "symbrowse-engine-safari",
-            "--tests",
+            "symbrowse-daemon",
+            "--test",
+            "safari_native",
             "--locked",
             "--",
+            "--exact",
+            "production_daemon_path_runs_safari_bidi_and_reaps_owned_driver",
             "--nocapture",
         ]
     evidence["command"] = command
@@ -291,7 +296,7 @@ def native_gate(suite: str) -> dict[str, Any]:
             evidence["reason"] = (
                 "native Chrome launch, CDP surface, and bounded profile cleanup passed"
                 if suite == "chrome-full"
-                else "native Safari launch, BiDi session, command, and bounded cleanup passed"
+                else "native Safari daemon path, BiDi session, command, and bounded cleanup passed"
             )
         else:
             evidence["reason"] = "native test returned a non-zero exit code"

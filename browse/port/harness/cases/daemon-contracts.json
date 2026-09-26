@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "DMN-002-frame-limits",
+      "platforms": ["all"],
+      "coverage": ["malformed-json", "truncated-json", "invalid-escape", "invalid-number", "empty-cmd", "whitespace-cmd", "vertical-tab-tail", "one-mib-boundary", "oversized-line"],
+      "expected": {
+        "malformed_json": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character 'n' looking for beginning of object key string"
+        },
+        "truncated_object": {
+          "class": "malformed_request",
+          "message": "decode frame: unexpected end of JSON input"
+        },
+        "truncated_string": {
+          "class": "malformed_request",
+          "message": "decode frame: unexpected end of JSON input"
+        },
+        "invalid_escape": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character 'q' in string escape code"
+        },
+        "leading_zero_number": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '1' after object key:value pair"
+        },
+        "invalid_exponent": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '}' in exponent of numeric literal"
+        },
+        "empty_cmd": {
+          "class": "malformed_request",
+          "message": "missing cmd"
+        },
+        "whitespace_cmd": {
+          "class": "accepted",
+          "message": ""
+        },
+        "vertical_tab_tail": {
+          "class": "malformed_request",
+          "message": "decode frame: invalid character '\\v' after top-level value"
+        },
+        "boundary": {
+          "class": "accepted",
+          "message": ""
+        },
+        "oversized": {
+          "class": "connection_close",
+          "message": ""
+        }
+      },
+      "go": ["go", "test", "./internal/daemon", "-run", "TestDecodeFrameAndStableResponseSchema|TestDecodeFrameValidation", "-count=1"],
+      "go_oracle": ["go", "run", "./port/harness/daemon_frame_limits_oracle.go"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "frame_line_ending_and_limit_match_go_scanner", "--locked"],
+      "rust_protocol": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "protocol::tests::", "--locked"]
+    },
+    {
+      "id": "DMN-003-peer-uid",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["same-uid-accepted", "different-uid-rejected-by-policy", "native-peer-credential-accepted"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestPeerUIDMatchPolicy|TestDefaultPeerUIDAcceptsCurrentUser", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "peer_uid_match_policy_accepts_only_the_current_uid", "--locked"]
+    },
+    {
+      "id": "DMN-003-socket-mode",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["socket-mode-0600", "socket-directory-mode-0700", "endpoint-cleanup"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestSocketPathValidationAndMode", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "socket_lifecycle_permissions_status_and_stop", "--locked"]
+    },
+    {
+      "id": "DMN-004-startup-race",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["stale-socket-recovered-by-startup", "live-socket-preserved", "all-concurrent-losers-rejected", "single-owner-endpoint-reusable"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestConcurrentStartupYieldsOneOwner|TestStaleSocketIsReplaced", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "--locked"]
+    },
+    {
+      "id": "DMN-005-status-lifecycle",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["status-identity-and-timestamps", "stop-removes-endpoint", "idle-timeout-removes-endpoint"],
+      "go": ["go", "test", "./internal/daemon", "-run", "TestStatusAndStop|TestIdleTimeoutStopsServer", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "lifecycle", "socket_lifecycle_permissions_status_and_stop", "--locked"]
+    },
+    {
+      "id": "DMN-006-deadlines",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["client-read-timeout", "operation-timeout-keeps-connection-usable", "client-disconnect-does-not-cancel-blocked-handler"],
+      "go": ["go", "test", "./internal/daemon", "-run", "Timeout|Deadline|Cancel|Disconnect", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked", "dmn006"]
+    },
+    {
+      "id": "DMN-007-session-registry",
+      "platforms": ["all"],
+      "coverage": ["sorted-list", "metadata-shape", "idempotent-ensure", "stable-errors", "reference-count", "clear-preserves-profiles", "timestamp-format", "cleans-user-data-root"],
+      "go": ["go", "test", "./internal/daemon", "-run", "SessionRegistry", "-count=1"],
+      "go_oracle": ["go", "run", "./port/harness/session_registry_oracle.go"],
+      "rust_oracle": ["cargo", "run", "--quiet", "-p", "symbrowse-daemon", "--example", "session_registry_oracle", "--locked"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "session_registry", "--locked"]
+    },
+    {
+      "id": "DMN-008-client-autostart",
+      "platforms": ["darwin", "linux"],
+      "coverage": ["autostart-retry", "autostart-start-failure", "autostart-timeout", "missing-daemon-no-autostart", "concurrent-client-autostart"],
+      "go": ["go", "test", "./internal/daemon", "./internal/mcp", "./cmd/symbrowse", "-run", "Autostart|Client|Engine", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-daemon", "--test", "cancellation", "--locked"]
+    },
+    {
+      "id": "DMN-008-mcp-config-warnings",
+      "platforms": ["darwin", "linux"],
+      "go": ["go", "test", "./internal/mcp", "-run", "Engine", "-count=1"],
+      "rust": ["cargo", "test", "-p", "symbrowse-mcp", "engine_and_policy_mismatches_warn_without_stopping_daemon", "--locked"]
+    }
+  ]
+}

@@ -9,7 +9,7 @@ use std::{
 };
 use symbrowse_engine_safari::{AttachEngine, AttachError, ScriptRunner};
 
-const ORACLE_COMMIT: &str = "652453d1595fc302bd69c328e7da8a21dbee28b9";
+const ORACLE_COMMIT: &str = "2ddbda51ef059181b99171ce7f87b6f6d8044c92";
 
 fn fixture() -> Value {
     let path =
@@ -24,6 +24,11 @@ fn safari_fixture_freezes_attach_and_bidi_boundaries() {
     assert_eq!(value["suite"], "safari");
     assert_eq!(value["attach"]["engine_kind"], "safari-attach");
     assert_eq!(value["attach"]["launch_mode"], "attach");
+    let attach = AttachEngine::new(FixtureNoopRunner);
+    assert_eq!(
+        serde_json::to_value(attach.capabilities()).expect("attach capabilities"),
+        value["attach"]["capabilities"]
+    );
     assert_eq!(
         value["attach"]["policy"]["invalid_target_before_runner"],
         true
@@ -31,6 +36,14 @@ fn safari_fixture_freezes_attach_and_bidi_boundaries() {
     assert_eq!(value["attach"]["lifecycle"]["close_quits_safari"], false);
     assert_eq!(value["bidi"]["engine_kind"], "safari-bidi");
     assert_eq!(value["bidi"]["launch_mode"], "launch");
+    let bidi = symbrowse_engine_safari::BidiEngine::from_transport(
+        Box::new(FixtureNoopTransport),
+        "fixture-context",
+    );
+    assert_eq!(
+        serde_json::to_value(bidi.capabilities()).expect("BiDi capabilities"),
+        value["bidi"]["capabilities"]
+    );
     assert_eq!(
         value["bidi"]["protocol"]["boolean_websocket_url_rejected"],
         true
@@ -40,6 +53,30 @@ fn safari_fixture_freezes_attach_and_bidi_boundaries() {
         value["bidi"]["lifecycle"]["session_delete_before_driver_stop"],
         true
     );
+}
+
+struct FixtureNoopRunner;
+
+impl ScriptRunner for FixtureNoopRunner {
+    fn run(&self, _script: &str, _timeout: Duration) -> Result<String, AttachError> {
+        Ok(String::new())
+    }
+}
+
+struct FixtureNoopTransport;
+
+impl symbrowse_engine_safari::BidiTransport for FixtureNoopTransport {
+    fn command<'a>(
+        &'a mut self,
+        _method: &'a str,
+        _params: Value,
+    ) -> symbrowse_engine_safari::BoxFuture<'a, Value> {
+        Box::pin(async { Ok(Value::Null) })
+    }
+
+    fn close<'a>(&'a mut self) -> symbrowse_engine_safari::BoxFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
 }
 
 #[test]

@@ -10,7 +10,8 @@ use serde_json::{Value, json};
 use symbrowse_core::state::OriginState;
 use symbrowse_engine::{Page, capabilities::Capabilities};
 use symbrowse_engine_safari::{
-    AttachEngine, BidiEngine, BidiError, DriverOptions, NavigationPolicy, OsascriptRunner,
+    AttachEngine, AttachError, BidiEngine, BidiError, DriverOptions, NavigationPolicy,
+    OsascriptRunner,
 };
 
 use crate::{DaemonError, Frame, HandlerResult, SessionSpec, codes};
@@ -43,10 +44,10 @@ impl SafariRuntime {
             // Attach is deliberately opt-in for all script-backed interaction,
             // including state capture and restore.
             engine.set_interactions_opt_in(true);
-            engine.check_prerequisites().map_err(runtime_error)?;
-            engine.launch().map_err(runtime_error)?;
-            let context = engine.new_context().map_err(runtime_error)?;
-            let page = engine.new_page(&context).map_err(runtime_error)?;
+            engine.check_prerequisites().map_err(attach_launch_error)?;
+            engine.launch().map_err(attach_launch_error)?;
+            let context = engine.new_context().map_err(attach_launch_error)?;
+            let page = engine.new_page(&context).map_err(attach_launch_error)?;
             return Ok(Self {
                 session: SafariSession::Attach { engine, page },
             });
@@ -58,8 +59,10 @@ impl SafariRuntime {
             navigation_policy: policy,
             ..DriverOptions::default()
         };
-        let engine = BidiEngine::launch(options).await.map_err(runtime_error)?;
-        let page = engine.new_page().map_err(runtime_error)?;
+        let engine = BidiEngine::launch(options)
+            .await
+            .map_err(bidi_launch_error)?;
+        let page = engine.new_page().map_err(bidi_launch_error)?;
         Ok(Self {
             session: SafariSession::Bidi { engine, page },
         })
@@ -97,6 +100,29 @@ impl SafariRuntime {
             .and_then(Value::as_object)
             .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd)))?;
         match frame.cmd.as_str() {
+            "storage.list" => {
+                let kind = crate::runtime::storage_kind(args)?;
+                let captured = self
+                    .eval(&crate::runtime::storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                let data = crate::runtime::storage_list_response(kind, captured)?;
+                Ok((Some(data), Vec::new()))
+            }
+            "storage.set" => {
+                let (kind, key, script) = crate::runtime::storage_set_request(args)?;
+                self.eval(&script).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                Ok((Some(json!({"set":key})), Vec::new()))
+            }
+            "storage.clear" => {
+                let (kind, script) = crate::runtime::storage_clear_request(args)?;
+                self.eval(&script)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                Ok((Some(json!({"cleared":kind})), Vec::new()))
+            }
             "open" | "goto" => {
                 let url = required(args, "url")?;
                 let result = self.navigate(url).await.map_err(runtime_error)?;
@@ -419,11 +445,33 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     }
 }
 
+fn attach_launch_error(error: AttachError) -> DaemonError {
+    if matches!(error, AttachError::Prerequisite { .. }) {
+        return unavailable(error);
+    }
+    runtime_error(error)
+}
+
+fn bidi_launch_error(error: BidiError) -> DaemonError {
+    if matches!(error, BidiError::Prerequisite { .. }) {
+        return unavailable(error);
+    }
+    runtime_error(error)
+}
+
+fn unavailable(error: impl std::fmt::Display) -> DaemonError {
+    DaemonError {
+        code: codes::DAEMON_UNAVAILABLE.into(),
+        message: crate::redact_str(&error.to_string()),
+        ..Default::default()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::{Arc, Mutex};
 
-    use symbrowse_engine_safari::{BidiTransport, BoxFuture};
+    use symbrowse_engine_safari::{BidiTransport, BoxFuture, SafariPrerequisite};
 
     use super::*;
 
@@ -447,15 +495,31 @@ mod tests {
     }
 
     #[test]
+    fn safari_prerequisites_report_unavailable_without_engine_substitution() {
+        let attach = attach_launch_error(AttachError::Prerequisite {
+            check: SafariPrerequisite::AutomationPermissionDenied,
+            message: "permission denied".into(),
+        });
+        let bidi = bidi_launch_error(BidiError::Prerequisite {
+            check: SafariPrerequisite::RemoteAutomationDisabled,
+            message: "remote automation disabled".into(),
+        });
+        assert_eq!(attach.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(bidi.code, codes::DAEMON_UNAVAILABLE);
+    }
+
+    #[test]
     fn bidi_capabilities_are_exposed_by_the_safari_runtime() {
         let capabilities = BidiEngine::planned_capabilities();
         assert_eq!(capabilities.kind, "safari-bidi");
         assert_eq!(
             capabilities.interfaces,
             [
-                "CookieEngine",
+                "FrameManager",
                 "InspectionEngine",
-                "NavigationStateProvider"
+                "NavigationStateProvider",
+                "NetworkPolicyReporter",
+                "TabManager"
             ]
         );
         assert!(

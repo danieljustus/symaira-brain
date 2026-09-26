@@ -151,6 +151,9 @@ func TestClientReadTimeoutOperationTimeout(t *testing.T) {
 	if terr.Code != ErrorOperationTimeout {
 		t.Fatalf("code = %q, want %q", terr.Code, ErrorOperationTimeout)
 	}
+	if terr.Message != "daemon response timed out after 30ms" {
+		t.Fatalf("message = %q, want daemon response timed out after 30ms", terr.Message)
+	}
 	if terr.ErrorCode() != "operation_timeout" {
 		t.Fatalf("ErrorCode() = %q, want operation_timeout", terr.ErrorCode())
 	}
@@ -236,11 +239,7 @@ func TestClientStartupTimeout(t *testing.T) {
 }
 
 func TestClientAutostartSuccessAfterRetries(t *testing.T) {
-	dir, err := os.MkdirTemp("", "sb-autostart-ok-")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.RemoveAll(dir) })
+	dir := shortSocketTempDir(t, "sb-autostart-ok-")
 	socketPath := filepath.Join(dir, "autostart-ok.sock")
 
 	var started atomic.Bool

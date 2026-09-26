@@ -1,0 +1,101 @@
+name: Browse Chrome native E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ['browse/**', '.github/workflows/browse-chrome-native-e2e.yml']
+  push:
+    branches: [main]
+    paths: ['browse/**', '.github/workflows/browse-chrome-native-e2e.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browse-chrome-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  chrome-native:
+    name: Chrome daemon E2E (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-amd64
+            cft: linux64
+          - runner: ubuntu-24.04-arm
+            platform: linux-arm64
+            cft: linux-arm64
+          - runner: macos-15-intel
+            platform: darwin-amd64
+            cft: mac-x64
+          - runner: macos-15
+            platform: darwin-arm64
+            cft: mac-arm64
+          - runner: windows-2025
+            platform: windows-amd64
+            cft: win64
+          - runner: windows-11-arm
+            platform: windows-arm64
+            cft: win-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+
+      - name: Run Go engine contract oracles
+        run: go test ./internal/engine ./internal/engine/chrome ./internal/engine/doctor ./internal/flows ./cmd/symbrowse -run 'Launch|Attach|Discover|Timeout|Interaction|Inspection|Find|Wait|Tab|Frame|Dialog|Network|Upload|Download|Screenshot|A11y'
+
+      - name: Verify Go Symvault auth behavior
+        run: go test ./internal/daemon -run '^TestAuthLogin(EndToEnd|RejectsUnsafeURLBeforeVaultAccess|RedactsErrors)$' -count=1
+
+      - name: Fetch official Chrome for Testing artifact
+        id: cft
+        run: python3 port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/symbrowse-cft"
+
+      - name: Run Chrome production-daemon E2E
+        if: steps.cft.outputs.available == 'true'
+        run: |
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            export SYMBROWSE_CHROME_REAL_EXECUTABLE="$SYMBROWSE_CHROME_EXECUTABLE"
+            wrapper="$RUNNER_TEMP/symbrowse-cft/chrome-ci-wrapper"
+            cat > "$wrapper" <<'SH'
+          #!/usr/bin/env bash
+          exec "$SYMBROWSE_CHROME_REAL_EXECUTABLE" --no-sandbox "$@"
+          SH
+            chmod +x "$wrapper"
+            export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
+          fi
+          cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --test-threads=1 --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test full -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}
+          SYMBROWSE_CHROME_VERSION: ${{ steps.cft.outputs.version }}
+
+      - name: Verify explicit unavailable behavior on Windows ARM64
+        if: steps.cft.outputs.available == 'false'
+        run: |
+          echo "No official Chrome for Testing Windows ARM64 asset is published at ${{ steps.cft.outputs.metadata }}."
+          echo "Testing that an explicitly selected but unavailable Chrome returns a typed error without engine substitution."
+          cargo test --locked -p symbrowse-daemon --test chrome_native -- --exact production_daemon_path_runs_chrome_over_platform_transport --nocapture
+          cargo test --locked -p symbrowse-daemon --test auth_native -- --exact production_daemon_auth_login_uses_fake_vault_and_fixture_chrome --test-threads=1 --nocapture
+        env:
+          SYMBROWSE_E2E: '1'
+          SYMBROWSE_E2E_EXPECT_CHROME_UNAVAILABLE: '1'
+          SYMBROWSE_CHROME_EXECUTABLE: ${{ steps.cft.outputs.executable }}

@@ -69,7 +69,7 @@ impl ToolError {
 
     #[must_use]
     pub fn display_message(&self) -> String {
-        format!("{}: {}", self.code, self.message)
+        format!("{}: {}", self.code, redact_str(&self.message))
     }
 
     #[must_use]
@@ -78,7 +78,7 @@ impl ToolError {
         data.insert("code".to_owned(), Value::String(self.code.clone()));
         data.insert("message".to_owned(), Value::String(self.display_message()));
         if let Some(hint) = &self.hint {
-            data.insert("hint".to_owned(), Value::String(hint.clone()));
+            data.insert("hint".to_owned(), Value::String(redact_str(hint)));
         }
         if let Some(value) = self.retryable {
             data.insert("retryable".to_owned(), Value::Bool(value));
@@ -87,10 +87,10 @@ impl ToolError {
             data.insert("requires_confirmation".to_owned(), Value::Bool(value));
         }
         if let Some(value) = &self.resume_hint {
-            data.insert("resume_hint".to_owned(), Value::String(value.clone()));
+            data.insert("resume_hint".to_owned(), Value::String(redact_str(value)));
         }
         if let Some(value) = &self.details {
-            data.insert("details".to_owned(), value.clone());
+            data.insert("details".to_owned(), symbrowse_daemon::redact_json(value));
         }
         Value::Object(data)
     }
@@ -133,6 +133,7 @@ impl Default for DaemonProxyOptions {
 pub struct DaemonProxy {
     options: DaemonProxyOptions,
     child: Option<Child>,
+    configuration_mismatch_warned: bool,
 }
 
 #[derive(Debug)]
@@ -167,6 +168,7 @@ impl DaemonProxy {
         Self {
             options,
             child: None,
+            configuration_mismatch_warned: false,
         }
     }
 
@@ -180,14 +182,15 @@ impl DaemonProxy {
             .get("session")
             .and_then(Value::as_str)
             .filter(|value| !value.is_empty())
-            .unwrap_or(&self.options.session);
+            .map(str::to_owned)
+            .unwrap_or_else(|| self.options.session.clone());
         let command = daemon_command(tool, arguments);
-        let endpoint = self.endpoint(session)?;
+        let endpoint = self.endpoint(&session)?;
         let max_tokens = requested_max_tokens(&command, arguments);
         let frame = DaemonFrame {
             cmd: command,
             args: daemon_args(tool, arguments),
-            session: session.to_owned(),
+            session: session.clone(),
             request_id: request_id(),
             max_tokens: (max_tokens > 0).then_some(max_tokens),
             retrieval_surface: Some("mcp".to_owned()),
@@ -196,7 +199,7 @@ impl DaemonProxy {
         match self.checked_request(&endpoint, &frame) {
             Ok(response) => response.into_result(),
             Err(CheckedRequestError::Autostart(first)) => {
-                let child = self.start_daemon(session).map_err(Box::new)?;
+                let child = self.start_daemon(&session).map_err(Box::new)?;
                 self.child = Some(child);
                 let deadline = Instant::now() + self.options.startup_timeout;
                 let mut last = first;
@@ -215,9 +218,9 @@ impl DaemonProxy {
                     code: "daemon_unavailable".to_owned(),
                     message: format!(
                         "daemon did not become ready for session {}",
-                        redact_str(session)
+                        redact_str(&session)
                     ),
-                    hint: Some(self.daemon_hint(session)),
+                    hint: Some(self.daemon_hint(&session)),
                     retryable: Some(true),
                     requires_user_confirmation: None,
                     resume_hint: None,
@@ -444,7 +447,7 @@ impl DaemonProxy {
 
     #[allow(clippy::result_large_err)]
     fn checked_request(
-        &self,
+        &mut self,
         endpoint: &str,
         frame: &DaemonFrame,
     ) -> Result<DaemonResponse, CheckedRequestError> {
@@ -465,41 +468,16 @@ impl DaemonProxy {
             return Err(CheckedRequestError::Fatal(status.into_tool_error()));
         }
         let data = status.data.unwrap_or(Value::Null);
-        let session_ok = data
-            .get("session")
-            .and_then(Value::as_str)
-            .is_none_or(|session| session == frame.session.as_str());
-        let engine_ok = self.options.engine.as_ref().is_none_or(|expected| {
-            data.get("engine").and_then(Value::as_str) == Some(expected.as_str())
-        });
-        let policy_ok = data
-            .get("policy")
-            .and_then(|policy| policy.get("allow_private"))
-            .and_then(Value::as_bool)
-            == Some(self.options.allow_private);
-        if !(session_ok && engine_ok && policy_ok) {
-            let _ = self.request(
-                endpoint,
-                &DaemonFrame {
-                    cmd: "daemon.stop".to_owned(),
-                    args: None,
-                    session: frame.session.clone(),
-                    request_id: request_id(),
-                    max_tokens: None,
-                    retrieval_surface: Some("mcp".to_owned()),
-                },
-            );
-            return Err(CheckedRequestError::Autostart(ToolError {
-                code: "daemon_unavailable".to_owned(),
-                message: "existing daemon configuration is incompatible; it was stopped".to_owned(),
-                hint: Some(
-                    "retry to start a daemon with the requested session configuration".to_owned(),
-                ),
-                retryable: Some(true),
-                requires_user_confirmation: None,
-                resume_hint: None,
-                details: None,
-            }));
+        let warnings = status_mismatch_warnings(
+            &data,
+            self.options.engine.as_deref(),
+            self.options.allow_private,
+        );
+        if !warnings.is_empty() && !self.configuration_mismatch_warned {
+            for warning in warnings {
+                eprintln!("warning: {warning}");
+            }
+            self.configuration_mismatch_warned = true;
         }
         self.request(endpoint, frame)
             .map_err(classify_checked_error)
@@ -569,6 +547,46 @@ impl DaemonProxy {
                 .unwrap_or("the configured daemon log")
         )
     }
+}
+
+fn status_mismatch_warnings(
+    data: &Value,
+    expected_engine: Option<&str>,
+    allow_private: bool,
+) -> Vec<String> {
+    let mut warnings = Vec::new();
+    if let Some(expected) = expected_engine {
+        let actual = data.get("engine").and_then(Value::as_str);
+        if actual != Some(expected) {
+            warnings.push(format!(
+                "running daemon engine {:?} differs from requested engine {:?}",
+                actual, expected
+            ));
+        }
+    }
+
+    let policy = data.get("policy");
+    let ssrf_enabled = policy
+        .and_then(|value| value.get("ssrf_enabled"))
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let daemon_allows_private = policy
+        .and_then(|value| value.get("allow_private"))
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    if !ssrf_enabled {
+        warnings.push(
+            "a daemon is already running without the SSRF guard; private targets are NOT denied. Stop it and let the MCP server start its own daemon, or pass --allow-private deliberately"
+                .into(),
+        );
+    }
+    if allow_private && !daemon_allows_private {
+        warnings.push(
+            "the running daemon does not allow private targets; use --allow-private on the daemon to match this server's option"
+                .into(),
+        );
+    }
+    warnings
 }
 
 impl Default for DaemonProxy {
@@ -1142,6 +1160,87 @@ mod tests {
         );
         assert_eq!(frame["session"], Value::String("test".to_owned()));
         server.join().expect("daemon fixture thread");
+        let _ = std::fs::remove_file(path);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn engine_and_policy_mismatches_warn_without_stopping_daemon() {
+        use std::{
+            io::{BufRead, BufReader, Write},
+            os::unix::net::UnixListener,
+            sync::mpsc,
+        };
+
+        let path = std::env::temp_dir().join(format!(
+            "symbrowse-mcp-config-mismatch-{}.sock",
+            request_id()
+        ));
+        let listener = UnixListener::bind(&path).expect("bind daemon fixture socket");
+        let (commands, receive) = mpsc::channel();
+        let server = std::thread::spawn(move || {
+            for _ in 0..2 {
+                let (stream, _) = listener.accept().expect("accept daemon fixture");
+                let mut reader = BufReader::new(stream);
+                let mut line = String::new();
+                reader.read_line(&mut line).expect("read daemon request");
+                let frame: Value = serde_json::from_str(&line).expect("decode daemon frame");
+                commands
+                    .send(frame["cmd"].clone())
+                    .expect("record daemon command");
+                let response: &[u8] = if frame["cmd"] == "daemon.status" {
+                    br#"{"success":true,"data":{"session":"test","engine":"chrome","policy":{"ssrf_enabled":false,"allow_private":false}}}"#
+                } else {
+                    br#"{"success":true,"data":{"ok":true}}"#
+                };
+                let mut writer = reader.into_inner();
+                writer.write_all(response).expect("write daemon response");
+                writer.write_all(b"\n").expect("terminate daemon response");
+            }
+        });
+        let mismatch_warnings = status_mismatch_warnings(
+            &json!({
+                "engine": "chrome",
+                "policy": {"ssrf_enabled": false, "allow_private": false}
+            }),
+            Some("firefox"),
+            true,
+        );
+        assert_eq!(mismatch_warnings.len(), 3);
+        assert!(mismatch_warnings[0].contains("engine"));
+        assert!(mismatch_warnings[1].contains("SSRF guard"));
+        assert!(mismatch_warnings[2].contains("--allow-private"));
+
+        let mut proxy = DaemonProxy::new(DaemonProxyOptions {
+            session: "test".to_owned(),
+            engine: Some("firefox".to_owned()),
+            allow_private: true,
+            endpoint: Some(path.to_string_lossy().into_owned()),
+            read_timeout: Duration::from_secs(1),
+            ..DaemonProxyOptions::default()
+        });
+        let spec = ToolSpec {
+            name: "open",
+            canonical: "open",
+            command: "open",
+            profile: "core",
+        };
+        let result = proxy
+            .call(
+                &spec,
+                &json!({"url":"https://example.com", "session":"test"}),
+            )
+            .expect("configuration mismatch must not stop or block daemon");
+        assert_eq!(result["ok"], Value::Bool(true));
+        server.join().expect("daemon fixture thread");
+        let seen: Vec<_> = receive.try_iter().collect();
+        assert_eq!(
+            seen,
+            [
+                Value::String("daemon.status".into()),
+                Value::String("open".into())
+            ]
+        );
         let _ = std::fs::remove_file(path);
     }
 

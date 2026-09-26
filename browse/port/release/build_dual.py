@@ -14,14 +14,18 @@ import hashlib
 import json
 import os
 import platform
-import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import Any, Iterable, Sequence
+from typing import Any, Sequence
+
+if str(Path(__file__).resolve().parent) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from binary_smoke import check_binary
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTERNAL_BASE_ENV = "SYMAIRA_EXTERNAL_BASE"
@@ -32,7 +36,7 @@ TARGETS: dict[str, tuple[str, str, str]] = {
     "darwin-arm64": ("darwin", "arm64", "aarch64-apple-darwin"),
     "linux-amd64": ("linux", "amd64", "x86_64-unknown-linux-gnu"),
     "linux-arm64": ("linux", "arm64", "aarch64-unknown-linux-gnu"),
-    "windows-amd64": ("windows", "amd64", "x86_64-pc-windows-gnu"),
+    "windows-amd64": ("windows", "amd64", "x86_64-pc-windows-msvc"),
     "windows-arm64": ("windows", "arm64", "aarch64-pc-windows-msvc"),
 }
 
@@ -173,10 +177,15 @@ def rust_binary(root: Path, staging: Path, target: str, version: str, env: dict[
 
 def archive_bytes(binary: Path, *, binary_name: str, root: Path, windows: bool) -> bytes:
     files: list[tuple[str, bytes, int]] = [(binary_name, binary.read_bytes(), 0o755)]
-    for name in ("LICENSE", "README.md", "AGENTS.md"):
-        source = root / name
-        if source.is_file():
-            files.append((name, source.read_bytes(), 0o644))
+    sources = {
+        "LICENSE": root.parent / "LICENSE",
+        "README.md": root / "README.md",
+        "AGENTS.md": root.parent / "AGENTS.md",
+    }
+    for name, source in sources.items():
+        if not source.is_file():
+            raise RuntimeError(f"required release archive input is missing: {source}")
+        files.append((name, source.read_bytes(), 0o644))
     if windows:
         from io import BytesIO
 
@@ -207,15 +216,26 @@ def archive_bytes(binary: Path, *, binary_name: str, root: Path, windows: bool) 
     return output.getvalue()
 
 
-def write_spdx(path: Path, archive_name: str, implementation: str, version: str) -> None:
+def write_spdx(path: Path, archive: Path, archive_name: str, implementation: str, version: str) -> None:
+    archive_digest = sha256(archive)
     document = {
         "spdxVersion": "SPDX-2.3",
         "dataLicense": "CC0-1.0",
         "SPDXID": "SPDXRef-DOCUMENT",
         "name": f"symbrowse-{implementation}-{archive_name}",
-        "documentNamespace": f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive_name}",
+        "documentNamespace": f"https://spdx.symaira.dev/symbrowse/{implementation}/{archive_name}#sha256-{archive_digest}",
         "creationInfo": {"created": "1970-01-01T00:00:00Z", "creators": ["Tool: symaira-browse dual release builder"]},
-        "packages": [{"SPDXID": "SPDXRef-Package-symbrowse", "name": "symbrowse", "versionInfo": version}],
+        "packages": [{
+            "SPDXID": "SPDXRef-Package-symbrowse",
+            "name": "symbrowse",
+            "versionInfo": version,
+            "downloadLocation": "NOASSERTION",
+            "filesAnalyzed": False,
+            "checksums": [{"algorithm": "SHA256", "checksumValue": archive_digest}],
+            "licenseConcluded": "NOASSERTION",
+            "licenseDeclared": "Apache-2.0",
+            "copyrightText": "NOASSERTION",
+        }],
     }
     path.write_text(json.dumps(document, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
@@ -228,7 +248,7 @@ def package(binary: Path, directory: Path, target: str, implementation: str, ver
     archive = directory / archive_name
     archive.write_bytes(archive_bytes(binary, binary_name=binary_name, root=root, windows=os_name == "windows"))
     sbom = directory / f"{archive_name}.sbom"
-    write_spdx(sbom, archive_name, implementation, version.removeprefix("v"))
+    write_spdx(sbom, archive, archive_name, implementation, version.removeprefix("v"))
     return {"archive": archive_name, "archive_sha256": sha256(archive), "sbom": sbom.name, "sbom_sha256": sha256(sbom)}
 
 
@@ -303,6 +323,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, default=Path("target/release-evidence/dual"))
     parser.add_argument("--target", action="append", choices=tuple(TARGETS))
     parser.add_argument("--all-targets", action="store_true")
+    parser.add_argument("--source-revision", required=True, help="integrated source commit SHA for candidate evidence")
     parser.add_argument("--skip-build", action="store_true")
     parser.add_argument("--go-binary", type=Path)
     parser.add_argument("--rust-binary", type=Path)
@@ -315,7 +336,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     external_environment(env)
     output = release_output(root, args.output, env)
     if output.exists():
-        shutil.rmtree(output)
+        raise RuntimeError(f"refusing to overwrite existing release output: {output}")
     (output / "dual").mkdir(parents=True)
     artifacts: dict[str, list[dict[str, str]]] = {"go": [], "rust": []}
     for implementation in artifacts:
@@ -341,6 +362,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if binary is None or not binary.is_file():
                     blocked.append(f"{implementation}/{target}: build unavailable")
                     continue
+                identity: dict[str, object] | None = None
+                if target == host:
+                    try:
+                        identity = check_binary(binary, version)
+                    except (OSError, ValueError, subprocess.SubprocessError) as error:
+                        blocked.append(f"{implementation}/{target}: native version smoke failed: {error}")
+                        continue
                 entry = package(binary, output / "dual" / implementation, target, implementation, version, root)
                 artifacts[implementation].append(entry)
                 proofs.append(
@@ -352,17 +380,22 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "mode": "native" if target == host else "cross",
                         "status": "native_verified" if target == host else "cross_built",
                         "native_runtime_proof": target == host,
+                        "version_smoke": identity is not None,
+                        "schema_version": identity["schema_version"] if identity else None,
+                        "source_revision": args.source_revision,
+                        "runner": f"{platform.system()}/{platform.machine()}",
                     }
                 )
     write_manifests(output, version, artifacts, proofs)
     report = {
         "schema_version": 1,
         "version": version,
+        "source_revision": args.source_revision,
         "targets_requested": targets,
         "artifacts": {name: len(entries) for name, entries in artifacts.items()},
         "blocked": blocked,
         "signing": "not performed; signature-input manifests require a later signing job",
-        "native_runtime_proof": [proof["target"] for proof in proofs if proof["native_runtime_proof"]],
+        "native_runtime_proof": sorted({proof["target"] for proof in proofs if proof["native_runtime_proof"]}),
         "cutover": "blocked until signatures, all six targets, native platform proofs and value gates pass",
     }
     (output / "build-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

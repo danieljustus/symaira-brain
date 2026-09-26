@@ -117,9 +117,23 @@ impl Client {
             Err(error) if self.options.autostart && should_autostart(&error) => {
                 let mut child = self.start_daemon()?;
                 let deadline = Instant::now() + self.options.startup_timeout;
-                let mut last = error;
-                while Instant::now() < deadline {
-                    thread::sleep(Duration::from_millis(25));
+                let mut last_error = match self.checked_request(&frame) {
+                    Ok(response) => {
+                        // Dropping Child closes this client's process handle
+                        // without killing the detached daemon. Forgetting it
+                        // leaks the handle for every autostarted request.
+                        drop(child);
+                        return Ok(response);
+                    }
+                    Err(error) => error,
+                };
+                loop {
+                    let remaining = deadline.saturating_duration_since(Instant::now());
+                    if remaining.is_zero() {
+                        terminate_child(&mut child);
+                        return Err(self.startup_timeout_error(&last_error));
+                    }
+                    thread::sleep(remaining.min(Duration::from_millis(25)));
                     match self.checked_request(&frame) {
                         Ok(response) => {
                             // Dropping Child closes this client's process handle
@@ -128,11 +142,9 @@ impl Client {
                             drop(child);
                             return Ok(response);
                         }
-                        Err(error) => last = error,
+                        Err(error) => last_error = error,
                     }
                 }
-                terminate_child(&mut child);
-                Err(last)
             }
             Err(error) => Err(error),
         }
@@ -167,37 +179,24 @@ impl Client {
         let data = status.data.unwrap_or(Value::Null);
         let session_ok =
             data.get("session").and_then(Value::as_str) == Some(self.options.session.as_str());
-        let engine_ok = self
-            .options
-            .expected_engine
-            .as_ref()
-            .is_none_or(|expected| {
-                data.get("engine").and_then(Value::as_str) == Some(expected.as_str())
-            });
-        let policy_ok = self
-            .options
-            .expected_policy
-            .as_ref()
-            .is_none_or(|expected| {
-                serde_json::to_value(expected)
-                    .ok()
-                    .is_some_and(|value| data.get("policy") == Some(&value))
-            });
-        if session_ok && engine_ok && policy_ok {
-            return Ok(());
+        if !session_ok {
+            return Err(ClientError::Transport(DaemonError {
+                code: codes::DAEMON_UNAVAILABLE.into(),
+                message: "running daemon reported a different session".into(),
+                hint: "check the daemon socket and session configuration".into(),
+                retryable: Some(true),
+                ..Default::default()
+            }));
         }
-        let _ = self.request_once(&Frame {
-            cmd: "daemon.stop".into(),
-            session: self.options.session.clone(),
-            ..Frame::default()
-        });
-        Err(ClientError::Transport(DaemonError {
-            code: codes::DAEMON_UNAVAILABLE.into(),
-            message: "existing daemon configuration is incompatible; it was stopped".into(),
-            hint: "retry to start a daemon with the requested session configuration".into(),
-            retryable: Some(true),
-            ..Default::default()
-        }))
+
+        for warning in status_mismatch_warnings(
+            &data,
+            self.options.expected_engine.as_deref(),
+            self.options.expected_policy.as_ref(),
+        ) {
+            eprintln!("warning: {warning}");
+        }
+        Ok(())
     }
 
     fn start_daemon(&self) -> Result<Child, ClientError> {
@@ -210,36 +209,98 @@ impl Client {
                 self.options.session.clone(),
             ],
         });
-        if let Some(parent) = start
-            .log_path
-            .parent()
-            .filter(|path| !path.as_os_str().is_empty())
-        {
-            fs::create_dir_all(parent)?;
+        let result = (|| {
+            if let Some(parent) = start
+                .log_path
+                .parent()
+                .filter(|path| !path.as_os_str().is_empty())
+            {
+                fs::create_dir_all(parent)?;
+            }
+            let mut log_options = OpenOptions::new();
+            log_options.create(true).append(true);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::OpenOptionsExt;
+                log_options.mode(0o600);
+            }
+            let log = log_options.open(&start.log_path)?;
+            let stderr = log.try_clone()?;
+            let mut command = Command::new(&start.executable);
+            command
+                .args(&start.args)
+                .stdin(Stdio::null())
+                .stdout(Stdio::from(log))
+                .stderr(Stdio::from(stderr));
+            detach_command(&mut command);
+            command.spawn()
+        })();
+        result.map_err(|error| self.start_error(error))
+    }
+
+    fn start_error(&self, error: io::Error) -> ClientError {
+        self.daemon_unavailable_error(
+            format!(
+                "failed to start daemon for session {:?}: {}",
+                self.options.session,
+                redact_str(&error.to_string())
+            ),
+            None,
+        )
+    }
+
+    fn startup_timeout_error(&self, last_error: &ClientError) -> ClientError {
+        self.daemon_unavailable_error(
+            format!(
+                "daemon did not become ready for session {:?}",
+                self.options.session
+            ),
+            Some(last_error),
+        )
+    }
+
+    fn daemon_unavailable_error(
+        &self,
+        message: String,
+        last_error: Option<&ClientError>,
+    ) -> ClientError {
+        let mut details = serde_json::json!({
+            "session": self.options.session,
+            "socket_path": self.options.socket_path,
+        });
+        if let Some(error) = last_error {
+            details["last_error"] = self.last_error_details(error);
         }
-        let mut log_options = OpenOptions::new();
-        log_options.create(true).append(true);
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            log_options.mode(0o600);
-        }
-        let log = log_options.open(&start.log_path)?;
-        let stderr = log.try_clone()?;
-        let mut command = Command::new(&start.executable);
-        command
-            .args(&start.args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(log))
-            .stderr(Stdio::from(stderr));
-        detach_command(&mut command);
-        command.spawn().map_err(|error| {
-            ClientError::Transport(DaemonError {
-                code: codes::DAEMON_UNAVAILABLE.into(),
-                message: format!("failed to start daemon: {}", redact_str(&error.to_string())),
-                hint: "start daemon manually with `symbrowse daemon`".into(),
-                ..Default::default()
-            })
+        ClientError::Transport(DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message,
+            hint: format!(
+                "start daemon manually with `symbrowse daemon --session {}`",
+                self.options.session
+            ),
+            details: Some(redact_json(&details)),
+            ..Default::default()
+        })
+    }
+
+    fn last_error_details(&self, error: &ClientError) -> Value {
+        let (kind, code, message) = match error {
+            ClientError::Transport(error) => {
+                ("transport", error.code.clone(), error.message.clone())
+            }
+            ClientError::Io(error) => ("io", "io_error".into(), error.to_string()),
+            ClientError::Unsupported => (
+                "unsupported",
+                "unsupported".into(),
+                "daemon transport is unsupported".into(),
+            ),
+        };
+        let socket_path = self.options.socket_path.to_string_lossy();
+        let message = message.replace(socket_path.as_ref(), "<socket>");
+        serde_json::json!({
+            "kind": kind,
+            "code": code,
+            "message": message,
         })
     }
 
@@ -354,6 +415,32 @@ impl Client {
     }
 }
 
+fn status_mismatch_warnings(
+    data: &Value,
+    expected_engine: Option<&str>,
+    expected_policy: Option<&crate::PolicyStatus>,
+) -> Vec<String> {
+    let mut warnings = Vec::new();
+    if let Some(expected) = expected_engine {
+        let actual = data.get("engine").and_then(Value::as_str);
+        if actual != Some(expected) {
+            warnings.push(format!(
+                "running daemon engine {:?} differs from requested engine {:?}",
+                actual, expected
+            ));
+        }
+    }
+    if let Some(expected) = expected_policy {
+        let matches = serde_json::to_value(expected)
+            .ok()
+            .is_some_and(|value| data.get("policy") == Some(&value));
+        if !matches {
+            warnings.push("running daemon policy differs from requested policy".into());
+        }
+    }
+    warnings
+}
+
 #[cfg(unix)]
 /// Connect to a Unix daemon endpoint without allowing the kernel connect call
 /// to block past `timeout`. The returned stream is restored to blocking mode;
@@ -458,9 +545,22 @@ fn map_io_error(options: &ClientOptions, error: io::Error, operation: &str) -> C
         error.kind(),
         io::ErrorKind::TimedOut | io::ErrorKind::WouldBlock
     ) {
+        let response_read = operation == "read daemon response";
         return ClientError::Transport(DaemonError {
             code: codes::OPERATION_TIMEOUT.into(),
-            message: format!("{operation} timed out after {:?}", options.read_timeout),
+            message: if response_read {
+                format!("daemon response timed out after {:?}", options.read_timeout)
+            } else {
+                format!("{operation} timed out after {:?}", options.read_timeout)
+            },
+            hint: if response_read {
+                format!(
+                    "increase timeout with SYMBROWSE_READ_TIMEOUT or inspect daemon logs for session {:?}",
+                    options.session
+                )
+            } else {
+                String::new()
+            },
             details: Some(redact_json(&serde_json::json!({
                 "session": options.session,
                 "socket_path": options.socket_path,
@@ -575,16 +675,26 @@ fn timed_out(operation: &str) -> io::Error {
     io::Error::new(io::ErrorKind::TimedOut, operation)
 }
 
-fn unavailable(options: &ClientOptions, error: io::Error) -> ClientError {
+fn unavailable(options: &ClientOptions, _error: io::Error) -> ClientError {
+    // Match Go's public envelope: retain only the stable session/socket fields,
+    // while keeping OS dial details out of JSON output.
+    let mut hint = format!(
+        "start daemon with 'symbrowse daemon --session {}'",
+        options.session
+    );
+    if !options.autostart {
+        hint.push_str(" (autostart disabled via SYMBROWSE_NO_AUTOSTART)");
+    }
+    hint.push_str(&format!(
+        "; see daemon log at {}",
+        default_log_path().display()
+    ));
     ClientError::Transport(DaemonError {
         code: codes::DAEMON_UNAVAILABLE.into(),
         message: format!("daemon is unavailable for session {:?}", options.session),
-        hint: format!(
-            "start daemon with `symbrowse daemon --session {}`",
-            options.session
-        ),
+        hint,
         details: Some(redact_json(
-            &serde_json::json!({"session": options.session, "socket_path": options.socket_path.display().to_string(), "transport_error": error.to_string()}),
+            &serde_json::json!({"session": options.session, "socket_path": options.socket_path.display().to_string()}),
         )),
         ..Default::default()
     })
@@ -616,6 +726,98 @@ mod tests {
             io::Error::other("password=hidden"),
         );
         assert!(!error.to_string().contains("hidden"));
+    }
+
+    #[test]
+    fn unavailable_metadata_matches_go_cli_contract() {
+        let options = ClientOptions {
+            session: "fixture".into(),
+            socket_path: PathBuf::from("/tmp/fixture.sock"),
+            autostart: false,
+            ..ClientOptions::default()
+        };
+        let ClientError::Transport(error) = unavailable(&options, io::Error::other("refused"))
+        else {
+            panic!("unavailable must preserve transport metadata");
+        };
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            error.hint,
+            format!(
+                "start daemon with 'symbrowse daemon --session fixture' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at {}",
+                default_log_path().display()
+            )
+        );
+        assert_eq!(
+            error.details,
+            Some(serde_json::json!({
+                "session": "fixture",
+                "socket_path": "/tmp/fixture.sock"
+            }))
+        );
+    }
+
+    #[test]
+    fn engine_and_policy_mismatches_are_reported_as_warnings() {
+        let warnings = status_mismatch_warnings(
+            &serde_json::json!({
+                "engine": "chrome",
+                "policy": {
+                    "allowed_domains": [],
+                    "ssrf_enabled": false,
+                    "fetch_ssrf_enabled": false,
+                    "allow_private": false
+                }
+            }),
+            Some("firefox"),
+            Some(&crate::PolicyStatus {
+                ssrf_enabled: true,
+                fetch_ssrf_enabled: true,
+                allow_private: true,
+                ..Default::default()
+            }),
+        );
+        assert_eq!(warnings.len(), 2);
+        assert!(warnings[0].contains("engine"));
+        assert!(warnings[1].contains("policy"));
+    }
+
+    #[test]
+    fn startup_timeout_keeps_redacted_last_retry_cause() {
+        let socket = PathBuf::from("/tmp/private-daemon.sock");
+        let client = Client::new(ClientOptions {
+            socket_path: socket.clone(),
+            session: "default".into(),
+            ..Default::default()
+        });
+        let last_error = ClientError::Transport(DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message: format!(
+                "connect failed at {} password=fixture-secret",
+                socket.display()
+            ),
+            ..Default::default()
+        });
+
+        let ClientError::Transport(timeout) = client.startup_timeout_error(&last_error) else {
+            panic!("startup timeout must be a transport error");
+        };
+        assert_eq!(timeout.code, codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            timeout.message,
+            "daemon did not become ready for session \"default\""
+        );
+        let details = timeout.details.expect("startup diagnostics");
+        let cause = &details["last_error"];
+        assert_eq!(cause["kind"], "transport");
+        assert_eq!(cause["code"], codes::DAEMON_UNAVAILABLE);
+        assert_eq!(
+            cause["message"],
+            "connect failed at <socket> password=[REDACTED]"
+        );
+        let serialized_cause = cause.to_string();
+        assert!(!serialized_cause.contains(&socket.to_string_lossy().to_string()));
+        assert!(!serialized_cause.contains("fixture-secret"));
     }
 
     #[cfg(target_os = "linux")]

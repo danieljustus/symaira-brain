@@ -5,3 +5,6 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# MCP raw-frame oracle outputs preserve protocol Content-Length CRLF bytes.
+browse/testdata/port/mcp/*.out binary

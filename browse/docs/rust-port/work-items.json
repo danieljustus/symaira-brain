@@ -223,34 +223,26 @@
       ],
       "status": "blocked",
       "acceptance_commands": [
-        "cargo nextest run -p symbrowse-fetch fingerprint",
-        "python3 port/harness/run.py --suite fetch-fingerprints --native-targets"
+        "SYMBROWSE_FETCH_FINGERPRINTS_OUT=<capture.json> go test ./internal/fetch/fetch -run TestGenerateFetchFingerprintsCapture -count=1",
+        "python3 port/harness/fetch_fingerprints_validate.py --capture <capture.json> --verify-source-bound-capture --repo-root <repo-root>"
       ],
       "stop_rule": "Do not replace compat until an implementation reproduces the pinned wire fixture without an unacceptable runtime dependency; retain the Go sidecar in the meantime.",
-      "decision": "blocked: the candidate has no source-bound six-profile fingerprint fixture or fetch-fingerprints harness suite; historical wreq evidence remains invalidated, and Go/AzureTLS stays the explicitly named compat transport",
+      "decision": "blocked: the source-bound six-profile Go capture and validator now exist, but no independently accepted oracle or native Rust TLS/HTTP2 transport parity is established; historical wreq evidence remains invalidated, and Go/AzureTLS stays the explicitly named compat transport",
       "blocker": {
-        "kind": "missing_source_bound_suite",
-        "observed": "port/harness/run.py exposes no fetch-fingerprints suite; compat-sidecar covers only the versioned NDJSON lifecycle, not TLS ClientHello, HTTP/2 settings or header-order parity",
+        "kind": "oracle_and_rust_parity_unestablished",
+        "observed": "port/harness/fetch_fingerprints_validate.py validates six source-bound Go captures and re-derives TLS ClientHello, HTTP/2 settings and header names from raw bytes, but explicitly reports that this does not establish an independently trusted oracle or compare native Rust TLS; the historical wreq candidate remains invalidated",
         "productive_callers": [
           "cmd/symbrowse/compat_sidecar.go",
           "crates/symbrowse-daemon/src/runtime.rs"
         ],
         "source_evidence": {
-          "source_commit": "e86c1db46ad758d89372640473a5311525e3edf1",
-          "source_path_count": 748,
-          "harness_blob": "fcc6564d458fba8d19570f9dd05843ce07a43618",
-          "go_capture_test_blob": "cf97aa5fb69a573c5f14e28bed9acb7df72bb393",
-          "retained_fixture_blob": "ebd2bec169b4c1aebc546672ae2fbcb8693a3e1c",
-          "retained_fixture_profiles": 6,
-          "retained_fixture_verdict": "INVALIDATED",
-          "missing": [
-            "raw_client_hello_capture",
-            "capture_generator",
-            "source_generator_fixture_digest_contract"
-          ]
+          "capture_generator": "internal/fetch/fetch/fetch_fingerprints_capture_test.go::TestGenerateFetchFingerprintsCapture",
+          "validator": "port/harness/fetch_fingerprints_validate.py",
+          "source_binding": "current HEAD, go-list test compiler-input closure, working-tree SHA-256 and committed Git blobs where present, Go executable SHA-256/build metadata, six profiles and raw TLS/H2 bytes",
+          "historical_fixture": "rust009-tls-results.json remains INVALIDATED"
         },
-        "next_existing_command": "python3 port/harness/run.py --suite compat-sidecar",
-        "next_dependency_step": "intake a pinned Go six-profile wire capture plus generator and source/generator/fixture digests before implementing fetch-fingerprints"
+        "next_existing_command": "python3 port/harness/fetch_fingerprints_validate.py --capture <capture.json> --verify-source-bound-capture --repo-root <repo-root>",
+        "next_dependency_step": "obtain an independently trusted current six-profile oracle and a Rust TLS/HTTP2 candidate that passes raw-wire comparison without unacceptable build, licensing or safety costs"
       }
     },
     {

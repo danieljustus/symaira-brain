@@ -11,6 +11,7 @@ publish = false
 aes-gcm.workspace = true
 fs2.workspace = true
 getrandom.workspace = true
+icu_properties = "=2.3.0"
 serde.workspace = true
 serde_json.workspace = true
 time.workspace = true

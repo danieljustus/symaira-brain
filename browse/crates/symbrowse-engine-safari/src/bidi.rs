@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeMap,
     fmt,
     future::Future,
     path::{Path, PathBuf},
@@ -21,6 +22,16 @@ use crate::attach::{NavigationPolicy, SafariPrerequisite};
 pub const ENGINE_KIND: &str = "safari-bidi";
 pub const DRIVER_PATH: &str = "/usr/bin/safaridriver";
 const MAX_CONNECT_ATTEMPTS: usize = 4;
+
+/// A direct navigation target rejected by Safari's configured URL policies.
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SafariBlockedRequest {
+    pub url: String,
+    pub resource_type: String,
+    pub count: u64,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub reason: String,
+}
 
 /// Typed failures from the Safari BiDi lifecycle and protocol.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -423,6 +434,7 @@ pub struct BidiEngine {
     session: Option<DriverSession>,
     context: String,
     navigation_policy: NavigationPolicy,
+    blocked: BTreeMap<String, SafariBlockedRequest>,
     closed: bool,
 }
 impl BidiEngine {
@@ -454,6 +466,7 @@ impl BidiEngine {
             }),
             context: context.into(),
             navigation_policy: NavigationPolicy::default(),
+            blocked: BTreeMap::new(),
             closed: false,
         }
     }
@@ -516,6 +529,7 @@ impl BidiEngine {
                         session: Some(session),
                         context,
                         navigation_policy: options.navigation_policy.clone(),
+                        blocked: BTreeMap::new(),
                         closed: false,
                     });
                 }
@@ -554,6 +568,7 @@ impl BidiEngine {
         self.ensure_open()?;
         let target = validate_target(target)?;
         if let Err(reason) = self.navigation_policy.check(&target) {
+            self.record_blocked(&target, &reason);
             return Err(BidiError::InvalidTarget { target, reason });
         }
         let context = if page.id.is_empty() {
@@ -690,9 +705,11 @@ impl BidiEngine {
         let mut caps = capabilities_for(
             ENGINE_KIND,
             [
-                "CookieEngine",
+                "FrameManager",
                 "InspectionEngine",
                 "NavigationStateProvider",
+                "NetworkPolicyReporter",
+                "TabManager",
             ],
         );
         caps.launch_mode = "launch".to_owned();
@@ -709,8 +726,34 @@ impl BidiEngine {
     #[must_use]
     pub fn limitations(&self) -> [&'static str; 1] {
         [
-            "safari-bidi enforces URL policy on navigation targets only: Safari has no WebDriver BiDi network module, so redirects and subresource requests are not intercepted",
+            "safari-bidi enforces the domain allowlist and SSRF guard on navigation targets only, specifically URLs passed directly to navigate: Safari 27.0 implements no WebDriver BiDi network module, so redirects, script-initiated navigations, and subresource requests (fetch, XHR, images, scripts) are not intercepted and not policed",
         ]
+    }
+
+    /// Return policy-denied navigation targets in URL order.
+    #[must_use]
+    pub fn blocked_requests(&self) -> Vec<SafariBlockedRequest> {
+        self.blocked.values().cloned().collect()
+    }
+
+    fn record_blocked(&mut self, target: &str, reason: &str) {
+        let reason = if reason.contains("domain allowlist") {
+            "domain allowlist"
+        } else if reason.contains("SSRF guard") {
+            "ssrf guard"
+        } else {
+            return;
+        };
+        let entry = self
+            .blocked
+            .entry(target.to_owned())
+            .or_insert_with(|| SafariBlockedRequest {
+                url: target.to_owned(),
+                resource_type: "document".to_owned(),
+                count: 0,
+                reason: reason.to_owned(),
+            });
+        entry.count += 1;
     }
 
     pub async fn close(&mut self) -> Result<(), BidiError> {

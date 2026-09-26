@@ -149,6 +149,52 @@ func TestPinnedTabNeverUsesWindow1CurrentTab(t *testing.T) {
 	}
 }
 
+func TestTabNewPinsCreatedWindowAndIndexWithoutRenaming(t *testing.T) {
+	fake := newFake(map[string]string{"make new tab": "42\t3"})
+	e := NewWithRunner(fake)
+	if _, err := e.TabNew(context.Background(), engine.Context{}, "requested-label", "https://example.com/"); err != nil {
+		t.Fatal(err)
+	}
+	if len(fake.calls) != 1 || strings.Contains(fake.calls[0], "set name of") {
+		t.Fatalf("Safari tab creation must not write its read-only name: %#v", fake.calls)
+	}
+	if _, err := e.evaluateTab(context.Background(), "1+1"); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(fake.calls[1], "tab 3 of window id 42") {
+		t.Fatalf("created tab was not pinned: %s", fake.calls[1])
+	}
+	if err := e.TabClose(context.Background(), engine.Page{}); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(fake.calls[2], "close tab 3 of window id 42") {
+		t.Fatalf("tab close addressed another tab: %s", fake.calls[2])
+	}
+	if err := e.TabClose(context.Background(), engine.Page{}); err == nil {
+		t.Fatal("second close must not address an unrelated tab")
+	}
+	if _, err := e.evaluateTab(context.Background(), "1+1"); err == nil {
+		t.Fatal("evaluation after close must not address an unrelated tab")
+	}
+	if _, err := e.Navigate(context.Background(), engine.Page{}, "https://example.com/"); err == nil {
+		t.Fatal("navigation after close must not address an unrelated tab")
+	}
+	if len(fake.calls) != 3 {
+		t.Fatalf("closed pin reached Safari again: %#v", fake.calls)
+	}
+}
+
+func TestTabNewRejectsUnsafeURLBeforeAppleScript(t *testing.T) {
+	fake := newFake(nil)
+	e := NewWithRunner(fake)
+	if _, err := e.TabNew(context.Background(), engine.Context{}, "", "data:text/html,unsafe"); err == nil {
+		t.Fatal("data URL must be rejected")
+	}
+	if len(fake.calls) != 0 {
+		t.Fatalf("unsafe navigation reached Safari: %#v", fake.calls)
+	}
+}
+
 func TestReadPathReturnsURLAndTitle(t *testing.T) {
 	fake := newFake(map[string]string{
 		"window.location.href": `"https://example.com/page"`,

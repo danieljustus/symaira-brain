@@ -86,14 +86,62 @@ def external_environment(env: dict[str, str]) -> dict[str, str]:
 
 def temporary_parent(env: dict[str, str] | None = None) -> str | None:
     selected = os.environ if env is None else env
-    if sys.platform != "darwin" or selected.get("CI"):
+    if sys.platform != "darwin":
         return None
+    if selected.get("CI"):
+        # Hosted macOS runners expose TMPDIR through a long per-user path. The
+        # daemon's default socket path adds another fixed directory suffix,
+        # which can exceed sockaddr_un.sun_path even for a short test name.
+        return "/tmp"
     return external_environment(selected)[EXTERNAL_RUNTIME_ENV]
 
 
 def run(command: list[str], root: Path, env: dict[str, str], *, timeout: int = 600) -> None:
     print("+", " ".join(command), flush=True)
     subprocess.run(command, cwd=root, env=env, check=True, timeout=timeout)
+
+
+def run_daemon_frame_limit_case(case: dict, root: Path, env: dict[str, str]) -> None:
+    command = case["go_oracle"]
+    print("+", " ".join(command), flush=True)
+    result = subprocess.run(
+        command,
+        cwd=root,
+        env=env,
+        check=True,
+        timeout=600,
+        capture_output=True,
+        text=True,
+    )
+    actual = json.loads(result.stdout)
+    if actual != case["expected"]:
+        raise AssertionError(f"DMN-002 Go oracle output differs from fixture: {actual!r}")
+    for key in ("go", "rust", "rust_protocol"):
+        run(case[key], root, env)
+
+
+def run_daemon_registry_case(case: dict, root: Path, env: dict[str, str]) -> None:
+    outputs = {}
+    for language, key in (("Go", "go_oracle"), ("Rust", "rust_oracle")):
+        command = case[key]
+        print("+", " ".join(command), flush=True)
+        result = subprocess.run(
+            command,
+            cwd=root,
+            env=env,
+            check=True,
+            timeout=600,
+            capture_output=True,
+            text=True,
+        )
+        outputs[language] = json.loads(result.stdout)
+    if outputs["Go"] != outputs["Rust"]:
+        raise AssertionError(
+            "DMN-007 Go/Rust registry JSON-semantic outputs differ: "
+            f"Go={outputs['Go']!r}, Rust={outputs['Rust']!r}"
+        )
+    run(case["go"], root, env)
+    run(case["rust"], root, env)
 
 
 def wait_for_path(path: Path, timeout: float = 5.0) -> None:
@@ -240,6 +288,20 @@ def external_file(path: Path, env: dict[str, str], *, name: str) -> Path:
     return resolved
 
 
+def compat_binary_path(root: Path, env: dict[str, str]) -> Path:
+    configured = env.get("SYMBROWSE_COMPAT_BINARY", "").strip()
+    if configured:
+        path = Path(configured).expanduser()
+        if not path.is_absolute():
+            raise RuntimeError("SYMBROWSE_COMPAT_BINARY must be an absolute path")
+        binary = external_file(path, env, name="SYMBROWSE_COMPAT_BINARY")
+    else:
+        binary = external_output(root, env, "target/compat-sidecar/symbrowse-compat")
+    if os.name == "nt" and binary.suffix.lower() != ".exe":
+        binary = binary.with_suffix(".exe")
+    return binary
+
+
 def lifecycle_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str) -> None:
     session = f"contract-{suffix}"
     socket_path = daemon_socket_path(runtime, session)
@@ -332,11 +394,37 @@ def race_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str, 
         status = request(socket_path, {"cmd": "daemon.status", "session": session})
         if not status.get("success"):
             raise AssertionError(f"race daemon did not become queryable: {status}")
-        request(socket_path, {"cmd": "daemon.stop", "session": session})
+        status_data = status.get("data")
+        owner_pid = status_data.get("pid") if isinstance(status_data, dict) else None
+        if not isinstance(owner_pid, int):
+            raise AssertionError(f"race daemon did not report its owner PID: {status}")
+        owner = next((process for process in processes if process.pid == owner_pid), None)
+        if owner is None:
+            raise AssertionError(
+                f"race daemon PID {owner_pid} is not one of the {starters} starters"
+            )
+
+        # Let every starter contend before stopping the winner. Stopping as soon
+        # as the socket appears allows a not-yet-scheduled starter to acquire
+        # the lock afterward and become a second, unexpected daemon.
+        deadline = time.monotonic() + 30.0
         for process in processes:
-            process.wait(timeout=10)
-        for process in processes:
+            if process is owner:
+                continue
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise AssertionError("daemon race starters did not settle within 30 seconds")
+            try:
+                process.wait(timeout=remaining)
+            except subprocess.TimeoutExpired as error:
+                raise AssertionError(
+                    f"daemon race starter PID {process.pid} remained active before shutdown"
+                ) from error
             assert_clean_process(process)
+
+        request(socket_path, {"cmd": "daemon.stop", "session": session})
+        owner.wait(timeout=10)
+        assert_clean_process(owner)
     finally:
         for process in processes:
             kill_tree(process)
@@ -402,10 +490,14 @@ ALL_SUITES = (
     "fetch-render",
     "workflows",
     "daemon",
+    "daemon-frame-limits",
+    "daemon-session-registry",
+    "daemon-contracts",
     "chrome-spike",
     "chrome-full",
     "safari",
     "browser-transport",
+    "config-contracts",
     "compat-sidecar",
 )
 
@@ -515,12 +607,45 @@ def main() -> int:
         ]
     elif args.suite == "browser-transport":
         fixture = json.loads((root / "testdata/port/core/transport-selection.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
-        assert {case["id"] for case in fixture["cases"]} == {
-            "static-default", "browser-chrome", "browser-safari", "browser-firefox",
-            "browser-missing-engine", "static-engine-conflict", "unknown-mode", "unknown-engine",
+        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 13
+        commands = [["cargo", "test", "-p", "symbrowse-core", "--test", "transport_selection", "--locked"]]
+    elif args.suite == "config-contracts":
+        fixture = json.loads((root / "port/harness/cases/config-contracts.json").read_text())
+        assert fixture["schema_version"] == 1
+        expected_ids = {
+            "CFG-001-config-precedence",
+            "CFG-002-xdg-config-cache-state",
+            "CFG-002-daemon-socket-path",
+            "CFG-005-engine-precedence",
+            "CFG-006-transport-selection",
         }
-        commands = [["cargo", "test", "-p", "symbrowse-core", "selection_is_exhaustive", "--locked"]]
+        assert {case["id"] for case in fixture["cases"]} == expected_ids
+        platform = (
+            "darwin" if sys.platform == "darwin" else
+            "windows" if os.name == "nt" else
+            "linux"
+        )
+        commands = []
+        seen = set()
+        for case in fixture["cases"]:
+            if "all" not in case["platforms"] and platform not in case["platforms"]:
+                continue
+            for key in ("go", "rust"):
+                command = case.get(key)
+                if command is None:
+                    continue
+                identity = tuple(command)
+                if identity not in seen:
+                    seen.add(identity)
+                    commands.append(command)
+        commands.extend([
+            ["cargo", "test", "-p", "symbrowse-daemon", "--lib", "missing_selected_chrome_is_typed_unavailable_without_fallback", "--locked"],
+        ])
+        if platform != "darwin":
+            commands.append([
+                "cargo", "test", "-p", "symbrowse-daemon", "--lib",
+                "selected_safari_is_typed_unavailable_on_other_platforms", "--locked",
+            ])
     elif args.suite == "fetch-fingerprints":
         # The capture, historical oracle and both binaries are retained artifacts.
         # This suite never builds or self-approves any of them.
@@ -555,10 +680,31 @@ def main() -> int:
         return 0
     elif args.suite == "compat-sidecar":
         fixture = json.loads((root / "port/harness/cases/compat-sidecar.json").read_text())
-        assert fixture["schema_version"] == 1 and len(fixture["cases"]) == 8
+        assert fixture["schema_version"] == 1
+        assert {case["id"] for case in fixture["cases"]} == {
+            "compat-handshake",
+            "compat-pinned-identity",
+            "compat-six-profiles",
+            "compat-request-id",
+            "compat-bounded-frame",
+            "compat-integrity-error",
+            "compat-typed-fetch-error",
+            "compat-timeout-restart",
+            "compat-clean-exit",
+            "compat-private-endpoint",
+            "compat-rollback-go",
+        }
+        compat_binary = compat_binary_path(root, env)
+        compat_binary.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        env["SYMBROWSE_COMPAT_BINARY"] = str(compat_binary)
         commands = [
-            ["go", "build", "-trimpath", "-o", str(external_output(root, env, "dist/symbrowse-compat")), "./cmd/symbrowse"],
-            ["cargo", "test", "-p", "symbrowse-compat", "-p", "symbrowse-daemon", "--locked"],
+            ["go", "build", "-trimpath", "-o", str(compat_binary), "./cmd/symbrowse"],
+            ["go", "test", "./cmd/symbrowse", "-run", "CompatSidecar", "-count=1"],
+            ["cargo", "test", "-p", "symbrowse-compat", "--locked"],
+            [
+                "cargo", "test", "-p", "symbrowse-compat", "--test", "go_sidecar", "--locked",
+                "--", "--ignored",
+            ],
         ]
     elif args.suite == "workflows":
         commands = [
@@ -591,6 +737,105 @@ def main() -> int:
         return 0
     elif args.suite == "daemon-races":
         daemon_suite(root, env, rounds=args.repeat, starters=50)
+        return 0
+    elif args.suite == "daemon-frame-limits":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        case = next(case for case in fixture["cases"] if case["id"] == "DMN-002-frame-limits")
+        run_daemon_frame_limit_case(case, root, env)
+        print("DMN-002 frame-limit suite passed")
+        return 0
+    elif args.suite == "daemon-session-registry":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        case = next(case for case in fixture["cases"] if case["id"] == "DMN-007-session-registry")
+        run_daemon_registry_case(case, root, env)
+        print("DMN-007 session-registry suite passed (Go/Rust JSON-semantic)")
+        return 0
+    elif args.suite == "daemon-contracts":
+        fixture = json.loads((root / "port/harness/cases/daemon-contracts.json").read_text())
+        if fixture.get("schema_version") != 1:
+            raise ValueError("unsupported daemon-contracts fixture schema")
+        expected = {
+            "DMN-002-frame-limits",
+            "DMN-003-peer-uid",
+            "DMN-003-socket-mode",
+            "DMN-004-startup-race",
+            "DMN-005-status-lifecycle",
+            "DMN-006-deadlines",
+            "DMN-007-session-registry",
+            "DMN-008-client-autostart",
+            "DMN-008-mcp-config-warnings",
+        }
+        cases = fixture.get("cases", [])
+        if {case.get("id") for case in cases} != expected:
+            raise ValueError("daemon-contracts fixture IDs do not match DMN-002..008")
+        frame_case = next(case for case in cases if case["id"] == "DMN-002-frame-limits")
+        if frame_case.get("coverage") != [
+            "malformed-json",
+            "truncated-json",
+            "invalid-escape",
+            "invalid-number",
+            "empty-cmd",
+            "whitespace-cmd",
+            "vertical-tab-tail",
+            "one-mib-boundary",
+            "oversized-line",
+        ]:
+            raise ValueError("DMN-002 fixture omits frame decoding or size-boundary coverage")
+        uid_case = next(case for case in cases if case["id"] == "DMN-003-peer-uid")
+        if uid_case.get("coverage") != [
+            "same-uid-accepted",
+            "different-uid-rejected-by-policy",
+            "native-peer-credential-accepted",
+        ]:
+            raise ValueError("DMN-003 UID fixture omits same/different UID coverage")
+        mode_case = next(case for case in cases if case["id"] == "DMN-003-socket-mode")
+        if mode_case.get("coverage") != [
+            "socket-mode-0600",
+            "socket-directory-mode-0700",
+            "endpoint-cleanup",
+        ]:
+            raise ValueError("DMN-003 socket fixture omits mode or cleanup coverage")
+        startup_case = next(case for case in cases if case["id"] == "DMN-004-startup-race")
+        if startup_case.get("coverage") != [
+            "stale-socket-recovered-by-startup",
+            "live-socket-preserved",
+            "all-concurrent-losers-rejected",
+            "single-owner-endpoint-reusable",
+        ]:
+            raise ValueError("DMN-004 fixture omits stale/live/concurrent ownership coverage")
+        status_case = next(case for case in cases if case["id"] == "DMN-005-status-lifecycle")
+        if status_case.get("coverage") != [
+            "status-identity-and-timestamps",
+            "stop-removes-endpoint",
+            "idle-timeout-removes-endpoint",
+        ]:
+            raise ValueError("DMN-005 fixture omits status, stop or idle-timeout coverage")
+        deadline_case = next(case for case in cases if case["id"] == "DMN-006-deadlines")
+        if deadline_case.get("coverage") != [
+            "client-read-timeout",
+            "operation-timeout-keeps-connection-usable",
+            "client-disconnect-does-not-cancel-blocked-handler",
+        ]:
+            raise ValueError("DMN-006 fixture omits timeout, blocked-handler or disconnect coverage")
+        platform = "windows" if os.name == "nt" else ("darwin" if sys.platform == "darwin" else "linux")
+        for case in cases:
+            if "all" not in case["platforms"] and platform not in case["platforms"]:
+                print(f"skip {case['id']} on {platform}", flush=True)
+                continue
+            if case["id"] == "DMN-002-frame-limits":
+                run_daemon_frame_limit_case(case, root, env)
+                print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
+                continue
+            if case["id"] == "DMN-007-session-registry":
+                run_daemon_registry_case(case, root, env)
+                print(f"executed {case['id']} Go/Rust JSON-semantic oracle", flush=True)
+                continue
+            run(case["go"], root, env)
+            run(case["rust"], root, env)
+            if case.get("rust_protocol"):
+                run(case["rust_protocol"], root, env)
+            print(f"executed {case['id']} Go oracle and Rust parity test", flush=True)
+        print("daemon-contracts suite passed", flush=True)
         return 0
     else:
         parser.error(f"unsupported suite: {args.suite}")

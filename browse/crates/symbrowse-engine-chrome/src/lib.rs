@@ -12,9 +12,9 @@ mod full;
 mod launch;
 
 pub use full::{
-    Artifact, ChromeCapabilities, ChromePage, ChromeSession, DialogInfo, FindOptions, FrameInfo,
-    InteractionResult, NetworkCapture, NetworkEvent, ScreenshotOptions, UnsupportedOperation,
-    capabilities,
+    Artifact, CapturedRequest, ChromeCapabilities, ChromePage, ChromeSession, ClickObstructedError,
+    DialogInfo, FindOptions, FrameInfo, InteractionResult, NetworkCapture, NetworkEvent,
+    ScreenshotOptions, UnsupportedOperation, capabilities,
 };
 
 /// Canonical capability partition used by the daemon handshake. Only names
@@ -23,7 +23,9 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
     symbrowse_engine::capabilities::capabilities_for(
         "chrome",
         [
+            "A11yAuditor",
             "AXSelectorResolver",
+            "ClickDiagnosticEngine",
             "CookieEngine",
             "DialogController",
             "FileTransfer",
@@ -33,8 +35,12 @@ pub fn canonical_capabilities() -> symbrowse_engine::capabilities::Capabilities 
             "NavigationStateProvider",
             "NetworkEvents",
             "NetworkPolicyReporter",
+            "OverlayHost",
+            "RuntimeEvents",
             "ScreenshotEngine",
             "ScreenshotOptionsEngine",
+            "ScriptDisabler",
+            "SettingsEngine",
             "TabManager",
         ],
     )

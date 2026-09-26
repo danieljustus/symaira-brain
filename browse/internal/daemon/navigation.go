@@ -77,6 +77,17 @@ func (r *NavigationRuntime) guardFrameTarget(frame Frame) error {
 			return nil // tab.new defaults to the browser's internal about:blank.
 		}
 		return r.guardTarget(request.URL)
+	case "read":
+		if len(frame.Args) == 0 || string(frame.Args) == "null" {
+			return nil // The read handler reports missing arguments.
+		}
+		if err := decodeArgs(frame, &request); err != nil {
+			return err
+		}
+		if request.URL != "" {
+			return r.guardTarget(request.URL)
+		}
+		return nil
 	case "window.new":
 		return nil // the internal about:blank target is not user supplied.
 	default:

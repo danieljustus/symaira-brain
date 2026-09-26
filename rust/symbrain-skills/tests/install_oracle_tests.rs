@@ -122,6 +122,18 @@ fn go_install_status_fixture_matches_rust_statuses_and_artifacts() {
         let mut expected_artifacts = case.expected.artifacts;
         #[cfg(windows)]
         for artifact in &mut expected_artifacts {
+            // Windows exposes ACL-derived mode bits instead of the Unix fixture modes.
+            artifact.mode = if artifact.kind == "dir" { 0o777 } else { 0o666 };
+            if artifact.path.ends_with("/manifest.json")
+                && let Some(bytes) = &artifact.bytes
+            {
+                let decoded = decode_base64(bytes);
+                let text = String::from_utf8(decoded).expect("fixture manifest UTF-8");
+                artifact.bytes = Some(base64(
+                    text.replace("\"mode\": \"0644\"", "\"mode\": \"0666\"")
+                        .as_bytes(),
+                ));
+            }
             if artifact.path.ends_with("/.symskills.json")
                 && let Some(bytes) = &artifact.bytes
             {

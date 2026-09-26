@@ -7,6 +7,8 @@ import io
 import json
 import stat
 import sys
+import tempfile
+from unittest.mock import patch
 import unittest
 import zipfile
 from pathlib import Path
@@ -84,6 +86,60 @@ class ReleaseVerifierTests(unittest.TestCase):
         extra_cask = cask + 'url "https://example.invalid/releases/download/v0.10.0/rogue.dmg"\n'
         with self.assertRaisesRegex(SystemExit, "cask has extra or missing release-download URLs"):
             verify_release.verify_tap_links(formula, extra_cask, manifest)
+
+    def test_signature_preflight_rejects_missing_or_malformed_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            payload_name = "checksums.txt"
+            payload = root / payload_name
+            payload.write_bytes(b"payload")
+            files = {payload_name: payload}
+            with self.assertRaisesRegex(SystemExit, "missing signature sidecar"):
+                verify_release.require_signature_sidecars({payload_name}, files)
+
+            signature = root / (payload_name + ".sig")
+            certificate = root / (payload_name + ".pem")
+            certificate.write_bytes(b"not a certificate")
+            files[certificate.name] = certificate
+            signature.write_bytes(b"")
+            files[signature.name] = signature
+            with self.assertRaisesRegex(SystemExit, "empty signature sidecar"):
+                verify_release.require_signature_sidecars({payload_name}, files)
+
+            signature.write_bytes(b"invalid synthetic signature fixture")
+            files.pop(certificate.name)
+            with self.assertRaisesRegex(SystemExit, "missing certificate sidecar"):
+                verify_release.require_signature_sidecars({payload_name}, files)
+
+            files[certificate.name] = certificate
+            with self.assertRaisesRegex(SystemExit, "invalid certificate PEM metadata"):
+                verify_release.require_signature_sidecars({payload_name}, files)
+
+    def test_cosign_rejection_blocks_invalid_signature_claim(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            payload = root / "checksums.txt"
+            signature = root / "checksums.txt.sig"
+            certificate = root / "checksums.txt.pem"
+            payload.write_bytes(b"payload")
+            signature.write_bytes(b"invalid synthetic signature fixture")
+            certificate.write_bytes(
+                b"-----BEGIN CERTIFICATE-----\nAA==\n-----END CERTIFICATE-----\n"
+            )
+            files = {
+                payload.name: payload,
+                signature.name: signature,
+                certificate.name: certificate,
+            }
+            rejected = verify_release.subprocess.CompletedProcess(
+                args=["cosign"], returncode=1, stdout="", stderr="invalid signature"
+            )
+            with patch.object(verify_release.subprocess, "run", return_value=rejected):
+                with self.assertRaisesRegex(SystemExit, "cosign verification failed"):
+                    verify_release.verify_signatures(
+                        {payload.name}, files,
+                        "https://github.com/example/project/.github/workflows/release.yml@refs/tags/v1.0.0",
+                    )
 
 
 if __name__ == "__main__":

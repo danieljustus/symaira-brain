@@ -5,7 +5,7 @@
 // and asserts that set equals the golden manifest captured from the real
 // GitHub release.
 //
-// The golden fixture (scripts/dist-oracle/fixtures/manifest_v0.11.0.json) is a
+// The golden fixture (scripts/dist-oracle/fixtures/manifest_v0.12.0.json) is a
 // real capture: `gh release view v0.11.0 --json ...assets`, real asset names,
 // sizes and sha256 digests only. This tool is offline and deterministic; it
 // never invents names and never claims to have run cosign/syft/goreleaser.
@@ -14,6 +14,8 @@
 //	go run ./scripts/dist-oracle -check                      # gate (exit 0/1)
 //	go run ./scripts/dist-oracle -check -manifest <path>     # point at another manifest copy (negative tests)
 //	go run ./scripts/dist-oracle -candidate-check -version 0.12.0 -assets <archive-bundle>
+//	go run ./scripts/dist-oracle -native-package -version 0.12.0 -binary target/<triple>/release/symbrain -assets <one-target-dir>
+//	go run ./scripts/dist-oracle -candidate-merge -version 0.12.0 -packages <six-native-package-dirs> -assets <archive-bundle>
 //
 // The macOS GUI DMG is not produced by goreleaser; it is uploaded by
 // .github/workflows/release.yml via `gh release upload`. It is therefore
@@ -27,6 +29,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -35,7 +38,7 @@ import (
 
 const (
 	defaultGoreleaser = ".goreleaser.yml"
-	defaultManifest   = "scripts/dist-oracle/fixtures/manifest_v0.11.0.json"
+	defaultManifest   = "scripts/dist-oracle/fixtures/manifest_v0.12.0.json"
 	defaultWorkflow   = ".github/workflows/release.yml"
 
 	// sigSuffix is goreleaser's default signature sidecar suffix. The config
@@ -342,12 +345,91 @@ func notRunLines() []string {
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	candidateGoCheck := flag.Bool("candidate-go-check", false, "verify GoReleaser candidate binaries' embedded target identities")
+	candidateSBOM := flag.Bool("candidate-sbom", false, "generate deterministic SPDX sidecars and checksums for an unpublished snapshot")
+	nativePackage := flag.Bool("native-package", false, "verify a native Rust symbrain binary and package its archive/checksum")
+	candidateMerge := flag.Bool("candidate-merge", false, "merge six native Rust packages and run the full candidate artifact check")
 	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
+	packagesDir := flag.String("packages", "", "directory with six subdirectories from -native-package")
+	binaryPath := flag.String("binary", "", "prebuilt Rust symbrain binary for -native-package")
 	version := flag.String("version", "", "candidate version without the v prefix")
 	manifestPath := flag.String("manifest", defaultManifest, "path to the pinned release manifest JSON")
 	goreleaserPath := flag.String("goreleaser", defaultGoreleaser, "path to the goreleaser config")
 	workflowPath := flag.String("workflow", defaultWorkflow, "path to the release workflow binding external assets")
 	flag.Parse()
+
+	if *candidateSBOM {
+		if *assetsDir == "" || *version == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-sbom requires -version and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := generateCandidateSPDX(&cfg, *version, resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: generate candidate SPDX: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-spdx: PASS generated %d deterministic SPDX SBOMs and checksum entries for %s (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		return
+	}
+
+	if *candidateMerge {
+		if *assetsDir == "" || *version == "" || *packagesDir == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-merge requires -version, -packages, and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := mergeNativeCandidatePackages(&cfg, *version, resolvePath(*packagesDir), resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: merge native candidates: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-merge: PASS %d native targets for %s (archives, SPDX SBOMs, checksums; unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		return
+	}
+
+	if *nativePackage {
+		if *assetsDir == "" || *version == "" || *binaryPath == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -native-package requires -version, -binary, and -assets")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		archive, err := packageNativeCandidate(&cfg, *version, *binaryPath, resolvePath(*assetsDir))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: native candidate: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("native-candidate: PASS %s and SPDX SBOM %s.sbom.json %s/%s Rust symbrain %s (unsigned)\n", archive, archive, runtime.GOOS, runtime.GOARCH, *version)
+		return
+	}
 
 	if *candidateCheck {
 		if *assetsDir == "" || *version == "" {
@@ -369,8 +451,32 @@ func main() {
 			fmt.Fprintf(os.Stderr, "dist-oracle: candidate artifacts: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("candidate-artifacts: PASS %d archives and checksums for %s\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
-		fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
+		fmt.Printf("candidate-artifacts: PASS %d archives, SPDX SBOMs, and checksum entries for %s (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH), *version)
+		fmt.Println("not-run: release signatures/certificates, Homebrew metadata/install, DMG, and publication")
+		return
+	}
+
+	if *candidateGoCheck {
+		if *assetsDir == "" || *version == "" {
+			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-go-check requires -assets and -version")
+			os.Exit(2)
+		}
+		goreleaserPathResolved := resolvePath(*goreleaserPath)
+		raw, err := os.ReadFile(goreleaserPathResolved)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: read %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		var cfg goreleaserConfig
+		if err := yaml.Unmarshal(raw, &cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: parse %s: %v\n", goreleaserPathResolved, err)
+			os.Exit(2)
+		}
+		if err := checkGoCandidateArtifacts(&cfg, *version, resolvePath(*assetsDir)); err != nil {
+			fmt.Fprintf(os.Stderr, "dist-oracle: Go candidate identity: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("candidate-go-identity: PASS %d Go binaries match their embedded OS/architecture and package identities (unsigned)\n", len(cfg.Builds[0].GOOS)*len(cfg.Builds[0].GOARCH))
 		return
 	}
 

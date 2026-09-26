@@ -10,14 +10,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import sys
 from pathlib import Path
 from typing import Any, Sequence
 
 VALUE_SIZE_REDUCTION = 20.0
-VALUE_RSS_REDUCTION = 20.0
 MAX_P95_REGRESSION = 10.0
 REQUIRED_WORKLOADS = ("cli", "mcp", "daemon", "fetch")
+CLI_VARIANTS = ("help", "config")
 
 
 def pct(reference: float, candidate: float) -> float:
@@ -52,9 +53,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"BLOCK: {error}", file=sys.stderr)
         return 1
 
-    result: dict[str, Any] = {"schema_version": 2, "gate": "blocked", "workloads": {}, "reasons": []}
-    if report.get("schema_version") != 2 or report.get("report_version") != "rust016-benchmark-v2":
-        result["reasons"].append("versioned rust016-benchmark-v2 report is required")
+    result: dict[str, Any] = {"schema_version": 3, "gate": "blocked", "workloads": {}, "reasons": []}
+    if report.get("schema_version") != 3 or report.get("report_version") != "rust016-benchmark-v3":
+        result["reasons"].append("versioned rust016-benchmark-v3 report is required")
     if report.get("cache_policy") != "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe":
         result["reasons"].append("required cache policy is missing")
     if report.get("runs_per_workload") != 30:
@@ -77,12 +78,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["reasons"].append("benchmark report did not pass its paired execution gate")
     for label, value in ((args.reference, reference), (args.candidate, candidate)):
         identity = value.get("identity")
-        if not isinstance(identity, dict) or not identity.get("sha256") or not identity.get("vcs_revision"):
-            result["reasons"].append(f"{label} binary identity digest and revision are required")
+        if not isinstance(identity, dict) or not identity.get("sha256"):
+            result["reasons"].append(f"{label} binary identity digest is required")
+    if not report.get("source_revision"):
+        result["reasons"].append("source checkout revision is required")
+    workload_pairs = {name: (reference.get(name), candidate.get(name)) for name in REQUIRED_WORKLOADS}
+    left_variants = reference.get("cli_variants") if isinstance(reference.get("cli_variants"), dict) else {}
+    right_variants = candidate.get("cli_variants") if isinstance(candidate.get("cli_variants"), dict) else {}
+    workload_pairs.update({f"cli/{name}": (left_variants.get(name), right_variants.get(name)) for name in CLI_VARIANTS})
+    workload_pairs["daemon/steady_state_100_frames"] = (
+        reference.get("daemon", {}).get("steady_state_100_frames"),
+        candidate.get("daemon", {}).get("steady_state_100_frames"),
+    )
     comparable = []
-    for name in REQUIRED_WORKLOADS:
-        left = reference.get(name)
-        right = candidate.get(name)
+    for name, (left, right) in workload_pairs.items():
         if not isinstance(left, dict) or left.get("status") != "pass":
             result["reasons"].append(f"{args.reference} workload {name} is not executable")
             continue
@@ -117,34 +126,81 @@ def main(argv: Sequence[str] | None = None) -> int:
             result["workloads"][name]["hard_gate"] = "<=10%"
         comparable.append(change)
 
-    baseline_release = baseline.get("release", {})
-    baseline_measurements = baseline.get("measurements", {})
-    baseline_size = baseline_release.get("v0_8_0_darwin_arm64_uncompressed_bytes") or baseline_release.get("current_build_uncompressed_bytes")
+    rss_medians: dict[str, int] = {}
+    rss_methods: dict[str, str] = {}
+    for label, value in ((args.reference, reference), (args.candidate, candidate)):
+        startup = value.get("cli")
+        samples = startup.get("raw_samples") if isinstance(startup, dict) else None
+        if (
+            not isinstance(startup, dict)
+            or startup.get("peak_rss_status") != "complete"
+            or not isinstance(samples, list)
+            or len(samples) != 30
+        ):
+            result["reasons"].append(f"{label} CLI startup peak RSS requires 30 complete samples")
+            continue
+        rss_values = [item.get("peak_rss_bytes") for item in samples if isinstance(item, dict)]
+        methods = [item.get("peak_rss_method") for item in samples if isinstance(item, dict)]
+        if (
+            len(rss_values) != 30
+            or any(not isinstance(item, int) or item <= 0 for item in rss_values)
+            or any(not isinstance(method, str) or not method for method in methods)
+            or len(set(methods)) != 1
+        ):
+            result["reasons"].append(f"{label} CLI startup RSS contains missing, zero, or untyped measurements")
+            continue
+        median_rss = int(statistics.median(rss_values))
+        if startup.get("median_peak_rss_bytes") != median_rss:
+            result["reasons"].append(f"{label} CLI startup RSS median does not match raw samples")
+            continue
+        rss_medians[label] = median_rss
+        rss_methods[label] = methods[0]
+    if len(rss_medians) == 2:
+        if rss_methods[args.reference] != rss_methods[args.candidate]:
+            result["reasons"].append("Go and Rust CLI RSS were measured by different OS mechanisms")
+        rss_change = pct(rss_medians[args.reference], rss_medians[args.candidate])
+        result["cli_peak_rss"] = {
+            f"{args.reference}_median_bytes": rss_medians[args.reference],
+            f"{args.candidate}_median_bytes": rss_medians[args.candidate],
+            "change_percent": rss_change,
+            "measurement_method": rss_methods[args.reference],
+            "hard_gate": "Rust median <=80% of Go median",
+        }
+        if rss_medians[args.candidate] > rss_medians[args.reference] * 0.8:
+            result["reasons"].append("Rust CLI startup median peak RSS exceeds 80% of the Go median")
+
+    baseline_size = report.get("reference_size_bytes")
     candidate_size = report.get("candidate_size_bytes")
     size_reduction = None
     if isinstance(baseline_size, (int, float)) and isinstance(candidate_size, (int, float)) and baseline_size:
         size_reduction = (1.0 - candidate_size / baseline_size) * 100.0
         result["size_reduction_percent"] = size_reduction
 
-    baseline_rss = baseline_measurements.get("version_peak_rss", {}).get("median_bytes")
-    candidate_rss = report.get("candidate_median_peak_rss_bytes")
+    value_reasons = []
+    if size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION:
+        value_reasons.append("binary_size")
     rss_reduction = None
-    if isinstance(baseline_rss, (int, float)) and isinstance(candidate_rss, (int, float)) and baseline_rss:
-        rss_reduction = (1.0 - candidate_rss / baseline_rss) * 100.0
-        result["rss_reduction_percent"] = rss_reduction
+    if len(rss_medians) == 2:
+        rss_reduction = (1.0 - rss_medians[args.candidate] / rss_medians[args.reference]) * 100.0
+        if rss_medians[args.candidate] * 100 <= rss_medians[args.reference] * (100 - VALUE_SIZE_REDUCTION):
+            value_reasons.append("median_rss")
+    result["value_gate"] = {
+        "satisfied": bool(value_reasons),
+        "satisfied_by": value_reasons,
+        "binary_size_reduction_percent": size_reduction,
+        "median_rss_reduction_percent": rss_reduction,
+    }
 
-    p95_ok = len(comparable) == len(REQUIRED_WORKLOADS) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
-    value_ok = (size_reduction is not None and size_reduction >= VALUE_SIZE_REDUCTION) or (
-        rss_reduction is not None and rss_reduction >= VALUE_RSS_REDUCTION
-    )
+    p95_ok = len(comparable) == len(workload_pairs) and max(comparable, default=float("inf")) <= MAX_P95_REGRESSION
+    value_ok = bool(value_reasons)
     if not comparable:
         result["reasons"].append("no complete representative workload pair")
-    elif len(comparable) != len(REQUIRED_WORKLOADS):
+    elif len(comparable) != len(workload_pairs):
         result["reasons"].append("every representative workload must have a Go/Rust pair")
     if not p95_ok:
         result["reasons"].append("p95 regression gate is missing or exceeds 10%")
     if not value_ok:
-        result["reasons"].append("neither the 20% size nor 20% median RSS gain is evidenced")
+        result["reasons"].append("neither binary size nor median RSS is improved by at least 20%")
     if not result["reasons"]:
         result["gate"] = "pass"
     print(json.dumps(result, indent=2))

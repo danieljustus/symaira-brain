@@ -24,8 +24,8 @@ from pathlib import Path
 
 
 HERE = Path(__file__).resolve().parent
-DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.11.0.json"
-DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.11.0.json"
+DEFAULT_MANIFEST = HERE / "fixtures" / "manifest_v0.12.0.json"
+DEFAULT_TAP_MANIFEST = HERE / "fixtures" / "tap_v0.12.0.json"
 OIDC_ISSUER = "https://token.actions.githubusercontent.com"
 
 
@@ -105,6 +105,35 @@ def zip_file_names(archive: zipfile.ZipFile, name: str) -> list[str]:
     return [item.filename for item in members]
 
 
+def require_signature_sidecars(signed: set[str], files: dict[str, Path]) -> None:
+    """Fail before cosign if a signed payload lacks non-empty signature metadata."""
+    for payload in sorted(signed):
+        signature_name = payload + ".sig"
+        certificate_name = payload + ".pem"
+        require(signature_name in files, f"missing signature sidecar for {payload}")
+        require(certificate_name in files, f"missing certificate sidecar for {payload}")
+        require(files[signature_name].stat().st_size > 0, f"empty signature sidecar for {payload}")
+        certificate = files[certificate_name].read_bytes()
+        require(
+            certificate.lstrip().startswith(b"-----BEGIN CERTIFICATE-----")
+            and b"-----END CERTIFICATE-----" in certificate,
+            f"invalid certificate PEM metadata for {payload}",
+        )
+
+
+def verify_signatures(signed: set[str], files: dict[str, Path], identity: str) -> None:
+    require_signature_sidecars(signed, files)
+    for name in sorted(signed):
+        payload = files[name]
+        cmd = [
+            "cosign", "verify-blob", "--certificate", str(files[name + ".pem"]),
+            "--signature", str(files[name + ".sig"]), "--certificate-identity", identity,
+            "--certificate-oidc-issuer", OIDC_ISSUER, str(payload),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        require(result.returncode == 0, f"cosign verification failed for {name}: {result.stderr.strip()}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--assets", required=True, type=Path, help="directory containing only the downloaded release assets")
@@ -114,7 +143,12 @@ def main() -> None:
     parser.add_argument("--tap-manifest", type=Path, default=DEFAULT_TAP_MANIFEST)
     parser.add_argument("--verify-signatures", action="store_true", help="verify cosign signatures, certificate identity, issuer, and Rekor inclusion")
     parser.add_argument("--verify-sboms", action="store_true", help="parse each SBOM with the syft CLI")
+    parser.add_argument("--release-claim", action="store_true", help="require full signature and SBOM verification before reporting a release claim")
     args = parser.parse_args()
+
+    if args.release_claim:
+        require(args.verify_signatures, "release claim requires --verify-signatures")
+        require(args.verify_sboms, "release claim requires --verify-sboms")
 
     manifest = json.loads(args.manifest.read_text())
     assets = {item["name"]: item for item in manifest["assets"]}
@@ -153,15 +187,7 @@ def main() -> None:
     }
     if args.verify_signatures:
         identity = f"https://{manifest['repository']}/.github/workflows/release.yml@refs/tags/{manifest['tag']}"
-        for name in sorted(signed):
-            payload = args.assets / name
-            cmd = [
-                "cosign", "verify-blob", "--certificate", str(payload) + ".pem",
-                "--signature", str(payload) + ".sig", "--certificate-identity", identity,
-                "--certificate-oidc-issuer", OIDC_ISSUER, str(payload),
-            ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-            require(result.returncode == 0, f"cosign verification failed for {name}: {result.stderr.strip()}")
+        verify_signatures(signed, files, identity)
         print(f"ok: {len(signed)} cosign signatures, workflow identity, OIDC issuer, and transparency proofs")
 
     archive_names = {name for name in assets if name.endswith((".tar.gz", ".zip"))}
@@ -195,6 +221,10 @@ def main() -> None:
     require_pinned_bytes(args.cask.read_bytes(), tap_files["Casks/symbrain.rb"], "Homebrew cask")
     formula_count, cask_count = verify_tap_links(args.formula.read_text(), args.cask.read_text(), manifest)
     print(f"ok: Homebrew tap snapshot {tap_manifest['commit']}; formula links {formula_count}, cask links {cask_count}")
+    if args.release_claim:
+        print("release-claim: PASS signatures and SBOM parser verified")
+    else:
+        print("not-verified: full release claim (use --release-claim --verify-signatures --verify-sboms)")
 
 
 if __name__ == "__main__":

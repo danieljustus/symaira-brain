@@ -96,7 +96,7 @@ func DecodeFrame(raw []byte) (Frame, error) {
 
 // NewError constructs a response error with a stable code and message.
 func NewError(code, message string) *Error {
-	return &Error{Code: code, Message: message}
+	return &Error{Code: code, Message: RedactDiagnostic(message)}
 }
 
 // ErrorResponse creates a failed protocol response.

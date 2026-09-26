@@ -525,6 +525,15 @@ func runCaptureServerWithBody(ln net.Listener, tlsConfig *tls.Config, responseBo
 					return captureOutcome{clientHello: info, alpn: alpn, err: fmt.Errorf("write response body: %w", err)}
 				}
 			}
+			// The capture caller closes the one-shot production session after
+			// Fetch returns. Send TLS close_notify, then drain that bounded client
+			// close before closing the raw socket. Closing TCP with unread TLS/H2
+			// bytes produces a Windows RST although the response was complete.
+			if err := tlsConn.CloseWrite(); err != nil {
+				return captureOutcome{clientHello: info, alpn: alpn, err: fmt.Errorf("close TLS write side: %w", err)}
+			}
+			_ = tlsConn.SetReadDeadline(time.Now().Add(time.Second))
+			_, _ = io.Copy(io.Discard, tlsConn)
 			return captureOutcome{
 				clientHello:        info,
 				alpn:               alpn,
@@ -743,7 +752,6 @@ func captureProfileWithProductionRequest(profile Profile, responseBody []byte, m
 	if err != nil {
 		return profileCapture{}, fmt.Errorf("newAzureClient: %w", err)
 	}
-	defer c.Close()
 	// Same-package field access, not a source edit: trust only this
 	// process's own freshly generated loopback certificate.
 	c.session.InsecureSkipVerify = true
@@ -761,6 +769,10 @@ func captureProfileWithProductionRequest(profile Profile, responseBody []byte, m
 		Body:         requestBody,
 		AllowPrivate: true,
 	})
+	// Close the capture session before waiting for the test server's bounded
+	// close_notify drain. The production client owns the same lifecycle; this
+	// makes its ordering explicit in the loopback test harness.
+	_ = c.Close()
 
 	var outcome captureOutcome
 	select {

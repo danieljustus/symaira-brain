@@ -1,0 +1,193 @@
+name: Browse PERF-003 real Chrome paired benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "browse/**"
+      - ".github/workflows/browse-perf003-real-chrome.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  paired-chrome:
+    name: PERF-003 native Chrome ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-amd64
+            runner: macos-15-intel
+            cft: mac-x64
+          - target: darwin-arm64
+            runner: macos-15
+            cft: mac-arm64
+          - target: linux-amd64
+            runner: ubuntu-24.04
+            cft: linux64
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+            cft: linux-arm64
+          - target: windows-amd64
+            runner: windows-2025
+            cft: win64
+          - target: windows-arm64
+            runner: windows-11-arm
+            cft: win-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+
+      - name: Build Go and Rust release binaries
+        working-directory: browse
+        shell: bash
+        run: |
+          set -euo pipefail
+          go build -ldflags="-s -w" -o "$RUNNER_TEMP/symbrowse-go${{ runner.os == 'Windows' && '.exe' || '' }}" ./cmd/symbrowse
+          cargo build --release --locked --bin symbrowse
+          cp "target/release/symbrowse${{ runner.os == 'Windows' && '.exe' || '' }}" "$RUNNER_TEMP/symbrowse-rust${{ runner.os == 'Windows' && '.exe' || '' }}"
+
+      - name: Fetch isolated official Chrome for Testing artifact
+        id: cft
+        shell: bash
+        run: python3 browse/port/harness/chrome_for_testing.py --platform "${{ matrix.cft }}" --destination "$RUNNER_TEMP/perf003-cft"
+
+      - name: Run paired Go/Rust real-Chrome fixture flow
+        working-directory: browse
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          CFT_AVAILABLE: ${{ steps.cft.outputs.available }}
+          CFT_EXECUTABLE: ${{ steps.cft.outputs.executable }}
+          CFT_VERSION: ${{ steps.cft.outputs.version }}
+          CFT_ARCHIVE_SHA256: ${{ steps.cft.outputs.archive_sha256 }}
+        run: |
+          set -euo pipefail
+          args=(--target "$TARGET" \
+            --go "$RUNNER_TEMP/symbrowse-go${{ runner.os == 'Windows' && '.exe' || '' }}" \
+            --rust "$RUNNER_TEMP/symbrowse-rust${{ runner.os == 'Windows' && '.exe' || '' }}" \
+            --expected-source-revision "$GITHUB_SHA" --runs 30 \
+            --output "$RUNNER_TEMP/perf003-${TARGET}.json")
+          if [[ "$CFT_AVAILABLE" == true ]]; then
+            args+=(--chrome "$CFT_EXECUTABLE" --chrome-version "$CFT_VERSION" --chrome-archive-sha256 "$CFT_ARCHIVE_SHA256")
+            if [[ "$RUNNER_OS" == Linux ]]; then
+              wrapper="$RUNNER_TEMP/perf003-chrome-wrapper"
+              cat > "$wrapper" <<'SH'
+          #!/usr/bin/env bash
+          exec "$PERF003_CFT_REAL" --no-sandbox "$@"
+          SH
+              chmod +x "$wrapper"
+              export PERF003_CFT_REAL="$CFT_EXECUTABLE"
+              args+=(--chrome-launcher "$wrapper")
+            fi
+          fi
+          python3 port/bench/chrome_pair.py "${args[@]}"
+
+      - name: Upload exact-SHA paired Chrome evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-perf003-${{ matrix.target }}
+          path: ${{ runner.temp }}/perf003-${{ matrix.target }}.json
+          if-no-files-found: warn
+
+  verify-native-evidence:
+    name: Verify exact-SHA PERF-003 platform receipts
+    if: always()
+    needs: [paired-chrome]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Keep failed native measurements visible
+        env:
+          MATRIX_RESULT: ${{ needs.paired-chrome.result }}
+        run: |
+          if [[ "$MATRIX_RESULT" != success ]]; then
+            echo "Native Chrome benchmark matrix failed: $MATRIX_RESULT" >&2
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: browse-perf003-*
+          path: ${{ runner.temp }}/perf003-reports
+          merge-multiple: false
+
+      - name: Require five measured native targets and report Windows ARM64 blocker
+        env:
+          REPORT_ROOT: ${{ runner.temp }}/perf003-reports
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          root = Path(os.environ["REPORT_ROOT"])
+          expected = {
+              "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
+              "darwin-arm64": ("Darwin", {"arm64", "aarch64"}),
+              "linux-amd64": ("Linux", {"x86_64", "amd64"}),
+              "linux-arm64": ("Linux", {"aarch64", "arm64"}),
+              "windows-amd64": ("Windows", {"amd64", "x86_64"}),
+              "windows-arm64": ("Windows", {"arm64", "aarch64"}),
+          }
+          dirs = {path.name.removeprefix("browse-perf003-"): path for path in root.iterdir() if path.is_dir()}
+          if set(dirs) != set(expected):
+              raise SystemExit(f"expected six platform evidence directories, got {sorted(dirs)}")
+          reports = {}
+          for target, directory in dirs.items():
+              files = list(directory.glob("*.json"))
+              if len(files) != 1:
+                  raise SystemExit(f"{target} must provide exactly one report")
+              report = json.loads(files[0].read_text(encoding="utf-8"))
+              if report.get("target") != target or report.get("source_revision") != os.environ["GITHUB_SHA"]:
+                  raise SystemExit(f"{target} receipt has wrong target/SHA")
+              reports[target] = report
+          for target in set(expected) - {"windows-arm64"}:
+              report = reports[target]
+              system, machines = expected[target]
+              host = report.get("host", {})
+              if host.get("system") != system or host.get("machine", "").casefold() not in machines:
+                  raise SystemExit(f"{target} native runner identity mismatch: {host}")
+              if report.get("status") != "measured" or report.get("gate") != "pass":
+                  raise SystemExit(f"{target} Chrome paired gate failed: {report.get('reason')}")
+              if report.get("runs_per_implementation") != 30:
+                  raise SystemExit(f"{target} lacks 30 paired samples")
+              for implementation in ("go", "rust"):
+                  identity = report.get("binaries", {}).get(implementation, {})
+                  digest = identity.get("sha256", "")
+                  if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+                      raise SystemExit(f"{target} missing measured {implementation} binary digest")
+              chrome = report.get("chrome", {})
+              for key in ("archive_sha256", "binary_sha256"):
+                  digest = chrome.get(key, "")
+                  if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+                      raise SystemExit(f"{target} missing verified Chrome for Testing {key}")
+          unsupported = reports["windows-arm64"]
+          if unsupported.get("host", {}).get("system") != expected["windows-arm64"][0] or unsupported.get("host", {}).get("machine", "").casefold() not in expected["windows-arm64"][1]:
+              raise SystemExit(f"Windows ARM64 native runner identity mismatch: {unsupported.get('host')}")
+          if unsupported.get("status") != "unsupported" or unsupported.get("chrome", {}).get("version") is not None:
+              raise SystemExit("Windows ARM64 must retain explicit unavailable-CfT evidence")
+          for implementation in ("go", "rust"):
+              digest = unsupported.get("binaries", {}).get(implementation, {}).get("sha256", "")
+              if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+                  raise SystemExit(f"Windows ARM64 receipt lacks {implementation} binary identity")
+          print(f"PERF-003: five real-Chrome targets measured on {os.environ['GITHUB_SHA']}; Windows ARM64 unsupported by official CfT. Ledger remains incomplete.")
+          PY

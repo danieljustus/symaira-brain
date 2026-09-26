@@ -472,6 +472,12 @@ fn normalize_charset(body: Vec<u8>, content_type: Option<&str>) -> Vec<u8> {
     let Some(encoding) = Encoding::for_label(label.as_bytes()) else {
         return String::from_utf8_lossy(&body).into_owned().into_bytes();
     };
+    if std::ptr::eq(encoding, encoding_rs::UTF_8)
+        && !body.starts_with(b"\xef\xbb\xbf")
+        && std::str::from_utf8(&body).is_ok()
+    {
+        return body;
+    }
     let (text, _, _) = encoding.decode(&body);
     text.into_owned().into_bytes()
 }
@@ -499,4 +505,41 @@ fn sniff_meta_charset(body: &[u8]) -> Option<String> {
         .unwrap_or(remainder.len());
     let label = remainder.get(..end)?.trim();
     (!label.is_empty()).then_some(label.to_owned())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_charset;
+
+    #[test]
+    fn valid_utf8_charset_keeps_the_original_body_allocation() {
+        let body = b"<html><title>RUST-016</title><p>fixture</p></html>\n".to_vec();
+        let original = body.as_ptr();
+        let normalized = normalize_charset(body, Some("text/html; charset=utf-8"));
+
+        assert_eq!(normalized.as_ptr(), original);
+        assert_eq!(
+            normalized,
+            b"<html><title>RUST-016</title><p>fixture</p></html>\n"
+        );
+    }
+
+    #[test]
+    fn invalid_utf8_still_uses_replacement_characters() {
+        let normalized =
+            normalize_charset(b"valid\xfftext".to_vec(), Some("text/html; charset=utf-8"));
+
+        assert_eq!(normalized, "valid\u{fffd}text".as_bytes());
+    }
+
+    #[test]
+    fn utf8_bom_matches_generic_encoding_rs_decode() {
+        let body = b"\xef\xbb\xbf<html>fixture</html>".to_vec();
+        let (generic, _, _) = encoding_rs::UTF_8.decode(&body);
+        let generic = generic.into_owned().into_bytes();
+        let normalized = normalize_charset(body, Some("text/html; charset=utf-8"));
+
+        assert_eq!(generic, b"<html>fixture</html>");
+        assert_eq!(normalized, generic);
+    }
 }

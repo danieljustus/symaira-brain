@@ -101,7 +101,7 @@ fn format_go_float(f: f64, w: &mut String) {
     }
 }
 
-fn local_offset_seconds() -> i32 {
+pub(super) fn local_offset_seconds() -> i32 {
     use chrono::Offset as _;
     static OFFSET: std::sync::OnceLock<i32> = std::sync::OnceLock::new();
     *OFFSET.get_or_init(|| chrono::Local::now().offset().fix().local_minus_utc())
@@ -128,7 +128,12 @@ pub(super) fn format_time_str(t: &toml_edit::Time) -> String {
     format!("{base}{frac}")
 }
 
-fn format_datetime_with_offset(dt: &toml_edit::Datetime, local: i32, w: &mut String) {
+fn format_datetime_with_offset(
+    dt: &toml_edit::Datetime,
+    local: i32,
+    local_zone: Option<&str>,
+    w: &mut String,
+) {
     let date = dt
         .date
         .map_or_else(|| "0000-01-01".to_owned(), format_date_str);
@@ -143,7 +148,7 @@ fn format_datetime_with_offset(dt: &toml_edit::Datetime, local: i32, w: &mut Str
             if minutes == 0 && local == 0 {
                 "+0000 UTC".to_owned()
             } else {
-                format!("{off} {off}")
+                format!("{off} {}", local_zone.unwrap_or(&off))
             }
         }
         None => {
@@ -161,12 +166,32 @@ fn format_datetime_with_offset(dt: &toml_edit::Datetime, local: i32, w: &mut Str
 }
 
 fn format_datetime(dt: &toml_edit::Datetime, w: &mut String) {
-    format_datetime_with_offset(dt, local_offset_seconds(), w);
+    let local = local_offset_seconds();
+    let zone = local_zone_name(dt);
+    format_datetime_with_offset(dt, local, zone.as_deref(), w);
+}
+
+fn local_zone_name(dt: &toml_edit::Datetime) -> Option<String> {
+    use chrono::Offset as _;
+    if !matches!(dt.offset, Some(toml_edit::Offset::Custom { .. })) {
+        return None;
+    }
+    let parsed =
+        chrono::DateTime::parse_from_rfc3339(&dt.to_string().replacen(' ', "T", 1)).ok()?;
+    let system = || iana_time_zone::get_timezone().ok();
+    #[cfg(windows)]
+    let name = system()?;
+    #[cfg(not(windows))]
+    let name = std::env::var("TZ").ok().or_else(system)?;
+    let zone: chrono_tz::Tz = name.parse().ok()?;
+    let local_date = parsed.with_timezone(&zone);
+    (local_date.offset().fix().local_minus_utc() == parsed.offset().local_minus_utc())
+        .then(|| local_date.format("%Z").to_string())
 }
 
 #[cfg(test)]
 pub(super) fn format_go_datetime_with_offset(dt: &toml_edit::Datetime, local: i32, w: &mut String) {
-    format_datetime_with_offset(dt, local, w);
+    format_datetime_with_offset(dt, local, None, w);
 }
 
 fn format_value(value: &Value, w: &mut String) {

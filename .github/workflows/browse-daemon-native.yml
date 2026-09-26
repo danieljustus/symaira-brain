@@ -1,0 +1,160 @@
+name: Browse daemon native parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+
+jobs:
+  daemon:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # fixture generators verify the pinned Go source commit
+      - name: Verify pinned toolchain
+        run: rustup show active-toolchain
+      - name: Smoke native Rust CLI release build
+        run: |
+          cargo build -p symbrowse-cli --bin symbrowse --release --locked
+          executable=target/release/symbrowse
+          if [[ "$RUNNER_OS" == Windows ]]; then executable+=.exe; fi
+          "$executable" version --json
+          "$executable" --help
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: browse/go.mod
+      - name: Verify Go batch, output and daemon-frame oracles
+        run: |
+          go test ./cmd/symbrowse -run 'TestBatch' -count=1
+          go test ./internal/output ./cmd/symbrowse -run 'Human|YAML|Output' -count=1
+          go test ./internal/daemon -run 'Malformed|Frame|Large' -count=1
+      - name: Compare native Go and Rust Browse CLI cases
+        continue-on-error: true # Report parity after the independent daemon contracts run.
+        run: |
+          go_binary="$RUNNER_TEMP/symbrowse-go"
+          rust_binary=target/release/symbrowse
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            go_binary+=.exe
+            rust_binary+=.exe
+          fi
+          go build -o "$go_binary" ./cmd/symbrowse
+          python3 port/harness/cli_differential.py \
+            --go "$go_binary" --rust "$rust_binary" \
+            --report "$RUNNER_TEMP/cli-differential.json" --temp-root "$RUNNER_TEMP"
+      - name: Verify native CLI compat sidecar proxy
+        run: |
+          go_binary="$RUNNER_TEMP/symbrowse-go"
+          if [[ "$RUNNER_OS" == Windows ]]; then go_binary+=.exe; fi
+          SYMBROWSE_COMPAT_BINARY="$go_binary" cargo test --locked -p symbrowse-cli --test compat_sidecar_proxy
+          SYMBROWSE_COMPAT_BINARY="$go_binary" cargo test --locked -p symbrowse-cli --test compat_sidecar_proxy -- --ignored --exact compat_sidecar_forwards_real_go_handshake_on_native_platform
+      - name: Run SEC-007 redaction corpus on native runner
+        run: |
+          cargo test --locked -p symbrowse-cli --test redaction_corpus
+          go test ./internal/config ./internal/daemon ./internal/mcp ./internal/journal \
+            -run 'SEC007|ConfigShowOmitsEncryptionKeyMaterial' -count=1
+      - name: Verify Go daemon and session oracle
+        if: runner.os != 'Windows'
+        run: go test ./internal/daemon ./internal/sessionid ./cmd/symbrowse -run 'Timeout|Deadline|Cancel|Session|Registry|Autostart|Client|Engine' -count=1
+      - name: Execute FETCH-011 compat protocol and lifecycle contracts
+        run: python3 port/harness/run.py --suite compat-sidecar
+      - name: Retain CLI comparison evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-cli-${{ github.sha }}-${{ matrix.runner }}
+          path: ${{ runner.temp }}/cli-differential.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Test daemon contracts
+        run: cargo test --manifest-path Cargo.toml -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --test session_registry --locked
+      - name: Exercise OOB status and handoff on native daemon
+        run: |
+          cargo test --locked -p symbrowse-daemon --lib oob_status_and_completion_share_the_daemon_prompt_manager
+          cargo test --locked -p symbrowse-daemon --lib handoff_waits_for_explicit_completion_and_times_out_closed
+          cargo test --locked -p symbrowse-cli --bin symbrowse handoff_requires_reason_and_forwards_the_timeout
+          cargo test --locked -p symbrowse-cli --bin symbrowse oob_status_routes_to_the_daemon_with_global_flags
+      - name: Compare daemon deadline, registry and autostart contracts
+        run: python3 port/harness/run.py --suite daemon-contracts
+      - name: Compare configuration and transport selection contracts
+        run: python3 port/harness/run.py --suite config-contracts
+      - name: Exercise daemon lifecycle and races
+        run: |
+          python3 port/harness/run.py --suite daemon
+          python3 port/harness/run.py --suite daemon-races --repeat 50
+      - name: Exercise static fetch, engine, and workflow contracts
+        run: |
+          python3 port/harness/run.py --suite fetch-control
+          python3 port/harness/run.py --suite fetch-render --comparison bytes
+          python3 scripts/rust-port/engine_fixture_gen.py --check
+          cargo test -p symbrowse-engine --all-targets --locked
+          go run ./scripts/rust-port/cmd/workflowgen --check
+          cargo test -p symbrowse-core --test workflows_contract --locked
+          cargo test -p symbrowse-core --lib --locked
+          # The Go fixture producer uses Unix sockets; Windows replays its pinned frames.
+          if [[ "$RUNNER_OS" != Windows ]]; then
+            go run ./scripts/rust-port/cmd/mcpfixturegen --check
+          fi
+          cargo test -p symbrowse-mcp --test raw_frames --locked
+      - name: Verify Safari adapter and typed prerequisite contracts
+        if: runner.os == 'macOS'
+        run: |
+          go test ./internal/engine/safari ./internal/engine/safaribidi -count=1
+          cargo test -p symbrowse-engine-safari --tests --locked
+          cargo test -p symbrowse-daemon --lib safari_prerequisites_report_unavailable_without_engine_substitution --locked
+      - name: Exercise native Safari attach and BiDi against loopback
+        if: runner.os == 'macOS'
+        env:
+          SYMBROWSE_NATIVE_TARGETS: "1"
+          SYMBROWSE_E2E: "1"
+        run: |
+          set -uo pipefail
+          result=0
+          run_gate() {
+            echo "::group::${1}"
+            shift
+            "$@"
+            code=$?
+            echo "native gate exit=$code"
+            echo "::endgroup::"
+            if [[ "$code" -ne 0 ]]; then result=1; fi
+          }
+          {
+            echo "Safari native receipt: sha=$GITHUB_SHA arch=$RUNNER_ARCH runner=${ImageOS:-unknown}"
+            run_gate "macOS version" sw_vers
+            run_gate "Safari WebDriver version" /usr/bin/safaridriver --version
+            run_gate "BiDi launch, navigation, JS, capability truth, cleanup" cargo test -p symbrowse-engine-safari --test bidi --locked real_safari_bidi_launch_is_opt_in_or_reports_typed_blocked_gate -- --exact
+            run_gate "Apple Events attach, navigation, capability truth, detach" cargo test -p symbrowse-engine-safari --test attach --locked real_safari_attach_uses_and_closes_only_its_named_loopback_tab -- --ignored --exact
+            run_gate "Production daemon BiDi and owned driver cleanup" cargo test -p symbrowse-daemon --test safari_native --locked production_daemon_path_runs_safari_bidi_and_reaps_owned_driver -- --exact
+            echo "Safari native suite result=$result; automation permissions were not enabled by this workflow."
+            exit "$result"
+          } 2>&1 | tee "$RUNNER_TEMP/safari-native-${RUNNER_ARCH}.log"
+      - name: Retain native Safari evidence per runner architecture
+        if: always() && runner.os == 'macOS'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-safari-native-${{ github.sha }}-${{ runner.arch }}
+          path: ${{ runner.temp }}/safari-native-${{ runner.arch }}.log
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Enforce native CLI parity
+        run: python3 -c 'import json, sys; sys.exit(0 if json.load(open(sys.argv[1], encoding="utf-8"))["parity_established"] else 1)' "$RUNNER_TEMP/cli-differential.json"

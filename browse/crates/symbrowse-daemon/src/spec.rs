@@ -17,6 +17,8 @@ pub struct SessionSpec {
     pub executable_path: PathBuf,
     pub cdp_endpoint: String,
     pub allowed_domains: Vec<String>,
+    /// Server-owned filesystem roots accepted by the path-guarded upload route.
+    pub upload_dirs: Vec<String>,
     pub ssrf_enabled: bool,
     pub allow_private: bool,
     pub fetch_robots: bool,
@@ -45,6 +47,12 @@ impl SessionSpec {
             executable_path: PathBuf::new(),
             cdp_endpoint: String::new(),
             allowed_domains: Vec::new(),
+            upload_dirs: vec![
+                std::env::current_dir()
+                    .unwrap_or_else(|_| PathBuf::from("."))
+                    .to_string_lossy()
+                    .into_owned(),
+            ],
             ssrf_enabled: false,
             allow_private: false,
             fetch_robots: true,
@@ -60,20 +68,25 @@ impl SessionSpec {
         let mut spec = Self::for_session(session);
         spec.state_dir = PathBuf::from(&config.state_dir);
         spec.cache_dir = PathBuf::from(&config.cache_dir);
-        spec.engine = if config.engine.is_empty() {
-            "chrome"
-        } else {
-            &config.engine
-        }
-        .into();
         spec.mode = if config.engine == "static" {
             "static".into()
         } else {
             config.mode.clone()
         };
+        spec.engine = if spec.mode == "browser" {
+            if config.engine.is_empty() {
+                "chrome"
+            } else {
+                &config.engine
+            }
+        } else {
+            "static"
+        }
+        .into();
         spec.executable_path = PathBuf::from(&config.executable_path);
         spec.cdp_endpoint = config.cdp_endpoint.clone();
         spec.allowed_domains = config.allowed_domains.clone();
+        spec.upload_dirs = config.upload_dirs.clone();
         spec.ssrf_enabled = config.ssrf_enabled;
         spec.allow_private = config.allow_private;
         spec.fetch_robots = config.fetch_robots;
@@ -93,7 +106,7 @@ impl SessionSpec {
     }
 
     pub fn validate_selection(&self) -> Result<(), String> {
-        if self.engine == "static" {
+        if self.engine == "static" && matches!(self.mode.as_str(), "static" | "compat") {
             return Ok(());
         }
         resolve_selection(Some(&self.mode), Some(&self.engine))
@@ -154,32 +167,69 @@ pub fn default_log_path() -> PathBuf {
 
 #[must_use]
 pub fn default_socket_path(session: &str) -> PathBuf {
-    if cfg!(windows) {
+    let platform = if cfg!(windows) {
+        "windows"
+    } else if cfg!(target_os = "macos") {
+        "macos"
+    } else {
+        "unix"
+    };
+    let home = std::env::var_os("HOME")
+        .or_else(|| {
+            cfg!(windows)
+                .then(|| std::env::var_os("USERPROFILE"))
+                .flatten()
+        })
+        .map(PathBuf::from);
+    socket_path_for(
+        session,
+        platform,
+        home,
+        std::env::var_os("XDG_RUNTIME_DIR").map(PathBuf::from),
+        std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
+        std::env::temp_dir(),
+    )
+}
+
+fn socket_path_for(
+    session: &str,
+    platform: &str,
+    home: Option<PathBuf>,
+    runtime_dir: Option<PathBuf>,
+    cache_home: Option<PathBuf>,
+    temp_dir: PathBuf,
+) -> PathBuf {
+    if platform == "windows" {
         return PathBuf::from(format!(r"\\.\pipe\symbrowse-{session}"));
     }
-    if cfg!(target_os = "macos") {
-        return std::env::var_os("HOME").map_or_else(
-            || std::env::temp_dir().join(format!("symbrowse-{session}.sock")),
+    if platform == "macos" {
+        return home.map_or_else(
+            || temp_dir.join(format!("symbrowse-{session}.sock")),
             |home| {
-                PathBuf::from(home)
-                    .join("Library/Caches/symbrowse/run")
+                home.join("Library/Caches/symbrowse/run")
                     .join(format!("{session}.sock"))
             },
         );
     }
-    if let Some(runtime) = std::env::var_os("XDG_RUNTIME_DIR") {
-        return PathBuf::from(runtime)
-            .join("symbrowse")
-            .join(format!("{session}.sock"));
+    if let Some(runtime) = runtime_dir {
+        return runtime.join("symbrowse").join(format!("{session}.sock"));
     }
-    default_state_dir()
-        .join("run")
-        .join(format!("{session}.sock"))
+    cache_home
+        .or_else(|| home.map(|path| path.join(".cache")))
+        .map_or_else(
+            || {
+                temp_dir
+                    .join("symbrowse/run")
+                    .join(format!("{session}.sock"))
+            },
+            |cache| cache.join("symbrowse/run").join(format!("{session}.sock")),
+        )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use symbrowse_core::config::{FlagOverrides, LoadContext, load};
 
     #[test]
     fn spec_paths_are_one_configured_tree() {
@@ -187,5 +237,142 @@ mod tests {
         assert!(spec.state_store_dir().ends_with("states"));
         assert!(spec.user_data_dir().ends_with("sessions/alpha"));
         assert!(spec.output_cache_dir().ends_with("out"));
+    }
+
+    #[test]
+    fn configured_upload_roots_are_owned_by_the_session_spec() {
+        let root =
+            std::env::temp_dir().join(format!("symbrowse-upload-spec-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        context.env.insert(
+            "SYMBROWSE_UPLOAD_DIRS".into(),
+            format!(
+                "{},{}",
+                root.join("one").display(),
+                root.join("two").display()
+            ),
+        );
+        let config = load(&context).expect("load config").config;
+        let spec = SessionSpec::from_config(&config, "alpha");
+        assert_eq!(spec.upload_dirs, config.upload_dirs);
+    }
+
+    #[test]
+    fn default_socket_paths_follow_go_xdg_cache_and_runtime_rules() {
+        let home = PathBuf::from("/home/agent");
+        let temp = PathBuf::from("/tmp");
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                None,
+                None,
+                temp.clone(),
+            ),
+            PathBuf::from("/home/agent/.cache/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                None,
+                Some(PathBuf::from("/xdg/cache")),
+                temp.clone(),
+            ),
+            PathBuf::from("/xdg/cache/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for(
+                "alpha",
+                "unix",
+                Some(home.clone()),
+                Some(PathBuf::from("relative/runtime")),
+                Some(PathBuf::from("/xdg/cache")),
+                temp.clone(),
+            ),
+            PathBuf::from("relative/runtime/symbrowse/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for("alpha", "macos", Some(home), None, None, temp.clone()),
+            PathBuf::from("/home/agent/Library/Caches/symbrowse/run/alpha.sock")
+        );
+        assert_eq!(
+            socket_path_for("alpha", "windows", None, None, None, temp),
+            PathBuf::from(r"\\.\pipe\symbrowse-alpha")
+        );
+    }
+
+    #[test]
+    fn nonbrowser_config_selects_no_browser_runtime() {
+        let root = std::env::temp_dir().join(format!("symbrowse-mode-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.clone(),
+            cwd: root.clone(),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        for mode in ["static", "compat"] {
+            context.env.insert("SYMBROWSE_MODE".into(), mode.into());
+            let config = load(&context).expect("load transport").config;
+            let spec = SessionSpec::from_config(&config, "test");
+            assert_eq!(spec.mode, mode);
+            assert_eq!(spec.engine, "static");
+            spec.validate_selection().expect("non-browser transport");
+        }
+    }
+
+    #[test]
+    fn configured_browser_engine_is_preserved_in_session_spec() {
+        let root =
+            std::env::temp_dir().join(format!("symbrowse-engine-spec-{}", std::process::id()));
+        let mut context = LoadContext {
+            home: root.join("home"),
+            cwd: root.join("project"),
+            xdg_config_home: Some(root.join("config")),
+            xdg_cache_home: None,
+            xdg_state_home: None,
+            env: Default::default(),
+            flags: FlagOverrides::default(),
+        };
+        std::fs::create_dir_all(&context.home).expect("create fixture home");
+        std::fs::create_dir_all(&context.cwd).expect("create fixture project");
+
+        for (source, engine) in [
+            ("default", "chrome"),
+            ("environment", "firefox"),
+            ("flag", "safari-bidi"),
+        ] {
+            context.env.remove("SYMBROWSE_ENGINE");
+            context.flags.engine = None;
+            match source {
+                "default" => {}
+                "environment" => {
+                    context.env.insert("SYMBROWSE_ENGINE".into(), engine.into());
+                }
+                "flag" => context.flags.engine = Some(engine.into()),
+                _ => unreachable!("test selection source"),
+            }
+            let config = load(&context).expect("load selected browser engine").config;
+            let spec = SessionSpec::from_config(&config, "selection-test");
+            assert_eq!(spec.mode, "browser", "source={source}");
+            assert_eq!(spec.engine, engine, "source={source}");
+            spec.validate_selection()
+                .unwrap_or_else(|error| panic!("source={source}: {error}"));
+        }
+
+        std::fs::remove_dir_all(root).expect("remove unique engine fixture root");
     }
 }

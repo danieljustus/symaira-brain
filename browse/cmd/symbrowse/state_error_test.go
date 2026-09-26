@@ -59,24 +59,16 @@ func uniqueSession() string {
 	return fmt.Sprintf("c%x", buf[:])
 }
 
-// fakeDaemon listens on a unix socket at path and answers every frame with
+// fakeDaemon listens on the native session endpoint and answers every frame with
 // the JSON produced by respond. A nil reply closes the connection without a
-// response. A stale socket file from an earlier crashed run is removed first
-// (mirroring the production daemon's stale-socket handling).
+// response.
 func fakeDaemon(t *testing.T, path string, respond func(frame []byte) []byte) {
 	t.Helper()
-	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-		t.Fatal(err)
-	}
-	_ = os.Remove(path)
-	listener, err := net.Listen("unix", path)
+	listener, cleanup, err := listenTestEndpoint(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		_ = listener.Close()
-		_ = os.Remove(path)
-	})
+	t.Cleanup(cleanup)
 	go func() {
 		for {
 			conn, err := listener.Accept()

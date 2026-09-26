@@ -8,6 +8,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use serde::{Deserialize, Serialize};
 use symbrowse_core::policy::{Allowlist, SsrfGuard};
 use symbrowse_engine::capabilities::{Capabilities, capabilities_for};
 use symbrowse_engine::{Context, NavigationResult, Page};
@@ -18,6 +19,19 @@ pub const DEFAULT_TAB_NAME: &str = "Symaira";
 pub const DEFAULT_COMMAND_TIMEOUT: Duration = Duration::from_secs(10);
 pub const DEFAULT_NAVIGATION_TIMEOUT: Duration = Duration::from_secs(30);
 const MAX_SCRIPT_BYTES: usize = 1024 * 1024;
+
+/// One tab reported by the attached Safari window.
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SafariTabInfo {
+    pub id: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub label: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub url: String,
+    pub active: bool,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub target_id: String,
+}
 
 /// A prerequisite that must be diagnosed before Safari automation is used.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -369,6 +383,9 @@ impl NavigationPolicy {
 pub struct AttachEngine<R = OsascriptRunner> {
     runner: R,
     tab_name: String,
+    tab_window_id: Option<i64>,
+    tab_index: Option<usize>,
+    pinned_tab_closed: bool,
     command_timeout: Duration,
     navigation_timeout: Duration,
     poll_interval: Duration,
@@ -390,6 +407,9 @@ impl<R: ScriptRunner> AttachEngine<R> {
         Self {
             runner,
             tab_name: DEFAULT_TAB_NAME.to_owned(),
+            tab_window_id: None,
+            tab_index: None,
+            pinned_tab_closed: false,
             command_timeout: DEFAULT_COMMAND_TIMEOUT,
             navigation_timeout: DEFAULT_NAVIGATION_TIMEOUT,
             poll_interval: Duration::from_millis(250),
@@ -402,6 +422,9 @@ impl<R: ScriptRunner> AttachEngine<R> {
     #[must_use]
     pub fn with_tab_name(mut self, name: impl Into<String>) -> Self {
         self.tab_name = name.into();
+        self.tab_window_id = None;
+        self.tab_index = None;
+        self.pinned_tab_closed = false;
         self
     }
 
@@ -485,8 +508,97 @@ impl<R: ScriptRunner> AttachEngine<R> {
         })
     }
 
+    /// List the tabs in Safari's selected window without changing its state.
+    pub fn tab_list(&self, _context: &Context) -> Result<Vec<SafariTabInfo>, AttachError> {
+        self.ensure_open()?;
+        let script = r#"tell application "Safari"
+  set out to ""
+  repeat with t in tabs of window 1
+    set out to out & (name of t) & "\t" & (URL of t) & "\n"
+  end repeat
+  return out
+end tell"#;
+        let output = self.runner.run(script, self.command_timeout)?;
+        Ok(output
+            .trim_end_matches('\n')
+            .split('\n')
+            .filter(|line| !line.is_empty())
+            .map(|line| {
+                let (label, url) = line.split_once('\t').unwrap_or((line, ""));
+                SafariTabInfo {
+                    label: label.to_owned(),
+                    url: url.to_owned(),
+                    ..SafariTabInfo::default()
+                }
+            })
+            .collect())
+    }
+
+    /// Open and pin a named tab after validating its target before Apple Events.
+    pub fn tab_new(
+        &mut self,
+        _context: &Context,
+        _label: &str,
+        target: &str,
+    ) -> Result<Page, AttachError> {
+        self.ensure_open()?;
+        let target = validate_web_target(target)?;
+        if let Err(reason) = self.navigation_policy.check(&target) {
+            return Err(AttachError::InvalidTarget { target, reason });
+        }
+        let script = format!(
+            "tell application \"Safari\"\nset targetWindow to window 1\nmake new tab with properties {{URL:{}}} at end of tabs of targetWindow\nreturn (id of targetWindow as text) & \"\\t\" & (count of tabs of targetWindow as text)\nend tell",
+            apple_string(&target)
+        );
+        let pin = self
+            .runner
+            .run(&script, self.command_timeout)?
+            .trim()
+            .to_owned();
+        let Some((window_id, index)) = pin.split_once('\t') else {
+            return Err(AttachError::Runner {
+                message: "Safari returned an invalid pinned tab reference".to_owned(),
+            });
+        };
+        let window_id = window_id
+            .parse::<i64>()
+            .ok()
+            .filter(|id| *id > 0)
+            .ok_or_else(|| AttachError::Runner {
+                message: "Safari returned an invalid pinned window ID".to_owned(),
+            })?;
+        let index = index
+            .parse::<usize>()
+            .ok()
+            .filter(|index| *index > 0)
+            .ok_or_else(|| AttachError::Runner {
+                message: "Safari returned an invalid pinned tab index".to_owned(),
+            })?;
+        self.tab_window_id = Some(window_id);
+        self.tab_index = Some(index);
+        self.pinned_tab_closed = false;
+        Ok(Page {
+            id: "safari-live".to_owned(),
+            session_id: String::new(),
+        })
+    }
+
+    /// Close the currently pinned tab; closing the engine itself never quits Safari.
+    pub fn tab_close(&mut self, _page: &Page) -> Result<(), AttachError> {
+        self.ensure_open()?;
+        self.ensure_pinned_tab()?;
+        let script = format!(
+            "tell application \"Safari\"\nclose {}\nend tell",
+            self.tab_reference()
+        );
+        self.runner.run(&script, self.command_timeout)?;
+        self.pinned_tab_closed = true;
+        Ok(())
+    }
+
     pub fn navigate(&self, _page: &Page, target: &str) -> Result<NavigationResult, AttachError> {
         self.ensure_open()?;
+        self.ensure_pinned_tab()?;
         let target = validate_web_target(target)?;
         if let Err(reason) = self.navigation_policy.check(&target) {
             return Err(AttachError::InvalidTarget { target, reason });
@@ -541,6 +653,7 @@ impl<R: ScriptRunner> AttachEngine<R> {
     /// operations; callers cannot bypass the script-size and lifecycle guards.
     pub fn evaluate_script(&self, expression: &str) -> Result<serde_json::Value, AttachError> {
         self.ensure_open()?;
+        self.ensure_pinned_tab()?;
         if !self.interactions_opt_in {
             return Err(AttachError::Unsupported {
                 operation: "evaluation (opt-in required)".to_owned(),
@@ -558,7 +671,7 @@ impl<R: ScriptRunner> AttachEngine<R> {
 
     #[must_use]
     pub fn capabilities(&self) -> Capabilities {
-        let mut implemented = vec!["InspectionEngine", "NavigationStateProvider"];
+        let mut implemented = vec!["InspectionEngine", "NavigationStateProvider", "TabManager"];
         if self.interactions_opt_in && self.navigation_policy.is_active() {
             implemented.push("InteractionEngine");
         }
@@ -581,7 +694,20 @@ impl<R: ScriptRunner> AttachEngine<R> {
         }
     }
 
+    fn ensure_pinned_tab(&self) -> Result<(), AttachError> {
+        if self.pinned_tab_closed {
+            return Err(AttachError::Prerequisite {
+                check: SafariPrerequisite::TabUnavailable,
+                message: "the pinned Safari tab has been closed".to_owned(),
+            });
+        }
+        Ok(())
+    }
+
     fn tab_reference(&self) -> String {
+        if let (Some(window_id), Some(index)) = (self.tab_window_id, self.tab_index) {
+            return format!("tab {index} of window id {window_id}");
+        }
         format!(
             "tab {} of window 1",
             apple_string(if self.tab_name.is_empty() {

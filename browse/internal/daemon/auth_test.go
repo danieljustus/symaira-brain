@@ -72,6 +72,19 @@ func TestVaultResolverDelegates(t *testing.T) {
 	}
 }
 
+func TestVaultResolverErrorsDoNotExposeEntryHandle(t *testing.T) {
+	resolver := &VaultResolver{
+		LookPath: func(string) (string, error) { return "/bin/symvault", nil },
+		Run: func(context.Context, string, ...string) ([]byte, error) {
+			return nil, errors.New("lookup failed")
+		},
+	}
+	_, err := resolver.Resolve(context.Background(), "synthetic-private-handle")
+	if err == nil || strings.Contains(err.Error(), "synthetic-private-handle") {
+		t.Fatalf("entry handle leaked in resolver error: %v", err)
+	}
+}
+
 func TestRedactSecrets(t *testing.T) {
 	redacted := redactSecrets("failed to fill field with p@ssw0rd for ada", "p@ssw0rd", "ada")
 	if strings.Contains(redacted, "p@ssw0rd") || strings.Contains(redacted, "ada") {
@@ -161,6 +174,23 @@ func TestAuthLoginEndToEnd(t *testing.T) {
 	raw, _ := json.Marshal(result)
 	if strings.Contains(string(raw), "hunter2-secret") {
 		t.Fatal("password leaked into login result")
+	}
+}
+
+func TestAuthLoginRejectsUnsafeURLBeforeVaultAccess(t *testing.T) {
+	called := false
+	auth := NewAuthRuntime(&NavigationRuntime{}, &VaultResolver{
+		LookPath: func(string) (string, error) {
+			called = true
+			return "/bin/symvault", nil
+		},
+	})
+	_, err := auth.Login(context.Background(), "default", "entry", "data:text/html,unsafe")
+	if err == nil || !strings.Contains(err.Error(), "navigation URL policy: unsupported target") {
+		t.Fatalf("unsafe login URL: %v", err)
+	}
+	if called {
+		t.Fatal("vault was accessed before URL policy accepted the target")
 	}
 }
 

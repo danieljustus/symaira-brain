@@ -957,6 +957,14 @@ jobs:
           go build ./...
           go vet ./...
 
+      - name: Verify source-bound Browse fixtures
+        if: steps.browse.outputs.changed == 'true'
+        working-directory: browse
+        run: |
+          python3 scripts/rust-port/engine_fixture_gen.py --check
+          python3 scripts/rust-port/browser_fixture_gen.py --suite all --check
+          python3 scripts/rust-port/file_guard_fixture_gen.py --check
+
       - name: Resolve pinned Rust toolchain
         if: steps.browse.outputs.changed == 'true'
         working-directory: browse
@@ -1225,10 +1233,9 @@ jobs:
 
   # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
   # broken release config is caught long before a real release tag is
-  # pushed. Runs the real build/archive/checksum/SBOM pipeline a release
-  # would (--snapshot skips publishing); signing is skipped here because it
-  # needs the tag-triggered release workflow's ambient OIDC token, which a
-  # plain push/PR run does not have.
+  # pushed. Runs the real build/archive/checksum pipeline (--snapshot skips
+  # publishing); the unpublished candidate gets deterministic SPDX SBOMs
+  # from dist-oracle because the release config emits CycloneDX instead.
   goreleaser-snapshot:
     runs-on: ubuntu-latest
     steps:
@@ -1242,8 +1249,8 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+      - name: Exercise offline release verifier mutation controls
+        run: python3 scripts/dist-oracle/test_verify_release_bundle.py
 
       - name: goreleaser release --snapshot --clean
         id: snapshot
@@ -1251,9 +1258,9 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: release --snapshot --clean --skip=sign
+          args: release --snapshot --clean --skip=sign,sbom
 
-      - name: Verify unpublished snapshot archives and checksums
+      - name: Generate and verify unpublished SPDX candidate
         env:
           GORELEASER_ARTIFACTS: ${{ steps.snapshot.outputs.artifacts }}
           GORELEASER_METADATA: ${{ steps.snapshot.outputs.metadata }}
@@ -1287,7 +1294,9 @@ jobs:
               shutil.copy2(source, destination / item["name"])
           print(f"staged {len(archives)} GoReleaser archives and {checksums[0]['name']}")
           PY
+          go run ./scripts/dist-oracle -candidate-sbom -version "$version" -assets "$candidate_dir"
           go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
+          go run ./scripts/dist-oracle -candidate-go-check -version "$version" -assets "$candidate_dir"
 
   coverage:
     needs: build-test

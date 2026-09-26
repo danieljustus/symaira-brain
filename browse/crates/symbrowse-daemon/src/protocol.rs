@@ -92,12 +92,12 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
             ..Default::default()
         });
     }
-    let frame: Frame = serde_json::from_slice(raw).map_err(|e| DaemonError {
+    let frame: Frame = serde_json::from_slice(raw).map_err(|error| DaemonError {
         code: codes::MALFORMED_REQUEST.into(),
-        message: format!("decode frame: {e}"),
+        message: format!("decode frame: {}", go_json_error(raw, &error)),
         ..Default::default()
     })?;
-    if frame.cmd.trim().is_empty() {
+    if frame.cmd.is_empty() {
         return Err(DaemonError {
             code: codes::MALFORMED_REQUEST.into(),
             message: "missing cmd".into(),
@@ -105,6 +105,66 @@ pub fn decode_frame(raw: &[u8]) -> Result<Frame, DaemonError> {
         });
     }
     Ok(frame)
+}
+
+fn go_json_error(raw: &[u8], error: &serde_json::Error) -> String {
+    let detail = error.to_string();
+    if error.classify() == serde_json::error::Category::Eof {
+        return "unexpected end of JSON input".into();
+    }
+
+    let offset = raw
+        .split_inclusive(|byte| *byte == b'\n')
+        .take(error.line().saturating_sub(1))
+        .map(<[u8]>::len)
+        .sum::<usize>()
+        .saturating_add(error.column().saturating_sub(1));
+    let character = raw.get(offset).copied().unwrap_or_default();
+    if detail.starts_with("invalid escape") {
+        return format!(
+            "invalid character {} in string escape code",
+            go_quote_byte(character)
+        );
+    }
+    if detail.starts_with("invalid number") {
+        let previous = raw.get(offset.saturating_sub(1)).copied();
+        let context = match previous {
+            Some(b'e' | b'E') => "in exponent of numeric literal",
+            Some(b'0') if character.is_ascii_digit() => "after object key:value pair",
+            _ => return detail,
+        };
+        return format!("invalid character {} {context}", go_quote_byte(character));
+    }
+
+    let context = if detail.starts_with("key must be a string") {
+        "looking for beginning of object key string"
+    } else if detail.starts_with("trailing characters") {
+        "after top-level value"
+    } else {
+        return detail;
+    };
+
+    // Go's encoding/json reports the offending byte and parser state here,
+    // while serde_json reports a category and line/column. Keep this mapping
+    // at the shared frame boundary so malformed daemon requests stay stable.
+    format!("invalid character {} {context}", go_quote_byte(character))
+}
+
+fn go_quote_byte(byte: u8) -> String {
+    match byte {
+        b'\'' => "'\\''".to_owned(),
+        b'"' => "'\"'".to_owned(),
+        b'\\' => "'\\\\'".to_owned(),
+        b'\x07' => "'\\a'".to_owned(),
+        b'\x08' => "'\\b'".to_owned(),
+        b'\x0c' => "'\\f'".to_owned(),
+        b'\n' => "'\\n'".to_owned(),
+        b'\r' => "'\\r'".to_owned(),
+        b'\t' => "'\\t'".to_owned(),
+        b'\x0b' => "'\\v'".to_owned(),
+        0x20..=0x7e => format!("'{}'", char::from(byte)),
+        _ => format!("'\\x{byte:02x}'"),
+    }
 }
 
 pub fn error_response(code: impl Into<String>, message: impl Into<String>) -> Response {
@@ -153,6 +213,23 @@ mod tests {
             decode_frame(br#"{"session":"x"}"#).unwrap_err().code,
             codes::MALFORMED_REQUEST
         );
+        assert_eq!(
+            decode_frame(br#"{"cmd":" "}"#).unwrap().cmd,
+            " ",
+            "Go rejects only an empty command; whitespace reaches command dispatch"
+        );
+        assert_eq!(
+            decode_frame(b"{\"cmd\":\"x\"}\x0b").unwrap_err().code,
+            codes::MALFORMED_REQUEST
+        );
+        assert_eq!(
+            decode_frame(b"{not json").unwrap_err().message,
+            "decode frame: invalid character 'n' looking for beginning of object key string"
+        );
+        assert_eq!(
+            decode_frame(b"{\"cmd\":\"x\"}\x0b").unwrap_err().message,
+            "decode frame: invalid character '\\v' after top-level value"
+        );
         let value = serde_json::json!({"cmd":"x","args": "x".repeat(crate::MAX_FRAME_BYTES)});
         let raw = serde_json::to_vec(&value).unwrap();
         assert!(raw.len() > crate::MAX_FRAME_BYTES);
@@ -160,5 +237,31 @@ mod tests {
             decode_frame(&raw).unwrap_err().code,
             codes::MALFORMED_REQUEST
         );
+    }
+
+    #[test]
+    fn malformed_json_messages_match_go() {
+        let cases: &[(&[u8], &str)] = &[
+            (b"{\"cmd\":", "decode frame: unexpected end of JSON input"),
+            (
+                b"{\"cmd\":\"x\"",
+                "decode frame: unexpected end of JSON input",
+            ),
+            (
+                b"{\"cmd\":\"x\\q\"}",
+                "decode frame: invalid character 'q' in string escape code",
+            ),
+            (
+                b"{\"cmd\":01}",
+                "decode frame: invalid character '1' after object key:value pair",
+            ),
+            (
+                b"{\"cmd\":1e}",
+                "decode frame: invalid character '}' in exponent of numeric literal",
+            ),
+        ];
+        for (raw, expected) in cases {
+            assert_eq!(decode_frame(raw).unwrap_err().message, *expected, "{raw:?}");
+        }
     }
 }

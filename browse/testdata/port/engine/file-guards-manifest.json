@@ -1,8 +1,8 @@
 {
   "download_collision_handling": "none",
   "fixture": "testdata/port/engine/file-guards.json",
-  "generator_sha256": "ed7742f34e944453974aec2cf87eb88b2638870db66198df0b43e29168e9d65d",
-  "oracle_commit": "652453d1595fc302bd69c328e7da8a21dbee28b9",
+  "generator_sha256": "2b551bb2e4a5c9f5065d8ec002b27b52ae5ccc2c7a8f3b208cdb86883ce3adbd",
+  "oracle_commit": "dc9c54e41beccf131fbe70e3f45bfff98871e709",
   "schema_version": 1,
   "source_files": {
     "internal/engine/chrome/files.go": "28cd94faf5306f4ce6fce8ef76f7bf1066b4e83f57dbb22a035239950b9524db",

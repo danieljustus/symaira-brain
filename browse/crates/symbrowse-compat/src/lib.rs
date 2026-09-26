@@ -13,7 +13,7 @@ use std::{
     time::Duration,
 };
 use tokio::{
-    io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
+    io::{AsyncBufRead, AsyncBufReadExt, AsyncWriteExt, BufReader},
     process::{Child, ChildStdin, ChildStdout, Command},
     time::timeout,
 };
@@ -56,6 +56,7 @@ pub struct Request {
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Response {
     pub id: u64,
+    #[serde(default)]
     pub ok: bool,
     #[serde(default)]
     pub status: u16,
@@ -171,7 +172,10 @@ impl CompatClient {
             .args(&self.args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null());
+            .stderr(Stdio::null())
+            // Handshake failures and canceled startup futures must not leave
+            // an untracked compatibility process behind.
+            .kill_on_drop(true);
         let mut child = command.spawn().map_err(|_| CompatError::SidecarExited)?;
         let mut stdin = child.stdin.take().ok_or(CompatError::SidecarExited)?;
         let stdout = child.stdout.take().ok_or(CompatError::SidecarExited)?;
@@ -187,23 +191,7 @@ impl CompatClient {
         let mut reader = BufReader::new(stdout);
         let line = read_line(&mut reader).await?;
         let ack: Frame = serde_json::from_slice(&line)?;
-        match ack {
-            Frame::HandshakeAck { protocol, .. } if protocol == PROTOCOL_VERSION => {}
-            Frame::HandshakeAck { protocol, .. } => {
-                return Err(CompatError::Integrity(TypedError {
-                    code: "compat_protocol_mismatch".into(),
-                    message: format!("unsupported sidecar protocol {protocol}"),
-                    retryable: false,
-                }));
-            }
-            _ => {
-                return Err(CompatError::Integrity(TypedError {
-                    code: "compat_handshake_invalid".into(),
-                    message: "sidecar did not acknowledge handshake".into(),
-                    retryable: false,
-                }));
-            }
-        }
+        validate_handshake_ack(ack)?;
         self.stdin = Some(stdin);
         self.stdout = Some(reader);
         self.child = Some(child);
@@ -251,9 +239,34 @@ impl CompatClient {
         &mut self,
         request: Request,
     ) -> Result<Response, CompatError> {
-        timeout(self.request_timeout, self.request(request))
-            .await
-            .map_err(|_| CompatError::Timeout)?
+        match timeout(self.request_timeout, self.request(request)).await {
+            Ok(result) => result,
+            Err(_) => {
+                // A timed-out response may still be queued on stdout. Retire
+                // that process so a later request cannot consume the stale
+                // response and misattribute it to a new request ID.
+                self.restart().await;
+                Err(CompatError::Timeout)
+            }
+        }
+    }
+    /// Close stdin to request the sidecar's normal EOF exit and wait for it.
+    /// A bounded kill is used if the process does not honor that protocol exit.
+    pub async fn shutdown(&mut self) -> Result<(), CompatError> {
+        self.stdin.take();
+        self.stdout.take();
+        let Some(mut child) = self.child.take() else {
+            return Ok(());
+        };
+        match timeout(self.request_timeout, child.wait()).await {
+            Ok(Ok(status)) if status.success() => Ok(()),
+            Ok(Ok(_)) => Err(CompatError::SidecarExited),
+            Ok(Err(error)) => Err(CompatError::Io(error)),
+            Err(_) => {
+                let _ = child.kill().await;
+                Err(CompatError::Timeout)
+            }
+        }
     }
     async fn restart(&mut self) {
         if let Some(mut child) = self.child.take() {
@@ -263,41 +276,138 @@ impl CompatClient {
         self.stdout = None;
     }
 }
-async fn write_frame(stdin: &mut ChildStdin, frame: &Frame) -> Result<(), CompatError> {
-    let bytes = serde_json::to_vec(frame)?;
-    if bytes.len() > MAX_FRAME_BYTES {
-        return Err(CompatError::FrameTooLarge);
+fn validate_handshake_ack(ack: Frame) -> Result<(), CompatError> {
+    match ack {
+        Frame::HandshakeAck {
+            protocol,
+            component,
+            oracle,
+        } if protocol == PROTOCOL_VERSION
+            && component == "symbrowse-go"
+            && oracle == "go-azuretls-v0.8.0" =>
+        {
+            Ok(())
+        }
+        Frame::HandshakeAck { protocol, .. } => Err(CompatError::Integrity(TypedError {
+            code: if protocol != PROTOCOL_VERSION {
+                "compat_protocol_mismatch"
+            } else {
+                "compat_identity_mismatch"
+            }
+            .into(),
+            message: format!(
+                "sidecar handshake did not match the pinned protocol and oracle (protocol {protocol})"
+            ),
+            retryable: false,
+        })),
+        _ => Err(CompatError::Integrity(TypedError {
+            code: "compat_handshake_invalid".into(),
+            message: "sidecar did not acknowledge handshake".into(),
+            retryable: false,
+        })),
     }
+}
+async fn write_frame(stdin: &mut ChildStdin, frame: &Frame) -> Result<(), CompatError> {
+    let bytes = encode_frame(frame)?;
     stdin.write_all(&bytes).await?;
     stdin.write_all(b"\n").await?;
     stdin.flush().await?;
     Ok(())
 }
-async fn read_line(reader: &mut BufReader<ChildStdout>) -> Result<Vec<u8>, CompatError> {
-    let mut line = Vec::new();
-    let n = reader.read_until(b'\n', &mut line).await?;
-    if n == 0 {
-        return Err(CompatError::SidecarExited);
-    }
-    if line.len() > MAX_FRAME_BYTES {
+fn encode_frame(frame: &Frame) -> Result<Vec<u8>, CompatError> {
+    let bytes = serde_json::to_vec(frame)?;
+    if bytes.len().saturating_add(1) > MAX_FRAME_BYTES {
         return Err(CompatError::FrameTooLarge);
     }
-    Ok(line)
+    Ok(bytes)
+}
+async fn read_line<R: AsyncBufRead + Unpin>(reader: &mut R) -> Result<Vec<u8>, CompatError> {
+    let mut line = Vec::new();
+    loop {
+        let (consumed, complete, too_large) = {
+            let available = reader.fill_buf().await?;
+            if available.is_empty() {
+                return Err(CompatError::SidecarExited);
+            }
+            let remaining = MAX_FRAME_BYTES.saturating_add(1).saturating_sub(line.len());
+            let scan = available.len().min(remaining);
+            let newline = available[..scan].iter().position(|byte| *byte == b'\n');
+            let consumed = newline.map_or(scan, |index| index + 1);
+            let too_large = line.len().saturating_add(consumed) > MAX_FRAME_BYTES;
+            line.extend_from_slice(&available[..consumed]);
+            reader.consume(consumed);
+            (consumed, newline.is_some(), too_large)
+        };
+        if too_large || consumed == 0 {
+            return Err(CompatError::FrameTooLarge);
+        }
+        if complete {
+            return Ok(line);
+        }
+        if line.len() >= MAX_FRAME_BYTES {
+            return Err(CompatError::FrameTooLarge);
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+    use tokio::io::AsyncWriteExt;
+
+    struct TestRoot(PathBuf);
+    impl TestRoot {
+        fn new() -> Self {
+            static NEXT: AtomicU64 = AtomicU64::new(1);
+            let timestamp = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("system clock")
+                .as_nanos();
+            for _ in 0..8 {
+                let path = std::env::temp_dir().join(format!(
+                    "symbrowse-compat-test-{}-{timestamp}-{}",
+                    std::process::id(),
+                    NEXT.fetch_add(1, Ordering::Relaxed)
+                ));
+                match std::fs::create_dir(&path) {
+                    Ok(()) => return Self(path),
+                    Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
+                    Err(error) => panic!("create unique test root: {error}"),
+                }
+            }
+            panic!("could not allocate unique test root")
+        }
+    }
+    impl Drop for TestRoot {
+        fn drop(&mut self) {
+            // This exact directory was reserved with create_dir in new().
+            std::fs::remove_dir_all(&self.0).expect("remove owned test root");
+        }
+    }
+
     #[test]
-    fn endpoint_schema_is_private() {
-        let root =
-            std::env::temp_dir().join(format!("symbrowse-compat-test-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&root);
-        let endpoint = private_endpoint(&root, "sidecar.sock").unwrap();
+    fn private_runtime_directory_schema_and_unix_mode() {
+        let root = TestRoot::new();
+        let endpoint = private_endpoint(&root.0, "sidecar.sock").unwrap();
         assert!(endpoint.private);
         assert_eq!(endpoint.directory_mode, 0o700);
         assert_eq!(endpoint.endpoint_mode, 0o600);
-        let _ = std::fs::remove_dir_all(root);
+        assert!(
+            std::fs::metadata(root.0.join("symbrowse-compat"))
+                .unwrap()
+                .is_dir()
+        );
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = std::fs::metadata(root.0.join("symbrowse-compat"))
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777;
+            assert_eq!(mode, 0o700);
+        }
     }
     #[test]
     fn frames_are_versioned_and_typed() {
@@ -309,5 +419,83 @@ mod tests {
         let raw = serde_json::to_string(&frame).unwrap();
         assert!(raw.contains("handshake"));
         assert!(raw.contains("protocol"));
+    }
+
+    #[test]
+    fn handshake_pins_protocol_component_and_oracle() {
+        assert!(
+            validate_handshake_ack(Frame::HandshakeAck {
+                protocol: PROTOCOL_VERSION,
+                component: "symbrowse-go".into(),
+                oracle: "go-azuretls-v0.8.0".into(),
+            })
+            .is_ok()
+        );
+        for (frame, expected_code) in [
+            (
+                Frame::HandshakeAck {
+                    protocol: PROTOCOL_VERSION + 1,
+                    component: "symbrowse-go".into(),
+                    oracle: "go-azuretls-v0.8.0".into(),
+                },
+                "compat_protocol_mismatch",
+            ),
+            (
+                Frame::HandshakeAck {
+                    protocol: PROTOCOL_VERSION,
+                    component: "other-sidecar".into(),
+                    oracle: "go-azuretls-v0.8.0".into(),
+                },
+                "compat_identity_mismatch",
+            ),
+        ] {
+            let Err(CompatError::Integrity(error)) = validate_handshake_ack(frame) else {
+                panic!("handshake mismatch unexpectedly passed")
+            };
+            assert_eq!(error.code, expected_code);
+        }
+    }
+
+    #[tokio::test]
+    async fn ndjson_reader_bounds_frames_before_unbounded_growth() {
+        for (length, expected_large) in [(MAX_FRAME_BYTES, false), (MAX_FRAME_BYTES + 1, true)] {
+            let (mut writer, reader) = tokio::io::duplex(length + 1);
+            let mut frame = vec![b'x'; length];
+            if !expected_large {
+                frame[length - 1] = b'\n';
+            }
+            writer.write_all(&frame).await.unwrap();
+            drop(writer);
+            let mut reader = BufReader::new(reader);
+            let result = read_line(&mut reader).await;
+            if expected_large {
+                assert!(matches!(result, Err(CompatError::FrameTooLarge)));
+            } else {
+                assert_eq!(result.unwrap().len(), MAX_FRAME_BYTES);
+            }
+        }
+    }
+
+    #[test]
+    fn outbound_frames_are_bounded_including_the_newline() {
+        let mut frame = Frame::Handshake {
+            protocol: PROTOCOL_VERSION,
+            component: String::new(),
+            oracle: String::new(),
+        };
+        let base_length = serde_json::to_vec(&frame).unwrap().len();
+        let component_length = MAX_FRAME_BYTES - 1 - base_length;
+        if let Frame::Handshake { component, .. } = &mut frame {
+            component.push_str(&"x".repeat(component_length));
+        }
+        assert_eq!(encode_frame(&frame).unwrap().len() + 1, MAX_FRAME_BYTES);
+
+        if let Frame::Handshake { component, .. } = &mut frame {
+            component.push('x');
+        }
+        assert!(matches!(
+            encode_frame(&frame),
+            Err(CompatError::FrameTooLarge)
+        ));
     }
 }

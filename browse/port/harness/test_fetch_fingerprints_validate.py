@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import json
 import os
 import struct
 import subprocess
@@ -293,6 +294,15 @@ MUTATIONS = [
 
 
 class FetchFingerprintsValidateMutationTests(unittest.TestCase):
+    def test_compiler_closure_decodes_go_json_as_utf8(self) -> None:
+        package = {"Dir": str(ROOT / "browse"), "GoFiles": ["go.mod"]}
+        result = subprocess.CompletedProcess([], 0, json.dumps(package), "")
+        validate_mod.compiler_input_closure.cache_clear()
+        with patch.object(validate_mod, "verified_external_go_environment", return_value={}), \
+             patch.object(validate_mod.subprocess, "run", return_value=result) as run:
+            validate_mod.compiler_input_closure(str(ROOT), "unit-only-go")
+        self.assertEqual(run.call_args.kwargs["encoding"], "utf-8")
+
     def test_artifact_identity(self) -> None:
         # Synthetic unit-only binary; only build-info parsing is mocked.
         with tempfile.TemporaryDirectory() as directory:
@@ -302,7 +312,13 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             capture = {"executable_path": str(binary),
                        "executable_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                        "compiler": {"go_version": "go1.26.6", "goos": "darwin", "goarch": "arm64"}}
-            result = subprocess.CompletedProcess([], 0, f"{binary}: go1.26.6\n\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n", "")
+            package_path = f"{validate_mod.EXPECTED_GO_MODULE}/internal/fetch/fetch.test"
+            result = subprocess.CompletedProcess(
+                [], 0,
+                f"{binary}: go1.26.6\n\tpath\t{package_path}\n"
+                "\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n",
+                "",
+            )
             with patch.object(validate_mod.subprocess, "run", return_value=result):
                 validate_mod.verify_artifacts(capture, evidence_root=root, go="unit-only-go")
                 for field, value, message in [
@@ -315,6 +331,15 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
                         changed = dict(capture, **{field: value})
                         with self.assertRaisesRegex(validate_mod.CaptureError, message):
                             validate_mod.verify_artifacts(changed, evidence_root=root, go="unit-only-go")
+            wrong_package = subprocess.CompletedProcess(
+                [], 0,
+                f"{binary}: go1.26.6\n\tpath\t{validate_mod.EXPECTED_GO_MODULE}/cmd/symbrowse\n"
+                "\tbuild\tGOOS=darwin\n\tbuild\tGOARCH=arm64\n",
+                "",
+            )
+            with patch.object(validate_mod.subprocess, "run", return_value=wrong_package):
+                with self.assertRaisesRegex(validate_mod.CaptureError, "not the pinned FETCH-002 Go test package"):
+                    validate_mod.verify_artifacts(capture, evidence_root=root, go="unit-only-go")
 
     def test_compat_build_identity_is_checked(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -341,6 +366,57 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
         comparison = validate_mod.compare_capture_to_historical_oracle(_valid_capture(), historical)
         self.assertFalse(comparison["passed"])
         self.assertTrue(comparison["mismatches"])
+
+    def test_chrome_family_extension_shuffle_is_membership_only(self) -> None:
+        historical = validate_mod.load_historical_oracle(
+            ROOT / validate_mod.HISTORICAL_ORACLE_REL_PATH, repo_root=ROOT
+        )
+        historical_rows = {row["profile"]: row["oracle"] for row in historical["profiles"]}
+        candidate = {"profiles": []}
+        for profile in validate_mod.FETCH_PROFILES:
+            oracle = historical_rows[profile]
+            candidate["profiles"].append({
+                "profile": profile,
+                "protocol": oracle["protocol"],
+                "tls_client_version": oracle["tls_version"],
+                "cipher_suites_no_grease": oracle["cipher_suites"],
+                "extensions_no_grease": list(oracle["extensions"]),
+                "h2_settings": oracle["h2_settings"],
+                "header_names": oracle["header_names"],
+            })
+        randomized = {"chrome", "edge", "opera"}
+        for row in candidate["profiles"]:
+            if row["profile"] in randomized:
+                row["extensions_no_grease"].reverse()
+
+        comparison = validate_mod.compare_capture_to_historical_oracle(candidate, historical)
+        self.assertTrue(comparison["passed"])
+        self.assertEqual(comparison["extension_order_relaxed_profiles"], ["chrome", "edge", "opera"])
+        for row in comparison["profiles"]:
+            extension_field = next(field for field in row["fields"] if field["field"] == "extensions_no_grease")
+            self.assertTrue(extension_field["equal"])
+            if row["profile"] in randomized:
+                self.assertEqual(extension_field["comparison"], "unordered_multiset")
+                self.assertFalse(extension_field["wire_order_equal"])
+
+        blockers = validate_mod.acceptance_blockers(
+            historical, comparison, {"executed": False, "passed": False, "reason": "Rust diagnostic absent"}
+        )
+        self.assertTrue(any("historical oracle verdict is INVALIDATED" in item for item in blockers))
+
+        # Negative controls: reordered deterministic Firefox extensions and a
+        # missing Chrome extension remain concrete mismatches.
+        negative = copy.deepcopy(candidate)
+        firefox = next(row for row in negative["profiles"] if row["profile"] == "firefox")
+        firefox["extensions_no_grease"].reverse()
+        missing_chrome = next(row for row in negative["profiles"] if row["profile"] == "chrome")
+        missing_chrome["extensions_no_grease"].pop()
+        rejected = validate_mod.compare_capture_to_historical_oracle(negative, historical)
+        self.assertFalse(rejected["passed"])
+        self.assertEqual(
+            {(item["profile"], item["field"]) for item in rejected["mismatches"]},
+            {("firefox", "extensions_no_grease"), ("chrome", "extensions_no_grease")},
+        )
 
     def test_invalidated_oracle_match_never_establishes_parity(self) -> None:
         historical = validate_mod.load_historical_oracle(
@@ -417,6 +493,33 @@ class FetchFingerprintsValidateMutationTests(unittest.TestCase):
             copy_path.write_bytes(source.read_bytes() + b"\\n")
             with self.assertRaisesRegex(validate_mod.CaptureError, "pinned Git object"):
                 validate_mod.load_historical_oracle(copy_path, repo_root=ROOT)
+
+    def test_source_bound_report_keeps_oracle_invalidated_and_parity_unclaimed(self) -> None:
+        raw = b"source-bound capture bytes"
+        capture = {
+            "capture_kind": "loopback_hermetic_production_client",
+            "worktree_head": "a" * 40,
+            "compiler": {"go_version": "go1.26.6", "goos": "linux", "goarch": "amd64"},
+            "executable_sha256": "b" * 64,
+            "build_inputs": [{"path": "browse/go.mod"}],
+            "profiles": [{"profile": profile} for profile in validate_mod.FETCH_PROFILES],
+        }
+        report = validate_mod.source_bound_capture_report(capture, raw)
+        self.assertEqual(report["capture_sha256_self_measured"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(report["historical_oracle_status"], "INVALIDATED")
+        self.assertFalse(report["current_source_bound_oracle_established"])
+        self.assertFalse(report["native_rust_parity_compared"])
+        self.assertEqual(len(report["wire_validation"]["profiles"]), 6)
+        capture["capture_kind"] = "loopback_hermetic_compat_sidecar"
+        with self.assertRaisesRegex(validate_mod.CaptureError, "production_client capture"):
+            validate_mod.source_bound_capture_report(capture, raw)
+
+    def test_ci_go_environment_does_not_require_local_nvme_cache_vars(self) -> None:
+        with patch.dict(os.environ, {"CI": "true"}, clear=True):
+            environment = validate_mod.verified_external_go_environment()
+        self.assertEqual(environment["GOPROXY"], "off")
+        self.assertEqual(environment["GOWORK"], "off")
+        self.assertEqual(environment["GOFLAGS"], "-mod=readonly")
 
     def test_rejects_every_mutation(self) -> None:
         self.assertEqual(len(MUTATIONS), 18, "update this count when the table changes")

@@ -10,16 +10,14 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Collection
+import ctypes
 import hashlib
 import json
 import os
 import platform
+import secrets
 import signal
 import sys
-try:
-    import resource
-except ImportError:  # pragma: no cover - resource is not available on native Windows
-    resource = None  # type: ignore[assignment]
 import socket
 import statistics
 import subprocess
@@ -40,6 +38,7 @@ MAX_OUTPUT = 1 << 20
 WORKLOADS = ("cli", "mcp", "daemon", "fetch")
 EXTERNAL_RUNTIME_ENV = "SYMAIRA_EXTERNAL_RUNTIME_ROOT"
 EXTERNAL_RUNTIME_ROOT = Path("/Volumes/1TB_NVMe_SN850X")
+_TEMP_HOME_ALIASES: list[Any] = []
 
 
 def temporary_parent() -> str | None:
@@ -106,8 +105,19 @@ class FixtureHandler(BaseHTTPRequestHandler):
 
 
 def base_env(root: Path) -> dict[str, str]:
-    home = root / "home"
-    runtime = root / "runtime"
+    isolated_home = root / "home"
+    isolated_home.mkdir(mode=0o700, exist_ok=True)
+    home = isolated_home
+    if platform.system() == "Darwin":
+        # AF_UNIX paths have a small SUN_LEN limit. A lexical /tmp symlink
+        # keeps macOS daemon probes runnable while its target and all contents
+        # remain under the already-validated external temporary root.
+        alias_dir = tempfile.TemporaryDirectory(prefix="sb-bench-", dir="/tmp")
+        _TEMP_HOME_ALIASES.append(alias_dir)
+        home = Path(alias_dir.name) / "home"
+        home.symlink_to(isolated_home, target_is_directory=True)
+    # Go uses AF_UNIX on Windows, where the socket pathname is length-limited.
+    runtime = root / ("r" if os.name == "nt" else "runtime")
     cache = root / "cache"
     for path in (home, runtime, cache):
         path.mkdir(mode=0o700, exist_ok=True)
@@ -131,6 +141,9 @@ def base_env(root: Path) -> dict[str, str]:
         "SYMBROWSE_SYMGUARD": "off",
         "SYMBROWSE_ALLOW_PRIVATE": "true",
     }
+    if os.name == "nt":
+        env["APPDATA"] = str(home / "AppData" / "Roaming")
+        env["LOCALAPPDATA"] = str(home / "AppData" / "Local")
     (root / "tmp").mkdir(mode=0o700, exist_ok=True)
     for key in ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT"):
         if key in os.environ:
@@ -196,65 +209,114 @@ def read_startup_diagnostic(path: Path, limit: int = 1 << 20) -> str:
     return detail or "startup process exited without diagnostics"
 
 
-def child_peak_rss_bytes() -> int | None:
-    if resource is None:
-        return None
-    value = int(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
-    # macOS reports bytes; Linux and the BSDs report KiB.
-    return value if platform.system() == "Darwin" else value * 1024
-
-
-def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict[str, object]:
+def run_once(
+    binary: Path, probe: Probe, env: dict[str, str], cwd: Path, *, measure_peak_rss: bool = False
+) -> dict[str, object]:
     started = time.perf_counter_ns()
-    rss_before = child_peak_rss_bytes()
-    try:
-        result = subprocess.run(
-            [str(binary), *probe.argv],
-            cwd=cwd,
-            env=env,
-            input=probe.stdin,
-            text=True,
-            capture_output=True,
-            timeout=15,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return {
-            "status": "error",
-            "reason": "timeout",
-            "duration_ns": time.perf_counter_ns() - started,
-            "peak_rss_bytes": child_peak_rss_bytes(),
+    if measure_peak_rss:
+        request = {
+            "command": [str(binary), *probe.argv],
+            "cwd": str(cwd),
+            "env": env,
+            "stdin": probe.stdin,
+            "timeout": 15,
         }
-    duration = time.perf_counter_ns() - started
-    rss_after = child_peak_rss_bytes()
-    peak_rss = None if rss_before is None or rss_after is None else max(0, rss_after - rss_before)
-    stdout = result.stdout[:MAX_OUTPUT]
-    stderr = result.stderr[:MAX_OUTPUT]
-    if len(result.stdout) > MAX_OUTPUT or len(result.stderr) > MAX_OUTPUT:
+        try:
+            worker = subprocess.run(
+                [sys.executable, str(Path(__file__).with_name("resource_probe.py"))],
+                cwd=cwd,
+                env=env,
+                input=json.dumps(request),
+                text=True,
+                capture_output=True,
+                timeout=20,
+                check=False,
+            )
+            measured = json.loads(worker.stdout) if worker.returncode == 0 else {}
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError):
+            measured = {}
+        if not measured:
+            return {
+                "status": "error", "reason": "OS peak RSS measurement helper failed",
+                "duration_ns": time.perf_counter_ns() - started, "peak_rss_bytes": None,
+            }
+        duration = int(measured["duration_ns"])
+        if measured["timed_out"]:
+            return {"status": "error", "reason": "timeout", "duration_ns": duration, "peak_rss_bytes": None}
+        returncode = int(measured["returncode"])
+        stdout = str(measured["stdout"])
+        stderr = str(measured["stderr"])
+        output_too_large = measured["stdout_bytes"] > MAX_OUTPUT or measured["stderr_bytes"] > MAX_OUTPUT
+        peak_rss = measured.get("peak_rss_bytes")
+        peak_rss_method = measured.get("peak_rss_method")
+    else:
+        try:
+            result = subprocess.run(
+                [str(binary), *probe.argv],
+                cwd=cwd,
+                env=env,
+                input=probe.stdin,
+                text=True,
+                capture_output=True,
+                timeout=15,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "status": "error",
+                "reason": "timeout",
+                "duration_ns": time.perf_counter_ns() - started,
+                "peak_rss_bytes": None,
+            }
+        duration = time.perf_counter_ns() - started
+        returncode = result.returncode
+        stdout = result.stdout
+        stderr = result.stderr
+        output_too_large = len(stdout) > MAX_OUTPUT or len(stderr) > MAX_OUTPUT
+        peak_rss = None
+        peak_rss_method = None
+    stdout = stdout[:MAX_OUTPUT]
+    stderr = stderr[:MAX_OUTPUT]
+    if output_too_large:
         return {"status": "error", "reason": "output limit exceeded", "duration_ns": duration, "peak_rss_bytes": peak_rss}
     lowered = (stdout + stderr).lower()
     if b"password=" in lowered.encode() or b"token=" in lowered.encode():
         return {"status": "error", "reason": "secret-like output", "duration_ns": duration, "peak_rss_bytes": peak_rss}
-    if result.returncode == 0 and not stdout and not stderr:
+    if returncode == 0 and not stdout and not stderr:
         return {
             "status": "unsupported",
             "reason": "binary accepted command without observable output",
             "duration_ns": duration,
             "peak_rss_bytes": peak_rss,
         }
-    if result.returncode != 0:
+    if returncode != 0:
         return {
             "status": "unsupported" if "unknown command" in stderr.lower() or "not implemented" in stderr.lower() else "error",
-            "reason": f"exit {result.returncode}",
+            "reason": f"exit {returncode}",
             "duration_ns": duration,
             "peak_rss_bytes": peak_rss,
             "stdout_sha256": __import__("hashlib").sha256(stdout.encode()).hexdigest(),
             "stderr_sha256": __import__("hashlib").sha256(stderr.encode()).hexdigest(),
         }
+    if probe.name == "mcp":
+        try:
+            frames = [json.loads(line) for line in stdout.splitlines()]
+            if [frame.get("id") for frame in frames] != [1, 2, 3]:
+                raise ValueError("initialize/list/call response IDs differ")
+            if any("result" not in frame for frame in frames):
+                raise ValueError("initialize/list/call did not all succeed")
+            call = frames[2]["result"]
+            if call.get("isError") or not call.get("content"):
+                raise ValueError("MCP tool call failed or returned no content")
+            if "fixture" not in json.dumps(call["content"]).lower():
+                raise ValueError("MCP fetch did not return the local fixture")
+        except (ValueError, TypeError, AttributeError) as error:
+            return {"status": "error", "reason": f"MCP response mismatch: {error}", "duration_ns": duration}
     return {
         "status": "pass",
         "duration_ns": duration,
         "peak_rss_bytes": peak_rss,
+        "peak_rss_method": peak_rss_method,
         "stdout_bytes": len(stdout),
         "stderr_bytes": len(stderr),
     }
@@ -268,8 +330,11 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
         and isinstance((duration := item.get("duration_ns")), (int, float))
     ]
     statuses = [str(item.get("status")) for item in samples]
+    if not samples:
+        return {"status": "error", "reason": "no benchmark samples were collected", "samples": []}
     if len(passed) != len(samples):
-        return {"status": statuses[0] if statuses else "error", "samples": samples}
+        failure_status = next(status for status in statuses if status != "pass")
+        return {"status": failure_status, "samples": samples}
     ordered = sorted(passed)
     p95 = ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)]
     peak_rss = [
@@ -286,6 +351,7 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
             {
                 "duration_ns": item.get("duration_ns"),
                 "peak_rss_bytes": item.get("peak_rss_bytes"),
+                "peak_rss_method": item.get("peak_rss_method"),
             }
             for item in samples
         ],
@@ -294,8 +360,11 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
         "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
         "statuses": statuses,
     }
-    if peak_rss:
+    if len(peak_rss) == len(samples):
+        summary["peak_rss_status"] = "complete"
         summary["median_peak_rss_bytes"] = int(statistics.median(peak_rss))
+    else:
+        summary["peak_rss_status"] = "incomplete"
     return summary
 
 
@@ -311,32 +380,34 @@ def startup_failure(process: subprocess.Popen[bytes], prefix: str, stderr_path: 
     detail = read_startup_diagnostic(stderr_path)
     if "password=" in detail.lower() or "token=" in detail.lower():
         detail = "secret-like startup diagnostic suppressed"
-    return {"status": "error", "reason": f"{prefix}: {detail[:256]}"}
+    return {"status": "error", "reason": f"{prefix}: {detail[-256:]}"}
 
 
 def launch_daemon(command: list[str], root: Path, env: dict[str, str]) -> tuple[subprocess.Popen[bytes], Path]:
     fd, name = tempfile.mkstemp(prefix="symbrowse-startup-", suffix=".log", dir=root / "tmp")
     stderr_path = Path(name)
     try:
+        process_options: dict[str, object] = (
+            {"start_new_session": True}
+            if os.name == "posix"
+            else {"creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)}
+        )
         with os.fdopen(fd, "wb") as stderr:
             process = subprocess.Popen(command, cwd=root, env=env, stdin=subprocess.DEVNULL,
-                                       stdout=subprocess.DEVNULL, stderr=stderr, start_new_session=True)
+                                       stdout=subprocess.DEVNULL, stderr=stderr, **process_options)
     except BaseException:
         stderr_path.unlink(missing_ok=True)
         raise
     return process, stderr_path
 
 
-def daemon_probe(
-    binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
-) -> dict[str, object]:
-    if os.name != "posix":
-        return {"status": "unsupported", "reason": "Unix socket probe requires a native Unix host"}
-    results: list[dict[str, object]] = []
-    session = "rust016"
-    socket_paths = [Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"]
+def daemon_endpoint(session: str, env: dict[str, str]) -> str | Path:
+    """Return the isolated per-probe daemon endpoint for this host."""
+    if os.name == "nt":
+        # Both daemons use the same named-pipe path on Windows.
+        return rf"\\.\pipe\symbrowse-{session}"
     if platform.system() == "Darwin":
-        socket_paths.append(
+        return (
             Path(env["HOME"])
             / "Library"
             / "Caches"
@@ -344,43 +415,250 @@ def daemon_probe(
             / "run"
             / f"{session}.sock"
         )
-    for _ in range(runs):
-        process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
-        started = time.perf_counter_ns()
+    return Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"
+
+
+def probe_session(name: str) -> str:
+    """Avoid attaching to a user's or another benchmark's named-pipe daemon."""
+    return f"{name}-{secrets.token_hex(8)}"
+
+
+def _windows_pipe_api() -> tuple[Any, Any, Any, Any]:
+    """Bind only the Win32 calls needed to exchange bounded JSON-line frames."""
+    if os.name != "nt":
+        raise OSError("Windows named pipes are available only on Windows")
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    wait_named_pipe = kernel32.WaitNamedPipeW
+    wait_named_pipe.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32]
+    wait_named_pipe.restype = ctypes.c_int
+    create_file = kernel32.CreateFileW
+    create_file.argtypes = [ctypes.c_wchar_p, ctypes.c_uint32, ctypes.c_uint32,
+                            ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_void_p]
+    create_file.restype = ctypes.c_void_p
+    set_pipe_state = kernel32.SetNamedPipeHandleState
+    set_pipe_state.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32),
+                               ctypes.c_void_p, ctypes.c_void_p]
+    set_pipe_state.restype = ctypes.c_int
+    read_file = kernel32.ReadFile
+    read_file.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
+                          ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+    read_file.restype = ctypes.c_int
+    write_file = kernel32.WriteFile
+    write_file.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint32,
+                           ctypes.POINTER(ctypes.c_uint32), ctypes.c_void_p]
+    write_file.restype = ctypes.c_int
+    close_handle = kernel32.CloseHandle
+    close_handle.argtypes = [ctypes.c_void_p]
+    close_handle.restype = ctypes.c_int
+    return wait_named_pipe, create_file, set_pipe_state, (read_file, write_file, close_handle)
+
+
+def windows_pipe_exchange(endpoint: str, payload: bytes, timeout: float) -> bytes:
+    """Connect to one private benchmark pipe instance and read one JSON line."""
+    wait_named_pipe, create_file, set_pipe_state, io_api = _windows_pipe_api()
+    read_file, write_file, close_handle = io_api
+    deadline = time.monotonic() + timeout
+    handle: int | None = None
+    while time.monotonic() < deadline:
+        if wait_named_pipe(endpoint, 100):
+            handle = create_file(endpoint, 0xC0000000, 0, None, 3, 0, None)
+            if handle not in (None, ctypes.c_void_p(-1).value):
+                break
+        else:
+            error = ctypes.get_last_error()
+            # ERROR_SEM_TIMEOUT means no instance is currently available;
+            # ERROR_FILE_NOT_FOUND means startup has not created it yet.
+            if error not in (2, 121):
+                raise ctypes.WinError(error)
+    if handle in (None, ctypes.c_void_p(-1).value):
+        raise TimeoutError("named-pipe instance did not become available")
+    try:
+        # Nonblocking byte mode lets this probe enforce its own bounded read
+        # deadline without creating worker threads that might outlive a run.
+        mode = ctypes.c_uint32(0x00000001)  # PIPE_READMODE_BYTE is zero; PIPE_NOWAIT is one.
+        if not set_pipe_state(handle, ctypes.byref(mode), None, None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        payload_buffer = ctypes.create_string_buffer(payload)
+        offset = 0
+        while offset < len(payload):
+            if time.monotonic() >= deadline:
+                raise TimeoutError("named-pipe request exceeded probe deadline")
+            written = ctypes.c_uint32()
+            remaining = len(payload) - offset
+            if not write_file(
+                handle,
+                ctypes.byref(payload_buffer, offset),
+                remaining,
+                ctypes.byref(written),
+                None,
+            ):
+                error = ctypes.get_last_error()
+                if error == 232:  # PIPE_NOWAIT reports ERROR_NO_DATA while its buffer is full.
+                    time.sleep(min(0.005, max(0.0, deadline - time.monotonic())))
+                    continue
+                raise ctypes.WinError(error)
+            if written.value > remaining:
+                raise OSError("named-pipe write reported more bytes than requested")
+            offset += written.value
+            if written.value == 0:
+                time.sleep(min(0.005, max(0.0, deadline - time.monotonic())))
+        result = bytearray()
+        while time.monotonic() < deadline:
+            chunk = ctypes.create_string_buffer(min(4096, MAX_OUTPUT + 1 - len(result)))
+            count = ctypes.c_uint32()
+            if read_file(handle, chunk, len(chunk), ctypes.byref(count), None):
+                result.extend(chunk.raw[:count.value])
+                if b"\n" in result:
+                    return bytes(result[: result.index(b"\n") + 1])
+                if len(result) > MAX_OUTPUT:
+                    return bytes(result)
+            else:
+                error = ctypes.get_last_error()
+                if error not in (109, 232, 234, 536, 997):  # broken/no data/listening/overlapped
+                    raise ctypes.WinError(error)
+                time.sleep(0.005)
+        raise TimeoutError("named-pipe response exceeded probe deadline")
+    finally:
+        close_handle(handle)
+
+
+def daemon_exchange(endpoint: str | Path, frame: dict[str, object], timeout: float) -> bytes:
+    payload = (json.dumps(frame) + "\n").encode()
+    if os.name == "nt" and isinstance(endpoint, str):
+        return windows_pipe_exchange(str(endpoint), payload, timeout)
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+        connection.settimeout(timeout)
+        connection.connect(str(endpoint))
+        connection.sendall(payload)
+        return connection.recv(MAX_OUTPUT + 1)
+
+
+def endpoint_ready(endpoint: str | Path) -> bool:
+    if os.name == "nt" and isinstance(endpoint, str):
+        wait_named_pipe, _, _, _ = _windows_pipe_api()
+        return bool(wait_named_pipe(str(endpoint), 25))
+    return Path(endpoint).exists()
+
+
+def daemon_ping_until_ready(endpoint: str | Path, session: str, process: subprocess.Popen[bytes], deadline: float) -> bytes:
+    """Retry only the startup window where an endpoint exists before accept is ready."""
+    last_error: OSError | None = None
+    while time.monotonic() < deadline:
         try:
-            deadline = time.monotonic() + 5
-            while time.monotonic() < deadline and not any(path.exists() for path in socket_paths):
+            return daemon_exchange(endpoint, {"cmd": "daemon.ping", "session": session},
+                                  max(0.05, deadline - time.monotonic()))
+        except OSError as error:
+            last_error = error
+            if process.poll() is not None:
+                break
+            time.sleep(0.01)
+    if last_error is not None:
+        raise last_error
+    raise TimeoutError("daemon did not accept a ping before the startup deadline")
+
+
+def daemon_probe(
+    binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
+) -> dict[str, object]:
+    if os.name != "posix" and os.name != "nt":
+        return {"status": "unsupported", "reason": "daemon probe requires Unix sockets or Windows named pipes"}
+    results: list[dict[str, object]] = []
+    steady_results: list[dict[str, object]] = []
+    session = probe_session("r")
+    endpoint = daemon_endpoint(session, env)
+    for _ in range(runs):
+        started = time.perf_counter_ns()
+        process: subprocess.Popen[bytes] | None = None
+        stderr_path: Path | None = None
+        try:
+            process, stderr_path = launch_daemon(
+                daemon_command(binary, session, static_mode=static_mode), root, env
+            )
+            startup_deadline = time.monotonic() + 5
+            while time.monotonic() < startup_deadline and not endpoint_ready(endpoint):
                 if process.poll() is not None:
                     break
                 time.sleep(0.02)
-            socket_path = next((path for path in socket_paths if path.exists()), None)
-            if socket_path is None:
-                results.append(startup_failure(process, "daemon socket did not appear", stderr_path))
+            if not endpoint_ready(endpoint):
+                failure = startup_failure(process, "daemon endpoint did not appear", stderr_path)
+                results.append(failure)
+                steady_results.append({**failure, "phase": "steady-state probe skipped after startup failure"})
                 continue
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                connection.settimeout(3)
-                connection.connect(str(socket_path))
-                connection.sendall((json.dumps({"cmd": "daemon.ping", "session": session}) + "\n").encode())
-                response = connection.recv(1 << 16)
+            response = daemon_ping_until_ready(endpoint, session, process, startup_deadline)
             if b'"success":true' not in response:
-                results.append({"status": "error", "reason": "daemon ping failed"})
+                failure = {"status": "error", "reason": "daemon ping failed"}
+                results.append(failure)
+                steady_results.append({**failure, "phase": "steady-state probe skipped after readiness failure"})
             else:
-                results.append({"status": "pass", "duration_ns": time.perf_counter_ns() - started})
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                connection.settimeout(3)
-                connection.connect(str(socket_path))
-                connection.sendall((json.dumps({"cmd": "daemon.stop", "session": session}) + "\n").encode())
-                connection.recv(1 << 16)
+                duration = time.perf_counter_ns() - started
+                steady_started = time.perf_counter_ns()
+                for _ in range(100):
+                    ping = daemon_exchange(endpoint, {"cmd": "daemon.ping", "session": session}, 3)
+                    if b'"success":true' not in ping:
+                        raise OSError("steady-state daemon ping failed")
+                steady_results.append({"status": "pass", "duration_ns": time.perf_counter_ns() - steady_started})
+            try:
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+            except OSError as error:
+                # A Windows pipe may close before the stop reply is read;
+                # a clean daemon exit still proves the stop was delivered.
+                if os.name != "nt" or getattr(error, "winerror", None) != 233:
+                    raise
             process.wait(timeout=5)
+            if process.returncode != 0:
+                raise OSError(f"daemon exited with status {process.returncode}")
+            if b'"success":true' in response:
+                results.append({"status": "pass", "duration_ns": duration})
         except (OSError, subprocess.TimeoutExpired) as error:
-            results.append({"status": "error", "reason": str(error)})
+            failure = {"status": "error", "reason": str(error)}
+            results.append(failure)
+            steady_results.append(failure)
         finally:
-            terminate_process_tree(process)
-            stderr_path.unlink(missing_ok=True)
-            for socket_path in socket_paths:
-                if socket_path.exists():
-                    socket_path.unlink()
-    return summarize(results)
+            if process is not None:
+                terminate_process_tree(process)
+            if stderr_path is not None:
+                stderr_path.unlink(missing_ok=True)
+    result = summarize(results)
+    result["steady_state_100_frames"] = summarize(steady_results)
+    return result
+
+
+def mcp_probe(binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool) -> dict[str, object]:
+    server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    session = probe_session("m")
+    endpoint = daemon_endpoint(session, env)
+    process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
+    try:
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and not endpoint_ready(endpoint):
+            if process.poll() is not None:
+                break
+            time.sleep(0.02)
+        if not endpoint_ready(endpoint):
+            return startup_failure(process, "MCP daemon endpoint did not appear", stderr_path)
+        daemon_ping_until_ready(endpoint, session, process, deadline)
+        url = f"http://127.0.0.1:{server.server_port}/fixture.html"
+        frames = [
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "rust016", "version": "0"}}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
+            {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "fetch_url", "arguments": {"url": url, "no_cache": True}}},
+        ]
+        probe = Probe("mcp", ("mcp", "--engine", "static", "--session", session, "--allow-private", "--tools", "all"),
+                      "".join(json.dumps(frame) + "\n" for frame in frames))
+        return summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+    finally:
+        try:
+            if endpoint_ready(endpoint):
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+        except OSError:
+            pass
+        terminate_process_tree(process)
+        stderr_path.unlink(missing_ok=True)
+        server.shutdown()
+        thread.join(timeout=3)
+        server.server_close()
 
 
 def fetch_semantics(response: bytes, expected_url: str) -> tuple[bool, str]:
@@ -419,30 +697,26 @@ def negative_control_rejected(expected_url: str) -> bool:
 def fetch_probe(
     binary: Path, env: dict[str, str], root: Path, runs: int, *, static_mode: bool
 ) -> dict[str, object]:
+    if os.name != "posix" and os.name != "nt":
+        return {"status": "unsupported", "reason": "fetch daemon probe requires Unix sockets or Windows named pipes"}
     server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
-    session = "rust016-fetch"
-    socket_paths = [Path(env["XDG_RUNTIME_DIR"]) / "symbrowse" / f"{session}.sock"]
-    if platform.system() == "Darwin":
-        socket_paths.append(
-            Path(env["HOME"])
-            / "Library"
-            / "Caches"
-            / "symbrowse"
-            / "run"
-            / f"{session}.sock"
-        )
+    session = probe_session("f")
+    endpoint = daemon_endpoint(session, env)
     process, stderr_path = launch_daemon(daemon_command(binary, session, static_mode=static_mode), root, env)
     try:
-        deadline = time.monotonic() + 5
-        while time.monotonic() < deadline and not any(path.exists() for path in socket_paths):
+        startup_deadline = time.monotonic() + 5
+        while time.monotonic() < startup_deadline and not endpoint_ready(endpoint):
             if process.poll() is not None:
                 break
             time.sleep(0.02)
-        socket_path = next((path for path in socket_paths if path.exists()), None)
-        if socket_path is None:
-            return startup_failure(process, "fetch daemon socket did not appear", stderr_path)
+        if not endpoint_ready(endpoint):
+            return startup_failure(process, "fetch daemon endpoint did not appear", stderr_path)
+        if b'"success":true' not in daemon_ping_until_ready(
+            endpoint, session, process, startup_deadline
+        ):
+            return {"status": "error", "reason": "fetch daemon readiness ping failed"}
         samples = []
         for index in range(runs):
             started = time.perf_counter_ns()
@@ -455,11 +729,7 @@ def fetch_probe(
                 },
             }
             try:
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                    connection.settimeout(15)
-                    connection.connect(str(socket_path))
-                    connection.sendall((json.dumps(frame) + "\n").encode())
-                    response = connection.recv(MAX_OUTPUT + 1)
+                response = daemon_exchange(endpoint, frame, 15)
                 duration = time.perf_counter_ns() - started
                 if len(response) > MAX_OUTPUT:
                     samples.append({"status": "error", "reason": "output limit exceeded"})
@@ -487,41 +757,24 @@ def fetch_probe(
         }
         return result
     finally:
-        socket_path = next((path for path in socket_paths if path.exists()), None)
-        if socket_path is not None:
-            try:
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
-                    connection.settimeout(3)
-                    connection.connect(str(socket_path))
-                    connection.sendall(
-                        (json.dumps({"cmd": "daemon.stop", "session": session}) + "\n").encode()
-                    )
-                    connection.recv(1 << 16)
-            except OSError:
-                pass
+        try:
+            if endpoint_ready(endpoint):
+                daemon_exchange(endpoint, {"cmd": "daemon.stop", "session": session}, 3)
+        except OSError:
+            pass
         terminate_process_tree(process)
         stderr_path.unlink(missing_ok=True)
-        for path in socket_paths:
-            if path.exists():
-                path.unlink()
         server.shutdown()
         thread.join(timeout=3)
         server.server_close()
 
 
-def binary_identity(binary: Path, repo_root: Path) -> dict[str, object]:
+def binary_identity(binary: Path) -> dict[str, object]:
     digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-    try:
-        revision = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.DEVNULL
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        revision = "unknown"
     return {
         "path": str(binary),
         "size_bytes": binary.stat().st_size,
         "sha256": digest,
-        "vcs_revision": revision,
     }
 
 
@@ -530,7 +783,6 @@ def run_binary(
     selected: Collection[str],
     runs: int,
     root: Path,
-    repo_root: Path,
     *,
     static_mode: bool,
 ) -> dict[str, object]:
@@ -539,19 +791,25 @@ def run_binary(
     env = implementation_env(root, "rust" if static_mode else "go")
     probes = {
         "cli": Probe("cli", ("version", "--json")),
-        "mcp": Probe(
-            "mcp",
-            ("mcp", "--engine", "static"),
-            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"rust016","version":"0"}}}\n'
-            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
-        ),
     }
-    result: dict[str, object] = {"identity": binary_identity(binary, repo_root)}
+    result: dict[str, object] = {"identity": binary_identity(binary)}
     for name, probe in probes.items():
         if name in selected:
-            result[name] = summarize([run_once(binary, probe, env, root) for _ in range(runs)])
+            result[name] = summarize([
+                run_once(binary, probe, env, root, measure_peak_rss=name == "cli") for _ in range(runs)
+            ])
+    if "cli" in selected:
+        result["cli_variants"] = {
+            name: summarize([run_once(binary, probe, env, root, measure_peak_rss=True) for _ in range(runs)])
+            for name, probe in {
+                "help": Probe("help", ("--help",)),
+                "config": Probe("config", ("config", "show", "--json")),
+            }.items()
+        }
     if "daemon" in selected:
         result["daemon"] = daemon_probe(binary, env, root, runs, static_mode=static_mode)
+    if "mcp" in selected:
+        result["mcp"] = mcp_probe(binary, env, root, runs, static_mode=static_mode)
     if "fetch" in selected:
         result["fetch"] = fetch_probe(binary, env, root, runs, static_mode=static_mode)
     return result
@@ -571,25 +829,29 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.error("--runs must be between 1 and 100")
     selected = set(args.workload or WORKLOADS)
     output = external_output(args.output)
-    with tempfile.TemporaryDirectory(prefix="rust016-bench-", dir=temporary_parent()) as raw:
+    with tempfile.TemporaryDirectory(prefix="b-", dir=temporary_parent()) as raw:
         root = Path(raw)
         report: dict[str, Any] = {
-            "schema_version": 2,
-            "report_version": "rust016-benchmark-v2",
+            "schema_version": 3,
+            "report_version": "rust016-benchmark-v3",
             "captured_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "source_revision": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
             ).strip(),
             "host": {"system": platform.system(), "machine": platform.machine()},
+            "daemon_transport": "windows-named-pipe" if os.name == "nt" else "unix-domain-socket",
+            "daemon_session_policy": "randomized per probe invocation to avoid user or concurrent daemon collisions",
             "runs_per_workload": args.runs,
             "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
             "workload_fixture": "rust016-static-fetch-html-v1",
             "workloads": sorted(selected),
             "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+            "peak_rss_metric": "per-process OS high-water resident memory; Windows reports PeakWorkingSetSize",
             "binaries": {},
             "gate": "blocked",
             "limitations": [
-                "Peak RSS is collected from child-process resource usage where the host exposes it; daemon RSS remains unavailable in this portable runner.",
+                "Peak RSS is unavailable on a sample if the host OS cannot report a positive process high-water value; such CLI measurements block the gate.",
+                "source_revision identifies the checkout; binary SHA-256 identifies measured bytes. CI build steps bind them.",
                 "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
                 "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result.",
             ],
@@ -603,22 +865,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                 selected,
                 args.runs,
                 root,
-                Path(__file__).resolve().parents[2],
                 static_mode=name == "rust",
             )
         rust_result = report["binaries"].get("rust")
         if isinstance(rust_result, dict):
             if isinstance(rust_result.get("identity"), dict) and isinstance(rust_result["identity"].get("size_bytes"), int):
                 report["candidate_size_bytes"] = rust_result["identity"]["size_bytes"]
-            rss_values = [
-                workload["median_peak_rss_bytes"]
-                for name, workload in rust_result.items()
-                if name in selected
-                and isinstance(workload, dict)
-                and isinstance(workload.get("median_peak_rss_bytes"), int)
-            ]
-            if rss_values:
-                report["candidate_median_peak_rss_bytes"] = int(statistics.median(rss_values))
         go_result = report["binaries"].get("go")
         if isinstance(go_result, dict) and isinstance(go_result.get("identity"), dict) and isinstance(go_result["identity"].get("size_bytes"), int):
             report["reference_size_bytes"] = go_result["identity"]["size_bytes"]
@@ -630,6 +882,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             for workload in selected:
                 if not isinstance(binary_result.get(workload), dict) or binary_result[workload].get("status") != "pass":
                     all_pass = False
+            if "cli" in selected:
+                variants = binary_result.get("cli_variants", {})
+                if any(variants.get(name, {}).get("status") != "pass" for name in ("help", "config")):
+                    all_pass = False
+                cli_summaries = [binary_result.get("cli", {}), variants.get("help", {}), variants.get("config", {})]
+                if any(
+                    summary.get("peak_rss_status") != "complete"
+                    or len(summary.get("raw_samples", [])) != args.runs
+                    for summary in cli_summaries
+                ):
+                    all_pass = False
+            if "daemon" in selected and binary_result.get("daemon", {}).get("steady_state_100_frames", {}).get("status") != "pass":
+                all_pass = False
         report["gate"] = "pass" if all_pass else "blocked"
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

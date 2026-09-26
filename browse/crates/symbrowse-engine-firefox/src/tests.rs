@@ -1,0 +1,123 @@
+use super::*;
+use crate::startup::{capture_startup_output, captured_output, startup_detail};
+use std::{
+    path::Path,
+    sync::{Arc, Mutex},
+};
+
+#[test]
+fn capabilities_are_truthful() {
+    let c = canonical_capabilities();
+    let actual: std::collections::BTreeSet<_> = c.interfaces.into_iter().collect();
+    let expected = [
+        "CookieEngine",
+        "FrameManager",
+        "InspectionEngine",
+        "InteractionEngine",
+        "NavigationStateProvider",
+        "ScreenshotEngine",
+        "TabManager",
+    ]
+    .into_iter()
+    .map(str::to_owned)
+    .collect();
+    assert_eq!(actual, expected);
+}
+
+#[test]
+fn cookie_partition_uses_bidi_context_tag() {
+    assert_eq!(
+        context_partition("context-123"),
+        json!({"type":"context","context":"context-123"})
+    );
+}
+
+#[test]
+fn evaluation_preserves_bidi_exception_details() {
+    let result = super::evaluation_result(json!({
+        "type": "exception",
+        "exceptionDetails": {"text": "SecurityError: access denied"}
+    }));
+    assert_eq!(result.exception_text, "SecurityError: access denied");
+    assert!(result.value.is_none());
+}
+
+#[test]
+fn evaluation_decodes_nested_bidi_remote_values() {
+    let result = evaluation_result(json!({
+        "result": {
+            "type":"object",
+            "value":[
+                ["title", {"type":"string", "value":"Firefox fixture"}],
+                ["count", {"type":"number", "value":3}],
+                ["items", {"type":"array", "value":[
+                    {"type":"boolean", "value":true},
+                    {"type":"undefined"}
+                ]}],
+                ["nested", {"type":"object", "value":[
+                    ["url", {"type":"string", "value":"http://127.0.0.1/"}]
+                ]}]
+            ]
+        }
+    }));
+    assert_eq!(
+        result.value,
+        Some(json!({
+            "title":"Firefox fixture",
+            "count":3,
+            "items":[true, null],
+            "nested":{"url":"http://127.0.0.1/"}
+        }))
+    );
+    assert_eq!(
+        evaluation_result(json!({"result":{"type":"string","value":"title"}})).value,
+        Some(json!("title"))
+    );
+}
+
+#[test]
+fn unsupported_downloads_and_network_capture_are_typed() {
+    for operation in ["downloads", "network.capture"] {
+        assert!(matches!(
+            FirefoxSession::unsupported(operation),
+            FirefoxError::Unsupported { .. }
+        ));
+    }
+}
+
+#[test]
+fn invalid_explicit_path_is_typed() {
+    assert!(matches!(
+        resolve_firefox_executable(Some(Path::new("/missing/firefox"))),
+        Err(FirefoxError::Driver(_))
+    ));
+}
+
+#[test]
+fn readiness_diagnostic_includes_browser_output_and_supported_channel() {
+    let detail = startup_detail(
+        b"",
+        b"sandbox_extension_issue_file_to_process: denied\nSWGL mapping failed",
+    )
+    .expect("captured Firefox diagnostic");
+    assert!(detail.contains("Mozilla Firefox Nightly"));
+    assert!(detail.contains("sandbox_extension_issue_file_to_process"));
+    assert!(detail.contains("SWGL mapping failed"));
+}
+
+#[test]
+fn readiness_diagnostic_is_absent_without_browser_output() {
+    assert_eq!(startup_detail(b"", b""), None);
+}
+
+#[tokio::test]
+async fn startup_output_capture_keeps_only_bounded_tail() {
+    let expected = vec![b'x'; startup::STARTUP_OUTPUT_LIMIT + 128];
+    let output = Arc::new(Mutex::new(Vec::new()));
+    capture_startup_output(std::io::Cursor::new(expected.clone()), Arc::clone(&output)).await;
+    assert_eq!(
+        captured_output(&output),
+        expected[128..].to_vec(),
+        "diagnostics must remain bounded while preserving the latest output"
+    );
+}

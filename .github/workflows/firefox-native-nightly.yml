@@ -1,0 +1,122 @@
+name: Firefox native Nightly contract
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "browse/**"
+      - ".github/workflows/firefox-native-nightly.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "browse/**"
+      - ".github/workflows/firefox-native-nightly.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firefox-native-nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nightly-plan:
+    name: Select one common official Nightly build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      source_revision: ${{ steps.plan.outputs.source_revision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Resolve matching Firefox Nightly artifacts
+        id: plan
+        working-directory: browse
+        run: python scripts/rust-port/firefox_native_gate.py --plan --destination "$RUNNER_TEMP/firefox-nightly-plan"
+
+  firefox-native:
+    name: Firefox BiDi ${{ matrix.target }}
+    needs: [nightly-plan]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-amd64
+            runner: macos-15-intel
+          - target: darwin-arm64
+            runner: macos-15
+          - target: linux-amd64
+            runner: ubuntu-latest
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+          - target: windows-amd64
+            runner: windows-2025
+          - target: windows-arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      FIREFOX_TARGET: ${{ matrix.target }}
+      NIGHTLY_VERSION: ${{ needs.nightly-plan.outputs.version }}
+      NIGHTLY_SOURCE_REVISION: ${{ needs.nightly-plan.outputs.source_revision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - name: Check gate harness
+        working-directory: browse
+        run: python scripts/rust-port/test_firefox_native_gate.py
+
+      - name: Fetch and verify native Nightly identity
+        working-directory: browse
+        shell: bash
+        run: >-
+          python scripts/rust-port/firefox_native_gate.py
+          --prepare
+          --target "$FIREFOX_TARGET"
+          --destination "$RUNNER_TEMP/firefox-nightly-$FIREFOX_TARGET"
+
+      - name: Execute Firefox native BiDi fixture gate
+        working-directory: browse
+        env:
+          SYMBROWSE_E2E: "1"
+          CARGO_TARGET_DIR: ${{ runner.temp }}/cargo-target
+        run: |
+          cargo test --locked -p symbrowse-daemon --test firefox_native -- --ignored --exact native_firefox_bidi_fixture_checks_supported_capabilities
+          cargo test --locked -p symbrowse-engine-firefox --test native_interaction -- --ignored --exact firefox_login_uses_trusted_bidi_input_actions
+
+  six-native-targets-required:
+    name: Require all six native Firefox gates
+    if: always()
+    needs: [nightly-plan, firefox-native]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enforce matrix result
+        shell: bash
+        env:
+          NIGHTLY_PLAN_RESULT: ${{ needs.nightly-plan.result }}
+          FIREFOX_MATRIX_RESULT: ${{ needs.firefox-native.result }}
+          FIREFOX_NIGHTLY_VERSION: ${{ needs.nightly-plan.outputs.version }}
+          FIREFOX_NIGHTLY_REVISION: ${{ needs.nightly-plan.outputs.source_revision }}
+        run: |
+          if [[ "$NIGHTLY_PLAN_RESULT" != success || "$FIREFOX_MATRIX_RESULT" != success ]]; then
+            echo "Nightly plan: $NIGHTLY_PLAN_RESULT; Firefox native matrix: $FIREFOX_MATRIX_RESULT" >&2
+            exit 1
+          fi
+          echo "All six native Firefox Nightly gates passed at $GITHUB_SHA with shared Firefox build $FIREFOX_NIGHTLY_VERSION ($FIREFOX_NIGHTLY_REVISION)"

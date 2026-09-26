@@ -2,15 +2,23 @@ use std::sync::{Arc, Mutex};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use symbrowse_compat::{CompatClient, Request as CompatRequest};
 use symbrowse_core::{
     flows,
-    policy::Allowlist,
+    journal::{
+        Redactor as JournalRedactor, SCHEMA_VERSION as JOURNAL_SCHEMA_VERSION,
+        Store as JournalStore,
+    },
+    oob::{Kind as OobKind, Manager as OobManager, Status as OobStatus, parse_timeout},
+    policy::{Allowlist, Mode as PolicyMode, Policy, SsrfGuard, classify, policy_host},
+    policy_guard::{Guard, GuardInput},
     runner::{self, AsyncExecutor, ExecutionError, RunOptions},
     state::{Cookie, OriginState},
     state_store::Store,
 };
+use symbrowse_engine_chrome::CapturedRequest;
 use symbrowse_engine_chrome::{
     BrowserMode, ChromePage, ChromeSession, NetworkCapture, resolve_chrome_executable,
 };
@@ -40,6 +48,7 @@ pub struct DispatchRuntime {
     compat: AsyncMutex<Option<CompatClient>>,
     browser: Mutex<Option<BrowserState>>,
     firefox: AsyncMutex<Option<FirefoxSession>>,
+    oob: OobManager,
     #[cfg(target_os = "macos")]
     safari: AsyncMutex<Option<SafariRuntime>>,
 }
@@ -49,6 +58,7 @@ struct BrowserState {
     page: ChromePage,
     tabs: Vec<BrowserTab>,
     network_capture: Option<NetworkCapture>,
+    network_requests: Vec<CapturedRequest>,
 }
 
 #[derive(Clone)]
@@ -60,6 +70,20 @@ struct BrowserTab {
 struct FlowExecutor<'a> {
     runtime: &'a DispatchRuntime,
     operation: OperationContext,
+}
+
+fn build_runtime_for_mode(mode: &str) -> std::io::Result<Runtime> {
+    if mode == "static" {
+        // Static mode has no persistent browser event tasks. Driving async work
+        // on the daemon's existing request workers avoids starting a Tokio
+        // worker pool on every short-lived static daemon process.
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+    } else {
+        // Browser engines retain background CDP/event tasks between requests.
+        Runtime::new()
+    }
 }
 
 impl AsyncExecutor for FlowExecutor<'_> {
@@ -122,7 +146,7 @@ impl DispatchRuntime {
         })?;
         let allowlist = allowlist.active().then_some(allowlist);
         let fetch = FetchClient::honest().map_err(runtime_error)?;
-        let runtime = Runtime::new().map_err(runtime_error)?;
+        let runtime = build_runtime_for_mode(&spec.mode).map_err(runtime_error)?;
         let output_cache = OutputCache::new(
             spec.output_cache_dir(),
             Some(std::time::Duration::from_secs(24 * 60 * 60)),
@@ -137,6 +161,7 @@ impl DispatchRuntime {
             compat: AsyncMutex::new(None),
             browser: Mutex::new(None),
             firefox: AsyncMutex::new(None),
+            oob: OobManager::new(),
             #[cfg(target_os = "macos")]
             safari: AsyncMutex::new(None),
         }))
@@ -149,6 +174,16 @@ impl DispatchRuntime {
                 message: "daemon operation was cancelled".into(),
                 ..Default::default()
             });
+        }
+        if frame.cmd == "handoff" {
+            // The handoff loop resolves its prompt when the transport cancels.
+            return self.runtime.block_on(self.dispatch(frame, operation));
+        }
+        if matches!(
+            frame.cmd.as_str(),
+            "oob.status" | "oob.complete" | "oob.cancel"
+        ) {
+            return self.oob_command(&frame);
         }
         self.runtime.block_on(async {
             tokio::select! {
@@ -189,10 +224,18 @@ impl DispatchRuntime {
             return Err(SafariRuntime::unsupported_interaction(&frame.cmd));
         }
         match frame.cmd.as_str() {
+            "handoff" => self.handoff(&frame, &operation).await,
+            "oob.status" | "oob.complete" | "oob.cancel" => self.oob_command(&frame),
+            "auth.login" => self.auth_login(&frame, &operation).await,
+            "console.list" | "console.clear" | "errors.list" | "errors.clear" => {
+                self.chrome_runtime_events_command(&frame).await
+            }
             "fetch.url" => self.fetch_url(&frame).await,
             "fetch.batch" => self.fetch_batch(&frame).await,
             "cache.get" => self.cache_get(&frame),
             "wayback.snapshots" => self.wayback_snapshots(&frame).await,
+            "policy.explain" => self.policy_explain(&frame),
+            "journal.tail" | "journal.show" => self.journal_read(&frame),
             "flow.run" => self.flow_run(&frame, operation.clone()).await,
             "capabilities" => {
                 #[cfg(target_os = "macos")]
@@ -208,7 +251,7 @@ impl DispatchRuntime {
                 #[cfg(not(target_os = "macos"))]
                 if matches!(self.spec.engine.as_str(), "safari-attach" | "safari-bidi") {
                     return Err(DaemonError {
-                        code: codes::OPERATION_FAILED.into(),
+                        code: codes::DAEMON_UNAVAILABLE.into(),
                         message: "Safari engines are only available on macOS".into(),
                         ..Default::default()
                     });
@@ -227,16 +270,20 @@ impl DispatchRuntime {
             }
             "open" | "goto" | "read" | "snapshot" | "click" | "dblclick" | "fill" | "type"
             | "press" | "focus" | "hover" | "select" | "check" | "uncheck" | "wait" | "back"
-            | "forward" | "reload" | "scrollintoview" | "get.text" | "get.html" | "get.title"
-            | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box" | "get.styles"
-            | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list" | "tab.list"
-            | "tab.new" | "tab.switch" | "tab.close" | "window.new" | "frames.list"
-            | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept" | "dialog.dismiss"
-            | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
-            | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
-            | "cookies.set" | "storage.get" | "storage.set" | "download" => {
+            | "forward" | "reload" | "scroll" | "scrollintoview" | "get.text" | "get.html"
+            | "get.title" | "get.url" | "get.count" | "get.value" | "get.attr" | "get.box"
+            | "get.styles" | "is.visible" | "is.enabled" | "is.checked" | "find" | "tabs.list"
+            | "tab.list" | "tab.new" | "tab.switch" | "tab.close" | "window.new"
+            | "frames.list" | "frame.tree" | "dialog" | "dialog.status" | "dialog.accept"
+            | "dialog.dismiss" | "dialog.auto" | "network.capture" | "network.requests"
+            | "network.request" | "network.offline" | "network.block" | "screenshot" | "pdf"
+            | "upload" | "a11y" | "cookies.get" | "cookies.set" | "cookies.list"
+            | "cookies.clear" | "storage.get" | "storage.list" | "storage.set"
+            | "storage.clear" | "download" | "download.setdir" | "downloads.list" | "eval" => {
                 self.browser_command(&frame).await
             }
+            "set.viewport" | "set.device" | "set.geo" | "set.offline" | "set.headers"
+            | "set.media" | "set.user-agent" => self.browser_command(&frame).await,
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Chrome daemon does not implement {:?}", frame.cmd),
@@ -256,6 +303,147 @@ impl DispatchRuntime {
                 hint: "use a registered MCP tool or daemon command".into(),
                 ..Default::default()
             }),
+        }
+    }
+
+    fn oob_command(&self, frame: &Frame) -> HandlerResult {
+        if frame.cmd == "oob.status" {
+            return Ok((
+                Some(match self.oob.active() {
+                    Some(prompt) => json!({"active": true, "prompt": go_oob_prompt(&prompt)}),
+                    None => json!({"active": false}),
+                }),
+                Vec::new(),
+            ));
+        }
+        let args = object_args(frame)?;
+        let id = required_string(args, "id")?;
+        let prompt = if frame.cmd == "oob.complete" {
+            self.oob.complete(id, None)
+        } else {
+            self.oob.cancel(
+                id,
+                args.get("reason")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default(),
+            )
+        }
+        .ok_or_else(|| malformed(format!("oob prompt {id:?} not found or already resolved")))?;
+        Ok((Some(go_oob_prompt(&prompt)), Vec::new()))
+    }
+
+    async fn handoff(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
+        let args = object_args(frame)?;
+        let reason = required_string(args, "reason")?;
+        let raw_timeout = args.get("timeout").and_then(Value::as_str).unwrap_or("5m");
+        let timeout = parse_timeout(raw_timeout)
+            .ok_or_else(|| malformed(format!("invalid timeout {raw_timeout:?}")))?;
+        let created_at = time::OffsetDateTime::now_utc()
+            .format(&time::format_description::well_known::Rfc3339)
+            .map_err(runtime_error)?;
+        let prompt = self.oob.create(
+            OobKind::Handoff,
+            "Symaira Browse: der Agent wartet",
+            reason,
+            timeout,
+            created_at,
+        );
+        let page = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        let overlay_page = if let Some(page) = page {
+            // Match Go's notification-only fallback when no browser page is
+            // ready or when the engine cannot host the overlay.
+            if page
+                .install_overlay(&prompt.id, &prompt.title, &prompt.reason, 0)
+                .await
+                .is_ok()
+            {
+                Some(page)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        #[cfg(target_os = "macos")]
+        {
+            let notice = symbrowse_core::oob::notification_command(&prompt);
+            let _ = tokio::time::timeout(
+                std::time::Duration::from_secs(2),
+                tokio::process::Command::new(&notice.program)
+                    .args(&notice.args)
+                    .kill_on_drop(true)
+                    .status(),
+            )
+            .await;
+        }
+        let started = std::time::Instant::now();
+        loop {
+            if operation.is_cancelled() || operation.remaining().is_zero() {
+                self.oob
+                    .cancel(&prompt.id, "daemon operation was cancelled");
+                if let Some(page) = overlay_page.as_ref() {
+                    let _ = page.remove_overlay().await;
+                }
+                return Err(DaemonError {
+                    code: codes::OPERATION_TIMEOUT.into(),
+                    message: "daemon operation was cancelled".into(),
+                    ..Default::default()
+                });
+            }
+            if let Some(page) = overlay_page.as_ref() {
+                if let Ok(decision) = page.overlay_result().await {
+                    match decision.as_str() {
+                        "completed" => {
+                            self.oob.complete(&prompt.id, None);
+                        }
+                        "cancelled" => {
+                            self.oob.cancel(&prompt.id, "cancelled by human");
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            let current = self.oob.get(&prompt.id).expect("created prompt exists");
+            if current.status != OobStatus::Pending || started.elapsed() >= timeout {
+                let result = if current.status == OobStatus::Pending {
+                    self.oob.expire(&prompt.id).unwrap_or(current)
+                } else {
+                    current
+                };
+                if let Some(page) = overlay_page.as_ref() {
+                    let _ = page.remove_overlay().await;
+                }
+                if result.status == OobStatus::Timeout {
+                    return Err(DaemonError {
+                        code: codes::HANDOFF_TIMEOUT.into(),
+                        message: format!(
+                            "handoff for session {:?} timed out and was denied",
+                            self.spec.session
+                        ),
+                        retryable: Some(false),
+                        requires_user_confirmation: Some(true),
+                        resume_hint: "start a new handoff after explicit human confirmation".into(),
+                        ..Default::default()
+                    });
+                }
+                let mut data = json!({
+                    "status": result.status,
+                    "prompt_id": result.id,
+                    "duration_ms": started.elapsed().as_millis() as u64,
+                });
+                if let Some(extra) = result.result.as_ref().and_then(Value::as_object) {
+                    data.as_object_mut()
+                        .expect("handoff object")
+                        .extend(extra.clone());
+                }
+                return Ok((Some(data), Vec::new()));
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(50)).await;
         }
     }
 
@@ -354,6 +542,36 @@ impl DispatchRuntime {
                 "tls_profile": Value::Null,
             });
         }
+        Ok((Some(data), Vec::new()))
+    }
+
+    async fn auth_login(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
+        if self.spec.mode != "browser" || self.spec.engine != "chrome" {
+            return Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!(
+                    "auth.login is not supported by the {:?} engine",
+                    self.spec.engine
+                ),
+                hint: "credential entry is only available with the Chrome engine".into(),
+                ..Default::default()
+            });
+        }
+        let args = object_args(frame)?;
+        let entry = required_string(args, "entry")?;
+        let url = match args.get("url") {
+            None | Some(Value::Null) => "",
+            Some(Value::String(url)) => url,
+            Some(_) => return Err(malformed("auth.login url must be a string")),
+        };
+        if !url.is_empty() {
+            self.guard_navigation_url(url).await?;
+        }
+        let mut credentials =
+            crate::auth::Credentials::resolve(std::path::Path::new("symvault"), entry, operation)
+                .await?;
+        let page = self.ensure_browser().await?;
+        let data = crate::auth::login(&page, url, &mut credentials).await?;
         Ok((Some(data), Vec::new()))
     }
 
@@ -517,6 +735,94 @@ impl DispatchRuntime {
         Ok((Some(result), Vec::new()))
     }
 
+    fn journal_read(&self, frame: &Frame) -> HandlerResult {
+        let args = object_args(frame)?;
+        let session = args
+            .get("session")
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+            .unwrap_or(&frame.session);
+        let path = self.spec.state_dir.join("journal");
+        if let Ok(metadata) = std::fs::symlink_metadata(&path) {
+            if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                return Err(runtime_error("journal directory must be a real directory"));
+            }
+        }
+        let store = JournalStore::new(&path, session, JournalRedactor::standard(), "")
+            .map_err(runtime_error)?;
+        let entries = if frame.cmd == "journal.tail" {
+            let lines = args.get("lines").and_then(Value::as_i64).unwrap_or(0);
+            store.tail(if lines <= 0 { 0 } else { lines as usize })
+        } else {
+            store.read()
+        }
+        .map_err(runtime_error)?;
+        Ok((
+            Some(json!({
+                "schema_version": JOURNAL_SCHEMA_VERSION,
+                "session": session,
+                "entries": entries,
+            })),
+            Vec::new(),
+        ))
+    }
+
+    fn policy_explain(&self, frame: &Frame) -> HandlerResult {
+        let args = object_args(frame)?;
+        let command = required_string(args, "command")?;
+        let url = args.get("url").and_then(Value::as_str).unwrap_or_default();
+        let requested_mode = args
+            .get("mode")
+            .and_then(Value::as_str)
+            .filter(|mode| !mode.is_empty());
+        let mode = match requested_mode {
+            Some("mcp") => PolicyMode::Mcp,
+            Some(_) => PolicyMode::Tty,
+            None if std::env::var("SYMBROWSE_MCP").as_deref() == Ok("1") => PolicyMode::Mcp,
+            None => PolicyMode::Tty,
+        };
+        let policy_path = self.spec.state_dir.join("policy.toml");
+        let policy = Policy::load(&policy_path).unwrap_or_else(|_| Policy {
+            source: policy_path.display().to_string(),
+            ..Policy::default()
+        });
+        let mut explanation = policy.explain(command, url, mode).map_err(runtime_error)?;
+        let class = classify(command).map_err(runtime_error)?;
+        let host = policy_host(url);
+        let guard = Guard::detect();
+        let (decider, reason) = if let Some(guard) = &guard {
+            let input = GuardInput {
+                command: command.to_owned(),
+                class,
+                domain: host,
+                warnings: Vec::new(),
+            };
+            match guard.decide(&input) {
+                Ok(outcome) if outcome.reason.is_empty() => ("guard", "guard".to_owned()),
+                Ok(outcome) => ("guard", format!("guard:{}", outcome.reason)),
+                Err(error) => ("guard", format!("guard failure: {error}")),
+            }
+        } else {
+            let (_, origin) = policy.decide(class, &host, mode);
+            ("policy", origin)
+        };
+        let guard_command = guard
+            .as_ref()
+            .map_or_else(|| "not configured".to_owned(), Guard::command);
+        explanation.push_str(&format!(
+            "\ndecider:   {decider}\nguard:     {guard_command}\nreason:    {reason}"
+        ));
+        Ok((
+            Some(json!({
+                "explanation": explanation,
+                "source": policy.source,
+                "decider": decider,
+                "guard_active": guard.is_some(),
+            })),
+            Vec::new(),
+        ))
+    }
+
     async fn wayback_snapshots(&self, frame: &Frame) -> HandlerResult {
         let args = object_args(frame)?;
         let url = required_string(args, "url")?;
@@ -569,7 +875,57 @@ impl DispatchRuntime {
         Ok((Some(Value::Array(entries)), Vec::new()))
     }
 
+    async fn chrome_runtime_events_command(&self, frame: &Frame) -> HandlerResult {
+        let page = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        let Some(page) = page else {
+            return Ok((Some(empty_runtime_events_payload(&frame.cmd)), Vec::new()));
+        };
+        if self.spec.engine != "chrome" {
+            return Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!("{} is not supported by the selected engine", frame.cmd),
+                hint: "runtime console capture requires Chrome".into(),
+                ..Default::default()
+            });
+        }
+        let data = match frame.cmd.as_str() {
+            "console.list" => {
+                page.enable_runtime_events().await.map_err(runtime_error)?;
+                let entries = go_runtime_entries(page.runtime_console_events().await);
+                let count = entries.as_array().map_or(0, Vec::len);
+                json!({"entries": entries, "count": count})
+            }
+            "console.clear" => {
+                page.clear_runtime_console().await;
+                json!({"cleared": true})
+            }
+            "errors.list" => {
+                page.enable_runtime_events().await.map_err(runtime_error)?;
+                let entries = go_runtime_entries(page.runtime_error_events().await);
+                let count = entries.as_array().map_or(0, Vec::len);
+                json!({"entries": entries, "count": count})
+            }
+            "errors.clear" => {
+                page.clear_runtime_errors().await;
+                json!({"cleared": true})
+            }
+            _ => {
+                return Err(runtime_error(format!(
+                    "unknown runtime events command {:?}",
+                    frame.cmd
+                )));
+            }
+        };
+        Ok((Some(data), Vec::new()))
+    }
+
     async fn browser_command(&self, frame: &Frame) -> HandlerResult {
+        self.guard_navigation_target(frame).await?;
         if self.spec.mode == "browser" && self.spec.engine == "firefox" {
             return self.firefox_command(frame).await;
         }
@@ -603,14 +959,166 @@ impl DispatchRuntime {
         #[cfg(not(target_os = "macos"))]
         if matches!(self.spec.engine.as_str(), "safari-attach" | "safari-bidi") {
             return Err(DaemonError {
-                code: codes::OPERATION_FAILED.into(),
+                code: codes::DAEMON_UNAVAILABLE.into(),
                 message: "Safari engines are only available on macOS".into(),
                 ..Default::default()
             });
         }
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=ensure-browser-start");
+        }
         let page = self.ensure_browser().await?;
-        let args = object_args(frame)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=ensure-browser-ready");
+        }
+        let empty_args = serde_json::Map::new();
+        let args = if (matches!(frame.cmd.as_str(), "cookies.list" | "downloads.list")
+            && frame.args.is_none())
+            || frame.cmd == "set.offline"
+        {
+            &empty_args
+        } else {
+            object_args(frame)?
+        };
         let data = match frame.cmd.as_str() {
+            "set.viewport" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    width: i64,
+                    height: i64,
+                    scale: f64,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_viewport(request.width, request.height, request.scale, false)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"viewport": [request.width, request.height]})
+            }
+            "set.device" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    name: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.apply_device(&request.name)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"device": request.name})
+            }
+            "set.geo" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    latitude: f64,
+                    longitude: f64,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_geolocation(request.latitude, request.longitude)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"geo": [request.latitude, request.longitude]})
+            }
+            "set.offline" => {
+                let offline = frame
+                    .args
+                    .as_ref()
+                    .and_then(Value::as_object)
+                    .and_then(|args| {
+                        args.iter()
+                            .find(|(name, _)| name.eq_ignore_ascii_case("offline"))
+                            .map(|(_, value)| value)
+                    })
+                    .and_then(Value::as_bool)
+                    .unwrap_or(false);
+                page.set_offline(offline).await.map_err(runtime_error)?;
+                json!({"offline": offline})
+            }
+            "set.headers" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    headers: Option<std::collections::BTreeMap<String, String>>,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                let headers = request.headers.unwrap_or_default();
+                let count = headers.len();
+                let headers = headers
+                    .into_iter()
+                    .map(|(name, value)| (name, Value::String(value)))
+                    .collect();
+                page.set_extra_headers(headers)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"headers_set": count})
+            }
+            "set.media" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    dark: bool,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_media(request.dark).await.map_err(runtime_error)?;
+                json!({"media": if request.dark { "dark" } else { "light" }})
+            }
+            "set.user-agent" => {
+                #[derive(Default, Deserialize)]
+                #[serde(default)]
+                struct Request {
+                    user_agent: String,
+                }
+                let request: Request =
+                    serde_json::from_value(Value::Object(args.clone())).map_err(runtime_error)?;
+                page.set_user_agent(&request.user_agent)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"user_agent_set": true})
+            }
+            "download.setdir" => {
+                let directory = match args.get("dir") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(directory)) => directory,
+                    Some(_) => return Err(malformed("download.setdir dir must be a string")),
+                };
+                page.configure_downloads(directory)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"download_dir":directory})
+            }
+            "downloads.list" => {
+                let downloads = page.download_events().await;
+                json!({"downloads":downloads,"count":downloads.len()})
+            }
+            "storage.list" => {
+                let kind = storage_kind(args)?;
+                let captured = page
+                    .evaluate_script(&storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                storage_list_response(kind, captured)?
+            }
+            "storage.set" => {
+                let (kind, key, script) = storage_set_request(args)?;
+                page.evaluate_script(&script).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                json!({"set":key})
+            }
+            "storage.clear" => {
+                let (kind, script) = storage_clear_request(args)?;
+                page.evaluate_script(&script)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                json!({"cleared":kind})
+            }
             "tabs.list" | "tab.list" => {
                 let (tabs, active_id) = {
                     let guard = self
@@ -643,11 +1151,21 @@ impl DispatchRuntime {
             }
             "tab.new" | "window.new" => {
                 let session = self.chrome_session()?;
-                let url = args
-                    .get("url")
-                    .and_then(Value::as_str)
-                    .unwrap_or("about:blank");
-                let page = session.new_page(url).await.map_err(runtime_error)?;
+                let url = Self::tab_navigation_url(frame.cmd.as_str(), args);
+                let page = session
+                    .new_page("about:blank")
+                    .await
+                    .map_err(runtime_error)?;
+                page.enable_network_guard(
+                    self.spec.allowed_domains.clone(),
+                    self.spec.ssrf_enabled,
+                    self.spec.allow_private,
+                )
+                .await
+                .map_err(runtime_error)?;
+                if url != "about:blank" {
+                    page.open(url).await.map_err(runtime_error)?;
+                }
                 let label = args.get("label").and_then(Value::as_str).unwrap_or("");
                 let mut guard = self
                     .browser
@@ -721,6 +1239,14 @@ impl DispatchRuntime {
                     .close()
                     .await
                     .map_err(runtime_error)?;
+                // Closing a foreground popup can leave Chrome focused on an
+                // unmanaged popup target. Make the logical next managed tab
+                // foreground before subsequent input.dispatchMouseEvent calls.
+                next.page
+                    .raw()
+                    .bring_to_front()
+                    .await
+                    .map_err(runtime_error)?;
                 let mut guard = self
                     .browser
                     .lock()
@@ -743,9 +1269,29 @@ impl DispatchRuntime {
                 json!({"closed": format!("t{}", closed_index + 1), "active": format!("t{}", active_index + 1)})
             }
             "frames.list" | "frame.tree" => {
-                json!({"frames": page.frames().await.map_err(runtime_error)?})
+                let mut frames = page.frames().await.map_err(runtime_error)?;
+                if frame.cmd == "frames.list" {
+                    let mut pending = frames;
+                    frames = Vec::new();
+                    while let Some(mut item) = pending.pop() {
+                        pending.extend(item.children.drain(..).rev());
+                        frames.push(item);
+                    }
+                }
+                json!({"frames": frames})
             }
-            "a11y" => json!({"nodes": page.accessibility_tree().await.map_err(runtime_error)?}),
+            "a11y" => {
+                let tags = args.get("tags").cloned().unwrap_or_else(|| json!([]));
+                let tags: Vec<String> = serde_json::from_value(tags).map_err(runtime_error)?;
+                let selector = args.get("selector").and_then(Value::as_str).unwrap_or("");
+                page.axe_audit(&tags, selector)
+                    .await
+                    .map_err(|error| DaemonError {
+                        code: "a11y_failed".into(),
+                        message: error.to_string(),
+                        ..Default::default()
+                    })?
+            }
             "dialog" => {
                 let accept = args.get("accept").and_then(Value::as_bool).unwrap_or(false);
                 let prompt = args
@@ -788,13 +1334,24 @@ impl DispatchRuntime {
                 json!({"auto_mode": mode})
             }
             "network.capture" => {
-                let capture = page.start_network_capture().await.map_err(runtime_error)?;
-                self.browser
+                let already_capturing = self
+                    .browser
                     .lock()
                     .map_err(|_| runtime_error("browser lock poisoned"))?
+                    .as_ref()
+                    .is_some_and(|state| state.network_capture.is_some());
+                if already_capturing {
+                    return Ok((Some(json!({"started": true})), Vec::new()));
+                }
+                let capture = page.start_network_capture().await.map_err(runtime_error)?;
+                let mut browser = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?;
+                let state = browser
                     .as_mut()
-                    .ok_or_else(|| runtime_error("browser was not initialized"))?
-                    .network_capture = Some(capture);
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                state.network_capture = Some(capture);
                 json!({"started": true})
             }
             "network.requests" => {
@@ -805,10 +1362,47 @@ impl DispatchRuntime {
                     .as_mut()
                     .ok_or_else(|| runtime_error("browser was not initialized"))?
                     .network_capture
-                    .take()
-                    .ok_or_else(|| runtime_error("network capture was not started"))?;
-                let events = capture.collect(std::time::Duration::from_millis(100)).await;
-                json!({"requests": events, "count": events.len()})
+                    .take();
+                let mut capture = match capture {
+                    Some(capture) => capture,
+                    None => page.start_network_capture().await.map_err(runtime_error)?,
+                };
+                let _events = capture
+                    .collect_retaining_requests(std::time::Duration::from_millis(100))
+                    .await;
+                let requests = capture.requests();
+                let mut browser = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?;
+                let state = browser
+                    .as_mut()
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?;
+                state.network_capture = Some(capture);
+                state.network_requests = requests.clone();
+                let requests: Vec<Value> = requests.iter().map(network_request_value).collect();
+                json!({"requests": requests, "count": requests.len()})
+            }
+            "network.request" => {
+                let id = args.get("id").and_then(Value::as_str).unwrap_or("");
+                let request = self
+                    .browser
+                    .lock()
+                    .map_err(|_| runtime_error("browser lock poisoned"))?
+                    .as_ref()
+                    .ok_or_else(|| runtime_error("browser was not initialized"))?
+                    .network_requests
+                    .iter()
+                    .find(|request| request.id == id)
+                    .cloned();
+                let Some(request) = request else {
+                    return Err(DaemonError {
+                        code: "network_request_not_found".into(),
+                        message: format!("no captured request with id {id:?}"),
+                        ..Default::default()
+                    });
+                };
+                json!({"request": network_request_value(&request)})
             }
             "network.offline" => {
                 page.set_offline(args.get("offline").and_then(Value::as_bool).unwrap_or(true))
@@ -828,6 +1422,76 @@ impl DispatchRuntime {
                 page.block_urls(urls).await.map_err(runtime_error)?;
                 json!({"blocked": true})
             }
+            "cookies.set" => {
+                let cookie = args
+                    .get("cookie")
+                    .ok_or_else(|| malformed("cookies.set requires cookie"))?;
+                let domain = cookie.get("domain").and_then(Value::as_str).unwrap_or("");
+                let url = match args.get("url").and_then(Value::as_str) {
+                    Some(url) if !url.is_empty() => url.to_owned(),
+                    _ if !domain.is_empty() => String::new(),
+                    _ => page
+                        .evaluate_script("location.href")
+                        .await
+                        .map_err(runtime_error)?
+                        .as_str()
+                        .filter(|url| url.starts_with("http://") || url.starts_with("https://"))
+                        .ok_or_else(|| {
+                            malformed(
+                                "cookies.set requires a current HTTP(S) page or an explicit URL",
+                            )
+                        })?
+                        .to_owned(),
+                };
+                let name = required_string(
+                    cookie
+                        .as_object()
+                        .ok_or_else(|| malformed("cookies.set requires cookie object"))?,
+                    "name",
+                )?;
+                let params = cookie_set_params(cookie, &url)?;
+                page.set_cookie(params).await.map_err(runtime_error)?;
+                json!({"set":name})
+            }
+            "cookies.list" => {
+                let origin = page
+                    .evaluate_script("location.origin")
+                    .await
+                    .map_err(runtime_error)?
+                    .as_str()
+                    .unwrap_or_default()
+                    .to_owned();
+                let cookies = if origin.is_empty() || origin == "null" {
+                    json!({"cookies": []})
+                } else {
+                    page.cookies_for_urls(std::slice::from_ref(&origin))
+                        .await
+                        .map_err(runtime_error)?
+                };
+                cookie_list_payload(&origin, cookies)?
+            }
+            "cookies.clear" => {
+                let name = required_string(args, "name")?;
+                let url = match args.get("url").and_then(Value::as_str) {
+                    Some(url) if !url.is_empty() => url.to_owned(),
+                    _ => page
+                        .evaluate_script("location.href")
+                        .await
+                        .map_err(runtime_error)?
+                        .as_str()
+                        .filter(|url| url.starts_with("http://") || url.starts_with("https://"))
+                        .ok_or_else(|| {
+                            malformed(
+                                "cookies.clear requires a current HTTP(S) page or an explicit URL",
+                            )
+                        })?
+                        .to_owned(),
+                };
+                page.delete_cookie(name, &url)
+                    .await
+                    .map_err(runtime_error)?;
+                json!({"cleared": name})
+            }
             "screenshot" => serde_json::to_value(
                 page.screenshot(
                     serde_json::from_value(args.clone().into()).map_err(runtime_error)?,
@@ -839,33 +1503,38 @@ impl DispatchRuntime {
             "pdf" => serde_json::to_value(page.pdf().await.map_err(runtime_error)?)
                 .map_err(runtime_error)?,
             "upload" => {
-                let files = args
-                    .get("files")
-                    .and_then(Value::as_array)
-                    .ok_or_else(|| malformed("upload requires files"))?
-                    .iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned)
-                    .collect::<Vec<_>>();
-                let allowed = args
-                    .get("allowed_dirs")
-                    .and_then(Value::as_array)
-                    .map(|v| {
-                        v.iter()
-                            .filter_map(Value::as_str)
-                            .map(str::to_owned)
-                            .collect::<Vec<_>>()
-                    })
-                    .unwrap_or_default();
-                page.upload_files(required_string(args, "selector")?, &files, &allowed)
+                let request = upload_request(args, &self.spec.upload_dirs)?;
+                let checked = symbrowse_engine::files::guard_upload_request(&request)
+                    .map_err(runtime_error)?;
+                page.upload_files(&request.selector, &request.files, &request.allowed_dirs)
                     .await
                     .map_err(runtime_error)?;
-                json!({"uploaded": files})
+                json!({"uploaded": checked.uploaded})
             }
-            "open" | "goto" => page
-                .open(required_string(args, "url")?)
-                .await
-                .map_err(runtime_error)?,
+            "open" | "goto" => {
+                if diagnostics {
+                    eprintln!("chrome_daemon_stage=open-engine-start");
+                }
+                let outcome = page
+                    .open(required_string(args, "url")?)
+                    .await
+                    .map_err(runtime_error)?;
+                if diagnostics {
+                    eprintln!("chrome_daemon_stage=open-engine-complete");
+                }
+                json!({
+                    "action": frame.cmd.as_str(),
+                    "url": outcome.get("url").and_then(Value::as_str).unwrap_or_default(),
+                    "http_status": outcome.get("http_status").and_then(Value::as_i64).unwrap_or_default(),
+                })
+            }
+            "eval" => {
+                let expression = args.get("expression").and_then(Value::as_str).unwrap_or("");
+                if expression.trim().is_empty() {
+                    return Err(runtime_error("eval requires a non-empty expression"));
+                }
+                page.evaluate(expression).await.map_err(runtime_error)?
+            }
             "read" => {
                 if let Some(url) = args
                     .get("url")
@@ -880,13 +1549,13 @@ impl DispatchRuntime {
             "click" => serde_json::to_value(
                 page.click(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "dblclick" => serde_json::to_value(
                 page.double_click(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "fill" => serde_json::to_value(
@@ -944,34 +1613,145 @@ impl DispatchRuntime {
             "check" => serde_json::to_value(
                 page.check(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
             )
             .map_err(runtime_error)?,
             "uncheck" => serde_json::to_value(
                 page.uncheck(required_string(args, "selector")?)
                     .await
-                    .map_err(runtime_error)?,
+                    .map_err(chrome_click_error)?,
+            )
+            .map_err(runtime_error)?,
+            "scroll" => serde_json::to_value(
+                page.scroll(
+                    required_string(args, "selector")?,
+                    args.get("amount").and_then(Value::as_i64).unwrap_or(0),
+                )
+                .await
+                .map_err(runtime_error)?,
             )
             .map_err(runtime_error)?,
             "get.text" | "get.html" | "get.title" | "get.url" | "get.count" | "get.value"
             | "get.attr" | "get.box" | "get.styles" | "is.visible" | "is.enabled"
             | "is.checked" => {
-                let selector = args
-                    .get("selector")
-                    .and_then(Value::as_str)
-                    .unwrap_or("body");
-                let kind = frame
+                let command_kind = frame
                     .cmd
                     .strip_prefix("get.")
                     .or_else(|| frame.cmd.strip_prefix("is."))
                     .unwrap_or("text");
-                let value = page.inspect(selector, kind).await.map_err(runtime_error)?;
-                if frame.cmd == "get.attr" {
-                    let attribute = required_string(args, "attribute")?;
-                    value.get(attribute).cloned().unwrap_or(Value::Null)
-                } else {
-                    value
+                let kind = args
+                    .get("kind")
+                    .and_then(Value::as_str)
+                    .filter(|kind| !kind.is_empty())
+                    .unwrap_or(command_kind);
+                if !matches!(
+                    kind,
+                    "text"
+                        | "html"
+                        | "value"
+                        | "attr"
+                        | "title"
+                        | "url"
+                        | "count"
+                        | "box"
+                        | "styles"
+                        | "visible"
+                        | "enabled"
+                        | "checked"
+                ) {
+                    return Err(DaemonError {
+                        code: "invalid_inspection".into(),
+                        message: format!("unsupported inspection kind {kind:?}"),
+                        ..Default::default()
+                    });
                 }
+                let selector = args
+                    .get("selector")
+                    .and_then(Value::as_str)
+                    .unwrap_or("")
+                    .trim();
+                if selector.is_empty() && !matches!(kind, "html" | "title" | "url") {
+                    return Err(DaemonError {
+                        code: "invalid_inspection".into(),
+                        message: format!("get {kind} requires a selector"),
+                        ..Default::default()
+                    });
+                }
+                let attribute = if kind == "attr" {
+                    let attribute = args.get("attribute").and_then(Value::as_str).unwrap_or("");
+                    if attribute.trim().is_empty() {
+                        return Err(DaemonError {
+                            code: "invalid_inspection".into(),
+                            message: "get attr requires an attribute name".into(),
+                            ..Default::default()
+                        });
+                    }
+                    Some(attribute)
+                } else {
+                    None
+                };
+                let properties = if kind == "styles" {
+                    match args.get("properties") {
+                        Some(Value::Array(values)) => values
+                            .iter()
+                            .map(|value| {
+                                value.as_str().map(str::to_owned).ok_or_else(|| {
+                                    malformed("get.styles properties must contain strings")
+                                })
+                            })
+                            .collect::<Result<Vec<_>, _>>()?,
+                        None | Some(Value::Null) => Vec::new(),
+                        _ => return Err(malformed("get.styles properties must be an array")),
+                    }
+                } else {
+                    Vec::new()
+                };
+                let inspected = if kind == "html" && selector.is_empty() {
+                    page.evaluate_script("document.documentElement.outerHTML")
+                        .await
+                        .map_err(runtime_error)?
+                } else if matches!(kind, "title" | "url") && !selector.is_empty() {
+                    let selector_json = serde_json::to_string(selector).map_err(runtime_error)?;
+                    let expression = if kind == "title" {
+                        format!(
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? {{found:true,value:e.title || ''}} : {{found:false}}; }})()"
+                        )
+                    } else {
+                        format!(
+                            "(() => {{ const e=document.querySelector({selector_json}); return e ? {{found:true,value:e.href || e.getAttribute('href') || ''}} : {{found:false}}; }})()"
+                        )
+                    };
+                    let result = page
+                        .evaluate_script(&expression)
+                        .await
+                        .map_err(runtime_error)?;
+                    if result.get("found") != Some(&Value::Bool(true)) {
+                        return Err(DaemonError {
+                            code: codes::OPERATION_FAILED.into(),
+                            // Go's inspection path returns Chrome's ExceptionDetails.Text
+                            // for this selector error, which is the protocol string "Uncaught".
+                            message: "Uncaught".into(),
+                            ..Default::default()
+                        });
+                    }
+                    result.get("value").cloned().unwrap_or(Value::Null)
+                } else {
+                    page.inspect_with_properties(selector, kind, &properties)
+                        .await
+                        .map_err(runtime_error)?
+                };
+                let value = if let Some(attribute) = attribute {
+                    inspected.get(attribute).cloned().unwrap_or(Value::Null)
+                } else {
+                    inspected
+                };
+                let mut result = serde_json::Map::new();
+                result.insert("kind".into(), Value::String(kind.into()));
+                if !selector.is_empty() {
+                    result.insert("selector".into(), Value::String(selector.into()));
+                }
+                result.insert("value".into(), value);
+                Value::Object(result)
             }
             "find" => {
                 let kind = args.get("kind").and_then(Value::as_str).unwrap_or("text");
@@ -1135,6 +1915,101 @@ impl DispatchRuntime {
         Ok((Some(data), Vec::new()))
     }
 
+    fn tab_navigation_url<'a>(command: &str, args: &'a serde_json::Map<String, Value>) -> &'a str {
+        if command == "window.new" {
+            "about:blank"
+        } else {
+            args.get("url")
+                .and_then(Value::as_str)
+                .unwrap_or("about:blank")
+        }
+    }
+
+    async fn guard_navigation_target(&self, frame: &Frame) -> Result<(), DaemonError> {
+        let target = match frame.cmd.as_str() {
+            "open" | "goto" => {
+                let args = object_args(frame)?;
+                Some(match args.get("url") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(target)) => target,
+                    Some(_) => return Err(malformed("navigation url must be a string")),
+                })
+            }
+            "tab.new" => {
+                let args = object_args(frame)?;
+                let target = match args.get("url") {
+                    None | Some(Value::Null) => "",
+                    Some(Value::String(target)) => target,
+                    Some(_) => return Err(malformed("tab.new url must be a string")),
+                };
+                (!target.trim().is_empty()).then_some(target)
+            }
+            "read" => {
+                let args = object_args(frame)?;
+                match args.get("url") {
+                    None | Some(Value::Null) => None,
+                    Some(Value::String(target)) if !target.trim().is_empty() => {
+                        Some(target.as_str())
+                    }
+                    Some(Value::String(_)) => None,
+                    Some(_) => return Err(malformed("read url must be a string")),
+                }
+            }
+            _ => None,
+        };
+        let Some(target) = target else {
+            return Ok(());
+        };
+        self.guard_navigation_url(target).await
+    }
+
+    pub(super) async fn guard_navigation_url(&self, target: &str) -> Result<(), DaemonError> {
+        let parsed = match url::Url::parse(target.trim()) {
+            Ok(parsed) => parsed,
+            Err(url::ParseError::RelativeUrlWithoutBase) => {
+                return Err(runtime_error(format!(
+                    "navigation URL policy: unsupported target {target:?} (http/https URL required)"
+                )));
+            }
+            Err(error) => {
+                return Err(runtime_error(format!(
+                    "navigation URL policy: invalid URL {target:?}: {error}"
+                )));
+            }
+        };
+        if !matches!(parsed.scheme(), "http" | "https") || parsed.host_str().is_none() {
+            return Err(runtime_error(format!(
+                "navigation URL policy: unsupported target {target:?} (http/https URL required)"
+            )));
+        }
+        let normalized_url = parsed.as_str();
+        if self
+            .allowlist
+            .as_ref()
+            .is_some_and(|allowlist| !allowlist.allows_url(normalized_url))
+        {
+            return Err(runtime_error(format!(
+                "navigation URL policy: target {target:?} is blocked by the domain allowlist"
+            )));
+        }
+        if self.spec.ssrf_enabled {
+            let original_target = target.to_owned();
+            let normalized_url = normalized_url.to_owned();
+            let allow_private = self.spec.allow_private;
+            let result = tokio::task::spawn_blocking(move || {
+                SsrfGuard::new(allow_private).allows_url(&normalized_url)
+            })
+            .await
+            .map_err(runtime_error)?;
+            result.map_err(|error| {
+                runtime_error(format!(
+                    "navigation URL policy: target {original_target:?} is blocked by the SSRF guard: {error}"
+                ))
+            })?;
+        }
+        Ok(())
+    }
+
     async fn flow_run(&self, frame: &Frame, operation: OperationContext) -> HandlerResult {
         let args = object_args(frame)?;
         let source = required_string(args, "yaml")?;
@@ -1215,7 +2090,11 @@ impl DispatchRuntime {
                 (!self.spec.executable_path.as_os_str().is_empty())
                     .then_some(self.spec.executable_path.as_path()),
             )
-            .map_err(runtime_error)?;
+            .map_err(|error| DaemonError {
+                code: codes::DAEMON_UNAVAILABLE.into(),
+                message: redact_str(&error.to_string()),
+                ..Default::default()
+            })?;
             let session = FirefoxSession::launch(
                 executable,
                 self.spec.user_data_dir(),
@@ -1288,23 +2167,44 @@ impl DispatchRuntime {
                 let data = serde_json::from_str(&data).map_err(runtime_error)?;
                 Ok((Some(data), Vec::new()))
             }
+            "storage.list" => {
+                let kind = storage_kind(args)?;
+                let captured = session
+                    .evaluate(&storage_list_script(kind))
+                    .await
+                    .map_err(runtime_error)?;
+                if !captured.exception_text.is_empty() {
+                    return Err(runtime_error(captured.exception_text));
+                }
+                let data = storage_list_response(kind, captured.value.unwrap_or(Value::Null))?;
+                Ok((Some(data), Vec::new()))
+            }
             "storage.set" => {
-                let local = args
-                    .get("local_storage")
-                    .cloned()
-                    .unwrap_or_else(|| json!({}));
-                let session_storage = args
-                    .get("session_storage")
-                    .cloned()
-                    .unwrap_or_else(|| json!({}));
-                let local = serde_json::to_string(&local).map_err(runtime_error)?;
-                let session_storage =
-                    serde_json::to_string(&session_storage).map_err(runtime_error)?;
-                let expression = format!(
-                    "(() => {{ for (const [k,v] of Object.entries({local})) localStorage.setItem(k,v); for (const [k,v] of Object.entries({session_storage})) sessionStorage.setItem(k,v); return true; }})()"
-                );
-                let value = session.evaluate(&expression).await.map_err(runtime_error)?;
-                Ok((Some(value.value.unwrap_or(Value::Null)), Vec::new()))
+                let (kind, key, expression) = storage_set_request(args)?;
+                let value = session.evaluate(&expression).await.map_err(|error| {
+                    runtime_error(format!("set {kind} storage {key:?}: {error}"))
+                })?;
+                if !value.exception_text.is_empty() {
+                    return Err(runtime_error(format!(
+                        "set {kind} storage {key:?}: {}",
+                        value.exception_text
+                    )));
+                }
+                Ok((Some(json!({"set":key})), Vec::new()))
+            }
+            "storage.clear" => {
+                let (kind, expression) = storage_clear_request(args)?;
+                let value = session
+                    .evaluate(&expression)
+                    .await
+                    .map_err(|error| runtime_error(format!("clear {kind} storage: {error}")))?;
+                if !value.exception_text.is_empty() {
+                    return Err(runtime_error(format!(
+                        "clear {kind} storage: {}",
+                        value.exception_text
+                    )));
+                }
+                Ok((Some(json!({"cleared":kind})), Vec::new()))
             }
             "click" | "type" | "fill" => {
                 let selector = args
@@ -1337,6 +2237,12 @@ impl DispatchRuntime {
                 ))
             }
             "network.capture" | "download" | "network.har" => Err(DaemonError {
+                code: "unsupported".into(),
+                message: format!("Firefox does not implement {:?}", frame.cmd),
+                hint: "the operation is explicitly unsupported by this engine".into(),
+                ..Default::default()
+            }),
+            "download.setdir" | "downloads.list" => Err(DaemonError {
                 code: "unsupported".into(),
                 message: format!("Firefox does not implement {:?}", frame.cmd),
                 hint: "the operation is explicitly unsupported by this engine".into(),
@@ -1407,6 +2313,7 @@ impl DispatchRuntime {
     }
 
     async fn ensure_browser(&self) -> Result<ChromePage, DaemonError> {
+        let diagnostics = std::env::var_os("SYMBROWSE_E2E").is_some();
         {
             let guard = self
                 .browser
@@ -1420,7 +2327,14 @@ impl DispatchRuntime {
             (!self.spec.executable_path.as_os_str().is_empty())
                 .then_some(self.spec.executable_path.as_path()),
         )
-        .map_err(runtime_error)?;
+        .map_err(|error| DaemonError {
+            code: codes::DAEMON_UNAVAILABLE.into(),
+            message: redact_str(&error),
+            ..Default::default()
+        })?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-connect-start");
+        }
         let session = ChromeSession::connect(
             BrowserMode::Launch {
                 executable,
@@ -1431,10 +2345,26 @@ impl DispatchRuntime {
         )
         .await
         .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-connect-ready");
+        }
         let page = session
             .new_page("about:blank")
             .await
             .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-blank-page-ready");
+        }
+        page.enable_network_guard(
+            self.spec.allowed_domains.clone(),
+            self.spec.ssrf_enabled,
+            self.spec.allow_private,
+        )
+        .await
+        .map_err(runtime_error)?;
+        if diagnostics {
+            eprintln!("chrome_daemon_stage=chrome-network-guard-ready");
+        }
         let result = page.clone();
         let mut guard = self
             .browser
@@ -1451,6 +2381,7 @@ impl DispatchRuntime {
                 page,
             }],
             network_capture: None,
+            network_requests: Vec::new(),
         });
         Ok(result)
     }
@@ -1676,6 +2607,231 @@ pub fn dispatch_once(spec: SessionSpec, frame: Frame) -> crate::Response {
     }
 }
 
+pub(crate) fn storage_kind(
+    args: &serde_json::Map<String, Value>,
+) -> Result<&'static str, DaemonError> {
+    let kind = match args.get("kind") {
+        None | Some(Value::Null) => "",
+        Some(Value::String(kind)) => kind.as_str(),
+        Some(_) => return Err(malformed("kind must be a string")),
+    };
+    match kind {
+        "local" => Ok("local"),
+        "session" => Ok("session"),
+        other => Err(runtime_error(format!("invalid storage kind {other:?}"))),
+    }
+}
+
+fn upload_request(
+    args: &serde_json::Map<String, Value>,
+    configured_dirs: &[String],
+) -> Result<symbrowse_engine::files::UploadRequest, DaemonError> {
+    let files = args
+        .get("files")
+        .and_then(Value::as_array)
+        .ok_or_else(|| malformed("upload requires files"))?
+        .iter()
+        .map(|file| {
+            file.as_str()
+                .map(str::to_owned)
+                .ok_or_else(|| malformed("upload files must contain strings"))
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(symbrowse_engine::files::UploadRequest {
+        selector: required_string(args, "selector")?.to_owned(),
+        files,
+        // This boundary is daemon-owned: untrusted frames may never widen the
+        // configured roots by providing their own `allowed_dirs` value.
+        allowed_dirs: configured_dirs.to_vec(),
+    })
+}
+
+pub(crate) fn storage_list_script(kind: &str) -> String {
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    format!(
+        "(function(){{ const s = window.{store}; const out = {{}}; for (let i = 0; i < s.length; i++) {{ const k = s.key(i); out[k] = s.getItem(k); }} return {{origin: location.origin, items: out}}; }})()"
+    )
+}
+
+pub(crate) fn storage_list_response(kind: &str, captured: Value) -> Result<Value, DaemonError> {
+    let origin = match captured.get("origin") {
+        None | Some(Value::Null) => "",
+        Some(Value::String(origin)) => origin.as_str(),
+        Some(_) => return Err(runtime_error("storage origin is not a string")),
+    };
+    let items = match captured.get("items") {
+        None | Some(Value::Null) => serde_json::Map::new(),
+        Some(Value::Object(items)) => {
+            let mut items = items.clone();
+            let mut null_keys = Vec::new();
+            for (key, value) in &items {
+                match value {
+                    Value::Null => null_keys.push(key.clone()),
+                    Value::String(_) => {}
+                    _ => {
+                        return Err(runtime_error(format!(
+                            "storage item {key:?} is not a string"
+                        )));
+                    }
+                }
+            }
+            for key in null_keys {
+                items.insert(key, Value::String(String::new()));
+            }
+            items
+        }
+        Some(_) => return Err(runtime_error("storage items are not an object")),
+    };
+    Ok(json!({"origin":origin,"kind":kind,"items":items}))
+}
+
+fn cookie_list_payload(origin: &str, captured: Value) -> Result<Value, DaemonError> {
+    let empty = Vec::new();
+    let cookies = match captured.get("cookies") {
+        None | Some(Value::Null) if captured.is_null() || captured.as_object().is_some() => &empty,
+        Some(Value::Array(cookies)) => cookies,
+        _ => return Err(runtime_error("cookie response has no cookies array")),
+    };
+    let mut output = Vec::with_capacity(cookies.len());
+    for cookie in cookies {
+        let cookie = cookie
+            .as_object()
+            .ok_or_else(|| runtime_error("cookie response contains a non-object cookie"))?;
+        let string = |key: &str| cookie.get(key).and_then(Value::as_str).unwrap_or_default();
+        let number = cookie.get("expires").and_then(Value::as_f64).unwrap_or(0.0);
+        let size = cookie.get("size").and_then(Value::as_i64).unwrap_or(0);
+        let same_site = string("sameSite");
+        let mut value = json!({
+            "name": string("name"),
+            "value": string("value"),
+            "domain": string("domain"),
+            "path": string("path"),
+            "expires": number,
+            "size": size,
+            "http_only": cookie.get("httpOnly").and_then(Value::as_bool).unwrap_or(false),
+            "secure": cookie.get("secure").and_then(Value::as_bool).unwrap_or(false),
+            "session": cookie.get("session").and_then(Value::as_bool).unwrap_or(false),
+        });
+        if !same_site.is_empty() {
+            value["same_site"] = Value::String(same_site.to_owned());
+        }
+        output.push(value);
+    }
+    Ok(json!({"origin": origin, "cookies": output}))
+}
+
+fn cookie_set_params(cookie: &Value, url: &str) -> Result<Value, DaemonError> {
+    let cookie = cookie
+        .as_object()
+        .ok_or_else(|| malformed("cookies.set requires cookie object"))?;
+    let name = required_string(cookie, "name")?;
+    let value = cookie.get("value").and_then(Value::as_str).unwrap_or("");
+    let mut params = json!({"name":name,"value":value});
+    if !url.is_empty() {
+        if !(url.starts_with("http://") || url.starts_with("https://")) {
+            return Err(malformed("cookies.set URL must use HTTP or HTTPS"));
+        }
+        params["url"] = Value::String(url.to_owned());
+    }
+    for (source, target) in [("domain", "domain"), ("path", "path")] {
+        if let Some(value) = cookie
+            .get(source)
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty())
+        {
+            params[target] = Value::String(value.to_owned());
+        }
+    }
+    if params.get("url").is_none() && params.get("domain").is_none() {
+        return Err(malformed(
+            "cookies.set requires an HTTP(S) URL or cookie domain",
+        ));
+    }
+    params["secure"] = Value::Bool(
+        cookie
+            .get("secure")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+    );
+    params["httpOnly"] = Value::Bool(
+        cookie
+            .get("http_only")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+    );
+    if let Some(same_site) = cookie
+        .get("same_site")
+        .and_then(Value::as_str)
+        .filter(|value| !value.is_empty())
+    {
+        params["sameSite"] = Value::String(same_site.to_owned());
+    }
+    if let Some(expires) = cookie
+        .get("expires")
+        .and_then(Value::as_f64)
+        .filter(|expires| *expires > 0.0)
+    {
+        params["expires"] = json!(expires);
+    }
+    Ok(params)
+}
+
+pub(crate) fn storage_set_request(
+    args: &serde_json::Map<String, Value>,
+) -> Result<(String, String, String), DaemonError> {
+    let kind = storage_kind(args)?.to_owned();
+    let key = storage_string_arg(args, "key")?.to_owned();
+    let value = storage_string_arg(args, "value")?;
+    if key.trim().is_empty() {
+        return Err(runtime_error("storage key is required"));
+    }
+    let expression = storage_set_script(&kind, &key, value)?;
+    Ok((kind, key, expression))
+}
+
+fn storage_string_arg<'a>(
+    args: &'a serde_json::Map<String, Value>,
+    name: &str,
+) -> Result<&'a str, DaemonError> {
+    match args.get(name) {
+        None | Some(Value::Null) => Ok(""),
+        Some(Value::String(value)) => Ok(value),
+        Some(_) => Err(malformed(format!("{name} must be a string"))),
+    }
+}
+
+fn storage_set_script(kind: &str, key: &str, value: &str) -> Result<String, DaemonError> {
+    let key = serde_json::to_string(key).map_err(runtime_error)?;
+    let value = serde_json::to_string(value).map_err(runtime_error)?;
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    Ok(format!(
+        "(function(){{ const s = window.{store}; s.setItem({key}, {value}); return true; }})()"
+    ))
+}
+
+pub(crate) fn storage_clear_request(
+    args: &serde_json::Map<String, Value>,
+) -> Result<(String, String), DaemonError> {
+    let kind = storage_kind(args)?.to_owned();
+    let store = if kind == "session" {
+        "sessionStorage"
+    } else {
+        "localStorage"
+    };
+    Ok((
+        kind,
+        format!("(function(){{ window.{store}.clear(); return true; }})()"),
+    ))
+}
+
 fn captured_origin_state(value: &Value) -> Result<(String, OriginState), String> {
     let origin = value
         .get("origin")
@@ -1797,6 +2953,22 @@ fn object_args(frame: &Frame) -> Result<&serde_json::Map<String, Value>, DaemonE
         .ok_or_else(|| malformed(format!("{} requires an object args payload", frame.cmd)))
 }
 
+fn go_oob_prompt(prompt: &symbrowse_core::oob::Prompt) -> Value {
+    let mut data = json!({
+        "id": prompt.id,
+        "kind": prompt.kind,
+        "title": prompt.title,
+        "reason": prompt.reason,
+        "status": prompt.status,
+        "created_at": prompt.created_at,
+        "timeout": prompt.timeout_ms.saturating_mul(1_000_000),
+    });
+    if let Some(result) = &prompt.result {
+        data["result"] = result.clone();
+    }
+    data
+}
+
 fn required_string<'a>(
     args: &'a serde_json::Map<String, Value>,
     name: &str,
@@ -1842,12 +3014,80 @@ fn malformed(message: impl Into<String>) -> DaemonError {
     }
 }
 
+fn empty_runtime_events_payload(command: &str) -> Value {
+    match command {
+        "console.list" | "errors.list" => json!({"entries": [], "count": 0}),
+        _ => json!({"cleared": true}),
+    }
+}
+
+fn go_runtime_entries(entries: Value) -> Value {
+    if entries.as_array().is_some_and(Vec::is_empty) {
+        Value::Null
+    } else {
+        entries
+    }
+}
+
 fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     DaemonError {
         code: codes::OPERATION_FAILED.into(),
         message: redact_str(&error.to_string()),
         ..Default::default()
     }
+}
+
+fn network_request_value(request: &CapturedRequest) -> Value {
+    let started_at = time::OffsetDateTime::from_unix_timestamp(request.started_at_unix_seconds)
+        .ok()
+        .and_then(|value| {
+            value
+                .format(&time::format_description::well_known::Rfc3339)
+                .ok()
+        })
+        .unwrap_or_default();
+    let mut value = json!({
+        "id": request.id,
+        "url": request.url,
+        "method": request.method,
+        "type": request.request_type,
+        "status": request.status,
+        "started_at": started_at,
+        "finished": request.finished,
+    });
+    let object = value.as_object_mut().expect("network request is an object");
+    if !request.status_text.is_empty() {
+        object.insert("status_text".into(), json!(request.status_text));
+    }
+    if !request.mime_type.is_empty() {
+        object.insert("mime_type".into(), json!(request.mime_type));
+    }
+    if !request.failed.is_empty() {
+        object.insert("failed".into(), json!(request.failed));
+    }
+    if !request.request_headers.is_empty() {
+        object.insert("request_headers".into(), json!(request.request_headers));
+    }
+    if !request.response_headers.is_empty() {
+        object.insert("response_headers".into(), json!(request.response_headers));
+    }
+    if request.encoded_body_size != 0 {
+        object.insert("encoded_body_size".into(), json!(request.encoded_body_size));
+    }
+    value
+}
+
+fn chrome_click_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {
+    if let Some(obstructed) = error.downcast_ref::<symbrowse_engine_chrome::ClickObstructedError>()
+    {
+        return DaemonError {
+            code: "click_obstructed".into(),
+            message: redact_str(&obstructed.message),
+            hint: redact_str(&obstructed.hint),
+            ..Default::default()
+        };
+    }
+    runtime_error(error)
 }
 
 fn fetch_error(error: symbrowse_fetch::FetchError) -> DaemonError {
@@ -1872,19 +3112,387 @@ mod tests {
     use std::{
         io::{Read, Write},
         net::TcpListener,
+        path::PathBuf,
         thread,
     };
 
+    #[test]
+    fn static_mode_uses_caller_driven_runtime_and_browser_keeps_workers() {
+        let static_runtime = build_runtime_for_mode("static").expect("static runtime");
+        assert_eq!(
+            static_runtime.handle().runtime_flavor(),
+            tokio::runtime::RuntimeFlavor::CurrentThread
+        );
+        assert_eq!(
+            static_runtime.block_on(async {
+                tokio::time::sleep(std::time::Duration::from_millis(1)).await;
+                7
+            }),
+            7
+        );
+
+        let browser_runtime = build_runtime_for_mode("browser").expect("browser runtime");
+        assert_eq!(
+            browser_runtime.handle().runtime_flavor(),
+            tokio::runtime::RuntimeFlavor::MultiThread
+        );
+    }
+
+    #[test]
+    fn window_new_uses_only_the_internal_blank_target() {
+        let args = json!({"url":"https://untrusted.example/path"});
+        let args = args.as_object().expect("object args");
+        assert_eq!(
+            DispatchRuntime::tab_navigation_url("window.new", args),
+            "about:blank"
+        );
+        assert_eq!(
+            DispatchRuntime::tab_navigation_url("tab.new", args),
+            "https://untrusted.example/path"
+        );
+    }
+
+    #[test]
+    fn browser_navigation_admission_runs_before_engine_access() {
+        let mut spec = temp_spec("navigation-admission");
+        spec.engine = "firefox".into();
+        spec.mode = "browser".into();
+        spec.allowed_domains = vec!["allowed.example".into()];
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+
+        for (command, url, expected) in [
+            (
+                "open",
+                "relative-probe",
+                "navigation URL policy: unsupported target \"relative-probe\" (http/https URL required)",
+            ),
+            (
+                "goto",
+                "data:text/html,unsafe",
+                "navigation URL policy: unsupported target \"data:text/html,unsafe\" (http/https URL required)",
+            ),
+            (
+                "tab.new",
+                "about:blank",
+                "navigation URL policy: unsupported target \"about:blank\" (http/https URL required)",
+            ),
+            (
+                "read",
+                "relative-probe",
+                "navigation URL policy: unsupported target \"relative-probe\" (http/https URL required)",
+            ),
+            (
+                "open",
+                "https://blocked.example/path",
+                "navigation URL policy: target \"https://blocked.example/path\" is blocked by the domain allowlist",
+            ),
+        ] {
+            let frame = Frame {
+                cmd: command.into(),
+                args: Some(json!({"url":url})),
+                session: "navigation-admission".into(),
+                ..Frame::default()
+            };
+            let error = runtime
+                .runtime
+                .block_on(runtime.browser_command(&frame))
+                .expect_err("navigation must be denied before engine startup");
+            assert_eq!(error.code, codes::OPERATION_FAILED, "{command} {url}");
+            assert_eq!(error.message, expected, "{command} {url}");
+            assert!(
+                runtime.browser.lock().expect("browser lock").is_none(),
+                "denied {command} {url} touched the browser"
+            );
+        }
+
+        let mut spec = temp_spec("navigation-ssrf-admission");
+        spec.engine = "chrome".into();
+        spec.mode = "browser".into();
+        spec.ssrf_enabled = true;
+        spec.allow_private = false;
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+        let frame = Frame {
+            cmd: "open".into(),
+            args: Some(json!({"url":"http://127.0.0.1:8080/private"})),
+            session: "navigation-ssrf-admission".into(),
+            ..Frame::default()
+        };
+        let error = runtime
+            .runtime
+            .block_on(runtime.browser_command(&frame))
+            .expect_err("private navigation must be denied before engine startup");
+        assert_eq!(error.code, codes::OPERATION_FAILED);
+        assert!(error.message.contains("blocked by the SSRF guard"));
+        assert!(runtime.browser.lock().expect("browser lock").is_none());
+    }
+
+    #[test]
+    fn auth_login_guards_url_before_vault_access_or_browser_start() {
+        let mut spec = temp_spec("auth-navigation-admission");
+        spec.engine = "chrome".into();
+        spec.mode = "browser".into();
+        let runtime = DispatchRuntime::new_with_wayback_url(spec, "https://example.invalid")
+            .expect("runtime");
+        let frame = Frame {
+            cmd: "auth.login".into(),
+            args: Some(json!({
+                "entry":"fixture-entry",
+                "url":"file:///private/credential-fixture"
+            })),
+            session: "auth-navigation-admission".into(),
+            ..Frame::default()
+        };
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(frame, OperationContext::for_test()))
+            .expect_err("unsafe auth target must be denied");
+        assert_eq!(error.code, codes::OPERATION_FAILED);
+        assert!(error.message.contains("http/https URL required"));
+        assert!(runtime.browser.lock().expect("browser lock").is_none());
+    }
+
+    fn unique_test_root(name: &str) -> PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
+
+        static NEXT_ROOT: AtomicU64 = AtomicU64::new(0);
+        for _ in 0..100 {
+            // Unix sockets need room for their filename under long CI temp paths.
+            let root = std::env::temp_dir().join(format!(
+                "b-{}-{}",
+                std::process::id(),
+                NEXT_ROOT.fetch_add(1, Ordering::Relaxed)
+            ));
+            match std::fs::create_dir(&root) {
+                Ok(()) => return root,
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(error) => panic!("create isolated test root {}: {error}", root.display()),
+            }
+        }
+        panic!("could not allocate isolated test root for {name}");
+    }
+
     fn temp_spec(name: &str) -> SessionSpec {
-        let root =
-            std::env::temp_dir().join(format!("symbrowse-runtime-{name}-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&root);
+        let root = unique_test_root(name);
         let mut spec = SessionSpec::for_session(name);
         spec.state_dir = root.join("state");
         spec.cache_dir = root.join("cache");
         spec.allow_private = true;
         spec.engine = "static".into();
+        spec.mode = "static".into();
         spec
+    }
+
+    #[test]
+    fn policy_explain_uses_session_policy_and_returns_go_response_shape() {
+        let spec = temp_spec("policy-explain");
+        let expected_source = spec.state_dir.join("policy.toml").display().to_string();
+        let response = super::dispatch_once(
+            spec,
+            Frame {
+                cmd: "policy.explain".into(),
+                args: Some(json!({
+                    "command":"snapshot", "url":"https://example.invalid/path", "mode":"mcp"
+                })),
+                session: "policy-explain".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(
+            response.success,
+            "policy explain failed: {:?}",
+            response.error
+        );
+        let data = response.data.expect("policy response data");
+        assert_eq!(data["source"], expected_source);
+        assert_eq!(
+            data["guard_active"].as_bool(),
+            Some(data["decider"] == "guard")
+        );
+        let explanation = data["explanation"].as_str().expect("explanation text");
+        for expected in [
+            "command:  snapshot",
+            "url:      https://example.invalid/path",
+            "host:     example.invalid",
+            "mode:     mcp",
+            "decider:   ",
+            "guard:     ",
+            "reason:    ",
+        ] {
+            assert!(
+                explanation.contains(expected),
+                "missing {expected:?}: {explanation}"
+            );
+        }
+    }
+
+    #[test]
+    fn policy_explain_rejects_unclassified_commands() {
+        let response = super::dispatch_once(
+            temp_spec("policy-explain-invalid"),
+            Frame {
+                cmd: "policy.explain".into(),
+                args: Some(json!({"command":"not-a-real-command"})),
+                session: "policy-explain-invalid".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(!response.success);
+        assert!(
+            response
+                .error
+                .expect("policy error")
+                .message
+                .contains("risk classification")
+        );
+    }
+
+    #[test]
+    fn journal_tail_reads_the_requested_session_and_limit() {
+        let spec = temp_spec("journal-read");
+        let directory = spec.state_dir.join("journal");
+        let store = JournalStore::new(&directory, "other", JournalRedactor::standard(), "")
+            .expect("journal fixture store");
+        for command in ["open", "click", "snapshot"] {
+            store
+                .append(symbrowse_core::journal::Entry {
+                    session: "other".into(),
+                    command: command.into(),
+                    risk_class: "read".into(),
+                    decider: "policy".into(),
+                    result: "ok".into(),
+                    ..Default::default()
+                })
+                .expect("append fixture entry");
+        }
+        let response = super::dispatch_once(
+            spec,
+            Frame {
+                cmd: "journal.tail".into(),
+                args: Some(json!({"session":"other", "lines":2})),
+                session: "default".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(
+            response.success,
+            "journal tail failed: {:?}",
+            response.error
+        );
+        let data = response.data.expect("journal response data");
+        assert_eq!(data["schema_version"], JOURNAL_SCHEMA_VERSION);
+        assert_eq!(data["session"], "other");
+        let entries = data["entries"].as_array().expect("journal entries");
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0]["command"], "click");
+        assert_eq!(entries[1]["command"], "snapshot");
+    }
+
+    #[test]
+    fn journal_read_rejects_unsafe_session_names() {
+        let response = super::dispatch_once(
+            temp_spec("journal-invalid-session"),
+            Frame {
+                cmd: "journal.show".into(),
+                args: Some(json!({"session":"../outside"})),
+                session: "default".into(),
+                ..Frame::default()
+            },
+        );
+        assert!(!response.success);
+        assert!(
+            response
+                .error
+                .expect("journal error")
+                .message
+                .contains("invalid journal session")
+        );
+    }
+
+    #[test]
+    fn upload_frames_cannot_widen_server_configured_roots() {
+        let args = json!({
+            "selector": "input[type=file]",
+            "files": ["/safe/uploads/fixture.txt"],
+            "allowed_dirs": ["/attacker/controlled"]
+        });
+        let request = super::upload_request(
+            args.as_object().expect("object args"),
+            &["/safe/uploads".to_owned()],
+        )
+        .expect("well-formed upload request");
+        assert_eq!(request.selector, "input[type=file]");
+        assert_eq!(request.files, ["/safe/uploads/fixture.txt"]);
+        assert_eq!(request.allowed_dirs, ["/safe/uploads"]);
+    }
+
+    #[test]
+    fn missing_selected_chrome_is_typed_unavailable_without_fallback() {
+        let mut spec = temp_spec("missing-chrome");
+        spec.engine = "chrome".into();
+        spec.mode = "browser".into();
+        spec.executable_path = spec.state_dir.join("missing-chrome-executable");
+        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "open".into(),
+                    args: Some(json!({"url":"https://example.invalid/fixture"})),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect_err("missing explicit Chrome must fail");
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+    }
+
+    #[test]
+    fn missing_selected_firefox_is_typed_unavailable_without_fallback() {
+        let mut spec = temp_spec("missing-firefox");
+        spec.engine = "firefox".into();
+        spec.mode = "browser".into();
+        spec.executable_path = spec.state_dir.join("missing-firefox-executable");
+        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let error = runtime
+            .runtime
+            .block_on(runtime.dispatch(
+                Frame {
+                    cmd: "open".into(),
+                    args: Some(json!({"url":"data:text/html,fixture"})),
+                    ..Frame::default()
+                },
+                OperationContext::for_test(),
+            ))
+            .expect_err("missing explicit Firefox must fail");
+        assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+        assert!(error.message.contains("Firefox executable not found"));
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    #[test]
+    fn selected_safari_is_typed_unavailable_on_other_platforms() {
+        for engine in ["safari-attach", "safari-bidi"] {
+            let mut spec = temp_spec(engine);
+            spec.engine = engine.into();
+            spec.mode = "browser".into();
+            let runtime = DispatchRuntime::new(spec).expect("runtime");
+            for cmd in ["capabilities", "open"] {
+                let error = runtime
+                    .runtime
+                    .block_on(runtime.dispatch(
+                        Frame {
+                            cmd: cmd.into(),
+                            args: Some(json!({"url":"https://example.com/fixture"})),
+                            ..Frame::default()
+                        },
+                        OperationContext::for_test(),
+                    ))
+                    .expect_err("Safari must not substitute another engine");
+                assert_eq!(error.code, codes::DAEMON_UNAVAILABLE);
+            }
+        }
     }
 
     #[cfg(target_os = "macos")]
@@ -1892,6 +3500,7 @@ mod tests {
     fn safari_bidi_capabilities_are_planned_without_starting_safari() {
         let mut spec = temp_spec("safari-capabilities");
         spec.engine = "safari-bidi".into();
+        spec.mode = "browser".into();
         let runtime = DispatchRuntime::new(spec).expect("runtime");
         let (data, _) = runtime
             .runtime
@@ -1908,9 +3517,11 @@ mod tests {
         assert_eq!(
             data["interfaces"],
             json!([
-                "CookieEngine",
+                "FrameManager",
                 "InspectionEngine",
-                "NavigationStateProvider"
+                "NavigationStateProvider",
+                "NetworkPolicyReporter",
+                "TabManager"
             ])
         );
         assert!(
@@ -1927,6 +3538,7 @@ mod tests {
     fn safari_bidi_interactions_are_rejected_before_initialization() {
         let mut spec = temp_spec("safari-interactions");
         spec.engine = "safari-bidi".into();
+        spec.mode = "browser".into();
         let runtime = DispatchRuntime::new(spec).expect("runtime");
         for command in ["click", "fill", "type", "press"] {
             let error = runtime
@@ -2079,11 +3691,11 @@ mod tests {
         use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
         use std::time::Duration;
 
-        let root =
-            std::env::temp_dir().join(format!("symbrowse-server-flow-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&root);
-        std::fs::create_dir_all(&root).expect("test root");
-        let mut spec = temp_spec("server-flow-cancel");
+        let root = unique_test_root("server-flow");
+        let mut spec = SessionSpec::for_session("server-flow-cancel");
+        spec.engine = "static".into();
+        spec.mode = "static".into();
+        spec.allow_private = true;
         #[cfg(unix)]
         {
             spec.socket_path = root.join("default.sock");
@@ -2216,6 +3828,8 @@ mod tests {
                 std::io::ErrorKind::ConnectionReset
                     | std::io::ErrorKind::BrokenPipe
                     | std::io::ErrorKind::UnexpectedEof
+                    | std::io::ErrorKind::NotConnected
+                    | std::io::ErrorKind::InvalidInput
             )),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }
@@ -2275,6 +3889,115 @@ mod tests {
     }
 
     #[test]
+    fn oob_status_and_completion_share_the_daemon_prompt_manager() {
+        let runtime = DispatchRuntime::new(temp_spec("oob-status")).expect("runtime");
+        let prompt = runtime.oob.create(
+            symbrowse_core::oob::Kind::Handoff,
+            "Handoff",
+            "2FA",
+            std::time::Duration::from_secs(1),
+            "fixed",
+        );
+        let send = |cmd: &str, args: Option<Value>| {
+            runtime
+                .runtime
+                .block_on(runtime.dispatch(
+                    Frame {
+                        cmd: cmd.into(),
+                        args,
+                        ..Frame::default()
+                    },
+                    OperationContext::for_test(),
+                ))
+                .expect("OOB request")
+                .0
+                .expect("OOB data")
+        };
+        assert_eq!(send("oob.status", None)["prompt"]["id"], prompt.id);
+        assert_eq!(
+            send("oob.status", None)["prompt"]["timeout"],
+            1_000_000_000_u64
+        );
+        assert_eq!(
+            send("oob.complete", Some(json!({"id": prompt.id})))["status"],
+            "completed"
+        );
+        assert_eq!(send("oob.status", None), json!({"active": false}));
+    }
+
+    #[test]
+    fn handoff_waits_for_explicit_completion_and_times_out_closed() {
+        let runtime = DispatchRuntime::new(temp_spec("handoff")).expect("runtime");
+        let responder = Arc::clone(&runtime);
+        let thread = thread::spawn(move || {
+            for _ in 0..100 {
+                if let Some(prompt) = responder.oob.active() {
+                    responder
+                        .handle(
+                            Frame {
+                                cmd: "oob.complete".into(),
+                                args: Some(json!({"id": prompt.id})),
+                                ..Frame::default()
+                            },
+                            OperationContext::for_test(),
+                        )
+                        .expect("complete prompt through daemon");
+                    return;
+                }
+                thread::sleep(std::time::Duration::from_millis(1));
+            }
+            panic!("handoff prompt did not appear");
+        });
+        let frame = |timeout: &str| Frame {
+            cmd: "handoff".into(),
+            args: Some(json!({"reason":"2FA", "timeout":timeout})),
+            ..Frame::default()
+        };
+        let (data, _) = runtime
+            .handle(frame("1s"), OperationContext::for_test())
+            .expect("completed handoff");
+        thread.join().expect("responder");
+        assert_eq!(data.expect("data")["status"], "completed");
+        let error = runtime
+            .handle(frame("1ms"), OperationContext::for_test())
+            .expect_err("handoff timeout must deny");
+        assert_eq!(error.code, codes::HANDOFF_TIMEOUT);
+        assert_eq!(error.retryable, Some(false));
+        assert_eq!(error.requires_user_confirmation, Some(true));
+    }
+
+    #[test]
+    fn runtime_event_commands_without_an_active_browser_match_go_empty_shape() {
+        let runtime = DispatchRuntime::new(temp_spec("empty-runtime-events")).expect("runtime");
+        for (command, expected) in [
+            ("console.list", json!({"entries": [], "count": 0})),
+            ("errors.list", json!({"entries": [], "count": 0})),
+            ("console.clear", json!({"cleared": true})),
+            ("errors.clear", json!({"cleared": true})),
+        ] {
+            let (data, _) = runtime
+                .runtime
+                .block_on(runtime.dispatch(
+                    Frame {
+                        cmd: command.into(),
+                        ..Frame::default()
+                    },
+                    OperationContext::for_test(),
+                ))
+                .unwrap_or_else(|error| panic!("{command} failed: {error}"));
+            assert_eq!(data.expect("runtime event data"), expected, "{command}");
+        }
+    }
+
+    #[test]
+    fn active_runtime_event_lists_encode_empty_go_slices_as_null() {
+        assert_eq!(go_runtime_entries(json!([])), Value::Null);
+        let populated = json!([{"type":"warning","text":"message"}]);
+        assert_eq!(go_runtime_entries(populated.clone()), populated);
+        assert_eq!(go_runtime_entries(Value::Null), Value::Null);
+    }
+
+    #[test]
     fn state_capture_preserves_storage_and_bidi_cookie_fields() {
         let value = json!({
             "origin": "https://example.test:8443/app",
@@ -2301,5 +4024,142 @@ mod tests {
         assert!(state.cookies[0].secure);
         assert!(state.cookies[0].http_only);
         assert!(!state.cookies[0].session);
+    }
+
+    #[test]
+    fn storage_list_uses_go_kinds_and_returns_origin_scoped_string_items() {
+        let args = json!({"kind": "session"}).as_object().unwrap().clone();
+        assert_eq!(storage_kind(&args).unwrap(), "session");
+        let script = storage_list_script("session");
+        assert!(script.contains("window.sessionStorage"));
+        assert!(script.contains("location.origin"));
+        assert!(!script.contains("window.localStorage"));
+
+        let data = storage_list_response(
+            "session",
+            json!({"origin":"https://example.test","items":{"step":"2","token":"redacted"}}),
+        )
+        .unwrap();
+        assert_eq!(data["origin"], "https://example.test");
+        assert_eq!(data["kind"], "session");
+        assert_eq!(data["items"]["step"], "2");
+        assert_eq!(data["items"]["token"], "redacted");
+    }
+
+    #[test]
+    fn storage_list_defaults_missing_items_and_rejects_invalid_values() {
+        let data =
+            storage_list_response("local", json!({"origin":"https://example.test"})).unwrap();
+        assert_eq!(data["items"], json!({}));
+        let null_value = storage_list_response("local", json!({"items":{"key":null}})).unwrap();
+        assert_eq!(null_value["items"]["key"], "");
+        let invalid = json!({"kind":"Local"}).as_object().unwrap().clone();
+        assert_eq!(
+            storage_kind(&invalid).unwrap_err().code,
+            codes::OPERATION_FAILED
+        );
+        assert_eq!(
+            storage_list_response("local", json!({"items":{"key":1}}))
+                .unwrap_err()
+                .code,
+            codes::OPERATION_FAILED
+        );
+    }
+
+    #[test]
+    fn cookie_list_projects_only_go_metadata_and_keeps_origin_scope() {
+        let result = cookie_list_payload(
+            "https://example.test",
+            json!({"cookies":[{
+                "name":"sid", "value":"fixture-secret", "domain":"example.test",
+                "path":"/", "expires":-1.0, "size":20, "httpOnly":true,
+                "secure":true, "session":true, "sameSite":"Lax",
+                "priority":"High", "sourcePort":443, "partitionKey":{"topLevelSite":"https://elsewhere.test"}
+            }]}),
+        ).unwrap();
+        assert_eq!(result["origin"], "https://example.test");
+        assert_eq!(
+            result["cookies"][0],
+            json!({
+                "name":"sid", "value":"fixture-secret", "domain":"example.test",
+                "path":"/", "expires":-1.0, "size":20, "http_only":true,
+                "secure":true, "session":true, "same_site":"Lax"
+            })
+        );
+        assert!(result.to_string().contains("fixture-secret"));
+        assert!(!result.to_string().contains("sourcePort"));
+        assert!(!result.to_string().contains("partitionKey"));
+        assert_eq!(
+            cookie_list_payload("https://example.test", Value::Null).unwrap()["cookies"],
+            json!([])
+        );
+        assert_eq!(
+            cookie_list_payload("https://example.test", json!({})).unwrap()["cookies"],
+            json!([])
+        );
+    }
+
+    #[test]
+    fn cookie_set_maps_go_fields_to_scoped_chrome_params() {
+        let cookie = json!({
+            "name":"sid", "value":"fixture-value", "domain":"",
+            "path":"/account", "expires":2000000000, "secure":true,
+            "http_only":true, "same_site":"Strict", "session":false
+        });
+        assert_eq!(
+            cookie_set_params(&cookie, "https://example.test/account").unwrap(),
+            json!({
+                "name":"sid", "value":"fixture-value", "url":"https://example.test/account",
+                "path":"/account", "expires":2000000000.0, "secure":true,
+                "httpOnly":true, "sameSite":"Strict"
+            })
+        );
+        assert_eq!(
+            cookie_set_params(
+                &json!({"name":"sid","value":"x","domain":"example.test"}),
+                ""
+            )
+            .unwrap()["domain"],
+            "example.test"
+        );
+        assert_eq!(
+            cookie_set_params(&cookie, "file:///tmp/file")
+                .unwrap_err()
+                .code,
+            codes::MALFORMED_REQUEST
+        );
+    }
+
+    #[test]
+    fn storage_mutations_match_go_single_item_and_clear_payloads() {
+        let set_args = json!({
+            "kind":"session",
+            "key":"quote\" and newline\n",
+            "value":"\"payload\"\n"
+        })
+        .as_object()
+        .unwrap()
+        .clone();
+        let (kind, key, script) = storage_set_request(&set_args).unwrap();
+        assert_eq!(kind, "session");
+        assert_eq!(key, "quote\" and newline\n");
+        assert!(script.contains("window.sessionStorage"));
+        let encoded_key = serde_json::to_string(&key).unwrap();
+        let encoded_value = serde_json::to_string("\"payload\"\n").unwrap();
+        assert!(script.contains(&format!("setItem({encoded_key}, {encoded_value})")));
+
+        let clear_args = json!({"kind":"local"}).as_object().unwrap().clone();
+        let (kind, script) = storage_clear_request(&clear_args).unwrap();
+        assert_eq!(kind, "local");
+        assert!(script.contains("window.localStorage.clear()"));
+
+        let bad_args = json!({"kind":"local","key":" \t","value":"x"})
+            .as_object()
+            .unwrap()
+            .clone();
+        assert_eq!(
+            storage_set_request(&bad_args).unwrap_err().message,
+            "storage key is required"
+        );
     }
 }
