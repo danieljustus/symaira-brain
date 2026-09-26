@@ -12,7 +12,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use serde_json::{Value, json};
+use serde_json::json;
 use symbrowse_daemon::{Client, ClientOptions, Frame, Server, ServerOptions, SessionSpec};
 
 fn enabled() -> bool {
