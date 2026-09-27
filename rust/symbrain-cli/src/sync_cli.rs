@@ -79,6 +79,23 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
         } else if arg == "-dry-run" || arg == "--dry-run" {
             dry_run = true;
             i += 1;
+        } else if let Some(value) = arg
+            .strip_prefix("-dry-run=")
+            .or_else(|| arg.strip_prefix("--dry-run="))
+        {
+            dry_run = match value {
+                "1" | "t" | "T" | "TRUE" | "true" | "True" => true,
+                "0" | "f" | "F" | "FALSE" | "false" | "False" => false,
+                _ => {
+                    let _ = writeln!(
+                        stderr,
+                        "invalid boolean value {value:?} for -dry-run: parse error"
+                    );
+                    let _ = write!(stderr, "{SYNC_FLAGS_USAGE}");
+                    return Err(exit::USAGE);
+                }
+            };
+            i += 1;
         } else if arg == "-project" || arg == "--project" {
             if i + 1 >= args.len() {
                 let _ = writeln!(stderr, "symbrain sync: flag needs an argument: {arg}");

@@ -2626,6 +2626,9 @@ CASES = (
     Case("sync_flag_terminator", ("sync", "--dry-run", "--", "agents")),
     Case("sync_flag_after_positional", ("sync", "agents", "--dry-run")),
     Case("sync_flag_after_terminator", ("sync", "--", "--dry-run")),
+    Case("sync_bool_true", ("sync", "--dry-run=TRUE", "agents")),
+    Case("sync_bool_false", ("sync", "--dry-run=false", "agents")),
+    Case("sync_bool_invalid", ("sync", "--dry-run=bogus")),
     Case(
         "sync_dry_run_with_library",
         ("sync", "--dry-run", "opencode"),
