@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::env;
 use std::fs;
 use std::path::Path;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use symbrain_core::xdg;
 use symbrain_policy::{self as policy, ServerConfig};
@@ -48,12 +48,12 @@ pub(super) fn check_handshakes(vault_agent: &str) -> Vec<ProfileHandshake> {
     result
 }
 
-pub(super) fn discover_vault() -> Result<String, String> {
+fn discover_vault() -> Result<String, String> {
     let override_path = config_binary_override();
     symbrain_broker::discover("symvault", &override_path).map_err(|error| error.to_string())
 }
 
-pub(super) fn config_binary_override() -> String {
+fn config_binary_override() -> String {
     let path = xdg::config_path();
     let Ok(bytes) = fs::read_to_string(path) else {
         return String::new();
@@ -87,16 +87,22 @@ fn probe_handshake(
         unknown: 0,
         error: String::new(),
     };
+    let args = if vault_agent.is_empty() {
+        vec!["serve".to_string()]
+    } else {
+        vec![
+            "serve".to_string(),
+            "--stdio".to_string(),
+            "--agent".to_string(),
+            vault_agent.to_string(),
+            "--allow-locked".to_string(),
+        ]
+    };
+    let deadline = Instant::now() + HANDSHAKE_TIMEOUT;
     let client = match Client::spawn(
         path,
         Options {
-            args: vec![
-                "serve".to_string(),
-                "--stdio".to_string(),
-                "--agent".to_string(),
-                vault_agent.to_string(),
-                "--allow-locked".to_string(),
-            ],
+            args,
             env: None,
             capture_stderr: true,
         },
@@ -107,7 +113,12 @@ fn probe_handshake(
             return result;
         }
     };
-    let init = match client.initialize(HANDSHAKE_TIMEOUT) {
+    let remaining = || {
+        deadline
+            .saturating_duration_since(Instant::now())
+            .max(Duration::from_nanos(1))
+    };
+    let init = match client.initialize(remaining()) {
         Ok(init) => init,
         Err(error) => {
             result.error = format!("initialize: {error}");
@@ -115,7 +126,7 @@ fn probe_handshake(
         }
     };
     result.protocol_version = init.protocol_version;
-    let tools = match client.list_tools(HANDSHAKE_TIMEOUT) {
+    let tools = match client.list_tools(remaining()) {
         Ok(tools) => tools,
         Err(error) => {
             result.error = format!("tools/list: {error}");

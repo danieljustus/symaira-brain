@@ -21,7 +21,7 @@ mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
-/// Whether this invocation requires the Go implementation's lifecycle or handshake semantics.
+/// Whether this invocation requires Go lifecycle or unreadable-profile handling.
 ///
 /// The Rust doctor implementation intentionally does not manage source-build
 /// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
@@ -51,29 +51,24 @@ pub(crate) fn requires_go_fallback_with(
         return true;
     }
 
-    // A vault-agent only affects enabled vault handshakes. Unreadable profile
-    // state stays on Go.
+    // Unreadable profile state stays on Go; valid Vault profiles are probed natively.
     vault_agent_with_profiles_requires_go(args, profiles_require_go)
 }
 
-/// Reports whether any profile can start a vault handshake through an available binary.
+/// Reports whether profile state cannot be inspected reliably.
 ///
 /// Unreadable profiles fail closed onto the Go fallback.
 fn xdg_profiles_require_go() -> bool {
     match symbrain_policy::list_names() {
-        Ok(names) => names.into_iter().any(|name| {
-            symbrain_policy::load(&name).map_or(true, |profile| {
-                profile.server(symbrain_policy::SERVER_VAULT).enabled
-                    && (!doctor_links::config_binary_override().is_empty()
-                        || doctor_links::discover_vault().is_ok())
-            })
-        }),
+        Ok(names) => names
+            .into_iter()
+            .any(|name| symbrain_policy::load(&name).is_err()),
         Err(_) => true,
     }
 }
 
 /// Walks the `doctor` flag prefix the way Go's `flag.FlagSet` does and reports
-/// whether a surviving `-vault-agent` still needs the shipped handshake.
+/// whether a surviving `-vault-agent` still needs Go profile handling.
 ///
 /// Go stops parsing at `-h`/`-help`, at an undefined flag and at a missing flag
 /// value, and all three print usage and exit 2 before any handshake happens. A

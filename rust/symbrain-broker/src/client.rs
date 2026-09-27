@@ -33,13 +33,18 @@ impl fmt::Display for BrokerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Closed { op, detail } => {
-                if detail.is_empty() {
-                    write!(f, "broker: {op}: child closed")
+                if detail.is_empty() || detail == "EOF" || detail == "child closed" {
+                    write!(f, "mcp broker: {op} failed: child connection closed")
                 } else {
-                    write!(f, "broker: {op}: child closed: {detail}")
+                    write!(
+                        f,
+                        "mcp broker: {op} failed: child connection closed: {detail}"
+                    )
                 }
             }
-            Self::Timeout { op } => write!(f, "broker: {op}: timeout"),
+            Self::Timeout { op } => {
+                write!(f, "mcp broker: {op} timed out waiting for child response")
+            }
             Self::Cancelled { op } => write!(f, "broker: {op} canceled: context canceled"),
             Self::Rpc { code, message } => write!(f, "broker: rpc error {code}: {message}"),
             Self::ProtocolMismatch { expected, actual } => {
@@ -463,7 +468,15 @@ impl Client {
         if recv_result.is_err() {
             self.inner.pending.lock().expect("pending lock").remove(&id);
         }
-        let response = recv_result.and_then(|result| result)?;
+        let response = recv_result
+            .and_then(|result| result)
+            .map_err(|error| match error {
+                BrokerError::Closed { detail, .. } => BrokerError::Closed {
+                    op: method.to_string(),
+                    detail,
+                },
+                other => other,
+            })?;
         if let Some(error) = response.get("error") {
             let code = error
                 .get("code")

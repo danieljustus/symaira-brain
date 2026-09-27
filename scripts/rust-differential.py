@@ -360,6 +360,50 @@ def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
             exit_code=1,
         )
     env["PATH"] = str(binary_dir)
+def setup_doctor_failing_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_failed_version(root, env)
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+def setup_doctor_successful_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    binary_dir = root / "doctor-path"
+    binary_dir.mkdir()
+    binary = binary_dir / "symvault"
+    _write_text(binary, '''#!/usr/bin/python3
+import json
+import os
+import sys
+import time
+if sys.argv[1] == "version":
+    print(json.dumps({"version": "0.22.1"}))
+    sys.exit(0)
+if sys.argv[1:] != json.loads(os.environ["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"]):
+    print("wrong vault arguments", file=sys.stderr)
+    sys.exit(2)
+for line in sys.stdin:
+    request = json.loads(line)
+    method = request.get("method")
+    if method == "initialize":
+        result = {"protocolVersion": "2024-11-05", "capabilities": {}, "serverInfo": {"name": "fixture", "version": "1"}}
+    elif method == "tools/list":
+        result = {"tools": []}
+    else:
+        continue
+    time.sleep(float(os.environ.get("SYMBRAIN_TEST_VAULT_DELAY", "0")))
+    print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": result}), flush=True)
+''')
+    binary.chmod(0o755)
+    env["PATH"] = str(binary_dir)
+    env["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"] = json.dumps(["serve", "--stdio", "--agent", "other", "--allow-locked"])
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+def setup_doctor_empty_vault_agent(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_successful_vault_handshake(root, env)
+    env["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"] = json.dumps(["serve"])
+def setup_doctor_slow_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_successful_vault_handshake(root, env)
+    env["SYMBRAIN_TEST_VAULT_DELAY"] = "3"
 def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
     audit_dir = Path(env["XDG_DATA_HOME"]) / "symbrain" / "audit"
     audit_dir.mkdir(parents=True, exist_ok=True)
@@ -1752,6 +1796,10 @@ CASES = (
     Case("doctor_disabled_force_release", ("doctor", "--force-release=false", "--json"), setup=setup_doctor_empty),
     Case("doctor_disabled_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_disabled_vault),
     Case("doctor_missing_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_missing_vault),
+    Case("doctor_failing_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_failing_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_successful_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_successful_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
+    Case("doctor_empty_vault_agent", ("doctor", "--vault-agent=", "--json"), setup=setup_doctor_empty_vault_agent, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
+    Case("doctor_slow_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_slow_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),
