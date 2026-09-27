@@ -374,7 +374,7 @@ jobs:
           mkdir -p "$(dirname "$cli_go_binary")"
           ./scripts/run-go-oracle.sh HEAD build -ldflags "-X main.version=dev" -o "$cli_go_binary" ./cmd/symbrain
           go_toolchain="$(awk '$1 == "go" { print "go" $2; exit }' go.mod)"
-          GOTOOLCHAIN="$go_toolchain" CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$cli_go_binary" -output "$cli_fixture"
+          ./scripts/run-go-oracle.sh HEAD run ./scripts/cli-oracle -go-binary "$cli_go_binary" -output "$cli_fixture"
           GOTOOLCHAIN="$go_toolchain" CGO_ENABLED=0 go run ./scripts/activity-cli-oracle -go-binary "$cli_go_binary" -output "$activity_cli_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"
           ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-oracle -output "$skills_fixture"

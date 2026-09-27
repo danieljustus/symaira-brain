@@ -93,6 +93,20 @@ fn doctor_json_reports_static_config_and_registered_harness_natively() {
 }
 
 #[test]
+fn doctor_json_true_uses_json_output() {
+    let root = TempDir::new().unwrap();
+    let output = command(&root, &["doctor", "--json=true"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(report.get("config").is_some());
+}
+
+#[test]
 fn doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary() {
     let root = TempDir::new().unwrap();
     let output = command(&root, &["doctor", "--vault-agent", "agent"])

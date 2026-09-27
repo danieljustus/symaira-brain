@@ -44,6 +44,11 @@ pub fn run(
         return doctor_fix::run_fix(stdout, stderr);
     }
     let report = doctor_checks::run_checks(&parsed.vault_agent);
+    let format = if parsed.json {
+        OutputFormat::Json
+    } else {
+        format
+    };
     let result = match format {
         OutputFormat::Json => writeln!(stdout, "{}", crate::go_json(&report)),
         OutputFormat::Table => doctor_render::human(stdout, &report),
@@ -59,6 +64,7 @@ pub fn run(
 #[derive(Default)]
 struct DoctorArgs {
     fix: bool,
+    json: bool,
     vault_agent: String,
 }
 
@@ -82,7 +88,8 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
             .split_once('=')
             .map_or((flag, None), |(n, v)| (n, Some(v)));
         match name {
-            "json" | "force-release" => {
+            "json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
+            "force-release" => {
                 parse_bool_flag(name, inline, stderr)?;
             }
             "fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
