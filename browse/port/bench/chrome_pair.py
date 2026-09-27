@@ -31,6 +31,9 @@ MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
 MAX_STAGE_LOG_BYTES = 64 << 10
 MAX_OPEN_STAGES = 32
 CHROME_OPEN_STAGES = {
+    "browser-setup-start", "browser-setup-ready", "browser-setup-error",
+    "browser-connect-start", "browser-connect-complete", "browser-page-created",
+    "page-open-start", "page-open-complete", "page-open-error",
     "navigation-listeners-ready", "main-frame status=present",
     "main-frame status=missing", "main-frame status=error",
     "navigation-future-start", "navigation-future-finish",

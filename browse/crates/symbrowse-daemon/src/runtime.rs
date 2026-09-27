@@ -32,6 +32,12 @@ use crate::{
     DaemonError, Frame, HandlerResult, OperationContext, SessionSpec, Warning, codes, redact_str,
 };
 
+fn chrome_open_stage(stage: &'static str) {
+    if std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1")) {
+        eprintln!("chrome_open_stage={stage}");
+    }
+}
+
 /// The daemon-owned typed runtime. It is deliberately composed from the Rust
 /// engine, fetch, and core crates; it never shells back into the CLI binary.
 pub struct DispatchRuntime {
@@ -625,7 +631,24 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
-        let page = self.ensure_browser(operation).await?;
+        let tracing_open = matches!(frame.cmd.as_str(), "open" | "goto");
+        if tracing_open {
+            chrome_open_stage("browser-setup-start");
+        }
+        let page = match self.ensure_browser(operation).await {
+            Ok(page) => {
+                if tracing_open {
+                    chrome_open_stage("browser-setup-ready");
+                }
+                page
+            }
+            Err(error) => {
+                if tracing_open {
+                    chrome_open_stage("browser-setup-error");
+                }
+                return Err(error);
+            }
+        };
         let args = object_args(frame)?;
         let data = match frame.cmd.as_str() {
             "tabs.list" | "tab.list" => {
@@ -879,10 +902,22 @@ impl DispatchRuntime {
                     .map_err(runtime_error)?;
                 json!({"uploaded": files})
             }
-            "open" | "goto" => page
-                .open_with_timeout(required_string(args, "url")?, operation.remaining())
-                .await
-                .map_err(navigation_error)?,
+            "open" | "goto" => {
+                chrome_open_stage("page-open-start");
+                match page
+                    .open_with_timeout(required_string(args, "url")?, operation.remaining())
+                    .await
+                {
+                    Ok(value) => {
+                        chrome_open_stage("page-open-complete");
+                        value
+                    }
+                    Err(error) => {
+                        chrome_open_stage("page-open-error");
+                        return Err(navigation_error(error));
+                    }
+                }
+            }
             "read" => {
                 if let Some(url) = args
                     .get("url")
@@ -1468,6 +1503,7 @@ impl DispatchRuntime {
                 .then_some(self.spec.executable_path.as_path()),
         )
         .map_err(runtime_error)?;
+        chrome_open_stage("browser-connect-start");
         let session = ChromeSession::connect(
             BrowserMode::Launch {
                 executable,
@@ -1478,10 +1514,12 @@ impl DispatchRuntime {
         )
         .await
         .map_err(runtime_error)?;
+        chrome_open_stage("browser-connect-complete");
         let page = session
             .new_page("about:blank")
             .await
             .map_err(runtime_error)?;
+        chrome_open_stage("browser-page-created");
         let result = page.clone();
         let mut guard = self
             .browser
