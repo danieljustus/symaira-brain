@@ -15,7 +15,10 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, network, page, target},
+    cdp::{
+        browser_protocol::{accessibility, browser, dom, network, page, target},
+        js_protocol::runtime,
+    },
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -243,6 +246,17 @@ impl ChromeSession {
                         // frame setup commands before returning the page.
                         loop {
                             if page.mainframe().await?.is_some() {
+                                // Match the Go adapter's page setup contract.
+                                // These domain enables are idempotent; awaiting
+                                // their acknowledgements ensures the attached
+                                // target is usable before the first navigation,
+                                // even while chromiumoxide finishes its own
+                                // asynchronous TargetInit sequence.
+                                page.execute(page::EnableParams::default()).await?;
+                                page.execute(runtime::EnableParams::default()).await?;
+                                page.execute(dom::EnableParams::default()).await?;
+                                page.execute(accessibility::EnableParams::default()).await?;
+                                page.execute(network::EnableParams::default()).await?;
                                 return Ok(page);
                             }
                             tokio::time::sleep(Duration::from_millis(10)).await;
