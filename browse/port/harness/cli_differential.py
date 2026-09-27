@@ -1849,9 +1849,10 @@ def main() -> int:
     root = args.temp_root or (Path(os.environ["SYMAIRA_EXTERNAL_RUNTIME_ROOT"])
                               if sys.platform == "darwin" and os.environ.get("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
                               else Path(tempfile.gettempdir()))
+    root = root.resolve()
     if sys.platform == "darwin" and not os.environ.get("CI"):
         nvme = Path("/Volumes/1TB_NVMe_SN850X").resolve(strict=True)
-        if not root.resolve(strict=True).is_relative_to(nvme):
+        if not root.is_relative_to(nvme):
             parser.error(f"local macOS --temp-root must be on external NVMe: {nvme}")
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     common = root / f"cli-base-{os.getpid()}"
