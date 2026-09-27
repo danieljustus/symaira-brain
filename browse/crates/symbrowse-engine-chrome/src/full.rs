@@ -1108,10 +1108,11 @@ impl ChromePage {
                     }
                     return Err("Chrome navigation timed out".into());
                 }
-                _ = tokio::time::sleep(Duration::from_millis(25)) => {
+                _ = tokio::time::sleep(Duration::from_millis(25)), if cfg!(windows) => {
                     // Chromiumoxide can miss the main-frame event on Windows.
                     // A changed document or same-document URL is the observable
-                    // navigation signal when the event stream stays silent. Keep
+                    // navigation signal when the event stream stays silent. On
+                    // Unix, these probes can stall CDP during navigation. Keep
                     // each CDP probe bounded so one stalled evaluation cannot
                     // bypass the navigation deadline or starve event handling.
                     let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
