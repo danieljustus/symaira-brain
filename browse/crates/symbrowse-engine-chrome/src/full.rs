@@ -24,6 +24,12 @@ use tokio::sync::Mutex;
 
 use crate::{BrowserMode, ConnectionMode, launch};
 
+fn chrome_open_stage(stage: &'static str) {
+    if std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1")) {
+        eprintln!("chrome_open_stage={stage}");
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnsupportedOperation(pub &'static str);
 
@@ -348,11 +354,40 @@ impl ChromePage {
     }
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        self.page.goto(url).await?;
-        Ok(serde_json::json!({
-            "url": self.page.url().await?.unwrap_or_default(),
-            "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
-        }))
+        chrome_open_stage("page-goto-start");
+        if let Err(error) = self.page.goto(url).await {
+            chrome_open_stage("page-goto-error");
+            return Err(Box::new(error));
+        }
+        chrome_open_stage("page-goto-complete");
+
+        chrome_open_stage("page-url-start");
+        let page_url = match self.page.url().await {
+            Ok(url) => url.unwrap_or_default(),
+            Err(error) => {
+                chrome_open_stage("page-url-error");
+                return Err(Box::new(error));
+            }
+        };
+        chrome_open_stage("page-url-complete");
+
+        chrome_open_stage("page-title-start");
+        let title = match self.page.evaluate("document.title").await {
+            Ok(value) => match value.into_value::<String>() {
+                Ok(title) => title,
+                Err(error) => {
+                    chrome_open_stage("page-title-error");
+                    return Err(Box::new(error));
+                }
+            },
+            Err(error) => {
+                chrome_open_stage("page-title-error");
+                return Err(Box::new(error));
+            }
+        };
+        chrome_open_stage("page-title-complete");
+
+        Ok(serde_json::json!({"url": page_url, "title": title}))
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
