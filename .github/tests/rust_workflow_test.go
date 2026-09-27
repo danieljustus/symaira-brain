@@ -2,6 +2,7 @@
 package workflows
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -75,8 +76,8 @@ func TestRustWorkflowPreservesPullRequests(t *testing.T) {
 
 func TestRustWorkflowJobsFailClosed(t *testing.T) {
 	w := rustWorkflow(t)
-	if len(w.Jobs) != 3 {
-		t.Errorf("expected three independent Rust gates, got %d", len(w.Jobs))
+	if len(w.Jobs) != 4 {
+		t.Errorf("expected four independent Rust gates, got %d", len(w.Jobs))
 	}
 	for _, name := range []string{"guard-parity", "cargo-audit", "cargo-deny"} {
 		t.Run(name, func(t *testing.T) {
@@ -116,6 +117,57 @@ func TestRustWorkflowJobsFailClosed(t *testing.T) {
 			}
 			requireCommand(t, jobCommands(j), "rustup show", "active-toolchain")
 		})
+	}
+}
+
+func TestHybridCandidateWorkflowBuildsAndOnlyUploadsUnpublishedLinuxArtifact(t *testing.T) {
+	w := rustWorkflow(t)
+	j, ok := w.Jobs["hybrid-release-candidate"]
+	if !ok {
+		t.Fatal("missing hybrid-release-candidate job")
+	}
+	if j.RunsOn != "ubuntu-latest" || j.TimeoutMinutes <= 0 || j.TimeoutMinutes > 45 {
+		t.Errorf("expected bounded Linux candidate build, got runner %q timeout %d", j.RunsOn, j.TimeoutMinutes)
+	}
+	for _, key := range []string{"if", "needs", "continue-on-error", "permissions"} {
+		if _, present := j.Other[key]; present {
+			t.Errorf("hybrid candidate job must not override %s", key)
+		}
+	}
+	commands := jobCommands(j)
+	for _, required := range []string{
+		"cargo build --locked --release -p symbrain-cli",
+		"CGO_ENABLED=0 go build",
+		"symbrain-go",
+		"-hybrid-candidate-check",
+		"smoke-hybrid-fallback.sh",
+	} {
+		if !strings.Contains(commands, required) {
+			t.Errorf("hybrid candidate job missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{"gh release upload", "goreleaser release", "cosign sign-blob", "syft "} {
+		if strings.Contains(commands, forbidden) {
+			t.Errorf("unpublished candidate job must not publish or release-sign: found %q", forbidden)
+		}
+	}
+
+	artifactUpload := false
+	for _, step := range j.Steps {
+		uses, _ := step["uses"].(string)
+		if strings.HasPrefix(uses, "actions/") && !regexp.MustCompile(`@[0-9a-f]{40}$`).MatchString(uses) {
+			t.Errorf("unpinned candidate action %s", uses)
+		}
+		if uses == "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" {
+			artifactUpload = true
+			with, ok := step["with"].(map[string]any)
+			if !ok || fmt.Sprint(with["retention-days"]) != "14" || with["if-no-files-found"] != "error" {
+				t.Errorf("candidate artifact must fail on missing files and expire after 14 days, got %v", step["with"])
+			}
+		}
+	}
+	if !artifactUpload {
+		t.Error("missing pinned candidate artifact upload")
 	}
 }
 
