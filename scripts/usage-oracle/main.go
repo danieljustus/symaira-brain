@@ -124,22 +124,68 @@ func main() {
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
-	previous, existed := os.LookupEnv("COPILOT_ACCESS_TOKEN")
+	// Keep the full ten-provider production graph deterministic without
+	// inheriting a developer's credential environment or home directory.
+	credentialEnv := []string{
+		"HOME", "CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME",
+		"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN",
+		"COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY",
+		"KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL", "MOONSHOT_API_KEY",
+		"MOONSHOT_REGION", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_PORTAL_BASE_URL",
+		"OPENCODE_COOKIE", "OPENCODE_WORKSPACE_ID", "OPENROUTER_API_KEY",
+		"OPENROUTER_API_URL",
+	}
+	previous := make(map[string]string, len(credentialEnv))
+	existed := make(map[string]bool, len(credentialEnv))
+	for _, name := range credentialEnv {
+		previous[name], existed[name] = os.LookupEnv(name)
+	}
+	restore := func() error {
+		for _, name := range credentialEnv {
+			var err error
+			if existed[name] {
+				err = os.Setenv(name, previous[name])
+			} else {
+				err = os.Unsetenv(name)
+			}
+			if err != nil {
+				return fmt.Errorf("restore %s: %w", name, err)
+			}
+		}
+		return nil
+	}
+	for _, name := range credentialEnv {
+		if err := os.Unsetenv(name); err != nil {
+			_ = restore()
+			return usage.Report{}, fmt.Errorf("clear %s for usage oracle: %w", name, err)
+		}
+	}
+	home, err := os.MkdirTemp("", "symbrain-usage-oracle-home-")
+	if err != nil {
+		_ = restore()
+		return usage.Report{}, fmt.Errorf("create isolated usage oracle home: %w", err)
+	}
+	if err := os.Setenv("HOME", home); err != nil {
+		_ = os.RemoveAll(home)
+		_ = restore()
+		return usage.Report{}, fmt.Errorf("set isolated usage oracle home: %w", err)
+	}
 	if err := os.Setenv("COPILOT_ACCESS_TOKEN", copilotOracleToken); err != nil {
+		_ = os.RemoveAll(home)
+		_ = restore()
 		return usage.Report{}, fmt.Errorf("set synthetic Copilot fixture env: %w", err)
 	}
 	report, buildErr := usage.BuildCopilotAuthenticatedReportOracle(body)
-	var restoreErr error
-	if existed {
-		restoreErr = os.Setenv("COPILOT_ACCESS_TOKEN", previous)
-	} else {
-		restoreErr = os.Unsetenv("COPILOT_ACCESS_TOKEN")
-	}
+	removeErr := os.RemoveAll(home)
+	restoreErr := restore()
 	if buildErr != nil {
 		return usage.Report{}, buildErr
 	}
+	if removeErr != nil {
+		return usage.Report{}, fmt.Errorf("remove isolated usage oracle home: %w", removeErr)
+	}
 	if restoreErr != nil {
-		return usage.Report{}, fmt.Errorf("restore Copilot fixture env: %w", restoreErr)
+		return usage.Report{}, fmt.Errorf("restore usage oracle environment: %w", restoreErr)
 	}
 	return report, nil
 }

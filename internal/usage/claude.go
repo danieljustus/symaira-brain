@@ -49,6 +49,10 @@ type ClaudeProvider struct {
 // NewClaudeProvider reads ANTHROPIC_ADMIN_KEY and the Claude CLI's own
 // credential file (~/.claude/.credentials.json) from the environment.
 func NewClaudeProvider(client *http.Client) *ClaudeProvider {
+	return newClaudeProvider(client, readClaudeKeychainCredential)
+}
+
+func newClaudeProvider(client *http.Client, readKeychain func() (string, *time.Time)) *ClaudeProvider {
 	if client == nil {
 		client = newProviderHTTPClient()
 	}
@@ -59,7 +63,7 @@ func NewClaudeProvider(client *http.Client) *ClaudeProvider {
 	// the keychain read can raise an approval panel, so it is the last
 	// source tried, never a redundant one.
 	if oauthToken == "" && oauthErr == nil {
-		if token, expiresAt := readClaudeKeychainCredential(); token != "" {
+		if token, expiresAt := readKeychain(); token != "" {
 			oauthToken, oauthSource, oauthExpiresAt = token, "keychain", expiresAt
 		}
 	}

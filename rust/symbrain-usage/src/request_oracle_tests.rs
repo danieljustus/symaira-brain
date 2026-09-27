@@ -145,20 +145,36 @@ fn provider_for(case: &Case) -> Provider {
 }
 
 fn authenticated_copilot_report(response: Response) -> (crate::Report, FixtureTransport) {
-    // This is the report-level replay of the shipped Copilot provider: the
-    // dummy value is intentionally not a GitHub token, and FixtureTransport
-    // makes a network request impossible.
-    let mut provider = Provider::fixture("copilot", "GitHub Copilot");
-    provider.auth_status = crate::AuthStatus {
-        status: "available".into(),
-        detail: "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)".into(),
-        source: Some("env".into()),
-    };
-    provider.credentials = vec![("env".into(), COPILOT_OAUTH.into())];
-    provider.credential = Some(COPILOT_OAUTH.into());
+    // Rebuild all ten report rows from the source-pinned Go fixture. The
+    // providers with no credentials have no probe state; Antigravity's
+    // fixture credential is absent to select its deterministic not-running
+    // result. Copilot alone has a synthetic direct environment token.
+    let oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/copilot_authenticated_report.json"
+    ))
+    .expect("Go authenticated Copilot report");
+    let providers = oracle["providers"]
+        .as_array()
+        .expect("Go provider rows")
+        .iter()
+        .map(|row| {
+            let id = row["id"].as_str().expect("provider id");
+            let name = row["display_name"].as_str().expect("provider name");
+            let mut provider = Provider::fixture(id, name);
+            provider.configured = row["configured"].as_bool().expect("configured state");
+            provider.auth_status =
+                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
+            provider.credential = None;
+            provider.credentials.clear();
+            if id == "copilot" {
+                provider.credentials = vec![("env".into(), COPILOT_OAUTH.into())];
+                provider.credential = Some(COPILOT_OAUTH.into());
+            }
+            provider
+        })
+        .collect();
     let transport = FixtureTransport::new([("copilot".into(), response)].into());
-    let report =
-        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
     (report, transport)
 }
 
@@ -306,8 +322,17 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
         body: serde_json::to_vec(&copilot["response"]).expect("response fixture"),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 1);
-    let usage = &mut report.providers[0];
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["copilot", "antigravity"]
+    );
+    let usage = &mut report.providers[2];
     assert_eq!(usage.id, "copilot");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -361,7 +386,7 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[0].error.as_deref(),
+            report.providers[2].error.as_deref(),
             Some(
                 copilot["errors"][oracle_index]["text"]
                     .as_str()
@@ -369,7 +394,7 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[0].snapshot, None);
+        assert_eq!(report.providers[2].snapshot, None);
     }
 }
 
