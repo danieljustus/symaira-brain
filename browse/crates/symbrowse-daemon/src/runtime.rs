@@ -1429,12 +1429,28 @@ impl DispatchRuntime {
         &self,
         operation: &OperationContext,
     ) -> Result<ChromePage, DaemonError> {
-        let timeout = operation.remaining().saturating_sub(Duration::from_secs(1));
+        let timeout = operation.remaining();
+        let cached = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        Self::with_cached_browser(cached, timeout, self.ensure_browser_setup(timeout)).await
+    }
+
+    async fn with_cached_browser<T>(
+        cached: Option<T>,
+        timeout: Duration,
+        setup: impl Future<Output = Result<T, DaemonError>>,
+    ) -> Result<T, DaemonError> {
         if timeout.is_zero() {
             return Err(operation_timeout_error());
         }
-        Self::within_operation_deadline(timeout, self.ensure_browser_setup(operation.remaining()))
-            .await
+        if let Some(browser) = cached {
+            return Ok(browser);
+        }
+        Self::within_operation_deadline(timeout, setup).await
     }
 
     async fn ensure_browser_setup(&self, timeout: Duration) -> Result<ChromePage, DaemonError> {
@@ -1949,6 +1965,28 @@ mod tests {
         .expect_err("pending Chrome setup must time out");
         assert_eq!(setup.code, codes::OPERATION_TIMEOUT);
         assert_eq!(setup.message, "daemon operation exceeded its timeout");
+    }
+
+    #[tokio::test]
+    async fn cached_chrome_page_is_reused_with_subsecond_operation_budget() {
+        let cached = DispatchRuntime::with_cached_browser(
+            Some("active-page"),
+            Duration::from_millis(500),
+            std::future::ready(Err(runtime_error("setup must not run for a cached page"))),
+        )
+        .await
+        .expect("cached page should be returned within the remaining budget");
+        assert_eq!(cached, "active-page");
+
+        let expired = DispatchRuntime::with_cached_browser(
+            Some("active-page"),
+            Duration::ZERO,
+            std::future::ready(Ok("new-page")),
+        )
+        .await
+        .expect_err("an expired operation must time out even when a page is cached");
+        assert_eq!(expired.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(expired.message, "daemon operation exceeded its timeout");
     }
 
     fn temp_spec(name: &str) -> SessionSpec {
