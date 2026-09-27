@@ -19,7 +19,8 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
 /// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential
 /// file or web token, or a direct `NOUS_PORTAL_ACCESS_TOKEN` using the default
-/// portal base and with no Hermes auth file now runs natively:
+/// portal base and with no Hermes auth file, or a direct `CODEX_ACCESS_TOKEN`
+/// with no Codex auth file or home override now runs natively:
 /// each configured report, request, parsed snapshot, and provider error cases
 /// are checked against Go oracles using synthetic credentials and canned
 /// transport. File credentials, secret references, provider-specific

@@ -16,6 +16,7 @@ import (
 )
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
+const codexOracleToken = "oracle-only-invalid-codex"
 const cursorOracleToken = "oracle-only-invalid-cursor"
 const kimiOracleToken = "oracle-only-invalid-kimi"
 const nousOracleToken = "oracle-only-invalid-nous"
@@ -71,6 +72,7 @@ func main() {
 	output := flag.String("output", "rust/symbrain-usage/tests/fixtures/provider_graph.json", "provider graph path")
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
+	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
@@ -97,6 +99,11 @@ func main() {
 		Providers     []usage.OracleProvider `json:"providers"`
 	}{SchemaVersion: usage.ReportSchemaVersion, Providers: cases.Providers}
 	copilotReport, err := buildCopilotAuthenticatedReport(fixtures["copilot"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	codexReport, err := buildCodexAuthenticatedReport(fixtures["codex"])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -140,6 +147,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*codexReportOutput, codexReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*openRouterReportOutput, openRouterReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -175,6 +186,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if err := writeJSON(*codexReportOutput, codexReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	if err := writeJSON(*openRouterReportOutput, openRouterReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -195,11 +210,15 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s, %s, %s, %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, *moonshotReportOutput, *cursorReportOutput, *kimiReportOutput, *nousReportOutput, len(graph.Providers))
+	fmt.Printf("Wrote %s, %s, %s, %s, %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *codexReportOutput, *openRouterReportOutput, *moonshotReportOutput, *cursorReportOutput, *kimiReportOutput, *nousReportOutput, len(graph.Providers))
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("copilot", copilotOracleToken, body)
+}
+
+func buildCodexAuthenticatedReport(body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("codex", codexOracleToken, body)
 }
 
 func buildOpenRouterAuthenticatedReport(body []byte) (usage.Report, error) {
@@ -271,6 +290,7 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 	}
 	envName := map[string]string{
 		"copilot":    "COPILOT_ACCESS_TOKEN",
+		"codex":      "CODEX_ACCESS_TOKEN",
 		"cursor":     "CURSOR_COOKIE",
 		"kimi":       "KIMI_CODE_API_KEY",
 		"moonshot":   "MOONSHOT_API_KEY",
@@ -292,6 +312,8 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 	switch provider {
 	case "copilot":
 		report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
+	case "codex":
+		report, buildErr = usage.BuildCodexAuthenticatedReportOracle(body)
 	case "openrouter":
 		report, buildErr = usage.BuildOpenRouterAuthenticatedReportOracle(body)
 	case "moonshot":

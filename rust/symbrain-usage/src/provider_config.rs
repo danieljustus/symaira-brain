@@ -18,11 +18,11 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
 /// Environment variables other than the narrow direct Copilot/OpenRouter/
-/// Moonshot/Cursor/Kimi/Nous cases allowed to use native reporting. Every one keeps the CLI on Go.
+/// Moonshot/Cursor/Kimi/Nous/Codex cases allowed to use native reporting. Every one keeps the CLI on Go.
 const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
-    "CODEX_ACCESS_TOKEN",
+    "CODEX_HOME",
     "HERMES_HOME",
     "HERMES_PORTAL_BASE_URL",
     "KIMI_CODE_BASE_URL",
@@ -940,6 +940,7 @@ pub fn needs_go_fallback() -> bool {
     let cursor_env = env_raw("CURSOR_COOKIE");
     let kimi_api_env = env_raw("KIMI_CODE_API_KEY");
     let nous_env = env_raw("NOUS_PORTAL_ACCESS_TOKEN");
+    let codex_env = env_raw("CODEX_ACCESS_TOKEN");
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
@@ -958,6 +959,7 @@ pub fn needs_go_fallback() -> bool {
         cursor_env: cursor_env.as_deref(),
         kimi_api_env: kimi_api_env.as_deref(),
         nous_env: nous_env.as_deref(),
+        codex_env: codex_env.as_deref(),
         other_provider_env,
         other_credential_source: false,
         local_provider_present: claude_keychain_present() || antigravity_running(),
@@ -968,7 +970,8 @@ pub fn needs_go_fallback() -> bool {
 /// one direct `OpenRouter` key using its default base URL, or one direct
 /// `Moonshot` key using its default `ai` region, one direct `Cursor` cookie,
 /// one direct Kimi Code API key using its default base, or one direct Nous
-/// Portal token using its default base, when every other
+/// Portal token using its default base, or one direct Codex access token,
+/// when every other
 /// provider source and local probe is absent. Secret
 /// references, credential files, and provider-specific overrides stay on Go.
 #[derive(Clone, Copy, Default)]
@@ -979,6 +982,7 @@ struct UsageFallbackSignals<'a> {
     cursor_env: Option<&'a str>,
     kimi_api_env: Option<&'a str>,
     nous_env: Option<&'a str>,
+    codex_env: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
@@ -998,14 +1002,16 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.cursor_env,
         signals.kimi_api_env,
         signals.nous_env,
+        signals.codex_env,
     ) {
-        (None, None, None, None, None, None) => false,
-        (Some(copilot), None, None, None, None, None) => is_secret_reference(copilot),
-        (None, Some(openrouter), None, None, None, None) => is_secret_reference(openrouter),
-        (None, None, Some(moonshot), None, None, None) => is_secret_reference(moonshot),
-        (None, None, None, Some(cursor), None, None) => is_secret_reference(cursor),
-        (None, None, None, None, Some(kimi), None) => is_secret_reference(kimi),
-        (None, None, None, None, None, Some(nous)) => is_secret_reference(nous),
+        (None, None, None, None, None, None, None) => false,
+        (Some(copilot), None, None, None, None, None, None) => is_secret_reference(copilot),
+        (None, Some(openrouter), None, None, None, None, None) => is_secret_reference(openrouter),
+        (None, None, Some(moonshot), None, None, None, None) => is_secret_reference(moonshot),
+        (None, None, None, Some(cursor), None, None, None) => is_secret_reference(cursor),
+        (None, None, None, None, Some(kimi), None, None) => is_secret_reference(kimi),
+        (None, None, None, None, None, Some(nous), None) => is_secret_reference(nous),
+        (None, None, None, None, None, None, Some(codex)) => is_secret_reference(codex),
         _ => true,
     }
 }

@@ -159,6 +159,14 @@ fn authenticated_copilot_report(response: Response) -> (crate::Report, FixtureTr
     )
 }
 
+fn authenticated_codex_report(response: Response) -> (crate::Report, FixtureTransport) {
+    authenticated_direct_provider_report(
+        response,
+        "codex",
+        include_str!("../tests/fixtures/codex_authenticated_report.json"),
+    )
+}
+
 fn authenticated_openrouter_report(response: Response) -> (crate::Report, FixtureTransport) {
     authenticated_direct_provider_report(
         response,
@@ -488,6 +496,100 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[2].snapshot, None);
+    }
+}
+
+#[test]
+fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/codex_authenticated_report.json"
+    ))
+    .expect("Go authenticated Codex report");
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let codex = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "codex")
+        .expect("Codex oracle case");
+
+    let (mut report, transport) = authenticated_codex_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["codex", "antigravity"]
+    );
+    let usage = &mut report.providers[1];
+    assert_eq!(usage.id, "codex");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(
+        usage.auth_status.detail,
+        "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)"
+    );
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Codex snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][1]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(snapshot).expect("Rust snapshot"),
+        report_oracle["providers"][1]["snapshot"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://chatgpt.com/backend-api/wham/usage"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer synthetic-direct-env-credential")
+    );
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Codex report"),
+        report_oracle
+    );
+
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17"), 1),
+        (200, b"{}".as_slice(), None, 2),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_codex_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        assert_eq!(
+            report.providers[1].error.as_deref(),
+            Some(
+                codex["errors"][oracle_index]["text"]
+                    .as_str()
+                    .expect("Go error text")
+            ),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[1].snapshot, None);
     }
 }
 

@@ -168,6 +168,15 @@ func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("copilot", body)
 }
 
+// BuildCodexAuthenticatedReportOracle runs the shipped Codex provider through
+// BuildReport with a direct CODEX_ACCESS_TOKEN and its default credential home.
+func BuildCodexAuthenticatedReportOracle(body []byte) (Report, error) {
+	if os.Getenv("CODEX_HOME") != "" {
+		return Report{}, fmt.Errorf("Codex report oracle requires the default isolated credential home")
+	}
+	return buildAuthenticatedDirectEnvReportOracle("codex", body)
+}
+
 // BuildOpenRouterAuthenticatedReportOracle runs the shipped OpenRouter
 // provider through BuildReport with a direct OPENROUTER_API_KEY and the
 // default API base. The caller supplies only a synthetic key and canned body.
@@ -219,14 +228,18 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	index := map[string]int{"copilot": 2, "cursor": 3, "kimi": 4, "moonshot": 5, "nous": 6, "openrouter": 8}[providerID]
+	index := map[string]int{"codex": 1, "copilot": 2, "cursor": 3, "kimi": 4, "moonshot": 5, "nous": 6, "openrouter": 8}[providerID]
 	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
 		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
 	}
-	if providerID == "kimi" || providerID == "nous" {
+	if providerID == "codex" || providerID == "kimi" || providerID == "nous" {
 		strategies := providers[index].Strategies()
-		if len(strategies) != 1 || strategies[0].Source() != "api" {
-			return Report{}, fmt.Errorf("%s report oracle requires exactly one direct API strategy", providerID)
+		wantSource := "api"
+		if providerID == "codex" {
+			wantSource = "oauth"
+		}
+		if len(strategies) != 1 || strategies[0].Source() != wantSource {
+			return Report{}, fmt.Errorf("%s report oracle requires exactly one direct %s strategy", providerID, wantSource)
 		}
 	}
 	for i, provider := range providers {
