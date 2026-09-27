@@ -15,6 +15,7 @@ mod unix {
         time::{Duration, Instant},
     };
 
+    use sha2::{Digest, Sha256};
     use symbrowse_daemon::{
         Client, ClientOptions, Frame, Response, Server, ServerError, ServerOptions, codes,
         connect_unix,
@@ -263,8 +264,32 @@ mod unix {
 
     #[test]
     #[allow(clippy::result_large_err)]
-    fn operation_timeout_is_a_typed_response() {
-        let root = root("timeout");
+    fn operation_timeout_response_keeps_connection_usable_and_matches_go_oracle() {
+        const GO_SERVER_COMMIT: &str = "f27c09780e076ab69f16c20195dd3265f6cab037";
+        const GO_SERVER_SHA256: &str =
+            "8f8cac924af5f5f96222a7f348a722e4dfbca49e09e52a8b56c1f004b5b744f0";
+        const GO_TEST_SHA256: &str =
+            "32ae1c6e56bb77b00b4773e2694dde6290f40ceb62912984310628bd50faae37";
+        let go_server = include_bytes!("../../../internal/daemon/server.go");
+        let go_test = include_bytes!("../../../internal/daemon/server_test.go");
+        let server_hash: String = Sha256::digest(go_server)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
+        let test_hash: String = Sha256::digest(go_test)
+            .iter()
+            .map(|byte| format!("{byte:02x}"))
+            .collect();
+        assert_eq!(
+            server_hash, GO_SERVER_SHA256,
+            "Go oracle server at {GO_SERVER_COMMIT}"
+        );
+        assert_eq!(
+            test_hash, GO_TEST_SHA256,
+            "Go timeout oracle test at {GO_SERVER_COMMIT}"
+        );
+
+        let root = root("timeout-live");
         let socket = root.join("default.sock");
         let cancellation_seen = Arc::new(AtomicBool::new(false));
         let seen = cancellation_seen.clone();
@@ -287,21 +312,53 @@ mod unix {
         );
         let running = server.clone();
         let thread = thread::spawn(move || running.listen_and_serve());
-        wait_for_socket(&socket);
-        let client = Client::new(ClientOptions {
-            socket_path: socket,
-            session: "default".to_owned(),
-            autostart: false,
-            ..Default::default()
-        });
-        let response = client
-            .request_without_autostart(Frame {
-                cmd: "slow".to_owned(),
-                ..Default::default()
-            })
+        let startup_deadline = Instant::now() + Duration::from_secs(2);
+        while Instant::now() < startup_deadline {
+            if fs::symlink_metadata(&socket)
+                .map(|metadata| metadata.permissions().mode() & 0o777 == 0o600)
+                .unwrap_or(false)
+            {
+                break;
+            }
+            if thread.is_finished() {
+                panic!("server startup failed: {:?}", thread.join().unwrap());
+            }
+            thread::sleep(Duration::from_millis(5));
+        }
+        let mut stream = std::os::unix::net::UnixStream::connect(&socket).unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(2)))
             .unwrap();
-        assert!(!response.success);
-        assert_eq!(response.error.unwrap().code, codes::OPERATION_TIMEOUT);
+        for frame in [
+            Frame {
+                cmd: "slow".to_owned(),
+                session: "default".to_owned(),
+                ..Default::default()
+            },
+            Frame {
+                cmd: "daemon.ping".to_owned(),
+                session: "default".to_owned(),
+                ..Default::default()
+            },
+        ] {
+            stream
+                .write_all(&serde_json::to_vec(&frame).unwrap())
+                .unwrap();
+            stream.write_all(b"\n").unwrap();
+        }
+        let mut reader = BufReader::new(stream);
+        let mut line = String::new();
+        reader.read_line(&mut line).unwrap();
+        let timeout: Response = serde_json::from_str(&line).unwrap();
+        assert!(!timeout.success);
+        let error = timeout.error.unwrap();
+        assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(error.message, "daemon operation exceeded its timeout");
+        line.clear();
+        reader.read_line(&mut line).unwrap();
+        let ping: Response = serde_json::from_str(&line).unwrap();
+        assert!(ping.success, "connection unusable after timeout: {ping:?}");
+        assert_eq!(ping.data.unwrap()["pong"], true);
         let deadline = Instant::now() + Duration::from_secs(1);
         while !cancellation_seen.load(Ordering::Acquire) && Instant::now() < deadline {
             thread::sleep(Duration::from_millis(1));

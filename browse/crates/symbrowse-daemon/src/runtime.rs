@@ -1,4 +1,8 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    future::Future,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
@@ -102,6 +106,15 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    async fn within_operation_deadline<T>(
+        timeout: Duration,
+        future: impl Future<Output = Result<T, DaemonError>>,
+    ) -> Result<T, DaemonError> {
+        tokio::time::timeout(timeout, future)
+            .await
+            .map_err(|_| operation_timeout_error())?
+    }
+
     pub fn new(spec: SessionSpec) -> Result<Arc<Self>, DaemonError> {
         Self::new_with_wayback_url(spec, "https://web.archive.org/cdx/search/cdx")
     }
@@ -235,7 +248,7 @@ impl DispatchRuntime {
             | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
             | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
             | "cookies.set" | "storage.get" | "storage.set" | "download" => {
-                self.browser_command(&frame).await
+                self.browser_command(&frame, &operation).await
             }
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
@@ -243,7 +256,7 @@ impl DispatchRuntime {
                 hint: "the operation is explicitly unsupported by this engine".into(),
                 ..Default::default()
             }),
-            "state.save" | "state.load" => self.state_browser_command(&frame).await,
+            "state.save" | "state.load" => self.state_browser_command(&frame, &operation).await,
             "state.list" | "state.show" | "state.clear" | "state.clean" => {
                 self.state_command(&frame)
             }
@@ -569,7 +582,7 @@ impl DispatchRuntime {
         Ok((Some(Value::Array(entries)), Vec::new()))
     }
 
-    async fn browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn browser_command(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
         if self.spec.mode == "browser" && self.spec.engine == "firefox" {
             return self.firefox_command(frame).await;
         }
@@ -608,7 +621,7 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
-        let page = self.ensure_browser().await?;
+        let page = self.ensure_browser(operation).await?;
         let args = object_args(frame)?;
         let data = match frame.cmd.as_str() {
             "tabs.list" | "tab.list" => {
@@ -863,16 +876,18 @@ impl DispatchRuntime {
                 json!({"uploaded": files})
             }
             "open" | "goto" => page
-                .open(required_string(args, "url")?)
+                .open_with_timeout(required_string(args, "url")?, operation.remaining())
                 .await
-                .map_err(runtime_error)?,
+                .map_err(navigation_error)?,
             "read" => {
                 if let Some(url) = args
                     .get("url")
                     .and_then(Value::as_str)
                     .filter(|url| !url.is_empty())
                 {
-                    page.open(url).await.map_err(runtime_error)?;
+                    page.open_with_timeout(url, operation.remaining())
+                        .await
+                        .map_err(navigation_error)?;
                 }
                 page.read().await.map_err(runtime_error)?
             }
@@ -1406,7 +1421,19 @@ impl DispatchRuntime {
             .ok_or_else(|| runtime_error("active tab is not tracked"))
     }
 
-    async fn ensure_browser(&self) -> Result<ChromePage, DaemonError> {
+    async fn ensure_browser(
+        &self,
+        operation: &OperationContext,
+    ) -> Result<ChromePage, DaemonError> {
+        let timeout = operation.remaining().saturating_sub(Duration::from_secs(1));
+        if timeout.is_zero() {
+            return Err(operation_timeout_error());
+        }
+        Self::within_operation_deadline(timeout, self.ensure_browser_setup(operation.remaining()))
+            .await
+    }
+
+    async fn ensure_browser_setup(&self, timeout: Duration) -> Result<ChromePage, DaemonError> {
         {
             let guard = self
                 .browser
@@ -1427,7 +1454,7 @@ impl DispatchRuntime {
                 user_data_dir: self.spec.user_data_dir(),
                 headless: true,
             },
-            self.spec.operation_timeout,
+            timeout,
         )
         .await
         .map_err(runtime_error)?;
@@ -1455,7 +1482,11 @@ impl DispatchRuntime {
         Ok(result)
     }
 
-    async fn state_browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn state_browser_command(
+        &self,
+        frame: &Frame,
+        operation: &OperationContext,
+    ) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
         let store = Store::new(
@@ -1491,13 +1522,13 @@ impl DispatchRuntime {
                         unreachable!()
                     }
                 } else {
-                    self.ensure_browser().await?.evaluate_script(
+                    self.ensure_browser(operation).await?.evaluate_script(
                         "(() => ({origin: location.origin, local_storage: Object.fromEntries(Object.entries(localStorage)), session_storage: Object.fromEntries(Object.entries(sessionStorage)), cookies: document.cookie}))()",
                     ).await.map_err(runtime_error)?
                 };
                 if self.spec.engine == "chrome" {
                     captured["bidi_cookies"] = self
-                        .ensure_browser()
+                        .ensure_browser(operation)
                         .await
                         .map_err(runtime_error)?
                         .cookies()
@@ -1551,8 +1582,10 @@ impl DispatchRuntime {
                             unreachable!()
                         }
                     } else {
-                        let page = self.ensure_browser().await.map_err(runtime_error)?;
-                        page.open(origin).await.map_err(runtime_error)?;
+                        let page = self.ensure_browser(operation).await?;
+                        page.open_with_timeout(origin, operation.remaining())
+                            .await
+                            .map_err(navigation_error)?;
                         for cookie in &entry.cookies {
                             let cookie_value =
                                 serde_json::to_value(cookie).map_err(runtime_error)?;
@@ -1850,6 +1883,25 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     }
 }
 
+fn navigation_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {
+    if error
+        .downcast_ref::<tokio::time::error::Elapsed>()
+        .is_some()
+    {
+        return operation_timeout_error();
+    }
+    runtime_error(error)
+}
+
+fn operation_timeout_error() -> DaemonError {
+    DaemonError {
+        code: codes::OPERATION_TIMEOUT.into(),
+        message: "daemon operation exceeded its timeout".into(),
+        retryable: Some(true),
+        ..Default::default()
+    }
+}
+
 fn fetch_error(error: symbrowse_fetch::FetchError) -> DaemonError {
     let code = match error {
         symbrowse_fetch::FetchError::BlockedDomain(_)
@@ -1874,6 +1926,26 @@ mod tests {
         net::TcpListener,
         thread,
     };
+
+    #[tokio::test]
+    async fn navigation_timeout_preserves_go_daemon_error() {
+        let elapsed = tokio::time::timeout(std::time::Duration::ZERO, std::future::pending::<()>())
+            .await
+            .expect_err("pending navigation must time out");
+        let error = navigation_error(Box::new(elapsed));
+        assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(error.message, "daemon operation exceeded its timeout");
+        assert_eq!(error.retryable, Some(true));
+
+        let setup = DispatchRuntime::within_operation_deadline(
+            Duration::from_millis(1),
+            std::future::pending::<Result<(), DaemonError>>(),
+        )
+        .await
+        .expect_err("pending Chrome setup must time out");
+        assert_eq!(setup.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(setup.message, "daemon operation exceeded its timeout");
+    }
 
     fn temp_spec(name: &str) -> SessionSpec {
         let root =

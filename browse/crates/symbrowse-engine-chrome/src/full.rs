@@ -297,6 +297,22 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        self.open_with_timeout(url, Duration::from_secs(30)).await
+    }
+
+    /// Bound navigation and its response reads by the caller's remaining budget.
+    pub async fn open_with_timeout(
+        &self,
+        url: &str,
+        timeout: Duration,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        match with_navigation_timeout(timeout, self.open_inner(url)).await {
+            Ok(result) => result,
+            Err(error) => Err(Box::new(error)),
+        }
+    }
+
+    async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
         self.page.goto(url).await?;
         Ok(serde_json::json!({
             "url": self.page.url().await?.unwrap_or_default(),
@@ -882,6 +898,13 @@ impl ChromePage {
     }
 }
 
+async fn with_navigation_timeout<T>(
+    timeout: Duration,
+    future: impl std::future::Future<Output = T>,
+) -> Result<T, tokio::time::error::Elapsed> {
+    tokio::time::timeout(timeout, future).await
+}
+
 pub struct NetworkCapture {
     requests: chromiumoxide::listeners::EventStream<network::EventRequestWillBeSent>,
     responses: chromiumoxide::listeners::EventStream<network::EventResponseReceived>,
@@ -948,6 +971,13 @@ fn browser_set_download_behavior(
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[tokio::test]
+    async fn navigation_deadline_bounds_stalled_open() {
+        let result =
+            with_navigation_timeout(Duration::from_millis(1), std::future::pending::<()>()).await;
+        assert!(result.is_err());
+    }
 
     #[test]
     fn canonical_capabilities_partition_matches_daemon_commands() {
