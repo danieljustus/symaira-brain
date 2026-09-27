@@ -805,9 +805,10 @@ class ReleaseFixtureServer:
 # --- skills status: OpenCode user-scope root fixtures ----------------------
 #
 # The native Rust slice covers `skills status --target opencode` in user scope
-# with a purely default configuration, plus an absent explicit Claude user
-# root. These setups build exactly those root states so the differential run
-# compares Go bytes against Rust bytes instead of trusting unit-test output.
+# with a purely default configuration, plus absent user roots for explicit
+# non-OpenCode targets. These setups build exactly those root states so the
+# differential run compares Go bytes against Rust bytes instead of trusting
+# unit-test output.
 OPENCODE_SKILLS_SUBDIR = "home/.config/opencode/skills"
 MANAGED_SKILL_MD = """---
 name: demo
@@ -2298,6 +2299,14 @@ CASES = (
     ),
     Case("skills_status_claude_missing_root_table", ("skills", "status", "--target", "claude")),
     Case("skills_status_claude_missing_root_json", ("skills", "status", "--target", "claude", "--json")),
+    Case("skills_status_codex_missing_root_table", ("skills", "status", "--target", "codex")),
+    Case("skills_status_codex_missing_root_json", ("skills", "status", "--target", "codex", "--json")),
+    Case("skills_status_hermes_missing_root_table", ("skills", "status", "--target", "hermes")),
+    Case("skills_status_hermes_missing_root_json", ("skills", "status", "--target", "hermes", "--json")),
+    Case("skills_status_antigravity_missing_root_table", ("skills", "status", "--target", "antigravity")),
+    Case("skills_status_antigravity_missing_root_json", ("skills", "status", "--target", "antigravity", "--json")),
+    Case("skills_status_openclaw_missing_root_table", ("skills", "status", "--target", "openclaw")),
+    Case("skills_status_openclaw_missing_root_json", ("skills", "status", "--target", "openclaw", "--json")),
     Case(
         "skills_status_opencode_escapable_name_json",
         ("skills", "status", "--target", "opencode", "--json"),
