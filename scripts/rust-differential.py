@@ -159,6 +159,18 @@ def setup_install_malformed(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".claude.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
     cfg.write_bytes(b"{not valid json")
+def setup_harness_health_missing_command(_root: Path, env: dict[str, str]) -> None:
+    cfg = Path(env["HOME"]) / ".claude.json"
+    cfg.parent.mkdir(parents=True, exist_ok=True)
+    cfg.write_bytes(b'{"mcpServers":{"missing":{"command":"symaira-missing-mcp-fixture"}}}')
+def setup_harness_health_probe(root: Path, env: dict[str, str]) -> None:
+    profile = root / "probe.toml"
+    profile.write_text('[profile]\nname = "probe"\n', encoding="utf-8")
+    cfg = Path(env["HOME"]) / ".claude.json"
+    cfg.write_text(json.dumps({"mcpServers": {"probe": {
+        "command": env["SYMBRAIN_GO_BINARY"],
+        "args": ["mcp", "--profile-file", str(profile)],
+    }}}), encoding="utf-8")
 def setup_install_superseded(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".cursor" / "mcp.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
@@ -323,6 +335,29 @@ def setup_doctor_empty(root: Path, env: dict[str, str]) -> None:
     empty_path = root / "empty-path"
     empty_path.mkdir()
     env["PATH"] = str(empty_path)
+def setup_doctor_disabled_vault(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_empty(root, env)
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = false\n')
+def setup_doctor_missing_vault(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_empty(root, env)
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+
+
+def html_project_path(root: Path) -> Path:
+    # Keep a path that exercises HTML escaping on every host. POSIX can also
+    # represent angle brackets; Windows reserves them in file names.
+    name = "x&y" if os.name == "nt" else "<x&>"
+    return root / "project" / name
+
+
+def setup_html_project(root: Path, _env: dict[str, str]) -> None:
+    html_project_path(root).mkdir()
+
+
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
@@ -336,6 +371,50 @@ def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
             exit_code=1,
         )
     env["PATH"] = str(binary_dir)
+def setup_doctor_failing_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_failed_version(root, env)
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+def setup_doctor_successful_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    binary_dir = root / "doctor-path"
+    binary_dir.mkdir()
+    binary = binary_dir / "symvault"
+    _write_text(binary, '''#!/usr/bin/python3
+import json
+import os
+import sys
+import time
+if sys.argv[1] == "version":
+    print(json.dumps({"version": "0.22.1"}))
+    sys.exit(0)
+if sys.argv[1:] != json.loads(os.environ["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"]):
+    print("wrong vault arguments", file=sys.stderr)
+    sys.exit(2)
+for line in sys.stdin:
+    request = json.loads(line)
+    method = request.get("method")
+    if method == "initialize":
+        result = {"protocolVersion": "2024-11-05", "capabilities": {}, "serverInfo": {"name": "fixture", "version": "1"}}
+    elif method == "tools/list":
+        result = {"tools": []}
+    else:
+        continue
+    time.sleep(float(os.environ.get("SYMBRAIN_TEST_VAULT_DELAY", "0")))
+    print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": result}), flush=True)
+''')
+    binary.chmod(0o755)
+    env["PATH"] = str(binary_dir)
+    env["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"] = json.dumps(["serve", "--stdio", "--agent", "other", "--allow-locked"])
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+def setup_doctor_empty_vault_agent(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_successful_vault_handshake(root, env)
+    env["SYMBRAIN_TEST_EXPECT_VAULT_ARGS"] = json.dumps(["serve"])
+def setup_doctor_slow_vault_handshake(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_successful_vault_handshake(root, env)
+    env["SYMBRAIN_TEST_VAULT_DELAY"] = "3"
 def setup_audit_fixture(_root: Path, env: dict[str, str]) -> None:
     audit_dir = Path(env["XDG_DATA_HOME"]) / "symbrain" / "audit"
     audit_dir.mkdir(parents=True, exist_ok=True)
@@ -737,9 +816,10 @@ class ReleaseFixtureServer:
 # --- skills status: OpenCode user-scope root fixtures ----------------------
 #
 # The native Rust slice covers `skills status --target opencode` in user scope
-# with a purely default configuration. These setups build exactly those root
-# states so the differential run compares Go bytes against Rust bytes for each
-# of them instead of trusting the Rust unit-test expectations.
+# with a purely default configuration, plus absent user roots for explicit
+# non-OpenCode targets. These setups build exactly those root states so the
+# differential run compares Go bytes against Rust bytes instead of trusting
+# unit-test output.
 OPENCODE_SKILLS_SUBDIR = "home/.config/opencode/skills"
 MANAGED_SKILL_MD = """---
 name: demo
@@ -1041,6 +1121,32 @@ def setup_activity_profile(root: Path, env: dict[str, str]) -> None:
     )
 
 
+def setup_activity_db_override(root: Path, env: dict[str, str]) -> None:
+    setup_activity_profile(root, env)
+    database = root / "data/symbrain/memory/activity-override.db"
+    database.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [env["SYMBRAIN_GO_BINARY"], "activity", "status", "--profile", "reader",
+         "--max-tokens", "100", "--db", str(database)],
+        env=env, cwd=env["PROJECT"], input=b"", stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, check=True, timeout=60,
+    )
+    connection = sqlite3.connect(database)
+    try:
+        with connection:
+            connection.execute(
+                "INSERT INTO activity_segments"
+                "(id, source, granularity, started_at, ended_at, applications,"
+                " redacted_summary, raw_ref, prior_segment_ids, superseded_by, expires_at)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                ("override-segment", "fixture", "10min", "2026-01-01T00:00:00Z",
+                 "2026-01-01T00:10:00Z", "[]", "override activity", "", "[]", "",
+                 "2099-01-01T00:00:00Z"),
+            )
+    finally:
+        connection.close()
+
+
 def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:
     for name in ("demo", "second"):
         write_library_skill(root, name)
@@ -1294,11 +1400,15 @@ def setup_skills_library_managed(root: Path, env: dict[str, str]) -> None:
         timeout=60,
     )
     freeze_managed_clocks(root)
+    # Keep access-time evidence explicit. Otherwise an ambient read between
+    # fixture setup and list can make one runtime report last_used and the
+    # other null, despite identical installed state.
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 3600.5)
 
 
 def setup_skills_library_last_used(root: Path, env: dict[str, str]) -> None:
     setup_skills_library_managed(root, env)
-    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 3600.5)
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 7200.5)
 
 
 def setup_skills_library_last_used_below_gap(root: Path, env: dict[str, str]) -> None:
@@ -1698,6 +1808,18 @@ CASES = (
     Case("doctor_empty_human", ("doctor",), setup=setup_doctor_empty),
     Case("doctor_empty_json", ("doctor", "--json"), setup=setup_doctor_empty),
     Case("doctor_global_json", ("--json", "doctor"), setup=setup_doctor_empty),
+    Case("doctor_disabled_fix", ("doctor", "--fix=false", "--json"), setup=setup_doctor_empty),
+    Case("doctor_disabled_force_release", ("doctor", "--force-release=false", "--json"), setup=setup_doctor_empty),
+    Case("doctor_unused_force_release", ("doctor", "--force-release", "--json"), setup=setup_doctor_empty, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_unused_force_release_true", ("doctor", "--force-release=true", "--json"), setup=setup_doctor_empty, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_disabled_fix_zero", ("doctor", "--fix=0", "--json"), setup=setup_doctor_empty, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_invalid_force_release", ("doctor", "--force-release=wat"), setup=setup_doctor_empty, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_disabled_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_disabled_vault),
+    Case("doctor_missing_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_missing_vault),
+    Case("doctor_failing_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_failing_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("doctor_successful_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_successful_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
+    Case("doctor_empty_vault_agent", ("doctor", "--vault-agent=", "--json"), setup=setup_doctor_empty_vault_agent, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
+    Case("doctor_slow_vault_handshake", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_slow_vault_handshake, env_overrides={"SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}, posix_only=True),
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),
@@ -2190,7 +2312,16 @@ CASES = (
         ("skills", "status", "--target", "opencode", "--scope", "team"),
         setup=setup_skills_opencode_unmanaged_skill,
     ),
-    Case("skills_status_other_target_fallback", ("skills", "status", "--target", "claude")),
+    Case("skills_status_claude_missing_root_table", ("skills", "status", "--target", "claude")),
+    Case("skills_status_claude_missing_root_json", ("skills", "status", "--target", "claude", "--json")),
+    Case("skills_status_codex_missing_root_table", ("skills", "status", "--target", "codex")),
+    Case("skills_status_codex_missing_root_json", ("skills", "status", "--target", "codex", "--json")),
+    Case("skills_status_hermes_missing_root_table", ("skills", "status", "--target", "hermes")),
+    Case("skills_status_hermes_missing_root_json", ("skills", "status", "--target", "hermes", "--json")),
+    Case("skills_status_antigravity_missing_root_table", ("skills", "status", "--target", "antigravity")),
+    Case("skills_status_antigravity_missing_root_json", ("skills", "status", "--target", "antigravity", "--json")),
+    Case("skills_status_openclaw_missing_root_table", ("skills", "status", "--target", "openclaw")),
+    Case("skills_status_openclaw_missing_root_json", ("skills", "status", "--target", "openclaw", "--json")),
     Case(
         "skills_status_opencode_escapable_name_json",
         ("skills", "status", "--target", "opencode", "--json"),
@@ -2335,6 +2466,36 @@ CASES = (
         setup=setup_activity_profile,
     ),
     Case(
+        "activity_status_db_override",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "100", "--db", "ACTIVITY_DB"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
+        "activity_get_db_override",
+        ("activity", "get", "--profile", "reader", "--max-tokens", "100", "--db", "ACTIVITY_DB", "override-segment"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
+        "activity_search_db_override",
+        ("activity", "search", "--profile", "reader", "--from", "2026-01-01T00:00:00Z", "--to", "2026-01-02T00:00:00Z", "--limit", "5", "--max-tokens", "100", "--db", "ACTIVITY_DB", "override"),
+        setup=setup_activity_db_override,
+    ),
+    Case(
+        "activity_status_missing_budget",
+        ("activity", "status", "--profile", "reader"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_status_zero_budget",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "0"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_status_excess_budget",
+        ("activity", "status", "--profile", "reader", "--max-tokens", "4001"),
+        setup=setup_activity_profile,
+    ),
+    Case(
         "activity_get_missing_row",
         ("activity", "get", "--profile", "reader", "--max-tokens", "100", "--json", "missing-id"),
         setup=setup_activity_profile,
@@ -2342,6 +2503,21 @@ CASES = (
     Case(
         "activity_get_missing_row_table",
         ("activity", "get", "--profile", "reader", "--max-tokens", "100", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_missing_budget",
+        ("activity", "get", "--profile=reader", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_zero_budget",
+        ("activity", "get", "--profile=reader", "--max-tokens=0", "missing-id"),
+        setup=setup_activity_profile,
+    ),
+    Case(
+        "activity_get_excess_budget",
+        ("activity", "get", "--profile=reader", "--max-tokens=4001", "missing-id"),
         setup=setup_activity_profile,
     ),
     Case(
@@ -2437,6 +2613,8 @@ CASES = (
     # endpoint and stay on the shipped implementation (see the CLI predicate).
     Case("usage_missing", ("usage",)),
     Case("usage_missing_json", ("usage", "--json")),
+    Case("usage_opencode_workspace_only", ("usage",), env_overrides={"OPENCODE_WORKSPACE_ID": "dump-workspace", "SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("usage_opencode_workspace_only_json", ("usage", "--json"), env_overrides={"OPENCODE_WORKSPACE_ID": "dump-workspace", "SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
     Case("usage_codex_stale_auth_file", ("usage",), setup=setup_codex_stale_auth),
     Case(
         "usage_codex_stale_auth_file_json",
@@ -2540,6 +2718,13 @@ CASES = (
     # native without oracle coverage.
     Case("sync_dry_run_empty", ("sync", "--dry-run")),
     Case("sync_dry_run_all", ("sync", "--dry-run", "opencode")),
+    Case("sync_html_project_json", ("sync", "--dry-run", "--project", "HTML_PROJECT", "claude", "--json"), setup=setup_html_project),
+    Case("sync_flag_terminator", ("sync", "--dry-run", "--", "agents")),
+    Case("sync_flag_after_positional", ("sync", "agents", "--dry-run")),
+    Case("sync_flag_after_terminator", ("sync", "--", "--dry-run")),
+    Case("sync_bool_true", ("sync", "--dry-run=TRUE", "agents")),
+    Case("sync_bool_false", ("sync", "--dry-run=false", "agents")),
+    Case("sync_bool_invalid", ("sync", "--dry-run=bogus")),
     Case(
         "sync_dry_run_with_library",
         ("sync", "--dry-run", "opencode"),
@@ -2580,6 +2765,12 @@ CASES = (
     Case("harness_list_unknown_flag", ("harness", "list", "--bogus")),
     Case("harness_unknown_subcommand", ("harness", "frobnicate")),
     Case("harness_health_empty_json", ("harness", "health", "--json")),
+    Case("harness_health_malformed_json", ("harness", "health"), setup=setup_install_malformed),
+    Case("harness_health_malformed_json_response", ("harness", "health", "--json"), setup=setup_install_malformed),
+    Case("harness_health_missing_command", ("harness", "health"), setup=setup_harness_health_missing_command),
+    Case("harness_health_missing_command_json", ("harness", "health", "--json"), setup=setup_harness_health_missing_command),
+    Case("harness_health_initialize", ("harness", "health"), setup=setup_harness_health_probe),
+    Case("harness_health_initialize_json", ("harness", "health", "--json"), setup=setup_harness_health_probe),
     Case(
         "harness_health_filter_json",
         ("harness", "health", "--harness", "cursor", "--json"),
@@ -2718,7 +2909,9 @@ CASES = (
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:
     replacements = {
         "PROJECT": root / "project",
+        "HTML_PROJECT": html_project_path(root),
         "MEMORY_DB": root / "data/symbrain/memory/default.db",
+        "ACTIVITY_DB": root / "data/symbrain/memory/activity-override.db",
     }
     return tuple(
         str(replacements[arg]) if isinstance(arg, str) and arg in replacements else arg

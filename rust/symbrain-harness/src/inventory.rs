@@ -257,7 +257,11 @@ fn add_binding(
     }
 }
 
-fn format_parse_error(harness: &Harness, original: &[u8], error: &crate::HarnessError) -> String {
+pub(crate) fn format_parse_error(
+    harness: &Harness,
+    original: &[u8],
+    error: &crate::HarnessError,
+) -> String {
     let detail = match error {
         crate::HarnessError::Json(message) => go_json_error_detail(original, message),
         crate::HarnessError::Toml(message) => message.clone(),

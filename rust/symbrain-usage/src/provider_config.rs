@@ -17,20 +17,18 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables that configure a provider on their own.
-const PROVIDER_ENV_VARS: &[&str] = &[
-    "ANTHROPIC_ADMIN_KEY",
+/// Environment variables other than the narrow direct provider credentials
+/// allowed to use native reporting. Every one keeps the CLI on Go.
+const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_OAUTH_TOKEN",
-    "CODEX_ACCESS_TOKEN",
-    "COPILOT_ACCESS_TOKEN",
-    "CURSOR_COOKIE",
-    "KIMI_CODE_API_KEY",
+    "CODEX_HOME",
+    "HERMES_HOME",
+    "HERMES_PORTAL_BASE_URL",
+    "KIMI_CODE_BASE_URL",
+    "KIMI_CODE_HOME",
     "KIMI_AUTH_TOKEN",
-    "MOONSHOT_API_KEY",
-    "NOUS_PORTAL_ACCESS_TOKEN",
-    "OPENCODE_COOKIE",
-    "OPENCODE_WORKSPACE_ID",
-    "OPENROUTER_API_KEY",
+    "MOONSHOT_REGION",
+    "OPENROUTER_API_URL",
 ];
 
 /// The service Claude Code stores its OAuth credentials under in the macOS
@@ -930,12 +928,23 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. The CLI keeps such reports on the shipped implementation until the
-/// provider fetch paths are pinned byte-for-byte.
+/// provider fetch paths are pinned byte-for-byte. A workspace override alone
+/// supplies no `OpenCode` cookie or strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
-    if PROVIDER_ENV_VARS.iter().any(|name| env_raw(name).is_some()) {
-        return true;
-    }
+    let claude_admin_env = env_raw("ANTHROPIC_ADMIN_KEY");
+    let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
+    let openrouter_env = env_raw("OPENROUTER_API_KEY");
+    let moonshot_env = env_raw("MOONSHOT_API_KEY");
+    let cursor_env = env_raw("CURSOR_COOKIE");
+    let kimi_api_env = env_raw("KIMI_CODE_API_KEY");
+    let nous_env = env_raw("NOUS_PORTAL_ACCESS_TOKEN");
+    let codex_env = env_raw("CODEX_ACCESS_TOKEN");
+    let opencode_env = env_raw("OPENCODE_COOKIE");
+    let opencode_workspace_override = env_raw("OPENCODE_WORKSPACE_ID");
+    let other_provider_env = OTHER_PROVIDER_ENV_VARS
+        .iter()
+        .any(|name| env_raw(name).is_some());
     if claude_file_token().is_some()
         || codex_file_token(&codex_home()).is_some()
         || copilot_file_token().is_some()
@@ -944,7 +953,70 @@ pub fn needs_go_fallback() -> bool {
     {
         return true;
     }
-    claude_keychain_present() || antigravity_running()
+    needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: claude_admin_env.as_deref(),
+        copilot_env: copilot_env.as_deref(),
+        openrouter_env: openrouter_env.as_deref(),
+        moonshot_env: moonshot_env.as_deref(),
+        cursor_env: cursor_env.as_deref(),
+        kimi_api_env: kimi_api_env.as_deref(),
+        nous_env: nous_env.as_deref(),
+        codex_env: codex_env.as_deref(),
+        opencode_env: opencode_env.as_deref(),
+        opencode_workspace_override: opencode_workspace_override.as_deref(),
+        other_provider_env,
+        other_credential_source: false,
+        local_provider_present: claude_keychain_present() || antigravity_running(),
+    })
+}
+
+/// Keeps reports native only for one direct credential from a pinned set of
+/// providers, when every other provider source and local probe is absent.
+/// Secret references, credential files, and provider-specific overrides stay
+/// on Go.
+#[derive(Clone, Copy, Default)]
+struct UsageFallbackSignals<'a> {
+    claude_admin_env: Option<&'a str>,
+    copilot_env: Option<&'a str>,
+    openrouter_env: Option<&'a str>,
+    moonshot_env: Option<&'a str>,
+    cursor_env: Option<&'a str>,
+    kimi_api_env: Option<&'a str>,
+    nous_env: Option<&'a str>,
+    codex_env: Option<&'a str>,
+    opencode_env: Option<&'a str>,
+    opencode_workspace_override: Option<&'a str>,
+    other_provider_env: bool,
+    other_credential_source: bool,
+    local_provider_present: bool,
+}
+
+fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
+    let credentials = [
+        signals.claude_admin_env,
+        signals.copilot_env,
+        signals.openrouter_env,
+        signals.moonshot_env,
+        signals.cursor_env,
+        signals.kimi_api_env,
+        signals.nous_env,
+        signals.codex_env,
+        signals.opencode_env,
+    ];
+    if signals.other_provider_env
+        || signals.other_credential_source
+        || signals.local_provider_present
+        || (signals.opencode_workspace_override.is_some()
+            && credentials.iter().any(Option::is_some))
+    {
+        return true;
+    }
+    let mut configured = credentials.into_iter().flatten();
+    match (configured.next(), configured.next()) {
+        (None, _) => false,
+        (Some(_), Some(_)) => true,
+        (Some(credential), None) => is_secret_reference(credential),
+    }
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.
@@ -1129,14 +1201,14 @@ fn kimi() -> Provider {
     };
     // Strategy order is API key, then CLI token, then web auth token.
     let mut credentials = Vec::new();
-    if let Some((source, value)) = api_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = api_value.clone() {
+        credentials.push(("api".into(), value));
     }
     if let Some(token) = cli_token.clone() {
         credentials.push(("cli".into(), token));
     }
-    if let Some((source, value)) = auth_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = auth_value.clone() {
+        credentials.push(("web".into(), value));
     }
     let mut provider = Provider::new(
         "kimi",

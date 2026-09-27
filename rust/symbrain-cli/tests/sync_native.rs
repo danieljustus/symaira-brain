@@ -68,7 +68,7 @@ fn skill_target_harness_syncs_natively_without_a_go_binary() {
     // handles it, and with an absent library it reports exactly what Go's
     // skillsrunner does for that case.
     let root = TempDir::new().unwrap();
-    let output = run(&root, &["sync", "claude", "--dry-run", "--json"]);
+    let output = run(&root, &["sync", "--dry-run", "--", "claude", "--json"]);
     assert!(
         output.status.success(),
         "native sync must succeed, stderr: {:?}",

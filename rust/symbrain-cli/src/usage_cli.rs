@@ -5,29 +5,34 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credentials are read-only and their\nvalues are never included in output, errors, or audit records.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
 /// The native port reproduces the per-provider credential state machine
 /// (sources, missing/expired/available texts, source tags) and is the reference
 /// for reports with no stored credential at all — those reach no endpoint and
-/// are pinned byte-for-byte by the parity suite. A report that *does* find a
-/// credential fetches from a live endpoint, and what remains unpinned there is
-/// narrower than it used to be:
+/// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
+/// without a cookie also stays native because Go has no fetch strategy for it.
+/// A report with only a direct `ANTHROPIC_ADMIN_KEY` and no Claude Code OAuth
+/// source, a direct `COPILOT_ACCESS_TOKEN` or a direct
+/// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
+/// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
+/// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential
+/// file or web token, or a direct `NOUS_PORTAL_ACCESS_TOKEN` using the default
+/// portal base and with no Hermes auth file, or a direct `CODEX_ACCESS_TOKEN`
+/// with no Codex auth file or home override now runs natively:
+/// each configured report, request, parsed snapshot, and provider error cases
+/// are checked against Go oracles using synthetic credentials and canned
+/// transport. File credentials, secret references, provider-specific
+/// overrides, and every other configured provider continue to use Go until pinned.
 ///
-/// - the request layer is frozen by `scripts/usage-request-oracle` and checked
-///   by the port's request oracle test (method, URL, headers, body, plus the
-///   provider-level error text for canned statuses), so drift on that layer
-///   fails a unit test;
-/// - the `OpenCode` workspace-discovery fallbacks (the shipped strategy retries
-///   the lookup with a POST and detects a signed-out body; the port performs a
-///   single GET) and the successful parse of a *live* response body are still
-///   open (issue #620).
-///
-/// Until those are closed, reports that resolve a credential stay with the
-/// shipped implementation.
-pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+/// The report fetch invoked below remains a user-initiated live read, as it
+/// does in the shipped Go command.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
+        return false;
+    }
     symbrain_usage::needs_go_fallback()
 }
 
@@ -139,6 +144,21 @@ fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn help_is_native_without_resolving_credentials() {
+        for flag in ["-h", "--help"] {
+            let args = [OsString::from(flag)];
+            assert!(!requires_go_fallback(&args));
+            let (mut stdout, mut stderr) = (Vec::new(), Vec::new());
+            assert_eq!(
+                run(&args, &mut stdout, &mut stderr, OutputFormat::Table),
+                exit::USAGE
+            );
+            assert!(stdout.is_empty());
+            assert_eq!(stderr, HELP.as_bytes());
+        }
+    }
 
     #[test]
     fn table_matches_go_shape() {

@@ -107,7 +107,9 @@ impl Provider {
         transport: &Arc<dyn Transport>,
         cancel: &Cancellation,
     ) -> Result<UsageSnapshot, UsageError> {
-        let result = if self.fixture && self.id == "antigravity" {
+        let result = if self.fixture && self.id == "antigravity" && self.credential.is_none() {
+            Err(UsageError::not_running())
+        } else if self.fixture && self.id == "antigravity" {
             self.fetch_antigravity_fixture(transport, cancel)
         } else if self.fixture {
             let source = match self.id.as_str() {

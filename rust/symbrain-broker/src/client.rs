@@ -33,13 +33,18 @@ impl fmt::Display for BrokerError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Closed { op, detail } => {
-                if detail.is_empty() {
-                    write!(f, "broker: {op}: child closed")
+                if detail.is_empty() || detail == "EOF" || detail == "child closed" {
+                    write!(f, "mcp broker: {op} failed: child connection closed")
                 } else {
-                    write!(f, "broker: {op}: child closed: {detail}")
+                    write!(
+                        f,
+                        "mcp broker: {op} failed: child connection closed: {detail}"
+                    )
                 }
             }
-            Self::Timeout { op } => write!(f, "broker: {op}: timeout"),
+            Self::Timeout { op } => {
+                write!(f, "mcp broker: {op} timed out waiting for child response")
+            }
             Self::Cancelled { op } => write!(f, "broker: {op} canceled: context canceled"),
             Self::Rpc { code, message } => write!(f, "broker: rpc error {code}: {message}"),
             Self::ProtocolMismatch { expected, actual } => {
@@ -94,9 +99,13 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
     }
 
     which(binary_name).ok_or_else(|| {
+        #[cfg(windows)]
+        let path_var = "%PATH%";
+        #[cfg(not(windows))]
+        let path_var = "$PATH";
         BrokerError::Io(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("broker: {binary_name:?} not found on PATH or in managed directory"),
+            format!("{binary_name:?} not found on PATH or in managed directory: exec: {binary_name:?}: executable file not found in {path_var}"),
         ))
     })
 }
@@ -321,7 +330,10 @@ impl Client {
         let raw = self.call("initialize", Some(&params), timeout, None)?;
         let result: InitializeResult = serde_json::from_str(raw.get())
             .map_err(|err| BrokerError::Parse(format!("initialize result: {err}")))?;
-        if result.protocol_version != PROTOCOL_VERSION {
+        if !matches!(
+            result.protocol_version.as_str(),
+            "2024-11-05" | "2025-03-26" | "2025-06-18"
+        ) {
             return Err(BrokerError::ProtocolMismatch {
                 expected: PROTOCOL_VERSION.to_string(),
                 actual: result.protocol_version,
@@ -460,7 +472,15 @@ impl Client {
         if recv_result.is_err() {
             self.inner.pending.lock().expect("pending lock").remove(&id);
         }
-        let response = recv_result.and_then(|result| result)?;
+        let response = recv_result
+            .and_then(|result| result)
+            .map_err(|error| match error {
+                BrokerError::Closed { detail, .. } => BrokerError::Closed {
+                    op: method.to_string(),
+                    detail,
+                },
+                other => other,
+            })?;
         if let Some(error) = response.get("error") {
             let code = error
                 .get("code")
@@ -843,6 +863,14 @@ mod tests {
         let error = discover("sh", missing.to_str().expect("temp path"))
             .expect_err("invalid explicit path must not fall back to PATH");
         assert!(error.to_string().contains("configured binary_path"));
+    }
+
+    #[test]
+    fn missing_binary_error_uses_go_platform_path_placeholder() {
+        let error = discover("symbrain-definitely-missing-fixture-binary", "")
+            .expect_err("fixture binary must not exist");
+        let expected = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+        assert!(error.to_string().contains(expected), "{error}");
     }
 
     #[test]

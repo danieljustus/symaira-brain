@@ -287,8 +287,8 @@ fn module_lifecycle_flags_are_forwarded_to_the_go_fallback() {
     let mut stderr = Vec::new();
     let cases = [
         vec!["doctor", "--fix"],
-        vec!["doctor", "--fix=FALSE"],
-        vec!["doctor", "--force-release"],
+        vec!["doctor", "--fix=TRUE"],
+        vec!["doctor", "--force-release", "--fix=TRUE"],
         vec!["setup", "--fix"],
         vec!["setup", "--force-release"],
         vec!["setup", "--from-source", "/receiver"],

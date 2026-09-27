@@ -138,6 +138,10 @@ fn normalize_stdout(s: &str, root: &str, repo: &str) -> String {
     let private_root = format!("/private{root}");
     out = out.replace(&private_root, "<root>");
     out = out.replace(root, "<root>");
+    #[cfg(windows)]
+    {
+        out = normalize_windows_temp_root(&out, root);
+    }
 
     if !repo.is_empty() && repo != root {
         let private_repo = format!("/private{repo}");
@@ -155,6 +159,22 @@ fn normalize_stdout(s: &str, root: &str, repo: &str) -> String {
     out = platform_re.replace_all(&out, "${1}<os/arch>").to_string();
 
     normalize_accepted_differences(&normalize_tokenized_paths(&out))
+}
+
+fn normalize_windows_temp_root(s: &str, root: &str) -> String {
+    let Some(root_base) = root
+        .rsplit(['/', '\\'])
+        .next()
+        .filter(|name| !name.is_empty())
+    else {
+        return s.to_string();
+    };
+    let pattern = regex::Regex::new(&format!(
+        r#"(?i)[A-Z]:\\[^\"]*?\\{}"#,
+        regex::escape(root_base)
+    ))
+    .unwrap();
+    pattern.replace_all(s, "<root>").into_owned()
 }
 
 /// Normalize separators only in paths rooted at an oracle placeholder. The
@@ -280,7 +300,7 @@ fn assert_native_fixture() {
 #[allow(clippy::too_many_lines)]
 fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
-    assert_eq!(cases.len(), 81, "fixture must contain 81 cases");
+    assert_eq!(cases.len(), 88, "fixture must contain 88 cases");
 
     #[cfg(windows)]
     assert_native_fixture();
@@ -311,8 +331,15 @@ fn cli_tree_fixture_matches_native_binary() {
             continue;
         }
 
+        if case.id.starts_with("go harness list malformed JSON") {
+            fs::write(real_root(&root).join("home/.claude.json"), b"{not-json").unwrap();
+        }
+
         let args: Vec<&str> = case.args.iter().map(String::as_str).collect();
         let output = run_case(&root, &args, &cwd);
+        if case.id == "go harness list malformed JSON response" {
+            fs::remove_file(real_root(&root).join("home/.claude.json")).unwrap();
+        }
 
         // Exit code
         let actual_exit = output.status.code().unwrap_or(-1);
@@ -412,7 +439,7 @@ mod tests {
     #[test]
     fn fixture_loads_and_has_correct_count() {
         let cases = load_fixture();
-        assert_eq!(cases.len(), 81);
+        assert_eq!(cases.len(), 88);
     }
 
     #[test]
@@ -423,5 +450,14 @@ mod tests {
             ),
             "<root>/home/.claude/config.json https://example.test/a\\b outside\\path"
         );
+    }
+
+    #[test]
+    fn temp_root_normalization_accepts_windows_short_path_aliases() {
+        let root = r"C:\Users\runneradmin\AppData\Local\Temp\.tmpfixture";
+        let output =
+            r#"{"path":"C:\Users\RUNNER~1\AppData\Local\Temp\.tmpfixture\home\.claude.json"}"#;
+        let normalized = normalize_tokenized_paths(&normalize_windows_temp_root(output, root));
+        assert_eq!(normalized, r#"{"path":"<root>/home/.claude.json"}"#);
     }
 }

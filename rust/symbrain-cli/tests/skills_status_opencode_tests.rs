@@ -1,4 +1,4 @@
-//! CLI byte checks for the native `OpenCode` user-scope status slice.
+//! CLI byte checks for native `OpenCode` status and absent explicit user roots.
 
 use std::process::{Command, Output};
 
@@ -102,12 +102,22 @@ fn default_user_status_empty_json_matches_go_bytes() {
 }
 
 #[test]
-fn unsupported_status_target_keeps_go_fallback() {
-    let root = TempDir::new().unwrap();
-    let output = run(&root, &["skills", "status", "--target", "claude"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+fn empty_explicit_user_roots_are_native() {
+    for target in ["claude", "codex", "hermes", "antigravity", "openclaw"] {
+        let root = TempDir::new().unwrap();
+        let output = run(&root, &["skills", "status", "--target", target]);
+        assert!(
+            output.status.success(),
+            "{target} stderr: {:?}",
+            output.stderr
+        );
+        assert!(
+            output.stderr.is_empty(),
+            "{target} stderr: {:?}",
+            output.stderr
+        );
+        assert_eq!(output.stdout, b"No installed skills found.\n", "{target}");
+    }
 }
 
 #[test]

@@ -53,7 +53,7 @@ pub(super) fn request_for(
         // oracle tests compare names case-insensitively.
         headers.insert("anthropic-beta".into(), "oauth-2025-04-20".into());
     }
-    if id == "kimi" && source != "web" {
+    if id == "kimi" && source == "cli" {
         // Identity metadata the Kimi Code CLI sends with its token. The
         // shipped implementation also sends `X-Msh-Os-Version` and
         // `X-Msh-Device-Model`, filled with the *Go runtime version* (see

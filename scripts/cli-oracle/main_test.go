@@ -37,3 +37,15 @@ func TestSetEnvReplacesInheritedNameCaseInsensitively(t *testing.T) {
 		t.Fatalf("USERPROFILE entries = %#v, want one isolated value", values)
 	}
 }
+
+func TestNormalizeWindowsOracleRootAcceptsShortPathAlias(t *testing.T) {
+	root := `C:\Users\runneradmin\AppData\Local\Temp\symbrain-cli-oracle.1234`
+	got := normalizeWindowsOracleRoot(
+		`{"path":"C:\Users\RUNNER~1\AppData\Local\Temp\symbrain-cli-oracle.1234\home\.claude.json"}`,
+		root,
+	)
+	want := `{"path":"<root>\home\.claude.json"}`
+	if got != want {
+		t.Fatalf("normalized output mismatch:\n got: %s\nwant: %s", got, want)
+	}
+}

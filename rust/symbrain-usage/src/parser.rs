@@ -39,6 +39,11 @@ pub(crate) fn parse_snapshot(
     match id {
         "claude" => {
             parse_claude(&value, &mut snapshot);
+            if source == "api" {
+                // The shipped Admin API strategy always reports USD, even
+                // when the cost response has no totals.
+                snapshot.currency = Some("USD".into());
+            }
             Ok(())
         }
         "codex" => {
@@ -69,7 +74,10 @@ pub(crate) fn parse_snapshot(
         "antigravity" => parser_extra::parse_antigravity(&value, &mut snapshot),
         _ => Err(UsageError::parse(id, "unknown provider")),
     }?;
-    if snapshot.meters.is_empty() && snapshot.balance.is_none() {
+    if snapshot.meters.is_empty()
+        && snapshot.balance.is_none()
+        && !(id == "claude" && source == "api")
+    {
         // A parseable response without usable fields is the shipped
         // `PayloadError`, which names the provider by id - unlike the
         // "unreadable response" wording of an unparseable body.

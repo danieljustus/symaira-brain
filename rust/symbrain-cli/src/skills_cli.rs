@@ -149,6 +149,13 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             }
             match target.as_deref() {
                 Some("opencode") => opencode_status_needs_go(&scope),
+                Some(target)
+                    if symbrain_skills::default_targets()
+                        .iter()
+                        .any(|known| known == target) =>
+                {
+                    target_status_missing_root_needs_go(target, &scope)
+                }
                 None => has_dynamic_target_state(),
                 Some(_) => true,
             }
@@ -844,6 +851,28 @@ fn opencode_status_root(scope: &str) -> PathBuf {
     skill_root_for("opencode", &home)
 }
 
+/// Keeps an explicit harness status scan native only when its user root is
+/// absent. Existing roots can carry markers and filesystem states whose Go
+/// diagnostics remain authoritative.
+fn target_status_missing_root_needs_go(target: &str, scope: &str) -> bool {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    target_status_missing_root_needs_go_at(target, scope, &home)
+}
+
+fn target_status_missing_root_needs_go_at(
+    target: &str,
+    scope: &str,
+    home: &std::path::Path,
+) -> bool {
+    if scope != "user" {
+        return true;
+    }
+    match fs::symlink_metadata(skill_root_for(target, home)) {
+        Err(error) => error.kind() != std::io::ErrorKind::NotFound,
+        Ok(_) => true,
+    }
+}
+
 fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {
     match target {
         "claude" => home.join(".claude"),
@@ -1155,10 +1184,35 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::current_project_dir;
+    use super::{current_project_dir, target_status_missing_root_needs_go_at};
+    use std::fs;
 
     #[test]
     fn sync_project_dir_matches_absolute_working_directory() {
         assert!(current_project_dir().is_absolute());
+    }
+
+    #[test]
+    fn explicit_target_status_is_native_only_for_absent_user_roots() {
+        let home = tempfile::tempdir().expect("temporary home");
+        for target in ["claude", "codex", "hermes", "antigravity", "openclaw"] {
+            assert!(
+                !target_status_missing_root_needs_go_at(target, "user", home.path()),
+                "absent {target} root should be native"
+            );
+            assert!(target_status_missing_root_needs_go_at(
+                target,
+                "project",
+                home.path()
+            ));
+        }
+
+        let codex_root = home.path().join(".agents/skills");
+        fs::create_dir_all(&codex_root).expect("create Codex root");
+        assert!(target_status_missing_root_needs_go_at(
+            "codex",
+            "user",
+            home.path()
+        ));
     }
 }

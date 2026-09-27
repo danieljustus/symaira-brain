@@ -2,7 +2,7 @@
 
 Frozen command-tree and flag behaviour for `CLI-006`, captured from the real
 production binary built at the pinned revision (via `run-go-oracle.sh`), never
-hand-written. 81 cases: the top-level usage text, `help`/`-h`/`--help`, no
+hand-written. 88 cases: the top-level usage text, `help`/`-h`/`--help`, no
 arguments, unknown commands, `version` and its flag boundaries, `config`,
 `profile`, `doctor`, `init`, `install`, `uninstall`, `sync`, `memory`,
 `skills`, `activity`, `audit` and `guard` — each with the measured stdout,
