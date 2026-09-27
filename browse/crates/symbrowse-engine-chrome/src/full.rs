@@ -1038,6 +1038,10 @@ impl ChromePage {
             None
         };
         let mut navigation_dispatch_open = cfg!(windows) && !same_document;
+        let navigation_fallback = self.page.execute(page::NavigateParams::new(url));
+        tokio::pin!(navigation_fallback);
+        let mut navigation_fallback_started = false;
+        let mut navigation_fallback_open = false;
         if !navigation_dispatch_open {
             let dispatch = self.evaluate(&navigation_expression).await?;
             if let Some(error) = dispatch
@@ -1088,6 +1092,16 @@ impl ChromePage {
                         return Err(error.to_owned().into());
                     }
                 }
+                fallback = &mut navigation_fallback, if navigation_fallback_open => {
+                    navigation_fallback_open = false;
+                    let fallback = fallback?;
+                    if diagnostics {
+                        eprintln!("chrome_open_stage=navigation-fallback status=completed error_text={}", fallback.result.error_text.is_some());
+                    }
+                    if let Some(error) = fallback.result.error_text {
+                        return Err(error.into());
+                    }
+                }
                 _ = tokio::time::sleep_until(deadline) => {
                     if navigation_dispatch_open && diagnostics {
                         eprintln!("chrome_open_stage=navigation-future status=timeout");
@@ -1114,6 +1128,19 @@ impl ChromePage {
                             let state = state.into_value::<Value>()?;
                             if navigation_state_changed(&before, &state) {
                                 navigation_observed = true;
+                            } else if cfg!(windows)
+                                && !same_document
+                                && !navigation_fallback_started
+                            {
+                                // On Windows Runtime.evaluate can complete while location.assign
+                                // leaves the page unchanged. Retry once through CDP's native
+                                // navigation command, keeping its response asynchronous so a
+                                // stalled load cannot block event and document probes.
+                                navigation_fallback_started = true;
+                                navigation_fallback_open = true;
+                                if diagnostics {
+                                    eprintln!("chrome_open_stage=navigation-fallback status=start");
+                                }
                             }
                         }
                         Ok(Err(_)) => {
