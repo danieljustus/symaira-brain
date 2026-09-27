@@ -65,8 +65,8 @@
     {
       "id": "CLI-006",
       "seam": "batch command execution",
-      "fixture": "mixed successful/failing commands, JSON-producing version, --bail and dry-run",
-      "go_oracle": "go test ./cmd/symbrowse -run 'TestBatch'",
+      "fixture": "mixed successful/failing commands, JSON-producing version, MCP --list-profiles, --bail and dry-run",
+      "go_oracle": "go test ./cmd/symbrowse -run 'TestBatch'; ./symbrowse mcp --list-profiles",
       "expected": "per-item results preserve input order; nested JSON is decoded as data; --bail stops at first failure; dry-run executes no side effect",
       "comparison": "json-semantic",
       "platforms": [

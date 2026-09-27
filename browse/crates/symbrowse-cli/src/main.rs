@@ -915,6 +915,10 @@ fn execute_batch_item(argv: &[String]) -> ItemOutput {
             stdout: render_version_text(VERSION),
             error: None,
         },
+        Ok(Action::McpListProfiles) => ItemOutput {
+            stdout: MCP_PROFILE_LIST.to_owned(),
+            error: None,
+        },
         Ok(Action::ConfigShow { format, flags }) => match render_config_show(format, flags) {
             Ok(stdout) => ItemOutput {
                 stdout,
@@ -2020,6 +2024,8 @@ mod tests {
     use super::{Action, Format, KeyInitResult, ParseError, parse, render_state_key_init};
     use std::ffi::OsString;
 
+    use sha2::{Digest, Sha256};
+
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
     }
@@ -2070,6 +2076,42 @@ mod tests {
                 bail: true,
                 dry_run: true,
             })
+        );
+    }
+
+    #[test]
+    fn batch_mcp_list_profiles_matches_source_pinned_go_output() {
+        const GO_ORACLE_COMMIT: &str = "f27c09780e076ab69f16c20195dd3265f6cab037";
+        const SOURCE_HASHES: [&str; 2] = [
+            "2b227ad48822e009f769b7cd9340b16148da3ac28788c164bb284a75f56d7d2f",
+            "7dbe1c0ab408d8ad69776fd5858f6db65be041ecfa8c8108cb86f58a45dffb46",
+        ];
+        let go_sources = [
+            include_bytes!("../../../cmd/symbrowse/mcp.go").as_slice(),
+            include_bytes!("../../../internal/mcp/profiles.go").as_slice(),
+        ];
+        for (source, expected_hash) in go_sources.into_iter().zip(SOURCE_HASHES) {
+            let actual_hash: String = Sha256::digest(source)
+                .iter()
+                .map(|byte| format!("{byte:02x}"))
+                .collect();
+            assert_eq!(
+                actual_hash, expected_hash,
+                "Go oracle at {GO_ORACLE_COMMIT}"
+            );
+        }
+
+        let expected = include_str!("../tests/fixtures/mcp-list-profiles.stdout");
+        let commands = vec!["mcp --list-profiles".to_owned()];
+        let report = super::batch::run(&commands, false, false, super::execute_batch_item);
+
+        assert_eq!(report.results.len(), 1);
+        assert!(report.results[0].success);
+        assert_eq!(
+            report.results[0].data,
+            Some(serde_json::Value::String(
+                expected.trim_end_matches('\n').to_owned()
+            ))
         );
     }
 
