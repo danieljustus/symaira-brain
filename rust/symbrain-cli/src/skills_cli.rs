@@ -149,6 +149,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             }
             match target.as_deref() {
                 Some("opencode") => opencode_status_needs_go(&scope),
+                Some("claude") => claude_status_needs_go(&scope),
                 None => has_dynamic_target_state(),
                 Some(_) => true,
             }
@@ -844,6 +845,24 @@ fn opencode_status_root(scope: &str) -> PathBuf {
     skill_root_for("opencode", &home)
 }
 
+/// Keeps the explicit Claude status slice native only when its user root is
+/// absent. Existing roots can carry markers and filesystem states whose Go
+/// diagnostics remain authoritative.
+fn claude_status_needs_go(scope: &str) -> bool {
+    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    claude_status_needs_go_at(scope, &home)
+}
+
+fn claude_status_needs_go_at(scope: &str, home: &std::path::Path) -> bool {
+    if scope != "user" {
+        return true;
+    }
+    match fs::symlink_metadata(skill_root_for("claude", home)) {
+        Err(error) => error.kind() != std::io::ErrorKind::NotFound,
+        Ok(_) => true,
+    }
+}
+
 fn config_dir_for(target: &str, home: &std::path::Path) -> PathBuf {
     match target {
         "claude" => home.join(".claude"),
@@ -1155,10 +1174,22 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::current_project_dir;
+    use super::{claude_status_needs_go_at, current_project_dir};
+    use std::fs;
 
     #[test]
     fn sync_project_dir_matches_absolute_working_directory() {
         assert!(current_project_dir().is_absolute());
+    }
+
+    #[test]
+    fn claude_status_is_native_only_for_an_absent_user_root() {
+        let home = tempfile::tempdir().expect("temporary home");
+        assert!(!claude_status_needs_go_at("user", home.path()));
+        assert!(claude_status_needs_go_at("project", home.path()));
+
+        let root = home.path().join(".claude/skills");
+        fs::create_dir_all(&root).expect("create Claude root");
+        assert!(claude_status_needs_go_at("user", home.path()));
     }
 }

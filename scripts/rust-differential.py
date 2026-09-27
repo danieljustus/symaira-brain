@@ -805,9 +805,9 @@ class ReleaseFixtureServer:
 # --- skills status: OpenCode user-scope root fixtures ----------------------
 #
 # The native Rust slice covers `skills status --target opencode` in user scope
-# with a purely default configuration. These setups build exactly those root
-# states so the differential run compares Go bytes against Rust bytes for each
-# of them instead of trusting the Rust unit-test expectations.
+# with a purely default configuration, plus an absent explicit Claude user
+# root. These setups build exactly those root states so the differential run
+# compares Go bytes against Rust bytes instead of trusting unit-test output.
 OPENCODE_SKILLS_SUBDIR = "home/.config/opencode/skills"
 MANAGED_SKILL_MD = """---
 name: demo
@@ -2296,7 +2296,8 @@ CASES = (
         ("skills", "status", "--target", "opencode", "--scope", "team"),
         setup=setup_skills_opencode_unmanaged_skill,
     ),
-    Case("skills_status_other_target_fallback", ("skills", "status", "--target", "claude")),
+    Case("skills_status_claude_missing_root_table", ("skills", "status", "--target", "claude")),
+    Case("skills_status_claude_missing_root_json", ("skills", "status", "--target", "claude", "--json")),
     Case(
         "skills_status_opencode_escapable_name_json",
         ("skills", "status", "--target", "opencode", "--json"),
