@@ -127,10 +127,10 @@ fn render_failure(format: Format, message: String) -> ExitCode {
         Ok(output) => {
             if format == Format::Text {
                 let _ = std::io::stderr().write_all(output.as_bytes());
-                ExitCode::from(1)
             } else {
-                super::write_stdout(&output)
+                let _ = std::io::stdout().write_all(output.as_bytes());
             }
+            ExitCode::from(ErrorCode::OperationFailed.exit_code())
         }
         Err(_) => ExitCode::from(1),
     }

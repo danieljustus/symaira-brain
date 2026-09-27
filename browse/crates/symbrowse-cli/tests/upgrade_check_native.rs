@@ -66,3 +66,41 @@ fn native_upgrade_check_reads_fixture_cache_without_applying_or_networking() {
     assert!(apply.stdout.is_empty());
     assert_eq!(fs::read(&cache).unwrap(), original_cache);
 }
+
+#[test]
+fn native_upgrade_check_failure_exits_nonzero_for_json_and_yaml() {
+    let cache_root = tempfile::tempdir().expect("isolated XDG cache");
+    let proxy_listener = TcpListener::bind("127.0.0.1:0").expect("reserve local proxy port");
+    let blocked_proxy = format!("http://{}", proxy_listener.local_addr().unwrap());
+    drop(proxy_listener);
+
+    for format in ["json", "yaml"] {
+        let output = Command::new(env!("CARGO_BIN_EXE_symbrowse"))
+            .args(["upgrade", "--check", "--output", format])
+            .env("XDG_CACHE_HOME", cache_root.path())
+            .env("HTTPS_PROXY", &blocked_proxy)
+            .env("https_proxy", &blocked_proxy)
+            .env("ALL_PROXY", &blocked_proxy)
+            .env("all_proxy", &blocked_proxy)
+            .env("NO_PROXY", "")
+            .env("no_proxy", "")
+            .output()
+            .expect("run native CLI executable");
+
+        assert_eq!(
+            output.status.code(),
+            Some(1),
+            "{format} must report failure"
+        );
+        assert!(output.stderr.is_empty(), "{format} uses structured stdout");
+        let stdout = String::from_utf8(output.stdout).expect("UTF-8 envelope");
+        if format == "json" {
+            let envelope: serde_json::Value = serde_json::from_str(&stdout).expect("JSON envelope");
+            assert_eq!(envelope["success"], false);
+            assert_eq!(envelope["error"]["code"], "operation_failed");
+        } else {
+            assert!(stdout.contains("success: false\n"), "{stdout}");
+            assert!(stdout.contains("code: operation_failed\n"), "{stdout}");
+        }
+    }
+}
