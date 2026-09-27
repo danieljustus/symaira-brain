@@ -144,6 +144,24 @@ fn provider_for(case: &Case) -> Provider {
     provider
 }
 
+fn authenticated_copilot_report(response: Response) -> (crate::Report, FixtureTransport) {
+    // This is the report-level replay of the shipped Copilot provider: the
+    // dummy value is intentionally not a GitHub token, and FixtureTransport
+    // makes a network request impossible.
+    let mut provider = Provider::fixture("copilot", "GitHub Copilot");
+    provider.auth_status = crate::AuthStatus {
+        status: "available".into(),
+        detail: "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)".into(),
+        source: Some("env".into()),
+    };
+    provider.credentials = vec![("env".into(), COPILOT_OAUTH.into())];
+    provider.credential = Some(COPILOT_OAUTH.into());
+    let transport = FixtureTransport::new([("copilot".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    (report, transport)
+}
+
 /// Mirrors the normalization the oracle applies, so both sides compare on the
 /// same placeholders.
 fn normalize(value: &str) -> String {
@@ -265,6 +283,85 @@ fn requests_match_the_shipped_oracle_recording() {
             ported.remove(&name.to_ascii_lowercase());
         }
         assert_eq!(ported, expected, "{} headers", case.provider);
+    }
+}
+
+#[test]
+fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let copilot = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "copilot")
+        .expect("Copilot oracle case");
+
+    let (mut report, transport) = authenticated_copilot_report(Response {
+        status: 200,
+        body: serde_json::to_vec(&copilot["response"]).expect("response fixture"),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
+    assert_eq!(usage.id, "copilot");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(
+        usage.auth_status.detail,
+        "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)"
+    );
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Copilot snapshot");
+    // Go's source oracle canonicalizes its clock; normalize the Rust clock to
+    // the same value before comparing the complete parsed snapshot.
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        copilot["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(snapshot).expect("Rust snapshot"),
+        copilot["snapshot"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://api.github.com/copilot_internal/user"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer dump-copilot-oauth")
+    );
+
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17"), 1),
+        (200, b"{}".as_slice(), None, 2),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_copilot_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        assert_eq!(
+            report.providers[0].error.as_deref(),
+            Some(
+                copilot["errors"][oracle_index]["text"]
+                    .as_str()
+                    .expect("Go error text")
+            ),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
