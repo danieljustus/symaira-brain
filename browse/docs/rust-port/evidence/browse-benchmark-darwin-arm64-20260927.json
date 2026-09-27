@@ -1,0 +1,3026 @@
+{
+  "schema_version": 3,
+  "report_version": "rust016-benchmark-v3",
+  "captured_at": "2026-09-27T09:32:50Z",
+  "source_revision": "95ef294ca615f30a9c3c710c730ba6899ed90165",
+  "host": {
+    "system": "Darwin",
+    "machine": "arm64"
+  },
+  "daemon_transport": "unix-domain-socket",
+  "daemon_session_policy": "randomized per probe invocation to avoid user or concurrent daemon collisions",
+  "runs_per_workload": 30,
+  "cache_policy": "no_cache=true for fetch requests; fresh HOME/XDG roots per process probe",
+  "workload_fixture": "rust016-static-fetch-html-v1",
+  "workloads": [
+    "cli",
+    "daemon",
+    "fetch",
+    "mcp"
+  ],
+  "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+  "peak_rss_metric": "per-process OS high-water resident memory; Windows reports PeakWorkingSetSize",
+  "binaries": {
+    "go": {
+      "identity": {
+        "path": "go-release-binary",
+        "size_bytes": 18508786,
+        "sha256": "33a822dd6982f380fce01b9c7d821948b5aeff169309c7dfaa0f5d929d15b681"
+      },
+      "cli": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 23365041,
+            "peak_rss_bytes": 25034752,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12869875,
+            "peak_rss_bytes": 24281088,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13779667,
+            "peak_rss_bytes": 24657920,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 15251250,
+            "peak_rss_bytes": 24428544,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10411292,
+            "peak_rss_bytes": 24199168,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12219333,
+            "peak_rss_bytes": 24084480,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11857625,
+            "peak_rss_bytes": 24559616,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 19408750,
+            "peak_rss_bytes": 24068096,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13240125,
+            "peak_rss_bytes": 24477696,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 19870791,
+            "peak_rss_bytes": 24363008,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13827209,
+            "peak_rss_bytes": 25247744,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10731083,
+            "peak_rss_bytes": 24313856,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11935625,
+            "peak_rss_bytes": 24903680,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13074542,
+            "peak_rss_bytes": 24035328,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11308250,
+            "peak_rss_bytes": 23707648,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12840791,
+            "peak_rss_bytes": 24297472,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11606500,
+            "peak_rss_bytes": 24330240,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 14079708,
+            "peak_rss_bytes": 24330240,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10514375,
+            "peak_rss_bytes": 24264704,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11037541,
+            "peak_rss_bytes": 24313856,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12954209,
+            "peak_rss_bytes": 24215552,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 14946417,
+            "peak_rss_bytes": 24821760,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13142250,
+            "peak_rss_bytes": 24100864,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12519667,
+            "peak_rss_bytes": 23756800,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 14616916,
+            "peak_rss_bytes": 24952832,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 11976375,
+            "peak_rss_bytes": 24330240,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 14466834,
+            "peak_rss_bytes": 24117248,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 13288333,
+            "peak_rss_bytes": 24133632,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 15775708,
+            "peak_rss_bytes": 24215552,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 16523958,
+            "peak_rss_bytes": 24051712,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          }
+        ],
+        "median_duration_ns": 13108396,
+        "p95_duration_ns": 19870791,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "complete",
+        "median_peak_rss_bytes": 24305664
+      },
+      "cli_variants": {
+        "help": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 11190458,
+              "peak_rss_bytes": 23773184,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13216583,
+              "peak_rss_bytes": 24723456,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10872375,
+              "peak_rss_bytes": 24248320,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10132042,
+              "peak_rss_bytes": 24018944,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11353959,
+              "peak_rss_bytes": 24248320,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 16307375,
+              "peak_rss_bytes": 24690688,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10689042,
+              "peak_rss_bytes": 24985600,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13173708,
+              "peak_rss_bytes": 23789568,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11393375,
+              "peak_rss_bytes": 23986176,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11089792,
+              "peak_rss_bytes": 24051712,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12584542,
+              "peak_rss_bytes": 24264704,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12318167,
+              "peak_rss_bytes": 24166400,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13967291,
+              "peak_rss_bytes": 24068096,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13006375,
+              "peak_rss_bytes": 23887872,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13346667,
+              "peak_rss_bytes": 24920064,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10898458,
+              "peak_rss_bytes": 24133632,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11634833,
+              "peak_rss_bytes": 24100864,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9912584,
+              "peak_rss_bytes": 24444928,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10768666,
+              "peak_rss_bytes": 24051712,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9789750,
+              "peak_rss_bytes": 24133632,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11434708,
+              "peak_rss_bytes": 24838144,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 15158208,
+              "peak_rss_bytes": 24559616,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9800083,
+              "peak_rss_bytes": 24133632,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10641167,
+              "peak_rss_bytes": 24887296,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13254542,
+              "peak_rss_bytes": 24248320,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13304792,
+              "peak_rss_bytes": 25100288,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9599750,
+              "peak_rss_bytes": 24166400,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10893042,
+              "peak_rss_bytes": 23937024,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12109833,
+              "peak_rss_bytes": 25083904,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11364375,
+              "peak_rss_bytes": 24051712,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            }
+          ],
+          "median_duration_ns": 11378875,
+          "p95_duration_ns": 15158208,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "complete",
+          "median_peak_rss_bytes": 24166400
+        },
+        "config": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 14080917,
+              "peak_rss_bytes": 25395200,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11714084,
+              "peak_rss_bytes": 24117248,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11486208,
+              "peak_rss_bytes": 25231360,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13417792,
+              "peak_rss_bytes": 25280512,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13360833,
+              "peak_rss_bytes": 24379392,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10979541,
+              "peak_rss_bytes": 25411584,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 15657209,
+              "peak_rss_bytes": 25296896,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12616792,
+              "peak_rss_bytes": 25247744,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13246875,
+              "peak_rss_bytes": 25198592,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12841167,
+              "peak_rss_bytes": 25034752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11335542,
+              "peak_rss_bytes": 25116672,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 15077417,
+              "peak_rss_bytes": 25362432,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 14148458,
+              "peak_rss_bytes": 24821760,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10582041,
+              "peak_rss_bytes": 24510464,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11340459,
+              "peak_rss_bytes": 25231360,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13812833,
+              "peak_rss_bytes": 24248320,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 15306375,
+              "peak_rss_bytes": 24117248,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12057000,
+              "peak_rss_bytes": 25427968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10114791,
+              "peak_rss_bytes": 24117248,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 19237625,
+              "peak_rss_bytes": 25296896,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10955834,
+              "peak_rss_bytes": 25214976,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12291541,
+              "peak_rss_bytes": 24690688,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 14631792,
+              "peak_rss_bytes": 25149440,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12230834,
+              "peak_rss_bytes": 25296896,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10750292,
+              "peak_rss_bytes": 25034752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13874750,
+              "peak_rss_bytes": 25231360,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11165000,
+              "peak_rss_bytes": 25034752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 14846417,
+              "peak_rss_bytes": 25673728,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10787542,
+              "peak_rss_bytes": 25116672,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 15486000,
+              "peak_rss_bytes": 25411584,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            }
+          ],
+          "median_duration_ns": 12728979,
+          "p95_duration_ns": 15657209,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "complete",
+          "median_peak_rss_bytes": 25206784
+        }
+      },
+      "daemon": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 94242625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 82693584,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 85263666,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 82472125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 79382709,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 87590125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 84686833,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 93695417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 86608250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 85673500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 80571125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 74150916,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 82094125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 85422584,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 87232167,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 91008542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 81772292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 92861083,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 62674458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 80385666,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 88640750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 89242166,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 86997375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 90704250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 90071833,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 91215041,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 72763875,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 85309542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 81786166,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 86819834,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          }
+        ],
+        "median_duration_ns": 85548042,
+        "p95_duration_ns": 93695417,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete",
+        "steady_state_100_frames": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 7093959,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8814083,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8957750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10402750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6919750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9511875,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9602500,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9955875,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8933583,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9800958,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8290083,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 11291334,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9801542,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 11592125,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9930459,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8667750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9492750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9847208,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8378875,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 11425500,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10978041,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10689250,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8823709,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 12805625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10115584,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8636500,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9828833,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 11950250,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10345334,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 18329459,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            }
+          ],
+          "median_duration_ns": 9815187,
+          "p95_duration_ns": 12805625,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "incomplete"
+        }
+      },
+      "mcp": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 24107166,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 38281667,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32907041,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 46183041,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 24597000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 62449416,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 28595541,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 24626292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21204792,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 26770375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 19989458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21646167,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21898375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21974084,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 39513833,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33921042,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 20145084,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21662750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 20152709,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 20743458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 18232000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 19773458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 21243792,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 23338250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 18954417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 23739500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 18225292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 19247209,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 18589666,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 18364750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          }
+        ],
+        "median_duration_ns": 21780562,
+        "p95_duration_ns": 46183041,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete"
+      },
+      "fetch": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 11829708,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1584625,
+            "fixture_response_ns": 105291,
+            "post_fixture_ns": 10139792
+          },
+          {
+            "duration_ns": 2760708,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1129000,
+            "fixture_response_ns": 58583,
+            "post_fixture_ns": 1573125
+          },
+          {
+            "duration_ns": 5273208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1337208,
+            "fixture_response_ns": 114209,
+            "post_fixture_ns": 3821791
+          },
+          {
+            "duration_ns": 6031917,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1703709,
+            "fixture_response_ns": 57291,
+            "post_fixture_ns": 4270917
+          },
+          {
+            "duration_ns": 2615250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1208125,
+            "fixture_response_ns": 60750,
+            "post_fixture_ns": 1346375
+          },
+          {
+            "duration_ns": 2186583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1088458,
+            "fixture_response_ns": 52375,
+            "post_fixture_ns": 1045750
+          },
+          {
+            "duration_ns": 3447291,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1620708,
+            "fixture_response_ns": 332333,
+            "post_fixture_ns": 1494250
+          },
+          {
+            "duration_ns": 2939166,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1326500,
+            "fixture_response_ns": 61291,
+            "post_fixture_ns": 1551375
+          },
+          {
+            "duration_ns": 3026875,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1444291,
+            "fixture_response_ns": 96542,
+            "post_fixture_ns": 1486042
+          },
+          {
+            "duration_ns": 2987250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1567833,
+            "fixture_response_ns": 57375,
+            "post_fixture_ns": 1362042
+          },
+          {
+            "duration_ns": 2361417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 987292,
+            "fixture_response_ns": 64250,
+            "post_fixture_ns": 1309875
+          },
+          {
+            "duration_ns": 2197792,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 800042,
+            "fixture_response_ns": 58000,
+            "post_fixture_ns": 1339750
+          },
+          {
+            "duration_ns": 2885625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1255459,
+            "fixture_response_ns": 115208,
+            "post_fixture_ns": 1514958
+          },
+          {
+            "duration_ns": 2654875,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1389750,
+            "fixture_response_ns": 111292,
+            "post_fixture_ns": 1153833
+          },
+          {
+            "duration_ns": 2672542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1028125,
+            "fixture_response_ns": 89959,
+            "post_fixture_ns": 1554458
+          },
+          {
+            "duration_ns": 2793084,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1436459,
+            "fixture_response_ns": 82333,
+            "post_fixture_ns": 1274292
+          },
+          {
+            "duration_ns": 2227292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1009375,
+            "fixture_response_ns": 48667,
+            "post_fixture_ns": 1169250
+          },
+          {
+            "duration_ns": 2278667,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 836417,
+            "fixture_response_ns": 72875,
+            "post_fixture_ns": 1369375
+          },
+          {
+            "duration_ns": 2808959,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1426084,
+            "fixture_response_ns": 102000,
+            "post_fixture_ns": 1280875
+          },
+          {
+            "duration_ns": 7481208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1021083,
+            "fixture_response_ns": 62292,
+            "post_fixture_ns": 6397833
+          },
+          {
+            "duration_ns": 6221708,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 4644541,
+            "fixture_response_ns": 42542,
+            "post_fixture_ns": 1534625
+          },
+          {
+            "duration_ns": 3348750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 2016041,
+            "fixture_response_ns": 64667,
+            "post_fixture_ns": 1268042
+          },
+          {
+            "duration_ns": 2062417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 856084,
+            "fixture_response_ns": 28250,
+            "post_fixture_ns": 1178083
+          },
+          {
+            "duration_ns": 3386292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1350959,
+            "fixture_response_ns": 86041,
+            "post_fixture_ns": 1949292
+          },
+          {
+            "duration_ns": 2615375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1590750,
+            "fixture_response_ns": 26584,
+            "post_fixture_ns": 998041
+          },
+          {
+            "duration_ns": 2232375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1005375,
+            "fixture_response_ns": 66500,
+            "post_fixture_ns": 1160500
+          },
+          {
+            "duration_ns": 1942500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 823125,
+            "fixture_response_ns": 52458,
+            "post_fixture_ns": 1066917
+          },
+          {
+            "duration_ns": 3280583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1772125,
+            "fixture_response_ns": 71500,
+            "post_fixture_ns": 1436958
+          },
+          {
+            "duration_ns": 2284250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 1112375,
+            "fixture_response_ns": 61459,
+            "post_fixture_ns": 1110416
+          },
+          {
+            "duration_ns": 2230708,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 934708,
+            "fixture_response_ns": 51000,
+            "post_fixture_ns": 1245000
+          }
+        ],
+        "median_duration_ns": 2776896,
+        "p95_duration_ns": 7481208,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete",
+        "median_pre_fixture_ns": 1290979,
+        "p95_pre_fixture_ns": 2016041,
+        "median_fixture_response_ns": 63271,
+        "p95_fixture_response_ns": 115208,
+        "median_post_fixture_ns": 1354208,
+        "p95_post_fixture_ns": 6397833,
+        "semantic_contract": {
+          "fixture_id": "rust016-static-fetch-html-v1",
+          "checks": [
+            "final_url",
+            "status_code",
+            "body",
+            "document_metadata",
+            "errors"
+          ],
+          "negative_control": {
+            "candidate": "success=true with wrong title/body",
+            "rejected": true
+          }
+        }
+      }
+    },
+    "rust": {
+      "identity": {
+        "path": "rust-release-binary",
+        "size_bytes": 10388560,
+        "sha256": "b554a85ab86ff364dc047a3088a9ee3f1ba0ea671ae4414233c20ef38b0062e3"
+      },
+      "cli": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 11596625,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7786416,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8394583,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7366375,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 6746000,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9516875,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7323000,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9837542,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9101500,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8611250,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 6953667,
+            "peak_rss_bytes": 6635520,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 6003083,
+            "peak_rss_bytes": 6635520,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7966292,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9012750,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 6864209,
+            "peak_rss_bytes": 6651904,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8561500,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7605291,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10623375,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10320500,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8768625,
+            "peak_rss_bytes": 6635520,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8072375,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9791875,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 8524000,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 10763541,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 6648583,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12018542,
+            "peak_rss_bytes": 6684672,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9028459,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 7419833,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 12576917,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          },
+          {
+            "duration_ns": 9286750,
+            "peak_rss_bytes": 6668288,
+            "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+          }
+        ],
+        "median_duration_ns": 8586375,
+        "p95_duration_ns": 12018542,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "complete",
+        "median_peak_rss_bytes": 6668288
+      },
+      "cli_variants": {
+        "help": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 9729958,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8387833,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10424459,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7091500,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6707167,
+              "peak_rss_bytes": 6553600,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10381667,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7763625,
+              "peak_rss_bytes": 6553600,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10535375,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6668375,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9945208,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7607458,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10213334,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9591791,
+              "peak_rss_bytes": 6569984,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7757375,
+              "peak_rss_bytes": 6553600,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9622416,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6962292,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6796708,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6990459,
+              "peak_rss_bytes": 6569984,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8801250,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6863083,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7486083,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10297125,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13063291,
+              "peak_rss_bytes": 6553600,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7602875,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 14516125,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7140375,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7227000,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8174750,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9687250,
+              "peak_rss_bytes": 6602752,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10786625,
+              "peak_rss_bytes": 6586368,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            }
+          ],
+          "median_duration_ns": 8281291,
+          "p95_duration_ns": 13063291,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "complete",
+          "median_peak_rss_bytes": 6586368
+        },
+        "config": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 10157125,
+              "peak_rss_bytes": 7061504,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7635250,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6699625,
+              "peak_rss_bytes": 7012352,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7480291,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 11394292,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8173417,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6151667,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6942917,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 10074791,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9643709,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7090292,
+              "peak_rss_bytes": 7012352,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8057167,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9206167,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9455833,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9006334,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6662791,
+              "peak_rss_bytes": 6995968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7554542,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6740708,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9290333,
+              "peak_rss_bytes": 7012352,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 6926333,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 12240750,
+              "peak_rss_bytes": 6995968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9874459,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8319958,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8379792,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8251125,
+              "peak_rss_bytes": 6995968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 8025833,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7949084,
+              "peak_rss_bytes": 6995968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 7460417,
+              "peak_rss_bytes": 7045120,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 9683334,
+              "peak_rss_bytes": 7028736,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            },
+            {
+              "duration_ns": 13856166,
+              "peak_rss_bytes": 6995968,
+              "peak_rss_method": "getrusage.RUSAGE_CHILDREN.ru_maxrss_bytes"
+            }
+          ],
+          "median_duration_ns": 8212271,
+          "p95_duration_ns": 12240750,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "complete",
+          "median_peak_rss_bytes": 7028736
+        }
+      },
+      "daemon": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 33405958,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 24363084,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33256500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33092167,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 26704041,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 31759542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 25003083,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 31943750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32875125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 36068125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32803125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 31281791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33156542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 31718791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33138583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 25196083,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 26591125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33888750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33191000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 33818458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 27155250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32950791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 27210083,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32490416,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 32741333,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 26689959,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 29732208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 37849416,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 34874875,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 25831208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          }
+        ],
+        "median_duration_ns": 32615874,
+        "p95_duration_ns": 36068125,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete",
+        "steady_state_100_frames": {
+          "status": "pass",
+          "samples": 30,
+          "raw_samples": [
+            {
+              "duration_ns": 8888792,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7207500,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8097333,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7721917,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7873750,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8328625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6476959,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7249625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6003417,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8336625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8315333,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 9097542,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8055417,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6195084,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6321125,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 10677708,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6686167,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7260125,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 5265625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7230833,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6974500,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7035709,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6220875,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8115875,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7621541,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6419542,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 5870625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 6849625,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 7444417,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            },
+            {
+              "duration_ns": 8137541,
+              "peak_rss_bytes": null,
+              "peak_rss_method": null
+            }
+          ],
+          "median_duration_ns": 7254875,
+          "p95_duration_ns": 9097542,
+          "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+          "statuses": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "peak_rss_status": "incomplete"
+        }
+      },
+      "mcp": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 12231542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13792625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12425333,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 17916583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 10890125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 11306917,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 11722208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 10861083,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 8740709,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12323667,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13643583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 9514417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 9415417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 14789375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13257500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12846583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 7592958,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13143458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 11937417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 10900333,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 11826000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13345208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 13432167,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 17216375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12189916,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12932625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12281917,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 10544250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 9004500,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          },
+          {
+            "duration_ns": 12681250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null
+          }
+        ],
+        "median_duration_ns": 12256729,
+        "p95_duration_ns": 17216375,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete"
+      },
+      "fetch": {
+        "status": "pass",
+        "samples": 30,
+        "raw_samples": [
+          {
+            "duration_ns": 3666375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 3237042,
+            "fixture_response_ns": 144417,
+            "post_fixture_ns": 284916
+          },
+          {
+            "duration_ns": 811791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 606583,
+            "fixture_response_ns": 62333,
+            "post_fixture_ns": 142875
+          },
+          {
+            "duration_ns": 638208,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 445583,
+            "fixture_response_ns": 53958,
+            "post_fixture_ns": 138667
+          },
+          {
+            "duration_ns": 577791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 398750,
+            "fixture_response_ns": 55708,
+            "post_fixture_ns": 123333
+          },
+          {
+            "duration_ns": 686791,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 468083,
+            "fixture_response_ns": 58458,
+            "post_fixture_ns": 160250
+          },
+          {
+            "duration_ns": 1643625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 528083,
+            "fixture_response_ns": 82625,
+            "post_fixture_ns": 1032917
+          },
+          {
+            "duration_ns": 1315458,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 772375,
+            "fixture_response_ns": 47958,
+            "post_fixture_ns": 495125
+          },
+          {
+            "duration_ns": 856833,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 622250,
+            "fixture_response_ns": 75208,
+            "post_fixture_ns": 159375
+          },
+          {
+            "duration_ns": 766250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 505708,
+            "fixture_response_ns": 55917,
+            "post_fixture_ns": 204625
+          },
+          {
+            "duration_ns": 1321000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 700959,
+            "fixture_response_ns": 111041,
+            "post_fixture_ns": 509000
+          },
+          {
+            "duration_ns": 1007875,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 716167,
+            "fixture_response_ns": 75750,
+            "post_fixture_ns": 215958
+          },
+          {
+            "duration_ns": 784625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 538125,
+            "fixture_response_ns": 55125,
+            "post_fixture_ns": 191375
+          },
+          {
+            "duration_ns": 1058250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 790750,
+            "fixture_response_ns": 86708,
+            "post_fixture_ns": 180792
+          },
+          {
+            "duration_ns": 1001250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 658291,
+            "fixture_response_ns": 65209,
+            "post_fixture_ns": 277750
+          },
+          {
+            "duration_ns": 1159000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 821625,
+            "fixture_response_ns": 74958,
+            "post_fixture_ns": 262417
+          },
+          {
+            "duration_ns": 676125,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 514000,
+            "fixture_response_ns": 41500,
+            "post_fixture_ns": 120625
+          },
+          {
+            "duration_ns": 725958,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 463541,
+            "fixture_response_ns": 78250,
+            "post_fixture_ns": 184167
+          },
+          {
+            "duration_ns": 800417,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 574375,
+            "fixture_response_ns": 68375,
+            "post_fixture_ns": 157667
+          },
+          {
+            "duration_ns": 661000,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 434833,
+            "fixture_response_ns": 65042,
+            "post_fixture_ns": 161125
+          },
+          {
+            "duration_ns": 705375,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 509167,
+            "fixture_response_ns": 63208,
+            "post_fixture_ns": 133000
+          },
+          {
+            "duration_ns": 576583,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 390875,
+            "fixture_response_ns": 72417,
+            "post_fixture_ns": 113291
+          },
+          {
+            "duration_ns": 535167,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 383667,
+            "fixture_response_ns": 51333,
+            "post_fixture_ns": 100167
+          },
+          {
+            "duration_ns": 628292,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 433500,
+            "fixture_response_ns": 49459,
+            "post_fixture_ns": 145333
+          },
+          {
+            "duration_ns": 570334,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 385459,
+            "fixture_response_ns": 26000,
+            "post_fixture_ns": 158875
+          },
+          {
+            "duration_ns": 586250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 385541,
+            "fixture_response_ns": 60500,
+            "post_fixture_ns": 140209
+          },
+          {
+            "duration_ns": 1000542,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 554084,
+            "fixture_response_ns": 72750,
+            "post_fixture_ns": 373708
+          },
+          {
+            "duration_ns": 895250,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 626167,
+            "fixture_response_ns": 114333,
+            "post_fixture_ns": 154750
+          },
+          {
+            "duration_ns": 708917,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 529500,
+            "fixture_response_ns": 47584,
+            "post_fixture_ns": 131833
+          },
+          {
+            "duration_ns": 724750,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 473542,
+            "fixture_response_ns": 81625,
+            "post_fixture_ns": 169583
+          },
+          {
+            "duration_ns": 913625,
+            "peak_rss_bytes": null,
+            "peak_rss_method": null,
+            "fixture_observed": true,
+            "pre_fixture_ns": 643375,
+            "fixture_response_ns": 85667,
+            "post_fixture_ns": 184583
+          }
+        ],
+        "median_duration_ns": 775437,
+        "p95_duration_ns": 1643625,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "statuses": [
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass",
+          "pass"
+        ],
+        "peak_rss_status": "incomplete",
+        "median_pre_fixture_ns": 528791,
+        "p95_pre_fixture_ns": 821625,
+        "median_fixture_response_ns": 65125,
+        "p95_fixture_response_ns": 114333,
+        "median_post_fixture_ns": 160687,
+        "p95_post_fixture_ns": 509000,
+        "semantic_contract": {
+          "fixture_id": "rust016-static-fetch-html-v1",
+          "checks": [
+            "final_url",
+            "status_code",
+            "body",
+            "document_metadata",
+            "errors"
+          ],
+          "negative_control": {
+            "candidate": "success=true with wrong title/body",
+            "rejected": true
+          }
+        }
+      }
+    }
+  },
+  "gate": "pass",
+  "limitations": [
+    "Peak RSS is unavailable on a sample if the host OS cannot report a positive process high-water value; such CLI measurements block the gate.",
+    "source_revision identifies the checkout; binary SHA-256 identifies measured bytes. CI build steps bind them.",
+    "The fetch probe is a local HTTP fixture and does not certify real browser/CDP behavior.",
+    "Unsupported candidate surfaces remain a BLOCK for cutover, not a passing result."
+  ],
+  "candidate_size_bytes": 10388560,
+  "reference_size_bytes": 18508786
+}

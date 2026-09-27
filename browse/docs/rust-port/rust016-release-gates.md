@@ -221,11 +221,14 @@ remain applicable; no release or default-implementation change was performed.
 The current Brain Browse Go source and Rust candidate at `95ef294c` were built
 as stripped darwin/arm64 release binaries and measured in 30 paired, isolated
 CLI, MCP, daemon and static-fetch runs. All eight workload/implementation pairs
-passed. `port/bench/compare.py docs/rust-port/baseline.json target/bench-release-30.json`
-returned `pass`:
+passed. The sanitized raw report at
+[`evidence/browse-benchmark-darwin-arm64-20260927.json`](evidence/browse-benchmark-darwin-arm64-20260927.json)
+reproduces a `pass` with `port/bench/compare.py docs/rust-port/baseline.json
+docs/rust-port/evidence/browse-benchmark-darwin-arm64-20260927.json`:
 Rust was 43.87% smaller (10,388,560 versus 18,508,786 bytes), used 72.56%
 less median CLI peak RSS, and had lower p95 latency on every measured workload.
 The Go and Rust binary SHA-256 digests were `33a822dd6982f380fce01b9c7d821948b5aeff169309c7dfaa0f5d929d15b681`
 and `b554a85ab86ff364dc047a3088a9ee3f1ba0ea671ae4414233c20ef38b0062e3`.
-The local report is `target/bench-release-30.json` (generated output); this
-measurement does not satisfy cross-platform, signing or native browser gates.
+Only the local executable paths were replaced with labels in the committed
+report; samples, hashes and comparison fields are unchanged. This measurement
+does not satisfy cross-platform, signing or native browser gates.

@@ -18,9 +18,9 @@ The oracle commit is one commit after `v0.8.0`; contract fixtures must name
 which of those two references produced them. New Go behavior after this pin
 requires an explicit matrix and fixture update before it enters the Rust port.
 
-CLI-001 through CLI-005 have byte parity in the full Go/Rust differential
-harness: 477 of 477 cases matched on macOS on 2026-09-27, including the
-recursive help tree. Reproduce with `python3 port/harness/cli_differential.py
+CLI-001 through CLI-005 matched byte-for-byte in the full Go/Rust differential
+harness on macOS: 477 of 477 cases matched on 2026-09-27, including the
+recursive help tree. Cross-platform parity remains unverified. Reproduce with `python3 port/harness/cli_differential.py
 --go target/go/symbrowse-go --rust target/debug/symbrowse --report
 target/cli-diff-full.json --temp-root target/cli-harness` from `browse/`.
 
