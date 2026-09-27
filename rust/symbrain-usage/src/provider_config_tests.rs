@@ -1,7 +1,7 @@
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, claude_file_token_in, codex_file_token, copilot_file_token_in,
-    decode_base64url, json_string, kimi_store, names_from_keychain_dump, nous_file_token,
-    nous_jwt_is_live, read_limited,
+    decode_base64url, json_string, kimi_store, names_from_keychain_dump, needs_go_fallback_for,
+    nous_file_token, nous_jwt_is_live, read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -158,6 +158,41 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
         copilot_file_token_in(directory.path()).as_deref(),
         Some("hosts-token")
     );
+}
+
+#[test]
+fn only_a_direct_copilot_environment_token_uses_native_reporting() {
+    assert!(!needs_go_fallback_for(
+        Some("synthetic-copilot-fixture"),
+        false,
+        false,
+        false,
+    ));
+    assert!(!needs_go_fallback_for(None, false, false, false));
+    assert!(needs_go_fallback_for(
+        Some("symvault://copilot/token"),
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        Some("synthetic-copilot-fixture"),
+        true,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        Some("synthetic-copilot-fixture"),
+        false,
+        true,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        Some("synthetic-copilot-fixture"),
+        false,
+        false,
+        true,
+    ));
 }
 
 #[test]

@@ -15,6 +15,8 @@ import (
 	"github.com/danieljustus/symaira-brain/internal/usage"
 )
 
+const copilotOracleToken = "oracle-only-invalid-copilot"
+
 func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
 		"claude": "claude-oauth-usage.json", "codex": "codex-wham-usage.json",
@@ -63,6 +65,7 @@ func main() {
 	check := flag.Bool("check", false, "fail if generated fixtures differ")
 	output := flag.String("output", "rust/symbrain-usage/tests/fixtures/provider_graph.json", "provider graph path")
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
+	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -83,6 +86,11 @@ func main() {
 		SchemaVersion int                    `json:"schema_version"`
 		Providers     []usage.OracleProvider `json:"providers"`
 	}{SchemaVersion: usage.ReportSchemaVersion, Providers: cases.Providers}
+	copilotReport, err := buildCopilotAuthenticatedReport(fixtures["copilot"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -90,6 +98,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*casesOutput, caseWire); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*copilotReportOutput, copilotReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -104,5 +116,30 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s and %s (%d providers)\n", *output, *casesOutput, len(graph.Providers))
+	if err := writeJSON(*copilotReportOutput, copilotReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Printf("Wrote %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, len(graph.Providers))
+}
+
+func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
+	previous, existed := os.LookupEnv("COPILOT_ACCESS_TOKEN")
+	if err := os.Setenv("COPILOT_ACCESS_TOKEN", copilotOracleToken); err != nil {
+		return usage.Report{}, fmt.Errorf("set synthetic Copilot fixture env: %w", err)
+	}
+	report, buildErr := usage.BuildCopilotAuthenticatedReportOracle(body)
+	var restoreErr error
+	if existed {
+		restoreErr = os.Setenv("COPILOT_ACCESS_TOKEN", previous)
+	} else {
+		restoreErr = os.Unsetenv("COPILOT_ACCESS_TOKEN")
+	}
+	if buildErr != nil {
+		return usage.Report{}, buildErr
+	}
+	if restoreErr != nil {
+		return usage.Report{}, fmt.Errorf("restore Copilot fixture env: %w", restoreErr)
+	}
+	return report, nil
 }

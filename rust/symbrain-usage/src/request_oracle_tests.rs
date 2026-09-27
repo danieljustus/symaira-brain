@@ -288,6 +288,10 @@ fn requests_match_the_shipped_oracle_recording() {
 
 #[test]
 fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/copilot_authenticated_report.json"
+    ))
+    .expect("Go authenticated Copilot report");
     let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
         .expect("Go provider cases");
     let copilot = oracle["providers"]
@@ -337,6 +341,10 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
     assert_eq!(
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer dump-copilot-oauth")
+    );
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Copilot report"),
+        report_oracle
     );
 
     for (status, body, retry_after, oracle_index) in [

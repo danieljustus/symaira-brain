@@ -159,6 +159,25 @@ func BuildOracleFixture(fixture map[string][]byte) (OracleFixture, error) {
 	return out, nil
 }
 
+// BuildCopilotAuthenticatedReportOracle runs the shipped Copilot provider
+// through BuildReport using the caller's synthetic COPILOT_ACCESS_TOKEN and
+// a canned response body. The caller must set only a dummy token; this helper
+// rejects missing or non-environment credential sources.
+func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
+	transport := &oracleTransport{bodies: map[string][]byte{"copilot": body}}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	provider := NewCopilotProvider(client)
+	if !provider.IsConfigured() || provider.AuthStatus().Source != "env" {
+		return Report{}, fmt.Errorf("Copilot report oracle requires COPILOT_ACCESS_TOKEN from env")
+	}
+	report := BuildReport(context.Background(), []Provider{provider})
+	if len(report.Providers) != 1 || report.Providers[0].Snapshot == nil {
+		return Report{}, fmt.Errorf("Copilot report oracle did not produce a snapshot")
+	}
+	report.Providers[0].Snapshot = canonicalOracleSnapshot(report.Providers[0].Snapshot)
+	return report, nil
+}
+
 type roundTripFixture struct{ target *oracleTransport }
 
 func (r roundTripFixture) RoundTrip(req *http.Request) (*http.Response, error) {

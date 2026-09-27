@@ -14,19 +14,14 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// for reports with no stored credential at all — those reach no endpoint and
 /// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
 /// without a cookie also stays native because Go has no fetch strategy for it.
-/// A report that *does* find a credential fetches from a live endpoint, and
-/// what remains unpinned there is
-/// narrower than it used to be:
+/// A report with only a direct `COPILOT_ACCESS_TOKEN` now runs natively: its
+/// configured report, request, parsed snapshot, and provider error cases are
+/// checked against the Go oracle using a synthetic token and canned transport.
+/// Copilot file credentials, secret references, and every other configured
+/// provider continue to use Go until their complete report paths are pinned.
 ///
-/// - the request layer is frozen by `scripts/usage-request-oracle` and checked
-///   by the port's request oracle test (method, URL, headers, body, plus the
-///   provider-level error text for canned statuses), so drift on that layer
-///   fails a unit test;
-/// - successful live responses and the full report's fetch behavior remain
-///   unpinned outside the isolated provider oracles (issue #620).
-///
-/// Until those are closed, reports that resolve a credential stay with the
-/// shipped implementation.
+/// The report fetch invoked below remains a user-initiated live read, as it
+/// does in the shipped Go command.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
         return false;

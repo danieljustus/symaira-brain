@@ -17,12 +17,12 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables that can make a provider fetch from an endpoint.
-const PROVIDER_ENV_VARS: &[&str] = &[
+/// Environment variables other than the one narrow Copilot case allowed to
+/// use native reporting. Every one of these keeps the CLI on Go.
+const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
     "CODEX_ACCESS_TOKEN",
-    "COPILOT_ACCESS_TOKEN",
     "CURSOR_COOKIE",
     "KIMI_CODE_API_KEY",
     "KIMI_AUTH_TOKEN",
@@ -933,7 +933,11 @@ pub fn all_providers() -> Vec<Provider> {
 /// supplies no `OpenCode` cookie or strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
-    if PROVIDER_ENV_VARS.iter().any(|name| env_raw(name).is_some()) {
+    let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
+    if OTHER_PROVIDER_ENV_VARS
+        .iter()
+        .any(|name| env_raw(name).is_some())
+    {
         return true;
     }
     if claude_file_token().is_some()
@@ -944,7 +948,28 @@ pub fn needs_go_fallback() -> bool {
     {
         return true;
     }
-    claude_keychain_present() || antigravity_running()
+    needs_go_fallback_for(
+        copilot_env.as_deref(),
+        false,
+        false,
+        claude_keychain_present() || antigravity_running(),
+    )
+}
+
+/// Keeps credential-backed reports on Go except for a direct Copilot token
+/// when every other provider source and local probe is absent. Secret
+/// references and Copilot CLI files remain on Go until those complete report
+/// paths have their own source-pinned oracle.
+fn needs_go_fallback_for(
+    copilot_env: Option<&str>,
+    other_provider_env: bool,
+    other_credential_source: bool,
+    local_provider_present: bool,
+) -> bool {
+    if other_provider_env || other_credential_source || local_provider_present {
+        return true;
+    }
+    copilot_env.is_some_and(is_secret_reference)
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.
