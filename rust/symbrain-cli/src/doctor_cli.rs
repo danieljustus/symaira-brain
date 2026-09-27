@@ -241,12 +241,14 @@ args = ["mcp", "--profile", "default"]
         assert!(!requires_go_fallback(&args(&["--force-release"])));
         assert!(!requires_go_fallback(&args(&["--force-release=true"])));
         assert!(requires_go_fallback(&args(&["--fix"])));
+        assert!(requires_go_fallback(&args(&["--fix=TRUE"])));
         assert!(!requires_go_fallback(&args(&["--fix=0"])));
         assert!(requires_go_fallback(&args(&["--force-release", "--fix"])));
         assert!(!requires_go_fallback(&args(&[
             "--fix=false",
             "--force-release=false"
         ])));
+        assert!(!requires_go_fallback(&args(&["--fix=FALSE"])));
     }
 
     #[test]
