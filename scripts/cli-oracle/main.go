@@ -324,6 +324,11 @@ func buildCases(goBinary string) ([]TestCase, error) {
 		return nil, err
 	}
 	cases = append(cases, runCase(bin, []string{"harness", "health"}, "harness health"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--unknown"}, "harness health rejects unknown flag"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--project"}, "harness health rejects missing project value"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "extra"}, "harness health rejects positional"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--", "extra"}, "harness health rejects positional after terminator"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--help"}, "harness health help flag"))
 
 	// usage
 	cases = append(cases, runCase(bin, []string{"usage"}, "usage"))

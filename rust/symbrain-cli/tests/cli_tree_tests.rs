@@ -280,7 +280,7 @@ fn assert_native_fixture() {
 #[allow(clippy::too_many_lines)]
 fn cli_tree_fixture_matches_native_binary() {
     let cases = load_fixture();
-    assert_eq!(cases.len(), 83, "fixture must contain 83 cases");
+    assert_eq!(cases.len(), 88, "fixture must contain 88 cases");
 
     #[cfg(windows)]
     assert_native_fixture();
@@ -419,7 +419,7 @@ mod tests {
     #[test]
     fn fixture_loads_and_has_correct_count() {
         let cases = load_fixture();
-        assert_eq!(cases.len(), 83);
+        assert_eq!(cases.len(), 88);
     }
 
     #[test]

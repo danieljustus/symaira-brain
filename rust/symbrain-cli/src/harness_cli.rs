@@ -38,6 +38,7 @@ pub struct HarnessHealthReport {
 
 /// The shipped `harness list` flag set as the Go flag package prints it.
 const HARNESS_LIST_FLAGS: &str = "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
+const HARNESS_HEALTH_FLAGS: &str = "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
 
 /// Runs `symbrain harness`.
 pub fn run(
@@ -218,27 +219,65 @@ fn run_health(
     let mut i = 0;
     while i < args.len() {
         let arg = args[i].to_string_lossy();
-        if arg == "-harness" || arg == "--harness" {
-            let value = args.get(i + 1)?;
-            harness_name = Some(value.to_string_lossy().into_owned());
-            i += 2;
-        } else if let Some(val) = arg
-            .strip_prefix("-harness=")
-            .or_else(|| arg.strip_prefix("--harness="))
-        {
-            harness_name = Some(val.to_string());
-            i += 1;
-        } else if arg == "-project" || arg == "--project" {
-            let value = args.get(i + 1)?;
-            project_dir = Some(PathBuf::from(value));
-            i += 2;
-        } else {
-            let val = arg
-                .strip_prefix("-project=")
-                .or_else(|| arg.strip_prefix("--project="))?;
-            project_dir = Some(PathBuf::from(val));
-            i += 1;
+        if matches!(arg.as_ref(), "-h" | "--h" | "-help" | "--help") {
+            let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+            return Some(exit::USAGE);
         }
+        if arg == "--" {
+            if let Some(value) = args.get(i + 1) {
+                let value = value.to_string_lossy();
+                let _ = writeln!(
+                    stderr,
+                    "symbrain harness health: unexpected argument {value:?}"
+                );
+                return Some(exit::USAGE);
+            }
+            break;
+        }
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-harness" | "--harness" | "-project" | "--project" => {
+                let value = if let Some(value) = inline {
+                    value.to_owned()
+                } else {
+                    let Some(value) = args.get(i + 1) else {
+                        let _ = writeln!(
+                            stderr,
+                            "flag needs an argument: -{}",
+                            name.trim_start_matches('-')
+                        );
+                        let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+                        return Some(exit::USAGE);
+                    };
+                    i += 1;
+                    value.to_string_lossy().into_owned()
+                };
+                if name.ends_with("harness") {
+                    harness_name = Some(value);
+                } else {
+                    project_dir = Some(PathBuf::from(value));
+                }
+            }
+            _ if name.starts_with('-') => {
+                let _ = writeln!(
+                    stderr,
+                    "flag provided but not defined: -{}",
+                    name.trim_start_matches('-')
+                );
+                let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+                return Some(exit::USAGE);
+            }
+            _ => {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain harness health: unexpected argument {arg:?}"
+                );
+                return Some(exit::USAGE);
+            }
+        }
+        i += 1;
     }
 
     let inventory = list(project_dir.as_deref());

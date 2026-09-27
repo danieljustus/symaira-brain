@@ -465,6 +465,67 @@
     "description": "harness health"
   },
   {
+    "id": "go harness health --unknown",
+    "args": [
+      "harness",
+      "health",
+      "--unknown"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag provided but not defined: -unknown\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+    "description": "harness health rejects unknown flag"
+  },
+  {
+    "id": "go harness health --project",
+    "args": [
+      "harness",
+      "health",
+      "--project"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "flag needs an argument: -project\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+    "description": "harness health rejects missing project value"
+  },
+  {
+    "id": "go harness health extra",
+    "args": [
+      "harness",
+      "health",
+      "extra"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain harness health: unexpected argument \"extra\"\n",
+    "description": "harness health rejects positional"
+  },
+  {
+    "id": "go harness health -- extra",
+    "args": [
+      "harness",
+      "health",
+      "--",
+      "extra"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "symbrain harness health: unexpected argument \"extra\"\n",
+    "description": "harness health rejects positional after terminator"
+  },
+  {
+    "id": "go harness health --help",
+    "args": [
+      "harness",
+      "health",
+      "--help"
+    ],
+    "exit_code": 2,
+    "stdout": "",
+    "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+    "description": "harness health help flag"
+  },
+  {
     "id": "go usage",
     "args": [
       "usage"
