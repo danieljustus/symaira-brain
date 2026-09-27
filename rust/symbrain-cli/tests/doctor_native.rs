@@ -2,6 +2,7 @@
 #![deny(unsafe_code)]
 
 use std::fs;
+use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 
 use serde_json::json;
