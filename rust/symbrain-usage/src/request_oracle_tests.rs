@@ -161,6 +161,14 @@ fn authenticated_openrouter_report(response: Response) -> (crate::Report, Fixtur
     )
 }
 
+fn authenticated_moonshot_report(response: Response) -> (crate::Report, FixtureTransport) {
+    authenticated_direct_provider_report(
+        response,
+        "moonshot",
+        include_str!("../tests/fixtures/moonshot_authenticated_report.json"),
+    )
+}
+
 fn authenticated_direct_provider_report(
     response: Response,
     configured_provider: &str,
@@ -505,6 +513,97 @@ fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[8].snapshot, None);
+    }
+}
+
+#[test]
+fn authenticated_moonshot_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/moonshot_authenticated_report.json"
+    ))
+    .expect("Go authenticated Moonshot report");
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let moonshot = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "moonshot")
+        .expect("Moonshot oracle case");
+
+    let (mut report, transport) = authenticated_moonshot_report(Response {
+        status: 200,
+        body: serde_json::to_vec(&moonshot["response"]).expect("response fixture"),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["moonshot", "antigravity"]
+    );
+    let usage = &mut report.providers[5];
+    assert_eq!(usage.id, "moonshot");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(usage.auth_status.detail, "API key from MOONSHOT_API_KEY");
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Moonshot snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][5]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(snapshot).expect("Rust snapshot"),
+        report_oracle["providers"][5]["snapshot"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://api.moonshot.ai/v1/users/me/balance"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer synthetic-direct-env-credential")
+    );
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Moonshot report"),
+        report_oracle
+    );
+
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17"), 1),
+        (200, b"{}".as_slice(), None, 2),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_moonshot_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        assert_eq!(
+            report.providers[5].error.as_deref(),
+            Some(
+                moonshot["errors"][oracle_index]["text"]
+                    .as_str()
+                    .expect("Go error text")
+            ),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[5].snapshot, None);
     }
 }
 

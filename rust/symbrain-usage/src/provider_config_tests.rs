@@ -161,24 +161,29 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_reporting() {
+fn only_one_direct_provider_environment_credential_uses_native_reporting() {
     assert!(!needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         None,
         false,
         false,
         false,
     ));
-    assert!(!needs_go_fallback_for(None, None, false, false, false));
+    assert!(!needs_go_fallback_for(
+        None, None, None, false, false, false
+    ));
     assert!(needs_go_fallback_for(
         Some("symvault://copilot/token"),
         None,
+        None,
         false,
         false,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         None,
         true,
         false,
@@ -187,12 +192,14 @@ fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_repo
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
         None,
+        None,
         false,
         true,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         None,
         false,
         false,
@@ -201,13 +208,27 @@ fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_repo
     assert!(!needs_go_fallback_for(
         None,
         Some("synthetic-openrouter-fixture"),
+        None,
         false,
         false,
         false,
     ));
+    assert!(!needs_go_fallback_for(
+        None,
+        None,
+        Some("synthetic-moonshot-fixture"),
+        false,
+        false,
+        false,
+    ));
+}
+
+#[test]
+fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
     assert!(needs_go_fallback_for(
         None,
         Some("symvault://openrouter/key"),
+        None,
         false,
         false,
         false,
@@ -215,6 +236,7 @@ fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_repo
     assert!(needs_go_fallback_for(
         None,
         Some("synthetic-openrouter-fixture"),
+        None,
         true,
         false,
         false,
@@ -222,6 +244,32 @@ fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_repo
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
         Some("synthetic-openrouter-fixture"),
+        None,
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        None,
+        Some("symvault://moonshot/key"),
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        None,
+        Some("synthetic-moonshot-fixture"),
+        // A non-empty MOONSHOT_REGION, including explicit `ai`, remains Go.
+        true,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        Some("synthetic-openrouter-fixture"),
+        Some("synthetic-moonshot-fixture"),
         false,
         false,
         false,

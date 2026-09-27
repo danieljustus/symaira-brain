@@ -15,12 +15,12 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
 /// without a cookie also stays native because Go has no fetch strategy for it.
 /// A report with only a direct `COPILOT_ACCESS_TOKEN` or a direct
-/// `OPENROUTER_API_KEY` using the default OpenRouter base now runs natively:
-/// each configured report, request, parsed snapshot, and provider error cases
-/// are checked against Go oracles using synthetic credentials and canned
-/// transport. Copilot file credentials, secret references, OpenRouter base
-/// overrides, and every other configured provider continue to use Go until
-/// their complete report paths are pinned.
+/// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
+/// using the default `ai` region now runs natively: each configured report,
+/// request, parsed snapshot, and provider error cases are checked against Go
+/// oracles using synthetic credentials and canned transport. Copilot file
+/// credentials, secret references, provider-specific overrides, and every
+/// other configured provider continue to use Go until pinned.
 ///
 /// The report fetch invoked below remains a user-initiated live read, as it
 /// does in the shipped Go command.

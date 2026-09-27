@@ -17,8 +17,8 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables other than the narrow direct Copilot/OpenRouter
-/// cases allowed to use native reporting. Every one of these keeps the CLI on Go.
+/// Environment variables other than the narrow direct Copilot/OpenRouter/
+/// Moonshot cases allowed to use native reporting. Every one keeps the CLI on Go.
 const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
@@ -26,7 +26,7 @@ const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "CURSOR_COOKIE",
     "KIMI_CODE_API_KEY",
     "KIMI_AUTH_TOKEN",
-    "MOONSHOT_API_KEY",
+    "MOONSHOT_REGION",
     "NOUS_PORTAL_ACCESS_TOKEN",
     "OPENCODE_COOKIE",
     "OPENROUTER_API_URL",
@@ -935,6 +935,7 @@ pub fn all_providers() -> Vec<Provider> {
 pub fn needs_go_fallback() -> bool {
     let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
     let openrouter_env = env_raw("OPENROUTER_API_KEY");
+    let moonshot_env = env_raw("MOONSHOT_API_KEY");
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
@@ -949,19 +950,22 @@ pub fn needs_go_fallback() -> bool {
     needs_go_fallback_for(
         copilot_env.as_deref(),
         openrouter_env.as_deref(),
+        moonshot_env.as_deref(),
         other_provider_env,
         false,
         claude_keychain_present() || antigravity_running(),
     )
 }
 
-/// Keeps credential-backed reports on Go except for one direct Copilot token
-/// or one direct `OpenRouter` key using its default base URL, when every other
-/// provider source and local probe is absent. Secret references, Copilot CLI
-/// files, and `OpenRouter` base overrides stay on Go until separately pinned.
+/// Keeps credential-backed reports on Go except for one direct Copilot token,
+/// one direct `OpenRouter` key using its default base URL, or one direct
+/// `Moonshot` key using its default `ai` region, when every other provider
+/// source and local probe is absent. Secret references, credential files, and
+/// provider-specific overrides stay on Go until separately pinned.
 fn needs_go_fallback_for(
     copilot_env: Option<&str>,
     openrouter_env: Option<&str>,
+    moonshot_env: Option<&str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
@@ -969,11 +973,12 @@ fn needs_go_fallback_for(
     if other_provider_env || other_credential_source || local_provider_present {
         return true;
     }
-    match (copilot_env, openrouter_env) {
-        (None, None) => false,
-        (Some(copilot), None) => is_secret_reference(copilot),
-        (None, Some(openrouter)) => is_secret_reference(openrouter),
-        (Some(_), Some(_)) => true,
+    match (copilot_env, openrouter_env, moonshot_env) {
+        (None, None, None) => false,
+        (Some(copilot), None, None) => is_secret_reference(copilot),
+        (None, Some(openrouter), None) => is_secret_reference(openrouter),
+        (None, None, Some(moonshot)) => is_secret_reference(moonshot),
+        _ => true,
     }
 }
 

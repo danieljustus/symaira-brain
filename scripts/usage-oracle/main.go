@@ -17,6 +17,7 @@ import (
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
 const openRouterOracleToken = "oracle-only-invalid-openrouter"
+const moonshotOracleToken = "oracle-only-invalid-moonshot"
 
 func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
@@ -68,6 +69,7 @@ func main() {
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
+	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -98,6 +100,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	moonshotReport, err := buildMoonshotAuthenticatedReport(fixtures["moonshot"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -113,6 +120,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*openRouterReportOutput, openRouterReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*moonshotReportOutput, moonshotReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -135,7 +146,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, len(graph.Providers))
+	if err := writeJSON(*moonshotReportOutput, moonshotReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Printf("Wrote %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, *moonshotReportOutput, len(graph.Providers))
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
@@ -144,6 +159,10 @@ func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
 
 func buildOpenRouterAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("openrouter", openRouterOracleToken, body)
+}
+
+func buildMoonshotAuthenticatedReport(body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("moonshot", moonshotOracleToken, body)
 }
 
 func buildAuthenticatedProviderReport(provider, token string, body []byte) (usage.Report, error) {
@@ -193,7 +212,11 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 		_ = restore()
 		return usage.Report{}, fmt.Errorf("set isolated usage oracle home: %w", err)
 	}
-	envName := map[string]string{"copilot": "COPILOT_ACCESS_TOKEN", "openrouter": "OPENROUTER_API_KEY"}[provider]
+	envName := map[string]string{
+		"copilot":    "COPILOT_ACCESS_TOKEN",
+		"moonshot":   "MOONSHOT_API_KEY",
+		"openrouter": "OPENROUTER_API_KEY",
+	}[provider]
 	if envName == "" {
 		_ = os.RemoveAll(home)
 		_ = restore()
@@ -211,6 +234,8 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 		report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
 	case "openrouter":
 		report, buildErr = usage.BuildOpenRouterAuthenticatedReportOracle(body)
+	case "moonshot":
+		report, buildErr = usage.BuildMoonshotAuthenticatedReportOracle(body)
 	}
 	removeErr := os.RemoveAll(home)
 	restoreErr := restore()

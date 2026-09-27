@@ -178,6 +178,16 @@ func BuildOpenRouterAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("openrouter", body)
 }
 
+// BuildMoonshotAuthenticatedReportOracle runs the shipped Moonshot provider
+// through BuildReport with a direct MOONSHOT_API_KEY and the default `ai`
+// region. The caller supplies only a synthetic key and canned body.
+func BuildMoonshotAuthenticatedReportOracle(body []byte) (Report, error) {
+	if os.Getenv("MOONSHOT_REGION") != "" {
+		return Report{}, fmt.Errorf("Moonshot report oracle requires the default ai region")
+	}
+	return buildAuthenticatedDirectEnvReportOracle("moonshot", body)
+}
+
 func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
 	transport := &oracleTransport{bodies: map[string][]byte{providerID: body}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
@@ -185,7 +195,7 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	index := map[string]int{"copilot": 2, "openrouter": 8}[providerID]
+	index := map[string]int{"copilot": 2, "moonshot": 5, "openrouter": 8}[providerID]
 	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
 		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
 	}
