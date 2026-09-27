@@ -2647,6 +2647,8 @@ CASES = (
     Case("harness_list_unknown_flag", ("harness", "list", "--bogus")),
     Case("harness_unknown_subcommand", ("harness", "frobnicate")),
     Case("harness_health_empty_json", ("harness", "health", "--json")),
+    Case("harness_health_malformed_json", ("harness", "health"), setup=setup_install_malformed),
+    Case("harness_health_malformed_json_response", ("harness", "health", "--json"), setup=setup_install_malformed),
     Case(
         "harness_health_filter_json",
         ("harness", "health", "--harness", "cursor", "--json"),

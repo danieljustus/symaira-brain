@@ -281,16 +281,6 @@ fn run_health(
     }
 
     let inventory = list(project_dir.as_deref());
-    if inventory.harnesses.iter().any(|harness| {
-        harness.global.error.is_some()
-            || harness
-                .project
-                .as_ref()
-                .is_some_and(|project| project.error.is_some())
-    }) {
-        return None;
-    }
-
     let mut entries = Vec::new();
     let mut probes = Vec::new();
 

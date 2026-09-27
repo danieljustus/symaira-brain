@@ -175,6 +175,30 @@ fn malformed_json_inventory_is_native_without_go_fallback() {
     );
 }
 
+#[test]
+fn malformed_config_health_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    write_claude_config(&root, b"{not-json");
+    let missing_go = root.path().join("missing-go-fallback");
+    for (args, expected) in [
+        (
+            &["harness", "health"][..],
+            b"no MCP servers found\n".as_slice(),
+        ),
+        (
+            &["harness", "health", "--json"][..],
+            b"{\"servers\":null}\n".as_slice(),
+        ),
+    ] {
+        let mut command = command(&root, args);
+        command.env("SYMBRAIN_GO_BINARY", &missing_go);
+        let output = command.output().unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        assert_eq!(output.stdout, expected);
+        assert!(output.stderr.is_empty());
+    }
+}
+
 #[cfg(unix)]
 #[test]
 fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
