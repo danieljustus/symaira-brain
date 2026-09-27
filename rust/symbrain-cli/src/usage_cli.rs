@@ -12,18 +12,18 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// The native port reproduces the per-provider credential state machine
 /// (sources, missing/expired/available texts, source tags) and is the reference
 /// for reports with no stored credential at all — those reach no endpoint and
-/// are pinned byte-for-byte by the parity suite. A report that *does* find a
-/// credential fetches from a live endpoint, and what remains unpinned there is
+/// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
+/// without a cookie also stays native because Go has no fetch strategy for it.
+/// A report that *does* find a credential fetches from a live endpoint, and
+/// what remains unpinned there is
 /// narrower than it used to be:
 ///
 /// - the request layer is frozen by `scripts/usage-request-oracle` and checked
 ///   by the port's request oracle test (method, URL, headers, body, plus the
 ///   provider-level error text for canned statuses), so drift on that layer
 ///   fails a unit test;
-/// - the `OpenCode` workspace-discovery fallbacks (the shipped strategy retries
-///   the lookup with a POST and detects a signed-out body; the port performs a
-///   single GET) and the successful parse of a *live* response body are still
-///   open (issue #620).
+/// - successful live responses and the full report's fetch behavior remain
+///   unpinned outside the isolated provider oracles (issue #620).
 ///
 /// Until those are closed, reports that resolve a credential stay with the
 /// shipped implementation.

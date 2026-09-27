@@ -2530,6 +2530,8 @@ CASES = (
     # endpoint and stay on the shipped implementation (see the CLI predicate).
     Case("usage_missing", ("usage",)),
     Case("usage_missing_json", ("usage", "--json")),
+    Case("usage_opencode_workspace_only", ("usage",), env_overrides={"OPENCODE_WORKSPACE_ID": "dump-workspace", "SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
+    Case("usage_opencode_workspace_only_json", ("usage", "--json"), env_overrides={"OPENCODE_WORKSPACE_ID": "dump-workspace", "SYMBRAIN_GO_BINARY": "___no_such_go_binary___"}),
     Case("usage_codex_stale_auth_file", ("usage",), setup=setup_codex_stale_auth),
     Case(
         "usage_codex_stale_auth_file_json",

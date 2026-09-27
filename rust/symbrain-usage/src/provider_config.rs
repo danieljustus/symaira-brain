@@ -17,7 +17,7 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables that configure a provider on their own.
+/// Environment variables that can make a provider fetch from an endpoint.
 const PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
@@ -29,7 +29,6 @@ const PROVIDER_ENV_VARS: &[&str] = &[
     "MOONSHOT_API_KEY",
     "NOUS_PORTAL_ACCESS_TOKEN",
     "OPENCODE_COOKIE",
-    "OPENCODE_WORKSPACE_ID",
     "OPENROUTER_API_KEY",
 ];
 
@@ -930,7 +929,8 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. The CLI keeps such reports on the shipped implementation until the
-/// provider fetch paths are pinned byte-for-byte.
+/// provider fetch paths are pinned byte-for-byte. A workspace override alone
+/// supplies no `OpenCode` cookie or strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
     if PROVIDER_ENV_VARS.iter().any(|name| env_raw(name).is_some()) {
