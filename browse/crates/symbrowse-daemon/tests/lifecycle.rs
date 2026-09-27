@@ -385,7 +385,10 @@ mod unix {
     }
 
     fn root(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!(
+        let parent = std::env::var_os("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/tmp"));
+        parent.join(format!(
             "symbrowse-daemon-{name}-{}-{}",
             std::process::id(),
             NEXT.fetch_add(1, Ordering::Relaxed)

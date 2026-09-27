@@ -1081,6 +1081,13 @@ mod tests {
     use super::*;
 
     #[cfg(unix)]
+    fn socket_temp_parent() -> std::path::PathBuf {
+        std::env::var_os("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|| std::path::PathBuf::from("/tmp"))
+    }
+
+    #[cfg(unix)]
     #[test]
     fn runtime_proxy_sends_daemon_frame_and_preserves_warnings() {
         use std::{
@@ -1089,7 +1096,7 @@ mod tests {
             sync::mpsc,
         };
 
-        let path = std::env::temp_dir().join(format!("symbrowse-mcp-test-{}.sock", request_id()));
+        let path = socket_temp_parent().join(format!("symbrowse-mcp-test-{}.sock", request_id()));
         let listener = UnixListener::bind(&path).expect("bind daemon fixture socket");
         let (seen, receive) = mpsc::channel();
         let server = std::thread::spawn(move || {
@@ -1172,7 +1179,7 @@ mod tests {
             sync::mpsc,
         };
 
-        let path = std::env::temp_dir().join(format!(
+        let path = socket_temp_parent().join(format!(
             "symbrowse-mcp-config-mismatch-{}.sock",
             request_id()
         ));
@@ -1256,7 +1263,7 @@ mod tests {
 
         use std::os::unix::net::UnixListener;
 
-        let path = std::env::temp_dir().join(format!(
+        let path = socket_temp_parent().join(format!(
             "symbrowse-mcp-status-failure-{}.sock",
             request_id()
         ));
