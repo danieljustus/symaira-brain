@@ -209,26 +209,6 @@ fn empty_health_matches_go_shapes() {
 }
 
 #[test]
-fn probe_failure_falls_back_without_native_output() {
-    let root = TempDir::new().unwrap();
-    write_servers(&root, &json!({"broken": {"command": "missing-mcp"}}));
-    let fallback = executable(
-        &root,
-        "go-fallback",
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 17\n",
-    );
-
-    let mut command = command(&root, &["harness", "health", "--json"]);
-    let output = command
-        .env("SYMBRAIN_GO_BINARY", fallback)
-        .output()
-        .unwrap();
-    assert_eq!(output.status.code(), Some(17));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
-}
-
-#[test]
 fn protocol_failure_falls_back_without_native_output() {
     let root = TempDir::new().unwrap();
     let fake = executable(&root, "invalid-mcp.py", INVALID_MCP);
@@ -250,7 +230,7 @@ fn protocol_failure_falls_back_without_native_output() {
 }
 
 #[test]
-fn multiple_stdio_probes_fall_back_without_native_output() {
+fn multiple_missing_stdio_probes_are_reported_natively() {
     let root = TempDir::new().unwrap();
     write_servers(
         &root,
@@ -259,41 +239,22 @@ fn multiple_stdio_probes_fall_back_without_native_output() {
             "second": {"command": "missing-second"}
         }),
     );
-    let fallback = executable(
-        &root,
-        "go-fallback",
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
-    );
-
     let mut command = command(&root, &["harness", "health", "--json"]);
     let output = command
-        .env("SYMBRAIN_GO_BINARY", fallback)
+        .env(
+            "SYMBRAIN_GO_BINARY",
+            root.path().join("missing-go-fallback"),
+        )
         .output()
         .unwrap();
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
-}
-
-#[test]
-fn malformed_config_falls_back_without_native_output() {
-    let root = TempDir::new().unwrap();
-    std::fs::create_dir_all(root.path().join("home")).unwrap();
-    std::fs::write(root.path().join("home/.claude.json"), b"{not-json").unwrap();
-    let fallback = executable(
-        &root,
-        "go-fallback",
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 19\n",
-    );
-
-    let mut command = command(&root, &["harness", "health", "--json"]);
-    let output = command
-        .env("SYMBRAIN_GO_BINARY", fallback)
-        .output()
-        .unwrap();
-    assert_eq!(output.status.code(), Some(19));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let servers = report["servers"].as_array().unwrap();
+    assert_eq!(servers.len(), 2);
+    assert_eq!(servers[0]["server"], "first");
+    assert_eq!(servers[1]["server"], "second");
+    assert!(servers.iter().all(|server| server["healthy"] == false));
 }
 
 #[test]
