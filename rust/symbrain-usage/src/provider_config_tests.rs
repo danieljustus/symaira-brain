@@ -201,6 +201,10 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         kimi_api_env: Some("synthetic-kimi-api-fixture"),
         ..UsageFallbackSignals::default()
     }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        nous_env: Some("synthetic-nous-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
 }
 
 #[test]
@@ -249,6 +253,15 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
     }));
     assert!(needs_go_fallback_for(UsageFallbackSignals {
         kimi_api_env: Some("synthetic-kimi-api-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        nous_env: Some("symvault://nous/access-token"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        nous_env: Some("synthetic-nous-env-fixture"),
         other_provider_env: true,
         ..UsageFallbackSignals::default()
     }));

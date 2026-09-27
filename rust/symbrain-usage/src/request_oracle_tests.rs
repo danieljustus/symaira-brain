@@ -191,6 +191,14 @@ fn authenticated_kimi_report(response: Response) -> (crate::Report, FixtureTrans
     )
 }
 
+fn authenticated_nous_report(response: Response) -> (crate::Report, FixtureTransport) {
+    authenticated_direct_provider_report(
+        response,
+        "nous",
+        include_str!("../tests/fixtures/nous_authenticated_report.json"),
+    )
+}
+
 fn authenticated_direct_provider_report(
     response: Response,
     configured_provider: &str,
@@ -891,6 +899,100 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[4].snapshot, None);
+    }
+}
+
+#[test]
+fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/nous_authenticated_report.json"
+    ))
+    .expect("Go authenticated Nous report");
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let nous = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "nous")
+        .expect("Nous oracle case");
+
+    let (mut report, transport) = authenticated_nous_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["nous", "antigravity"]
+    );
+    let usage = &mut report.providers[6];
+    assert_eq!(usage.id, "nous");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(
+        usage.auth_status.detail,
+        "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)"
+    );
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Nous snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][6]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(snapshot).expect("Rust snapshot"),
+        report_oracle["providers"][6]["snapshot"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://portal.nousresearch.com/api/oauth/account"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer synthetic-direct-env-credential")
+    );
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Nous report"),
+        report_oracle
+    );
+
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17"), 1),
+        (200, b"{}".as_slice(), None, 2),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_nous_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        assert_eq!(
+            report.providers[6].error.as_deref(),
+            Some(
+                nous["errors"][oracle_index]["text"]
+                    .as_str()
+                    .expect("Go error text")
+            ),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[6].snapshot, None);
     }
 }
 
