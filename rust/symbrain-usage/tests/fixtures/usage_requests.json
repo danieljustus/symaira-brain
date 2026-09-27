@@ -98,6 +98,26 @@
     },
     {
       "provider": "kimi",
+      "source": "api",
+      "requests": [
+        {
+          "method": "GET",
+          "url": "https://api.kimi.com/coding/v1/usages",
+          "headers": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer CREDENTIAL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "provider": "kimi",
       "source": "cli",
       "requests": [
         {
@@ -391,22 +411,22 @@
     {
       "provider": "kimi",
       "status": "unauthorized",
-      "text": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+      "text": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
     },
     {
       "provider": "kimi",
       "status": "rate-limited",
-      "text": "all AI usage fallbacks failed: AI usage provider \"kimi\" is rate limited; AI usage provider \"kimi\" is rate limited"
+      "text": "all AI usage fallbacks failed: AI usage provider \"kimi\" is rate limited; AI usage provider \"kimi\" is rate limited; AI usage provider \"kimi\" is rate limited"
     },
     {
       "provider": "kimi",
       "status": "server-error",
-      "text": "all AI usage fallbacks failed: Kimi request failed with HTTP 500; Kimi request failed with HTTP 500"
+      "text": "all AI usage fallbacks failed: Kimi request failed with HTTP 500; Kimi request failed with HTTP 500; Kimi request failed with HTTP 500"
     },
     {
       "provider": "kimi",
       "status": "malformed",
-      "text": "all AI usage fallbacks failed: Kimi returned an unreadable response; Kimi returned an unreadable response"
+      "text": "all AI usage fallbacks failed: Kimi returned an unreadable response; Kimi returned an unreadable response; Kimi returned an unreadable response"
     },
     {
       "provider": "moonshot",

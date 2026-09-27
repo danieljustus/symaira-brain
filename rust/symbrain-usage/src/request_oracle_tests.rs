@@ -62,7 +62,7 @@ struct Case {
     device_id: Option<&'static str>,
 }
 
-const CASES: [Case; 12] = [
+const CASES: [Case; 13] = [
     Case {
         provider: "claude",
         source: "api",
@@ -91,6 +91,12 @@ const CASES: [Case; 12] = [
         provider: "cursor",
         source: "web",
         credential: CURSOR_COOKIE,
+        device_id: None,
+    },
+    Case {
+        provider: "kimi",
+        source: "api",
+        credential: KIMI_CLI,
         device_id: None,
     },
     Case {
@@ -177,6 +183,14 @@ fn authenticated_cursor_report(response: Response) -> (crate::Report, FixtureTra
     )
 }
 
+fn authenticated_kimi_report(response: Response) -> (crate::Report, FixtureTransport) {
+    authenticated_direct_provider_report(
+        response,
+        "kimi",
+        include_str!("../tests/fixtures/kimi_authenticated_report.json"),
+    )
+}
+
 fn authenticated_direct_provider_report(
     response: Response,
     configured_provider: &str,
@@ -201,7 +215,8 @@ fn authenticated_direct_provider_report(
             provider.credential = None;
             provider.credentials.clear();
             if id == configured_provider {
-                provider.credentials = vec![("env".into(), REPORT_ENV_CREDENTIAL.into())];
+                let strategy = if id == "kimi" { "api" } else { "env" };
+                provider.credentials = vec![(strategy.into(), REPORT_ENV_CREDENTIAL.into())];
                 provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
             }
             provider
@@ -210,6 +225,42 @@ fn authenticated_direct_provider_report(
     let transport = FixtureTransport::new([(configured_provider.into(), response)].into());
     let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
     (report, transport)
+}
+
+fn normalize_rfc3339_fields(value: &mut Value) {
+    match value {
+        Value::Object(object) => {
+            for (key, value) in object {
+                if matches!(key.as_str(), "fetched_at" | "resets_at")
+                    && let Some(text) = value.as_str()
+                    && let Ok(parsed) = chrono::DateTime::parse_from_rfc3339(text)
+                {
+                    let formatted = parsed.to_rfc3339_opts(chrono::SecondsFormat::Nanos, true);
+                    let formatted = formatted.strip_suffix('Z').unwrap_or(&formatted);
+                    let normalized = formatted.split_once('.').map_or_else(
+                        || format!("{formatted}Z"),
+                        |(seconds, fraction)| {
+                            let fraction = fraction.trim_end_matches('0');
+                            if fraction.is_empty() {
+                                format!("{seconds}Z")
+                            } else {
+                                format!("{seconds}.{fraction}Z")
+                            }
+                        },
+                    );
+                    *value = Value::String(normalized);
+                    continue;
+                }
+                normalize_rfc3339_fields(value);
+            }
+        }
+        Value::Array(values) => {
+            for value in values {
+                normalize_rfc3339_fields(value);
+            }
+        }
+        _ => {}
+    }
 }
 
 /// Mirrors the normalization the oracle applies, so both sides compare on the
@@ -707,6 +758,139 @@ fn authenticated_cursor_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[3].snapshot, None);
+    }
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/kimi_authenticated_report.json"
+    ))
+    .expect("Go authenticated Kimi report");
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let kimi = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "kimi")
+        .expect("Kimi oracle case");
+
+    let (mut report, transport) = authenticated_kimi_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/kimi-api-usages.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["kimi", "antigravity"]
+    );
+    let usage = &mut report.providers[4];
+    assert_eq!(usage.id, "kimi");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(usage.auth_status.detail, "API key from KIMI_CODE_API_KEY");
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Kimi snapshot");
+    let response: Value = serde_json::from_slice(include_bytes!(
+        "../../../internal/usage/testdata/kimi-api-usages.json"
+    ))
+    .expect("Go Kimi response fixture");
+    for (meter, response_time) in [
+        (
+            &snapshot.meters[0],
+            response["usage"]["resetTime"].as_str().unwrap(),
+        ),
+        (
+            &snapshot.meters[1],
+            response["limits"][0]["detail"]["resetTime"]
+                .as_str()
+                .unwrap(),
+        ),
+    ] {
+        assert_eq!(
+            meter.resets_at,
+            Some(
+                chrono::DateTime::parse_from_rfc3339(response_time)
+                    .expect("Go response reset timestamp")
+                    .with_timezone(&chrono::Utc)
+            ),
+            "{} reset timestamp follows the Go response",
+            meter.label
+        );
+    }
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][4]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    for (meter, index) in snapshot.meters.iter_mut().zip(0..2) {
+        meter.resets_at = Some(
+            chrono::DateTime::parse_from_rfc3339(
+                report_oracle["providers"][4]["snapshot"]["meters"][index]["resets_at"]
+                    .as_str()
+                    .expect("oracle reset timestamp"),
+            )
+            .expect("oracle reset timestamp parses")
+            .with_timezone(&chrono::Utc),
+        );
+    }
+    let mut rust_snapshot = serde_json::to_value(snapshot).expect("Rust snapshot");
+    let mut go_snapshot = report_oracle["providers"][4]["snapshot"].clone();
+    normalize_rfc3339_fields(&mut rust_snapshot);
+    normalize_rfc3339_fields(&mut go_snapshot);
+    assert_eq!(rust_snapshot, go_snapshot);
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(requests[0].url, "https://api.kimi.com/coding/v1/usages");
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer synthetic-direct-env-credential")
+    );
+    assert_eq!(
+        requests[0].headers.get("Accept").map(String::as_str),
+        Some("application/json")
+    );
+    let mut rust_report = serde_json::to_value(&report).expect("Rust Kimi report");
+    let mut go_report = report_oracle;
+    normalize_rfc3339_fields(&mut rust_report);
+    normalize_rfc3339_fields(&mut go_report);
+    assert_eq!(rust_report, go_report);
+
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17"), 1),
+        (200, b"{}".as_slice(), None, 2),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_kimi_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        assert_eq!(
+            report.providers[4].error.as_deref(),
+            Some(
+                kimi["errors"][oracle_index]["text"]
+                    .as_str()
+                    .expect("Go error text")
+            ),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[4].snapshot, None);
     }
 }
 

@@ -194,6 +194,15 @@ func BuildCursorAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("cursor", body)
 }
 
+// BuildKimiAuthenticatedReportOracle runs the shipped Kimi provider through
+// BuildReport with a direct KIMI_CODE_API_KEY and the default API base.
+func BuildKimiAuthenticatedReportOracle(body []byte) (Report, error) {
+	if os.Getenv("KIMI_CODE_BASE_URL") != "" || os.Getenv("KIMI_CODE_HOME") != "" || os.Getenv("KIMI_AUTH_TOKEN") != "" {
+		return Report{}, fmt.Errorf("Kimi report oracle requires only the direct API key, default base, and isolated credential home")
+	}
+	return buildAuthenticatedDirectEnvReportOracle("kimi", body)
+}
+
 func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
 	transport := &oracleTransport{bodies: map[string][]byte{providerID: body}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
@@ -201,9 +210,15 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	index := map[string]int{"copilot": 2, "cursor": 3, "moonshot": 5, "openrouter": 8}[providerID]
+	index := map[string]int{"copilot": 2, "cursor": 3, "kimi": 4, "moonshot": 5, "openrouter": 8}[providerID]
 	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
 		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
+	}
+	if providerID == "kimi" {
+		strategies := providers[index].Strategies()
+		if len(strategies) != 1 || strategies[0].Source() != "api" {
+			return Report{}, fmt.Errorf("Kimi report oracle requires exactly one direct API-key strategy")
+		}
 	}
 	for i, provider := range providers {
 		if i != index && i != 9 && provider.IsConfigured() {

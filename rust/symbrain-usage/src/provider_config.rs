@@ -18,12 +18,13 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
 /// Environment variables other than the narrow direct Copilot/OpenRouter/
-/// Moonshot/Cursor cases allowed to use native reporting. Every one keeps the CLI on Go.
+/// Moonshot/Cursor/Kimi cases allowed to use native reporting. Every one keeps the CLI on Go.
 const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
     "CODEX_ACCESS_TOKEN",
-    "KIMI_CODE_API_KEY",
+    "KIMI_CODE_BASE_URL",
+    "KIMI_CODE_HOME",
     "KIMI_AUTH_TOKEN",
     "MOONSHOT_REGION",
     "NOUS_PORTAL_ACCESS_TOKEN",
@@ -936,6 +937,7 @@ pub fn needs_go_fallback() -> bool {
     let openrouter_env = env_raw("OPENROUTER_API_KEY");
     let moonshot_env = env_raw("MOONSHOT_API_KEY");
     let cursor_env = env_raw("CURSOR_COOKIE");
+    let kimi_api_env = env_raw("KIMI_CODE_API_KEY");
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
@@ -947,40 +949,56 @@ pub fn needs_go_fallback() -> bool {
     {
         return true;
     }
-    needs_go_fallback_for(
-        copilot_env.as_deref(),
-        openrouter_env.as_deref(),
-        moonshot_env.as_deref(),
-        cursor_env.as_deref(),
+    needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: copilot_env.as_deref(),
+        openrouter_env: openrouter_env.as_deref(),
+        moonshot_env: moonshot_env.as_deref(),
+        cursor_env: cursor_env.as_deref(),
+        kimi_api_env: kimi_api_env.as_deref(),
         other_provider_env,
-        false,
-        claude_keychain_present() || antigravity_running(),
-    )
+        other_credential_source: false,
+        local_provider_present: claude_keychain_present() || antigravity_running(),
+    })
 }
 
 /// Keeps credential-backed reports on Go except for one direct Copilot token,
 /// one direct `OpenRouter` key using its default base URL, or one direct
-/// `Moonshot` key using its default `ai` region, or one direct `Cursor` cookie,
-/// when every other provider source and local probe is absent. Secret
+/// `Moonshot` key using its default `ai` region, one direct `Cursor` cookie,
+/// or one direct Kimi Code API key using its default base, when every other
+/// provider source and local probe is absent. Secret
 /// references, credential files, and provider-specific overrides stay on Go.
-fn needs_go_fallback_for(
-    copilot_env: Option<&str>,
-    openrouter_env: Option<&str>,
-    moonshot_env: Option<&str>,
-    cursor_env: Option<&str>,
+#[derive(Clone, Copy, Default)]
+struct UsageFallbackSignals<'a> {
+    copilot_env: Option<&'a str>,
+    openrouter_env: Option<&'a str>,
+    moonshot_env: Option<&'a str>,
+    cursor_env: Option<&'a str>,
+    kimi_api_env: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
-) -> bool {
-    if other_provider_env || other_credential_source || local_provider_present {
+}
+
+fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
+    if signals.other_provider_env
+        || signals.other_credential_source
+        || signals.local_provider_present
+    {
         return true;
     }
-    match (copilot_env, openrouter_env, moonshot_env, cursor_env) {
-        (None, None, None, None) => false,
-        (Some(copilot), None, None, None) => is_secret_reference(copilot),
-        (None, Some(openrouter), None, None) => is_secret_reference(openrouter),
-        (None, None, Some(moonshot), None) => is_secret_reference(moonshot),
-        (None, None, None, Some(cursor)) => is_secret_reference(cursor),
+    match (
+        signals.copilot_env,
+        signals.openrouter_env,
+        signals.moonshot_env,
+        signals.cursor_env,
+        signals.kimi_api_env,
+    ) {
+        (None, None, None, None, None) => false,
+        (Some(copilot), None, None, None, None) => is_secret_reference(copilot),
+        (None, Some(openrouter), None, None, None) => is_secret_reference(openrouter),
+        (None, None, Some(moonshot), None, None) => is_secret_reference(moonshot),
+        (None, None, None, Some(cursor), None) => is_secret_reference(cursor),
+        (None, None, None, None, Some(kimi)) => is_secret_reference(kimi),
         _ => true,
     }
 }
@@ -1167,14 +1185,14 @@ fn kimi() -> Provider {
     };
     // Strategy order is API key, then CLI token, then web auth token.
     let mut credentials = Vec::new();
-    if let Some((source, value)) = api_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = api_value.clone() {
+        credentials.push(("api".into(), value));
     }
     if let Some(token) = cli_token.clone() {
         credentials.push(("cli".into(), token));
     }
-    if let Some((source, value)) = auth_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = auth_value.clone() {
+        credentials.push(("web".into(), value));
     }
     let mut provider = Provider::new(
         "kimi",

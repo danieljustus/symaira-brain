@@ -1,7 +1,7 @@
 use super::{
-    MAX_CREDENTIAL_FILE_BYTES, claude_file_token_in, codex_file_token, copilot_file_token_in,
-    decode_base64url, json_string, kimi_store, names_from_keychain_dump, needs_go_fallback_for,
-    nous_file_token, nous_jwt_is_live, read_limited,
+    MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
+    copilot_file_token_in, decode_base64url, json_string, kimi_store, names_from_keychain_dump,
+    needs_go_fallback_for, nous_file_token, nous_jwt_is_live, read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -162,158 +162,96 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 
 #[test]
 fn only_one_direct_provider_environment_credential_uses_native_reporting() {
-    assert!(!needs_go_fallback_for(
-        Some("synthetic-copilot-fixture"),
-        None,
-        None,
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(!needs_go_fallback_for(
-        None, None, None, None, false, false, false
-    ));
-    assert!(needs_go_fallback_for(
-        Some("symvault://copilot/token"),
-        None,
-        None,
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        Some("synthetic-copilot-fixture"),
-        None,
-        None,
-        None,
-        true,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        Some("synthetic-copilot-fixture"),
-        None,
-        None,
-        None,
-        false,
-        true,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        Some("synthetic-copilot-fixture"),
-        None,
-        None,
-        None,
-        false,
-        false,
-        true,
-    ));
-    assert!(!needs_go_fallback_for(
-        None,
-        Some("synthetic-openrouter-fixture"),
-        None,
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(!needs_go_fallback_for(
-        None,
-        None,
-        Some("synthetic-moonshot-fixture"),
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(!needs_go_fallback_for(
-        None,
-        None,
-        None,
-        Some("synthetic-cursor-fixture"),
-        false,
-        false,
-        false,
-    ));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("synthetic-copilot-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("symvault://copilot/token"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("synthetic-copilot-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("synthetic-copilot-fixture"),
+        other_credential_source: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("synthetic-copilot-fixture"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        openrouter_env: Some("synthetic-openrouter-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        moonshot_env: Some("synthetic-moonshot-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        cursor_env: Some("synthetic-cursor-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        kimi_api_env: Some("synthetic-kimi-api-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
 }
 
 #[test]
 fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
-    assert!(needs_go_fallback_for(
-        None,
-        Some("symvault://openrouter/key"),
-        None,
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        None,
-        None,
-        Some("symvault://cursor/cookie"),
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        Some("synthetic-openrouter-fixture"),
-        None,
-        None,
-        true,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        Some("synthetic-copilot-fixture"),
-        Some("synthetic-openrouter-fixture"),
-        None,
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        None,
-        Some("symvault://moonshot/key"),
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        None,
-        Some("synthetic-moonshot-fixture"),
-        None,
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        openrouter_env: Some("symvault://openrouter/key"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        cursor_env: Some("symvault://cursor/cookie"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        openrouter_env: Some("synthetic-openrouter-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_env: Some("synthetic-copilot-fixture"),
+        openrouter_env: Some("synthetic-openrouter-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        moonshot_env: Some("symvault://moonshot/key"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        moonshot_env: Some("synthetic-moonshot-fixture"),
         // A non-empty MOONSHOT_REGION, including explicit `ai`, remains Go.
-        true,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        Some("synthetic-openrouter-fixture"),
-        Some("synthetic-moonshot-fixture"),
-        None,
-        false,
-        false,
-        false,
-    ));
-    assert!(needs_go_fallback_for(
-        None,
-        None,
-        None,
-        Some("synthetic-cursor-fixture"),
-        true,
-        false,
-        false,
-    ));
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        openrouter_env: Some("synthetic-openrouter-fixture"),
+        moonshot_env: Some("synthetic-moonshot-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        cursor_env: Some("synthetic-cursor-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        kimi_api_env: Some("symvault://kimi/api-key"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        kimi_api_env: Some("synthetic-kimi-api-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
 }
 
 #[test]
