@@ -199,6 +199,32 @@ fn malformed_config_health_is_native_without_go_fallback() {
     }
 }
 
+#[test]
+fn missing_command_health_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    write_claude_config(
+        &root,
+        br#"{"mcpServers":{"missing":{"command":"symaira-missing-mcp-fixture"}}}"#,
+    );
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    command.env(
+        "SYMBRAIN_GO_BINARY",
+        root.path().join("missing-go-fallback"),
+    );
+    let output = command.output().unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let error = report["servers"][0]["error"].as_str().unwrap();
+    let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+    assert_eq!(
+        error,
+        format!(
+            "discover: broker: \"symaira-missing-mcp-fixture\" not found on PATH or in managed directory: exec: \"symaira-missing-mcp-fixture\": executable file not found in {path_var}"
+        )
+    );
+}
+
 #[cfg(unix)]
 #[test]
 fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {

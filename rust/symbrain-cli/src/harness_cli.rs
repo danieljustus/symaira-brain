@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use serde::Serialize;
-use symbrain_broker::{Client, Options};
+use symbrain_broker::{BrokerError, Client, Options};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_harness::list;
@@ -384,7 +384,30 @@ struct HealthProbe {
 }
 
 fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
-    let path = symbrain_broker::discover(&probe.command, "").map_err(|_| ())?;
+    let path = match symbrain_broker::discover(&probe.command, "") {
+        Ok(path) => path,
+        Err(BrokerError::Io(error))
+            if error.kind() == std::io::ErrorKind::NotFound
+                && probe
+                    .command
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_')) =>
+        {
+            let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+            return Ok(HarnessHealthEntry {
+                harness: probe.harness,
+                config: probe.config,
+                server: probe.server,
+                transport: probe.transport,
+                healthy: false,
+                error: format!(
+                    "discover: broker: {:?} not found on PATH or in managed directory: exec: {:?}: executable file not found in {path_var}",
+                    probe.command, probe.command
+                ),
+            });
+        }
+        Err(_) => return Err(()),
+    };
     let client = Client::spawn(
         &path,
         Options {

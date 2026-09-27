@@ -159,6 +159,10 @@ def setup_install_malformed(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".claude.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
     cfg.write_bytes(b"{not valid json")
+def setup_harness_health_missing_command(_root: Path, env: dict[str, str]) -> None:
+    cfg = Path(env["HOME"]) / ".claude.json"
+    cfg.parent.mkdir(parents=True, exist_ok=True)
+    cfg.write_bytes(b'{"mcpServers":{"missing":{"command":"symaira-missing-mcp-fixture"}}}')
 def setup_install_superseded(_root: Path, env: dict[str, str]) -> None:
     cfg = Path(env["HOME"]) / ".cursor" / "mcp.json"
     cfg.parent.mkdir(parents=True, exist_ok=True)
@@ -2649,6 +2653,8 @@ CASES = (
     Case("harness_health_empty_json", ("harness", "health", "--json")),
     Case("harness_health_malformed_json", ("harness", "health"), setup=setup_install_malformed),
     Case("harness_health_malformed_json_response", ("harness", "health", "--json"), setup=setup_install_malformed),
+    Case("harness_health_missing_command", ("harness", "health"), setup=setup_harness_health_missing_command),
+    Case("harness_health_missing_command_json", ("harness", "health", "--json"), setup=setup_harness_health_missing_command),
     Case(
         "harness_health_filter_json",
         ("harness", "health", "--harness", "cursor", "--json"),
