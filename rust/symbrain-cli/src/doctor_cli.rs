@@ -27,13 +27,7 @@ mod doctor_types;
 /// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
 /// managed installer owns that behavior.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    crate::has_go_owned_flag(
-        args,
-        &["json", "fix", "force-release", "vault-agent", "h", "help"],
-        &["vault-agent"],
-        &[],
-        &["fix", "force-release"],
-    )
+    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
 }
 
 pub fn run(
@@ -88,9 +82,10 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
             .split_once('=')
             .map_or((flag, None), |(n, v)| (n, Some(v)));
         match name {
-            "json" => {}
-            "fix" => parsed.fix = inline != Some("false"),
-            "force-release" if inline == Some("false") => {}
+            "json" | "force-release" => {
+                parse_bool_flag(name, inline, stderr)?;
+            }
+            "fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
             "vault-agent" => {
                 let value = inline.map(str::to_owned).or_else(|| {
                     i += 1;
@@ -118,6 +113,18 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
         i += 1;
     }
     Ok(parsed)
+}
+
+fn parse_bool_flag(name: &str, value: Option<&str>, stderr: &mut dyn Write) -> Result<bool, u8> {
+    let Some(value) = value else { return Ok(true) };
+    crate::setup_cli::parse_go_bool(value).map_err(|()| {
+        let _ = writeln!(
+            stderr,
+            "invalid boolean value {value:?} for -{name}: parse error"
+        );
+        let _ = write!(stderr, "{DOCTOR_USAGE}");
+        exit::USAGE
+    })
 }
 
 #[cfg(test)]
@@ -231,8 +238,11 @@ args = ["mcp", "--profile", "default"]
         assert!(!requires_go_fallback(&args(&["--vault-agent", "agent"])));
         assert!(!requires_go_fallback(&args(&["--vault-agent=agent"])));
         assert!(!requires_go_fallback(&args(&["--json"])));
-        assert!(requires_go_fallback(&args(&["--force-release"])));
+        assert!(!requires_go_fallback(&args(&["--force-release"])));
+        assert!(!requires_go_fallback(&args(&["--force-release=true"])));
         assert!(requires_go_fallback(&args(&["--fix"])));
+        assert!(!requires_go_fallback(&args(&["--fix=0"])));
+        assert!(requires_go_fallback(&args(&["--force-release", "--fix"])));
         assert!(!requires_go_fallback(&args(&[
             "--fix=false",
             "--force-release=false"
