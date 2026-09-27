@@ -2,9 +2,7 @@
 #![deny(unsafe_code)]
 
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::Command;
 
 use serde_json::json;
 use tempfile::TempDir;
@@ -34,23 +32,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
         .current_dir(project)
         .args(args);
     command
-}
-
-fn fallback(root: &TempDir) -> PathBuf {
-    let path = root.path().join("go-fallback");
-    fs::write(
-        &path,
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
-    )
-    .unwrap();
-    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-    path
-}
-
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
 }
 
 #[test]
@@ -126,19 +107,19 @@ fn doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary() {
 }
 
 #[test]
-fn doctor_vault_agent_with_existing_profile_uses_go_fallback() {
+fn doctor_vault_agent_skips_broken_profile_without_go() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     fs::create_dir_all(&profiles).unwrap();
     fs::write(profiles.join("broken.toml"), b"[profile\n").unwrap();
-    let go_binary = fallback(&root);
-
-    let output = command(&root, &["doctor", "--vault-agent", "agent"])
-        .env("SYMBRAIN_GO_BINARY", go_binary)
+    let output = command(&root, &["doctor", "--vault-agent", "agent", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["profiles"], json!(["broken"]));
+    assert!(report.get("handshakes").is_none());
 }
 
 #[test]
@@ -189,17 +170,17 @@ fn doctor_vault_agent_with_missing_vault_binary_stays_native() {
 }
 
 #[test]
-fn doctor_vault_agent_with_unreadable_profiles_uses_go_fallback() {
+fn doctor_vault_agent_skips_unlistable_profiles_without_go() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     fs::create_dir_all(profiles.parent().unwrap()).unwrap();
     fs::write(&profiles, b"profiles are not a directory").unwrap();
-    let go_binary = fallback(&root);
-
-    let output = command(&root, &["doctor", "--vault-agent", "agent"])
-        .env("SYMBRAIN_GO_BINARY", go_binary)
+    let output = command(&root, &["doctor", "--vault-agent", "agent", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["profiles"], json!([]));
+    assert!(report.get("handshakes").is_none());
 }
