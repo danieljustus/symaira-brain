@@ -166,10 +166,14 @@ impl DispatchRuntime {
         self.runtime.block_on(async {
             tokio::select! {
                 result = self.dispatch(frame, operation.clone()) => result,
-                _ = Self::wait_for_cancellation(operation.clone()) => Err(DaemonError {
-                    code: codes::OPERATION_TIMEOUT.into(),
-                    message: "daemon operation was cancelled".into(),
-                    ..Default::default()
+                _ = Self::wait_for_cancellation(operation.clone()) => Err(if operation.remaining().is_zero() {
+                    operation_timeout_error()
+                } else {
+                    DaemonError {
+                        code: codes::OPERATION_TIMEOUT.into(),
+                        message: "daemon operation was cancelled".into(),
+                        ..Default::default()
+                    }
                 }),
             }
         })
