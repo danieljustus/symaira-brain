@@ -935,11 +935,9 @@ pub fn all_providers() -> Vec<Provider> {
 pub fn needs_go_fallback() -> bool {
     let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
     let openrouter_env = env_raw("OPENROUTER_API_KEY");
-    let openrouter_base = env_raw("OPENROUTER_API_URL");
-    let other_provider_env = openrouter_base.is_some()
-        || OTHER_PROVIDER_ENV_VARS
-            .iter()
-            .any(|name| env_raw(name).is_some());
+    let other_provider_env = OTHER_PROVIDER_ENV_VARS
+        .iter()
+        .any(|name| env_raw(name).is_some());
     if claude_file_token().is_some()
         || codex_file_token(&codex_home()).is_some()
         || copilot_file_token().is_some()
