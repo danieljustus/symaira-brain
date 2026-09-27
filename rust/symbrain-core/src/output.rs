@@ -151,8 +151,15 @@ pub fn extract_format(args: &[OsString]) -> Result<(OutputFormat, Vec<OsString>)
 ///
 /// Returns an `io::Error` if serialization or writing fails.
 pub fn render_json<W: Write, T: Serialize + ?Sized>(mut writer: W, value: &T) -> io::Result<()> {
-    serde_json::to_writer(&mut writer, value).map_err(io::Error::other)?;
-    writeln!(writer)?;
+    let encoded = serde_json::to_string(value).map_err(io::Error::other)?;
+    writeln!(
+        writer,
+        "{}",
+        encoded
+            .replace('&', "\\u0026")
+            .replace('<', "\\u003c")
+            .replace('>', "\\u003e")
+    )?;
     Ok(())
 }
 

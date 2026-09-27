@@ -189,6 +189,16 @@ fn render_json_preserves_values_and_appends_newline() {
 }
 
 #[test]
+fn render_json_escapes_html_like_go() {
+    let mut output = Vec::new();
+    render_json(&mut output, &"<x&>").unwrap();
+    assert_eq!(
+        String::from_utf8(output).unwrap(),
+        "\"\\u003cx\\u0026\\u003e\"\n"
+    );
+}
+
+#[test]
 fn render_table_uses_table_function() {
     let mut buf = Vec::new();
     let data = "ignored-for-table";

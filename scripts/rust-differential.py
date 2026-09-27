@@ -340,6 +340,8 @@ def setup_doctor_disabled_vault(root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
     _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = false\n')
+def setup_html_project(root: Path, _env: dict[str, str]) -> None:
+    (root / "project/<x&>").mkdir()
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
@@ -2631,6 +2633,7 @@ CASES = (
     # native without oracle coverage.
     Case("sync_dry_run_empty", ("sync", "--dry-run")),
     Case("sync_dry_run_all", ("sync", "--dry-run", "opencode")),
+    Case("sync_html_project_json", ("sync", "--dry-run", "--project", "HTML_PROJECT", "claude", "--json"), setup=setup_html_project),
     Case("sync_flag_terminator", ("sync", "--dry-run", "--", "agents")),
     Case("sync_flag_after_positional", ("sync", "agents", "--dry-run")),
     Case("sync_flag_after_terminator", ("sync", "--", "--dry-run")),
@@ -2821,6 +2824,7 @@ CASES = (
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:
     replacements = {
         "PROJECT": root / "project",
+        "HTML_PROJECT": root / "project/<x&>",
         "MEMORY_DB": root / "data/symbrain/memory/default.db",
         "ACTIVITY_DB": root / "data/symbrain/memory/activity-override.db",
     }
