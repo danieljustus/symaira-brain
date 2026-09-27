@@ -345,8 +345,19 @@ def setup_doctor_missing_vault(root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
     _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
+
+
+def html_project_path(root: Path) -> Path:
+    # Keep a path that exercises HTML escaping on every host. POSIX can also
+    # represent angle brackets; Windows reserves them in file names.
+    name = "x&y" if os.name == "nt" else "<x&>"
+    return root / "project" / name
+
+
 def setup_html_project(root: Path, _env: dict[str, str]) -> None:
-    (root / "project/<x&>").mkdir()
+    html_project_path(root).mkdir()
+
+
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
@@ -2898,7 +2909,7 @@ CASES = (
 def materialize_argv(argv: tuple[str | bytes, ...], root: Path) -> tuple[str | bytes, ...]:
     replacements = {
         "PROJECT": root / "project",
-        "HTML_PROJECT": root / "project/<x&>",
+        "HTML_PROJECT": html_project_path(root),
         "MEMORY_DB": root / "data/symbrain/memory/default.db",
         "ACTIVITY_DB": root / "data/symbrain/memory/activity-override.db",
     }
