@@ -340,6 +340,11 @@ def setup_doctor_disabled_vault(root: Path, env: dict[str, str]) -> None:
     profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
     profiles.mkdir(parents=True, exist_ok=True)
     _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = false\n')
+def setup_doctor_missing_vault(root: Path, env: dict[str, str]) -> None:
+    setup_doctor_empty(root, env)
+    profiles = Path(env["XDG_CONFIG_HOME"]) / "symbrain" / "profiles"
+    profiles.mkdir(parents=True, exist_ok=True)
+    _write_text(profiles / "personal.toml", '[profile]\nname = "personal"\n[servers.vault]\nenabled = true\n')
 def setup_html_project(root: Path, _env: dict[str, str]) -> None:
     (root / "project/<x&>").mkdir()
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
@@ -1746,6 +1751,7 @@ CASES = (
     Case("doctor_disabled_fix", ("doctor", "--fix=false", "--json"), setup=setup_doctor_empty),
     Case("doctor_disabled_force_release", ("doctor", "--force-release=false", "--json"), setup=setup_doctor_empty),
     Case("doctor_disabled_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_disabled_vault),
+    Case("doctor_missing_vault_profile", ("doctor", "--vault-agent", "other", "--json"), setup=setup_doctor_missing_vault),
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),

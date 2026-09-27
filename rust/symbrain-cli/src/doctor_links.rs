@@ -48,12 +48,12 @@ pub(super) fn check_handshakes(vault_agent: &str) -> Vec<ProfileHandshake> {
     result
 }
 
-fn discover_vault() -> Result<String, String> {
+pub(super) fn discover_vault() -> Result<String, String> {
     let override_path = config_binary_override();
     symbrain_broker::discover("symvault", &override_path).map_err(|error| error.to_string())
 }
 
-fn config_binary_override() -> String {
+pub(super) fn config_binary_override() -> String {
     let path = xdg::config_path();
     let Ok(bytes) = fs::read_to_string(path) else {
         return String::new();

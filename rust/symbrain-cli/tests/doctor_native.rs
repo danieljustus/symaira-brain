@@ -162,6 +162,33 @@ fn doctor_vault_agent_with_disabled_vault_profile_stays_native() {
 }
 
 #[test]
+fn doctor_vault_agent_with_missing_vault_binary_stays_native() {
+    let root = TempDir::new().unwrap();
+    let profiles = root.path().join("config/symbrain/profiles");
+    fs::create_dir_all(&profiles).unwrap();
+    fs::write(
+        profiles.join("personal.toml"),
+        b"[profile]\nname = \"personal\"\n[servers.vault]\nenabled = true\n",
+    )
+    .unwrap();
+
+    let output = command(&root, &["doctor", "--vault-agent", "other", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["handshakes"][0]["profile"], json!("personal"));
+    assert_eq!(report["handshakes"][0]["server"], json!("vault"));
+    assert!(
+        report["handshakes"][0]["error"]
+            .as_str()
+            .unwrap()
+            .contains("not found on PATH or in managed directory")
+    );
+}
+
+#[test]
 fn doctor_vault_agent_with_unreadable_profiles_uses_go_fallback() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");

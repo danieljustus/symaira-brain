@@ -56,7 +56,7 @@ pub(crate) fn requires_go_fallback_with(
     vault_agent_with_profiles_requires_go(args, profiles_require_go)
 }
 
-/// Reports whether any profile can start a vault handshake.
+/// Reports whether any profile can start a vault handshake through an available binary.
 ///
 /// Unreadable profiles fail closed onto the Go fallback.
 fn xdg_profiles_require_go() -> bool {
@@ -64,6 +64,8 @@ fn xdg_profiles_require_go() -> bool {
         Ok(names) => names.into_iter().any(|name| {
             symbrain_policy::load(&name).map_or(true, |profile| {
                 profile.server(symbrain_policy::SERVER_VAULT).enabled
+                    && (!doctor_links::config_binary_override().is_empty()
+                        || doctor_links::discover_vault().is_ok())
             })
         }),
         Err(_) => true,

@@ -96,7 +96,7 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
     which(binary_name).ok_or_else(|| {
         BrokerError::Io(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("broker: {binary_name:?} not found on PATH or in managed directory"),
+            format!("{binary_name:?} not found on PATH or in managed directory: exec: {binary_name:?}: executable file not found in $PATH"),
         ))
     })
 }
