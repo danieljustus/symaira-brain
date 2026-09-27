@@ -673,7 +673,9 @@ jobs:
         run: |
           set -euo pipefail
           activity_cli_fixture="$RUNNER_TEMP/activity-cli-oracle-windows.json"
-          go run ./scripts/activity-cli-oracle -output "$activity_cli_fixture"
+          activity_cli_go_binary="$RUNNER_TEMP/symbrain-activity-oracle-go.exe"
+          go build -ldflags "-X main.version=dev" -o "$activity_cli_go_binary" ./cmd/symbrain
+          go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
           export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
           cargo test --workspace --all-features --locked --no-fail-fast
       - name: Retain native init observations
