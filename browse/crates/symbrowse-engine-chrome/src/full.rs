@@ -167,6 +167,20 @@ fn navigation_state_changed(before: &Value, state: &Value) -> bool {
     new_document || same_document_url_changed
 }
 
+const WINDOWS_NAVIGATION_FALLBACK_GRACE: Duration = Duration::from_secs(1);
+
+fn navigation_fallback_due(
+    dispatch_completed_at: Option<tokio::time::Instant>,
+    now: tokio::time::Instant,
+    navigation_observed: bool,
+    fallback_started: bool,
+) -> bool {
+    !navigation_observed
+        && !fallback_started
+        && dispatch_completed_at
+            .is_some_and(|completed_at| now >= completed_at + WINDOWS_NAVIGATION_FALLBACK_GRACE)
+}
+
 fn has_explicit_url_scheme(url: &str) -> bool {
     let Some((scheme, _)) = url.split_once(':') else {
         return false;
@@ -1042,6 +1056,7 @@ impl ChromePage {
         tokio::pin!(navigation_fallback);
         let mut navigation_fallback_started = false;
         let mut navigation_fallback_open = false;
+        let mut navigation_dispatch_completed_at = None;
         if !navigation_dispatch_open {
             let dispatch = self.evaluate(&navigation_expression).await?;
             if let Some(error) = dispatch
@@ -1091,6 +1106,9 @@ impl ChromePage {
                     if let Some(error) = error {
                         return Err(error.to_owned().into());
                     }
+                    if cfg!(windows) && !same_document {
+                        navigation_dispatch_completed_at = Some(tokio::time::Instant::now());
+                    }
                 }
                 fallback = &mut navigation_fallback, if navigation_fallback_open => {
                     navigation_fallback_open = false;
@@ -1109,6 +1127,25 @@ impl ChromePage {
                     return Err("Chrome navigation timed out".into());
                 }
                 _ = tokio::time::sleep(Duration::from_millis(25)), if cfg!(windows) => {
+                    if cfg!(windows)
+                        && navigation_fallback_due(
+                            navigation_dispatch_completed_at,
+                            tokio::time::Instant::now(),
+                            navigation_observed,
+                            navigation_fallback_started,
+                        )
+                    {
+                        // Let navigation events and responsive document probes
+                        // win first. If neither reports progress for this
+                        // bounded grace period, retry once through CDP's native
+                        // navigation command. Keep probes active afterward:
+                        // Windows may still omit the frame event.
+                        navigation_fallback_started = true;
+                        navigation_fallback_open = true;
+                        if diagnostics {
+                            eprintln!("chrome_open_stage=navigation-fallback status=start");
+                        }
+                    }
                     // Chromiumoxide can miss the main-frame event on Windows.
                     // A changed document or same-document URL is the observable
                     // navigation signal when the event stream stays silent. On
@@ -1129,19 +1166,6 @@ impl ChromePage {
                             let state = state.into_value::<Value>()?;
                             if navigation_state_changed(&before, &state) {
                                 navigation_observed = true;
-                            } else if cfg!(windows)
-                                && !same_document
-                                && !navigation_fallback_started
-                            {
-                                // On Windows Runtime.evaluate can complete while location.assign
-                                // leaves the page unchanged. Retry once through CDP's native
-                                // navigation command, keeping its response asynchronous so a
-                                // stalled load cannot block event and document probes.
-                                navigation_fallback_started = true;
-                                navigation_fallback_open = true;
-                                if diagnostics {
-                                    eprintln!("chrome_open_stage=navigation-fallback status=start");
-                                }
                             }
                         }
                         Ok(Err(_)) => {
@@ -2843,6 +2867,40 @@ mod tests {
             &before,
             &json!({"url": "https://example.test/", "time_origin": 1, "ready_state": "loading"})
         ));
+    }
+
+    #[test]
+    fn navigation_fallback_waits_for_grace_and_skips_observed_navigation() {
+        let dispatched_at = tokio::time::Instant::now();
+        let before_grace =
+            dispatched_at + WINDOWS_NAVIGATION_FALLBACK_GRACE - Duration::from_millis(1);
+        let grace_elapsed = dispatched_at + WINDOWS_NAVIGATION_FALLBACK_GRACE;
+
+        assert!(!navigation_fallback_due(
+            Some(dispatched_at),
+            before_grace,
+            false,
+            false,
+        ));
+        assert!(navigation_fallback_due(
+            Some(dispatched_at),
+            grace_elapsed,
+            false,
+            false,
+        ));
+        assert!(!navigation_fallback_due(
+            Some(dispatched_at),
+            grace_elapsed,
+            true,
+            false,
+        ));
+        assert!(!navigation_fallback_due(
+            Some(dispatched_at),
+            grace_elapsed,
+            false,
+            true,
+        ));
+        assert!(!navigation_fallback_due(None, grace_elapsed, false, false,));
     }
 
     #[test]
