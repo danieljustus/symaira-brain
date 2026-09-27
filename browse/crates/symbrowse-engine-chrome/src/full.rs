@@ -234,7 +234,20 @@ impl ChromeSession {
             let target_id = self.browser.execute(params).await?.result.target_id;
             loop {
                 match self.browser.get_page(target_id.clone()).await {
-                    Ok(page) => return Ok(page),
+                    Ok(page) => {
+                        // `get_page` returns as soon as chromiumoxide has an
+                        // attached session. Its Page/Frame initialization
+                        // continues asynchronously, so wait until the initial
+                        // frame tree is available before callers navigate.
+                        // Go's page setup similarly awaits its CDP enable and
+                        // frame setup commands before returning the page.
+                        loop {
+                            if page.mainframe().await?.is_some() {
+                                return Ok(page);
+                            }
+                            tokio::time::sleep(Duration::from_millis(10)).await;
+                        }
+                    }
                     Err(chromiumoxide::error::CdpError::NotFound) => {
                         tokio::time::sleep(Duration::from_millis(10)).await;
                     }
