@@ -417,7 +417,21 @@ fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
         },
     )
     .map_err(|_| ())?;
-    client.initialize(Duration::from_secs(5)).map_err(|_| ())?;
+    if let Err(error) = client.initialize(Duration::from_secs(5)) {
+        if let BrokerError::ProtocolMismatch { expected, actual } = error {
+            return Ok(HarnessHealthEntry {
+                harness: probe.harness,
+                config: probe.config,
+                server: probe.server,
+                transport: probe.transport,
+                healthy: false,
+                error: format!(
+                    "initialize: broker: protocol version mismatch: sent {expected:?}, child returned {actual:?}"
+                ),
+            });
+        }
+        return Err(());
+    }
     Ok(HarnessHealthEntry {
         harness: probe.harness,
         config: probe.config,

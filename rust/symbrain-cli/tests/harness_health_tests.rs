@@ -229,7 +229,7 @@ fn probe_failure_falls_back_without_native_output() {
 }
 
 #[test]
-fn protocol_failure_falls_back_without_native_output() {
+fn protocol_mismatch_reports_go_diagnostic_without_fallback() {
     let root = TempDir::new().unwrap();
     let fake = executable(&root, "invalid-mcp.py", INVALID_MCP);
     write_servers(&root, &json!({"broken": {"command": fake}}));
@@ -244,9 +244,14 @@ fn protocol_failure_falls_back_without_native_output() {
         .env("SYMBRAIN_GO_BINARY", fallback)
         .output()
         .unwrap();
-    assert_eq!(output.status.code(), Some(29));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["servers"][0]["healthy"], false);
+    assert_eq!(
+        report["servers"][0]["error"],
+        "initialize: broker: protocol version mismatch: sent \"2024-11-05\", child returned \"wrong-version\""
+    );
 }
 
 #[test]
