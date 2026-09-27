@@ -14,6 +14,7 @@
 //	go run ./scripts/dist-oracle -check                      # gate (exit 0/1)
 //	go run ./scripts/dist-oracle -check -manifest <path>     # point at another manifest copy (negative tests)
 //	go run ./scripts/dist-oracle -candidate-check -version 0.12.0 -assets <archive-bundle>
+//	go run ./scripts/dist-oracle -hybrid-candidate-check -version <version> -assets <candidate-bundle>
 //
 // The macOS GUI DMG is not produced by goreleaser; it is uploaded by
 // .github/workflows/release.yml via `gh release upload`. It is therefore
@@ -342,6 +343,7 @@ func notRunLines() []string {
 func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
+	hybridCandidateCheck := flag.Bool("hybrid-candidate-check", false, "verify one unpublished Linux Rust/Go candidate archive and checksum")
 	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
 	version := flag.String("version", "", "candidate version without the v prefix")
 	manifestPath := flag.String("manifest", defaultManifest, "path to the pinned release manifest JSON")
@@ -349,10 +351,19 @@ func main() {
 	workflowPath := flag.String("workflow", defaultWorkflow, "path to the release workflow binding external assets")
 	flag.Parse()
 
-	if *candidateCheck {
+	if *candidateCheck || *hybridCandidateCheck {
 		if *assetsDir == "" || *version == "" {
-			fmt.Fprintln(os.Stderr, "dist-oracle: -candidate-check requires -assets and -version")
+			fmt.Fprintln(os.Stderr, "dist-oracle: candidate checks require -assets and -version")
 			os.Exit(2)
+		}
+		if *hybridCandidateCheck {
+			if err := checkHybridCandidateArtifacts(*version, resolvePath(*assetsDir)); err != nil {
+				fmt.Fprintf(os.Stderr, "dist-oracle: hybrid candidate artifacts: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Printf("hybrid-candidate-artifacts: PASS symbrain_%s_linux_amd64.tar.gz and exact SHA-256 manifest\n", *version)
+			fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
+			return
 		}
 		goreleaserPathResolved := resolvePath(*goreleaserPath)
 		raw, err := os.ReadFile(goreleaserPathResolved)

@@ -108,3 +108,54 @@ func mustRead(t *testing.T, path string) []byte {
 	}
 	return data
 }
+
+func TestHybridCandidateArchiveRequiresBothBinariesAndExactChecksum(t *testing.T) {
+	const version = "0.12.0-candidate.0123456789ab"
+	assets := t.TempDir()
+	archiveName := "symbrain_" + version + "_linux_amd64.tar.gz"
+	archivePath := filepath.Join(assets, archiveName)
+	var archive bytes.Buffer
+	gzipWriter := gzip.NewWriter(&archive)
+	tarWriter := tar.NewWriter(gzipWriter)
+	for _, member := range hybridCandidateMembers {
+		contents := []byte(member)
+		if err := tarWriter.WriteHeader(&tar.Header{Name: member, Mode: 0o755, Size: int64(len(contents)), Typeflag: tar.TypeReg}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := tarWriter.Write(contents); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := tarWriter.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := gzipWriter.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(archivePath, archive.Bytes(), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	digest := sha256.Sum256(archive.Bytes())
+	checksums := fmt.Sprintf("%s  %s\n", hex.EncodeToString(digest[:]), archiveName)
+	if err := os.WriteFile(filepath.Join(assets, "checksums.txt"), []byte(checksums), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := checkHybridCandidateArtifacts(version, assets); err != nil {
+		t.Fatalf("valid hybrid candidate rejected: %v", err)
+	}
+
+	badChecksum := strings.Replace(checksums, hex.EncodeToString(digest[:]), strings.Repeat("0", 64), 1)
+	if err := os.WriteFile(filepath.Join(assets, "checksums.txt"), []byte(badChecksum), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := checkHybridCandidateArtifacts(version, assets); err == nil || !strings.Contains(err.Error(), "digest mismatch") {
+		t.Fatalf("bad checksum error = %v, want digest mismatch", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(assets, "unexpected.txt"), []byte("extra"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := checkHybridCandidateArtifacts(version, assets); err == nil || !strings.Contains(err.Error(), "must contain exactly") {
+		t.Fatalf("extra asset error = %v, want exact asset-set rejection", err)
+	}
+}
