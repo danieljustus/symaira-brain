@@ -16,6 +16,7 @@ import (
 )
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
+const openRouterOracleToken = "oracle-only-invalid-openrouter"
 
 func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
@@ -66,6 +67,7 @@ func main() {
 	output := flag.String("output", "rust/symbrain-usage/tests/fixtures/provider_graph.json", "provider graph path")
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
+	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -91,6 +93,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	openRouterReport, err := buildOpenRouterAuthenticatedReport(fixtures["openrouter"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -102,6 +109,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*copilotReportOutput, copilotReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*openRouterReportOutput, openRouterReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -120,10 +131,22 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, len(graph.Providers))
+	if err := writeJSON(*openRouterReportOutput, openRouterReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Printf("Wrote %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, len(graph.Providers))
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("copilot", copilotOracleToken, body)
+}
+
+func buildOpenRouterAuthenticatedReport(body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("openrouter", openRouterOracleToken, body)
+}
+
+func buildAuthenticatedProviderReport(provider, token string, body []byte) (usage.Report, error) {
 	// Keep the full ten-provider production graph deterministic without
 	// inheriting a developer's credential environment or home directory.
 	credentialEnv := []string{
@@ -170,12 +193,25 @@ func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
 		_ = restore()
 		return usage.Report{}, fmt.Errorf("set isolated usage oracle home: %w", err)
 	}
-	if err := os.Setenv("COPILOT_ACCESS_TOKEN", copilotOracleToken); err != nil {
+	envName := map[string]string{"copilot": "COPILOT_ACCESS_TOKEN", "openrouter": "OPENROUTER_API_KEY"}[provider]
+	if envName == "" {
 		_ = os.RemoveAll(home)
 		_ = restore()
-		return usage.Report{}, fmt.Errorf("set synthetic Copilot fixture env: %w", err)
+		return usage.Report{}, fmt.Errorf("unsupported authenticated usage oracle provider %q", provider)
 	}
-	report, buildErr := usage.BuildCopilotAuthenticatedReportOracle(body)
+	if err := os.Setenv(envName, token); err != nil {
+		_ = os.RemoveAll(home)
+		_ = restore()
+		return usage.Report{}, fmt.Errorf("set synthetic %s fixture env: %w", provider, err)
+	}
+	var report usage.Report
+	var buildErr error
+	switch provider {
+	case "copilot":
+		report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
+	case "openrouter":
+		report, buildErr = usage.BuildOpenRouterAuthenticatedReportOracle(body)
+	}
 	removeErr := os.RemoveAll(home)
 	restoreErr := restore()
 	if buildErr != nil {

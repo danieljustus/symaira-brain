@@ -17,8 +17,8 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables other than the one narrow Copilot case allowed to
-/// use native reporting. Every one of these keeps the CLI on Go.
+/// Environment variables other than the narrow direct Copilot/OpenRouter
+/// cases allowed to use native reporting. Every one of these keeps the CLI on Go.
 const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
@@ -29,7 +29,7 @@ const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
     "MOONSHOT_API_KEY",
     "NOUS_PORTAL_ACCESS_TOKEN",
     "OPENCODE_COOKIE",
-    "OPENROUTER_API_KEY",
+    "OPENROUTER_API_URL",
 ];
 
 /// The service Claude Code stores its OAuth credentials under in the macOS
@@ -934,12 +934,12 @@ pub fn all_providers() -> Vec<Provider> {
 #[must_use]
 pub fn needs_go_fallback() -> bool {
     let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
-    if OTHER_PROVIDER_ENV_VARS
-        .iter()
-        .any(|name| env_raw(name).is_some())
-    {
-        return true;
-    }
+    let openrouter_env = env_raw("OPENROUTER_API_KEY");
+    let openrouter_base = env_raw("OPENROUTER_API_URL");
+    let other_provider_env = openrouter_base.is_some()
+        || OTHER_PROVIDER_ENV_VARS
+            .iter()
+            .any(|name| env_raw(name).is_some());
     if claude_file_token().is_some()
         || codex_file_token(&codex_home()).is_some()
         || copilot_file_token().is_some()
@@ -950,18 +950,20 @@ pub fn needs_go_fallback() -> bool {
     }
     needs_go_fallback_for(
         copilot_env.as_deref(),
-        false,
+        openrouter_env.as_deref(),
+        other_provider_env,
         false,
         claude_keychain_present() || antigravity_running(),
     )
 }
 
-/// Keeps credential-backed reports on Go except for a direct Copilot token
-/// when every other provider source and local probe is absent. Secret
-/// references and Copilot CLI files remain on Go until those complete report
-/// paths have their own source-pinned oracle.
+/// Keeps credential-backed reports on Go except for one direct Copilot token
+/// or one direct `OpenRouter` key using its default base URL, when every other
+/// provider source and local probe is absent. Secret references, Copilot CLI
+/// files, and `OpenRouter` base overrides stay on Go until separately pinned.
 fn needs_go_fallback_for(
     copilot_env: Option<&str>,
+    openrouter_env: Option<&str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
@@ -969,7 +971,12 @@ fn needs_go_fallback_for(
     if other_provider_env || other_credential_source || local_provider_present {
         return true;
     }
-    copilot_env.is_some_and(is_secret_reference)
+    match (copilot_env, openrouter_env) {
+        (None, None) => false,
+        (Some(copilot), None) => is_secret_reference(copilot),
+        (None, Some(openrouter)) => is_secret_reference(openrouter),
+        (Some(_), Some(_)) => true,
+    }
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.

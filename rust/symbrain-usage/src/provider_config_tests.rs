@@ -161,37 +161,70 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn only_a_direct_copilot_environment_token_uses_native_reporting() {
+fn only_one_direct_copilot_or_openrouter_environment_credential_uses_native_reporting() {
     assert!(!needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         false,
         false,
         false,
     ));
-    assert!(!needs_go_fallback_for(None, false, false, false));
+    assert!(!needs_go_fallback_for(None, None, false, false, false));
     assert!(needs_go_fallback_for(
         Some("symvault://copilot/token"),
+        None,
         false,
         false,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         true,
         false,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         false,
         true,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         false,
         false,
         true,
+    ));
+    assert!(!needs_go_fallback_for(
+        None,
+        Some("synthetic-openrouter-fixture"),
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        Some("symvault://openrouter/key"),
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        Some("synthetic-openrouter-fixture"),
+        true,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        Some("synthetic-copilot-fixture"),
+        Some("synthetic-openrouter-fixture"),
+        false,
+        false,
+        false,
     ));
 }
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -164,17 +165,32 @@ func BuildOracleFixture(fixture map[string][]byte) (OracleFixture, error) {
 // a canned response body. The caller must set only a dummy token; this helper
 // rejects missing or non-environment credential sources.
 func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
-	transport := &oracleTransport{bodies: map[string][]byte{"copilot": body}}
+	return buildAuthenticatedDirectEnvReportOracle("copilot", body)
+}
+
+// BuildOpenRouterAuthenticatedReportOracle runs the shipped OpenRouter
+// provider through BuildReport with a direct OPENROUTER_API_KEY and the
+// default API base. The caller supplies only a synthetic key and canned body.
+func BuildOpenRouterAuthenticatedReportOracle(body []byte) (Report, error) {
+	if os.Getenv("OPENROUTER_API_URL") != "" {
+		return Report{}, fmt.Errorf("OpenRouter report oracle requires the default API base")
+	}
+	return buildAuthenticatedDirectEnvReportOracle("openrouter", body)
+}
+
+func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
+	transport := &oracleTransport{bodies: map[string][]byte{providerID: body}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
 	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	if !providers[2].IsConfigured() || providers[2].AuthStatus().Source != "env" {
-		return Report{}, fmt.Errorf("Copilot report oracle requires COPILOT_ACCESS_TOKEN from env")
+	index := map[string]int{"copilot": 2, "openrouter": 8}[providerID]
+	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
+		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
 	}
 	for i, provider := range providers {
-		if i != 2 && i != 9 && provider.IsConfigured() {
+		if i != index && i != 9 && provider.IsConfigured() {
 			return Report{}, fmt.Errorf("usage report oracle found unexpected configured provider %q", provider.ID())
 		}
 	}
@@ -182,13 +198,13 @@ func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
 		return Report{}, fmt.Errorf("usage report oracle Antigravity probe must be isolated and stopped")
 	}
 	report := BuildReport(context.Background(), providers)
-	if len(report.Providers) != 10 || report.Providers[2].Snapshot == nil {
-		return Report{}, fmt.Errorf("Copilot report oracle did not produce a snapshot")
+	if len(report.Providers) != 10 || report.Providers[index].Snapshot == nil {
+		return Report{}, fmt.Errorf("%s report oracle did not produce a snapshot", providerID)
 	}
 	if len(transport.requests) != 1 {
-		return Report{}, fmt.Errorf("usage report oracle made %d fixture requests, want only Copilot", len(transport.requests))
+		return Report{}, fmt.Errorf("usage report oracle made %d fixture requests, want only %s", len(transport.requests), providerID)
 	}
-	report.Providers[2].Snapshot = canonicalOracleSnapshot(report.Providers[2].Snapshot)
+	report.Providers[index].Snapshot = canonicalOracleSnapshot(report.Providers[index].Snapshot)
 	return report, nil
 }
 
