@@ -1120,16 +1120,20 @@ def setup_activity_db_override(root: Path, env: dict[str, str]) -> None:
         env=env, cwd=env["PROJECT"], input=b"", stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, check=True, timeout=60,
     )
-    with sqlite3.connect(database) as connection:
-        connection.execute(
-            "INSERT INTO activity_segments"
-            "(id, source, granularity, started_at, ended_at, applications,"
-            " redacted_summary, raw_ref, prior_segment_ids, superseded_by, expires_at)"
-            " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-            ("override-segment", "fixture", "10min", "2026-01-01T00:00:00Z",
-             "2026-01-01T00:10:00Z", "[]", "override activity", "", "[]", "",
-             "2099-01-01T00:00:00Z"),
-        )
+    connection = sqlite3.connect(database)
+    try:
+        with connection:
+            connection.execute(
+                "INSERT INTO activity_segments"
+                "(id, source, granularity, started_at, ended_at, applications,"
+                " redacted_summary, raw_ref, prior_segment_ids, superseded_by, expires_at)"
+                " VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                ("override-segment", "fixture", "10min", "2026-01-01T00:00:00Z",
+                 "2026-01-01T00:10:00Z", "[]", "override activity", "", "[]", "",
+                 "2099-01-01T00:00:00Z"),
+            )
+    finally:
+        connection.close()
 
 
 def setup_skills_library_fixture(root: Path, env: dict[str, str]) -> None:

@@ -480,6 +480,9 @@ func normalizeStdout(s, root string) string {
 	}
 	s = strings.ReplaceAll(s, "/private"+root, "<root>")
 	s = strings.ReplaceAll(s, root, "<root>")
+	if runtime.GOOS == "windows" {
+		s = normalizeWindowsOracleRoot(s, root)
+	}
 	// Cases that report project-scoped paths embed the checkout location, which
 	// differs per machine and per CI runner.
 	if oracleCwd != "" && oracleCwd != root {
@@ -497,6 +500,19 @@ func normalizeStdout(s, root string) string {
 		return claudeDesktopPath.ReplaceAllString(s, "<claude-desktop-dir>")
 	}
 	return s
+}
+
+func normalizeWindowsOracleRoot(s, root string) string {
+	if root == "" {
+		return s
+	}
+	// Windows can expose the same temp directory through its long user
+	// profile name in the child process and an 8.3 alias in the parent. The
+	// generated root basename is unique to this oracle invocation, so only
+	// paths containing that exact basename are normalized.
+	rootBase := regexp.QuoteMeta(root[strings.LastIndexAny(root, `/\\`)+1:])
+	windowsRoot := regexp.MustCompile(`(?i)[A-Z]:\\[^\"]*?\\` + rootBase)
+	return windowsRoot.ReplaceAllString(s, "<root>")
 }
 
 // normalizeStderr removes toolchain identifiers and absolute paths from
