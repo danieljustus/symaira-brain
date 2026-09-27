@@ -213,6 +213,19 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         codex_env: Some("synthetic-codex-env-fixture"),
         ..UsageFallbackSignals::default()
     }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        opencode_env: Some("synthetic-opencode-cookie"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        opencode_workspace_override: Some("wrk_workspace"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        opencode_env: Some("synthetic-opencode-cookie"),
+        opencode_workspace_override: Some("wrk_workspace"),
+        ..UsageFallbackSignals::default()
+    }));
 }
 
 #[test]

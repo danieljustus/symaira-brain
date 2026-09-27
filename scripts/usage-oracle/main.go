@@ -23,13 +23,14 @@ const kimiOracleToken = "oracle-only-invalid-kimi"
 const nousOracleToken = "oracle-only-invalid-nous"
 const openRouterOracleToken = "oracle-only-invalid-openrouter"
 const moonshotOracleToken = "oracle-only-invalid-moonshot"
+const openCodeOracleToken = "oracle-only-invalid-opencode"
 
 func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
 		"claude": "claude-oauth-usage.json", "claude-admin": "claude-admin-cost.json", "codex": "codex-wham-usage.json",
 		"copilot": "copilot-user.json", "cursor": "cursor-usage-summary.json",
 		"kimi": "kimi-api-usages.json", "moonshot": "moonshot-balance-ai.json",
-		"nous": "nous-account.json", "opencode": "opencode-subscription-json.txt",
+		"nous": "nous-account.json", "opencode": "opencode-subscription-json.txt", "opencode-workspaces": "opencode-workspaces.txt",
 		"openrouter": "openrouter-credits.json", "antigravity": "antigravity-quota-summary.json",
 	}
 	out := make(map[string][]byte, len(names))
@@ -80,6 +81,7 @@ func main() {
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
 	kimiReportOutput := flag.String("kimi-report-output", "rust/symbrain-usage/tests/fixtures/kimi_authenticated_report.json", "authenticated Kimi report path")
 	nousReportOutput := flag.String("nous-report-output", "rust/symbrain-usage/tests/fixtures/nous_authenticated_report.json", "authenticated Nous report path")
+	openCodeReportOutput := flag.String("opencode-report-output", "rust/symbrain-usage/tests/fixtures/opencode_authenticated_report.json", "authenticated OpenCode report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -140,6 +142,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	openCodeReport, err := buildOpenCodeAuthenticatedReport(fixtures["opencode-workspaces"], fixtures["opencode"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -179,6 +186,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*nousReportOutput, nousReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*openCodeReportOutput, openCodeReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -225,7 +236,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s, %s, %s, %s, %s, %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *claudeAdminReportOutput, *codexReportOutput, *openRouterReportOutput, *moonshotReportOutput, *cursorReportOutput, *kimiReportOutput, *nousReportOutput, len(graph.Providers))
+	if err := writeJSON(*openCodeReportOutput, openCodeReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Printf("Wrote usage graph, request cases, and authenticated provider reports (%d providers)\n", len(graph.Providers))
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
@@ -260,7 +275,11 @@ func buildNousAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("nous", nousOracleToken, body)
 }
 
-func buildAuthenticatedProviderReport(provider, token string, body []byte) (usage.Report, error) {
+func buildOpenCodeAuthenticatedReport(workspaceBody, body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("opencode", openCodeOracleToken, body, workspaceBody)
+}
+
+func buildAuthenticatedProviderReport(provider, token string, body []byte, extra ...[]byte) (usage.Report, error) {
 	// Keep the full ten-provider production graph deterministic without
 	// inheriting a developer's credential environment or home directory.
 	credentialEnv := []string{
@@ -315,6 +334,7 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 		"kimi":         "KIMI_CODE_API_KEY",
 		"moonshot":     "MOONSHOT_API_KEY",
 		"nous":         "NOUS_PORTAL_ACCESS_TOKEN",
+		"opencode":     "OPENCODE_COOKIE",
 		"openrouter":   "OPENROUTER_API_KEY",
 	}[provider]
 	if envName == "" {
@@ -346,6 +366,12 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 		report, buildErr = usage.BuildKimiAuthenticatedReportOracle(body)
 	case "nous":
 		report, buildErr = usage.BuildNousAuthenticatedReportOracle(body)
+	case "opencode":
+		if len(extra) != 1 {
+			buildErr = fmt.Errorf("OpenCode report oracle requires a workspace fixture")
+		} else {
+			report, buildErr = usage.BuildOpenCodeAuthenticatedReportOracle(extra[0], body)
+		}
 	}
 	removeErr := os.RemoveAll(home)
 	restoreErr := restore()

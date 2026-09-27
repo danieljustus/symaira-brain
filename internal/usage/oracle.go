@@ -78,9 +78,10 @@ func (p oracleProbe) listeningPorts(int) (string, bool) {
 func (p oracleProbe) isAntigravityRunning() bool { return p.running }
 
 type oracleTransport struct {
-	bodies   map[string][]byte
-	status   int
-	requests []*http.Request
+	bodies    map[string][]byte
+	sequences map[string][][]byte
+	status    int
+	requests  []*http.Request
 }
 
 func (t *oracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -108,12 +109,30 @@ func (t *oracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	case req.URL.Hostname() == "127.0.0.1":
 		id = "antigravity"
 	}
-	body := t.bodies[id]
+	body := t.bodyFor(id)
 	status := t.status
 	if status == 0 {
 		status = http.StatusOK
 	}
 	return &http.Response{StatusCode: status, Body: http.NoBody, Header: make(http.Header), Request: req, ContentLength: int64(len(body))}, nil
+}
+
+func (t *oracleTransport) bodyFor(id string) []byte {
+	sequence := t.sequences[id]
+	if len(sequence) == 0 {
+		return t.bodies[id]
+	}
+	seen := 0
+	for _, request := range t.requests {
+		if oracleID(request) == id {
+			seen++
+		}
+	}
+	index := seen - 1
+	if index >= len(sequence) {
+		index = len(sequence) - 1
+	}
+	return sequence[index]
 }
 
 // oracleTransportBody is used because http.NoBody cannot carry fixture bytes.
@@ -227,6 +246,46 @@ func BuildNousAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("nous", body)
 }
 
+// BuildOpenCodeAuthenticatedReportOracle runs the shipped OpenCode provider
+// through the ten-provider report with only a direct synthetic cookie. The
+// fixture transport supplies workspace discovery and subscription responses.
+func BuildOpenCodeAuthenticatedReportOracle(workspaceBody, subscriptionBody []byte) (Report, error) {
+	if os.Getenv("OPENCODE_WORKSPACE_ID") != "" {
+		return Report{}, fmt.Errorf("OpenCode report oracle requires workspace discovery without an override")
+	}
+	transport := &oracleTransport{
+		sequences: map[string][][]byte{"opencode": {workspaceBody, subscriptionBody}},
+	}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
+	if len(providers) != 10 || providers[7].ID() != "opencode" || !providers[7].IsConfigured() || providers[7].AuthStatus().Source != "env" {
+		return Report{}, fmt.Errorf("OpenCode report oracle requires only direct OPENCODE_COOKIE credentials")
+	}
+	for i, provider := range providers {
+		if i != 7 && i != 9 && provider.IsConfigured() {
+			return Report{}, fmt.Errorf("OpenCode report oracle found unexpected configured provider %q", provider.ID())
+		}
+	}
+	if providers[9].AuthStatus().Source != "" {
+		return Report{}, fmt.Errorf("OpenCode report oracle Antigravity probe must be isolated and stopped")
+	}
+	report := BuildReport(context.Background(), providers)
+	if len(report.Providers) != 10 || report.Providers[7].Snapshot == nil {
+		return Report{}, fmt.Errorf("OpenCode report oracle did not produce a snapshot")
+	}
+	if len(transport.requests) != 2 {
+		return Report{}, fmt.Errorf("OpenCode report oracle made %d fixture requests, want workspace discovery and subscription", len(transport.requests))
+	}
+	if transport.requests[0].Method != http.MethodGet || transport.requests[0].URL.Query().Get("id") != openCodeWorkspacesServerID {
+		return Report{}, fmt.Errorf("OpenCode report oracle did not discover the workspace using the shipped GET")
+	}
+	if transport.requests[1].Method != http.MethodGet || transport.requests[1].URL.Query().Get("id") != openCodeSubscriptionServerID {
+		return Report{}, fmt.Errorf("OpenCode report oracle did not fetch the subscription using the shipped GET")
+	}
+	report.Providers[7].Snapshot = canonicalOracleSnapshot(report.Providers[7].Snapshot)
+	return report, nil
+}
+
 func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
 	transportID := providerID
 	if providerID == "claude-admin" {
@@ -279,7 +338,7 @@ type roundTripFixture struct{ target *oracleTransport }
 
 func (r roundTripFixture) RoundTrip(req *http.Request) (*http.Response, error) {
 	r.target.requests = append(r.target.requests, req.Clone(req.Context()))
-	body := r.target.bodies[oracleID(req)]
+	body := r.target.bodyFor(oracleID(req))
 	return r.target.response(req, body), nil
 }
 func oracleID(req *http.Request) string {

@@ -258,6 +258,39 @@ fn authenticated_direct_provider_report(
     (report, transport)
 }
 
+fn authenticated_opencode_report(responses: Vec<Response>) -> (crate::Report, FixtureTransport) {
+    let oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/opencode_authenticated_report.json"
+    ))
+    .expect("Go authenticated OpenCode report");
+    let providers = oracle["providers"]
+        .as_array()
+        .expect("Go provider rows")
+        .iter()
+        .map(|row| {
+            let id = row["id"].as_str().expect("provider id");
+            let name = row["display_name"].as_str().expect("provider name");
+            let mut provider = Provider::fixture(id, name);
+            provider.configured = row["configured"].as_bool().expect("configured state");
+            provider.auth_status =
+                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
+            provider.credential = None;
+            provider.credentials.clear();
+            if id == "opencode" {
+                provider.fixture = false;
+                provider.credentials = vec![("env".into(), REPORT_ENV_CREDENTIAL.into())];
+                provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
+            }
+            provider
+        })
+        .collect();
+    let transport = FixtureTransport::with_sequences(
+        [("opencode".into(), responses.into_iter().map(Ok).collect())].into(),
+    );
+    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    (report, transport)
+}
+
 fn normalize_rfc3339_fields(value: &mut Value) {
     match value {
         Value::Object(object) => {
@@ -1212,6 +1245,108 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
         );
         assert_eq!(report.providers[6].snapshot, None);
     }
+}
+
+#[test]
+fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/opencode_authenticated_report.json"
+    ))
+    .expect("Go authenticated OpenCode report");
+    let cases: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let subscription = cases["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "opencode")
+        .expect("OpenCode oracle case");
+    let (mut report, transport) = authenticated_opencode_report(vec![
+        Response {
+            status: 200,
+            body: br#"{"workspaces":[{"id":"wrk_abc123def"}]}"#.to_vec(),
+            headers: BTreeMap::new(),
+        },
+        Response {
+            status: 200,
+            body: serde_json::to_vec(&subscription["response"]).expect("response fixture"),
+            headers: BTreeMap::new(),
+        },
+    ]);
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["opencode", "antigravity"]
+    );
+    let usage = &report.providers[7];
+    assert_eq!(usage.id, "opencode");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(
+        usage.auth_status.detail,
+        "Cookie configured (OPENCODE_COOKIE)"
+    );
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = report.providers[7]
+        .snapshot
+        .as_mut()
+        .expect("OpenCode snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][7]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    for (meter, expected) in snapshot.meters.iter_mut().zip(
+        report_oracle["providers"][7]["snapshot"]["meters"]
+            .as_array()
+            .unwrap(),
+    ) {
+        meter.resets_at = Some(
+            chrono::DateTime::parse_from_rfc3339(
+                expected["resets_at"]
+                    .as_str()
+                    .expect("oracle reset timestamp"),
+            )
+            .expect("oracle reset timestamp parses")
+            .with_timezone(&chrono::Utc),
+        );
+    }
+
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 2);
+    assert_eq!(requests[0].method, "GET");
+    assert!(
+        requests[0]
+            .url
+            .contains("id=def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f")
+    );
+    assert_eq!(requests[1].method, "GET");
+    assert!(requests[1].url.contains("args=%5B%22wrk_abc123def%22%5D"));
+    assert!(
+        requests[1]
+            .url
+            .contains("id=7abeebee372f304e050aaaf92be863f4a86490e382f8c79db68fd94040d691b4")
+    );
+    for request in &requests {
+        assert_eq!(
+            request.headers.get("Cookie").map(String::as_str),
+            Some(REPORT_ENV_CREDENTIAL)
+        );
+    }
+
+    let mut rust_report = serde_json::to_value(&report).expect("Rust OpenCode report");
+    let mut go_report = report_oracle;
+    normalize_rfc3339_fields(&mut rust_report);
+    normalize_rfc3339_fields(&mut go_report);
+    assert_eq!(rust_report, go_report);
 }
 
 #[path = "request_oracle_opencode_tests.rs"]
