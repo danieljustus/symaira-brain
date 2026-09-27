@@ -670,7 +670,12 @@ jobs:
       - name: Test Rust workspace on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
-        run: cargo test --workspace --all-features --locked --no-fail-fast
+        run: |
+          set -euo pipefail
+          activity_cli_fixture="$RUNNER_TEMP/activity-cli-oracle-windows.json"
+          go run ./scripts/activity-cli-oracle -output "$activity_cli_fixture"
+          export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
+          cargo test --workspace --all-features --locked --no-fail-fast
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
