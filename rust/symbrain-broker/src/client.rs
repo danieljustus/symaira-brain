@@ -99,9 +99,13 @@ pub fn discover(binary_name: &str, override_path: &str) -> Result<String, Broker
     }
 
     which(binary_name).ok_or_else(|| {
+        #[cfg(windows)]
+        let path_var = "%PATH%";
+        #[cfg(not(windows))]
+        let path_var = "$PATH";
         BrokerError::Io(io::Error::new(
             io::ErrorKind::NotFound,
-            format!("{binary_name:?} not found on PATH or in managed directory: exec: {binary_name:?}: executable file not found in $PATH"),
+            format!("{binary_name:?} not found on PATH or in managed directory: exec: {binary_name:?}: executable file not found in {path_var}"),
         ))
     })
 }
@@ -859,6 +863,14 @@ mod tests {
         let error = discover("sh", missing.to_str().expect("temp path"))
             .expect_err("invalid explicit path must not fall back to PATH");
         assert!(error.to_string().contains("configured binary_path"));
+    }
+
+    #[test]
+    fn missing_binary_error_uses_go_platform_path_placeholder() {
+        let error = discover("symbrain-definitely-missing-fixture-binary", "")
+            .expect_err("fixture binary must not exist");
+        let expected = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+        assert!(error.to_string().contains(expected), "{error}");
     }
 
     #[test]
