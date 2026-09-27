@@ -374,7 +374,7 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
-        if implementation == "rust" and outcome.get("phase") == "open":
+        if implementation == "rust":
             stages = chrome_open_stages(root / "daemon.log")
             if stages:
                 outcome["chrome_open_stages"] = stages

@@ -108,6 +108,29 @@ class ChromePairTests(unittest.TestCase):
             "document-probe status=timeout", "navigation-event-wait-start",
         ])
 
+    def test_rust_success_retains_navigation_stages_for_perf_diagnosis(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+
+            def run(binary, args, session, env, cwd, **kwargs):
+                if args[0] == "open":
+                    return 0, "{}", ""
+                if args[0] == "read":
+                    return 0, json.dumps({"text": f"{FIXTURE_TITLE} {FIXTURE_TOKEN}"}), ""
+                if args == ["daemon", "stop"]:
+                    (root / "daemon.log").write_text(
+                        "chrome_open_stage=navigation-fallback status=start\n", encoding="utf-8"
+                    )
+                    return 0, "", ""
+                return 1, "", "daemon stopped"
+
+            with patch("chrome_pair.run_cli", side_effect=run):
+                result = flow(Path("symbrowse"), "rust", Path("chrome"), None,
+                              "http://127.0.0.1/", root, 0)
+
+        self.assertEqual(result["status"], "pass")
+        self.assertEqual(result["chrome_open_stages"], ["navigation-fallback status=start"])
+
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
