@@ -210,6 +210,18 @@ fn protocol_mismatch_is_terminal_degradation() {
 }
 
 #[test]
+fn published_compatible_protocol_versions_initialize() {
+    for version in ["2025-03-26", "2025-06-18"] {
+        let server = ManagedServer::new(cfg_with_env(&[("FAKEMCP_PROTOCOL_VERSION", version)]));
+        let tools = server
+            .list_tools()
+            .expect("compatible child must initialize");
+        assert!(!tools.is_empty(), "{version} returned no tools");
+        server.shutdown();
+    }
+}
+
+#[test]
 fn crash_then_restart_with_backoff() {
     let marker_dir = tempfile::tempdir().expect("tempdir");
     let marker = marker_dir.path().join("spawns.txt");

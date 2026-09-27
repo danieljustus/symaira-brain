@@ -321,7 +321,10 @@ impl Client {
         let raw = self.call("initialize", Some(&params), timeout, None)?;
         let result: InitializeResult = serde_json::from_str(raw.get())
             .map_err(|err| BrokerError::Parse(format!("initialize result: {err}")))?;
-        if result.protocol_version != PROTOCOL_VERSION {
+        if !matches!(
+            result.protocol_version.as_str(),
+            "2024-11-05" | "2025-03-26" | "2025-06-18"
+        ) {
             return Err(BrokerError::ProtocolMismatch {
                 expected: PROTOCOL_VERSION.to_string(),
                 actual: result.protocol_version,
