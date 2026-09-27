@@ -44,8 +44,8 @@ pub(crate) fn requires_go_fallback_with(
         args,
         &["json", "fix", "force-release", "vault-agent", "h", "help"],
         &["vault-agent"],
-        &["force-release"],
-        &["fix"],
+        &[],
+        &["fix", "force-release"],
     );
     if lifecycle_fallback {
         return true;
@@ -164,6 +164,7 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
         match name {
             "json" => {}
             "fix" => parsed.fix = inline != Some("false"),
+            "force-release" if inline == Some("false") => {}
             "vault-agent" => {
                 let value = inline.map(str::to_owned).or_else(|| {
                     i += 1;
@@ -289,6 +290,7 @@ args = ["mcp", "--profile", "default"]
     fn doctor_argument_parser_accepts_go_flag_forms() {
         let args = vec![
             OsString::from("--fix=false"),
+            OsString::from("--force-release=false"),
             OsString::from("--vault-agent"),
             OsString::from("agent"),
         ];
@@ -346,6 +348,10 @@ args = ["mcp", "--profile", "default"]
             || false
         ));
         assert!(requires_go_fallback_with(&args(&["--fix"]), || false));
+        assert!(!requires_go_fallback_with(
+            &args(&["--fix=false", "--force-release=false"]),
+            || false
+        ));
     }
 
     #[test]

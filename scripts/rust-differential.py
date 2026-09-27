@@ -1736,6 +1736,8 @@ CASES = (
     Case("doctor_empty_human", ("doctor",), setup=setup_doctor_empty),
     Case("doctor_empty_json", ("doctor", "--json"), setup=setup_doctor_empty),
     Case("doctor_global_json", ("--json", "doctor"), setup=setup_doctor_empty),
+    Case("doctor_disabled_fix", ("doctor", "--fix=false", "--json"), setup=setup_doctor_empty),
+    Case("doctor_disabled_force_release", ("doctor", "--force-release=false", "--json"), setup=setup_doctor_empty),
     Case("doctor_help", ("doctor", "--help")),
     Case("doctor_unknown_flag", ("doctor", "--bogus")),
     Case("doctor_ignores_positionals", ("doctor", "ignored", "--bogus"), setup=setup_doctor_empty),
