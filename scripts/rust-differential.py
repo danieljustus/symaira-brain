@@ -1328,11 +1328,15 @@ def setup_skills_library_managed(root: Path, env: dict[str, str]) -> None:
         timeout=60,
     )
     freeze_managed_clocks(root)
+    # Keep access-time evidence explicit. Otherwise an ambient read between
+    # fixture setup and list can make one runtime report last_used and the
+    # other null, despite identical installed state.
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 3600.5)
 
 
 def setup_skills_library_last_used(root: Path, env: dict[str, str]) -> None:
     setup_skills_library_managed(root, env)
-    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 3600.5)
+    set_access_times(root, "demo", SKILLS_LIBRARY_STAMP + 7200.5)
 
 
 def setup_skills_library_last_used_below_gap(root: Path, env: dict[str, str]) -> None:
@@ -2619,6 +2623,9 @@ CASES = (
     # native without oracle coverage.
     Case("sync_dry_run_empty", ("sync", "--dry-run")),
     Case("sync_dry_run_all", ("sync", "--dry-run", "opencode")),
+    Case("sync_flag_terminator", ("sync", "--dry-run", "--", "agents")),
+    Case("sync_flag_after_positional", ("sync", "agents", "--dry-run")),
+    Case("sync_flag_after_terminator", ("sync", "--", "--dry-run")),
     Case(
         "sync_dry_run_with_library",
         ("sync", "--dry-run", "opencode"),

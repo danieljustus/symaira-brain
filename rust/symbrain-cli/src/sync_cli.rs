@@ -56,21 +56,9 @@ struct ParsedSyncArgs {
 /// The shipped `sync` flag set as the Go flag package prints it.
 const SYNC_FLAGS_USAGE: &str = "Usage of sync:\n  -dry-run\n    \tshow what would be written without making changes\n  -project string\n    \tproject directory (default: current directory)\n";
 
-/// Returns whether `sync` still belongs to the Go oracle.
-///
-/// Native sync covers the explicit `agents` instruction target and the
-/// implicit all-harness default, plus its own flag-package-style rejection
-/// of unknown flags. Project overrides remain Go-owned (no fixture yet).
-/// Whether this invocation still has to be handled by the Go binary.
-///
-/// `sync` is native for every argument shape now that `skillsrunner.Run` is
-/// ported and differentially proven crate-side (result messages, on-disk
-/// layout and symlink targets are all frozen against real Go behaviour in
-/// `rust/symbrain-skills/tests/`). The single remaining exception is `--`:
-/// flag-parsing for a trailing argument list is not modelled here, so that
-/// shape still defers rather than guessing.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    args.iter().any(|arg| arg.to_string_lossy() == "--")
+/// Native sync covers every argument shape, including Go's flag terminator.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    false
 }
 
 fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArgs, u8> {
@@ -81,7 +69,14 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
     let mut i = 0;
     while i < args.len() {
         let arg = args[i].to_string_lossy();
-        if arg == "-dry-run" || arg == "--dry-run" {
+        if arg == "--" {
+            harnesses.extend(
+                args[i + 1..]
+                    .iter()
+                    .map(|arg| arg.to_string_lossy().into_owned()),
+            );
+            break;
+        } else if arg == "-dry-run" || arg == "--dry-run" {
             dry_run = true;
             i += 1;
         } else if arg == "-project" || arg == "--project" {
@@ -111,8 +106,21 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<ParsedSyncArg
             let _ = write!(stderr, "{SYNC_FLAGS_USAGE}");
             return Err(exit::USAGE);
         } else {
-            harnesses.push(arg.into_owned());
-            i += 1;
+            // Go's flag package stops parsing at the first positional value.
+            // normalizeFlags still folds double-dash names before `--`.
+            let mut terminated = false;
+            for remaining in &args[i..] {
+                let value = remaining.to_string_lossy();
+                if value == "--" {
+                    terminated = true;
+                }
+                harnesses.push(if !terminated && value.starts_with("--") {
+                    format!("-{}", &value[2..])
+                } else {
+                    value.into_owned()
+                });
+            }
+            break;
         }
     }
 
