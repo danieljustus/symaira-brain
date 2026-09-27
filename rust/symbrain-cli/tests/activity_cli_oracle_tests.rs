@@ -6,13 +6,19 @@ use tempfile::tempdir;
 
 #[derive(Deserialize)]
 struct Oracle {
+    id: String,
     args: Vec<String>,
     exit_code: i32,
     stdout: String,
     stderr: String,
 }
 
-fn fixture() -> Oracle {
+#[derive(Deserialize)]
+struct Suite {
+    cases: Vec<Oracle>,
+}
+
+fn fixture() -> Suite {
     #[cfg(windows)]
     let path = PathBuf::from(
         std::env::var_os("SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE")
@@ -26,8 +32,13 @@ fn fixture() -> Oracle {
 }
 
 #[test]
-fn empty_activity_status_matches_the_pinned_go_command() {
-    let oracle = fixture();
+fn bounded_activity_reads_match_the_pinned_go_commands() {
+    for oracle in fixture().cases {
+        run_case(&oracle);
+    }
+}
+
+fn run_case(oracle: &Oracle) {
     let root = tempdir().expect("temporary isolated root");
     let root = root
         .path()
@@ -44,6 +55,33 @@ fn empty_activity_status_matches_the_pinned_go_command() {
         "[profile]\nname = \"activity-oracle\"\n\n[servers.memory]\nenabled = true\nmode = \"read_only\"\ntools_allow = [\"activity_search\", \"activity_get\", \"activity_status\"]\n",
     )
     .expect("write isolated profile");
+
+    let db_path = data.join(format!("{}.db", oracle.id));
+    if oracle.id.starts_with("search-") {
+        let store =
+            symbrain_memory::Store::open(&db_path).expect("initialize isolated memory schema");
+        drop(store);
+        let connection =
+            rusqlite::Connection::open(&db_path).expect("open seeded activity database");
+        connection
+            .execute(
+                "INSERT INTO activity_segments (id,source,granularity,started_at,ended_at,applications,redacted_summary,raw_ref,prior_segment_ids,superseded_by,expires_at) VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",
+                rusqlite::params![
+                    "cli-segment",
+                    "symcockpit",
+                    "10min",
+                    "2026-08-28T12:00:00Z",
+                    "2026-08-28T12:10:00Z",
+                    "[\"Editor\"]",
+                    "edited activity summary",
+                    "opaque://oracle-fixture",
+                    "[]",
+                    "",
+                    "2027-08-28T12:10:00Z",
+                ],
+            )
+            .expect("seed synthetic activity segment");
+    }
 
     let args = oracle
         .args
@@ -65,8 +103,13 @@ fn empty_activity_status_matches_the_pinned_go_command() {
             command.env(key, value);
         }
     }
-    let output = command.output().expect("run native activity status");
-    assert_eq!(output.status.code(), Some(oracle.exit_code));
-    assert_eq!(output.stdout, oracle.stdout.as_bytes());
-    assert_eq!(output.stderr, oracle.stderr.as_bytes());
+    let output = command.output().expect("run native activity CLI case");
+    assert_eq!(
+        output.status.code(),
+        Some(oracle.exit_code),
+        "{}",
+        oracle.id
+    );
+    assert_eq!(output.stdout, oracle.stdout.as_bytes(), "{}", oracle.id);
+    assert_eq!(output.stderr, oracle.stderr.as_bytes(), "{}", oracle.id);
 }

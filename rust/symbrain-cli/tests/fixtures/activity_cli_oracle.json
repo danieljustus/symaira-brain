@@ -1,12 +1,59 @@
 {
-  "args": [
-    "activity",
-    "status",
-    "--profile=activity-oracle",
-    "--max-tokens=40",
-    "--db=\u003croot\u003e/data/activity.db"
-  ],
-  "exit_code": 0,
-  "stdout": "segments=0\tepisodes=0\n",
-  "stderr": ""
+  "cases": [
+    {
+      "id": "status",
+      "args": [
+        "activity",
+        "status",
+        "--profile=activity-oracle",
+        "--max-tokens=40",
+        "--db=\u003croot\u003e/data/status.db"
+      ],
+      "exit_code": 0,
+      "stdout": "segments=0\tepisodes=0\n",
+      "stderr": ""
+    },
+    {
+      "id": "search-inline",
+      "args": [
+        "--json",
+        "activity",
+        "search",
+        "--profile=activity-oracle",
+        "--from=2026-08-27T11:59:00Z",
+        "--to=2026-08-29T15:00:00Z",
+        "--limit=10",
+        "--max-tokens=100",
+        "--db=\u003croot\u003e/data/search-inline.db",
+        "editor"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"results\":[{\"id\":\"cli-segment\",\"kind\":\"segment\",\"source\":\"symcockpit\",\"granularity\":\"10min\",\"started_at\":\"2026-08-28T12:00:00Z\",\"ended_at\":\"2026-08-28T12:10:00Z\",\"applications\":[\"Editor\"],\"summary\":\"[UNTRUSTED_ACTIVITY_SUMMARY]\\nedited activity summary\\n[/UNTRUSTED_ACTIVITY_SUMMARY]\",\"provenance\":{\"source\":\"symcockpit\",\"reference\":\"opaque://oracle-fixture\"},\"tokens\":21}],\"truncated\":false,\"used_tokens\":21,\"max_tokens\":100}\n",
+      "stderr": ""
+    },
+    {
+      "id": "search-separated",
+      "args": [
+        "--json",
+        "activity",
+        "search",
+        "--profile",
+        "activity-oracle",
+        "--from",
+        "2026-08-27T11:59:00Z",
+        "--to",
+        "2026-08-29T15:00:00Z",
+        "--limit",
+        "10",
+        "--max-tokens",
+        "100",
+        "--db",
+        "\u003croot\u003e/data/search-separated.db",
+        "editor"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"results\":[{\"id\":\"cli-segment\",\"kind\":\"segment\",\"source\":\"symcockpit\",\"granularity\":\"10min\",\"started_at\":\"2026-08-28T12:00:00Z\",\"ended_at\":\"2026-08-28T12:10:00Z\",\"applications\":[\"Editor\"],\"summary\":\"[UNTRUSTED_ACTIVITY_SUMMARY]\\nedited activity summary\\n[/UNTRUSTED_ACTIVITY_SUMMARY]\",\"provenance\":{\"source\":\"symcockpit\",\"reference\":\"opaque://oracle-fixture\"},\"tokens\":21}],\"truncated\":false,\"used_tokens\":21,\"max_tokens\":100}\n",
+      "stderr": ""
+    }
+  ]
 }

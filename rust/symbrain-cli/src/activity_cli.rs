@@ -23,6 +23,28 @@ Usage:
 Every command requires --profile, an explicit bounded response budget, and (for search) an explicit RFC3339 window and result limit.
 ";
 const MAX_ACTIVITY_BUDGET: usize = 4000;
+const GET_FLAGS: &[&str] = &[
+    "--profile",
+    "-profile",
+    "--max-tokens",
+    "-max-tokens",
+    "--db",
+    "-db",
+];
+const SEARCH_FLAGS: &[&str] = &[
+    "--profile",
+    "-profile",
+    "--from",
+    "-from",
+    "--to",
+    "-to",
+    "--limit",
+    "-limit",
+    "--max-tokens",
+    "-max-tokens",
+    "--db",
+    "-db",
+];
 
 fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
     if let Some(path) = override_path.filter(|path| !path.is_empty()) {
@@ -45,13 +67,9 @@ fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
 
 /// Reports whether `symbrain activity` has to stay on the Go implementation.
 ///
-/// Native today: the usage/dispatch text and the policy message for a profile
-/// that is absent, unloadable or does not expose the activity read tools.
-/// Those bytes are pinned by differential cases.
-///
-/// Still on Go: `search`, `get` and `status` themselves - the shipped
-/// implementations carry a bounded response budget, token-fenced summaries,
-/// TTL fields and a result page the native path does not reproduce yet.
+/// Supported commands stay native for absent or unusable profiles and for a
+/// granting profile with a valid bounded `search`, `get`, or `status` request.
+/// Invalid requests and unsupported flag shapes retain Go's diagnostics.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
         return false;
@@ -59,8 +77,7 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if matches!(verb.as_str(), "-h" | "--help" | "help") {
         return false;
     }
-    // An unusable profile is answered natively; a usable one falls through to
-    // the subcommand, which stays on Go.
+    // An unusable profile is answered natively with the policy diagnostic.
     let profile_name = extract_flag(args, "--profile").or_else(|| extract_flag(args, "-profile"));
     let Some(name) = profile_name else {
         return false;
@@ -72,18 +89,21 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if !allowed {
         return false;
     }
-    // A granting profile: `status` and `get` run natively, `search` still
-    // needs the shipped budget/window/page semantics.
+    // A granting profile: `status` and `get` run natively; `search` is native
+    // only when its bounded window, page size, and response budget are valid.
     match verb.as_str() {
         "status" => !status_args_are_supported(&args[1..]),
         // The shipped flag set stops at the first bare argument, so a flag
         // after the identifier is a usage error there; only the documented
         // `get <flags> <id>` order is reproducible natively.
-        "get" => !flags_before_positional(&args[1..]),
+        "get" => !flags_before_positional(&args[1..], GET_FLAGS),
         // `search` runs natively only for a fully valid request: every
         // validation failure carries the shipped (or the Go time parser's)
         // error text and stays on Go.
-        "search" => !flags_before_positional(&args[1..]) || !search_request_is_valid(&args[1..]),
+        "search" => {
+            !flags_before_positional(&args[1..], SEARCH_FLAGS)
+                || !search_request_is_valid(&args[1..])
+        }
         _ => true,
     }
 }
@@ -141,7 +161,7 @@ fn search_request_is_valid(args: &[OsString]) -> bool {
 ///
 /// The shipped flag set stops parsing at the first bare argument, so a flag
 /// after it is a usage error there and the native path must not accept it.
-fn flags_before_positional(args: &[OsString]) -> bool {
+fn flags_before_positional(args: &[OsString], value_flags: &[&str]) -> bool {
     let mut positionals = 0;
     let mut seen_positional = false;
     let mut index = 0;
@@ -150,17 +170,15 @@ fn flags_before_positional(args: &[OsString]) -> bool {
         let (name, inline) = arg
             .split_once('=')
             .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        let flag = [
-            "--profile",
-            "-profile",
-            "--max-tokens",
-            "-max-tokens",
-            "--db",
-            "-db",
-        ];
-        if flag.contains(&name) {
-            if seen_positional || inline.is_none() {
+        if value_flags.contains(&name) {
+            if seen_positional {
                 return false;
+            }
+            if inline.is_none() {
+                if index + 1 >= args.len() {
+                    return false;
+                }
+                index += 1;
             }
         } else if arg.starts_with('-') {
             return false;
@@ -342,8 +360,7 @@ fn run_search(
         Err(code) => return code,
     };
 
-    // `search` stays on Go (see the gate); this path only needs to compile
-    // and behave sanely for callers that reach it directly.
+    // The fallback gate admits only complete, validated windows and budgets.
     let from_dt = from.unwrap_or_else(Utc::now);
     let to_dt = to.unwrap_or_else(Utc::now);
     let mem_search = ActivitySearch {
@@ -592,7 +609,10 @@ fn positional_count(args: &[OsString], flags: &[&str]) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use super::{run_get, run_search, run_status, status_args_are_supported};
+    use super::{
+        GET_FLAGS, SEARCH_FLAGS, flags_before_positional, run_get, run_search, run_status,
+        search_request_is_valid, status_args_are_supported,
+    };
     use std::ffi::OsString;
     use symbrain_core::exit;
     use symbrain_core::output::OutputFormat;
@@ -646,6 +666,63 @@ mod tests {
         ])));
         assert!(!status_args_are_supported(&args(&["--unknown"])));
         assert!(!status_args_are_supported(&args(&["stray"])));
+    }
+
+    #[test]
+    fn bounded_search_flags_are_recognized_before_the_query() {
+        let inline = args(&[
+            "--profile=activity",
+            "--from=2026-08-28T11:59:00Z",
+            "--to=2026-08-28T15:00:00Z",
+            "--limit=10",
+            "--max-tokens=100",
+            "--db=/tmp/activity.db",
+            "editor",
+        ]);
+        assert!(flags_before_positional(&inline, SEARCH_FLAGS));
+        assert!(search_request_is_valid(&inline));
+
+        let separate_values = args(&[
+            "--profile",
+            "activity",
+            "--from",
+            "2026-08-28T11:59:00Z",
+            "--to",
+            "2026-08-28T15:00:00Z",
+            "--limit",
+            "10",
+            "--max-tokens",
+            "100",
+            "--db",
+            "/tmp/activity.db",
+            "editor",
+        ]);
+        assert!(flags_before_positional(&separate_values, SEARCH_FLAGS));
+        assert!(search_request_is_valid(&separate_values));
+
+        let misplaced = args(&[
+            "--profile=activity",
+            "editor",
+            "--from=2026-08-28T11:59:00Z",
+            "--to=2026-08-28T15:00:00Z",
+            "--limit=10",
+            "--max-tokens=100",
+        ]);
+        assert!(!flags_before_positional(&misplaced, SEARCH_FLAGS));
+        let invalid_window = args(&[
+            "--profile=activity",
+            "--from=invalid",
+            "--to=2026-08-28T15:00:00Z",
+            "--limit=10",
+            "--max-tokens=100",
+            "editor",
+        ]);
+        assert!(flags_before_positional(&invalid_window, SEARCH_FLAGS));
+        assert!(!search_request_is_valid(&invalid_window));
+        assert!(flags_before_positional(
+            &args(&["--profile=activity", "id"]),
+            GET_FLAGS
+        ));
     }
 
     #[test]

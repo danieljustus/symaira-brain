@@ -107,7 +107,7 @@ usage-opencode-check:
 usage-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
 
-## activity-cli-oracle-check: Ensure native activity status bytes remain pinned to production Go
+## activity-cli-oracle-check: Ensure native bounded activity CLI bytes remain pinned to production Go
 activity-cli-oracle-check:
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
