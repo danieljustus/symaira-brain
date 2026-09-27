@@ -1,6 +1,7 @@
 #![deny(unsafe_code)]
 
 mod browser_profiles;
+mod upgrade;
 
 use std::{
     collections::BTreeMap,
@@ -39,6 +40,9 @@ enum Action {
     RootVersion,
     Version {
         structured: bool,
+    },
+    UpgradeCheck {
+        format: Format,
     },
     ConfigShow {
         format: Format,
@@ -146,6 +150,7 @@ fn main() -> ExitCode {
             Err(_) => ExitCode::from(1),
         },
         Ok(Action::Version { structured: false }) => write_stdout(&render_version_text(VERSION)),
+        Ok(Action::UpgradeCheck { format }) => upgrade::run(format, VERSION),
         Ok(Action::ConfigShow { format, flags }) => run_config_show(format, flags),
         Ok(Action::Batch {
             format,
@@ -1040,6 +1045,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     };
     match values[command_index].as_str() {
         "version" => parse_version(&values, command_index),
+        "upgrade" => parse_upgrade(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
         "state" => parse_state_lifecycle(&values, command_index),
@@ -1902,6 +1908,56 @@ fn parse_version(values: &[String], version_index: usize) -> Result<Action, Pars
     let format = parse_format(&output)?;
     Ok(Action::Version {
         structured: json || format != Format::Text,
+    })
+}
+
+fn parse_upgrade(values: &[String], upgrade_index: usize) -> Result<Action, ParseError> {
+    let mut check = false;
+    let mut json = false;
+    let mut output = "text";
+    let mut index = 0;
+    while index < values.len() {
+        if index == upgrade_index {
+            index += 1;
+            continue;
+        }
+        match values[index].as_str() {
+            "--check" => check = true,
+            value if value.starts_with("--check=") => check = parse_bool("--check", &value[8..])?,
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                output = required_value(values, index, "--output")?;
+            }
+            value if value.starts_with("--output=") => output = &value[9..],
+            value if value.starts_with('-') => {
+                return Err(ParseError {
+                    message: format!("unknown flag: {value}"),
+                    exit_code: 2,
+                });
+            }
+            value => {
+                return Err(ParseError {
+                    message: format!("unknown command {value:?} for \"symbrowse upgrade\""),
+                    exit_code: 2,
+                });
+            }
+        }
+        index += 1;
+    }
+    if !check {
+        return Err(ParseError {
+            message: "upgrade currently supports only --check; applying an update is not implemented in this Rust slice".to_owned(),
+            exit_code: 2,
+        });
+    }
+    Ok(Action::UpgradeCheck {
+        format: if json {
+            Format::Json
+        } else {
+            parse_format(output)?
+        },
     })
 }
 

@@ -1874,6 +1874,7 @@ dependencies = [
 name = "symbrowse-cli"
 version = "0.0.0"
 dependencies = [
+ "reqwest",
  "serde",
  "serde_json",
  "sha2",
@@ -1881,6 +1882,9 @@ dependencies = [
  "symbrowse-daemon",
  "symbrowse-mcp",
  "symbrowse-protocol",
+ "tempfile",
+ "time",
+ "tokio",
 ]
 
 [[package]]
