@@ -1126,7 +1126,7 @@ impl ChromePage {
                     }
                     return Err("Chrome navigation timed out".into());
                 }
-                _ = tokio::time::sleep(Duration::from_millis(25)) => {
+                _ = tokio::time::sleep(Duration::from_millis(25)), if cfg!(windows) => {
                     if cfg!(windows)
                         && navigation_fallback_due(
                             navigation_dispatch_completed_at,
