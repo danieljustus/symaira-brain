@@ -188,6 +188,12 @@ func BuildMoonshotAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("moonshot", body)
 }
 
+// BuildCursorAuthenticatedReportOracle runs the shipped Cursor provider
+// through BuildReport with a direct CURSOR_COOKIE and canned response body.
+func BuildCursorAuthenticatedReportOracle(body []byte) (Report, error) {
+	return buildAuthenticatedDirectEnvReportOracle("cursor", body)
+}
+
 func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
 	transport := &oracleTransport{bodies: map[string][]byte{providerID: body}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
@@ -195,7 +201,7 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	index := map[string]int{"copilot": 2, "moonshot": 5, "openrouter": 8}[providerID]
+	index := map[string]int{"copilot": 2, "cursor": 3, "moonshot": 5, "openrouter": 8}[providerID]
 	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
 		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
 	}

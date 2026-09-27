@@ -16,6 +16,7 @@ import (
 )
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
+const cursorOracleToken = "oracle-only-invalid-cursor"
 const openRouterOracleToken = "oracle-only-invalid-openrouter"
 const moonshotOracleToken = "oracle-only-invalid-moonshot"
 
@@ -70,6 +71,7 @@ func main() {
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
+	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -105,6 +107,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	cursorReport, err := buildCursorAuthenticatedReport(fixtures["cursor"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -124,6 +131,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*moonshotReportOutput, moonshotReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*cursorReportOutput, cursorReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -150,7 +161,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	fmt.Printf("Wrote %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, *moonshotReportOutput, len(graph.Providers))
+	if err := writeJSON(*cursorReportOutput, cursorReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Printf("Wrote %s, %s, %s, %s, %s, and %s (%d providers)\n", *output, *casesOutput, *copilotReportOutput, *openRouterReportOutput, *moonshotReportOutput, *cursorReportOutput, len(graph.Providers))
 }
 
 func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
@@ -163,6 +178,10 @@ func buildOpenRouterAuthenticatedReport(body []byte) (usage.Report, error) {
 
 func buildMoonshotAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("moonshot", moonshotOracleToken, body)
+}
+
+func buildCursorAuthenticatedReport(body []byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReport("cursor", cursorOracleToken, body)
 }
 
 func buildAuthenticatedProviderReport(provider, token string, body []byte) (usage.Report, error) {
@@ -214,6 +233,7 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 	}
 	envName := map[string]string{
 		"copilot":    "COPILOT_ACCESS_TOKEN",
+		"cursor":     "CURSOR_COOKIE",
 		"moonshot":   "MOONSHOT_API_KEY",
 		"openrouter": "OPENROUTER_API_KEY",
 	}[provider]
@@ -236,6 +256,8 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte) (usag
 		report, buildErr = usage.BuildOpenRouterAuthenticatedReportOracle(body)
 	case "moonshot":
 		report, buildErr = usage.BuildMoonshotAuthenticatedReportOracle(body)
+	case "cursor":
+		report, buildErr = usage.BuildCursorAuthenticatedReportOracle(body)
 	}
 	removeErr := os.RemoveAll(home)
 	restoreErr := restore()

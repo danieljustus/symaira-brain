@@ -166,23 +166,26 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         Some("synthetic-copilot-fixture"),
         None,
         None,
+        None,
         false,
         false,
         false,
     ));
     assert!(!needs_go_fallback_for(
-        None, None, None, false, false, false
+        None, None, None, None, false, false, false
     ));
     assert!(needs_go_fallback_for(
         Some("symvault://copilot/token"),
         None,
         None,
+        None,
         false,
         false,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         None,
         None,
         true,
@@ -193,12 +196,14 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         Some("synthetic-copilot-fixture"),
         None,
         None,
+        None,
         false,
         true,
         false,
     ));
     assert!(needs_go_fallback_for(
         Some("synthetic-copilot-fixture"),
+        None,
         None,
         None,
         false,
@@ -209,6 +214,7 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         None,
         Some("synthetic-openrouter-fixture"),
         None,
+        None,
         false,
         false,
         false,
@@ -217,6 +223,16 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         None,
         None,
         Some("synthetic-moonshot-fixture"),
+        None,
+        false,
+        false,
+        false,
+    ));
+    assert!(!needs_go_fallback_for(
+        None,
+        None,
+        None,
+        Some("synthetic-cursor-fixture"),
         false,
         false,
         false,
@@ -229,6 +245,16 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
         None,
         Some("symvault://openrouter/key"),
         None,
+        None,
+        false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        None,
+        None,
+        Some("symvault://cursor/cookie"),
         false,
         false,
         false,
@@ -236,6 +262,7 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
     assert!(needs_go_fallback_for(
         None,
         Some("synthetic-openrouter-fixture"),
+        None,
         None,
         true,
         false,
@@ -245,6 +272,7 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
         Some("synthetic-copilot-fixture"),
         Some("synthetic-openrouter-fixture"),
         None,
+        None,
         false,
         false,
         false,
@@ -253,6 +281,7 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
         None,
         None,
         Some("symvault://moonshot/key"),
+        None,
         false,
         false,
         false,
@@ -261,6 +290,7 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
         None,
         None,
         Some("synthetic-moonshot-fixture"),
+        None,
         // A non-empty MOONSHOT_REGION, including explicit `ai`, remains Go.
         true,
         false,
@@ -270,7 +300,17 @@ fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
         None,
         Some("synthetic-openrouter-fixture"),
         Some("synthetic-moonshot-fixture"),
+        None,
         false,
+        false,
+        false,
+    ));
+    assert!(needs_go_fallback_for(
+        None,
+        None,
+        None,
+        Some("synthetic-cursor-fixture"),
+        true,
         false,
         false,
     ));

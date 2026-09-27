@@ -16,11 +16,11 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// without a cookie also stays native because Go has no fetch strategy for it.
 /// A report with only a direct `COPILOT_ACCESS_TOKEN` or a direct
 /// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
-/// using the default `ai` region now runs natively: each configured report,
-/// request, parsed snapshot, and provider error cases are checked against Go
-/// oracles using synthetic credentials and canned transport. Copilot file
-/// credentials, secret references, provider-specific overrides, and every
-/// other configured provider continue to use Go until pinned.
+/// using the default `ai` region or a direct `CURSOR_COOKIE` now runs natively:
+/// each configured report, request, parsed snapshot, and provider error cases
+/// are checked against Go oracles using synthetic credentials and canned
+/// transport. File credentials, secret references, provider-specific
+/// overrides, and every other configured provider continue to use Go until pinned.
 ///
 /// The report fetch invoked below remains a user-initiated live read, as it
 /// does in the shipped Go command.
