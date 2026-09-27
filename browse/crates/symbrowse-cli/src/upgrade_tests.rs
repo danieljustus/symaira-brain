@@ -51,3 +51,22 @@ fn local_fake_release_is_fetched_then_reused_from_go_compatible_cache() {
     let second = check_release("v0.0.0", &endpoint, &cache).unwrap().unwrap();
     assert_eq!(second.tag_name, "v0.0.1");
 }
+
+#[cfg(unix)]
+#[test]
+fn cache_write_rejects_user_symlink_parent() {
+    use std::os::unix::fs::symlink;
+
+    let root = tempfile::tempdir().unwrap();
+    let outside = root.path().join("outside");
+    fs::create_dir(&outside).unwrap();
+    let alias = root.path().join("alias");
+    symlink(&outside, &alias).unwrap();
+    let cache = alias.join("cache.json");
+    let entry = CacheEntry {
+        timestamp: "2099-01-01T00:00:00Z".into(),
+        release: None,
+    };
+    write_cache(&cache, &entry);
+    assert!(!outside.join("cache.json").exists());
+}
