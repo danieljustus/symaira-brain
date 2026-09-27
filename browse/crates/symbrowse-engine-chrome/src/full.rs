@@ -15,7 +15,7 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, network, page},
+    cdp::browser_protocol::{accessibility, browser, dom, network, page, target},
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -175,6 +175,7 @@ pub fn capabilities() -> ChromeCapabilities {
 pub struct ChromeSession {
     browser: Browser,
     mode: ConnectionMode,
+    timeout: Duration,
     _handler_task: tokio::task::JoinHandle<()>,
 }
 
@@ -191,6 +192,7 @@ impl ChromeSession {
         Ok(Self {
             browser: connection.browser,
             mode: connection.mode,
+            timeout,
             _handler_task: task,
         })
     }
@@ -203,7 +205,40 @@ impl ChromeSession {
         &self,
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
-        ChromePage::new(self.browser.new_page(url.into()).await?).await
+        let url = url.into();
+        let page = if url == "about:blank" {
+            self.new_blank_page_without_load_wait().await?
+        } else {
+            self.browser.new_page(url).await?
+        };
+        ChromePage::new(page).await
+    }
+
+    // chromiumoxide::Browser::new_page waits for the new target's main frame
+    // to report loaded. Chrome can leave an about:blank target in that state
+    // indefinitely, while Go's CDP path returns as soon as the target is
+    // attached. Create the same blank target, then obtain its Page handle once
+    // chromiumoxide has attached the target without waiting for navigation.
+    async fn new_blank_page_without_load_wait(&self) -> Result<Page, Box<dyn Error + Send + Sync>> {
+        let params = target::CreateTargetParams::builder()
+            .url("about:blank")
+            .build()
+            .map_err(chromiumoxide::error::CdpError::msg)?;
+        let page = tokio::time::timeout(self.timeout, async {
+            let target_id = self.browser.execute(params).await?.result.target_id;
+            loop {
+                match self.browser.get_page(target_id.clone()).await {
+                    Ok(page) => return Ok(page),
+                    Err(chromiumoxide::error::CdpError::NotFound) => {
+                        tokio::time::sleep(Duration::from_millis(10)).await;
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        })
+        .await
+        .map_err(|_| chromiumoxide::error::CdpError::Timeout)??;
+        Ok(page)
     }
 
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {

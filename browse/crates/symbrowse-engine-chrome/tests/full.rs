@@ -51,6 +51,57 @@ struct TestServer {
     thread: Option<thread::JoinHandle<()>>,
 }
 
+#[tokio::test]
+async fn blank_page_attaches_before_navigation_and_remains_usable() {
+    if !e2e_enabled() {
+        return;
+    }
+
+    let server = TestServer::start();
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-rust012-blank-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(20),
+    )
+    .await
+    .expect("launch Chrome");
+
+    let page = session
+        .new_page("about:blank")
+        .await
+        .expect("attach blank page without waiting for a load event");
+    assert_eq!(
+        page.raw().url().await.expect("read blank URL").as_deref(),
+        Some("about:blank")
+    );
+
+    let opened = page
+        .open_with_timeout(&format!("{}/", server.base_url), Duration::from_secs(10))
+        .await
+        .expect("navigate from blank page");
+    assert!(
+        opened["url"]
+            .as_str()
+            .unwrap_or_default()
+            .starts_with(&server.base_url)
+    );
+    assert_eq!(opened["title"], "rust012");
+
+    session.close().await.expect("close Chrome");
+}
+
 impl TestServer {
     fn start() -> Self {
         let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind test server");
