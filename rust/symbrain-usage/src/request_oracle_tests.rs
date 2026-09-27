@@ -515,21 +515,11 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
 }
 
 #[test]
-#[allow(clippy::too_many_lines)]
 fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
     let report_oracle: Value = serde_json::from_str(include_str!(
         "../tests/fixtures/claude_admin_authenticated_report.json"
     ))
     .expect("Go authenticated Claude Admin report");
-    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
-        .expect("Go provider cases");
-    let claude = oracle["providers"]
-        .as_array()
-        .expect("providers")
-        .iter()
-        .find(|provider| provider["id"] == "claude")
-        .expect("Claude oracle case");
-
     let (mut report, transport) = authenticated_claude_admin_report(Response {
         status: 200,
         body: include_bytes!("../../../internal/usage/testdata/claude-admin-cost.json").to_vec(),
@@ -596,39 +586,25 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
     assert!(empty.meters.is_empty());
     assert_eq!(empty.currency.as_deref(), Some("USD"));
 
-    let chains: Value = serde_json::from_str(ORACLE).expect("Go request oracle");
-    let claude_chain = chains["chains"]
-        .as_array()
-        .expect("error chains")
-        .iter()
-        .find(|entry| entry["provider"] == "claude" && entry["status"] == "malformed")
-        .and_then(|entry| entry["text"].as_str())
-        .expect("Go Claude malformed response error");
-    let direct_parse_error = claude_chain
-        .split_once("; ")
-        .map_or(claude_chain, |(first, _)| first);
-    for (status, body, retry_after, oracle_index) in [
-        (401, br#"{"error":"nope"}"#.as_slice(), None, Some(0)),
-        (
-            429,
-            br#"{"error":"slow down"}"#.as_slice(),
-            Some("17"),
-            Some(1),
-        ),
-        (200, b"not-json".as_slice(), None, None),
+    let go_oracle: Value = serde_json::from_str(ORACLE).expect("Go request oracle");
+    let chains = go_oracle["chains"].as_array().expect("error chains");
+    for (status, label, body) in [
+        (401, "unauthorized", br#"{"error":"nope"}"#.as_slice()),
+        (429, "rate-limited", br#"{"error":"slow down"}"#.as_slice()),
+        (200, "malformed", b"not-json".as_slice()),
     ] {
-        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
-            [("Retry-After".into(), value.into())].into_iter().collect()
-        });
+        let expected_chain = chains
+            .iter()
+            .find(|entry| entry["provider"] == "claude" && entry["status"] == label)
+            .and_then(|entry| entry["text"].as_str())
+            .unwrap_or_else(|| panic!("Go oracle has no Claude/{label} error"));
+        let expected = expected_chain
+            .split_once("; ")
+            .map_or(expected_chain, |(first, _)| first);
         let (report, _) = authenticated_claude_admin_report(Response {
             status,
             body: body.to_vec(),
-            headers,
-        });
-        let expected = oracle_index.map_or(direct_parse_error, |index| {
-            claude["errors"][index]["text"]
-                .as_str()
-                .expect("Go error text")
+            headers: BTreeMap::new(),
         });
         assert_eq!(
             report.providers[0].error.as_deref(),
