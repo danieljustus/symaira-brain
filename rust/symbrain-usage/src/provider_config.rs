@@ -17,10 +17,9 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
-/// Environment variables other than the narrow direct Copilot/OpenRouter/
-/// Moonshot/Cursor/Kimi/Nous/Codex cases allowed to use native reporting. Every one keeps the CLI on Go.
+/// Environment variables other than the narrow direct provider credentials
+/// allowed to use native reporting. Every one keeps the CLI on Go.
 const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
-    "ANTHROPIC_ADMIN_KEY",
     "ANTHROPIC_OAUTH_TOKEN",
     "CODEX_HOME",
     "HERMES_HOME",
@@ -934,6 +933,7 @@ pub fn all_providers() -> Vec<Provider> {
 /// supplies no `OpenCode` cookie or strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
+    let claude_admin_env = env_raw("ANTHROPIC_ADMIN_KEY");
     let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
     let openrouter_env = env_raw("OPENROUTER_API_KEY");
     let moonshot_env = env_raw("MOONSHOT_API_KEY");
@@ -953,6 +953,7 @@ pub fn needs_go_fallback() -> bool {
         return true;
     }
     needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: claude_admin_env.as_deref(),
         copilot_env: copilot_env.as_deref(),
         openrouter_env: openrouter_env.as_deref(),
         moonshot_env: moonshot_env.as_deref(),
@@ -966,16 +967,13 @@ pub fn needs_go_fallback() -> bool {
     })
 }
 
-/// Keeps credential-backed reports on Go except for one direct Copilot token,
-/// one direct `OpenRouter` key using its default base URL, or one direct
-/// `Moonshot` key using its default `ai` region, one direct `Cursor` cookie,
-/// one direct Kimi Code API key using its default base, or one direct Nous
-/// Portal token using its default base, or one direct Codex access token,
-/// when every other
-/// provider source and local probe is absent. Secret
-/// references, credential files, and provider-specific overrides stay on Go.
+/// Keeps reports native only for one direct credential from a pinned set of
+/// providers, when every other provider source and local probe is absent.
+/// Secret references, credential files, and provider-specific overrides stay
+/// on Go.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
+    claude_admin_env: Option<&'a str>,
     copilot_env: Option<&'a str>,
     openrouter_env: Option<&'a str>,
     moonshot_env: Option<&'a str>,
@@ -995,7 +993,8 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
     {
         return true;
     }
-    match (
+    let credentials = [
+        signals.claude_admin_env,
         signals.copilot_env,
         signals.openrouter_env,
         signals.moonshot_env,
@@ -1003,16 +1002,12 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.kimi_api_env,
         signals.nous_env,
         signals.codex_env,
-    ) {
-        (None, None, None, None, None, None, None) => false,
-        (Some(copilot), None, None, None, None, None, None) => is_secret_reference(copilot),
-        (None, Some(openrouter), None, None, None, None, None) => is_secret_reference(openrouter),
-        (None, None, Some(moonshot), None, None, None, None) => is_secret_reference(moonshot),
-        (None, None, None, Some(cursor), None, None, None) => is_secret_reference(cursor),
-        (None, None, None, None, Some(kimi), None, None) => is_secret_reference(kimi),
-        (None, None, None, None, None, Some(nous), None) => is_secret_reference(nous),
-        (None, None, None, None, None, None, Some(codex)) => is_secret_reference(codex),
-        _ => true,
+    ];
+    let mut configured = credentials.into_iter().flatten();
+    match (configured.next(), configured.next()) {
+        (None, _) => false,
+        (Some(_), Some(_)) => true,
+        (Some(credential), None) => is_secret_reference(credential),
     }
 }
 

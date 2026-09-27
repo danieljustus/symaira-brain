@@ -168,6 +168,12 @@ func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("copilot", body)
 }
 
+// BuildClaudeAdminAuthenticatedReportOracle runs the shipped Claude provider
+// through BuildReport with a direct ANTHROPIC_ADMIN_KEY and no OAuth source.
+func BuildClaudeAdminAuthenticatedReportOracle(body []byte) (Report, error) {
+	return buildAuthenticatedDirectEnvReportOracle("claude-admin", body)
+}
+
 // BuildCodexAuthenticatedReportOracle runs the shipped Codex provider through
 // BuildReport with a direct CODEX_ACCESS_TOKEN and its default credential home.
 func BuildCodexAuthenticatedReportOracle(body []byte) (Report, error) {
@@ -222,17 +228,25 @@ func BuildNousAuthenticatedReportOracle(body []byte) (Report, error) {
 }
 
 func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Report, error) {
-	transport := &oracleTransport{bodies: map[string][]byte{providerID: body}}
+	transportID := providerID
+	if providerID == "claude-admin" {
+		transportID = "claude"
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{transportID: body}}
 	client := &http.Client{Transport: roundTripFixture{transport}}
 	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
 	if len(providers) != 10 {
 		return Report{}, fmt.Errorf("usage report oracle registered %d providers, want 10", len(providers))
 	}
-	index := map[string]int{"codex": 1, "copilot": 2, "cursor": 3, "kimi": 4, "moonshot": 5, "nous": 6, "openrouter": 8}[providerID]
-	if index == 0 || providers[index].ID() != providerID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
+	index := map[string]int{"claude-admin": 0, "codex": 1, "copilot": 2, "cursor": 3, "kimi": 4, "moonshot": 5, "nous": 6, "openrouter": 8}[providerID]
+	wantID := providerID
+	if providerID == "claude-admin" {
+		wantID = "claude"
+	}
+	if providers[index].ID() != wantID || !providers[index].IsConfigured() || providers[index].AuthStatus().Source != "env" {
 		return Report{}, fmt.Errorf("%s report oracle requires its direct environment credential", providerID)
 	}
-	if providerID == "codex" || providerID == "kimi" || providerID == "nous" {
+	if providerID == "claude-admin" || providerID == "codex" || providerID == "kimi" || providerID == "nous" {
 		strategies := providers[index].Strategies()
 		wantSource := "api"
 		if providerID == "codex" {

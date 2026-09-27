@@ -163,6 +163,10 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 #[test]
 fn only_one_direct_provider_environment_credential_uses_native_reporting() {
     assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
         copilot_env: Some("synthetic-copilot-fixture"),
         ..UsageFallbackSignals::default()
     }));
@@ -213,6 +217,15 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
 
 #[test]
 fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: Some("symvault://claude/admin-key"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
     assert!(needs_go_fallback_for(UsageFallbackSignals {
         openrouter_env: Some("symvault://openrouter/key"),
         ..UsageFallbackSignals::default()

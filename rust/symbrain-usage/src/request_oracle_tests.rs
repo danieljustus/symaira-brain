@@ -159,6 +159,14 @@ fn authenticated_copilot_report(response: Response) -> (crate::Report, FixtureTr
     )
 }
 
+fn authenticated_claude_admin_report(response: Response) -> (crate::Report, FixtureTransport) {
+    authenticated_direct_provider_report(
+        response,
+        "claude",
+        include_str!("../tests/fixtures/claude_admin_authenticated_report.json"),
+    )
+}
+
 fn authenticated_codex_report(response: Response) -> (crate::Report, FixtureTransport) {
     authenticated_direct_provider_report(
         response,
@@ -231,7 +239,14 @@ fn authenticated_direct_provider_report(
             provider.credential = None;
             provider.credentials.clear();
             if id == configured_provider {
-                let strategy = if id == "kimi" { "api" } else { "env" };
+                let strategy = if matches!(id, "kimi" | "claude") {
+                    "api"
+                } else {
+                    "env"
+                };
+                if id == "claude" {
+                    provider.fixture = false;
+                }
                 provider.credentials = vec![(strategy.into(), REPORT_ENV_CREDENTIAL.into())];
                 provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
             }
@@ -496,6 +511,131 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[2].snapshot, None);
+    }
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
+    let report_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/claude_admin_authenticated_report.json"
+    ))
+    .expect("Go authenticated Claude Admin report");
+    let oracle: Value = serde_json::from_str(include_str!("../tests/fixtures/provider_cases.json"))
+        .expect("Go provider cases");
+    let claude = oracle["providers"]
+        .as_array()
+        .expect("providers")
+        .iter()
+        .find(|provider| provider["id"] == "claude")
+        .expect("Claude oracle case");
+
+    let (mut report, transport) = authenticated_claude_admin_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/claude-admin-cost.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    assert_eq!(report.providers.len(), 10);
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .filter(|provider| provider.configured)
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["claude", "antigravity"]
+    );
+    let usage = &mut report.providers[0];
+    assert_eq!(usage.id, "claude");
+    assert!(usage.configured);
+    assert_eq!(usage.auth_status.status, "available");
+    assert_eq!(
+        usage.auth_status.detail,
+        "Admin API key from ANTHROPIC_ADMIN_KEY"
+    );
+    assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
+    assert_eq!(usage.error, None);
+    let snapshot = usage.snapshot.as_mut().expect("Claude snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        report_oracle["providers"][0]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle timestamp"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(snapshot).expect("Rust snapshot"),
+        report_oracle["providers"][0]["snapshot"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://api.anthropic.com/v1/organizations/cost_report?bucket_width=1d&limit=7"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer synthetic-direct-env-credential")
+    );
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Claude Admin report"),
+        report_oracle
+    );
+
+    // The Admin API emits a USD snapshot even when there are no totals.
+    let (empty_report, _) = authenticated_claude_admin_report(Response {
+        status: 200,
+        body: b"{}".to_vec(),
+        headers: BTreeMap::new(),
+    });
+    let empty = empty_report.providers[0]
+        .snapshot
+        .as_ref()
+        .expect("empty Claude Admin response still yields a snapshot");
+    assert!(empty.meters.is_empty());
+    assert_eq!(empty.currency.as_deref(), Some("USD"));
+
+    let chains: Value = serde_json::from_str(ORACLE).expect("Go request oracle");
+    let claude_chain = chains["chains"]
+        .as_array()
+        .expect("error chains")
+        .iter()
+        .find(|entry| entry["provider"] == "claude" && entry["status"] == "malformed")
+        .and_then(|entry| entry["text"].as_str())
+        .expect("Go Claude malformed response error");
+    let direct_parse_error = claude_chain
+        .split_once("; ")
+        .map_or(claude_chain, |(first, _)| first);
+    for (status, body, retry_after, oracle_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None, Some(0)),
+        (
+            429,
+            br#"{"error":"slow down"}"#.as_slice(),
+            Some("17"),
+            Some(1),
+        ),
+        (200, b"not-json".as_slice(), None, None),
+    ] {
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, _) = authenticated_claude_admin_report(Response {
+            status,
+            body: body.to_vec(),
+            headers,
+        });
+        let expected = oracle_index.map_or(direct_parse_error, |index| {
+            claude["errors"][index]["text"]
+                .as_str()
+                .expect("Go error text")
+        });
+        assert_eq!(
+            report.providers[0].error.as_deref(),
+            Some(expected),
+            "HTTP {status} report error"
+        );
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
