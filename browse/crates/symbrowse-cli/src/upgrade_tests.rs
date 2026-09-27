@@ -44,9 +44,21 @@ fn local_fake_release_is_fetched_then_reused_from_go_compatible_cache() {
         write!(stream, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}", body.len()).unwrap();
     });
     let directory = tempfile::tempdir().unwrap();
-    let cache = directory.path().join("updatecheck.json");
+    let cache = directory.path().join("symaira/updatecheck/cache.json");
     let first = check_release("v0.0.0", &endpoint, &cache).unwrap().unwrap();
     assert_eq!(first.tag_name, "v0.0.1");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            fs::metadata(cache.parent().unwrap())
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o700
+        );
+    }
     server.join().unwrap();
     let second = check_release("v0.0.0", &endpoint, &cache).unwrap().unwrap();
     assert_eq!(second.tag_name, "v0.0.1");

@@ -296,7 +296,7 @@ fn safe_cache_dir(path: &Path) -> io::Result<()> {
                 #[cfg(unix)]
                 {
                     use std::os::unix::fs::DirBuilderExt;
-                    builder.mode(0o755);
+                    builder.mode(0o700);
                 }
                 builder.create(&current)?;
             }
