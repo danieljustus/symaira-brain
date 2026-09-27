@@ -1,0 +1,12 @@
+{
+  "args": [
+    "activity",
+    "status",
+    "--profile=activity-oracle",
+    "--max-tokens=40",
+    "--db=\u003croot\u003e/data/activity.db"
+  ],
+  "exit_code": 0,
+  "stdout": "segments=0\tepisodes=0\n",
+  "stderr": ""
+}
