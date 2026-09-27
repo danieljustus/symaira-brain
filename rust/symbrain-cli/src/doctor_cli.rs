@@ -51,17 +51,21 @@ pub(crate) fn requires_go_fallback_with(
         return true;
     }
 
-    // A vault-agent only affects profile handshakes. With no profiles there
-    // is no handshake to customize; unreadable profile state stays on Go.
+    // A vault-agent only affects enabled vault handshakes. Unreadable profile
+    // state stays on Go.
     vault_agent_with_profiles_requires_go(args, profiles_require_go)
 }
 
-/// Reports whether the XDG profile directory holds at least one profile.
+/// Reports whether any profile can start a vault handshake.
 ///
-/// An unreadable directory fails closed onto the Go fallback.
+/// Unreadable profiles fail closed onto the Go fallback.
 fn xdg_profiles_require_go() -> bool {
     match symbrain_policy::list_names() {
-        Ok(names) => !names.is_empty(),
+        Ok(names) => names.into_iter().any(|name| {
+            symbrain_policy::load(&name).map_or(true, |profile| {
+                profile.server(symbrain_policy::SERVER_VAULT).enabled
+            })
+        }),
         Err(_) => true,
     }
 }
@@ -125,7 +129,7 @@ pub fn run(
     }
     let report = doctor_checks::run_checks(&parsed.vault_agent);
     let result = match format {
-        OutputFormat::Json => symbrain_core::output::render_json(&mut *stdout, &report),
+        OutputFormat::Json => writeln!(stdout, "{}", crate::go_json(&report)),
         OutputFormat::Table => doctor_render::human(stdout, &report),
     };
     if result.is_err() {

@@ -142,6 +142,26 @@ fn doctor_vault_agent_with_existing_profile_uses_go_fallback() {
 }
 
 #[test]
+fn doctor_vault_agent_with_disabled_vault_profile_stays_native() {
+    let root = TempDir::new().unwrap();
+    let profiles = root.path().join("config/symbrain/profiles");
+    fs::create_dir_all(&profiles).unwrap();
+    fs::write(
+        profiles.join("personal.toml"),
+        b"[profile]\nname = \"personal\"\n[servers.vault]\nenabled = false\n",
+    )
+    .unwrap();
+
+    let output = command(&root, &["doctor", "--vault-agent", "other", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(report.get("handshakes").is_none());
+}
+
+#[test]
 fn doctor_vault_agent_with_unreadable_profiles_uses_go_fallback() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
