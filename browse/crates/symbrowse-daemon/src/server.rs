@@ -73,7 +73,9 @@ impl OperationContext {
         }
     }
     pub fn is_cancelled(&self) -> bool {
-        self.cancelled.load(Ordering::Acquire) || self.shutdown.load(Ordering::Acquire)
+        self.cancelled.load(Ordering::Acquire)
+            || self.shutdown.load(Ordering::Acquire)
+            || self.remaining().is_zero()
     }
 
     pub fn remaining(&self) -> Duration {
@@ -1632,6 +1634,7 @@ mod tests {
             shutdown: Arc::new(AtomicBool::new(false)),
             deadline: Instant::now() - Duration::from_millis(1),
         };
+        assert!(operation.is_cancelled());
         let response =
             operation_result_response(Ok((Some(json!({"done": true})), vec![])), &operation);
         assert_eq!(
