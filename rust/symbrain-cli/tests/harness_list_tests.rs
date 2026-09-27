@@ -225,6 +225,30 @@ fn missing_command_health_is_native_without_go_fallback() {
     );
 }
 
+#[test]
+fn successful_health_probe_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    let profile = root.path().join("probe.toml");
+    std::fs::write(&profile, b"[profile]\nname = \"probe\"\n").unwrap();
+    let child = env!("CARGO_BIN_EXE_symbrain");
+    let config = serde_json::json!({"mcpServers":{"probe":{
+        "command":child,
+        "args":["mcp","--profile-file",profile]
+    }}});
+    write_claude_config(&root, serde_json::to_string(&config).unwrap().as_bytes());
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    command.env(
+        "SYMBRAIN_GO_BINARY",
+        root.path().join("missing-go-fallback"),
+    );
+    let output = command.output().unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["servers"][0]["server"], "probe");
+    assert_eq!(report["servers"][0]["healthy"], true);
+}
+
 #[cfg(unix)]
 #[test]
 fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
