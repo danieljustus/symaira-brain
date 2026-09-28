@@ -304,6 +304,12 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
     )
 }
 
+fn perf_diagnostic(message: &str) {
+    if std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_some() {
+        eprintln!("symbrowse Chrome navigation: {message}");
+    }
+}
+
 impl ChromePage {
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
@@ -372,12 +378,14 @@ impl ChromePage {
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
         self.navigate_and_wait_for_load(url).await?;
+        perf_diagnostic("navigation complete; reading final URL");
 
         let page_url = match self.evaluate_runtime_json("location.href").await {
             Ok(url) => url.as_str().unwrap_or_default().to_owned(),
             Err(error) => return Err(error),
         };
 
+        perf_diagnostic("final URL read; reading title");
         let title = match self.page.evaluate("document.title").await {
             Ok(value) => match value.into_value::<String>() {
                 Ok(title) => title,
@@ -416,9 +424,12 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
+        perf_diagnostic("baseline state read; dispatching Page.navigate");
         let navigation = self.page.execute(page::NavigateParams::new(url));
         let poll = async {
+            let mut polls = 0_u32;
             loop {
+                polls += 1;
                 let state = match self
                     .evaluate_runtime_json(
                         "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
@@ -427,6 +438,9 @@ impl ChromePage {
                 {
                     Ok(state) => state,
                     Err(error) if is_transient_navigation_context_error(error.as_ref()) => {
+                        if polls == 1 || polls % 20 == 0 {
+                            perf_diagnostic("state poll waiting for transient target context");
+                        }
                         tokio::time::sleep(Duration::from_millis(25)).await;
                         continue;
                     }
@@ -437,9 +451,17 @@ impl ChromePage {
                     .get("time_origin")
                     .and_then(Value::as_f64)
                     .is_some_and(|time_origin| time_origin != initial_time_origin);
-                if (url_changed || document_changed)
-                    && state.get("ready_state").and_then(Value::as_str) == Some("complete")
-                {
+                let ready_state = state
+                    .get("ready_state")
+                    .and_then(Value::as_str)
+                    .unwrap_or("unknown");
+                if polls == 1 || polls % 20 == 0 {
+                    perf_diagnostic(&format!(
+                        "state poll={polls} url_changed={url_changed} document_changed={document_changed} ready_state={ready_state}"
+                    ));
+                }
+                if (url_changed || document_changed) && ready_state == "complete" {
+                    perf_diagnostic("state poll observed completed navigation");
                     return Ok(());
                 }
                 tokio::time::sleep(Duration::from_millis(25)).await;
@@ -448,7 +470,10 @@ impl ChromePage {
         tokio::pin!(navigation);
         tokio::pin!(poll);
         tokio::select! {
-            result = &mut navigation => result.map(|_| ()).map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>),
+            result = &mut navigation => {
+                perf_diagnostic("Page.navigate command completed");
+                result.map(|_| ()).map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>)
+            },
             result = &mut poll => result,
         }
     }

@@ -161,6 +161,7 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_ENGINE"] = "chrome"
     elif implementation == "rust":
         env["SYMBROWSE_MODE"] = "browser"
+        env["SYMBROWSE_PERF_DIAGNOSTICS"] = "1"
     else:
         raise ValueError(f"unknown implementation: {implementation}")
     return env
@@ -403,6 +404,10 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                     outcome["error_message"] = str(error.get("message", ""))[:256]
             except (json.JSONDecodeError, AttributeError):
                 pass
+            if implementation == "rust":
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_navigation_log"] = diagnostic
         else:
             read_started = time.perf_counter_ns()
             read = run_cli(binary, ["read"], session, env, root)

@@ -128,6 +128,25 @@ class ChromePairTests(unittest.TestCase):
             self.assertEqual(result["error_code"], "operation_timeout")
             self.assertIn("cleanup_error", result)
 
+    def test_rust_open_failure_captures_navigation_log_even_after_chrome_exit(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"error": {"code": "operation_timeout"}})
+            with patch("chrome_pair.run_cli", side_effect=[
+                (1, response, ""), (0, "", ""),
+                (0, json.dumps({"success": True, "data": {"running": False}}), ""),
+            ]), patch("chrome_pair.sys.platform", "win32"), \
+                 patch("chrome_pair.wait_for_windows_profile_cleanup", return_value=0), \
+                 patch("chrome_pair.daemon_startup_log",
+                       return_value="symbrowse Chrome navigation: state poll=20 ready_state=loading") as log:
+                result = flow(root / "symbrowse", "rust", root / "chrome", None,
+                              "http://127.0.0.1/fixture.html", root, 0)
+
+        self.assertEqual(result["error_code"], "operation_timeout")
+        self.assertEqual(result["chrome_profile_processes_after_stop"], 0)
+        self.assertIn("ready_state=loading", result["daemon_navigation_log"])
+        self.assertEqual(log.call_count, 1)
+
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
