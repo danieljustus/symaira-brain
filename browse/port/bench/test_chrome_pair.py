@@ -219,7 +219,7 @@ class ChromePairTests(unittest.TestCase):
 
         self.assertEqual(diagnostic, "[earlier daemon log bytes omitted]\n" + "a" * 4 + "tail")
 
-    def test_operation_timeout_gets_one_unmeasured_diagnostic_retry(self):
+    def test_operation_failure_gets_one_unmeasured_diagnostic_retry(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             binary = root / "symbrowse"
@@ -232,19 +232,19 @@ class ChromePairTests(unittest.TestCase):
                                    chrome_version="fixture", chrome_archive_sha256="a" * 64,
                                    chrome_launcher=None, runs=1)
             go_pass = {"status": "pass", "duration_ns": 100}
-            rust_timeout = {"status": "error", "error_code": "operation_timeout"}
+            rust_failure = {"status": "error", "error_code": "operation_failed"}
             diagnostic_pass = {"status": "pass", "diagnostic_daemon_log": "navigation.dispatch.start"}
-            with patch("chrome_pair.native_target_matches", return_value=True),                  patch("chrome_pair.random.Random", return_value=SimpleNamespace(randrange=lambda _size: 0)),                  patch("chrome_pair.flow", side_effect=[go_pass, rust_timeout, diagnostic_pass]) as run_flow:
+            with patch("chrome_pair.native_target_matches", return_value=True),                  patch("chrome_pair.random.Random", return_value=SimpleNamespace(randrange=lambda _size: 0)),                  patch("chrome_pair.flow", side_effect=[go_pass, rust_failure, diagnostic_pass]) as run_flow:
                 report = measure(args)
 
         self.assertEqual(run_flow.call_count, 3)
         self.assertNotIn("diagnostics", run_flow.call_args_list[1].kwargs)
         self.assertTrue(run_flow.call_args.kwargs["diagnostics"])
         self.assertNotIn("diagnostic_only", report)
-        self.assertTrue(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_only"])
-        self.assertEqual(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_daemon_log"],
+        self.assertTrue(report["windows_amd64_rust_failure_diagnostic"]["diagnostic_only"])
+        self.assertEqual(report["windows_amd64_rust_failure_diagnostic"]["diagnostic_daemon_log"],
                          "navigation.dispatch.start")
-        self.assertEqual(report["binaries"]["rust"]["chrome_flow"]["samples"], [rust_timeout])
+        self.assertEqual(report["binaries"]["rust"]["chrome_flow"]["samples"], [rust_failure])
         self.assertEqual(report["gate"], "blocked")
 
     def test_measure_reports_cleanup_failure_without_losing_open_error(self):

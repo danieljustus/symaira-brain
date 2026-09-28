@@ -576,9 +576,11 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             if cleanup_failed:
                 break
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
-                rust_sample = samples["rust"][-1]
+                rust_samples = samples["rust"]
                 if (
-                    rust_sample.get("error_code") == "operation_timeout"
+                    samples["go"][-1].get("status") == "pass"
+                    and rust_samples
+                    and rust_samples[-1].get("status") != "pass"
                 ):
                     diagnostic_root = Path(tempfile.mkdtemp(prefix="p3-diagnostic-r-"))
                     try:
@@ -592,7 +594,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                             timeout=30.0 if args.target.startswith("windows-") else 5.0,
                         )
                     diagnostic["diagnostic_only"] = True
-                    report["windows_amd64_operation_timeout_diagnostic"] = diagnostic
+                    report["windows_amd64_rust_failure_diagnostic"] = diagnostic
                 break
     finally:
         server.shutdown()

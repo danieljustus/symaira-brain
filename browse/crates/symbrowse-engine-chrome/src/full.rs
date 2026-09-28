@@ -416,8 +416,9 @@ async fn send_page_navigate(
     websocket_address: &str,
     target_id: &str,
     url: &str,
-) -> Result<(), Box<dyn Error + Send + Sync>> {
+) -> Result<DirectCdpSocket, Box<dyn Error + Send + Sync>> {
     let (mut socket, _) = connect_async(websocket_address).await?;
+    perf_diagnostic("navigation.cdp.attach.start");
     let attached = direct_cdp_command(
         &mut socket,
         cdp_request(
@@ -428,16 +429,20 @@ async fn send_page_navigate(
         ),
     )
     .await?;
+    perf_diagnostic("navigation.cdp.attach.ready");
     let session_id = attached
         .get("sessionId")
         .and_then(Value::as_str)
         .ok_or("Target.attachToTarget response is missing sessionId")?;
+    perf_diagnostic("navigation.cdp.navigate.start");
     let result = direct_cdp_command(&mut socket, page_navigate_request(2, session_id, url)).await?;
     let result: page::NavigateReturns = serde_json::from_value(result)?;
     if let Some(error) = page_navigate_error(result) {
+        perf_diagnostic("navigation.cdp.navigate.error_text=true");
         return Err(Box::new(error));
     }
-    Ok(())
+    perf_diagnostic("navigation.cdp.navigate.response");
+    Ok(socket)
 }
 
 impl ChromePage {
@@ -558,7 +563,8 @@ impl ChromePage {
             .unwrap_or_default();
         perf_diagnostic("navigation.baseline.ready");
         perf_diagnostic("navigation.dispatch.start");
-        send_page_navigate(&self.websocket_address, self.page.target_id().inner(), url).await?;
+        let _navigation_socket =
+            send_page_navigate(&self.websocket_address, self.page.target_id().inner(), url).await?;
         perf_diagnostic("navigation.dispatch.ready");
         let poll = async {
             let diagnostics = perf_diagnostics_enabled();
