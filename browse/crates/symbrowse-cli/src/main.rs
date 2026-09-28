@@ -1260,14 +1260,77 @@ fn help_for_path(path: &[&str]) -> String {
     root_help()
 }
 
-fn parse_completion(values: &[String]) -> Result<Action, ParseError> {
-    if values
-        .get(1)
-        .is_some_and(|value| matches!(value.as_str(), "-h" | "--help"))
-    {
-        return Ok(Action::Help(completion_help().to_owned()));
+fn parse_completion(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let mut no_descriptions = false;
+    let mut shell = None;
+    let mut help = false;
+    let mut index = 0;
+    while index < values.len() {
+        let value = values[index].as_str();
+        if index == command_index {
+            index += 1;
+            continue;
+        }
+        match value {
+            "--output" => {
+                let raw = values.get(index + 1).ok_or_else(|| ParseError {
+                    message: "flag needs an argument: --output".to_owned(),
+                    exit_code: 2,
+                })?;
+                parse_format(raw)?;
+                index += 2;
+            }
+            value if value.starts_with("--output=") => {
+                parse_format(&value[9..])?;
+                index += 1;
+            }
+            "--json" => index += 1,
+            value if value.starts_with("--json=") => {
+                parse_bool("--json", &value[7..])?;
+                index += 1;
+            }
+            "-h" | "--help" => {
+                help = true;
+                index += 1;
+            }
+            "--no-descriptions" => {
+                no_descriptions = true;
+                index += 1;
+            }
+            value if value.starts_with("--no-descriptions=") => {
+                no_descriptions = parse_bool("--no-descriptions", &value[18..])?;
+                index += 1;
+            }
+            value if value.starts_with('-') => {
+                return Err(ParseError {
+                    message: format!("unknown flag: {value}"),
+                    exit_code: 2,
+                });
+            }
+            value => {
+                if index < command_index {
+                    return Err(ParseError {
+                        message: format!("unknown argument {value:?}"),
+                        exit_code: 2,
+                    });
+                }
+                if shell.replace(value).is_some() {
+                    return Err(ParseError {
+                        message: format!("unknown argument {value:?}"),
+                        exit_code: 2,
+                    });
+                }
+                index += 1;
+            }
+        }
     }
-    let Some(shell) = values.get(1).map(String::as_str) else {
+    if help {
+        return Ok(Action::Help(shell.map_or_else(
+            || completion_help().to_owned(),
+            completion_shell_help,
+        )));
+    }
+    let Some(shell) = shell else {
         return Err(ParseError {
             message: "completion requires one shell: bash, zsh, fish or powershell".into(),
             exit_code: 2,
@@ -1278,34 +1341,6 @@ fn parse_completion(values: &[String]) -> Result<Action, ParseError> {
             message: format!("unsupported shell {shell:?}; choose bash, zsh, fish or powershell"),
             exit_code: 2,
         });
-    }
-    if values
-        .iter()
-        .skip(2)
-        .any(|value| matches!(value.as_str(), "-h" | "--help"))
-    {
-        return Ok(Action::Help(completion_shell_help(shell)));
-    }
-    let mut no_descriptions = false;
-    for value in values.iter().skip(2) {
-        match value.as_str() {
-            "--no-descriptions" => no_descriptions = true,
-            value if value.starts_with("--no-descriptions=") => {
-                no_descriptions = parse_bool("--no-descriptions", &value[18..])?;
-            }
-            value if value.starts_with('-') => {
-                return Err(ParseError {
-                    message: format!("unknown flag: {value}"),
-                    exit_code: 2,
-                });
-            }
-            value => {
-                return Err(ParseError {
-                    message: format!("unknown argument {value:?}"),
-                    exit_code: 2,
-                });
-            }
-        }
     }
     Ok(Action::Completion {
         shell: shell.to_owned(),
@@ -1348,9 +1383,6 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         .iter()
         .map(|value| value.to_string_lossy().into_owned())
         .collect();
-    if values.first().is_some_and(|value| value == "completion") {
-        return parse_completion(&values);
-    }
     if values
         .first()
         .is_some_and(|value| matches!(value.as_str(), "__complete" | "__completeNoDesc"))
@@ -1362,6 +1394,11 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     }
     if root_version_requested(&values)? {
         return Ok(Action::RootVersion);
+    }
+    if let Some(command_index) = top_command_index(&values)
+        && values[command_index] == "completion"
+    {
+        return parse_completion(&values, command_index);
     }
     if let Some(help_index) = values
         .iter()

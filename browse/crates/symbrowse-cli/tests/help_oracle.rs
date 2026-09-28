@@ -225,6 +225,27 @@ fn rust_help_and_completion_follow_the_go_source_tree() {
     }
 
     for args in [
+        &["--output", "json", "completion", "bash"][..],
+        &["completion", "bash", "--output", "json"][..],
+    ] {
+        let go_completion = output(&go_binary, args);
+        let rust_completion = output(rust_binary, args);
+        assert!(
+            go_completion.status.success(),
+            "Go completion failed for global output placement {args:?}"
+        );
+        assert!(
+            rust_completion.status.success(),
+            "Rust completion failed for global output placement {args:?}: {}",
+            String::from_utf8_lossy(&rust_completion.stderr)
+        );
+        assert_eq!(
+            rust_completion.stdout, go_completion.stdout,
+            "completion script differs for global output placement {args:?}"
+        );
+    }
+
+    for args in [
         &["__complete", "s"][..],
         &["__complete", "state", "c"][..],
         &["__complete", "open", ""][..],
