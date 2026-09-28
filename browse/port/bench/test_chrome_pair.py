@@ -219,7 +219,7 @@ class ChromePairTests(unittest.TestCase):
 
         self.assertEqual(diagnostic, "[earlier daemon log bytes omitted]\n" + "a" * 4 + "tail")
 
-    def test_windows_operation_timeout_gets_one_unmeasured_diagnostic_retry(self):
+    def test_operation_timeout_gets_one_unmeasured_diagnostic_retry(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             binary = root / "symbrowse"
@@ -227,7 +227,7 @@ class ChromePairTests(unittest.TestCase):
             for path in (binary, chrome):
                 path.write_bytes(b"fixture")
                 path.chmod(0o700)
-            args = SimpleNamespace(target="windows-amd64", repo=Path(__file__).resolve().parents[3],
+            args = SimpleNamespace(target="linux-amd64", repo=Path(__file__).resolve().parents[3],
                                    expected_source_revision=None, go=binary, rust=binary, chrome=chrome,
                                    chrome_version="fixture", chrome_archive_sha256="a" * 64,
                                    chrome_launcher=None, runs=1)

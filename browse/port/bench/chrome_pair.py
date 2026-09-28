@@ -578,8 +578,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
                 rust_sample = samples["rust"][-1]
                 if (
-                    args.target == "windows-amd64"
-                    and rust_sample.get("error_code") == "operation_timeout"
+                    rust_sample.get("error_code") == "operation_timeout"
                 ):
                     diagnostic_root = Path(tempfile.mkdtemp(prefix="p3-diagnostic-r-"))
                     try:
