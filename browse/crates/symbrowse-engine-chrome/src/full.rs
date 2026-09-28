@@ -9,7 +9,7 @@ use std::{
     error::Error,
     fmt,
     path::Path,
-    sync::Arc,
+    sync::{Arc, OnceLock},
     time::{Duration, Instant},
 };
 
@@ -182,12 +182,25 @@ pub struct ChromeSession {
     _handler_task: tokio::task::JoinHandle<()>,
 }
 
+fn perf_diagnostics_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_some())
+}
+
+fn perf_diagnostic(message: &str) {
+    if perf_diagnostics_enabled() {
+        eprintln!("symbrowse Chrome phase: {message}");
+    }
+}
+
 impl ChromeSession {
     pub async fn connect(
         mode: BrowserMode,
         timeout: Duration,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        perf_diagnostic("browser.connect.start");
         let connection = launch::connect(&mode, timeout).await?;
+        perf_diagnostic("browser.connect.ready");
         let task = tokio::spawn(async move {
             let mut handler = connection.handler;
             while handler.next().await.is_some() {}
@@ -209,12 +222,15 @@ impl ChromeSession {
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
         let url = url.into();
+        perf_diagnostic("page.create.start");
         let page = if url == "about:blank" {
             self.new_blank_page_without_load_wait().await?
         } else {
             self.browser.new_page(url).await?
         };
-        ChromePage::new(page).await
+        let page = ChromePage::new(page).await?;
+        perf_diagnostic("page.create.ready");
+        Ok(page)
     }
 
     // chromiumoxide::Browser::new_page waits for the new target's main frame
@@ -228,10 +244,16 @@ impl ChromeSession {
             .build()
             .map_err(chromiumoxide::error::CdpError::msg)?;
         let page = tokio::time::timeout(self.timeout, async {
+            perf_diagnostic("blank_target.create.start");
             let target_id = self.browser.execute(params).await?.result.target_id;
+            perf_diagnostic("blank_target.create.ready");
             loop {
                 match self.browser.get_page(target_id.clone()).await {
                     Ok(page) => {
+                        perf_diagnostic("blank_target.attach.ready");
+                        let diagnostics = perf_diagnostics_enabled();
+                        let readiness_started = diagnostics.then(Instant::now);
+                        let mut last_readiness_report = readiness_started;
                         // `get_page` returns as soon as chromiumoxide has an
                         // attached session. Its Page/Frame initialization
                         // continues asynchronously, so wait for the initial
@@ -239,9 +261,25 @@ impl ChromeSession {
                         // callers navigate.
                         loop {
                             if let Some(frame) = page.mainframe().await? {
-                                if page.frame_execution_context(frame).await?.is_some() {
+                                if page.frame_execution_context(frame.clone()).await?.is_some() {
+                                    if let Some(started) = readiness_started {
+                                        perf_diagnostic(&format!(
+                                            "blank_target.context.ready elapsed_ms={} frame={frame:?}",
+                                            started.elapsed().as_millis()
+                                        ));
+                                    }
                                     return Ok(page);
                                 }
+                            }
+                            if let (Some(started), Some(last_report)) =
+                                (readiness_started, last_readiness_report.as_mut())
+                                && last_report.elapsed() >= Duration::from_secs(1)
+                            {
+                                perf_diagnostic(&format!(
+                                    "blank_target.context.wait elapsed_ms={}",
+                                    started.elapsed().as_millis()
+                                ));
+                                *last_report = Instant::now();
                             }
                             tokio::time::sleep(Duration::from_millis(10)).await;
                         }
@@ -414,6 +452,7 @@ impl ChromePage {
             self.page.goto(url).await?;
             return Ok(());
         }
+        perf_diagnostic("navigation.baseline.start");
         let initial = self
             .evaluate_runtime_json("({url: location.href, time_origin: performance.timeOrigin})")
             .await?;
@@ -425,9 +464,15 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
+        perf_diagnostic("navigation.baseline.ready");
         let expression = direct_navigation_expression(url)?;
+        perf_diagnostic("navigation.dispatch.start");
         self.evaluate_runtime_json(&expression).await?;
+        perf_diagnostic("navigation.dispatch.ready");
         let poll = async {
+            let diagnostics = perf_diagnostics_enabled();
+            let poll_started = diagnostics.then(Instant::now);
+            let mut last_poll_report = poll_started;
             loop {
                 let state = match self
                     .evaluate_runtime_json(
@@ -451,7 +496,24 @@ impl ChromePage {
                     .get("ready_state")
                     .and_then(Value::as_str)
                     .unwrap_or("unknown");
+                if diagnostics
+                    && let (Some(started), Some(last_report)) =
+                        (poll_started, last_poll_report.as_mut())
+                    && last_report.elapsed() >= Duration::from_secs(1)
+                {
+                    perf_diagnostic(&format!(
+                        "navigation.poll elapsed_ms={} url_changed={url_changed} document_changed={document_changed} ready_state={ready_state}",
+                        started.elapsed().as_millis()
+                    ));
+                    *last_report = Instant::now();
+                }
                 if (url_changed || document_changed) && ready_state == "complete" {
+                    if let Some(started) = poll_started {
+                        perf_diagnostic(&format!(
+                            "navigation.poll.complete elapsed_ms={}",
+                            started.elapsed().as_millis()
+                        ));
+                    }
                     return Ok(());
                 }
                 tokio::time::sleep(Duration::from_millis(25)).await;

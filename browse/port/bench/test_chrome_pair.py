@@ -22,6 +22,19 @@ from chrome_pair import (
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_rust_environment_enables_diagnostics_only_for_the_unmeasured_retry(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            ordinary = make_env(root / "ordinary", "rust", root / "chrome")
+            diagnostic = make_env(root / "diagnostic", "rust", root / "chrome", diagnostics=True)
+
+        self.assertNotIn("SYMBROWSE_PERF_DIAGNOSTICS", ordinary)
+        self.assertEqual(diagnostic["SYMBROWSE_PERF_DIAGNOSTICS"], "1")
+        self.assertEqual(
+            diagnostic["SYMBROWSE_DAEMON_LOG"],
+            str(root / "diagnostic" / "home" / ".local" / "state" / "symbrowse" / "daemon.log"),
+        )
+
     def test_windows_profile_process_probe_returns_a_count_without_command_lines(self):
         output = json.dumps([
             {"name": "chrome.exe", "count": 2},
@@ -205,6 +218,32 @@ class ChromePairTests(unittest.TestCase):
             diagnostic = daemon_startup_log({"XDG_STATE_HOME": str(state_home)}, limit=8)
 
         self.assertEqual(diagnostic, "[earlier daemon log bytes omitted]\n" + "a" * 4 + "tail")
+
+    def test_windows_operation_timeout_gets_one_unmeasured_diagnostic_retry(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "symbrowse"
+            chrome = root / "chrome"
+            for path in (binary, chrome):
+                path.write_bytes(b"fixture")
+                path.chmod(0o700)
+            args = SimpleNamespace(target="windows-amd64", repo=Path(__file__).resolve().parents[3],
+                                   expected_source_revision=None, go=binary, rust=binary, chrome=chrome,
+                                   chrome_version="fixture", chrome_archive_sha256="a" * 64,
+                                   chrome_launcher=None, runs=1)
+            go_pass = {"status": "pass", "duration_ns": 100}
+            rust_timeout = {"status": "error", "error_code": "operation_timeout"}
+            diagnostic_pass = {"status": "pass", "diagnostic_daemon_log": "navigation.dispatch.start"}
+            with patch("chrome_pair.native_target_matches", return_value=True),                  patch("chrome_pair.random.Random", return_value=SimpleNamespace(randrange=lambda _size: 0)),                  patch("chrome_pair.flow", side_effect=[go_pass, rust_timeout, diagnostic_pass]) as run_flow:
+                report = measure(args)
+
+        self.assertEqual(run_flow.call_count, 3)
+        self.assertTrue(run_flow.call_args.kwargs["diagnostics"])
+        self.assertTrue(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_only"])
+        self.assertEqual(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_daemon_log"],
+                         "navigation.dispatch.start")
+        self.assertEqual(report["binaries"]["rust"]["chrome_flow"]["samples"], [rust_timeout])
+        self.assertEqual(report["gate"], "blocked")
 
     def test_measure_reports_cleanup_failure_without_losing_open_error(self):
         with tempfile.TemporaryDirectory() as temporary:

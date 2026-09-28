@@ -128,7 +128,8 @@ def native_target_matches(target: str, system: str, machine: str) -> bool:
     return bool(expected and expected[0] == system and machine.casefold() in expected[1])
 
 
-def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | None = None) -> dict[str, str]:
+def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | None = None,
+             diagnostics: bool = False) -> dict[str, str]:
     home = root / "home"
     tmp = root / "tmp"
     for path in (home, tmp, root / "runtime", root / "cache"):
@@ -161,6 +162,9 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_ENGINE"] = "chrome"
     elif implementation == "rust":
         env["SYMBROWSE_MODE"] = "browser"
+        if diagnostics:
+            env["SYMBROWSE_PERF_DIAGNOSTICS"] = "1"
+            env["SYMBROWSE_DAEMON_LOG"] = str(home / ".local" / "state" / "symbrowse" / "daemon.log")
     else:
         raise ValueError(f"unknown implementation: {implementation}")
     return env
@@ -265,7 +269,8 @@ def daemon_startup_log(env: dict[str, str], limit: int = MAX_DAEMON_LOG_BYTES) -
     state_home = env.get("XDG_STATE_HOME")
     if not state_home or limit <= 0:
         return None
-    path = Path(state_home) / "symbrowse" / "daemon.log"
+    configured_log = env.get("SYMBROWSE_DAEMON_LOG")
+    path = Path(configured_log) if configured_log else Path(state_home) / "symbrowse" / "daemon.log"
     try:
         with path.open("rb") as stream:
             stream.seek(0, os.SEEK_END)
@@ -382,9 +387,10 @@ def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 15.0) 
             time.sleep(min(0.1, remaining))
 
 
-def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str, root: Path, index: int) -> dict[str, Any]:
+def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str,
+         root: Path, index: int, diagnostics: bool = False) -> dict[str, Any]:
     session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
-    env = make_env(root, implementation, chrome, launcher)
+    env = make_env(root, implementation, chrome, launcher, diagnostics=diagnostics)
     started = time.perf_counter_ns()
     outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
     try:
@@ -474,6 +480,10 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
         diagnostic = daemon_startup_log(env)
         if diagnostic is not None:
             outcome["daemon_startup_log"] = diagnostic
+    if diagnostics:
+        diagnostic_log = daemon_startup_log(env)
+        if diagnostic_log is not None:
+            outcome["diagnostic_daemon_log"] = diagnostic_log
     outcome["sample_index"] = index
     outcome["fixture_url"] = url
     return outcome
@@ -564,6 +574,24 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             if cleanup_failed:
                 break
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
+                rust_sample = samples["rust"][-1]
+                if (
+                    args.target == "windows-amd64"
+                    and rust_sample.get("error_code") == "operation_timeout"
+                ):
+                    diagnostic_root = Path(tempfile.mkdtemp(prefix="p3-diagnostic-r-"))
+                    try:
+                        diagnostic = flow(
+                            args.rust, "rust", args.chrome, args.chrome_launcher, url,
+                            diagnostic_root, index, diagnostics=True,
+                        )
+                    finally:
+                        remove_owned_tempdir(
+                            diagnostic_root,
+                            timeout=30.0 if args.target.startswith("windows-") else 5.0,
+                        )
+                    diagnostic["diagnostic_only"] = True
+                    report["windows_amd64_operation_timeout_diagnostic"] = diagnostic
                 break
     finally:
         server.shutdown()
