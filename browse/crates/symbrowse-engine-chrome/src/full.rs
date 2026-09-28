@@ -345,6 +345,12 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
     )
 }
 
+fn page_navigate_error(result: page::NavigateReturns) -> Option<chromiumoxide::error::CdpError> {
+    result
+        .error_text
+        .map(chromiumoxide::error::CdpError::ChromeMessage)
+}
+
 impl ChromePage {
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
@@ -459,7 +465,10 @@ impl ChromePage {
             .unwrap_or_default();
         perf_diagnostic("navigation.baseline.ready");
         perf_diagnostic("navigation.dispatch.start");
-        self.page.execute(page::NavigateParams::new(url)).await?;
+        let response = self.page.execute(page::NavigateParams::new(url)).await?;
+        if let Some(error) = page_navigate_error(response.result) {
+            return Err(Box::new(error));
+        }
         perf_diagnostic("navigation.dispatch.ready");
         let poll = async {
             let diagnostics = perf_diagnostics_enabled();
@@ -1219,6 +1228,25 @@ mod tests {
             serde_json::to_value(params).expect("serialize CDP params"),
             json!({"url": "https://example.test/a'b?x=1&y=2"})
         );
+    }
+
+    #[test]
+    fn page_navigate_response_preserves_chrome_navigation_errors() {
+        let failed: page::NavigateReturns = serde_json::from_value(json!({
+            "frameId": "frame-id",
+            "errorText": "net::ERR_ABORTED"
+        }))
+        .expect("decode failed Page.navigate response");
+        assert!(matches!(
+            page_navigate_error(failed),
+            Some(chromiumoxide::error::CdpError::ChromeMessage(message))
+                if message == "net::ERR_ABORTED"
+        ));
+
+        let succeeded: page::NavigateReturns =
+            serde_json::from_value(json!({"frameId": "frame-id"}))
+                .expect("decode successful Page.navigate response");
+        assert!(page_navigate_error(succeeded).is_none());
     }
 
     #[test]
