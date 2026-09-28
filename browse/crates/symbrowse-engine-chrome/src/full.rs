@@ -310,11 +310,9 @@ fn perf_diagnostic(message: &str) {
     }
 }
 
-fn scheduled_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
+fn direct_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
     let url = serde_json::to_string(url)?;
-    Ok(format!(
-        "setTimeout(() => location.assign({url}), 50); 'scheduled'"
-    ))
+    Ok(format!("location.assign({url}); 'navigating'"))
 }
 
 impl ChromePage {
@@ -406,9 +404,9 @@ impl ChromePage {
 
     // chromiumoxide intercepts Page.navigate and queues it behind its own
     // frame-lifecycle watcher. On some native Chrome targets that command can
-    // remain queued while the current document stays unchanged. Schedule the
-    // same navigation in the current page session, after Runtime.evaluate has
-    // had time to return, then use the Go-compatible document-state poll below.
+    // remain queued while the current document stays unchanged. Assign the URL
+    // in the current page session, then use the Go-compatible document-state
+    // poll below to confirm that navigation completed.
     async fn navigate_and_wait_for_load(
         &self,
         url: &str,
@@ -432,10 +430,10 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
-        perf_diagnostic("baseline state read; scheduling location navigation");
-        let expression = scheduled_navigation_expression(url)?;
+        perf_diagnostic("baseline state read; dispatching location navigation");
+        let expression = direct_navigation_expression(url)?;
         self.evaluate_runtime_json(&expression).await?;
-        perf_diagnostic("navigation scheduled; polling document state");
+        perf_diagnostic("navigation dispatched; polling document state");
         let poll = async {
             let mut polls = 0_u32;
             loop {
@@ -1178,11 +1176,14 @@ mod tests {
     }
 
     #[test]
-    fn scheduled_navigation_quotes_urls_as_javascript_strings() {
-        let expression = scheduled_navigation_expression("https://example.test/a'b?x=1&y=2")
+    fn direct_navigation_quotes_urls_as_javascript_strings() {
+        let expression = direct_navigation_expression("https://example.test/a'b?x=1&y=2")
             .expect("JSON string encoding");
         assert!(expression.contains(r#"location.assign("https://example.test/a'b?x=1&y=2")"#));
-        assert!(expression.ends_with("50); 'scheduled'"));
+        assert_eq!(
+            expression,
+            r#"location.assign("https://example.test/a'b?x=1&y=2"); 'navigating'"#
+        );
     }
 
     #[test]
