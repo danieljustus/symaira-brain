@@ -28,35 +28,6 @@ MAX_OUTPUT = 1 << 20
 # UTF-8 uses at most four bytes per output character. This bounds temporary
 # capture files while keeping the public limit in decoded text characters.
 MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
-MAX_STAGE_LOG_BYTES = 64 << 10
-MAX_OPEN_STAGES = 32
-CHROME_OPEN_STAGES = {
-    "browser-setup-start", "browser-setup-ready", "browser-setup-error",
-    "browser-connect-start", "browser-connect-complete", "browser-page-created",
-    "page-open-start", "page-open-complete", "page-open-error",
-    "page-init-mainframe-start", "page-init-mainframe-ready",
-    "page-init-mainframe-missing",
-    "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
-    "page-lifecycle-init", "page-lifecycle-domcontentloaded", "page-lifecycle-load",
-    "page-goto-start", "page-goto-complete", "page-goto-error",
-    "page-navigate-evaluate-start", "page-navigate-evaluate-complete",
-    "page-ready-state-poll-start", "page-ready-state-complete",
-    "page-url-start", "page-url-complete", "page-url-error",
-    "page-title-start", "page-title-complete", "page-title-error",
-    "navigation-listeners-ready", "main-frame status=present",
-    "main-frame status=missing", "main-frame status=error",
-    "navigation-future-start", "navigation-future-finish",
-    "navigation-future status=completed error_text=false",
-    "navigation-future status=completed error_text=true",
-    "navigation-future status=timeout", "navigation-event-wait-start",
-    "navigation-fallback status=start",
-    "navigation-fallback status=completed error_text=false",
-    "navigation-fallback status=completed error_text=true",
-    "document-probe status=responsive", "document-probe status=error",
-    "document-probe status=timeout",
-    "main-frame-navigation-observed", "same-document-navigation-observed",
-    "load-event-observed", "document-complete",
-}
 METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 TARGETS = {
     "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
@@ -185,36 +156,15 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_ENGINE"] = "chrome"
     elif implementation == "rust":
         env["SYMBROWSE_MODE"] = "browser"
-        env["SYMBROWSE_E2E"] = "1"
-        env["SYMBROWSE_DAEMON_LOG"] = str(root / "daemon.log")
     else:
         raise ValueError(f"unknown implementation: {implementation}")
     return env
 
 
-def chrome_open_stages(log_path: Path) -> list[str]:
-    """Return only known Chrome-open stage names from a bounded log tail."""
-    try:
-        with log_path.open("rb") as log:
-            log.seek(0, os.SEEK_END)
-            size = log.tell()
-            log.seek(max(0, size - MAX_STAGE_LOG_BYTES))
-            lines = log.read(MAX_STAGE_LOG_BYTES).decode("utf-8", errors="ignore").splitlines()
-    except OSError:
-        return []
-    stages = [
-        value for line in lines
-        if line.startswith("chrome_open_stage=")
-        for value in (line.removeprefix("chrome_open_stage=").strip(),)
-        if value in CHROME_OPEN_STAGES
-    ]
-    return stages[-MAX_OPEN_STAGES:]
-
-
 def command(binary: Path, args: list[str], session: str) -> list[str]:
     if args[:2] in (["daemon", "stop"], ["daemon", "status"]):
-        return [str(binary), "--json", "daemon", args[1], "--session", session, *args[2:]]
-    return [str(binary), "--json", args[0], "--session", session, *args[1:]]
+        return [str(binary), "daemon", args[1], "--json", "--session", session, *args[2:]]
+    return [str(binary), args[0], "--json", "--session", session, *args[1:]]
 
 
 def run_cli(
@@ -305,17 +255,6 @@ def read_output_markers(output: str) -> dict[str, bool]:
     }
 
 
-def session_state_markers(output: str, fixture_url: str) -> dict[str, bool]:
-    try:
-        serialized = json.dumps(json.loads(output), sort_keys=True).casefold()
-    except (json.JSONDecodeError, TypeError):
-        serialized = ""
-    return {
-        "session_url_matches_fixture": fixture_url.casefold() in serialized,
-        "session_title_matches_fixture": FIXTURE_TITLE.casefold() in serialized,
-    }
-
-
 def wait_for_daemon_exit(
     binary: Path,
     session: str,
@@ -362,8 +301,6 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
         open_started = time.perf_counter_ns()
         opened = run_cli(binary, ["open", url], session, env, root)
         open_duration = time.perf_counter_ns() - open_started
-        diagnostic_duration = 0
-        pre_read_markers: dict[str, bool | int] = {}
         if opened[0] != 0:
             outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
                        "open_cli_duration_ns": open_duration,
@@ -377,35 +314,15 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             except (json.JSONDecodeError, AttributeError):
                 pass
         else:
-            if implementation == "rust" and index == 0:
-                pre_read_markers.update(session_state_markers(opened[1], url))
-                for probe_name in ("url", "title"):
-                    probe_started = time.perf_counter_ns()
-                    probe = run_cli(binary, ["get", probe_name], session, env, root)
-                    diagnostic_duration += time.perf_counter_ns() - probe_started
-                    pre_read_markers[f"pre_read_{probe_name}_probe_exit_code"] = probe[0]
-                    pre_read_markers.update({
-                        f"pre_read_{probe_name}_{key}": value
-                        for key, value in session_state_markers(probe[1], url).items()
-                    })
             read_started = time.perf_counter_ns()
             read = run_cli(binary, ["read"], session, env, root)
             read_duration = time.perf_counter_ns() - read_started
-            elapsed = time.perf_counter_ns() - started - diagnostic_duration
+            elapsed = time.perf_counter_ns() - started
             read_markers = read_output_markers(read[1])
             if read[0] != 0 or not all(read_markers.values()):
-                state_markers: dict[str, bool | int] = dict(pre_read_markers)
-                for probe_name in ("url", "title"):
-                    probe = run_cli(binary, ["get", probe_name], session, env, root)
-                    state_markers[f"{probe_name}_probe_exit_code"] = probe[0]
-                    state_markers.update({
-                        f"{probe_name}_{key}": value
-                        for key, value in session_state_markers(probe[1], url).items()
-                    })
                 outcome = {"status": "error", "phase": "read", "exit_code": read[0],
                            "semantic_contract": "local fixture title/token must appear in JSON read output",
                            **read_markers,
-                           **state_markers,
                            "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
                            "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
                            "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
@@ -429,10 +346,6 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
-        if implementation == "rust":
-            stages = chrome_open_stages(root / "daemon.log")
-            if stages:
-                outcome["chrome_open_stages"] = stages
     return outcome
 
 

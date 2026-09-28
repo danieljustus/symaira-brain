@@ -15,7 +15,7 @@ from unittest.mock import patch
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
-    paired_gate_passes, read_output_markers, session_state_markers, validate_read_output,
+    paired_gate_passes, read_output_markers, validate_read_output,
     wait_for_daemon_exit, flow, measure, run_cli,
 )
 
@@ -71,89 +71,6 @@ class ChromePairTests(unittest.TestCase):
             self.assertEqual(result["phase"], "open")
             self.assertEqual(result["error_code"], "operation_timeout")
             self.assertIn("cleanup_error", result)
-
-    def test_rust_open_failure_reports_only_known_stages_from_daemon_log(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            response = json.dumps({"error": {"code": "operation_timeout"}})
-
-            def run(binary, args, session, env, cwd, **kwargs):
-                if args == ["open", "http://127.0.0.1/"]:
-                    return 1, response, ""
-                if args == ["daemon", "stop"]:
-                    (root / "daemon.log").write_text(
-                        "warning contains a secret\n"
-                        "chrome_open_stage=browser-setup-start\n"
-                        "chrome_open_stage=browser-connect-start\n"
-                        "chrome_open_stage=browser-connect-complete\n"
-                        "chrome_open_stage=page-init-mainframe-start\n"
-                        "chrome_open_stage=page-init-mainframe-ready\n"
-                        "chrome_open_stage=page-init-lifecycle-enable-start\n"
-                        "chrome_open_stage=page-init-lifecycle-enable-complete\n"
-                        "chrome_open_stage=browser-page-created\n"
-                        "chrome_open_stage=browser-setup-ready\n"
-                        "chrome_open_stage=page-open-start\n"
-                        "chrome_open_stage=page-goto-start\n"
-                        "chrome_open_stage=page-lifecycle-init\n"
-                        "chrome_open_stage=page-lifecycle-domcontentloaded\n"
-                        "chrome_open_stage=page-lifecycle-load\n"
-                        "chrome_open_stage=page-goto-error\n"
-                        "chrome_open_stage=page-open-error\n"
-                        "chrome_open_stage=main-frame status=missing\n"
-                        "chrome_open_stage=navigation-future-start\n"
-                        "chrome_open_stage=navigation-future status=timeout\n"
-                        "chrome_open_stage=navigation-fallback status=start\n"
-                        "chrome_open_stage=navigation-fallback status=completed error_text=false\n"
-                        "chrome_open_stage=unknown-secret\n"
-                        "chrome_open_stage=document-probe status=timeout\n"
-                        "chrome_open_stage=navigation-event-wait-start\n",
-                        encoding="utf-8",
-                    )
-                    return 0, "", ""
-                return 1, "", "daemon stopped"
-
-            with patch("chrome_pair.run_cli", side_effect=run):
-                result = flow(Path("symbrowse"), "rust", Path("chrome"), None,
-                              "http://127.0.0.1/", root, 0)
-
-        self.assertEqual(result["error_code"], "operation_timeout")
-        self.assertEqual(result["chrome_open_stages"], [
-            "browser-setup-start", "browser-connect-start", "browser-connect-complete",
-            "page-init-mainframe-start", "page-init-mainframe-ready",
-            "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
-            "browser-page-created", "browser-setup-ready",
-            "page-open-start",
-            "page-goto-start", "page-lifecycle-init", "page-lifecycle-domcontentloaded",
-            "page-lifecycle-load", "page-goto-error", "page-open-error",
-            "main-frame status=missing", "navigation-future-start",
-            "navigation-future status=timeout",
-            "navigation-fallback status=start",
-            "navigation-fallback status=completed error_text=false",
-            "document-probe status=timeout", "navigation-event-wait-start",
-        ])
-
-    def test_rust_success_retains_navigation_stages_for_perf_diagnosis(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-
-            def run(binary, args, session, env, cwd, **kwargs):
-                if args[0] == "open":
-                    return 0, "{}", ""
-                if args[0] == "read":
-                    return 0, json.dumps({"text": f"{FIXTURE_TITLE} {FIXTURE_TOKEN}"}), ""
-                if args == ["daemon", "stop"]:
-                    (root / "daemon.log").write_text(
-                        "chrome_open_stage=navigation-fallback status=start\n", encoding="utf-8"
-                    )
-                    return 0, "", ""
-                return 1, "", "daemon stopped"
-
-            with patch("chrome_pair.run_cli", side_effect=run):
-                result = flow(Path("symbrowse"), "rust", Path("chrome"), None,
-                              "http://127.0.0.1/", root, 0)
-
-        self.assertEqual(result["status"], "pass")
-        self.assertEqual(result["chrome_open_stages"], ["navigation-fallback status=start"])
 
     def test_failed_open_records_code_and_stops_unusable_benchmark(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -212,19 +129,24 @@ class ChromePairTests(unittest.TestCase):
                 env = make_env(Path(temporary) / implementation, implementation, chrome, launcher)
                 self.assertEqual(env["SYMBROWSE_EXECUTABLE_PATH"], str(launcher))
                 self.assertEqual(env["SYMBROWSE_CHROME_EXECUTABLE"], str(launcher))
-                if implementation == "rust":
-                    self.assertEqual(env["SYMBROWSE_E2E"], "1")
-                    self.assertEqual(env["SYMBROWSE_DAEMON_LOG"], str(Path(temporary) / implementation / "daemon.log"))
 
-    def test_daemon_stop_and_status_keep_subcommand_before_session(self):
+    def test_commands_place_json_after_subcommand(self):
         binary = Path("symbrowse")
         self.assertEqual(
             command(binary, ["daemon", "stop"], "session"),
-            ["symbrowse", "--json", "daemon", "stop", "--session", "session"],
+            ["symbrowse", "daemon", "stop", "--json", "--session", "session"],
         )
         self.assertEqual(
             command(binary, ["daemon", "status"], "session"),
-            ["symbrowse", "--json", "daemon", "status", "--session", "session"],
+            ["symbrowse", "daemon", "status", "--json", "--session", "session"],
+        )
+        self.assertEqual(
+            command(binary, ["get", "url"], "session"),
+            ["symbrowse", "get", "--json", "--session", "session", "url"],
+        )
+        self.assertEqual(
+            command(binary, ["read"], "session"),
+            ["symbrowse", "read", "--json", "--session", "session"],
         )
 
     def test_read_requires_fixture_title_and_content_token(self):
@@ -237,17 +159,6 @@ class ChromePairTests(unittest.TestCase):
         )
         self.assertFalse(validate_read_output(json.dumps({"success": True, "data": {"title": FIXTURE_TITLE}})))
         self.assertFalse(validate_read_output("not json"))
-
-    def test_session_state_markers_only_report_fixture_matches(self):
-        state = json.dumps({"success": True, "data": {"value": "http://127.0.0.1:1234/fixture.html"}})
-        self.assertEqual(
-            session_state_markers(state, "http://127.0.0.1:1234/fixture.html"),
-            {"session_url_matches_fixture": True, "session_title_matches_fixture": False},
-        )
-        self.assertEqual(
-            session_state_markers("not json", "http://127.0.0.1:1234/fixture.html"),
-            {"session_url_matches_fixture": False, "session_title_matches_fixture": False},
-        )
 
     def test_nearest_rank_matches_contract(self):
         self.assertEqual(nearest_rank(list(range(1, 31))), 29)

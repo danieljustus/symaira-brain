@@ -27,12 +27,6 @@ use tokio::sync::Mutex;
 
 use crate::{BrowserMode, ConnectionMode, launch};
 
-fn chrome_open_stage(stage: &'static str) {
-    if std::env::var_os("SYMBROWSE_E2E").as_deref() == Some(std::ffi::OsStr::new("1")) {
-        eprintln!("chrome_open_stage={stage}");
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnsupportedOperation(pub &'static str);
 
@@ -242,16 +236,9 @@ impl ChromeSession {
                         // attached session. Its Page/Frame initialization
                         // continues asynchronously, so wait until the initial
                         // frame tree is available before callers navigate.
-                        let mut mainframe_missing_reported = false;
                         loop {
-                            chrome_open_stage("page-init-mainframe-start");
                             if page.mainframe().await?.is_some() {
-                                chrome_open_stage("page-init-mainframe-ready");
                                 return Ok(page);
-                            }
-                            if !mainframe_missing_reported {
-                                chrome_open_stage("page-init-mainframe-missing");
-                                mainframe_missing_reported = true;
                             }
                             tokio::time::sleep(Duration::from_millis(10)).await;
                         }
@@ -375,35 +362,20 @@ impl ChromePage {
     }
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        chrome_open_stage("page-navigate-start");
         self.navigate_and_wait_for_load(url).await?;
-        chrome_open_stage("page-navigate-complete");
 
-        chrome_open_stage("page-url-start");
         let page_url = match self.evaluate_runtime_json("location.href").await {
             Ok(url) => url.as_str().unwrap_or_default().to_owned(),
-            Err(error) => {
-                chrome_open_stage("page-url-error");
-                return Err(error);
-            }
+            Err(error) => return Err(error),
         };
-        chrome_open_stage("page-url-complete");
 
-        chrome_open_stage("page-title-start");
         let title = match self.page.evaluate("document.title").await {
             Ok(value) => match value.into_value::<String>() {
                 Ok(title) => title,
-                Err(error) => {
-                    chrome_open_stage("page-title-error");
-                    return Err(Box::new(error));
-                }
+                Err(error) => return Err(Box::new(error)),
             },
-            Err(error) => {
-                chrome_open_stage("page-title-error");
-                return Err(Box::new(error));
-            }
+            Err(error) => return Err(Box::new(error)),
         };
-        chrome_open_stage("page-title-complete");
 
         Ok(serde_json::json!({"url": page_url, "title": title}))
     }
@@ -439,7 +411,6 @@ impl ChromePage {
             "(() => {{ const target = new URL({}, location.href); setTimeout(() => location.assign(target.href), 0); }})()",
             serde_json::to_string(url)?
         );
-        chrome_open_stage("page-navigate-evaluate-start");
         let response = self
             .page
             .execute(
@@ -452,9 +423,7 @@ impl ChromePage {
         if let Some(exception) = response.result.exception_details {
             return Err(format!("Chrome navigation evaluation failed: {exception:?}").into());
         }
-        chrome_open_stage("page-navigate-evaluate-complete");
 
-        chrome_open_stage("page-ready-state-poll-start");
         loop {
             let state = self
                 .evaluate_runtime_json(
@@ -469,7 +438,6 @@ impl ChromePage {
             if (url_changed || document_changed)
                 && state.get("ready_state").and_then(Value::as_str) == Some("complete")
             {
-                chrome_open_stage("page-ready-state-complete");
                 return Ok(());
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
