@@ -313,7 +313,7 @@ fn perf_diagnostic(message: &str) {
 fn scheduled_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
     let url = serde_json::to_string(url)?;
     Ok(format!(
-        "setTimeout(() => location.assign({url}), 250); 'scheduled'"
+        "setTimeout(() => location.assign({url}), 50); 'scheduled'"
     ))
 }
 
@@ -1182,7 +1182,7 @@ mod tests {
         let expression = scheduled_navigation_expression("https://example.test/a'b?x=1&y=2")
             .expect("JSON string encoding");
         assert!(expression.contains(r#"location.assign("https://example.test/a'b?x=1&y=2")"#));
-        assert!(expression.ends_with("250); 'scheduled'"));
+        assert!(expression.ends_with("50); 'scheduled'"));
     }
 
     #[test]
