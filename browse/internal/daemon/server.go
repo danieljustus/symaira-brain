@@ -68,6 +68,7 @@ type Server struct {
 	mu               sync.RWMutex
 	startedAt        time.Time
 	lastRequestNanos atomic.Int64
+	idleTimedOut     atomic.Bool
 	registry         *SessionRegistry
 }
 
@@ -169,10 +170,35 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		s.mu.Unlock()
 		s.registry.Clear()
 	}()
-	go func() {
-		<-ctx.Done()
-		_ = s.Close()
-	}()
+	deadlineListener, supportsDeadline := listener.(interface{ SetDeadline(time.Time) error })
+	if !supportsDeadline {
+		watchDone := make(chan struct{})
+		defer close(watchDone)
+		go func() {
+			var idleTicker *time.Ticker
+			var idleTicks <-chan time.Time
+			if s.options.IdleTimeout > 0 {
+				idleTicker = time.NewTicker(250 * time.Millisecond)
+				idleTicks = idleTicker.C
+				defer idleTicker.Stop()
+			}
+			for {
+				select {
+				case <-ctx.Done():
+					_ = s.Close()
+					return
+				case <-watchDone:
+					return
+				case <-idleTicks:
+					if time.Since(s.lastActivity()) >= s.options.IdleTimeout {
+						s.idleTimedOut.Store(true)
+						_ = s.Close()
+						return
+					}
+				}
+			}
+		}()
+	}
 
 	for {
 		if err := ctx.Err(); err != nil {
@@ -181,11 +207,14 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		if s.options.IdleTimeout > 0 && time.Since(s.lastActivity()) >= s.options.IdleTimeout {
 			return ErrIdleTimeout
 		}
-		if deadlineListener, ok := listener.(interface{ SetDeadline(time.Time) error }); ok {
+		if supportsDeadline {
 			_ = deadlineListener.SetDeadline(time.Now().Add(250 * time.Millisecond))
 		}
 		conn, err := listener.Accept()
 		if err != nil {
+			if s.idleTimedOut.Load() {
+				return ErrIdleTimeout
+			}
 			if errors.Is(err, net.ErrClosed) || errors.Is(ctx.Err(), context.Canceled) {
 				return nil
 			}

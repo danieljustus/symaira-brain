@@ -56,7 +56,7 @@ jobs:
         if: runner.os == 'Windows'
         working-directory: browse
         shell: bash
-        run: go test ./internal/daemon -run '^Test(WindowsNamedPipeDaemonRoundTrip|SocketPathUsesBrowseNamedPipe)$' -count=1
+        run: go test ./internal/daemon -run '^Test(WindowsNamedPipeContractMatchesRust|SocketPathUsesBrowseNamedPipe|WindowsNamedPipeDaemonRoundTrip|WindowsNamedPipeDaemonHonorsIdleTimeout)$' -count=1
 
       - name: Fetch isolated official Chrome for Testing artifact
         id: cft

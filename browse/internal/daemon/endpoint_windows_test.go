@@ -94,3 +94,22 @@ func TestWindowsNamedPipeDaemonRoundTrip(t *testing.T) {
 		t.Fatal("named-pipe daemon did not stop after context cancellation")
 	}
 }
+
+func TestWindowsNamedPipeDaemonHonorsIdleTimeout(t *testing.T) {
+	session := fmt.Sprintf("idle-%x", time.Now().UnixNano())
+	path, err := SocketPath(session)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server := NewServer(Options{SocketPath: path, Session: session, IdleTimeout: 50 * time.Millisecond})
+	done := make(chan error, 1)
+	go func() { done <- server.ListenAndServe(context.Background()) }()
+	select {
+	case err := <-done:
+		if err != ErrIdleTimeout {
+			t.Fatalf("ListenAndServe() = %v, want ErrIdleTimeout", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("named-pipe daemon did not stop at its idle timeout")
+	}
+}
