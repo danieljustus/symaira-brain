@@ -310,12 +310,47 @@ fn perf_diagnostic(message: &str) {
     }
 }
 
+fn diagnostic_url_origin(url: Option<&str>) -> String {
+    let Some(url) = url else {
+        return "<unavailable>".into();
+    };
+    let Some((scheme, remainder)) = url.split_once("://") else {
+        return url.to_owned();
+    };
+    let authority = remainder.split('/').next().unwrap_or_default();
+    let host = authority.rsplit('@').next().unwrap_or_default();
+    format!("{scheme}://{host}")
+}
+
 fn direct_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
     let url = serde_json::to_string(url)?;
     Ok(format!("location.assign({url}); 'navigating'"))
 }
 
 impl ChromePage {
+    async fn perf_navigation_context(&self, phase: &str) {
+        if std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_none() {
+            return;
+        }
+        let page_url = self.page.url().await.ok().flatten();
+        let frame = self.page.mainframe().await.ok().flatten();
+        let frame_url = match frame.as_ref() {
+            Some(frame) => self.page.frame_url(frame.clone()).await.ok().flatten(),
+            None => None,
+        };
+        let sample =
+            std::env::var("SYMBROWSE_PERF_SAMPLE_INDEX").unwrap_or_else(|_| "unknown".into());
+        let fixture_url =
+            std::env::var("SYMBROWSE_PERF_FIXTURE_URL").unwrap_or_else(|_| "<unavailable>".into());
+        perf_diagnostic(&format!(
+            "context phase={phase} sample={sample} fixture_url={fixture_url} target_id={} frame_id={:?} page_url={} frame_url={}",
+            self.page.target_id().inner(),
+            frame,
+            diagnostic_url_origin(page_url.as_deref()),
+            diagnostic_url_origin(frame_url.as_deref()),
+        ));
+    }
+
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
@@ -430,9 +465,11 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
+        self.perf_navigation_context("before-dispatch").await;
         perf_diagnostic("baseline state read; dispatching location navigation");
         let expression = direct_navigation_expression(url)?;
         self.evaluate_runtime_json(&expression).await?;
+        self.perf_navigation_context("after-dispatch").await;
         perf_diagnostic("navigation dispatched; polling document state");
         let poll = async {
             let mut polls = 0_u32;
@@ -492,6 +529,13 @@ impl ChromePage {
                     .build()?,
             )
             .await?;
+        if expression.starts_with("location.assign(") {
+            perf_diagnostic(&format!(
+                "Runtime.evaluate dispatch response exception_details={} result_type={:?}",
+                response.result.exception_details.is_some(),
+                response.result.result.r#type,
+            ));
+        }
         if let Some(exception) = response.result.exception_details {
             return Err(format!("Chrome state evaluation failed: {exception:?}").into());
         }
@@ -1184,6 +1228,16 @@ mod tests {
             expression,
             r#"location.assign("https://example.test/a'b?x=1&y=2"); 'navigating'"#
         );
+    }
+
+    #[test]
+    fn diagnostic_url_origin_omits_credentials_and_path() {
+        assert_eq!(
+            diagnostic_url_origin(Some("http://user:secret@127.0.0.1:8080/private?q=x")),
+            "http://127.0.0.1:8080"
+        );
+        assert_eq!(diagnostic_url_origin(Some("about:blank")), "about:blank");
+        assert_eq!(diagnostic_url_origin(None), "<unavailable>");
     }
 
     #[test]

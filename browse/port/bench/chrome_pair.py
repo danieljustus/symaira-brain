@@ -386,6 +386,9 @@ def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 15.0) 
 def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str, root: Path, index: int) -> dict[str, Any]:
     session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
     env = make_env(root, implementation, chrome, launcher)
+    if implementation == "rust":
+        env["SYMBROWSE_PERF_SAMPLE_INDEX"] = str(index)
+        env["SYMBROWSE_PERF_FIXTURE_URL"] = url
     started = time.perf_counter_ns()
     outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
     try:
@@ -475,6 +478,8 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
         diagnostic = daemon_startup_log(env)
         if diagnostic is not None:
             outcome["daemon_startup_log"] = diagnostic
+    outcome["sample_index"] = index
+    outcome["fixture_url"] = url
     return outcome
 
 
