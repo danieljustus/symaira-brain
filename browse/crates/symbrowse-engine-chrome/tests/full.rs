@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
     sync::{
         Arc,
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     thread,
     time::Duration,
@@ -48,6 +48,7 @@ impl Drop for ProfileCleanup {
 struct TestServer {
     base_url: String,
     stop: Arc<AtomicBool>,
+    requests: Arc<AtomicUsize>,
     thread: Option<thread::JoinHandle<()>>,
 }
 
@@ -102,8 +103,102 @@ async fn blank_page_attaches_before_navigation_and_remains_usable() {
     session.close().await.expect("close Chrome");
 }
 
+#[tokio::test]
+async fn blank_page_navigation_handles_redirect_reload_and_http_error_loads() {
+    if !e2e_enabled() {
+        return;
+    }
+
+    let redirect_target = TestServer::start();
+    let redirect_target_url = format!("{}/", redirect_target.base_url);
+    let server = TestServer::start_with_redirect_location(Some(redirect_target_url.clone()));
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-rust012-navigation-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(20),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page("about:blank")
+        .await
+        .expect("attach blank page");
+
+    let redirected = page
+        .open_with_timeout(
+            &format!("{}/redirect", server.base_url),
+            Duration::from_secs(10),
+        )
+        .await
+        .expect("follow redirect to load completion");
+    assert_eq!(redirected["url"], redirect_target_url);
+    assert_eq!(redirected["title"], "rust012");
+    assert_eq!(
+        page.raw()
+            .evaluate("document.readyState")
+            .await
+            .expect("read ready state")
+            .into_value::<String>()
+            .expect("decode ready state"),
+        "complete"
+    );
+
+    page.open_with_timeout(&format!("{}/", server.base_url), Duration::from_secs(10))
+        .await
+        .expect("navigate to reload fixture");
+    let before_reload = server.requests.load(Ordering::Relaxed);
+    let reloaded = page
+        .open_with_timeout(&format!("{}/", server.base_url), Duration::from_secs(10))
+        .await
+        .expect("reload the same URL");
+    assert_eq!(reloaded["url"], format!("{}/", server.base_url));
+    assert!(
+        server.requests.load(Ordering::Relaxed) > before_reload,
+        "same-URL navigation must issue another document request"
+    );
+
+    let error_page = page
+        .open_with_timeout(
+            &format!("{}/server-error", server.base_url),
+            Duration::from_secs(10),
+        )
+        .await
+        .expect("HTTP error responses still finish document loading");
+    assert_eq!(
+        error_page["url"],
+        format!("{}/server-error", server.base_url)
+    );
+    assert_eq!(
+        page.raw()
+            .evaluate("document.readyState")
+            .await
+            .expect("read ready state after HTTP error")
+            .into_value::<String>()
+            .expect("decode ready state after HTTP error"),
+        "complete"
+    );
+
+    session.close().await.expect("close Chrome");
+}
+
 impl TestServer {
     fn start() -> Self {
+        Self::start_with_redirect_location(None)
+    }
+
+    fn start_with_redirect_location(redirect_location: Option<String>) -> Self {
         let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind test server");
         let port = listener.local_addr().expect("test server address").port();
         listener
@@ -111,10 +206,18 @@ impl TestServer {
             .expect("nonblocking listener");
         let stop = Arc::new(AtomicBool::new(false));
         let stop_for_thread = Arc::clone(&stop);
+        let requests = Arc::new(AtomicUsize::new(0));
+        let requests_for_thread = Arc::clone(&requests);
         let thread = thread::spawn(move || {
             while !stop_for_thread.load(Ordering::Relaxed) {
                 match listener.accept() {
-                    Ok((stream, _)) => serve(stream),
+                    Ok((stream, _)) => {
+                        let request_count = Arc::clone(&requests_for_thread);
+                        let redirect_location = redirect_location.clone();
+                        thread::spawn(move || {
+                            serve(stream, request_count, redirect_location.as_deref())
+                        });
+                    }
                     Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
                         thread::sleep(Duration::from_millis(2));
                     }
@@ -125,6 +228,7 @@ impl TestServer {
         Self {
             base_url: format!("http://127.0.0.1:{port}"),
             stop,
+            requests,
             thread: Some(thread),
         }
     }
@@ -139,18 +243,45 @@ impl Drop for TestServer {
     }
 }
 
-fn serve(mut stream: TcpStream) {
+fn serve(mut stream: TcpStream, requests: Arc<AtomicUsize>, redirect_location: Option<&str>) {
     stream
         .set_read_timeout(Some(Duration::from_secs(2)))
         .expect("set read timeout");
-    let mut request = [0_u8; 4096];
-    let size = stream.read(&mut request).unwrap_or(0);
-    let request = String::from_utf8_lossy(&request[..size]);
+    let mut request = Vec::new();
+    let mut chunk = [0_u8; 1024];
+    while !request.ends_with(b"\r\n\r\n") {
+        match stream.read(&mut chunk) {
+            Ok(0) | Err(_) => return,
+            Ok(size) => request.extend_from_slice(&chunk[..size]),
+        }
+        if request.len() > 16 * 1024 {
+            return;
+        }
+    }
+    requests.fetch_add(1, Ordering::Relaxed);
+    let request = String::from_utf8_lossy(&request);
     let path = request
         .lines()
         .next()
         .and_then(|line| line.split_whitespace().nth(1))
         .unwrap_or("/");
+    if path == "/redirect" {
+        let location = redirect_location.unwrap_or("/");
+        let response = format!(
+            "HTTP/1.1 302 Found\r\nLocation: {location}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+        );
+        let _ = stream.write_all(response.as_bytes());
+        return;
+    }
+    if path == "/server-error" {
+        let body = "<!doctype html><title>server-error</title>";
+        let response = format!(
+            "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+            body.len()
+        );
+        let _ = stream.write_all(response.as_bytes());
+        return;
+    }
     let (status, content_type, body) = match path {
         "/asset.js" => (
             "200 OK",

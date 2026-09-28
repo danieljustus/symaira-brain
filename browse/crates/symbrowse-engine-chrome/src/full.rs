@@ -15,7 +15,10 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, network, page, target},
+    cdp::{
+        browser_protocol::{accessibility, browser, dom, network, page, target},
+        js_protocol::runtime,
+    },
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -244,15 +247,6 @@ impl ChromeSession {
                             chrome_open_stage("page-init-mainframe-start");
                             if page.mainframe().await?.is_some() {
                                 chrome_open_stage("page-init-mainframe-ready");
-                                // chromiumoxide's Page.goto waits for the
-                                // Page.navigate response and matching load
-                                // lifecycle event. get_page can return before
-                                // TargetInit confirms lifecycle events, so
-                                // confirm that required subscription first.
-                                chrome_open_stage("page-init-lifecycle-enable-start");
-                                page.execute(page::SetLifecycleEventsEnabledParams::new(true))
-                                    .await?;
-                                chrome_open_stage("page-init-lifecycle-enable-complete");
                                 return Ok(page);
                             }
                             if !mainframe_missing_reported {
@@ -300,7 +294,6 @@ impl ChromeSession {
 pub struct ChromePage {
     page: Page,
     dialogs: DialogMonitor,
-    _lifecycle_task: Option<Arc<tokio::task::JoinHandle<()>>>,
 }
 
 #[derive(Clone)]
@@ -320,25 +313,6 @@ impl ChromePage {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
-        let lifecycle_task = if std::env::var_os("SYMBROWSE_E2E").as_deref()
-            == Some(std::ffi::OsStr::new("1"))
-        {
-            let mut lifecycle_events = page.event_listener::<page::EventLifecycleEvent>().await?;
-            Some(Arc::new(tokio::spawn(async move {
-                while let Some(event) = lifecycle_events.next().await {
-                    match event.name.as_str() {
-                        "init" => chrome_open_stage("page-lifecycle-init"),
-                        "DOMContentLoaded" => {
-                            chrome_open_stage("page-lifecycle-domcontentloaded");
-                        }
-                        "load" => chrome_open_stage("page-lifecycle-load"),
-                        _ => {}
-                    }
-                }
-            })))
-        } else {
-            None
-        };
         let state = Arc::new(Mutex::new(DialogState::default()));
         let monitor_state = Arc::clone(&state);
         let monitor_page = page.clone();
@@ -375,7 +349,6 @@ impl ChromePage {
                 state,
                 _task: Arc::new(task),
             },
-            _lifecycle_task: lifecycle_task,
         })
     }
     pub fn target_id(&self) -> String {
@@ -402,19 +375,16 @@ impl ChromePage {
     }
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        chrome_open_stage("page-goto-start");
-        if let Err(error) = self.page.goto(url).await {
-            chrome_open_stage("page-goto-error");
-            return Err(Box::new(error));
-        }
-        chrome_open_stage("page-goto-complete");
+        chrome_open_stage("page-navigate-start");
+        self.navigate_and_wait_for_load(url).await?;
+        chrome_open_stage("page-navigate-complete");
 
         chrome_open_stage("page-url-start");
-        let page_url = match self.page.url().await {
-            Ok(url) => url.unwrap_or_default(),
+        let page_url = match self.evaluate_runtime_json("location.href").await {
+            Ok(url) => url.as_str().unwrap_or_default().to_owned(),
             Err(error) => {
                 chrome_open_stage("page-url-error");
-                return Err(Box::new(error));
+                return Err(error);
             }
         };
         chrome_open_stage("page-url-complete");
@@ -436,6 +406,93 @@ impl ChromePage {
         chrome_open_stage("page-title-complete");
 
         Ok(serde_json::json!({"url": page_url, "title": title}))
+    }
+
+    // `Page::goto` in chromiumoxide holds the Page.navigate response until it
+    // observes a matching lifecycle event. Go's CDP path returns that response
+    // directly and performs its load wait separately. Trigger navigation in
+    // the existing page session, then poll the same document state contract.
+    async fn navigate_and_wait_for_load(
+        &self,
+        url: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if url
+            .trim_start()
+            .get(..5)
+            .is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"))
+        {
+            self.page.goto(url).await?;
+            return Ok(());
+        }
+        let initial = self
+            .evaluate_runtime_json("({url: location.href, time_origin: performance.timeOrigin})")
+            .await?;
+        let initial_url = initial
+            .get("url")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let initial_time_origin = initial
+            .get("time_origin")
+            .and_then(Value::as_f64)
+            .unwrap_or_default();
+        let expression = format!(
+            "(() => {{ const target = new URL({}, location.href); setTimeout(() => location.assign(target.href), 0); }})()",
+            serde_json::to_string(url)?
+        );
+        chrome_open_stage("page-navigate-evaluate-start");
+        let response = self
+            .page
+            .execute(
+                runtime::EvaluateParams::builder()
+                    .expression(expression)
+                    .return_by_value(true)
+                    .build()?,
+            )
+            .await?;
+        if let Some(exception) = response.result.exception_details {
+            return Err(format!("Chrome navigation evaluation failed: {exception:?}").into());
+        }
+        chrome_open_stage("page-navigate-evaluate-complete");
+
+        chrome_open_stage("page-ready-state-poll-start");
+        loop {
+            let state = self
+                .evaluate_runtime_json(
+                    "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
+                )
+                .await?;
+            let url_changed = state.get("url").and_then(Value::as_str) != Some(initial_url);
+            let document_changed = state
+                .get("time_origin")
+                .and_then(Value::as_f64)
+                .is_some_and(|time_origin| time_origin != initial_time_origin);
+            if (url_changed || document_changed)
+                && state.get("ready_state").and_then(Value::as_str) == Some("complete")
+            {
+                chrome_open_stage("page-ready-state-complete");
+                return Ok(());
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+    }
+
+    async fn evaluate_runtime_json(
+        &self,
+        expression: &str,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let response = self
+            .page
+            .execute(
+                runtime::EvaluateParams::builder()
+                    .expression(expression)
+                    .return_by_value(true)
+                    .build()?,
+            )
+            .await?;
+        if let Some(exception) = response.result.exception_details {
+            return Err(format!("Chrome state evaluation failed: {exception:?}").into());
+        }
+        Ok(response.result.result.value.unwrap_or(Value::Null))
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {

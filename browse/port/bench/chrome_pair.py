@@ -39,6 +39,8 @@ CHROME_OPEN_STAGES = {
     "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
     "page-lifecycle-init", "page-lifecycle-domcontentloaded", "page-lifecycle-load",
     "page-goto-start", "page-goto-complete", "page-goto-error",
+    "page-navigate-evaluate-start", "page-navigate-evaluate-complete",
+    "page-ready-state-poll-start", "page-ready-state-complete",
     "page-url-start", "page-url-complete", "page-url-error",
     "page-title-start", "page-title-complete", "page-title-error",
     "navigation-listeners-ready", "main-frame status=present",
