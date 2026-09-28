@@ -310,6 +310,13 @@ fn perf_diagnostic(message: &str) {
     }
 }
 
+fn scheduled_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
+    let url = serde_json::to_string(url)?;
+    Ok(format!(
+        "setTimeout(() => location.assign({url}), 250); 'scheduled'"
+    ))
+}
+
 impl ChromePage {
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
@@ -397,10 +404,11 @@ impl ChromePage {
         Ok(serde_json::json!({"url": page_url, "title": title}))
     }
 
-    // Go issues Page.navigate and performs its document-state wait separately.
-    // Use the command API directly, then race its completion against that same
-    // state poll: chromiumoxide holds Page.navigate responses until a lifecycle
-    // event arrives, which can be missing even after the document is complete.
+    // chromiumoxide intercepts Page.navigate and queues it behind its own
+    // frame-lifecycle watcher. On some native Chrome targets that command can
+    // remain queued while the current document stays unchanged. Schedule the
+    // same navigation in the current page session, after Runtime.evaluate has
+    // had time to return, then use the Go-compatible document-state poll below.
     async fn navigate_and_wait_for_load(
         &self,
         url: &str,
@@ -424,8 +432,10 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
-        perf_diagnostic("baseline state read; dispatching Page.navigate");
-        let navigation = self.page.execute(page::NavigateParams::new(url));
+        perf_diagnostic("baseline state read; scheduling location navigation");
+        let expression = scheduled_navigation_expression(url)?;
+        self.evaluate_runtime_json(&expression).await?;
+        perf_diagnostic("navigation scheduled; polling document state");
         let poll = async {
             let mut polls = 0_u32;
             loop {
@@ -467,15 +477,8 @@ impl ChromePage {
                 tokio::time::sleep(Duration::from_millis(25)).await;
             }
         };
-        tokio::pin!(navigation);
         tokio::pin!(poll);
-        tokio::select! {
-            result = &mut navigation => {
-                perf_diagnostic("Page.navigate command completed");
-                result.map(|_| ()).map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>)
-            },
-            result = &mut poll => result,
-        }
+        poll.await
     }
 
     async fn evaluate_runtime_json(
@@ -1172,6 +1175,14 @@ mod tests {
         assert!(!is_transient_navigation_context_error(
             &chromiumoxide::error::CdpError::Timeout
         ));
+    }
+
+    #[test]
+    fn scheduled_navigation_quotes_urls_as_javascript_strings() {
+        let expression = scheduled_navigation_expression("https://example.test/a'b?x=1&y=2")
+            .expect("JSON string encoding");
+        assert!(expression.contains(r#"location.assign("https://example.test/a'b?x=1&y=2")"#));
+        assert!(expression.ends_with("250); 'scheduled'"));
     }
 
     #[test]
