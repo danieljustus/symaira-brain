@@ -80,6 +80,38 @@ mod windows {
     }
 
     #[test]
+    fn listener_shutdown_runs_browser_cleanup_hook_after_workers_drain() {
+        use std::sync::{
+            Arc,
+            atomic::{AtomicBool, Ordering},
+        };
+        use std::thread;
+
+        let session = format!("windows-cleanup-{}", std::process::id());
+        let endpoint = default_socket_path(&session);
+        let cleaned = Arc::new(AtomicBool::new(false));
+        let cleanup = cleaned.clone();
+        let server = Arc::new(
+            symbrowse_daemon::Server::new(symbrowse_daemon::ServerOptions {
+                socket_path: endpoint.clone(),
+                session,
+                idle_timeout: None,
+                handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
+                shutdown_handler: Some(Arc::new(move || cleanup.store(true, Ordering::Release))),
+                ..Default::default()
+            })
+            .expect("construct cleanup daemon"),
+        );
+        let running = server.clone();
+        let mut server_threads = vec![thread::spawn(move || running.listen_and_serve())];
+
+        drop(connect_when_server_ready(&endpoint, &mut server_threads));
+        server.stop();
+        assert!(server_threads.pop().unwrap().join().unwrap().is_ok());
+        assert!(cleaned.load(Ordering::Acquire));
+    }
+
+    #[test]
     fn delayed_fragmented_frame_is_served_after_accept() {
         use std::{
             io::{BufRead, BufReader, Write},

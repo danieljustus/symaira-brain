@@ -106,6 +106,42 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    fn shutdown_browser(&self) {
+        let browser = self
+            .browser
+            .lock()
+            .ok()
+            .and_then(|mut browser| browser.take());
+        let Some(BrowserState {
+            session,
+            page,
+            tabs,
+            network_capture,
+        }) = browser
+        else {
+            return;
+        };
+        // Drop the runtime's page handles before closing the owning browser.
+        drop((page, tabs, network_capture));
+
+        // A request worker may still be unwinding after the server has stopped
+        // accepting connections. Give its cloned session a bounded chance to
+        // release ownership so we can perform Chromiumoxide's graceful close.
+        let deadline = std::time::Instant::now() + Duration::from_secs(1);
+        while Arc::strong_count(&session) > 1 && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let Ok(session) = Arc::try_unwrap(session) else {
+            // Let an operation that outlived the shutdown cap release its
+            // remaining handle and invoke Chromiumoxide's kill-on-drop fallback.
+            return;
+        };
+        let _ = self.runtime.block_on(tokio::time::timeout(
+            Duration::from_secs(3),
+            session.close(),
+        ));
+    }
+
     async fn within_operation_deadline<T>(
         timeout: Duration,
         future: impl Future<Output = Result<T, DaemonError>>,
@@ -1714,11 +1750,15 @@ impl DispatchRuntime {
     }
 }
 
-pub fn handler(spec: SessionSpec) -> Result<crate::DaemonHandler, DaemonError> {
+pub fn handlers(
+    spec: SessionSpec,
+) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
     let runtime = DispatchRuntime::new(spec)?;
-    Ok(Arc::new(move |frame, operation| {
-        runtime.handle(frame, operation)
-    }))
+    let dispatch_runtime = runtime.clone();
+    let shutdown_runtime = runtime;
+    let handler = Arc::new(move |frame, operation| dispatch_runtime.handle(frame, operation));
+    let shutdown = Arc::new(move || shutdown_runtime.shutdown_browser());
+    Ok((handler, shutdown))
 }
 
 /// Execute one command in-process through the same typed runtime used by the daemon.
@@ -2265,7 +2305,7 @@ mod tests {
             }
         });
 
-        let production = handler(spec.clone()).expect("production handler");
+        let (production, shutdown) = handlers(spec.clone()).expect("production handlers");
         let followups = Arc::new(AtomicUsize::new(0));
         let observed = followups.clone();
         let wrapped = Arc::new(move |frame: Frame, operation: OperationContext| {
@@ -2278,6 +2318,7 @@ mod tests {
             crate::Server::new(crate::ServerOptions {
                 session_spec: Some(spec.clone()),
                 handler: Some(wrapped),
+                shutdown_handler: Some(shutdown),
                 ..Default::default()
             })
             .expect("server"),

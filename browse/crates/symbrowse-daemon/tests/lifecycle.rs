@@ -92,6 +92,34 @@ mod unix {
     }
 
     #[test]
+    fn unix_listener_shutdown_runs_runtime_cleanup_hook() {
+        let root = root("shutdown-hook");
+        let socket = root.join("default.sock");
+        let cleaned = Arc::new(AtomicBool::new(false));
+        let cleanup = cleaned.clone();
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: socket.clone(),
+                session: "default".to_owned(),
+                idle_timeout: None,
+                handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
+                shutdown_handler: Some(Arc::new(move || cleanup.store(true, Ordering::Release))),
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = server.clone();
+        let thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&socket);
+
+        server.stop();
+        assert!(thread.join().unwrap().is_ok());
+        assert!(cleaned.load(Ordering::Acquire));
+        assert!(!socket.exists());
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn shutdown_does_not_unlink_replacement_socket() {
         let root = root("replacement");
         let socket = root.join("default.sock");
@@ -265,9 +293,9 @@ mod unix {
     #[test]
     #[allow(clippy::result_large_err)]
     fn operation_timeout_response_keeps_connection_usable_and_matches_go_oracle() {
-        const GO_SERVER_COMMIT: &str = "f27c09780e076ab69f16c20195dd3265f6cab037";
+        const GO_SERVER_COMMIT: &str = "4180a1072245c542e22b5c294894009f1672fdf8";
         const GO_SERVER_SHA256: &str =
-            "8f8cac924af5f5f96222a7f348a722e4dfbca49e09e52a8b56c1f004b5b744f0";
+            "4dbf19e9c0e067a8e8bf93d5c020875ccda0af2a7e9eb9d00814e19394b38720";
         const GO_TEST_SHA256: &str =
             "32ae1c6e56bb77b00b4773e2694dde6290f40ceb62912984310628bd50faae37";
         let go_server = include_bytes!("../../../internal/daemon/server.go");

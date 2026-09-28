@@ -32,6 +32,7 @@ use symbrowse_core::state_store::Store;
 pub type HandlerResult = Result<(Option<Value>, Vec<Warning>), DaemonError>;
 pub type DaemonHandler =
     Arc<dyn Fn(Frame, OperationContext) -> HandlerResult + Send + Sync + 'static>;
+pub type ShutdownHandler = Arc<dyn Fn() + Send + Sync + 'static>;
 
 // Connections can stay open for several request frames. Bound the number of
 // connection threads so short-lived CLI requests do not create one OS thread
@@ -122,6 +123,7 @@ pub struct ServerOptions {
     pub operation_timeout: Duration,
     pub read_timeout: Duration,
     pub handler: Option<DaemonHandler>,
+    pub shutdown_handler: Option<ShutdownHandler>,
     pub registry: Option<Arc<crate::SessionRegistry>>,
     pub session_spec: Option<crate::SessionSpec>,
     pub policy: PolicyStatus,
@@ -137,6 +139,7 @@ impl Default for ServerOptions {
             operation_timeout: Duration::from_millis(crate::DEFAULT_OPERATION_TIMEOUT_MS),
             read_timeout: Duration::from_millis(crate::DEFAULT_READ_TIMEOUT_MS),
             handler: None,
+            shutdown_handler: None,
             registry: None,
             session_spec: None,
             policy: PolicyStatus::default(),
@@ -242,10 +245,10 @@ impl Server {
             }))
         });
         if options.handler.is_none() {
-            options.handler = Some(
-                crate::runtime::handler(spec)
-                    .map_err(|error| ServerError::Io(io::Error::other(error.message)))?,
-            );
+            let (handler, shutdown_handler) = crate::runtime::handlers(spec)
+                .map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
+            options.handler = Some(handler);
+            options.shutdown_handler = Some(shutdown_handler);
         }
         Ok(Self {
             options,
@@ -272,11 +275,19 @@ impl Server {
     pub fn listen_and_serve(&self) -> Result<(), ServerError> {
         #[cfg(unix)]
         {
-            self.listen_unix()
+            let result = self.listen_unix();
+            if let Some(shutdown) = &self.options.shutdown_handler {
+                shutdown();
+            }
+            result
         }
         #[cfg(windows)]
         {
-            listen_windows(self)
+            let result = listen_windows(self);
+            if let Some(shutdown) = &self.options.shutdown_handler {
+                shutdown();
+            }
+            result
         }
         #[cfg(not(any(unix, windows)))]
         {

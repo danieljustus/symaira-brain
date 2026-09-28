@@ -320,6 +320,52 @@ def wait_for_daemon_exit(
         sleep(min(0.05, max(0.0, deadline - time.monotonic())))
 
 
+def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> int:
+    """Count Chrome processes left in the sample's process tree on Windows."""
+    escaped = str(profile_root).replace("'", "''")
+    script = "\n".join([
+        f"$profile = '{escaped}'",
+        "$all = @(Get-CimInstance Win32_Process -ErrorAction Stop)",
+        "$ids = [System.Collections.Generic.HashSet[int]]::new()",
+        "foreach ($process in $all) {",
+        "  if ($process.Name -match '^chrome.*\\.exe$' -and $process.CommandLine -and $process.CommandLine.Contains($profile)) {",
+        "    [void]$ids.Add([int]$process.ProcessId)",
+        "  }",
+        "}",
+        "do {",
+        "  $before = $ids.Count",
+        "  foreach ($process in $all) {",
+        "    if ($ids.Contains([int]$process.ParentProcessId)) { [void]$ids.Add([int]$process.ProcessId) }",
+        "  }",
+        "} while ($ids.Count -gt $before)",
+        "[Console]::Out.Write($ids.Count)",
+    ])
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    return int(result.stdout.strip())
+
+
+def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 3.0) -> int:
+    """Poll outside the measured interval until Chrome releases the sample profile."""
+    deadline = time.monotonic() + timeout
+    count = 0
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return count
+        count = windows_profile_process_count(profile_root, timeout=min(1.5, remaining))
+        if count == 0:
+            return 0
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(0.1, remaining))
+
+
 def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str, root: Path, index: int) -> dict[str, Any]:
     session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
     env = make_env(root, implementation, chrome, launcher)
@@ -374,6 +420,21 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
+    if sys.platform == "win32" and implementation == "rust":
+        try:
+            remaining = wait_for_windows_profile_cleanup(root)
+            outcome["chrome_profile_processes_after_stop"] = remaining
+            if remaining:
+                if outcome["status"] == "pass":
+                    outcome = {"status": "error", "phase": "chrome-cleanup",
+                               "reason": "Chrome processes still reference the stopped sample profile",
+                               "chrome_profile_processes_after_stop": remaining}
+        except (OSError, subprocess.SubprocessError, ValueError):
+            if outcome["status"] == "pass":
+                outcome = {"status": "error", "phase": "chrome-cleanup",
+                           "reason": "Windows Chrome profile cleanup could not be verified"}
+            else:
+                outcome["chrome_cleanup_probe"] = "unavailable"
     if outcome.get("error_code") == "daemon_unavailable":
         diagnostic = daemon_startup_log(env)
         if diagnostic is not None:

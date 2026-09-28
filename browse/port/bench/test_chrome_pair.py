@@ -16,11 +16,36 @@ from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
     paired_gate_passes, read_output_markers, validate_read_output,
-    wait_for_daemon_exit, daemon_startup_log, flow, measure, run_cli,
+    wait_for_daemon_exit, daemon_startup_log, windows_profile_process_count,
+    flow, measure, run_cli,
 )
 
 
 class ChromePairTests(unittest.TestCase):
+    def test_windows_profile_process_probe_returns_a_count_without_command_lines(self):
+        with patch("chrome_pair.subprocess.run", return_value=SimpleNamespace(stdout="3")) as run:
+            count = windows_profile_process_count(Path("D:/runner/sample-profile"))
+
+        self.assertEqual(count, 3)
+        self.assertIn("Get-CimInstance Win32_Process", run.call_args.args[0][-1])
+        self.assertEqual(run.call_args.kwargs["timeout"], 5)
+
+    def test_rust_flow_fails_when_chrome_keeps_the_stopped_profile_open(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"success": True, "data": {"title": FIXTURE_TITLE, "markdown": FIXTURE_TOKEN}})
+            with patch("chrome_pair.run_cli", side_effect=[
+                (0, "{}", ""), (0, response, ""), (0, "", ""),
+                (0, json.dumps({"success": True, "data": {"running": False}}), ""),
+            ]), patch("chrome_pair.sys.platform", "win32"), \
+                 patch("chrome_pair.wait_for_windows_profile_cleanup", return_value=2):
+                result = flow(root / "symbrowse", "rust", root / "chrome", None,
+                              "http://127.0.0.1/fixture.html", root, 0)
+
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["phase"], "chrome-cleanup")
+        self.assertEqual(result["chrome_profile_processes_after_stop"], 2)
+
     def test_run_cli_keeps_the_decoded_output_limit(self):
         with tempfile.TemporaryDirectory() as temporary:
             with patch("chrome_pair.command", return_value=[
