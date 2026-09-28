@@ -16,7 +16,7 @@ from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
     paired_gate_passes, read_output_markers, validate_read_output,
-    wait_for_daemon_exit, flow, measure, run_cli,
+    wait_for_daemon_exit, daemon_startup_log, flow, measure, run_cli,
 )
 
 
@@ -93,6 +93,43 @@ class ChromePairTests(unittest.TestCase):
                 report = measure(args)
             self.assertEqual(run_flow.call_count, 2)
             self.assertEqual(report["gate"], "blocked")
+
+    def test_daemon_startup_failure_captures_bounded_redacted_child_log(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "symbrowse"
+            chrome = root / "chrome"
+            for path in (binary, chrome):
+                path.write_bytes(b"fixture")
+                path.chmod(0o700)
+            response = json.dumps({"error": {"code": "daemon_unavailable", "message": "daemon did not become ready"}})
+
+            def fake_cli(_binary, args, _session, env, _cwd, **_kwargs):
+                if args[0] == "open":
+                    log = Path(env["XDG_STATE_HOME"]) / "symbrowse" / "daemon.log"
+                    log.parent.mkdir(parents=True)
+                    log.write_text("bind failed: address unavailable token=private-value\n", encoding="utf-8")
+                    return 1, response, ""
+                return 1, "", ""
+
+            with patch("chrome_pair.run_cli", side_effect=fake_cli):
+                result = flow(binary, "go", chrome, None, "http://127.0.0.1/", root, 0)
+
+        self.assertEqual(result["error_code"], "daemon_unavailable")
+        self.assertIn("bind failed: address unavailable", result["daemon_startup_log"])
+        self.assertIn("token=[redacted]", result["daemon_startup_log"])
+        self.assertNotIn("private-value", result["daemon_startup_log"])
+
+    def test_daemon_startup_log_keeps_only_the_bounded_tail(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            state_home = Path(temporary)
+            log = state_home / "symbrowse" / "daemon.log"
+            log.parent.mkdir(parents=True)
+            log.write_text("a" * 32 + "tail", encoding="utf-8")
+
+            diagnostic = daemon_startup_log({"XDG_STATE_HOME": str(state_home)}, limit=8)
+
+        self.assertEqual(diagnostic, "[earlier daemon log bytes omitted]\n" + "a" * 4 + "tail")
 
     def test_measure_reports_cleanup_failure_without_losing_open_error(self):
         with tempfile.TemporaryDirectory() as temporary:

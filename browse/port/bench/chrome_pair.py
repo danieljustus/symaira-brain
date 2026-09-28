@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import random
+import re
 import shutil
 import statistics
 import subprocess
@@ -28,6 +29,10 @@ MAX_OUTPUT = 1 << 20
 # UTF-8 uses at most four bytes per output character. This bounds temporary
 # capture files while keeping the public limit in decoded text characters.
 MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
+MAX_DAEMON_LOG_BYTES = 8192
+SECRET_ASSIGNMENT = re.compile(
+    r"(?i)\b(password|token|secret|authorization)(\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|[^\s,}]+)"
+)
 METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 TARGETS = {
     "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
@@ -255,6 +260,29 @@ def read_output_markers(output: str) -> dict[str, bool]:
     }
 
 
+def daemon_startup_log(env: dict[str, str], limit: int = MAX_DAEMON_LOG_BYTES) -> str | None:
+    """Return a bounded, redacted tail of the Go daemon log for failed starts."""
+    state_home = env.get("XDG_STATE_HOME")
+    if not state_home or limit <= 0:
+        return None
+    path = Path(state_home) / "symbrowse" / "daemon.log"
+    try:
+        with path.open("rb") as stream:
+            stream.seek(0, os.SEEK_END)
+            size = stream.tell()
+            stream.seek(max(0, size - limit))
+            data = stream.read(limit)
+    except OSError:
+        return None
+    text = data.decode("utf-8", errors="replace").strip()
+    if not text:
+        return None
+    text = SECRET_ASSIGNMENT.sub(r"\1\2[redacted]", text)
+    if size > limit:
+        text = "[earlier daemon log bytes omitted]\n" + text
+    return text
+
+
 def wait_for_daemon_exit(
     binary: Path,
     session: str,
@@ -346,6 +374,10 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
+    if outcome.get("error_code") == "daemon_unavailable":
+        diagnostic = daemon_startup_log(env)
+        if diagnostic is not None:
+            outcome["daemon_startup_log"] = diagnostic
     return outcome
 
 
