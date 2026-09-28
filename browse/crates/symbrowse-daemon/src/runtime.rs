@@ -66,6 +66,14 @@ struct FlowExecutor<'a> {
     operation: OperationContext,
 }
 
+fn block_on_timeout<F: Future>(
+    runtime: &Runtime,
+    timeout: Duration,
+    future: F,
+) -> Result<F::Output, tokio::time::error::Elapsed> {
+    runtime.block_on(async move { tokio::time::timeout(timeout, future).await })
+}
+
 impl AsyncExecutor for FlowExecutor<'_> {
     fn execute<'a>(
         &'a mut self,
@@ -144,10 +152,7 @@ impl DispatchRuntime {
             return;
         };
         let started = std::time::Instant::now();
-        let result = self.runtime.block_on(tokio::time::timeout(
-            Duration::from_secs(3),
-            session.close(),
-        ));
+        let result = block_on_timeout(&self.runtime, Duration::from_secs(3), session.close());
         let outcome = match result {
             Ok(Ok(())) => "closed",
             Ok(Err(_)) => "close-error",
@@ -2011,6 +2016,17 @@ mod tests {
         net::TcpListener,
         thread,
     };
+
+    #[test]
+    fn shutdown_timeout_is_created_inside_the_tokio_runtime() {
+        let runtime = Runtime::new().expect("Tokio runtime");
+        let result = block_on_timeout(&runtime, Duration::from_secs(1), async {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            42
+        })
+        .expect("bounded future should complete");
+        assert_eq!(result, 42);
+    }
 
     #[tokio::test]
     async fn navigation_timeout_preserves_go_daemon_error() {

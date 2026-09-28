@@ -295,6 +295,15 @@ struct DialogState {
     auto_mode: String,
 }
 
+fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'static)) -> bool {
+    matches!(
+        error.downcast_ref::<chromiumoxide::error::CdpError>(),
+        Some(chromiumoxide::error::CdpError::Chrome(cdp_error))
+            if cdp_error.code == -32000
+                && cdp_error.message == "Inspected target navigated or closed"
+    )
+}
+
 impl ChromePage {
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
@@ -380,23 +389,68 @@ impl ChromePage {
         Ok(serde_json::json!({"url": page_url, "title": title}))
     }
 
-    // `Page::goto` in chromiumoxide holds the Page.navigate response until it
-    // observes a matching lifecycle event. Go's CDP path returns that response
-    // directly and performs its load wait separately. Trigger navigation in
-    // the existing page session, then poll the same document state contract.
+    // Go issues Page.navigate and performs its document-state wait separately.
+    // Use the command API directly, then race its completion against that same
+    // state poll: chromiumoxide holds Page.navigate responses until a lifecycle
+    // event arrives, which can be missing even after the document is complete.
     async fn navigate_and_wait_for_load(
         &self,
         url: &str,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        // Use the protocol navigation command rather than scheduling
-        // location.assign from Runtime.evaluate. A zero-delay timer can
-        // navigate away before chromiumoxide receives the evaluation result,
-        // which closes the inspected execution context and makes a successful
-        // navigation look like an open failure. `Page::goto` sends
-        // Page.navigate and waits for the matching load event, as the Go
-        // engine does before reading final document state.
-        self.page.goto(url).await?;
-        Ok(())
+        if url
+            .trim_start()
+            .get(..5)
+            .is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"))
+        {
+            self.page.goto(url).await?;
+            return Ok(());
+        }
+        let initial = self
+            .evaluate_runtime_json("({url: location.href, time_origin: performance.timeOrigin})")
+            .await?;
+        let initial_url = initial
+            .get("url")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let initial_time_origin = initial
+            .get("time_origin")
+            .and_then(Value::as_f64)
+            .unwrap_or_default();
+        let navigation = self.page.execute(page::NavigateParams::new(url));
+        let poll = async {
+            loop {
+                let state = match self
+                    .evaluate_runtime_json(
+                        "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
+                    )
+                    .await
+                {
+                    Ok(state) => state,
+                    Err(error) if is_transient_navigation_context_error(error.as_ref()) => {
+                        tokio::time::sleep(Duration::from_millis(25)).await;
+                        continue;
+                    }
+                    Err(error) => return Err(error),
+                };
+                let url_changed = state.get("url").and_then(Value::as_str) != Some(initial_url);
+                let document_changed = state
+                    .get("time_origin")
+                    .and_then(Value::as_f64)
+                    .is_some_and(|time_origin| time_origin != initial_time_origin);
+                if (url_changed || document_changed)
+                    && state.get("ready_state").and_then(Value::as_str) == Some("complete")
+                {
+                    return Ok(());
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        };
+        tokio::pin!(navigation);
+        tokio::pin!(poll);
+        tokio::select! {
+            result = &mut navigation => result.map(|_| ()).map_err(|error| Box::new(error) as Box<dyn Error + Send + Sync>),
+            result = &mut poll => result,
+        }
     }
 
     async fn evaluate_runtime_json(
@@ -1075,6 +1129,24 @@ mod tests {
         let result =
             with_navigation_timeout(Duration::from_millis(1), std::future::pending::<()>()).await;
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn navigation_retry_only_accepts_the_transient_target_context_error() {
+        let transient = chromiumoxide::error::CdpError::Chrome(chromiumoxide::types::Error {
+            code: -32000,
+            message: "Inspected target navigated or closed".into(),
+        });
+        assert!(is_transient_navigation_context_error(&transient));
+
+        let unrelated = chromiumoxide::error::CdpError::Chrome(chromiumoxide::types::Error {
+            code: -32000,
+            message: "Target closed".into(),
+        });
+        assert!(!is_transient_navigation_context_error(&unrelated));
+        assert!(!is_transient_navigation_context_error(
+            &chromiumoxide::error::CdpError::Timeout
+        ));
     }
 
     #[test]
