@@ -68,6 +68,8 @@ func run(binary string) suite {
 		runStatus(binary),
 		runSearch(binary, "search-inline", true),
 		runSearch(binary, "search-separated", false),
+		runGet(binary, "get-found", "cli-segment"),
+		runGet(binary, "get-missing", "missing-segment"),
 	}}
 }
 
@@ -130,6 +132,18 @@ func runSearch(binary, id string, inline bool) result {
 		)
 	}
 	return runCase(binary, id, root, home, config, args)
+}
+
+func runGet(binary, caseID, activityID string) result {
+	root, home, config, dbPath := prepare(caseID)
+	defer os.RemoveAll(root)
+	seedActivityDatabase(dbPath)
+	args := []string{
+		"--json", "activity", "get",
+		"--profile=activity-oracle", "--max-tokens=100", "--db=" + dbPath,
+		activityID,
+	}
+	return runCase(binary, caseID, root, home, config, args)
 }
 
 func seedActivityDatabase(path string) {

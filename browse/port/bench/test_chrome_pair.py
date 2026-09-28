@@ -238,7 +238,7 @@ class ChromePairTests(unittest.TestCase):
                 report = measure(args)
 
         self.assertEqual(run_flow.call_count, 3)
-        self.assertNotIn("diagnostics", run_flow.call_args_list[1].kwargs)
+        self.assertFalse(run_flow.call_args_list[1].kwargs["diagnostics"])
         self.assertTrue(run_flow.call_args.kwargs["diagnostics"])
         self.assertNotIn("diagnostic_only", report)
         self.assertTrue(report["windows_amd64_rust_failure_diagnostic"]["diagnostic_only"])
@@ -246,6 +246,30 @@ class ChromePairTests(unittest.TestCase):
                          "navigation.dispatch.start")
         self.assertEqual(report["binaries"]["rust"]["chrome_flow"]["samples"], [rust_failure])
         self.assertEqual(report["gate"], "blocked")
+
+    def test_diagnostic_only_instruments_rust_primary_samples_and_skips_gate(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            binary = root / "symbrowse"
+            chrome = root / "chrome"
+            for path in (binary, chrome):
+                path.write_bytes(b"fixture")
+                path.chmod(0o700)
+            args = SimpleNamespace(target="windows-amd64", repo=Path(__file__).resolve().parents[3],
+                                   expected_source_revision=None, go=binary, rust=binary, chrome=chrome,
+                                   chrome_version="fixture", chrome_archive_sha256="a" * 64,
+                                   chrome_launcher=None, runs=1, diagnostic_only=True)
+            go_pass = {"status": "pass", "duration_ns": 100}
+            rust_pass = {"status": "pass", "duration_ns": 90}
+            with patch("chrome_pair.native_target_matches", return_value=True), \
+                 patch("chrome_pair.random.Random", return_value=SimpleNamespace(randrange=lambda _size: 0)), \
+                 patch("chrome_pair.flow", side_effect=[go_pass, rust_pass]) as run_flow:
+                report = measure(args)
+
+        self.assertEqual([call.kwargs["diagnostics"] for call in run_flow.call_args_list], [False, True])
+        self.assertTrue(report["diagnostic_only"])
+        self.assertEqual(report["status"], "diagnostic_only")
+        self.assertEqual(report["gate"], "not_evaluated")
 
     def test_measure_reports_cleanup_failure_without_losing_open_error(self):
         with tempfile.TemporaryDirectory() as temporary:

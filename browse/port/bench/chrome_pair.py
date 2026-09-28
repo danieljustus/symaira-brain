@@ -494,6 +494,7 @@ def identity(binary: Path) -> dict[str, Any]:
 
 
 def measure(args: argparse.Namespace) -> dict[str, Any]:
+    diagnostic_only = bool(getattr(args, "diagnostic_only", False))
     revision = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=args.repo, capture_output=True, text=True,
         check=True,
@@ -510,6 +511,8 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
         "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
         "gate": "blocked", "reason": None,
     }
+    if diagnostic_only:
+        report["diagnostic_only"] = True
     if args.expected_source_revision and revision != args.expected_source_revision:
         report["reason"] = "checkout source revision differs from expected workflow SHA"
         return report
@@ -552,6 +555,7 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 try:
                     sample = flow(
                         binary, implementation, args.chrome, args.chrome_launcher, url, temp, index,
+                        diagnostics=diagnostic_only and implementation == "rust",
                     )
                 except BaseException as primary:
                     try:
@@ -578,7 +582,8 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
                 rust_samples = samples["rust"]
                 if (
-                    samples["go"][-1].get("status") == "pass"
+                    not diagnostic_only
+                    and samples["go"][-1].get("status") == "pass"
                     and rust_samples
                     and rust_samples[-1].get("status") != "pass"
                 ):
@@ -615,6 +620,11 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
         }
     go_p95 = report["binaries"]["go"]["chrome_flow"]["p95_duration_ns"]
     rust_p95 = report["binaries"]["rust"]["chrome_flow"]["p95_duration_ns"]
+    if diagnostic_only:
+        report["gate"] = "not_evaluated"
+        report["status"] = "diagnostic_only"
+        report["reason"] = "primary Rust samples are instrumented; PERF-003 gate not evaluated"
+        return report
     report["gate"] = "pass" if paired_gate_passes(
         [int(item["duration_ns"]) for item in samples["go"] if item.get("status") == "pass"],
         [int(item["duration_ns"]) for item in samples["rust"] if item.get("status") == "pass"],
@@ -641,6 +651,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--expected-source-revision")
     parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--runs", type=int, default=30)
+    parser.add_argument("--diagnostic-only", action="store_true",
+                        help="instrument primary Rust samples and do not evaluate the PERF gate")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.runs < 1:
@@ -649,7 +661,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
-    return 0 if report.get("gate") == "pass" or report.get("status") == "unsupported" else 1
+    return 0 if report.get("gate") == "pass" or report.get("status") in {"unsupported", "diagnostic_only"} else 1
 
 
 if __name__ == "__main__":
