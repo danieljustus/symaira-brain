@@ -61,6 +61,9 @@ func TestNavigationLoadParityRedirectReloadAndHTTPError(t *testing.T) {
 		if err := chrome.Close(); err != nil {
 			t.Errorf("close Chrome: %v", err)
 		}
+		if err := removeChromeProfileWithRetry(profile); err != nil {
+			t.Errorf("remove Chrome profile: %v", err)
+		}
 	}()
 	browserContext, err := chrome.NewContext(ctx)
 	if err != nil {
@@ -105,6 +108,17 @@ func TestNavigationLoadParityRedirectReloadAndHTTPError(t *testing.T) {
 	if _, err := service.Open(ctx, "http://"); err == nil {
 		t.Fatal("malformed navigation URL unexpectedly succeeded")
 	}
+}
+
+func removeChromeProfileWithRetry(path string) error {
+	var lastErr error
+	for attempt := 0; attempt < 40; attempt++ {
+		if lastErr = os.RemoveAll(path); lastErr == nil {
+			return nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	return lastErr
 }
 
 func assertChromeDocumentComplete(t *testing.T, ctx context.Context, chrome *Engine, page engine.Page) {
