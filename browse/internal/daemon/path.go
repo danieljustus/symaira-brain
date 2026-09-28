@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"net"
@@ -36,6 +37,9 @@ func SocketPath(session string) (string, error) {
 	if !validSession.MatchString(session) {
 		return "", fmt.Errorf("invalid session %q: use 1-64 letters, digits, '.', '_' or '-'", session)
 	}
+	if runtime.GOOS == "windows" {
+		return fmt.Sprintf(`\\.\pipe\symbrowse-%s`, session), nil
+	}
 	base, err := socketBaseDir()
 	if err != nil {
 		return "", err
@@ -43,14 +47,18 @@ func SocketPath(session string) (string, error) {
 	return filepath.Join(base, session+".sock"), nil
 }
 
-// SocketPathIn returns a socket path under base. It is intended for tests and
-// callers that explicitly own a runtime directory.
+// SocketPathIn returns a local endpoint under base. It is intended for tests
+// and callers that explicitly own a runtime directory.
 func SocketPathIn(base, session string) (string, error) {
 	if !validSession.MatchString(session) {
 		return "", fmt.Errorf("invalid session %q", session)
 	}
 	if base == "" {
 		return "", errors.New("socket base directory is empty")
+	}
+	if runtime.GOOS == "windows" {
+		hash := sha256.Sum256([]byte(filepath.Clean(base) + "\x00" + session))
+		return fmt.Sprintf(`\\.\pipe\symbrowse-test-%x`, hash[:12]), nil
 	}
 	return filepath.Join(base, session+".sock"), nil
 }
@@ -74,6 +82,10 @@ func socketBaseDir() (string, error) {
 }
 
 func prepareSocketDir(path string) error {
+	if runtime.GOOS == "windows" {
+		// Windows endpoints are named pipes and have no backing directory.
+		return nil
+	}
 	if err := os.MkdirAll(path, 0o700); err != nil {
 		return fmt.Errorf("create socket directory: %w", err)
 	}
@@ -92,6 +104,11 @@ func prepareSocketDir(path string) error {
 // probed first and ErrDaemonAlreadyRunning is returned when something answers,
 // so the losing starter connects to the winner instead of replacing it.
 func removeStaleSocket(path string) error {
+	if !socketOwnershipSupported {
+		// Windows named pipes are removed by the OS when the owning listener
+		// closes; a filesystem stale-socket check does not apply.
+		return nil
+	}
 	info, err := os.Lstat(path)
 	if os.IsNotExist(err) {
 		return nil

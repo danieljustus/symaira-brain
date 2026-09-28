@@ -52,6 +52,12 @@ jobs:
           cargo build --release --locked --bin symbrowse
           cp "target/release/symbrowse${{ runner.os == 'Windows' && '.exe' || '' }}" "$RUNNER_TEMP/symbrowse-rust${{ runner.os == 'Windows' && '.exe' || '' }}"
 
+      - name: Test Windows named-pipe daemon transport
+        if: runner.os == 'Windows'
+        working-directory: browse
+        shell: bash
+        run: go test ./internal/daemon -run '^Test(WindowsNamedPipeDaemonRoundTrip|SocketPathUsesBrowseNamedPipe)$' -count=1
+
       - name: Fetch isolated official Chrome for Testing artifact
         id: cft
         shell: bash
