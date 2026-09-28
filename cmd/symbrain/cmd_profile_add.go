@@ -1,17 +1,18 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 
 	"github.com/danieljustus/symaira-brain/internal/profile"
 	"github.com/danieljustus/symaira-brain/internal/xdg"
 	"github.com/danieljustus/symaira-corekit/exitcodes"
-	"github.com/danieljustus/symaira-corekit/fsutil"
 )
 
 // profileNameFieldPattern matches the [profile] table's `name = "..."`
@@ -77,11 +78,42 @@ func cmdProfileAdd(args []string, stdout, stderr io.Writer) exitcodes.ExitCode {
 		fmt.Fprintf(stderr, "symbrain profile add: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
-	if err := fsutil.AtomicWriteFile(profile.Path(name), []byte(contents), 0o600); err != nil {
+	if err := createProfileFile(profile.Path(name), []byte(contents)); err != nil {
+		if errors.Is(err, os.ErrExist) {
+			fmt.Fprintf(stderr, "symbrain profile add: profile %q already exists (%s)\n", name, profile.Path(name))
+			return exitcodes.ExitNoInput
+		}
 		fmt.Fprintf(stderr, "symbrain profile add: %v\n", err)
 		return exitcodes.ExitGeneric
 	}
 
 	fmt.Fprintf(stdout, "created %s (from %s)\n", profile.Path(name), *from)
 	return exitcodes.ExitOK
+}
+
+// createProfileFile publishes a fully written 0600 temp file with a hard link,
+// which fails with os.ErrExist instead of replacing a profile that a
+// concurrent creator published after the existence check (#461).
+func createProfileFile(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".*.tmp")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name())
+	if err := tmp.Chmod(0o600); err != nil {
+		tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Link(tmp.Name(), path)
 }

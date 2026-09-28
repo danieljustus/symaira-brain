@@ -57,7 +57,7 @@ fn run_case(oracle: &Oracle) {
     .expect("write isolated profile");
 
     let db_path = data.join(format!("{}.db", oracle.id));
-    if oracle.id.starts_with("search-") {
+    if oracle.id.starts_with("search-") || oracle.id.starts_with("get-") {
         let store =
             symbrain_memory::Store::open(&db_path).expect("initialize isolated memory schema");
         drop(store);
