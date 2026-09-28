@@ -37,6 +37,48 @@ fn output(binary: &Path, args: &[&str]) -> Output {
     Command::new(binary).args(args).output().expect("run CLI")
 }
 
+fn filter_commands(help: &str, allowed: &BTreeMap<String, String>) -> String {
+    let mut in_commands = false;
+    help.lines()
+        .filter(|line| {
+            let trimmed = line.trim();
+            if trimmed.ends_with(" Commands:") {
+                in_commands = true;
+                return true;
+            }
+            if matches!(trimmed, "Flags:" | "Global Flags:") {
+                in_commands = false;
+                return true;
+            }
+            if in_commands && line.starts_with("  ") && !trimmed.starts_with('-') {
+                if let Some(name) = trimmed.split_whitespace().next() {
+                    return allowed.contains_key(name);
+                }
+            }
+            true
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n"
+}
+
+fn completion_items(output: &[u8]) -> (BTreeMap<String, String>, Option<String>) {
+    let text = String::from_utf8_lossy(output);
+    let items = text
+        .lines()
+        .filter(|line| !line.starts_with(':'))
+        .filter_map(|line| {
+            let (name, description) = line.split_once('\t').unwrap_or((line, ""));
+            (!name.is_empty()).then(|| (name.to_owned(), description.to_owned()))
+        })
+        .collect();
+    let directive = text
+        .lines()
+        .find(|line| line.starts_with(':'))
+        .map(str::to_owned);
+    (items, directive)
+}
+
 #[test]
 fn rust_help_and_completion_follow_the_go_source_tree() {
     let browse = Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -88,38 +130,48 @@ fn rust_help_and_completion_follow_the_go_source_tree() {
         );
     }
 
-    for command in rust_commands.keys() {
-        let go_help = output(&go_binary, &[command, "--help"]);
-        let rust_help = output(rust_binary, &[command, "--help"]);
-        assert!(
-            go_help.status.success(),
-            "source Go command {command} has no help"
-        );
-        assert!(
-            rust_help.status.success(),
-            "Rust advertises {command} but its help fails"
-        );
-    }
-
-    for path in [
-        &["click"][..],
-        &["fill"][..],
-        &["get"][..],
-        &["get", "text"][..],
-        &["is"][..],
-        &["open"][..],
-        &["read"][..],
-        &["snapshot"][..],
-    ] {
-        let mut args = path.to_vec();
+    let mut pending = rust_commands
+        .keys()
+        .map(|command| vec![command.clone()])
+        .collect::<Vec<_>>();
+    let mut checked = BTreeMap::<String, ()>::new();
+    while let Some(path) = pending.pop() {
+        let key = path.join(" ");
+        if checked.insert(key.clone(), ()).is_some() {
+            continue;
+        }
+        let mut args = path.iter().map(String::as_str).collect::<Vec<_>>();
         args.push("--help");
         let go_help = output(&go_binary, &args);
         let rust_help = output(rust_binary, &args);
-        assert!(go_help.status.success(), "Go help failed for {path:?}");
-        assert!(rust_help.status.success(), "Rust help failed for {path:?}");
+        assert!(go_help.status.success(), "Go help failed for {key}");
+        assert!(
+            rust_help.status.success(),
+            "Rust advertises {key} but its help fails: {}",
+            String::from_utf8_lossy(&rust_help.stderr)
+        );
+        let children = commands(std::str::from_utf8(&rust_help.stdout).expect("Rust help UTF-8"));
+        let go_children = commands(std::str::from_utf8(&go_help.stdout).expect("Go help UTF-8"));
+        assert!(
+            children
+                .iter()
+                .all(|(name, description)| go_children.get(name) == Some(description)),
+            "Rust help for {key} advertises source-absent or drifted children: {children:?}; Go: {go_children:?}"
+        );
+        let normalized_go = filter_commands(
+            std::str::from_utf8(&go_help.stdout).expect("Go help UTF-8"),
+            &children,
+        );
+        pending.extend(children.keys().map(|child| {
+            path.iter()
+                .cloned()
+                .chain(std::iter::once(child.clone()))
+                .collect()
+        }));
         assert_eq!(
-            rust_help.stdout, go_help.stdout,
-            "help output drift for {path:?}"
+            String::from_utf8_lossy(&rust_help.stdout),
+            normalized_go,
+            "help output drift for {key} after filtering unsupported Go-only commands; Rust children: {children:?}"
         );
     }
 
@@ -169,6 +221,41 @@ fn rust_help_and_completion_follow_the_go_source_tree() {
         assert_eq!(
             rust_help.stdout, go_help.stdout,
             "completion help drift for {shell}"
+        );
+    }
+
+    for args in [
+        &["__complete", "s"][..],
+        &["__complete", "state", "c"][..],
+        &["__complete", "open", ""][..],
+        &["__complete", "click", "--"][..],
+        &["__completeNoDesc", "state", "c"][..],
+    ] {
+        let go_completion = output(&go_binary, args);
+        let rust_completion = output(rust_binary, args);
+        assert!(
+            go_completion.status.success(),
+            "Go completion failed for {args:?}"
+        );
+        assert!(
+            rust_completion.status.success(),
+            "Rust completion failed for {args:?}"
+        );
+        let (rust_items, rust_directive) = completion_items(&rust_completion.stdout);
+        let (go_items, go_directive) = completion_items(&go_completion.stdout);
+        assert_eq!(
+            rust_directive, go_directive,
+            "completion directive drift for {args:?}"
+        );
+        assert!(
+            rust_items
+                .iter()
+                .all(
+                    |(name, description)| go_items.get(name).is_some_and(|go_description| {
+                        description.is_empty() || description == go_description
+                    })
+                ),
+            "Rust completion items are absent from or drifted from Go for {args:?}: {rust_items:?}; Go: {go_items:?}"
         );
     }
 

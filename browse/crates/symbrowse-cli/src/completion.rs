@@ -28,7 +28,9 @@ pub(super) fn complete(args: &[String]) -> String {
         return ":0\n".to_owned();
     };
 
-    let no_file_completion = prefix.is_empty() || prefix.starts_with('-');
+    // Cobra suppresses filesystem suggestions while completing command names
+    // or flags. Positional arguments on leaf commands retain file completion.
+    let no_file_completion = prefix.starts_with('-') || !command_candidates(&help, "").is_empty();
     let candidates = if prefix.starts_with('-') {
         flag_candidates(&help, prefix)
     } else if context.iter().all(|value| !value.starts_with('-')) {
