@@ -381,9 +381,10 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             elapsed = time.perf_counter_ns() - started
             read_markers = read_output_markers(read[1])
             if read[0] != 0 or not all(read_markers.values()):
-                state_markers: dict[str, bool] = {}
+                state_markers: dict[str, bool | int] = {}
                 for probe_name in ("url", "title"):
                     probe = run_cli(binary, ["get", probe_name], session, env, root)
+                    state_markers[f"{probe_name}_probe_exit_code"] = probe[0]
                     state_markers.update({
                         f"{probe_name}_{key}": value
                         for key, value in session_state_markers(probe[1], url).items()
