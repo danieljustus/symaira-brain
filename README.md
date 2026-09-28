@@ -531,9 +531,11 @@ can connect without re-parsing harness configs:
 }
 ```
 
-Per server, `transport` is `stdio` or `http` (inferred from the entry
-shape, or taken from an explicit `transport`/`type` field), `command` and
-`args` describe the stdio invocation, and `url` the HTTP endpoint.
+Per server, `transport` is taken verbatim from an explicit `transport`
+field, else from `type`, so custom values such as `sse` are preserved as
+written; without either field it is inferred from the entry shape (`url` →
+`http`, otherwise `stdio`). `command` and `args` describe the stdio
+invocation, and `url` the HTTP endpoint.
 `env_names` lists the environment variable *names* an entry reads — **values
 are never emitted**, so a config carrying a plaintext key cannot leak it
 through the inventory.
