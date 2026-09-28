@@ -109,7 +109,7 @@ fn bounded_tail_and_latest_degradations_match_go() {
 }
 
 #[test]
-fn production_chained_tail_behavior_matches_frozen_go_defect() {
+fn production_chained_tail_entries_decode_envelopes_like_go() {
     let expected = suite().chained_tail_entries;
     let dir = tempdir().expect("tempdir");
     let logger = Logger::open_in_with_session(
@@ -133,8 +133,10 @@ fn production_chained_tail_behavior_matches_frozen_go_defect() {
         None,
     );
     logger.close().expect("close");
-    assert_eq!(
-        tail_entries_in(dir.path(), "chain", 1).expect("tail"),
-        expected
-    );
+    let mut actual = tail_entries_in(dir.path(), "chain", 1).expect("tail");
+    for entry in &mut actual {
+        entry.timestamp.clear();
+        entry.session_id.clear();
+    }
+    assert_eq!(actual, expected);
 }

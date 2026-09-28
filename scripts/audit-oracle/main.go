@@ -151,6 +151,11 @@ func chainedTailFixture() []audit.Entry {
 	if err != nil {
 		panic(err)
 	}
+	// The production logger stamps wall-clock time; blank it for a stable fixture.
+	for i := range entries {
+		entries[i].Timestamp = ""
+		entries[i].SessionID = ""
+	}
 	return entries
 }
 

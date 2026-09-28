@@ -113,11 +113,12 @@
     {
       "timestamp": "",
       "profile": "chain",
-      "server": "",
-      "tool": "",
-      "duration_ms": 0,
-      "status": "",
-      "retryable": false
+      "server": "memory",
+      "tool": "memory_search",
+      "duration_ms": 1,
+      "status": "ok",
+      "retryable": false,
+      "arg_keys": "query"
     }
   ]
 }
