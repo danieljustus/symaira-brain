@@ -362,6 +362,8 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
         open_started = time.perf_counter_ns()
         opened = run_cli(binary, ["open", url], session, env, root)
         open_duration = time.perf_counter_ns() - open_started
+        diagnostic_duration = 0
+        pre_read_markers: dict[str, bool | int] = {}
         if opened[0] != 0:
             outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
                        "open_cli_duration_ns": open_duration,
@@ -375,13 +377,24 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             except (json.JSONDecodeError, AttributeError):
                 pass
         else:
+            if implementation == "rust" and index == 0:
+                pre_read_markers.update(session_state_markers(opened[1], url))
+                for probe_name in ("url", "title"):
+                    probe_started = time.perf_counter_ns()
+                    probe = run_cli(binary, ["get", probe_name], session, env, root)
+                    diagnostic_duration += time.perf_counter_ns() - probe_started
+                    pre_read_markers[f"pre_read_{probe_name}_probe_exit_code"] = probe[0]
+                    pre_read_markers.update({
+                        f"pre_read_{probe_name}_{key}": value
+                        for key, value in session_state_markers(probe[1], url).items()
+                    })
             read_started = time.perf_counter_ns()
             read = run_cli(binary, ["read"], session, env, root)
             read_duration = time.perf_counter_ns() - read_started
-            elapsed = time.perf_counter_ns() - started
+            elapsed = time.perf_counter_ns() - started - diagnostic_duration
             read_markers = read_output_markers(read[1])
             if read[0] != 0 or not all(read_markers.values()):
-                state_markers: dict[str, bool | int] = {}
+                state_markers: dict[str, bool | int] = dict(pre_read_markers)
                 for probe_name in ("url", "title"):
                     probe = run_cli(binary, ["get", probe_name], session, env, root)
                     state_markers[f"{probe_name}_probe_exit_code"] = probe[0]
