@@ -351,6 +351,7 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
 fn page_navigate_error(result: page::NavigateReturns) -> Option<chromiumoxide::error::CdpError> {
     result
         .error_text
+        .filter(|message| message != "net::ERR_ABORTED")
         .map(chromiumoxide::error::CdpError::ChromeMessage)
 }
 
@@ -1331,16 +1332,36 @@ mod tests {
     }
 
     #[test]
-    fn page_navigate_response_preserves_chrome_navigation_errors() {
-        let failed: page::NavigateReturns = serde_json::from_value(json!({
+    fn aborted_navigation_follows_go_polling_contract() {
+        let go_navigation = std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../internal/engine/navigation.go"),
+        )
+        .expect("read Go navigation oracle");
+        assert!(
+            go_navigation.contains("if _, err := s.engine.Navigate(ctx, s.page, url); err != nil")
+        );
+        assert!(!go_navigation.contains("result.ErrorText"));
+
+        let aborted: page::NavigateReturns = serde_json::from_value(json!({
             "frameId": "frame-id",
             "errorText": "net::ERR_ABORTED"
+        }))
+        .expect("decode aborted Page.navigate response");
+        assert!(page_navigate_error(aborted).is_none());
+    }
+
+    #[test]
+    fn page_navigate_response_preserves_other_chrome_navigation_errors() {
+        let failed: page::NavigateReturns = serde_json::from_value(json!({
+            "frameId": "frame-id",
+            "errorText": "net::ERR_CONNECTION_REFUSED"
         }))
         .expect("decode failed Page.navigate response");
         assert!(matches!(
             page_navigate_error(failed),
             Some(chromiumoxide::error::CdpError::ChromeMessage(message))
-                if message == "net::ERR_ABORTED"
+                if message == "net::ERR_CONNECTION_REFUSED"
         ));
 
         let succeeded: page::NavigateReturns =
