@@ -54,6 +54,36 @@
       "exit_code": 0,
       "stdout": "{\"results\":[{\"id\":\"cli-segment\",\"kind\":\"segment\",\"source\":\"symcockpit\",\"granularity\":\"10min\",\"started_at\":\"2026-08-28T12:00:00Z\",\"ended_at\":\"2026-08-28T12:10:00Z\",\"applications\":[\"Editor\"],\"summary\":\"[UNTRUSTED_ACTIVITY_SUMMARY]\\nedited activity summary\\n[/UNTRUSTED_ACTIVITY_SUMMARY]\",\"provenance\":{\"source\":\"symcockpit\",\"reference\":\"opaque://oracle-fixture\"},\"tokens\":21}],\"truncated\":false,\"used_tokens\":21,\"max_tokens\":100}\n",
       "stderr": ""
+    },
+    {
+      "id": "get-found",
+      "args": [
+        "--json",
+        "activity",
+        "get",
+        "--profile=activity-oracle",
+        "--max-tokens=100",
+        "--db=\u003croot\u003e/data/get-found.db",
+        "cli-segment"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"id\":\"cli-segment\",\"kind\":\"segment\",\"source\":\"symcockpit\",\"granularity\":\"10min\",\"started_at\":\"2026-08-28T12:00:00Z\",\"ended_at\":\"2026-08-28T12:10:00Z\",\"applications\":[\"Editor\"],\"summary\":\"[UNTRUSTED_ACTIVITY_SUMMARY]\\nedited activity summary\\n[/UNTRUSTED_ACTIVITY_SUMMARY]\",\"provenance\":{\"source\":\"symcockpit\",\"reference\":\"opaque://oracle-fixture\"},\"tokens\":21}\n",
+      "stderr": ""
+    },
+    {
+      "id": "get-missing",
+      "args": [
+        "--json",
+        "activity",
+        "get",
+        "--profile=activity-oracle",
+        "--max-tokens=100",
+        "--db=\u003croot\u003e/data/get-missing.db",
+        "missing-segment"
+      ],
+      "exit_code": 2,
+      "stdout": "",
+      "stderr": "symbrain activity get: activity not found: missing-segment\n"
     }
   ]
 }
