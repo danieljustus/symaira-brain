@@ -46,7 +46,11 @@ pub(crate) fn run_add(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dy
         symbrain_policy::profile::create::create_in(&xdg::profiles_dir(), &name, &from)
     {
         let _ = writeln!(stderr, "symbrain profile add: {error}");
-        return exit::GENERIC;
+        return if error.kind() == io::ErrorKind::AlreadyExists {
+            exit::NO_INPUT
+        } else {
+            exit::GENERIC
+        };
     }
     let _ = writeln!(stdout, "created {} (from {})", path.display(), from);
     exit::OK
