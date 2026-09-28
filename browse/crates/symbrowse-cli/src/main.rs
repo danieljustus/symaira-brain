@@ -1,6 +1,8 @@
 #![deny(unsafe_code)]
 
 mod browser_profiles;
+mod completion;
+mod help_catalog;
 mod upgrade;
 
 use std::{
@@ -37,6 +39,15 @@ const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
 
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
+    Help(String),
+    Completion {
+        shell: String,
+        no_descriptions: bool,
+    },
+    CompletionRequest {
+        args: Vec<String>,
+        no_descriptions: bool,
+    },
     RootVersion,
     Version {
         structured: bool,
@@ -144,6 +155,29 @@ struct StateSuccess<'a> {
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     match parse(&args) {
+        Ok(Action::Help(text)) => write_stdout(&text),
+        Ok(Action::Completion {
+            shell,
+            no_descriptions,
+        }) => {
+            let script = if no_descriptions {
+                completion::script_without_descriptions(&shell)
+            } else {
+                completion::script(&shell).map(str::to_owned)
+            };
+            script.map_or_else(|| ExitCode::from(2), |script| write_stdout(&script))
+        }
+        Ok(Action::CompletionRequest {
+            args,
+            no_descriptions,
+        }) => {
+            let output = if no_descriptions {
+                completion::complete_no_descriptions(&args)
+            } else {
+                completion::complete(&args)
+            };
+            write_stdout(&output)
+        }
         Ok(Action::RootVersion) => write_stdout(&render_root_version(VERSION)),
         Ok(Action::Version { structured: true }) => match render_version_json(VERSION) {
             Ok(output) => write_stdout(&output),
@@ -902,6 +936,10 @@ fn json_type_name(value: &serde_json::Value) -> &'static str {
 fn execute_batch_item(argv: &[String]) -> ItemOutput {
     let args: Vec<OsString> = argv.iter().map(OsString::from).collect();
     match parse(&args) {
+        Ok(Action::Help(stdout)) => ItemOutput {
+            stdout,
+            error: None,
+        },
         Ok(Action::RootVersion) => ItemOutput {
             stdout: render_root_version(VERSION),
             error: None,
@@ -1023,13 +1061,250 @@ fn write_config_error(format: Format, message: &str) -> ExitCode {
     ExitCode::from(9)
 }
 
+fn implemented_help_command(command: &str) -> bool {
+    matches!(
+        command,
+        "batch"
+            | "back"
+            | "click"
+            | "config"
+            | "daemon"
+            | "fill"
+            | "find"
+            | "flow"
+            | "forward"
+            | "get"
+            | "goto"
+            | "is"
+            | "mcp"
+            | "open"
+            | "press"
+            | "profiles"
+            | "read"
+            | "reload"
+            | "snapshot"
+            | "state"
+            | "type"
+            | "upgrade"
+            | "version"
+            | "wait"
+            | "tools"
+            | "fetch"
+            | "workflow"
+    )
+}
+
+fn root_help() -> String {
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch     Run multiple commands in one process and report per-item status\n  click     Click an element matching a selector or @ref\n  fill      Fill an input element, replacing its content\n  find      Find an element semantically and optionally act on it\n  get       Inspect page and element values\n  goto      Navigate to a URL (alias for open)\n  is        Check page and element state\n  open      Open a URL in the browser and wait for load\n  press     Press a keyboard key on an element\n  read      Render the page as markdown (or JSON) in the symfetch output schema\n  snapshot  Render the accessibility tree\n  type      Type text into an element, appending to its content\n  wait      Wait for a browser condition\n\nNavigation Commands:\n  back      Navigate back in page history\n  forward   Navigate forward in page history\n  reload    Reload the current page\n\nState Commands:\n  profiles  List discovered Chrome profiles available for reuse\n  state     Save, restore and manage named browser session states\n\nDebug Commands:\n  config    Inspect symbrowse configuration\n  daemon    Run or inspect the symbrowse daemon\n  mcp       Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  upgrade   Check for and apply symbrowse updates\n  version   Print the symbrowse version\n\nFlows Commands:\n  flow      Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion  Generate the autocompletion script for the specified shell\n  help        Help about any command\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n"
+        .to_owned()
+}
+
+fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
+    let path = std::iter::once(command)
+        .chain(suffix.iter().copied())
+        .collect::<Vec<_>>()
+        .join(" ");
+    let (description, children) = match path.as_str() {
+        "config" => (
+            "Inspect symbrowse configuration",
+            "show        Show the effective configuration and its source\n",
+        ),
+        "state" => (
+            "Save, restore and manage named browser session states",
+            "clear       Delete one named state\nclean       Remove expired states\nkey         Provision the state-encryption key\nlist        List named states\nload        Restore cookies and web storage from a named state\nsave        Capture cookies and web storage into a named state\nshow        Show state metadata without values\n",
+        ),
+        "state key" => (
+            "Provision the state-encryption key",
+            "init        Generate and provision a state-encryption key\n",
+        ),
+        "daemon" => (
+            "Run or inspect the symbrowse daemon",
+            "status      Show daemon status\nstop        Stop the daemon\n",
+        ),
+        "flow" | "workflow" => (
+            "Validate, run and record declarative browser flows",
+            "list        List available flows\nrun         Run a flow\nvalidate    Validate a flow\n",
+        ),
+        "tools" => (
+            "List available MCP tools",
+            "list        List tools by profile\n",
+        ),
+        "mcp" => (
+            "Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)",
+            "",
+        ),
+        "version" => ("Print the symbrowse version", ""),
+        "upgrade" => ("Check for and apply symbrowse updates", ""),
+        "profiles" => ("List discovered Chrome profiles available for reuse", ""),
+        "batch" => (
+            "Run multiple commands in one process and report per-item status",
+            "",
+        ),
+        _ => return None,
+    };
+    let usage = if children.is_empty() {
+        format!("symbrowse {path} [flags]")
+    } else {
+        format!("symbrowse {path} [command]")
+    };
+    let mut help = format!("{description}\n\nUsage:\n  {usage}\n");
+    if !children.is_empty() {
+        help.push_str(&format!("\nAvailable Commands:\n{children}"));
+    }
+    help.push_str("\nFlags:\n  -h, --help   help for ");
+    help.push_str(suffix.last().copied().unwrap_or(command));
+    help.push_str("\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n");
+    Some(help)
+}
+
+fn help_for_path(path: &[&str]) -> String {
+    let Some((command, suffix)) = path.split_first() else {
+        return root_help();
+    };
+    let command = if *command == "workflow" {
+        "flow"
+    } else {
+        command
+    };
+    if implemented_help_command(command) {
+        if let Some(text) = help_catalog::help(command, suffix) {
+            return text.to_owned();
+        }
+        if let Some(text) = command_help(command, suffix) {
+            return text;
+        }
+    }
+    root_help()
+}
+
+fn parse_completion(values: &[String]) -> Result<Action, ParseError> {
+    if values
+        .get(1)
+        .is_some_and(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        return Ok(Action::Help(completion_help().to_owned()));
+    }
+    let Some(shell) = values.get(1).map(String::as_str) else {
+        return Err(ParseError {
+            message: "completion requires one shell: bash, zsh, fish or powershell".into(),
+            exit_code: 2,
+        });
+    };
+    if completion::script(shell).is_none() {
+        return Err(ParseError {
+            message: format!("unsupported shell {shell:?}; choose bash, zsh, fish or powershell"),
+            exit_code: 2,
+        });
+    }
+    if values
+        .iter()
+        .skip(2)
+        .any(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        return Ok(Action::Help(completion_shell_help(shell)));
+    }
+    let mut no_descriptions = false;
+    for value in values.iter().skip(2) {
+        match value.as_str() {
+            "--no-descriptions" => no_descriptions = true,
+            value if value.starts_with("--no-descriptions=") => {
+                no_descriptions = parse_bool("--no-descriptions", &value[18..])?;
+            }
+            value if value.starts_with('-') => {
+                return Err(ParseError {
+                    message: format!("unknown flag: {value}"),
+                    exit_code: 2,
+                });
+            }
+            value => {
+                return Err(ParseError {
+                    message: format!("unknown argument {value:?}"),
+                    exit_code: 2,
+                });
+            }
+        }
+    }
+    Ok(Action::Completion {
+        shell: shell.to_owned(),
+        no_descriptions,
+    })
+}
+
+fn completion_shell_help(shell: &str) -> String {
+    let (description, long) = match shell {
+        "bash" => (
+            "Generate the autocompletion script for the bash shell",
+            "This script depends on the 'bash-completion' package.\nIf it is not installed already, you can install it via your OS's package manager.\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion bash)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion bash > /etc/bash_completion.d/symbrowse\n\n#### macOS:\n\n\tsymbrowse completion bash > $(brew --prefix)/etc/bash_completion.d/symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "zsh" => (
+            "Generate the autocompletion script for the zsh shell",
+            "If shell completion is not already enabled in your environment you will need\nto enable it.  You can execute the following once:\n\n\techo \"autoload -U compinit; compinit\" >> ~/.zshrc\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion zsh)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion zsh > \"${fpath[1]}/_symbrowse\"\n\n#### macOS:\n\n\tsymbrowse completion zsh > $(brew --prefix)/share/zsh/site-functions/_symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "fish" => (
+            "Generate the autocompletion script for the fish shell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion fish | source\n\nTo load completions for every new session, execute once:\n\n\tsymbrowse completion fish > ~/.config/fish/completions/symbrowse.fish\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "powershell" => (
+            "Generate the autocompletion script for powershell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion powershell | Out-String | Invoke-Expression\n\nTo load completions for every new session, add the output of the above command\nto your powershell profile.",
+        ),
+        _ => return completion_help().to_owned(),
+    };
+    let usage_suffix = if shell == "bash" { "" } else { " [flags]" };
+    format!(
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n  -h, --help              help for {shell}\n      --no-descriptions   disable completion descriptions\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+    )
+}
+
+fn completion_help() -> &'static str {
+    "Generate the autocompletion script for symbrowse for the specified shell.\nSee each sub-command's help for details on how to use the generated script.\n\nUsage:\n  symbrowse completion [command]\n\nAvailable Commands:\n  bash        Generate the autocompletion script for bash\n  fish        Generate the autocompletion script for fish\n  powershell  Generate the autocompletion script for powershell\n  zsh         Generate the autocompletion script for zsh\n\nFlags:\n  -h, --help   help for completion\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse completion [command] --help\" for more information about a command.\n"
+}
+
 fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     let values: Vec<String> = args
         .iter()
         .map(|value| value.to_string_lossy().into_owned())
         .collect();
+    if values.first().is_some_and(|value| value == "completion") {
+        return parse_completion(&values);
+    }
+    if values
+        .first()
+        .is_some_and(|value| matches!(value.as_str(), "__complete" | "__completeNoDesc"))
+    {
+        return Ok(Action::CompletionRequest {
+            args: values[1..].to_vec(),
+            no_descriptions: values[0] == "__completeNoDesc",
+        });
+    }
     if root_version_requested(&values)? {
         return Ok(Action::RootVersion);
+    }
+    if let Some(help_index) = values
+        .iter()
+        .take_while(|value| value.as_str() != "--")
+        .position(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        let Some(command_index) = top_command_index(&values[..help_index]) else {
+            return Ok(Action::Help(root_help()));
+        };
+        let command = values[command_index].as_str();
+        let suffix = values[command_index + 1..help_index]
+            .iter()
+            .filter(|value| !value.starts_with('-'))
+            .map(String::as_str)
+            .collect::<Vec<_>>();
+        if command == "help" {
+            return Ok(Action::Help(help_for_path(&suffix)));
+        }
+        if implemented_help_command(command) {
+            if let Some(text) = help_catalog::help(command, &suffix) {
+                return Ok(Action::Help(text.to_owned()));
+            }
+            if let Some(text) = command_help(command, &suffix) {
+                return Ok(Action::Help(text));
+            }
+        }
     }
     let Some(command_index) = top_command_index(&values) else {
         if let Some(value) = values.iter().find(|value| value.starts_with('-')) {
@@ -1044,6 +1319,12 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         });
     };
     match values[command_index].as_str() {
+        "help" => Ok(Action::Help(help_for_path(
+            &values[command_index + 1..]
+                .iter()
+                .map(String::as_str)
+                .collect::<Vec<_>>(),
+        ))),
         "version" => parse_version(&values, command_index),
         "upgrade" => parse_upgrade(&values, command_index),
         "config" => parse_config(&values, command_index),
