@@ -1,0 +1,15 @@
+{
+  "timestamp": "2099-01-01T00:00:00Z",
+  "release": {
+    "TagName": "v0.0.1",
+    "Body": "Local fixture release",
+    "HTMLURL": "https://github.com/danieljustus/symaira-browse/releases/tag/v0.0.1",
+    "Assets": [
+      {
+        "Name": "symbrowse_linux_amd64.tar.gz",
+        "BrowserDownloadURL": "https://github.com/danieljustus/symaira-browse/releases/download/v0.0.1/symbrowse_linux_amd64.tar.gz",
+        "Size": 100
+      }
+    ]
+  }
+}
