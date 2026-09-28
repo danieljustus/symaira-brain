@@ -92,6 +92,29 @@ struct ProfileSummaryTests {
     }
 }
 
+struct ProfileSummaryBrokenEntryTests {
+    /// Real `profile list --json` shape with one valid and one broken profile (#460).
+    @Test func decodesBrokenEntryWithoutFailingTheList() throws {
+        let json = """
+        [
+            {"name": "personal", "description": "Full access", "servers": [{"server": "vault", "enabled": true, "mode": "full"}]},
+            {"name": "broken", "error": "parse profile broken: toml: line 1: expected '='"}
+        ]
+        """
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let profiles = try decoder.decode([ProfileSummary].self, from: Data(json.utf8))
+
+        #expect(profiles.count == 2)
+        #expect(profiles[0].error == nil)
+        #expect(profiles[0].servers.count == 1)
+        #expect(profiles[1].name == "broken")
+        #expect(profiles[1].description == "")
+        #expect(profiles[1].servers.isEmpty)
+        #expect(profiles[1].error?.hasPrefix("parse profile broken") == true)
+    }
+}
+
 struct ProfileDetailTests {
     @Test func decodesProfileShowJSON() throws {
         let json = """
