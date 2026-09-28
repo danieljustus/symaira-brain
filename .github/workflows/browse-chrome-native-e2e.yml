@@ -74,6 +74,8 @@ jobs:
           cargo test --locked -p symbrowse-engine-chrome --test full \
             -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
           cargo test --locked -p symbrowse-engine-chrome --test full \
+            -- --exact blank_page_data_url_navigation_completes_and_remains_usable --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test full \
             -- --exact blank_page_attaches_before_navigation_and_remains_usable --nocapture
 
       - name: Run macOS production-daemon Chrome E2E

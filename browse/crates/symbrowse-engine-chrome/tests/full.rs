@@ -104,6 +104,63 @@ async fn blank_page_attaches_before_navigation_and_remains_usable() {
 }
 
 #[tokio::test]
+async fn blank_page_data_url_navigation_completes_and_remains_usable() {
+    if !e2e_enabled() {
+        return;
+    }
+
+    let profile = std::env::temp_dir().join(format!(
+        "symbrowse-rust012-data-url-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos()
+    ));
+    let _profile_cleanup = ProfileCleanup(profile.clone());
+    let session = ChromeSession::connect(
+        BrowserMode::Launch {
+            executable: chrome_executable(),
+            user_data_dir: profile,
+            headless: true,
+        },
+        Duration::from_secs(20),
+    )
+    .await
+    .expect("launch Chrome");
+    let page = session
+        .new_page("about:blank")
+        .await
+        .expect("attach blank page");
+
+    let opened = page
+        .open_with_timeout(
+            "data:text/html,%3Ctitle%3Edata-url%3C/title%3E%3Cp%3Eready%3C/p%3E",
+            Duration::from_secs(10),
+        )
+        .await
+        .expect("complete data URL navigation");
+    assert!(
+        opened["url"]
+            .as_str()
+            .unwrap_or_default()
+            .starts_with("data:text/html,")
+    );
+    assert_eq!(opened["title"], "data-url");
+    assert_eq!(
+        page.raw()
+            .evaluate("document.readyState")
+            .await
+            .expect("read data URL ready state")
+            .into_value::<String>()
+            .expect("decode data URL ready state"),
+        "complete"
+    );
+
+    session.close().await.expect("close Chrome");
+}
+
+#[tokio::test]
 async fn blank_page_navigation_handles_redirect_reload_and_http_error_loads() {
     if !e2e_enabled() {
         return;
