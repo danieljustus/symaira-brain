@@ -366,7 +366,7 @@ def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> i
     return sum(windows_profile_process_names(profile_root, timeout).values())
 
 
-def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 3.0) -> int:
+def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 15.0) -> int:
     """Poll outside the measured interval until Chrome releases the sample profile."""
     deadline = time.monotonic() + timeout
     count = 0
@@ -374,7 +374,7 @@ def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 3.0) -
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             return count
-        count = windows_profile_process_count(profile_root, timeout=min(5.0, max(1.0, remaining)))
+        count = windows_profile_process_count(profile_root, timeout=max(1.0, remaining))
         if count == 0:
             return 0
         remaining = deadline - time.monotonic()
@@ -451,16 +451,19 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                 if diagnostic is not None:
                     outcome["daemon_shutdown_log"] = diagnostic
                 if outcome["status"] == "pass":
-                    outcome = {"status": "error", "phase": "chrome-cleanup",
-                               "reason": "Chrome processes still reference the stopped sample profile",
-                               "chrome_profile_processes_after_stop": remaining}
-        except (OSError, subprocess.SubprocessError, ValueError):
+                    outcome.update(status="error", phase="chrome-cleanup",
+                                   reason="Chrome processes still reference the stopped sample profile")
+        except (OSError, subprocess.SubprocessError, ValueError) as error:
             diagnostic = daemon_startup_log(env)
             if diagnostic is not None:
                 outcome["daemon_shutdown_log"] = diagnostic
+            if isinstance(error, subprocess.TimeoutExpired):
+                outcome["chrome_cleanup_probe_error"] = f"TimeoutExpired after {error.timeout}s"
+            else:
+                outcome["chrome_cleanup_probe_error"] = f"{type(error).__name__}: {str(error)[:200]}"
             if outcome["status"] == "pass":
-                outcome = {"status": "error", "phase": "chrome-cleanup",
-                           "reason": "Windows Chrome profile cleanup could not be verified"}
+                outcome.update(status="error", phase="chrome-cleanup",
+                               reason="Windows Chrome profile cleanup could not be verified")
             else:
                 outcome["chrome_cleanup_probe"] = "unavailable"
     if outcome.get("error_code") == "daemon_unavailable":

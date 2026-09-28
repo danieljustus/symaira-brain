@@ -17,7 +17,7 @@ from chrome_pair import (
     remove_owned_tempdir, summarize_stage,
     paired_gate_passes, read_output_markers, validate_read_output,
     wait_for_daemon_exit, daemon_startup_log, windows_profile_process_count,
-    flow, measure, run_cli,
+    wait_for_windows_profile_cleanup, flow, measure, run_cli,
 )
 
 
@@ -34,6 +34,12 @@ class ChromePairTests(unittest.TestCase):
         self.assertIn("Get-CimInstance Win32_Process", run.call_args.args[0][-1])
         self.assertEqual(run.call_args.kwargs["timeout"], 5)
 
+    def test_windows_profile_cleanup_probe_has_time_for_process_enumeration(self):
+        with patch("chrome_pair.windows_profile_process_count", return_value=0) as count:
+            self.assertEqual(wait_for_windows_profile_cleanup(Path("D:/runner/sample-profile")), 0)
+
+        self.assertGreaterEqual(count.call_args.kwargs["timeout"], 14.9)
+
     def test_rust_flow_fails_when_chrome_keeps_the_stopped_profile_open(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -42,13 +48,34 @@ class ChromePairTests(unittest.TestCase):
                 (0, "{}", ""), (0, response, ""), (0, "", ""),
                 (0, json.dumps({"success": True, "data": {"running": False}}), ""),
             ]), patch("chrome_pair.sys.platform", "win32"), \
-                 patch("chrome_pair.wait_for_windows_profile_cleanup", return_value=2):
+                 patch("chrome_pair.wait_for_windows_profile_cleanup", return_value=2), \
+                 patch("chrome_pair.daemon_startup_log", return_value="symbrowse shutdown: browser close closed"):
                 result = flow(root / "symbrowse", "rust", root / "chrome", None,
                               "http://127.0.0.1/fixture.html", root, 0)
 
         self.assertEqual(result["status"], "error")
         self.assertEqual(result["phase"], "chrome-cleanup")
         self.assertEqual(result["chrome_profile_processes_after_stop"], 2)
+        self.assertIn("browser close closed", result["daemon_shutdown_log"])
+
+    def test_rust_flow_preserves_shutdown_log_when_process_probe_times_out(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            response = json.dumps({"success": True, "data": {"title": FIXTURE_TITLE, "markdown": FIXTURE_TOKEN}})
+            with patch("chrome_pair.run_cli", side_effect=[
+                (0, "{}", ""), (0, response, ""), (0, "", ""),
+                (0, json.dumps({"success": True, "data": {"running": False}}), ""),
+            ]), patch("chrome_pair.sys.platform", "win32"), \
+                 patch("chrome_pair.wait_for_windows_profile_cleanup",
+                       side_effect=subprocess.TimeoutExpired("powershell.exe", 15)), \
+                 patch("chrome_pair.daemon_startup_log", return_value="symbrowse shutdown: browser close close-timeout"):
+                result = flow(root / "symbrowse", "rust", root / "chrome", None,
+                              "http://127.0.0.1/fixture.html", root, 0)
+
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["phase"], "chrome-cleanup")
+        self.assertEqual(result["chrome_cleanup_probe_error"], "TimeoutExpired after 15s")
+        self.assertIn("browser close close-timeout", result["daemon_shutdown_log"])
 
     def test_run_cli_keeps_the_decoded_output_limit(self):
         with tempfile.TemporaryDirectory() as temporary:

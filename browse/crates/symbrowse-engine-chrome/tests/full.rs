@@ -247,6 +247,14 @@ async fn blank_page_navigation_handles_redirect_reload_and_http_error_loads() {
         "complete"
     );
 
+    for iteration in 0..24 {
+        let opened = page
+            .open_with_timeout(&format!("{}/", server.base_url), Duration::from_secs(10))
+            .await
+            .unwrap_or_else(|error| panic!("repeat navigation {iteration} failed: {error}"));
+        assert_eq!(opened["title"], "rust012");
+    }
+
     session.close().await.expect("close Chrome");
 }
 

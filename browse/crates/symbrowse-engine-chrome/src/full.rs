@@ -388,60 +388,15 @@ impl ChromePage {
         &self,
         url: &str,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        if url
-            .trim_start()
-            .get(..5)
-            .is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"))
-        {
-            self.page.goto(url).await?;
-            return Ok(());
-        }
-        let initial = self
-            .evaluate_runtime_json("({url: location.href, time_origin: performance.timeOrigin})")
-            .await?;
-        let initial_url = initial
-            .get("url")
-            .and_then(Value::as_str)
-            .unwrap_or_default();
-        let initial_time_origin = initial
-            .get("time_origin")
-            .and_then(Value::as_f64)
-            .unwrap_or_default();
-        let expression = format!(
-            "(() => {{ const target = new URL({}, location.href); setTimeout(() => location.assign(target.href), 0); }})()",
-            serde_json::to_string(url)?
-        );
-        let response = self
-            .page
-            .execute(
-                runtime::EvaluateParams::builder()
-                    .expression(expression)
-                    .return_by_value(true)
-                    .build()?,
-            )
-            .await?;
-        if let Some(exception) = response.result.exception_details {
-            return Err(format!("Chrome navigation evaluation failed: {exception:?}").into());
-        }
-
-        loop {
-            let state = self
-                .evaluate_runtime_json(
-                    "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
-                )
-                .await?;
-            let url_changed = state.get("url").and_then(Value::as_str) != Some(initial_url);
-            let document_changed = state
-                .get("time_origin")
-                .and_then(Value::as_f64)
-                .is_some_and(|time_origin| time_origin != initial_time_origin);
-            if (url_changed || document_changed)
-                && state.get("ready_state").and_then(Value::as_str) == Some("complete")
-            {
-                return Ok(());
-            }
-            tokio::time::sleep(Duration::from_millis(25)).await;
-        }
+        // Use the protocol navigation command rather than scheduling
+        // location.assign from Runtime.evaluate. A zero-delay timer can
+        // navigate away before chromiumoxide receives the evaluation result,
+        // which closes the inspected execution context and makes a successful
+        // navigation look like an open failure. `Page::goto` sends
+        // Page.navigate and waits for the matching load event, as the Go
+        // engine does before reading final document state.
+        self.page.goto(url).await?;
+        Ok(())
     }
 
     async fn evaluate_runtime_json(
