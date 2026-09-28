@@ -501,7 +501,6 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
     report: dict[str, Any] = {
         "schema_version": 1, "report_version": "perf003-real-chrome-paired-v1",
         "target": args.target, "source_revision": revision,
-        "diagnostic_only": args.target == "windows-amd64",
         "host": {"system": platform.system(), "machine": platform.machine()}, "status": "blocked",
         "fixture": {"id": "perf003-local-chrome-html-v1", "title": FIXTURE_TITLE,
                     "content_token": FIXTURE_TOKEN, "flow": ["open", "read"]},
@@ -553,7 +552,6 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 try:
                     sample = flow(
                         binary, implementation, args.chrome, args.chrome_launcher, url, temp, index,
-                        diagnostics=args.target == "windows-amd64" and implementation == "rust",
                     )
                 except BaseException as primary:
                     try:

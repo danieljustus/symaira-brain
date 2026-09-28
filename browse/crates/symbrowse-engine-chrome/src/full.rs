@@ -345,11 +345,6 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
     )
 }
 
-fn direct_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
-    let url = serde_json::to_string(url)?;
-    Ok(format!("location.assign({url}); 'navigating'"))
-}
-
 impl ChromePage {
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
@@ -435,11 +430,9 @@ impl ChromePage {
         Ok(serde_json::json!({"url": page_url, "title": title}))
     }
 
-    // chromiumoxide intercepts Page.navigate and queues it behind its own
-    // frame-lifecycle watcher. On some native Chrome targets that command can
-    // remain queued while the current document stays unchanged. Assign the URL
-    // in the current page session, then use the Go-compatible document-state
-    // poll below to confirm that navigation completed.
+    // Send Page.navigate directly through the CDP session. The Page::goto
+    // helper waits on chromiumoxide's frame-lifecycle watcher; the Go adapter
+    // instead dispatches navigation and polls document state independently.
     async fn navigate_and_wait_for_load(
         &self,
         url: &str,
@@ -465,9 +458,8 @@ impl ChromePage {
             .and_then(Value::as_f64)
             .unwrap_or_default();
         perf_diagnostic("navigation.baseline.ready");
-        let expression = direct_navigation_expression(url)?;
         perf_diagnostic("navigation.dispatch.start");
-        self.evaluate_runtime_json(&expression).await?;
+        self.page.execute(page::NavigateParams::new(url)).await?;
         perf_diagnostic("navigation.dispatch.ready");
         let poll = async {
             let diagnostics = perf_diagnostics_enabled();
@@ -1220,13 +1212,12 @@ mod tests {
     }
 
     #[test]
-    fn direct_navigation_quotes_urls_as_javascript_strings() {
-        let expression = direct_navigation_expression("https://example.test/a'b?x=1&y=2")
-            .expect("JSON string encoding");
-        assert!(expression.contains(r#"location.assign("https://example.test/a'b?x=1&y=2")"#));
+    fn navigation_uses_raw_page_navigate_cdp_command() {
+        let params = page::NavigateParams::new("https://example.test/a'b?x=1&y=2");
+        assert_eq!(page::NavigateParams::IDENTIFIER, "Page.navigate");
         assert_eq!(
-            expression,
-            r#"location.assign("https://example.test/a'b?x=1&y=2"); 'navigating'"#
+            serde_json::to_value(params).expect("serialize CDP params"),
+            json!({"url": "https://example.test/a'b?x=1&y=2"})
         );
     }
 
