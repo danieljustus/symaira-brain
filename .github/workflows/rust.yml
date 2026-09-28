@@ -125,6 +125,9 @@ jobs:
             ~/.cargo/git
           key: rust-hybrid-candidate-v1-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}
 
+      - name: Check Browse CLI help and completion parity
+        run: cargo test --manifest-path browse/Cargo.toml -p symbrowse-cli --locked --test help_oracle
+
       - name: Determine unpublished candidate version
         id: candidate
         run: |

@@ -1,6 +1,8 @@
 #![deny(unsafe_code)]
 
 mod browser_profiles;
+mod completion;
+mod help_catalog;
 mod upgrade;
 
 use std::{
@@ -37,6 +39,15 @@ const VERSION: &str = match option_env!("SYMBROWSE_VERSION") {
 
 #[derive(Debug, Eq, PartialEq)]
 enum Action {
+    Help(String),
+    Completion {
+        shell: String,
+        no_descriptions: bool,
+    },
+    CompletionRequest {
+        args: Vec<String>,
+        no_descriptions: bool,
+    },
     RootVersion,
     Version {
         structured: bool,
@@ -144,6 +155,29 @@ struct StateSuccess<'a> {
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
     match parse(&args) {
+        Ok(Action::Help(text)) => write_stdout(&text),
+        Ok(Action::Completion {
+            shell,
+            no_descriptions,
+        }) => {
+            let script = if no_descriptions {
+                completion::script_without_descriptions(&shell)
+            } else {
+                completion::script(&shell).map(str::to_owned)
+            };
+            script.map_or_else(|| ExitCode::from(2), |script| write_stdout(&script))
+        }
+        Ok(Action::CompletionRequest {
+            args,
+            no_descriptions,
+        }) => {
+            let output = if no_descriptions {
+                completion::complete_no_descriptions(&args)
+            } else {
+                completion::complete(&args)
+            };
+            write_stdout(&output)
+        }
         Ok(Action::RootVersion) => write_stdout(&render_root_version(VERSION)),
         Ok(Action::Version { structured: true }) => match render_version_json(VERSION) {
             Ok(output) => write_stdout(&output),
@@ -902,6 +936,10 @@ fn json_type_name(value: &serde_json::Value) -> &'static str {
 fn execute_batch_item(argv: &[String]) -> ItemOutput {
     let args: Vec<OsString> = argv.iter().map(OsString::from).collect();
     match parse(&args) {
+        Ok(Action::Help(stdout)) => ItemOutput {
+            stdout,
+            error: None,
+        },
         Ok(Action::RootVersion) => ItemOutput {
             stdout: render_root_version(VERSION),
             error: None,
@@ -1023,13 +1061,370 @@ fn write_config_error(format: Format, message: &str) -> ExitCode {
     ExitCode::from(9)
 }
 
+fn implemented_help_command(command: &str) -> bool {
+    matches!(
+        command,
+        "batch"
+            | "back"
+            | "click"
+            | "config"
+            | "daemon"
+            | "fill"
+            | "find"
+            | "flow"
+            | "forward"
+            | "get"
+            | "goto"
+            | "is"
+            | "mcp"
+            | "open"
+            | "press"
+            | "profiles"
+            | "read"
+            | "reload"
+            | "snapshot"
+            | "state"
+            | "type"
+            | "upgrade"
+            | "version"
+            | "wait"
+            | "tools"
+            | "fetch"
+            | "workflow"
+    )
+}
+
+fn root_help() -> String {
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch     Run multiple commands in one process and report per-item status\n  click     Click an element matching a selector or @ref\n  fill      Fill an input element, replacing its content\n  find      Find an element semantically and optionally act on it\n  get       Inspect page and element values\n  goto      Navigate to a URL (alias for open)\n  is        Check page and element state\n  open      Open a URL in the browser and wait for load\n  press     Press a keyboard key on an element\n  read      Render the page as markdown (or JSON) in the symfetch output schema\n  snapshot  Render the accessibility tree\n  type      Type text into an element, appending to its content\n  wait      Wait for a browser condition\n\nNavigation Commands:\n  back      Navigate back in page history\n  forward   Navigate forward in page history\n  reload    Reload the current page\n\nState Commands:\n  profiles  List discovered Chrome profiles available for reuse\n  state     Save, restore and manage named browser session states\n\nDebug Commands:\n  config    Inspect symbrowse configuration\n  daemon    Run or inspect the symbrowse daemon\n  mcp       Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  upgrade   Check for and apply symbrowse updates\n  version   Print the symbrowse version\n\nFlows Commands:\n  flow      Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion  Generate the autocompletion script for the specified shell\n  help        Help about any command\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n"
+        .to_owned()
+}
+
+fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
+    let first = suffix.first().copied();
+    let target = match command {
+        "workflow" => "flow",
+        other => other,
+    };
+    let global = "Global Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n";
+    let session_global = "Global Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n";
+    let plain = |description: &str, usage: &str, flags: &str, globals: &str| {
+        format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
+    };
+    match (target, first) {
+        ("version", None) => Some(plain(
+            "Print the symbrowse version",
+            "symbrowse version [flags]",
+            "  -h, --help   help for version\n",
+            global,
+        )),
+        ("upgrade", None) => Some(plain(
+            "upgrade checks GitHub for a newer release (cached for 24h), verifies the asset checksum (and cosign signature when available), and atomically replaces the running binary with backup and rollback. Homebrew installations are not replaced — the command prints the brew upgrade hint instead.",
+            "symbrowse upgrade [flags]",
+            "      --check   only check for updates, do not apply\n  -h, --help    help for upgrade\n",
+            global,
+        )),
+        ("profiles", None) => Some(plain(
+            "List discovered Chrome profiles available for reuse",
+            "symbrowse profiles [flags]",
+            "  -h, --help   help for profiles\n",
+            global,
+        )),
+        ("batch", None) => Some(plain(
+            "batch runs each quoted command string as a symbrowse invocation in the same process, which avoids one daemon autostart and process startup per command. Without positional arguments a JSON array of command strings is read from stdin. --bail stops at the first failure; --dry-run returns the execution plan with risk classes without executing anything.",
+            "symbrowse batch <cmd> [cmd...] [flags]",
+            "      --bail      stop at the first failed command\n      --dry-run   return the execution plan without executing\n  -h, --help      help for batch\n",
+            global,
+        )),
+        ("config", None) => Some(
+            "Inspect symbrowse configuration\n\nUsage:\n  symbrowse config [command]\n\nAvailable Commands:\n  show        Show the effective configuration and its source\n\nFlags:\n  -h, --help   help for config\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse config [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("config", Some("show")) => Some(plain(
+            "Show the effective configuration and its source",
+            "symbrowse config show [flags]",
+            "      --cache-dir string         override the cache directory\n      --config-dir string        override the config directory\n      --executable-path string   override the browser executable path\n  -h, --help                     help for show\n      --log-format string        override the configured log format\n      --log-level string         override the configured log level\n      --state-dir string         override the state directory\n",
+            global,
+        )),
+        ("state", None) => Some(
+            "Save, restore and manage named browser session states\n\nUsage:\n  symbrowse state [command]\n\nAvailable Commands:\n  clean       Remove expired states (or states older than --older-than days)\n  clear       Delete one named state\n  key         Provision the state-encryption key\n  list        List named states\n  load        Restore cookies and web storage from a named state\n  save        Capture cookies and web storage into a named state\n  show        Show state metadata (origins, counts, age) without values\n\nFlags:\n  -h, --help             help for state\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse state [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("state", Some("key")) if suffix.get(1).is_none() => Some(
+            "Provision the state-encryption key\n\nUsage:\n  symbrowse state key [command]\n\nAvailable Commands:\n  init        Generate and provision a state-encryption key without rotating an existing key\n\nFlags:\n  -h, --help   help for key\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n\nUse \"symbrowse state key [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("state", Some("key")) if suffix.get(1) == Some(&"init") => Some(plain(
+            "Generate and provision a state-encryption key without rotating an existing key",
+            "symbrowse state key init [flags]",
+            "  -h, --help   help for init\n",
+            session_global,
+        )),
+        ("state", Some(subcommand @ ("save" | "load" | "show" | "clear"))) => {
+            let description = match subcommand {
+                "save" => "Capture cookies and web storage into a named state",
+                "load" => "Restore cookies and web storage from a named state",
+                "show" => "Show state metadata (origins, counts, age) without values",
+                "clear" => "Delete one named state",
+                _ => unreachable!(),
+            };
+            Some(plain(
+                description,
+                &format!("symbrowse state {subcommand} <name> [flags]"),
+                &format!("  -h, --help   help for {subcommand}\n"),
+                session_global,
+            ))
+        }
+        ("state", Some(subcommand @ ("list" | "clean"))) => {
+            let description = if subcommand == "list" {
+                "List named states"
+            } else {
+                "Remove expired states (or states older than --older-than days)"
+            };
+            let flags = if subcommand == "clean" {
+                "  -h, --help                help for clean\n      --older-than string   remove states saved more than this many days ago\n"
+            } else {
+                "  -h, --help   help for list\n"
+            };
+            Some(plain(
+                description,
+                &format!("symbrowse state {subcommand} [flags]"),
+                flags,
+                session_global,
+            ))
+        }
+        ("flow", Some("list")) => Some(plain(
+            "List discovered flows with their origin",
+            "symbrowse flow list [flags]",
+            "  -h, --help   help for list\n",
+            global,
+        )),
+        ("flow", Some("validate")) => Some(plain(
+            "Validate a flow document with line-accurate errors",
+            "symbrowse flow validate <datei> [flags]",
+            "  -h, --help   help for validate\n",
+            global,
+        )),
+        ("flow", Some("run")) => Some(plain(
+            "Execute a flow step by step (assertions are hard abort conditions)",
+            "symbrowse flow run <name> [flags]",
+            "      --dry-run             print the execution plan with risk classes without executing\n  -h, --help                help for run\n      --input stringArray   flow input as k=v (repeatable)\n      --session string      daemon session name (default \"default\")\n",
+            global,
+        )),
+        ("mcp", None) => Some(
+            "mcp runs the Model Context Protocol stdio server. Tools proxy to the local symbrowse daemon; every tool accepts an optional session argument. No byte is written to stdout except JSON-RPC frames (zero stdout pollution); all logging goes to stderr.\n\nTool profiles select the registered tools (--tools core|nav|state|network|debug|flows|all, comma-separated combinations allowed; default core).\n\nSecurity defaults in MCP mode: the daemon is started with the SSRF guard enabled, so private and loopback targets are denied. Pass --allow-private to permit them explicitly. The domain allowlist stays configurable through the daemon flags and config.toml.\n\nThe browser engine is selected with --engine, or persistently through the engine key in config.toml (the flag wins). The selected engine is passed to the daemon this server starts.\n\nUsage:\n  symbrowse mcp [flags]\n\nFlags:\n      --allow-private    allow private and loopback targets (SSRF opt-out; MCP mode denies them by default)\n      --engine string    engine implementation: chrome (default), static (JS-free HTML reader), safari-attach (live Safari session via Apple Events), or safari-bidi (isolated Safari via safaridriver --bidi) (default \"chrome\")\n  -h, --help             help for mcp\n      --list-profiles    describe every tool profile and its tool count, then exit\n      --session string   default session for tool calls without a session argument (default \"default\")\n      --tools string     tool profiles to register: core|nav|state|network|debug|flows|all (comma-separated combinations allowed) (default \"core\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned(),
+        ),
+        ("tools", Some("list")) => Some(plain(
+            "List registered Browse tools for one or more profiles",
+            "symbrowse tools list [flags]",
+            "  -h, --help              help for list\n      --profiles string   comma-separated tool profiles (default \"core\")\n      --tools string      alias for --profiles\n",
+            global,
+        )),
+        ("tools", None) => Some(
+            "List registered Browse tools for one or more profiles\n\nUsage:\n  symbrowse tools [command]\n\nAvailable Commands:\n  list        List registered Browse tools for one or more profiles\n\nFlags:\n  -h, --help   help for tools\n\nUse \"symbrowse tools [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("daemon", Some("status" | "stop")) => Some(format!(
+            "Usage:\n  symbrowse daemon {} [flags]\n\nUse --help with an implemented command for its usage.\n",
+            first.unwrap()
+        )),
+        ("daemon", None | Some("run")) => Some("Run or inspect the symbrowse daemon\n\nUsage:\n  symbrowse daemon [flags]\n".to_owned()),
+        ("flow", None) => Some(
+            "flow manages declarative, versioned browser automation scripts. Flows are YAML documents with semantic finders, hard domain constraints and op://…-only secret references.\n\nUsage:\n  symbrowse flow [command]\n\nAvailable Commands:\n  list        List discovered flows with their origin\n  run         Execute a flow step by step (assertions are hard abort conditions)\n  validate    Validate a flow document with line-accurate errors\n\nFlags:\n  -h, --help   help for flow\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse flow [command] --help\" for more information about a command.\n".to_owned(),
+        ),
+        ("config", Some(_)) | ("state", Some(_)) | ("flow", Some(_)) | ("tools", Some(_)) => None,
+        ("open" | "goto" | "fetch", None) => {
+            Some("Usage:\n  symbrowse <open|goto|fetch> <url> [flags]\n".to_owned())
+        }
+        (
+            "back" | "click" | "fill" | "find" | "forward" | "get" | "is" | "press" | "read"
+            | "reload" | "snapshot" | "type" | "wait",
+            None,
+        ) => Some("Usage:\n  symbrowse <command> [arguments] [flags]\n".to_owned()),
+        _ => None,
+    }
+}
+
+fn help_for_path(path: &[&str]) -> String {
+    let Some((command, suffix)) = path.split_first() else {
+        return "Help provides help for any command in the application.\nSimply type symbrowse help [path to command] for full details.\n\nUsage:\n  symbrowse help [command] [flags]\n\nFlags:\n  -h, --help   help for help\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n".to_owned();
+    };
+    let command = if *command == "workflow" {
+        "flow"
+    } else {
+        command
+    };
+    if implemented_help_command(command) {
+        if let Some(text) = help_catalog::help(command, suffix) {
+            return text.to_owned();
+        }
+        if let Some(text) = command_help(command, suffix) {
+            return text;
+        }
+    }
+    root_help()
+}
+
+fn parse_completion(values: &[String], command_index: usize) -> Result<Action, ParseError> {
+    let mut no_descriptions = false;
+    let mut shell = None;
+    let mut help = false;
+    let mut index = 0;
+    while index < values.len() {
+        let value = values[index].as_str();
+        if index == command_index {
+            index += 1;
+            continue;
+        }
+        match value {
+            "--output" => {
+                let raw = values.get(index + 1).ok_or_else(|| ParseError {
+                    message: "flag needs an argument: --output".to_owned(),
+                    exit_code: 2,
+                })?;
+                parse_format(raw)?;
+                index += 2;
+            }
+            value if value.starts_with("--output=") => {
+                parse_format(&value[9..])?;
+                index += 1;
+            }
+            "--json" => index += 1,
+            value if value.starts_with("--json=") => {
+                parse_bool("--json", &value[7..])?;
+                index += 1;
+            }
+            "-h" | "--help" => {
+                help = true;
+                index += 1;
+            }
+            "--no-descriptions" => {
+                no_descriptions = true;
+                index += 1;
+            }
+            value if value.starts_with("--no-descriptions=") => {
+                no_descriptions = parse_bool("--no-descriptions", &value[18..])?;
+                index += 1;
+            }
+            value if value.starts_with('-') => {
+                return Err(ParseError {
+                    message: format!("unknown flag: {value}"),
+                    exit_code: 2,
+                });
+            }
+            value => {
+                if index < command_index {
+                    return Err(ParseError {
+                        message: format!("unknown argument {value:?}"),
+                        exit_code: 2,
+                    });
+                }
+                if shell.replace(value).is_some() {
+                    return Err(ParseError {
+                        message: format!("unknown argument {value:?}"),
+                        exit_code: 2,
+                    });
+                }
+                index += 1;
+            }
+        }
+    }
+    if help {
+        return Ok(Action::Help(shell.map_or_else(
+            || completion_help().to_owned(),
+            completion_shell_help,
+        )));
+    }
+    let Some(shell) = shell else {
+        return Err(ParseError {
+            message: "completion requires one shell: bash, zsh, fish or powershell".into(),
+            exit_code: 2,
+        });
+    };
+    if completion::script(shell).is_none() {
+        return Err(ParseError {
+            message: format!("unsupported shell {shell:?}; choose bash, zsh, fish or powershell"),
+            exit_code: 2,
+        });
+    }
+    Ok(Action::Completion {
+        shell: shell.to_owned(),
+        no_descriptions,
+    })
+}
+
+fn completion_shell_help(shell: &str) -> String {
+    let (description, long) = match shell {
+        "bash" => (
+            "Generate the autocompletion script for the bash shell",
+            "This script depends on the 'bash-completion' package.\nIf it is not installed already, you can install it via your OS's package manager.\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion bash)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion bash > /etc/bash_completion.d/symbrowse\n\n#### macOS:\n\n\tsymbrowse completion bash > $(brew --prefix)/etc/bash_completion.d/symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "zsh" => (
+            "Generate the autocompletion script for the zsh shell",
+            "If shell completion is not already enabled in your environment you will need\nto enable it.  You can execute the following once:\n\n\techo \"autoload -U compinit; compinit\" >> ~/.zshrc\n\nTo load completions in your current shell session:\n\n\tsource <(symbrowse completion zsh)\n\nTo load completions for every new session, execute once:\n\n#### Linux:\n\n\tsymbrowse completion zsh > \"${fpath[1]}/_symbrowse\"\n\n#### macOS:\n\n\tsymbrowse completion zsh > $(brew --prefix)/share/zsh/site-functions/_symbrowse\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "fish" => (
+            "Generate the autocompletion script for the fish shell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion fish | source\n\nTo load completions for every new session, execute once:\n\n\tsymbrowse completion fish > ~/.config/fish/completions/symbrowse.fish\n\nYou will need to start a new shell for this setup to take effect.",
+        ),
+        "powershell" => (
+            "Generate the autocompletion script for powershell",
+            "To load completions in your current shell session:\n\n\tsymbrowse completion powershell | Out-String | Invoke-Expression\n\nTo load completions for every new session, add the output of the above command\nto your powershell profile.",
+        ),
+        _ => return completion_help().to_owned(),
+    };
+    let usage_suffix = if shell == "bash" { "" } else { " [flags]" };
+    format!(
+        "{description}.\n\n{long}\n\nUsage:\n  symbrowse completion {shell}{usage_suffix}\n\nFlags:\n  -h, --help              help for {shell}\n      --no-descriptions   disable completion descriptions\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n"
+    )
+}
+
+fn completion_help() -> &'static str {
+    "Generate the autocompletion script for symbrowse for the specified shell.\nSee each sub-command's help for details on how to use the generated script.\n\nUsage:\n  symbrowse completion [command]\n\nAvailable Commands:\n  bash        Generate the autocompletion script for bash\n  fish        Generate the autocompletion script for fish\n  powershell  Generate the autocompletion script for powershell\n  zsh         Generate the autocompletion script for zsh\n\nFlags:\n  -h, --help   help for completion\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse completion [command] --help\" for more information about a command.\n"
+}
+
 fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     let values: Vec<String> = args
         .iter()
         .map(|value| value.to_string_lossy().into_owned())
         .collect();
+    if values
+        .first()
+        .is_some_and(|value| matches!(value.as_str(), "__complete" | "__completeNoDesc"))
+    {
+        return Ok(Action::CompletionRequest {
+            args: values[1..].to_vec(),
+            no_descriptions: values[0] == "__completeNoDesc",
+        });
+    }
     if root_version_requested(&values)? {
         return Ok(Action::RootVersion);
+    }
+    if let Some(command_index) = top_command_index(&values)
+        && values[command_index] == "completion"
+    {
+        return parse_completion(&values, command_index);
+    }
+    if let Some(help_index) = values
+        .iter()
+        .take_while(|value| value.as_str() != "--")
+        .position(|value| matches!(value.as_str(), "-h" | "--help"))
+    {
+        let Some(command_index) = top_command_index(&values[..help_index]) else {
+            return Ok(Action::Help(root_help()));
+        };
+        let command = values[command_index].as_str();
+        let suffix = values[command_index + 1..help_index]
+            .iter()
+            .filter(|value| !value.starts_with('-'))
+            .map(String::as_str)
+            .collect::<Vec<_>>();
+        if command == "help" {
+            return Ok(Action::Help(help_for_path(&suffix)));
+        }
+        if implemented_help_command(command) {
+            if let Some(text) = help_catalog::help(command, &suffix) {
+                return Ok(Action::Help(text.to_owned()));
+            }
+            if let Some(text) = command_help(command, &suffix) {
+                return Ok(Action::Help(text));
+            }
+        }
     }
     let Some(command_index) = top_command_index(&values) else {
         if let Some(value) = values.iter().find(|value| value.starts_with('-')) {
@@ -1044,6 +1439,12 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         });
     };
     match values[command_index].as_str() {
+        "help" => Ok(Action::Help(help_for_path(
+            &values[command_index + 1..]
+                .iter()
+                .map(String::as_str)
+                .collect::<Vec<_>>(),
+        ))),
         "version" => parse_version(&values, command_index),
         "upgrade" => parse_upgrade(&values, command_index),
         "config" => parse_config(&values, command_index),
