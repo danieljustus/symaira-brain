@@ -15,10 +15,7 @@ use std::{
 
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::{
-        browser_protocol::{accessibility, browser, dom, network, page, target},
-        js_protocol::runtime,
-    },
+    cdp::browser_protocol::{accessibility, browser, dom, network, page, target},
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -242,34 +239,20 @@ impl ChromeSession {
                         // attached session. Its Page/Frame initialization
                         // continues asynchronously, so wait until the initial
                         // frame tree is available before callers navigate.
-                        // Go's page setup similarly awaits its CDP enable and
-                        // frame setup commands before returning the page.
                         let mut mainframe_missing_reported = false;
                         loop {
                             chrome_open_stage("page-init-mainframe-start");
                             if page.mainframe().await?.is_some() {
                                 chrome_open_stage("page-init-mainframe-ready");
-                                // Match the Go adapter's page setup contract.
-                                // These domain enables are idempotent; awaiting
-                                // their acknowledgements ensures the attached
-                                // target is usable before the first navigation,
-                                // even while chromiumoxide finishes its own
-                                // asynchronous TargetInit sequence.
-                                chrome_open_stage("page-init-page-enable-start");
-                                page.execute(page::EnableParams::default()).await?;
-                                chrome_open_stage("page-init-page-enable-complete");
-                                chrome_open_stage("page-init-runtime-enable-start");
-                                page.execute(runtime::EnableParams::default()).await?;
-                                chrome_open_stage("page-init-runtime-enable-complete");
-                                chrome_open_stage("page-init-dom-enable-start");
-                                page.execute(dom::EnableParams::default()).await?;
-                                chrome_open_stage("page-init-dom-enable-complete");
-                                chrome_open_stage("page-init-accessibility-enable-start");
-                                page.execute(accessibility::EnableParams::default()).await?;
-                                chrome_open_stage("page-init-accessibility-enable-complete");
-                                chrome_open_stage("page-init-network-enable-start");
-                                page.execute(network::EnableParams::default()).await?;
-                                chrome_open_stage("page-init-network-enable-complete");
+                                // chromiumoxide's Page.goto waits for the
+                                // Page.navigate response and matching load
+                                // lifecycle event. get_page can return before
+                                // TargetInit confirms lifecycle events, so
+                                // confirm that required subscription first.
+                                chrome_open_stage("page-init-lifecycle-enable-start");
+                                page.execute(page::SetLifecycleEventsEnabledParams::new(true))
+                                    .await?;
+                                chrome_open_stage("page-init-lifecycle-enable-complete");
                                 return Ok(page);
                             }
                             if !mainframe_missing_reported {

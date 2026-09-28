@@ -87,16 +87,8 @@ class ChromePairTests(unittest.TestCase):
                         "chrome_open_stage=browser-connect-complete\n"
                         "chrome_open_stage=page-init-mainframe-start\n"
                         "chrome_open_stage=page-init-mainframe-ready\n"
-                        "chrome_open_stage=page-init-page-enable-start\n"
-                        "chrome_open_stage=page-init-page-enable-complete\n"
-                        "chrome_open_stage=page-init-runtime-enable-start\n"
-                        "chrome_open_stage=page-init-runtime-enable-complete\n"
-                        "chrome_open_stage=page-init-dom-enable-start\n"
-                        "chrome_open_stage=page-init-dom-enable-complete\n"
-                        "chrome_open_stage=page-init-accessibility-enable-start\n"
-                        "chrome_open_stage=page-init-accessibility-enable-complete\n"
-                        "chrome_open_stage=page-init-network-enable-start\n"
-                        "chrome_open_stage=page-init-network-enable-complete\n"
+                        "chrome_open_stage=page-init-lifecycle-enable-start\n"
+                        "chrome_open_stage=page-init-lifecycle-enable-complete\n"
                         "chrome_open_stage=browser-page-created\n"
                         "chrome_open_stage=browser-setup-ready\n"
                         "chrome_open_stage=page-open-start\n"
@@ -124,11 +116,7 @@ class ChromePairTests(unittest.TestCase):
         self.assertEqual(result["chrome_open_stages"], [
             "browser-setup-start", "browser-connect-start", "browser-connect-complete",
             "page-init-mainframe-start", "page-init-mainframe-ready",
-            "page-init-page-enable-start", "page-init-page-enable-complete",
-            "page-init-runtime-enable-start", "page-init-runtime-enable-complete",
-            "page-init-dom-enable-start", "page-init-dom-enable-complete",
-            "page-init-accessibility-enable-start", "page-init-accessibility-enable-complete",
-            "page-init-network-enable-start", "page-init-network-enable-complete",
+            "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
             "browser-page-created", "browser-setup-ready",
             "page-open-start",
             "page-goto-start", "page-goto-error", "page-open-error",
