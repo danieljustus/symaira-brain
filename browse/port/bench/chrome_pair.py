@@ -374,7 +374,7 @@ def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 3.0) -
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             return count
-        count = windows_profile_process_count(profile_root, timeout=min(1.5, remaining))
+        count = windows_profile_process_count(profile_root, timeout=min(5.0, max(1.0, remaining)))
         if count == 0:
             return 0
         remaining = deadline - time.monotonic()
@@ -443,7 +443,7 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             if remaining:
                 try:
                     outcome["chrome_profile_process_names"] = windows_profile_process_names(
-                        root, timeout=1.5
+                        root, timeout=5.0
                     )
                 except (OSError, subprocess.SubprocessError, ValueError):
                     outcome["chrome_profile_process_names"] = "unavailable"
@@ -455,6 +455,9 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                                "reason": "Chrome processes still reference the stopped sample profile",
                                "chrome_profile_processes_after_stop": remaining}
         except (OSError, subprocess.SubprocessError, ValueError):
+            diagnostic = daemon_startup_log(env)
+            if diagnostic is not None:
+                outcome["daemon_shutdown_log"] = diagnostic
             if outcome["status"] == "pass":
                 outcome = {"status": "error", "phase": "chrome-cleanup",
                            "reason": "Windows Chrome profile cleanup could not be verified"}
