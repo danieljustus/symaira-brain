@@ -238,7 +238,9 @@ class ChromePairTests(unittest.TestCase):
                 report = measure(args)
 
         self.assertEqual(run_flow.call_count, 3)
+        self.assertTrue(run_flow.call_args_list[1].kwargs["diagnostics"])
         self.assertTrue(run_flow.call_args.kwargs["diagnostics"])
+        self.assertTrue(report["diagnostic_only"])
         self.assertTrue(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_only"])
         self.assertEqual(report["windows_amd64_operation_timeout_diagnostic"]["diagnostic_daemon_log"],
                          "navigation.dispatch.start")
