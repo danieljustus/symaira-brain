@@ -287,14 +287,22 @@ def _read_capture_text(capture: io.BufferedRandom) -> str:
 
 
 def validate_read_output(output: str) -> bool:
+    markers = read_output_markers(output)
+    return markers["fixture_title_present"] and markers["fixture_token_present"]
+
+
+def read_output_markers(output: str) -> dict[str, bool]:
     if not output:
-        return False
+        return {"fixture_title_present": False, "fixture_token_present": False}
     try:
         document: Any = json.loads(output)
     except json.JSONDecodeError:
-        return False
+        return {"fixture_title_present": False, "fixture_token_present": False}
     serialized = json.dumps(document, sort_keys=True).casefold()
-    return FIXTURE_TITLE.casefold() in serialized and FIXTURE_TOKEN.casefold() in serialized
+    return {
+        "fixture_title_present": FIXTURE_TITLE.casefold() in serialized,
+        "fixture_token_present": FIXTURE_TOKEN.casefold() in serialized,
+    }
 
 
 def wait_for_daemon_exit(
@@ -360,9 +368,11 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             read = run_cli(binary, ["read"], session, env, root)
             read_duration = time.perf_counter_ns() - read_started
             elapsed = time.perf_counter_ns() - started
-            if read[0] != 0 or not validate_read_output(read[1]):
+            read_markers = read_output_markers(read[1])
+            if read[0] != 0 or not all(read_markers.values()):
                 outcome = {"status": "error", "phase": "read", "exit_code": read[0],
                            "semantic_contract": "local fixture title/token must appear in JSON read output",
+                           **read_markers,
                            "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
                            "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
                            "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}

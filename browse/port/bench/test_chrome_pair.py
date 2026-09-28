@@ -15,7 +15,7 @@ from unittest.mock import patch
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
-    paired_gate_passes, validate_read_output, wait_for_daemon_exit, flow, measure, run_cli,
+    paired_gate_passes, read_output_markers, validate_read_output, wait_for_daemon_exit, flow, measure, run_cli,
 )
 
 
@@ -229,6 +229,11 @@ class ChromePairTests(unittest.TestCase):
     def test_read_requires_fixture_title_and_content_token(self):
         good = json.dumps({"success": True, "data": {"title": FIXTURE_TITLE, "markdown": FIXTURE_TOKEN}})
         self.assertTrue(validate_read_output(good))
+        self.assertEqual(read_output_markers(good), {"fixture_title_present": True, "fixture_token_present": True})
+        self.assertEqual(
+            read_output_markers(json.dumps({"success": True, "data": {"markdown": FIXTURE_TOKEN}})),
+            {"fixture_title_present": False, "fixture_token_present": True},
+        )
         self.assertFalse(validate_read_output(json.dumps({"success": True, "data": {"title": FIXTURE_TITLE}})))
         self.assertFalse(validate_read_output("not json"))
 
