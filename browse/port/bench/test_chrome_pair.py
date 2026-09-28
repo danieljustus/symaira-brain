@@ -15,7 +15,8 @@ from unittest.mock import patch
 from chrome_pair import (
     FIXTURE_TITLE, FIXTURE_TOKEN, MAX_OUTPUT, command, make_env, native_target_matches, nearest_rank,
     remove_owned_tempdir, summarize_stage,
-    paired_gate_passes, read_output_markers, validate_read_output, wait_for_daemon_exit, flow, measure, run_cli,
+    paired_gate_passes, read_output_markers, session_state_markers, validate_read_output,
+    wait_for_daemon_exit, flow, measure, run_cli,
 )
 
 
@@ -236,6 +237,17 @@ class ChromePairTests(unittest.TestCase):
         )
         self.assertFalse(validate_read_output(json.dumps({"success": True, "data": {"title": FIXTURE_TITLE}})))
         self.assertFalse(validate_read_output("not json"))
+
+    def test_session_state_markers_only_report_fixture_matches(self):
+        state = json.dumps({"success": True, "data": {"value": "http://127.0.0.1:1234/fixture.html"}})
+        self.assertEqual(
+            session_state_markers(state, "http://127.0.0.1:1234/fixture.html"),
+            {"session_url_matches_fixture": True, "session_title_matches_fixture": False},
+        )
+        self.assertEqual(
+            session_state_markers("not json", "http://127.0.0.1:1234/fixture.html"),
+            {"session_url_matches_fixture": False, "session_title_matches_fixture": False},
+        )
 
     def test_nearest_rank_matches_contract(self):
         self.assertEqual(nearest_rank(list(range(1, 31))), 29)

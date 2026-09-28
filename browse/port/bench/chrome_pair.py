@@ -305,6 +305,17 @@ def read_output_markers(output: str) -> dict[str, bool]:
     }
 
 
+def session_state_markers(output: str, fixture_url: str) -> dict[str, bool]:
+    try:
+        serialized = json.dumps(json.loads(output), sort_keys=True).casefold()
+    except (json.JSONDecodeError, TypeError):
+        serialized = ""
+    return {
+        "session_url_matches_fixture": fixture_url.casefold() in serialized,
+        "session_title_matches_fixture": FIXTURE_TITLE.casefold() in serialized,
+    }
+
+
 def wait_for_daemon_exit(
     binary: Path,
     session: str,
@@ -370,9 +381,17 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             elapsed = time.perf_counter_ns() - started
             read_markers = read_output_markers(read[1])
             if read[0] != 0 or not all(read_markers.values()):
+                state_markers: dict[str, bool] = {}
+                for probe_name in ("url", "title"):
+                    probe = run_cli(binary, ["get", probe_name], session, env, root)
+                    state_markers.update({
+                        f"{probe_name}_{key}": value
+                        for key, value in session_state_markers(probe[1], url).items()
+                    })
                 outcome = {"status": "error", "phase": "read", "exit_code": read[0],
                            "semantic_contract": "local fixture title/token must appear in JSON read output",
                            **read_markers,
+                           **state_markers,
                            "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
                            "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
                            "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
