@@ -261,7 +261,7 @@ def read_output_markers(output: str) -> dict[str, bool]:
 
 
 def daemon_startup_log(env: dict[str, str], limit: int = MAX_DAEMON_LOG_BYTES) -> str | None:
-    """Return a bounded, redacted tail of the Go daemon log for failed starts."""
+    """Return a bounded, redacted tail of the sample daemon log."""
     state_home = env.get("XDG_STATE_HOME")
     if not state_home or limit <= 0:
         return None
@@ -320,8 +320,8 @@ def wait_for_daemon_exit(
         sleep(min(0.05, max(0.0, deadline - time.monotonic())))
 
 
-def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> int:
-    """Count Chrome processes left in the sample's process tree on Windows."""
+def windows_profile_process_names(profile_root: Path, timeout: float = 5.0) -> dict[str, int]:
+    """Count process names in Chrome's sample-profile process tree on Windows."""
     escaped = str(profile_root).replace("'", "''")
     script = "\n".join([
         f"$profile = '{escaped}'",
@@ -338,7 +338,8 @@ def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> i
         "    if ($ids.Contains([int]$process.ParentProcessId)) { [void]$ids.Add([int]$process.ProcessId) }",
         "  }",
         "} while ($ids.Count -gt $before)",
-        "[Console]::Out.Write($ids.Count)",
+        "$details = @($all | Where-Object { $ids.Contains([int]$_.ProcessId) } | Group-Object Name | ForEach-Object { @{name=$_.Name;count=$_.Count} })",
+        "[Console]::Out.Write((ConvertTo-Json -InputObject $details -Compress))",
     ])
     result = subprocess.run(
         ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
@@ -347,7 +348,22 @@ def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> i
         text=True,
         timeout=timeout,
     )
-    return int(result.stdout.strip())
+    output = result.stdout.strip()
+    if not output:
+        return {}
+    details = json.loads(output)
+    if isinstance(details, dict):
+        details = [details]
+    return {
+        str(item["name"]): int(item["count"])
+        for item in details
+        if isinstance(item, dict) and item.get("name") and item.get("count") is not None
+    }
+
+
+def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> int:
+    """Count Chrome processes left in the sample's process tree on Windows."""
+    return sum(windows_profile_process_names(profile_root, timeout).values())
 
 
 def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 3.0) -> int:
@@ -425,6 +441,15 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
             remaining = wait_for_windows_profile_cleanup(root)
             outcome["chrome_profile_processes_after_stop"] = remaining
             if remaining:
+                try:
+                    outcome["chrome_profile_process_names"] = windows_profile_process_names(
+                        root, timeout=1.5
+                    )
+                except (OSError, subprocess.SubprocessError, ValueError):
+                    outcome["chrome_profile_process_names"] = "unavailable"
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_shutdown_log"] = diagnostic
                 if outcome["status"] == "pass":
                     outcome = {"status": "error", "phase": "chrome-cleanup",
                                "reason": "Chrome processes still reference the stopped sample profile",

@@ -107,6 +107,7 @@ impl AsyncExecutor for FlowExecutor<'_> {
 
 impl DispatchRuntime {
     fn shutdown_browser(&self) {
+        eprintln!("symbrowse shutdown: begin");
         let browser = self
             .browser
             .lock()
@@ -119,6 +120,7 @@ impl DispatchRuntime {
             network_capture,
         }) = browser
         else {
+            eprintln!("symbrowse shutdown: no browser session");
             return;
         };
         // Drop the runtime's page handles before closing the owning browser.
@@ -131,15 +133,30 @@ impl DispatchRuntime {
         while Arc::strong_count(&session) > 1 && std::time::Instant::now() < deadline {
             std::thread::sleep(Duration::from_millis(10));
         }
+        eprintln!(
+            "symbrowse shutdown: browser session handles remaining={}",
+            Arc::strong_count(&session).saturating_sub(1)
+        );
         let Ok(session) = Arc::try_unwrap(session) else {
             // Let an operation that outlived the shutdown cap release its
             // remaining handle and invoke Chromiumoxide's kill-on-drop fallback.
+            eprintln!("symbrowse shutdown: graceful close skipped; shared session remains");
             return;
         };
-        let _ = self.runtime.block_on(tokio::time::timeout(
+        let started = std::time::Instant::now();
+        let result = self.runtime.block_on(tokio::time::timeout(
             Duration::from_secs(3),
             session.close(),
         ));
+        let outcome = match result {
+            Ok(Ok(())) => "closed",
+            Ok(Err(_)) => "close-error",
+            Err(_) => "close-timeout",
+        };
+        eprintln!(
+            "symbrowse shutdown: browser close {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
     }
 
     async fn within_operation_deadline<T>(

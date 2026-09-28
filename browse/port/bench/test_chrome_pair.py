@@ -23,7 +23,11 @@ from chrome_pair import (
 
 class ChromePairTests(unittest.TestCase):
     def test_windows_profile_process_probe_returns_a_count_without_command_lines(self):
-        with patch("chrome_pair.subprocess.run", return_value=SimpleNamespace(stdout="3")) as run:
+        output = json.dumps([
+            {"name": "chrome.exe", "count": 2},
+            {"name": "crashpad_handler.exe", "count": 1},
+        ])
+        with patch("chrome_pair.subprocess.run", return_value=SimpleNamespace(stdout=output)) as run:
             count = windows_profile_process_count(Path("D:/runner/sample-profile"))
 
         self.assertEqual(count, 3)
