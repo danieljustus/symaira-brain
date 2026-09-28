@@ -103,7 +103,16 @@ pub fn create_in(dir: &Path, name: &str, from: &str) -> io::Result<PathBuf> {
     let contents = render_template(from, name)
         .map_err(|message| io::Error::new(io::ErrorKind::InvalidInput, message))?;
     create_dirs_secure(dir)?;
-    atomic_write_new(&path, contents.as_bytes())?;
+    atomic_write_new(&path, contents.as_bytes()).map_err(|err| {
+        if err.kind() == io::ErrorKind::AlreadyExists {
+            io::Error::new(
+                io::ErrorKind::AlreadyExists,
+                format!("profile {name:?} already exists ({})", path.display()),
+            )
+        } else {
+            err
+        }
+    })?;
     Ok(path)
 }
 
@@ -174,11 +183,11 @@ fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
     file.write_all(contents)?;
     file.sync_all()?;
     drop(file);
-    if let Err(err) = fs::rename(&temp_path, path) {
-        let _ = fs::remove_file(&temp_path);
-        return Err(err);
-    }
-    Ok(())
+    // A hard link publishes atomically but, unlike rename, fails with
+    // AlreadyExists instead of replacing a concurrent creator's profile (#461).
+    let published = fs::hard_link(&temp_path, path);
+    let _ = fs::remove_file(&temp_path);
+    published
 }
 
 #[cfg(unix)]
@@ -193,6 +202,40 @@ fn set_mode(_file: &std::fs::File, _mode: u32) {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn concurrent_creators_never_clobber_each_other() {
+        let temp_dir = tempfile::tempdir().expect("tempdir");
+        let dir = temp_dir.path().join("profiles");
+        let results: Vec<_> = std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..8)
+                .map(|i| {
+                    let dir = &dir;
+                    let from = if i % 2 == 0 { "personal" } else { "restricted" };
+                    scope.spawn(move || create_in(dir, "race", from).map(|_| from))
+                })
+                .collect();
+            handles.into_iter().map(|h| h.join().unwrap()).collect()
+        });
+        let winners: Vec<_> = results.iter().filter_map(|r| r.as_ref().ok()).collect();
+        assert_eq!(winners.len(), 1, "{results:?}");
+        for loser in results.iter().filter_map(|r| r.as_ref().err()) {
+            assert_eq!(loser.kind(), io::ErrorKind::AlreadyExists);
+        }
+        let written = fs::read_to_string(dir.join("race.toml")).expect("profile");
+        assert_eq!(written, render_template(winners[0], "race").unwrap());
+        let leftovers = fs::read_dir(&dir).unwrap().count();
+        assert_eq!(leftovers, 1, "temporary files must be cleaned up");
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mode = fs::metadata(dir.join("race.toml"))
+                .unwrap()
+                .permissions()
+                .mode();
+            assert_eq!(mode & 0o777, 0o600);
+        }
+    }
 
     #[cfg(unix)]
     #[test]

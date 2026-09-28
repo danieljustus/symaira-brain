@@ -25,11 +25,11 @@
 //! * any discovery source that exists but fails to read or parse, or an
 //!   entry with neither `command` nor `url` — Go turns those into an
 //!   `mcp servers  error: discovery: …` line carrying the upstream parser's
-//!   message;
-//! * a single server carrying more than one plaintext secret key — Go emits
-//!   those in `EnvKeys` order, which comes from a Go map range and is
-//!   therefore not deterministic even between two Go runs (see the report
-//!   in the migration notes); there is no byte answer to match.
+//!   message.
+//!
+//! Deliberate deviation (#640): Go prints a server's plaintext secret keys
+//! in Go map-range order, which is not stable between two Go runs. Rust
+//! prints them sorted by key and handles multi-secret servers natively.
 
 use std::collections::BTreeMap;
 use std::env;
@@ -142,7 +142,7 @@ fn build_report() -> Option<(String, u8)> {
         row("mcp servers", "none discovered");
     } else {
         row("mcp servers", &format!("{} discovered", servers.len()));
-        checks = check_servers(servers, &allowlist)?;
+        checks = check_servers(servers, &allowlist);
     }
 
     let discovery_problems = usize::from(discovery_error.is_some());
@@ -633,10 +633,9 @@ struct ServerCheck {
     secrets: Vec<String>,
 }
 
-/// Ports `checkServers`. `None` gates: Go emits a server's secret keys in
-/// `EnvKeys` order, which is a Go map range and so is not stable even
-/// between two Go runs, leaving no byte answer to match for more than one.
-fn check_servers(servers: Vec<Discovered>, allowlist: &[SpawnEntry]) -> Option<Vec<ServerCheck>> {
+/// Ports `checkServers`. Secret keys come out sorted because `env` is a
+/// `BTreeMap`; Go's order is a map range (#640).
+fn check_servers(servers: Vec<Discovered>, allowlist: &[SpawnEntry]) -> Vec<ServerCheck> {
     let mut checks: Vec<ServerCheck> = servers
         .into_iter()
         .map(|server| {
@@ -658,11 +657,8 @@ fn check_servers(servers: Vec<Discovered>, allowlist: &[SpawnEntry]) -> Option<V
             }
         })
         .collect();
-    if checks.iter().any(|check| check.secrets.len() > 1) {
-        return None;
-    }
     checks.sort_by(|a, b| a.client.cmp(&b.client).then_with(|| a.name.cmp(&b.name)));
-    Some(checks)
+    checks
 }
 
 /// Ports `printServerChecks`.
@@ -904,10 +900,11 @@ mod tests {
     }
 
     #[test]
-    fn multiple_secret_keys_on_one_server_gate_to_go() {
+    fn multiple_secret_keys_on_one_server_are_sorted() {
         let mut server = stdio("/usr/bin/env", &[]);
         server.env.insert("SECRET_KEY".to_owned(), "a".to_owned());
         server.env.insert("API_KEY".to_owned(), "b".to_owned());
-        assert!(check_servers(vec![server], &[]).is_none());
+        let checks = check_servers(vec![server], &[]);
+        assert_eq!(checks[0].secrets, ["API_KEY", "SECRET_KEY"]);
     }
 }
