@@ -67,12 +67,27 @@ public struct HarnessStatus: Decodable, Sendable {
 // MARK: - profile list --json
 
 /// One entry from `symbrain profile list --json`.
+/// One `profile list --json` entry. A profile that fails to load is still
+/// listed, carrying only `name` and `error` (#460).
 public struct ProfileSummary: Decodable, Sendable, Identifiable {
     public let name: String
     public let description: String
     public let servers: [ProfileServerRef]
+    public let error: String?
 
     public var id: String { name }
+
+    private enum CodingKeys: String, CodingKey {
+        case name, description, servers, error
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        description = try container.decodeIfPresent(String.self, forKey: .description) ?? ""
+        servers = try container.decodeIfPresent([ProfileServerRef].self, forKey: .servers) ?? []
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+    }
 }
 
 public struct ProfileServerRef: Decodable, Sendable {
