@@ -87,6 +87,20 @@ async fn blank_page_attaches_before_navigation_and_remains_usable() {
         page.raw().url().await.expect("read blank URL").as_deref(),
         Some("about:blank")
     );
+    let main_frame = page
+        .raw()
+        .mainframe()
+        .await
+        .expect("read blank main frame")
+        .expect("blank main frame exists");
+    assert!(
+        page.raw()
+            .frame_execution_context(main_frame)
+            .await
+            .expect("read blank frame execution context")
+            .is_some(),
+        "blank page should not be returned before its main-frame execution context exists"
+    );
 
     let opened = page
         .open_with_timeout(&format!("{}/", server.base_url), Duration::from_secs(10))

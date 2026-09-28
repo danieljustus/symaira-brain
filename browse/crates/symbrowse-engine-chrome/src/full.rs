@@ -234,11 +234,14 @@ impl ChromeSession {
                     Ok(page) => {
                         // `get_page` returns as soon as chromiumoxide has an
                         // attached session. Its Page/Frame initialization
-                        // continues asynchronously, so wait until the initial
-                        // frame tree is available before callers navigate.
+                        // continues asynchronously, so wait for the initial
+                        // main frame and its default JavaScript context before
+                        // callers navigate.
                         loop {
-                            if page.mainframe().await?.is_some() {
-                                return Ok(page);
+                            if let Some(frame) = page.mainframe().await? {
+                                if page.frame_execution_context(frame).await?.is_some() {
+                                    return Ok(page);
+                                }
                             }
                             tokio::time::sleep(Duration::from_millis(10)).await;
                         }
@@ -304,60 +307,12 @@ fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'sta
     )
 }
 
-fn perf_diagnostic(message: &str) {
-    if std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_some() {
-        eprintln!("symbrowse Chrome navigation: {message}");
-    }
-}
-
-fn diagnostic_url_origin(url: Option<&str>) -> String {
-    let Some(url) = url else {
-        return "<unavailable>".into();
-    };
-    if url == "about:blank" || (url.starts_with('<') && url.ends_with('>')) {
-        return url.to_owned();
-    }
-    let Some((scheme, remainder)) = url.split_once("://") else {
-        return url
-            .split_once(':')
-            .map_or_else(|| "<non-url>".into(), |(scheme, _)| format!("{scheme}:"));
-    };
-    let authority_end = remainder.find(['/', '?', '#']).unwrap_or(remainder.len());
-    let authority = &remainder[..authority_end];
-    let host = authority.rsplit('@').next().unwrap_or_default();
-    format!("{scheme}://{host}")
-}
-
 fn direct_navigation_expression(url: &str) -> Result<String, serde_json::Error> {
     let url = serde_json::to_string(url)?;
     Ok(format!("location.assign({url}); 'navigating'"))
 }
 
 impl ChromePage {
-    async fn perf_navigation_context(&self, phase: &str) {
-        if std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_none() {
-            return;
-        }
-        let page_url = self.page.url().await.ok().flatten();
-        let frame = self.page.mainframe().await.ok().flatten();
-        let frame_url = match frame.as_ref() {
-            Some(frame) => self.page.frame_url(frame.clone()).await.ok().flatten(),
-            None => None,
-        };
-        let sample =
-            std::env::var("SYMBROWSE_PERF_SAMPLE_INDEX").unwrap_or_else(|_| "unknown".into());
-        let fixture_url =
-            std::env::var("SYMBROWSE_PERF_FIXTURE_URL").unwrap_or_else(|_| "<unavailable>".into());
-        perf_diagnostic(&format!(
-            "context phase={phase} sample={sample} fixture_origin={} target_id={} frame_id={:?} page_url={} frame_url={}",
-            diagnostic_url_origin(Some(&fixture_url)),
-            self.page.target_id().inner(),
-            frame,
-            diagnostic_url_origin(page_url.as_deref()),
-            diagnostic_url_origin(frame_url.as_deref()),
-        ));
-    }
-
     async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
@@ -425,14 +380,12 @@ impl ChromePage {
 
     async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
         self.navigate_and_wait_for_load(url).await?;
-        perf_diagnostic("navigation complete; reading final URL");
 
         let page_url = match self.evaluate_runtime_json("location.href").await {
             Ok(url) => url.as_str().unwrap_or_default().to_owned(),
             Err(error) => return Err(error),
         };
 
-        perf_diagnostic("final URL read; reading title");
         let title = match self.page.evaluate("document.title").await {
             Ok(value) => match value.into_value::<String>() {
                 Ok(title) => title,
@@ -472,16 +425,10 @@ impl ChromePage {
             .get("time_origin")
             .and_then(Value::as_f64)
             .unwrap_or_default();
-        self.perf_navigation_context("before-dispatch").await;
-        perf_diagnostic("baseline state read; dispatching location navigation");
         let expression = direct_navigation_expression(url)?;
         self.evaluate_runtime_json(&expression).await?;
-        self.perf_navigation_context("after-dispatch").await;
-        perf_diagnostic("navigation dispatched; polling document state");
         let poll = async {
-            let mut polls = 0_u32;
             loop {
-                polls += 1;
                 let state = match self
                     .evaluate_runtime_json(
                         "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
@@ -490,9 +437,6 @@ impl ChromePage {
                 {
                     Ok(state) => state,
                     Err(error) if is_transient_navigation_context_error(error.as_ref()) => {
-                        if polls == 1 || polls % 20 == 0 {
-                            perf_diagnostic("state poll waiting for transient target context");
-                        }
                         tokio::time::sleep(Duration::from_millis(25)).await;
                         continue;
                     }
@@ -507,13 +451,7 @@ impl ChromePage {
                     .get("ready_state")
                     .and_then(Value::as_str)
                     .unwrap_or("unknown");
-                if polls == 1 || polls % 20 == 0 {
-                    perf_diagnostic(&format!(
-                        "state poll={polls} url_changed={url_changed} document_changed={document_changed} ready_state={ready_state}"
-                    ));
-                }
                 if (url_changed || document_changed) && ready_state == "complete" {
-                    perf_diagnostic("state poll observed completed navigation");
                     return Ok(());
                 }
                 tokio::time::sleep(Duration::from_millis(25)).await;
@@ -536,13 +474,6 @@ impl ChromePage {
                     .build()?,
             )
             .await?;
-        if expression.starts_with("location.assign(") {
-            perf_diagnostic(&format!(
-                "Runtime.evaluate dispatch response exception_details={} result_type={:?}",
-                response.result.exception_details.is_some(),
-                response.result.result.r#type,
-            ));
-        }
         if let Some(exception) = response.result.exception_details {
             return Err(format!("Chrome state evaluation failed: {exception:?}").into());
         }
@@ -1235,32 +1166,6 @@ mod tests {
             expression,
             r#"location.assign("https://example.test/a'b?x=1&y=2"); 'navigating'"#
         );
-    }
-
-    #[test]
-    fn diagnostic_url_origin_omits_credentials_and_path() {
-        assert_eq!(
-            diagnostic_url_origin(Some("http://user:secret@127.0.0.1:8080/private?q=x")),
-            "http://127.0.0.1:8080"
-        );
-        assert_eq!(
-            diagnostic_url_origin(Some("https://example.test?token=secret")),
-            "https://example.test"
-        );
-        assert_eq!(
-            diagnostic_url_origin(Some("https://example.test#secret")),
-            "https://example.test"
-        );
-        assert_eq!(diagnostic_url_origin(Some("about:blank")), "about:blank");
-        assert_eq!(
-            diagnostic_url_origin(Some("data:text/html,private-content")),
-            "data:"
-        );
-        assert_eq!(
-            diagnostic_url_origin(Some("javascript:private-content")),
-            "javascript:"
-        );
-        assert_eq!(diagnostic_url_origin(None), "<unavailable>");
     }
 
     #[test]
