@@ -314,8 +314,13 @@ fn diagnostic_url_origin(url: Option<&str>) -> String {
     let Some(url) = url else {
         return "<unavailable>".into();
     };
-    let Some((scheme, remainder)) = url.split_once("://") else {
+    if url == "about:blank" || (url.starts_with('<') && url.ends_with('>')) {
         return url.to_owned();
+    }
+    let Some((scheme, remainder)) = url.split_once("://") else {
+        return url
+            .split_once(':')
+            .map_or_else(|| "<non-url>".into(), |(scheme, _)| format!("{scheme}:"));
     };
     let authority = remainder.split('/').next().unwrap_or_default();
     let host = authority.rsplit('@').next().unwrap_or_default();
@@ -343,7 +348,8 @@ impl ChromePage {
         let fixture_url =
             std::env::var("SYMBROWSE_PERF_FIXTURE_URL").unwrap_or_else(|_| "<unavailable>".into());
         perf_diagnostic(&format!(
-            "context phase={phase} sample={sample} fixture_url={fixture_url} target_id={} frame_id={:?} page_url={} frame_url={}",
+            "context phase={phase} sample={sample} fixture_origin={} target_id={} frame_id={:?} page_url={} frame_url={}",
+            diagnostic_url_origin(Some(&fixture_url)),
             self.page.target_id().inner(),
             frame,
             diagnostic_url_origin(page_url.as_deref()),
@@ -1237,6 +1243,14 @@ mod tests {
             "http://127.0.0.1:8080"
         );
         assert_eq!(diagnostic_url_origin(Some("about:blank")), "about:blank");
+        assert_eq!(
+            diagnostic_url_origin(Some("data:text/html,private-content")),
+            "data:"
+        );
+        assert_eq!(
+            diagnostic_url_origin(Some("javascript:private-content")),
+            "javascript:"
+        );
         assert_eq!(diagnostic_url_origin(None), "<unavailable>");
     }
 
