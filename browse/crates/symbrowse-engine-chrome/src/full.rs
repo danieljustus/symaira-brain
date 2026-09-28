@@ -10,7 +10,7 @@ use std::{
     fmt,
     path::Path,
     sync::{Arc, OnceLock},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use async_tungstenite::{tokio::connect_async, tungstenite::Message};
@@ -190,7 +190,11 @@ fn perf_diagnostics_enabled() -> bool {
 
 fn perf_diagnostic(message: &str) {
     if perf_diagnostics_enabled() {
-        eprintln!("symbrowse Chrome phase: {message}");
+        let unix_ms = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis();
+        eprintln!("symbrowse Chrome phase: unix_ms={unix_ms} {message}");
     }
 }
 
@@ -261,16 +265,16 @@ impl ChromeSession {
                         // main frame and its default JavaScript context before
                         // callers navigate.
                         loop {
-                            if let Some(frame) = page.mainframe().await? {
-                                if page.frame_execution_context(frame.clone()).await?.is_some() {
-                                    if let Some(started) = readiness_started {
-                                        perf_diagnostic(&format!(
-                                            "blank_target.context.ready elapsed_ms={} frame={frame:?}",
-                                            started.elapsed().as_millis()
-                                        ));
-                                    }
-                                    return Ok(page);
+                            if let Some(frame) = page.mainframe().await?
+                                && page.frame_execution_context(frame.clone()).await?.is_some()
+                            {
+                                if let Some(started) = readiness_started {
+                                    perf_diagnostic(&format!(
+                                        "blank_target.context.ready elapsed_ms={} frame={frame:?}",
+                                        started.elapsed().as_millis()
+                                    ));
                                 }
+                                return Ok(page);
                             }
                             if let (Some(started), Some(last_report)) =
                                 (readiness_started, last_readiness_report.as_mut())
