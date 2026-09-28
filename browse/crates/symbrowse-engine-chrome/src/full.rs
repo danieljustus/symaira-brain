@@ -244,20 +244,37 @@ impl ChromeSession {
                         // frame tree is available before callers navigate.
                         // Go's page setup similarly awaits its CDP enable and
                         // frame setup commands before returning the page.
+                        let mut mainframe_missing_reported = false;
                         loop {
+                            chrome_open_stage("page-init-mainframe-start");
                             if page.mainframe().await?.is_some() {
+                                chrome_open_stage("page-init-mainframe-ready");
                                 // Match the Go adapter's page setup contract.
                                 // These domain enables are idempotent; awaiting
                                 // their acknowledgements ensures the attached
                                 // target is usable before the first navigation,
                                 // even while chromiumoxide finishes its own
                                 // asynchronous TargetInit sequence.
+                                chrome_open_stage("page-init-page-enable-start");
                                 page.execute(page::EnableParams::default()).await?;
+                                chrome_open_stage("page-init-page-enable-complete");
+                                chrome_open_stage("page-init-runtime-enable-start");
                                 page.execute(runtime::EnableParams::default()).await?;
+                                chrome_open_stage("page-init-runtime-enable-complete");
+                                chrome_open_stage("page-init-dom-enable-start");
                                 page.execute(dom::EnableParams::default()).await?;
+                                chrome_open_stage("page-init-dom-enable-complete");
+                                chrome_open_stage("page-init-accessibility-enable-start");
                                 page.execute(accessibility::EnableParams::default()).await?;
+                                chrome_open_stage("page-init-accessibility-enable-complete");
+                                chrome_open_stage("page-init-network-enable-start");
                                 page.execute(network::EnableParams::default()).await?;
+                                chrome_open_stage("page-init-network-enable-complete");
                                 return Ok(page);
+                            }
+                            if !mainframe_missing_reported {
+                                chrome_open_stage("page-init-mainframe-missing");
+                                mainframe_missing_reported = true;
                             }
                             tokio::time::sleep(Duration::from_millis(10)).await;
                         }
