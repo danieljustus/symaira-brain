@@ -5,6 +5,7 @@ go 1.26.6
 require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
+	github.com/Microsoft/go-winio v0.6.2
 	github.com/Noooste/azuretls-client v1.13.2
 	github.com/Noooste/fhttp v1.0.15
 	github.com/PuerkitoBio/goquery v1.13.0

@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import random
+import re
 import shutil
 import statistics
 import subprocess
@@ -28,23 +29,10 @@ MAX_OUTPUT = 1 << 20
 # UTF-8 uses at most four bytes per output character. This bounds temporary
 # capture files while keeping the public limit in decoded text characters.
 MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
-MAX_STAGE_LOG_BYTES = 64 << 10
-MAX_OPEN_STAGES = 32
-CHROME_OPEN_STAGES = {
-    "navigation-listeners-ready", "main-frame status=present",
-    "main-frame status=missing", "main-frame status=error",
-    "navigation-future-start", "navigation-future-finish",
-    "navigation-future status=completed error_text=false",
-    "navigation-future status=completed error_text=true",
-    "navigation-future status=timeout", "navigation-event-wait-start",
-    "navigation-fallback status=start",
-    "navigation-fallback status=completed error_text=false",
-    "navigation-fallback status=completed error_text=true",
-    "document-probe status=responsive", "document-probe status=error",
-    "document-probe status=timeout",
-    "main-frame-navigation-observed", "same-document-navigation-observed",
-    "load-event-observed", "document-complete",
-}
+MAX_DAEMON_LOG_BYTES = 8192
+SECRET_ASSIGNMENT = re.compile(
+    r"(?i)\b(password|token|secret|authorization)(\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|[^\s,}]+)"
+)
 METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
 TARGETS = {
     "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
@@ -140,7 +128,8 @@ def native_target_matches(target: str, system: str, machine: str) -> bool:
     return bool(expected and expected[0] == system and machine.casefold() in expected[1])
 
 
-def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | None = None) -> dict[str, str]:
+def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | None = None,
+             diagnostics: bool = False) -> dict[str, str]:
     home = root / "home"
     tmp = root / "tmp"
     for path in (home, tmp, root / "runtime", root / "cache"):
@@ -173,36 +162,18 @@ def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | Non
         env["SYMBROWSE_ENGINE"] = "chrome"
     elif implementation == "rust":
         env["SYMBROWSE_MODE"] = "browser"
-        env["SYMBROWSE_E2E"] = "1"
-        env["SYMBROWSE_DAEMON_LOG"] = str(root / "daemon.log")
+        if diagnostics:
+            env["SYMBROWSE_PERF_DIAGNOSTICS"] = "1"
+            env["SYMBROWSE_DAEMON_LOG"] = str(home / ".local" / "state" / "symbrowse" / "daemon.log")
     else:
         raise ValueError(f"unknown implementation: {implementation}")
     return env
 
 
-def chrome_open_stages(log_path: Path) -> list[str]:
-    """Return only known Chrome-open stage names from a bounded log tail."""
-    try:
-        with log_path.open("rb") as log:
-            log.seek(0, os.SEEK_END)
-            size = log.tell()
-            log.seek(max(0, size - MAX_STAGE_LOG_BYTES))
-            lines = log.read(MAX_STAGE_LOG_BYTES).decode("utf-8", errors="ignore").splitlines()
-    except OSError:
-        return []
-    stages = [
-        value for line in lines
-        if line.startswith("chrome_open_stage=")
-        for value in (line.removeprefix("chrome_open_stage=").strip(),)
-        if value in CHROME_OPEN_STAGES
-    ]
-    return stages[-MAX_OPEN_STAGES:]
-
-
 def command(binary: Path, args: list[str], session: str) -> list[str]:
     if args[:2] in (["daemon", "stop"], ["daemon", "status"]):
-        return [str(binary), "--json", "daemon", args[1], "--session", session, *args[2:]]
-    return [str(binary), "--json", args[0], "--session", session, *args[1:]]
+        return [str(binary), "daemon", args[1], "--json", "--session", session, *args[2:]]
+    return [str(binary), args[0], "--json", "--session", session, *args[1:]]
 
 
 def run_cli(
@@ -275,14 +246,46 @@ def _read_capture_text(capture: io.BufferedRandom) -> str:
 
 
 def validate_read_output(output: str) -> bool:
+    markers = read_output_markers(output)
+    return markers["fixture_title_present"] and markers["fixture_token_present"]
+
+
+def read_output_markers(output: str) -> dict[str, bool]:
     if not output:
-        return False
+        return {"fixture_title_present": False, "fixture_token_present": False}
     try:
         document: Any = json.loads(output)
     except json.JSONDecodeError:
-        return False
+        return {"fixture_title_present": False, "fixture_token_present": False}
     serialized = json.dumps(document, sort_keys=True).casefold()
-    return FIXTURE_TITLE.casefold() in serialized and FIXTURE_TOKEN.casefold() in serialized
+    return {
+        "fixture_title_present": FIXTURE_TITLE.casefold() in serialized,
+        "fixture_token_present": FIXTURE_TOKEN.casefold() in serialized,
+    }
+
+
+def daemon_startup_log(env: dict[str, str], limit: int = MAX_DAEMON_LOG_BYTES) -> str | None:
+    """Return a bounded, redacted tail of the sample daemon log."""
+    state_home = env.get("XDG_STATE_HOME")
+    if not state_home or limit <= 0:
+        return None
+    configured_log = env.get("SYMBROWSE_DAEMON_LOG")
+    path = Path(configured_log) if configured_log else Path(state_home) / "symbrowse" / "daemon.log"
+    try:
+        with path.open("rb") as stream:
+            stream.seek(0, os.SEEK_END)
+            size = stream.tell()
+            stream.seek(max(0, size - limit))
+            data = stream.read(limit)
+    except OSError:
+        return None
+    text = data.decode("utf-8", errors="replace").strip()
+    if not text:
+        return None
+    text = SECRET_ASSIGNMENT.sub(r"\1\2[redacted]", text)
+    if size > limit:
+        text = "[earlier daemon log bytes omitted]\n" + text
+    return text
 
 
 def wait_for_daemon_exit(
@@ -322,9 +325,72 @@ def wait_for_daemon_exit(
         sleep(min(0.05, max(0.0, deadline - time.monotonic())))
 
 
-def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str, root: Path, index: int) -> dict[str, Any]:
+def windows_profile_process_names(profile_root: Path, timeout: float = 5.0) -> dict[str, int]:
+    """Count process names in Chrome's sample-profile process tree on Windows."""
+    escaped = str(profile_root).replace("'", "''")
+    script = "\n".join([
+        f"$profile = '{escaped}'",
+        "$all = @(Get-CimInstance Win32_Process -ErrorAction Stop)",
+        "$ids = [System.Collections.Generic.HashSet[int]]::new()",
+        "foreach ($process in $all) {",
+        "  if ($process.Name -match '^chrome.*\\.exe$' -and $process.CommandLine -and $process.CommandLine.Contains($profile)) {",
+        "    [void]$ids.Add([int]$process.ProcessId)",
+        "  }",
+        "}",
+        "do {",
+        "  $before = $ids.Count",
+        "  foreach ($process in $all) {",
+        "    if ($ids.Contains([int]$process.ParentProcessId)) { [void]$ids.Add([int]$process.ProcessId) }",
+        "  }",
+        "} while ($ids.Count -gt $before)",
+        "$details = @($all | Where-Object { $ids.Contains([int]$_.ProcessId) } | Group-Object Name | ForEach-Object { @{name=$_.Name;count=$_.Count} })",
+        "[Console]::Out.Write((ConvertTo-Json -InputObject $details -Compress))",
+    ])
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    output = result.stdout.strip()
+    if not output:
+        return {}
+    details = json.loads(output)
+    if isinstance(details, dict):
+        details = [details]
+    return {
+        str(item["name"]): int(item["count"])
+        for item in details
+        if isinstance(item, dict) and item.get("name") and item.get("count") is not None
+    }
+
+
+def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> int:
+    """Count Chrome processes left in the sample's process tree on Windows."""
+    return sum(windows_profile_process_names(profile_root, timeout).values())
+
+
+def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 15.0) -> int:
+    """Poll outside the measured interval until Chrome releases the sample profile."""
+    deadline = time.monotonic() + timeout
+    count = 0
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return count
+        count = windows_profile_process_count(profile_root, timeout=max(1.0, remaining))
+        if count == 0:
+            return 0
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(0.1, remaining))
+
+
+def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str,
+         root: Path, index: int, diagnostics: bool = False) -> dict[str, Any]:
     session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
-    env = make_env(root, implementation, chrome, launcher)
+    env = make_env(root, implementation, chrome, launcher, diagnostics=diagnostics)
     started = time.perf_counter_ns()
     outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
     try:
@@ -343,14 +409,20 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                     outcome["error_message"] = str(error.get("message", ""))[:256]
             except (json.JSONDecodeError, AttributeError):
                 pass
+            if implementation == "rust":
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_navigation_log"] = diagnostic
         else:
             read_started = time.perf_counter_ns()
             read = run_cli(binary, ["read"], session, env, root)
             read_duration = time.perf_counter_ns() - read_started
             elapsed = time.perf_counter_ns() - started
-            if read[0] != 0 or not validate_read_output(read[1]):
+            read_markers = read_output_markers(read[1])
+            if read[0] != 0 or not all(read_markers.values()):
                 outcome = {"status": "error", "phase": "read", "exit_code": read[0],
                            "semantic_contract": "local fixture title/token must appear in JSON read output",
+                           **read_markers,
                            "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
                            "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
                            "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
@@ -374,10 +446,46 @@ def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None,
                            "reason": "daemon shutdown could not be confirmed"}
             else:
                 outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
-        if implementation == "rust":
-            stages = chrome_open_stages(root / "daemon.log")
-            if stages:
-                outcome["chrome_open_stages"] = stages
+    if sys.platform == "win32" and implementation == "rust":
+        try:
+            remaining = wait_for_windows_profile_cleanup(root)
+            outcome["chrome_profile_processes_after_stop"] = remaining
+            if remaining:
+                try:
+                    outcome["chrome_profile_process_names"] = windows_profile_process_names(
+                        root, timeout=5.0
+                    )
+                except (OSError, subprocess.SubprocessError, ValueError):
+                    outcome["chrome_profile_process_names"] = "unavailable"
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_shutdown_log"] = diagnostic
+                if outcome["status"] == "pass":
+                    outcome.update(status="error", phase="chrome-cleanup",
+                                   reason="Chrome processes still reference the stopped sample profile")
+        except (OSError, subprocess.SubprocessError, ValueError) as error:
+            diagnostic = daemon_startup_log(env)
+            if diagnostic is not None:
+                outcome["daemon_shutdown_log"] = diagnostic
+            if isinstance(error, subprocess.TimeoutExpired):
+                outcome["chrome_cleanup_probe_error"] = f"TimeoutExpired after {error.timeout}s"
+            else:
+                outcome["chrome_cleanup_probe_error"] = f"{type(error).__name__}: {str(error)[:200]}"
+            if outcome["status"] == "pass":
+                outcome.update(status="error", phase="chrome-cleanup",
+                               reason="Windows Chrome profile cleanup could not be verified")
+            else:
+                outcome["chrome_cleanup_probe"] = "unavailable"
+    if outcome.get("error_code") == "daemon_unavailable":
+        diagnostic = daemon_startup_log(env)
+        if diagnostic is not None:
+            outcome["daemon_startup_log"] = diagnostic
+    if diagnostics:
+        diagnostic_log = daemon_startup_log(env)
+        if diagnostic_log is not None:
+            outcome["diagnostic_daemon_log"] = diagnostic_log
+    outcome["sample_index"] = index
+    outcome["fixture_url"] = url
     return outcome
 
 
@@ -442,7 +550,9 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
                 binary = args.go if implementation == "go" else args.rust
                 temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-", dir="/tmp" if sys.platform == "darwin" else None))
                 try:
-                    sample = flow(binary, implementation, args.chrome, args.chrome_launcher, url, temp, index)
+                    sample = flow(
+                        binary, implementation, args.chrome, args.chrome_launcher, url, temp, index,
+                    )
                 except BaseException as primary:
                     try:
                         remove_owned_tempdir(temp, timeout=30.0 if args.target.startswith("windows-") else 5.0)
@@ -466,6 +576,25 @@ def measure(args: argparse.Namespace) -> dict[str, Any]:
             if cleanup_failed:
                 break
             if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
+                rust_samples = samples["rust"]
+                if (
+                    samples["go"][-1].get("status") == "pass"
+                    and rust_samples
+                    and rust_samples[-1].get("status") != "pass"
+                ):
+                    diagnostic_root = Path(tempfile.mkdtemp(prefix="p3-diagnostic-r-"))
+                    try:
+                        diagnostic = flow(
+                            args.rust, "rust", args.chrome, args.chrome_launcher, url,
+                            diagnostic_root, index, diagnostics=True,
+                        )
+                    finally:
+                        remove_owned_tempdir(
+                            diagnostic_root,
+                            timeout=30.0 if args.target.startswith("windows-") else 5.0,
+                        )
+                    diagnostic["diagnostic_only"] = True
+                    report["windows_amd64_rust_failure_diagnostic"] = diagnostic
                 break
     finally:
         server.shutdown()

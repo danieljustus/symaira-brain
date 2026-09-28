@@ -59,7 +59,8 @@ type Options struct {
 	CacheTTL time.Duration
 }
 
-// Server serves newline-delimited JSON frames over a protected Unix socket.
+// Server serves newline-delimited JSON frames over the platform's protected
+// local endpoint (Unix socket on Unix, named pipe on Windows).
 type Server struct {
 	options          Options
 	listener         net.Listener
@@ -67,6 +68,7 @@ type Server struct {
 	mu               sync.RWMutex
 	startedAt        time.Time
 	lastRequestNanos atomic.Int64
+	idleTimedOut     atomic.Bool
 	registry         *SessionRegistry
 }
 
@@ -102,22 +104,22 @@ func (s *Server) Registry() *SessionRegistry { return s.registry }
 // Policy returns the network policy this server reports through daemon.status.
 func (s *Server) Policy() PolicyStatus { return s.options.Policy }
 
-// bindLocked clears a provably dead socket and binds a fresh one. It must run
-// under the startup lock so the liveness probe and the bind cannot interleave
-// with another starter (issue #371).
+// bindLocked clears a provably dead Unix socket and binds a fresh endpoint.
+// It runs under the startup lock so the liveness probe and bind cannot
+// interleave with another Unix starter (issue #371).
 func (s *Server) bindLocked() (net.Listener, error) {
 	if err := removeStaleSocket(s.options.SocketPath); err != nil {
 		return nil, err
 	}
-	listener, err := net.Listen("unix", s.options.SocketPath)
+	listener, err := listenDaemonEndpoint(s.options.SocketPath)
 	if err != nil {
 		return nil, fmt.Errorf("listen on %s: %w", s.options.SocketPath, err)
 	}
 	return listener, nil
 }
 
-// ListenAndServe binds the socket and serves until ctx is canceled, Close is
-// called, or the configured idle timeout expires.
+// ListenAndServe binds the local endpoint and serves until ctx is canceled,
+// Close is called, or the configured idle timeout expires.
 func (s *Server) ListenAndServe(ctx context.Context) error {
 	if s.options.SocketPath == "" {
 		return errors.New("socket path is required")
@@ -144,15 +146,15 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := os.Chmod(s.options.SocketPath, 0o600); err != nil {
+	if err := secureDaemonEndpoint(s.options.SocketPath); err != nil {
 		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+		cleanupDaemonEndpoint(s.options.SocketPath)
 		return fmt.Errorf("secure socket: %w", err)
 	}
 	startedAt := time.Now()
 	if _, err := s.registry.Ensure(s.options.Session); err != nil {
 		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+		cleanupDaemonEndpoint(s.options.SocketPath)
 		return err
 	}
 	s.mu.Lock()
@@ -162,12 +164,41 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	s.mu.Unlock()
 	defer func() {
 		_ = listener.Close()
-		_ = os.Remove(s.options.SocketPath)
+		cleanupDaemonEndpoint(s.options.SocketPath)
 		s.mu.Lock()
 		s.listener = nil
 		s.mu.Unlock()
 		s.registry.Clear()
 	}()
+	deadlineListener, supportsDeadline := listener.(interface{ SetDeadline(time.Time) error })
+	if !supportsDeadline {
+		watchDone := make(chan struct{})
+		defer close(watchDone)
+		go func() {
+			var idleTicker *time.Ticker
+			var idleTicks <-chan time.Time
+			if s.options.IdleTimeout > 0 {
+				idleTicker = time.NewTicker(250 * time.Millisecond)
+				idleTicks = idleTicker.C
+				defer idleTicker.Stop()
+			}
+			for {
+				select {
+				case <-ctx.Done():
+					_ = s.Close()
+					return
+				case <-watchDone:
+					return
+				case <-idleTicks:
+					if time.Since(s.lastActivity()) >= s.options.IdleTimeout {
+						s.idleTimedOut.Store(true)
+						_ = s.Close()
+						return
+					}
+				}
+			}
+		}()
+	}
 
 	for {
 		if err := ctx.Err(); err != nil {
@@ -176,11 +207,14 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		if s.options.IdleTimeout > 0 && time.Since(s.lastActivity()) >= s.options.IdleTimeout {
 			return ErrIdleTimeout
 		}
-		if deadlineListener, ok := listener.(interface{ SetDeadline(time.Time) error }); ok {
+		if supportsDeadline {
 			_ = deadlineListener.SetDeadline(time.Now().Add(250 * time.Millisecond))
 		}
 		conn, err := listener.Accept()
 		if err != nil {
+			if s.idleTimedOut.Load() {
+				return ErrIdleTimeout
+			}
 			if errors.Is(err, net.ErrClosed) || errors.Is(ctx.Err(), context.Canceled) {
 				return nil
 			}

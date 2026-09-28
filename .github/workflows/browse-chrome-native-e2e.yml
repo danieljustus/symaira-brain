@@ -41,6 +41,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
@@ -65,8 +69,14 @@ jobs:
             export SYMBROWSE_CHROME_REAL_EXECUTABLE="$real_chrome"
             export SYMBROWSE_CHROME_EXECUTABLE="$wrapper"
           fi
+          go test ./internal/engine/chrome \
+            -run '^TestNavigationLoadParityRedirectReloadAndHTTPError$' -count=1 -v
           cargo test --locked -p symbrowse-engine-chrome --test full \
             -- --exact full_chrome_surface_is_real_and_opt_in --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test full \
+            -- --exact blank_page_data_url_navigation_completes_and_remains_usable --nocapture
+          cargo test --locked -p symbrowse-engine-chrome --test full \
+            -- --exact blank_page_attaches_before_navigation_and_remains_usable --nocapture
 
       - name: Run macOS production-daemon Chrome E2E
         if: runner.os == 'macOS'

@@ -9,13 +9,17 @@ use std::{
     error::Error,
     fmt,
     path::Path,
-    sync::Arc,
+    sync::{Arc, OnceLock},
     time::{Duration, Instant},
 };
 
+use async_tungstenite::{tokio::connect_async, tungstenite::Message};
 use chromiumoxide::{
     Browser, Element, Page,
-    cdp::browser_protocol::{accessibility, browser, dom, network, page},
+    cdp::{
+        browser_protocol::{accessibility, browser, dom, network, page, target},
+        js_protocol::runtime,
+    },
 };
 use futures::StreamExt;
 use serde::{Deserialize, Serialize};
@@ -175,7 +179,19 @@ pub fn capabilities() -> ChromeCapabilities {
 pub struct ChromeSession {
     browser: Browser,
     mode: ConnectionMode,
+    timeout: Duration,
     _handler_task: tokio::task::JoinHandle<()>,
+}
+
+fn perf_diagnostics_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os("SYMBROWSE_PERF_DIAGNOSTICS").is_some())
+}
+
+fn perf_diagnostic(message: &str) {
+    if perf_diagnostics_enabled() {
+        eprintln!("symbrowse Chrome phase: {message}");
+    }
 }
 
 impl ChromeSession {
@@ -183,7 +199,9 @@ impl ChromeSession {
         mode: BrowserMode,
         timeout: Duration,
     ) -> Result<Self, Box<dyn Error + Send + Sync>> {
+        perf_diagnostic("browser.connect.start");
         let connection = launch::connect(&mode, timeout).await?;
+        perf_diagnostic("browser.connect.ready");
         let task = tokio::spawn(async move {
             let mut handler = connection.handler;
             while handler.next().await.is_some() {}
@@ -191,6 +209,7 @@ impl ChromeSession {
         Ok(Self {
             browser: connection.browser,
             mode: connection.mode,
+            timeout,
             _handler_task: task,
         })
     }
@@ -203,13 +222,86 @@ impl ChromeSession {
         &self,
         url: impl Into<String>,
     ) -> Result<ChromePage, Box<dyn Error + Send + Sync>> {
-        ChromePage::new(self.browser.new_page(url.into()).await?).await
+        let url = url.into();
+        perf_diagnostic("page.create.start");
+        let page = if url == "about:blank" {
+            self.new_blank_page_without_load_wait().await?
+        } else {
+            self.browser.new_page(url).await?
+        };
+        let page = ChromePage::new(page, self.browser.websocket_address().clone()).await?;
+        perf_diagnostic("page.create.ready");
+        Ok(page)
+    }
+
+    // chromiumoxide::Browser::new_page waits for the new target's main frame
+    // to report loaded. Chrome can leave an about:blank target in that state
+    // indefinitely, while Go's CDP path returns as soon as the target is
+    // attached. Create the same blank target, then obtain its Page handle once
+    // chromiumoxide has attached the target without waiting for navigation.
+    async fn new_blank_page_without_load_wait(&self) -> Result<Page, Box<dyn Error + Send + Sync>> {
+        let params = target::CreateTargetParams::builder()
+            .url("about:blank")
+            .build()
+            .map_err(chromiumoxide::error::CdpError::msg)?;
+        let page = tokio::time::timeout(self.timeout, async {
+            perf_diagnostic("blank_target.create.start");
+            let target_id = self.browser.execute(params).await?.result.target_id;
+            perf_diagnostic("blank_target.create.ready");
+            loop {
+                match self.browser.get_page(target_id.clone()).await {
+                    Ok(page) => {
+                        perf_diagnostic("blank_target.attach.ready");
+                        let diagnostics = perf_diagnostics_enabled();
+                        let readiness_started = diagnostics.then(Instant::now);
+                        let mut last_readiness_report = readiness_started;
+                        // `get_page` returns as soon as chromiumoxide has an
+                        // attached session. Its Page/Frame initialization
+                        // continues asynchronously, so wait for the initial
+                        // main frame and its default JavaScript context before
+                        // callers navigate.
+                        loop {
+                            if let Some(frame) = page.mainframe().await? {
+                                if page.frame_execution_context(frame.clone()).await?.is_some() {
+                                    if let Some(started) = readiness_started {
+                                        perf_diagnostic(&format!(
+                                            "blank_target.context.ready elapsed_ms={} frame={frame:?}",
+                                            started.elapsed().as_millis()
+                                        ));
+                                    }
+                                    return Ok(page);
+                                }
+                            }
+                            if let (Some(started), Some(last_report)) =
+                                (readiness_started, last_readiness_report.as_mut())
+                                && last_report.elapsed() >= Duration::from_secs(1)
+                            {
+                                perf_diagnostic(&format!(
+                                    "blank_target.context.wait elapsed_ms={}",
+                                    started.elapsed().as_millis()
+                                ));
+                                *last_report = Instant::now();
+                            }
+                            tokio::time::sleep(Duration::from_millis(10)).await;
+                        }
+                    }
+                    Err(chromiumoxide::error::CdpError::NotFound) => {
+                        tokio::time::sleep(Duration::from_millis(10)).await;
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        })
+        .await
+        .map_err(|_| chromiumoxide::error::CdpError::Timeout)??;
+        Ok(page)
     }
 
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {
         let mut chrome_pages = Vec::new();
         for page in self.browser.pages().await? {
-            chrome_pages.push(ChromePage::new(page).await?);
+            chrome_pages
+                .push(ChromePage::new(page, self.browser.websocket_address().clone()).await?);
         }
         Ok(chrome_pages)
     }
@@ -231,6 +323,7 @@ impl ChromeSession {
 #[derive(Clone)]
 pub struct ChromePage {
     page: Page,
+    websocket_address: String,
     dialogs: DialogMonitor,
 }
 
@@ -246,8 +339,118 @@ struct DialogState {
     auto_mode: String,
 }
 
+fn is_transient_navigation_context_error(error: &(dyn Error + Send + Sync + 'static)) -> bool {
+    matches!(
+        error.downcast_ref::<chromiumoxide::error::CdpError>(),
+        Some(chromiumoxide::error::CdpError::Chrome(cdp_error))
+            if cdp_error.code == -32000
+                && cdp_error.message == "Inspected target navigated or closed"
+    )
+}
+
+fn page_navigate_error(result: page::NavigateReturns) -> Option<chromiumoxide::error::CdpError> {
+    result
+        .error_text
+        .filter(|message| message != "net::ERR_ABORTED")
+        .map(chromiumoxide::error::CdpError::ChromeMessage)
+}
+
+fn cdp_request(id: u64, method: &str, params: Value, session_id: Option<&str>) -> Value {
+    let mut request = serde_json::json!({
+        "id": id,
+        "method": method,
+        "params": params,
+    });
+    if let Some(session_id) = session_id {
+        request["sessionId"] = Value::String(session_id.to_owned());
+    }
+    request
+}
+
+fn page_navigate_request(id: u64, session_id: &str, url: &str) -> Value {
+    cdp_request(
+        id,
+        page::NavigateParams::IDENTIFIER,
+        serde_json::json!({"url": url}),
+        Some(session_id),
+    )
+}
+
+type DirectCdpSocket = async_tungstenite::WebSocketStream<async_tungstenite::tokio::ConnectStream>;
+
+async fn direct_cdp_command(
+    socket: &mut DirectCdpSocket,
+    request: Value,
+) -> Result<Value, Box<dyn Error + Send + Sync>> {
+    let id = request
+        .get("id")
+        .and_then(Value::as_u64)
+        .ok_or("CDP request has no id")?;
+    socket
+        .send(Message::Text(request.to_string().into()))
+        .await?;
+    while let Some(message) = socket.next().await {
+        let message = message?;
+        let Message::Text(text) = message else {
+            continue;
+        };
+        let response: Value = serde_json::from_str(&text)?;
+        if response.get("id").and_then(Value::as_u64) != Some(id) {
+            continue;
+        }
+        if let Some(error) = response.get("error") {
+            let message = error
+                .get("message")
+                .and_then(Value::as_str)
+                .unwrap_or("CDP command failed");
+            return Err(chromiumoxide::error::CdpError::msg(message).into());
+        }
+        return response
+            .get("result")
+            .cloned()
+            .ok_or_else(|| "CDP response is missing result".into());
+    }
+    Err("CDP websocket closed before command response".into())
+}
+
+async fn send_page_navigate(
+    websocket_address: &str,
+    target_id: &str,
+    url: &str,
+) -> Result<DirectCdpSocket, Box<dyn Error + Send + Sync>> {
+    let (mut socket, _) = connect_async(websocket_address).await?;
+    perf_diagnostic("navigation.cdp.attach.start");
+    let attached = direct_cdp_command(
+        &mut socket,
+        cdp_request(
+            1,
+            "Target.attachToTarget",
+            serde_json::json!({"targetId": target_id, "flatten": true}),
+            None,
+        ),
+    )
+    .await?;
+    perf_diagnostic("navigation.cdp.attach.ready");
+    let session_id = attached
+        .get("sessionId")
+        .and_then(Value::as_str)
+        .ok_or("Target.attachToTarget response is missing sessionId")?;
+    perf_diagnostic("navigation.cdp.navigate.start");
+    let result = direct_cdp_command(&mut socket, page_navigate_request(2, session_id, url)).await?;
+    let result: page::NavigateReturns = serde_json::from_value(result)?;
+    if let Some(error) = page_navigate_error(result) {
+        perf_diagnostic("navigation.cdp.navigate.error_text=true");
+        return Err(Box::new(error));
+    }
+    perf_diagnostic("navigation.cdp.navigate.response");
+    Ok(socket)
+}
+
 impl ChromePage {
-    async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    async fn new(
+        page: Page,
+        websocket_address: String,
+    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
@@ -283,6 +486,7 @@ impl ChromePage {
         });
         Ok(Self {
             page,
+            websocket_address,
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
@@ -297,11 +501,143 @@ impl ChromePage {
     }
 
     pub async fn open(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
-        self.page.goto(url).await?;
-        Ok(serde_json::json!({
-            "url": self.page.url().await?.unwrap_or_default(),
-            "title": self.page.evaluate("document.title").await?.into_value::<String>()?,
-        }))
+        self.open_with_timeout(url, Duration::from_secs(30)).await
+    }
+
+    /// Bound navigation and its response reads by the caller's remaining budget.
+    pub async fn open_with_timeout(
+        &self,
+        url: &str,
+        timeout: Duration,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        match with_navigation_timeout(timeout, self.open_inner(url)).await {
+            Ok(result) => result,
+            Err(error) => Err(Box::new(error)),
+        }
+    }
+
+    async fn open_inner(&self, url: &str) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        self.navigate_and_wait_for_load(url).await?;
+
+        let page_url = match self.evaluate_runtime_json("location.href").await {
+            Ok(url) => url.as_str().unwrap_or_default().to_owned(),
+            Err(error) => return Err(error),
+        };
+
+        let title = match self.page.evaluate("document.title").await {
+            Ok(value) => match value.into_value::<String>() {
+                Ok(title) => title,
+                Err(error) => return Err(Box::new(error)),
+            },
+            Err(error) => return Err(Box::new(error)),
+        };
+
+        Ok(serde_json::json!({"url": page_url, "title": title}))
+    }
+
+    // Send Page.navigate over a direct CDP websocket. chromiumoxide routes
+    // Page::execute(Page.navigate) through its frame-lifecycle watcher, while
+    // the Go adapter dispatches the command and polls document state itself.
+    async fn navigate_and_wait_for_load(
+        &self,
+        url: &str,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if url
+            .trim_start()
+            .get(..5)
+            .is_some_and(|scheme| scheme.eq_ignore_ascii_case("data:"))
+        {
+            self.page.goto(url).await?;
+            return Ok(());
+        }
+        perf_diagnostic("navigation.baseline.start");
+        let initial = self
+            .evaluate_runtime_json("({url: location.href, time_origin: performance.timeOrigin})")
+            .await?;
+        let initial_url = initial
+            .get("url")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let initial_time_origin = initial
+            .get("time_origin")
+            .and_then(Value::as_f64)
+            .unwrap_or_default();
+        perf_diagnostic("navigation.baseline.ready");
+        perf_diagnostic("navigation.dispatch.start");
+        let _navigation_socket =
+            send_page_navigate(&self.websocket_address, self.page.target_id().inner(), url).await?;
+        perf_diagnostic("navigation.dispatch.ready");
+        let poll = async {
+            let diagnostics = perf_diagnostics_enabled();
+            let poll_started = diagnostics.then(Instant::now);
+            let mut last_poll_report = poll_started;
+            loop {
+                let state = match self
+                    .evaluate_runtime_json(
+                        "({url: location.href, time_origin: performance.timeOrigin, ready_state: document.readyState})",
+                    )
+                    .await
+                {
+                    Ok(state) => state,
+                    Err(error) if is_transient_navigation_context_error(error.as_ref()) => {
+                        tokio::time::sleep(Duration::from_millis(25)).await;
+                        continue;
+                    }
+                    Err(error) => return Err(error),
+                };
+                let url_changed = state.get("url").and_then(Value::as_str) != Some(initial_url);
+                let document_changed = state
+                    .get("time_origin")
+                    .and_then(Value::as_f64)
+                    .is_some_and(|time_origin| time_origin != initial_time_origin);
+                let ready_state = state
+                    .get("ready_state")
+                    .and_then(Value::as_str)
+                    .unwrap_or("unknown");
+                if diagnostics
+                    && let (Some(started), Some(last_report)) =
+                        (poll_started, last_poll_report.as_mut())
+                    && last_report.elapsed() >= Duration::from_secs(1)
+                {
+                    perf_diagnostic(&format!(
+                        "navigation.poll elapsed_ms={} url_changed={url_changed} document_changed={document_changed} ready_state={ready_state}",
+                        started.elapsed().as_millis()
+                    ));
+                    *last_report = Instant::now();
+                }
+                if (url_changed || document_changed) && ready_state == "complete" {
+                    if let Some(started) = poll_started {
+                        perf_diagnostic(&format!(
+                            "navigation.poll.complete elapsed_ms={}",
+                            started.elapsed().as_millis()
+                        ));
+                    }
+                    return Ok(());
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
+            }
+        };
+        tokio::pin!(poll);
+        poll.await
+    }
+
+    async fn evaluate_runtime_json(
+        &self,
+        expression: &str,
+    ) -> Result<Value, Box<dyn Error + Send + Sync>> {
+        let response = self
+            .page
+            .execute(
+                runtime::EvaluateParams::builder()
+                    .expression(expression)
+                    .return_by_value(true)
+                    .build()?,
+            )
+            .await?;
+        if let Some(exception) = response.result.exception_details {
+            return Err(format!("Chrome state evaluation failed: {exception:?}").into());
+        }
+        Ok(response.result.result.value.unwrap_or(Value::Null))
     }
 
     pub async fn read(&self) -> Result<Value, Box<dyn Error + Send + Sync>> {
@@ -882,6 +1218,13 @@ impl ChromePage {
     }
 }
 
+async fn with_navigation_timeout<T>(
+    timeout: Duration,
+    future: impl std::future::Future<Output = T>,
+) -> Result<T, tokio::time::error::Elapsed> {
+    tokio::time::timeout(timeout, future).await
+}
+
 pub struct NetworkCapture {
     requests: chromiumoxide::listeners::EventStream<network::EventRequestWillBeSent>,
     responses: chromiumoxide::listeners::EventStream<network::EventResponseReceived>,
@@ -948,6 +1291,84 @@ fn browser_set_download_behavior(
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[tokio::test]
+    async fn navigation_deadline_bounds_stalled_open() {
+        let result =
+            with_navigation_timeout(Duration::from_millis(1), std::future::pending::<()>()).await;
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn navigation_retry_only_accepts_the_transient_target_context_error() {
+        let transient = chromiumoxide::error::CdpError::Chrome(chromiumoxide::types::Error {
+            code: -32000,
+            message: "Inspected target navigated or closed".into(),
+        });
+        assert!(is_transient_navigation_context_error(&transient));
+
+        let unrelated = chromiumoxide::error::CdpError::Chrome(chromiumoxide::types::Error {
+            code: -32000,
+            message: "Target closed".into(),
+        });
+        assert!(!is_transient_navigation_context_error(&unrelated));
+        assert!(!is_transient_navigation_context_error(
+            &chromiumoxide::error::CdpError::Timeout
+        ));
+    }
+
+    #[test]
+    fn navigation_request_targets_page_session_without_lifecycle_future() {
+        let request = page_navigate_request(1, "session-1", "https://example.test/a'b?x=1&y=2");
+        assert_eq!(
+            request,
+            json!({
+                "id": 1,
+                "method": "Page.navigate",
+                "params": {"url": "https://example.test/a'b?x=1&y=2"},
+                "sessionId": "session-1"
+            })
+        );
+    }
+
+    #[test]
+    fn aborted_navigation_follows_go_polling_contract() {
+        let go_navigation = std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../../internal/engine/navigation.go"),
+        )
+        .expect("read Go navigation oracle");
+        assert!(
+            go_navigation.contains("if _, err := s.engine.Navigate(ctx, s.page, url); err != nil")
+        );
+        assert!(!go_navigation.contains("result.ErrorText"));
+
+        let aborted: page::NavigateReturns = serde_json::from_value(json!({
+            "frameId": "frame-id",
+            "errorText": "net::ERR_ABORTED"
+        }))
+        .expect("decode aborted Page.navigate response");
+        assert!(page_navigate_error(aborted).is_none());
+    }
+
+    #[test]
+    fn page_navigate_response_preserves_other_chrome_navigation_errors() {
+        let failed: page::NavigateReturns = serde_json::from_value(json!({
+            "frameId": "frame-id",
+            "errorText": "net::ERR_CONNECTION_REFUSED"
+        }))
+        .expect("decode failed Page.navigate response");
+        assert!(matches!(
+            page_navigate_error(failed),
+            Some(chromiumoxide::error::CdpError::ChromeMessage(message))
+                if message == "net::ERR_CONNECTION_REFUSED"
+        ));
+
+        let succeeded: page::NavigateReturns =
+            serde_json::from_value(json!({"frameId": "frame-id"}))
+                .expect("decode successful Page.navigate response");
+        assert!(page_navigate_error(succeeded).is_none());
+    }
 
     #[test]
     fn canonical_capabilities_partition_matches_daemon_commands() {
