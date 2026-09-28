@@ -93,6 +93,9 @@ class ChromePairTests(unittest.TestCase):
                         "chrome_open_stage=browser-setup-ready\n"
                         "chrome_open_stage=page-open-start\n"
                         "chrome_open_stage=page-goto-start\n"
+                        "chrome_open_stage=page-lifecycle-init\n"
+                        "chrome_open_stage=page-lifecycle-domcontentloaded\n"
+                        "chrome_open_stage=page-lifecycle-load\n"
                         "chrome_open_stage=page-goto-error\n"
                         "chrome_open_stage=page-open-error\n"
                         "chrome_open_stage=main-frame status=missing\n"
@@ -119,7 +122,8 @@ class ChromePairTests(unittest.TestCase):
             "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
             "browser-page-created", "browser-setup-ready",
             "page-open-start",
-            "page-goto-start", "page-goto-error", "page-open-error",
+            "page-goto-start", "page-lifecycle-init", "page-lifecycle-domcontentloaded",
+            "page-lifecycle-load", "page-goto-error", "page-open-error",
             "main-frame status=missing", "navigation-future-start",
             "navigation-future status=timeout",
             "navigation-fallback status=start",

@@ -300,6 +300,7 @@ impl ChromeSession {
 pub struct ChromePage {
     page: Page,
     dialogs: DialogMonitor,
+    _lifecycle_task: Option<Arc<tokio::task::JoinHandle<()>>>,
 }
 
 #[derive(Clone)]
@@ -319,6 +320,25 @@ impl ChromePage {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
+        let lifecycle_task = if std::env::var_os("SYMBROWSE_E2E").as_deref()
+            == Some(std::ffi::OsStr::new("1"))
+        {
+            let mut lifecycle_events = page.event_listener::<page::EventLifecycleEvent>().await?;
+            Some(Arc::new(tokio::spawn(async move {
+                while let Some(event) = lifecycle_events.next().await {
+                    match event.name.as_str() {
+                        "init" => chrome_open_stage("page-lifecycle-init"),
+                        "DOMContentLoaded" => {
+                            chrome_open_stage("page-lifecycle-domcontentloaded");
+                        }
+                        "load" => chrome_open_stage("page-lifecycle-load"),
+                        _ => {}
+                    }
+                }
+            })))
+        } else {
+            None
+        };
         let state = Arc::new(Mutex::new(DialogState::default()));
         let monitor_state = Arc::clone(&state);
         let monitor_page = page.clone();
@@ -355,6 +375,7 @@ impl ChromePage {
                 state,
                 _task: Arc::new(task),
             },
+            _lifecycle_task: lifecycle_task,
         })
     }
     pub fn target_id(&self) -> String {

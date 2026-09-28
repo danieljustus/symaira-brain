@@ -37,6 +37,7 @@ CHROME_OPEN_STAGES = {
     "page-init-mainframe-start", "page-init-mainframe-ready",
     "page-init-mainframe-missing",
     "page-init-lifecycle-enable-start", "page-init-lifecycle-enable-complete",
+    "page-lifecycle-init", "page-lifecycle-domcontentloaded", "page-lifecycle-load",
     "page-goto-start", "page-goto-complete", "page-goto-error",
     "page-url-start", "page-url-complete", "page-url-error",
     "page-title-start", "page-title-complete", "page-title-error",
