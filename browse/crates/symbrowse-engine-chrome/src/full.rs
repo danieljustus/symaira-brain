@@ -13,6 +13,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use async_tungstenite::{tokio::connect_async, tungstenite::Message};
 use chromiumoxide::{
     Browser, Element, Page,
     cdp::{
@@ -228,7 +229,7 @@ impl ChromeSession {
         } else {
             self.browser.new_page(url).await?
         };
-        let page = ChromePage::new(page).await?;
+        let page = ChromePage::new(page, self.browser.websocket_address().clone()).await?;
         perf_diagnostic("page.create.ready");
         Ok(page)
     }
@@ -299,7 +300,8 @@ impl ChromeSession {
     pub async fn pages(&self) -> Result<Vec<ChromePage>, Box<dyn Error + Send + Sync>> {
         let mut chrome_pages = Vec::new();
         for page in self.browser.pages().await? {
-            chrome_pages.push(ChromePage::new(page).await?);
+            chrome_pages
+                .push(ChromePage::new(page, self.browser.websocket_address().clone()).await?);
         }
         Ok(chrome_pages)
     }
@@ -321,6 +323,7 @@ impl ChromeSession {
 #[derive(Clone)]
 pub struct ChromePage {
     page: Page,
+    websocket_address: String,
     dialogs: DialogMonitor,
 }
 
@@ -351,8 +354,97 @@ fn page_navigate_error(result: page::NavigateReturns) -> Option<chromiumoxide::e
         .map(chromiumoxide::error::CdpError::ChromeMessage)
 }
 
+fn cdp_request(id: u64, method: &str, params: Value, session_id: Option<&str>) -> Value {
+    let mut request = serde_json::json!({
+        "id": id,
+        "method": method,
+        "params": params,
+    });
+    if let Some(session_id) = session_id {
+        request["sessionId"] = Value::String(session_id.to_owned());
+    }
+    request
+}
+
+fn page_navigate_request(id: u64, session_id: &str, url: &str) -> Value {
+    cdp_request(
+        id,
+        page::NavigateParams::IDENTIFIER,
+        serde_json::json!({"url": url}),
+        Some(session_id),
+    )
+}
+
+type DirectCdpSocket = async_tungstenite::WebSocketStream<async_tungstenite::tokio::ConnectStream>;
+
+async fn direct_cdp_command(
+    socket: &mut DirectCdpSocket,
+    request: Value,
+) -> Result<Value, Box<dyn Error + Send + Sync>> {
+    let id = request
+        .get("id")
+        .and_then(Value::as_u64)
+        .ok_or("CDP request has no id")?;
+    socket
+        .send(Message::Text(request.to_string().into()))
+        .await?;
+    while let Some(message) = socket.next().await {
+        let message = message?;
+        let Message::Text(text) = message else {
+            continue;
+        };
+        let response: Value = serde_json::from_str(&text)?;
+        if response.get("id").and_then(Value::as_u64) != Some(id) {
+            continue;
+        }
+        if let Some(error) = response.get("error") {
+            let message = error
+                .get("message")
+                .and_then(Value::as_str)
+                .unwrap_or("CDP command failed");
+            return Err(chromiumoxide::error::CdpError::msg(message).into());
+        }
+        return response
+            .get("result")
+            .cloned()
+            .ok_or_else(|| "CDP response is missing result".into());
+    }
+    Err("CDP websocket closed before command response".into())
+}
+
+async fn send_page_navigate(
+    websocket_address: &str,
+    target_id: &str,
+    url: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let (mut socket, _) = connect_async(websocket_address).await?;
+    let attached = direct_cdp_command(
+        &mut socket,
+        cdp_request(
+            1,
+            "Target.attachToTarget",
+            serde_json::json!({"targetId": target_id, "flatten": true}),
+            None,
+        ),
+    )
+    .await?;
+    let session_id = attached
+        .get("sessionId")
+        .and_then(Value::as_str)
+        .ok_or("Target.attachToTarget response is missing sessionId")?;
+    let result = direct_cdp_command(&mut socket, page_navigate_request(2, session_id, url)).await?;
+    let result: page::NavigateReturns = serde_json::from_value(result)?;
+    if let Some(error) = page_navigate_error(result) {
+        return Err(Box::new(error));
+    }
+    Ok(())
+}
+
 impl ChromePage {
-    async fn new(page: Page) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    async fn new(
+        page: Page,
+        websocket_address: String,
+    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let mut events = page
             .event_listener::<page::EventJavascriptDialogOpening>()
             .await?;
@@ -388,6 +480,7 @@ impl ChromePage {
         });
         Ok(Self {
             page,
+            websocket_address,
             dialogs: DialogMonitor {
                 state,
                 _task: Arc::new(task),
@@ -436,9 +529,9 @@ impl ChromePage {
         Ok(serde_json::json!({"url": page_url, "title": title}))
     }
 
-    // Send Page.navigate directly through the CDP session. The Page::goto
-    // helper waits on chromiumoxide's frame-lifecycle watcher; the Go adapter
-    // instead dispatches navigation and polls document state independently.
+    // Send Page.navigate over a direct CDP websocket. chromiumoxide routes
+    // Page::execute(Page.navigate) through its frame-lifecycle watcher, while
+    // the Go adapter dispatches the command and polls document state itself.
     async fn navigate_and_wait_for_load(
         &self,
         url: &str,
@@ -465,10 +558,7 @@ impl ChromePage {
             .unwrap_or_default();
         perf_diagnostic("navigation.baseline.ready");
         perf_diagnostic("navigation.dispatch.start");
-        let response = self.page.execute(page::NavigateParams::new(url)).await?;
-        if let Some(error) = page_navigate_error(response.result) {
-            return Err(Box::new(error));
-        }
+        send_page_navigate(&self.websocket_address, self.page.target_id().inner(), url).await?;
         perf_diagnostic("navigation.dispatch.ready");
         let poll = async {
             let diagnostics = perf_diagnostics_enabled();
@@ -1221,12 +1311,16 @@ mod tests {
     }
 
     #[test]
-    fn navigation_uses_raw_page_navigate_cdp_command() {
-        let params = page::NavigateParams::new("https://example.test/a'b?x=1&y=2");
-        assert_eq!(page::NavigateParams::IDENTIFIER, "Page.navigate");
+    fn navigation_request_targets_page_session_without_lifecycle_future() {
+        let request = page_navigate_request(1, "session-1", "https://example.test/a'b?x=1&y=2");
         assert_eq!(
-            serde_json::to_value(params).expect("serialize CDP params"),
-            json!({"url": "https://example.test/a'b?x=1&y=2"})
+            request,
+            json!({
+                "id": 1,
+                "method": "Page.navigate",
+                "params": {"url": "https://example.test/a'b?x=1&y=2"},
+                "sessionId": "session-1"
+            })
         );
     }
 

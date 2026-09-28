@@ -1953,6 +1953,7 @@ dependencies = [
 name = "symbrowse-engine-chrome"
 version = "0.0.0"
 dependencies = [
+ "async-tungstenite",
  "chromiumoxide",
  "futures",
  "serde",
