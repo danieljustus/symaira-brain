@@ -322,7 +322,8 @@ fn diagnostic_url_origin(url: Option<&str>) -> String {
             .split_once(':')
             .map_or_else(|| "<non-url>".into(), |(scheme, _)| format!("{scheme}:"));
     };
-    let authority = remainder.split('/').next().unwrap_or_default();
+    let authority_end = remainder.find(['/', '?', '#']).unwrap_or(remainder.len());
+    let authority = &remainder[..authority_end];
     let host = authority.rsplit('@').next().unwrap_or_default();
     format!("{scheme}://{host}")
 }
@@ -1241,6 +1242,14 @@ mod tests {
         assert_eq!(
             diagnostic_url_origin(Some("http://user:secret@127.0.0.1:8080/private?q=x")),
             "http://127.0.0.1:8080"
+        );
+        assert_eq!(
+            diagnostic_url_origin(Some("https://example.test?token=secret")),
+            "https://example.test"
+        );
+        assert_eq!(
+            diagnostic_url_origin(Some("https://example.test#secret")),
+            "https://example.test"
         );
         assert_eq!(diagnostic_url_origin(Some("about:blank")), "about:blank");
         assert_eq!(
