@@ -2,12 +2,19 @@ name: Browse PERF-003 real Chrome paired benchmark
 
 on:
   workflow_dispatch:
+    inputs:
+      diagnostic_only:
+        description: Run timestamped Windows AMD64 phase diagnostics without evaluating PERF-003.
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
   paired-chrome:
+    if: ${{ !inputs.diagnostic_only || matrix.target == 'windows-amd64' }}
     name: PERF-003 native Chrome ${{ matrix.target }}
     strategy:
       fail-fast: false
@@ -72,6 +79,7 @@ jobs:
           CFT_EXECUTABLE: ${{ steps.cft.outputs.executable }}
           CFT_VERSION: ${{ steps.cft.outputs.version }}
           CFT_ARCHIVE_SHA256: ${{ steps.cft.outputs.archive_sha256 }}
+          DIAGNOSTIC_ONLY: ${{ inputs.diagnostic_only }}
         run: |
           set -euo pipefail
           args=(--target "$TARGET" \
@@ -92,6 +100,9 @@ jobs:
               args+=(--chrome-launcher "$wrapper")
             fi
           fi
+          if [[ "$DIAGNOSTIC_ONLY" == true ]]; then
+            args+=(--diagnostic-only)
+          fi
           python3 port/bench/chrome_pair.py "${args[@]}"
 
       - name: Upload exact-SHA paired Chrome evidence
@@ -104,7 +115,7 @@ jobs:
 
   verify-native-evidence:
     name: Verify exact-SHA PERF-003 platform receipts
-    if: always()
+    if: ${{ always() && !inputs.diagnostic_only }}
     needs: [paired-chrome]
     runs-on: ubuntu-24.04
     timeout-minutes: 15

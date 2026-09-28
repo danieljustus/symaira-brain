@@ -266,9 +266,14 @@ fn run_tool_list(profiles: String, format: Format) -> ExitCode {
 fn run_dispatch(
     session: String,
     command: String,
-    args: serde_json::Value,
+    mut args: serde_json::Value,
     format: Format,
 ) -> ExitCode {
+    // Go navigates first when `a11y` gets a URL, then audits.
+    let a11y_url = (command == "a11y")
+        .then(|| args.as_object_mut().and_then(|args| args.remove("url")))
+        .flatten()
+        .and_then(|url| url.as_str().map(str::to_owned));
     let frame = Frame {
         cmd: command,
         args: Some(args),
@@ -289,15 +294,39 @@ fn run_dispatch(
     } else {
         None
     };
+    let client = || {
+        Client::new(ClientOptions {
+            socket_path: default_socket_path(&session),
+            session: session.clone(),
+            ..ClientOptions::default()
+        })
+    };
+    if let Some(url) = a11y_url {
+        let open = Frame {
+            cmd: "open".into(),
+            args: Some(serde_json::json!({ "url": url })),
+            session: session.clone(),
+            ..Frame::default()
+        };
+        match client().request(open) {
+            Ok(response) if response.success => {}
+            Ok(response) => {
+                let error = response.error.unwrap_or_default();
+                return render_dispatch_error(format, &error.code, error.message);
+            }
+            Err(error) => {
+                return render_dispatch_error(
+                    format,
+                    daemon_codes::DAEMON_UNAVAILABLE,
+                    error.to_string(),
+                );
+            }
+        }
+    }
     let response = match if let Some(response) = direct {
         Ok(response)
     } else {
-        Client::new(ClientOptions {
-            socket_path: default_socket_path(&session),
-            session,
-            ..ClientOptions::default()
-        })
-        .request(frame)
+        client().request(frame)
     } {
         Ok(response) => response,
         Err(error) => {
@@ -1064,7 +1093,8 @@ fn write_config_error(format: Format, message: &str) -> ExitCode {
 fn implemented_help_command(command: &str) -> bool {
     matches!(
         command,
-        "batch"
+        "a11y"
+            | "batch"
             | "back"
             | "click"
             | "config"
@@ -1095,7 +1125,7 @@ fn implemented_help_command(command: &str) -> bool {
 }
 
 fn root_help() -> String {
-    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch     Run multiple commands in one process and report per-item status\n  click     Click an element matching a selector or @ref\n  fill      Fill an input element, replacing its content\n  find      Find an element semantically and optionally act on it\n  get       Inspect page and element values\n  goto      Navigate to a URL (alias for open)\n  is        Check page and element state\n  open      Open a URL in the browser and wait for load\n  press     Press a keyboard key on an element\n  read      Render the page as markdown (or JSON) in the symfetch output schema\n  snapshot  Render the accessibility tree\n  type      Type text into an element, appending to its content\n  wait      Wait for a browser condition\n\nNavigation Commands:\n  back      Navigate back in page history\n  forward   Navigate forward in page history\n  reload    Reload the current page\n\nState Commands:\n  profiles  List discovered Chrome profiles available for reuse\n  state     Save, restore and manage named browser session states\n\nDebug Commands:\n  config    Inspect symbrowse configuration\n  daemon    Run or inspect the symbrowse daemon\n  mcp       Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  upgrade   Check for and apply symbrowse updates\n  version   Print the symbrowse version\n\nFlows Commands:\n  flow      Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion  Generate the autocompletion script for the specified shell\n  help        Help about any command\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n"
+    "symbrowse is the standalone command-line entrypoint for Symaira Browse.\n\nUsage:\n  symbrowse [command]\n\nCore Commands:\n  batch     Run multiple commands in one process and report per-item status\n  click     Click an element matching a selector or @ref\n  fill      Fill an input element, replacing its content\n  find      Find an element semantically and optionally act on it\n  get       Inspect page and element values\n  goto      Navigate to a URL (alias for open)\n  is        Check page and element state\n  open      Open a URL in the browser and wait for load\n  press     Press a keyboard key on an element\n  read      Render the page as markdown (or JSON) in the symfetch output schema\n  snapshot  Render the accessibility tree\n  type      Type text into an element, appending to its content\n  wait      Wait for a browser condition\n\nNavigation Commands:\n  back      Navigate back in page history\n  forward   Navigate forward in page history\n  reload    Reload the current page\n\nState Commands:\n  profiles  List discovered Chrome profiles available for reuse\n  state     Save, restore and manage named browser session states\n\nDebug Commands:\n  a11y      Run an axe-core accessibility audit on the current page\n  config    Inspect symbrowse configuration\n  daemon    Run or inspect the symbrowse daemon\n  mcp       Start the MCP stdio server (JSON-RPC 2.0 over stdin/stdout)\n  upgrade   Check for and apply symbrowse updates\n  version   Print the symbrowse version\n\nFlows Commands:\n  flow      Validate, run and record declarative browser flows\n\nAdditional Commands:\n  completion  Generate the autocompletion script for the specified shell\n  help        Help about any command\n\nFlags:\n  -h, --help            help for symbrowse\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n  -v, --version         version for symbrowse\n\nUse \"symbrowse [command] --help\" for more information about a command.\n"
         .to_owned()
 }
 
@@ -1111,6 +1141,12 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("a11y", None) => Some(plain(
+            "Run an axe-core accessibility audit on the current page",
+            "symbrowse a11y [url] [flags]",
+            "  -h, --help              help for a11y\n      --selector string   restrict the audit to a CSS selector\n      --session string    daemon session name (default \"default\")\n      --tags string       comma-separated WCAG tags (e.g. wcag2a,wcag2aa)\n",
+            global,
+        )),
         ("version", None) => Some(plain(
             "Print the symbrowse version",
             "symbrowse version [flags]",
@@ -1460,7 +1496,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         }
         "tools" => parse_tools(&values, command_index),
         "fetch" | "read" | "open" | "goto" | "snapshot" | "click" | "fill" | "type" | "press"
-        | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" => {
+        | "wait" | "back" | "forward" | "reload" | "get" | "is" | "find" | "a11y" => {
             parse_dispatch(&values, command_index)
         }
         command => Err(ParseError {
@@ -1557,6 +1593,13 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                 args.insert(
                     "selector".into(),
                     serde_json::Value::String(required_value(values, index, "--selector")?.into()),
+                );
+            }
+            "--tags" if name == "a11y" => {
+                index += 1;
+                args.insert(
+                    "tags".into(),
+                    split_tags(required_value(values, index, "--tags")?),
                 );
             }
             "--kind" => {
@@ -1657,6 +1700,9 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                     serde_json::Value::String(value[11..].into()),
                 );
             }
+            value if name == "a11y" && value.starts_with("--tags=") => {
+                args.insert("tags".into(), split_tags(&value[7..]));
+            }
             value if value.starts_with("--value=") => {
                 args.insert("value".into(), serde_json::Value::String(value[8..].into()));
             }
@@ -1683,6 +1729,12 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         "click" | "fill" => take_positional(&mut args, &mut positional, "selector"),
         "press" => take_positional(&mut args, &mut positional, "key"),
         "get" | "is" => take_positional(&mut args, &mut positional, "kind"),
+        "a11y" => {
+            take_positional(&mut args, &mut positional, "url");
+            args.entry("tags").or_insert(serde_json::Value::Null);
+            args.entry("selector")
+                .or_insert_with(|| serde_json::Value::String(String::new()));
+        }
         _ => {}
     }
     if name == "fill" {
@@ -1776,6 +1828,17 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         args: serde_json::Value::Object(args),
         format,
     })
+}
+
+fn split_tags(value: &str) -> serde_json::Value {
+    serde_json::Value::Array(
+        value
+            .split(',')
+            .map(str::trim)
+            .filter(|tag| !tag.is_empty())
+            .map(|tag| serde_json::Value::String(tag.to_owned()))
+            .collect(),
+    )
 }
 
 fn take_positional(
@@ -2482,6 +2545,50 @@ mod tests {
     use std::ffi::OsString;
 
     use sha2::{Digest, Sha256};
+
+    #[test]
+    fn a11y_routes_tags_selector_and_optional_url() {
+        let Action::Dispatch {
+            session,
+            command,
+            args: payload,
+            format,
+        } = parse(&args(&[
+            "a11y",
+            "https://fixture.invalid",
+            "--tags",
+            "wcag2a, ,wcag2aa",
+            "--selector",
+            ".main",
+            "--output=json",
+        ]))
+        .unwrap()
+        else {
+            panic!("a11y must dispatch");
+        };
+        assert_eq!(session, "default");
+        assert_eq!(command, "a11y");
+        assert!(matches!(format, Format::Json));
+        assert_eq!(
+            payload,
+            serde_json::json!({
+                "url": "https://fixture.invalid",
+                "tags": ["wcag2a", "wcag2aa"],
+                "selector": ".main",
+            })
+        );
+
+        let Action::Dispatch { args: defaults, .. } = parse(&args(&["a11y"])).unwrap() else {
+            panic!("a11y must dispatch");
+        };
+        assert_eq!(defaults, serde_json::json!({"tags": null, "selector": ""}));
+        assert!(parse(&args(&["a11y", "one", "two"])).is_err());
+        assert!(
+            super::command_help("a11y", &[])
+                .unwrap()
+                .contains("--tags string")
+        );
+    }
 
     fn args(values: &[&str]) -> Vec<OsString> {
         values.iter().map(OsString::from).collect()
