@@ -1,5 +1,28 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated lazy per-call usage discovery — 2026-09-29
+
+Candidate `7a5cd70f156e60a6c00a2f8a23f91e87d7239d9b` constructs the production
+usage Service inside each allowed get_ai_usage dispatch instead of at Gateway
+startup. Actual Go New/handleAIUsage and Rust Gateway/Service tests use an
+isolated home, synthetic credentials and fake ps to prove no startup probe,
+per-call discovery and newly written credential-file visibility. Pre-cancelled
+reports return before spawning authenticated requests. The handler's 30-second
+budget starts before discovery; elapsed-budget exhaustion was not separately
+exercised in this slice.
+
+Independent native Darwin/arm64 and Linux/arm64 gates pass Go usage tests,
+actual Go gateway lifecycle and usage/OpenCode fixture freshness. Rust passes
+3+9+4 Gateway tests, 62+9+9 usage tests on Darwin / 62+8+9 on Linux, and20 CLI
+MCP tests on each, zero failures or ignored. Worker strict Clippy/fmt also pass.
+`gateway-lazy-receipt-7a5cd70f.json` in both build roots binds clean candidate
+metadata and log hashes. The Make rust-check gate includes the Go lifecycle.
+
+USE-001 remains open for real host integration, elapsed deadline exhaustion,
+remaining native targets and final whole-ledger acceptance. No real Keychain,
+process table, provider, installed cutover or publication was used.
+
+
 ## Integrated Claude Keychain parser and report parity — 2026-09-29
 
 Candidate `c9cd446079252ae67c74db8a6df67058f4fbc355` preserves Go's typed
