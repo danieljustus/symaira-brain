@@ -750,7 +750,7 @@ func buildCopilotFileTokenOracle() (copilotFileTokenOracleFixture, error) {
 					return copilotFileTokenOracleFixture{}, err
 				}
 				if _, ok := allowed[token]; !ok {
-					return copilotFileTokenOracleFixture{}, fmt.Errorf("Copilot parser returned %q outside the normalized map-order set for %s", token, input.id)
+					return copilotFileTokenOracleFixture{}, fmt.Errorf("Copilot parser returned a value outside the normalized map-order set for %s", input.id)
 				}
 			}
 			fixture.Cases = append(fixture.Cases, copilotFileTokenOracleCase{
@@ -861,7 +861,7 @@ func buildClaudeFileTokenOracle() (claudeFileTokenOracleFixture, error) {
 					return claudeFileTokenOracleFixture{}, err
 				}
 				if _, ok := allowed[token]; !ok {
-					return claudeFileTokenOracleFixture{}, fmt.Errorf("Claude parser returned %q outside the normalized map-order set for %s", token, input.id)
+					return claudeFileTokenOracleFixture{}, fmt.Errorf("Claude parser returned a value outside the normalized map-order set for %s", input.id)
 				}
 			}
 			fixture.Cases = append(fixture.Cases, claudeFileTokenOracleCase{
@@ -1024,12 +1024,17 @@ func buildClaudeOAuthReportFrom(status int, body []byte, fileCredential bool) (r
 		fileToken = token
 	}
 	credentialsPath := filepath.Join(home, ".claude", ".credentials.json")
-	credentials := fmt.Sprintf(`{"oauthAccount":{"work":{"accessToken":"%s"},"default":{"accessToken":"%s"}}}`,
-		"oracle-only-invalid-claude-oauth-work", fileToken)
+	credentials, err := json.Marshal(map[string]any{"oauthAccount": map[string]any{
+		"work":    map[string]string{"accessToken": "oracle-only-invalid-claude-oauth-work"},
+		"default": map[string]string{"accessToken": fileToken},
+	}})
+	if err != nil {
+		return usage.Report{}, fmt.Errorf("encode synthetic Claude credential file: %w", err)
+	}
 	if err := os.MkdirAll(filepath.Dir(credentialsPath), 0o700); err != nil {
 		return usage.Report{}, fmt.Errorf("create isolated Claude credential directory: %w", err)
 	}
-	if err := os.WriteFile(credentialsPath, []byte(credentials), 0o600); err != nil {
+	if err := os.WriteFile(credentialsPath, credentials, 0o600); err != nil {
 		return usage.Report{}, fmt.Errorf("write synthetic Claude credential file: %w", err)
 	}
 	if !fileCredential {
@@ -1238,8 +1243,13 @@ func buildAuthenticatedProviderReportFrom(provider, token string, body []byte, s
 				_ = restore()
 				return usage.Report{}, fmt.Errorf("create isolated Copilot credential directory: %w", err)
 			}
-			contents := fmt.Sprintf("{\"github.com:Iv1.oracle\":{\"oauth_token\":%q}}", token)
-			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+			contents, err := json.Marshal(map[string]any{"github.com:Iv1.oracle": map[string]string{"oauth_token": token}})
+			if err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("encode synthetic Copilot apps file: %w", err)
+			}
+			if err := os.WriteFile(path, contents, 0o600); err != nil {
 				_ = os.RemoveAll(home)
 				_ = restore()
 				return usage.Report{}, fmt.Errorf("write synthetic Copilot apps file: %w", err)
@@ -1251,8 +1261,13 @@ func buildAuthenticatedProviderReportFrom(provider, token string, body []byte, s
 				_ = restore()
 				return usage.Report{}, fmt.Errorf("create isolated Codex credential directory: %w", err)
 			}
-			contents := fmt.Sprintf("{\"access_token\":%q}", token)
-			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+			contents, err := json.Marshal(map[string]string{"access_token": token})
+			if err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("encode synthetic Codex auth file: %w", err)
+			}
+			if err := os.WriteFile(path, contents, 0o600); err != nil {
 				_ = os.RemoveAll(home)
 				_ = restore()
 				return usage.Report{}, fmt.Errorf("write synthetic Codex auth file: %w", err)
