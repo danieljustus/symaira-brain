@@ -5,7 +5,7 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; Claude, Codex, and Copilot accept narrowly proven\ndefault credential-file shapes read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
@@ -15,7 +15,8 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
 /// without a cookie also stays native because Go has no fetch strategy for it.
 /// A report with only a direct `ANTHROPIC_ADMIN_KEY` or
-/// `ANTHROPIC_OAUTH_TOKEN`, a direct `COPILOT_ACCESS_TOKEN` or a direct
+/// `ANTHROPIC_OAUTH_TOKEN`, a direct `COPILOT_ACCESS_TOKEN` or a sole token in
+/// the default `~/.config/github-copilot/{apps,hosts}.json` shape, or a direct
 /// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
 /// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
 /// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential
@@ -28,8 +29,10 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// transport. A Claude OAuth file is native only for a deterministic Go-equivalent
 /// default-account or single-token shape; alternate field casing, unknown
 /// metadata, ambiguous account selection, malformed typed fields, and other
-/// unproven file shapes stay on Go. Codex `CODEX_HOME` overrides, mixed env/file sources, other file
-/// credentials, secret references, provider-specific overrides, and every
+/// unproven file shapes stay on Go. Copilot files are native only for one
+/// deterministic token entry; reference-shaped and mixed env/file sources,
+/// Codex `CODEX_HOME` overrides, other file credentials, secret references,
+/// provider-specific overrides, and every
 /// other configured provider continue to use Go until pinned.
 ///
 /// The report fetch invoked below remains a user-initiated live read, as it

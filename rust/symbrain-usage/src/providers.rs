@@ -26,7 +26,9 @@ pub use provider_config::{
     resolve_reference_or_env, secretref_timeout, set_secretref_timeout,
 };
 #[cfg(test)]
-pub(crate) use provider_config::{claude_from_resolved, codex_from_resolved};
+pub(crate) use provider_config::{
+    claude_from_resolved, codex_from_resolved, copilot_from_resolved,
+};
 
 const MAX_CREDENTIAL_FILE_BYTES: u64 = 64 * 1024;
 

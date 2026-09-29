@@ -8,7 +8,7 @@
 
 use super::super::{hostname, platform_label, request_for};
 use crate::providers::Provider;
-use crate::providers::{claude_from_resolved, codex_from_resolved};
+use crate::providers::{claude_from_resolved, codex_from_resolved, copilot_from_resolved};
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -20,6 +20,8 @@ const CLAUDE_OAUTH_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/claude_oauth_authenticated_report.json");
 const CODEX_FILE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/codex_file_authenticated_report.json");
+const COPILOT_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/copilot_file_authenticated_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
@@ -28,6 +30,7 @@ const COPILOT_OAUTH: &str = "dump-copilot-oauth";
 const REPORT_ENV_CREDENTIAL: &str = "synthetic-direct-env-credential";
 const REPORT_FILE_CREDENTIAL: &str = "oracle-only-invalid-claude-oauth-file";
 const CODEX_FILE_CREDENTIAL: &str = "oracle-only-invalid-codex-file";
+const COPILOT_FILE_CREDENTIAL: &str = "oracle-only-invalid-copilot-file";
 const CURSOR_COOKIE: &str = "dump-cursor-cookie";
 const KIMI_CLI: &str = "dump-kimi-api-key";
 const KIMI_WEB: &str = "dump-kimi-web-token";
@@ -228,6 +231,15 @@ fn authenticated_codex_file_report(response: Response) -> (crate::Report, Fixtur
         .collect();
     let transport = FixtureTransport::new([("codex".into(), response)].into());
     let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    (report, transport)
+}
+
+fn authenticated_copilot_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let provider =
+        copilot_from_resolved(Some(("file".into(), COPILOT_FILE_CREDENTIAL.into())), None);
+    let transport = FixtureTransport::new([("copilot".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
     (report, transport)
 }
 
@@ -1643,6 +1655,63 @@ fn authenticated_codex_file_report_matches_go_success_and_failure_oracles() {
         });
         assert_eq!(
             serde_json::to_value(&report).expect("Rust Codex file error report"),
+            oracle["errors"][error_index]["report"],
+            "HTTP {status} report"
+        );
+    }
+}
+
+#[test]
+fn authenticated_copilot_file_report_matches_go_success_and_failure_oracles() {
+    let oracle: Value =
+        serde_json::from_str(COPILOT_FILE_REPORT_ORACLE).expect("Go Copilot file report oracle");
+    let (mut report, transport) = authenticated_copilot_file_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/copilot-user.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    let copilot = &mut report.providers[0];
+    assert_eq!(copilot.id, "copilot");
+    assert!(copilot.configured);
+    assert_eq!(copilot.auth_status.status, "available");
+    assert_eq!(copilot.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(copilot.error, None);
+    let snapshot = copilot.snapshot.as_mut().expect("Copilot file snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        oracle["success"]["providers"][0]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("Go fetched_at"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Copilot file report"),
+        oracle["success"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://api.github.com/copilot_internal/user"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer oracle-only-invalid-copilot-file")
+    );
+
+    for (status, body, error_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), 1),
+        (200, b"{}".as_slice(), 2),
+    ] {
+        let (report, _) = authenticated_copilot_file_report(Response {
+            status,
+            body: body.to_vec(),
+            headers: BTreeMap::new(),
+        });
+        assert_eq!(
+            serde_json::to_value(&report).expect("Rust Copilot file error report"),
             oracle["errors"][error_index]["report"],
             "HTTP {status} report"
         );

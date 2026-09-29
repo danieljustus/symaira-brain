@@ -20,6 +20,7 @@ import (
 )
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
+const copilotFileOracleToken = "oracle-only-invalid-copilot-file"
 const claudeAdminOracleToken = "oracle-only-invalid-claude-admin"
 const claudeOAuthOracleToken = "oracle-only-invalid-claude-oauth"
 const claudeOAuthFileOracleToken = "oracle-only-invalid-claude-oauth-file"
@@ -81,6 +82,8 @@ func main() {
 	output := flag.String("output", "rust/symbrain-usage/tests/fixtures/provider_graph.json", "provider graph path")
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
+	copilotFileReportOutput := flag.String("copilot-file-report-output", "rust/symbrain-usage/tests/fixtures/copilot_file_authenticated_report.json", "authenticated Copilot file report path")
+	copilotFileTokenOutput := flag.String("copilot-file-token-output", "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json", "Copilot credential file parser cases")
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
@@ -113,6 +116,16 @@ func main() {
 		Providers     []usage.OracleProvider `json:"providers"`
 	}{SchemaVersion: usage.ReportSchemaVersion, Providers: cases.Providers}
 	copilotReport, err := buildCopilotAuthenticatedReport(fixtures["copilot"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	copilotFileReport, err := buildCopilotFileAuthenticatedReport(fixtures["copilot"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	copilotFileTokenOracle, err := buildCopilotFileTokenOracle()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -186,6 +199,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*copilotFileReportOutput, copilotFileReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*copilotFileTokenOutput, copilotFileTokenOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*claudeAdminReportOutput, claudeAdminReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -242,6 +263,14 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*copilotReportOutput, copilotReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*copilotFileReportOutput, copilotFileReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*copilotFileTokenOutput, copilotFileTokenOracle); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -326,12 +355,201 @@ type claudeFileTokenOracleCase struct {
 	SelectionRule  string   `json:"selection_rule,omitempty"`
 }
 
+type copilotFileTokenOracleFixture struct {
+	SchemaVersion int                          `json:"schema_version"`
+	Cases         []copilotFileTokenOracleCase `json:"cases"`
+}
+
+type copilotFileTokenOracleCase struct {
+	ID             string   `json:"id"`
+	AppsJSON       *string  `json:"apps_json,omitempty"`
+	HostsJSON      *string  `json:"hosts_json,omitempty"`
+	Token          *string  `json:"token,omitempty"`
+	PossibleTokens []string `json:"possible_tokens,omitempty"`
+	SelectionRule  string   `json:"selection_rule,omitempty"`
+	RustCandidate  bool     `json:"rust_candidate"`
+	NativeRoute    bool     `json:"native_route"`
+}
+
 type codexFileReportFixture struct {
 	Success usage.Report `json:"success"`
 	Errors  []struct {
 		Status int          `json:"status"`
 		Report usage.Report `json:"report"`
 	} `json:"errors"`
+}
+
+type copilotFileReportFixture struct {
+	Success usage.Report `json:"success"`
+	Errors  []struct {
+		Status int          `json:"status"`
+		Report usage.Report `json:"report"`
+	} `json:"errors"`
+}
+
+func buildCopilotFileTokenOracle() (copilotFileTokenOracleFixture, error) {
+	file := func(value string) *string { return &value }
+	inputs := []struct {
+		id             string
+		apps           *string
+		hosts          *string
+		possibleTokens []string
+		rustCandidate  bool
+		nativeRoute    bool
+	}{
+		{
+			id:            "single-app-entry-prefers-github-prefix",
+			apps:          file(`{"github.com:Iv1.test":{"user":"dev","oauth_token":"apps-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   true,
+		},
+		{
+			id:            "apps-token-precedes-hosts-token",
+			apps:          file(`{"enterprise":{"oauth_token":"apps-token"}}`),
+			hosts:         file(`{"github.com:Iv1.test":{"oauth_token":"hosts-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   true,
+		},
+		{
+			id:            "single-nongithub-app-entry-uses-fallback-pass",
+			apps:          file(`{"enterprise":{"oauth_token":"enterprise-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   true,
+		},
+		{
+			id:            "single-hosts-entry-when-apps-absent",
+			hosts:         file(`{"github.com:Iv1.test":{"user":"dev","oauth_token":"hosts-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   true,
+		},
+		{
+			id:            "duplicate-root-key-last-value",
+			apps:          file(`{"github.com:Iv1.test":{"oauth_token":"first-token"},"github.com:Iv1.test":{"oauth_token":"last-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   true,
+		},
+		{
+			id:          "alternate-case-token-field-is-go-readable",
+			apps:        file(`{"github.com:Iv1.test":{"OAUTH_TOKEN":"case-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:          "duplicate-token-fields-use-go-decode-order",
+			apps:        file(`{"github.com:Iv1.test":{"oauth_token":"first-token","oauth_token":"last-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:          "unknown-entry-metadata-is-go-readable",
+			apps:        file(`{"github.com:Iv1.test":{"oauth_token":"apps-token","refresh_token":"refresh-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:          "wrong-type-entry-is-skipped-before-hosts",
+			apps:        file(`{"github.com:Iv1.test":{"oauth_token":42}}`),
+			hosts:       file(`{"github.com:Iv1.test":{"oauth_token":"hosts-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:          "malformed-apps-json-falls-through-to-hosts",
+			apps:        file(`{"github.com:Iv1.test":`),
+			hosts:       file(`{"github.com:Iv1.test":{"oauth_token":"hosts-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:          "empty-apps-token-falls-through-to-hosts",
+			apps:        file(`{"github.com:Iv1.test":{"oauth_token":""}}`),
+			hosts:       file(`{"github.com:Iv1.test":{"oauth_token":"hosts-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:             "multiple-github-tokens-have-map-order-dependent-choice",
+			apps:           file(`{"github.com:one":{"oauth_token":"one-token"},"github.com:two":{"oauth_token":"two-token"}}`),
+			possibleTokens: []string{"one-token", "two-token"},
+			nativeRoute:    false,
+		},
+		{
+			id:             "multiple-fallback-tokens-have-map-order-dependent-choice",
+			apps:           file(`{"enterprise-one":{"oauth_token":"one-token"},"enterprise-two":{"oauth_token":"two-token"}}`),
+			possibleTokens: []string{"one-token", "two-token"},
+			nativeRoute:    false,
+		},
+		{
+			id:          "github-prefix-phase-precedes-other-hosts",
+			apps:        file(`{"enterprise":{"oauth_token":"enterprise-token"},"github.com:one":{"oauth_token":"github-token"}}`),
+			nativeRoute: false,
+		},
+		{
+			id:            "single-reference-shaped-token-stays-on-go",
+			apps:          file(`{"github.com:Iv1.test":{"oauth_token":"symvault://copilot/access-token"}}`),
+			rustCandidate: true,
+			nativeRoute:   false,
+		},
+		{
+			id:          "missing-both-files-has-no-token",
+			nativeRoute: true,
+		},
+	}
+	fixture := copilotFileTokenOracleFixture{SchemaVersion: 1}
+	for _, input := range inputs {
+		if len(input.possibleTokens) != 0 {
+			allowed := make(map[string]struct{}, len(input.possibleTokens))
+			for _, token := range input.possibleTokens {
+				allowed[token] = struct{}{}
+			}
+			for attempt := 0; attempt < 32; attempt++ {
+				token, err := usage.BuildCopilotFileTokenOracle(input.apps, input.hosts)
+				if err != nil {
+					return copilotFileTokenOracleFixture{}, err
+				}
+				if _, ok := allowed[token]; !ok {
+					return copilotFileTokenOracleFixture{}, fmt.Errorf("Copilot parser returned %q outside the normalized map-order set for %s", token, input.id)
+				}
+			}
+			fixture.Cases = append(fixture.Cases, copilotFileTokenOracleCase{
+				ID: input.id, AppsJSON: input.apps, HostsJSON: input.hosts,
+				PossibleTokens: input.possibleTokens,
+				SelectionRule:  "one of possible_tokens; Go map iteration order is unspecified",
+				RustCandidate:  input.rustCandidate, NativeRoute: input.nativeRoute,
+			})
+			continue
+		}
+		token, err := usage.BuildCopilotFileTokenOracle(input.apps, input.hosts)
+		if err != nil {
+			return copilotFileTokenOracleFixture{}, err
+		}
+		fixture.Cases = append(fixture.Cases, copilotFileTokenOracleCase{
+			ID: input.id, AppsJSON: input.apps, HostsJSON: input.hosts,
+			Token: &token, RustCandidate: input.rustCandidate, NativeRoute: input.nativeRoute,
+		})
+	}
+	return fixture, nil
+}
+
+func buildCopilotFileAuthenticatedReport(body []byte) (copilotFileReportFixture, error) {
+	fixture := copilotFileReportFixture{}
+	var err error
+	fixture.Success, err = buildAuthenticatedProviderReportFrom("copilot", copilotFileOracleToken, body, http.StatusOK, true)
+	if err != nil {
+		return copilotFileReportFixture{}, err
+	}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{http.StatusUnauthorized, []byte(`{"error":"nope"}`)},
+		{http.StatusTooManyRequests, []byte(`{"error":"slow down"}`)},
+		{http.StatusOK, []byte("{}")},
+	} {
+		report, reportErr := buildAuthenticatedProviderReportFrom("copilot", copilotFileOracleToken, response.body, response.status, true)
+		if reportErr != nil {
+			return copilotFileReportFixture{}, reportErr
+		}
+		fixture.Errors = append(fixture.Errors, struct {
+			Status int          `json:"status"`
+			Report usage.Report `json:"report"`
+		}{Status: response.status, Report: report})
+	}
+	return fixture, nil
 }
 
 func buildClaudeFileTokenOracle() (claudeFileTokenOracleFixture, error) {
@@ -706,22 +924,36 @@ func buildAuthenticatedProviderReportFrom(provider, token string, body []byte, s
 		return usage.Report{}, fmt.Errorf("unsupported authenticated usage oracle provider %q", provider)
 	}
 	if fileCredential {
-		if provider != "codex" {
+		if provider == "copilot" {
+			path := filepath.Join(home, ".config", "github-copilot", "apps.json")
+			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("create isolated Copilot credential directory: %w", err)
+			}
+			contents := fmt.Sprintf("{\"github.com:Iv1.oracle\":{\"oauth_token\":%q}}", token)
+			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("write synthetic Copilot apps file: %w", err)
+			}
+		} else if provider == "codex" {
+			path := filepath.Join(home, ".codex", "auth.json")
+			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("create isolated Codex credential directory: %w", err)
+			}
+			contents := fmt.Sprintf("{\"access_token\":%q}", token)
+			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+				_ = os.RemoveAll(home)
+				_ = restore()
+				return usage.Report{}, fmt.Errorf("write synthetic Codex auth file: %w", err)
+			}
+		} else {
 			_ = os.RemoveAll(home)
 			_ = restore()
 			return usage.Report{}, fmt.Errorf("file credential oracle is unsupported for %q", provider)
-		}
-		path := filepath.Join(home, ".codex", "auth.json")
-		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
-			_ = os.RemoveAll(home)
-			_ = restore()
-			return usage.Report{}, fmt.Errorf("create isolated Codex credential directory: %w", err)
-		}
-		contents := fmt.Sprintf("{\"access_token\":%q}", token)
-		if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
-			_ = os.RemoveAll(home)
-			_ = restore()
-			return usage.Report{}, fmt.Errorf("write synthetic Codex auth file: %w", err)
 		}
 	} else if err := os.Setenv(envName, token); err != nil {
 		_ = os.RemoveAll(home)
@@ -734,7 +966,11 @@ func buildAuthenticatedProviderReportFrom(provider, token string, body []byte, s
 	case "claude-admin":
 		report, buildErr = usage.BuildClaudeAdminAuthenticatedReportOracle(body)
 	case "copilot":
-		report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
+		if fileCredential {
+			report, buildErr = usage.BuildCopilotFileAuthenticatedReportOracle(body, status)
+		} else {
+			report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
+		}
 	case "codex":
 		if fileCredential {
 			report, buildErr = usage.BuildCodexFileAuthenticatedReportOracle(body, status)

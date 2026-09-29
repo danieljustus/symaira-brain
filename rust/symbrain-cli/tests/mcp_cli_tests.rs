@@ -666,3 +666,61 @@ fn codex_default_auth_file_routes_natively_but_override_and_mixed_sources_keep_g
         "reference-shaped file credential must stay on Go: {reference_stderr}"
     );
 }
+
+#[test]
+fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../symbrain-usage/tests/fixtures/copilot_file_token_oracle.json"
+    ))
+    .expect("Go Copilot parser oracle");
+    for case in fixture["cases"].as_array().expect("oracle cases") {
+        let id = case["id"].as_str().expect("case id");
+        let root = TempDir::new().unwrap();
+        let config = root.path().join("home/.config/github-copilot");
+        for (key, filename) in [("apps_json", "apps.json"), ("hosts_json", "hosts.json")] {
+            if let Some(contents) = case[key].as_str() {
+                std::fs::create_dir_all(&config).unwrap();
+                std::fs::write(config.join(filename), contents).unwrap();
+            }
+        }
+        let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        if case["native_route"] == true {
+            assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
+            assert!(
+                stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+                "Go-equivalent Copilot file case {id} should select native parser: {stderr}"
+            );
+            assert!(
+                !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+                "Copilot file case {id} unexpectedly selected Go fallback: {stderr}"
+            );
+        } else {
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "unproven Copilot file case {id} must remain on Go: {stderr}"
+            );
+        }
+    }
+
+    let root = TempDir::new().unwrap();
+    let apps = root.path().join("home/.config/github-copilot/apps.json");
+    std::fs::create_dir_all(apps.parent().unwrap()).unwrap();
+    std::fs::write(
+        &apps,
+        br#"{"github.com:Iv1.synthetic":{"oauth_token":"synthetic-copilot-file-fixture"}}"#,
+    )
+    .unwrap();
+    let mixed = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("COPILOT_ACCESS_TOKEN", "synthetic-copilot-env-fixture")
+        .output()
+        .unwrap();
+    assert!(
+        String::from_utf8(mixed.stderr)
+            .unwrap()
+            .contains("not ported yet and no Go fallback was found"),
+        "file plus environment credential must remain on Go"
+    );
+}

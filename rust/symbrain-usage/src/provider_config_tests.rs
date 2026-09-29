@@ -1,14 +1,16 @@
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
-    codex_from_resolved, copilot_file_token_in, decode_base64url, is_secret_reference, json_string,
-    kimi_store, names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_jwt_is_live,
-    read_limited,
+    codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
+    is_secret_reference, json_string, kimi_store, names_from_keychain_dump, needs_go_fallback_for,
+    nous_file_token, nous_jwt_is_live, read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
 
 const CLAUDE_FILE_TOKEN_ORACLE: &str =
     include_str!("../tests/fixtures/claude_file_token_oracle.json");
+const COPILOT_FILE_TOKEN_ORACLE: &str =
+    include_str!("../tests/fixtures/copilot_file_token_oracle.json");
 
 fn write(directory: &Path, name: &str, contents: &str) -> PathBuf {
     let path = directory.join(name);
@@ -132,6 +134,38 @@ fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
 }
 
 #[test]
+fn copilot_file_token_matches_go_for_native_shapes_and_rejects_unproven_files() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(COPILOT_FILE_TOKEN_ORACLE).expect("Go Copilot parser oracle");
+    for case in fixture["cases"].as_array().expect("oracle cases") {
+        let directory = tempfile::tempdir().expect("temporary Copilot directory");
+        for (key, filename) in [("apps_json", "apps.json"), ("hosts_json", "hosts.json")] {
+            if let Some(contents) = case[key].as_str() {
+                write(directory.path(), filename, contents);
+            }
+        }
+        let got = copilot_file_token_candidate_in(directory.path());
+        let id = case["id"].as_str().expect("case id");
+        if case["rust_candidate"] == true {
+            let expected = case["token"].as_str().expect("Go token");
+            let expected = (!expected.is_empty()).then_some(expected);
+            assert_eq!(got.ok().flatten().as_deref(), expected, "Go case {id}");
+            if case["native_route"] == true {
+                assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
+            }
+        } else if case["native_route"] == true {
+            assert!(
+                got.expect("both Copilot files absent").is_none(),
+                "Go case {id}"
+            );
+            assert!(copilot_file_token_in(directory.path()).is_none());
+        } else {
+            assert!(got.is_err(), "unproven Go case {id} must stay on Go");
+        }
+    }
+}
+
+#[test]
 fn codex_token_reads_both_shipped_shapes() {
     let directory = tempfile::tempdir().expect("temporary directory");
     write(
@@ -238,6 +272,19 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
     }));
     assert!(!needs_go_fallback_for(UsageFallbackSignals {
         copilot_env: Some("synthetic-copilot-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        copilot_file: Some("synthetic-copilot-file-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_file: Some("symvault://copilot/token"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        copilot_file: Some("synthetic-copilot-file-fixture"),
+        copilot_env: Some("synthetic-copilot-env-fixture"),
         ..UsageFallbackSignals::default()
     }));
     assert!(needs_go_fallback_for(UsageFallbackSignals {

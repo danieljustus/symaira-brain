@@ -5,8 +5,9 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain. Claude and Codex default CLI OAuth files are native only when
-//! their file credential is the sole configured provider source.
+//! keychain. Claude, Codex, and Copilot default CLI files are native only for
+//! proven deterministic shapes and when their credential is the sole
+//! configured provider source.
 
 use super::provider_requests::validated_base;
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
@@ -619,11 +620,15 @@ fn codex_file_token(home_dir: &Path) -> Option<String> {
 }
 
 fn copilot_config_dir() -> PathBuf {
-    home().join(".config/github-copilot")
+    copilot_config_dir_for(&home())
 }
 
-/// `apps.json`, then `hosts.json`: the `github.com:` host entry first, then any
-/// entry with an `oauth_token`.
+fn copilot_config_dir_for(home: &Path) -> PathBuf {
+    home.join(".config/github-copilot")
+}
+
+/// Best-effort provider parser for `apps.json` then `hosts.json`; the CLI's
+/// native route separately requires a strict Go-equivalent candidate below.
 fn copilot_file_token() -> Option<String> {
     copilot_file_token_in(&copilot_config_dir())
 }
@@ -652,6 +657,89 @@ fn copilot_file_token_in(dir: &Path) -> Option<String> {
         }
     }
     None
+}
+
+/// `Ok(None)` means both files are absent. `Err(())` means an existing source
+/// cannot be proven to have the same token selection as Go and must be routed
+/// to the Go implementation before constructing a provider.
+fn copilot_file_token_candidate_in(dir: &Path) -> Result<Option<String>, ()> {
+    let apps_path = dir.join("apps.json");
+    if let Some(contents) = read_optional_credential_file(&apps_path)? {
+        // Go checks apps.json before hosts.json and returns its first usable
+        // token. An empty or unknown apps file can affect whether hosts.json
+        // is reached, so leave every such case to Go.
+        return parse_single_copilot_token(&contents).map(Some);
+    }
+
+    let hosts_path = dir.join("hosts.json");
+    let Some(contents) = read_optional_credential_file(&hosts_path)? else {
+        return Ok(None);
+    };
+    parse_single_copilot_token(&contents).map(Some)
+}
+
+fn read_optional_credential_file(path: &Path) -> Result<Option<Vec<u8>>, ()> {
+    let metadata = match fs::symlink_metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => return Err(()),
+    };
+    if !metadata.file_type().is_file() {
+        return Err(());
+    }
+    read_limited(path).map(Some).ok_or(())
+}
+
+fn parse_single_copilot_token(contents: &[u8]) -> Result<String, ()> {
+    let entries: std::collections::BTreeMap<String, CopilotTokenEntry> =
+        serde_json::from_slice(contents).map_err(|_| ())?;
+    if entries.len() != 1 {
+        return Err(());
+    }
+    entries
+        .into_values()
+        .next()
+        .and_then(|entry| entry.oauth_token)
+        .filter(|token| !token.is_empty())
+        .ok_or(())
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CopilotTokenEntry {
+    #[serde(rename = "oauth_token")]
+    oauth_token: Option<String>,
+    #[serde(rename = "user")]
+    _user: Option<String>,
+}
+
+#[cfg(windows)]
+fn copilot_home_mismatch_requires_go() -> bool {
+    let rust_home = home();
+    let go_home = env::var_os("USERPROFILE")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    if rust_home == go_home {
+        return false;
+    }
+    let rust_dir = copilot_config_dir_for(&rust_home);
+    let go_dir = copilot_config_dir_for(&go_home);
+    copilot_config_files_may_exist(&rust_dir) || copilot_config_files_may_exist(&go_dir)
+}
+
+#[cfg(not(windows))]
+fn copilot_home_mismatch_requires_go() -> bool {
+    false
+}
+
+#[cfg(windows)]
+fn copilot_config_files_may_exist(dir: &Path) -> bool {
+    ["apps.json", "hosts.json"]
+        .iter()
+        .any(|name| match fs::symlink_metadata(dir.join(name)) {
+            Ok(_) => true,
+            Err(error) => error.kind() != std::io::ErrorKind::NotFound,
+        })
 }
 
 /// `$KIMI_CODE_HOME`, else the current `~/.kimi-code`, else the legacy
@@ -942,9 +1030,9 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. A direct Claude OAuth env token can be native only when it is the
-/// sole provider source; a Claude OAuth file is native only when its strict
-/// shape proves Go's default-account choice or a single token-bearing account.
-/// Other file/keychain sources and mixed credentials stay on Go. A workspace
+/// sole provider source; Claude OAuth and Copilot files are native only when
+/// their strict shapes prove Go's deterministic token choice. Other
+/// file/keychain sources and mixed credentials stay on Go. A workspace
 /// override alone supplies no `OpenCode` cookie or strategy, so it cannot
 /// start a fetch.
 #[must_use]
@@ -963,6 +1051,12 @@ pub fn needs_go_fallback() -> bool {
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
+    if copilot_home_mismatch_requires_go() {
+        return true;
+    }
+    let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
+        return true;
+    };
     let claude_file_path = home().join(".claude/.credentials.json");
     let claude_file_token = claude_file_token_in(&claude_file_path);
     if claude_file_token.is_none() && claude_file_path.exists() {
@@ -972,16 +1066,14 @@ pub fn needs_go_fallback() -> bool {
         return true;
     }
     let codex_file = codex_file_token(&codex_home());
-    if copilot_file_token().is_some()
-        || kimi_store(&kimi_cli_home()).0.is_some()
-        || nous_file_token(&nous_auth_path()).is_some()
-    {
+    if kimi_store(&kimi_cli_home()).0.is_some() || nous_file_token(&nous_auth_path()).is_some() {
         return true;
     }
     needs_go_fallback_for(UsageFallbackSignals {
         claude_admin_env: claude_admin_env.as_deref(),
         claude_oauth_env: claude_oauth_env.as_deref(),
         copilot_env: copilot_env.as_deref(),
+        copilot_file: copilot_file.as_deref(),
         openrouter_env: openrouter_env.as_deref(),
         moonshot_env: moonshot_env.as_deref(),
         cursor_env: cursor_env.as_deref(),
@@ -1005,14 +1097,16 @@ pub fn needs_go_fallback() -> bool {
 /// Keeps reports native only for one direct credential from a pinned set of
 /// providers, when every other provider source and local probe is absent.
 /// Secret references, other credential files, and provider-specific overrides
-/// stay on Go. A Go-equivalent Claude OAuth file token or default Codex
-/// `auth.json` token joins the credential set and is native only when no other
-/// source is configured. Unsupported existing Claude file shapes stay on Go.
+/// stay on Go. Go-equivalent Claude OAuth and Copilot file tokens or the
+/// default Codex `auth.json` token join the credential set and are native only
+/// when no other source is configured. Unsupported existing Claude or Copilot
+/// file shapes stay on Go.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
     claude_oauth_env: Option<&'a str>,
     copilot_env: Option<&'a str>,
+    copilot_file: Option<&'a str>,
     openrouter_env: Option<&'a str>,
     moonshot_env: Option<&'a str>,
     cursor_env: Option<&'a str>,
@@ -1033,6 +1127,7 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.claude_admin_env,
         signals.claude_oauth_env,
         signals.copilot_env,
+        signals.copilot_file,
         signals.openrouter_env,
         signals.moonshot_env,
         signals.cursor_env,
@@ -1208,6 +1303,13 @@ fn copilot() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    copilot_from_resolved(value, error)
+}
+
+pub(crate) fn copilot_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+) -> Provider {
     let mut provider = Provider::new(
         "copilot",
         "GitHub Copilot",

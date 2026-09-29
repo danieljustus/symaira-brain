@@ -84,6 +84,32 @@ func BuildClaudeFileTokenOracle(contents []byte) (string, error) {
 	return readClaudeFileToken(), nil
 }
 
+// BuildCopilotFileTokenOracle reads synthetic apps.json and hosts.json files
+// with the shipped parser. A nil file argument means that file is absent.
+func BuildCopilotFileTokenOracle(apps, hosts *string) (string, error) {
+	dir, err := os.MkdirTemp("", "symbrain-copilot-file-oracle-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Copilot oracle directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	for _, file := range []struct {
+		name    string
+		content *string
+	}{
+		{name: "apps.json", content: apps},
+		{name: "hosts.json", content: hosts},
+	} {
+		if file.content == nil {
+			continue
+		}
+		path := filepath.Join(dir, file.name)
+		if err := os.WriteFile(path, []byte(*file.content), 0o600); err != nil {
+			return "", fmt.Errorf("write synthetic Copilot %s: %w", file.name, err)
+		}
+	}
+	return readCopilotToken(dir), nil
+}
+
 type OracleRequest struct {
 	Method  string            `json:"method"`
 	URL     string            `json:"url"`
@@ -231,6 +257,38 @@ func BuildOracleFixture(fixture map[string][]byte) (OracleFixture, error) {
 // rejects missing or non-environment credential sources.
 func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("copilot", body)
+}
+
+// BuildCopilotFileAuthenticatedReportOracle runs the shipped Copilot provider
+// through BuildReport using only its default apps.json/hosts.json file and a
+// canned response. The caller supplies an isolated HOME and synthetic file;
+// no real credential or live provider is consulted.
+func BuildCopilotFileAuthenticatedReportOracle(body []byte, status int) (Report, error) {
+	if os.Getenv("COPILOT_ACCESS_TOKEN") != "" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires only the default file credential")
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"copilot": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	copilot := NewCopilotProvider(client)
+	if !copilot.IsConfigured() || copilot.credSource != "file" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires a file-sourced apps.json/hosts.json token")
+	}
+	if len(copilot.Strategies()) != 1 || copilot.Strategies()[0].Source() != "api" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires exactly one API strategy")
+	}
+	report := BuildReport(context.Background(), []Provider{copilot})
+	if len(report.Providers) != 1 || len(transport.requests) != 1 {
+		return Report{}, fmt.Errorf("Copilot file report oracle did not produce one authenticated request")
+	}
+	request := transport.requests[0]
+	if request.Method != http.MethodGet || request.URL.String() != "https://api.github.com/copilot_internal/user" ||
+		request.Header.Get("Authorization") != "Bearer "+copilot.accessToken {
+		return Report{}, fmt.Errorf("Copilot file report oracle did not issue the expected authenticated usage request")
+	}
+	if snapshot := report.Providers[0].Snapshot; snapshot != nil {
+		snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
 }
 
 // BuildClaudeAdminAuthenticatedReportOracle runs the shipped Claude provider
