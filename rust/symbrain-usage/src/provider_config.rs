@@ -709,9 +709,7 @@ struct CopilotTokenEntry {
 #[cfg(windows)]
 fn usage_home_mismatch_requires_go() -> bool {
     let rust_home = home();
-    let go_home = env::var_os("USERPROFILE")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("."));
+    let go_home = env::var_os("USERPROFILE").map_or_else(|| PathBuf::from("."), PathBuf::from);
     rust_home != go_home
 }
 
