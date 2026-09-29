@@ -27,7 +27,9 @@ pub use provider_config::{
 };
 #[cfg(test)]
 pub(crate) use provider_config::{
-    claude_from_resolved, codex_from_resolved, copilot_from_resolved,
+    claude_from_resolved, codex_from_resolved, copilot_from_resolved, cursor_from_resolved,
+    kimi_from_resolved, moonshot_from_resolved, nous_from_resolved, opencode_from_resolved,
+    openrouter_from_resolved,
 };
 
 const MAX_CREDENTIAL_FILE_BYTES: u64 = 64 * 1024;

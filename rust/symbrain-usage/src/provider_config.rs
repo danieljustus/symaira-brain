@@ -1209,8 +1209,10 @@ pub(crate) fn claude_from_resolved(
     oauth_expires_at: Option<SystemTime>,
 ) -> Provider {
     let mut credentials = Vec::new();
-    if let Some((source, value)) = admin_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = admin_value.clone() {
+        // The Go strategy's request/report source is always "api"; the
+        // resolved source (env, vault, and so on) belongs in AuthStatus only.
+        credentials.push(("api".into(), value));
     }
     if let Some((_credential_source, value)) = oauth_value.clone() {
         // Go's Claude OAuth strategy always reports `oauth` for the fetched
@@ -1338,6 +1340,13 @@ fn cursor() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    cursor_from_resolved(value, error)
+}
+
+pub(crate) fn cursor_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+) -> Provider {
     let mut provider = Provider::new(
         "cursor",
         "Cursor",
@@ -1369,13 +1378,37 @@ fn kimi() -> Provider {
         Ok(found) => (found, None),
         Err(failure) => (None, Some(failure)),
     };
+    let base_url = env::var("KIMI_CODE_BASE_URL").map_or_else(
+        |_| "https://api.kimi.com".into(),
+        |value| validated_base(&value, "https://api.kimi.com"),
+    );
+    kimi_from_resolved(
+        api_value,
+        api_failure,
+        cli_token.as_deref(),
+        auth_value,
+        auth_failure,
+        base_url,
+        device_id,
+    )
+}
+
+pub(crate) fn kimi_from_resolved(
+    api_value: Option<(String, String)>,
+    api_failure: Option<String>,
+    cli_token: Option<&str>,
+    auth_value: Option<(String, String)>,
+    auth_failure: Option<String>,
+    base_url: String,
+    device_id: Option<String>,
+) -> Provider {
     // Strategy order is API key, then CLI token, then web auth token.
     let mut credentials = Vec::new();
     if let Some((_, value)) = api_value.clone() {
         credentials.push(("api".into(), value));
     }
-    if let Some(token) = cli_token.clone() {
-        credentials.push(("cli".into(), token));
+    if let Some(token) = cli_token {
+        credentials.push(("cli".into(), token.into()));
     }
     if let Some((_, value)) = auth_value.clone() {
         credentials.push(("web".into(), value));
@@ -1401,10 +1434,7 @@ fn kimi() -> Provider {
         let source = auth_value.map_or_else(|| "env".to_owned(), |(source, _)| source);
         available("Web auth token from KIMI_AUTH_TOKEN", source)
     };
-    provider.base_url = Some(env::var("KIMI_CODE_BASE_URL").map_or_else(
-        |_| "https://api.kimi.com".into(),
-        |value| validated_base(&value, "https://api.kimi.com"),
-    ));
+    provider.base_url = Some(base_url);
     provider.device_id = device_id.filter(|value| !value.is_empty());
     provider
 }
@@ -1415,6 +1445,19 @@ fn moonshot() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let region = if env::var("MOONSHOT_REGION").ok().as_deref() == Some("cn") {
+        "cn"
+    } else {
+        "ai"
+    };
+    moonshot_from_resolved(value, error, region)
+}
+
+pub(crate) fn moonshot_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    region: &str,
+) -> Provider {
     let mut provider = Provider::new(
         "moonshot",
         "Moonshot",
@@ -1430,11 +1473,7 @@ fn moonshot() -> Provider {
     } else {
         missing("no API key configured (MOONSHOT_API_KEY)")
     };
-    provider.region = if env::var("MOONSHOT_REGION").ok().as_deref() == Some("cn") {
-        "cn".into()
-    } else {
-        "ai".into()
-    };
+    provider.region = if region == "cn" { "cn" } else { "ai" }.into();
     provider
 }
 
@@ -1445,6 +1484,18 @@ fn nous() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let base_url = env::var("HERMES_PORTAL_BASE_URL").map_or_else(
+        |_| "https://portal.nousresearch.com".into(),
+        |value| validated_base(&value, "https://portal.nousresearch.com"),
+    );
+    nous_from_resolved(value, error, base_url)
+}
+
+pub(crate) fn nous_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    base_url: String,
+) -> Provider {
     let mut provider = Provider::new(
         "nous",
         "Nous Portal",
@@ -1463,10 +1514,7 @@ fn nous() -> Provider {
     } else {
         missing("No Nous Portal credentials found — sign in with the Hermes CLI")
     };
-    provider.base_url = Some(env::var("HERMES_PORTAL_BASE_URL").map_or_else(
-        |_| "https://portal.nousresearch.com".into(),
-        |value| validated_base(&value, "https://portal.nousresearch.com"),
-    ));
+    provider.base_url = Some(base_url);
     provider
 }
 
@@ -1477,9 +1525,17 @@ fn opencode() -> Provider {
         Err(error) => (None, Some(error)),
     };
     let workspace = env_raw("OPENCODE_WORKSPACE_ID");
+    opencode_from_resolved(value, error, workspace.as_deref())
+}
+
+pub(crate) fn opencode_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    workspace: Option<&str>,
+) -> Provider {
     let mut credentials: Vec<(String, String)> = value.clone().into_iter().collect();
-    if let Some(workspace) = workspace.clone() {
-        credentials.push(("workspace".into(), workspace));
+    if let Some(workspace) = workspace {
+        credentials.push(("workspace".into(), workspace.into()));
     }
     let mut provider = Provider::new(
         "opencode",
@@ -1507,6 +1563,18 @@ fn openrouter() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let base_url = env::var("OPENROUTER_API_URL").map_or_else(
+        |_| "https://openrouter.ai/api/v1".into(),
+        |value| validated_base(&value, "https://openrouter.ai/api/v1"),
+    );
+    openrouter_from_resolved(value, error, base_url)
+}
+
+pub(crate) fn openrouter_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    base_url: String,
+) -> Provider {
     let mut provider = Provider::new(
         "openrouter",
         "OpenRouter",
@@ -1522,10 +1590,7 @@ fn openrouter() -> Provider {
     } else {
         missing("no API key configured (OPENROUTER_API_KEY)")
     };
-    provider.base_url = Some(env::var("OPENROUTER_API_URL").map_or_else(
-        |_| "https://openrouter.ai/api/v1".into(),
-        |value| validated_base(&value, "https://openrouter.ai/api/v1"),
-    ));
+    provider.base_url = Some(base_url);
     provider
 }
 
