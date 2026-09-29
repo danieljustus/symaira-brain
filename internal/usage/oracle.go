@@ -3,13 +3,18 @@ package usage
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 // OracleFixture builds the source-owned provider graph from the production
@@ -36,6 +41,314 @@ type OracleAuth struct {
 	Configured bool   `json:"configured"`
 	Source     string `json:"source"`
 	Status     string `json:"status"`
+}
+
+type ClaudeKeychainTokenOracleInput struct {
+	ID        string `json:"id"`
+	Blob      string `json:"blob"`
+	BlobBytes []byte `json:"-"`
+}
+
+type ClaudeKeychainTokenOracleCase struct {
+	ID                 string `json:"id"`
+	Blob               string `json:"blob"`
+	BlobHex            string `json:"blob_hex,omitempty"`
+	Token              string `json:"token,omitempty"`
+	ExpiresAtUnixMilli *int64 `json:"expires_at_unix_milli,omitempty"`
+	Accepted           bool   `json:"accepted"`
+}
+
+type ClaudeKeychainTokenOracle struct {
+	SchemaVersion int                             `json:"schema_version"`
+	Cases         []ClaudeKeychainTokenOracleCase `json:"cases"`
+}
+
+type ClaudeKeychainReportCase struct {
+	Status          int               `json:"status"`
+	Body            string            `json:"body"`
+	ResponseHeaders map[string]string `json:"response_headers"`
+	Report          Report            `json:"report"`
+	Requests        []OracleRequest   `json:"requests"`
+}
+
+type ClaudeKeychainAuthenticatedReportOracle struct {
+	CredentialBlob string                     `json:"credential_blob"`
+	Success        ClaudeKeychainReportCase   `json:"success"`
+	Errors         []ClaudeKeychainReportCase `json:"errors"`
+}
+
+// BuildClaudeKeychainTokenOracle passes every supplied JSON blob through the
+// production typed decoder. The blobs are synthetic and parsing never invokes
+// the macOS security command.
+func BuildClaudeKeychainTokenOracle(inputs []ClaudeKeychainTokenOracleInput) ClaudeKeychainTokenOracle {
+	fixture := ClaudeKeychainTokenOracle{SchemaVersion: ReportSchemaVersion}
+	for _, input := range inputs {
+		blob := input.BlobBytes
+		if blob == nil {
+			blob = []byte(input.Blob)
+		}
+		token, expiresAt, accepted := parseClaudeKeychainBlob(blob)
+		caseFixture := ClaudeKeychainTokenOracleCase{ID: input.ID, Blob: input.Blob, Accepted: accepted}
+		if !utf8.Valid(blob) {
+			caseFixture.Blob = ""
+			caseFixture.BlobHex = hex.EncodeToString(blob)
+		}
+		if accepted {
+			caseFixture.Token = token
+			if expiresAt != nil {
+				milliseconds := expiresAt.UnixMilli()
+				caseFixture.ExpiresAtUnixMilli = &milliseconds
+			}
+		}
+		fixture.Cases = append(fixture.Cases, caseFixture)
+	}
+	return fixture
+}
+
+// BuildClaudeKeychainAuthenticatedReportOracle joins the real Claude keychain
+// blob parser and provider constructor to a canned HTTP transport. The
+// keychain callback returns only the token parsed from the supplied synthetic
+// blob; this helper never invokes `security` or reads developer credentials.
+func BuildClaudeKeychainAuthenticatedReportOracle(credentialBlob, successBody []byte) (ClaudeKeychainAuthenticatedReportOracle, error) {
+	token, expiresAt, accepted := parseClaudeKeychainBlob(credentialBlob)
+	if !accepted {
+		return ClaudeKeychainAuthenticatedReportOracle{}, fmt.Errorf("Claude keychain report fixture has no usable OAuth token")
+	}
+	if len(successBody) == 0 {
+		return ClaudeKeychainAuthenticatedReportOracle{}, fmt.Errorf("Claude keychain report fixture response is empty")
+	}
+	cleanup, err := isolateClaudeKeychainOracleEnvironment()
+	if err != nil {
+		return ClaudeKeychainAuthenticatedReportOracle{}, err
+	}
+	defer cleanup()
+
+	makeCase := func(status int, body []byte) (ClaudeKeychainReportCase, error) {
+		transport := &oracleTransport{
+			bodies:          map[string][]byte{"claude": body},
+			status:          status,
+			responseHeaders: http.Header{"Retry-After": []string{"17"}},
+		}
+		client := &http.Client{Transport: roundTripFixture{transport}}
+		providers := allProviders(client, func() (string, *time.Time) { return token, expiresAt }, oracleProbe{})
+		if len(providers) != 10 || providers[0].ID() != "claude" || providers[9].ID() != "antigravity" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle found an unexpected provider registry")
+		}
+		provider, ok := providers[0].(*ClaudeProvider)
+		if !ok || !provider.IsConfigured() || provider.oauthSource != "keychain" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle did not construct a keychain-sourced provider")
+		}
+		if len(provider.Strategies()) != 1 || provider.Strategies()[0].Source() != "oauth" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle expected exactly one OAuth strategy")
+		}
+		for _, other := range providers[1:9] {
+			if other.IsConfigured() {
+				return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle unexpectedly configured %q", other.ID())
+			}
+		}
+		fullReport := BuildReport(context.Background(), providers)
+		if len(fullReport.Providers) != 10 || len(transport.requests) != 1 {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle produced %d report rows and %d requests", len(fullReport.Providers), len(transport.requests))
+		}
+		row := fullReport.Providers[0]
+		if row.AuthStatus.Source != "keychain" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle auth source = %q", row.AuthStatus.Source)
+		}
+		if row.Snapshot != nil {
+			row.Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		}
+		request := transport.requests[0]
+		if request.Method != http.MethodGet || request.URL.String() != "https://api.anthropic.com/api/oauth/usage" || request.Header.Get("Authorization") != "Bearer "+token {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle generated an unexpected request")
+		}
+		return ClaudeKeychainReportCase{
+			Status:          status,
+			Body:            string(body),
+			ResponseHeaders: map[string]string{"Retry-After": "17"},
+			Report:          Report{SchemaVersion: fullReport.SchemaVersion, Providers: []ProviderUsage{row}},
+			Requests:        []OracleRequest{safeOracleRequest(request)},
+		}, nil
+	}
+
+	success, err := makeCase(http.StatusOK, successBody)
+	if err != nil {
+		return ClaudeKeychainAuthenticatedReportOracle{}, err
+	}
+	fixture := ClaudeKeychainAuthenticatedReportOracle{CredentialBlob: string(credentialBlob), Success: success}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{status: http.StatusUnauthorized, body: []byte(`{"error":"nope"}`)},
+		{status: http.StatusTooManyRequests, body: []byte(`{"error":"slow down"}`)},
+		{status: http.StatusOK, body: []byte("not-json")},
+	} {
+		caseFixture, err := makeCase(response.status, response.body)
+		if err != nil {
+			return ClaudeKeychainAuthenticatedReportOracle{}, err
+		}
+		fixture.Errors = append(fixture.Errors, caseFixture)
+	}
+	return fixture, nil
+}
+
+func isolateClaudeKeychainOracleEnvironment() (func(), error) {
+	home, err := os.MkdirTemp("", "symbrain-claude-keychain-oracle-home-")
+	if err != nil {
+		return nil, fmt.Errorf("create isolated Claude keychain oracle home: %w", err)
+	}
+	previous := make(map[string]struct {
+		value string
+		set   bool
+	}, 21)
+	environmentNames := []string{
+		"HOME", "USERPROFILE", "ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN",
+		"CODEX_HOME", "CODEX_ACCESS_TOKEN", "COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE",
+		"KIMI_CODE_HOME", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL",
+		"MOONSHOT_API_KEY", "MOONSHOT_REGION", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME",
+		"HERMES_PORTAL_BASE_URL", "OPENCODE_COOKIE", "OPENCODE_WORKSPACE_ID",
+		"OPENROUTER_API_KEY", "OPENROUTER_API_URL",
+	}
+	for _, name := range environmentNames {
+		value, set := os.LookupEnv(name)
+		previous[name] = struct {
+			value string
+			set   bool
+		}{value: value, set: set}
+	}
+	cleanup := func() {
+		for name, old := range previous {
+			if old.set {
+				_ = os.Setenv(name, old.value)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		}
+		_ = os.RemoveAll(home)
+	}
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(name, home); err != nil {
+			cleanup()
+			return nil, fmt.Errorf("set isolated Claude keychain oracle %s: %w", name, err)
+		}
+	}
+	for _, name := range environmentNames[2:] {
+		if err := os.Unsetenv(name); err != nil {
+			cleanup()
+			return nil, fmt.Errorf("clear Claude keychain oracle %s: %w", name, err)
+		}
+	}
+	return cleanup, nil
+}
+
+// BuildClaudeFileTokenOracle reads a synthetic Claude credentials file with
+// the shipped parser. It isolates HOME and USERPROFILE and never constructs a
+// ClaudeProvider, so this parser oracle cannot consult the real keychain.
+func BuildClaudeFileTokenOracle(contents []byte) (string, error) {
+	home, err := os.MkdirTemp("", "symbrain-claude-file-oracle-home-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Claude oracle home: %w", err)
+	}
+	defer os.RemoveAll(home)
+
+	previous := make(map[string]struct {
+		value string
+		set   bool
+	}, 2)
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		value, set := os.LookupEnv(name)
+		previous[name] = struct {
+			value string
+			set   bool
+		}{value: value, set: set}
+	}
+	defer func() {
+		for name, old := range previous {
+			if old.set {
+				_ = os.Setenv(name, old.value)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		}
+	}()
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(name, home); err != nil {
+			return "", fmt.Errorf("set isolated Claude oracle %s: %w", name, err)
+		}
+	}
+	path := filepath.Join(home, ".claude", ".credentials.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return "", fmt.Errorf("create isolated Claude credential directory: %w", err)
+	}
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		return "", fmt.Errorf("write synthetic Claude credential file: %w", err)
+	}
+	return readClaudeFileToken(), nil
+}
+
+// BuildCopilotFileTokenOracle reads synthetic apps.json and hosts.json files
+// with the shipped parser. A nil file argument means that file is absent.
+func BuildCopilotFileTokenOracle(apps, hosts *string) (string, error) {
+	dir, err := os.MkdirTemp("", "symbrain-copilot-file-oracle-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Copilot oracle directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	for _, file := range []struct {
+		name    string
+		content *string
+	}{
+		{name: "apps.json", content: apps},
+		{name: "hosts.json", content: hosts},
+	} {
+		if file.content == nil {
+			continue
+		}
+		path := filepath.Join(dir, file.name)
+		if err := os.WriteFile(path, []byte(*file.content), 0o600); err != nil {
+			return "", fmt.Errorf("write synthetic Copilot %s: %w", file.name, err)
+		}
+	}
+	return readCopilotToken(dir), nil
+}
+
+// BuildNousFileTokenOracle reads a synthetic Hermes auth.json with the shipped
+// Nous parser. A nil file argument means auth.json is absent.
+func BuildNousFileTokenOracle(contents *string) (string, error) {
+	dir, err := os.MkdirTemp("", "symbrain-nous-file-oracle-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Nous oracle directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	if contents != nil {
+		path := filepath.Join(dir, "auth.json")
+		if err := os.WriteFile(path, []byte(*contents), 0o600); err != nil {
+			return "", fmt.Errorf("write synthetic Nous auth.json: %w", err)
+		}
+		return readNousAccessToken(path), nil
+	}
+	return readNousAccessToken(filepath.Join(dir, "auth.json")), nil
+}
+
+// BuildKimiFileTokenOracle reads a synthetic Kimi CLI credential file with
+// the shipped typed decoder. A nil file argument means the file is absent.
+func BuildKimiFileTokenOracle(contents *string) (string, error) {
+	dir, err := os.MkdirTemp("", "symbrain-kimi-file-oracle-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Kimi oracle directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	if contents == nil {
+		return (kimiCLICredentialStore{home: dir}).readAccessToken(), nil
+	}
+	path := filepath.Join(dir, "credentials", "kimi-code.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return "", fmt.Errorf("create synthetic Kimi credentials directory: %w", err)
+	}
+	if err := os.WriteFile(path, []byte(*contents), 0o600); err != nil {
+		return "", fmt.Errorf("write synthetic Kimi credentials: %w", err)
+	}
+	return (kimiCLICredentialStore{home: dir}).readAccessToken(), nil
 }
 
 type OracleRequest struct {
@@ -77,14 +390,213 @@ func (p oracleProbe) listeningPorts(int) (string, bool) {
 }
 func (p oracleProbe) isAntigravityRunning() bool { return p.running }
 
-type oracleTransport struct {
-	bodies    map[string][]byte
-	sequences map[string][][]byte
-	status    int
+type antigravityOracleProbe struct {
+	processes  string
+	portsByPID map[int]string
+}
+
+func (p antigravityOracleProbe) processList() (string, bool) { return p.processes, true }
+func (p antigravityOracleProbe) listeningPorts(pid int) (string, bool) {
+	ports, ok := p.portsByPID[pid]
+	return ports, ok
+}
+func (p antigravityOracleProbe) isAntigravityRunning() bool {
+	return strings.Contains(p.processes, "agy") || strings.Contains(p.processes, "Antigravity")
+}
+
+type antigravityOracleReply struct {
+	status int
+	body   []byte
+	inputs map[string]string
+}
+
+type antigravityOracleTransport struct {
+	replies   map[string]antigravityOracleReply
 	requests  []*http.Request
+	responses []AntigravityOracleResponse
+}
+
+type AntigravityOracleResponse struct {
+	Status  int               `json:"status"`
+	Body    string            `json:"body"`
+	Headers map[string]string `json:"headers,omitempty"`
+}
+
+func (t *antigravityOracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.requests = append(t.requests, req.Clone(req.Context()))
+	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("Antigravity oracle received an empty path")
+	}
+	port, err := strconv.Atoi(req.URL.Port())
+	if err != nil {
+		return nil, fmt.Errorf("Antigravity oracle received invalid port")
+	}
+	reply, ok := t.replies[fmt.Sprintf("%d/%s", port, parts[len(parts)-1])]
+	if !ok {
+		return nil, fmt.Errorf("Antigravity oracle has no reply for port %d method %s", port, parts[len(parts)-1])
+	}
+	header := make(http.Header)
+	for name, value := range reply.inputs {
+		header.Set(name, value)
+	}
+	if reply.status == 0 {
+		reply.status = http.StatusOK
+	}
+	response := AntigravityOracleResponse{Status: reply.status, Body: string(reply.body), Headers: reply.inputs}
+	t.responses = append(t.responses, response)
+	return &http.Response{
+		StatusCode: reply.status,
+		Body:       ioNopCloser{Reader: bytes.NewReader(reply.body)},
+		Header:     header,
+		Request:    req,
+	}, nil
+}
+
+type AntigravityReportOracleCase struct {
+	ID          string                      `json:"id"`
+	ProcessList string                      `json:"process_list"`
+	PortsByPID  map[int]string              `json:"ports_by_pid"`
+	Responses   []AntigravityOracleResponse `json:"responses"`
+	Report      Report                      `json:"report"`
+	Requests    []OracleRequest             `json:"requests"`
+}
+
+type AntigravityReportOracleFixture struct {
+	SchemaVersion int                           `json:"schema_version"`
+	Cases         []AntigravityReportOracleCase `json:"cases"`
+}
+
+// BuildAntigravityAuthenticatedReportOracle runs the production provider and
+// report assembly against synthetic process/port observations and local canned
+// responses. It never starts Antigravity or contacts a live endpoint.
+func BuildAntigravityAuthenticatedReportOracle(fixtures map[string][]byte) (AntigravityReportOracleFixture, error) {
+	for _, name := range []string{"antigravity", "antigravity-user-status"} {
+		if len(fixtures[name]) == 0 {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle fixture %q is empty", name)
+		}
+	}
+	server := " 111 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n"
+	fallbackServer := " 333 /opt/homebrew/bin/agy\n"
+	failedServer := " 444 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n"
+	cases := []struct {
+		id           string
+		processes    string
+		ports        map[int]string
+		replies      map[string]antigravityOracleReply
+		wantSnapshot bool
+		wantError    string
+		wantRequests []string
+	}{
+		{
+			id:           "active-second-port-after-connect-failure",
+			processes:    server,
+			ports:        map[int]string{111: "COMMAND PID NAME\nlanguage 111 TCP 127.0.0.1:43121 (LISTEN)\nlanguage 111 TCP 127.0.0.1:43122 (LISTEN)\n"},
+			wantSnapshot: true,
+			wantRequests: []string{"43121/GetUnleashData", "43122/GetUnleashData", "43122/RetrieveUserQuotaSummary"},
+			replies: map[string]antigravityOracleReply{
+				"43121/GetUnleashData":           {status: http.StatusServiceUnavailable},
+				"43122/GetUnleashData":           {status: http.StatusOK},
+				"43122/RetrieveUserQuotaSummary": {status: http.StatusOK, body: fixtures["antigravity"]},
+			},
+		},
+		{
+			id:           "fallback-to-user-status",
+			processes:    fallbackServer,
+			ports:        map[int]string{333: "agy 333 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43123 (LISTEN)\n"},
+			wantSnapshot: true,
+			wantRequests: []string{"43123/GetUnleashData", "43123/RetrieveUserQuotaSummary", "43123/GetUserStatus"},
+			replies: map[string]antigravityOracleReply{
+				"43123/GetUnleashData":           {status: http.StatusOK},
+				"43123/RetrieveUserQuotaSummary": {status: http.StatusOK, body: []byte("not json")},
+				"43123/GetUserStatus":            {status: http.StatusOK, body: fixtures["antigravity-user-status"]},
+			},
+		},
+		{
+			id:        "fallback-to-next-candidate",
+			processes: " 555 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token first-candidate\n 556 /opt/homebrew/bin/agy\n",
+			ports: map[int]string{
+				555: "language 555 TCP 127.0.0.1:43125 (LISTEN)\n",
+				556: "agy 556 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43126 (LISTEN)\n",
+			},
+			wantSnapshot: true,
+			wantRequests: []string{"43125/GetUnleashData", "43126/GetUnleashData", "43126/RetrieveUserQuotaSummary"},
+			replies: map[string]antigravityOracleReply{
+				"43125/GetUnleashData":           {status: http.StatusServiceUnavailable},
+				"43126/GetUnleashData":           {status: http.StatusOK},
+				"43126/RetrieveUserQuotaSummary": {status: http.StatusOK, body: fixtures["antigravity"]},
+			},
+		},
+		{
+			id:           "not-running-no-request",
+			wantError:    "all AI usage fallbacks failed: Antigravity is not running — no local quota server found.",
+			wantRequests: []string{},
+		},
+		{
+			id:           "all-endpoints-fail",
+			processes:    failedServer,
+			ports:        map[int]string{444: "language 444 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43124 (LISTEN)\n"},
+			wantError:    "all AI usage fallbacks failed: Antigravity local server returned HTTP 500.",
+			wantRequests: []string{"43124/GetUnleashData", "43124/RetrieveUserQuotaSummary", "43124/GetUserStatus", "43124/GetCommandModelConfigs"},
+			replies: map[string]antigravityOracleReply{
+				"43124/GetUnleashData":           {status: http.StatusOK},
+				"43124/RetrieveUserQuotaSummary": {status: http.StatusUnauthorized},
+				"43124/GetUserStatus":            {status: http.StatusTooManyRequests, inputs: map[string]string{"Retry-After": "9"}},
+				"43124/GetCommandModelConfigs":   {status: http.StatusInternalServerError},
+			},
+		},
+	}
+	fixture := AntigravityReportOracleFixture{SchemaVersion: ReportSchemaVersion}
+	for _, input := range cases {
+		transport := &antigravityOracleTransport{replies: input.replies}
+		client := &http.Client{Transport: transport}
+		provider := newAntigravityProvider(antigravityOracleProbe{processes: input.processes, portsByPID: input.ports}, client)
+		report := BuildReport(context.Background(), []Provider{provider})
+		if len(report.Providers) != 1 {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s returned %d rows", input.id, len(report.Providers))
+		}
+		row := report.Providers[0]
+		if (row.Snapshot != nil) != input.wantSnapshot {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s snapshot presence = %t, want %t (error %q)", input.id, row.Snapshot != nil, input.wantSnapshot, row.Error)
+		}
+		if input.wantError != "" && row.Error != input.wantError {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s error = %q, want %q", input.id, row.Error, input.wantError)
+		}
+		gotRequests := make([]string, 0, len(transport.requests))
+		for _, request := range transport.requests {
+			parts := strings.Split(strings.Trim(request.URL.Path, "/"), "/")
+			gotRequests = append(gotRequests, fmt.Sprintf("%s/%s", request.URL.Port(), parts[len(parts)-1]))
+		}
+		if strings.Join(gotRequests, ",") != strings.Join(input.wantRequests, ",") {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s requests = %v, want %v", input.id, gotRequests, input.wantRequests)
+		}
+		if row := &report.Providers[0]; row.Snapshot != nil {
+			row.Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		}
+		requests := make([]OracleRequest, 0, len(transport.requests))
+		for _, request := range transport.requests {
+			requests = append(requests, safeAntigravityOracleRequest(request))
+		}
+		fixture.Cases = append(fixture.Cases, AntigravityReportOracleCase{
+			ID: input.id, ProcessList: input.processes, PortsByPID: input.ports, Responses: transport.responses, Report: report, Requests: requests,
+		})
+	}
+	return fixture, nil
+}
+
+type oracleTransport struct {
+	mu              sync.Mutex
+	bodies          map[string][]byte
+	sequences       map[string][][]byte
+	statuses        map[string][]int
+	status          int
+	responseHeaders http.Header
+	requests        []*http.Request
 }
 
 func (t *oracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.requests = append(t.requests, req.Clone(req.Context()))
 	id := ""
 	switch {
@@ -138,10 +650,124 @@ func (t *oracleTransport) bodyFor(id string) []byte {
 // oracleTransportBody is used because http.NoBody cannot carry fixture bytes.
 func (t *oracleTransport) response(req *http.Request, body []byte) *http.Response {
 	status := t.status
+	if sequence := t.statuses[oracleID(req)]; len(sequence) > 0 {
+		seen := 0
+		for _, request := range t.requests {
+			if oracleID(request) == oracleID(req) {
+				seen++
+			}
+		}
+		index := seen - 1
+		if index >= len(sequence) {
+			index = len(sequence) - 1
+		}
+		status = sequence[index]
+	}
 	if status == 0 {
 		status = http.StatusOK
 	}
-	return &http.Response{StatusCode: status, Body: ioNopCloser{Reader: bytes.NewReader(body)}, Header: make(http.Header), Request: req, ContentLength: int64(len(body))}
+	return &http.Response{StatusCode: status, Body: ioNopCloser{Reader: bytes.NewReader(body)}, Header: t.responseHeaders.Clone(), Request: req, ContentLength: int64(len(body))}
+}
+
+type kimiFallbackReportFixture struct {
+	APIFailsCLIRecovers Report `json:"api_fails_cli_recovers"`
+	APICLIFailWebWorks  Report `json:"api_cli_fail_web_works"`
+}
+
+// BuildKimiFallbackAuthenticatedReportOracle runs the shipped Kimi provider's
+// API -> CLI and API -> CLI -> web chains with only temporary files and canned
+// HTTP responses. It exercises the production constructor and report path.
+func BuildKimiFallbackAuthenticatedReportOracle(apiBody, webBody []byte) (kimiFallbackReportFixture, error) {
+	build := func(includeWeb bool) (Report, error) {
+		home, err := os.MkdirTemp("", "symbrain-kimi-fallback-oracle-")
+		if err != nil {
+			return Report{}, fmt.Errorf("create isolated Kimi fallback home: %w", err)
+		}
+		defer os.RemoveAll(home)
+		keys := []string{"HOME", "USERPROFILE", "KIMI_CODE_API_KEY", "KIMI_CODE_BASE_URL", "KIMI_CODE_HOME", "KIMI_AUTH_TOKEN"}
+		type previous struct {
+			value string
+			set   bool
+		}
+		old := make(map[string]previous, len(keys))
+		for _, key := range keys {
+			value, set := os.LookupEnv(key)
+			old[key] = previous{value: value, set: set}
+			if err := os.Unsetenv(key); err != nil {
+				return Report{}, fmt.Errorf("clear %s for Kimi fallback oracle: %w", key, err)
+			}
+		}
+		defer func() {
+			for key, item := range old {
+				if item.set {
+					_ = os.Setenv(key, item.value)
+				} else {
+					_ = os.Unsetenv(key)
+				}
+			}
+		}()
+		if err := os.Setenv("HOME", home); err != nil {
+			return Report{}, fmt.Errorf("set isolated Kimi HOME: %w", err)
+		}
+		if err := os.Setenv("KIMI_CODE_API_KEY", "fallback-kimi-api-token"); err != nil {
+			return Report{}, fmt.Errorf("set Kimi API oracle token: %w", err)
+		}
+		if includeWeb {
+			if err := os.Setenv("KIMI_AUTH_TOKEN", "fallback-kimi-web-token"); err != nil {
+				return Report{}, fmt.Errorf("set Kimi web oracle token: %w", err)
+			}
+		}
+		credentialPath := filepath.Join(home, ".kimi-code", "credentials", "kimi-code.json")
+		if err := os.MkdirAll(filepath.Dir(credentialPath), 0o700); err != nil {
+			return Report{}, fmt.Errorf("create synthetic Kimi CLI directory: %w", err)
+		}
+		if err := os.WriteFile(credentialPath, []byte(`{"access_token":"fallback-kimi-cli-token"}`), 0o600); err != nil {
+			return Report{}, fmt.Errorf("write synthetic Kimi CLI token: %w", err)
+		}
+		if err := os.WriteFile(filepath.Join(home, ".kimi-code", "device_id"), []byte("fallback-device-id\n"), 0o600); err != nil {
+			return Report{}, fmt.Errorf("write synthetic Kimi device id: %w", err)
+		}
+		statuses := []int{http.StatusUnauthorized, http.StatusOK}
+		bodies := [][]byte{apiBody, apiBody}
+		wantRequests := 2
+		if includeWeb {
+			statuses = []int{http.StatusUnauthorized, http.StatusUnauthorized, http.StatusOK}
+			bodies = append(bodies, webBody)
+			wantRequests = 3
+		}
+		transport := &oracleTransport{
+			sequences: map[string][][]byte{"kimi": bodies},
+			statuses:  map[string][]int{"kimi": statuses},
+		}
+		client := &http.Client{Transport: roundTripFixture{transport}}
+		provider := NewKimiProvider(client)
+		got := strategySources(provider.Strategies())
+		if includeWeb && (len(got) != 3 || got[0] != "api" || got[1] != "cli" || got[2] != "web") ||
+			!includeWeb && (len(got) != 2 || got[0] != "api" || got[1] != "cli") {
+			return Report{}, fmt.Errorf("Kimi fallback oracle has strategies %v", got)
+		}
+		report := BuildReport(context.Background(), []Provider{provider})
+		if len(report.Providers) != 1 || report.Providers[0].Snapshot == nil || len(transport.requests) != wantRequests {
+			return Report{}, fmt.Errorf("Kimi fallback oracle produced report=%d requests=%d, want one and %d", len(report.Providers), len(transport.requests), wantRequests)
+		}
+		if !includeWeb && (report.Providers[0].Snapshot.Source != "cli" || transport.requests[0].Header.Get("Authorization") != "Bearer fallback-kimi-api-token" || transport.requests[1].Header.Get("Authorization") != "Bearer fallback-kimi-cli-token" || transport.requests[1].Header.Get("X-Msh-Device-Id") != "fallback-device-id") {
+			return Report{}, fmt.Errorf("Kimi CLI fallback did not use its stored credential")
+		}
+		if includeWeb && (report.Providers[0].Snapshot.Source != "web" || transport.requests[0].Header.Get("Authorization") != "Bearer fallback-kimi-api-token" || transport.requests[1].Header.Get("Authorization") != "Bearer fallback-kimi-cli-token" || transport.requests[1].Header.Get("X-Msh-Device-Id") != "fallback-device-id" || transport.requests[2].Header.Get("Authorization") != "Bearer fallback-kimi-web-token" || transport.requests[2].URL.Host != "www.kimi.com") {
+			return Report{}, fmt.Errorf("Kimi web fallback did not use its environment credential")
+		}
+		report.Providers[0].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		return report, nil
+	}
+	cli, err := build(false)
+	if err != nil {
+		return kimiFallbackReportFixture{}, err
+	}
+	web, err := build(true)
+	if err != nil {
+		return kimiFallbackReportFixture{}, err
+	}
+	return kimiFallbackReportFixture{APIFailsCLIRecovers: cli, APICLIFailWebWorks: web}, nil
 }
 
 type ioNopCloser struct{ *bytes.Reader }
@@ -187,6 +813,38 @@ func BuildCopilotAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("copilot", body)
 }
 
+// BuildCopilotFileAuthenticatedReportOracle runs the shipped Copilot provider
+// through BuildReport using only its default apps.json/hosts.json file and a
+// canned response. The caller supplies an isolated HOME and synthetic file;
+// no real credential or live provider is consulted.
+func BuildCopilotFileAuthenticatedReportOracle(body []byte, status int) (Report, error) {
+	if os.Getenv("COPILOT_ACCESS_TOKEN") != "" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires only the default file credential")
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"copilot": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	copilot := NewCopilotProvider(client)
+	if !copilot.IsConfigured() || copilot.credSource != "file" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires a file-sourced apps.json/hosts.json token")
+	}
+	if len(copilot.Strategies()) != 1 || copilot.Strategies()[0].Source() != "api" {
+		return Report{}, fmt.Errorf("Copilot file report oracle requires exactly one API strategy")
+	}
+	report := BuildReport(context.Background(), []Provider{copilot})
+	if len(report.Providers) != 1 || len(transport.requests) != 1 {
+		return Report{}, fmt.Errorf("Copilot file report oracle did not produce one authenticated request")
+	}
+	request := transport.requests[0]
+	if request.Method != http.MethodGet || request.URL.String() != "https://api.github.com/copilot_internal/user" ||
+		request.Header.Get("Authorization") != "Bearer "+copilot.accessToken {
+		return Report{}, fmt.Errorf("Copilot file report oracle did not issue the expected authenticated usage request")
+	}
+	if snapshot := report.Providers[0].Snapshot; snapshot != nil {
+		snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
+}
+
 // BuildClaudeAdminAuthenticatedReportOracle runs the shipped Claude provider
 // through BuildReport with a direct ANTHROPIC_ADMIN_KEY and no OAuth source.
 func BuildClaudeAdminAuthenticatedReportOracle(body []byte) (Report, error) {
@@ -200,6 +858,51 @@ func BuildCodexAuthenticatedReportOracle(body []byte) (Report, error) {
 		return Report{}, fmt.Errorf("Codex report oracle requires the default isolated credential home")
 	}
 	return buildAuthenticatedDirectEnvReportOracle("codex", body)
+}
+
+// BuildCodexFileAuthenticatedReportOracle runs the shipped Codex provider
+// through BuildReport using only its read-only auth.json credential and a
+// canned response. The caller supplies an isolated HOME containing
+// ~/.codex/auth.json and a status/body pair; no Keychain or live provider is
+// consulted.
+func BuildCodexFileAuthenticatedReportOracle(body []byte, status int) (Report, error) {
+	if os.Getenv("CODEX_HOME") != "" || os.Getenv("CODEX_ACCESS_TOKEN") != "" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires only the default auth.json credential")
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"codex": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
+	if len(providers) != 10 || providers[1].ID() != "codex" {
+		return Report{}, fmt.Errorf("Codex file report oracle found an unexpected provider registry")
+	}
+	codex, ok := providers[1].(*CodexProvider)
+	if !ok || !codex.IsConfigured() || codex.AuthStatus().Source != "file" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires a file-sourced auth.json token")
+	}
+	if len(codex.Strategies()) != 1 || codex.Strategies()[0].Source() != "oauth" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires exactly one OAuth strategy")
+	}
+	for index, provider := range providers {
+		if index != 1 && index != 9 && provider.IsConfigured() {
+			return Report{}, fmt.Errorf("Codex file report oracle found unexpected configured provider %q", provider.ID())
+		}
+	}
+	if providers[9].AuthStatus().Source != "" {
+		return Report{}, fmt.Errorf("Codex file report oracle Antigravity probe must be isolated and stopped")
+	}
+	report := BuildReport(context.Background(), providers)
+	if len(report.Providers) != 10 || len(transport.requests) != 1 {
+		return Report{}, fmt.Errorf("Codex file report oracle produced %d providers and %d requests, want 10 and one", len(report.Providers), len(transport.requests))
+	}
+	request := transport.requests[0]
+	if request.Method != http.MethodGet || request.URL.String() != "https://chatgpt.com/backend-api/wham/usage" ||
+		request.Header.Get("Authorization") != "Bearer "+codex.accessToken {
+		return Report{}, fmt.Errorf("Codex file report oracle did not issue the expected authenticated usage request")
+	}
+	if snapshot := report.Providers[1].Snapshot; snapshot != nil {
+		snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
 }
 
 // BuildOpenRouterAuthenticatedReportOracle runs the shipped OpenRouter
@@ -246,6 +949,131 @@ func BuildNousAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("nous", body)
 }
 
+// BuildNousFileAuthenticatedReportOracle constructs the shipped Nous provider
+// from an isolated synthetic Hermes auth.json and drives it with canned HTTP
+// responses. It never reads a user credential or contacts the portal.
+func BuildNousFileAuthenticatedReportOracle(token string, body []byte, status int) (Report, error) {
+	home, err := os.MkdirTemp("", "symbrain-nous-file-report-oracle-")
+	if err != nil {
+		return Report{}, fmt.Errorf("create isolated Nous file home: %w", err)
+	}
+	defer os.RemoveAll(home)
+	keys := []string{"HOME", "USERPROFILE", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME", "HERMES_PORTAL_BASE_URL"}
+	type previous struct {
+		value string
+		set   bool
+	}
+	old := make(map[string]previous, len(keys))
+	for _, key := range keys {
+		value, set := os.LookupEnv(key)
+		old[key] = previous{value: value, set: set}
+		if err := os.Unsetenv(key); err != nil {
+			return Report{}, fmt.Errorf("clear %s for Nous file oracle: %w", key, err)
+		}
+	}
+	defer func() {
+		for key, item := range old {
+			if item.set {
+				_ = os.Setenv(key, item.value)
+			} else {
+				_ = os.Unsetenv(key)
+			}
+		}
+	}()
+	for _, key := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(key, home); err != nil {
+			return Report{}, fmt.Errorf("set isolated Nous file %s: %w", key, err)
+		}
+	}
+	path := filepath.Join(home, ".hermes", "auth.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return Report{}, fmt.Errorf("create isolated Hermes auth directory: %w", err)
+	}
+	type providerEntry struct {
+		ID        string `json:"id"`
+		InvokeJWT string `json:"invoke_jwt"`
+	}
+	contents, err := json.Marshal(struct {
+		Providers []providerEntry `json:"providers"`
+	}{Providers: []providerEntry{{ID: "nous", InvokeJWT: token}}})
+	if err != nil {
+		return Report{}, fmt.Errorf("encode synthetic Hermes auth file: %w", err)
+	}
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Hermes auth file: %w", err)
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"nous": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	provider := NewNousPortalProvider(client)
+	if !provider.IsConfigured() || provider.AuthStatus().Source != "file" || len(provider.Strategies()) != 1 || provider.Strategies()[0].Source() != "api" {
+		return Report{}, fmt.Errorf("Nous file report oracle did not select its synthetic file credential")
+	}
+	report := BuildReport(context.Background(), []Provider{provider})
+	if len(report.Providers) != 1 || len(transport.requests) != 1 || transport.requests[0].Header.Get("Authorization") != "Bearer "+token {
+		return Report{}, fmt.Errorf("Nous file report oracle did not issue one authenticated request")
+	}
+	if report.Providers[0].Snapshot != nil {
+		report.Providers[0].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
+}
+
+// BuildNousEnvironmentPrecedenceReportOracle proves that the shipped
+// environment credential wins over an existing default auth.json file.
+func BuildNousEnvironmentPrecedenceReportOracle(body []byte) (Report, error) {
+	home, err := os.MkdirTemp("", "symbrain-nous-precedence-oracle-")
+	if err != nil {
+		return Report{}, fmt.Errorf("create isolated Nous precedence home: %w", err)
+	}
+	defer os.RemoveAll(home)
+	keys := []string{"HOME", "USERPROFILE", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME", "HERMES_PORTAL_BASE_URL"}
+	type previous struct {
+		value string
+		set   bool
+	}
+	old := make(map[string]previous, len(keys))
+	for _, key := range keys {
+		value, set := os.LookupEnv(key)
+		old[key] = previous{value: value, set: set}
+		if err := os.Unsetenv(key); err != nil {
+			return Report{}, fmt.Errorf("clear %s for Nous precedence oracle: %w", key, err)
+		}
+	}
+	defer func() {
+		for key, item := range old {
+			if item.set {
+				_ = os.Setenv(key, item.value)
+			} else {
+				_ = os.Unsetenv(key)
+			}
+		}
+	}()
+	for key, value := range map[string]string{"HOME": home, "NOUS_PORTAL_ACCESS_TOKEN": "nous-env-precedence-token"} {
+		if err := os.Setenv(key, value); err != nil {
+			return Report{}, fmt.Errorf("set %s for Nous precedence oracle: %w", key, err)
+		}
+	}
+	path := filepath.Join(home, ".hermes", "auth.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return Report{}, fmt.Errorf("create synthetic Hermes auth directory: %w", err)
+	}
+	if err := os.WriteFile(path, []byte(`{"providers":[{"id":"nous","access_token":"nous-file-shadow-token"}]}`), 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Hermes auth file: %w", err)
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"nous": body}}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	provider := NewNousPortalProvider(client)
+	if !provider.IsConfigured() || provider.AuthStatus().Source != "env" || len(provider.Strategies()) != 1 || provider.Strategies()[0].Source() != "api" {
+		return Report{}, fmt.Errorf("Nous precedence oracle did not choose the environment credential")
+	}
+	report := BuildReport(context.Background(), []Provider{provider})
+	if len(report.Providers) != 1 || report.Providers[0].Snapshot == nil || len(transport.requests) != 1 || transport.requests[0].Header.Get("Authorization") != "Bearer nous-env-precedence-token" {
+		return Report{}, fmt.Errorf("Nous precedence oracle did not issue one authenticated request with env token")
+	}
+	report.Providers[0].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	return report, nil
+}
+
 // BuildOpenCodeAuthenticatedReportOracle runs the shipped OpenCode provider
 // through the ten-provider report with only a direct synthetic cookie. The
 // fixture transport supplies workspace discovery and subscription responses.
@@ -283,6 +1111,148 @@ func BuildOpenCodeAuthenticatedReportOracle(workspaceBody, subscriptionBody []by
 		return Report{}, fmt.Errorf("OpenCode report oracle did not fetch the subscription using the shipped GET")
 	}
 	report.Providers[7].Snapshot = canonicalOracleSnapshot(report.Providers[7].Snapshot)
+	return report, nil
+}
+
+// BuildCombinedNativeAuthenticatedReportOracle assembles several supported
+// production providers together from synthetic env and default CLI files.
+// All HTTP requests use the fixture transport; Claude's keychain and process
+// probes are injected as empty.
+func BuildCombinedNativeAuthenticatedReportOracle(fixtures map[string][]byte) (Report, error) {
+	home, err := os.MkdirTemp("", "symbrain-combined-usage-oracle-")
+	if err != nil {
+		return Report{}, fmt.Errorf("create isolated combined oracle home: %w", err)
+	}
+	defer os.RemoveAll(home)
+	keys := []string{
+		"HOME", "USERPROFILE", "ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "COPILOT_ACCESS_TOKEN",
+		"OPENROUTER_API_KEY", "OPENROUTER_API_URL", "MOONSHOT_API_KEY", "MOONSHOT_REGION", "CURSOR_COOKIE",
+		"KIMI_CODE_API_KEY", "KIMI_CODE_BASE_URL", "KIMI_CODE_HOME", "KIMI_AUTH_TOKEN",
+		"NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME", "HERMES_PORTAL_BASE_URL", "CODEX_ACCESS_TOKEN", "CODEX_HOME",
+		"OPENCODE_COOKIE", "OPENCODE_WORKSPACE_ID",
+	}
+	type previous struct {
+		value string
+		set   bool
+	}
+	old := make(map[string]previous, len(keys))
+	for _, key := range keys {
+		value, set := os.LookupEnv(key)
+		old[key] = previous{value: value, set: set}
+		if err := os.Unsetenv(key); err != nil {
+			return Report{}, fmt.Errorf("clear %s for combined oracle: %w", key, err)
+		}
+	}
+	defer func() {
+		for key, item := range old {
+			if item.set {
+				_ = os.Setenv(key, item.value)
+			} else {
+				_ = os.Unsetenv(key)
+			}
+		}
+	}()
+	for key, value := range map[string]string{
+		"HOME": home, "KIMI_CODE_API_KEY": "combined-kimi-api-token", "KIMI_CODE_BASE_URL": "https://api.kimi.com/custom/v1",
+		"MOONSHOT_API_KEY": "combined-moonshot-token", "MOONSHOT_REGION": "cn", "OPENROUTER_API_KEY": "combined-openrouter-token",
+		"OPENROUTER_API_URL": "https://openrouter.ai/custom/v1", "OPENCODE_COOKIE": "combined-opencode-cookie",
+		"OPENCODE_WORKSPACE_ID": "wrk_combined123",
+	} {
+		if err := os.Setenv(key, value); err != nil {
+			return Report{}, fmt.Errorf("set %s for combined oracle: %w", key, err)
+		}
+	}
+	kimiPath := filepath.Join(home, ".kimi-code", "credentials", "kimi-code.json")
+	if err := os.MkdirAll(filepath.Dir(kimiPath), 0o700); err != nil {
+		return Report{}, fmt.Errorf("create synthetic Kimi home: %w", err)
+	}
+	if err := os.WriteFile(kimiPath, []byte(`{"access_token":"combined-kimi-cli-token","refresh_token":"unused"}`), 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Kimi credentials: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(home, ".kimi-code", "device_id"), []byte("combined-device-id\n"), 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Kimi device id: %w", err)
+	}
+	nousPath := filepath.Join(home, ".hermes", "auth.json")
+	if err := os.MkdirAll(filepath.Dir(nousPath), 0o700); err != nil {
+		return Report{}, fmt.Errorf("create synthetic Nous home: %w", err)
+	}
+	if err := os.WriteFile(nousPath, []byte(`{"providers":[{"id":"nous","access_token":"combined-nous-file-token"}]}`), 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Nous credentials: %w", err)
+	}
+
+	combinedFixtures := make(map[string][]byte, len(fixtures))
+	for name, body := range fixtures {
+		combinedFixtures[name] = body
+	}
+	combinedFixtures["opencode"] = fixtures["opencode-stable"]
+	combinedFixtures["kimi"] = fixtures["kimi-stable"]
+	combinedFixtures["moonshot"] = fixtures["moonshot-cn"]
+	transport := &oracleTransport{bodies: combinedFixtures}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
+	if len(providers) != 10 {
+		return Report{}, fmt.Errorf("combined oracle registered %d providers, want 10", len(providers))
+	}
+	for index, provider := range providers {
+		wantConfigured := (index >= 4 && index <= 8) || index == 9
+		if provider.IsConfigured() != wantConfigured {
+			return Report{}, fmt.Errorf("combined oracle provider %s configured=%t, want %t", provider.ID(), provider.IsConfigured(), wantConfigured)
+		}
+	}
+	if got := strategySources(providers[4].Strategies()); len(got) != 2 || got[0] != "api" || got[1] != "cli" || providers[4].AuthStatus().Source != "cli" {
+		return Report{}, fmt.Errorf("combined oracle Kimi precedence is strategies=%v source=%q", got, providers[4].AuthStatus().Source)
+	}
+	if got := providers[6].AuthStatus().Source; got != "file" {
+		return Report{}, fmt.Errorf("combined oracle Nous source is %q, want file", got)
+	}
+	if providers[7].AuthStatus().Source != "env" {
+		return Report{}, fmt.Errorf("combined oracle OpenCode source is %q, want env", providers[7].AuthStatus().Source)
+	}
+	report := BuildReport(context.Background(), providers)
+	if len(report.Providers) != 10 {
+		return Report{}, fmt.Errorf("combined oracle produced %d report rows, want 10", len(report.Providers))
+	}
+	for _, index := range []int{4, 5, 6, 7, 8} {
+		if report.Providers[index].Snapshot == nil {
+			return Report{}, fmt.Errorf("combined oracle provider %s produced no snapshot", report.Providers[index].ID)
+		}
+		report.Providers[index].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	if len(transport.requests) != 5 {
+		return Report{}, fmt.Errorf("combined oracle made %d fixture requests, want five", len(transport.requests))
+	}
+	findRequest := func(match func(*http.Request) bool) *http.Request {
+		for _, request := range transport.requests {
+			if match(request) {
+				return request
+			}
+		}
+		return nil
+	}
+	kimiRequest := findRequest(func(request *http.Request) bool {
+		return request.URL.Host == "api.kimi.com" && request.URL.Path == "/custom/v1/coding/v1/usages" && request.Header.Get("Authorization") == "Bearer combined-kimi-api-token"
+	})
+	if kimiRequest == nil {
+		return Report{}, fmt.Errorf("combined oracle Kimi did not try API strategy first")
+	}
+	if findRequest(func(request *http.Request) bool { return request.URL.Host == "api.moonshot.cn" }) == nil {
+		return Report{}, fmt.Errorf("combined oracle Moonshot region was not cn")
+	}
+	if findRequest(func(request *http.Request) bool {
+		return request.Header.Get("Authorization") == "Bearer combined-nous-file-token"
+	}) == nil {
+		return Report{}, fmt.Errorf("combined oracle Nous did not use the default credential file")
+	}
+	if findRequest(func(request *http.Request) bool {
+		return request.URL.Query().Get("id") == openCodeSubscriptionServerID && request.URL.Query().Get("args") == `["wrk_combined123"]`
+	}) == nil {
+		return Report{}, fmt.Errorf("combined oracle OpenCode did not use the workspace override")
+	}
+	if findRequest(func(request *http.Request) bool {
+		return request.URL.Host == "openrouter.ai" && request.URL.Path == "/custom/v1/auth/key"
+	}) == nil {
+		return Report{}, fmt.Errorf("combined oracle OpenRouter custom API base was not used")
+	}
 	return report, nil
 }
 
@@ -337,6 +1307,8 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 type roundTripFixture struct{ target *oracleTransport }
 
 func (r roundTripFixture) RoundTrip(req *http.Request) (*http.Response, error) {
+	r.target.mu.Lock()
+	defer r.target.mu.Unlock()
 	r.target.requests = append(r.target.requests, req.Clone(req.Context()))
 	body := r.target.bodyFor(oracleID(req))
 	return r.target.response(req, body), nil
@@ -388,6 +1360,15 @@ func safeOracleRequest(req *http.Request) OracleRequest {
 	u = regexp.MustCompile(`127\.0\.0\.1:[0-9]+`).ReplaceAllString(u, "127.0.0.1:<port>")
 	return OracleRequest{Method: req.Method, URL: u, Headers: h, Body: body}
 }
+
+func safeAntigravityOracleRequest(req *http.Request) OracleRequest {
+	request := safeOracleRequest(req)
+	if token := req.Header.Get("X-Codeium-Csrf-Token"); token != "" {
+		request.Headers["X-Codeium-Csrf-Token"] = token
+	}
+	return request
+}
+
 func canonicalOracleSnapshot(s *UsageSnapshot) *UsageSnapshot {
 	c := *s
 	fixed := time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)

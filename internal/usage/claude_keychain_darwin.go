@@ -5,7 +5,6 @@ package usage
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"os/exec"
 	"sort"
@@ -124,34 +123,6 @@ func validSecurityArgs(args []string) bool {
 		return args[0] == "dump-keychain"
 	}
 	return len(args) == 4 && args[0] == "find-generic-password" && args[1] == "-w" && args[2] == "-s" && validClaudeServiceName(args[3])
-}
-
-// parseClaudeKeychainBlob reads the access token out of the stored JSON.
-//
-// The blob can also carry an `mcpOAuth` section holding tokens for MCP
-// server logins. Those are not Claude subscription tokens and the usage
-// endpoint rejects them, so an entry with `mcpOAuth` but no `claudeAiOauth`
-// counts as "not signed in" rather than yielding a token that 401s — the
-// same pitfall symaira-cockpit's Swift provider had to handle.
-func parseClaudeKeychainBlob(blob []byte) (string, *time.Time, bool) {
-	var root struct {
-		ClaudeAIOAuth *struct {
-			AccessToken string `json:"accessToken"`
-			ExpiresAt   *int64 `json:"expiresAt"`
-		} `json:"claudeAiOauth"`
-	}
-	if err := json.Unmarshal(bytes.TrimSpace(blob), &root); err != nil {
-		return "", nil, false
-	}
-	if root.ClaudeAIOAuth == nil || root.ClaudeAIOAuth.AccessToken == "" {
-		return "", nil, false
-	}
-	var expiresAt *time.Time
-	if milliseconds := root.ClaudeAIOAuth.ExpiresAt; milliseconds != nil && *milliseconds > 0 {
-		expiry := time.UnixMilli(*milliseconds).UTC()
-		expiresAt = &expiry
-	}
-	return root.ClaudeAIOAuth.AccessToken, expiresAt, true
 }
 
 const maxKeychainOutputBytes = 64 << 10

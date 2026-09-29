@@ -264,7 +264,7 @@ Changes to the default branch are squash-merged only.
 ## Contributing · Security · License
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contribution workflow
-- [SECURITY.md](SECURITY.md) — security reporting policy
-- [AGENTS.md](AGENTS.md) — repository rules for contributors and agents
+- [SECURITY.md](../.github/SECURITY.md) — security reporting policy
+- [AGENTS.md](../AGENTS.md) — repository rules for contributors and agents
 
-Licensed under the Apache-2.0 license. See [LICENSE](LICENSE).
+Licensed under the Apache-2.0 license. See [LICENSE](../LICENSE).

@@ -331,9 +331,9 @@ fn compare_snapshot(id: &str, snapshot: &UsageSnapshot, recorded: &Value) {
             "{id}: meter {index} resets_at"
         );
         assert_eq!(
-            meter
-                .resets_at
-                .and_then(|reset| (reset - snapshot.fetched_at).num_nanoseconds()),
+            meter.resets_at.and_then(|reset| {
+                (reset.with_timezone(&chrono::Utc) - snapshot.fetched_at).num_nanoseconds()
+            }),
             expected["reset_after_ns"].as_i64(),
             "{id}: meter {index} exact reset delta"
         );

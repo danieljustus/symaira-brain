@@ -21,9 +21,13 @@ impl Cancellation {
     }
     #[must_use]
     pub fn with_timeout(timeout: Duration) -> Self {
+        Self::with_deadline(Instant::now() + timeout)
+    }
+    #[must_use]
+    pub(crate) fn with_deadline(deadline: Instant) -> Self {
         Self {
             cancelled: Arc::new(std::sync::atomic::AtomicBool::new(false)),
-            deadline: Arc::new(Mutex::new(Some(Instant::now() + timeout))),
+            deadline: Arc::new(Mutex::new(Some(deadline))),
         }
     }
     pub fn cancel(&self) {
@@ -67,8 +71,9 @@ pub struct Response {
 }
 
 /// Side-effect boundary for provider reads. Implementations should check the
-/// cancellation flag between I/O chunks; the default keeps old test doubles
-/// source-compatible while production transports are fully cooperative.
+/// cancellation flag between I/O chunks. The built-in HTTP transport applies
+/// the remaining timeout when a request starts, but cannot interrupt an
+/// already-blocking synchronous response read.
 pub trait Transport: Send + Sync {
     /// # Errors
     /// Returns the transport error when the request cannot be completed.
@@ -263,5 +268,72 @@ impl Transport for UreqTransport {
             .build();
         let agent = ureq::Agent::new_with_config(config);
         Self::execute(request, &agent)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Cancellation, Request, Transport, UreqTransport};
+    use std::collections::BTreeMap;
+    use std::io;
+    use std::net::TcpListener;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn ureq_caps_loopback_tls_stall_to_absolute_cancellation_deadline() {
+        let listener = TcpListener::bind(("127.0.0.1", 0)).expect("loopback listener");
+        listener
+            .set_nonblocking(true)
+            .expect("nonblocking listener");
+        let port = listener.local_addr().expect("listener address").port();
+        let server = thread::spawn(move || {
+            let accept_deadline = Instant::now() + Duration::from_secs(2);
+            loop {
+                match listener.accept() {
+                    Ok((stream, _)) => return Ok(stream),
+                    Err(error)
+                        if error.kind() == io::ErrorKind::WouldBlock
+                            && Instant::now() < accept_deadline =>
+                    {
+                        thread::sleep(Duration::from_millis(2));
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        });
+
+        let deadline = Instant::now() + Duration::from_millis(200);
+        let cancellation = Cancellation::with_deadline(deadline);
+        let request = Request {
+            provider_id: "antigravity".to_string(),
+            method: "GET".to_string(),
+            url: format!("https://127.0.0.1:{port}/usage"),
+            headers: BTreeMap::new(),
+            body: None,
+        };
+        let started = Instant::now();
+        let transport = UreqTransport::default();
+        let client = thread::spawn(move || transport.request_with_cancel(request, &cancellation));
+        let server_result = server.join().expect("server thread");
+        let result = client.join().expect("HTTP client thread");
+        let finished = Instant::now();
+        let elapsed = finished.duration_since(started);
+
+        let stalled_peer = server_result.expect("client connected to local TLS stall");
+        let error = result.expect_err("TLS handshake unexpectedly completed");
+        assert!(
+            error.to_ascii_lowercase().contains("timeout"),
+            "request failed without a timeout: {error}"
+        );
+        assert!(
+            finished + Duration::from_millis(10) >= deadline,
+            "request returned before its absolute deadline: {elapsed:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(1),
+            "request exceeded its absolute deadline: {elapsed:?}"
+        );
+        drop(stalled_peer);
     }
 }

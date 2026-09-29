@@ -33,13 +33,18 @@ const (
 // criteria, and the OAuth path would need Google credentials this tool
 // does not manage. Mirrors symaira-cockpit's AntigravityUsageProvider.
 type AntigravityProvider struct {
-	probe antigravityProcessProbe
+	probe  antigravityProcessProbe
+	client *http.Client
 }
 
 // NewAntigravityProvider is always "configured" — whether a quota is
 // available depends on the running language server, not on configuration.
 func NewAntigravityProvider() *AntigravityProvider {
-	return &AntigravityProvider{probe: shellProcessProbe{}}
+	return newAntigravityProvider(shellProcessProbe{}, nil)
+}
+
+func newAntigravityProvider(probe antigravityProcessProbe, client *http.Client) *AntigravityProvider {
+	return &AntigravityProvider{probe: probe, client: client}
 }
 
 func (p *AntigravityProvider) ID() string          { return antigravityProviderID }
@@ -47,7 +52,7 @@ func (p *AntigravityProvider) DisplayName() string { return antigravityDisplayNa
 func (p *AntigravityProvider) IsConfigured() bool  { return true }
 
 func (p *AntigravityProvider) Strategies() []Strategy {
-	return []Strategy{&antigravityLocalProbeStrategy{probe: p.probe}}
+	return []Strategy{&antigravityLocalProbeStrategy{probe: p.probe, client: p.client}}
 }
 
 func (p *AntigravityProvider) AuthStatus() AuthStatus {

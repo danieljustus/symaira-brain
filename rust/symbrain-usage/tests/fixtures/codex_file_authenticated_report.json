@@ -1,0 +1,432 @@
+{
+  "success": {
+    "schema_version": 1,
+    "providers": [
+      {
+        "id": "claude",
+        "display_name": "Claude",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No Claude credentials found — add an admin key or sign in with the Claude CLI"
+        }
+      },
+      {
+        "id": "codex",
+        "display_name": "Codex",
+        "configured": true,
+        "auth_status": {
+          "status": "available",
+          "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+          "source": "file"
+        },
+        "snapshot": {
+          "provider_id": "codex",
+          "meters": [
+            {
+              "label": "1w",
+              "used": "67",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": "2026-09-07T06:59:29Z"
+            },
+            {
+              "label": "GPT-5.3-Codex-Spark 5h",
+              "used": "12",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": "2026-09-03T12:36:38Z"
+            },
+            {
+              "label": "GPT-5.3-Codex-Spark 1w",
+              "used": "3",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": "2026-09-10T07:36:38Z"
+            }
+          ],
+          "fetched_at": "2026-08-01T00:00:00Z",
+          "source": "oauth"
+        }
+      },
+      {
+        "id": "copilot",
+        "display_name": "GitHub Copilot",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No Copilot token found — sign in with the Copilot CLI"
+        }
+      },
+      {
+        "id": "cursor",
+        "display_name": "Cursor",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"
+        }
+      },
+      {
+        "id": "kimi",
+        "display_name": "Kimi Code",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No Kimi Code CLI credentials found"
+        }
+      },
+      {
+        "id": "moonshot",
+        "display_name": "Moonshot",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "no API key configured (MOONSHOT_API_KEY)"
+        }
+      },
+      {
+        "id": "nous",
+        "display_name": "Nous Portal",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No Nous Portal credentials found — sign in with the Hermes CLI"
+        }
+      },
+      {
+        "id": "opencode",
+        "display_name": "OpenCode Go",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "No OpenCode Go credentials found — set OPENCODE_COOKIE or run OpenCode Go"
+        }
+      },
+      {
+        "id": "openrouter",
+        "display_name": "OpenRouter",
+        "configured": false,
+        "auth_status": {
+          "status": "missing",
+          "detail": "no API key configured (OPENROUTER_API_KEY)"
+        }
+      },
+      {
+        "id": "antigravity",
+        "display_name": "Antigravity",
+        "configured": true,
+        "auth_status": {
+          "status": "missing",
+          "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+        },
+        "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+      }
+    ]
+  },
+  "errors": [
+    {
+      "status": 401,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Claude credentials found — add an admin key or sign in with the Claude CLI"
+            }
+          },
+          {
+            "id": "codex",
+            "display_name": "Codex",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+          },
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Copilot token found — sign in with the Copilot CLI"
+            }
+          },
+          {
+            "id": "cursor",
+            "display_name": "Cursor",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"
+            }
+          },
+          {
+            "id": "kimi",
+            "display_name": "Kimi Code",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Kimi Code CLI credentials found"
+            }
+          },
+          {
+            "id": "moonshot",
+            "display_name": "Moonshot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (MOONSHOT_API_KEY)"
+            }
+          },
+          {
+            "id": "nous",
+            "display_name": "Nous Portal",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Nous Portal credentials found — sign in with the Hermes CLI"
+            }
+          },
+          {
+            "id": "opencode",
+            "display_name": "OpenCode Go",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No OpenCode Go credentials found — set OPENCODE_COOKIE or run OpenCode Go"
+            }
+          },
+          {
+            "id": "openrouter",
+            "display_name": "OpenRouter",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (OPENROUTER_API_KEY)"
+            }
+          },
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "missing",
+              "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+            },
+            "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+          }
+        ]
+      }
+    },
+    {
+      "status": 429,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Claude credentials found — add an admin key or sign in with the Claude CLI"
+            }
+          },
+          {
+            "id": "codex",
+            "display_name": "Codex",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"codex\" is rate limited"
+          },
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Copilot token found — sign in with the Copilot CLI"
+            }
+          },
+          {
+            "id": "cursor",
+            "display_name": "Cursor",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"
+            }
+          },
+          {
+            "id": "kimi",
+            "display_name": "Kimi Code",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Kimi Code CLI credentials found"
+            }
+          },
+          {
+            "id": "moonshot",
+            "display_name": "Moonshot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (MOONSHOT_API_KEY)"
+            }
+          },
+          {
+            "id": "nous",
+            "display_name": "Nous Portal",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Nous Portal credentials found — sign in with the Hermes CLI"
+            }
+          },
+          {
+            "id": "opencode",
+            "display_name": "OpenCode Go",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No OpenCode Go credentials found — set OPENCODE_COOKIE or run OpenCode Go"
+            }
+          },
+          {
+            "id": "openrouter",
+            "display_name": "OpenRouter",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (OPENROUTER_API_KEY)"
+            }
+          },
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "missing",
+              "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+            },
+            "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+          }
+        ]
+      }
+    },
+    {
+      "status": 200,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Claude credentials found — add an admin key or sign in with the Claude CLI"
+            }
+          },
+          {
+            "id": "codex",
+            "display_name": "Codex",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"codex\" returned malformed usage data: response contained no usable usage fields"
+          },
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Copilot token found — sign in with the Copilot CLI"
+            }
+          },
+          {
+            "id": "cursor",
+            "display_name": "Cursor",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"
+            }
+          },
+          {
+            "id": "kimi",
+            "display_name": "Kimi Code",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Kimi Code CLI credentials found"
+            }
+          },
+          {
+            "id": "moonshot",
+            "display_name": "Moonshot",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (MOONSHOT_API_KEY)"
+            }
+          },
+          {
+            "id": "nous",
+            "display_name": "Nous Portal",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No Nous Portal credentials found — sign in with the Hermes CLI"
+            }
+          },
+          {
+            "id": "opencode",
+            "display_name": "OpenCode Go",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "No OpenCode Go credentials found — set OPENCODE_COOKIE or run OpenCode Go"
+            }
+          },
+          {
+            "id": "openrouter",
+            "display_name": "OpenRouter",
+            "configured": false,
+            "auth_status": {
+              "status": "missing",
+              "detail": "no API key configured (OPENROUTER_API_KEY)"
+            }
+          },
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "missing",
+              "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+            },
+            "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+          }
+        ]
+      }
+    }
+  ]
+}

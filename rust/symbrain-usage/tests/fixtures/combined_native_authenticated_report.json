@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "providers": [
+    {
+      "id": "claude",
+      "display_name": "Claude",
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Claude credentials found — add an admin key or sign in with the Claude CLI"
+      }
+    },
+    {
+      "id": "codex",
+      "display_name": "Codex",
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Codex credentials found — sign in with the Codex CLI"
+      }
+    },
+    {
+      "id": "copilot",
+      "display_name": "GitHub Copilot",
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Copilot token found — sign in with the Copilot CLI"
+      }
+    },
+    {
+      "id": "cursor",
+      "display_name": "Cursor",
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Cursor credentials found — set CURSOR_COOKIE or sign in to Cursor.app"
+      }
+    },
+    {
+      "id": "kimi",
+      "display_name": "Kimi Code",
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      },
+      "snapshot": {
+        "provider_id": "kimi",
+        "meters": [
+          {
+            "label": "Weekly quota",
+            "used": "214",
+            "limit": "2048",
+            "unit": "requests",
+            "resets_at": "2026-01-09T17:53:13.716839301+02:30"
+          },
+          {
+            "label": "5h window",
+            "used": "139",
+            "limit": "200",
+            "unit": "requests",
+            "resets_at": "2026-01-06T13:33:02.717479433Z"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      }
+    },
+    {
+      "id": "moonshot",
+      "display_name": "Moonshot",
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "API key from MOONSHOT_API_KEY",
+        "source": "env"
+      },
+      "snapshot": {
+        "provider_id": "moonshot",
+        "meters": [
+          {
+            "label": "Cash balance",
+            "used": "88.88",
+            "unit": "CNY"
+          }
+        ],
+        "balance": "88.88",
+        "currency": "CNY",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      }
+    },
+    {
+      "id": "nous",
+      "display_name": "Nous Portal",
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)",
+        "source": "file"
+      },
+      "snapshot": {
+        "provider_id": "nous",
+        "meters": [
+          {
+            "label": "Subscription credits",
+            "used": "42.5",
+            "unit": "credits"
+          },
+          {
+            "label": "Purchased credits",
+            "used": "15",
+            "unit": "credits"
+          },
+          {
+            "label": "Plan credits remaining",
+            "used": "42.5",
+            "limit": "100",
+            "unit": "credits",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "Rollover credits",
+            "used": "7.5",
+            "unit": "credits"
+          }
+        ],
+        "balance": "57.5",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      }
+    },
+    {
+      "id": "opencode",
+      "display_name": "OpenCode Go",
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Cookie configured (OPENCODE_COOKIE)",
+        "source": "env"
+      },
+      "snapshot": {
+        "provider_id": "opencode",
+        "meters": [
+          {
+            "label": "5h window",
+            "used": "12.34",
+            "limit": "100",
+            "unit": "%"
+          },
+          {
+            "label": "This week",
+            "used": "45.6",
+            "limit": "100",
+            "unit": "%"
+          }
+        ],
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "web"
+      }
+    },
+    {
+      "id": "openrouter",
+      "display_name": "OpenRouter",
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "API key from OPENROUTER_API_KEY",
+        "source": "env"
+      },
+      "snapshot": {
+        "provider_id": "openrouter",
+        "meters": [
+          {
+            "label": "Key limit",
+            "used": "7.25",
+            "limit": "50",
+            "unit": "USD",
+            "resets_at": "2026-09-01T00:00:00Z"
+          },
+          {
+            "label": "Requests",
+            "limit": "500",
+            "unit": "requests"
+          }
+        ],
+        "balance": "42.75",
+        "currency": "USD",
+        "fetched_at": "2026-08-01T00:00:00Z",
+        "source": "api"
+      }
+    },
+    {
+      "id": "antigravity",
+      "display_name": "Antigravity",
+      "configured": true,
+      "auth_status": {
+        "status": "missing",
+        "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+      },
+      "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+    }
+  ]
+}

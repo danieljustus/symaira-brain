@@ -17,18 +17,18 @@ through no-follow removal. The Go implementation remains the source-bound oracle
 for this seam until all release gates pass.
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
-implementation's 1 MiB bounds. Gateway dispatch remains on Go until Phase 5.
-Both protocol decoders have nightly libFuzzer targets seeded from the checked
-Go corekit v0.16.2 remains the framing oracle for ordinary cases. Rust
+implementation's 1 MiB bounds. Gateway dispatch is implemented natively;
+Go remains the source-bound oracle and rollback path.
+Go corekit v0.17.0 remains the framing oracle for ordinary cases. Rust
 intentionally hardens two known upstream defects tracked as
 [symaira-corekit#225](https://github.com/danieljustus/symaira-corekit/issues/225)
 and [#226](https://github.com/danieljustus/symaira-corekit/issues/226): aggregate
 framed-header byte/line limits, and JSON-RPC envelope validation for `-32600`.
 Rust also flushes complete framed responses so buffered writers expose them
-immediately. These are an intentional pending parity boundary, not a claim
-that Rust matches the pinned Go defect. MCP/GW matrix rows stay
-`fixture-ready` until corekit is corrected, released, bumped here, and the
-P5-3 CLI executable fixtures are regenerated. `notifications/cancelled` is
+immediately. These hardening boundaries do not claim that Rust matches the
+pinned Go defects. The current MCP/GW matrix rows are `green-native`; see
+the [contract matrix](migration/contract-matrix.csv) for per-contract
+evidence and remaining platform gates. `notifications/cancelled` is
 still treated as a silent notification; no per-request cancellation behavior
 is claimed because Go does not implement it. Connection cancellation does
 propagate through concurrent gateway dispatch into real broker calls. Both
@@ -38,8 +38,8 @@ nightly libFuzzer targets seeded from the checked Go oracle corpus;
 tracked seeds.
 
 The native broker now owns child spawn, initialize, tools/list, tools/call,
-crash detection with backoff restart, and graceful shutdown. Gateway dispatch
-remains on Go until Phase 5.
+crash detection with backoff restart, and graceful shutdown. Native gateway
+dispatch uses this broker; Go remains the oracle and rollback path.
 Its integration suite uses a Rust fake MCP child and compares lifecycle results
 against the production Go broker oracle, including concurrent lazy start,
 timeouts, protocol mismatch, restart counts, and descendant process cleanup.

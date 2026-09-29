@@ -17,10 +17,15 @@ import (
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
-// isolatedPATH points $PATH at dir only, so exec.LookPath cannot find any
-// real binary installed on the machine running the test.
+// isolatedPATH excludes both PATH binaries and higher-priority config/managed
+// binaries so discovery cannot reach tools installed on the test host.
 func isolatedPATH(t *testing.T, dir string) {
 	t.Helper()
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", "")
 	t.Setenv("PATH", dir)
 }
 

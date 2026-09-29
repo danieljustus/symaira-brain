@@ -59,6 +59,16 @@ func TestFmtCheckBatchesLargeFileSetAndRejectsDrift(t *testing.T) {
 		t.Fatalf("fixture manifest is only %d bytes; expected more than ARG_MAX=%d", inputBytes, argMax)
 	}
 
+	for _, excluded := range []string{"browse", ".git", ".worktrees/linked/browse"} {
+		dir := filepath.Join(fixtureRoot, excluded)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatalf("create excluded directory: %v", err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "unformatted.go"), []byte("package p\n\nfunc f(){}\n"), 0o644); err != nil {
+			t.Fatalf("write excluded fixture: %v", err)
+		}
+	}
+
 	if output, err := runFmtCheck(t, fixtureRoot, makefile); err != nil {
 		t.Fatalf("large formatted fixture failed fmt-check: %v\n%s", err, output)
 	}

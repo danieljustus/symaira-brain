@@ -73,8 +73,12 @@ Go at 5.894 ms; the maximum permitted Rust p95 is 6.4834 ms.
 3. Execute daemon fixtures via the installed Rust binary, not just internal
    tests, on macOS/Linux/Windows.
 
-**Acceptance:** `make rust-daemon-contract`; native daemon suites on all declared
-platforms; `DMN-001/002/003/004/005/007/008` are individually green.
+**Acceptance (from `browse/`):** `cargo test -p symbrowse-daemon --locked`,
+`python3 port/harness/run.py --suite daemon`, and
+`python3 port/harness/run.py --suite daemon-races --repeat 50`. The dedicated
+`browse-daemon-native.yml` workflow executes all three on the six declared
+OS/architecture runners; `DMN-001/002/003/004/005/007/008` remain open until
+those exact-candidate native receipts pass.
 
 ### 1B. Static fetch semantics (RUST-007)
 

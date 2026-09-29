@@ -359,6 +359,8 @@ def setup_html_project(root: Path, _env: dict[str, str]) -> None:
 
 
 def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
+    # Consume initialize, then close stdout while staying alive until stdin closes.
+    # This avoids both write/exit and Go Wait/StdoutPipe-close races.
     binary_dir = root / "doctor-path"
     binary_dir.mkdir()
     if os.name == "nt":
@@ -367,7 +369,9 @@ def setup_doctor_failed_version(root: Path, env: dict[str, str]) -> None:
     else:
         _write_fake_vault(
             binary_dir / "symvault",
-            "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\nprintf 'not found\\n' >&2",
+            "if [ \"$1\" = version ]; then printf '{\"version\":\"9.9.9\"}'; exit 42; fi\n"
+            "if [ \"$1\" = serve ]; then IFS= read -r request; exec 1>&-; while IFS= read -r request; do :; done; fi\n"
+            "printf 'not found\\n' >&2",
             exit_code=1,
         )
     env["PATH"] = str(binary_dir)
@@ -669,6 +673,7 @@ def _build_windows_stub() -> None:
     go_source = r'''package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -686,6 +691,12 @@ func main() {
 		if len(os.Args) > 1 && os.Args[1] == "version" {
 			fmt.Print(`{"version":"9.9.9"}`)
 			os.Exit(42)
+		}
+		if len(os.Args) > 1 && os.Args[1] == "serve" {
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			os.Stdout.Close()
+			for scanner.Scan() {}
 		}
 		fmt.Fprintln(os.Stderr, "not found")
 		os.Exit(1)

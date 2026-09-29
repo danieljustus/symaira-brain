@@ -165,6 +165,7 @@ pub(super) fn status_error(
         ("opencode", 401 | 403) => {
             "OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie.".into()
         }
+        ("antigravity", 429) => format!("AI usage provider \"{provider}\" is rate limited{retry_text}"),
         ("antigravity", _) => format!("Antigravity local server returned HTTP {status}."),
         (_, 401 | 403) => format!("AI usage provider \"{provider}\" is not configured"),
         ("opencode", 429) => "OpenCode API error: HTTP 429".into(),

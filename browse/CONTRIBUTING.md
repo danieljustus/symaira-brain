@@ -1,6 +1,6 @@
 # Contributing to Symaira Browse
 
-Thanks for helping improve Symaira Browse. Please read [AGENTS.md](AGENTS.md) before making a change; it is the binding design contract, and the per-topic documents under [docs/](docs) are its detailed reference. The issue or milestone defines the permitted scope.
+Thanks for helping improve Symaira Browse. Please read [AGENTS.md](../AGENTS.md) before making a change; it defines the repository rules. The per-topic documents under [docs/](docs) describe Browse's design contracts. The issue or milestone defines the permitted scope.
 
 ## Development workflow
 
@@ -27,4 +27,4 @@ Thanks for helping improve Symaira Browse. Please read [AGENTS.md](AGENTS.md) be
 - Preserve stable JSON output contracts as they are introduced.
 - Treat browser content as untrusted input and keep policy decisions explicit.
 
-For security-sensitive changes, follow [SECURITY.md](SECURITY.md) instead of opening a public issue with exploit details.
+For security-sensitive changes, follow [SECURITY.md](../.github/SECURITY.md) instead of opening a public issue with exploit details.

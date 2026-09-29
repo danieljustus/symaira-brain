@@ -1,7 +1,9 @@
 use super::{Provider, Request};
 use std::collections::BTreeMap;
+use std::env;
 use std::fmt::Write as _;
 use std::io::{Read, Seek, SeekFrom};
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -324,9 +326,11 @@ pub(super) fn command_output_with_cancel(
     args: &[&str],
 ) -> Option<String> {
     const PROBE_TIMEOUT: Duration = Duration::from_secs(2);
+    const MAX_PROBE_OUTPUT_BYTES: u64 = 64 * 1024;
+    let command_path = resolve_probe_tool(command)?;
     let mut output = tempfile::NamedTempFile::new().ok()?;
     let child_stdout = output.as_file().try_clone().ok()?;
-    let mut command_line = Command::new(command);
+    let mut command_line = Command::new(command_path);
     command_line
         .args(args)
         .stdout(Stdio::from(child_stdout))
@@ -346,6 +350,13 @@ pub(super) fn command_output_with_cancel(
         match child.try_wait() {
             Ok(Some(status)) => break status,
             Ok(None) if !cancel.is_cancelled() && Instant::now() < deadline => {
+                match output.as_file().metadata() {
+                    Ok(metadata) if metadata.len() <= MAX_PROBE_OUTPUT_BYTES => {}
+                    Ok(_) | Err(_) => {
+                        terminate_probe(&mut child);
+                        return None;
+                    }
+                }
                 thread::sleep(Duration::from_millis(2));
             }
             Ok(None) | Err(_) => {
@@ -357,14 +368,73 @@ pub(super) fn command_output_with_cancel(
     if !status.success() {
         return None;
     }
+    if output.as_file().metadata().ok()?.len() > MAX_PROBE_OUTPUT_BYTES {
+        return None;
+    }
     output.as_file_mut().seek(SeekFrom::Start(0)).ok()?;
     let mut data = Vec::new();
     output
         .as_file_mut()
-        .take(64 * 1024 + 1)
+        .take(MAX_PROBE_OUTPUT_BYTES + 1)
         .read_to_end(&mut data)
         .ok()?;
-    (data.len() <= 64 * 1024).then(|| String::from_utf8_lossy(&data).into_owned())
+    (u64::try_from(data.len()).ok()? <= MAX_PROBE_OUTPUT_BYTES)
+        .then(|| String::from_utf8_lossy(&data).into_owned())
+}
+
+fn resolve_probe_tool(name: &str) -> Option<PathBuf> {
+    let path = env::var_os("PATH")?;
+    let search_paths = env::split_paths(&path);
+    resolve_probe_tool_from(name, search_paths, &env::current_dir().ok()?)
+}
+
+fn resolve_probe_tool_from(
+    name: &str,
+    search_paths: impl IntoIterator<Item = PathBuf>,
+    current_dir: &Path,
+) -> Option<PathBuf> {
+    let basename = Path::new(name).file_name()?.to_str()?;
+    if basename != name {
+        return None;
+    }
+    for directory in search_paths {
+        if !directory.is_absolute() {
+            let candidate = current_dir.join(directory).join(name);
+            let Ok(metadata) = candidate.metadata() else {
+                continue;
+            };
+            if !metadata.is_file() {
+                continue;
+            }
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                if metadata.permissions().mode() & 0o111 == 0 {
+                    continue;
+                }
+            }
+            // Go's exec.LookPath returns an ErrDot error when PATH would
+            // select an executable through a relative entry. Do not silently
+            // continue to a later absolute entry in that case.
+            return None;
+        }
+        let candidate = directory.join(name);
+        let Ok(metadata) = candidate.metadata() else {
+            continue;
+        };
+        if !metadata.is_file() {
+            continue;
+        }
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            if metadata.permissions().mode() & 0o111 == 0 {
+                continue;
+            }
+        }
+        return Some(candidate);
+    }
+    None
 }
 
 fn terminate_probe(child: &mut std::process::Child) {

@@ -63,6 +63,7 @@ pub struct UsageSnapshot {
     pub balance: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub currency: Option<String>,
+    #[serde(serialize_with = "serialize_go_timestamp")]
     pub fetched_at: DateTime<Utc>,
     pub source: String,
 }
@@ -76,6 +77,93 @@ pub struct UsageMeter {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub limit: Option<String>,
     pub unit: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub resets_at: Option<DateTime<Utc>>,
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "serialize_optional_go_timestamp"
+    )]
+    pub resets_at: Option<DateTime<chrono::FixedOffset>>,
+}
+
+fn format_go_rfc3339_nano(value: &DateTime<chrono::FixedOffset>) -> String {
+    let mut encoded = value.to_rfc3339_opts(chrono::SecondsFormat::Nanos, true);
+    if let Some(dot) = encoded.find('.') {
+        let zone = if encoded.ends_with('Z') {
+            encoded.len() - 1
+        } else {
+            encoded.len() - 6
+        };
+        let trimmed = encoded[dot..zone].trim_end_matches('0').len() + dot;
+        if trimmed == dot + 1 {
+            encoded.replace_range(dot..zone, "");
+        } else {
+            encoded.replace_range(trimmed..zone, "");
+        }
+    }
+    encoded
+}
+
+fn serialize_go_timestamp<S>(value: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(&format_go_rfc3339_nano(&value.fixed_offset()))
+}
+
+#[allow(clippy::ref_option)] // serde's serialize_with contract passes the field by reference.
+fn serialize_optional_go_timestamp<S>(
+    value: &Option<DateTime<chrono::FixedOffset>>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    match value {
+        Some(value) => serializer.serialize_some(&format_go_rfc3339_nano(value)),
+        None => serializer.serialize_none(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{UsageMeter, UsageSnapshot};
+    use chrono::{DateTime, Utc};
+
+    #[test]
+    fn report_timestamps_trim_fractional_zeroes_like_go_rfc3339nano() {
+        let timestamp: DateTime<Utc> = "2026-01-09T15:23:13.716839300Z"
+            .parse()
+            .expect("valid timestamp");
+        let snapshot = UsageSnapshot {
+            fetched_at: timestamp,
+            ..UsageSnapshot::default()
+        };
+        let meter = UsageMeter {
+            resets_at: Some(timestamp.fixed_offset()),
+            ..UsageMeter::default()
+        };
+        let snapshot_json = serde_json::to_value(snapshot).expect("serialize snapshot");
+        let meter_json = serde_json::to_value(meter).expect("serialize meter");
+        assert_eq!(snapshot_json["fetched_at"], "2026-01-09T15:23:13.7168393Z");
+        assert_eq!(meter_json["resets_at"], "2026-01-09T15:23:13.7168393Z");
+        let offset: chrono::DateTime<chrono::FixedOffset> = "2026-01-09T17:53:13.716839300+02:30"
+            .parse()
+            .expect("valid offset timestamp");
+        let offset_meter = UsageMeter {
+            resets_at: Some(offset),
+            ..UsageMeter::default()
+        };
+        assert_eq!(
+            serde_json::to_value(offset_meter).expect("serialize offset meter")["resets_at"],
+            "2026-01-09T17:53:13.7168393+02:30"
+        );
+        let decoded: UsageSnapshot =
+            serde_json::from_value(snapshot_json).expect("deserialize snapshot");
+        assert_eq!(decoded.fetched_at, timestamp);
+        let missing_reset: UsageMeter = serde_json::from_value(serde_json::json!({
+            "label": "window",
+            "unit": "requests"
+        }))
+        .expect("missing optional reset remains accepted");
+        assert_eq!(missing_reset.resets_at, None);
+    }
 }

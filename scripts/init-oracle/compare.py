@@ -433,8 +433,8 @@ def build_go_reference_binary(
     build_cache_dir.mkdir(parents=True, exist_ok=True)
 
     env = dict(os.environ)
-    env["GOCACHE"] = str(build_cache_dir / "gocache")
-    env["GOPATH"] = str(build_cache_dir / "gopath")
+    env.setdefault("GOCACHE", str(build_cache_dir / "gocache"))
+    env.setdefault("GOPATH", str(build_cache_dir / "gopath"))
     env["CGO_ENABLED"] = "0"
 
     go_version_proc = subprocess.run(
@@ -1172,6 +1172,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=Path(__file__).resolve().parents[2],
         help="Repository root directory",
     )
+    parser.add_argument(
+        "--work-dir",
+        type=Path,
+        help="Disposable oracle workspace outside a read-only checkout (default: target/init-oracle)",
+    )
     return parser
 
 
@@ -1183,7 +1188,7 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError(f"commit must be frozen at pinned commit {PINNED_COMMIT_SHA}")
 
     repo_root = args.repo_root.resolve()
-    target_oracle_dir = repo_root / "target" / "init-oracle"
+    target_oracle_dir = args.work_dir.resolve() if args.work_dir else repo_root / "target" / "init-oracle"
     target_oracle_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Verify hostile autocrlf resilience

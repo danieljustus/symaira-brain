@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "active-second-port-after-connect-failure",
+      "process_list": " 111 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n",
+      "ports_by_pid": {
+        "111": "COMMAND PID NAME\nlanguage 111 TCP 127.0.0.1:43121 (LISTEN)\nlanguage 111 TCP 127.0.0.1:43122 (LISTEN)\n"
+      },
+      "responses": [
+        {
+          "status": 503,
+          "body": ""
+        },
+        {
+          "status": 200,
+          "body": ""
+        },
+        {
+          "status": 200,
+          "body": "{\n  \"code\": 0,\n  \"message\": \"\",\n  \"response\": {\n    \"description\": \"Quota summary\",\n    \"groups\": [\n      {\n        \"displayName\": \"Gemini Models\",\n        \"description\": \"Weekly and five-hour limits\",\n        \"buckets\": [\n          { \"bucketId\": \"gemini-weekly\", \"displayName\": \"Weekly limit\", \"remainingFraction\": 0.42, \"resetTime\": \"2026-08-10T00:00:00Z\", \"disabled\": false },\n          { \"bucketId\": \"gemini-5h\", \"displayName\": \"5-hour limit\", \"remainingFraction\": 0.85, \"resetTime\": \"2026-08-05T23:00:00Z\", \"disabled\": false }\n        ]\n      },\n      {\n        \"displayName\": \"Claude and GPT models\",\n        \"buckets\": [\n          { \"bucketId\": \"claude-weekly\", \"displayName\": \"Weekly limit\", \"remainingFraction\": 0.1, \"resetTime\": \"2026-08-10T00:00:00Z\", \"disabled\": false }\n        ]\n      }\n    ]\n  }\n}\n"
+        }
+      ],
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Antigravity is running",
+              "source": "local"
+            },
+            "snapshot": {
+              "provider_id": "antigravity",
+              "meters": [
+                {
+                  "label": "Gemini Models — Weekly limit",
+                  "used": "58",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-10T00:00:00Z"
+                },
+                {
+                  "label": "Gemini Models — 5-hour limit",
+                  "used": "15",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-05T23:00:00Z"
+                },
+                {
+                  "label": "Claude and GPT models — Weekly limit",
+                  "used": "90",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-10T00:00:00Z"
+                }
+              ],
+              "fetched_at": "2026-08-01T00:00:00Z",
+              "source": "local"
+            }
+          }
+        ]
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          },
+          "body": "{}"
+        }
+      ]
+    },
+    {
+      "id": "fallback-to-user-status",
+      "process_list": " 333 /opt/homebrew/bin/agy\n",
+      "ports_by_pid": {
+        "333": "agy 333 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43123 (LISTEN)\n"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "body": ""
+        },
+        {
+          "status": 200,
+          "body": "not json"
+        },
+        {
+          "status": 200,
+          "body": "{\n  \"code\": \"ok\",\n  \"message\": \"\",\n  \"userStatus\": {\n    \"email\": \"user@example.com\",\n    \"cascadeModelConfigData\": {\n      \"clientModelConfigs\": [\n        { \"label\": \"Gemini 2.5 Pro\", \"modelOrAlias\": { \"model\": \"gemini-2.5-pro\" }, \"quotaInfo\": { \"remainingFraction\": 0.33, \"resetTime\": \"2026-08-05T23:00:00Z\" } },\n        { \"label\": \"\", \"modelOrAlias\": { \"model\": \"claude-sonnet-4\" }, \"quotaInfo\": { \"remainingFraction\": 0.5 } }\n      ]\n    }\n  }\n}\n"
+        }
+      ],
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Antigravity is running",
+              "source": "local"
+            },
+            "snapshot": {
+              "provider_id": "antigravity",
+              "meters": [
+                {
+                  "label": "Gemini 2.5 Pro",
+                  "used": "67",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-05T23:00:00Z"
+                },
+                {
+                  "label": "claude-sonnet-4",
+                  "used": "50",
+                  "limit": "100",
+                  "unit": "%"
+                }
+              ],
+              "fetched_at": "2026-08-01T00:00:00Z",
+              "source": "local"
+            }
+          }
+        ]
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "body": "{}"
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUserStatus",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "body": "{}"
+        }
+      ]
+    },
+    {
+      "id": "fallback-to-next-candidate",
+      "process_list": " 555 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token first-candidate\n 556 /opt/homebrew/bin/agy\n",
+      "ports_by_pid": {
+        "555": "language 555 TCP 127.0.0.1:43125 (LISTEN)\n",
+        "556": "agy 556 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43126 (LISTEN)\n"
+      },
+      "responses": [
+        {
+          "status": 503,
+          "body": ""
+        },
+        {
+          "status": 200,
+          "body": ""
+        },
+        {
+          "status": 200,
+          "body": "{\n  \"code\": 0,\n  \"message\": \"\",\n  \"response\": {\n    \"description\": \"Quota summary\",\n    \"groups\": [\n      {\n        \"displayName\": \"Gemini Models\",\n        \"description\": \"Weekly and five-hour limits\",\n        \"buckets\": [\n          { \"bucketId\": \"gemini-weekly\", \"displayName\": \"Weekly limit\", \"remainingFraction\": 0.42, \"resetTime\": \"2026-08-10T00:00:00Z\", \"disabled\": false },\n          { \"bucketId\": \"gemini-5h\", \"displayName\": \"5-hour limit\", \"remainingFraction\": 0.85, \"resetTime\": \"2026-08-05T23:00:00Z\", \"disabled\": false }\n        ]\n      },\n      {\n        \"displayName\": \"Claude and GPT models\",\n        \"buckets\": [\n          { \"bucketId\": \"claude-weekly\", \"displayName\": \"Weekly limit\", \"remainingFraction\": 0.1, \"resetTime\": \"2026-08-10T00:00:00Z\", \"disabled\": false }\n        ]\n      }\n    ]\n  }\n}\n"
+        }
+      ],
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Antigravity is running",
+              "source": "local"
+            },
+            "snapshot": {
+              "provider_id": "antigravity",
+              "meters": [
+                {
+                  "label": "Gemini Models — Weekly limit",
+                  "used": "58",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-10T00:00:00Z"
+                },
+                {
+                  "label": "Gemini Models — 5-hour limit",
+                  "used": "15",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-05T23:00:00Z"
+                },
+                {
+                  "label": "Claude and GPT models — Weekly limit",
+                  "used": "90",
+                  "limit": "100",
+                  "unit": "%",
+                  "resets_at": "2026-08-10T00:00:00Z"
+                }
+              ],
+              "fetched_at": "2026-08-01T00:00:00Z",
+              "source": "local"
+            }
+          }
+        ]
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1",
+            "X-Codeium-Csrf-Token": "first-candidate"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          "body": "{}"
+        }
+      ]
+    },
+    {
+      "id": "not-running-no-request",
+      "process_list": "",
+      "ports_by_pid": null,
+      "responses": null,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "missing",
+              "detail": "Antigravity is not running — start the Antigravity app or agy CLI"
+            },
+            "error": "all AI usage fallbacks failed: Antigravity is not running — no local quota server found."
+          }
+        ]
+      },
+      "requests": []
+    },
+    {
+      "id": "all-endpoints-fail",
+      "process_list": " 444 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n",
+      "ports_by_pid": {
+        "444": "language 444 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43124 (LISTEN)\n"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "body": ""
+        },
+        {
+          "status": 401,
+          "body": ""
+        },
+        {
+          "status": 429,
+          "body": "",
+          "headers": {
+            "Retry-After": "9"
+          }
+        },
+        {
+          "status": 500,
+          "body": ""
+        }
+      ],
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "antigravity",
+            "display_name": "Antigravity",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Antigravity is running",
+              "source": "local"
+            },
+            "error": "all AI usage fallbacks failed: Antigravity local server returned HTTP 500."
+          }
+        ]
+      },
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUnleashData",
+          "headers": {
+            "Connect-Protocol-Version": "1",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/RetrieveUserQuotaSummary",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          },
+          "body": "{}"
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetUserStatus",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          },
+          "body": "{}"
+        },
+        {
+          "method": "POST",
+          "url": "https://127.0.0.1:\u003cport\u003e/exa.language_server_pb.LanguageServerService/GetCommandModelConfigs",
+          "headers": {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-Codeium-Csrf-Token": "oracle-csrf"
+          },
+          "body": "{}"
+        }
+      ]
+    }
+  ]
+}
