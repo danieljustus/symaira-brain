@@ -1,5 +1,35 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated active Antigravity usage probe — 2026-09-29
+
+Candidate `ec6da43e84d2e4d85cab342714107c4f6ae3d400` routes Antigravity usage
+through the native provider. It preserves Go's candidate/port traversal,
+GetUnleashData handshake, CSRF/header/body contract and three-endpoint quota
+fallback. Actual Go production constructors and BuildReport receive synthetic
+process/port observations and canned HTTP replies; Rust replays the same inputs
+through its production fetch path and compares reports plus request traces.
+
+The reference generator rejects missing fixture bodies and validates intended
+success/failure and request sequences before saving its observed output. Cases
+cover a later listening port, another candidate, malformed-summary fallback,
+no running process and all endpoints failing. Subprocess discovery reuses the
+bounded runner with output limits during execution, kill/wait on errors,
+absolute PATH resolution matching Go ErrDot rejection, and a PID ceiling.
+A real Unix CLI regression uses a private synthetic ps executable; it never
+reads the installed process table or Keychain.
+
+Independent clean Darwin/arm64 and Linux/arm64 gates pass Go1.26.7 usage tests
+and usage/OpenCode oracle freshness. Rust usage passes 60+9+8 on Darwin and
+60+8+8 on Linux, with all20 CLI tests passing on each, zero failed/ignored.
+Worker strict Clippy and fmt pass. Both build roots contain
+`antigravity-receipt-ec6da43e.json` with source metadata and fixture/log hashes.
+
+USE-001 remains open: installed Antigravity/its real TLS endpoint was not
+exercised, Windows/other native targets remain pending, and Claude Keychain-only
+or unproven credential shapes still use Go. No live credential/provider access,
+publication, installed cutover or Go removal occurred.
+
+
 ## Integrated usage home overrides and canonical Nous JWT — 2026-09-29
 
 Candidate `49c1905b175b078b43c6533c445462dd1bf8058f` enables proven Codex,
