@@ -14,30 +14,12 @@ permissions:
 
 jobs:
   paired-chrome:
-    if: ${{ !inputs.diagnostic_only || matrix.target == 'windows-amd64' }}
     name: PERF-003 native Chrome ${{ matrix.target }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - target: darwin-amd64
-            runner: macos-15-intel
-            cft: mac-x64
-          - target: darwin-arm64
-            runner: macos-15
-            cft: mac-arm64
-          - target: linux-amd64
-            runner: ubuntu-24.04
-            cft: linux64
-          - target: linux-arm64
-            runner: ubuntu-24.04-arm
-            cft: linux-arm64
-          - target: windows-amd64
-            runner: windows-2025
-            cft: win64
-          - target: windows-arm64
-            runner: windows-11-arm
-            cft: win-arm64
+        # Job-level `if` cannot read `matrix`; diagnostic runs narrow the matrix instead.
+        include: ${{ fromJSON(inputs.diagnostic_only && '[{"target":"windows-amd64","runner":"windows-2025","cft":"win64"}]' || '[{"target":"darwin-amd64","runner":"macos-15-intel","cft":"mac-x64"},{"target":"darwin-arm64","runner":"macos-15","cft":"mac-arm64"},{"target":"linux-amd64","runner":"ubuntu-24.04","cft":"linux64"},{"target":"linux-arm64","runner":"ubuntu-24.04-arm","cft":"linux-arm64"},{"target":"windows-amd64","runner":"windows-2025","cft":"win64"},{"target":"windows-arm64","runner":"windows-11-arm","cft":"win-arm64"}]') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     steps:
