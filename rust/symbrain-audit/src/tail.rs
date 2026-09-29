@@ -79,6 +79,20 @@ where
     Ok(results)
 }
 
+/// Decodes a legacy plain entry line or a hash-chain envelope
+/// (`{"d":"<entry JSON>","h":"<hash>"}`) written by the production logger.
+fn decode_line(line: &[u8]) -> Option<Entry> {
+    #[derive(serde::Deserialize)]
+    struct Envelope {
+        d: Option<String>,
+    }
+    let envelope = serde_json::from_slice::<Envelope>(line).ok()?;
+    match envelope.d {
+        Some(data) => serde_json::from_str(&data).ok(),
+        None => serde_json::from_slice(line).ok(),
+    }
+}
+
 fn consume_line<F>(
     line: &[u8],
     limit: usize,
@@ -93,7 +107,7 @@ where
     if line.is_empty() {
         return false;
     }
-    let Ok(entry) = serde_json::from_slice::<Entry>(line) else {
+    let Some(entry) = decode_line(line) else {
         return false;
     };
     if session_scoped {
