@@ -1,5 +1,31 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Resume checkpoint — 2026-09-29 (local integrated OAuth candidate)
+
+- Candidate `7390afb944893bc8c2a5a573942a39212caff346` includes the Browse daemon
+  gate slice `78723fef` and direct Claude OAuth reporting `5a2bcb31`. Go remains
+  production; no publication, cutover or Go removal occurred.
+- USE-001 now dispatches a sole direct `ANTHROPIC_OAUTH_TOKEN` natively. Secret
+  references, credential files/keychain, mixed credentials and configured
+  overrides retain the existing Go gate. The oracle invokes production Go
+  `NewClaudeProvider` and `BuildReport` with synthetic credentials and a canned
+  transport: success, 401, 429 and malformed JSON, with request authentication
+  asserted. Only dynamic `fetched_at` is normalized; reset timestamps are compared.
+- Parent acceptance at this exact candidate on Darwin/arm64: pinned Go1.26.7
+  `make usage-oracle-check` passed; `cargo test -p symbrain-usage --locked`
+  passed 37 unit, 9 secret and 8 report tests. The CLI test
+  `direct_claude_oauth_routes_usage_to_native_parser_without_provider_request`
+  passed once and proves routing before a provider request. Parent review
+  required removal of reset-timestamp normalization, fixed by `7390afb`.
+  A first parent suite attempt used a nonexistent isolated TMPDIR and failed;
+  it is not acceptance evidence. The rerun used an explicitly created secure
+  runtime directory and passed. Worker fmt and strict Clippy also passed.
+- Receipts: external `builds/symaira-brain/claude-oauth-usage-20260929/`, including
+  `coordinator-go-oracle-7390afb.log`, `coordinator-usage-7390afb-rerun.log`,
+  `coordinator-cli-oauth-7390afb.log` and source-bound Cargo metadata. Required
+  native target receipts for this integrated candidate remain pending. The
+  historical green rows below do not establish acceptance of these new changes.
+
 ## Resume checkpoint — 2026-09-24 (native SEC-005 candidate)
 
 - **Integrated base:** `main` is `d8ccd31c` after PR #674; post-merge CI [35927186139](https://github.com/danieljustus/symaira-brain/actions/runs/35927186139) passed. Draft PR [#677](https://github.com/danieljustus/symaira-brain/pull/677) reached `e07a651d`; [CI 35935398952](https://github.com/danieljustus/symaira-brain/actions/runs/35935398952) passed 25 jobs with one intentional coverage-publish skip, including the full Linux/macOS gates and native Windows Go/Rust CLI differential and workspace tests. [Rust guard 35935398958](https://github.com/danieljustus/symaira-brain/actions/runs/35935398958) passed on the same SHA. The first PR attempt exposed strict Clippy findings, corrected at `ab305716`. Windows CLI differential then exposed mixed separators in the shared Guard source path helper, corrected at `620e8625`; `e07a651d` additionally cleans slash-form and parent-containing base paths. No release, cutover, Go removal, paid provider or destructive cleanup is authorized.
