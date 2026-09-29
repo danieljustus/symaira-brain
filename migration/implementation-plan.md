@@ -1,5 +1,33 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+
+## Integrated production provider assembly — 2026-09-29
+
+Candidate `f99f13c6c7bb9dde4041b7a9186ec7285f5ac2fe` includes code `6d5d6056`
+and all preceding usage file/routing slices. Nine authenticated direct-provider
+replays now use the constructors called by production: Claude Admin, Codex,
+Copilot, Cursor, Kimi, Moonshot, Nous, OpenRouter and OpenCode. Each active Rust
+report row is compared to the corresponding actual Go BuildReport row. Expected
+Go configuration/auth state is no longer copied into those test providers.
+Inactive rows from older report fixtures are not claimed as assembly evidence.
+
+This exposed and fixed an actual Claude Admin defect: the strategy and snapshot
+source is `api`, while AuthStatus retains resolved credential provenance `env`.
+The complete active-row regression now detects that difference. Existing success,
+provider-error, request and workspace checks remain in place. No routing was widened.
+
+Independent clean-candidate Go1.26.7 usage package/oracle checks and Rust tests pass
+on Darwin/arm64 (46+9+8 usage) and Linux/arm64 (46+8+8), with all16 CLI MCP tests on
+each; zero failed/ignored. Worker strict Clippy passed; parent workspace fmt passed
+on the candidate after formatting one earlier Nous test assertion. Receipts
+`provider-assembly-receipt-f99f13c6.json` in the Brain/native-linux build roots retain
+native toolchain identity, log hashes and metadata proving this worktree's sources.
+
+USE-001 remains open for other configured routes and required native platforms,
+including the Windows home-routing regression. No real credentials, live provider
+requests, publication, installed cutover or Go removal occurred.
+
+
 ## Integrated usage file-routing guards — 2026-09-29
 
 Candidate `246cbc1be691f9060d3540054bfea81764464ff8` fixes an existing routing
