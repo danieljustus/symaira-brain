@@ -110,6 +110,24 @@ func BuildCopilotFileTokenOracle(apps, hosts *string) (string, error) {
 	return readCopilotToken(dir), nil
 }
 
+// BuildNousFileTokenOracle reads a synthetic Hermes auth.json with the shipped
+// Nous parser. A nil file argument means auth.json is absent.
+func BuildNousFileTokenOracle(contents *string) (string, error) {
+	dir, err := os.MkdirTemp("", "symbrain-nous-file-oracle-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Nous oracle directory: %w", err)
+	}
+	defer os.RemoveAll(dir)
+	if contents != nil {
+		path := filepath.Join(dir, "auth.json")
+		if err := os.WriteFile(path, []byte(*contents), 0o600); err != nil {
+			return "", fmt.Errorf("write synthetic Nous auth.json: %w", err)
+		}
+		return readNousAccessToken(path), nil
+	}
+	return readNousAccessToken(filepath.Join(dir, "auth.json")), nil
+}
+
 type OracleRequest struct {
 	Method  string            `json:"method"`
 	URL     string            `json:"url"`

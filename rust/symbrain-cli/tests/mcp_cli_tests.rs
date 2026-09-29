@@ -724,3 +724,107 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
         "file plus environment credential must remain on Go"
     );
 }
+
+#[test]
+fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../symbrain-usage/tests/fixtures/nous_file_token_oracle.json"
+    ))
+    .expect("Go Nous parser oracle");
+    let cases = fixture["cases"].as_array().expect("oracle cases");
+    assert!(cases.iter().any(|case| {
+        case["id"] == "case-insensitive-struct-fields"
+            && case["token"] == "synthetic-nous-case-token"
+    }));
+    for id in [
+        "missing-file",
+        "empty-file",
+        "malformed-json",
+        "wrong-typed-token-invalidates-file",
+        "unrelated-provider",
+    ] {
+        assert!(cases.iter().any(|case| case["id"] == id && case["token"] == ""));
+    }
+    for case in cases {
+        let id = case["id"].as_str().expect("case id");
+        let root = TempDir::new().unwrap();
+        let auth = root.path().join("home/.hermes/auth.json");
+        if case["file_present"] == true {
+            std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+            std::fs::write(
+                &auth,
+                case["contents"].as_str().expect("present file contents"),
+            )
+            .unwrap();
+        }
+
+        let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        if case["file_present"] == true {
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "existing Nous auth.json case {id} must remain on Go: {stderr}"
+            );
+        } else {
+            assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
+            assert!(
+                stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+                "missing Nous auth.json should preserve native direct-env-free routing: {stderr}"
+            );
+            assert!(
+                !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+                "missing Nous auth.json unexpectedly selected Go: {stderr}"
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::symlink;
+        let root = TempDir::new().unwrap();
+        let auth = root.path().join("home/.hermes/auth.json");
+        std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+        symlink(root.path().join("missing-target"), &auth).unwrap();
+        let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap();
+        assert!(
+            String::from_utf8(output.stderr)
+                .unwrap()
+                .contains("not ported yet and no Go fallback was found"),
+            "dangling Nous auth.json symlink must remain on Go"
+        );
+    }
+}
+
+#[cfg(windows)]
+#[test]
+fn differing_home_and_userprofile_keep_the_whole_usage_report_on_go() {
+    let root = TempDir::new().unwrap();
+    let rust_home = root.path().join("rust-home");
+    let go_home = root.path().join("userprofile-home");
+    let auth = go_home.join(".hermes/auth.json");
+    std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+    std::fs::write(
+        &auth,
+        br#"{"providers":[{"id":"nous","invoke_jwt":"synthetic-nous-windows-fixture"}]}"#,
+    )
+    .unwrap();
+
+    // Go resolves its default home through USERPROFILE on Windows; Rust's
+    // current home helper uses HOME. A second direct credential confirms the
+    // mismatch keeps the entire report on Go, not only the Nous row.
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("HOME", rust_home)
+        .env("USERPROFILE", go_home)
+        .env("OPENROUTER_API_KEY", "synthetic-direct-env-fixture")
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.contains("not ported yet and no Go fallback was found"),
+        "different Windows home roots must retain Go routing: {stderr}"
+    );
+}

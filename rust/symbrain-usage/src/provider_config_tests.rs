@@ -2,7 +2,7 @@ use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
     codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
     is_secret_reference, json_string, kimi_store, names_from_keychain_dump, needs_go_fallback_for,
-    nous_file_token, nous_jwt_is_live, read_limited,
+    nous_file_token, nous_jwt_is_live, path_may_exist, read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -58,6 +58,32 @@ fn bounded_credential_file_read_rejects_oversized_files() {
     let contents = vec![b'x'; usize::try_from(MAX_CREDENTIAL_FILE_BYTES).unwrap() + 1];
     fs::write(&path, contents).expect("credential file");
     assert!(read_limited(&path).is_none());
+}
+
+#[test]
+fn routing_metadata_treats_indeterminate_and_symlink_paths_as_present() {
+    let directory = tempfile::tempdir().expect("temporary directory");
+    let missing = directory.path().join("missing/auth.json");
+    assert!(!path_may_exist(&missing));
+
+    let ordinary = write(directory.path(), "ordinary/auth.json", "{}");
+    assert!(path_may_exist(&ordinary));
+
+    // A metadata error other than NotFound is conservatively treated as a
+    // possible credential path; this Unix case is a non-directory parent.
+    #[cfg(unix)]
+    let not_directory = write(directory.path(), "file-parent", "x").join("auth.json");
+    #[cfg(unix)]
+    assert!(path_may_exist(&not_directory));
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::symlink;
+        let dangling = directory.path().join("dangling/auth.json");
+        fs::create_dir_all(dangling.parent().expect("parent")).expect("create parent");
+        symlink(directory.path().join("absent-target"), &dangling).expect("create symlink");
+        assert!(path_may_exist(&dangling));
+    }
 }
 
 #[cfg(unix)]

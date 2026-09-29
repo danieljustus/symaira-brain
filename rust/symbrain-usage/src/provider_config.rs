@@ -714,32 +714,24 @@ struct CopilotTokenEntry {
 }
 
 #[cfg(windows)]
-fn copilot_home_mismatch_requires_go() -> bool {
+fn usage_home_mismatch_requires_go() -> bool {
     let rust_home = home();
     let go_home = env::var_os("USERPROFILE")
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from("."));
-    if rust_home == go_home {
-        return false;
-    }
-    let rust_dir = copilot_config_dir_for(&rust_home);
-    let go_dir = copilot_config_dir_for(&go_home);
-    copilot_config_files_may_exist(&rust_dir) || copilot_config_files_may_exist(&go_dir)
+    rust_home != go_home
 }
 
 #[cfg(not(windows))]
-fn copilot_home_mismatch_requires_go() -> bool {
+fn usage_home_mismatch_requires_go() -> bool {
     false
 }
 
-#[cfg(windows)]
-fn copilot_config_files_may_exist(dir: &Path) -> bool {
-    ["apps.json", "hosts.json"]
-        .iter()
-        .any(|name| match fs::symlink_metadata(dir.join(name)) {
-            Ok(_) => true,
-            Err(error) => error.kind() != std::io::ErrorKind::NotFound,
-        })
+fn path_may_exist(path: &Path) -> bool {
+    match fs::symlink_metadata(path) {
+        Ok(_) => true,
+        Err(error) => error.kind() != std::io::ErrorKind::NotFound,
+    }
 }
 
 /// `$KIMI_CODE_HOME`, else the current `~/.kimi-code`, else the legacy
@@ -1051,7 +1043,10 @@ pub fn needs_go_fallback() -> bool {
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
-    if copilot_home_mismatch_requires_go() {
+    // Go resolves its home from USERPROFILE on Windows; Rust currently uses
+    // HOME. Keep the entire usage report on Go if those roots differ so no
+    // provider can silently miss a file-backed credential.
+    if usage_home_mismatch_requires_go() {
         return true;
     }
     let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
@@ -1066,7 +1061,13 @@ pub fn needs_go_fallback() -> bool {
         return true;
     }
     let codex_file = codex_file_token(&codex_home());
-    if kimi_store(&kimi_cli_home()).0.is_some() || nous_file_token(&nous_auth_path()).is_some() {
+    // Nous files are not a native route yet. Presence alone is enough to keep
+    // Go in charge, including malformed files, unreadable paths, and symlinks
+    // that the token parser cannot recognize.
+    if path_may_exist(&nous_auth_path()) {
+        return true;
+    }
+    if kimi_store(&kimi_cli_home()).0.is_some() {
         return true;
     }
     needs_go_fallback_for(UsageFallbackSignals {

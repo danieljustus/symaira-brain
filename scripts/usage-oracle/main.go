@@ -84,6 +84,7 @@ func main() {
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
 	copilotFileReportOutput := flag.String("copilot-file-report-output", "rust/symbrain-usage/tests/fixtures/copilot_file_authenticated_report.json", "authenticated Copilot file report path")
 	copilotFileTokenOutput := flag.String("copilot-file-token-output", "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json", "Copilot credential file parser cases")
+	nousFileTokenOutput := flag.String("nous-file-token-output", "rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json", "Nous auth.json parser cases")
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
@@ -126,6 +127,11 @@ func main() {
 		os.Exit(1)
 	}
 	copilotFileTokenOracle, err := buildCopilotFileTokenOracle()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	nousFileTokenOracle, err := buildNousFileTokenOracle()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -207,6 +213,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*nousFileTokenOutput, nousFileTokenOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*claudeAdminReportOutput, claudeAdminReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -271,6 +281,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*copilotFileTokenOutput, copilotFileTokenOracle); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*nousFileTokenOutput, nousFileTokenOracle); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -371,6 +385,18 @@ type copilotFileTokenOracleCase struct {
 	NativeRoute    bool     `json:"native_route"`
 }
 
+type nousFileTokenOracleFixture struct {
+	SchemaVersion int                       `json:"schema_version"`
+	Cases         []nousFileTokenOracleCase `json:"cases"`
+}
+
+type nousFileTokenOracleCase struct {
+	ID          string  `json:"id"`
+	FilePresent bool    `json:"file_present"`
+	Contents    *string `json:"contents,omitempty"`
+	Token       string  `json:"token"`
+}
+
 type codexFileReportFixture struct {
 	Success usage.Report `json:"success"`
 	Errors  []struct {
@@ -385,6 +411,33 @@ type copilotFileReportFixture struct {
 		Status int          `json:"status"`
 		Report usage.Report `json:"report"`
 	} `json:"errors"`
+}
+
+func buildNousFileTokenOracle() (nousFileTokenOracleFixture, error) {
+	file := func(value string) *string { return &value }
+	inputs := []struct {
+		id       string
+		contents *string
+	}{
+		{id: "canonical-invoke-jwt", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"synthetic-nous-jwt"}]}`)},
+		{id: "case-insensitive-struct-fields", contents: file(`{"Providers":[{"ID":"nous","Invoke_JWT":"synthetic-nous-case-token"}]}`)},
+		{id: "missing-file"},
+		{id: "empty-file", contents: file("")},
+		{id: "malformed-json", contents: file(`{"providers":[`)},
+		{id: "wrong-typed-token-invalidates-file", contents: file(`{"providers":[{"id":"nous","invoke_jwt":42}]}`)},
+		{id: "unrelated-provider", contents: file(`{"providers":[{"id":"other","access_token":"other-token"}]}`)},
+	}
+	fixture := nousFileTokenOracleFixture{SchemaVersion: 1}
+	for _, input := range inputs {
+		token, err := usage.BuildNousFileTokenOracle(input.contents)
+		if err != nil {
+			return nousFileTokenOracleFixture{}, err
+		}
+		fixture.Cases = append(fixture.Cases, nousFileTokenOracleCase{
+			ID: input.id, FilePresent: input.contents != nil, Contents: input.contents, Token: token,
+		})
+	}
+	return fixture, nil
 }
 
 func buildCopilotFileTokenOracle() (copilotFileTokenOracleFixture, error) {

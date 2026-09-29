@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "canonical-invoke-jwt",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"synthetic-nous-jwt\"}]}",
+      "token": "synthetic-nous-jwt"
+    },
+    {
+      "id": "case-insensitive-struct-fields",
+      "file_present": true,
+      "contents": "{\"Providers\":[{\"ID\":\"nous\",\"Invoke_JWT\":\"synthetic-nous-case-token\"}]}",
+      "token": "synthetic-nous-case-token"
+    },
+    {
+      "id": "missing-file",
+      "file_present": false,
+      "token": ""
+    },
+    {
+      "id": "empty-file",
+      "file_present": true,
+      "contents": "",
+      "token": ""
+    },
+    {
+      "id": "malformed-json",
+      "file_present": true,
+      "contents": "{\"providers\":[",
+      "token": ""
+    },
+    {
+      "id": "wrong-typed-token-invalidates-file",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":42}]}",
+      "token": ""
+    },
+    {
+      "id": "unrelated-provider",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"other\",\"access_token\":\"other-token\"}]}",
+      "token": ""
+    }
+  ]
+}
