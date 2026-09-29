@@ -432,8 +432,8 @@ func TestCmdDoctor_HumanOutput_ReportsHarnessBindings(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	installed := harnessByName(t, "cursor")
 	writeHarnessConfig(t, installed, "personal")
@@ -464,8 +464,8 @@ func TestCmdDoctor_HumanOutput_ReportsSupersededBesideSymbrain(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	h := harnessByName(t, "claude")
 	path, err := h.ConfigPath()
@@ -509,8 +509,8 @@ func TestCmdDoctor_JSON_HarnessesIncludeProfileBindingFields(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	h := harnessByName(t, "codex")
 	writeHarnessConfig(t, h, "personal")
@@ -554,8 +554,8 @@ func TestRunDoctorChecks_FlagsMissingProfileBinding(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	harnessSandbox(t)
 
 	h := harnessByName(t, "antigravity")
 	writeHarnessConfig(t, h, "ghost")

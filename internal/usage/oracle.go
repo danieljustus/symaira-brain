@@ -706,8 +706,10 @@ func BuildKimiFallbackAuthenticatedReportOracle(apiBody, webBody []byte) (kimiFa
 				}
 			}
 		}()
-		if err := os.Setenv("HOME", home); err != nil {
-			return Report{}, fmt.Errorf("set isolated Kimi HOME: %w", err)
+		for _, key := range []string{"HOME", "USERPROFILE"} {
+			if err := os.Setenv(key, home); err != nil {
+				return Report{}, fmt.Errorf("set isolated Kimi %s: %w", key, err)
+			}
 		}
 		if err := os.Setenv("KIMI_CODE_API_KEY", "fallback-kimi-api-token"); err != nil {
 			return Report{}, fmt.Errorf("set Kimi API oracle token: %w", err)
@@ -1153,7 +1155,8 @@ func BuildCombinedNativeAuthenticatedReportOracle(fixtures map[string][]byte) (R
 		}
 	}()
 	for key, value := range map[string]string{
-		"HOME": home, "KIMI_CODE_API_KEY": "combined-kimi-api-token", "KIMI_CODE_BASE_URL": "https://api.kimi.com/custom/v1",
+		"HOME": home, "USERPROFILE": home,
+		"KIMI_CODE_API_KEY": "combined-kimi-api-token", "KIMI_CODE_BASE_URL": "https://api.kimi.com/custom/v1",
 		"MOONSHOT_API_KEY": "combined-moonshot-token", "MOONSHOT_REGION": "cn", "OPENROUTER_API_KEY": "combined-openrouter-token",
 		"OPENROUTER_API_URL": "https://openrouter.ai/custom/v1", "OPENCODE_COOKIE": "combined-opencode-cookie",
 		"OPENCODE_WORKSPACE_ID": "wrk_combined123",
