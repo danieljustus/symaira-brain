@@ -3,7 +3,7 @@ use super::routing::{joined_text, route_tool_with_context};
 use super::{Gateway, GatewayError, GatewayResponse};
 use serde_json::Value;
 use serde_json::value::RawValue;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use symbrain_mcp::{CODE_INVALID_PARAMS, DispatchContext};
 
 impl Gateway {
@@ -73,7 +73,13 @@ impl Gateway {
         context: DispatchContext<'_>,
         started: Instant,
     ) -> Result<GatewayResponse, GatewayError> {
-        if !self.usage_allowed || self.usage.is_none() {
+        // Go's handler starts its overall usage deadline before constructing
+        // the provider registry. Keep the same start point so slow discovery
+        // does not reset the report budget.
+        let report_started = Instant::now();
+        let report_cancelled =
+            || context.is_cancelled() || report_started.elapsed() >= Duration::from_secs(30);
+        if !self.usage_allowed {
             let error = GatewayError::UnknownTool("get_ai_usage".to_string());
             let hidden_args = params
                 .get("arguments")
@@ -91,8 +97,15 @@ impl Gateway {
                 "Unknown tool: get_ai_usage",
             ));
         }
-        let service = self.usage.as_ref().expect("usage checked above");
-        let report = service.report_with_cancel(|| context.is_cancelled());
+        // Go creates AllProviders inside every handler invocation. Preserve
+        // that timing so credential and local-process discovery stays lazy
+        // and reflects changes made while the gateway connection is alive.
+        // Tests may inject a fixed service to avoid touching host state.
+        let report = if let Some(service) = &self.usage {
+            service.report_with_cancel(report_cancelled)
+        } else {
+            symbrain_usage::Service::new().report_with_cancel(report_cancelled)
+        };
         let result = symbrain_usage::report_json(&report)
             .map_err(|error| GatewayError::Serialization(error.to_string()));
         let status = super::audit::usage_status(&report, result.is_ok());

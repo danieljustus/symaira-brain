@@ -84,6 +84,18 @@ impl Service {
             .enumerate()
             .filter_map(|(i, p)| p.configured.then_some(i))
             .collect();
+        // Do not start an authenticated request when the handler has already
+        // been cancelled. Provider discovery above still runs per call, as it
+        // does in Go before BuildReport begins its cancellable fetch workers.
+        if cancelled() {
+            for index in configured {
+                report.providers[index].error = Some(format!(
+                    "AI usage provider {:?} cancelled",
+                    self.providers[index].id
+                ));
+            }
+            return report;
+        }
         for batch in configured.chunks(self.max_concurrency) {
             let (sender, receiver) = mpsc::channel();
             let cancels: Vec<Cancellation> = batch

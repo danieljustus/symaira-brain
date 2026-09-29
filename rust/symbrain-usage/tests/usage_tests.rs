@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use symbrain_usage::{Provider, Response, Service, Transport};
@@ -49,6 +49,41 @@ fn fixture_service() -> Service {
         providers,
         Arc::new(symbrain_usage::FixtureTransport::new(responses)),
     )
+}
+
+struct CountingTransport(AtomicUsize);
+
+impl Transport for CountingTransport {
+    fn request(&self, _request: symbrain_usage::Request) -> Result<Response, String> {
+        self.0.fetch_add(1, Ordering::SeqCst);
+        Ok(Response {
+            status: 200,
+            body: b"{}".to_vec(),
+            headers: BTreeMap::new(),
+        })
+    }
+}
+
+#[test]
+fn already_cancelled_report_does_not_start_provider_requests() {
+    let transport = Arc::new(CountingTransport(AtomicUsize::new(0)));
+    let service = Service::with_transport(
+        vec![Provider::fixture("claude", "Claude")],
+        transport.clone(),
+    );
+    let cancelled = AtomicBool::new(true);
+
+    let report = service.report_with_cancel(|| cancelled.load(Ordering::SeqCst));
+
+    assert_eq!(transport.0.load(Ordering::SeqCst), 0);
+    assert_eq!(report.providers.len(), 1);
+    assert!(
+        report.providers[0]
+            .error
+            .as_deref()
+            .unwrap()
+            .contains("cancelled")
+    );
 }
 
 #[test]
