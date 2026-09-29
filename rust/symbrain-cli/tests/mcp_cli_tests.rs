@@ -743,7 +743,11 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         "wrong-typed-token-invalidates-file",
         "unrelated-provider",
     ] {
-        assert!(cases.iter().any(|case| case["id"] == id && case["token"] == ""));
+        assert!(
+            cases
+                .iter()
+                .any(|case| case["id"] == id && case["token"] == "")
+        );
     }
     for case in cases {
         let id = case["id"].as_str().expect("case id");
