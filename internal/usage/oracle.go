@@ -202,6 +202,51 @@ func BuildCodexAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("codex", body)
 }
 
+// BuildCodexFileAuthenticatedReportOracle runs the shipped Codex provider
+// through BuildReport using only its read-only auth.json credential and a
+// canned response. The caller supplies an isolated HOME containing
+// ~/.codex/auth.json and a status/body pair; no Keychain or live provider is
+// consulted.
+func BuildCodexFileAuthenticatedReportOracle(body []byte, status int) (Report, error) {
+	if os.Getenv("CODEX_HOME") != "" || os.Getenv("CODEX_ACCESS_TOKEN") != "" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires only the default auth.json credential")
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"codex": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	providers := allProviders(client, func() (string, *time.Time) { return "", nil }, oracleProbe{})
+	if len(providers) != 10 || providers[1].ID() != "codex" {
+		return Report{}, fmt.Errorf("Codex file report oracle found an unexpected provider registry")
+	}
+	codex, ok := providers[1].(*CodexProvider)
+	if !ok || !codex.IsConfigured() || codex.AuthStatus().Source != "file" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires a file-sourced auth.json token")
+	}
+	if len(codex.Strategies()) != 1 || codex.Strategies()[0].Source() != "oauth" {
+		return Report{}, fmt.Errorf("Codex file report oracle requires exactly one OAuth strategy")
+	}
+	for index, provider := range providers {
+		if index != 1 && index != 9 && provider.IsConfigured() {
+			return Report{}, fmt.Errorf("Codex file report oracle found unexpected configured provider %q", provider.ID())
+		}
+	}
+	if providers[9].AuthStatus().Source != "" {
+		return Report{}, fmt.Errorf("Codex file report oracle Antigravity probe must be isolated and stopped")
+	}
+	report := BuildReport(context.Background(), providers)
+	if len(report.Providers) != 10 || len(transport.requests) != 1 {
+		return Report{}, fmt.Errorf("Codex file report oracle produced %d providers and %d requests, want 10 and one", len(report.Providers), len(transport.requests))
+	}
+	request := transport.requests[0]
+	if request.Method != http.MethodGet || request.URL.String() != "https://chatgpt.com/backend-api/wham/usage" ||
+		request.Header.Get("Authorization") != "Bearer "+codex.accessToken {
+		return Report{}, fmt.Errorf("Codex file report oracle did not issue the expected authenticated usage request")
+	}
+	if snapshot := report.Providers[1].Snapshot; snapshot != nil {
+		snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
+}
+
 // BuildOpenRouterAuthenticatedReportOracle runs the shipped OpenRouter
 // provider through BuildReport with a direct OPENROUTER_API_KEY and the
 // default API base. The caller supplies only a synthetic key and canned body.

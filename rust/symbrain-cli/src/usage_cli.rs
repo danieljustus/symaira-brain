@@ -20,13 +20,15 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
 /// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential
 /// file or web token, or a direct `NOUS_PORTAL_ACCESS_TOKEN` using the default
-/// portal base and with no Hermes auth file, or a direct `CODEX_ACCESS_TOKEN`
-/// with no Codex auth file or home override now runs natively:
+/// portal base and with no Hermes auth file, a direct `CODEX_ACCESS_TOKEN`
+/// with no Codex auth file or home override, or a sole Codex token from the
+/// default `~/.codex/auth.json` now runs natively:
 /// each configured report, request, parsed snapshot, and provider error cases
 /// are checked against Go oracles using synthetic credentials and canned
-/// transport. A sole Claude OAuth credential file is also native; other file
-/// credentials, secret references, provider-specific overrides, and every
-/// other configured provider continue to use Go until pinned.
+/// transport. A sole Claude OAuth credential file is also native. Codex `CODEX_HOME`
+/// overrides, mixed env/file sources, other file credentials, secret references,
+/// provider-specific overrides, and every other configured provider continue
+/// to use Go until pinned.
 ///
 /// The report fetch invoked below remains a user-initiated live read, as it
 /// does in the shipped Go command.

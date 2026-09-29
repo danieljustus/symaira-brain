@@ -30,6 +30,7 @@ const nousOracleToken = "oracle-only-invalid-nous"
 const openRouterOracleToken = "oracle-only-invalid-openrouter"
 const moonshotOracleToken = "oracle-only-invalid-moonshot"
 const openCodeOracleToken = "oracle-only-invalid-opencode"
+const codexFileOracleToken = "oracle-only-invalid-codex-file"
 
 func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
@@ -83,6 +84,7 @@ func main() {
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
+	codexFileReportOutput := flag.String("codex-file-report-output", "rust/symbrain-usage/tests/fixtures/codex_file_authenticated_report.json", "authenticated Codex auth.json report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
@@ -125,6 +127,11 @@ func main() {
 		os.Exit(1)
 	}
 	codexReport, err := buildCodexAuthenticatedReport(fixtures["codex"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	codexFileReport, err := buildCodexFileAuthenticatedReport(fixtures["codex"])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -185,6 +192,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*codexFileReportOutput, codexFileReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*openRouterReportOutput, openRouterReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -236,6 +247,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if err := writeJSON(*codexFileReportOutput, codexFileReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	if err := writeJSON(*openRouterReportOutput, openRouterReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -282,6 +297,14 @@ type claudeOAuthReportFixture struct {
 		Status int          `json:"status"`
 		Report usage.Report `json:"report"`
 	} `json:"file_errors"`
+}
+
+type codexFileReportFixture struct {
+	Success usage.Report `json:"success"`
+	Errors  []struct {
+		Status int          `json:"status"`
+		Report usage.Report `json:"report"`
+	} `json:"errors"`
 }
 
 func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture, error) {
@@ -451,6 +474,33 @@ func buildCodexAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("codex", codexOracleToken, body)
 }
 
+func buildCodexFileAuthenticatedReport(body []byte) (codexFileReportFixture, error) {
+	var fixture codexFileReportFixture
+	var err error
+	fixture.Success, err = buildAuthenticatedProviderReportFrom("codex", codexFileOracleToken, body, http.StatusOK, true)
+	if err != nil {
+		return codexFileReportFixture{}, err
+	}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{http.StatusUnauthorized, []byte("{\"error\":\"nope\"}")},
+		{http.StatusTooManyRequests, []byte("{\"error\":\"slow down\"}")},
+		{http.StatusOK, []byte("{}")},
+	} {
+		report, reportErr := buildAuthenticatedProviderReportFrom("codex", codexFileOracleToken, response.body, response.status, true)
+		if reportErr != nil {
+			return codexFileReportFixture{}, reportErr
+		}
+		fixture.Errors = append(fixture.Errors, struct {
+			Status int          `json:"status"`
+			Report usage.Report `json:"report"`
+		}{Status: response.status, Report: report})
+	}
+	return fixture, nil
+}
+
 func buildOpenRouterAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("openrouter", openRouterOracleToken, body)
 }
@@ -476,10 +526,14 @@ func buildOpenCodeAuthenticatedReport(workspaceBody, body []byte) (usage.Report,
 }
 
 func buildAuthenticatedProviderReport(provider, token string, body []byte, extra ...[]byte) (usage.Report, error) {
+	return buildAuthenticatedProviderReportFrom(provider, token, body, http.StatusOK, false, extra...)
+}
+
+func buildAuthenticatedProviderReportFrom(provider, token string, body []byte, status int, fileCredential bool, extra ...[]byte) (usage.Report, error) {
 	// Keep the full ten-provider production graph deterministic without
 	// inheriting a developer's credential environment or home directory.
 	credentialEnv := []string{
-		"HOME", "CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME",
+		"HOME", "USERPROFILE", "CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME",
 		"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN",
 		"COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY",
 		"KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL", "MOONSHOT_API_KEY",
@@ -522,6 +576,11 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte, extra
 		_ = restore()
 		return usage.Report{}, fmt.Errorf("set isolated usage oracle home: %w", err)
 	}
+	if err := os.Setenv("USERPROFILE", home); err != nil {
+		_ = os.RemoveAll(home)
+		_ = restore()
+		return usage.Report{}, fmt.Errorf("set isolated usage oracle user profile: %w", err)
+	}
 	envName := map[string]string{
 		"claude-admin": "ANTHROPIC_ADMIN_KEY",
 		"copilot":      "COPILOT_ACCESS_TOKEN",
@@ -538,7 +597,25 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte, extra
 		_ = restore()
 		return usage.Report{}, fmt.Errorf("unsupported authenticated usage oracle provider %q", provider)
 	}
-	if err := os.Setenv(envName, token); err != nil {
+	if fileCredential {
+		if provider != "codex" {
+			_ = os.RemoveAll(home)
+			_ = restore()
+			return usage.Report{}, fmt.Errorf("file credential oracle is unsupported for %q", provider)
+		}
+		path := filepath.Join(home, ".codex", "auth.json")
+		if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+			_ = os.RemoveAll(home)
+			_ = restore()
+			return usage.Report{}, fmt.Errorf("create isolated Codex credential directory: %w", err)
+		}
+		contents := fmt.Sprintf("{\"access_token\":%q}", token)
+		if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+			_ = os.RemoveAll(home)
+			_ = restore()
+			return usage.Report{}, fmt.Errorf("write synthetic Codex auth file: %w", err)
+		}
+	} else if err := os.Setenv(envName, token); err != nil {
 		_ = os.RemoveAll(home)
 		_ = restore()
 		return usage.Report{}, fmt.Errorf("set synthetic %s fixture env: %w", provider, err)
@@ -551,7 +628,11 @@ func buildAuthenticatedProviderReport(provider, token string, body []byte, extra
 	case "copilot":
 		report, buildErr = usage.BuildCopilotAuthenticatedReportOracle(body)
 	case "codex":
-		report, buildErr = usage.BuildCodexAuthenticatedReportOracle(body)
+		if fileCredential {
+			report, buildErr = usage.BuildCodexFileAuthenticatedReportOracle(body, status)
+		} else {
+			report, buildErr = usage.BuildCodexAuthenticatedReportOracle(body)
+		}
 	case "openrouter":
 		report, buildErr = usage.BuildOpenRouterAuthenticatedReportOracle(body)
 	case "moonshot":

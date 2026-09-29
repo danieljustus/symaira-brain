@@ -149,3 +149,32 @@ func TestFileCredentialFallbackStillWorks(t *testing.T) {
 		t.Fatalf("codex: AuthStatus.Source = %q, want file", as.Source)
 	}
 }
+
+// TestCodexEnvironmentCredentialWinsFileFallback preserves Go's env-first
+// source precedence when both direct env and auth.json credentials exist.
+func TestCodexEnvironmentCredentialWinsFileFallback(t *testing.T) {
+	home := t.TempDir()
+	codexHome := filepath.Join(home, ".codex")
+	if err := os.MkdirAll(codexHome, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(codexHome, "auth.json"),
+		[]byte("{\"access_token\":\"synthetic-file-token\"}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("CODEX_HOME", "")
+	t.Setenv("CODEX_ACCESS_TOKEN", "synthetic-env-token")
+
+	provider := NewCodexProvider(nil)
+	if !provider.IsConfigured() {
+		t.Fatal("Codex provider is not configured")
+	}
+	if source := provider.AuthStatus().Source; source != "env" {
+		t.Fatalf("Codex source = %q, want env", source)
+	}
+	if len(provider.Strategies()) != 1 {
+		t.Fatalf("Codex strategies = %d, want exactly one", len(provider.Strategies()))
+	}
+}

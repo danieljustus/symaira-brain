@@ -5,7 +5,8 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain.
+//! keychain. Claude and Codex default CLI OAuth files are native only when
+//! their file credential is the sole configured provider source.
 
 use super::provider_requests::validated_base;
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
@@ -927,7 +928,8 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. A direct Claude OAuth env token can be native only when it is the
-/// sole provider source; a sole Claude OAuth file credential is also native.
+/// sole provider source; a sole default Claude or Codex OAuth file credential
+/// is also native.
 /// Other file/keychain sources and mixed credentials stay on Go. A workspace
 /// override alone supplies no `OpenCode` cookie or strategy, so it cannot
 /// start a fetch.
@@ -948,8 +950,8 @@ pub fn needs_go_fallback() -> bool {
         .iter()
         .any(|name| env_raw(name).is_some());
     let claude_file_token = claude_file_token();
-    if codex_file_token(&codex_home()).is_some()
-        || copilot_file_token().is_some()
+    let codex_file = codex_file_token(&codex_home());
+    if copilot_file_token().is_some()
         || kimi_store(&kimi_cli_home()).0.is_some()
         || nous_file_token(&nous_auth_path()).is_some()
     {
@@ -965,6 +967,7 @@ pub fn needs_go_fallback() -> bool {
         kimi_api_env: kimi_api_env.as_deref(),
         nous_env: nous_env.as_deref(),
         codex_env: codex_env.as_deref(),
+        codex_file: codex_file.as_deref(),
         opencode_env: opencode_env.as_deref(),
         claude_file: claude_file_token.as_deref(),
         opencode_workspace_override: opencode_workspace_override.as_deref(),
@@ -980,9 +983,10 @@ pub fn needs_go_fallback() -> bool {
 
 /// Keeps reports native only for one direct credential from a pinned set of
 /// providers, when every other provider source and local probe is absent.
-/// Secret references, non-Claude credential files, and provider-specific
-/// overrides stay on Go. A Claude OAuth file token joins the credential set
-/// and is native only when no other source is configured.
+/// Secret references, other credential files, and provider-specific overrides
+/// stay on Go. A Claude OAuth file token or default Codex `auth.json` token
+/// joins the credential set and is native only when no other source is
+/// configured.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
@@ -994,6 +998,7 @@ struct UsageFallbackSignals<'a> {
     kimi_api_env: Option<&'a str>,
     nous_env: Option<&'a str>,
     codex_env: Option<&'a str>,
+    codex_file: Option<&'a str>,
     opencode_env: Option<&'a str>,
     claude_file: Option<&'a str>,
     opencode_workspace_override: Option<&'a str>,
@@ -1013,6 +1018,7 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.kimi_api_env,
         signals.nous_env,
         signals.codex_env,
+        signals.codex_file,
         signals.opencode_env,
         signals.claude_file,
     ];
@@ -1140,6 +1146,14 @@ fn codex() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    codex_from_resolved(value, error, home_dir.join("auth.json").exists())
+}
+
+pub(crate) fn codex_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    auth_file_exists: bool,
+) -> Provider {
     let mut provider = Provider::new(
         "codex",
         "Codex",
@@ -1155,7 +1169,7 @@ fn codex() -> Provider {
         )
     } else if let Some(error) = error {
         auth_error(&error)
-    } else if home_dir.join("auth.json").exists() {
+    } else if auth_file_exists {
         AuthStatus {
             status: "expired".into(),
             detail: "Codex auth file found but no valid token — re-auth with the Codex CLI".into(),

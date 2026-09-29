@@ -8,7 +8,7 @@
 
 use super::super::{hostname, platform_label, request_for};
 use crate::providers::Provider;
-use crate::providers::claude_from_resolved;
+use crate::providers::{claude_from_resolved, codex_from_resolved};
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -18,6 +18,8 @@ use std::time::Duration;
 const ORACLE: &str = include_str!("../tests/fixtures/usage_requests.json");
 const CLAUDE_OAUTH_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/claude_oauth_authenticated_report.json");
+const CODEX_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/codex_file_authenticated_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
@@ -25,6 +27,7 @@ const CODEX_OAUTH: &str = "dump-codex-oauth";
 const COPILOT_OAUTH: &str = "dump-copilot-oauth";
 const REPORT_ENV_CREDENTIAL: &str = "synthetic-direct-env-credential";
 const REPORT_FILE_CREDENTIAL: &str = "oracle-only-invalid-claude-oauth-file";
+const CODEX_FILE_CREDENTIAL: &str = "oracle-only-invalid-codex-file";
 const CURSOR_COOKIE: &str = "dump-cursor-cookie";
 const KIMI_CLI: &str = "dump-kimi-api-key";
 const KIMI_WEB: &str = "dump-kimi-web-token";
@@ -195,6 +198,37 @@ fn authenticated_codex_report(response: Response) -> (crate::Report, FixtureTran
         "codex",
         include_str!("../tests/fixtures/codex_authenticated_report.json"),
     )
+}
+
+fn authenticated_codex_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let oracle: Value =
+        serde_json::from_str(CODEX_FILE_REPORT_ORACLE).expect("Go Codex file-authenticated report");
+    let providers = oracle["success"]["providers"]
+        .as_array()
+        .expect("Go provider rows")
+        .iter()
+        .map(|row| {
+            let id = row["id"].as_str().expect("provider id");
+            if id == "codex" {
+                return codex_from_resolved(
+                    Some(("file".into(), CODEX_FILE_CREDENTIAL.into())),
+                    None,
+                    true,
+                );
+            }
+            let name = row["display_name"].as_str().expect("provider display name");
+            let mut provider = Provider::fixture(id, name);
+            provider.configured = row["configured"].as_bool().expect("configured state");
+            provider.auth_status =
+                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
+            provider.credential = None;
+            provider.credentials.clear();
+            provider
+        })
+        .collect();
+    let transport = FixtureTransport::new([("codex".into(), response)].into());
+    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    (report, transport)
 }
 
 fn authenticated_openrouter_report(response: Response) -> (crate::Report, FixtureTransport) {
@@ -1554,5 +1588,63 @@ fn provider_error_texts_match_the_shipped_oracle_recording() {
                 "{provider_id} {label}"
             );
         }
+    }
+}
+
+#[test]
+fn authenticated_codex_file_report_matches_go_success_and_failure_oracles() {
+    let oracle: Value =
+        serde_json::from_str(CODEX_FILE_REPORT_ORACLE).expect("Go Codex file report oracle");
+    let (mut report, transport) = authenticated_codex_file_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    let codex = &mut report.providers[1];
+    assert_eq!(codex.id, "codex");
+    assert!(codex.configured);
+    assert_eq!(codex.auth_status.status, "available");
+    assert_eq!(codex.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(codex.error, None);
+    let snapshot = codex.snapshot.as_mut().expect("Codex file snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        oracle["success"]["providers"][1]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle fetched_at"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Codex file report"),
+        oracle["success"]
+    );
+
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://chatgpt.com/backend-api/wham/usage"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer oracle-only-invalid-codex-file")
+    );
+
+    for (status, body, error_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), 1),
+        (200, b"{}".as_slice(), 2),
+    ] {
+        let (report, _) = authenticated_codex_file_report(Response {
+            status,
+            body: body.to_vec(),
+            headers: BTreeMap::new(),
+        });
+        assert_eq!(
+            serde_json::to_value(&report).expect("Rust Codex file error report"),
+            oracle["errors"][error_index]["report"],
+            "HTTP {status} report"
+        );
     }
 }

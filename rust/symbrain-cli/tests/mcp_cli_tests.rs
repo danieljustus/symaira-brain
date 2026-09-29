@@ -554,3 +554,72 @@ fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider
         "outer audit directory was created in outer XDG_DATA_HOME, proving environment leaked into child command"
     );
 }
+
+#[test]
+fn codex_default_auth_file_routes_natively_but_override_and_mixed_sources_keep_go() {
+    let root = TempDir::new().unwrap();
+    let default_auth = root.path().join("home").join(".codex").join("auth.json");
+    std::fs::create_dir_all(default_auth.parent().unwrap()).unwrap();
+    std::fs::write(
+        &default_auth,
+        br#"{"access_token":"synthetic-codex-file-fixture"}"#,
+    )
+    .unwrap();
+
+    // Invalid CLI syntax exits before usage fetching. This proves the default
+    // auth.json selects native routing without contacting chatgpt.com.
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2), "stderr: {:?}", output.stderr);
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+        "native usage parser did not handle Codex auth.json: {stderr}"
+    );
+    assert!(
+        !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+        "Codex auth.json unexpectedly selected Go fallback: {stderr}"
+    );
+
+    let override_home = root.path().join("codex-override");
+    std::fs::create_dir_all(&override_home).unwrap();
+    std::fs::write(
+        override_home.join("auth.json"),
+        br#"{"tokens":{"access_token":"synthetic-codex-override-fixture"}}"#,
+    )
+    .unwrap();
+    let overridden = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("CODEX_HOME", &override_home)
+        .output()
+        .unwrap();
+    let overridden_stderr = String::from_utf8(overridden.stderr).unwrap();
+    assert!(
+        overridden_stderr.contains("not ported yet and no Go fallback was found"),
+        "CODEX_HOME override must stay on Go: {overridden_stderr}"
+    );
+
+    let mixed = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("CODEX_ACCESS_TOKEN", "synthetic-codex-env-fixture")
+        .output()
+        .unwrap();
+    let mixed_stderr = String::from_utf8(mixed.stderr).unwrap();
+    assert!(
+        mixed_stderr.contains("not ported yet and no Go fallback was found"),
+        "file plus direct environment credential must stay on Go: {mixed_stderr}"
+    );
+
+    std::fs::write(
+        &default_auth,
+        br#"{"access_token":"symvault://codex/access-token"}"#,
+    )
+    .unwrap();
+    let reference = command(&root, &["usage", "--not-a-usage-flag"])
+        .output()
+        .unwrap();
+    let reference_stderr = String::from_utf8(reference.stderr).unwrap();
+    assert!(
+        reference_stderr.contains("not ported yet and no Go fallback was found"),
+        "reference-shaped file credential must stay on Go: {reference_stderr}"
+    );
+}

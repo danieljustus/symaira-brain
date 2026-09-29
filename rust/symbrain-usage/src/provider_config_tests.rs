@@ -1,7 +1,8 @@
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
-    copilot_file_token_in, decode_base64url, json_string, kimi_store, names_from_keychain_dump,
-    needs_go_fallback_for, nous_file_token, nous_jwt_is_live, read_limited,
+    codex_from_resolved, copilot_file_token_in, decode_base64url, is_secret_reference, json_string,
+    kimi_store, names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_jwt_is_live,
+    read_limited,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -122,6 +123,31 @@ fn codex_token_ignores_a_logged_out_auth_file() {
         r#"{"OPENAI_API_KEY":"stale","tokens":{}}"#,
     );
     assert!(codex_file_token(directory.path()).is_none());
+}
+
+#[test]
+fn codex_provider_reports_file_source_and_keeps_invalid_file_status() {
+    let file = codex_from_resolved(
+        Some(("file".into(), "synthetic-codex-file-fixture".into())),
+        None,
+        true,
+    );
+    assert!(file.configured);
+    assert_eq!(file.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(file.auth_status.status, "available");
+    assert_eq!(
+        file.auth_status.detail,
+        "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)"
+    );
+
+    let invalid = codex_from_resolved(None, None, true);
+    assert!(!invalid.configured);
+    assert_eq!(invalid.auth_status.status, "expired");
+    assert_eq!(invalid.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(
+        invalid.auth_status.detail,
+        "Codex auth file found but no valid token — re-auth with the Codex CLI"
+    );
 }
 
 #[test]
@@ -271,6 +297,46 @@ fn claude_file_credential_uses_native_reporting_only_when_it_is_the_sole_source(
     ] {
         assert!(needs_go_fallback_for(UsageFallbackSignals {
             claude_file: Some(reference),
+            ..UsageFallbackSignals::default()
+        }));
+    }
+}
+
+#[test]
+fn codex_file_credential_uses_native_reporting_only_when_it_is_the_sole_source() {
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        codex_file: Some("synthetic-codex-file-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        codex_file: Some("synthetic-codex-file-fixture"),
+        codex_env: Some("synthetic-codex-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        codex_file: Some("synthetic-codex-file-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        codex_file: Some("synthetic-codex-file-fixture"),
+        other_credential_source: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        codex_file: Some("synthetic-codex-file-fixture"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
+    for reference in [
+        "symvault://codex/access-token",
+        "vault://codex/access-token",
+        "env://CODEX_ACCESS_TOKEN",
+        "keychain://Codex/account",
+    ] {
+        assert!(is_secret_reference(reference));
+        assert!(needs_go_fallback_for(UsageFallbackSignals {
+            codex_file: Some(reference),
             ..UsageFallbackSignals::default()
         }));
     }
