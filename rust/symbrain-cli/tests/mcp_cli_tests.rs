@@ -483,11 +483,7 @@ fn claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_
         .env("ANTHROPIC_OAUTH_TOKEN", "synthetic-env-shadow-fixture")
         .output()
         .unwrap();
-    let mixed_stderr = String::from_utf8(mixed.stderr).unwrap();
-    assert!(
-        mixed_stderr.contains("not ported yet and no Go fallback was found"),
-        "file plus direct environment credential must remain on Go: {mixed_stderr}"
-    );
+    assert_native_usage_parser(mixed, "environment credential with supported default file");
 }
 
 #[test]
@@ -599,7 +595,7 @@ fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider
 }
 
 #[test]
-fn codex_default_auth_file_routes_natively_but_override_and_mixed_sources_keep_go() {
+fn codex_default_file_and_env_routes_are_native_but_home_override_keeps_go() {
     let root = TempDir::new().unwrap();
     let default_auth = root.path().join("home").join(".codex").join("auth.json");
     std::fs::create_dir_all(default_auth.parent().unwrap()).unwrap();
@@ -646,11 +642,7 @@ fn codex_default_auth_file_routes_natively_but_override_and_mixed_sources_keep_g
         .env("CODEX_ACCESS_TOKEN", "synthetic-codex-env-fixture")
         .output()
         .unwrap();
-    let mixed_stderr = String::from_utf8(mixed.stderr).unwrap();
-    assert!(
-        mixed_stderr.contains("not ported yet and no Go fallback was found"),
-        "file plus direct environment credential must stay on Go: {mixed_stderr}"
-    );
+    assert_native_usage_parser(mixed, "environment credential with supported default file");
 
     std::fs::write(
         &default_auth,
@@ -717,12 +709,7 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
         .env("COPILOT_ACCESS_TOKEN", "synthetic-copilot-env-fixture")
         .output()
         .unwrap();
-    assert!(
-        String::from_utf8(mixed.stderr)
-            .unwrap()
-            .contains("not ported yet and no Go fallback was found"),
-        "file plus environment credential must remain on Go"
-    );
+    assert_native_usage_parser(mixed, "Copilot environment credential with default file");
 }
 
 #[test]
@@ -765,21 +752,13 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        let stderr = String::from_utf8(output.stderr).unwrap();
-        if case["file_present"] == true {
+        if case["file_present"] != true || id == "canonical-plain-invoke-token" {
+            assert_native_usage_parser(output, id);
+        } else {
+            let stderr = String::from_utf8(output.stderr).unwrap();
             assert!(
                 stderr.contains("not ported yet and no Go fallback was found"),
-                "existing Nous auth.json case {id} must remain on Go: {stderr}"
-            );
-        } else {
-            assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
-            assert!(
-                stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
-                "missing Nous auth.json should preserve native direct-env-free routing: {stderr}"
-            );
-            assert!(
-                !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
-                "missing Nous auth.json unexpectedly selected Go: {stderr}"
+                "unproven Nous auth.json case {id} must remain on Go: {stderr}"
             );
         }
     }
@@ -831,4 +810,64 @@ fn differing_home_and_userprofile_keep_the_whole_usage_report_on_go() {
         stderr.contains("not ported yet and no Go fallback was found"),
         "different Windows home roots must retain Go routing: {stderr}"
     );
+}
+
+fn assert_native_usage_parser(output: Output, case: &str) {
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert_eq!(output.status.code(), Some(2), "{case}: {stderr}");
+    assert!(
+        stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+        "{case} did not reach the native parser before fetching: {stderr}"
+    );
+}
+
+#[test]
+fn kimi_default_file_routes_follow_the_source_bound_candidate_contract() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../symbrain-usage/tests/fixtures/kimi_file_token_oracle.json"
+    ))
+    .expect("Go Kimi parser oracle");
+    for case in fixture["cases"].as_array().expect("Go cases") {
+        let id = case["id"].as_str().expect("case id");
+        let root = TempDir::new().unwrap();
+        let auth = root
+            .path()
+            .join("home/.kimi-code/credentials/kimi-code.json");
+        if case["file_present"] == true {
+            std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+            std::fs::write(&auth, case["contents"].as_str().unwrap()).unwrap();
+        }
+        // Invalid syntax exits before credential resolution or provider requests.
+        let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap();
+        if case["file_present"] != true || id == "canonical-with-ignored-refresh-token" {
+            assert_native_usage_parser(output, id);
+        } else {
+            let stderr = String::from_utf8(output.stderr).unwrap();
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "unproven Kimi case {id} must remain on Go: {stderr}"
+            );
+        }
+    }
+}
+
+#[test]
+fn supported_provider_combination_routes_before_any_live_request() {
+    let root = TempDir::new().unwrap();
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("KIMI_CODE_API_KEY", "synthetic-kimi-api")
+        .env("KIMI_AUTH_TOKEN", "synthetic-kimi-web")
+        .env("KIMI_CODE_BASE_URL", "https://api.kimi.com/custom/v1")
+        .env("MOONSHOT_API_KEY", "synthetic-moonshot")
+        .env("MOONSHOT_REGION", "cn")
+        .env("NOUS_PORTAL_ACCESS_TOKEN", "synthetic-nous")
+        .env("OPENCODE_COOKIE", "synthetic-opencode")
+        .env("OPENCODE_WORKSPACE_ID", "wrk_fixture123")
+        .env("OPENROUTER_API_KEY", "synthetic-openrouter")
+        .env("OPENROUTER_API_URL", "https://openrouter.ai/custom/v1")
+        .output()
+        .unwrap();
+    assert_native_usage_parser(output, "supported provider combination");
 }
