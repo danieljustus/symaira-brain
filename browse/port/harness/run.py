@@ -334,9 +334,23 @@ def race_once(binary: Path, env: dict[str, str], runtime: Path, *, suffix: str, 
         status = request(socket_path, {"cmd": "daemon.status", "session": session})
         if not status.get("success"):
             raise AssertionError(f"race daemon did not become queryable: {status}")
-        request(socket_path, {"cmd": "daemon.stop", "session": session})
+        status_data = status.get("data")
+        if not isinstance(status_data, dict):
+            raise AssertionError("race daemon status omitted its data")
+        winner_pid = status_data.get("pid")
+        winner = next((process for process in processes if process.pid == winner_pid), None)
+        if winner is None:
+            raise AssertionError("race status did not identify an owned starter")
+        # Keep the winner's lock held until every competing starter has exited.
+        # Otherwise a delayed starter can acquire it after stop and stay alive.
+        deadline = time.monotonic() + 10.0
         for process in processes:
-            process.wait(timeout=10)
+            if process.pid != winner_pid:
+                process.wait(timeout=max(0.0, deadline - time.monotonic()))
+        stopped = request(socket_path, {"cmd": "daemon.stop", "session": session})
+        if not stopped.get("success"):
+            raise AssertionError(f"race daemon did not stop: {stopped}")
+        winner.wait(timeout=10)
         for process in processes:
             assert_clean_process(process)
     finally:

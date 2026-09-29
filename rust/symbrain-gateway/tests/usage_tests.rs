@@ -14,9 +14,7 @@ use std::time::{Duration, Instant};
 use serde_json::{Value, json};
 use symbrain_broker::Tool;
 use symbrain_gateway::{Gateway, GatewayBackend};
-#[cfg(unix)]
-use symbrain_mcp::DispatchContext;
-use symbrain_mcp::Request;
+use symbrain_mcp::{DispatchContext, Request};
 use symbrain_policy::profile::parse::parse;
 use symbrain_usage::{
     Cancellation, Provider, Request as UsageRequest, Response, Service, Transport,
