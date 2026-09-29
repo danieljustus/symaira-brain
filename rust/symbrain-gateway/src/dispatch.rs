@@ -77,8 +77,8 @@ impl Gateway {
         // the provider registry. Keep the same start point so slow discovery
         // does not reset the report budget.
         let report_started = Instant::now();
-        let report_cancelled =
-            || context.is_cancelled() || report_started.elapsed() >= Duration::from_secs(30);
+        let report_deadline = report_started + Duration::from_secs(30);
+        let report_cancelled = || context.is_cancelled();
         if !self.usage_allowed {
             let error = GatewayError::UnknownTool("get_ai_usage".to_string());
             let hidden_args = params
@@ -102,9 +102,10 @@ impl Gateway {
         // and reflects changes made while the gateway connection is alive.
         // Tests may inject a fixed service to avoid touching host state.
         let report = if let Some(service) = &self.usage {
-            service.report_with_cancel(report_cancelled)
+            service.report_with_cancel_until(report_cancelled, Some(report_deadline))
         } else {
-            symbrain_usage::Service::new().report_with_cancel(report_cancelled)
+            symbrain_usage::Service::new()
+                .report_with_cancel_until(report_cancelled, Some(report_deadline))
         };
         let result = symbrain_usage::report_json(&report)
             .map_err(|error| GatewayError::Serialization(error.to_string()));

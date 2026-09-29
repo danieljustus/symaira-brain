@@ -73,6 +73,18 @@ impl Service {
     /// cooperative transport never survives a report call.
     #[must_use]
     pub fn report_with_cancel(&self, cancelled: impl Fn() -> bool) -> Report {
+        self.report_with_cancel_until(cancelled, None)
+    }
+
+    /// Runs the report under an optional absolute deadline shared by all
+    /// provider batches. Existing per-provider timeouts remain independently
+    /// enforced when they expire first.
+    #[must_use]
+    pub fn report_with_cancel_until(
+        &self,
+        cancelled: impl Fn() -> bool,
+        report_deadline: Option<Instant>,
+    ) -> Report {
         let mut report = Report::new();
         report.providers = self
             .providers
@@ -88,23 +100,25 @@ impl Service {
         for (batch_index, batch) in configured.chunks(self.max_concurrency).enumerate() {
             // Recheck before starting each batch so cancellation or the
             // handler deadline never launches another provider request.
-            if cancelled() {
-                for index in configured
-                    .iter()
-                    .skip(batch_index * self.max_concurrency)
-                    .copied()
-                {
-                    report.providers[index].error = Some(format!(
-                        "AI usage provider {:?} cancelled",
-                        self.providers[index].id
-                    ));
-                }
+            if cancelled() || report_deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+                mark_unstarted_cancelled(
+                    &mut report,
+                    &self.providers,
+                    &configured,
+                    batch_index * self.max_concurrency,
+                );
                 break;
             }
+            let provider_deadline = Instant::now() + self.provider_timeout;
+            let batch_deadline = report_deadline.map_or(provider_deadline, |deadline| {
+                deadline.min(provider_deadline)
+            });
+            let report_deadline_wins =
+                report_deadline.is_some_and(|deadline| deadline <= provider_deadline);
             let (sender, receiver) = mpsc::channel();
             let cancels: Vec<Cancellation> = batch
                 .iter()
-                .map(|_| Cancellation::with_timeout(self.provider_timeout))
+                .map(|_| Cancellation::with_deadline(batch_deadline))
                 .collect();
             let transport = Arc::clone(&self.transport);
             std::thread::scope(|scope| {
@@ -121,9 +135,10 @@ impl Service {
                 }
                 drop(sender);
                 let mut pending: BTreeSet<usize> = batch.iter().copied().collect();
-                let deadline = Instant::now() + self.provider_timeout;
                 while !pending.is_empty() {
-                    if cancelled() {
+                    if cancelled()
+                        || report_deadline.is_some_and(|deadline| Instant::now() >= deadline)
+                    {
                         for (slot, index) in batch.iter().copied().enumerate() {
                             if pending.contains(&index) {
                                 cancels[slot].cancel();
@@ -135,14 +150,15 @@ impl Service {
                         }
                         break;
                     }
-                    let remaining = deadline.saturating_duration_since(Instant::now());
+                    let remaining = batch_deadline.saturating_duration_since(Instant::now());
                     if remaining.is_zero() {
                         for (slot, index) in batch.iter().copied().enumerate() {
                             if pending.contains(&index) {
                                 cancels[slot].cancel();
-                                report.providers[index].error = Some(format!(
-                                    "AI usage provider {:?} timed out after {:?}",
-                                    self.providers[index].id, self.provider_timeout
+                                report.providers[index].error = Some(timeout_error(
+                                    &self.providers[index],
+                                    report_deadline_wins,
+                                    self.provider_timeout,
                                 ));
                             }
                         }
@@ -170,6 +186,36 @@ impl Service {
         report
     }
 }
+
+fn mark_unstarted_cancelled(
+    report: &mut Report,
+    providers: &[Provider],
+    configured: &[usize],
+    first_unstarted: usize,
+) {
+    for index in configured.iter().skip(first_unstarted).copied() {
+        report.providers[index].error = Some(format!(
+            "AI usage provider {:?} cancelled",
+            providers[index].id
+        ));
+    }
+}
+
+fn timeout_error(
+    provider: &Provider,
+    report_deadline_wins: bool,
+    provider_timeout: Duration,
+) -> String {
+    if report_deadline_wins {
+        format!("AI usage provider {:?} cancelled", provider.id)
+    } else {
+        format!(
+            "AI usage provider {:?} timed out after {:?}",
+            provider.id, provider_timeout
+        )
+    }
+}
+
 impl Default for Service {
     fn default() -> Self {
         Self::new()
@@ -185,4 +231,82 @@ pub fn build_report() -> Report {
 /// Returns the JSON serialization error when the report cannot be encoded.
 pub fn report_json(report: &Report) -> Result<String, serde_json::Error> {
     serde_json::to_string(report)
+}
+
+#[cfg(test)]
+mod deadline_tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    use std::thread;
+
+    #[derive(Default)]
+    struct WaitingTransport {
+        requests: AtomicUsize,
+    }
+
+    impl Transport for WaitingTransport {
+        fn request(&self, _request: Request) -> Result<Response, String> {
+            Err("expected cancellation-aware request".to_string())
+        }
+
+        fn request_with_cancel(
+            &self,
+            _request: Request,
+            cancel: &Cancellation,
+        ) -> Result<Response, String> {
+            self.requests.fetch_add(1, Ordering::AcqRel);
+            while !cancel.is_cancelled() {
+                thread::sleep(Duration::from_millis(2));
+            }
+            Err("request cancelled".to_string())
+        }
+    }
+
+    #[test]
+    fn absolute_report_deadline_cancels_inflight_and_skips_later_batch() {
+        let transport = Arc::new(WaitingTransport::default());
+        let service = Service::with_transport(
+            vec![
+                Provider::fixture("claude", "Claude"),
+                Provider::fixture("codex", "Codex"),
+            ],
+            transport.clone(),
+        )
+        .with_provider_timeout(Duration::from_secs(60))
+        .with_max_concurrency(1);
+        let deadline = Instant::now() + Duration::from_millis(100);
+        let started = Instant::now();
+        let report = service.report_with_cancel_until(|| false, Some(deadline));
+
+        assert!(started.elapsed() < Duration::from_secs(1));
+        assert_eq!(transport.requests.load(Ordering::Acquire), 1);
+        assert!(
+            report.providers[0]
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("cancelled"))
+        );
+        assert!(
+            report.providers[1]
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("cancelled"))
+        );
+    }
+
+    #[test]
+    fn provider_timeout_keeps_timeout_error_classification() {
+        let transport = Arc::new(WaitingTransport::default());
+        let service =
+            Service::with_transport(vec![Provider::fixture("claude", "Claude")], transport)
+                .with_provider_timeout(Duration::from_millis(100));
+        let report = service.report_with_cancel_until(|| false, None);
+
+        assert!(
+            report.providers[0]
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("timed out after 100ms"))
+        );
+    }
 }
