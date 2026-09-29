@@ -1,5 +1,27 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated Claude env/file OAuth evidence — 2026-09-29
+
+- Implementation candidate `732412fe2dab303ae56987937b595f8582290511`
+  includes the prior Browse daemon and direct OAuth slices. A sole valid
+  default Claude credential file now selects the native report path. Mixed
+  sources, references and provider overrides still select Go.
+- Production Go `NewClaudeProvider` plus `BuildReport` provides success,
+  401, 429 and malformed-response fixtures for environment and file sources.
+  Rust invokes its real provider builder: AuthStatus retains `env` or `file`,
+  while the OAuth snapshot reports `oauth`. The differential caught and fixed
+  that distinction. Valid synthetic files avoid any real Keychain read.
+- Independent coordinator checks on clean exact HEAD passed the Go1.26.7
+  oracle, all usage tests (Darwin/arm64: 39+9+8; Linux/arm64: 39+8+8), and all
+  12 CLI MCP integration tests, with zero failures or ignored tests.
+  Darwin log: `../builds/symaira-brain/claude-oauth-usage-20260929/coordinator-file-732412fe.log`.
+  Linux receipt: `../builds/native-linux-20260929/brain-file-oauth-receipt-732412fe.json`.
+  Cargo metadata and compiler source paths bind both runs to this worktree.
+- USE-001 remains open for other native targets and remaining provider paths.
+  These checks do not complete the full integrated migration ledger. No real
+  provider call, release, installed cutover or Go removal occurred.
+
+
 ## Resume checkpoint — 2026-09-29 (local integrated OAuth candidate)
 
 - Candidate `7390afb944893bc8c2a5a573942a39212caff346` includes the Browse daemon
