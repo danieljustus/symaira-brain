@@ -596,7 +596,7 @@ fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
 }
 
 #[test]
-fn nous_file_candidate_matches_only_plain_source_bound_tokens() {
+fn nous_file_candidate_matches_source_bound_plain_and_live_jwt_tokens() {
     let fixture: serde_json::Value =
         serde_json::from_str(NOUS_FILE_TOKEN_ORACLE).expect("Go Nous file parser oracle");
     for case in fixture["cases"].as_array().expect("oracle cases") {
@@ -702,9 +702,38 @@ fn nous_token_accepts_a_live_jwt() {
         .as_secs()
         + 3_600;
     assert!(nous_jwt_is_live(&jwt_expiring_at(future)));
+    let now_seconds = std::time::SystemTime::now()
+        .duration_since(std::time::SystemTime::UNIX_EPOCH)
+        .expect("clock")
+        .as_secs();
+    assert!(!nous_jwt_is_live(&jwt_expiring_at(now_seconds)));
+    let boundary_payload = encode_base64url(&format!(r#"{{"exp":{now_seconds}.9}}"#));
+    assert!(!nous_jwt_is_live(&format!(
+        "header.{boundary_payload}.signature"
+    )));
+    let fractional_payload = encode_base64url(r#"{"exp":4102444800.9,"sub":"synthetic"}"#);
+    assert!(nous_jwt_is_live(&format!(
+        "header.{fractional_payload}.signature"
+    )));
+    for ambiguous_payload in [
+        r#"{"exp":4102444800,"EXP":0}"#,
+        r#"{"EXP":0,"exp":4102444800}"#,
+    ] {
+        assert!(!nous_jwt_is_live(&format!(
+            "header.{}.signature",
+            encode_base64url(ambiguous_payload)
+        )));
+    }
     assert!(!nous_jwt_is_live("not-a-jwt"));
     assert!(!nous_jwt_is_live("only.two"));
     assert!(!nous_jwt_is_live("no.exp-claim.signature"));
+    assert!(!nous_jwt_is_live(
+        "header.eyJleHAiOjQxMDI0NDQ4MDB9=.signature"
+    ));
+    assert!(!nous_jwt_is_live(&format!(
+        "header.{}.signature",
+        encode_base64url(r#"{"exp":"4102444800"}"#)
+    )));
 }
 
 #[test]

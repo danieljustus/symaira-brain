@@ -119,6 +119,29 @@ func TestNousAuthStoreTreatsExpiredJWTAsUnavailable(t *testing.T) {
 	}
 }
 
+func TestNousJWTExpiryUsesGoUnixSecondTruncation(t *testing.T) {
+	now := time.Now().Unix()
+	for _, tc := range []struct {
+		name     string
+		claims   string
+		wantLive bool
+	}{
+		{name: "whole-second boundary", claims: fmt.Sprintf(`{"exp":%d}`, now)},
+		{name: "fraction inside current second truncates", claims: fmt.Sprintf(`{"exp":%d.9}`, now)},
+		{name: "fixed far-future numeric exp", claims: `{"exp":4102444800.9}`, wantLive: true},
+		{name: "string exp is invalid", claims: `{"exp":"4102444800"}`},
+		{name: "malformed claims are invalid", claims: `{"exp":`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			payload := base64.RawURLEncoding.EncodeToString([]byte(tc.claims))
+			got := nousJWTIsLive("header." + payload + ".signature")
+			if got != tc.wantLive {
+				t.Fatalf("nousJWTIsLive() = %v, want %v", got, tc.wantLive)
+			}
+		})
+	}
+}
+
 func TestNousAuthStoreIgnoresOtherProviders(t *testing.T) {
 	store := `{"version":1,"providers":[{"id":"opencode","access_token":"sekrit"}]}`
 	path := writeNousAuthStore(t, store)
@@ -131,6 +154,39 @@ func TestNousAuthStoreIgnoresOtherProviders(t *testing.T) {
 func TestNousAuthStoreMissingFileYieldsEmpty(t *testing.T) {
 	if got := readNousAccessToken(filepath.Join(t.TempDir(), "does-not-exist.json")); got != "" {
 		t.Errorf("readNousAccessToken() = %q, want empty for a missing file", got)
+	}
+}
+
+func TestNousProviderUsesHermesHomeOverride(t *testing.T) {
+	home := t.TempDir()
+	store := `{"providers":[{"id":"nous","access_token":"synthetic-nous-override"}]}`
+	if err := os.WriteFile(filepath.Join(home, "auth.json"), []byte(store), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("HERMES_HOME", home)
+	t.Setenv("NOUS_PORTAL_ACCESS_TOKEN", "")
+	provider := NewNousPortalProvider(nil)
+	if !provider.IsConfigured() || provider.accessToken != "synthetic-nous-override" || provider.AuthStatus().Source != "file" {
+		t.Fatalf("Nous override home was not selected: configured=%v source=%q", provider.IsConfigured(), provider.AuthStatus().Source)
+	}
+}
+
+func TestNousProviderEmptyHermesHomeUsesDefault(t *testing.T) {
+	home := t.TempDir()
+	defaultHome := filepath.Join(home, ".hermes")
+	if err := os.MkdirAll(defaultHome, 0o700); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(defaultHome, "auth.json"), []byte(`{"providers":[{"id":"nous","access_token":"synthetic-nous-default"}]}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("HERMES_HOME", "")
+	t.Setenv("NOUS_PORTAL_ACCESS_TOKEN", "")
+	provider := NewNousPortalProvider(nil)
+	if provider.accessToken != "synthetic-nous-default" || provider.AuthStatus().Source != "file" {
+		t.Fatalf("empty HERMES_HOME did not use default: source=%q", provider.AuthStatus().Source)
 	}
 }
 

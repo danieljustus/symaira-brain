@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -97,6 +98,7 @@ func main() {
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
 	kimiReportOutput := flag.String("kimi-report-output", "rust/symbrain-usage/tests/fixtures/kimi_authenticated_report.json", "authenticated Kimi report path")
 	nousReportOutput := flag.String("nous-report-output", "rust/symbrain-usage/tests/fixtures/nous_authenticated_report.json", "authenticated Nous report path")
+	nousFileReportOutput := flag.String("nous-file-report-output", "rust/symbrain-usage/tests/fixtures/nous_file_authenticated_report.json", "authenticated Nous auth.json report path")
 	openCodeReportOutput := flag.String("opencode-report-output", "rust/symbrain-usage/tests/fixtures/opencode_authenticated_report.json", "authenticated OpenCode report path")
 	combinedReportOutput := flag.String("combined-native-report-output", "rust/symbrain-usage/tests/fixtures/combined_native_authenticated_report.json", "combined configured-provider report path")
 	kimiFallbackReportOutput := flag.String("kimi-fallback-report-output", "rust/symbrain-usage/tests/fixtures/kimi_fallback_authenticated_report.json", "Kimi API/CLI/web fallback report path")
@@ -196,6 +198,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	nousFileReport, err := buildNousFileAuthenticatedReport(fixtures["nous"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	openCodeReport, err := buildOpenCodeAuthenticatedReport(fixtures["opencode-workspaces"], fixtures["opencode"])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -286,6 +293,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*nousFileReportOutput, nousFileReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*openCodeReportOutput, openCodeReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -370,6 +381,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*nousReportOutput, nousReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*nousFileReportOutput, nousFileReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -484,8 +499,19 @@ type copilotFileReportFixture struct {
 	} `json:"errors"`
 }
 
+type nousFileReportFixture struct {
+	Success usage.Report `json:"success"`
+	Errors  []struct {
+		Status int          `json:"status"`
+		Report usage.Report `json:"report"`
+	} `json:"errors"`
+}
+
 func buildNousFileTokenOracle() (nousFileTokenOracleFixture, error) {
 	file := func(value string) *string { return &value }
+	jwt := func(payload string) string {
+		return "header." + base64.RawURLEncoding.EncodeToString([]byte(payload)) + ".signature"
+	}
 	inputs := []struct {
 		id       string
 		contents *string
@@ -504,11 +530,26 @@ func buildNousFileTokenOracle() (nousFileTokenOracleFixture, error) {
 		{id: "wrong-typed-token-invalidates-file", contents: file(`{"providers":[{"id":"nous","invoke_jwt":42}]}`)},
 		{id: "duplicate-token-key-remains-go-only", contents: file(`{"providers":[{"id":"nous","access_token":"first","access_token":"last"}]}`)},
 		{id: "jwt-shaped-token-remains-go-only", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"a.b.c"}]}`)},
+		{id: "canonical-future-jwt", contents: file(fmt.Sprintf(`{"version":1,"providers":[{"id":"nous","invoke_jwt":%q,"client_id":"hermes-cli"}]}`, jwt(`{"exp":4102444800}`)))},
+		{id: "canonical-fractional-future-jwt", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":4102444800.9,"sub":"synthetic"}`)))},
+		{id: "jwt-exp-case-alias-after-canonical", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":4102444800,"EXP":0}`)))},
+		{id: "jwt-exp-case-alias-before-canonical", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"EXP":0,"exp":4102444800}`)))},
+		{id: "jwt-duplicate-exp-invalid-before-valid", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":"invalid","exp":4102444800}`)))},
+		{id: "jwt-duplicate-exp-valid-before-invalid", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":4102444800,"exp":"invalid"}`)))},
+		{id: "expired-jwt", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":1}`)))},
+		{id: "case-insensitive-exp-is-go-only", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"EXP":4102444800}`)))},
+		{id: "string-exp-is-invalid", contents: file(fmt.Sprintf(`{"providers":[{"id":"nous","invoke_jwt":%q}]}`, jwt(`{"exp":"4102444800"}`)))},
+		{id: "malformed-jwt-payload-is-invalid", contents: file("{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHA.signature\"}]}")},
+		{id: "padded-jwt-payload-is-invalid", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjQxMDI0NDQ4MDB9=.signature"}]}`)},
 		{id: "secret-reference-token-remains-go-only", contents: file(`{"providers":[{"id":"nous","access_token":"symvault://nous/token"}]}`)},
 		{id: "unrelated-provider", contents: file(`{"providers":[{"id":"other","access_token":"other-token"}]}`)},
 	}
 	fixture := nousFileTokenOracleFixture{SchemaVersion: 1}
-	native := map[string]bool{"canonical-plain-invoke-token": true}
+	native := map[string]bool{
+		"canonical-plain-invoke-token":    true,
+		"canonical-future-jwt":            true,
+		"canonical-fractional-future-jwt": true,
+	}
 	for _, input := range inputs {
 		token, err := usage.BuildNousFileTokenOracle(input.contents)
 		if err != nil {
@@ -1010,6 +1051,34 @@ func buildKimiAuthenticatedReport(body []byte) (usage.Report, error) {
 
 func buildNousAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("nous", nousOracleToken, body)
+}
+
+func buildNousFileAuthenticatedReport(body []byte) (nousFileReportFixture, error) {
+	token := "header." + base64.RawURLEncoding.EncodeToString([]byte(`{"exp":4102444800}`)) + ".signature"
+	fixture := nousFileReportFixture{}
+	var err error
+	fixture.Success, err = usage.BuildNousFileAuthenticatedReportOracle(token, body, http.StatusOK)
+	if err != nil {
+		return nousFileReportFixture{}, err
+	}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{http.StatusUnauthorized, []byte(`{"error":"nope"}`)},
+		{http.StatusTooManyRequests, []byte(`{"error":"slow down"}`)},
+		{http.StatusOK, []byte(`{}`)},
+	} {
+		report, reportErr := usage.BuildNousFileAuthenticatedReportOracle(token, response.body, response.status)
+		if reportErr != nil {
+			return nousFileReportFixture{}, reportErr
+		}
+		fixture.Errors = append(fixture.Errors, struct {
+			Status int          `json:"status"`
+			Report usage.Report `json:"report"`
+		}{Status: response.status, Report: report})
+	}
+	return fixture, nil
 }
 
 func buildOpenCodeAuthenticatedReport(workspaceBody, body []byte) (usage.Report, error) {

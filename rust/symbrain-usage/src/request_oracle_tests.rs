@@ -32,6 +32,8 @@ const KIMI_FALLBACK_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/kimi_fallback_authenticated_report.json");
 const NOUS_PRECEDENCE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/nous_env_file_precedence_report.json");
+const NOUS_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/nous_file_authenticated_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
@@ -259,6 +261,29 @@ fn authenticated_kimi_report(response: Response) -> (crate::Report, FixtureTrans
 
 fn authenticated_nous_report(response: Response) -> (crate::Report, FixtureTransport) {
     authenticated_direct_provider_report(response, "nous")
+}
+
+fn authenticated_nous_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let parser_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/nous_file_token_oracle.json"
+    ))
+    .expect("Go Nous auth.json parser oracle");
+    let token = parser_oracle["cases"]
+        .as_array()
+        .expect("Nous parser cases")
+        .iter()
+        .find(|case| case["id"] == "canonical-future-jwt")
+        .and_then(|case| case["token"].as_str())
+        .expect("Go selected a canonical live JWT");
+    let provider = nous_from_resolved(
+        Some(("file".into(), token.into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let transport = FixtureTransport::new([("nous".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    (report, transport)
 }
 
 fn authenticated_direct_provider_report(
@@ -1632,6 +1657,67 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
             "HTTP {status} report error"
         );
         assert_eq!(report.providers[0].snapshot, None);
+    }
+}
+
+#[test]
+fn authenticated_nous_live_jwt_file_matches_go_production_constructor() {
+    let oracle: Value =
+        serde_json::from_str(NOUS_FILE_REPORT_ORACLE).expect("Go Nous file-authenticated reports");
+    for (response, expected) in [
+        (
+            Response {
+                status: 200,
+                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["success"],
+        ),
+        (
+            Response {
+                status: 401,
+                body: br#"{"error":"nope"}"#.to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][0]["report"],
+        ),
+        (
+            Response {
+                status: 429,
+                body: br#"{"error":"slow down"}"#.to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][1]["report"],
+        ),
+        (
+            Response {
+                status: 200,
+                body: b"{}".to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][2]["report"],
+        ),
+    ] {
+        let (report, transport) = authenticated_nous_file_report(response);
+        assert_eq!(report.providers.len(), 1);
+        assert_eq!(
+            report.providers[0].auth_status.source.as_deref(),
+            Some("file")
+        );
+        assert_eq!(transport.requests().len(), 1);
+        assert_eq!(
+            transport.requests()[0]
+                .headers
+                .get("Authorization")
+                .map(String::as_str),
+            Some("Bearer header.eyJleHAiOjQxMDI0NDQ4MDB9.signature")
+        );
+        let mut rust = serde_json::to_value(report).expect("Rust Nous file report");
+        if expected["providers"][0]["snapshot"].is_object() {
+            rust["providers"][0]["snapshot"]["fetched_at"] =
+                expected["providers"][0]["snapshot"]["fetched_at"].clone();
+        }
+        assert_eq!(rust, *expected);
     }
 }
 

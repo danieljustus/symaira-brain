@@ -148,6 +148,16 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     command
 }
 
+fn install_synthetic_claude_file(root: &TempDir) {
+    let path = root.path().join("home/.claude/.credentials.json");
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    std::fs::write(
+        path,
+        br#"{"oauthAccount":{"default":{"accessToken":"synthetic-claude-file"}}}"#,
+    )
+    .unwrap();
+}
+
 fn run_with_input(root: &TempDir, args: &[&str], input: &[u8]) -> Output {
     let mut child = command(root, args).spawn().unwrap();
     child.stdin.as_mut().unwrap().write_all(input).unwrap();
@@ -595,8 +605,9 @@ fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider
 }
 
 #[test]
-fn codex_default_file_and_env_routes_are_native_but_home_override_keeps_go() {
+fn codex_default_file_env_and_home_override_routes_are_native() {
     let root = TempDir::new().unwrap();
+    install_synthetic_claude_file(&root);
     let default_auth = root.path().join("home").join(".codex").join("auth.json");
     std::fs::create_dir_all(default_auth.parent().unwrap()).unwrap();
     std::fs::write(
@@ -620,6 +631,11 @@ fn codex_default_file_and_env_routes_are_native_but_home_override_keeps_go() {
         !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
         "Codex auth.json unexpectedly selected Go fallback: {stderr}"
     );
+    let empty_override = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("CODEX_HOME", "")
+        .output()
+        .unwrap();
+    assert_native_usage_parser(empty_override, "empty CODEX_HOME uses the default home");
 
     let override_home = root.path().join("codex-override");
     std::fs::create_dir_all(&override_home).unwrap();
@@ -632,11 +648,7 @@ fn codex_default_file_and_env_routes_are_native_but_home_override_keeps_go() {
         .env("CODEX_HOME", &override_home)
         .output()
         .unwrap();
-    let overridden_stderr = String::from_utf8(overridden.stderr).unwrap();
-    assert!(
-        overridden_stderr.contains("not ported yet and no Go fallback was found"),
-        "CODEX_HOME override must stay on Go: {overridden_stderr}"
-    );
+    assert_native_usage_parser(overridden, "CODEX_HOME override");
 
     let mixed = command(&root, &["usage", "--not-a-usage-flag"])
         .env("CODEX_ACCESS_TOKEN", "synthetic-codex-env-fixture")
@@ -656,6 +668,86 @@ fn codex_default_file_and_env_routes_are_native_but_home_override_keeps_go() {
     assert!(
         reference_stderr.contains("not ported yet and no Go fallback was found"),
         "reference-shaped file credential must stay on Go: {reference_stderr}"
+    );
+}
+
+#[test]
+fn kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files() {
+    let default_kimi_root = TempDir::new().unwrap();
+    install_synthetic_claude_file(&default_kimi_root);
+    let default_kimi_file = default_kimi_root
+        .path()
+        .join("home/.kimi-code/credentials/kimi-code.json");
+    std::fs::create_dir_all(default_kimi_file.parent().unwrap()).unwrap();
+    std::fs::write(
+        &default_kimi_file,
+        br#"{"access_token":"synthetic-kimi-default"}"#,
+    )
+    .unwrap();
+    let default_kimi = command(&default_kimi_root, &["usage", "--not-a-usage-flag"])
+        .env("KIMI_CODE_HOME", "")
+        .output()
+        .unwrap();
+    assert_native_usage_parser(default_kimi, "empty KIMI_CODE_HOME uses the default home");
+
+    let kimi_root = TempDir::new().unwrap();
+    install_synthetic_claude_file(&kimi_root);
+    let kimi_home = kimi_root.path().join("kimi-override");
+    let kimi_credentials = kimi_home.join("credentials/kimi-code.json");
+    std::fs::create_dir_all(kimi_credentials.parent().unwrap()).unwrap();
+    std::fs::write(
+        &kimi_credentials,
+        br#"{"access_token":"synthetic-kimi-home-override"}"#,
+    )
+    .unwrap();
+    std::fs::write(kimi_home.join("device_id"), b"synthetic-device-id\n").unwrap();
+    let kimi = command(&kimi_root, &["usage", "--not-a-usage-flag"])
+        .env("KIMI_CODE_HOME", &kimi_home)
+        .output()
+        .unwrap();
+    assert_native_usage_parser(kimi, "KIMI_CODE_HOME with canonical token and device id");
+
+    let nous_root = TempDir::new().unwrap();
+    install_synthetic_claude_file(&nous_root);
+    let default_nous_file = nous_root.path().join("home/.hermes/auth.json");
+    std::fs::create_dir_all(default_nous_file.parent().unwrap()).unwrap();
+    std::fs::write(
+        &default_nous_file,
+        br#"{"providers":[{"id":"nous","access_token":"synthetic-nous-default"}]}"#,
+    )
+    .unwrap();
+    let default_nous = command(&nous_root, &["usage", "--not-a-usage-flag"])
+        .env("HERMES_HOME", "")
+        .output()
+        .unwrap();
+    assert_native_usage_parser(default_nous, "empty HERMES_HOME uses the default home");
+
+    let nous_home = nous_root.path().join("hermes-override");
+    std::fs::create_dir_all(&nous_home).unwrap();
+    std::fs::write(
+        nous_home.join("auth.json"),
+        br#"{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjQxMDI0NDQ4MDB9.signature"}]}"#,
+    )
+    .unwrap();
+    let nous = command(&nous_root, &["usage", "--not-a-usage-flag"])
+        .env("HERMES_HOME", &nous_home)
+        .output()
+        .unwrap();
+    assert_native_usage_parser(nous, "HERMES_HOME with canonical live JWT");
+
+    std::fs::write(
+        nous_home.join("auth.json"),
+        br#"{"providers":[{"id":"nous","invoke_jwt":"header.a.b"}]}"#,
+    )
+    .unwrap();
+    let malformed = command(&nous_root, &["usage", "--not-a-usage-flag"])
+        .env("HERMES_HOME", &nous_home)
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8(malformed.stderr).unwrap();
+    assert!(
+        stderr.contains("not ported yet and no Go fallback was found"),
+        "malformed existing Hermes JWT must remain on Go: {stderr}"
     );
 }
 
@@ -752,7 +844,7 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        if case["file_present"] != true || id == "canonical-plain-invoke-token" {
+        if case["file_present"] != true || case["native_route"] == true {
             assert_native_usage_parser(output, id);
         } else {
             let stderr = String::from_utf8(output.stderr).unwrap();

@@ -14,14 +14,15 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// together. Native sources include direct credentials; the canonical default
 /// Copilot, Kimi CLI, Nous, Codex, and Claude files; Moonshot's supported `ai`
 /// and `cn` regions; constrained public HTTPS base overrides; and a canonical
-/// OpenCode workspace id. File sources with case aliases, duplicate or
+/// `OpenCode` workspace id. File sources with case aliases, duplicate or
 /// malformed fields, ambiguous provider selection, unsupported metadata,
 /// secret references, non-ASCII Kimi device ids, or other unproven shapes stay
-/// on Go. Explicit CODEX_HOME, HERMES_HOME, and KIMI_CODE_HOME overrides,
-/// differing Windows home roots, unsupported URL/workspace forms, Claude
-/// Keychain-only credentials, and a running Antigravity provider also keep the
-/// report on Go. Source-bound Go oracles use synthetic credentials and canned
-/// transport; the user-invoked live report remains unchanged.
+/// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
+/// eligibility checks as their default paths; differing Windows home roots,
+/// unsupported URL/workspace forms, Claude Keychain-only credentials, and a
+/// running Antigravity provider also keep the report on Go. Source-bound Go
+/// oracles use synthetic credentials and canned transport; the user-invoked
+/// live report remains unchanged.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
         return false;

@@ -5,13 +5,15 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain. Claude, Codex, Copilot, Kimi CLI, and Hermes default files use
-//! native reporting only for proven deterministic shapes. Supported providers
-//! may be combined; any unproven source keeps the report on Go.
+//! keychain. Claude, Codex, Copilot, Kimi CLI, and Hermes files use native
+//! reporting only for proven deterministic shapes at their default or
+//! supported home paths. Supported providers may be combined; any unproven
+//! source keeps the report on Go.
 
 use super::provider_requests::{trusted_https_url, validated_base};
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
-use serde::Deserialize;
+use serde::de::{IgnoredAny, MapAccess, Visitor};
+use serde::{Deserialize, Deserializer};
 use std::env;
 use std::fs;
 use std::io::{Read, Seek, SeekFrom};
@@ -19,10 +21,6 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
-
-/// Environment variables other than the narrow direct provider credentials
-/// allowed to use native reporting. Every one keeps the CLI on Go.
-const OTHER_PROVIDER_ENV_VARS: &[&str] = &["CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME"];
 
 /// The service Claude Code stores its OAuth credentials under in the macOS
 /// login keychain. Current versions append a per-installation hex suffix that
@@ -542,7 +540,9 @@ fn home() -> PathBuf {
 }
 
 fn env_path(name: &str, fallback: PathBuf) -> PathBuf {
-    env::var_os(name).map_or(fallback, PathBuf::from)
+    env::var_os(name)
+        .filter(|value| !value.is_empty())
+        .map_or(fallback, PathBuf::from)
 }
 
 // ---------------------------------------------------------------------------
@@ -728,7 +728,7 @@ fn path_may_exist(path: &Path) -> bool {
 /// `$KIMI_CODE_HOME`, else the current `~/.kimi-code`, else the legacy
 /// `~/.kimi` when that one is the only install with a credential file.
 fn kimi_cli_home() -> PathBuf {
-    if let Some(name) = env::var_os("KIMI_CODE_HOME") {
+    if let Some(name) = env::var_os("KIMI_CODE_HOME").filter(|value| !value.is_empty()) {
         return PathBuf::from(name);
     }
     let current = home().join(".kimi-code");
@@ -823,6 +823,7 @@ fn nous_file_token(path: &Path) -> Option<String> {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct NousCredentialCandidate {
+    #[serde(rename = "version")]
     _version: Option<Value>,
     providers: Option<Vec<NousProviderCandidate>>,
 }
@@ -833,11 +834,12 @@ struct NousProviderCandidate {
     id: Option<String>,
     invoke_jwt: Option<String>,
     access_token: Option<String>,
+    #[serde(rename = "client_id")]
+    _client_id: Option<Value>,
 }
 
-/// The default Hermes file is native only when Go's typed decode has a
-/// deterministic, plain-text result. JWT expiry uses Go's Unix-second
-/// truncation and remains on the shipped route.
+/// The Hermes file is native only when Go's typed decode has a deterministic
+/// result. JWT expiry follows Go's float64-to-int64 Unix-second truncation.
 fn nous_file_token_candidate(path: &Path) -> Option<String> {
     let data = read_limited(path)?;
     let root: NousCredentialCandidate = serde_json::from_slice(&data).ok()?;
@@ -849,7 +851,7 @@ fn nous_file_token_candidate(path: &Path) -> Option<String> {
         .invoke_jwt
         .filter(|token| !token.is_empty())
         .or_else(|| provider.access_token.filter(|token| !token.is_empty()))?;
-    if token.contains('.') || is_secret_reference(&token) {
+    if (token.contains('.') && !nous_jwt_is_live(&token)) || is_secret_reference(&token) {
         return None;
     }
     Some(token)
@@ -897,6 +899,7 @@ fn supported_opencode_workspace(raw: &str) -> bool {
     })
 }
 
+#[allow(clippy::cast_precision_loss)] // Mirrors Go's float64 expiry-to-int64 conversion and current Unix-second comparison.
 fn nous_jwt_is_live(token: &str) -> bool {
     let mut parts = token.split('.');
     let (Some(_), Some(payload), Some(_), None) =
@@ -904,24 +907,75 @@ fn nous_jwt_is_live(token: &str) -> bool {
     else {
         return false;
     };
-    let Some(claims) = decode_base64url(payload)
-        .and_then(|decoded| serde_json::from_slice::<Value>(&decoded).ok())
+    let Some(expiry) = decode_base64url(payload)
+        .and_then(|decoded| serde_json::from_slice::<JwtExpiryClaims>(&decoded).ok())
     else {
         return false;
     };
-    let Some(expiry) = claims.get("exp").and_then(Value::as_f64) else {
+    let Some(expiry) = expiry.0 else {
         return false;
     };
-    seconds_since_epoch() < expiry
+    // Go decodes exp into float64, converts it to int64 (truncating toward
+    // zero), then constructs a whole-second time.Time. Keep out-of-range
+    // values on Go rather than relying on Rust's saturating float cast.
+    if !expiry.is_finite() || expiry < i64::MIN as f64 || expiry >= i64::MAX as f64 {
+        return false;
+    }
+    expiry.trunc() > seconds_since_epoch() as f64
 }
 
-fn seconds_since_epoch() -> f64 {
+struct JwtExpiryClaims(Option<f64>);
+
+impl<'de> Deserialize<'de> for JwtExpiryClaims {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ClaimsVisitor;
+
+        impl<'de> Visitor<'de> for ClaimsVisitor {
+            type Value = JwtExpiryClaims;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str("a JWT claims object with one exact exp field")
+            }
+
+            fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+            where
+                M: MapAccess<'de>,
+            {
+                let mut expiry = None;
+                let mut saw_exp = false;
+                while let Some(key) = map.next_key::<String>()? {
+                    if key.eq_ignore_ascii_case("exp") {
+                        if key != "exp" || saw_exp {
+                            let _: IgnoredAny = map.next_value()?;
+                            return Err(serde::de::Error::custom(
+                                "ambiguous or duplicate JWT expiry claim",
+                            ));
+                        }
+                        saw_exp = true;
+                        expiry = Some(map.next_value::<f64>()?);
+                    } else {
+                        let _: IgnoredAny = map.next_value()?;
+                    }
+                }
+                Ok(JwtExpiryClaims(expiry))
+            }
+        }
+
+        deserializer.deserialize_map(ClaimsVisitor)
+    }
+}
+
+fn seconds_since_epoch() -> u64 {
     SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
-        .map_or(0.0, |elapsed| elapsed.as_secs_f64())
+        .map_or(0, |elapsed| elapsed.as_secs())
 }
 
-/// Decodes an unpadded base64url payload.
+/// Decodes an unpadded base64url payload. Rejecting noncanonical trailing
+/// bits keeps this gate within a conservative subset of Go `RawURLEncoding`.
 ///
 /// ponytail: hand-rolled because this one JWT claim decode is the crate's only
 /// call site; switch to the `base64` crate (already pinned in guard-core) once a
@@ -937,7 +991,6 @@ fn decode_base64url(value: &str) -> Option<Vec<u8>> {
             b'0'..=b'9' => byte - b'0' + 52,
             b'-' => 62,
             b'_' => 63,
-            b'=' => continue,
             _ => return None,
         };
         buffer = (buffer << 6) | u32::from(digit);
@@ -948,7 +1001,7 @@ fn decode_base64url(value: &str) -> Option<Vec<u8>> {
             buffer &= (1 << bits) - 1;
         }
     }
-    Some(decoded)
+    (bits != 6 && buffer == 0).then_some(decoded)
 }
 
 // ---------------------------------------------------------------------------
@@ -1126,8 +1179,9 @@ pub fn all_providers() -> Vec<Provider> {
 ///
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
-/// table. File-backed routes require a deterministic Go-equivalent subset;
-/// secret references and unsupported home/base/workspace overrides stay on Go.
+/// table. File-backed routes and home overrides require a deterministic
+/// Go-equivalent subset; secret references and unsupported base/workspace
+/// overrides stay on Go.
 /// Multiple configured providers can be native together when each source is
 /// proven. A workspace override alone supplies no `OpenCode` cookie or
 /// strategy, so it cannot start a fetch.
@@ -1153,16 +1207,13 @@ pub fn needs_go_fallback() -> bool {
     .into_iter()
     .flatten()
     .any(|value| !supported_custom_base(&value));
-    let other_provider_env = OTHER_PROVIDER_ENV_VARS
-        .iter()
-        .any(|name| env_raw(name).is_some());
     // Go resolves its home from USERPROFILE on Windows; Rust currently uses
     // HOME. Keep the entire usage report on Go if those roots differ so no
     // provider can silently miss a file-backed credential.
     if usage_home_mismatch_requires_go() {
         return true;
     }
-    if other_provider_env || unsupported_base {
+    if unsupported_base {
         return true;
     }
     let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
@@ -1215,7 +1266,7 @@ pub fn needs_go_fallback() -> bool {
         codex_file: codex_file.as_deref(),
         opencode_env: opencode_env.as_deref(),
         claude_file: claude_file_token.as_deref(),
-        other_provider_env,
+        other_provider_env: false,
         other_credential_source: false,
         // A file token wins before Go reads Keychain, so an existing Claude
         // Keychain item is irrelevant when that source is present. Avoid even

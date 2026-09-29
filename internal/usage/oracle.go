@@ -549,6 +549,75 @@ func BuildNousAuthenticatedReportOracle(body []byte) (Report, error) {
 	return buildAuthenticatedDirectEnvReportOracle("nous", body)
 }
 
+// BuildNousFileAuthenticatedReportOracle constructs the shipped Nous provider
+// from an isolated synthetic Hermes auth.json and drives it with canned HTTP
+// responses. It never reads a user credential or contacts the portal.
+func BuildNousFileAuthenticatedReportOracle(token string, body []byte, status int) (Report, error) {
+	home, err := os.MkdirTemp("", "symbrain-nous-file-report-oracle-")
+	if err != nil {
+		return Report{}, fmt.Errorf("create isolated Nous file home: %w", err)
+	}
+	defer os.RemoveAll(home)
+	keys := []string{"HOME", "USERPROFILE", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME", "HERMES_PORTAL_BASE_URL"}
+	type previous struct {
+		value string
+		set   bool
+	}
+	old := make(map[string]previous, len(keys))
+	for _, key := range keys {
+		value, set := os.LookupEnv(key)
+		old[key] = previous{value: value, set: set}
+		if err := os.Unsetenv(key); err != nil {
+			return Report{}, fmt.Errorf("clear %s for Nous file oracle: %w", key, err)
+		}
+	}
+	defer func() {
+		for key, item := range old {
+			if item.set {
+				_ = os.Setenv(key, item.value)
+			} else {
+				_ = os.Unsetenv(key)
+			}
+		}
+	}()
+	for _, key := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(key, home); err != nil {
+			return Report{}, fmt.Errorf("set isolated Nous file %s: %w", key, err)
+		}
+	}
+	path := filepath.Join(home, ".hermes", "auth.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return Report{}, fmt.Errorf("create isolated Hermes auth directory: %w", err)
+	}
+	type providerEntry struct {
+		ID        string `json:"id"`
+		InvokeJWT string `json:"invoke_jwt"`
+	}
+	contents, err := json.Marshal(struct {
+		Providers []providerEntry `json:"providers"`
+	}{Providers: []providerEntry{{ID: "nous", InvokeJWT: token}}})
+	if err != nil {
+		return Report{}, fmt.Errorf("encode synthetic Hermes auth file: %w", err)
+	}
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		return Report{}, fmt.Errorf("write synthetic Hermes auth file: %w", err)
+	}
+	transport := &oracleTransport{bodies: map[string][]byte{"nous": body}, status: status}
+	client := &http.Client{Transport: roundTripFixture{transport}}
+	provider := NewNousPortalProvider(client)
+	if !provider.IsConfigured() || provider.AuthStatus().Source != "file" || len(provider.Strategies()) != 1 || provider.Strategies()[0].Source() != "api" {
+		return Report{}, fmt.Errorf("Nous file report oracle did not select its synthetic file credential")
+	}
+	report := BuildReport(context.Background(), []Provider{provider})
+	if len(report.Providers) != 1 || len(transport.requests) != 1 || transport.requests[0].Header.Get("Authorization") != "Bearer "+token {
+		return Report{}, fmt.Errorf("Nous file report oracle did not issue one authenticated request")
+	}
+	if report.Providers[0].Snapshot != nil {
+		report.Providers[0].Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	}
+	return report, nil
+}
+
 // BuildNousEnvironmentPrecedenceReportOracle proves that the shipped
 // environment credential wins over an existing default auth.json file.
 func BuildNousEnvironmentPrecedenceReportOracle(body []byte) (Report, error) {

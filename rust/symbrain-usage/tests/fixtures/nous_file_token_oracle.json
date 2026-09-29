@@ -99,6 +99,83 @@
       "native_route": false
     },
     {
+      "id": "canonical-future-jwt",
+      "file_present": true,
+      "contents": "{\"version\":1,\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDB9.signature\",\"client_id\":\"hermes-cli\"}]}",
+      "token": "header.eyJleHAiOjQxMDI0NDQ4MDB9.signature",
+      "native_route": true
+    },
+    {
+      "id": "canonical-fractional-future-jwt",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAuOSwic3ViIjoic3ludGhldGljIn0.signature\"}]}",
+      "token": "header.eyJleHAiOjQxMDI0NDQ4MDAuOSwic3ViIjoic3ludGhldGljIn0.signature",
+      "native_route": true
+    },
+    {
+      "id": "jwt-exp-case-alias-after-canonical",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAsIkVYUCI6MH0.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "jwt-exp-case-alias-before-canonical",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJFWFAiOjAsImV4cCI6NDEwMjQ0NDgwMH0.signature\"}]}",
+      "token": "header.eyJFWFAiOjAsImV4cCI6NDEwMjQ0NDgwMH0.signature",
+      "native_route": false
+    },
+    {
+      "id": "jwt-duplicate-exp-invalid-before-valid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOiJpbnZhbGlkIiwiZXhwIjo0MTAyNDQ0ODAwfQ.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "jwt-duplicate-exp-valid-before-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAsImV4cCI6ImludmFsaWQifQ.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "expired-jwt",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjF9.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "case-insensitive-exp-is-go-only",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJFWFAiOjQxMDI0NDQ4MDB9.signature\"}]}",
+      "token": "header.eyJFWFAiOjQxMDI0NDQ4MDB9.signature",
+      "native_route": false
+    },
+    {
+      "id": "string-exp-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOiI0MTAyNDQ0ODAwIn0.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "malformed-jwt-payload-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHA.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "padded-jwt-payload-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDB9=.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
       "id": "secret-reference-token-remains-go-only",
       "file_present": true,
       "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"symvault://nous/token\"}]}",
