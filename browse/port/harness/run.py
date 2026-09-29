@@ -202,6 +202,8 @@ def wait_for_request(
 
 def assert_clean_process(process: subprocess.Popen[bytes], *, timeout: float = 5.0) -> None:
     stdout, stderr = process.communicate(timeout=timeout)
+    if process.returncode != 0:
+        raise AssertionError(f"daemon exited with status {process.returncode}, expected 0")
     if stdout:
         raise AssertionError(f"daemon wrote to stdout: {stdout[:200]!r}")
     if len(stderr) > 65536:

@@ -159,15 +159,15 @@
       ],
       "status": "in_progress",
       "acceptance_commands": [
-        "cargo nextest run -p symbrowse-daemon",
+        "cargo test -p symbrowse-daemon --locked",
         "python3 port/harness/run.py --suite daemon",
         "python3 port/harness/run.py --suite daemon-races --repeat 50"
       ],
       "stop_rule": "Do not proceed while a concurrent starter can unlink a live socket or peer validation is weaker than Go.",
       "acceptance": [
-        "make rust-daemon-contract",
-        "make rust-lint",
-        "make rust-test",
+        "cargo test -p symbrowse-daemon --locked",
+        "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings",
+        "cargo test --workspace --locked",
         "cargo clippy --workspace --all-targets --all-features --target x86_64-pc-windows-msvc --locked -- -D warnings"
       ]
     },

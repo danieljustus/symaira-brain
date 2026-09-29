@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -16,6 +17,21 @@ assert SPEC and SPEC.loader
 run = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = run
 SPEC.loader.exec_module(run)
+
+
+class DaemonExitTests(unittest.TestCase):
+    def test_clean_output_does_not_hide_a_failed_daemon(self) -> None:
+        for status in (0, 7):
+            with self.subTest(status=status), subprocess.Popen(
+                [sys.executable, "-c", f"raise SystemExit({status})"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            ) as process:
+                if status:
+                    with self.assertRaisesRegex(AssertionError, "daemon exited with status 7"):
+                        run.assert_clean_process(process)
+                else:
+                    run.assert_clean_process(process)
 
 
 class CargoTargetRootTests(unittest.TestCase):

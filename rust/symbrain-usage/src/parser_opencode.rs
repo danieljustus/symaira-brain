@@ -27,6 +27,7 @@ pub(super) fn parse(body: &[u8], now: DateTime<Utc>) -> Result<UsageSnapshot, Us
             #[allow(clippy::cast_possible_truncation)]
             let reset = reset.and_then(|value| {
                 now.checked_add_signed(chrono::Duration::nanoseconds((value * 1e9) as i64))
+                    .map(|time| time.fixed_offset())
             });
             meter(
                 if index == 0 { "5h window" } else { "This week" },

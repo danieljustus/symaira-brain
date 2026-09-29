@@ -4,7 +4,7 @@ Contract CLI-006A is the bounded `symbrain init` portion of CLI-006. The full co
 
 ## Source and behavior
 
-The oracle is the unreleased immutable commit `d53c3824e7d6771fabefd62a18dd3c5e50c3c37d`. `scripts/init-oracle/compare.py` extracts its Git archive with LF settings and verifies extracted source bytes against that commit's Git blobs before building the real Go CLI. The public Rust CLI dispatches init in process; its tests also run with the Go fallback unavailable.
+The current comparator pins the unreleased immutable commit `9c0e2b259753901a372ed5a688382bb6d4fadd18`. `scripts/init-oracle/compare.py` extracts its Git archive with LF settings and verifies extracted source bytes against that commit's Git blobs before building the real Go CLI. The public Rust CLI dispatches init in process; its tests also run with the Go fallback unavailable.
 
 The 20-case differential compares exact stdout/stderr, status and filesystem manifests: initial files, existing edits, XDG precedence, missing home, flag failures, positional/terminator parsing, directory collisions, existing/dangling/cyclic symlinks and partial side effects. Templates retain the Go bytes. Creation modes remain 0700/0600 on Unix; Windows uses its native filesystem semantics. The comparator has no output normalization. The original Go implementation remains available for rollback; running Go init after Rust must preserve existing files under the same write-if-missing contract.
 
@@ -87,3 +87,15 @@ evidence remains applicable. Raw failures and native reports remain retained.
 A documentation-only successor must record its exact-head workflow separately in
 the task handoff; this section identifies the tested implementation source.
 CLI-006, CFG-001, value and full-product rollback acceptance remain open.
+
+
+## Current local native checkpoint — 2026-09-29
+
+Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes all 20 exact
+init comparisons on native Darwin/arm64 and Linux/arm64. Both reports record
+the pinned Go source manifest, Go 1.26.7, Rust 1.98.0 and executable hashes.
+Fourteen comparator controls pass; the Windows process-tree control is not
+applicable to these hosts. `--work-dir` selects a disposable writable runtime
+outside the source checkout, and explicit GOCACHE/GOPATH values are reused.
+Receipts are `init-receipt-f1263bea.json` in the existing Brain/native-linux
+build roots. Current native Windows acceptance remains unverified.

@@ -112,8 +112,8 @@ func callRequest(id int, name string, args map[string]any) request {
 	}}
 }
 
-func runCase(root, fakePath string, requests []request, childTools []childTool) (caseExpectation, error) {
-	home, err := os.MkdirTemp(root, "gateway-home-")
+func runCase(fakePath string, requests []request, childTools []childTool) (caseExpectation, error) {
+	home, err := os.MkdirTemp("", "gateway-home-")
 	if err != nil {
 		return caseExpectation{}, err
 	}
@@ -226,8 +226,8 @@ func runCase(root, fakePath string, requests []request, childTools []childTool) 
 	return result, nil
 }
 
-func runCancellationCase(root, fakePath string) (cancellationCase, error) {
-	home, err := os.MkdirTemp(root, "gateway-cancel-home-")
+func runCancellationCase(fakePath string) (cancellationCase, error) {
+	home, err := os.MkdirTemp("", "gateway-cancel-home-")
 	if err != nil {
 		return cancellationCase{}, err
 	}
@@ -475,14 +475,14 @@ func generate(root string) (fixture, error) {
 	}
 	result := fixture{SchemaVersion: 1, ProfileTOML: profileTOML, ChildTools: baseTools}
 	for _, tc := range cases {
-		got, err := runCase(root, fakePath, tc.requests, tc.tools)
+		got, err := runCase(fakePath, tc.requests, tc.tools)
 		if err != nil {
 			return fixture{}, fmt.Errorf("case %s: %w", tc.id, err)
 		}
 		got.ID = tc.id
 		result.Cases = append(result.Cases, got)
 	}
-	cancelled, err := runCancellationCase(root, fakePath)
+	cancelled, err := runCancellationCase(fakePath)
 	if err != nil {
 		return fixture{}, fmt.Errorf("case tools-call-connection-cancelled: %w", err)
 	}

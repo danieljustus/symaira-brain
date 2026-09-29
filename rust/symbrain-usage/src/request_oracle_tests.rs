@@ -8,6 +8,11 @@
 
 use super::super::{hostname, platform_label, request_for};
 use crate::providers::Provider;
+use crate::providers::{
+    claude_from_resolved, codex_from_resolved, copilot_from_resolved, cursor_from_resolved,
+    kimi_from_resolved, moonshot_from_resolved, nous_from_resolved, opencode_from_resolved,
+    openrouter_from_resolved, parse_claude_keychain_blob,
+};
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -15,12 +20,33 @@ use std::sync::Arc;
 use std::time::Duration;
 
 const ORACLE: &str = include_str!("../tests/fixtures/usage_requests.json");
+const CLAUDE_OAUTH_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/claude_oauth_authenticated_report.json");
+const CLAUDE_KEYCHAIN_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/claude_keychain_authenticated_report.json");
+const CODEX_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/codex_file_authenticated_report.json");
+const COPILOT_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/copilot_file_authenticated_report.json");
+const COMBINED_NATIVE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/combined_native_authenticated_report.json");
+const KIMI_FALLBACK_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/kimi_fallback_authenticated_report.json");
+const NOUS_PRECEDENCE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/nous_env_file_precedence_report.json");
+const NOUS_FILE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/nous_file_authenticated_report.json");
+const ANTIGRAVITY_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/antigravity_authenticated_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
 const CODEX_OAUTH: &str = "dump-codex-oauth";
 const COPILOT_OAUTH: &str = "dump-copilot-oauth";
 const REPORT_ENV_CREDENTIAL: &str = "synthetic-direct-env-credential";
+const REPORT_FILE_CREDENTIAL: &str = "oracle-only-invalid-claude-oauth-file";
+const CODEX_FILE_CREDENTIAL: &str = "oracle-only-invalid-codex-file";
+const COPILOT_FILE_CREDENTIAL: &str = "oracle-only-invalid-copilot-file";
 const CURSOR_COOKIE: &str = "dump-cursor-cookie";
 const KIMI_CLI: &str = "dump-kimi-api-key";
 const KIMI_WEB: &str = "dump-kimi-web-token";
@@ -152,143 +178,653 @@ fn provider_for(case: &Case) -> Provider {
 }
 
 fn authenticated_copilot_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "copilot",
-        include_str!("../tests/fixtures/copilot_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "copilot")
 }
 
 fn authenticated_claude_admin_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "claude",
-        include_str!("../tests/fixtures/claude_admin_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "claude")
+}
+
+fn authenticated_claude_oauth_report(
+    response: Response,
+    source: &str,
+    credential: &str,
+) -> (crate::Report, FixtureTransport) {
+    let provider = claude_from_resolved(
+        None,
+        None,
+        Some((source.into(), credential.into())),
+        None,
+        None,
+    );
+    let transport = FixtureTransport::new([("claude".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    (report, transport)
 }
 
 fn authenticated_codex_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "codex",
-        include_str!("../tests/fixtures/codex_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "codex")
+}
+
+fn authenticated_codex_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let oracle: Value =
+        serde_json::from_str(CODEX_FILE_REPORT_ORACLE).expect("Go Codex file-authenticated report");
+    let providers = oracle["success"]["providers"]
+        .as_array()
+        .expect("Go provider rows")
+        .iter()
+        .map(|row| {
+            let id = row["id"].as_str().expect("provider id");
+            if id == "codex" {
+                return codex_from_resolved(
+                    Some(("file".into(), CODEX_FILE_CREDENTIAL.into())),
+                    None,
+                    true,
+                );
+            }
+            let name = row["display_name"].as_str().expect("provider display name");
+            let mut provider = Provider::fixture(id, name);
+            provider.configured = row["configured"].as_bool().expect("configured state");
+            provider.auth_status =
+                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
+            provider.credential = None;
+            provider.credentials.clear();
+            provider
+        })
+        .collect();
+    let transport = FixtureTransport::new([("codex".into(), response)].into());
+    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    (report, transport)
+}
+
+fn authenticated_copilot_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let provider =
+        copilot_from_resolved(Some(("file".into(), COPILOT_FILE_CREDENTIAL.into())), None);
+    let transport = FixtureTransport::new([("copilot".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    (report, transport)
 }
 
 fn authenticated_openrouter_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "openrouter",
-        include_str!("../tests/fixtures/openrouter_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "openrouter")
 }
 
 fn authenticated_moonshot_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "moonshot",
-        include_str!("../tests/fixtures/moonshot_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "moonshot")
 }
 
 fn authenticated_cursor_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "cursor",
-        include_str!("../tests/fixtures/cursor_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "cursor")
 }
 
 fn authenticated_kimi_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "kimi",
-        include_str!("../tests/fixtures/kimi_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "kimi")
 }
 
 fn authenticated_nous_report(response: Response) -> (crate::Report, FixtureTransport) {
-    authenticated_direct_provider_report(
-        response,
-        "nous",
-        include_str!("../tests/fixtures/nous_authenticated_report.json"),
-    )
+    authenticated_direct_provider_report(response, "nous")
+}
+
+fn authenticated_nous_file_report(response: Response) -> (crate::Report, FixtureTransport) {
+    let parser_oracle: Value = serde_json::from_str(include_str!(
+        "../tests/fixtures/nous_file_token_oracle.json"
+    ))
+    .expect("Go Nous auth.json parser oracle");
+    let token = parser_oracle["cases"]
+        .as_array()
+        .expect("Nous parser cases")
+        .iter()
+        .find(|case| case["id"] == "canonical-future-jwt")
+        .and_then(|case| case["token"].as_str())
+        .expect("Go selected a canonical live JWT");
+    let provider = nous_from_resolved(
+        Some(("file".into(), token.into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let transport = FixtureTransport::new([("nous".into(), response)].into());
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    (report, transport)
 }
 
 fn authenticated_direct_provider_report(
     response: Response,
     configured_provider: &str,
-    report_fixture: &str,
 ) -> (crate::Report, FixtureTransport) {
-    // Rebuild all ten report rows from the source-pinned Go fixture. The
-    // providers with no credentials have no probe state; Antigravity's
-    // fixture credential is absent to select its deterministic not-running
-    // result. Only the selected provider gets a synthetic direct env token.
-    let oracle: Value = serde_json::from_str(report_fixture).expect("Go authenticated report");
-    let providers = oracle["providers"]
-        .as_array()
-        .expect("Go provider rows")
-        .iter()
-        .map(|row| {
-            let id = row["id"].as_str().expect("provider id");
-            let name = row["display_name"].as_str().expect("provider name");
-            let mut provider = Provider::fixture(id, name);
-            provider.configured = row["configured"].as_bool().expect("configured state");
-            provider.auth_status =
-                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
-            provider.credential = None;
-            provider.credentials.clear();
-            if id == configured_provider {
-                let strategy = if matches!(id, "kimi" | "claude") {
-                    "api"
-                } else {
-                    "env"
-                };
-                if id == "claude" {
-                    provider.fixture = false;
-                }
-                provider.credentials = vec![(strategy.into(), REPORT_ENV_CREDENTIAL.into())];
-                provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
-            }
-            provider
-        })
-        .collect();
+    let credential = Some(("env".into(), REPORT_ENV_CREDENTIAL.into()));
+    let provider = match configured_provider {
+        "claude" => claude_from_resolved(credential, None, None, None, None),
+        "codex" => codex_from_resolved(credential, None, false),
+        "copilot" => copilot_from_resolved(credential, None),
+        "cursor" => cursor_from_resolved(credential, None),
+        "kimi" => kimi_from_resolved(
+            credential,
+            None,
+            None,
+            None,
+            None,
+            "https://api.kimi.com".into(),
+            None,
+        ),
+        "moonshot" => moonshot_from_resolved(credential, None, "ai"),
+        "nous" => nous_from_resolved(credential, None, "https://portal.nousresearch.com".into()),
+        "openrouter" => {
+            openrouter_from_resolved(credential, None, "https://openrouter.ai/api/v1".into())
+        }
+        _ => panic!("unsupported direct provider {configured_provider}"),
+    };
     let transport = FixtureTransport::new([(configured_provider.into(), response)].into());
-    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
     (report, transport)
 }
 
-fn authenticated_opencode_report(responses: Vec<Response>) -> (crate::Report, FixtureTransport) {
-    let oracle: Value = serde_json::from_str(include_str!(
-        "../tests/fixtures/opencode_authenticated_report.json"
-    ))
-    .expect("Go authenticated OpenCode report");
-    let providers = oracle["providers"]
+fn go_report_provider_row(report: &Value, provider_id: &str) -> Value {
+    report["providers"]
         .as_array()
         .expect("Go provider rows")
         .iter()
-        .map(|row| {
-            let id = row["id"].as_str().expect("provider id");
-            let name = row["display_name"].as_str().expect("provider name");
-            let mut provider = Provider::fixture(id, name);
-            provider.configured = row["configured"].as_bool().expect("configured state");
-            provider.auth_status =
-                serde_json::from_value(row["auth_status"].clone()).expect("Go auth status");
-            provider.credential = None;
-            provider.credentials.clear();
-            if id == "opencode" {
-                provider.fixture = false;
-                provider.credentials = vec![("env".into(), REPORT_ENV_CREDENTIAL.into())];
-                provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
+        .find(|row| row["id"] == provider_id)
+        .unwrap_or_else(|| panic!("Go report has no {provider_id} row"))
+        .clone()
+}
+
+fn assert_single_provider_report_matches_go(
+    report: &crate::Report,
+    provider_id: &str,
+    expected: &Value,
+) {
+    assert_eq!(
+        report.providers.len(),
+        1,
+        "only {provider_id} is under test"
+    );
+    assert_eq!(report.providers[0].id, provider_id);
+    assert_eq!(
+        serde_json::to_value(&report.providers[0]).expect("Rust provider report row"),
+        *expected,
+        "{provider_id} provider report row"
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn antigravity_local_probe_report_and_requests_match_production_go_oracle() {
+    let oracle: Value = serde_json::from_str(ANTIGRAVITY_REPORT_ORACLE)
+        .expect("Go Antigravity local report oracle");
+    let cases = oracle["cases"]
+        .as_array()
+        .expect("Antigravity oracle cases");
+    assert_eq!(cases.len(), 5);
+
+    for case in cases {
+        let case_id = case["id"].as_str().expect("case id");
+        let process_list = case["process_list"]
+            .as_str()
+            .expect("synthetic process list");
+        let provider = crate::providers::provider_config::antigravity_from_process_list(
+            (!process_list.is_empty()).then_some(process_list),
+        );
+        let expected_responses = case["responses"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|response| {
+                let headers = response["headers"]
+                    .as_object()
+                    .into_iter()
+                    .flatten()
+                    .map(|(name, value)| {
+                        (
+                            name.clone(),
+                            value.as_str().expect("response header value").to_string(),
+                        )
+                    })
+                    .collect();
+                Ok(Response {
+                    status: u16::try_from(response["status"].as_u64().expect("response status"))
+                        .expect("HTTP status fits u16"),
+                    body: response["body"]
+                        .as_str()
+                        .expect("response body")
+                        .as_bytes()
+                        .to_vec(),
+                    headers,
+                })
+            })
+            .collect::<Vec<Result<Response, String>>>();
+        let transport =
+            FixtureTransport::with_sequences([("antigravity".into(), expected_responses)].into());
+        let transport_ref: Arc<dyn crate::Transport> = Arc::new(transport.clone());
+        let port_outputs = case["ports_by_pid"].as_object();
+        let result = crate::providers::wrap_fetch_error(
+            &provider.id,
+            crate::providers::fetch_antigravity_from_observations(
+                &provider,
+                &transport_ref,
+                &Cancellation::new(),
+                process_list,
+                |pid| {
+                    port_outputs
+                        .and_then(|outputs| outputs.get(&pid.to_string()))
+                        .and_then(Value::as_str)
+                        .map(str::to_owned)
+                },
+            ),
+        );
+        let mut actual_row = crate::ProviderUsage::from_provider(&provider);
+        match result {
+            Ok(snapshot) => actual_row.snapshot = Some(snapshot),
+            Err(error) => actual_row.error = Some(error.to_string()),
+        }
+
+        let expected_report: crate::Report =
+            serde_json::from_value(case["report"].clone()).expect("Go report fixture");
+        let expected_row = expected_report.providers.first().expect("Go provider row");
+        if let (Some(actual), Some(expected)) =
+            (actual_row.snapshot.as_mut(), expected_row.snapshot.as_ref())
+        {
+            // Only fetched_at is wall-clock data. Resets and all parsed values
+            // remain direct comparisons against the Go production report.
+            actual.fetched_at = expected.fetched_at;
+        }
+        assert_eq!(
+            serde_json::to_value(&actual_row).expect("Rust Antigravity provider row"),
+            serde_json::to_value(expected_row).expect("Go Antigravity provider row"),
+            "Antigravity report case {case_id}"
+        );
+
+        let expected_requests = case["requests"].as_array().expect("Go request trace");
+        let actual_requests = transport.requests();
+        assert_eq!(
+            actual_requests.len(),
+            expected_requests.len(),
+            "{case_id} request count"
+        );
+        let port_numbers: Vec<String> = case["ports_by_pid"]
+            .as_object()
+            .into_iter()
+            .flatten()
+            .flat_map(|(_, output)| {
+                output
+                    .as_str()
+                    .unwrap_or_default()
+                    .split(':')
+                    .skip(1)
+                    .filter_map(|tail| tail.split_whitespace().next())
+                    .filter(|port| port.chars().all(|ch| ch.is_ascii_digit()))
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        for (actual, expected) in actual_requests.iter().zip(expected_requests) {
+            let mut url = actual.url.clone();
+            for port in &port_numbers {
+                url = url.replace(&format!("127.0.0.1:{port}"), "127.0.0.1:<port>");
             }
-            provider
-        })
-        .collect();
+            let headers = actual
+                .headers
+                .iter()
+                .filter(|(name, _)| {
+                    [
+                        "accept",
+                        "content-type",
+                        "connect-protocol-version",
+                        "x-codeium-csrf-token",
+                    ]
+                    .iter()
+                    .any(|allowed| name.eq_ignore_ascii_case(allowed))
+                })
+                .map(|(name, value)| (name.to_ascii_lowercase(), value.clone()))
+                .collect::<BTreeMap<_, _>>();
+            let expected_headers = expected["headers"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .map(|(name, value)| (name.to_ascii_lowercase(), value.clone()))
+                .collect::<serde_json::Map<_, _>>();
+            let normalized = serde_json::json!({
+                "method": actual.method,
+                "url": url,
+                "headers": headers,
+                "body": actual.body.as_deref().map(String::from_utf8_lossy).map(std::borrow::Cow::into_owned).unwrap_or_default(),
+            });
+            let expected_normalized = serde_json::json!({
+                "method": expected["method"],
+                "url": expected["url"],
+                "headers": expected_headers,
+                "body": expected["body"].as_str().unwrap_or_default(),
+            });
+            assert_eq!(normalized, expected_normalized, "{case_id} request");
+        }
+    }
+}
+
+fn authenticated_opencode_report(responses: Vec<Response>) -> (crate::Report, FixtureTransport) {
+    let provider = opencode_from_resolved(
+        Some(("env".into(), REPORT_ENV_CREDENTIAL.into())),
+        None,
+        None,
+    );
     let transport = FixtureTransport::with_sequences(
         [("opencode".into(), responses.into_iter().map(Ok).collect())].into(),
     );
-    let report = crate::Service::with_transport(providers, Arc::new(transport.clone())).report();
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
     (report, transport)
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn combined_native_providers_match_the_production_go_report_and_overrides() {
+    let expected: Value = serde_json::from_str(COMBINED_NATIVE_REPORT_ORACLE)
+        .expect("Go combined configured-provider report");
+    let kimi = kimi_from_resolved(
+        Some(("env".into(), "combined-kimi-api-token".into())),
+        None,
+        Some("combined-kimi-cli-token"),
+        None,
+        None,
+        "https://api.kimi.com/custom/v1".into(),
+        Some("combined-device-id".into()),
+    );
+    let moonshot = moonshot_from_resolved(
+        Some(("env".into(), "combined-moonshot-token".into())),
+        None,
+        "cn",
+    );
+    let nous = nous_from_resolved(
+        Some(("file".into(), "combined-nous-file-token".into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let opencode = opencode_from_resolved(
+        Some(("env".into(), "combined-opencode-cookie".into())),
+        None,
+        Some("wrk_combined123"),
+    );
+    let openrouter = openrouter_from_resolved(
+        Some(("env".into(), "combined-openrouter-token".into())),
+        None,
+        "https://openrouter.ai/custom/v1".into(),
+    );
+    let transport = FixtureTransport::new(
+        [
+            (
+                "kimi".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/kimi-fallback-api-usages.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "moonshot".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/moonshot-balance-cn.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "nous".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!("../../../internal/usage/testdata/nous-account.json")
+                        .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "opencode".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/opencode-subscription-no-reset.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "openrouter".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/openrouter-credits.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+        ]
+        .into(),
+    );
+    let mut report = crate::Service::with_transport(
+        vec![kimi, moonshot, nous, opencode, openrouter],
+        Arc::new(transport.clone()),
+    )
+    .report();
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["kimi", "moonshot", "nous", "opencode", "openrouter"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 5);
+    let find_request = |matches: &dyn Fn(&crate::transport::Request) -> bool| {
+        requests.iter().find(|request| matches(request))
+    };
+    let kimi_request =
+        find_request(&|request| request.url == "https://api.kimi.com/custom/v1/coding/v1/usages")
+            .expect("Kimi API request");
+    assert_eq!(
+        kimi_request
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer combined-kimi-api-token")
+    );
+    assert!(
+        find_request(&|request| request.url == "https://api.moonshot.cn/v1/users/me/balance")
+            .is_some()
+    );
+    assert!(
+        find_request(
+            &|request| request.headers.get("Authorization").map(String::as_str)
+                == Some("Bearer combined-nous-file-token")
+        )
+        .is_some()
+    );
+    assert!(
+        find_request(&|request| {
+            request.url.starts_with("https://opencode.ai/_server?")
+                && request.url.contains("args=%5B%22wrk_combined123%22%5D")
+        })
+        .is_some()
+    );
+    assert!(
+        find_request(&|request| request.url == "https://openrouter.ai/custom/v1/auth/key")
+            .is_some()
+    );
+
+    let go_rows = expected["providers"].as_array().expect("Go provider rows");
+    for provider in &mut report.providers {
+        let go_row = go_rows
+            .iter()
+            .find(|row| row["id"] == provider.id)
+            .unwrap_or_else(|| panic!("Go report has no {} row", provider.id));
+        let mut rust_row = serde_json::to_value(&*provider).expect("Rust provider row");
+        let fetched_at = go_row["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("Go canonical fetched_at");
+        rust_row["snapshot"]["fetched_at"] = Value::String(fetched_at.to_owned());
+        assert_eq!(rust_row, *go_row, "{} provider row", provider.id);
+    }
+}
+
+#[test]
+fn nous_environment_credential_precedes_the_default_file() {
+    let expected: Value =
+        serde_json::from_str(NOUS_PRECEDENCE_REPORT_ORACLE).expect("Go Nous env-over-file report");
+    let provider = nous_from_resolved(
+        Some(("env".into(), "nous-env-precedence-token".into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let transport = FixtureTransport::new(
+        [(
+            "nous".into(),
+            Response {
+                status: 200,
+                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                headers: BTreeMap::new(),
+            },
+        )]
+        .into(),
+    );
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    assert_eq!(
+        report.providers[0].auth_status.source.as_deref(),
+        Some("env")
+    );
+    assert_eq!(
+        transport.requests()[0]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer nous-env-precedence-token")
+    );
+    let expected_row = &expected["providers"][0];
+    let mut rust_row = serde_json::to_value(&report.providers[0]).expect("Rust Nous row");
+    rust_row["snapshot"]["fetched_at"] = expected_row["snapshot"]["fetched_at"].clone();
+    assert_eq!(rust_row, *expected_row);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn kimi_cli_and_web_fallback_reports_match_production_go_chains() {
+    let expected: Value =
+        serde_json::from_str(KIMI_FALLBACK_REPORT_ORACLE).expect("Go Kimi fallback reports");
+    let api_response = Response {
+        status: 401,
+        body: br#"{"error":"unauthorized"}"#.to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let cli_success = Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-api-usages.json")
+            .to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let cli_transport = FixtureTransport::with_sequences(
+        [(
+            "kimi".into(),
+            vec![Ok(api_response.clone()), Ok(cli_success)],
+        )]
+        .into(),
+    );
+    let cli = kimi_from_resolved(
+        Some(("env".into(), "fallback-kimi-api-token".into())),
+        None,
+        Some("fallback-kimi-cli-token"),
+        None,
+        None,
+        "https://api.kimi.com".into(),
+        Some("fallback-device-id".into()),
+    );
+    let cli_report =
+        crate::Service::with_transport(vec![cli], Arc::new(cli_transport.clone())).report();
+    assert_eq!(
+        cli_report.providers[0].snapshot.as_ref().unwrap().source,
+        "cli"
+    );
+    let cli_requests = cli_transport.requests();
+    assert_eq!(cli_requests.len(), 2);
+    assert_eq!(
+        cli_requests[0]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-api-token")
+    );
+    assert_eq!(
+        cli_requests[1]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-cli-token")
+    );
+    assert_eq!(
+        cli_requests[1]
+            .headers
+            .get("X-Msh-Device-Id")
+            .map(String::as_str),
+        Some("fallback-device-id")
+    );
+    let cli_expected = &expected["api_fails_cli_recovers"]["providers"][0];
+    let mut cli_row = serde_json::to_value(&cli_report.providers[0]).expect("Rust Kimi CLI row");
+    cli_row["snapshot"]["fetched_at"] = cli_expected["snapshot"]["fetched_at"].clone();
+    assert_eq!(cli_row, *cli_expected);
+
+    let web_success = Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-web-usages.json")
+            .to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let web_transport = FixtureTransport::with_sequences(
+        [(
+            "kimi".into(),
+            vec![Ok(api_response.clone()), Ok(api_response), Ok(web_success)],
+        )]
+        .into(),
+    );
+    let web = kimi_from_resolved(
+        Some(("env".into(), "fallback-kimi-api-token".into())),
+        None,
+        Some("fallback-kimi-cli-token"),
+        Some(("env".into(), "fallback-kimi-web-token".into())),
+        None,
+        "https://api.kimi.com".into(),
+        Some("fallback-device-id".into()),
+    );
+    let web_report =
+        crate::Service::with_transport(vec![web], Arc::new(web_transport.clone())).report();
+    assert_eq!(
+        web_report.providers[0].snapshot.as_ref().unwrap().source,
+        "web"
+    );
+    let web_requests = web_transport.requests();
+    assert_eq!(web_requests.len(), 3);
+    assert_eq!(
+        web_requests[2].url,
+        "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages"
+    );
+    assert_eq!(
+        web_requests[2]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-web-token")
+    );
+    let web_expected = &expected["api_cli_fail_web_works"]["providers"][0];
+    let mut web_row = serde_json::to_value(&web_report.providers[0]).expect("Rust Kimi web row");
+    web_row["snapshot"]["fetched_at"] = web_expected["snapshot"]["fetched_at"].clone();
+    assert_eq!(web_row, *web_expected);
 }
 
 fn normalize_rfc3339_fields(value: &mut Value) {
@@ -471,17 +1007,8 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
         body: serde_json::to_vec(&copilot["response"]).expect("response fixture"),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["copilot", "antigravity"]
-    );
-    let usage = &mut report.providers[2];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "copilot");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -516,9 +1043,10 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer synthetic-direct-env-credential")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Copilot report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "copilot",
+        &go_report_provider_row(&report_oracle, "copilot"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -535,7 +1063,7 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[2].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 copilot["errors"][oracle_index]["text"]
                     .as_str()
@@ -543,7 +1071,7 @@ fn authenticated_copilot_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[2].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -558,16 +1086,7 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
         body: include_bytes!("../../../internal/usage/testdata/claude-admin-cost.json").to_vec(),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["claude", "antigravity"]
-    );
+    assert_eq!(report.providers.len(), 1);
     let usage = &mut report.providers[0];
     assert_eq!(usage.id, "claude");
     assert!(usage.configured);
@@ -601,9 +1120,10 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer synthetic-direct-env-credential")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Claude Admin report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "claude",
+        &go_report_provider_row(&report_oracle, "claude"),
     );
 
     // The Admin API emits a USD snapshot even when there are no totals.
@@ -649,6 +1169,193 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
 }
 
 #[test]
+fn authenticated_claude_oauth_report_matches_go_build_report_oracle() {
+    let oracle: Value =
+        serde_json::from_str(CLAUDE_OAUTH_REPORT_ORACLE).expect("Go Claude OAuth report oracle");
+    assert_claude_oauth_report_matches_scenario(
+        &oracle,
+        "success",
+        "env",
+        REPORT_ENV_CREDENTIAL,
+        "errors",
+    );
+}
+
+#[test]
+fn authenticated_claude_oauth_file_report_matches_go_build_report_oracle() {
+    let oracle: Value =
+        serde_json::from_str(CLAUDE_OAUTH_REPORT_ORACLE).expect("Go Claude OAuth report oracle");
+    assert_claude_oauth_report_matches_scenario(
+        &oracle,
+        "file_success",
+        "file",
+        REPORT_FILE_CREDENTIAL,
+        "file_errors",
+    );
+}
+
+#[test]
+fn authenticated_claude_keychain_report_matches_go_production_builder() {
+    let oracle: Value = serde_json::from_str(CLAUDE_KEYCHAIN_REPORT_ORACLE)
+        .expect("Go Claude keychain report oracle");
+    let credential_blob = oracle["credential_blob"]
+        .as_str()
+        .expect("synthetic keychain blob")
+        .as_bytes();
+    let (credential, expires_at) = parse_claude_keychain_blob(credential_blob)
+        .expect("Rust decodes the same synthetic keychain blob");
+
+    let mut scenarios = vec![&oracle["success"]];
+    scenarios.extend(
+        oracle["errors"]
+            .as_array()
+            .expect("Go keychain report errors")
+            .iter(),
+    );
+    assert_eq!(scenarios.len(), 4);
+    for scenario in scenarios {
+        let status = u16::try_from(scenario["status"].as_u64().expect("HTTP status"))
+            .expect("status fits u16");
+        let body = scenario["body"].as_str().expect("canned response body");
+        let response_headers = scenario["response_headers"]
+            .as_object()
+            .expect("Go canned response headers")
+            .iter()
+            .map(|(name, value)| {
+                (
+                    name.clone(),
+                    value.as_str().expect("response header value").to_string(),
+                )
+            })
+            .collect();
+        let response = Response {
+            status,
+            body: body.as_bytes().to_vec(),
+            headers: response_headers,
+        };
+        let provider = claude_from_resolved(
+            None,
+            None,
+            Some(("keychain".into(), credential.clone())),
+            None,
+            expires_at,
+        );
+        let transport = FixtureTransport::new([("claude".into(), response)].into());
+        let report =
+            crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+        let requests = transport.requests();
+        assert_eq!(requests.len(), 1, "status {status}");
+        let request = &requests[0];
+        assert_eq!(request.method, "GET");
+        assert_eq!(request.url, "https://api.anthropic.com/api/oauth/usage");
+        let authorization = format!("Bearer {credential}");
+        assert_eq!(
+            request.headers.get("Authorization").map(String::as_str),
+            Some(authorization.as_str())
+        );
+        assert_eq!(
+            request.headers.get("anthropic-beta").map(String::as_str),
+            Some("oauth-2025-04-20")
+        );
+
+        let expected = &scenario["report"];
+        let mut actual = serde_json::to_value(&report).expect("Rust keychain report");
+        if expected["providers"][0]["snapshot"].is_object() {
+            actual["providers"][0]["snapshot"]["fetched_at"] =
+                expected["providers"][0]["snapshot"]["fetched_at"].clone();
+        }
+        assert_eq!(actual, *expected, "Claude keychain report status {status}");
+
+        let expected_request = &scenario["requests"][0];
+        assert_eq!(expected_request["method"], request.method.as_str());
+        assert_eq!(expected_request["url"], request.url.as_str());
+        for (header, value) in expected_request["headers"]
+            .as_object()
+            .expect("Go safe headers")
+        {
+            assert_eq!(
+                request.headers.get(header).map(String::as_str),
+                value.as_str(),
+                "header {header}"
+            );
+        }
+    }
+}
+
+fn assert_claude_oauth_report_matches_scenario(
+    oracle: &Value,
+    scenario: &str,
+    source: &str,
+    credential: &str,
+    errors_key: &str,
+) {
+    let success = &oracle[scenario];
+    let (report, transport) = authenticated_claude_oauth_report(
+        Response {
+            status: 200,
+            body: include_bytes!("../../../internal/usage/testdata/claude-oauth-usage.json")
+                .to_vec(),
+            headers: BTreeMap::new(),
+        },
+        source,
+        credential,
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(requests[0].url, "https://api.anthropic.com/api/oauth/usage");
+    let expected_authorization = format!("Bearer {credential}");
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some(expected_authorization.as_str())
+    );
+    assert_eq!(
+        requests[0]
+            .headers
+            .get("anthropic-beta")
+            .map(String::as_str),
+        Some("oauth-2025-04-20")
+    );
+
+    let mut actual = serde_json::to_value(&report).expect("Rust Claude OAuth report");
+    actual["providers"][0]["snapshot"]["fetched_at"] =
+        success["providers"][0]["snapshot"]["fetched_at"].clone();
+    assert_eq!(actual, *success);
+
+    let errors = oracle[errors_key]
+        .as_array()
+        .expect("Go report error cases");
+    assert_eq!(errors.len(), 3);
+    for (index, (status, body, retry_after)) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), None),
+        (429, br#"{"error":"slow down"}"#.as_slice(), Some("17")),
+        (200, b"not-json".as_slice(), None),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        assert_eq!(errors[index]["status"], status);
+        let headers = retry_after.map_or_else(BTreeMap::new, |value| {
+            [("Retry-After".into(), value.into())].into_iter().collect()
+        });
+        let (report, transport) = authenticated_claude_oauth_report(
+            Response {
+                status,
+                body: body.to_vec(),
+                headers,
+            },
+            source,
+            credential,
+        );
+        assert_eq!(transport.requests().len(), 1);
+        assert_eq!(
+            serde_json::to_value(report).expect("Rust Claude OAuth error report"),
+            errors[index]["report"]
+        );
+    }
+}
+
+#[test]
 fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
     let report_oracle: Value = serde_json::from_str(include_str!(
         "../tests/fixtures/codex_authenticated_report.json"
@@ -668,17 +1375,8 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
         body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["codex", "antigravity"]
-    );
-    let usage = &mut report.providers[1];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "codex");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -711,9 +1409,10 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer synthetic-direct-env-credential")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Codex report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "codex",
+        &go_report_provider_row(&report_oracle, "codex"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -730,7 +1429,7 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[1].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 codex["errors"][oracle_index]["text"]
                     .as_str()
@@ -738,7 +1437,7 @@ fn authenticated_codex_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[1].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -762,17 +1461,8 @@ fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
         body: serde_json::to_vec(&openrouter["response"]).expect("response fixture"),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["openrouter", "antigravity"]
-    );
-    let usage = &mut report.providers[8];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "openrouter");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -803,9 +1493,10 @@ fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("X-Title").map(String::as_str),
         Some("symbrain")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust OpenRouter report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "openrouter",
+        &go_report_provider_row(&report_oracle, "openrouter"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -822,7 +1513,7 @@ fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[8].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 openrouter["errors"][oracle_index]["text"]
                     .as_str()
@@ -830,7 +1521,7 @@ fn authenticated_openrouter_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[8].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -854,17 +1545,8 @@ fn authenticated_moonshot_report_matches_go_success_and_failure_oracles() {
         body: serde_json::to_vec(&moonshot["response"]).expect("response fixture"),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["moonshot", "antigravity"]
-    );
-    let usage = &mut report.providers[5];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "moonshot");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -894,9 +1576,10 @@ fn authenticated_moonshot_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer synthetic-direct-env-credential")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Moonshot report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "moonshot",
+        &go_report_provider_row(&report_oracle, "moonshot"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -913,7 +1596,7 @@ fn authenticated_moonshot_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[5].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 moonshot["errors"][oracle_index]["text"]
                     .as_str()
@@ -921,7 +1604,7 @@ fn authenticated_moonshot_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[5].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -945,17 +1628,8 @@ fn authenticated_cursor_report_matches_go_success_and_failure_oracles() {
         body: serde_json::to_vec(&cursor["response"]).expect("response fixture"),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["cursor", "antigravity"]
-    );
-    let usage = &mut report.providers[3];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "cursor");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -989,9 +1663,10 @@ fn authenticated_cursor_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Accept").map(String::as_str),
         Some("application/json")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Cursor report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "cursor",
+        &go_report_provider_row(&report_oracle, "cursor"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -1008,7 +1683,7 @@ fn authenticated_cursor_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[3].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 cursor["errors"][oracle_index]["text"]
                     .as_str()
@@ -1016,7 +1691,7 @@ fn authenticated_cursor_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[3].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -1041,17 +1716,8 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
         body: include_bytes!("../../../internal/usage/testdata/kimi-api-usages.json").to_vec(),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["kimi", "antigravity"]
-    );
-    let usage = &mut report.providers[4];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "kimi");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -1080,7 +1746,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
             Some(
                 chrono::DateTime::parse_from_rfc3339(response_time)
                     .expect("Go response reset timestamp")
-                    .with_timezone(&chrono::Utc)
+                    .fixed_offset()
             ),
             "{} reset timestamp follows the Go response",
             meter.label
@@ -1101,7 +1767,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
                     .expect("oracle reset timestamp"),
             )
             .expect("oracle reset timestamp parses")
-            .with_timezone(&chrono::Utc),
+            .fixed_offset(),
         );
     }
     let mut rust_snapshot = serde_json::to_value(snapshot).expect("Rust snapshot");
@@ -1121,11 +1787,11 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Accept").map(String::as_str),
         Some("application/json")
     );
-    let mut rust_report = serde_json::to_value(&report).expect("Rust Kimi report");
-    let mut go_report = report_oracle;
-    normalize_rfc3339_fields(&mut rust_report);
-    normalize_rfc3339_fields(&mut go_report);
-    assert_eq!(rust_report, go_report);
+    let mut rust_row = serde_json::to_value(&report.providers[0]).expect("Rust Kimi row");
+    let mut go_row = go_report_provider_row(&report_oracle, "kimi");
+    normalize_rfc3339_fields(&mut rust_row);
+    normalize_rfc3339_fields(&mut go_row);
+    assert_eq!(rust_row, go_row, "Kimi provider report row");
 
     for (status, body, retry_after, oracle_index) in [
         (401, br#"{"error":"nope"}"#.as_slice(), None, 0),
@@ -1141,7 +1807,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[4].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 kimi["errors"][oracle_index]["text"]
                     .as_str()
@@ -1149,7 +1815,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[4].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
     }
 }
 
@@ -1173,17 +1839,8 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
         body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
         headers: BTreeMap::new(),
     });
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["nous", "antigravity"]
-    );
-    let usage = &mut report.providers[6];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &mut report.providers[0];
     assert_eq!(usage.id, "nous");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -1216,9 +1873,10 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
         requests[0].headers.get("Authorization").map(String::as_str),
         Some("Bearer synthetic-direct-env-credential")
     );
-    assert_eq!(
-        serde_json::to_value(&report).expect("Rust Nous report"),
-        report_oracle
+    assert_single_provider_report_matches_go(
+        &report,
+        "nous",
+        &go_report_provider_row(&report_oracle, "nous"),
     );
 
     for (status, body, retry_after, oracle_index) in [
@@ -1235,7 +1893,7 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
             headers,
         });
         assert_eq!(
-            report.providers[6].error.as_deref(),
+            report.providers[0].error.as_deref(),
             Some(
                 nous["errors"][oracle_index]["text"]
                     .as_str()
@@ -1243,7 +1901,68 @@ fn authenticated_nous_report_matches_go_success_and_failure_oracles() {
             ),
             "HTTP {status} report error"
         );
-        assert_eq!(report.providers[6].snapshot, None);
+        assert_eq!(report.providers[0].snapshot, None);
+    }
+}
+
+#[test]
+fn authenticated_nous_live_jwt_file_matches_go_production_constructor() {
+    let oracle: Value =
+        serde_json::from_str(NOUS_FILE_REPORT_ORACLE).expect("Go Nous file-authenticated reports");
+    for (response, expected) in [
+        (
+            Response {
+                status: 200,
+                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["success"],
+        ),
+        (
+            Response {
+                status: 401,
+                body: br#"{"error":"nope"}"#.to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][0]["report"],
+        ),
+        (
+            Response {
+                status: 429,
+                body: br#"{"error":"slow down"}"#.to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][1]["report"],
+        ),
+        (
+            Response {
+                status: 200,
+                body: b"{}".to_vec(),
+                headers: BTreeMap::new(),
+            },
+            &oracle["errors"][2]["report"],
+        ),
+    ] {
+        let (report, transport) = authenticated_nous_file_report(response);
+        assert_eq!(report.providers.len(), 1);
+        assert_eq!(
+            report.providers[0].auth_status.source.as_deref(),
+            Some("file")
+        );
+        assert_eq!(transport.requests().len(), 1);
+        assert_eq!(
+            transport.requests()[0]
+                .headers
+                .get("Authorization")
+                .map(String::as_str),
+            Some("Bearer header.eyJleHAiOjQxMDI0NDQ4MDB9.signature")
+        );
+        let mut rust = serde_json::to_value(report).expect("Rust Nous file report");
+        if expected["providers"][0]["snapshot"].is_object() {
+            rust["providers"][0]["snapshot"]["fetched_at"] =
+                expected["providers"][0]["snapshot"]["fetched_at"].clone();
+        }
+        assert_eq!(rust, *expected);
     }
 }
 
@@ -1273,17 +1992,8 @@ fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() 
             headers: BTreeMap::new(),
         },
     ]);
-    assert_eq!(report.providers.len(), 10);
-    assert_eq!(
-        report
-            .providers
-            .iter()
-            .filter(|provider| provider.configured)
-            .map(|provider| provider.id.as_str())
-            .collect::<Vec<_>>(),
-        ["opencode", "antigravity"]
-    );
-    let usage = &report.providers[7];
+    assert_eq!(report.providers.len(), 1);
+    let usage = &report.providers[0];
     assert_eq!(usage.id, "opencode");
     assert!(usage.configured);
     assert_eq!(usage.auth_status.status, "available");
@@ -1293,7 +2003,7 @@ fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() 
     );
     assert_eq!(usage.auth_status.source.as_deref(), Some("env"));
     assert_eq!(usage.error, None);
-    let snapshot = report.providers[7]
+    let snapshot = report.providers[0]
         .snapshot
         .as_mut()
         .expect("OpenCode snapshot");
@@ -1315,8 +2025,7 @@ fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() 
                     .as_str()
                     .expect("oracle reset timestamp"),
             )
-            .expect("oracle reset timestamp parses")
-            .with_timezone(&chrono::Utc),
+            .expect("oracle reset timestamp parses"),
         );
     }
 
@@ -1342,11 +2051,11 @@ fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() 
         );
     }
 
-    let mut rust_report = serde_json::to_value(&report).expect("Rust OpenCode report");
-    let mut go_report = report_oracle;
-    normalize_rfc3339_fields(&mut rust_report);
-    normalize_rfc3339_fields(&mut go_report);
-    assert_eq!(rust_report, go_report);
+    let mut rust_row = serde_json::to_value(&report.providers[0]).expect("Rust OpenCode row");
+    let mut go_row = go_report_provider_row(&report_oracle, "opencode");
+    normalize_rfc3339_fields(&mut rust_row);
+    normalize_rfc3339_fields(&mut go_row);
+    assert_eq!(rust_row, go_row, "OpenCode provider report row");
 }
 
 #[path = "request_oracle_opencode_tests.rs"]
@@ -1433,5 +2142,120 @@ fn provider_error_texts_match_the_shipped_oracle_recording() {
                 "{provider_id} {label}"
             );
         }
+    }
+}
+
+#[test]
+fn authenticated_codex_file_report_matches_go_success_and_failure_oracles() {
+    let oracle: Value =
+        serde_json::from_str(CODEX_FILE_REPORT_ORACLE).expect("Go Codex file report oracle");
+    let (mut report, transport) = authenticated_codex_file_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/codex-wham-usage.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    let codex = &mut report.providers[1];
+    assert_eq!(codex.id, "codex");
+    assert!(codex.configured);
+    assert_eq!(codex.auth_status.status, "available");
+    assert_eq!(codex.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(codex.error, None);
+    let snapshot = codex.snapshot.as_mut().expect("Codex file snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        oracle["success"]["providers"][1]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("oracle fetched_at"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Codex file report"),
+        oracle["success"]
+    );
+
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://chatgpt.com/backend-api/wham/usage"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer oracle-only-invalid-codex-file")
+    );
+
+    for (status, body, error_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), 1),
+        (200, b"{}".as_slice(), 2),
+    ] {
+        let (report, _) = authenticated_codex_file_report(Response {
+            status,
+            body: body.to_vec(),
+            headers: BTreeMap::new(),
+        });
+        assert_eq!(
+            serde_json::to_value(&report).expect("Rust Codex file error report"),
+            oracle["errors"][error_index]["report"],
+            "HTTP {status} report"
+        );
+    }
+}
+
+#[test]
+fn authenticated_copilot_file_report_matches_go_success_and_failure_oracles() {
+    let oracle: Value =
+        serde_json::from_str(COPILOT_FILE_REPORT_ORACLE).expect("Go Copilot file report oracle");
+    let (mut report, transport) = authenticated_copilot_file_report(Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/copilot-user.json").to_vec(),
+        headers: BTreeMap::new(),
+    });
+    let copilot = &mut report.providers[0];
+    assert_eq!(copilot.id, "copilot");
+    assert!(copilot.configured);
+    assert_eq!(copilot.auth_status.status, "available");
+    assert_eq!(copilot.auth_status.source.as_deref(), Some("file"));
+    assert_eq!(copilot.error, None);
+    let snapshot = copilot.snapshot.as_mut().expect("Copilot file snapshot");
+    snapshot.fetched_at = chrono::DateTime::parse_from_rfc3339(
+        oracle["success"]["providers"][0]["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("Go fetched_at"),
+    )
+    .expect("oracle timestamp parses")
+    .with_timezone(&chrono::Utc);
+    assert_eq!(
+        serde_json::to_value(&report).expect("Rust Copilot file report"),
+        oracle["success"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 1);
+    assert_eq!(requests[0].method, "GET");
+    assert_eq!(
+        requests[0].url,
+        "https://api.github.com/copilot_internal/user"
+    );
+    assert_eq!(
+        requests[0].headers.get("Authorization").map(String::as_str),
+        Some("Bearer oracle-only-invalid-copilot-file")
+    );
+
+    for (status, body, error_index) in [
+        (401, br#"{"error":"nope"}"#.as_slice(), 0),
+        (429, br#"{"error":"slow down"}"#.as_slice(), 1),
+        (200, b"{}".as_slice(), 2),
+    ] {
+        let (report, _) = authenticated_copilot_file_report(Response {
+            status,
+            body: body.to_vec(),
+            headers: BTreeMap::new(),
+        });
+        assert_eq!(
+            serde_json::to_value(&report).expect("Rust Copilot file error report"),
+            oracle["errors"][error_index]["report"],
+            "HTTP {status} report"
+        );
     }
 }

@@ -1,0 +1,90 @@
+{
+  "success": {
+    "schema_version": 1,
+    "providers": [
+      {
+        "id": "copilot",
+        "display_name": "GitHub Copilot",
+        "configured": true,
+        "auth_status": {
+          "status": "available",
+          "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+          "source": "file"
+        },
+        "snapshot": {
+          "provider_id": "copilot",
+          "meters": [
+            {
+              "label": "Premium requests",
+              "used": "45",
+              "limit": "300",
+              "unit": "requests",
+              "resets_at": "2026-10-01T00:00:00Z"
+            }
+          ],
+          "fetched_at": "2026-08-01T00:00:00Z",
+          "source": "api"
+        }
+      }
+    ]
+  },
+  "errors": [
+    {
+      "status": 401,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+          }
+        ]
+      }
+    },
+    {
+      "status": 429,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"copilot\" is rate limited"
+          }
+        ]
+      }
+    },
+    {
+      "status": 200,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "copilot",
+            "display_name": "GitHub Copilot",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+              "source": "file"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"copilot\" returned malformed usage data: response contained no usable usage fields"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -118,7 +118,7 @@ fn meter(
     used: Option<String>,
     limit: Option<String>,
     unit: &str,
-    reset: Option<DateTime<Utc>>,
+    reset: Option<DateTime<chrono::FixedOffset>>,
 ) -> UsageMeter {
     UsageMeter {
         label: label.into(),
@@ -128,21 +128,22 @@ fn meter(
         resets_at: reset,
     }
 }
-fn parse_time(v: Option<&Value>) -> Option<DateTime<Utc>> {
+fn parse_time(v: Option<&Value>) -> Option<DateTime<chrono::FixedOffset>> {
     if let Some(s) = text(v) {
         if let Ok(time) = DateTime::parse_from_rfc3339(s) {
-            return Some(time.with_timezone(&Utc));
+            return Some(time);
         }
         if let Ok(date) = chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d") {
-            return date
-                .and_hms_opt(0, 0, 0)
-                .map(|value| DateTime::<Utc>::from_naive_utc_and_offset(value, Utc));
+            return date.and_hms_opt(0, 0, 0).map(|value| {
+                DateTime::<Utc>::from_naive_utc_and_offset(value, Utc).fixed_offset()
+            });
         }
     }
     number(v).and_then(|value| {
         let millis = value.abs() >= 1_000_000_000_000.0;
         let seconds = if millis { value / 1000.0 } else { value };
-        whole_f64(seconds).and_then(|value| DateTime::from_timestamp(value, 0))
+        whole_f64(seconds)
+            .and_then(|value| DateTime::from_timestamp(value, 0).map(|time| time.fixed_offset()))
     })
 }
 fn whole_f64(value: f64) -> Option<i64> {
@@ -246,12 +247,16 @@ fn parse_rate(v: &Value, s: &mut UsageSnapshot, prefix: &str) {
             .or_else(|| {
                 number(w.get("reset_at"))
                     .and_then(whole_f64)
-                    .and_then(|x| DateTime::from_timestamp(x, 0))
+                    .and_then(|x| DateTime::from_timestamp(x, 0).map(|time| time.fixed_offset()))
             })
             .or_else(|| {
                 number(w.get("reset_after_seconds"))
                     .and_then(whole_f64)
-                    .and_then(|x| Utc::now().checked_add_signed(chrono::Duration::seconds(x)))
+                    .and_then(|x| {
+                        Utc::now()
+                            .checked_add_signed(chrono::Duration::seconds(x))
+                            .map(|time| time.fixed_offset())
+                    })
             });
         s.meters.push(meter(
             label,
@@ -286,7 +291,7 @@ fn parse_copilot(v: &Value, s: &mut UsageSnapshot) {
             text(v.get("quota_reset_date"))
                 .and_then(|x| chrono::NaiveDate::parse_from_str(x, "%Y-%m-%d").ok())
                 .and_then(|d| d.and_hms_opt(0, 0, 0))
-                .map(|x| DateTime::<Utc>::from_naive_utc_and_offset(x, Utc))
+                .map(|x| DateTime::<Utc>::from_naive_utc_and_offset(x, Utc).fixed_offset())
         });
         for id in ["premium_interactions", "chat", "completions"]
             .into_iter()

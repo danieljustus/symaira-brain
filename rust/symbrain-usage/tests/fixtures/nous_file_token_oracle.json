@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "canonical-plain-invoke-token",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"synthetic-nous-token\"}]}",
+      "token": "synthetic-nous-token",
+      "native_route": true
+    },
+    {
+      "id": "case-insensitive-struct-fields",
+      "file_present": true,
+      "contents": "{\"Providers\":[{\"ID\":\"nous\",\"Invoke_JWT\":\"synthetic-nous-case-token\"}]}",
+      "token": "synthetic-nous-case-token",
+      "native_route": false
+    },
+    {
+      "id": "canonical-then-case-alias",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"canonical-token\",\"ACCESS_TOKEN\":\"alias-token\"}]}",
+      "token": "alias-token",
+      "native_route": false
+    },
+    {
+      "id": "case-alias-then-canonical",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"ACCESS_TOKEN\":\"alias-token\",\"access_token\":\"canonical-token\"}]}",
+      "token": "canonical-token",
+      "native_route": false
+    },
+    {
+      "id": "invoke-jwt-case-alias",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"canonical-token\",\"INVOKE_JWT\":\"alias-token\"}]}",
+      "token": "alias-token",
+      "native_route": false
+    },
+    {
+      "id": "case-alias-providers-then-canonical",
+      "file_present": true,
+      "contents": "{\"Providers\":[{\"id\":\"nous\",\"access_token\":\"alias-token\"}],\"providers\":[{\"id\":\"nous\",\"access_token\":\"canonical-token\"}]}",
+      "token": "canonical-token",
+      "native_route": false
+    },
+    {
+      "id": "canonical-providers-then-case-alias",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"canonical-token\"}],\"Providers\":[{\"id\":\"nous\",\"access_token\":\"alias-token\"}]}",
+      "token": "alias-token",
+      "native_route": false
+    },
+    {
+      "id": "unknown-provider-field-with-token",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"synthetic-nous-token\",\"unknown_metadata\":true}]}",
+      "token": "synthetic-nous-token",
+      "native_route": false
+    },
+    {
+      "id": "missing-file",
+      "file_present": false,
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "empty-file",
+      "file_present": true,
+      "contents": "",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "malformed-json",
+      "file_present": true,
+      "contents": "{\"providers\":[",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "wrong-typed-token-invalidates-file",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":42}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "duplicate-token-key-remains-go-only",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"first\",\"access_token\":\"last\"}]}",
+      "token": "last",
+      "native_route": false
+    },
+    {
+      "id": "jwt-shaped-token-remains-go-only",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"a.b.c\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "canonical-future-jwt",
+      "file_present": true,
+      "contents": "{\"version\":1,\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDB9.signature\",\"client_id\":\"hermes-cli\"}]}",
+      "token": "header.eyJleHAiOjQxMDI0NDQ4MDB9.signature",
+      "native_route": true
+    },
+    {
+      "id": "canonical-fractional-future-jwt",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAuOSwic3ViIjoic3ludGhldGljIn0.signature\"}]}",
+      "token": "header.eyJleHAiOjQxMDI0NDQ4MDAuOSwic3ViIjoic3ludGhldGljIn0.signature",
+      "native_route": true
+    },
+    {
+      "id": "jwt-exp-case-alias-after-canonical",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAsIkVYUCI6MH0.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "jwt-exp-case-alias-before-canonical",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJFWFAiOjAsImV4cCI6NDEwMjQ0NDgwMH0.signature\"}]}",
+      "token": "header.eyJFWFAiOjAsImV4cCI6NDEwMjQ0NDgwMH0.signature",
+      "native_route": false
+    },
+    {
+      "id": "jwt-duplicate-exp-invalid-before-valid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOiJpbnZhbGlkIiwiZXhwIjo0MTAyNDQ0ODAwfQ.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "jwt-duplicate-exp-valid-before-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDAsImV4cCI6ImludmFsaWQifQ.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "expired-jwt",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjF9.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "case-insensitive-exp-is-go-only",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJFWFAiOjQxMDI0NDQ4MDB9.signature\"}]}",
+      "token": "header.eyJFWFAiOjQxMDI0NDQ4MDB9.signature",
+      "native_route": false
+    },
+    {
+      "id": "string-exp-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOiI0MTAyNDQ0ODAwIn0.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "malformed-jwt-payload-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHA.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "padded-jwt-payload-is-invalid",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"invoke_jwt\":\"header.eyJleHAiOjQxMDI0NDQ4MDB9=.signature\"}]}",
+      "token": "",
+      "native_route": false
+    },
+    {
+      "id": "secret-reference-token-remains-go-only",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"nous\",\"access_token\":\"symvault://nous/token\"}]}",
+      "token": "symvault://nous/token",
+      "native_route": false
+    },
+    {
+      "id": "unrelated-provider",
+      "file_present": true,
+      "contents": "{\"providers\":[{\"id\":\"other\",\"access_token\":\"other-token\"}]}",
+      "token": "",
+      "native_route": false
+    }
+  ]
+}

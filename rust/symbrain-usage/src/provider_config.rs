@@ -5,31 +5,23 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain.
+//! keychain. Claude, Codex, Copilot, Kimi CLI, and Hermes files use native
+//! reporting only for proven deterministic shapes at their default or
+//! supported home paths. Supported providers may be combined; any unproven
+//! source keeps the report on Go.
 
-use super::provider_requests::validated_base;
+use super::provider_requests::{trusted_https_url, validated_base};
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
+use serde::de::{IgnoredAny, MapAccess, Visitor};
+use serde::{Deserialize, Deserializer};
 use std::env;
+use std::fmt;
 use std::fs;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
-
-/// Environment variables other than the narrow direct provider credentials
-/// allowed to use native reporting. Every one keeps the CLI on Go.
-const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
-    "ANTHROPIC_OAUTH_TOKEN",
-    "CODEX_HOME",
-    "HERMES_HOME",
-    "HERMES_PORTAL_BASE_URL",
-    "KIMI_CODE_BASE_URL",
-    "KIMI_CODE_HOME",
-    "KIMI_AUTH_TOKEN",
-    "MOONSHOT_REGION",
-    "OPENROUTER_API_URL",
-];
 
 /// The service Claude Code stores its OAuth credentials under in the macOS
 /// login keychain. Current versions append a per-installation hex suffix that
@@ -42,8 +34,8 @@ const CLAUDE_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 /// an unattended machine.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(20);
-/// Bound for the prompt-free process probes (`ps`, `lsof`).
-const PROCESS_PROBE_TIMEOUT: Duration = Duration::from_secs(2);
+/// Bound for the prompt-free macOS Keychain listing.
+#[cfg(target_os = "macos")]
 const MAX_PROBE_OUTPUT_BYTES: u64 = 64 * 1024;
 
 // ---------------------------------------------------------------------------
@@ -258,6 +250,7 @@ fn read_capture(file: &std::fs::File, cap: u64) -> Vec<u8> {
 
 /// Legacy surface: probes and the usage credential path keep their
 /// `Option<Vec<u8>>` contract over the shared runner.
+#[cfg(target_os = "macos")]
 fn bounded_command_stdout(
     command: &str,
     args: &[&str],
@@ -549,39 +542,54 @@ fn home() -> PathBuf {
 }
 
 fn env_path(name: &str, fallback: PathBuf) -> PathBuf {
-    env::var_os(name).map_or(fallback, PathBuf::from)
+    env::var_os(name)
+        .filter(|value| !value.is_empty())
+        .map_or(fallback, PathBuf::from)
 }
 
 // ---------------------------------------------------------------------------
 // Provider credential files
 // ---------------------------------------------------------------------------
 
-/// `~/.claude/.credentials.json`, preferring the `default` account and then any
-/// account carrying a token (file order, like the shipped map iteration).
+/// `~/.claude/.credentials.json`, accepting only shapes whose token choice is
+/// deterministic and matches Go: the default account, or exactly one other
+/// account with a nonempty token. Unknown metadata and other unproven shapes
+/// remain on the Go path.
 fn claude_file_token() -> Option<String> {
     claude_file_token_in(&home().join(".claude/.credentials.json"))
 }
 
 fn claude_file_token_in(path: &Path) -> Option<String> {
-    let root = json_value(path)?;
-    let accounts = root.get("oauthAccount")?.as_object()?;
+    let contents = read_limited(path)?;
+    let credentials: ClaudeCredentialFile = serde_json::from_slice(&contents).ok()?;
+    let accounts = credentials.oauth_account;
     if let Some(token) = accounts
         .get("default")
-        .and_then(|account| account.get("accessToken"))
-        .and_then(Value::as_str)
+        .and_then(|account| account.access_token.as_deref())
         .filter(|token| !token.is_empty())
     {
         return Some(token.to_owned());
     }
-    accounts
+    let mut tokens = accounts
         .values()
-        .find_map(|account| {
-            account
-                .get("accessToken")
-                .and_then(Value::as_str)
-                .filter(|token| !token.is_empty())
-        })
-        .map(Into::into)
+        .filter_map(|account| account.access_token.as_deref())
+        .filter(|token| !token.is_empty());
+    let token = tokens.next()?;
+    tokens.next().is_none().then(|| token.to_owned())
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ClaudeCredentialFile {
+    #[serde(rename = "oauthAccount")]
+    oauth_account: std::collections::BTreeMap<String, ClaudeOAuthAccount>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ClaudeOAuthAccount {
+    #[serde(rename = "accessToken")]
+    access_token: Option<String>,
 }
 
 fn codex_home() -> PathBuf {
@@ -605,11 +613,15 @@ fn codex_file_token(home_dir: &Path) -> Option<String> {
 }
 
 fn copilot_config_dir() -> PathBuf {
-    home().join(".config/github-copilot")
+    copilot_config_dir_for(&home())
 }
 
-/// `apps.json`, then `hosts.json`: the `github.com:` host entry first, then any
-/// entry with an `oauth_token`.
+fn copilot_config_dir_for(home: &Path) -> PathBuf {
+    home.join(".config/github-copilot")
+}
+
+/// Best-effort provider parser for `apps.json` then `hosts.json`; the CLI's
+/// native route separately requires a strict Go-equivalent candidate below.
 fn copilot_file_token() -> Option<String> {
     copilot_file_token_in(&copilot_config_dir())
 }
@@ -640,10 +652,85 @@ fn copilot_file_token_in(dir: &Path) -> Option<String> {
     None
 }
 
+/// `Ok(None)` means both files are absent. `Err(())` means an existing source
+/// cannot be proven to have the same token selection as Go and must be routed
+/// to the Go implementation before constructing a provider.
+fn copilot_file_token_candidate_in(dir: &Path) -> Result<Option<String>, ()> {
+    let apps_path = dir.join("apps.json");
+    if let Some(contents) = read_optional_credential_file(&apps_path)? {
+        // Go checks apps.json before hosts.json and returns its first usable
+        // token. An empty or unknown apps file can affect whether hosts.json
+        // is reached, so leave every such case to Go.
+        return parse_single_copilot_token(&contents).map(Some);
+    }
+
+    let hosts_path = dir.join("hosts.json");
+    let Some(contents) = read_optional_credential_file(&hosts_path)? else {
+        return Ok(None);
+    };
+    parse_single_copilot_token(&contents).map(Some)
+}
+
+fn read_optional_credential_file(path: &Path) -> Result<Option<Vec<u8>>, ()> {
+    let metadata = match fs::symlink_metadata(path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => return Err(()),
+    };
+    if !metadata.file_type().is_file() {
+        return Err(());
+    }
+    read_limited(path).map(Some).ok_or(())
+}
+
+fn parse_single_copilot_token(contents: &[u8]) -> Result<String, ()> {
+    let entries: std::collections::BTreeMap<String, CopilotTokenEntry> =
+        serde_json::from_slice(contents).map_err(|_| ())?;
+    if entries.len() != 1 {
+        return Err(());
+    }
+    entries
+        .into_values()
+        .next()
+        .and_then(|entry| entry.oauth_token)
+        .filter(|token| !token.is_empty())
+        .ok_or(())
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CopilotTokenEntry {
+    #[serde(rename = "oauth_token")]
+    oauth_token: Option<String>,
+    #[serde(rename = "user")]
+    _user: Option<String>,
+}
+
+#[cfg(windows)]
+fn usage_home_mismatch_requires_go() -> bool {
+    let rust_home = home();
+    let go_home = env::var_os("USERPROFILE")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."));
+    rust_home != go_home
+}
+
+#[cfg(not(windows))]
+fn usage_home_mismatch_requires_go() -> bool {
+    false
+}
+
+fn path_may_exist(path: &Path) -> bool {
+    match fs::symlink_metadata(path) {
+        Ok(_) => true,
+        Err(error) => error.kind() != std::io::ErrorKind::NotFound,
+    }
+}
+
 /// `$KIMI_CODE_HOME`, else the current `~/.kimi-code`, else the legacy
 /// `~/.kimi` when that one is the only install with a credential file.
 fn kimi_cli_home() -> PathBuf {
-    if let Some(name) = env::var_os("KIMI_CODE_HOME") {
+    if let Some(name) = env::var_os("KIMI_CODE_HOME").filter(|value| !value.is_empty()) {
         return PathBuf::from(name);
     }
     let current = home().join(".kimi-code");
@@ -668,6 +755,43 @@ fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
         .map(|value| value.trim().to_owned())
         .filter(|value| !value.is_empty());
     (token, device_id)
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct KimiCredentialCandidate {
+    #[serde(rename = "access_token")]
+    access_token: Option<String>,
+    #[serde(rename = "refresh_token")]
+    _refresh_token: Option<String>,
+}
+
+/// Return only the deterministic subset of the Go Kimi file parser: the
+/// canonical field spelling, without duplicate JSON keys, case aliases,
+/// unknown fields, or secret refs.
+fn kimi_file_token_candidate(path: &Path) -> Option<String> {
+    let data = read_limited(path)?;
+    let candidate: KimiCredentialCandidate = serde_json::from_slice(&data).ok()?;
+    candidate
+        .access_token
+        .filter(|token| !token.is_empty() && !is_secret_reference(token))
+}
+
+/// The Go Kimi provider converts the device-id file's raw bytes to a string,
+/// while Rust reads UTF-8. Keep existing non-ASCII or unreadable forms on Go
+/// until their header encoding has source-bound parity evidence.
+fn kimi_device_id_is_native(path: &Path) -> bool {
+    if !path_may_exist(path) {
+        return true;
+    }
+    read_limited(path).is_some_and(|bytes| {
+        std::str::from_utf8(&bytes).is_ok_and(|value| {
+            value
+                .trim()
+                .bytes()
+                .all(|byte| byte == b' ' || byte.is_ascii_graphic())
+        })
+    })
 }
 
 fn nous_auth_path() -> PathBuf {
@@ -698,6 +822,86 @@ fn nous_file_token(path: &Path) -> Option<String> {
     None
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NousCredentialCandidate {
+    #[serde(rename = "version")]
+    _version: Option<Value>,
+    providers: Option<Vec<NousProviderCandidate>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NousProviderCandidate {
+    id: Option<String>,
+    invoke_jwt: Option<String>,
+    access_token: Option<String>,
+    #[serde(rename = "client_id")]
+    _client_id: Option<Value>,
+}
+
+/// The Hermes file is native only when Go's typed decode has a deterministic
+/// result. JWT expiry follows Go's float64-to-int64 Unix-second truncation.
+fn nous_file_token_candidate(path: &Path) -> Option<String> {
+    let data = read_limited(path)?;
+    let root: NousCredentialCandidate = serde_json::from_slice(&data).ok()?;
+    let provider = root
+        .providers?
+        .into_iter()
+        .find(|provider| provider.id.as_deref() == Some("nous"))?;
+    let token = provider
+        .invoke_jwt
+        .filter(|token| !token.is_empty())
+        .or_else(|| provider.access_token.filter(|token| !token.is_empty()))?;
+    if (token.contains('.') && !nous_jwt_is_live(&token)) || is_secret_reference(&token) {
+        return None;
+    }
+    Some(token)
+}
+
+fn supported_custom_base(raw: &str) -> bool {
+    if !trusted_https_url(raw, false) || !raw.is_ascii() || raw.contains(['?', '#', '%', '@']) {
+        return false;
+    }
+    let Some(authority_and_path) = raw.strip_prefix("https://") else {
+        return false;
+    };
+    let (authority, path) = authority_and_path
+        .split_once('/')
+        .unwrap_or((authority_and_path, ""));
+    if !authority.contains('.')
+        || !authority.split('.').all(|label| {
+            !label.is_empty()
+                && label
+                    .as_bytes()
+                    .first()
+                    .is_some_and(u8::is_ascii_alphanumeric)
+                && label
+                    .as_bytes()
+                    .last()
+                    .is_some_and(u8::is_ascii_alphanumeric)
+                && label
+                    .bytes()
+                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+        })
+    {
+        return false;
+    }
+    path.bytes()
+        .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'/' | b'-' | b'_' | b'.'))
+        && !path.contains("//")
+        && !path
+            .split('/')
+            .any(|segment| segment == "." || segment == "..")
+}
+
+fn supported_opencode_workspace(raw: &str) -> bool {
+    raw.strip_prefix("wrk_").is_some_and(|suffix| {
+        !suffix.is_empty() && suffix.bytes().all(|byte| byte.is_ascii_alphanumeric())
+    })
+}
+
+#[allow(clippy::cast_precision_loss)] // Mirrors Go's float64 expiry-to-int64 conversion and current Unix-second comparison.
 fn nous_jwt_is_live(token: &str) -> bool {
     let mut parts = token.split('.');
     let (Some(_), Some(payload), Some(_), None) =
@@ -705,24 +909,75 @@ fn nous_jwt_is_live(token: &str) -> bool {
     else {
         return false;
     };
-    let Some(claims) = decode_base64url(payload)
-        .and_then(|decoded| serde_json::from_slice::<Value>(&decoded).ok())
+    let Some(expiry) = decode_base64url(payload)
+        .and_then(|decoded| serde_json::from_slice::<JwtExpiryClaims>(&decoded).ok())
     else {
         return false;
     };
-    let Some(expiry) = claims.get("exp").and_then(Value::as_f64) else {
+    let Some(expiry) = expiry.0 else {
         return false;
     };
-    seconds_since_epoch() < expiry
+    // Go decodes exp into float64, converts it to int64 (truncating toward
+    // zero), then constructs a whole-second time.Time. Keep out-of-range
+    // values on Go rather than relying on Rust's saturating float cast.
+    if !expiry.is_finite() || expiry < i64::MIN as f64 || expiry >= i64::MAX as f64 {
+        return false;
+    }
+    expiry.trunc() > seconds_since_epoch() as f64
 }
 
-fn seconds_since_epoch() -> f64 {
+struct JwtExpiryClaims(Option<f64>);
+
+impl<'de> Deserialize<'de> for JwtExpiryClaims {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct ClaimsVisitor;
+
+        impl<'de> Visitor<'de> for ClaimsVisitor {
+            type Value = JwtExpiryClaims;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                formatter.write_str("a JWT claims object with one exact exp field")
+            }
+
+            fn visit_map<M>(self, mut map: M) -> Result<Self::Value, M::Error>
+            where
+                M: MapAccess<'de>,
+            {
+                let mut expiry = None;
+                let mut saw_exp = false;
+                while let Some(key) = map.next_key::<String>()? {
+                    if key.eq_ignore_ascii_case("exp") {
+                        if key != "exp" || saw_exp {
+                            let _: IgnoredAny = map.next_value()?;
+                            return Err(serde::de::Error::custom(
+                                "ambiguous or duplicate JWT expiry claim",
+                            ));
+                        }
+                        saw_exp = true;
+                        expiry = Some(map.next_value::<f64>()?);
+                    } else {
+                        let _: IgnoredAny = map.next_value()?;
+                    }
+                }
+                Ok(JwtExpiryClaims(expiry))
+            }
+        }
+
+        deserializer.deserialize_map(ClaimsVisitor)
+    }
+}
+
+fn seconds_since_epoch() -> u64 {
     SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
-        .map_or(0.0, |elapsed| elapsed.as_secs_f64())
+        .map_or(0, |elapsed| elapsed.as_secs())
 }
 
-/// Decodes an unpadded base64url payload.
+/// Decodes an unpadded base64url payload. Rejecting noncanonical trailing
+/// bits keeps this gate within a conservative subset of Go `RawURLEncoding`.
 ///
 /// ponytail: hand-rolled because this one JWT claim decode is the crate's only
 /// call site; switch to the `base64` crate (already pinned in guard-core) once a
@@ -738,7 +993,6 @@ fn decode_base64url(value: &str) -> Option<Vec<u8>> {
             b'0'..=b'9' => byte - b'0' + 52,
             b'-' => 62,
             b'_' => 63,
-            b'=' => continue,
             _ => return None,
         };
         buffer = (buffer << 6) | u32::from(digit);
@@ -749,7 +1003,7 @@ fn decode_base64url(value: &str) -> Option<Vec<u8>> {
             buffer &= (1 << bits) - 1;
         }
     }
-    Some(decoded)
+    (bits != 6 && buffer == 0).then_some(decoded)
 }
 
 // ---------------------------------------------------------------------------
@@ -788,21 +1042,276 @@ fn claude_keychain_service_credential(service: &str) -> Option<(String, Option<S
         CLAUDE_KEYCHAIN_TIMEOUT,
         MAX_CREDENTIAL_FILE_BYTES,
     )?;
-    let root: Value = serde_json::from_slice(blob.trim_ascii()).ok()?;
-    let oauth = root.get("claudeAiOauth")?;
-    let token = oauth
-        .get("accessToken")
-        .and_then(Value::as_str)
-        .filter(|token| !token.is_empty())?;
+    parse_claude_keychain_blob(&blob)
+}
+
+#[derive(Default)]
+struct ClaudeKeychainBlob {
+    oauth: Option<ClaudeKeychainOAuth>,
+}
+
+#[derive(Default)]
+struct ClaudeKeychainOAuth {
+    access_token: String,
+    expires_at_millis: Option<i64>,
+}
+
+#[derive(Default)]
+struct ClaudeKeychainOAuthPatch {
+    access_token: Option<String>,
+    expires_at_millis: ExpiryPatch,
+}
+
+#[derive(Default)]
+enum ExpiryPatch {
+    #[default]
+    Unchanged,
+    Clear,
+    Set(i64),
+}
+
+impl ClaudeKeychainOAuthPatch {
+    fn apply(self, target: &mut ClaudeKeychainOAuth) {
+        if let Some(access_token) = self.access_token {
+            target.access_token = access_token;
+        }
+        match self.expires_at_millis {
+            ExpiryPatch::Unchanged => {}
+            ExpiryPatch::Clear => target.expires_at_millis = None,
+            ExpiryPatch::Set(expires_at_millis) => {
+                target.expires_at_millis = Some(expires_at_millis);
+            }
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for ClaudeKeychainBlob {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct BlobVisitor;
+
+        impl<'de> Visitor<'de> for BlobVisitor {
+            type Value = ClaudeKeychainBlob;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a Claude keychain JSON object")
+            }
+
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut blob = ClaudeKeychainBlob::default();
+                while let Some(name) = map.next_key::<String>()? {
+                    if go_json_field_matches(&name, "claudeAiOauth") {
+                        match map.next_value::<Option<ClaudeKeychainOAuthPatch>>()? {
+                            None => blob.oauth = None,
+                            Some(patch) => {
+                                patch.apply(
+                                    blob.oauth.get_or_insert_with(ClaudeKeychainOAuth::default),
+                                );
+                            }
+                        }
+                    } else {
+                        map.next_value::<IgnoredAny>()?;
+                    }
+                }
+                Ok(blob)
+            }
+        }
+
+        deserializer.deserialize_map(BlobVisitor)
+    }
+}
+
+impl<'de> Deserialize<'de> for ClaudeKeychainOAuthPatch {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct OAuthPatchVisitor;
+
+        impl<'de> Visitor<'de> for OAuthPatchVisitor {
+            type Value = ClaudeKeychainOAuthPatch;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a Claude keychain OAuth object")
+            }
+
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut patch = ClaudeKeychainOAuthPatch::default();
+                while let Some(name) = map.next_key::<String>()? {
+                    if go_json_field_matches(&name, "accessToken") {
+                        // Go decoding null into a non-pointer string leaves
+                        // the previous value untouched; malformed types fail.
+                        if let Some(value) = map.next_value::<Option<String>>()? {
+                            patch.access_token = Some(value);
+                        }
+                    } else if go_json_field_matches(&name, "expiresAt") {
+                        // expiresAt is a pointer: null explicitly clears it.
+                        patch.expires_at_millis = match map.next_value::<Option<i64>>()? {
+                            Some(value) => ExpiryPatch::Set(value),
+                            None => ExpiryPatch::Clear,
+                        };
+                    } else {
+                        map.next_value::<IgnoredAny>()?;
+                    }
+                }
+                Ok(patch)
+            }
+        }
+
+        deserializer.deserialize_map(OAuthPatchVisitor)
+    }
+}
+
+fn go_json_field_matches(actual: &str, expected: &str) -> bool {
+    fn fold(character: char) -> char {
+        match character {
+            // unicode.SimpleFold cycles these compatibility characters with
+            // ASCII S/s and K/k; encoding/json's tagged-field matcher accepts
+            // them even though Rust's eq_ignore_ascii_case does not.
+            '\u{017f}' => 's',
+            '\u{212a}' => 'k',
+            character => character.to_ascii_lowercase(),
+        }
+    }
+
+    actual.chars().map(fold).eq(expected.chars().map(fold))
+}
+
+/// Parses the same typed fields used by Go's Claude keychain decoder. Custom
+/// map visitors preserve encoding/json's case-insensitive tagged-field match,
+/// duplicate-object merge, scalar-null no-op, and pointer-null reset rules.
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+pub(crate) fn parse_claude_keychain_blob(blob: &[u8]) -> Option<(String, Option<SystemTime>)> {
+    let text = go_json_compatible_text(blob);
+    let text = text.trim();
+    let decoded: ClaudeKeychainBlob = serde_json::from_str(text).ok()?;
+    let oauth = decoded.oauth?;
+    if oauth.access_token.is_empty() {
+        return None;
+    }
     let expires_at = oauth
-        .get("expiresAt")
-        .and_then(Value::as_i64)
+        .expires_at_millis
         .filter(|milliseconds| *milliseconds > 0)
         .and_then(|milliseconds| {
             SystemTime::UNIX_EPOCH
                 .checked_add(Duration::from_millis(u64::try_from(milliseconds).ok()?))
         });
-    Some((token.to_owned(), expires_at))
+    Some((oauth.access_token, expires_at))
+}
+
+fn go_json_compatible_text(blob: &[u8]) -> String {
+    // encoding/json decodes invalid UTF-8 with utf8.DecodeRune, replacing one
+    // invalid byte at a time. Rust's from_utf8_lossy groups some invalid
+    // prefixes, so preserve Go's bytewise replacement explicitly.
+    let mut utf8 = String::with_capacity(blob.len());
+    let mut remaining = blob;
+    while !remaining.is_empty() {
+        match std::str::from_utf8(remaining) {
+            Ok(valid) => {
+                utf8.push_str(valid);
+                break;
+            }
+            Err(error) => {
+                let valid_end = error.valid_up_to();
+                utf8.push_str(
+                    std::str::from_utf8(&remaining[..valid_end])
+                        .expect("valid_up_to marks a UTF-8 boundary"),
+                );
+                utf8.push('\u{fffd}');
+                remaining = &remaining[valid_end + 1..];
+            }
+        }
+    }
+
+    // Go's JSON decoder replaces unpaired UTF-16 surrogate escapes with
+    // U+FFFD; serde_json rejects them. Normalize only string escapes, leaving
+    // malformed JSON escapes for serde_json to reject as before.
+    let bytes = utf8.as_bytes();
+    let mut normalized = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    let mut in_string = false;
+    while index < bytes.len() {
+        let byte = bytes[index];
+        if !in_string {
+            normalized.push(byte);
+            index += 1;
+            if byte == b'"' {
+                in_string = true;
+            }
+            continue;
+        }
+        if byte == b'"' {
+            normalized.push(byte);
+            index += 1;
+            in_string = false;
+            continue;
+        }
+        if byte != b'\\' {
+            normalized.push(byte);
+            index += 1;
+            continue;
+        }
+
+        if let Some(first) = unicode_escape_unit(bytes, index) {
+            if (0xd800..=0xdbff).contains(&first) {
+                if let Some(second) = unicode_escape_unit(bytes, index + 6)
+                    && (0xdc00..=0xdfff).contains(&second)
+                {
+                    normalized.extend_from_slice(&bytes[index..index + 12]);
+                    index += 12;
+                    continue;
+                }
+                normalized.extend_from_slice(b"\\uFFFD");
+                index += 6;
+                continue;
+            }
+            if (0xdc00..=0xdfff).contains(&first) {
+                normalized.extend_from_slice(b"\\uFFFD");
+                index += 6;
+                continue;
+            }
+            normalized.extend_from_slice(&bytes[index..index + 6]);
+            index += 6;
+            continue;
+        }
+
+        normalized.push(byte);
+        index += 1;
+        if index < bytes.len() {
+            normalized.push(bytes[index]);
+            index += 1;
+        }
+    }
+    String::from_utf8(normalized).expect("normalized JSON text remains valid UTF-8")
+}
+
+fn unicode_escape_unit(bytes: &[u8], start: usize) -> Option<u16> {
+    let escape = bytes.get(start..start.checked_add(6)?)?;
+    if escape[0] != b'\\' || escape[1] != b'u' {
+        return None;
+    }
+    let mut value = 0u16;
+    for digit in &escape[2..] {
+        value = value.checked_mul(16)? + u16::from(hex_digit(*digit)?);
+    }
+    Some(value)
+}
+
+fn hex_digit(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    }
 }
 
 /// Per-installation service names present in the keychain, in stable order.
@@ -863,19 +1372,8 @@ fn valid_claude_service_name(name: &str) -> bool {
 // Antigravity process probe
 // ---------------------------------------------------------------------------
 
-/// Whether the Antigravity app or `agy` CLI is running. The provider is always
-/// "configured"; availability depends on the running language server.
-fn antigravity_running() -> bool {
-    let Some(output) = bounded_command_stdout(
-        "ps",
-        &["-ax", "-o", "pid=,command="],
-        PROCESS_PROBE_TIMEOUT,
-        MAX_PROBE_OUTPUT_BYTES,
-    ) else {
-        return false;
-    };
-    let list = String::from_utf8_lossy(&output);
-    list.contains("agy") || list.contains("Antigravity")
+fn antigravity_process_list_running(process_list: &str) -> bool {
+    process_list.contains("agy") || process_list.contains("Antigravity")
 }
 
 // ---------------------------------------------------------------------------
@@ -922,101 +1420,167 @@ pub fn all_providers() -> Vec<Provider> {
     ]
 }
 
-/// Whether the report would read a stored credential or probe a running
-/// Antigravity, i.e. whether a fetch against a live endpoint would run.
+/// Whether the report would read a stored credential outside the native
+/// provider subset, i.e. whether the Go fallback is required.
 ///
-/// The checks here are prompt-free: environment values, credential files, the
-/// keychain *listing* (attributes only, never a secret value), and the process
-/// table. The CLI keeps such reports on the shipped implementation until the
-/// provider fetch paths are pinned byte-for-byte. A workspace override alone
-/// supplies no `OpenCode` cookie or strategy, so it cannot start a fetch.
+/// The checks here are prompt-free: environment values, credential files, and
+/// the keychain *listing* (attributes only, never a secret value). The local
+/// Antigravity probe is performed by its native provider. File-backed routes
+/// and home overrides require a deterministic
+/// Go-equivalent subset; secret references and unsupported base/workspace
+/// overrides stay on Go.
+/// Multiple configured providers can be native together when each source is
+/// proven. A workspace override alone supplies no `OpenCode` cookie or
+/// strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
     let claude_admin_env = env_raw("ANTHROPIC_ADMIN_KEY");
+    let claude_oauth_env = env_raw("ANTHROPIC_OAUTH_TOKEN");
     let copilot_env = env_raw("COPILOT_ACCESS_TOKEN");
     let openrouter_env = env_raw("OPENROUTER_API_KEY");
     let moonshot_env = env_raw("MOONSHOT_API_KEY");
     let cursor_env = env_raw("CURSOR_COOKIE");
     let kimi_api_env = env_raw("KIMI_CODE_API_KEY");
+    let kimi_auth_env = env_raw("KIMI_AUTH_TOKEN");
     let nous_env = env_raw("NOUS_PORTAL_ACCESS_TOKEN");
     let codex_env = env_raw("CODEX_ACCESS_TOKEN");
     let opencode_env = env_raw("OPENCODE_COOKIE");
     let opencode_workspace_override = env_raw("OPENCODE_WORKSPACE_ID");
-    let other_provider_env = OTHER_PROVIDER_ENV_VARS
-        .iter()
-        .any(|name| env_raw(name).is_some());
-    if claude_file_token().is_some()
-        || codex_file_token(&codex_home()).is_some()
-        || copilot_file_token().is_some()
-        || kimi_store(&kimi_cli_home()).0.is_some()
-        || nous_file_token(&nous_auth_path()).is_some()
+    let unsupported_base = [
+        env_raw("KIMI_CODE_BASE_URL"),
+        env_raw("HERMES_PORTAL_BASE_URL"),
+        env_raw("OPENROUTER_API_URL"),
+    ]
+    .into_iter()
+    .flatten()
+    .any(|value| !supported_custom_base(&value));
+    // Go resolves its home from USERPROFILE on Windows; Rust currently uses
+    // HOME. Keep the entire usage report on Go if those roots differ so no
+    // provider can silently miss a file-backed credential.
+    if usage_home_mismatch_requires_go() {
+        return true;
+    }
+    if unsupported_base {
+        return true;
+    }
+    let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
+        return true;
+    };
+    let claude_file_path = home().join(".claude/.credentials.json");
+    let claude_file_token = claude_file_token_in(&claude_file_path);
+    if claude_file_token.is_none() && claude_file_path.exists() {
+        // Go accepts case-insensitive struct tags and duplicate-map merge
+        // semantics. If this strict candidate parser cannot prove equivalence,
+        // let Go interpret the existing file before any keychain probe.
+        return true;
+    }
+    let codex_file = codex_file_token(&codex_home());
+    let nous_path = nous_auth_path();
+    let nous_file = nous_file_token_candidate(&nous_path);
+    if path_may_exist(&nous_path) && nous_file.is_none() {
+        // Existing files that fall outside the deterministic plain-token
+        // subset remain interpreted by Go, including expired JWTs.
+        return true;
+    }
+    let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
+    let kimi_cli = kimi_file_token_candidate(&kimi_path);
+    if path_may_exist(&kimi_path) && kimi_cli.is_none() {
+        return true;
+    }
+    if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {
+        return true;
+    }
+    // Without a cookie Go has no request strategy, so the workspace is only
+    // reported as configured and its spelling cannot affect an HTTP request.
+    if opencode_env.is_some()
+        && opencode_workspace_override
+            .as_deref()
+            .is_some_and(|workspace| !supported_opencode_workspace(workspace))
     {
         return true;
     }
-    needs_go_fallback_for(UsageFallbackSignals {
+    needs_go_fallback_for(&UsageFallbackSignals {
         claude_admin_env: claude_admin_env.as_deref(),
+        claude_oauth_env: claude_oauth_env.as_deref(),
         copilot_env: copilot_env.as_deref(),
+        copilot_file: copilot_file.as_deref(),
         openrouter_env: openrouter_env.as_deref(),
         moonshot_env: moonshot_env.as_deref(),
         cursor_env: cursor_env.as_deref(),
         kimi_api_env: kimi_api_env.as_deref(),
+        kimi_auth_env: kimi_auth_env.as_deref(),
+        kimi_cli: kimi_cli.as_deref(),
         nous_env: nous_env.as_deref(),
+        nous_file: nous_file.as_deref(),
         codex_env: codex_env.as_deref(),
+        codex_file: codex_file.as_deref(),
         opencode_env: opencode_env.as_deref(),
-        opencode_workspace_override: opencode_workspace_override.as_deref(),
-        other_provider_env,
+        claude_file: claude_file_token.as_deref(),
+        other_provider_env: false,
         other_credential_source: false,
-        local_provider_present: claude_keychain_present() || antigravity_running(),
+        // Go skips its Keychain read when either the OAuth environment source
+        // is present (even if resolving it fails) or the file supplied a
+        // token. Avoid listing Keychain attributes in either case.
+        local_provider_present: claude_oauth_env.is_none()
+            && claude_file_token.is_none()
+            && claude_keychain_present(),
     })
 }
 
-/// Keeps reports native only for one direct credential from a pinned set of
-/// providers, when every other provider source and local probe is absent.
-/// Secret references, credential files, and provider-specific overrides stay
-/// on Go.
+/// Keeps reports native for the proven portable sources once every configured
+/// source is handled by the same provider constructors. Unsupported files,
+/// secret references and the Claude Keychain source still keep Go in charge.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
+    claude_oauth_env: Option<&'a str>,
     copilot_env: Option<&'a str>,
+    copilot_file: Option<&'a str>,
     openrouter_env: Option<&'a str>,
     moonshot_env: Option<&'a str>,
     cursor_env: Option<&'a str>,
     kimi_api_env: Option<&'a str>,
+    kimi_auth_env: Option<&'a str>,
+    kimi_cli: Option<&'a str>,
     nous_env: Option<&'a str>,
+    nous_file: Option<&'a str>,
     codex_env: Option<&'a str>,
+    codex_file: Option<&'a str>,
     opencode_env: Option<&'a str>,
-    opencode_workspace_override: Option<&'a str>,
+    claude_file: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
 }
 
-fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
+fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     let credentials = [
         signals.claude_admin_env,
+        signals.claude_oauth_env,
         signals.copilot_env,
+        signals.copilot_file,
         signals.openrouter_env,
         signals.moonshot_env,
         signals.cursor_env,
         signals.kimi_api_env,
+        signals.kimi_auth_env,
+        signals.kimi_cli,
         signals.nous_env,
+        signals.nous_file,
         signals.codex_env,
+        signals.codex_file,
         signals.opencode_env,
+        signals.claude_file,
     ];
     if signals.other_provider_env
         || signals.other_credential_source
-        || signals.local_provider_present
-        || (signals.opencode_workspace_override.is_some()
-            && credentials.iter().any(Option::is_some))
+        || (signals.local_provider_present
+            && signals.claude_oauth_env.is_none()
+            && signals.claude_file.is_none())
     {
         return true;
     }
-    let mut configured = credentials.into_iter().flatten();
-    match (configured.next(), configured.next()) {
-        (None, _) => false,
-        (Some(_), Some(_)) => true,
-        (Some(credential), None) => is_secret_reference(credential),
-    }
+    credentials.into_iter().flatten().any(is_secret_reference)
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.
@@ -1056,12 +1620,33 @@ fn claude() -> Provider {
         oauth_value = Some(("keychain".into(), token));
         oauth_expires_at = expires_at;
     }
+    claude_from_resolved(
+        admin_value,
+        admin_error,
+        oauth_value,
+        oauth_error,
+        oauth_expires_at,
+    )
+}
+
+pub(crate) fn claude_from_resolved(
+    admin_value: Option<(String, String)>,
+    admin_error: Option<String>,
+    oauth_value: Option<(String, String)>,
+    oauth_error: Option<String>,
+    oauth_expires_at: Option<SystemTime>,
+) -> Provider {
     let mut credentials = Vec::new();
-    if let Some((source, value)) = admin_value.clone() {
-        credentials.push((source, value));
+    if let Some((_, value)) = admin_value.clone() {
+        // The Go strategy's request/report source is always "api"; the
+        // resolved source (env, vault, and so on) belongs in AuthStatus only.
+        credentials.push(("api".into(), value));
     }
-    if let Some((source, value)) = oauth_value.clone() {
-        credentials.push((source, value));
+    if let Some((_credential_source, value)) = oauth_value.clone() {
+        // Go's Claude OAuth strategy always reports `oauth` for the fetched
+        // snapshot, while AuthStatus separately retains env/file/keychain
+        // provenance. Keep those two source labels distinct.
+        credentials.push(("oauth".into(), value));
     }
     let mut provider = Provider::new(
         "claude",
@@ -1108,6 +1693,14 @@ fn codex() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    codex_from_resolved(value, error, home_dir.join("auth.json").exists())
+}
+
+pub(crate) fn codex_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    auth_file_exists: bool,
+) -> Provider {
     let mut provider = Provider::new(
         "codex",
         "Codex",
@@ -1123,7 +1716,7 @@ fn codex() -> Provider {
         )
     } else if let Some(error) = error {
         auth_error(&error)
-    } else if home_dir.join("auth.json").exists() {
+    } else if auth_file_exists {
         AuthStatus {
             status: "expired".into(),
             detail: "Codex auth file found but no valid token — re-auth with the Codex CLI".into(),
@@ -1141,6 +1734,13 @@ fn copilot() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    copilot_from_resolved(value, error)
+}
+
+pub(crate) fn copilot_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+) -> Provider {
     let mut provider = Provider::new(
         "copilot",
         "GitHub Copilot",
@@ -1168,6 +1768,13 @@ fn cursor() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    cursor_from_resolved(value, error)
+}
+
+pub(crate) fn cursor_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+) -> Provider {
     let mut provider = Provider::new(
         "cursor",
         "Cursor",
@@ -1199,13 +1806,37 @@ fn kimi() -> Provider {
         Ok(found) => (found, None),
         Err(failure) => (None, Some(failure)),
     };
+    let base_url = env::var("KIMI_CODE_BASE_URL").map_or_else(
+        |_| "https://api.kimi.com".into(),
+        |value| validated_base(&value, "https://api.kimi.com"),
+    );
+    kimi_from_resolved(
+        api_value,
+        api_failure,
+        cli_token.as_deref(),
+        auth_value,
+        auth_failure,
+        base_url,
+        device_id,
+    )
+}
+
+pub(crate) fn kimi_from_resolved(
+    api_value: Option<(String, String)>,
+    api_failure: Option<String>,
+    cli_token: Option<&str>,
+    auth_value: Option<(String, String)>,
+    auth_failure: Option<String>,
+    base_url: String,
+    device_id: Option<String>,
+) -> Provider {
     // Strategy order is API key, then CLI token, then web auth token.
     let mut credentials = Vec::new();
     if let Some((_, value)) = api_value.clone() {
         credentials.push(("api".into(), value));
     }
-    if let Some(token) = cli_token.clone() {
-        credentials.push(("cli".into(), token));
+    if let Some(token) = cli_token {
+        credentials.push(("cli".into(), token.into()));
     }
     if let Some((_, value)) = auth_value.clone() {
         credentials.push(("web".into(), value));
@@ -1231,10 +1862,7 @@ fn kimi() -> Provider {
         let source = auth_value.map_or_else(|| "env".to_owned(), |(source, _)| source);
         available("Web auth token from KIMI_AUTH_TOKEN", source)
     };
-    provider.base_url = Some(env::var("KIMI_CODE_BASE_URL").map_or_else(
-        |_| "https://api.kimi.com".into(),
-        |value| validated_base(&value, "https://api.kimi.com"),
-    ));
+    provider.base_url = Some(base_url);
     provider.device_id = device_id.filter(|value| !value.is_empty());
     provider
 }
@@ -1245,6 +1873,19 @@ fn moonshot() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let region = if env::var("MOONSHOT_REGION").ok().as_deref() == Some("cn") {
+        "cn"
+    } else {
+        "ai"
+    };
+    moonshot_from_resolved(value, error, region)
+}
+
+pub(crate) fn moonshot_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    region: &str,
+) -> Provider {
     let mut provider = Provider::new(
         "moonshot",
         "Moonshot",
@@ -1260,11 +1901,7 @@ fn moonshot() -> Provider {
     } else {
         missing("no API key configured (MOONSHOT_API_KEY)")
     };
-    provider.region = if env::var("MOONSHOT_REGION").ok().as_deref() == Some("cn") {
-        "cn".into()
-    } else {
-        "ai".into()
-    };
+    provider.region = if region == "cn" { "cn" } else { "ai" }.into();
     provider
 }
 
@@ -1275,6 +1912,18 @@ fn nous() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let base_url = env::var("HERMES_PORTAL_BASE_URL").map_or_else(
+        |_| "https://portal.nousresearch.com".into(),
+        |value| validated_base(&value, "https://portal.nousresearch.com"),
+    );
+    nous_from_resolved(value, error, base_url)
+}
+
+pub(crate) fn nous_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    base_url: String,
+) -> Provider {
     let mut provider = Provider::new(
         "nous",
         "Nous Portal",
@@ -1293,10 +1942,7 @@ fn nous() -> Provider {
     } else {
         missing("No Nous Portal credentials found — sign in with the Hermes CLI")
     };
-    provider.base_url = Some(env::var("HERMES_PORTAL_BASE_URL").map_or_else(
-        |_| "https://portal.nousresearch.com".into(),
-        |value| validated_base(&value, "https://portal.nousresearch.com"),
-    ));
+    provider.base_url = Some(base_url);
     provider
 }
 
@@ -1307,9 +1953,17 @@ fn opencode() -> Provider {
         Err(error) => (None, Some(error)),
     };
     let workspace = env_raw("OPENCODE_WORKSPACE_ID");
+    opencode_from_resolved(value, error, workspace.as_deref())
+}
+
+pub(crate) fn opencode_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    workspace: Option<&str>,
+) -> Provider {
     let mut credentials: Vec<(String, String)> = value.clone().into_iter().collect();
-    if let Some(workspace) = workspace.clone() {
-        credentials.push(("workspace".into(), workspace));
+    if let Some(workspace) = workspace {
+        credentials.push(("workspace".into(), workspace.into()));
     }
     let mut provider = Provider::new(
         "opencode",
@@ -1337,6 +1991,18 @@ fn openrouter() -> Provider {
         Ok(found) => (found, None),
         Err(error) => (None, Some(error)),
     };
+    let base_url = env::var("OPENROUTER_API_URL").map_or_else(
+        |_| "https://openrouter.ai/api/v1".into(),
+        |value| validated_base(&value, "https://openrouter.ai/api/v1"),
+    );
+    openrouter_from_resolved(value, error, base_url)
+}
+
+pub(crate) fn openrouter_from_resolved(
+    value: Option<(String, String)>,
+    error: Option<String>,
+    base_url: String,
+) -> Provider {
     let mut provider = Provider::new(
         "openrouter",
         "OpenRouter",
@@ -1352,15 +2018,12 @@ fn openrouter() -> Provider {
     } else {
         missing("no API key configured (OPENROUTER_API_KEY)")
     };
-    provider.base_url = Some(env::var("OPENROUTER_API_URL").map_or_else(
-        |_| "https://openrouter.ai/api/v1".into(),
-        |value| validated_base(&value, "https://openrouter.ai/api/v1"),
-    ));
+    provider.base_url = Some(base_url);
     provider
 }
 
-fn antigravity() -> Provider {
-    let running = antigravity_running();
+pub(super) fn antigravity_from_process_list(process_list: Option<&str>) -> Provider {
+    let running = process_list.is_some_and(antigravity_process_list_running);
     let mut provider = Provider::new(
         "antigravity",
         "Antigravity",
@@ -1375,6 +2038,16 @@ fn antigravity() -> Provider {
         missing("Antigravity is not running — start the Antigravity app or agy CLI")
     };
     provider
+}
+
+fn antigravity() -> Provider {
+    let cancellation = crate::Cancellation::with_timeout(Duration::from_secs(2));
+    let process_list = super::provider_requests::command_output_with_cancel(
+        &cancellation,
+        "ps",
+        &["-ax", "-o", "pid=,command="],
+    );
+    antigravity_from_process_list(process_list.as_deref())
 }
 
 #[cfg(test)]

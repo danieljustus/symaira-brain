@@ -5,30 +5,24 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; Claude, Codex, and Copilot accept narrowly proven\ndefault credential-file shapes read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
-/// The native port reproduces the per-provider credential state machine
-/// (sources, missing/expired/available texts, source tags) and is the reference
-/// for reports with no stored credential at all — those reach no endpoint and
-/// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
-/// without a cookie also stays native because Go has no fetch strategy for it.
-/// A report with only a direct `ANTHROPIC_ADMIN_KEY` and no Claude Code OAuth
-/// source, a direct `COPILOT_ACCESS_TOKEN` or a direct
-/// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
-/// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
-/// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential
-/// file or web token, or a direct `NOUS_PORTAL_ACCESS_TOKEN` using the default
-/// portal base and with no Hermes auth file, or a direct `CODEX_ACCESS_TOKEN`
-/// with no Codex auth file or home override now runs natively:
-/// each configured report, request, parsed snapshot, and provider error cases
-/// are checked against Go oracles using synthetic credentials and canned
-/// transport. File credentials, secret references, provider-specific
-/// overrides, and every other configured provider continue to use Go until pinned.
-///
-/// The report fetch invoked below remains a user-initiated live read, as it
-/// does in the shipped Go command.
+/// The native port reproduces each proven provider's credential state machine,
+/// request, snapshot, and error behavior. Several supported providers can run
+/// together. Native sources include direct credentials; the canonical default
+/// Copilot, Kimi CLI, Nous, Codex, and Claude files; Moonshot's supported `ai`
+/// and `cn` regions; constrained public HTTPS base overrides; and a canonical
+/// `OpenCode` workspace id. File sources with case aliases, duplicate or
+/// malformed fields, ambiguous provider selection, unsupported metadata,
+/// secret references, non-ASCII Kimi device ids, or other unproven shapes stay
+/// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
+/// eligibility checks as their default paths; differing Windows home roots,
+/// unsupported URL/workspace forms and Claude Keychain-only credentials also
+/// keep the report on Go. Antigravity's local probe runs natively. Source-bound Go
+/// oracles use synthetic credentials and canned transport; the user-invoked
+/// live report remains unchanged.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
         return false;

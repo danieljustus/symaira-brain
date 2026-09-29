@@ -40,7 +40,7 @@ jobs:
         run: cargo build -p symbrowse-cli --bin symbrowse --release --locked
 
       - name: Verify daemon platform and lifecycle contracts
-        run: cargo test -p symbrowse-daemon --test protocol_fixture --test lifecycle --test cancellation --test platform --locked
+        run: cargo test -p symbrowse-daemon --locked
 
       - name: Exercise native daemon lifecycle and races
         env:
@@ -48,7 +48,10 @@ jobs:
           TMPDIR: ${{ runner.temp }}
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
-        run: python3 port/harness/run.py --suite daemon
+        run: |
+          python3 port/harness/test_run.py DaemonExitTests
+          python3 port/harness/run.py --suite daemon
+          python3 port/harness/run.py --suite daemon-races --repeat 50
 
       - name: Retain exact-head daemon receipt
         if: always()

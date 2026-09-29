@@ -107,6 +107,11 @@ usage-opencode-check:
 usage-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
 
+.PHONY: usage-gateway-lifecycle-check
+## usage-gateway-lifecycle-check: Verify production Go usage discovery is lazy and per-call
+usage-gateway-lifecycle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" test -count=1 ./internal/gateway -run '^TestUsageDiscoveryIsDeferredAndRepeatedPerCall$$'
+
 ## activity-cli-oracle-check: Ensure native bounded activity CLI bytes remain pinned to production Go
 activity-cli-oracle-check:
 	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
@@ -245,7 +250,7 @@ rust-fast:
 # in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
 # all four pass locally; per #631 they are wired back in this same change so
 # CI proves them before merge, rather than being re-added on faith.
-rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usage-gateway-lifecycle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
