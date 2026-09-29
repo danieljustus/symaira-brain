@@ -1,5 +1,33 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Additional native init, Swift and fuzz evidence — 2026-09-29
+
+Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes the exact
+20-case init differential on Darwin/arm64 and Linux/arm64. The comparator
+verifies and builds immutable Go oracle `9c0e2b259753901a372ed5a688382bb6d4fadd18`.
+Fourteen comparator controls pass; one Windows-only process-tree check is
+explicitly skipped on these Unix hosts. Its optional disposable work directory
+supports read-only source mounts and explicit Go caches are reused.
+
+The real Swift `ConfiguredBinaryContractTests` suite passes separately with
+Go and Rust: one test, zero failures, zero skips each. Xcode builds the current
+source and exact-pinned AppKit dependency, then executes with isolated HOME/XDG
+roots and a PATH excluding installed Symaira binaries. Result bundles and
+`gui-receipt-f1263bea.json` bind both executable hashes and native summaries.
+
+Both MCP fuzz targets pass 10,000 runs each on Darwin/arm64 using installed
+nightly-2026-09-20 and cargo-fuzz 0.13.2, retained Go seeds copied into private
+runtime directories, max input 1,048,577 bytes and RSS limit 2,048 MiB. The
+tracked corpora are unchanged. `fuzz-receipt-f1263bea.json` and both native
+`init-receipt-f1263bea.json` receipts retain logs, hashes and exact parameters.
+
+Only documentation and the init comparator/control test changed since the
+`b1fa75df` root gate; Go/Rust/Swift runtime source is unchanged. These receipts
+do not replace remaining Browse, Linux fuzz or native Windows/other target
+acceptance. Linux lacks the required nightly/fuzz tools; their installation
+was not started before the requested session close. Migration remains open.
+
+
 ## Integrated root gates and usage deadlines — 2026-09-29
 
 Candidate `b1fa75df5be9c871c5715913cefb316733300460` passes independent
@@ -125,7 +153,7 @@ with a synthetic Keychain callback against Rust claude_from_resolved and
 Service::with_transport. Both receive the same response status, body and
 Retry-After header. Only fetched_at is fixed; output errors are not normalized.
 
-Independent clean Darwin/arm64 and Linux/arm64 gates pass Go1.26.7 usage tests
+Independent clean Darwin/arm64 and Linux/arm64 gates pass Go 1.26.7 usage tests
 and usage/OpenCode oracle freshness. Rust passes 62+9+8 usage tests on Darwin,
 62+8+8 on Linux and all 20 CLI tests on both, zero failed or ignored. Worker
 strict Clippy/fmt and Go vet pass. `keychain-parity-receipt-c9cd4460.json` in
@@ -157,9 +185,9 @@ absolute PATH resolution matching Go ErrDot rejection, and a PID ceiling.
 A real Unix CLI regression uses a private synthetic ps executable; it never
 reads the installed process table or Keychain.
 
-Independent clean Darwin/arm64 and Linux/arm64 gates pass Go1.26.7 usage tests
+Independent clean Darwin/arm64 and Linux/arm64 gates pass Go 1.26.7 usage tests
 and usage/OpenCode oracle freshness. Rust usage passes 60+9+8 on Darwin and
-60+8+8 on Linux, with all20 CLI tests passing on each, zero failed/ignored.
+60+8+8 on Linux, with all 20 CLI tests passing on each, zero failed/ignored.
 Worker strict Clippy and fmt pass. Both build roots contain
 `antigravity-receipt-ec6da43e.json` with source metadata and fixture/log hashes.
 
@@ -184,7 +212,7 @@ claims remain ignored. Real Go NewNousPortalProvider/BuildReport and Rust's
 production file-auth assembly compare success, 401, 429 and malformed responses.
 The real CLI covers all three overrides without reading Keychain or live providers.
 
-Independent clean-candidate Go1.26.7 usage package plus usage/OpenCode oracle
+Independent clean-candidate Go 1.26.7 usage package plus usage/OpenCode oracle
 checks pass on Darwin/arm64 and Linux/arm64. Rust usage tests pass 55+9+8 on
 Darwin and 55+8+8 on Linux; all 19 CLI tests pass on each, zero failures/ignored.
 Worker strict usage/CLI Clippy and workspace fmt pass. Receipts
@@ -211,7 +239,7 @@ Go RFC3339Nano trailing-zero behavior. No reset values are masked in comparisons
 Two real CLI routing cases replace stale expectations and verify the widened
 route before any live request; unsupported shapes still select Go.
 
-Independent clean-candidate Go1.26.7 package plus usage and OpenCode oracle checks
+Independent clean-candidate Go 1.26.7 package plus usage and OpenCode oracle checks
 pass on Darwin/arm64 and Linux/arm64. Rust usage tests pass 54+9+8 on Darwin and
 54+8+8 on Linux, with all 18 CLI tests on each; zero failed/ignored. Receipts
 `remaining-usage-receipt-b9cf5f62.json` in the Brain/native-linux build roots retain
@@ -237,7 +265,7 @@ source is `api`, while AuthStatus retains resolved credential provenance `env`.
 The complete active-row regression now detects that difference. Existing success,
 provider-error, request and workspace checks remain in place. No routing was widened.
 
-Independent clean-candidate Go1.26.7 usage package/oracle checks and Rust tests pass
+Independent clean-candidate Go 1.26.7 usage package/oracle checks and Rust tests pass
 on Darwin/arm64 (46+9+8 usage) and Linux/arm64 (46+8+8), with all16 CLI MCP tests on
 each; zero failed/ignored. Worker strict Clippy passed; parent workspace fmt passed
 on the candidate after formatting one earlier Nous test assertion. Receipts
@@ -264,7 +292,7 @@ differ, replacing the narrower Copilot-only probe. Its real CLI regression is
 committed under cfg(windows), but was not executed on the available native hosts.
 This is an explicit remaining Windows acceptance gap.
 
-Independent clean-candidate Go1.26.7 package/oracle and Rust tests pass on
+Independent clean-candidate Go 1.26.7 package/oracle and Rust tests pass on
 Darwin/arm64 (46+9+8 usage) and Linux/arm64 (46+8+8), with all16 CLI MCP tests on
 each; zero failed/ignored. Receipts `usage-guards-receipt-246cbc1b.json` are retained
 in the existing Brain/native-linux build roots. USE-001 remains open for direct-env
@@ -287,7 +315,7 @@ The authenticated success/401/429/malformed reports compare actual single-provid
 Go and Rust production constructors with canned transport; only fetched_at is fixed.
 Rust auth/configuration is not copied from the expected fixture for these cases.
 
-Independent clean-candidate Go1.26.7 package/oracle checks and Rust tests pass on
+Independent clean-candidate Go 1.26.7 package/oracle checks and Rust tests pass on
 Darwin/arm64 (45+9+8 usage tests) and Linux/arm64 (45+8+8), plus all15 CLI MCP tests
 on each; zero failed/ignored. Receipts `copilot-file-receipt-4d4042c6.json` live in
 the existing Brain and native-linux build roots. Other target platforms remain open.
@@ -313,7 +341,7 @@ conservative limit, not a claim that Go rejects it.
 Ten real Go `readClaudeFileToken` cases exercise these differences without
 constructing a provider or reading a Keychain. Nondeterministic map selection
 is checked against its two-token allowed set; no single random winner is frozen.
-Independent clean-candidate Go1.26.7 usage package/oracle and Rust tests pass on
+Independent clean-candidate Go 1.26.7 usage package/oracle and Rust tests pass on
 Darwin/arm64 (43+9+8 usage tests) and Linux/arm64 (43+8+8), plus all 14 CLI MCP
 tests on each; zero failed or ignored. Receipts `claude-compat-receipt-cbfc46a9.json`
 are retained under the existing Brain and native-linux build roots.
@@ -334,7 +362,7 @@ fallback are checked. `CODEX_HOME` overrides remain on Go.
 The actual Go provider/BuildReport oracle compares success, 401, 429 and malformed
 responses with the real Rust provider builder. Only fetched-at is pinned;
 provider-derived reset timestamps are preserved. Independent exact-clean-HEAD
-Go1.26.7 package/oracle and Rust gates pass on Darwin/arm64 (42+9+8 usage tests)
+Go 1.26.7 package/oracle and Rust gates pass on Darwin/arm64 (42+9+8 usage tests)
 and Linux/arm64 (42+8+8); both pass all 13 CLI MCP tests, zero failed/ignored.
 Receipts are `../builds/symaira-brain/claude-oauth-usage-20260929/codex-file-receipt-d634d71b.json`
 and `../builds/native-linux-20260929/codex-file-receipt-d634d71b.json`.
@@ -361,7 +389,7 @@ No live provider/Keychain access, publication, cutover or Go removal.
   Rust invokes its real provider builder: AuthStatus retains `env` or `file`,
   while the OAuth snapshot reports `oauth`. The differential caught and fixed
   that distinction. Valid synthetic files avoid any real Keychain read.
-- Independent coordinator checks on clean exact HEAD passed the Go1.26.7
+- Independent coordinator checks on clean exact HEAD passed the Go 1.26.7
   oracle, all usage tests (Darwin/arm64: 39+9+8; Linux/arm64: 39+8+8), and all
   12 CLI MCP integration tests, with zero failures or ignored tests.
   Darwin log: `../builds/symaira-brain/claude-oauth-usage-20260929/coordinator-file-732412fe.log`.
@@ -383,7 +411,7 @@ No live provider/Keychain access, publication, cutover or Go removal.
   `NewClaudeProvider` and `BuildReport` with synthetic credentials and a canned
   transport: success, 401, 429 and malformed JSON, with request authentication
   asserted. Only dynamic `fetched_at` is normalized; reset timestamps are compared.
-- Parent acceptance at this exact candidate on Darwin/arm64: pinned Go1.26.7
+- Parent acceptance at this exact candidate on Darwin/arm64: pinned Go 1.26.7
   `make usage-oracle-check` passed; `cargo test -p symbrain-usage --locked`
   passed 37 unit, 9 secret and 8 report tests. The CLI test
   `direct_claude_oauth_routes_usage_to_native_parser_without_provider_request`
