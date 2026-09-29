@@ -260,7 +260,7 @@ Art Abweichung, die dieses Dokument verhindern soll.
 ## Nicht-Ziele
 
 - Playwright oder eine Node-Laufzeit als Abhängigkeit. Verstößt gegen die
-  standalone-first- und CGO-freie Invariante aus [AGENTS.md](../AGENTS.md).
+  standalone-first- und CGO-freie Invariante aus [AGENTS.md](../../AGENTS.md).
 - **`safaridriver --mcp` als Backend:** Der Safari-MCP-Server liefert eine
   isolierte Sitzung ohne die Logins des Menschen. Außerdem müsste symbrowse
   als MCP-Client LLM-förmige `content`-Blobs in seine stabile Engine- und

@@ -453,6 +453,7 @@ Implemented today:
 | `symbrain setup` | Download and install pinned core binaries to `~/.symaira/bin` |
 | `symbrain setup --from-source DIR [--modules browse,operate,scope]` | Build optional module binaries from the in-repo Brain sources at `DIR` and install them into the managed directory with a provenance sidecar (see "Building module binaries from Brain sources" above) |
 | `symbrain profile list \| show \| add \| remove` | Manage profiles under `~/.config/symbrain/profiles/` (`--output table\|json` applies to list/show) |
+| `symbrain config path \| get \| set` | Inspect the global configuration path and read or update configuration values |
 | `symbrain harness list [--project DIR]` | Inspect every known harness, its global/project config state, and registered MCP servers with transport detail (`--output table\|json`) |
 | `symbrain harness health [--harness NAME] [--project DIR]` | Probe the MCP `initialize` handshake of every registered server (stdio servers only; concurrent, bounded per server) |
 | `symbrain usage` | AI subscription/token usage per provider |
@@ -657,14 +658,14 @@ Requirements: Go 1.26+, `CGO_ENABLED=0` (the release build is CGO-free; see
 make build       # CGO_ENABLED=0 go build -o symbrain ./cmd/symbrain
 make test        # go test ./...
 make test-race   # go test -race ./...
-make lint        # golangci-lint if available, else go vet
+make lint        # go vet + gofmt check (matches CI)
 make fmt         # gofmt -w -s .
 
 # Full local check (mirrors CI):
 go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 ```
 
-The incremental Rust workspace currently contains `symbrain-guard-core`.
+The incremental Rust workspace includes `symbrain-guard-core`.
 Its [PR workflow](.github/workflows/rust.yml) runs the existing Go fixture
 checks (including the revision-pinned capability oracle), locked Rust
 checks/tests, and independent dependency-policy jobs on every PR to `main`.
@@ -682,10 +683,11 @@ make rust-deny
 `rust-audit` reads `Cargo.lock`; `rust-deny` checks the locked dependency
 graph for all platforms against [deny.toml](deny.toml). Failures block
 their jobs. These library and dependency checks do not establish native
-MCP process/stdio behavior. Native macOS/Linux/Windows MCP tests, scheduled
-bounded fuzzing, and phase-quality evidence remain open in
-[#532](https://github.com/danieljustus/symaira-brain/issues/532), pending the
-corresponding Rust packages and test tooling. Go remains the production
+MCP process/stdio behavior. The native-target CI work tracked in
+[#532](https://github.com/danieljustus/symaira-brain/issues/532) is complete;
+the current per-contract evidence and remaining platform gates, including
+fuzzing, are recorded in the
+[contract matrix](migration/contract-matrix.csv). Go remains the production
 implementation and rollback path.
 
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
