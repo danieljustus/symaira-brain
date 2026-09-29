@@ -305,7 +305,8 @@ lint: vet fmt-check
 # another nested go.mod directory is introduced later.
 # Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
 # below the platform's exec limit instead of expanding every path in make.
-GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -exec
+# Linked checkouts are independent trees, not sources owned by this checkout.
+GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -exec
 
 ## fmt: Format all Go source files
 fmt:
