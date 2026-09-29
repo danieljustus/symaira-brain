@@ -1488,9 +1488,12 @@ pub fn needs_go_fallback() -> bool {
     if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {
         return true;
     }
-    if opencode_workspace_override
-        .as_deref()
-        .is_some_and(|workspace| !supported_opencode_workspace(workspace))
+    // Without a cookie Go has no request strategy, so the workspace is only
+    // reported as configured and its spelling cannot affect an HTTP request.
+    if opencode_env.is_some()
+        && opencode_workspace_override
+            .as_deref()
+            .is_some_and(|workspace| !supported_opencode_workspace(workspace))
     {
         return true;
     }
