@@ -9,7 +9,7 @@ A private HOME and empty PATH do not isolate that command. Earlier eager
 Gateway construction could also discover credentials before an injected
 fixture Service replaced it. Consequently, earlier assertions below that the
 complete CLI/Gateway suites did not access host Keychain state are unsupported.
-The synthetic parser/report tests remain separate from this discovery path.
+The synthetic parser/report tests remain separate from this discovery path. The Go registry-count test also directly constructs AllProviders(nil), so the full Go usage package requires the same isolation correction.
 
 Historical execution logs are preserved. Darwin receipts now carry a later
 isolation-review annotation; passing suite counts do not establish credential
