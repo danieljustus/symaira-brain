@@ -1,5 +1,31 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated Codex default-file evidence — 2026-09-29
+
+Candidate `d634d71b24825073be565e1c0fdf9fd692d44437` includes `bad314a2`
+and prior Claude/Browse slices. A sole token from default `~/.codex/auth.json`
+now selects native reporting. Top-level token precedence, nested token shape,
+invalid-file status, env-over-file precedence and reference/override/mixed-source
+fallback are checked. `CODEX_HOME` overrides remain on Go.
+
+The actual Go provider/BuildReport oracle compares success, 401, 429 and malformed
+responses with the real Rust provider builder. Only fetched-at is pinned;
+provider-derived reset timestamps are preserved. Independent exact-clean-HEAD
+Go1.26.7 package/oracle and Rust gates pass on Darwin/arm64 (42+9+8 usage tests)
+and Linux/arm64 (42+8+8); both pass all 13 CLI MCP tests, zero failed/ignored.
+Receipts are `../builds/symaira-brain/claude-oauth-usage-20260929/codex-file-receipt-d634d71b.json`
+and `../builds/native-linux-20260929/codex-file-receipt-d634d71b.json`.
+
+Source review also identified an open limitation of the prior Claude file gate:
+Go typed JSON accepts alternate field casing and merges structured duplicates,
+rejects invalid typed siblings, and chooses arbitrarily among non-default
+accounts. Rust's existing Value parser does not have the same behavior. A
+follow-on conservative eligibility fix keeps unproven forms on Go. Prior
+canonical default-file evidence does not establish parity for those forms.
+USE-001 remains open for that fix, remaining providers and other native targets.
+No live provider/Keychain access, publication, cutover or Go removal.
+
+
 ## Integrated Claude env/file OAuth evidence — 2026-09-29
 
 - Implementation candidate `732412fe2dab303ae56987937b595f8582290511`
