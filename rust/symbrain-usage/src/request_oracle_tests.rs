@@ -699,21 +699,6 @@ fn authenticated_claude_oauth_report_matches_go_build_report_oracle() {
     let mut actual = serde_json::to_value(&report).expect("Rust Claude OAuth report");
     actual["providers"][0]["snapshot"]["fetched_at"] =
         success["providers"][0]["snapshot"]["fetched_at"].clone();
-    for (index, expected) in success["providers"][0]["snapshot"]["meters"]
-        .as_array()
-        .expect("Go Claude OAuth meters")
-        .iter()
-        .enumerate()
-    {
-        if let Some(reset) = expected.get("resets_at") {
-            actual["providers"][0]["snapshot"]["meters"][index]["resets_at"] = reset.clone();
-        } else {
-            actual["providers"][0]["snapshot"]["meters"][index]
-                .as_object_mut()
-                .expect("Rust meter object")
-                .remove("resets_at");
-        }
-    }
     assert_eq!(actual, *success);
 
     let errors = oracle["errors"].as_array().expect("Go report error cases");
