@@ -5,11 +5,11 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain. Claude, Codex, and Copilot default CLI files are native only for
-//! proven deterministic shapes and when their credential is the sole
-//! configured provider source.
+//! keychain. Claude, Codex, Copilot, Kimi CLI, and Hermes default files use
+//! native reporting only for proven deterministic shapes. Supported providers
+//! may be combined; any unproven source keeps the report on Go.
 
-use super::provider_requests::validated_base;
+use super::provider_requests::{trusted_https_url, validated_base};
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
 use serde::Deserialize;
 use std::env;
@@ -22,16 +22,7 @@ use std::time::{Duration, Instant, SystemTime};
 
 /// Environment variables other than the narrow direct provider credentials
 /// allowed to use native reporting. Every one keeps the CLI on Go.
-const OTHER_PROVIDER_ENV_VARS: &[&str] = &[
-    "CODEX_HOME",
-    "HERMES_HOME",
-    "HERMES_PORTAL_BASE_URL",
-    "KIMI_CODE_BASE_URL",
-    "KIMI_CODE_HOME",
-    "KIMI_AUTH_TOKEN",
-    "MOONSHOT_REGION",
-    "OPENROUTER_API_URL",
-];
+const OTHER_PROVIDER_ENV_VARS: &[&str] = &["CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME"];
 
 /// The service Claude Code stores its OAuth credentials under in the macOS
 /// login keychain. Current versions append a per-installation hex suffix that
@@ -764,6 +755,43 @@ fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
     (token, device_id)
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct KimiCredentialCandidate {
+    #[serde(rename = "access_token")]
+    access_token: Option<String>,
+    #[serde(rename = "refresh_token")]
+    _refresh_token: Option<String>,
+}
+
+/// Return only the deterministic subset of the Go Kimi file parser: the
+/// canonical field spelling, without duplicate JSON keys, case aliases,
+/// unknown fields, or secret refs.
+fn kimi_file_token_candidate(path: &Path) -> Option<String> {
+    let data = read_limited(path)?;
+    let candidate: KimiCredentialCandidate = serde_json::from_slice(&data).ok()?;
+    candidate
+        .access_token
+        .filter(|token| !token.is_empty() && !is_secret_reference(token))
+}
+
+/// The Go Kimi provider converts the device-id file's raw bytes to a string,
+/// while Rust reads UTF-8. Keep existing non-ASCII or unreadable forms on Go
+/// until their header encoding has source-bound parity evidence.
+fn kimi_device_id_is_native(path: &Path) -> bool {
+    if !path_may_exist(path) {
+        return true;
+    }
+    read_limited(path).is_some_and(|bytes| {
+        std::str::from_utf8(&bytes).is_ok_and(|value| {
+            value
+                .trim()
+                .bytes()
+                .all(|byte| byte == b' ' || byte.is_ascii_graphic())
+        })
+    })
+}
+
 fn nous_auth_path() -> PathBuf {
     env_path("HERMES_HOME", home().join(".hermes")).join("auth.json")
 }
@@ -790,6 +818,83 @@ fn nous_file_token(path: &Path) -> Option<String> {
         return Some(token.to_owned());
     }
     None
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NousCredentialCandidate {
+    _version: Option<Value>,
+    providers: Option<Vec<NousProviderCandidate>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NousProviderCandidate {
+    id: Option<String>,
+    invoke_jwt: Option<String>,
+    access_token: Option<String>,
+}
+
+/// The default Hermes file is native only when Go's typed decode has a
+/// deterministic, plain-text result. JWT expiry uses Go's Unix-second
+/// truncation and remains on the shipped route.
+fn nous_file_token_candidate(path: &Path) -> Option<String> {
+    let data = read_limited(path)?;
+    let root: NousCredentialCandidate = serde_json::from_slice(&data).ok()?;
+    let provider = root
+        .providers?
+        .into_iter()
+        .find(|provider| provider.id.as_deref() == Some("nous"))?;
+    let token = provider
+        .invoke_jwt
+        .filter(|token| !token.is_empty())
+        .or_else(|| provider.access_token.filter(|token| !token.is_empty()))?;
+    if token.contains('.') || is_secret_reference(&token) {
+        return None;
+    }
+    Some(token)
+}
+
+fn supported_custom_base(raw: &str) -> bool {
+    if !trusted_https_url(raw, false) || !raw.is_ascii() || raw.contains(['?', '#', '%', '@']) {
+        return false;
+    }
+    let Some(authority_and_path) = raw.strip_prefix("https://") else {
+        return false;
+    };
+    let (authority, path) = authority_and_path
+        .split_once('/')
+        .unwrap_or((authority_and_path, ""));
+    if !authority.contains('.')
+        || !authority.split('.').all(|label| {
+            !label.is_empty()
+                && label
+                    .as_bytes()
+                    .first()
+                    .is_some_and(u8::is_ascii_alphanumeric)
+                && label
+                    .as_bytes()
+                    .last()
+                    .is_some_and(u8::is_ascii_alphanumeric)
+                && label
+                    .bytes()
+                    .all(|byte| byte.is_ascii_lowercase() || byte.is_ascii_digit() || byte == b'-')
+        })
+    {
+        return false;
+    }
+    path.bytes()
+        .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'/' | b'-' | b'_' | b'.'))
+        && !path.contains("//")
+        && !path
+            .split('/')
+            .any(|segment| segment == "." || segment == "..")
+}
+
+fn supported_opencode_workspace(raw: &str) -> bool {
+    raw.strip_prefix("wrk_").is_some_and(|suffix| {
+        !suffix.is_empty() && suffix.bytes().all(|byte| byte.is_ascii_alphanumeric())
+    })
 }
 
 fn nous_jwt_is_live(token: &str) -> bool {
@@ -1021,12 +1126,11 @@ pub fn all_providers() -> Vec<Provider> {
 ///
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
-/// table. A direct Claude OAuth env token can be native only when it is the
-/// sole provider source; Claude OAuth and Copilot files are native only when
-/// their strict shapes prove Go's deterministic token choice. Other
-/// file/keychain sources and mixed credentials stay on Go. A workspace
-/// override alone supplies no `OpenCode` cookie or strategy, so it cannot
-/// start a fetch.
+/// table. File-backed routes require a deterministic Go-equivalent subset;
+/// secret references and unsupported home/base/workspace overrides stay on Go.
+/// Multiple configured providers can be native together when each source is
+/// proven. A workspace override alone supplies no `OpenCode` cookie or
+/// strategy, so it cannot start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
     let claude_admin_env = env_raw("ANTHROPIC_ADMIN_KEY");
@@ -1036,10 +1140,19 @@ pub fn needs_go_fallback() -> bool {
     let moonshot_env = env_raw("MOONSHOT_API_KEY");
     let cursor_env = env_raw("CURSOR_COOKIE");
     let kimi_api_env = env_raw("KIMI_CODE_API_KEY");
+    let kimi_auth_env = env_raw("KIMI_AUTH_TOKEN");
     let nous_env = env_raw("NOUS_PORTAL_ACCESS_TOKEN");
     let codex_env = env_raw("CODEX_ACCESS_TOKEN");
     let opencode_env = env_raw("OPENCODE_COOKIE");
     let opencode_workspace_override = env_raw("OPENCODE_WORKSPACE_ID");
+    let unsupported_base = [
+        env_raw("KIMI_CODE_BASE_URL"),
+        env_raw("HERMES_PORTAL_BASE_URL"),
+        env_raw("OPENROUTER_API_URL"),
+    ]
+    .into_iter()
+    .flatten()
+    .any(|value| !supported_custom_base(&value));
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
@@ -1047,6 +1160,9 @@ pub fn needs_go_fallback() -> bool {
     // HOME. Keep the entire usage report on Go if those roots differ so no
     // provider can silently miss a file-backed credential.
     if usage_home_mismatch_requires_go() {
+        return true;
+    }
+    if other_provider_env || unsupported_base {
         return true;
     }
     let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
@@ -1061,16 +1177,28 @@ pub fn needs_go_fallback() -> bool {
         return true;
     }
     let codex_file = codex_file_token(&codex_home());
-    // Nous files are not a native route yet. Presence alone is enough to keep
-    // Go in charge, including malformed files, unreadable paths, and symlinks
-    // that the token parser cannot recognize.
-    if path_may_exist(&nous_auth_path()) {
+    let nous_path = nous_auth_path();
+    let nous_file = nous_file_token_candidate(&nous_path);
+    if path_may_exist(&nous_path) && nous_file.is_none() {
+        // Existing files that fall outside the deterministic plain-token
+        // subset remain interpreted by Go, including expired JWTs.
         return true;
     }
-    if kimi_store(&kimi_cli_home()).0.is_some() {
+    let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
+    let kimi_cli = kimi_file_token_candidate(&kimi_path);
+    if path_may_exist(&kimi_path) && kimi_cli.is_none() {
         return true;
     }
-    needs_go_fallback_for(UsageFallbackSignals {
+    if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {
+        return true;
+    }
+    if opencode_workspace_override
+        .as_deref()
+        .is_some_and(|workspace| !supported_opencode_workspace(workspace))
+    {
+        return true;
+    }
+    needs_go_fallback_for(&UsageFallbackSignals {
         claude_admin_env: claude_admin_env.as_deref(),
         claude_oauth_env: claude_oauth_env.as_deref(),
         copilot_env: copilot_env.as_deref(),
@@ -1079,12 +1207,14 @@ pub fn needs_go_fallback() -> bool {
         moonshot_env: moonshot_env.as_deref(),
         cursor_env: cursor_env.as_deref(),
         kimi_api_env: kimi_api_env.as_deref(),
+        kimi_auth_env: kimi_auth_env.as_deref(),
+        kimi_cli: kimi_cli.as_deref(),
         nous_env: nous_env.as_deref(),
+        nous_file: nous_file.as_deref(),
         codex_env: codex_env.as_deref(),
         codex_file: codex_file.as_deref(),
         opencode_env: opencode_env.as_deref(),
         claude_file: claude_file_token.as_deref(),
-        opencode_workspace_override: opencode_workspace_override.as_deref(),
         other_provider_env,
         other_credential_source: false,
         // A file token wins before Go reads Keychain, so an existing Claude
@@ -1095,13 +1225,9 @@ pub fn needs_go_fallback() -> bool {
     })
 }
 
-/// Keeps reports native only for one direct credential from a pinned set of
-/// providers, when every other provider source and local probe is absent.
-/// Secret references, other credential files, and provider-specific overrides
-/// stay on Go. Go-equivalent Claude OAuth and Copilot file tokens or the
-/// default Codex `auth.json` token join the credential set and are native only
-/// when no other source is configured. Unsupported existing Claude or Copilot
-/// file shapes stay on Go.
+/// Keeps reports native for the proven portable sources once every configured
+/// source is handled by the same provider constructors. Unsupported files,
+/// secret references and local providers still keep Go in charge.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
@@ -1112,18 +1238,20 @@ struct UsageFallbackSignals<'a> {
     moonshot_env: Option<&'a str>,
     cursor_env: Option<&'a str>,
     kimi_api_env: Option<&'a str>,
+    kimi_auth_env: Option<&'a str>,
+    kimi_cli: Option<&'a str>,
     nous_env: Option<&'a str>,
+    nous_file: Option<&'a str>,
     codex_env: Option<&'a str>,
     codex_file: Option<&'a str>,
     opencode_env: Option<&'a str>,
     claude_file: Option<&'a str>,
-    opencode_workspace_override: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
     local_provider_present: bool,
 }
 
-fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
+fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     let credentials = [
         signals.claude_admin_env,
         signals.claude_oauth_env,
@@ -1133,7 +1261,10 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.moonshot_env,
         signals.cursor_env,
         signals.kimi_api_env,
+        signals.kimi_auth_env,
+        signals.kimi_cli,
         signals.nous_env,
+        signals.nous_file,
         signals.codex_env,
         signals.codex_file,
         signals.opencode_env,
@@ -1142,17 +1273,10 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
     if signals.other_provider_env
         || signals.other_credential_source
         || signals.local_provider_present
-        || (signals.opencode_workspace_override.is_some()
-            && credentials.iter().any(Option::is_some))
     {
         return true;
     }
-    let mut configured = credentials.into_iter().flatten();
-    match (configured.next(), configured.next()) {
-        (None, _) => false,
-        (Some(_), Some(_)) => true,
-        (Some(credential), None) => is_secret_reference(credential),
-    }
+    credentials.into_iter().flatten().any(is_secret_reference)
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.

@@ -1,0 +1,74 @@
+{
+  "api_fails_cli_recovers": {
+    "schema_version": 1,
+    "providers": [
+      {
+        "id": "kimi",
+        "display_name": "Kimi Code",
+        "configured": true,
+        "auth_status": {
+          "status": "available",
+          "detail": "Kimi Code CLI is signed in",
+          "source": "cli"
+        },
+        "snapshot": {
+          "provider_id": "kimi",
+          "meters": [
+            {
+              "label": "Weekly quota",
+              "used": "214",
+              "limit": "2048",
+              "unit": "requests",
+              "resets_at": "2026-01-09T17:53:13.716839301+02:30"
+            },
+            {
+              "label": "5h window",
+              "used": "139",
+              "limit": "200",
+              "unit": "requests",
+              "resets_at": "2026-01-06T13:33:02.717479433Z"
+            }
+          ],
+          "fetched_at": "2026-08-01T00:00:00Z",
+          "source": "cli"
+        }
+      }
+    ]
+  },
+  "api_cli_fail_web_works": {
+    "schema_version": 1,
+    "providers": [
+      {
+        "id": "kimi",
+        "display_name": "Kimi Code",
+        "configured": true,
+        "auth_status": {
+          "status": "available",
+          "detail": "Kimi Code CLI is signed in",
+          "source": "cli"
+        },
+        "snapshot": {
+          "provider_id": "kimi",
+          "meters": [
+            {
+              "label": "Weekly quota",
+              "used": "214",
+              "limit": "2048",
+              "unit": "requests",
+              "resets_at": "2026-01-09T17:53:13.716839301+02:30"
+            },
+            {
+              "label": "5h window",
+              "used": "139",
+              "limit": "200",
+              "unit": "requests",
+              "resets_at": "2026-01-06T13:33:02.717479433Z"
+            }
+          ],
+          "fetched_at": "2026-08-01T00:00:00Z",
+          "source": "web"
+        }
+      }
+    ]
+  }
+}

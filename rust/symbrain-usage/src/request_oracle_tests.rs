@@ -26,6 +26,12 @@ const CODEX_FILE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/codex_file_authenticated_report.json");
 const COPILOT_FILE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/copilot_file_authenticated_report.json");
+const COMBINED_NATIVE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/combined_native_authenticated_report.json");
+const KIMI_FALLBACK_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/kimi_fallback_authenticated_report.json");
+const NOUS_PRECEDENCE_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/nous_env_file_precedence_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
@@ -327,6 +333,316 @@ fn authenticated_opencode_report(responses: Vec<Response>) -> (crate::Report, Fi
     let report =
         crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
     (report, transport)
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn combined_native_providers_match_the_production_go_report_and_overrides() {
+    let expected: Value = serde_json::from_str(COMBINED_NATIVE_REPORT_ORACLE)
+        .expect("Go combined configured-provider report");
+    let kimi = kimi_from_resolved(
+        Some(("env".into(), "combined-kimi-api-token".into())),
+        None,
+        Some("combined-kimi-cli-token"),
+        None,
+        None,
+        "https://api.kimi.com/custom/v1".into(),
+        Some("combined-device-id".into()),
+    );
+    let moonshot = moonshot_from_resolved(
+        Some(("env".into(), "combined-moonshot-token".into())),
+        None,
+        "cn",
+    );
+    let nous = nous_from_resolved(
+        Some(("file".into(), "combined-nous-file-token".into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let opencode = opencode_from_resolved(
+        Some(("env".into(), "combined-opencode-cookie".into())),
+        None,
+        Some("wrk_combined123"),
+    );
+    let openrouter = openrouter_from_resolved(
+        Some(("env".into(), "combined-openrouter-token".into())),
+        None,
+        "https://openrouter.ai/custom/v1".into(),
+    );
+    let transport = FixtureTransport::new(
+        [
+            (
+                "kimi".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/kimi-fallback-api-usages.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "moonshot".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/moonshot-balance-cn.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "nous".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!("../../../internal/usage/testdata/nous-account.json")
+                        .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "opencode".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/opencode-subscription-no-reset.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+            (
+                "openrouter".into(),
+                Response {
+                    status: 200,
+                    body: include_bytes!(
+                        "../../../internal/usage/testdata/openrouter-credits.json"
+                    )
+                    .to_vec(),
+                    headers: BTreeMap::new(),
+                },
+            ),
+        ]
+        .into(),
+    );
+    let mut report = crate::Service::with_transport(
+        vec![kimi, moonshot, nous, opencode, openrouter],
+        Arc::new(transport.clone()),
+    )
+    .report();
+    assert_eq!(
+        report
+            .providers
+            .iter()
+            .map(|provider| provider.id.as_str())
+            .collect::<Vec<_>>(),
+        ["kimi", "moonshot", "nous", "opencode", "openrouter"]
+    );
+    let requests = transport.requests();
+    assert_eq!(requests.len(), 5);
+    let find_request = |matches: &dyn Fn(&crate::transport::Request) -> bool| {
+        requests.iter().find(|request| matches(request))
+    };
+    let kimi_request =
+        find_request(&|request| request.url == "https://api.kimi.com/custom/v1/coding/v1/usages")
+            .expect("Kimi API request");
+    assert_eq!(
+        kimi_request
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer combined-kimi-api-token")
+    );
+    assert!(
+        find_request(&|request| request.url == "https://api.moonshot.cn/v1/users/me/balance")
+            .is_some()
+    );
+    assert!(
+        find_request(
+            &|request| request.headers.get("Authorization").map(String::as_str)
+                == Some("Bearer combined-nous-file-token")
+        )
+        .is_some()
+    );
+    assert!(
+        find_request(&|request| {
+            request.url.starts_with("https://opencode.ai/_server?")
+                && request.url.contains("args=%5B%22wrk_combined123%22%5D")
+        })
+        .is_some()
+    );
+    assert!(
+        find_request(&|request| request.url == "https://openrouter.ai/custom/v1/auth/key")
+            .is_some()
+    );
+
+    let go_rows = expected["providers"].as_array().expect("Go provider rows");
+    for provider in &mut report.providers {
+        let go_row = go_rows
+            .iter()
+            .find(|row| row["id"] == provider.id)
+            .unwrap_or_else(|| panic!("Go report has no {} row", provider.id));
+        let mut rust_row = serde_json::to_value(&*provider).expect("Rust provider row");
+        let fetched_at = go_row["snapshot"]["fetched_at"]
+            .as_str()
+            .expect("Go canonical fetched_at");
+        rust_row["snapshot"]["fetched_at"] = Value::String(fetched_at.to_owned());
+        assert_eq!(rust_row, *go_row, "{} provider row", provider.id);
+    }
+}
+
+#[test]
+fn nous_environment_credential_precedes_the_default_file() {
+    let expected: Value =
+        serde_json::from_str(NOUS_PRECEDENCE_REPORT_ORACLE).expect("Go Nous env-over-file report");
+    let provider = nous_from_resolved(
+        Some(("env".into(), "nous-env-precedence-token".into())),
+        None,
+        "https://portal.nousresearch.com".into(),
+    );
+    let transport = FixtureTransport::new(
+        [(
+            "nous".into(),
+            Response {
+                status: 200,
+                body: include_bytes!("../../../internal/usage/testdata/nous-account.json").to_vec(),
+                headers: BTreeMap::new(),
+            },
+        )]
+        .into(),
+    );
+    let report =
+        crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+    assert_eq!(
+        report.providers[0].auth_status.source.as_deref(),
+        Some("env")
+    );
+    assert_eq!(
+        transport.requests()[0]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer nous-env-precedence-token")
+    );
+    let expected_row = &expected["providers"][0];
+    let mut rust_row = serde_json::to_value(&report.providers[0]).expect("Rust Nous row");
+    rust_row["snapshot"]["fetched_at"] = expected_row["snapshot"]["fetched_at"].clone();
+    assert_eq!(rust_row, *expected_row);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn kimi_cli_and_web_fallback_reports_match_production_go_chains() {
+    let expected: Value =
+        serde_json::from_str(KIMI_FALLBACK_REPORT_ORACLE).expect("Go Kimi fallback reports");
+    let api_response = Response {
+        status: 401,
+        body: br#"{"error":"unauthorized"}"#.to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let cli_success = Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-api-usages.json")
+            .to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let cli_transport = FixtureTransport::with_sequences(
+        [(
+            "kimi".into(),
+            vec![Ok(api_response.clone()), Ok(cli_success)],
+        )]
+        .into(),
+    );
+    let cli = kimi_from_resolved(
+        Some(("env".into(), "fallback-kimi-api-token".into())),
+        None,
+        Some("fallback-kimi-cli-token"),
+        None,
+        None,
+        "https://api.kimi.com".into(),
+        Some("fallback-device-id".into()),
+    );
+    let cli_report =
+        crate::Service::with_transport(vec![cli], Arc::new(cli_transport.clone())).report();
+    assert_eq!(
+        cli_report.providers[0].snapshot.as_ref().unwrap().source,
+        "cli"
+    );
+    let cli_requests = cli_transport.requests();
+    assert_eq!(cli_requests.len(), 2);
+    assert_eq!(
+        cli_requests[0]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-api-token")
+    );
+    assert_eq!(
+        cli_requests[1]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-cli-token")
+    );
+    assert_eq!(
+        cli_requests[1]
+            .headers
+            .get("X-Msh-Device-Id")
+            .map(String::as_str),
+        Some("fallback-device-id")
+    );
+    let cli_expected = &expected["api_fails_cli_recovers"]["providers"][0];
+    let mut cli_row = serde_json::to_value(&cli_report.providers[0]).expect("Rust Kimi CLI row");
+    cli_row["snapshot"]["fetched_at"] = cli_expected["snapshot"]["fetched_at"].clone();
+    assert_eq!(cli_row, *cli_expected);
+
+    let web_success = Response {
+        status: 200,
+        body: include_bytes!("../../../internal/usage/testdata/kimi-fallback-web-usages.json")
+            .to_vec(),
+        headers: BTreeMap::new(),
+    };
+    let web_transport = FixtureTransport::with_sequences(
+        [(
+            "kimi".into(),
+            vec![Ok(api_response.clone()), Ok(api_response), Ok(web_success)],
+        )]
+        .into(),
+    );
+    let web = kimi_from_resolved(
+        Some(("env".into(), "fallback-kimi-api-token".into())),
+        None,
+        Some("fallback-kimi-cli-token"),
+        Some(("env".into(), "fallback-kimi-web-token".into())),
+        None,
+        "https://api.kimi.com".into(),
+        Some("fallback-device-id".into()),
+    );
+    let web_report =
+        crate::Service::with_transport(vec![web], Arc::new(web_transport.clone())).report();
+    assert_eq!(
+        web_report.providers[0].snapshot.as_ref().unwrap().source,
+        "web"
+    );
+    let web_requests = web_transport.requests();
+    assert_eq!(web_requests.len(), 3);
+    assert_eq!(
+        web_requests[2].url,
+        "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages"
+    );
+    assert_eq!(
+        web_requests[2]
+            .headers
+            .get("Authorization")
+            .map(String::as_str),
+        Some("Bearer fallback-kimi-web-token")
+    );
+    let web_expected = &expected["api_cli_fail_web_works"]["providers"][0];
+    let mut web_row = serde_json::to_value(&web_report.providers[0]).expect("Rust Kimi web row");
+    web_row["snapshot"]["fetched_at"] = web_expected["snapshot"]["fetched_at"].clone();
+    assert_eq!(web_row, *web_expected);
 }
 
 fn normalize_rfc3339_fields(value: &mut Value) {
@@ -1160,7 +1476,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
             Some(
                 chrono::DateTime::parse_from_rfc3339(response_time)
                     .expect("Go response reset timestamp")
-                    .with_timezone(&chrono::Utc)
+                    .fixed_offset()
             ),
             "{} reset timestamp follows the Go response",
             meter.label
@@ -1181,7 +1497,7 @@ fn authenticated_kimi_report_matches_go_success_and_failure_oracles() {
                     .expect("oracle reset timestamp"),
             )
             .expect("oracle reset timestamp parses")
-            .with_timezone(&chrono::Utc),
+            .fixed_offset(),
         );
     }
     let mut rust_snapshot = serde_json::to_value(snapshot).expect("Rust snapshot");
@@ -1378,8 +1694,7 @@ fn authenticated_opencode_report_matches_go_success_oracle_and_workspace_walk() 
                     .as_str()
                     .expect("oracle reset timestamp"),
             )
-            .expect("oracle reset timestamp parses")
-            .with_timezone(&chrono::Utc),
+            .expect("oracle reset timestamp parses"),
         );
     }
 

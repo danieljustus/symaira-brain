@@ -17,7 +17,7 @@
       "internal/usage/testdata/opencode-workspaces.txt": "c3cbcaafe98b449934fc2cdf178c7ca2bc4522e262868cdd44ec36db5c299475"
     },
     "harness_hashes": {
-      "rust/symbrain-usage/src/opencode_discovery_tests.rs": "0bb07d0ea178ae6197d96006f9928e263ffcd69628106463a96aa0e3b15c0bd4",
+      "rust/symbrain-usage/src/opencode_discovery_tests.rs": "6595e79878fde8fe457a0131b2f7f4d685e6fa99e70d964d12cec4d27c276acd",
       "rust/symbrain-usage/src/opencode_provenance_tests.rs": "e8a7a8c48c7db0fa8400a489cfae030fce1f28f185b0f9624508d852b1011fab",
       "scripts/usage-request-oracle/opencode/cases.go": "125be7ed13f8bb868deccf63770bf923fcf5328f84d9da4198565ceb4be42544",
       "scripts/usage-request-oracle/opencode/main.go": "5e879a83151e491f6cb22506bd32e5211dadfc04ed3a8c417c06dad7c0f50f56",

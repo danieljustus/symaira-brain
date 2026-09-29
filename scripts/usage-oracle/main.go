@@ -37,9 +37,10 @@ func loadFixtures(dir string) (map[string][]byte, error) {
 	names := map[string]string{
 		"claude": "claude-oauth-usage.json", "claude-admin": "claude-admin-cost.json", "codex": "codex-wham-usage.json",
 		"copilot": "copilot-user.json", "cursor": "cursor-usage-summary.json",
-		"kimi": "kimi-api-usages.json", "moonshot": "moonshot-balance-ai.json",
+		"kimi": "kimi-api-usages.json", "kimi-fallback": "kimi-fallback-api-usages.json", "kimi-stable": "kimi-fallback-api-usages.json", "kimi-web": "kimi-web-usages.json", "kimi-web-stable": "kimi-fallback-web-usages.json", "moonshot": "moonshot-balance-ai.json", "moonshot-cn": "moonshot-balance-cn.json",
 		"nous": "nous-account.json", "opencode": "opencode-subscription-json.txt", "opencode-workspaces": "opencode-workspaces.txt",
-		"openrouter": "openrouter-credits.json", "antigravity": "antigravity-quota-summary.json",
+		"opencode-stable": "opencode-subscription-no-reset.json",
+		"openrouter":      "openrouter-credits.json", "antigravity": "antigravity-quota-summary.json",
 	}
 	out := make(map[string][]byte, len(names))
 	for id, name := range names {
@@ -85,6 +86,7 @@ func main() {
 	copilotFileReportOutput := flag.String("copilot-file-report-output", "rust/symbrain-usage/tests/fixtures/copilot_file_authenticated_report.json", "authenticated Copilot file report path")
 	copilotFileTokenOutput := flag.String("copilot-file-token-output", "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json", "Copilot credential file parser cases")
 	nousFileTokenOutput := flag.String("nous-file-token-output", "rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json", "Nous auth.json parser cases")
+	kimiFileTokenOutput := flag.String("kimi-file-token-output", "rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json", "Kimi CLI credential parser cases")
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
@@ -96,6 +98,9 @@ func main() {
 	kimiReportOutput := flag.String("kimi-report-output", "rust/symbrain-usage/tests/fixtures/kimi_authenticated_report.json", "authenticated Kimi report path")
 	nousReportOutput := flag.String("nous-report-output", "rust/symbrain-usage/tests/fixtures/nous_authenticated_report.json", "authenticated Nous report path")
 	openCodeReportOutput := flag.String("opencode-report-output", "rust/symbrain-usage/tests/fixtures/opencode_authenticated_report.json", "authenticated OpenCode report path")
+	combinedReportOutput := flag.String("combined-native-report-output", "rust/symbrain-usage/tests/fixtures/combined_native_authenticated_report.json", "combined configured-provider report path")
+	kimiFallbackReportOutput := flag.String("kimi-fallback-report-output", "rust/symbrain-usage/tests/fixtures/kimi_fallback_authenticated_report.json", "Kimi API/CLI/web fallback report path")
+	nousPrecedenceReportOutput := flag.String("nous-precedence-report-output", "rust/symbrain-usage/tests/fixtures/nous_env_file_precedence_report.json", "Nous environment-over-file precedence report path")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -132,6 +137,11 @@ func main() {
 		os.Exit(1)
 	}
 	nousFileTokenOracle, err := buildNousFileTokenOracle()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	kimiFileTokenOracle, err := buildKimiFileTokenOracle()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -191,6 +201,21 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	combinedNativeReport, err := usage.BuildCombinedNativeAuthenticatedReportOracle(fixtures)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	kimiFallbackReport, err := usage.BuildKimiFallbackAuthenticatedReportOracle(fixtures["kimi-fallback"], fixtures["kimi-web-stable"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	nousPrecedenceReport, err := usage.BuildNousEnvironmentPrecedenceReportOracle(fixtures["nous"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -214,6 +239,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*nousFileTokenOutput, nousFileTokenOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*kimiFileTokenOutput, kimiFileTokenOracle); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -261,6 +290,18 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*combinedReportOutput, combinedNativeReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*kimiFallbackReportOutput, kimiFallbackReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*nousPrecedenceReportOutput, nousPrecedenceReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		fmt.Printf("PASS: usage oracle deterministic check passed (%d providers, %d cases)\n", len(graph.Providers), len(caseWire.Providers))
 		return
 	}
@@ -285,6 +326,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*nousFileTokenOutput, nousFileTokenOracle); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*kimiFileTokenOutput, kimiFileTokenOracle); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -329,6 +374,18 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*openCodeReportOutput, openCodeReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*combinedReportOutput, combinedNativeReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*kimiFallbackReportOutput, kimiFallbackReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*nousPrecedenceReportOutput, nousPrecedenceReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -395,6 +452,20 @@ type nousFileTokenOracleCase struct {
 	FilePresent bool    `json:"file_present"`
 	Contents    *string `json:"contents,omitempty"`
 	Token       string  `json:"token"`
+	NativeRoute bool    `json:"native_route"`
+}
+
+type kimiFileTokenOracleFixture struct {
+	SchemaVersion int                       `json:"schema_version"`
+	Cases         []kimiFileTokenOracleCase `json:"cases"`
+}
+
+type kimiFileTokenOracleCase struct {
+	ID          string  `json:"id"`
+	FilePresent bool    `json:"file_present"`
+	Contents    *string `json:"contents,omitempty"`
+	Token       string  `json:"token"`
+	NativeRoute bool    `json:"native_route"`
 }
 
 type codexFileReportFixture struct {
@@ -419,22 +490,63 @@ func buildNousFileTokenOracle() (nousFileTokenOracleFixture, error) {
 		id       string
 		contents *string
 	}{
-		{id: "canonical-invoke-jwt", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"synthetic-nous-jwt"}]}`)},
+		{id: "canonical-plain-invoke-token", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"synthetic-nous-token"}]}`)},
 		{id: "case-insensitive-struct-fields", contents: file(`{"Providers":[{"ID":"nous","Invoke_JWT":"synthetic-nous-case-token"}]}`)},
+		{id: "canonical-then-case-alias", contents: file(`{"providers":[{"id":"nous","access_token":"canonical-token","ACCESS_TOKEN":"alias-token"}]}`)},
+		{id: "case-alias-then-canonical", contents: file(`{"providers":[{"id":"nous","ACCESS_TOKEN":"alias-token","access_token":"canonical-token"}]}`)},
+		{id: "invoke-jwt-case-alias", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"canonical-token","INVOKE_JWT":"alias-token"}]}`)},
+		{id: "case-alias-providers-then-canonical", contents: file(`{"Providers":[{"id":"nous","access_token":"alias-token"}],"providers":[{"id":"nous","access_token":"canonical-token"}]}`)},
+		{id: "canonical-providers-then-case-alias", contents: file(`{"providers":[{"id":"nous","access_token":"canonical-token"}],"Providers":[{"id":"nous","access_token":"alias-token"}]}`)},
+		{id: "unknown-provider-field-with-token", contents: file(`{"providers":[{"id":"nous","access_token":"synthetic-nous-token","unknown_metadata":true}]}`)},
 		{id: "missing-file"},
 		{id: "empty-file", contents: file("")},
 		{id: "malformed-json", contents: file(`{"providers":[`)},
 		{id: "wrong-typed-token-invalidates-file", contents: file(`{"providers":[{"id":"nous","invoke_jwt":42}]}`)},
+		{id: "duplicate-token-key-remains-go-only", contents: file(`{"providers":[{"id":"nous","access_token":"first","access_token":"last"}]}`)},
+		{id: "jwt-shaped-token-remains-go-only", contents: file(`{"providers":[{"id":"nous","invoke_jwt":"a.b.c"}]}`)},
+		{id: "secret-reference-token-remains-go-only", contents: file(`{"providers":[{"id":"nous","access_token":"symvault://nous/token"}]}`)},
 		{id: "unrelated-provider", contents: file(`{"providers":[{"id":"other","access_token":"other-token"}]}`)},
 	}
 	fixture := nousFileTokenOracleFixture{SchemaVersion: 1}
+	native := map[string]bool{"canonical-plain-invoke-token": true}
 	for _, input := range inputs {
 		token, err := usage.BuildNousFileTokenOracle(input.contents)
 		if err != nil {
 			return nousFileTokenOracleFixture{}, err
 		}
 		fixture.Cases = append(fixture.Cases, nousFileTokenOracleCase{
-			ID: input.id, FilePresent: input.contents != nil, Contents: input.contents, Token: token,
+			ID: input.id, FilePresent: input.contents != nil, Contents: input.contents, Token: token, NativeRoute: native[input.id],
+		})
+	}
+	return fixture, nil
+}
+
+func buildKimiFileTokenOracle() (kimiFileTokenOracleFixture, error) {
+	file := func(value string) *string { return &value }
+	inputs := []struct {
+		id       string
+		contents *string
+	}{
+		{id: "canonical-with-ignored-refresh-token", contents: file(`{"access_token":"synthetic-kimi-file-token","refresh_token":"unused-refresh"}`)},
+		{id: "case-insensitive-struct-field", contents: file(`{"Access_Token":"synthetic-kimi-case-token"}`)},
+		{id: "canonical-then-case-alias", contents: file(`{"access_token":"canonical-token","ACCESS_TOKEN":"alias-token"}`)},
+		{id: "case-alias-then-canonical", contents: file(`{"ACCESS_TOKEN":"alias-token","access_token":"canonical-token"}`)},
+		{id: "unknown-field-with-token", contents: file(`{"access_token":"synthetic-kimi-token","unknown_metadata":true}`)},
+		{id: "duplicate-token-field", contents: file(`{"access_token":"first-token","access_token":"last-token"}`)},
+		{id: "wrong-typed-token", contents: file(`{"access_token":42}`)},
+		{id: "secret-reference-token", contents: file(`{"access_token":"symvault://kimi/token"}`)},
+		{id: "missing-file"},
+	}
+	native := map[string]bool{"canonical-with-ignored-refresh-token": true}
+	fixture := kimiFileTokenOracleFixture{SchemaVersion: 1}
+	for _, input := range inputs {
+		token, err := usage.BuildKimiFileTokenOracle(input.contents)
+		if err != nil {
+			return kimiFileTokenOracleFixture{}, err
+		}
+		fixture.Cases = append(fixture.Cases, kimiFileTokenOracleCase{
+			ID: input.id, FilePresent: input.contents != nil, Contents: input.contents,
+			Token: token, NativeRoute: native[input.id],
 		})
 	}
 	return fixture, nil
