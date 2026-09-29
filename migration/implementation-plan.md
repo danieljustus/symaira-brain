@@ -1,5 +1,31 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated remaining native usage routes — 2026-09-29
+
+Candidate `b9cf5f62b9b6949ee3379170272a6272f68f468a` integrates the preceding
+production assembly with strict default Kimi and plain-token Nous files,
+KIMI_AUTH_TOKEN, supported provider combinations, Moonshot cn, canonical OpenCode
+workspace overrides and bounded public HTTPS base overrides. Unknown fields,
+case aliases, duplicates, secret references, custom homes and Nous JWT files
+remain on Go. Kimi device_id files must be readable and valid header values.
+
+Actual Go constructors and BuildReport now cover the combined five-provider
+report, Kimi API-to-CLI-to-web fallback and Nous environment-over-file precedence.
+These fixtures exposed timestamp defects: Rust now preserves reset offsets and
+Go RFC3339Nano trailing-zero behavior. No reset values are masked in comparisons.
+Two real CLI routing cases replace stale expectations and verify the widened
+route before any live request; unsupported shapes still select Go.
+
+Independent clean-candidate Go1.26.7 package plus usage and OpenCode oracle checks
+pass on Darwin/arm64 and Linux/arm64. Rust usage tests pass 54+9+8 on Darwin and
+54+8+8 on Linux, with all 18 CLI tests on each; zero failed/ignored. Receipts
+`remaining-usage-receipt-b9cf5f62.json` in the Brain/native-linux build roots retain
+log hashes and Cargo metadata proving this worktree's source paths.
+
+USE-001 remains open for remaining routes and required native targets, including
+Windows home routing. No real credentials, live provider requests, publication,
+installed cutover or Go removal occurred.
+
 
 ## Integrated production provider assembly — 2026-09-29
 
