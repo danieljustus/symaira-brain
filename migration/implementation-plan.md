@@ -1,5 +1,33 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated Copilot default-file evidence — 2026-09-29
+
+Candidate `4d4042c62184d28a337d0eb686673dedf592850d` adds a sole deterministic
+Copilot token from default `~/.config/github-copilot/apps.json`, or `hosts.json`
+when apps is absent, to the native usage route. Unknown/ambiguous/malformed
+existing file shapes, mixed sources and secret-reference tokens stay on Go.
+The provider's existing parser is preserved; strict eligibility fences routing.
+
+Sixteen real Go parser cases include apps precedence, hosts fallback, duplicate
+root keys, case-insensitive fields, typed errors, unknown metadata, references,
+and map-order ambiguity. Ambiguous Go choices use allowed sets, not frozen winners.
+The authenticated success/401/429/malformed reports compare actual single-provider
+Go and Rust production constructors with canned transport; only fetched_at is fixed.
+Rust auth/configuration is not copied from the expected fixture for these cases.
+
+Independent clean-candidate Go1.26.7 package/oracle checks and Rust tests pass on
+Darwin/arm64 (45+9+8 usage tests) and Linux/arm64 (45+8+8), plus all15 CLI MCP tests
+on each; zero failed/ignored. Receipts `copilot-file-receipt-4d4042c6.json` live in
+the existing Brain and native-linux build roots. Other target platforms remain open.
+
+Review identified further work: unrecognized existing Nous files and divergent
+Windows HOME/USERPROFILE roots can evade current fallback detection. Also older
+direct-env report tests seed configured/auth_status from the expected oracle and
+therefore do not independently prove production assembly. These remain explicit
+USE-001 gaps; this file-only slice does not close the row. No real credentials,
+live provider, publication, installed cutover or Go removal occurred.
+
+
 ## Integrated Claude file compatibility evidence — 2026-09-29
 
 Candidate `cbfc46a94e5c6f8aa15730130ed2dd33590d35a9` includes code `14a54551`
