@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -187,6 +188,200 @@ func (p oracleProbe) listeningPorts(int) (string, bool) {
 	return "COMMAND PID NAME\nlanguage 123 TCP 127.0.0.1:43123 (LISTEN)\n", true
 }
 func (p oracleProbe) isAntigravityRunning() bool { return p.running }
+
+type antigravityOracleProbe struct {
+	processes  string
+	portsByPID map[int]string
+}
+
+func (p antigravityOracleProbe) processList() (string, bool) { return p.processes, true }
+func (p antigravityOracleProbe) listeningPorts(pid int) (string, bool) {
+	ports, ok := p.portsByPID[pid]
+	return ports, ok
+}
+func (p antigravityOracleProbe) isAntigravityRunning() bool {
+	return strings.Contains(p.processes, "agy") || strings.Contains(p.processes, "Antigravity")
+}
+
+type antigravityOracleReply struct {
+	status int
+	body   []byte
+	inputs map[string]string
+}
+
+type antigravityOracleTransport struct {
+	replies   map[string]antigravityOracleReply
+	requests  []*http.Request
+	responses []AntigravityOracleResponse
+}
+
+type AntigravityOracleResponse struct {
+	Status  int               `json:"status"`
+	Body    string            `json:"body"`
+	Headers map[string]string `json:"headers,omitempty"`
+}
+
+func (t *antigravityOracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.requests = append(t.requests, req.Clone(req.Context()))
+	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(parts) == 0 {
+		return nil, fmt.Errorf("Antigravity oracle received an empty path")
+	}
+	port, err := strconv.Atoi(req.URL.Port())
+	if err != nil {
+		return nil, fmt.Errorf("Antigravity oracle received invalid port")
+	}
+	reply, ok := t.replies[fmt.Sprintf("%d/%s", port, parts[len(parts)-1])]
+	if !ok {
+		return nil, fmt.Errorf("Antigravity oracle has no reply for port %d method %s", port, parts[len(parts)-1])
+	}
+	header := make(http.Header)
+	for name, value := range reply.inputs {
+		header.Set(name, value)
+	}
+	if reply.status == 0 {
+		reply.status = http.StatusOK
+	}
+	response := AntigravityOracleResponse{Status: reply.status, Body: string(reply.body), Headers: reply.inputs}
+	t.responses = append(t.responses, response)
+	return &http.Response{
+		StatusCode: reply.status,
+		Body:       ioNopCloser{Reader: bytes.NewReader(reply.body)},
+		Header:     header,
+		Request:    req,
+	}, nil
+}
+
+type AntigravityReportOracleCase struct {
+	ID          string                      `json:"id"`
+	ProcessList string                      `json:"process_list"`
+	PortsByPID  map[int]string              `json:"ports_by_pid"`
+	Responses   []AntigravityOracleResponse `json:"responses"`
+	Report      Report                      `json:"report"`
+	Requests    []OracleRequest             `json:"requests"`
+}
+
+type AntigravityReportOracleFixture struct {
+	SchemaVersion int                           `json:"schema_version"`
+	Cases         []AntigravityReportOracleCase `json:"cases"`
+}
+
+// BuildAntigravityAuthenticatedReportOracle runs the production provider and
+// report assembly against synthetic process/port observations and local canned
+// responses. It never starts Antigravity or contacts a live endpoint.
+func BuildAntigravityAuthenticatedReportOracle(fixtures map[string][]byte) (AntigravityReportOracleFixture, error) {
+	for _, name := range []string{"antigravity", "antigravity-user-status"} {
+		if len(fixtures[name]) == 0 {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle fixture %q is empty", name)
+		}
+	}
+	server := " 111 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n"
+	fallbackServer := " 333 /opt/homebrew/bin/agy\n"
+	failedServer := " 444 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token oracle-csrf\n"
+	cases := []struct {
+		id           string
+		processes    string
+		ports        map[int]string
+		replies      map[string]antigravityOracleReply
+		wantSnapshot bool
+		wantError    string
+		wantRequests []string
+	}{
+		{
+			id:           "active-second-port-after-connect-failure",
+			processes:    server,
+			ports:        map[int]string{111: "COMMAND PID NAME\nlanguage 111 TCP 127.0.0.1:43121 (LISTEN)\nlanguage 111 TCP 127.0.0.1:43122 (LISTEN)\n"},
+			wantSnapshot: true,
+			wantRequests: []string{"43121/GetUnleashData", "43122/GetUnleashData", "43122/RetrieveUserQuotaSummary"},
+			replies: map[string]antigravityOracleReply{
+				"43121/GetUnleashData":           {status: http.StatusServiceUnavailable},
+				"43122/GetUnleashData":           {status: http.StatusOK},
+				"43122/RetrieveUserQuotaSummary": {status: http.StatusOK, body: fixtures["antigravity"]},
+			},
+		},
+		{
+			id:           "fallback-to-user-status",
+			processes:    fallbackServer,
+			ports:        map[int]string{333: "agy 333 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43123 (LISTEN)\n"},
+			wantSnapshot: true,
+			wantRequests: []string{"43123/GetUnleashData", "43123/RetrieveUserQuotaSummary", "43123/GetUserStatus"},
+			replies: map[string]antigravityOracleReply{
+				"43123/GetUnleashData":           {status: http.StatusOK},
+				"43123/RetrieveUserQuotaSummary": {status: http.StatusOK, body: []byte("not json")},
+				"43123/GetUserStatus":            {status: http.StatusOK, body: fixtures["antigravity-user-status"]},
+			},
+		},
+		{
+			id:        "fallback-to-next-candidate",
+			processes: " 555 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity --csrf_token first-candidate\n 556 /opt/homebrew/bin/agy\n",
+			ports: map[int]string{
+				555: "language 555 TCP 127.0.0.1:43125 (LISTEN)\n",
+				556: "agy 556 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43126 (LISTEN)\n",
+			},
+			wantSnapshot: true,
+			wantRequests: []string{"43125/GetUnleashData", "43126/GetUnleashData", "43126/RetrieveUserQuotaSummary"},
+			replies: map[string]antigravityOracleReply{
+				"43125/GetUnleashData":           {status: http.StatusServiceUnavailable},
+				"43126/GetUnleashData":           {status: http.StatusOK},
+				"43126/RetrieveUserQuotaSummary": {status: http.StatusOK, body: fixtures["antigravity"]},
+			},
+		},
+		{
+			id:           "not-running-no-request",
+			wantError:    "all AI usage fallbacks failed: Antigravity is not running — no local quota server found.",
+			wantRequests: []string{},
+		},
+		{
+			id:           "all-endpoints-fail",
+			processes:    failedServer,
+			ports:        map[int]string{444: "language 444 daniel 14u IPv4 0x123 0t0 TCP 127.0.0.1:43124 (LISTEN)\n"},
+			wantError:    "all AI usage fallbacks failed: Antigravity local server returned HTTP 500.",
+			wantRequests: []string{"43124/GetUnleashData", "43124/RetrieveUserQuotaSummary", "43124/GetUserStatus", "43124/GetCommandModelConfigs"},
+			replies: map[string]antigravityOracleReply{
+				"43124/GetUnleashData":           {status: http.StatusOK},
+				"43124/RetrieveUserQuotaSummary": {status: http.StatusUnauthorized},
+				"43124/GetUserStatus":            {status: http.StatusTooManyRequests, inputs: map[string]string{"Retry-After": "9"}},
+				"43124/GetCommandModelConfigs":   {status: http.StatusInternalServerError},
+			},
+		},
+	}
+	fixture := AntigravityReportOracleFixture{SchemaVersion: ReportSchemaVersion}
+	for _, input := range cases {
+		transport := &antigravityOracleTransport{replies: input.replies}
+		client := &http.Client{Transport: transport}
+		provider := newAntigravityProvider(antigravityOracleProbe{processes: input.processes, portsByPID: input.ports}, client)
+		report := BuildReport(context.Background(), []Provider{provider})
+		if len(report.Providers) != 1 {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s returned %d rows", input.id, len(report.Providers))
+		}
+		row := report.Providers[0]
+		if (row.Snapshot != nil) != input.wantSnapshot {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s snapshot presence = %t, want %t (error %q)", input.id, row.Snapshot != nil, input.wantSnapshot, row.Error)
+		}
+		if input.wantError != "" && row.Error != input.wantError {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s error = %q, want %q", input.id, row.Error, input.wantError)
+		}
+		gotRequests := make([]string, 0, len(transport.requests))
+		for _, request := range transport.requests {
+			parts := strings.Split(strings.Trim(request.URL.Path, "/"), "/")
+			gotRequests = append(gotRequests, fmt.Sprintf("%s/%s", request.URL.Port(), parts[len(parts)-1]))
+		}
+		if strings.Join(gotRequests, ",") != strings.Join(input.wantRequests, ",") {
+			return AntigravityReportOracleFixture{}, fmt.Errorf("Antigravity oracle %s requests = %v, want %v", input.id, gotRequests, input.wantRequests)
+		}
+		if row := &report.Providers[0]; row.Snapshot != nil {
+			row.Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		}
+		requests := make([]OracleRequest, 0, len(transport.requests))
+		for _, request := range transport.requests {
+			requests = append(requests, safeAntigravityOracleRequest(request))
+		}
+		fixture.Cases = append(fixture.Cases, AntigravityReportOracleCase{
+			ID: input.id, ProcessList: input.processes, PortsByPID: input.ports, Responses: transport.responses, Report: report, Requests: requests,
+		})
+	}
+	return fixture, nil
+}
 
 type oracleTransport struct {
 	bodies    map[string][]byte
@@ -958,6 +1153,15 @@ func safeOracleRequest(req *http.Request) OracleRequest {
 	u = regexp.MustCompile(`127\.0\.0\.1:[0-9]+`).ReplaceAllString(u, "127.0.0.1:<port>")
 	return OracleRequest{Method: req.Method, URL: u, Headers: h, Body: body}
 }
+
+func safeAntigravityOracleRequest(req *http.Request) OracleRequest {
+	request := safeOracleRequest(req)
+	if token := req.Header.Get("X-Codeium-Csrf-Token"); token != "" {
+		request.Headers["X-Codeium-Csrf-Token"] = token
+	}
+	return request
+}
+
 func canonicalOracleSnapshot(s *UsageSnapshot) *UsageSnapshot {
 	c := *s
 	fixed := time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)

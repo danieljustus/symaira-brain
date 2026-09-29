@@ -34,6 +34,8 @@ const NOUS_PRECEDENCE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/nous_env_file_precedence_report.json");
 const NOUS_FILE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/nous_file_authenticated_report.json");
+const ANTIGRAVITY_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/antigravity_authenticated_report.json");
 
 const CLAUDE_ADMIN: &str = "dump-claude-admin";
 const CLAUDE_OAUTH: &str = "dump-claude-oauth";
@@ -344,6 +346,159 @@ fn assert_single_provider_report_matches_go(
         *expected,
         "{provider_id} provider report row"
     );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn antigravity_local_probe_report_and_requests_match_production_go_oracle() {
+    let oracle: Value = serde_json::from_str(ANTIGRAVITY_REPORT_ORACLE)
+        .expect("Go Antigravity local report oracle");
+    let cases = oracle["cases"]
+        .as_array()
+        .expect("Antigravity oracle cases");
+    assert_eq!(cases.len(), 5);
+
+    for case in cases {
+        let case_id = case["id"].as_str().expect("case id");
+        let process_list = case["process_list"]
+            .as_str()
+            .expect("synthetic process list");
+        let provider = crate::providers::provider_config::antigravity_from_process_list(
+            (!process_list.is_empty()).then_some(process_list),
+        );
+        let expected_responses = case["responses"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|response| {
+                let headers = response["headers"]
+                    .as_object()
+                    .into_iter()
+                    .flatten()
+                    .map(|(name, value)| {
+                        (
+                            name.clone(),
+                            value.as_str().expect("response header value").to_string(),
+                        )
+                    })
+                    .collect();
+                Ok(Response {
+                    status: u16::try_from(response["status"].as_u64().expect("response status"))
+                        .expect("HTTP status fits u16"),
+                    body: response["body"]
+                        .as_str()
+                        .expect("response body")
+                        .as_bytes()
+                        .to_vec(),
+                    headers,
+                })
+            })
+            .collect::<Vec<Result<Response, String>>>();
+        let transport =
+            FixtureTransport::with_sequences([("antigravity".into(), expected_responses)].into());
+        let transport_ref: Arc<dyn crate::Transport> = Arc::new(transport.clone());
+        let port_outputs = case["ports_by_pid"].as_object();
+        let result = crate::providers::wrap_fetch_error(
+            &provider.id,
+            crate::providers::fetch_antigravity_from_observations(
+                &provider,
+                &transport_ref,
+                &Cancellation::new(),
+                process_list,
+                |pid| {
+                    port_outputs
+                        .and_then(|outputs| outputs.get(&pid.to_string()))
+                        .and_then(Value::as_str)
+                        .map(str::to_owned)
+                },
+            ),
+        );
+        let mut actual_row = crate::ProviderUsage::from_provider(&provider);
+        match result {
+            Ok(snapshot) => actual_row.snapshot = Some(snapshot),
+            Err(error) => actual_row.error = Some(error.to_string()),
+        }
+
+        let expected_report: crate::Report =
+            serde_json::from_value(case["report"].clone()).expect("Go report fixture");
+        let expected_row = expected_report.providers.first().expect("Go provider row");
+        if let (Some(actual), Some(expected)) =
+            (actual_row.snapshot.as_mut(), expected_row.snapshot.as_ref())
+        {
+            // Only fetched_at is wall-clock data. Resets and all parsed values
+            // remain direct comparisons against the Go production report.
+            actual.fetched_at = expected.fetched_at;
+        }
+        assert_eq!(
+            serde_json::to_value(&actual_row).expect("Rust Antigravity provider row"),
+            serde_json::to_value(expected_row).expect("Go Antigravity provider row"),
+            "Antigravity report case {case_id}"
+        );
+
+        let expected_requests = case["requests"].as_array().expect("Go request trace");
+        let actual_requests = transport.requests();
+        assert_eq!(
+            actual_requests.len(),
+            expected_requests.len(),
+            "{case_id} request count"
+        );
+        let port_numbers: Vec<String> = case["ports_by_pid"]
+            .as_object()
+            .into_iter()
+            .flatten()
+            .flat_map(|(_, output)| {
+                output
+                    .as_str()
+                    .unwrap_or_default()
+                    .split(':')
+                    .skip(1)
+                    .filter_map(|tail| tail.split_whitespace().next())
+                    .filter(|port| port.chars().all(|ch| ch.is_ascii_digit()))
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        for (actual, expected) in actual_requests.iter().zip(expected_requests) {
+            let mut url = actual.url.clone();
+            for port in &port_numbers {
+                url = url.replace(&format!("127.0.0.1:{port}"), "127.0.0.1:<port>");
+            }
+            let headers = actual
+                .headers
+                .iter()
+                .filter(|(name, _)| {
+                    [
+                        "accept",
+                        "content-type",
+                        "connect-protocol-version",
+                        "x-codeium-csrf-token",
+                    ]
+                    .iter()
+                    .any(|allowed| name.eq_ignore_ascii_case(allowed))
+                })
+                .map(|(name, value)| (name.to_ascii_lowercase(), value.clone()))
+                .collect::<BTreeMap<_, _>>();
+            let expected_headers = expected["headers"]
+                .as_object()
+                .into_iter()
+                .flatten()
+                .map(|(name, value)| (name.to_ascii_lowercase(), value.clone()))
+                .collect::<serde_json::Map<_, _>>();
+            let normalized = serde_json::json!({
+                "method": actual.method,
+                "url": url,
+                "headers": headers,
+                "body": actual.body.as_deref().map(String::from_utf8_lossy).map(std::borrow::Cow::into_owned).unwrap_or_default(),
+            });
+            let expected_normalized = serde_json::json!({
+                "method": expected["method"],
+                "url": expected["url"],
+                "headers": expected_headers,
+                "body": expected["body"].as_str().unwrap_or_default(),
+            });
+            assert_eq!(normalized, expected_normalized, "{case_id} request");
+        }
+    }
 }
 
 fn authenticated_opencode_report(responses: Vec<Response>) -> (crate::Report, FixtureTransport) {

@@ -40,8 +40,10 @@ func loadFixtures(dir string) (map[string][]byte, error) {
 		"copilot": "copilot-user.json", "cursor": "cursor-usage-summary.json",
 		"kimi": "kimi-api-usages.json", "kimi-fallback": "kimi-fallback-api-usages.json", "kimi-stable": "kimi-fallback-api-usages.json", "kimi-web": "kimi-web-usages.json", "kimi-web-stable": "kimi-fallback-web-usages.json", "moonshot": "moonshot-balance-ai.json", "moonshot-cn": "moonshot-balance-cn.json",
 		"nous": "nous-account.json", "opencode": "opencode-subscription-json.txt", "opencode-workspaces": "opencode-workspaces.txt",
-		"opencode-stable": "opencode-subscription-no-reset.json",
-		"openrouter":      "openrouter-credits.json", "antigravity": "antigravity-quota-summary.json",
+		"opencode-stable":         "opencode-subscription-no-reset.json",
+		"openrouter":              "openrouter-credits.json",
+		"antigravity":             "antigravity-quota-summary.json",
+		"antigravity-user-status": "antigravity-user-status.json",
 	}
 	out := make(map[string][]byte, len(names))
 	for id, name := range names {
@@ -103,6 +105,7 @@ func main() {
 	combinedReportOutput := flag.String("combined-native-report-output", "rust/symbrain-usage/tests/fixtures/combined_native_authenticated_report.json", "combined configured-provider report path")
 	kimiFallbackReportOutput := flag.String("kimi-fallback-report-output", "rust/symbrain-usage/tests/fixtures/kimi_fallback_authenticated_report.json", "Kimi API/CLI/web fallback report path")
 	nousPrecedenceReportOutput := flag.String("nous-precedence-report-output", "rust/symbrain-usage/tests/fixtures/nous_env_file_precedence_report.json", "Nous environment-over-file precedence report path")
+	antigravityReportOutput := flag.String("antigravity-report-output", "rust/symbrain-usage/tests/fixtures/antigravity_authenticated_report.json", "Antigravity local probe reports from synthetic observations")
 	flag.Parse()
 
 	fixtures, err := loadFixtures(filepath.Join("internal", "usage", "testdata"))
@@ -223,6 +226,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	antigravityReport, err := usage.BuildAntigravityAuthenticatedReportOracle(fixtures)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 
 	if *check {
 		if err := checkJSON(*output, graph); err != nil {
@@ -310,6 +318,10 @@ func main() {
 			os.Exit(1)
 		}
 		if err := checkJSON(*nousPrecedenceReportOutput, nousPrecedenceReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*antigravityReportOutput, antigravityReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
@@ -401,6 +413,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*nousPrecedenceReportOutput, nousPrecedenceReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*antigravityReportOutput, antigravityReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

@@ -34,7 +34,6 @@ const CLAUDE_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(20);
 /// Bound for the prompt-free process probes (`ps`, `lsof`).
-const PROCESS_PROBE_TIMEOUT: Duration = Duration::from_secs(2);
 const MAX_PROBE_OUTPUT_BYTES: u64 = 64 * 1024;
 
 // ---------------------------------------------------------------------------
@@ -1115,19 +1114,8 @@ fn valid_claude_service_name(name: &str) -> bool {
 // Antigravity process probe
 // ---------------------------------------------------------------------------
 
-/// Whether the Antigravity app or `agy` CLI is running. The provider is always
-/// "configured"; availability depends on the running language server.
-fn antigravity_running() -> bool {
-    let Some(output) = bounded_command_stdout(
-        "ps",
-        &["-ax", "-o", "pid=,command="],
-        PROCESS_PROBE_TIMEOUT,
-        MAX_PROBE_OUTPUT_BYTES,
-    ) else {
-        return false;
-    };
-    let list = String::from_utf8_lossy(&output);
-    list.contains("agy") || list.contains("Antigravity")
+fn antigravity_process_list_running(process_list: &str) -> bool {
+    process_list.contains("agy") || process_list.contains("Antigravity")
 }
 
 // ---------------------------------------------------------------------------
@@ -1174,12 +1162,13 @@ pub fn all_providers() -> Vec<Provider> {
     ]
 }
 
-/// Whether the report would read a stored credential or probe a running
-/// Antigravity, i.e. whether a fetch against a live endpoint would run.
+/// Whether the report would read a stored credential outside the native
+/// provider subset, i.e. whether the Go fallback is required.
 ///
-/// The checks here are prompt-free: environment values, credential files, the
-/// keychain *listing* (attributes only, never a secret value), and the process
-/// table. File-backed routes and home overrides require a deterministic
+/// The checks here are prompt-free: environment values, credential files, and
+/// the keychain *listing* (attributes only, never a secret value). The local
+/// Antigravity probe is performed by its native provider. File-backed routes
+/// and home overrides require a deterministic
 /// Go-equivalent subset; secret references and unsupported base/workspace
 /// overrides stay on Go.
 /// Multiple configured providers can be native together when each source is
@@ -1270,15 +1259,15 @@ pub fn needs_go_fallback() -> bool {
         other_credential_source: false,
         // A file token wins before Go reads Keychain, so an existing Claude
         // Keychain item is irrelevant when that source is present. Avoid even
-        // listing Keychain attributes on the native file-only route.
-        local_provider_present: (claude_file_token.is_none() && claude_keychain_present())
-            || antigravity_running(),
+        // listing Keychain attributes on the native file-only route. The
+        // Antigravity local process probe is handled by its native provider.
+        local_provider_present: claude_file_token.is_none() && claude_keychain_present(),
     })
 }
 
 /// Keeps reports native for the proven portable sources once every configured
 /// source is handled by the same provider constructors. Unsupported files,
-/// secret references and local providers still keep Go in charge.
+/// secret references and the Claude Keychain source still keep Go in charge.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
@@ -1769,8 +1758,8 @@ pub(crate) fn openrouter_from_resolved(
     provider
 }
 
-fn antigravity() -> Provider {
-    let running = antigravity_running();
+pub(super) fn antigravity_from_process_list(process_list: Option<&str>) -> Provider {
+    let running = process_list.is_some_and(antigravity_process_list_running);
     let mut provider = Provider::new(
         "antigravity",
         "Antigravity",
@@ -1785,6 +1774,16 @@ fn antigravity() -> Provider {
         missing("Antigravity is not running — start the Antigravity app or agy CLI")
     };
     provider
+}
+
+fn antigravity() -> Provider {
+    let cancellation = crate::Cancellation::with_timeout(Duration::from_secs(2));
+    let process_list = super::provider_requests::command_output_with_cancel(
+        &cancellation,
+        "ps",
+        &["-ax", "-o", "pid=,command="],
+    );
+    antigravity_from_process_list(process_list.as_deref())
 }
 
 #[cfg(test)]

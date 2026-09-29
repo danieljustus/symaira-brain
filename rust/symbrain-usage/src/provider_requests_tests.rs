@@ -72,6 +72,62 @@ fn invalid_provider_base_urls_fail_closed_to_defaults() {
     );
 }
 
+#[test]
+#[cfg(unix)]
+fn probe_tool_resolution_fails_closed_for_executable_relative_path_entries() {
+    use std::os::unix::fs::PermissionsExt;
+    use std::path::PathBuf;
+
+    let root = tempfile::tempdir().expect("temporary probe path");
+    let relative = root.path().join("relative");
+    let absolute = root.path().join("absolute");
+    std::fs::create_dir_all(&relative).expect("relative PATH directory");
+    std::fs::create_dir_all(&absolute).expect("absolute PATH directory");
+    let relative_tool = relative.join("ps");
+    let absolute_tool = absolute.join("ps");
+    std::fs::write(&relative_tool, "#!/bin/sh\n").expect("relative probe executable");
+    std::fs::write(&absolute_tool, "#!/bin/sh\n").expect("absolute probe executable");
+    std::fs::set_permissions(&relative_tool, std::fs::Permissions::from_mode(0o700))
+        .expect("relative executable mode");
+    std::fs::set_permissions(&absolute_tool, std::fs::Permissions::from_mode(0o700))
+        .expect("absolute executable mode");
+
+    assert_eq!(
+        super::resolve_probe_tool_from(
+            "ps",
+            [PathBuf::from("relative"), absolute.clone()],
+            root.path(),
+        ),
+        None,
+        "Go LookPath would return ErrDot rather than selecting the later absolute executable"
+    );
+    assert_eq!(
+        super::resolve_probe_tool_from(
+            "ps",
+            [PathBuf::from("missing"), absolute.clone()],
+            root.path()
+        ),
+        Some(absolute_tool),
+        "a relative directory without the command does not block a later absolute match"
+    );
+}
+
+#[test]
+#[cfg(unix)]
+fn oversized_probe_output_terminates_the_child_while_it_is_running() {
+    use std::time::{Duration, Instant};
+
+    let cancellation = crate::Cancellation::with_timeout(Duration::from_secs(5));
+    let started = Instant::now();
+    let output = super::command_output_with_cancel(
+        &cancellation,
+        "sh",
+        &["-c", "head -c 65537 /dev/zero; sleep 5"],
+    );
+    assert!(output.is_none());
+    assert!(started.elapsed() < Duration::from_secs(1));
+}
+
 /// The request layer cannot be reached by the differential suite: a real fetch
 /// needs a live endpoint and a working credential. `scripts/usage-request-oracle`
 /// therefore records what the shipped strategies send, and this test pins the

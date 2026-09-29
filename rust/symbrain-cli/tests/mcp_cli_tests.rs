@@ -5,6 +5,8 @@ use std::process::{Command, Output, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 use tempfile::TempDir;
 
 #[cfg(unix)]
@@ -494,6 +496,53 @@ fn claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_
         .output()
         .unwrap();
     assert_native_usage_parser(mixed, "environment credential with supported default file");
+}
+
+#[test]
+#[cfg(unix)]
+fn configured_antigravity_does_not_force_the_usage_route_to_go() {
+    let root = TempDir::new().unwrap();
+    let credentials = root
+        .path()
+        .join("home")
+        .join(".claude")
+        .join(".credentials.json");
+    std::fs::create_dir_all(credentials.parent().unwrap()).unwrap();
+    std::fs::write(
+        &credentials,
+        br#"{"oauthAccount":{"default":{"accessToken":"synthetic-claude-file-fixture"}}}"#,
+    )
+    .unwrap();
+    let fake_bin = root.path().join("fake-bin");
+    std::fs::create_dir_all(&fake_bin).unwrap();
+    let fake_ps = fake_bin.join("ps");
+    std::fs::write(
+        &fake_ps,
+        "#!/bin/sh\nprintf '%s\\n' ' 445 /Applications/Antigravity.app/Contents/Resources/language_server --app_data_dir antigravity'\n",
+    )
+    .unwrap();
+    let mut permissions = std::fs::metadata(&fake_ps).unwrap().permissions();
+    permissions.set_mode(0o755);
+    std::fs::set_permissions(&fake_ps, permissions).unwrap();
+
+    // Antigravity is always configured. The usage route must no longer
+    // delegate solely because its local server may be running. The synthetic
+    // ps command reports that server without inspecting real processes; the
+    // invalid flag stops before Service::new can enumerate anything else.
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("PATH", fake_bin)
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2), "stderr: {:?}", output.stderr);
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+        "native usage parser did not handle the request: {stderr}"
+    );
+    assert!(
+        !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+        "Antigravity unexpectedly selected Go fallback: {stderr}"
+    );
 }
 
 #[test]

@@ -38,7 +38,7 @@ func allProviders(client *http.Client, readClaudeKeychain func() (string, *time.
 		NewNousPortalProvider(client),
 		NewOpenCodeProvider(client),
 		NewOpenRouterProvider(client),
-		&AntigravityProvider{probe: antigravityProbe},
+		newAntigravityProvider(antigravityProbe, client),
 	}
 }
 
