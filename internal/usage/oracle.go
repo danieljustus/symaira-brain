@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 )
@@ -584,6 +585,7 @@ func BuildAntigravityAuthenticatedReportOracle(fixtures map[string][]byte) (Anti
 }
 
 type oracleTransport struct {
+	mu              sync.Mutex
 	bodies          map[string][]byte
 	sequences       map[string][][]byte
 	statuses        map[string][]int
@@ -593,6 +595,8 @@ type oracleTransport struct {
 }
 
 func (t *oracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.requests = append(t.requests, req.Clone(req.Context()))
 	id := ""
 	switch {
@@ -1303,6 +1307,8 @@ func buildAuthenticatedDirectEnvReportOracle(providerID string, body []byte) (Re
 type roundTripFixture struct{ target *oracleTransport }
 
 func (r roundTripFixture) RoundTrip(req *http.Request) (*http.Response, error) {
+	r.target.mu.Lock()
+	defer r.target.mu.Unlock()
 	r.target.requests = append(r.target.requests, req.Clone(req.Context()))
 	body := r.target.bodyFor(oracleID(req))
 	return r.target.response(req, body), nil
