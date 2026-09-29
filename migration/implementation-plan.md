@@ -1,5 +1,34 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated Claude Keychain parser and report parity — 2026-09-29
+
+Candidate `c9cd446079252ae67c74db8a6df67058f4fbc355` preserves Go's typed
+Claude subscription credential parsing for 25 source-generated cases. These
+cover ASCII and Unicode field folding, duplicate object merges, null handling,
+wrong types, expiry, bytewise malformed UTF-8 replacement and paired/unpaired
+UTF-16 escapes. The pure Go parser moved from the Darwin file without changing
+its implementation; a fake-security Darwin test still reaches the production
+reader. Rust reuses its existing production credential/report construction.
+
+Four authenticated report cases compare actual Go allProviders/BuildReport
+with a synthetic Keychain callback against Rust claude_from_resolved and
+Service::with_transport. Both receive the same response status, body and
+Retry-After header. Only fetched_at is fixed; output errors are not normalized.
+
+Independent clean Darwin/arm64 and Linux/arm64 gates pass Go1.26.7 usage tests
+and usage/OpenCode oracle freshness. Rust passes 62+9+8 usage tests on Darwin,
+62+8+8 on Linux and all 20 CLI tests on both, zero failed or ignored. Worker
+strict Clippy/fmt and Go vet pass. `keychain-parity-receipt-c9cd4460.json` in
+both existing build roots retains source metadata and fixture/log hashes.
+
+USE-001 remains open. The real host Keychain and installed service enumeration
+were not exercised. CLI needs_go_fallback remains conservative; MCP Gateway
+constructs Service::new directly, and that startup/discovery path was not
+invoked by these synthetic tests. Required Windows/other native targets and
+whole-ledger acceptance remain pending. No live credentials/provider access,
+publication, installed cutover or Go removal occurred.
+
+
 ## Integrated active Antigravity usage probe — 2026-09-29
 
 Candidate `ec6da43e84d2e4d85cab342714107c4f6ae3d400` routes Antigravity usage
