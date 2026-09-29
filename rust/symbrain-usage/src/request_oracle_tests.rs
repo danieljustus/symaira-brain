@@ -11,7 +11,7 @@ use crate::providers::Provider;
 use crate::providers::{
     claude_from_resolved, codex_from_resolved, copilot_from_resolved, cursor_from_resolved,
     kimi_from_resolved, moonshot_from_resolved, nous_from_resolved, opencode_from_resolved,
-    openrouter_from_resolved,
+    openrouter_from_resolved, parse_claude_keychain_blob,
 };
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
@@ -22,6 +22,8 @@ use std::time::Duration;
 const ORACLE: &str = include_str!("../tests/fixtures/usage_requests.json");
 const CLAUDE_OAUTH_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/claude_oauth_authenticated_report.json");
+const CLAUDE_KEYCHAIN_REPORT_ORACLE: &str =
+    include_str!("../tests/fixtures/claude_keychain_authenticated_report.json");
 const CODEX_FILE_REPORT_ORACLE: &str =
     include_str!("../tests/fixtures/codex_file_authenticated_report.json");
 const COPILOT_FILE_REPORT_ORACLE: &str =
@@ -1190,6 +1192,94 @@ fn authenticated_claude_oauth_file_report_matches_go_build_report_oracle() {
         REPORT_FILE_CREDENTIAL,
         "file_errors",
     );
+}
+
+#[test]
+fn authenticated_claude_keychain_report_matches_go_production_builder() {
+    let oracle: Value = serde_json::from_str(CLAUDE_KEYCHAIN_REPORT_ORACLE)
+        .expect("Go Claude keychain report oracle");
+    let credential_blob = oracle["credential_blob"]
+        .as_str()
+        .expect("synthetic keychain blob")
+        .as_bytes();
+    let (credential, expires_at) = parse_claude_keychain_blob(credential_blob)
+        .expect("Rust decodes the same synthetic keychain blob");
+
+    let mut scenarios = vec![&oracle["success"]];
+    scenarios.extend(
+        oracle["errors"]
+            .as_array()
+            .expect("Go keychain report errors")
+            .iter(),
+    );
+    assert_eq!(scenarios.len(), 4);
+    for scenario in scenarios {
+        let status = u16::try_from(scenario["status"].as_u64().expect("HTTP status"))
+            .expect("status fits u16");
+        let body = scenario["body"].as_str().expect("canned response body");
+        let response_headers = scenario["response_headers"]
+            .as_object()
+            .expect("Go canned response headers")
+            .iter()
+            .map(|(name, value)| {
+                (
+                    name.clone(),
+                    value.as_str().expect("response header value").to_string(),
+                )
+            })
+            .collect();
+        let response = Response {
+            status,
+            body: body.as_bytes().to_vec(),
+            headers: response_headers,
+        };
+        let provider = claude_from_resolved(
+            None,
+            None,
+            Some(("keychain".into(), credential.clone())),
+            None,
+            expires_at,
+        );
+        let transport = FixtureTransport::new([("claude".into(), response)].into());
+        let report =
+            crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
+        let requests = transport.requests();
+        assert_eq!(requests.len(), 1, "status {status}");
+        let request = &requests[0];
+        assert_eq!(request.method, "GET");
+        assert_eq!(request.url, "https://api.anthropic.com/api/oauth/usage");
+        let authorization = format!("Bearer {credential}");
+        assert_eq!(
+            request.headers.get("Authorization").map(String::as_str),
+            Some(authorization.as_str())
+        );
+        assert_eq!(
+            request.headers.get("anthropic-beta").map(String::as_str),
+            Some("oauth-2025-04-20")
+        );
+
+        let expected = &scenario["report"];
+        let mut actual = serde_json::to_value(&report).expect("Rust keychain report");
+        if expected["providers"][0]["snapshot"].is_object() {
+            actual["providers"][0]["snapshot"]["fetched_at"] =
+                expected["providers"][0]["snapshot"]["fetched_at"].clone();
+        }
+        assert_eq!(actual, *expected, "Claude keychain report status {status}");
+
+        let expected_request = &scenario["requests"][0];
+        assert_eq!(expected_request["method"], request.method.as_str());
+        assert_eq!(expected_request["url"], request.url.as_str());
+        for (header, value) in expected_request["headers"]
+            .as_object()
+            .expect("Go safe headers")
+        {
+            assert_eq!(
+                request.headers.get(header).map(String::as_str),
+                value.as_str(),
+                "header {header}"
+            );
+        }
+    }
 }
 
 fn assert_claude_oauth_report_matches_scenario(

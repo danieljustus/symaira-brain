@@ -3,8 +3,8 @@ use super::{
     codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
     is_secret_reference, json_string, kimi_device_id_is_native, kimi_file_token_candidate,
     kimi_store, names_from_keychain_dump, needs_go_fallback_for, nous_file_token,
-    nous_file_token_candidate, nous_jwt_is_live, path_may_exist, read_limited,
-    supported_custom_base, supported_opencode_workspace,
+    nous_file_token_candidate, nous_jwt_is_live, parse_claude_keychain_blob, path_may_exist,
+    read_limited, supported_custom_base, supported_opencode_workspace,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -15,6 +15,8 @@ const COPILOT_FILE_TOKEN_ORACLE: &str =
     include_str!("../tests/fixtures/copilot_file_token_oracle.json");
 const NOUS_FILE_TOKEN_ORACLE: &str = include_str!("../tests/fixtures/nous_file_token_oracle.json");
 const KIMI_FILE_TOKEN_ORACLE: &str = include_str!("../tests/fixtures/kimi_file_token_oracle.json");
+const CLAUDE_KEYCHAIN_TOKEN_ORACLE: &str =
+    include_str!("../tests/fixtures/claude_keychain_token_oracle.json");
 
 fn write(directory: &Path, name: &str, contents: &str) -> PathBuf {
     let path = directory.join(name);
@@ -752,6 +754,71 @@ fn keychain_dump_lines_yield_service_names() {
             "Claude Code-credentials-552ffa86".to_owned()
         ]
     );
+}
+
+#[test]
+fn claude_keychain_blob_parser_matches_go_typed_decoder_cases() {
+    let oracle: serde_json::Value = serde_json::from_str(CLAUDE_KEYCHAIN_TOKEN_ORACLE)
+        .expect("Go Claude keychain parser oracle");
+    let cases = oracle["cases"].as_array().expect("keychain parser cases");
+    assert!(
+        cases.len() >= 20,
+        "keychain parser fixture must retain edge cases"
+    );
+
+    for case in cases {
+        let blob = if let Some(hex) = case["blob_hex"].as_str() {
+            decode_fixture_hex(hex)
+        } else {
+            case["blob"]
+                .as_str()
+                .expect("keychain blob input")
+                .as_bytes()
+                .to_vec()
+        };
+        let parsed = parse_claude_keychain_blob(&blob);
+        assert_eq!(parsed.is_some(), case["accepted"], "case {}", case["id"]);
+        if let Some((token, expires_at)) = parsed {
+            assert_eq!(
+                token,
+                case["token"].as_str().expect("Go token"),
+                "case {}",
+                case["id"]
+            );
+            let actual_millis = expires_at.map(|expiry| {
+                i64::try_from(
+                    expiry
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .expect("positive fixture expiry")
+                        .as_millis(),
+                )
+                .expect("expiry milliseconds fit i64")
+            });
+            assert_eq!(
+                actual_millis,
+                case["expires_at_unix_milli"].as_i64(),
+                "expiry case {}",
+                case["id"]
+            );
+        }
+    }
+}
+
+fn decode_fixture_hex(hex: &str) -> Vec<u8> {
+    let (pairs, remainder) = hex.as_bytes().as_chunks::<2>();
+    assert!(remainder.is_empty(), "fixture hex has complete bytes");
+    pairs
+        .iter()
+        .map(|pair| {
+            let digit = |byte: u8| match byte {
+                b'0'..=b'9' => byte - b'0',
+                b'a'..=b'f' => byte - b'a' + 10,
+                b'A'..=b'F' => byte - b'A' + 10,
+                _ => panic!("invalid fixture hex digit"),
+            };
+            digit(pair[0]) * 16 + digit(pair[1])
+        })
+        .collect()
 }
 
 #[test]

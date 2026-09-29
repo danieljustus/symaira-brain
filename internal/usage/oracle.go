@@ -3,6 +3,7 @@ package usage
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // OracleFixture builds the source-owned provider graph from the production
@@ -38,6 +40,204 @@ type OracleAuth struct {
 	Configured bool   `json:"configured"`
 	Source     string `json:"source"`
 	Status     string `json:"status"`
+}
+
+type ClaudeKeychainTokenOracleInput struct {
+	ID        string `json:"id"`
+	Blob      string `json:"blob"`
+	BlobBytes []byte `json:"-"`
+}
+
+type ClaudeKeychainTokenOracleCase struct {
+	ID                 string `json:"id"`
+	Blob               string `json:"blob"`
+	BlobHex            string `json:"blob_hex,omitempty"`
+	Token              string `json:"token,omitempty"`
+	ExpiresAtUnixMilli *int64 `json:"expires_at_unix_milli,omitempty"`
+	Accepted           bool   `json:"accepted"`
+}
+
+type ClaudeKeychainTokenOracle struct {
+	SchemaVersion int                             `json:"schema_version"`
+	Cases         []ClaudeKeychainTokenOracleCase `json:"cases"`
+}
+
+type ClaudeKeychainReportCase struct {
+	Status          int               `json:"status"`
+	Body            string            `json:"body"`
+	ResponseHeaders map[string]string `json:"response_headers"`
+	Report          Report            `json:"report"`
+	Requests        []OracleRequest   `json:"requests"`
+}
+
+type ClaudeKeychainAuthenticatedReportOracle struct {
+	CredentialBlob string                     `json:"credential_blob"`
+	Success        ClaudeKeychainReportCase   `json:"success"`
+	Errors         []ClaudeKeychainReportCase `json:"errors"`
+}
+
+// BuildClaudeKeychainTokenOracle passes every supplied JSON blob through the
+// production typed decoder. The blobs are synthetic and parsing never invokes
+// the macOS security command.
+func BuildClaudeKeychainTokenOracle(inputs []ClaudeKeychainTokenOracleInput) ClaudeKeychainTokenOracle {
+	fixture := ClaudeKeychainTokenOracle{SchemaVersion: ReportSchemaVersion}
+	for _, input := range inputs {
+		blob := input.BlobBytes
+		if blob == nil {
+			blob = []byte(input.Blob)
+		}
+		token, expiresAt, accepted := parseClaudeKeychainBlob(blob)
+		caseFixture := ClaudeKeychainTokenOracleCase{ID: input.ID, Blob: input.Blob, Accepted: accepted}
+		if !utf8.Valid(blob) {
+			caseFixture.Blob = ""
+			caseFixture.BlobHex = hex.EncodeToString(blob)
+		}
+		if accepted {
+			caseFixture.Token = token
+			if expiresAt != nil {
+				milliseconds := expiresAt.UnixMilli()
+				caseFixture.ExpiresAtUnixMilli = &milliseconds
+			}
+		}
+		fixture.Cases = append(fixture.Cases, caseFixture)
+	}
+	return fixture
+}
+
+// BuildClaudeKeychainAuthenticatedReportOracle joins the real Claude keychain
+// blob parser and provider constructor to a canned HTTP transport. The
+// keychain callback returns only the token parsed from the supplied synthetic
+// blob; this helper never invokes `security` or reads developer credentials.
+func BuildClaudeKeychainAuthenticatedReportOracle(credentialBlob, successBody []byte) (ClaudeKeychainAuthenticatedReportOracle, error) {
+	token, expiresAt, accepted := parseClaudeKeychainBlob(credentialBlob)
+	if !accepted {
+		return ClaudeKeychainAuthenticatedReportOracle{}, fmt.Errorf("Claude keychain report fixture has no usable OAuth token")
+	}
+	if len(successBody) == 0 {
+		return ClaudeKeychainAuthenticatedReportOracle{}, fmt.Errorf("Claude keychain report fixture response is empty")
+	}
+	cleanup, err := isolateClaudeKeychainOracleEnvironment()
+	if err != nil {
+		return ClaudeKeychainAuthenticatedReportOracle{}, err
+	}
+	defer cleanup()
+
+	makeCase := func(status int, body []byte) (ClaudeKeychainReportCase, error) {
+		transport := &oracleTransport{
+			bodies:          map[string][]byte{"claude": body},
+			status:          status,
+			responseHeaders: http.Header{"Retry-After": []string{"17"}},
+		}
+		client := &http.Client{Transport: roundTripFixture{transport}}
+		providers := allProviders(client, func() (string, *time.Time) { return token, expiresAt }, oracleProbe{})
+		if len(providers) != 10 || providers[0].ID() != "claude" || providers[9].ID() != "antigravity" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle found an unexpected provider registry")
+		}
+		provider, ok := providers[0].(*ClaudeProvider)
+		if !ok || !provider.IsConfigured() || provider.oauthSource != "keychain" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle did not construct a keychain-sourced provider")
+		}
+		if len(provider.Strategies()) != 1 || provider.Strategies()[0].Source() != "oauth" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle expected exactly one OAuth strategy")
+		}
+		for _, other := range providers[1:9] {
+			if other.IsConfigured() {
+				return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle unexpectedly configured %q", other.ID())
+			}
+		}
+		fullReport := BuildReport(context.Background(), providers)
+		if len(fullReport.Providers) != 10 || len(transport.requests) != 1 {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle produced %d report rows and %d requests", len(fullReport.Providers), len(transport.requests))
+		}
+		row := fullReport.Providers[0]
+		if row.AuthStatus.Source != "keychain" {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle auth source = %q", row.AuthStatus.Source)
+		}
+		if row.Snapshot != nil {
+			row.Snapshot.FetchedAt = time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		}
+		request := transport.requests[0]
+		if request.Method != http.MethodGet || request.URL.String() != "https://api.anthropic.com/api/oauth/usage" || request.Header.Get("Authorization") != "Bearer "+token {
+			return ClaudeKeychainReportCase{}, fmt.Errorf("Claude keychain oracle generated an unexpected request")
+		}
+		return ClaudeKeychainReportCase{
+			Status:          status,
+			Body:            string(body),
+			ResponseHeaders: map[string]string{"Retry-After": "17"},
+			Report:          Report{SchemaVersion: fullReport.SchemaVersion, Providers: []ProviderUsage{row}},
+			Requests:        []OracleRequest{safeOracleRequest(request)},
+		}, nil
+	}
+
+	success, err := makeCase(http.StatusOK, successBody)
+	if err != nil {
+		return ClaudeKeychainAuthenticatedReportOracle{}, err
+	}
+	fixture := ClaudeKeychainAuthenticatedReportOracle{CredentialBlob: string(credentialBlob), Success: success}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{status: http.StatusUnauthorized, body: []byte(`{"error":"nope"}`)},
+		{status: http.StatusTooManyRequests, body: []byte(`{"error":"slow down"}`)},
+		{status: http.StatusOK, body: []byte("not-json")},
+	} {
+		caseFixture, err := makeCase(response.status, response.body)
+		if err != nil {
+			return ClaudeKeychainAuthenticatedReportOracle{}, err
+		}
+		fixture.Errors = append(fixture.Errors, caseFixture)
+	}
+	return fixture, nil
+}
+
+func isolateClaudeKeychainOracleEnvironment() (func(), error) {
+	home, err := os.MkdirTemp("", "symbrain-claude-keychain-oracle-home-")
+	if err != nil {
+		return nil, fmt.Errorf("create isolated Claude keychain oracle home: %w", err)
+	}
+	previous := make(map[string]struct {
+		value string
+		set   bool
+	}, 21)
+	environmentNames := []string{
+		"HOME", "USERPROFILE", "ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN",
+		"CODEX_HOME", "CODEX_ACCESS_TOKEN", "COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE",
+		"KIMI_CODE_HOME", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL",
+		"MOONSHOT_API_KEY", "MOONSHOT_REGION", "NOUS_PORTAL_ACCESS_TOKEN", "HERMES_HOME",
+		"HERMES_PORTAL_BASE_URL", "OPENCODE_COOKIE", "OPENCODE_WORKSPACE_ID",
+		"OPENROUTER_API_KEY", "OPENROUTER_API_URL",
+	}
+	for _, name := range environmentNames {
+		value, set := os.LookupEnv(name)
+		previous[name] = struct {
+			value string
+			set   bool
+		}{value: value, set: set}
+	}
+	cleanup := func() {
+		for name, old := range previous {
+			if old.set {
+				_ = os.Setenv(name, old.value)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		}
+		_ = os.RemoveAll(home)
+	}
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(name, home); err != nil {
+			cleanup()
+			return nil, fmt.Errorf("set isolated Claude keychain oracle %s: %w", name, err)
+		}
+	}
+	for _, name := range environmentNames[2:] {
+		if err := os.Unsetenv(name); err != nil {
+			cleanup()
+			return nil, fmt.Errorf("clear Claude keychain oracle %s: %w", name, err)
+		}
+	}
+	return cleanup, nil
 }
 
 // BuildClaudeFileTokenOracle reads a synthetic Claude credentials file with
@@ -384,11 +584,12 @@ func BuildAntigravityAuthenticatedReportOracle(fixtures map[string][]byte) (Anti
 }
 
 type oracleTransport struct {
-	bodies    map[string][]byte
-	sequences map[string][][]byte
-	statuses  map[string][]int
-	status    int
-	requests  []*http.Request
+	bodies          map[string][]byte
+	sequences       map[string][][]byte
+	statuses        map[string][]int
+	status          int
+	responseHeaders http.Header
+	requests        []*http.Request
 }
 
 func (t *oracleTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -461,7 +662,7 @@ func (t *oracleTransport) response(req *http.Request, body []byte) *http.Respons
 	if status == 0 {
 		status = http.StatusOK
 	}
-	return &http.Response{StatusCode: status, Body: ioNopCloser{Reader: bytes.NewReader(body)}, Header: make(http.Header), Request: req, ContentLength: int64(len(body))}
+	return &http.Response{StatusCode: status, Body: ioNopCloser{Reader: bytes.NewReader(body)}, Header: t.responseHeaders.Clone(), Request: req, ContentLength: int64(len(body))}
 }
 
 type kimiFallbackReportFixture struct {

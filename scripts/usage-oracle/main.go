@@ -95,6 +95,8 @@ func main() {
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
 	codexFileReportOutput := flag.String("codex-file-report-output", "rust/symbrain-usage/tests/fixtures/codex_file_authenticated_report.json", "authenticated Codex auth.json report path")
 	claudeFileTokenOutput := flag.String("claude-file-token-output", "rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json", "Claude credentials file parser cases")
+	claudeKeychainTokenOutput := flag.String("claude-keychain-token-output", "rust/symbrain-usage/tests/fixtures/claude_keychain_token_oracle.json", "Claude keychain blob parser cases")
+	claudeKeychainReportOutput := flag.String("claude-keychain-report-output", "rust/symbrain-usage/tests/fixtures/claude_keychain_authenticated_report.json", "authenticated Claude keychain report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
@@ -162,6 +164,14 @@ func main() {
 		os.Exit(1)
 	}
 	claudeFileTokenOracle, err := buildClaudeFileTokenOracle()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	claudeKeychainTokenOracle := buildClaudeKeychainTokenOracle()
+	claudeKeychainReport, err := usage.BuildClaudeKeychainAuthenticatedReportOracle(
+		[]byte(claudeKeychainTokenOracle.Cases[0].Blob), fixtures["claude"],
+	)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -273,6 +283,14 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*claudeKeychainTokenOutput, claudeKeychainTokenOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		if err := checkJSON(*claudeKeychainReportOutput, claudeKeychainReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*codexReportOutput, codexReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -365,6 +383,14 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*claudeFileTokenOutput, claudeFileTokenOracle); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*claudeKeychainTokenOutput, claudeKeychainTokenOracle); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*claudeKeychainReportOutput, claudeKeychainReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -853,6 +879,37 @@ func buildClaudeFileTokenOracle() (claudeFileTokenOracleFixture, error) {
 		})
 	}
 	return fixture, nil
+}
+
+func buildClaudeKeychainTokenOracle() usage.ClaudeKeychainTokenOracle {
+	inputs := []usage.ClaudeKeychainTokenOracleInput{
+		{ID: "canonical-token-with-future-expiry", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-keychain-token","expiresAt":4102444800000}}`},
+		{ID: "case-insensitive-root-and-fields", Blob: `{"CLAUDEAiOAUTH":{"ACCESSTOKEN":"synthetic-case-token","EXPIRESAT":4102444800000}}`},
+		{ID: "unicode-simple-fold-long-s-field", Blob: `{"claudeAiOauth":{"acceſsToken":"synthetic-long-s-token","expiresAt":4102444800000}}`},
+		{ID: "unicode-simple-fold-kelvin-field", Blob: `{"claudeAiOauth":{"accessToKen":"synthetic-kelvin-token","expiresAt":4102444800000}}`},
+		{ID: "unicode-simple-fold-expiry-field", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-fold-expiry-token","expireſAt":4102444800000}}`},
+		{ID: "duplicate-token-field-last-wins", Blob: `{"claudeAiOauth":{"accessToken":"first-token","ACCESSTOKEN":"synthetic-last-token","expiresAt":4102444800000}}`},
+		{ID: "duplicate-token-field-reversed-last-wins", Blob: `{"claudeAiOauth":{"ACCESSTOKEN":"synthetic-first-token","accessToken":"synthetic-last-token","expiresAt":4102444800000}}`},
+		{ID: "duplicate-root-object-merges-fields", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-merged-token"},"CLAUDEAiOAUTH":{"expiresAt":4102444800000}}`},
+		{ID: "null-token-keeps-previous-scalar", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","accessToken":null,"expiresAt":4102444800000}}`},
+		{ID: "null-expiry-clears-previous-pointer", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","expiresAt":4102444800000,"EXPIRESAT":null}}`},
+		{ID: "null-root-is-not-a-credential", Blob: `{"claudeAiOauth":null}`},
+		{ID: "mcp-only-entry-is-not-a-credential", Blob: `{"mcpOAuth":{"server":{"accessToken":"mcp-token"}}}`},
+		{ID: "empty-token-is-not-a-credential", Blob: `{"claudeAiOauth":{"accessToken":""}}`},
+		{ID: "zero-expiry-means-no-expiry", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","expiresAt":0}}`},
+		{ID: "negative-expiry-means-no-expiry", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","expiresAt":-1}}`},
+		{ID: "wrong-typed-token-rejects-whole-blob", Blob: `{"claudeAiOauth":{"accessToken":42,"expiresAt":4102444800000}}`},
+		{ID: "wrong-typed-expiry-rejects-whole-blob", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","expiresAt":"4102444800000"}}`},
+		{ID: "fractional-expiry-rejects-whole-blob", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","expiresAt":1.5}}`},
+		{ID: "duplicate-alias-wrong-type-rejects-whole-blob", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-token","ACCESS_TOKEN":42}}`},
+		{ID: "invalid-utf8-token-byte-replaced", BlobBytes: []byte("{\"claudeAiOauth\":{\"accessToken\":\"synthetic-\xff-token\"}}")},
+		{ID: "invalid-utf8-continuation-bytes-replaced-individually", BlobBytes: []byte("{\"claudeAiOauth\":{\"accessToken\":\"synthetic-\xe1\x80-token\"}}")},
+		{ID: "lone-surrogate-escape-replaced", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-\ud800-token"}}`},
+		{ID: "valid-surrogate-pair-preserved", Blob: `{"claudeAiOauth":{"accessToken":"synthetic-\ud83d\ude00-token"}}`},
+		{ID: "empty-blob", Blob: ``},
+		{ID: "malformed-blob", Blob: `{"claudeAiOauth":{"accessToken":"partial-token"}`},
+	}
+	return usage.BuildClaudeKeychainTokenOracle(inputs)
 }
 
 func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture, error) {
