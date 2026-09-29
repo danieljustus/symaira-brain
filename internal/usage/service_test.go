@@ -183,7 +183,24 @@ func TestBuildReportBoundsAStalledProviderWithoutBlockingOthers(t *testing.T) {
 }
 
 func TestAllProvidersReturnsTenProviders(t *testing.T) {
-	providers := AllProviders(nil)
+	// Keep this registry-shape test independent of the host Keychain and
+	// installed process table. Keep credential discovery under a private home
+	// as well; this test does not fetch provider usage.
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	for _, name := range []string{
+		"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN",
+		"COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY",
+		"KIMI_AUTH_TOKEN", "MOONSHOT_API_KEY", "NOUS_PORTAL_ACCESS_TOKEN",
+		"OPENCODE_COOKIE", "OPENROUTER_API_KEY", "CODEX_HOME", "HERMES_HOME",
+		"KIMI_CODE_HOME", "MOONSHOT_REGION", "KIMI_CODE_BASE_URL",
+		"HERMES_PORTAL_BASE_URL", "OPENROUTER_API_URL", "OPENCODE_WORKSPACE_ID",
+	} {
+		t.Setenv(name, "")
+	}
+	// Both external probes are injected by the production registry helper.
+	providers := allProviders(nil, func() (string, *time.Time) { return "", nil }, oracleProbe{})
 	if len(providers) != 10 {
 		t.Fatalf("AllProviders() = %d, want 10", len(providers))
 	}

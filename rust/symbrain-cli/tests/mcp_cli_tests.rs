@@ -111,6 +111,15 @@ fn write_profile(root: &TempDir, fake: &FakeCommand) -> std::path::PathBuf {
 }
 
 fn command(root: &TempDir, args: &[&str]) -> Command {
+    if args.first() == Some(&"usage") {
+        let claude_file = root.path().join("home/.claude/.credentials.json");
+        if std::fs::symlink_metadata(&claude_file).is_err() {
+            // `needs_go_fallback` checks Claude Keychain presence when the
+            // default file is absent. Give usage-route subprocesses a
+            // synthetic file so tests never enumerate the host Keychain.
+            install_synthetic_claude_file(root);
+        }
+    }
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command.env_clear();
     #[cfg(windows)]
@@ -394,11 +403,23 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
         r#"{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_ai_usage","arguments":{}}}"#,
         "\n"
     );
-    let output = run_with_input(
-        &root,
-        &["mcp", "--profile-file", profile.to_str().unwrap()],
-        input.as_bytes(),
-    );
+    let mut child = command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()])
+        // Make provider discovery fail before its macOS Keychain fallback. The
+        // test exercises the MCP route and report shape, not real credentials.
+        .env(
+            "ANTHROPIC_OAUTH_TOKEN",
+            "env://SYMBRAIN_USAGE_TEST_MISSING_TOKEN",
+        )
+        .spawn()
+        .unwrap();
+    child
+        .stdin
+        .as_mut()
+        .unwrap()
+        .write_all(input.as_bytes())
+        .unwrap();
+    drop(child.stdin.take());
+    let output = child.wait_with_output().unwrap();
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
     let responses = String::from_utf8(output.stdout)
@@ -417,6 +438,40 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
     .expect("usage report");
     assert_eq!(report["schema_version"], 1);
     assert_eq!(report["providers"].as_array().unwrap().len(), 10);
+    assert!(
+        report["providers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|provider| provider["snapshot"].is_null())
+    );
+    for provider in report["providers"].as_array().unwrap() {
+        if provider["id"] == "antigravity" {
+            assert_eq!(provider["configured"], true);
+            assert!(
+                provider["error"]
+                    .as_str()
+                    .unwrap()
+                    .contains("Antigravity is not running")
+            );
+        } else {
+            assert_eq!(provider["configured"], false, "provider: {provider}");
+        }
+    }
+    let claude = report["providers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|provider| provider["id"] == "claude")
+        .expect("Claude provider");
+    assert_eq!(claude["configured"], false);
+    assert!(claude["snapshot"].is_null());
+    assert!(
+        claude["auth_status"]["detail"]
+            .as_str()
+            .unwrap()
+            .contains("secret resolution failed")
+    );
     let audit_path = root
         .path()
         .join("home/.local/share/symbrain/audit/usage.jsonl");
