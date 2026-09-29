@@ -113,11 +113,15 @@ fn write_profile(root: &TempDir, fake: &FakeCommand) -> std::path::PathBuf {
 fn command(root: &TempDir, args: &[&str]) -> Command {
     if args.first() == Some(&"usage") {
         let claude_file = root.path().join("home/.claude/.credentials.json");
-        if std::fs::symlink_metadata(&claude_file).is_err() {
-            // `needs_go_fallback` checks Claude Keychain presence when the
-            // default file is absent. Give usage-route subprocesses a
-            // synthetic file so tests never enumerate the host Keychain.
-            install_synthetic_claude_file(root);
+        match std::fs::symlink_metadata(&claude_file) {
+            Ok(_) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                // `needs_go_fallback` checks Claude Keychain presence when
+                // the default file is absent. Give usage-route subprocesses a
+                // synthetic file so tests never enumerate the host Keychain.
+                install_synthetic_claude_file(root);
+            }
+            Err(error) => panic!("inspect synthetic Claude credentials path: {error}"),
         }
     }
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
