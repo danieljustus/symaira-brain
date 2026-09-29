@@ -34,7 +34,8 @@ const CLAUDE_KEYCHAIN_SERVICE: &str = "Claude Code-credentials";
 /// an unattended machine.
 #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 const CLAUDE_KEYCHAIN_TIMEOUT: Duration = Duration::from_secs(20);
-/// Bound for the prompt-free process probes (`ps`, `lsof`).
+/// Bound for the prompt-free macOS Keychain listing.
+#[cfg(target_os = "macos")]
 const MAX_PROBE_OUTPUT_BYTES: u64 = 64 * 1024;
 
 // ---------------------------------------------------------------------------
@@ -249,6 +250,7 @@ fn read_capture(file: &std::fs::File, cap: u64) -> Vec<u8> {
 
 /// Legacy surface: probes and the usage credential path keep their
 /// `Option<Vec<u8>>` contract over the shared runner.
+#[cfg(target_os = "macos")]
 fn bounded_command_stdout(
     command: &str,
     args: &[&str],
