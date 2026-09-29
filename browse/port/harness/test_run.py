@@ -8,7 +8,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -20,6 +20,27 @@ SPEC.loader.exec_module(run)
 
 
 class DaemonExitTests(unittest.TestCase):
+    def test_race_waits_for_competing_starters_before_stopping_winner(self) -> None:
+        winner = Mock(pid=101)
+        loser = Mock(pid=102)
+        events: list[str] = []
+        loser.wait.side_effect = lambda **kwargs: events.append("loser-exited")
+
+        def request(_socket: Path, frame: dict[str, object]) -> dict[str, object]:
+            if frame["cmd"] == "daemon.stop":
+                self.assertEqual(events, ["loser-exited"])
+                events.append("winner-stopped")
+            return {"success": True, "data": {"pid": winner.pid}}
+
+        with patch.object(run, "start_daemon", side_effect=[winner, loser]), \
+                patch.object(run, "wait_for_path"), patch.object(run, "wait_for_request"), \
+                patch.object(run, "request", side_effect=request), \
+                patch.object(run, "assert_clean_process") as clean, \
+                patch.object(run, "kill_tree"), patch.object(Path, "exists", return_value=False):
+            run.race_once(Path("daemon"), {}, Path("runtime"), suffix="test", starters=2)
+        self.assertEqual(events, ["loser-exited", "winner-stopped"])
+        self.assertEqual(clean.call_count, 2)
+
     def test_clean_output_does_not_hide_a_failed_daemon(self) -> None:
         for status in (0, 7):
             with self.subTest(status=status), subprocess.Popen(
