@@ -11,6 +11,7 @@ import (
 func TestCmdVaultSetUsesStdinAndSanitizesConfirmation(t *testing.T) {
 	dir := t.TempDir()
 	fake := filepath.Join(dir, "symvault")
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", fake)
 	script := "#!/bin/sh\n" +
 		"if [ \"$1\" = set ]; then [ \"$2\" = work/edit.password ] || exit 3; cat > \"$STATE\"; exit 0; fi\n" +
 		"if [ \"$1\" = get ]; then printf '%s' '{\"path\":\"work/edit\",\"fields\":{\"password\":\"new-secret\"}}'; exit 0; fi\n" +
@@ -50,6 +51,7 @@ func TestCmdVaultSetUsesStdinAndSanitizesConfirmation(t *testing.T) {
 func TestCmdVaultDeleteRequiresYesAndConfirmsAbsence(t *testing.T) {
 	dir := t.TempDir()
 	fake := filepath.Join(dir, "symvault")
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", fake)
 	state := filepath.Join(dir, "exists")
 	script := "#!/bin/sh\n" +
 		"if [ \"$1\" = delete ]; then [ \"$3\" = --yes ] || exit 2; rm -f \"$STATE\"; exit 0; fi\n" +
@@ -83,6 +85,7 @@ func TestCmdVaultDeleteRequiresYesAndConfirmsAbsence(t *testing.T) {
 func TestCmdVaultDeleteReportsUnverifiedWhenGetFailsOtherwise(t *testing.T) {
 	dir := t.TempDir()
 	fake := filepath.Join(dir, "symvault")
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", fake)
 	// delete succeeds, but the confirmation read fails with a generic error
 	// (exit 1, e.g. vault locked) — absence must NOT be claimed.
 	script := "#!/bin/sh\n" +

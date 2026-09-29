@@ -12,6 +12,7 @@ func TestCmdVaultCreateReadsValueFromStdinAndSanitizesConfirmation(t *testing.T)
 	dir := t.TempDir()
 	state := filepath.Join(dir, "stdin")
 	fake := filepath.Join(dir, "symvault")
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", fake)
 	script := "#!/bin/sh\n" +
 		"if [ \"$1\" = add ]; then cat > \"$STATE\"; exit 0; fi\n" +
 		"if [ \"$1\" = get ]; then printf '%s' '{\"path\":\"work/new\",\"fields\":{\"password\":\"hidden-value\"}}'; exit 0; fi\n" +
