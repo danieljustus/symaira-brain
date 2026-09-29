@@ -1,5 +1,47 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated root gates and usage deadlines — 2026-09-29
+
+Candidate `b1fa75df5be9c871c5715913cefb316733300460` passes independent
+native Darwin/arm64 and Linux/arm64 root gates: 882/881 outer Rust tests,
+504 exact CLI comparisons, seven MCP comparison groups and nine Guard scan
+cases. Go oracle freshness, the 11-case skills install/status oracle, 44 offline
+distribution assertions, workspace formatting/check/strict Clippy and doc tests
+pass. Two ignored child entrypoints are executed by their parent tests; nested
+child summaries are not counted twice. Darwin also passes audit/deny with the
+cached advisory database `ef03605143a913024f864d2edf476adad5720c93`
+(2026-09-28; no freshness-to-current claim).
+
+The integrated changes avoid Claude Keychain enumeration when OAuth environment
+credentials already determine routing, preserve the no-cookie OpenCode workspace
+case, check cancellation between provider batches and cap HTTP timeouts to the
+absolute gateway report deadline. Actual 30-second exhaustion and a bounded
+local TLS-stall exercise that deadline. The Go usage oracle's shared request
+recorder is synchronized; its concurrent regression and actual oracle pass the
+race detector. Adapter metadata applies final permissions after xattrs, matching
+native macOS set-id semantics. The failed-doctor child fixture consumes initialize
+and closes stdout before waiting for stdin closure, eliminating Go write/exit and
+Wait/StdoutPipe races without normalizing away diagnostics.
+
+The Darwin main gate uses private HOME/XDG/TMP and verified sandbox denial of
+`security`, `ps` and `lsof`. Two exact tests run separately outside that sandbox:
+the filesystem-only special-mode/xattr check and the lifecycle fixture's own
+child-process check. Linux runs three original compiled relative-CWD tests in a
+private writable runtime, since its source mount is read-only. Each is actually
+executed; only those exact tests are filtered from the later workspace run.
+
+`whole-brain-receipt-b1fa75df.json` in the existing Brain and native-linux build
+roots binds candidate, manifest paths, counts, exceptions and logs. Log SHA-256:
+Darwin `34aa0ce9832dc22d9c7ea9d05d4c36f1148ccfddbd1e6aaf3536c4fa5c0c3ca8`;
+Linux `607e77394177867ac9a86483f878ea0f95d5979b6326cc59b06d92f8211b6fd0`.
+These are local native root gates, not whole-ledger completion. Swift consumer,
+dedicated init comparator, fuzz, Browse harnesses and remaining native targets
+still require final-candidate acceptance. Live credential/host integration is not
+proved; synchronous usage HTTP cannot immediately interrupt an already-blocked
+read on arbitrary cancellation. Distribution signatures, archive/SBOM bytes and
+installed package-manager artifacts remain outside the offline naming gate.
+No publication, installed cutover or Go removal occurred.
+
 ## Corrected isolated usage gate — 2026-09-29
 
 Candidate `7a6a66ad3e0cc659625b8bd0ae2c6e8f847b5e22` repairs the two test
