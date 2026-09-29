@@ -14,8 +14,8 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// for reports with no stored credential at all — those reach no endpoint and
 /// are pinned byte-for-byte by the parity suite. An `OpenCode` workspace override
 /// without a cookie also stays native because Go has no fetch strategy for it.
-/// A report with only a direct `ANTHROPIC_ADMIN_KEY` and no Claude Code OAuth
-/// source, a direct `COPILOT_ACCESS_TOKEN` or a direct
+/// A report with only a direct `ANTHROPIC_ADMIN_KEY` or
+/// `ANTHROPIC_OAUTH_TOKEN`, a direct `COPILOT_ACCESS_TOKEN` or a direct
 /// `OPENROUTER_API_KEY` using the default base or a direct `MOONSHOT_API_KEY`
 /// using the default `ai` region, a direct `CURSOR_COOKIE`, or a direct
 /// `KIMI_CODE_API_KEY` using the default base and with no Kimi CLI credential

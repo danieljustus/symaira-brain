@@ -426,6 +426,28 @@ fn usage_subprocess_lists_and_calls_native_tool_without_go_fallback() {
 }
 
 #[test]
+fn direct_claude_oauth_routes_usage_to_native_parser_without_provider_request() {
+    let root = TempDir::new().unwrap();
+    // The invalid flag returns before any report fetch. With PATH empty and
+    // provider variables cleared by `command`, this proves route selection
+    // for a synthetic direct OAuth token without contacting Anthropic.
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("ANTHROPIC_OAUTH_TOKEN", "synthetic-direct-oauth-fixture")
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2), "stderr: {:?}", output.stderr);
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+        "native usage parser did not handle the request: {stderr}"
+    );
+    assert!(
+        !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+        "direct Claude OAuth unexpectedly selected Go fallback: {stderr}"
+    );
+}
+
+#[test]
 fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys() {
     let current_exe = std::env::current_exe().expect("current test executable path");
     let outer_data_dir = TempDir::new().unwrap();

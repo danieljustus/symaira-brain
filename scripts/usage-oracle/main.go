@@ -6,17 +6,22 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/usage"
 )
 
 const copilotOracleToken = "oracle-only-invalid-copilot"
 const claudeAdminOracleToken = "oracle-only-invalid-claude-admin"
+const claudeOAuthOracleToken = "oracle-only-invalid-claude-oauth"
 const codexOracleToken = "oracle-only-invalid-codex"
 const cursorOracleToken = "oracle-only-invalid-cursor"
 const kimiOracleToken = "oracle-only-invalid-kimi"
@@ -75,6 +80,7 @@ func main() {
 	casesOutput := flag.String("cases-output", "rust/symbrain-usage/tests/fixtures/provider_cases.json", "provider cases path")
 	copilotReportOutput := flag.String("copilot-report-output", "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json", "authenticated Copilot report path")
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
+	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
@@ -108,6 +114,11 @@ func main() {
 		os.Exit(1)
 	}
 	claudeAdminReport, err := buildClaudeAdminAuthenticatedReport(fixtures["claude-admin"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	claudeOAuthReport, err := buildClaudeOAuthAuthenticatedReport(fixtures["claude"])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -165,6 +176,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*claudeOAuthReportOutput, claudeOAuthReport); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*codexReportOutput, codexReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -212,6 +227,10 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	if err := writeJSON(*claudeOAuthReportOutput, claudeOAuthReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	if err := writeJSON(*codexReportOutput, codexReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -249,6 +268,136 @@ func buildCopilotAuthenticatedReport(body []byte) (usage.Report, error) {
 
 func buildClaudeAdminAuthenticatedReport(body []byte) (usage.Report, error) {
 	return buildAuthenticatedProviderReport("claude-admin", claudeAdminOracleToken, body)
+}
+
+type claudeOAuthReportFixture struct {
+	Success usage.Report `json:"success"`
+	Errors  []struct {
+		Status int          `json:"status"`
+		Report usage.Report `json:"report"`
+	} `json:"errors"`
+}
+
+func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture, error) {
+	fixture := claudeOAuthReportFixture{}
+	var err error
+	fixture.Success, err = buildClaudeOAuthReport(200, body)
+	if err != nil {
+		return claudeOAuthReportFixture{}, err
+	}
+	for _, response := range []struct {
+		status int
+		body   []byte
+	}{
+		{http.StatusUnauthorized, []byte(`{"error":"nope"}`)},
+		{http.StatusTooManyRequests, []byte(`{"error":"slow down"}`)},
+		{http.StatusOK, []byte("not-json")},
+	} {
+		report, reportErr := buildClaudeOAuthReport(response.status, response.body)
+		if reportErr != nil {
+			return claudeOAuthReportFixture{}, reportErr
+		}
+		fixture.Errors = append(fixture.Errors, struct {
+			Status int          `json:"status"`
+			Report usage.Report `json:"report"`
+		}{Status: response.status, Report: report})
+	}
+	return fixture, nil
+}
+
+func buildClaudeOAuthReport(status int, body []byte) (report usage.Report, retErr error) {
+	credentialEnv := []string{
+		"HOME", "USERPROFILE", "ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN",
+		"CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME", "CODEX_ACCESS_TOKEN",
+		"COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN",
+		"KIMI_CODE_BASE_URL", "MOONSHOT_API_KEY", "MOONSHOT_REGION",
+		"NOUS_PORTAL_ACCESS_TOKEN", "HERMES_PORTAL_BASE_URL", "OPENCODE_COOKIE",
+		"OPENCODE_WORKSPACE_ID", "OPENROUTER_API_KEY", "OPENROUTER_API_URL",
+	}
+	previous := make(map[string]string, len(credentialEnv))
+	existed := make(map[string]bool, len(credentialEnv))
+	for _, name := range credentialEnv {
+		previous[name], existed[name] = os.LookupEnv(name)
+	}
+	restore := func() error {
+		for _, name := range credentialEnv {
+			var err error
+			if existed[name] {
+				err = os.Setenv(name, previous[name])
+			} else {
+				err = os.Unsetenv(name)
+			}
+			if err != nil {
+				return fmt.Errorf("restore %s after Claude OAuth oracle: %w", name, err)
+			}
+		}
+		return nil
+	}
+	for _, name := range credentialEnv {
+		if err := os.Unsetenv(name); err != nil {
+			_ = restore()
+			return usage.Report{}, fmt.Errorf("clear %s for Claude OAuth oracle: %w", name, err)
+		}
+	}
+	defer func() {
+		if err := restore(); err != nil && retErr == nil {
+			retErr = err
+		}
+	}()
+	home, err := os.MkdirTemp("", "symbrain-claude-oauth-oracle-home-")
+	if err != nil {
+		return usage.Report{}, fmt.Errorf("create isolated Claude OAuth oracle home: %w", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(home); err != nil && retErr == nil {
+			retErr = fmt.Errorf("remove isolated Claude OAuth oracle home: %w", err)
+		}
+	}()
+	if err := os.Setenv("HOME", home); err != nil {
+		return usage.Report{}, fmt.Errorf("set isolated Claude OAuth oracle home: %w", err)
+	}
+	if err := os.Setenv("USERPROFILE", home); err != nil {
+		return usage.Report{}, fmt.Errorf("set isolated Claude OAuth oracle profile: %w", err)
+	}
+	if err := os.Setenv("ANTHROPIC_OAUTH_TOKEN", claudeOAuthOracleToken); err != nil {
+		return usage.Report{}, fmt.Errorf("set synthetic Claude OAuth oracle token: %w", err)
+	}
+	transport := &claudeOAuthOracleTransport{status: status, body: body}
+	provider := usage.NewClaudeProvider(&http.Client{Transport: transport})
+	if !provider.IsConfigured() || provider.AuthStatus().Source != "env" {
+		return usage.Report{}, fmt.Errorf("Claude OAuth oracle requires only its direct synthetic environment credential")
+	}
+	report = usage.BuildReport(context.Background(), []usage.Provider{provider})
+	if len(report.Providers) != 1 || len(transport.requests) != 1 {
+		return usage.Report{}, fmt.Errorf("Claude OAuth oracle produced %d providers and %d fixture requests, want one each", len(report.Providers), len(transport.requests))
+	}
+	request := transport.requests[0]
+	if request.Method != http.MethodGet || request.URL.String() != "https://api.anthropic.com/api/oauth/usage" ||
+		request.Header.Get("Authorization") != "Bearer "+claudeOAuthOracleToken ||
+		request.Header.Get("anthropic-beta") != "oauth-2025-04-20" {
+		return usage.Report{}, fmt.Errorf("Claude OAuth oracle did not issue the expected authenticated usage request")
+	}
+	if snapshot := report.Providers[0].Snapshot; snapshot != nil {
+		fixed := time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+		snapshot.FetchedAt = fixed
+	}
+	return report, nil
+}
+
+type claudeOAuthOracleTransport struct {
+	status   int
+	body     []byte
+	requests []*http.Request
+}
+
+func (t *claudeOAuthOracleTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	t.requests = append(t.requests, request.Clone(request.Context()))
+	return &http.Response{
+		StatusCode: t.status,
+		Header:     http.Header{"Retry-After": []string{"17"}},
+		Body:       io.NopCloser(bytes.NewReader(t.body)),
+		Request:    request,
+	}, nil
 }
 
 func buildCodexAuthenticatedReport(body []byte) (usage.Report, error) {

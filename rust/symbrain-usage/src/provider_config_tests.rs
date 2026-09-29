@@ -167,6 +167,10 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
         ..UsageFallbackSignals::default()
     }));
     assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
         copilot_env: Some("synthetic-copilot-fixture"),
         ..UsageFallbackSignals::default()
     }));
@@ -232,6 +236,30 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
 fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
     assert!(needs_go_fallback_for(UsageFallbackSignals {
         claude_admin_env: Some("symvault://claude/admin-key"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_oauth_env: Some("symvault://claude/oauth-token"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        other_credential_source: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        local_provider_present: true,
         ..UsageFallbackSignals::default()
     }));
     assert!(needs_go_fallback_for(UsageFallbackSignals {

@@ -1,0 +1,104 @@
+{
+  "success": {
+    "schema_version": 1,
+    "providers": [
+      {
+        "id": "claude",
+        "display_name": "Claude",
+        "configured": true,
+        "auth_status": {
+          "status": "available",
+          "detail": "Signed in via Claude Code OAuth token",
+          "source": "env"
+        },
+        "snapshot": {
+          "provider_id": "claude",
+          "meters": [
+            {
+              "label": "five_hour",
+              "used": "45",
+              "limit": "100",
+              "unit": "%",
+              "resets_at": "2026-08-05T18:00:00Z"
+            },
+            {
+              "label": "seven_day",
+              "used": "120",
+              "limit": "400",
+              "unit": "%",
+              "resets_at": "2026-08-09T00:00:00Z"
+            },
+            {
+              "label": "Extra usage",
+              "used": "3.25",
+              "limit": "10",
+              "unit": "USD"
+            }
+          ],
+          "currency": "USD",
+          "fetched_at": "2026-08-01T00:00:00Z",
+          "source": "oauth"
+        }
+      }
+    ]
+  },
+  "errors": [
+    {
+      "status": 401,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Claude Code OAuth token",
+              "source": "env"
+            },
+            "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+          }
+        ]
+      }
+    },
+    {
+      "status": 429,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Claude Code OAuth token",
+              "source": "env"
+            },
+            "error": "all AI usage fallbacks failed: AI usage provider \"claude\" is rate limited; retry in 17s"
+          }
+        ]
+      }
+    },
+    {
+      "status": 200,
+      "report": {
+        "schema_version": 1,
+        "providers": [
+          {
+            "id": "claude",
+            "display_name": "Claude",
+            "configured": true,
+            "auth_status": {
+              "status": "available",
+              "detail": "Signed in via Claude Code OAuth token",
+              "source": "env"
+            },
+            "error": "all AI usage fallbacks failed: Claude returned an unreadable response"
+          }
+        ]
+      }
+    }
+  ]
+}
