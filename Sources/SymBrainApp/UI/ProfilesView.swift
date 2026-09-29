@@ -101,7 +101,7 @@ struct ProfilesView: View {
         let servers = profile.servers
             .map { "\($0.server) \($0.mode ?? ($0.enabled ? "on" : "off"))" }
             .joined(separator: ", ")
-        var parts = ["Profile \(profile.name)", profile.description]
+        var parts = ["Profile \(profile.name)", profile.error.map { "Error: \($0)" } ?? profile.description]
         if !servers.isEmpty {
             parts.append(servers)
         }
@@ -126,9 +126,15 @@ struct ProfilesView: View {
                         Text(profile.name)
                             .font(.body.weight(.semibold))
                             .foregroundStyle(SymairaTheme.textPrimary)
-                        Text(profile.description)
-                            .font(.caption)
-                            .foregroundStyle(SymairaTheme.textSecondary)
+                        if let error = profile.error {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(SymairaTheme.critical)
+                        } else {
+                            Text(profile.description)
+                                .font(.caption)
+                                .foregroundStyle(SymairaTheme.textSecondary)
+                        }
                     }
                     Spacer()
                     ForEach(profile.servers, id: \.server) { server in
