@@ -1,5 +1,32 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Corrected isolated usage gate — 2026-09-29
+
+Candidate `7a6a66ad3e0cc659625b8bd0ae2c6e8f847b5e22` repairs the two test
+isolation paths identified below. The Go registry-count test uses private
+HOME/XDG and existing injected Keychain/process probes. The real CLI MCP
+report uses a deliberately missing env reference, so Claude reports a
+configuration error before Keychain or HTTP; assertions require every
+credential-based provider to remain unconfigured and all snapshots absent.
+Antigravity remains configured by design, but empty PATH must yield its
+unavailable-process error. CLI usage routing tests get a synthetic default
+Claude file only on true absence; their invalid flags return before fetching.
+Existing files and symlinks are preserved, and other metadata errors fail.
+
+Independent Darwin/arm64 and Linux/arm64 gates pass actual Go usage and
+Gateway lifecycle tests plus usage/OpenCode freshness. Rust passes3+9+4
+Gateway tests,62+9+9 usage tests on Darwin /62+8+9 on Linux, and20 CLI tests
+on each, zero failures/ignored. Worker formatting and strict targeted Clippy
+pass. Receipts `usage-isolation-receipt-7a6a66ad.json` retain candidate/test
+hashes, metadata, logs and explicit isolation controls. Historical logs and
+their corrections remain preserved; these reruns supersede their unsupported
+no-host-isolation claims for the affected gates.
+
+Real host integration, actual30s exhaustion, production OAuth-env routing's
+unnecessary Keychain enumeration, required other targets and whole-ledger
+acceptance remain open. No installed cutover or publication occurred.
+
+
 ## Evidence correction: usage test host isolation — 2026-09-29
 
 The whole-gate review found that the existing CLI test
