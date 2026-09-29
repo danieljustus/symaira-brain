@@ -67,8 +67,9 @@ pub struct Response {
 }
 
 /// Side-effect boundary for provider reads. Implementations should check the
-/// cancellation flag between I/O chunks; the default keeps old test doubles
-/// source-compatible while production transports are fully cooperative.
+/// cancellation flag between I/O chunks. The built-in HTTP transport applies
+/// the remaining timeout when a request starts, but cannot interrupt an
+/// already-blocking synchronous response read.
 pub trait Transport: Send + Sync {
     /// # Errors
     /// Returns the transport error when the request cannot be completed.

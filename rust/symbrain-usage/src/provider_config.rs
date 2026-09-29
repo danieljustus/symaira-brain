@@ -1513,11 +1513,12 @@ pub fn needs_go_fallback() -> bool {
         claude_file: claude_file_token.as_deref(),
         other_provider_env: false,
         other_credential_source: false,
-        // A file token wins before Go reads Keychain, so an existing Claude
-        // Keychain item is irrelevant when that source is present. Avoid even
-        // listing Keychain attributes on the native file-only route. The
-        // Antigravity local process probe is handled by its native provider.
-        local_provider_present: claude_file_token.is_none() && claude_keychain_present(),
+        // Go skips its Keychain read when either the OAuth environment source
+        // is present (even if resolving it fails) or the file supplied a
+        // token. Avoid listing Keychain attributes in either case.
+        local_provider_present: claude_oauth_env.is_none()
+            && claude_file_token.is_none()
+            && claude_keychain_present(),
     })
 }
 
@@ -1568,7 +1569,9 @@ fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     ];
     if signals.other_provider_env
         || signals.other_credential_source
-        || signals.local_provider_present
+        || (signals.local_provider_present
+            && signals.claude_oauth_env.is_none()
+            && signals.claude_file.is_none())
     {
         return true;
     }

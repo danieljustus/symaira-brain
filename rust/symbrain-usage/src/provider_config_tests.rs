@@ -394,9 +394,8 @@ fn claude_file_credential_can_be_combined_with_proven_sources() {
         other_credential_source: true,
         ..UsageFallbackSignals::default()
     }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
+    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
         claude_file: Some("synthetic-claude-file-fixture"),
-        local_provider_present: true,
         ..UsageFallbackSignals::default()
     }));
     for reference in [
@@ -410,6 +409,25 @@ fn claude_file_credential_can_be_combined_with_proven_sources() {
             ..UsageFallbackSignals::default()
         }));
     }
+}
+
+#[test]
+fn claude_oauth_source_preempts_keychain_fallback() {
+    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(&UsageFallbackSignals {
+        claude_oauth_env: Some("env://SYMBRAIN_TEST_MISSING_CLAUDE_TOKEN"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
 }
 
 #[test]
@@ -475,11 +493,6 @@ fn secret_references_and_unproven_sources_keep_go_fallback() {
     assert!(needs_go_fallback_for(&UsageFallbackSignals {
         claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
         other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        local_provider_present: true,
         ..UsageFallbackSignals::default()
     }));
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {

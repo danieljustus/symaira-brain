@@ -21,6 +21,7 @@ use std::time::{Duration, Instant};
 pub const REPORT_SCHEMA_VERSION: u32 = 1;
 pub const DEFAULT_PROVIDER_TIMEOUT: Duration = Duration::from_secs(8);
 pub const MAX_CONCURRENT_PROVIDERS: usize = 4;
+const CANCELLATION_POLL_INTERVAL: Duration = Duration::from_millis(25);
 
 pub struct Service {
     providers: Vec<Provider>,
@@ -84,19 +85,22 @@ impl Service {
             .enumerate()
             .filter_map(|(i, p)| p.configured.then_some(i))
             .collect();
-        // Do not start an authenticated request when the handler has already
-        // been cancelled. Provider discovery above still runs per call, as it
-        // does in Go before BuildReport begins its cancellable fetch workers.
-        if cancelled() {
-            for index in configured {
-                report.providers[index].error = Some(format!(
-                    "AI usage provider {:?} cancelled",
-                    self.providers[index].id
-                ));
+        for (batch_index, batch) in configured.chunks(self.max_concurrency).enumerate() {
+            // Recheck before starting each batch so cancellation or the
+            // handler deadline never launches another provider request.
+            if cancelled() {
+                for index in configured
+                    .iter()
+                    .skip(batch_index * self.max_concurrency)
+                    .copied()
+                {
+                    report.providers[index].error = Some(format!(
+                        "AI usage provider {:?} cancelled",
+                        self.providers[index].id
+                    ));
+                }
+                break;
             }
-            return report;
-        }
-        for batch in configured.chunks(self.max_concurrency) {
             let (sender, receiver) = mpsc::channel();
             let cancels: Vec<Cancellation> = batch
                 .iter()
@@ -144,7 +148,7 @@ impl Service {
                         }
                         break;
                     }
-                    match receiver.recv_timeout(remaining) {
+                    match receiver.recv_timeout(remaining.min(CANCELLATION_POLL_INTERVAL)) {
                         Ok((index, result)) => {
                             pending.remove(&index);
                             match result {
@@ -154,18 +158,7 @@ impl Service {
                                 }
                             }
                         }
-                        Err(mpsc::RecvTimeoutError::Timeout) => {
-                            for (slot, index) in batch.iter().copied().enumerate() {
-                                if pending.contains(&index) {
-                                    cancels[slot].cancel();
-                                    report.providers[index].error = Some(format!(
-                                        "AI usage provider {:?} timed out after {:?}",
-                                        self.providers[index].id, self.provider_timeout
-                                    ));
-                                }
-                            }
-                            break;
-                        }
+                        Err(mpsc::RecvTimeoutError::Timeout) => {}
                         Err(mpsc::RecvTimeoutError::Disconnected) => break,
                     }
                 }
