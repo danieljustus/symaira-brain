@@ -1,5 +1,28 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated Claude file compatibility evidence — 2026-09-29
+
+Candidate `cbfc46a94e5c6f8aa15730130ed2dd33590d35a9` includes code `14a54551`
+and the preceding Codex/Claude/Browse slices. Typed candidate parsing now keeps
+ambiguous account selection, alternate field casing, duplicate root fields,
+wrong-typed siblings, malformed input and unknown metadata on Go before a
+Keychain probe. Exact default selection, a sole nondefault token and Go-equivalent
+duplicate same-account keys remain native. Unknown metadata is a deliberate
+conservative limit, not a claim that Go rejects it.
+
+Ten real Go `readClaudeFileToken` cases exercise these differences without
+constructing a provider or reading a Keychain. Nondeterministic map selection
+is checked against its two-token allowed set; no single random winner is frozen.
+Independent clean-candidate Go1.26.7 usage package/oracle and Rust tests pass on
+Darwin/arm64 (43+9+8 usage tests) and Linux/arm64 (43+8+8), plus all 14 CLI MCP
+tests on each; zero failed or ignored. Receipts `claude-compat-receipt-cbfc46a9.json`
+are retained under the existing Brain and native-linux build roots.
+
+This resolves the parser-routing defect described below. USE-001 remains open
+for remaining provider paths and required native targets. No real credentials,
+live provider requests, publication, installed cutover or Go removal occurred.
+
+
 ## Integrated Codex default-file evidence — 2026-09-29
 
 Candidate `d634d71b24825073be565e1c0fdf9fd692d44437` includes `bad314a2`
@@ -22,7 +45,8 @@ rejects invalid typed siblings, and chooses arbitrarily among non-default
 accounts. Rust's existing Value parser does not have the same behavior. A
 follow-on conservative eligibility fix keeps unproven forms on Go. Prior
 canonical default-file evidence does not establish parity for those forms.
-USE-001 remains open for that fix, remaining providers and other native targets.
+The fix is now covered by the integrated Claude compatibility evidence above;
+USE-001 remains open for remaining providers and other native targets.
 No live provider/Keychain access, publication, cutover or Go removal.
 
 
