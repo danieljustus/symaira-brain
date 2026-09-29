@@ -25,10 +25,12 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// default `~/.codex/auth.json` now runs natively:
 /// each configured report, request, parsed snapshot, and provider error cases
 /// are checked against Go oracles using synthetic credentials and canned
-/// transport. A sole Claude OAuth credential file is also native. Codex `CODEX_HOME`
-/// overrides, mixed env/file sources, other file credentials, secret references,
-/// provider-specific overrides, and every other configured provider continue
-/// to use Go until pinned.
+/// transport. A Claude OAuth file is native only for a deterministic Go-equivalent
+/// default-account or single-token shape; alternate field casing, unknown
+/// metadata, ambiguous account selection, malformed typed fields, and other
+/// unproven file shapes stay on Go. Codex `CODEX_HOME` overrides, mixed env/file sources, other file
+/// credentials, secret references, provider-specific overrides, and every
+/// other configured provider continue to use Go until pinned.
 ///
 /// The report fetch invoked below remains a user-initiated live read, as it
 /// does in the shipped Go command.

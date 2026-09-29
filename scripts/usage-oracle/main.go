@@ -85,6 +85,7 @@ func main() {
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
 	codexFileReportOutput := flag.String("codex-file-report-output", "rust/symbrain-usage/tests/fixtures/codex_file_authenticated_report.json", "authenticated Codex auth.json report path")
+	claudeFileTokenOutput := flag.String("claude-file-token-output", "rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json", "Claude credentials file parser cases")
 	openRouterReportOutput := flag.String("openrouter-report-output", "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json", "authenticated OpenRouter report path")
 	moonshotReportOutput := flag.String("moonshot-report-output", "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json", "authenticated Moonshot report path")
 	cursorReportOutput := flag.String("cursor-report-output", "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json", "authenticated Cursor report path")
@@ -122,6 +123,11 @@ func main() {
 		os.Exit(1)
 	}
 	claudeOAuthReport, err := buildClaudeOAuthAuthenticatedReport(fixtures["claude"])
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	claudeFileTokenOracle, err := buildClaudeFileTokenOracle()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -188,6 +194,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*claudeFileTokenOutput, claudeFileTokenOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*codexReportOutput, codexReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -240,6 +250,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*claudeOAuthReportOutput, claudeOAuthReport); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*claudeFileTokenOutput, claudeFileTokenOracle); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -299,12 +313,106 @@ type claudeOAuthReportFixture struct {
 	} `json:"file_errors"`
 }
 
+type claudeFileTokenOracleFixture struct {
+	SchemaVersion int                         `json:"schema_version"`
+	Cases         []claudeFileTokenOracleCase `json:"cases"`
+}
+
+type claudeFileTokenOracleCase struct {
+	ID             string   `json:"id"`
+	Contents       string   `json:"contents"`
+	Token          *string  `json:"token,omitempty"`
+	PossibleTokens []string `json:"possible_tokens,omitempty"`
+	SelectionRule  string   `json:"selection_rule,omitempty"`
+}
+
 type codexFileReportFixture struct {
 	Success usage.Report `json:"success"`
 	Errors  []struct {
 		Status int          `json:"status"`
 		Report usage.Report `json:"report"`
 	} `json:"errors"`
+}
+
+func buildClaudeFileTokenOracle() (claudeFileTokenOracleFixture, error) {
+	inputs := []struct {
+		id             string
+		contents       string
+		possibleTokens []string
+	}{
+		{
+			id:       "default-account-precedes-other-accounts",
+			contents: `{"oauthAccount":{"work":{"accessToken":"work-token"},"default":{"accessToken":"default-token"}}}`,
+		},
+		{
+			id:       "single-nondefault-account-is-unambiguous",
+			contents: `{"oauthAccount":{"spare":{"accessToken":"spare-token"}}}`,
+		},
+		{
+			id:       "duplicate-account-key-uses-last-token",
+			contents: `{"oauthAccount":{"default":{"accessToken":"first-token"},"default":{"accessToken":"last-token"}}}`,
+		},
+		{
+			id:       "unknown-credential-metadata-is-ignored-by-go",
+			contents: `{"version":1,"oauthAccount":{"default":{"accessToken":"default-token","refreshToken":"refresh-token"}}}`,
+		},
+		{
+			id:       "struct-field-matching-is-case-insensitive",
+			contents: `{"OAuthAccount":{"spare":{"AccessToken":"case-token"}}}`,
+		},
+		{
+			id:       "duplicate-top-level-map-field-merges-entries",
+			contents: `{"oauthAccount":{"default":{"accessToken":"default-token"}},"oauthAccount":{"work":{"accessToken":"work-token"}}}`,
+		},
+		{
+			id:       "duplicate-struct-token-field-uses-last-value",
+			contents: `{"oauthAccount":{"default":{"accessToken":"first-token","accessToken":"last-token"}}}`,
+		},
+		{
+			id:       "wrong-typed-sibling-invalidates-whole-decode",
+			contents: `{"oauthAccount":{"default":{"accessToken":"default-token"},"work":{"accessToken":42}}}`,
+		},
+		{
+			id:       "malformed-json-yields-no-token",
+			contents: `{"oauthAccount":{"default":{"accessToken":"partial-token"}}`,
+		},
+		{
+			id:             "nondefault-multiple-token-accounts-are-map-order-dependent",
+			contents:       `{"oauthAccount":{"work":{"accessToken":"work-token"},"spare":{"accessToken":"spare-token"}}}`,
+			possibleTokens: []string{"spare-token", "work-token"},
+		},
+	}
+	fixture := claudeFileTokenOracleFixture{SchemaVersion: 1}
+	for _, input := range inputs {
+		if len(input.possibleTokens) != 0 {
+			allowed := make(map[string]struct{}, len(input.possibleTokens))
+			for _, token := range input.possibleTokens {
+				allowed[token] = struct{}{}
+			}
+			for attempt := 0; attempt < 16; attempt++ {
+				token, err := usage.BuildClaudeFileTokenOracle([]byte(input.contents))
+				if err != nil {
+					return claudeFileTokenOracleFixture{}, err
+				}
+				if _, ok := allowed[token]; !ok {
+					return claudeFileTokenOracleFixture{}, fmt.Errorf("Claude parser returned %q outside the normalized map-order set for %s", token, input.id)
+				}
+			}
+			fixture.Cases = append(fixture.Cases, claudeFileTokenOracleCase{
+				ID: input.id, Contents: input.contents, PossibleTokens: input.possibleTokens,
+				SelectionRule: "one of possible_tokens; Go map iteration order is unspecified",
+			})
+			continue
+		}
+		token, err := usage.BuildClaudeFileTokenOracle([]byte(input.contents))
+		if err != nil {
+			return claudeFileTokenOracleFixture{}, err
+		}
+		fixture.Cases = append(fixture.Cases, claudeFileTokenOracleCase{
+			ID: input.id, Contents: input.contents, Token: &token,
+		})
+	}
+	return fixture, nil
 }
 
 func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture, error) {

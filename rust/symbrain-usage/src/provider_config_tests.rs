@@ -7,6 +7,9 @@ use super::{
 use std::fs;
 use std::path::{Path, PathBuf};
 
+const CLAUDE_FILE_TOKEN_ORACLE: &str =
+    include_str!("../tests/fixtures/claude_file_token_oracle.json");
+
 fn write(directory: &Path, name: &str, contents: &str) -> PathBuf {
     let path = directory.join(name);
     if let Some(parent) = path.parent() {
@@ -89,6 +92,43 @@ fn claude_token_falls_back_to_any_account_with_a_token() {
         r#"{"oauthAccount":{"work":{"accessToken":""},"spare":{"accessToken":"spare-token"}}}"#,
     );
     assert_eq!(claude_file_token_in(&path).as_deref(), Some("spare-token"));
+}
+
+#[test]
+fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(CLAUDE_FILE_TOKEN_ORACLE).expect("Go Claude parser oracle");
+    for case in fixture["cases"].as_array().expect("oracle cases") {
+        let directory = tempfile::tempdir().expect("temporary directory");
+        let path = write(
+            directory.path(),
+            ".credentials.json",
+            case["contents"].as_str().expect("file contents"),
+        );
+        let got = claude_file_token_in(&path);
+        let id = case["id"].as_str().expect("case id");
+        match id {
+            "default-account-precedes-other-accounts"
+            | "single-nondefault-account-is-unambiguous"
+            | "duplicate-account-key-uses-last-token" => {
+                assert_eq!(
+                    got.as_deref(),
+                    case["token"].as_str(),
+                    "safe candidate must match Go case {id}"
+                );
+            }
+            _ => {
+                assert!(
+                    case["token"].is_string() || case["possible_tokens"].is_array(),
+                    "Go oracle case {id} must record an exact token or its normalized choices"
+                );
+                assert!(
+                    got.is_none(),
+                    "unproven Go case {id} must remain on the Go path, got {got:?}"
+                );
+            }
+        }
+    }
 }
 
 #[test]

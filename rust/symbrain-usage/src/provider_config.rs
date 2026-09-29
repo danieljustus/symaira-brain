@@ -10,6 +10,7 @@
 
 use super::provider_requests::validated_base;
 use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
+use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::io::{Read, Seek, SeekFrom};
@@ -556,32 +557,45 @@ fn env_path(name: &str, fallback: PathBuf) -> PathBuf {
 // Provider credential files
 // ---------------------------------------------------------------------------
 
-/// `~/.claude/.credentials.json`, preferring the `default` account and then any
-/// account carrying a token (file order, like the shipped map iteration).
+/// `~/.claude/.credentials.json`, accepting only shapes whose token choice is
+/// deterministic and matches Go: the default account, or exactly one other
+/// account with a nonempty token. Unknown metadata and other unproven shapes
+/// remain on the Go path.
 fn claude_file_token() -> Option<String> {
     claude_file_token_in(&home().join(".claude/.credentials.json"))
 }
 
 fn claude_file_token_in(path: &Path) -> Option<String> {
-    let root = json_value(path)?;
-    let accounts = root.get("oauthAccount")?.as_object()?;
+    let contents = read_limited(path)?;
+    let credentials: ClaudeCredentialFile = serde_json::from_slice(&contents).ok()?;
+    let accounts = credentials.oauth_account;
     if let Some(token) = accounts
         .get("default")
-        .and_then(|account| account.get("accessToken"))
-        .and_then(Value::as_str)
+        .and_then(|account| account.access_token.as_deref())
         .filter(|token| !token.is_empty())
     {
         return Some(token.to_owned());
     }
-    accounts
+    let mut tokens = accounts
         .values()
-        .find_map(|account| {
-            account
-                .get("accessToken")
-                .and_then(Value::as_str)
-                .filter(|token| !token.is_empty())
-        })
-        .map(Into::into)
+        .filter_map(|account| account.access_token.as_deref())
+        .filter(|token| !token.is_empty());
+    let token = tokens.next()?;
+    tokens.next().is_none().then(|| token.to_owned())
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ClaudeCredentialFile {
+    #[serde(rename = "oauthAccount")]
+    oauth_account: std::collections::BTreeMap<String, ClaudeOAuthAccount>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ClaudeOAuthAccount {
+    #[serde(rename = "accessToken")]
+    access_token: Option<String>,
 }
 
 fn codex_home() -> PathBuf {
@@ -928,8 +942,8 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. A direct Claude OAuth env token can be native only when it is the
-/// sole provider source; a sole default Claude or Codex OAuth file credential
-/// is also native.
+/// sole provider source; a Claude OAuth file is native only when its strict
+/// shape proves Go's default-account choice or a single token-bearing account.
 /// Other file/keychain sources and mixed credentials stay on Go. A workspace
 /// override alone supplies no `OpenCode` cookie or strategy, so it cannot
 /// start a fetch.
@@ -949,7 +963,14 @@ pub fn needs_go_fallback() -> bool {
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
-    let claude_file_token = claude_file_token();
+    let claude_file_path = home().join(".claude/.credentials.json");
+    let claude_file_token = claude_file_token_in(&claude_file_path);
+    if claude_file_token.is_none() && claude_file_path.exists() {
+        // Go accepts case-insensitive struct tags and duplicate-map merge
+        // semantics. If this strict candidate parser cannot prove equivalence,
+        // let Go interpret the existing file before any keychain probe.
+        return true;
+    }
     let codex_file = codex_file_token(&codex_home());
     if copilot_file_token().is_some()
         || kimi_store(&kimi_cli_home()).0.is_some()
@@ -984,9 +1005,9 @@ pub fn needs_go_fallback() -> bool {
 /// Keeps reports native only for one direct credential from a pinned set of
 /// providers, when every other provider source and local probe is absent.
 /// Secret references, other credential files, and provider-specific overrides
-/// stay on Go. A Claude OAuth file token or default Codex `auth.json` token
-/// joins the credential set and is native only when no other source is
-/// configured.
+/// stay on Go. A Go-equivalent Claude OAuth file token or default Codex
+/// `auth.json` token joins the credential set and is native only when no other
+/// source is configured. Unsupported existing Claude file shapes stay on Go.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,

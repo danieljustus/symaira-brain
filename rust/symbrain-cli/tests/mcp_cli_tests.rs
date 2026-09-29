@@ -491,6 +491,49 @@ fn claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_
 }
 
 #[test]
+fn noncanonical_or_ambiguous_claude_files_remain_on_go() {
+    let fixture: serde_json::Value = serde_json::from_str(include_str!(
+        "../../symbrain-usage/tests/fixtures/claude_file_token_oracle.json"
+    ))
+    .expect("Go Claude parser oracle");
+    for case in fixture["cases"].as_array().expect("oracle cases") {
+        let id = case["id"].as_str().expect("case id");
+        if matches!(
+            id,
+            "default-account-precedes-other-accounts"
+                | "single-nondefault-account-is-unambiguous"
+                | "duplicate-account-key-uses-last-token"
+        ) {
+            continue;
+        }
+        let root = TempDir::new().unwrap();
+        let credentials = root
+            .path()
+            .join("home")
+            .join(".claude")
+            .join(".credentials.json");
+        std::fs::create_dir_all(credentials.parent().unwrap()).unwrap();
+        std::fs::write(
+            &credentials,
+            case["contents"].as_str().expect("file contents"),
+        )
+        .unwrap();
+
+        // Invalid syntax returns before fetching or accessing credentials. An
+        // existing file whose Go interpretation is broader or nondeterministic
+        // must select Go before the native parser or any Keychain read.
+        let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        assert!(
+            stderr.contains("not ported yet and no Go fallback was found"),
+            "Claude file case {id} should remain on Go: {stderr}"
+        );
+    }
+}
+
+#[test]
 fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys() {
     let current_exe = std::env::current_exe().expect("current test executable path");
     let outer_data_dir = TempDir::new().unwrap();

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -36,6 +37,51 @@ type OracleAuth struct {
 	Configured bool   `json:"configured"`
 	Source     string `json:"source"`
 	Status     string `json:"status"`
+}
+
+// BuildClaudeFileTokenOracle reads a synthetic Claude credentials file with
+// the shipped parser. It isolates HOME and USERPROFILE and never constructs a
+// ClaudeProvider, so this parser oracle cannot consult the real keychain.
+func BuildClaudeFileTokenOracle(contents []byte) (string, error) {
+	home, err := os.MkdirTemp("", "symbrain-claude-file-oracle-home-")
+	if err != nil {
+		return "", fmt.Errorf("create isolated Claude oracle home: %w", err)
+	}
+	defer os.RemoveAll(home)
+
+	previous := make(map[string]struct {
+		value string
+		set   bool
+	}, 2)
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		value, set := os.LookupEnv(name)
+		previous[name] = struct {
+			value string
+			set   bool
+		}{value: value, set: set}
+	}
+	defer func() {
+		for name, old := range previous {
+			if old.set {
+				_ = os.Setenv(name, old.value)
+			} else {
+				_ = os.Unsetenv(name)
+			}
+		}
+	}()
+	for _, name := range []string{"HOME", "USERPROFILE"} {
+		if err := os.Setenv(name, home); err != nil {
+			return "", fmt.Errorf("set isolated Claude oracle %s: %w", name, err)
+		}
+	}
+	path := filepath.Join(home, ".claude", ".credentials.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return "", fmt.Errorf("create isolated Claude credential directory: %w", err)
+	}
+	if err := os.WriteFile(path, contents, 0o600); err != nil {
+		return "", fmt.Errorf("write synthetic Claude credential file: %w", err)
+	}
+	return readClaudeFileToken(), nil
 }
 
 type OracleRequest struct {
