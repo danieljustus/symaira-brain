@@ -1,5 +1,31 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated usage home overrides and canonical Nous JWT — 2026-09-29
+
+Candidate `49c1905b175b078b43c6533c445462dd1bf8058f` enables proven Codex,
+Kimi Code and Hermes credential-file shapes under explicit CODEX_HOME,
+KIMI_CODE_HOME and HERMES_HOME. Empty overrides follow Go's default paths.
+Canonical live Nous JWTs use Go's float64-to-int64 whole-second expiry behavior;
+expired, malformed, padded/noncanonical or ambiguous claims remain on Go.
+
+Actual Go cases include both orders of case-aliased and duplicate exp fields.
+A raw serde map would hide typed Go decode failures; the production Rust visitor
+now rejects duplicate/aliased expiry fields before native routing. Unrelated
+claims remain ignored. Real Go NewNousPortalProvider/BuildReport and Rust's
+production file-auth assembly compare success, 401, 429 and malformed responses.
+The real CLI covers all three overrides without reading Keychain or live providers.
+
+Independent clean-candidate Go1.26.7 usage package plus usage/OpenCode oracle
+checks pass on Darwin/arm64 and Linux/arm64. Rust usage tests pass 55+9+8 on
+Darwin and 55+8+8 on Linux; all 19 CLI tests pass on each, zero failures/ignored.
+Worker strict usage/CLI Clippy and workspace fmt pass. Receipts
+`home-jwt-receipt-49c1905b.json` in Brain/native-linux build roots retain source
+metadata and log hashes. The source-bound CLI help literal remains unchanged.
+
+USE-001 remains open for local provider routes and required native targets,
+including Windows HOME/USERPROFILE mismatch execution. No publication, installed
+cutover, Go removal, real credential access or live provider request occurred.
+
 ## Integrated remaining native usage routes — 2026-09-29
 
 Candidate `b9cf5f62b9b6949ee3379170272a6272f68f468a` integrates the preceding
