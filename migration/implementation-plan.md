@@ -1,5 +1,28 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Integrated usage file-routing guards — 2026-09-29
+
+Candidate `246cbc1be691f9060d3540054bfea81764464ff8` fixes an existing routing
+hole without enabling Nous files natively. Any possibly present default Hermes
+`auth.json` keeps Go, including malformed/unrecognized files, metadata errors
+and symlinks. A production-Go seven-case parser oracle proves that case-insensitive
+Nous field names can provide a token where the Rust best-effort parser sees none;
+missing/empty/malformed/wrong-typed/unrelated cases are also recorded. CLI checks
+prove present files stay on Go and an absent file preserves native routing.
+
+A Windows-only guard keeps the entire usage report on Go when HOME and USERPROFILE
+differ, replacing the narrower Copilot-only probe. Its real CLI regression is
+committed under cfg(windows), but was not executed on the available native hosts.
+This is an explicit remaining Windows acceptance gap.
+
+Independent clean-candidate Go1.26.7 package/oracle and Rust tests pass on
+Darwin/arm64 (46+9+8 usage) and Linux/arm64 (46+8+8), with all16 CLI MCP tests on
+each; zero failed/ignored. Receipts `usage-guards-receipt-246cbc1b.json` are retained
+in the existing Brain/native-linux build roots. USE-001 remains open for direct-env
+production-constructor evidence, remaining provider routes and native platforms.
+No live providers, real credentials, publication, installed cutover or Go removal.
+
+
 ## Integrated Copilot default-file evidence — 2026-09-29
 
 Candidate `4d4042c62184d28a337d0eb686673dedf592850d` adds a sole deterministic
