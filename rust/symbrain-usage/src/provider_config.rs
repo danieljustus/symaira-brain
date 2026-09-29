@@ -927,9 +927,10 @@ pub fn all_providers() -> Vec<Provider> {
 /// The checks here are prompt-free: environment values, credential files, the
 /// keychain *listing* (attributes only, never a secret value), and the process
 /// table. A direct Claude OAuth env token can be native only when it is the
-/// sole provider source; file/keychain sources and mixed credentials stay on
-/// Go. A workspace override alone supplies no `OpenCode` cookie or strategy,
-/// so it cannot start a fetch.
+/// sole provider source; a sole Claude OAuth file credential is also native.
+/// Other file/keychain sources and mixed credentials stay on Go. A workspace
+/// override alone supplies no `OpenCode` cookie or strategy, so it cannot
+/// start a fetch.
 #[must_use]
 pub fn needs_go_fallback() -> bool {
     let claude_admin_env = env_raw("ANTHROPIC_ADMIN_KEY");
@@ -946,8 +947,8 @@ pub fn needs_go_fallback() -> bool {
     let other_provider_env = OTHER_PROVIDER_ENV_VARS
         .iter()
         .any(|name| env_raw(name).is_some());
-    if claude_file_token().is_some()
-        || codex_file_token(&codex_home()).is_some()
+    let claude_file_token = claude_file_token();
+    if codex_file_token(&codex_home()).is_some()
         || copilot_file_token().is_some()
         || kimi_store(&kimi_cli_home()).0.is_some()
         || nous_file_token(&nous_auth_path()).is_some()
@@ -965,17 +966,23 @@ pub fn needs_go_fallback() -> bool {
         nous_env: nous_env.as_deref(),
         codex_env: codex_env.as_deref(),
         opencode_env: opencode_env.as_deref(),
+        claude_file: claude_file_token.as_deref(),
         opencode_workspace_override: opencode_workspace_override.as_deref(),
         other_provider_env,
         other_credential_source: false,
-        local_provider_present: claude_keychain_present() || antigravity_running(),
+        // A file token wins before Go reads Keychain, so an existing Claude
+        // Keychain item is irrelevant when that source is present. Avoid even
+        // listing Keychain attributes on the native file-only route.
+        local_provider_present: (claude_file_token.is_none() && claude_keychain_present())
+            || antigravity_running(),
     })
 }
 
 /// Keeps reports native only for one direct credential from a pinned set of
 /// providers, when every other provider source and local probe is absent.
-/// Secret references, credential files, and provider-specific overrides stay
-/// on Go.
+/// Secret references, non-Claude credential files, and provider-specific
+/// overrides stay on Go. A Claude OAuth file token joins the credential set
+/// and is native only when no other source is configured.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_admin_env: Option<&'a str>,
@@ -988,6 +995,7 @@ struct UsageFallbackSignals<'a> {
     nous_env: Option<&'a str>,
     codex_env: Option<&'a str>,
     opencode_env: Option<&'a str>,
+    claude_file: Option<&'a str>,
     opencode_workspace_override: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
@@ -1006,6 +1014,7 @@ fn needs_go_fallback_for(signals: UsageFallbackSignals<'_>) -> bool {
         signals.nous_env,
         signals.codex_env,
         signals.opencode_env,
+        signals.claude_file,
     ];
     if signals.other_provider_env
         || signals.other_credential_source
@@ -1060,12 +1069,31 @@ fn claude() -> Provider {
         oauth_value = Some(("keychain".into(), token));
         oauth_expires_at = expires_at;
     }
+    claude_from_resolved(
+        admin_value,
+        admin_error,
+        oauth_value,
+        oauth_error,
+        oauth_expires_at,
+    )
+}
+
+pub(crate) fn claude_from_resolved(
+    admin_value: Option<(String, String)>,
+    admin_error: Option<String>,
+    oauth_value: Option<(String, String)>,
+    oauth_error: Option<String>,
+    oauth_expires_at: Option<SystemTime>,
+) -> Provider {
     let mut credentials = Vec::new();
     if let Some((source, value)) = admin_value.clone() {
         credentials.push((source, value));
     }
-    if let Some((source, value)) = oauth_value.clone() {
-        credentials.push((source, value));
+    if let Some((_credential_source, value)) = oauth_value.clone() {
+        // Go's Claude OAuth strategy always reports `oauth` for the fetched
+        // snapshot, while AuthStatus separately retains env/file/keychain
+        // provenance. Keep those two source labels distinct.
+        credentials.push(("oauth".into(), value));
     }
     let mut provider = Provider::new(
         "claude",

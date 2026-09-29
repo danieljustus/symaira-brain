@@ -21,6 +21,8 @@ use provider_fetch::fetch_one;
 
 #[path = "provider_config.rs"]
 mod provider_config;
+#[cfg(test)]
+pub(crate) use provider_config::claude_from_resolved;
 pub use provider_config::{
     all_providers, is_secret_reference, is_vault_uri, needs_go_fallback, resolve_reference,
     resolve_reference_or_env, secretref_timeout, set_secretref_timeout,

@@ -233,6 +233,50 @@ fn only_one_direct_provider_environment_credential_uses_native_reporting() {
 }
 
 #[test]
+fn claude_file_credential_uses_native_reporting_only_when_it_is_the_sole_source() {
+    assert!(!needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        other_provider_env: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        other_credential_source: true,
+        ..UsageFallbackSignals::default()
+    }));
+    assert!(needs_go_fallback_for(UsageFallbackSignals {
+        claude_file: Some("synthetic-claude-file-fixture"),
+        local_provider_present: true,
+        ..UsageFallbackSignals::default()
+    }));
+    for reference in [
+        "symvault://claude/oauth-token",
+        "vault://claude/oauth-token",
+        "env://ANTHROPIC_OAUTH_TOKEN",
+        "keychain://Claude Code-credentials/account",
+    ] {
+        assert!(needs_go_fallback_for(UsageFallbackSignals {
+            claude_file: Some(reference),
+            ..UsageFallbackSignals::default()
+        }));
+    }
+}
+
+#[test]
 fn secret_references_overrides_and_multiple_credentials_keep_go_fallback() {
     assert!(needs_go_fallback_for(UsageFallbackSignals {
         claude_admin_env: Some("symvault://claude/admin-key"),

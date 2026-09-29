@@ -22,6 +22,7 @@ import (
 const copilotOracleToken = "oracle-only-invalid-copilot"
 const claudeAdminOracleToken = "oracle-only-invalid-claude-admin"
 const claudeOAuthOracleToken = "oracle-only-invalid-claude-oauth"
+const claudeOAuthFileOracleToken = "oracle-only-invalid-claude-oauth-file"
 const codexOracleToken = "oracle-only-invalid-codex"
 const cursorOracleToken = "oracle-only-invalid-cursor"
 const kimiOracleToken = "oracle-only-invalid-kimi"
@@ -271,17 +272,26 @@ func buildClaudeAdminAuthenticatedReport(body []byte) (usage.Report, error) {
 }
 
 type claudeOAuthReportFixture struct {
-	Success usage.Report `json:"success"`
-	Errors  []struct {
+	Success     usage.Report `json:"success"`
+	FileSuccess usage.Report `json:"file_success"`
+	Errors      []struct {
 		Status int          `json:"status"`
 		Report usage.Report `json:"report"`
 	} `json:"errors"`
+	FileErrors []struct {
+		Status int          `json:"status"`
+		Report usage.Report `json:"report"`
+	} `json:"file_errors"`
 }
 
 func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture, error) {
 	fixture := claudeOAuthReportFixture{}
 	var err error
 	fixture.Success, err = buildClaudeOAuthReport(200, body)
+	if err != nil {
+		return claudeOAuthReportFixture{}, err
+	}
+	fixture.FileSuccess, err = buildClaudeOAuthFileReport(200, body)
 	if err != nil {
 		return claudeOAuthReportFixture{}, err
 	}
@@ -301,11 +311,27 @@ func buildClaudeOAuthAuthenticatedReport(body []byte) (claudeOAuthReportFixture,
 			Status int          `json:"status"`
 			Report usage.Report `json:"report"`
 		}{Status: response.status, Report: report})
+		fileReport, fileErr := buildClaudeOAuthFileReport(response.status, response.body)
+		if fileErr != nil {
+			return claudeOAuthReportFixture{}, fileErr
+		}
+		fixture.FileErrors = append(fixture.FileErrors, struct {
+			Status int          `json:"status"`
+			Report usage.Report `json:"report"`
+		}{Status: response.status, Report: fileReport})
 	}
 	return fixture, nil
 }
 
 func buildClaudeOAuthReport(status int, body []byte) (report usage.Report, retErr error) {
+	return buildClaudeOAuthReportFrom(status, body, false)
+}
+
+func buildClaudeOAuthFileReport(status int, body []byte) (report usage.Report, retErr error) {
+	return buildClaudeOAuthReportFrom(status, body, true)
+}
+
+func buildClaudeOAuthReportFrom(status int, body []byte, fileCredential bool) (report usage.Report, retErr error) {
 	credentialEnv := []string{
 		"HOME", "USERPROFILE", "ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN",
 		"CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME", "CODEX_ACCESS_TOKEN",
@@ -359,13 +385,34 @@ func buildClaudeOAuthReport(status int, body []byte) (report usage.Report, retEr
 	if err := os.Setenv("USERPROFILE", home); err != nil {
 		return usage.Report{}, fmt.Errorf("set isolated Claude OAuth oracle profile: %w", err)
 	}
-	if err := os.Setenv("ANTHROPIC_OAUTH_TOKEN", claudeOAuthOracleToken); err != nil {
-		return usage.Report{}, fmt.Errorf("set synthetic Claude OAuth oracle token: %w", err)
+	token := claudeOAuthOracleToken
+	source := "env"
+	if fileCredential {
+		token = claudeOAuthFileOracleToken
+		source = "file"
+	}
+	fileToken := "oracle-only-invalid-claude-oauth-file-shadowed-by-env"
+	if fileCredential {
+		fileToken = token
+	}
+	credentialsPath := filepath.Join(home, ".claude", ".credentials.json")
+	credentials := fmt.Sprintf(`{"oauthAccount":{"work":{"accessToken":"%s"},"default":{"accessToken":"%s"}}}`,
+		"oracle-only-invalid-claude-oauth-work", fileToken)
+	if err := os.MkdirAll(filepath.Dir(credentialsPath), 0o700); err != nil {
+		return usage.Report{}, fmt.Errorf("create isolated Claude credential directory: %w", err)
+	}
+	if err := os.WriteFile(credentialsPath, []byte(credentials), 0o600); err != nil {
+		return usage.Report{}, fmt.Errorf("write synthetic Claude credential file: %w", err)
+	}
+	if !fileCredential {
+		if err := os.Setenv("ANTHROPIC_OAUTH_TOKEN", token); err != nil {
+			return usage.Report{}, fmt.Errorf("set synthetic Claude OAuth oracle token: %w", err)
+		}
 	}
 	transport := &claudeOAuthOracleTransport{status: status, body: body}
 	provider := usage.NewClaudeProvider(&http.Client{Transport: transport})
-	if !provider.IsConfigured() || provider.AuthStatus().Source != "env" {
-		return usage.Report{}, fmt.Errorf("Claude OAuth oracle requires only its direct synthetic environment credential")
+	if !provider.IsConfigured() || provider.AuthStatus().Source != source {
+		return usage.Report{}, fmt.Errorf("Claude OAuth oracle source is %q, want %q", provider.AuthStatus().Source, source)
 	}
 	report = usage.BuildReport(context.Background(), []usage.Provider{provider})
 	if len(report.Providers) != 1 || len(transport.requests) != 1 {
@@ -373,7 +420,7 @@ func buildClaudeOAuthReport(status int, body []byte) (report usage.Report, retEr
 	}
 	request := transport.requests[0]
 	if request.Method != http.MethodGet || request.URL.String() != "https://api.anthropic.com/api/oauth/usage" ||
-		request.Header.Get("Authorization") != "Bearer "+claudeOAuthOracleToken ||
+		request.Header.Get("Authorization") != "Bearer "+token ||
 		request.Header.Get("anthropic-beta") != "oauth-2025-04-20" {
 		return usage.Report{}, fmt.Errorf("Claude OAuth oracle did not issue the expected authenticated usage request")
 	}

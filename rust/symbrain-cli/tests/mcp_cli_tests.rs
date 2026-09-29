@@ -448,6 +448,49 @@ fn direct_claude_oauth_routes_usage_to_native_parser_without_provider_request() 
 }
 
 #[test]
+fn claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_request() {
+    let root = TempDir::new().unwrap();
+    let credentials = root
+        .path()
+        .join("home")
+        .join(".claude")
+        .join(".credentials.json");
+    std::fs::create_dir_all(credentials.parent().unwrap()).unwrap();
+    std::fs::write(
+        &credentials,
+        br#"{"oauthAccount":{"default":{"accessToken":"synthetic-claude-file-fixture"}}}"#,
+    )
+    .unwrap();
+
+    // The valid file token wins before Claude's Keychain fallback. The invalid
+    // flag is handled before any report fetch, so this proves file-source route
+    // selection without reading Keychain secrets or contacting Anthropic.
+    let output = command(&root, &["usage", "--not-a-usage-flag"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2), "stderr: {:?}", output.stderr);
+    let stderr = String::from_utf8(output.stderr).unwrap();
+    assert!(
+        stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
+        "native usage parser did not handle the request: {stderr}"
+    );
+    assert!(
+        !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
+        "Claude file OAuth unexpectedly selected Go fallback: {stderr}"
+    );
+
+    let mixed = command(&root, &["usage", "--not-a-usage-flag"])
+        .env("ANTHROPIC_OAUTH_TOKEN", "synthetic-env-shadow-fixture")
+        .output()
+        .unwrap();
+    let mixed_stderr = String::from_utf8(mixed.stderr).unwrap();
+    assert!(
+        mixed_stderr.contains("not ported yet and no Go fallback was found"),
+        "file plus direct environment credential must remain on Go: {mixed_stderr}"
+    );
+}
+
+#[test]
 fn command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys() {
     let current_exe = std::env::current_exe().expect("current test executable path");
     let outer_data_dir = TempDir::new().unwrap();

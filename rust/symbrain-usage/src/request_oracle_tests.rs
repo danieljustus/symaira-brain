@@ -8,6 +8,7 @@
 
 use super::super::{hostname, platform_label, request_for};
 use crate::providers::Provider;
+use crate::providers::claude_from_resolved;
 use crate::transport::{Cancellation, FixtureTransport, Response};
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -23,6 +24,7 @@ const CLAUDE_OAUTH: &str = "dump-claude-oauth";
 const CODEX_OAUTH: &str = "dump-codex-oauth";
 const COPILOT_OAUTH: &str = "dump-copilot-oauth";
 const REPORT_ENV_CREDENTIAL: &str = "synthetic-direct-env-credential";
+const REPORT_FILE_CREDENTIAL: &str = "oracle-only-invalid-claude-oauth-file";
 const CURSOR_COOKIE: &str = "dump-cursor-cookie";
 const KIMI_CLI: &str = "dump-kimi-api-key";
 const KIMI_WEB: &str = "dump-kimi-web-token";
@@ -169,20 +171,18 @@ fn authenticated_claude_admin_report(response: Response) -> (crate::Report, Fixt
     )
 }
 
-fn authenticated_claude_oauth_report(response: Response) -> (crate::Report, FixtureTransport) {
-    let oracle: Value =
-        serde_json::from_str(CLAUDE_OAUTH_REPORT_ORACLE).expect("Go Claude OAuth report oracle");
-    let row = &oracle["success"]["providers"][0];
-    let mut provider = Provider::fixture(
-        row["id"].as_str().expect("Claude provider id"),
-        row["display_name"].as_str().expect("Claude display name"),
+fn authenticated_claude_oauth_report(
+    response: Response,
+    source: &str,
+    credential: &str,
+) -> (crate::Report, FixtureTransport) {
+    let provider = claude_from_resolved(
+        None,
+        None,
+        Some((source.into(), credential.into())),
+        None,
+        None,
     );
-    provider.configured = row["configured"].as_bool().expect("configured state");
-    provider.auth_status =
-        serde_json::from_value(row["auth_status"].clone()).expect("Go Claude OAuth auth status");
-    provider.fixture = false;
-    provider.credentials = vec![("oauth".into(), REPORT_ENV_CREDENTIAL.into())];
-    provider.credential = Some(REPORT_ENV_CREDENTIAL.into());
     let transport = FixtureTransport::new([("claude".into(), response)].into());
     let report =
         crate::Service::with_transport(vec![provider], Arc::new(transport.clone())).report();
@@ -674,19 +674,54 @@ fn authenticated_claude_admin_report_matches_go_success_and_failure_oracles() {
 fn authenticated_claude_oauth_report_matches_go_build_report_oracle() {
     let oracle: Value =
         serde_json::from_str(CLAUDE_OAUTH_REPORT_ORACLE).expect("Go Claude OAuth report oracle");
-    let success = &oracle["success"];
-    let (report, transport) = authenticated_claude_oauth_report(Response {
-        status: 200,
-        body: include_bytes!("../../../internal/usage/testdata/claude-oauth-usage.json").to_vec(),
-        headers: BTreeMap::new(),
-    });
+    assert_claude_oauth_report_matches_scenario(
+        &oracle,
+        "success",
+        "env",
+        REPORT_ENV_CREDENTIAL,
+        "errors",
+    );
+}
+
+#[test]
+fn authenticated_claude_oauth_file_report_matches_go_build_report_oracle() {
+    let oracle: Value =
+        serde_json::from_str(CLAUDE_OAUTH_REPORT_ORACLE).expect("Go Claude OAuth report oracle");
+    assert_claude_oauth_report_matches_scenario(
+        &oracle,
+        "file_success",
+        "file",
+        REPORT_FILE_CREDENTIAL,
+        "file_errors",
+    );
+}
+
+fn assert_claude_oauth_report_matches_scenario(
+    oracle: &Value,
+    scenario: &str,
+    source: &str,
+    credential: &str,
+    errors_key: &str,
+) {
+    let success = &oracle[scenario];
+    let (report, transport) = authenticated_claude_oauth_report(
+        Response {
+            status: 200,
+            body: include_bytes!("../../../internal/usage/testdata/claude-oauth-usage.json")
+                .to_vec(),
+            headers: BTreeMap::new(),
+        },
+        source,
+        credential,
+    );
     let requests = transport.requests();
     assert_eq!(requests.len(), 1);
     assert_eq!(requests[0].method, "GET");
     assert_eq!(requests[0].url, "https://api.anthropic.com/api/oauth/usage");
+    let expected_authorization = format!("Bearer {credential}");
     assert_eq!(
         requests[0].headers.get("Authorization").map(String::as_str),
-        Some("Bearer synthetic-direct-env-credential")
+        Some(expected_authorization.as_str())
     );
     assert_eq!(
         requests[0]
@@ -701,7 +736,9 @@ fn authenticated_claude_oauth_report_matches_go_build_report_oracle() {
         success["providers"][0]["snapshot"]["fetched_at"].clone();
     assert_eq!(actual, *success);
 
-    let errors = oracle["errors"].as_array().expect("Go report error cases");
+    let errors = oracle[errors_key]
+        .as_array()
+        .expect("Go report error cases");
     assert_eq!(errors.len(), 3);
     for (index, (status, body, retry_after)) in [
         (401, br#"{"error":"nope"}"#.as_slice(), None),
@@ -715,11 +752,15 @@ fn authenticated_claude_oauth_report_matches_go_build_report_oracle() {
         let headers = retry_after.map_or_else(BTreeMap::new, |value| {
             [("Retry-After".into(), value.into())].into_iter().collect()
         });
-        let (report, transport) = authenticated_claude_oauth_report(Response {
-            status,
-            body: body.to_vec(),
-            headers,
-        });
+        let (report, transport) = authenticated_claude_oauth_report(
+            Response {
+                status,
+                body: body.to_vec(),
+                headers,
+            },
+            source,
+            credential,
+        );
         assert_eq!(transport.requests().len(), 1);
         assert_eq!(
             serde_json::to_value(report).expect("Rust Claude OAuth error report"),
