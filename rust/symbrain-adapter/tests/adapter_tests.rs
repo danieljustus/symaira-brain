@@ -376,8 +376,6 @@ fn atomic_write_preserves_special_mode_and_extended_attribute() {
     let temp = tempfile::tempdir().expect("temporary project");
     let target = temp.path().join("metadata.md");
     std::fs::write(&target, b"old").expect("existing target");
-    std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o4751))
-        .expect("special mode");
     let name = if cfg!(target_os = "macos") {
         OsStr::from_bytes(b"com.apple.metadata:_kMDItemUserTags")
     } else {
@@ -387,6 +385,13 @@ fn atomic_write_preserves_special_mode_and_extended_attribute() {
         eprintln!("skipping xattr preservation test: {error}");
         return;
     }
+    std::fs::set_permissions(&target, std::fs::Permissions::from_mode(0o4751))
+        .expect("special mode after xattr");
+    assert_eq!(
+        std::fs::metadata(&target).expect("source metadata").mode() & 0o7777,
+        0o4751,
+        "test filesystem must retain the source mode before replacement"
+    );
 
     symbrain_adapter::write_atomic(temp.path(), Path::new("metadata.md"), b"new")
         .expect("atomic metadata replacement");
