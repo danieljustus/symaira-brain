@@ -63,6 +63,9 @@ func Validate(bundle *Bundle) []Issue {
 		if res.Executable {
 			issues = append(issues, Issue{Code: "resource_executable", Severity: "warning", Message: "resource file is executable; install strips the executable bit unless --allow-executable (or the manifest setting) is set", Path: res.Path})
 		}
+		if isGeneratedArtifact(res.Path) {
+			issues = append(issues, Issue{Code: "resource_generated_artifact", Severity: "warning", Message: "resource looks like a generated cache or build artifact and would be distributed with the skill; remove it from the source", Path: res.Path})
+		}
 		if res.Size > MaxResourceSize {
 			issues = append(issues, Issue{Code: "resource_too_large", Severity: "error", Message: fmt.Sprintf("resource exceeds maximum size of %d bytes (actual: %d)", MaxResourceSize, res.Size), Path: res.Path})
 		}
@@ -249,4 +252,24 @@ func safeRelativeFile(bundle *Bundle, rel string) error {
 		return fmt.Errorf("overlay reference %q: %w", rel, err)
 	}
 	return nil
+}
+
+// isGeneratedArtifact reports resource paths that are generated caches or
+// test/coverage output rather than authored skill content (#463).
+func isGeneratedArtifact(path string) bool {
+	parts := strings.Split(filepath.ToSlash(path), "/")
+	for _, part := range parts[:len(parts)-1] {
+		switch part {
+		case "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache":
+			return true
+		}
+	}
+	base := parts[len(parts)-1]
+	switch {
+	case base == ".DS_Store", base == ".coverage", base == "coverage.out":
+		return true
+	case strings.EqualFold(filepath.Ext(base), ".pyc"), strings.EqualFold(filepath.Ext(base), ".pyo"):
+		return true
+	}
+	return false
 }

@@ -162,6 +162,14 @@ pub fn validate_with_targets(bundle: &Bundle, known_targets: &[String]) -> Vec<I
         if resource.executable {
             issues.push(normalize_issue("resource_executable", "warning", "resource file is executable; install strips the executable bit unless --allow-executable (or the manifest setting) is set", &resource.path));
         }
+        if is_generated_artifact(&resource.path) {
+            issues.push(normalize_issue(
+                "resource_generated_artifact",
+                "warning",
+                "resource looks like a generated cache or build artifact and would be distributed with the skill; remove it from the source",
+                &resource.path,
+            ));
+        }
         if resource.size > MAX_RESOURCE_SIZE {
             issues.push(normalize_issue(
                 "resource_too_large",
@@ -314,4 +322,21 @@ fn safe_relative_file(bundle: &Bundle, reference: &str) -> Result<(), String> {
         }
         Err(error) => Err(error.to_string()),
     }
+}
+
+/// Reports resource paths that are generated caches or test/coverage output
+/// rather than authored skill content (#463).
+fn is_generated_artifact(path: &str) -> bool {
+    let path = path.replace('\\', "/");
+    let mut parts: Vec<&str> = path.split('/').collect();
+    let base = parts.pop().unwrap_or_default();
+    parts.iter().any(|part| {
+        matches!(
+            *part,
+            "__pycache__" | ".pytest_cache" | ".mypy_cache" | ".ruff_cache"
+        )
+    }) || matches!(base, ".DS_Store" | ".coverage" | "coverage.out")
+        || std::path::Path::new(base)
+            .extension()
+            .is_some_and(|ext| ext.eq_ignore_ascii_case("pyc") || ext.eq_ignore_ascii_case("pyo"))
 }
