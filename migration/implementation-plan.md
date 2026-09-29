@@ -1,5 +1,23 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Evidence correction: usage test host isolation — 2026-09-29
+
+The whole-gate review found that the existing CLI test
+usage_subprocess_lists_and_calls_native_tool_without_go_fallback can reach
+the absolute macOS security executable through Claude credential discovery.
+A private HOME and empty PATH do not isolate that command. Earlier eager
+Gateway construction could also discover credentials before an injected
+fixture Service replaced it. Consequently, earlier assertions below that the
+complete CLI/Gateway suites did not access host Keychain state are unsupported.
+The synthetic parser/report tests remain separate from this discovery path.
+
+Historical execution logs are preserved. Darwin receipts now carry a later
+isolation-review annotation; passing suite counts do not establish credential
+isolation. A safe synthetic configuration that blocks both Keychain and live
+provider requests is required before rerunning the integrated whole gate.
+No whole-ledger or host-isolation completion is claimed.
+
+
 ## Integrated lazy per-call usage discovery — 2026-09-29
 
 Candidate `7a5cd70f156e60a6c00a2f8a23f91e87d7239d9b` constructs the production
