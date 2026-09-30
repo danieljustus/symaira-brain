@@ -244,6 +244,7 @@ func TestClientAutostartSuccessAfterRetries(t *testing.T) {
 	socketPath := filepath.Join(dir, "autostart-ok.sock")
 
 	var started atomic.Bool
+	listenResult := make(chan error, 1)
 	client := NewClient(ClientOptions{
 		SocketPath:     socketPath,
 		Session:        "ok-sess",
@@ -255,9 +256,11 @@ func TestClientAutostartSuccessAfterRetries(t *testing.T) {
 				time.Sleep(30 * time.Millisecond)
 				listener, err := net.Listen("unix", socketPath)
 				if err != nil {
+					listenResult <- err
 					return
 				}
 				t.Cleanup(func() { _ = listener.Close() })
+				listenResult <- nil
 				for {
 					conn, err := listener.Accept()
 					if err != nil {
@@ -274,6 +277,14 @@ func TestClientAutostartSuccessAfterRetries(t *testing.T) {
 	})
 
 	resp, err := client.Request(context.Background(), Frame{Cmd: "ping"})
+	select {
+	case listenErr := <-listenResult:
+		if listenErr != nil {
+			t.Fatalf("listen for autostart fixture (%d-byte socket path): %v", len(socketPath), listenErr)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("autostart fixture did not report its listener result")
+	}
 	if err != nil {
 		t.Fatalf("expected successful request after autostart retry, got: %v", err)
 	}
