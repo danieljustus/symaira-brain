@@ -430,8 +430,10 @@ class TestInitOracle(unittest.TestCase):
                     "--rust-binary", str(dummy_rust),
                     "--output", str(dummy_out),
                     "--commit", PINNED_COMMIT_SHA,
+                    "--work-dir", str(Path(td) / "isolated-oracle"),
                 ])
                 self.assertEqual(parsed.commit, PINNED_COMMIT_SHA)
+                self.assertEqual(parsed.work_dir, Path(td) / "isolated-oracle")
 
                 # Wrong commit rejected by parser
                 with self.assertRaises(SystemExit):
@@ -451,6 +453,22 @@ class TestInitOracle(unittest.TestCase):
 
 
 class BuildFailureEvidence(unittest.TestCase):
+    def test_build_reuses_explicit_go_cache_and_gopath(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            binary = root / "bin/oracle"
+            def run(command, **kwargs):
+                if command == ["go", "version"]:
+                    return subprocess.CompletedProcess(command, 0, stdout="go version go1.26.7 test/test\n")
+                self.assertEqual(kwargs["env"]["GOCACHE"], str(root / "shared-cache"))
+                self.assertEqual(kwargs["env"]["GOPATH"], str(root / "shared-gopath"))
+                binary.write_bytes(b"synthetic compiled binary")
+                return subprocess.CompletedProcess(command, 0, stdout=b"", stderr=b"")
+            with patch.dict(os.environ, {"GOCACHE": str(root / "shared-cache"), "GOPATH": str(root / "shared-gopath")}), patch("compare.subprocess.run", side_effect=run):
+                build_go_reference_binary(root, binary, root / "fallback-cache")
+            self.assertFalse((root / "fallback-cache/gocache").exists())
+            self.assertFalse((root / "fallback-cache/gopath").exists())
+
     @unittest.skipUnless(os.name == "nt", "native Windows process-tree contract")
     def test_windows_timeout_reaps_cmd_python_descendant(self):
         import csv

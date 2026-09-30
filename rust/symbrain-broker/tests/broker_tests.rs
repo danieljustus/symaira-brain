@@ -6,7 +6,9 @@ use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use symbrain_broker::{BrokerError, Client, Config, ManagedServer, Options, State};
+use symbrain_broker::{BrokerError, Config, ManagedServer, State};
+#[cfg(unix)]
+use symbrain_broker::{Client, Options};
 
 #[derive(Deserialize)]
 struct Oracle {
@@ -205,6 +207,18 @@ fn protocol_mismatch_is_terminal_degradation() {
     assert_eq!(server.state().as_str(), oracle().mismatch_state);
     assert!(server.last_error().is_some());
     server.shutdown();
+}
+
+#[test]
+fn published_compatible_protocol_versions_initialize() {
+    for version in ["2025-03-26", "2025-06-18"] {
+        let server = ManagedServer::new(cfg_with_env(&[("FAKEMCP_PROTOCOL_VERSION", version)]));
+        let tools = server
+            .list_tools()
+            .expect("compatible child must initialize");
+        assert!(!tools.is_empty(), "{version} returned no tools");
+        server.shutdown();
+    }
 }
 
 #[test]

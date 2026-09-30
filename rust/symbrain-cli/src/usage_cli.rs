@@ -5,29 +5,28 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credentials are read-only and their\nvalues are never included in output, errors, or audit records.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; Claude, Codex, and Copilot accept narrowly proven\ndefault credential-file shapes read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
-/// The native port reproduces the per-provider credential state machine
-/// (sources, missing/expired/available texts, source tags) and is the reference
-/// for reports with no stored credential at all — those reach no endpoint and
-/// are pinned byte-for-byte by the parity suite. A report that *does* find a
-/// credential fetches from a live endpoint, and what remains unpinned there is
-/// narrower than it used to be:
-///
-/// - the request layer is frozen by `scripts/usage-request-oracle` and checked
-///   by the port's request oracle test (method, URL, headers, body, plus the
-///   provider-level error text for canned statuses), so drift on that layer
-///   fails a unit test;
-/// - the `OpenCode` workspace-discovery fallbacks (the shipped strategy retries
-///   the lookup with a POST and detects a signed-out body; the port performs a
-///   single GET) and the successful parse of a *live* response body are still
-///   open (issue #620).
-///
-/// Until those are closed, reports that resolve a credential stay with the
-/// shipped implementation.
-pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+/// The native port reproduces each proven provider's credential state machine,
+/// request, snapshot, and error behavior. Several supported providers can run
+/// together. Native sources include direct credentials; the canonical default
+/// Copilot, Kimi CLI, Nous, Codex, and Claude files; Moonshot's supported `ai`
+/// and `cn` regions; constrained public HTTPS base overrides; and a canonical
+/// `OpenCode` workspace id. File sources with case aliases, duplicate or
+/// malformed fields, ambiguous provider selection, unsupported metadata,
+/// secret references, non-ASCII Kimi device ids, or other unproven shapes stay
+/// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
+/// eligibility checks as their default paths; differing Windows home roots,
+/// unsupported URL/workspace forms and Claude Keychain-only credentials also
+/// keep the report on Go. Antigravity's local probe runs natively. Source-bound Go
+/// oracles use synthetic credentials and canned transport; the user-invoked
+/// live report remains unchanged.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
+        return false;
+    }
     symbrain_usage::needs_go_fallback()
 }
 
@@ -139,6 +138,21 @@ fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn help_is_native_without_resolving_credentials() {
+        for flag in ["-h", "--help"] {
+            let args = [OsString::from(flag)];
+            assert!(!requires_go_fallback(&args));
+            let (mut stdout, mut stderr) = (Vec::new(), Vec::new());
+            assert_eq!(
+                run(&args, &mut stdout, &mut stderr, OutputFormat::Table),
+                exit::USAGE
+            );
+            assert!(stdout.is_empty());
+            assert_eq!(stderr, HELP.as_bytes());
+        }
+    }
 
     #[test]
     fn table_matches_go_shape() {

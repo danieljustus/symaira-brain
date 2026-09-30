@@ -8,7 +8,7 @@
 >
 > **Date**: 2026-08-27
 > **Scope**: `internal/gateway`, `internal/broker`, `internal/profile`, `internal/policy`, `guard/`; nachgelagert `symaira-browse/internal/policy/symguard.go`
-> **Verwandt**: [`docs/ARCHITEKTUR.md`](../ARCHITEKTUR.md) §1 und §4, `../../docs/repo-konsolidierung.md` §12.7, [`guard/README.md`](../../guard/README.md)
+> **Verwandt**: `docs/ARCHITEKTUR.md` §1 und §4 (historische Referenz, nicht im Repository enthalten), `../../docs/repo-konsolidierung.md` §12.7, [`guard/README.md`](../../guard/README.md)
 
 ## Context
 

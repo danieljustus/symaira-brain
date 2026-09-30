@@ -18,11 +18,18 @@ const MaxConcurrentProviders = 4
 
 // AllProviders returns every registered provider in stable contract order.
 func AllProviders(client *http.Client) []Provider {
+	return allProviders(client, readClaudeKeychainCredential, shellProcessProbe{})
+}
+
+// allProviders is the production registry with the platform probes injected
+// so report oracles can pin a machine-independent state without consulting a
+// developer keychain or process table.
+func allProviders(client *http.Client, readClaudeKeychain func() (string, *time.Time), antigravityProbe antigravityProcessProbe) []Provider {
 	if client == nil {
 		client = newProviderHTTPClient()
 	}
 	return []Provider{
-		NewClaudeProvider(client),
+		newClaudeProvider(client, readClaudeKeychain),
 		NewCodexProvider(client),
 		NewCopilotProvider(client),
 		NewCursorProvider(client),
@@ -31,7 +38,7 @@ func AllProviders(client *http.Client) []Provider {
 		NewNousPortalProvider(client),
 		NewOpenCodeProvider(client),
 		NewOpenRouterProvider(client),
-		NewAntigravityProvider(),
+		newAntigravityProvider(antigravityProbe, client),
 	}
 }
 

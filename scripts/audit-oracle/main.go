@@ -151,6 +151,11 @@ func chainedTailFixture() []audit.Entry {
 	if err != nil {
 		panic(err)
 	}
+	// The production logger stamps wall-clock time; blank it for a stable fixture.
+	for i := range entries {
+		entries[i].Timestamp = ""
+		entries[i].SessionID = ""
+	}
 	return entries
 }
 
@@ -171,6 +176,10 @@ func generate() suite {
 			loggerRedaction("vault", "vault", "get_entry", `{"password":"secret"}`, true),
 			loggerRedaction("keys", "memory", "memory_search", `{"query":"term"}`, false),
 			loggerRedaction("verbose", "memory", "memory_set", `{"content":"private"}`, true),
+			loggerRedaction("number-integral", "memory", "memory_set", `{"count":1.0}`, true),
+			loggerRedaction("number-large", "memory", "memory_set", `{"count":1e20}`, true),
+			loggerRedaction("number-rounded", "memory", "memory_set", `{"count":9007199254740993}`, true),
+			loggerRedaction("number-nested", "memory", "memory_set", `{"count":[1.0,2]}`, true),
 		},
 		Tail:               tailFixture(),
 		ChainedTailEntries: chainedTailFixture(),

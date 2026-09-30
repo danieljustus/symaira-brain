@@ -68,7 +68,7 @@ fn skill_target_harness_syncs_natively_without_a_go_binary() {
     // handles it, and with an absent library it reports exactly what Go's
     // skillsrunner does for that case.
     let root = TempDir::new().unwrap();
-    let output = run(&root, &["sync", "claude", "--dry-run", "--json"]);
+    let output = run(&root, &["sync", "--dry-run", "--", "claude", "--json"]);
     assert!(
         output.status.success(),
         "native sync must succeed, stderr: {:?}",
@@ -113,4 +113,28 @@ fn project_override_syncs_natively_without_a_go_binary() {
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(value["skills"][0]["target"], "agents");
     assert_eq!(value["skills"][0]["status"], "skipped");
+}
+
+#[test]
+fn instruction_target_error_fails_sync_after_reporting_all_statuses() {
+    // #492: an instruction target error must fail the command, not only skills.
+    let root = TempDir::new().unwrap();
+    let source_dir = root.path().join("config/symbrain");
+    std::fs::create_dir_all(&source_dir).unwrap();
+    std::fs::write(source_dir.join("instructions.md"), b"global\n").unwrap();
+    // A directory where AGENTS.md should be makes the atomic write fail.
+    std::fs::create_dir_all(root.path().join("project/AGENTS.md")).unwrap();
+
+    let output = run(&root, &["sync", "agents", "--json"]);
+    assert_eq!(output.status.code(), Some(1), "stderr: {:?}", output.stderr);
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(value["targets"][0]["name"], "agents");
+    assert_eq!(value["targets"][0]["status"], "error");
+    assert_eq!(value["skills"][0]["status"], "skipped");
+
+    let output = run(&root, &["sync", "agents"]);
+    assert_eq!(output.status.code(), Some(1));
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(text.starts_with("Instruction targets:\n  agents:      error ("));
+    assert!(text.contains("\nSkills:\n  agents:"));
 }

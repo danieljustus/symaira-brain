@@ -23,9 +23,6 @@ pub(super) fn copy(parent: &Dir, name: &Path, destination: &File) -> io::Result<
         ));
     }
 
-    // fchmod preserves the complete Unix mode word, including set-id and
-    // sticky bits. The source is opened read-only and is never chmod'ed.
-    fs::fchmod(destination, (stat.st_mode & 0o7777).into()).map_err(io::Error::from)?;
     for name in xattr_names(&source)? {
         #[cfg(target_os = "macos")]
         if name == b"com.apple.provenance" {
@@ -42,6 +39,10 @@ pub(super) fn copy(parent: &Dir, name: &Path, destination: &File) -> io::Result<
         )
         .map_err(io::Error::from)?;
     }
+    // macOS may clear set-id bits when an extended attribute is changed, so
+    // apply the complete mode word only after copying xattrs. The source is
+    // opened read-only and is never chmod'ed.
+    fs::fchmod(destination, (stat.st_mode & 0o7777).into()).map_err(io::Error::from)?;
     Ok(())
 }
 

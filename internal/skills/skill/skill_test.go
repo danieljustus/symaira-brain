@@ -355,3 +355,39 @@ func writeFile(t *testing.T, path, content string) {
 		t.Fatal(err)
 	}
 }
+
+// TestValidateGeneratedArtifacts pins #463: generated caches are reported with
+// their exact path, and a clean skill carries no such diagnostic.
+func TestValidateGeneratedArtifacts(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "cache-skill")
+	writeFile(t, filepath.Join(dir, "SKILL.md"), "---\nname: cache-skill\ndescription: test\n---\nBody\n")
+	writeFile(t, filepath.Join(dir, "scripts", "example.py"), "print('hi')\n")
+
+	clean, err := LoadBundle(dir)
+	if err != nil {
+		t.Fatalf("LoadBundle: %v", err)
+	}
+	if issue := issueByCode(Validate(clean), "resource_generated_artifact"); issue != nil {
+		t.Fatalf("clean skill reported %#v", issue)
+	}
+
+	writeFile(t, filepath.Join(dir, "scripts", "__pycache__", "example.cpython-314.pyc"), "\x00bytecode")
+	contaminated, err := LoadBundle(dir)
+	if err != nil {
+		t.Fatalf("LoadBundle: %v", err)
+	}
+	issue := issueByCode(Validate(contaminated), "resource_generated_artifact")
+	if issue == nil || issue.Severity != "warning" || issue.Path != "scripts/__pycache__/example.cpython-314.pyc" {
+		t.Fatalf("generated artifact issue = %#v", issue)
+	}
+	for _, path := range []string{".DS_Store", "a/.pytest_cache/v", "x.pyo", ".coverage"} {
+		if !isGeneratedArtifact(path) {
+			t.Errorf("%s should be a generated artifact", path)
+		}
+	}
+	for _, path := range []string{"scripts/example.py", "pycache.md", "docs/coverage.md"} {
+		if isGeneratedArtifact(path) {
+			t.Errorf("%s should not be a generated artifact", path)
+		}
+	}
+}

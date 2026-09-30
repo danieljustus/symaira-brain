@@ -185,6 +185,38 @@ func TestCodexAuthStoreIgnoresMissingFile(t *testing.T) {
 	}
 }
 
+func TestCodexProviderUsesCODEXHomeOverride(t *testing.T) {
+	home := t.TempDir()
+	if err := os.WriteFile(filepath.Join(home, "auth.json"), []byte(`{"tokens":{"access_token":"synthetic-codex-override"}}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("CODEX_HOME", home)
+	t.Setenv("CODEX_ACCESS_TOKEN", "")
+	provider := NewCodexProvider(nil)
+	if !provider.IsConfigured() || provider.accessToken != "synthetic-codex-override" || provider.AuthStatus().Source != "file" {
+		t.Fatalf("Codex override home was not selected: configured=%v source=%q", provider.IsConfigured(), provider.AuthStatus().Source)
+	}
+}
+
+func TestCodexProviderEmptyHomeOverrideUsesDefault(t *testing.T) {
+	home := t.TempDir()
+	defaultHome := filepath.Join(home, ".codex")
+	if err := os.MkdirAll(defaultHome, 0o700); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(defaultHome, "auth.json"), []byte(`{"access_token":"synthetic-codex-default"}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("CODEX_HOME", "")
+	t.Setenv("CODEX_ACCESS_TOKEN", "")
+	provider := NewCodexProvider(nil)
+	if provider.accessToken != "synthetic-codex-default" || provider.AuthStatus().Source != "file" {
+		t.Fatalf("empty CODEX_HOME did not use default: source=%q", provider.AuthStatus().Source)
+	}
+}
+
 // MARK: Errors never leak token material
 
 func TestCodexAuthErrorIsUnderstandableWithoutTokenMaterial(t *testing.T) {

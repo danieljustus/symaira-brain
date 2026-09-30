@@ -433,7 +433,7 @@ fn parse_enabled_cores(
     Ok(enabled)
 }
 
-fn parse_go_bool(value: &str) -> Result<bool, ()> {
+pub(crate) fn parse_go_bool(value: &str) -> Result<bool, ()> {
     match value {
         "1" | "t" | "T" | "TRUE" | "True" | "true" => Ok(true),
         "0" | "f" | "F" | "FALSE" | "False" | "false" => Ok(false),

@@ -3,8 +3,7 @@
 
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::Command;
 
 use serde_json::json;
 use tempfile::TempDir;
@@ -34,23 +33,6 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
         .current_dir(project)
         .args(args);
     command
-}
-
-fn fallback(root: &TempDir) -> PathBuf {
-    let path = root.path().join("go-fallback");
-    fs::write(
-        &path,
-        b"#!/bin/sh\nprintf 'fallback-stdout\\n'\nprintf 'fallback-stderr\\n' >&2\nexit 23\n",
-    )
-    .unwrap();
-    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
-    path
-}
-
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
 }
 
 #[test]
@@ -112,6 +94,69 @@ fn doctor_json_reports_static_config_and_registered_harness_natively() {
 }
 
 #[test]
+fn doctor_json_true_uses_json_output() {
+    let root = TempDir::new().unwrap();
+    let output = command(&root, &["doctor", "--json=true"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(report.get("config").is_some());
+}
+
+#[test]
+fn doctor_vault_probe_does_not_expose_child_stderr() {
+    const SECRET: &str = "credential=SENTINEL_SECRET_473";
+    let root = TempDir::new().unwrap();
+    let vault_dir = root.path().join("fake-vault-bin");
+    fs::create_dir_all(&vault_dir).unwrap();
+    let vault = vault_dir.join("symvault");
+    fs::write(
+        &vault,
+        format!("#!/bin/sh\nprintf '%s\\n' '{SECRET}' >&2\nexit 42\n"),
+    )
+    .unwrap();
+    fs::set_permissions(&vault, fs::Permissions::from_mode(0o755)).unwrap();
+
+    for args in [&["doctor"][..], &["doctor", "--json"][..]] {
+        let output = command(&root, args)
+            .env("PATH", &vault_dir)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            !stdout.contains(SECRET),
+            "doctor stdout leaked child stderr: {stdout}"
+        );
+        assert!(
+            !stderr.contains(SECRET),
+            "doctor stderr leaked child stderr: {stderr}"
+        );
+        assert!(output.stderr.is_empty(), "unexpected stderr: {stderr}");
+
+        if args.len() == 2 {
+            let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+            let vault_link = report["links"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|link| link["name"] == "vault: reachable")
+                .unwrap();
+            assert_eq!(vault_link["status"], "fail");
+            assert_eq!(
+                vault_link["detail"],
+                "symvault probe failed: exit status 42"
+            );
+        }
+    }
+}
+
+#[test]
 fn doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary() {
     let root = TempDir::new().unwrap();
     let output = command(&root, &["doctor", "--vault-agent", "agent"])
@@ -126,33 +171,80 @@ fn doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary() {
 }
 
 #[test]
-fn doctor_vault_agent_with_existing_profile_uses_go_fallback() {
+fn doctor_vault_agent_skips_broken_profile_without_go() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     fs::create_dir_all(&profiles).unwrap();
     fs::write(profiles.join("broken.toml"), b"[profile\n").unwrap();
-    let go_binary = fallback(&root);
-
-    let output = command(&root, &["doctor", "--vault-agent", "agent"])
-        .env("SYMBRAIN_GO_BINARY", go_binary)
+    let output = command(&root, &["doctor", "--vault-agent", "agent", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["profiles"], json!(["broken"]));
+    assert!(report.get("handshakes").is_none());
 }
 
 #[test]
-fn doctor_vault_agent_with_unreadable_profiles_uses_go_fallback() {
+fn doctor_vault_agent_with_disabled_vault_profile_stays_native() {
+    let root = TempDir::new().unwrap();
+    let profiles = root.path().join("config/symbrain/profiles");
+    fs::create_dir_all(&profiles).unwrap();
+    fs::write(
+        profiles.join("personal.toml"),
+        b"[profile]\nname = \"personal\"\n[servers.vault]\nenabled = false\n",
+    )
+    .unwrap();
+
+    let output = command(&root, &["doctor", "--vault-agent", "other", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert!(report.get("handshakes").is_none());
+}
+
+#[test]
+fn doctor_vault_agent_with_missing_vault_binary_stays_native() {
+    let root = TempDir::new().unwrap();
+    let profiles = root.path().join("config/symbrain/profiles");
+    fs::create_dir_all(&profiles).unwrap();
+    fs::write(
+        profiles.join("personal.toml"),
+        b"[profile]\nname = \"personal\"\n[servers.vault]\nenabled = true\n",
+    )
+    .unwrap();
+
+    let output = command(&root, &["doctor", "--vault-agent", "other", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["handshakes"][0]["profile"], json!("personal"));
+    assert_eq!(report["handshakes"][0]["server"], json!("vault"));
+    assert!(
+        report["handshakes"][0]["error"]
+            .as_str()
+            .unwrap()
+            .contains("not found on PATH or in managed directory")
+    );
+}
+
+#[test]
+fn doctor_vault_agent_skips_unlistable_profiles_without_go() {
     let root = TempDir::new().unwrap();
     let profiles = root.path().join("config/symbrain/profiles");
     fs::create_dir_all(profiles.parent().unwrap()).unwrap();
     fs::write(&profiles, b"profiles are not a directory").unwrap();
-    let go_binary = fallback(&root);
-
-    let output = command(&root, &["doctor", "--vault-agent", "agent"])
-        .env("SYMBRAIN_GO_BINARY", go_binary)
+    let output = command(&root, &["doctor", "--vault-agent", "agent", "--json"])
+        .env("SYMBRAIN_GO_BINARY", root.path().join("missing-go"))
         .output()
         .unwrap();
-
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["profiles"], json!([]));
+    assert!(report.get("handshakes").is_none());
 }

@@ -207,6 +207,44 @@ func TestKimiDefaultCLIHomePrefersCurrentLayout(t *testing.T) {
 	}
 }
 
+func TestKimiProviderUsesKIMICodeHomeOverride(t *testing.T) {
+	home := t.TempDir()
+	credentials := filepath.Join(home, "credentials", "kimi-code.json")
+	if err := os.MkdirAll(filepath.Dir(credentials), 0o700); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	if err := os.WriteFile(credentials, []byte(`{"access_token":"synthetic-kimi-override"}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("KIMI_CODE_HOME", home)
+	t.Setenv("KIMI_CODE_API_KEY", "")
+	t.Setenv("KIMI_AUTH_TOKEN", "")
+	provider := NewKimiProvider(nil)
+	if provider.cliAccessToken != "synthetic-kimi-override" || provider.cliDeviceID != "" {
+		t.Fatalf("Kimi override home was not selected: token=%q device_id=%q", provider.cliAccessToken, provider.cliDeviceID)
+	}
+}
+
+func TestKimiProviderEmptyHomeOverrideUsesDefault(t *testing.T) {
+	home := t.TempDir()
+	credentials := filepath.Join(home, ".kimi-code", "credentials", "kimi-code.json")
+	if err := os.MkdirAll(filepath.Dir(credentials), 0o700); err != nil {
+		t.Fatalf("MkdirAll(): %v", err)
+	}
+	if err := os.WriteFile(credentials, []byte(`{"access_token":"synthetic-kimi-default"}`), 0o600); err != nil {
+		t.Fatalf("WriteFile(): %v", err)
+	}
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("KIMI_CODE_HOME", "")
+	t.Setenv("KIMI_CODE_API_KEY", "")
+	t.Setenv("KIMI_AUTH_TOKEN", "")
+	provider := NewKimiProvider(nil)
+	if provider.cliAccessToken != "synthetic-kimi-default" {
+		t.Fatalf("empty KIMI_CODE_HOME did not use default: token=%q", provider.cliAccessToken)
+	}
+}
+
 // MARK: Provider configuration
 
 func TestKimiProviderUnconfiguredWithoutAnyCredential(t *testing.T) {

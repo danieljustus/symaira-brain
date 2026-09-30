@@ -118,6 +118,6 @@ pub fn run_config_get_with_path(
 #[path = "get_tests.rs"]
 mod tests;
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 #[path = "bytes_tests.rs"]
 mod bytes_tests;

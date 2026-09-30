@@ -325,6 +325,20 @@ def main() -> int:
             assert_foreign_child(go, rust, framing)
         print("PASS Go/Rust MCP foreign stdio child initialize/list/call, notification silence, frames and diagnostics")
 
+        url_root = root / "url-only"
+        url_root.mkdir()
+        url_profile = url_root / "profile.toml"
+        url_profile.write_text(
+            PROFILE + '\n[servers.remote]\nenabled = true\nurl = "https://mcp.example.invalid"\n',
+            encoding="utf-8",
+        )
+        go = run_raw(go_binary, url_root, url_profile, b"")
+        rust = run_raw(rust_binary, url_root, url_profile, b"")
+        assert_exact(go, rust, "URL-only foreign server warning")
+        assert go.returncode == 0 and go.stdout == b""
+        assert go.stderr == b"symbrain mcp: remote: url-only foreign server (no stdio transport yet); skipping\n"
+        print("PASS Go/Rust MCP URL-only foreign server warning and skip")
+
         malformed_root = root / "malformed-frames"
         malformed_root.mkdir()
         malformed_profile = malformed_root / "profile.toml"

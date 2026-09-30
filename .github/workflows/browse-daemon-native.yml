@@ -1,0 +1,74 @@
+name: Browse daemon native parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-daemon-native.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  daemon:
+    name: daemon (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Build the Rust CLI
+        run: cargo build -p symbrowse-cli --bin symbrowse --release --locked
+
+      - name: Verify daemon platform and lifecycle contracts
+        run: cargo test -p symbrowse-daemon --locked
+
+      - name: Exercise native daemon lifecycle and races
+        env:
+          SYMBROWSE_RUST_BINARY: ${{ github.workspace }}/browse/target/release/symbrowse${{ runner.os == 'Windows' && '.exe' || '' }}
+          TMPDIR: ${{ runner.temp }}
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: |
+          python3 port/harness/test_run.py DaemonExitTests
+          python3 port/harness/run.py --suite daemon
+          python3 port/harness/run.py --suite daemon-races --repeat 50
+
+      - name: Retain exact-head daemon receipt
+        if: always()
+        env:
+          RECEIPT: ${{ runner.temp }}/browse-daemon-${{ matrix.runner }}.txt
+        run: |
+          {
+            echo "source_revision=$GITHUB_SHA"
+            echo "runner=${{ matrix.runner }}"
+            rustc -Vv
+            cargo -V
+          } > "$RECEIPT"
+      - name: Upload native daemon receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-daemon-${{ matrix.runner }}-${{ github.sha }}
+          path: ${{ runner.temp }}/browse-daemon-${{ matrix.runner }}.txt
+          if-no-files-found: error
+          retention-days: 14

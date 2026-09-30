@@ -25,7 +25,7 @@ pub use redaction::{Redactor, redact_args, redact_env, redact_json, redact_str};
 pub use runtime::dispatch_once;
 pub use server::{
     DaemonHandler, DaemonState, HandlerResult, OperationContext, PolicyStatus, Server, ServerError,
-    ServerOptions, default_socket_path, socket_path, validate_session,
+    ServerOptions, ShutdownHandler, default_socket_path, socket_path, validate_session,
 };
 pub use session::{
     SESSION_SCHEMA_VERSION, SessionError, SessionInfo, SessionListData, SessionRegistry,

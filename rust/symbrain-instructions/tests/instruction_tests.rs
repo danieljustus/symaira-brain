@@ -377,7 +377,6 @@ fn source_paths_follow_xdg_and_project_layout() {
         PathBuf::from(&item.expected_global_path)
     );
     assert_eq!(item.xdg_config_home, "/oracle-config");
-    #[cfg(not(windows))]
     assert_eq!(
         resolve_global_path(Some(Path::new(&item.xdg_config_home)), Some(&home)),
         PathBuf::from(&item.expected_xdg_global_path)

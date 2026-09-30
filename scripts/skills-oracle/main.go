@@ -27,6 +27,7 @@ type expectedBundle struct {
 	Resources     []skill.Resource             `json:"resources"`
 	MarkdownPaths []string                     `json:"markdown_paths"`
 	OverridePaths map[string][]string          `json:"override_paths"`
+	Manifest      *skill.Manifest              `json:"manifest,omitempty"`
 	ManifestTerms map[string]map[string]string `json:"manifest_terms"`
 	TargetNames   []string                     `json:"target_names"`
 }
@@ -75,6 +76,11 @@ type securityCase struct {
 	Error    string `json:"error,omitempty"`
 }
 
+type relativeRootCase struct {
+	RootIsAbsolute bool          `json:"root_is_absolute"`
+	Issues         []skill.Issue `json:"issues"`
+}
+
 type hashCase struct {
 	Initial        string `json:"initial"`
 	AfterContent   string `json:"after_content"`
@@ -89,11 +95,12 @@ type suite struct {
 	Diagnostics   []diagnosticCase `json:"diagnostics"`
 	RenderCases   []renderGolden   `json:"render_cases"`
 	SecurityCases []securityCase   `json:"security_cases"`
+	RelativeRoot  relativeRootCase `json:"relative_root"`
 	HashCase      hashCase         `json:"hash_case"`
 }
 
 func generate() (suite, error) {
-	ids := []string{"source", "variant-source", "oracle-edge"}
+	ids := []string{"source", "variant-source", "oracle-edge", "inline-manifest"}
 	result := suite{Cases: make([]expectedBundle, 0, len(ids))}
 	for _, id := range ids {
 		bundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", id))
@@ -123,12 +130,16 @@ func generate() (suite, error) {
 		if terms == nil {
 			terms = map[string]map[string]string{}
 		}
-		result.Cases = append(result.Cases, expectedBundle{
+		caseResult := expectedBundle{
 			ID: id, Name: bundle.Frontmatter.Name, Description: bundle.Frontmatter.Description,
 			Category: bundle.Frontmatter.Category, Version: bundle.Frontmatter.Version,
 			Body: bundle.Body, Resources: bundle.Resources, MarkdownPaths: markdown,
 			OverridePaths: overrides, ManifestTerms: terms, TargetNames: targets,
-		})
+		}
+		if id == "inline-manifest" {
+			caseResult.Manifest = &bundle.Manifest
+		}
+		result.Cases = append(result.Cases, caseResult)
 	}
 	variantBundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", "variant-source"))
 	if err != nil {
@@ -162,7 +173,9 @@ func generate() (suite, error) {
 	result.Diagnostics = []diagnosticCase{
 		toDiagnostics("unknown_region_target", variant.CheckRegionTargets([]variant.Region{{Kind: variant.KindOnly, Targets: []string{"hermez"}, Line: 4}}, known)),
 		toDiagnostics("unknown_override", variant.CheckOverrides([]string{"worker"}, map[string][]string{"claude": {"invented"}})),
+		toDiagnostics("unknown_override_order", variant.CheckOverrides(nil, map[string][]string{"claude": {"zed", "alpha"}})),
 		toDiagnostics("term_without_default", variant.CheckTerms(map[string]map[string]string{"report_dir": {"hermes": "value"}}, known)),
+		toDiagnostics("term_without_default_empty_known", variant.CheckTerms(map[string]map[string]string{"report_dir": {"hermez": "value"}}, nil)),
 		toDiagnostics("term_unknown_target", variant.CheckTerms(map[string]map[string]string{"report_dir": {variant.DefaultKey: "value", "hermez": "value"}}, known)),
 	}
 	_, problems := variant.Apply("{{term:Bad Name}}\n", variant.Options{Target: "hermes"})
@@ -171,6 +184,10 @@ func generate() (suite, error) {
 	result.Diagnostics = append(result.Diagnostics, toDiagnostics("unknown_term_reference", problems))
 	_, problems = variant.Apply("{{term:no_default}}\n", variant.Options{Target: "hermes", Terms: map[string]map[string]string{"no_default": {"claude": "value"}}})
 	result.Diagnostics = append(result.Diagnostics, toDiagnostics("missing_term_default", problems))
+	result.RelativeRoot, err = relativeRootCaseFromGo()
+	if err != nil {
+		return suite{}, err
+	}
 
 	for _, id := range []string{"source", "variant-source", "oracle-edge"} {
 		bundle, err := skill.LoadBundle(filepath.Join("internal", "skills", "render", "testdata", id))
@@ -192,6 +209,23 @@ func generate() (suite, error) {
 		return suite{}, err
 	}
 	return result, nil
+}
+
+func relativeRootCaseFromGo() (relativeRootCase, error) {
+	root := filepath.Join("scripts", "skills-oracle", "fixtures", "relative-root")
+	oldWorkingDirectory, err := os.Getwd()
+	if err != nil {
+		return relativeRootCase{}, err
+	}
+	if err := os.Chdir(root); err != nil {
+		return relativeRootCase{}, err
+	}
+	defer func() { _ = os.Chdir(oldWorkingDirectory) }()
+	bundle, err := skill.LoadBundle(".")
+	if err != nil {
+		return relativeRootCase{}, err
+	}
+	return relativeRootCase{RootIsAbsolute: filepath.IsAbs(bundle.Root), Issues: skill.Validate(bundle)}, nil
 }
 
 func renderAndManifest(bundle *skill.Bundle, id string) (renderGolden, error) {
@@ -257,6 +291,27 @@ func securityCases() ([]securityCase, error) {
 	result, err := renderValidationCases()
 	if err != nil {
 		return nil, err
+	}
+	for _, item := range []struct{ id, manifest string }{
+		{"scalar_skill_root", `skill = "wrong"`},
+		{"scalar_targets_root", `targets = "wrong"`},
+		{"scalar_terms_root", `terms = "wrong"`},
+	} {
+		root, err := os.MkdirTemp("", "skills-oracle-scalar-root-")
+		if err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(root, "SKILL.md"), []byte("---\nname: security-skill\ndescription: security fixture\n---\nBody.\n"), 0o644); err != nil {
+			_ = os.RemoveAll(root)
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(root, "symskills.toml"), []byte(item.manifest), 0o644); err != nil {
+			_ = os.RemoveAll(root)
+			return nil, err
+		}
+		_, loadErr := skill.LoadBundle(root)
+		_ = os.RemoveAll(root)
+		result = append(result, securityCase{ID: item.id, Rejected: loadErr != nil, Error: errorText(loadErr)})
 	}
 	unknownRoot, err := os.MkdirTemp("", "skills-oracle-unknown-target-")
 	if err != nil {
@@ -475,7 +530,11 @@ func errorText(err error) string {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
-	output := flag.String("output", "rust/symbrain-skills/tests/fixtures/oracle_expectations.json", "output path")
+	defaultOutput := os.Getenv("SYMBRAIN_SKILLS_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-skills/tests/fixtures/oracle_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "output path")
 	flag.Parse()
 	generated, err := generate()
 	if err != nil {

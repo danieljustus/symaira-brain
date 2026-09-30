@@ -212,7 +212,7 @@ struct HarnessesView: View {
             HStack(spacing: SymairaSpacing.medium) {
                 // #75: Install menu — confirm overwrite when already installed
                 Menu {
-                    ForEach(vm.profiles, id: \.name) { profile in
+                    ForEach(vm.profiles.filter { $0.error == nil }, id: \.name) { profile in
                         Button("\(profile.name)") {
                             if status.installed {
                                 pendingInstall = InstallConfirmation(harness: name, profile: profile.name)

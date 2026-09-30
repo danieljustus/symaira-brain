@@ -66,7 +66,11 @@ type caseDef struct {
 func main() {
 	check := flag.Bool("check", false, "fail if generated output differs")
 	compareRust := flag.String("compare-rust", "", "compare each isolated Go case with this Rust binary")
-	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_"+runtime.GOOS+".json", "fixture path")
+	defaultOutput := os.Getenv("SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_" + runtime.GOOS + ".json"
+	}
+	output := flag.String("output", defaultOutput, "fixture path")
 	flag.Parse()
 	root := repoRoot()
 	generated := generate(root)

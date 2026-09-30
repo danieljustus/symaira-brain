@@ -14,7 +14,7 @@ import (
 // without symvault installed produces a clear error message.
 func TestCmdPassthrough_VaultNotFound(t *testing.T) {
 	// Ensure symvault is NOT on PATH for this test.
-	t.Setenv("PATH", t.TempDir())
+	isolatedPATH(t, t.TempDir())
 
 	var stdout, stderr strings.Builder
 	code := cmdPassthrough("vault", []string{"--help"}, strings.NewReader(""), &stdout, &stderr)
@@ -43,7 +43,7 @@ func TestCmdPassthrough_FakeBinary(t *testing.T) {
 	if err := os.WriteFile(fakeBin, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("PATH", binDir)
+	isolatedPATH(t, binDir)
 
 	var stdout, stderr strings.Builder
 	code := cmdPassthrough("vault", []string{"--version"}, strings.NewReader(""), &stdout, &stderr)
@@ -181,7 +181,7 @@ func TestCmdPassthrough_ExitCodePropagation(t *testing.T) {
 	if err := os.WriteFile(fakeBin, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("PATH", binDir)
+	isolatedPATH(t, binDir)
 
 	var stdout, stderr strings.Builder
 	code := cmdPassthrough("vault", nil, strings.NewReader(""), &stdout, &stderr)

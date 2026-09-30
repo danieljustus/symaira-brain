@@ -376,6 +376,25 @@ func LatestDegradations(profile string) ([]Degradation, error) {
 // entries for which it returns true are counted toward limit and
 // returned. A nil filter matches every entry. Results are returned in
 // chronological order (oldest first).
+// decodeTailLine decodes a legacy plain Entry line or an auditkit hash-chain
+// envelope ({"d":"<entry JSON>","h":"<hash>"}) written by the production Logger.
+func decodeTailLine(line []byte) (Entry, bool) {
+	var envelope struct {
+		Data *string `json:"d"`
+	}
+	if err := json.Unmarshal(line, &envelope); err != nil {
+		return Entry{}, false
+	}
+	if envelope.Data != nil {
+		line = []byte(*envelope.Data)
+	}
+	var entry Entry
+	if err := json.Unmarshal(line, &entry); err != nil {
+		return Entry{}, false
+	}
+	return entry, true
+}
+
 func tailEntriesBounded(path string, limit int, filter func(Entry) bool, sessionScoped bool) ([]Entry, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -400,8 +419,8 @@ func tailEntriesBounded(path string, limit int, filter func(Entry) bool, session
 			return false
 		}
 
-		var entry Entry
-		if err := json.Unmarshal(line, &entry); err != nil {
+		entry, ok := decodeTailLine(line)
+		if !ok {
 			return false
 		}
 

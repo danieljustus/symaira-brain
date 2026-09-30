@@ -1,4 +1,8 @@
-use std::sync::{Arc, Mutex};
+use std::{
+    future::Future,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 #[cfg(target_os = "macos")]
 use crate::safari_runtime::SafariRuntime;
@@ -62,6 +66,14 @@ struct FlowExecutor<'a> {
     operation: OperationContext,
 }
 
+fn block_on_timeout<F: Future>(
+    runtime: &Runtime,
+    timeout: Duration,
+    future: F,
+) -> Result<F::Output, tokio::time::error::Elapsed> {
+    runtime.block_on(async move { tokio::time::timeout(timeout, future).await })
+}
+
 impl AsyncExecutor for FlowExecutor<'_> {
     fn execute<'a>(
         &'a mut self,
@@ -102,6 +114,65 @@ impl AsyncExecutor for FlowExecutor<'_> {
 }
 
 impl DispatchRuntime {
+    fn shutdown_browser(&self) {
+        eprintln!("symbrowse shutdown: begin");
+        let browser = self
+            .browser
+            .lock()
+            .ok()
+            .and_then(|mut browser| browser.take());
+        let Some(BrowserState {
+            session,
+            page,
+            tabs,
+            network_capture,
+        }) = browser
+        else {
+            eprintln!("symbrowse shutdown: no browser session");
+            return;
+        };
+        // Drop the runtime's page handles before closing the owning browser.
+        drop((page, tabs, network_capture));
+
+        // A request worker may still be unwinding after the server has stopped
+        // accepting connections. Give its cloned session a bounded chance to
+        // release ownership so we can perform Chromiumoxide's graceful close.
+        let deadline = std::time::Instant::now() + Duration::from_secs(1);
+        while Arc::strong_count(&session) > 1 && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        eprintln!(
+            "symbrowse shutdown: browser session handles remaining={}",
+            Arc::strong_count(&session).saturating_sub(1)
+        );
+        let Ok(session) = Arc::try_unwrap(session) else {
+            // Let an operation that outlived the shutdown cap release its
+            // remaining handle and invoke Chromiumoxide's kill-on-drop fallback.
+            eprintln!("symbrowse shutdown: graceful close skipped; shared session remains");
+            return;
+        };
+        let started = std::time::Instant::now();
+        let result = block_on_timeout(&self.runtime, Duration::from_secs(3), session.close());
+        let outcome = match result {
+            Ok(Ok(())) => "closed",
+            Ok(Err(_)) => "close-error",
+            Err(_) => "close-timeout",
+        };
+        eprintln!(
+            "symbrowse shutdown: browser close {outcome} elapsed_ms={}",
+            started.elapsed().as_millis()
+        );
+    }
+
+    async fn within_operation_deadline<T>(
+        timeout: Duration,
+        future: impl Future<Output = Result<T, DaemonError>>,
+    ) -> Result<T, DaemonError> {
+        tokio::time::timeout(timeout, future)
+            .await
+            .map_err(|_| operation_timeout_error())?
+    }
+
     pub fn new(spec: SessionSpec) -> Result<Arc<Self>, DaemonError> {
         Self::new_with_wayback_url(spec, "https://web.archive.org/cdx/search/cdx")
     }
@@ -153,10 +224,14 @@ impl DispatchRuntime {
         self.runtime.block_on(async {
             tokio::select! {
                 result = self.dispatch(frame, operation.clone()) => result,
-                _ = Self::wait_for_cancellation(operation.clone()) => Err(DaemonError {
-                    code: codes::OPERATION_TIMEOUT.into(),
-                    message: "daemon operation was cancelled".into(),
-                    ..Default::default()
+                _ = Self::wait_for_cancellation(operation.clone()) => Err(if operation.remaining().is_zero() {
+                    operation_timeout_error()
+                } else {
+                    DaemonError {
+                        code: codes::OPERATION_TIMEOUT.into(),
+                        message: "daemon operation was cancelled".into(),
+                        ..Default::default()
+                    }
                 }),
             }
         })
@@ -235,7 +310,7 @@ impl DispatchRuntime {
             | "dialog.auto" | "network.capture" | "network.requests" | "network.offline"
             | "network.block" | "screenshot" | "pdf" | "upload" | "a11y" | "cookies.get"
             | "cookies.set" | "storage.get" | "storage.set" | "download" => {
-                self.browser_command(&frame).await
+                self.browser_command(&frame, &operation).await
             }
             "network.har" | "axe.audit" => Err(DaemonError {
                 code: "unsupported".into(),
@@ -243,7 +318,7 @@ impl DispatchRuntime {
                 hint: "the operation is explicitly unsupported by this engine".into(),
                 ..Default::default()
             }),
-            "state.save" | "state.load" => self.state_browser_command(&frame).await,
+            "state.save" | "state.load" => self.state_browser_command(&frame, &operation).await,
             "state.list" | "state.show" | "state.clear" | "state.clean" => {
                 self.state_command(&frame)
             }
@@ -569,7 +644,7 @@ impl DispatchRuntime {
         Ok((Some(Value::Array(entries)), Vec::new()))
     }
 
-    async fn browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn browser_command(&self, frame: &Frame, operation: &OperationContext) -> HandlerResult {
         if self.spec.mode == "browser" && self.spec.engine == "firefox" {
             return self.firefox_command(frame).await;
         }
@@ -608,7 +683,10 @@ impl DispatchRuntime {
                 ..Default::default()
             });
         }
-        let page = self.ensure_browser().await?;
+        let page = match self.ensure_browser(operation).await {
+            Ok(page) => page,
+            Err(error) => return Err(error),
+        };
         let args = object_args(frame)?;
         let data = match frame.cmd.as_str() {
             "tabs.list" | "tab.list" => {
@@ -862,17 +940,24 @@ impl DispatchRuntime {
                     .map_err(runtime_error)?;
                 json!({"uploaded": files})
             }
-            "open" | "goto" => page
-                .open(required_string(args, "url")?)
-                .await
-                .map_err(runtime_error)?,
+            "open" | "goto" => {
+                match page
+                    .open_with_timeout(required_string(args, "url")?, operation.remaining())
+                    .await
+                {
+                    Ok(value) => value,
+                    Err(error) => return Err(navigation_error(error)),
+                }
+            }
             "read" => {
                 if let Some(url) = args
                     .get("url")
                     .and_then(Value::as_str)
                     .filter(|url| !url.is_empty())
                 {
-                    page.open(url).await.map_err(runtime_error)?;
+                    page.open_with_timeout(url, operation.remaining())
+                        .await
+                        .map_err(navigation_error)?;
                 }
                 page.read().await.map_err(runtime_error)?
             }
@@ -1406,7 +1491,35 @@ impl DispatchRuntime {
             .ok_or_else(|| runtime_error("active tab is not tracked"))
     }
 
-    async fn ensure_browser(&self) -> Result<ChromePage, DaemonError> {
+    async fn ensure_browser(
+        &self,
+        operation: &OperationContext,
+    ) -> Result<ChromePage, DaemonError> {
+        let timeout = operation.remaining();
+        let cached = self
+            .browser
+            .lock()
+            .map_err(|_| runtime_error("browser lock poisoned"))?
+            .as_ref()
+            .map(|browser| browser.page.clone());
+        Self::with_cached_browser(cached, timeout, self.ensure_browser_setup(timeout)).await
+    }
+
+    async fn with_cached_browser<T>(
+        cached: Option<T>,
+        timeout: Duration,
+        setup: impl Future<Output = Result<T, DaemonError>>,
+    ) -> Result<T, DaemonError> {
+        if timeout.is_zero() {
+            return Err(operation_timeout_error());
+        }
+        if let Some(browser) = cached {
+            return Ok(browser);
+        }
+        Self::within_operation_deadline(timeout, setup).await
+    }
+
+    async fn ensure_browser_setup(&self, timeout: Duration) -> Result<ChromePage, DaemonError> {
         {
             let guard = self
                 .browser
@@ -1427,7 +1540,7 @@ impl DispatchRuntime {
                 user_data_dir: self.spec.user_data_dir(),
                 headless: true,
             },
-            self.spec.operation_timeout,
+            timeout,
         )
         .await
         .map_err(runtime_error)?;
@@ -1455,7 +1568,11 @@ impl DispatchRuntime {
         Ok(result)
     }
 
-    async fn state_browser_command(&self, frame: &Frame) -> HandlerResult {
+    async fn state_browser_command(
+        &self,
+        frame: &Frame,
+        operation: &OperationContext,
+    ) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
         let store = Store::new(
@@ -1491,13 +1608,13 @@ impl DispatchRuntime {
                         unreachable!()
                     }
                 } else {
-                    self.ensure_browser().await?.evaluate_script(
+                    self.ensure_browser(operation).await?.evaluate_script(
                         "(() => ({origin: location.origin, local_storage: Object.fromEntries(Object.entries(localStorage)), session_storage: Object.fromEntries(Object.entries(sessionStorage)), cookies: document.cookie}))()",
                     ).await.map_err(runtime_error)?
                 };
                 if self.spec.engine == "chrome" {
                     captured["bidi_cookies"] = self
-                        .ensure_browser()
+                        .ensure_browser(operation)
                         .await
                         .map_err(runtime_error)?
                         .cookies()
@@ -1551,8 +1668,10 @@ impl DispatchRuntime {
                             unreachable!()
                         }
                     } else {
-                        let page = self.ensure_browser().await.map_err(runtime_error)?;
-                        page.open(origin).await.map_err(runtime_error)?;
+                        let page = self.ensure_browser(operation).await?;
+                        page.open_with_timeout(origin, operation.remaining())
+                            .await
+                            .map_err(navigation_error)?;
                         for cookie in &entry.cookies {
                             let cookie_value =
                                 serde_json::to_value(cookie).map_err(runtime_error)?;
@@ -1653,11 +1772,15 @@ impl DispatchRuntime {
     }
 }
 
-pub fn handler(spec: SessionSpec) -> Result<crate::DaemonHandler, DaemonError> {
+pub fn handlers(
+    spec: SessionSpec,
+) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
     let runtime = DispatchRuntime::new(spec)?;
-    Ok(Arc::new(move |frame, operation| {
-        runtime.handle(frame, operation)
-    }))
+    let dispatch_runtime = runtime.clone();
+    let shutdown_runtime = runtime;
+    let handler = Arc::new(move |frame, operation| dispatch_runtime.handle(frame, operation));
+    let shutdown = Arc::new(move || shutdown_runtime.shutdown_browser());
+    Ok((handler, shutdown))
 }
 
 /// Execute one command in-process through the same typed runtime used by the daemon.
@@ -1850,6 +1973,25 @@ fn runtime_error(error: impl std::fmt::Display) -> DaemonError {
     }
 }
 
+fn navigation_error(error: Box<dyn std::error::Error + Send + Sync>) -> DaemonError {
+    if error
+        .downcast_ref::<tokio::time::error::Elapsed>()
+        .is_some()
+    {
+        return operation_timeout_error();
+    }
+    runtime_error(error)
+}
+
+fn operation_timeout_error() -> DaemonError {
+    DaemonError {
+        code: codes::OPERATION_TIMEOUT.into(),
+        message: "daemon operation exceeded its timeout".into(),
+        retryable: Some(true),
+        ..Default::default()
+    }
+}
+
 fn fetch_error(error: symbrowse_fetch::FetchError) -> DaemonError {
     let code = match error {
         symbrowse_fetch::FetchError::BlockedDomain(_)
@@ -1874,6 +2016,59 @@ mod tests {
         net::TcpListener,
         thread,
     };
+
+    #[test]
+    fn shutdown_timeout_is_created_inside_the_tokio_runtime() {
+        let runtime = Runtime::new().expect("Tokio runtime");
+        let result = block_on_timeout(&runtime, Duration::from_secs(1), async {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+            42
+        })
+        .expect("bounded future should complete");
+        assert_eq!(result, 42);
+    }
+
+    #[tokio::test]
+    async fn navigation_timeout_preserves_go_daemon_error() {
+        let elapsed = tokio::time::timeout(std::time::Duration::ZERO, std::future::pending::<()>())
+            .await
+            .expect_err("pending navigation must time out");
+        let error = navigation_error(Box::new(elapsed));
+        assert_eq!(error.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(error.message, "daemon operation exceeded its timeout");
+        assert_eq!(error.retryable, Some(true));
+
+        let setup = DispatchRuntime::within_operation_deadline(
+            Duration::from_millis(1),
+            std::future::pending::<Result<(), DaemonError>>(),
+        )
+        .await
+        .expect_err("pending Chrome setup must time out");
+        assert_eq!(setup.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(setup.message, "daemon operation exceeded its timeout");
+    }
+
+    #[tokio::test]
+    async fn cached_chrome_page_is_reused_with_subsecond_operation_budget() {
+        let cached = DispatchRuntime::with_cached_browser(
+            Some("active-page"),
+            Duration::from_millis(500),
+            std::future::ready(Err(runtime_error("setup must not run for a cached page"))),
+        )
+        .await
+        .expect("cached page should be returned within the remaining budget");
+        assert_eq!(cached, "active-page");
+
+        let expired = DispatchRuntime::with_cached_browser(
+            Some("active-page"),
+            Duration::ZERO,
+            std::future::ready(Ok("new-page")),
+        )
+        .await
+        .expect_err("an expired operation must time out even when a page is cached");
+        assert_eq!(expired.code, codes::OPERATION_TIMEOUT);
+        assert_eq!(expired.message, "daemon operation exceeded its timeout");
+    }
 
     fn temp_spec(name: &str) -> SessionSpec {
         let root =
@@ -2143,7 +2338,7 @@ mod tests {
             }
         });
 
-        let production = handler(spec.clone()).expect("production handler");
+        let (production, shutdown) = handlers(spec.clone()).expect("production handlers");
         let followups = Arc::new(AtomicUsize::new(0));
         let observed = followups.clone();
         let wrapped = Arc::new(move |frame: Frame, operation: OperationContext| {
@@ -2156,6 +2351,7 @@ mod tests {
             crate::Server::new(crate::ServerOptions {
                 session_spec: Some(spec.clone()),
                 handler: Some(wrapped),
+                shutdown_handler: Some(shutdown),
                 ..Default::default()
             })
             .expect("server"),
@@ -2216,6 +2412,7 @@ mod tests {
                 std::io::ErrorKind::ConnectionReset
                     | std::io::ErrorKind::BrokenPipe
                     | std::io::ErrorKind::UnexpectedEof
+                    | std::io::ErrorKind::NotConnected
             )),
             Err(error) => panic!("production cancellation request = {error:?}"),
         }

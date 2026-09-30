@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use std::time::Duration;
 
 use serde::Serialize;
-use symbrain_broker::{Client, Options};
+use symbrain_broker::{BrokerError, Client, Options};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_harness::list;
@@ -38,6 +38,7 @@ pub struct HarnessHealthReport {
 
 /// The shipped `harness list` flag set as the Go flag package prints it.
 const HARNESS_LIST_FLAGS: &str = "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
+const HARNESS_HEALTH_FLAGS: &str = "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
 
 /// Runs `symbrain harness`.
 pub fn run(
@@ -120,11 +121,11 @@ fn run_list(
 
     let inventory = list(project_dir.as_deref());
     if inventory.harnesses.iter().any(|harness| {
-        harness.global.error.is_some()
-            || harness
-                .project
-                .as_ref()
-                .is_some_and(|project| project.error.is_some())
+        [Some(&harness.global), harness.project.as_ref()]
+            .into_iter()
+            .flatten()
+            .filter_map(|config| config.error.as_deref())
+            .any(|error| !go_json_inventory_error(error))
     }) {
         return None;
     }
@@ -139,6 +140,15 @@ fn run_list(
     }
 
     Some(exit::OK)
+}
+
+fn go_json_inventory_error(error: &str) -> bool {
+    // ponytail: only this oracle-frozen JSON diagnostic is native; add other parser messages with exact Go fixture evidence.
+    error.starts_with("harness: ")
+        && error.contains(
+            " config is not valid json; refusing to edit a config symbrain cannot parse: parse json: ",
+        )
+        && error.ends_with("invalid character 'n'")
 }
 
 fn render_inventory_table(
@@ -209,40 +219,68 @@ fn run_health(
     let mut i = 0;
     while i < args.len() {
         let arg = args[i].to_string_lossy();
-        if arg == "-harness" || arg == "--harness" {
-            let value = args.get(i + 1)?;
-            harness_name = Some(value.to_string_lossy().into_owned());
-            i += 2;
-        } else if let Some(val) = arg
-            .strip_prefix("-harness=")
-            .or_else(|| arg.strip_prefix("--harness="))
-        {
-            harness_name = Some(val.to_string());
-            i += 1;
-        } else if arg == "-project" || arg == "--project" {
-            let value = args.get(i + 1)?;
-            project_dir = Some(PathBuf::from(value));
-            i += 2;
-        } else {
-            let val = arg
-                .strip_prefix("-project=")
-                .or_else(|| arg.strip_prefix("--project="))?;
-            project_dir = Some(PathBuf::from(val));
-            i += 1;
+        if matches!(arg.as_ref(), "-h" | "--h" | "-help" | "--help") {
+            let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+            return Some(exit::USAGE);
         }
+        if arg == "--" {
+            if let Some(value) = args.get(i + 1) {
+                let value = value.to_string_lossy();
+                let _ = writeln!(
+                    stderr,
+                    "symbrain harness health: unexpected argument {value:?}"
+                );
+                return Some(exit::USAGE);
+            }
+            break;
+        }
+        let (name, inline) = arg
+            .split_once('=')
+            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
+        match name {
+            "-harness" | "--harness" | "-project" | "--project" => {
+                let value = if let Some(value) = inline {
+                    value.to_owned()
+                } else {
+                    let Some(value) = args.get(i + 1) else {
+                        let _ = writeln!(
+                            stderr,
+                            "flag needs an argument: -{}",
+                            name.trim_start_matches('-')
+                        );
+                        let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+                        return Some(exit::USAGE);
+                    };
+                    i += 1;
+                    value.to_string_lossy().into_owned()
+                };
+                if name.ends_with("harness") {
+                    harness_name = Some(value);
+                } else {
+                    project_dir = Some(PathBuf::from(value));
+                }
+            }
+            _ if name.starts_with('-') => {
+                let _ = writeln!(
+                    stderr,
+                    "flag provided but not defined: -{}",
+                    name.trim_start_matches('-')
+                );
+                let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
+                return Some(exit::USAGE);
+            }
+            _ => {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain harness health: unexpected argument {arg:?}"
+                );
+                return Some(exit::USAGE);
+            }
+        }
+        i += 1;
     }
 
     let inventory = list(project_dir.as_deref());
-    if inventory.harnesses.iter().any(|harness| {
-        harness.global.error.is_some()
-            || harness
-                .project
-                .as_ref()
-                .is_some_and(|project| project.error.is_some())
-    }) {
-        return None;
-    }
-
     let mut entries = Vec::new();
     let mut probes = Vec::new();
 
@@ -346,7 +384,30 @@ struct HealthProbe {
 }
 
 fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
-    let path = symbrain_broker::discover(&probe.command, "").map_err(|_| ())?;
+    let path = match symbrain_broker::discover(&probe.command, "") {
+        Ok(path) => path,
+        Err(BrokerError::Io(error))
+            if error.kind() == std::io::ErrorKind::NotFound
+                && probe
+                    .command
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_')) =>
+        {
+            let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+            return Ok(HarnessHealthEntry {
+                harness: probe.harness,
+                config: probe.config,
+                server: probe.server,
+                transport: probe.transport,
+                healthy: false,
+                error: format!(
+                    "discover: broker: {:?} not found on PATH or in managed directory: exec: {:?}: executable file not found in {path_var}",
+                    probe.command, probe.command
+                ),
+            });
+        }
+        Err(_) => return Err(()),
+    };
     let client = Client::spawn(
         &path,
         Options {
@@ -356,7 +417,21 @@ fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
         },
     )
     .map_err(|_| ())?;
-    client.initialize(Duration::from_secs(5)).map_err(|_| ())?;
+    if let Err(error) = client.initialize(Duration::from_secs(5)) {
+        if let BrokerError::ProtocolMismatch { expected, actual } = error {
+            return Ok(HarnessHealthEntry {
+                harness: probe.harness,
+                config: probe.config,
+                server: probe.server,
+                transport: probe.transport,
+                healthy: false,
+                error: format!(
+                    "initialize: broker: protocol version mismatch: sent {expected:?}, child returned {actual:?}"
+                ),
+            });
+        }
+        return Err(());
+    }
     Ok(HarnessHealthEntry {
         harness: probe.harness,
         config: probe.config,

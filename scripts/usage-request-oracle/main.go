@@ -301,9 +301,8 @@ func applyFixtureEnv(home string) {
 	os.Setenv("OPENCODE_COOKIE", fixtureOpenCode)
 	os.Setenv("OPENROUTER_API_KEY", fixtureOpenRouter)
 	os.Setenv("OPENCODE_WORKSPACE_ID", "dump-workspace")
-	// Not set on purpose: KIMI_CODE_API_KEY is written to the CLI store instead,
-	// so the dump covers the CLI strategy rather than the API-key strategy.
-	_ = os.Unsetenv("KIMI_CODE_API_KEY")
+	// Pin the direct API-key strategy as well as the CLI and web strategies.
+	os.Setenv("KIMI_CODE_API_KEY", fixtureKimiAPIKey)
 	_ = os.Unsetenv("KIMI_CODE_BASE_URL")
 	_ = os.Unsetenv("OPENROUTER_API_URL")
 	_ = os.Unsetenv("HERMES_PORTAL_BASE_URL")

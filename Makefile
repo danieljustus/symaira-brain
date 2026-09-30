@@ -23,7 +23,7 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
 
-.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
+.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
@@ -106,6 +106,17 @@ usage-opencode-check:
 ## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
 usage-oracle-check:
 	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" run ./scripts/usage-oracle -check
+
+.PHONY: usage-gateway-lifecycle-check
+## usage-gateway-lifecycle-check: Verify production Go usage discovery is lazy and per-call
+usage-gateway-lifecycle-check:
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" test -count=1 ./internal/gateway -run '^TestUsageDiscoveryIsDeferredAndRepeatedPerCall$$'
+
+## activity-cli-oracle-check: Ensure native bounded activity CLI bytes remain pinned to production Go
+activity-cli-oracle-check:
+	@$(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_GO_ARTIFACT_ROOT)"
+	./scripts/run-go-oracle.sh "$(GO_ORACLE_REF)" build -ldflags "-X main.version=dev" -o "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" ./cmd/symbrain
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(GO_ORACLE_TOOLCHAIN) CGO_ENABLED=0 go run ./scripts/activity-cli-oracle -go-binary "$(abspath $(EXTERNAL_GO_ARTIFACT_ROOT)/symbrain-go)" -check
 
 ## policy-oracle-check: Ensure the profile/policy oracle expectations are current
 policy-oracle-check:
@@ -239,7 +250,7 @@ rust-fast:
 # in scripts/cli-oracle and in the cli_tree_tests.rs consumer) are fixed and
 # all four pass locally; per #631 they are wired back in this same change so
 # CI proves them before merge, rather than being re-added on faith.
-rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
+rust-check: rust-go-printable-check usage-oracle-check usage-opencode-check usage-gateway-lifecycle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check db-memory-oracle-check cli-oracle-check
 	$(EXTERNAL_RUN) cargo fmt --all --check
 	$(EXTERNAL_RUN) cargo check --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
@@ -294,7 +305,8 @@ lint: vet fmt-check
 # another nested go.mod directory is introduced later.
 # Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
 # below the platform's exec limit instead of expanding every path in make.
-GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -exec
+# Linked checkouts are independent trees, not sources owned by this checkout.
+GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -exec
 
 ## fmt: Format all Go source files
 fmt:

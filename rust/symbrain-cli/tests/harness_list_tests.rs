@@ -146,13 +146,119 @@ fn invalid_and_extra_arguments_keep_go_exit_and_diagnostics() {
     );
 }
 
-#[cfg(unix)]
 #[test]
-fn malformed_inventory_falls_back_before_native_output() {
-    use std::os::unix::fs::PermissionsExt;
-
+fn malformed_json_inventory_is_native_without_go_fallback() {
     let root = TempDir::new().unwrap();
     write_claude_config(&root, b"{not-json");
+    let missing_go = root.path().join("missing-go-fallback");
+    let mut table_command = command(&root, &["harness", "list"]);
+    table_command.env("SYMBRAIN_GO_BINARY", &missing_go);
+    let table = table_command.output().unwrap();
+
+    assert!(table.status.success(), "stderr: {:?}", table.stderr);
+    assert!(table.stderr.is_empty());
+    let stdout = String::from_utf8(table.stdout).unwrap();
+    assert!(stdout.contains("\tinvalid\tservers=(none)\n"));
+    assert!(stdout.contains(
+        "error: harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'\n"
+    ));
+
+    let mut json_command = command(&root, &["harness", "list", "--json"]);
+    json_command.env("SYMBRAIN_GO_BINARY", &missing_go);
+    let json = json_command.output().unwrap();
+    assert!(json.status.success(), "stderr: {:?}", json.stderr);
+    assert!(json.stderr.is_empty());
+    let value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    assert_eq!(
+        value["harnesses"][0]["global"]["error"],
+        "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character 'n'"
+    );
+}
+
+#[test]
+fn malformed_config_health_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    write_claude_config(&root, b"{not-json");
+    let missing_go = root.path().join("missing-go-fallback");
+    for (args, expected) in [
+        (
+            &["harness", "health"][..],
+            b"no MCP servers found\n".as_slice(),
+        ),
+        (
+            &["harness", "health", "--json"][..],
+            b"{\"servers\":null}\n".as_slice(),
+        ),
+    ] {
+        let mut command = command(&root, args);
+        command.env("SYMBRAIN_GO_BINARY", &missing_go);
+        let output = command.output().unwrap();
+        assert!(output.status.success(), "stderr: {:?}", output.stderr);
+        assert_eq!(output.stdout, expected);
+        assert!(output.stderr.is_empty());
+    }
+}
+
+#[test]
+fn missing_command_health_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    write_claude_config(
+        &root,
+        br#"{"mcpServers":{"missing":{"command":"symaira-missing-mcp-fixture"}}}"#,
+    );
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    command.env(
+        "SYMBRAIN_GO_BINARY",
+        root.path().join("missing-go-fallback"),
+    );
+    let output = command.output().unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let error = report["servers"][0]["error"].as_str().unwrap();
+    let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
+    assert_eq!(
+        error,
+        format!(
+            "discover: broker: \"symaira-missing-mcp-fixture\" not found on PATH or in managed directory: exec: \"symaira-missing-mcp-fixture\": executable file not found in {path_var}"
+        )
+    );
+}
+
+#[test]
+fn successful_health_probe_is_native_without_go_fallback() {
+    let root = TempDir::new().unwrap();
+    let profile = root.path().join("probe.toml");
+    std::fs::write(&profile, b"[profile]\nname = \"probe\"\n").unwrap();
+    let child = env!("CARGO_BIN_EXE_symbrain");
+    let config = serde_json::json!({"mcpServers":{"probe":{
+        "command":child,
+        "args":["mcp","--profile-file",profile]
+    }}});
+    write_claude_config(&root, serde_json::to_string(&config).unwrap().as_bytes());
+    let mut command = command(&root, &["harness", "health", "--json"]);
+    command.env(
+        "SYMBRAIN_GO_BINARY",
+        root.path().join("missing-go-fallback"),
+    );
+    let output = command.output().unwrap();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["servers"][0]["server"], "probe");
+    assert_eq!(report["servers"][0]["healthy"], true);
+}
+
+#[cfg(unix)]
+#[test]
+fn toml_and_io_inventory_errors_keep_go_fallback_before_output() {
+    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::symlink;
+
+    let root = TempDir::new().unwrap();
+    let codex = root.path().join("home/.codex");
+    std::fs::create_dir_all(&codex).unwrap();
+    std::fs::write(codex.join("config.toml"), b"mcp_servers = [\n").unwrap();
     let fallback = root.path().join("go-fallback");
     std::fs::write(
         &fallback,
@@ -171,11 +277,24 @@ fn malformed_inventory_falls_back_before_native_output() {
     assert_eq!(output.stdout, b"fallback-stdout\n");
     assert_eq!(output.stderr, b"fallback-stderr\n");
 
+    write_claude_config(&root, b"[]");
+    let mut json_command = command(&root, &["harness", "list", "--json"]);
+    json_command.env("SYMBRAIN_GO_BINARY", &fallback);
+    let json_output = json_command.output().unwrap();
+    assert_eq!(json_output.status.code(), Some(17));
+    assert_eq!(json_output.stdout, b"fallback-stdout\n");
+    assert_eq!(json_output.stderr, b"fallback-stderr\n");
+
     write_claude_config(
         &root,
         br#"{"mcpServers":{"global":{"command":"global-cmd"}}}"#,
     );
-    std::fs::write(root.path().join("project/.mcp.json"), b"{not-json").unwrap();
+    std::fs::write(root.path().join("unsafe.json"), b"{}").unwrap();
+    symlink(
+        root.path().join("unsafe.json"),
+        root.path().join("project/.mcp.json"),
+    )
+    .unwrap();
     let mut project_command = command(
         &root,
         &[

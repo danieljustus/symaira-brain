@@ -1,0 +1,14 @@
+{
+  "draft": false,
+  "prerelease": false,
+  "tag_name": "v0.0.1",
+  "html_url": "https://github.com/danieljustus/symaira-browse/releases/tag/v0.0.1",
+  "body": "Local fixture release",
+  "assets": [
+    {
+      "name": "symbrowse_linux_amd64.tar.gz",
+      "browser_download_url": "https://github.com/danieljustus/symaira-browse/releases/download/v0.0.1/symbrowse_linux_amd64.tar.gz",
+      "size": 100
+    }
+  ]
+}

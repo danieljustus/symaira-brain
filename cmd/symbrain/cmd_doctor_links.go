@@ -99,9 +99,13 @@ func checkVaultReachable(ctx context.Context) linkCheck {
 			Remedy: "run `symvault unlock` to authenticate",
 		}
 	default:
+		detail := "symvault probe failed"
+		if cmd.ProcessState != nil && cmd.ProcessState.ExitCode() >= 0 {
+			detail = fmt.Sprintf("symvault probe failed: exit status %d", cmd.ProcessState.ExitCode())
+		}
 		return linkCheck{
 			Name: name, Status: linkFail,
-			Detail: "symvault probe failed: " + runErr.Error(),
+			Detail: detail,
 			Remedy: "run `symvault doctor` to diagnose",
 		}
 	}

@@ -1,0 +1,668 @@
+#!/usr/bin/env python3
+"""Measure a paired Go/Rust real-Chrome local-fixture flow on one native host."""
+from __future__ import annotations
+
+import argparse
+import errno
+import hashlib
+import io
+import json
+import os
+import platform
+import random
+import re
+import shutil
+import statistics
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any, Sequence
+
+FIXTURE_TITLE = "PERF-003 Chrome fixture"
+FIXTURE_TOKEN = "chrome-fixture-token-9281"
+P95_LIMIT = 1.10
+MAX_OUTPUT = 1 << 20
+# UTF-8 uses at most four bytes per output character. This bounds temporary
+# capture files while keeping the public limit in decoded text characters.
+MAX_CAPTURE_BYTES = MAX_OUTPUT * 4
+MAX_DAEMON_LOG_BYTES = 8192
+SECRET_ASSIGNMENT = re.compile(
+    r"(?i)\b(password|token|secret|authorization)(\s*[=:]\s*)(\"[^\"]*\"|'[^']*'|[^\s,}]+)"
+)
+METADATA_URL = "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
+TARGETS = {
+    "darwin-amd64": ("Darwin", {"x86_64", "amd64"}),
+    "darwin-arm64": ("Darwin", {"arm64", "aarch64"}),
+    "linux-amd64": ("Linux", {"x86_64", "amd64"}),
+    "linux-arm64": ("Linux", {"aarch64", "arm64"}),
+    "windows-amd64": ("Windows", {"amd64", "x86_64"}),
+    "windows-arm64": ("Windows", {"arm64", "aarch64"}),
+}
+SUPPORTED_CFT = set(TARGETS) - {"windows-arm64"}
+
+
+def remove_owned_tempdir(
+    root: Path,
+    *,
+    timeout: float = 5.0,
+    remove=shutil.rmtree,
+    sleep=time.sleep,
+) -> None:
+    """Retry removal only for this runner-owned profile after browser shutdown."""
+    deadline = time.monotonic() + timeout
+    while root.exists():
+        try:
+            remove(root)
+            return
+        except FileNotFoundError:
+            return
+        except OSError as error:
+            if error.errno not in {errno.ENOTEMPTY, errno.EBUSY, errno.EACCES, errno.EPERM}:
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise
+            sleep(min(0.05, remaining))
+
+
+class FixtureHandler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:  # noqa: N802 - stdlib callback
+        body = (
+            "<!doctype html><html><head><title>" + FIXTURE_TITLE + "</title></head>"
+            "<body><main><h1>" + FIXTURE_TITLE + "</h1><p>" + FIXTURE_TOKEN + "</p></main></body></html>"
+        ).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format: str, *args: object) -> None:
+        return
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def nearest_rank(samples: list[int]) -> int:
+    ordered = sorted(samples)
+    return ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)]
+
+
+def summarize_stage(samples: list[dict[str, Any]], field: str) -> dict[str, int | str]:
+    values = [
+        int(sample[field])
+        for sample in samples
+        if sample.get("status") == "pass" and isinstance(sample.get(field), int)
+    ]
+    if not values:
+        return {"status": "incomplete", "samples": 0}
+    return {
+        "status": "complete" if len(values) == len(samples) else "incomplete",
+        "samples": len(values),
+        "median_duration_ns": int(statistics.median(values)),
+        "p95_duration_ns": nearest_rank(values),
+    }
+
+
+def paired_gate_passes(go_samples: list[int], rust_samples: list[int], required: int) -> bool:
+    return (
+        len(go_samples) == required
+        and len(rust_samples) == required
+        and bool(go_samples)
+        and nearest_rank(rust_samples) <= nearest_rank(go_samples) * P95_LIMIT
+    )
+
+
+def native_target_matches(target: str, system: str, machine: str) -> bool:
+    expected = TARGETS.get(target)
+    return bool(expected and expected[0] == system and machine.casefold() in expected[1])
+
+
+def make_env(root: Path, implementation: str, chrome: Path, launcher: Path | None = None,
+             diagnostics: bool = False) -> dict[str, str]:
+    home = root / "home"
+    tmp = root / "tmp"
+    for path in (home, tmp, root / "runtime", root / "cache"):
+        path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    env = {key: value for key, value in os.environ.items() if not key.startswith("SYMBROWSE_")}
+    for key in ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "USER", "USERNAME"):
+        if key in os.environ:
+            env[key] = os.environ[key]
+    executable = launcher or chrome
+    env.update({
+        "HOME": str(home), "USERPROFILE": str(home),
+        "XDG_CONFIG_HOME": str(home / ".config"),
+        "XDG_DATA_HOME": str(home / ".local" / "share"),
+        "XDG_CACHE_HOME": str(root / "cache"),
+        "XDG_STATE_HOME": str(home / ".local" / "state"),
+        "XDG_RUNTIME_DIR": str(root / "runtime"),
+        "TMPDIR": str(tmp), "TMP": str(tmp), "TEMP": str(tmp),
+        "SYMBROWSE_MODE": "browser", "SYMBROWSE_ENGINE": "chrome",
+        "SYMBROWSE_EXECUTABLE_PATH": str(executable),
+        "SYMBROWSE_CHROME_EXECUTABLE": str(executable),
+        "SYMBROWSE_HEADLESS": "1",
+        "SYMBROWSE_CHECK_UPDATES": "0", "SYMBROWSE_SYMGUARD": "off",
+        "SYMBROWSE_ALLOW_PRIVATE": "true", "LANG": "C", "LC_ALL": "C", "TZ": "UTC",
+        "NO_COLOR": "1",
+    })
+    if os.name == "nt":
+        env["APPDATA"] = str(home / "AppData" / "Roaming")
+        env["LOCALAPPDATA"] = str(home / "AppData" / "Local")
+    if implementation == "go":
+        env["SYMBROWSE_ENGINE"] = "chrome"
+    elif implementation == "rust":
+        env["SYMBROWSE_MODE"] = "browser"
+        if diagnostics:
+            env["SYMBROWSE_PERF_DIAGNOSTICS"] = "1"
+            env["SYMBROWSE_DAEMON_LOG"] = str(home / ".local" / "state" / "symbrowse" / "daemon.log")
+    else:
+        raise ValueError(f"unknown implementation: {implementation}")
+    return env
+
+
+def command(binary: Path, args: list[str], session: str) -> list[str]:
+    if args[:2] in (["daemon", "stop"], ["daemon", "status"]):
+        return [str(binary), "daemon", args[1], "--json", "--session", session, *args[2:]]
+    return [str(binary), args[0], "--json", "--session", session, *args[1:]]
+
+
+def run_cli(
+    binary: Path,
+    args: list[str],
+    session: str,
+    env: dict[str, str],
+    cwd: Path,
+    *,
+    timeout: float = 45,
+) -> tuple[int, str, str]:
+    argv = command(binary, args, session)
+    with (
+        tempfile.TemporaryFile(mode="w+b") as stdout_file,
+        tempfile.TemporaryFile(mode="w+b") as stderr_file,
+    ):
+        process = subprocess.Popen(
+            argv,
+            cwd=cwd,
+            env=env,
+            stdout=stdout_file,
+            stderr=stderr_file,
+            close_fds=True,
+        )
+        deadline = time.monotonic() + timeout
+        timed_out = False
+        output_limited = False
+        while process.poll() is None:
+            stdout_size = os.fstat(stdout_file.fileno()).st_size
+            stderr_size = os.fstat(stderr_file.fileno()).st_size
+            if max(stdout_size, stderr_size) > MAX_CAPTURE_BYTES:
+                output_limited = True
+                process.kill()
+                break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                timed_out = True
+                process.kill()
+                break
+            time.sleep(min(0.01, remaining))
+        try:
+            process.wait(timeout=1.0)
+        except subprocess.TimeoutExpired:
+            # Killing the CLI must not make capture cleanup depend on a
+            # detached daemon or other descendant releasing inherited pipes.
+            process.kill()
+            try:
+                process.wait(timeout=1.0)
+            except subprocess.TimeoutExpired:
+                raise subprocess.TimeoutExpired(argv, timeout)
+        if timed_out:
+            raise subprocess.TimeoutExpired(argv, timeout)
+        if output_limited:
+            return process.returncode or 1, "", "output limit exceeded"
+
+        stdout = _read_capture_text(stdout_file)
+        stderr = _read_capture_text(stderr_file)
+    if len(stdout) > MAX_OUTPUT or len(stderr) > MAX_OUTPUT:
+        return process.returncode or 1, "", "output limit exceeded"
+    return process.returncode, stdout, stderr
+
+
+def _read_capture_text(capture: io.BufferedRandom) -> str:
+    """Read one bounded file-backed CLI stream with subprocess text semantics."""
+    with io.open(
+        os.dup(capture.fileno()), "r", encoding=None, errors=None, newline=None
+    ) as stream:
+        stream.seek(0)
+        return stream.read(MAX_OUTPUT + 1)
+
+
+def validate_read_output(output: str) -> bool:
+    markers = read_output_markers(output)
+    return markers["fixture_title_present"] and markers["fixture_token_present"]
+
+
+def read_output_markers(output: str) -> dict[str, bool]:
+    if not output:
+        return {"fixture_title_present": False, "fixture_token_present": False}
+    try:
+        document: Any = json.loads(output)
+    except json.JSONDecodeError:
+        return {"fixture_title_present": False, "fixture_token_present": False}
+    serialized = json.dumps(document, sort_keys=True).casefold()
+    return {
+        "fixture_title_present": FIXTURE_TITLE.casefold() in serialized,
+        "fixture_token_present": FIXTURE_TOKEN.casefold() in serialized,
+    }
+
+
+def daemon_startup_log(env: dict[str, str], limit: int = MAX_DAEMON_LOG_BYTES) -> str | None:
+    """Return a bounded, redacted tail of the sample daemon log."""
+    state_home = env.get("XDG_STATE_HOME")
+    if not state_home or limit <= 0:
+        return None
+    configured_log = env.get("SYMBROWSE_DAEMON_LOG")
+    path = Path(configured_log) if configured_log else Path(state_home) / "symbrowse" / "daemon.log"
+    try:
+        with path.open("rb") as stream:
+            stream.seek(0, os.SEEK_END)
+            size = stream.tell()
+            stream.seek(max(0, size - limit))
+            data = stream.read(limit)
+    except OSError:
+        return None
+    text = data.decode("utf-8", errors="replace").strip()
+    if not text:
+        return None
+    text = SECRET_ASSIGNMENT.sub(r"\1\2[redacted]", text)
+    if size > limit:
+        text = "[earlier daemon log bytes omitted]\n" + text
+    return text
+
+
+def wait_for_daemon_exit(
+    binary: Path,
+    session: str,
+    env: dict[str, str],
+    cwd: Path,
+    *,
+    timeout: float = 10.0,
+    sleep=time.sleep,
+) -> bool:
+    """Wait until daemon.stop's asynchronous server teardown has completed."""
+    deadline = time.monotonic() + timeout
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        try:
+            code, stdout, _ = run_cli(
+                binary, ["daemon", "status"], session, env, cwd,
+                timeout=min(1.0, remaining),
+            )
+        except subprocess.TimeoutExpired:
+            sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+            continue
+        except OSError:
+            return False
+        if code != 0:
+            return True
+        try:
+            document = json.loads(stdout)
+        except json.JSONDecodeError:
+            return False
+        data = document.get("data") if isinstance(document, dict) else None
+        if isinstance(data, dict) and data.get("running") is False:
+            return True
+        sleep(min(0.05, max(0.0, deadline - time.monotonic())))
+
+
+def windows_profile_process_names(profile_root: Path, timeout: float = 5.0) -> dict[str, int]:
+    """Count process names in Chrome's sample-profile process tree on Windows."""
+    escaped = str(profile_root).replace("'", "''")
+    script = "\n".join([
+        f"$profile = '{escaped}'",
+        "$all = @(Get-CimInstance Win32_Process -ErrorAction Stop)",
+        "$ids = [System.Collections.Generic.HashSet[int]]::new()",
+        "foreach ($process in $all) {",
+        "  if ($process.Name -match '^chrome.*\\.exe$' -and $process.CommandLine -and $process.CommandLine.Contains($profile)) {",
+        "    [void]$ids.Add([int]$process.ProcessId)",
+        "  }",
+        "}",
+        "do {",
+        "  $before = $ids.Count",
+        "  foreach ($process in $all) {",
+        "    if ($ids.Contains([int]$process.ParentProcessId)) { [void]$ids.Add([int]$process.ProcessId) }",
+        "  }",
+        "} while ($ids.Count -gt $before)",
+        "$details = @($all | Where-Object { $ids.Contains([int]$_.ProcessId) } | Group-Object Name | ForEach-Object { @{name=$_.Name;count=$_.Count} })",
+        "[Console]::Out.Write((ConvertTo-Json -InputObject $details -Compress))",
+    ])
+    result = subprocess.run(
+        ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", script],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    output = result.stdout.strip()
+    if not output:
+        return {}
+    details = json.loads(output)
+    if isinstance(details, dict):
+        details = [details]
+    return {
+        str(item["name"]): int(item["count"])
+        for item in details
+        if isinstance(item, dict) and item.get("name") and item.get("count") is not None
+    }
+
+
+def windows_profile_process_count(profile_root: Path, timeout: float = 5.0) -> int:
+    """Count Chrome processes left in the sample's process tree on Windows."""
+    return sum(windows_profile_process_names(profile_root, timeout).values())
+
+
+def wait_for_windows_profile_cleanup(profile_root: Path, timeout: float = 15.0) -> int:
+    """Poll outside the measured interval until Chrome releases the sample profile."""
+    deadline = time.monotonic() + timeout
+    count = 0
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return count
+        count = windows_profile_process_count(profile_root, timeout=max(1.0, remaining))
+        if count == 0:
+            return 0
+        remaining = deadline - time.monotonic()
+        if remaining > 0:
+            time.sleep(min(0.1, remaining))
+
+
+def flow(binary: Path, implementation: str, chrome: Path, launcher: Path | None, url: str,
+         root: Path, index: int, diagnostics: bool = False) -> dict[str, Any]:
+    session = f"p3-{implementation[0]}-{index}-{os.getpid()}"
+    env = make_env(root, implementation, chrome, launcher, diagnostics=diagnostics)
+    started = time.perf_counter_ns()
+    outcome: dict[str, Any] = {"status": "error", "phase": "startup"}
+    try:
+        open_started = time.perf_counter_ns()
+        opened = run_cli(binary, ["open", url], session, env, root)
+        open_duration = time.perf_counter_ns() - open_started
+        if opened[0] != 0:
+            outcome = {"status": "error", "phase": "open", "exit_code": opened[0],
+                       "open_cli_duration_ns": open_duration,
+                       "stdout_sha256": hashlib.sha256(opened[1].encode()).hexdigest(),
+                       "stderr_sha256": hashlib.sha256(opened[2].encode()).hexdigest()}
+            try:
+                error = json.loads(opened[1]).get("error", {})
+                if isinstance(error, dict):
+                    outcome["error_code"] = str(error.get("code", ""))[:128]
+                    outcome["error_message"] = str(error.get("message", ""))[:256]
+            except (json.JSONDecodeError, AttributeError):
+                pass
+            if implementation == "rust":
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_navigation_log"] = diagnostic
+        else:
+            read_started = time.perf_counter_ns()
+            read = run_cli(binary, ["read"], session, env, root)
+            read_duration = time.perf_counter_ns() - read_started
+            elapsed = time.perf_counter_ns() - started
+            read_markers = read_output_markers(read[1])
+            if read[0] != 0 or not all(read_markers.values()):
+                outcome = {"status": "error", "phase": "read", "exit_code": read[0],
+                           "semantic_contract": "local fixture title/token must appear in JSON read output",
+                           **read_markers,
+                           "stdout_sha256": hashlib.sha256(read[1].encode()).hexdigest(),
+                           "stderr_sha256": hashlib.sha256(read[2].encode()).hexdigest(), "duration_ns": elapsed,
+                           "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
+            else:
+                outcome = {"status": "pass", "duration_ns": elapsed,
+                           "open_cli_duration_ns": open_duration, "read_cli_duration_ns": read_duration}
+    except (OSError, subprocess.TimeoutExpired) as error:
+        outcome = {"status": "error", "reason": type(error).__name__, "duration_ns": time.perf_counter_ns() - started}
+    finally:
+        try:
+            run_cli(binary, ["daemon", "stop"], session, env, root)
+            if not wait_for_daemon_exit(binary, session, env, root):
+                if outcome["status"] == "pass":
+                    outcome = {"status": "error", "phase": "daemon-stop",
+                               "reason": "daemon did not exit within 10 seconds after stop"}
+                else:
+                    outcome["cleanup_error"] = "daemon did not exit within 10 seconds after stop"
+        except (OSError, subprocess.TimeoutExpired):
+            if outcome["status"] == "pass":
+                outcome = {"status": "error", "phase": "daemon-stop",
+                           "reason": "daemon shutdown could not be confirmed"}
+            else:
+                outcome["cleanup_error"] = "daemon shutdown could not be confirmed"
+    if sys.platform == "win32" and implementation == "rust":
+        try:
+            remaining = wait_for_windows_profile_cleanup(root)
+            outcome["chrome_profile_processes_after_stop"] = remaining
+            if remaining:
+                try:
+                    outcome["chrome_profile_process_names"] = windows_profile_process_names(
+                        root, timeout=5.0
+                    )
+                except (OSError, subprocess.SubprocessError, ValueError):
+                    outcome["chrome_profile_process_names"] = "unavailable"
+                diagnostic = daemon_startup_log(env)
+                if diagnostic is not None:
+                    outcome["daemon_shutdown_log"] = diagnostic
+                if outcome["status"] == "pass":
+                    outcome.update(status="error", phase="chrome-cleanup",
+                                   reason="Chrome processes still reference the stopped sample profile")
+        except (OSError, subprocess.SubprocessError, ValueError) as error:
+            diagnostic = daemon_startup_log(env)
+            if diagnostic is not None:
+                outcome["daemon_shutdown_log"] = diagnostic
+            if isinstance(error, subprocess.TimeoutExpired):
+                outcome["chrome_cleanup_probe_error"] = f"TimeoutExpired after {error.timeout}s"
+            else:
+                outcome["chrome_cleanup_probe_error"] = f"{type(error).__name__}: {str(error)[:200]}"
+            if outcome["status"] == "pass":
+                outcome.update(status="error", phase="chrome-cleanup",
+                               reason="Windows Chrome profile cleanup could not be verified")
+            else:
+                outcome["chrome_cleanup_probe"] = "unavailable"
+    if outcome.get("error_code") == "daemon_unavailable":
+        diagnostic = daemon_startup_log(env)
+        if diagnostic is not None:
+            outcome["daemon_startup_log"] = diagnostic
+    if diagnostics:
+        diagnostic_log = daemon_startup_log(env)
+        if diagnostic_log is not None:
+            outcome["diagnostic_daemon_log"] = diagnostic_log
+    outcome["sample_index"] = index
+    outcome["fixture_url"] = url
+    return outcome
+
+
+def identity(binary: Path) -> dict[str, Any]:
+    return {"sha256": sha256(binary), "size_bytes": binary.stat().st_size}
+
+
+def measure(args: argparse.Namespace) -> dict[str, Any]:
+    diagnostic_only = bool(getattr(args, "diagnostic_only", False))
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=args.repo, capture_output=True, text=True,
+        check=True,
+    ).stdout.strip()
+    report: dict[str, Any] = {
+        "schema_version": 1, "report_version": "perf003-real-chrome-paired-v1",
+        "target": args.target, "source_revision": revision,
+        "host": {"system": platform.system(), "machine": platform.machine()}, "status": "blocked",
+        "fixture": {"id": "perf003-local-chrome-html-v1", "title": FIXTURE_TITLE,
+                    "content_token": FIXTURE_TOKEN, "flow": ["open", "read"]},
+        "chrome": {"provider": "Chrome for Testing", "version": args.chrome_version,
+                   "metadata_url": METADATA_URL, "archive_sha256": args.chrome_archive_sha256},
+        "binaries": {}, "runs_per_implementation": args.runs,
+        "p95_calculation": "nearest-rank: sorted_samples[ceil(0.95*n)-1]",
+        "gate": "blocked", "reason": None,
+    }
+    if diagnostic_only:
+        report["diagnostic_only"] = True
+    if args.expected_source_revision and revision != args.expected_source_revision:
+        report["reason"] = "checkout source revision differs from expected workflow SHA"
+        return report
+    if not native_target_matches(args.target, platform.system(), platform.machine()):
+        report["reason"] = f"native runner identity mismatch: {platform.system()}/{platform.machine()}"
+        return report
+    if not all(path.is_file() and os.access(path, os.X_OK) for path in (args.go, args.rust)):
+        report["reason"] = "both native Go and Rust binaries must be executable files"
+        return report
+    report["binaries"] = {"go": identity(args.go), "rust": identity(args.rust)}
+    if args.target not in SUPPORTED_CFT:
+        report["status"] = "unsupported"
+        report["reason"] = "official Chrome for Testing has no Windows ARM64 browser artifact"
+        report["chrome"]["version"] = None
+        report["chrome"]["archive_sha256"] = None
+        return report
+    if not args.chrome or not args.chrome.is_file() or not args.chrome_version or not args.chrome_archive_sha256:
+        report["reason"] = "verified Chrome for Testing executable/version/archive digest are required"
+        return report
+    if len(args.chrome_archive_sha256) != 64 or any(char not in "0123456789abcdef" for char in args.chrome_archive_sha256):
+        report["reason"] = "Chrome for Testing archive SHA-256 must be 64 lowercase hexadecimal characters"
+        return report
+    report["chrome"]["binary_sha256"] = sha256(args.chrome)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), FixtureHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{server.server_port}/fixture.html"
+    samples: dict[str, list[dict[str, Any]]] = {"go": [], "rust": []}
+    chooser = random.Random(int(revision[:12], 16))
+    cleanup_failed = False
+    try:
+        for index in range(args.runs):
+            order = ["go", "rust"]
+            if chooser.randrange(2):
+                order.reverse()
+            for implementation in order:
+                binary = args.go if implementation == "go" else args.rust
+                temp = Path(tempfile.mkdtemp(prefix=f"p3-{implementation[0]}-", dir="/tmp" if sys.platform == "darwin" else None))
+                try:
+                    sample = flow(
+                        binary, implementation, args.chrome, args.chrome_launcher, url, temp, index,
+                        diagnostics=diagnostic_only and implementation == "rust",
+                    )
+                except BaseException as primary:
+                    try:
+                        remove_owned_tempdir(temp, timeout=30.0 if args.target.startswith("windows-") else 5.0)
+                    except OSError as cleanup:
+                        if hasattr(primary, "add_note"):
+                            primary.add_note(f"owned Chrome profile cleanup also failed: {cleanup}")
+                        else:
+                            primary.cleanup_error = str(cleanup)
+                    raise
+                try:
+                    remove_owned_tempdir(temp, timeout=30.0 if args.target.startswith("windows-") else 5.0)
+                except OSError as error:
+                    sample["cleanup_error"] = f"{type(error).__name__}: {error.strerror or 'profile cleanup failed'}"
+                    if sample["status"] == "pass":
+                        sample["measurement_status"] = "pass"
+                        sample.update(status="error", phase="cleanup")
+                    cleanup_failed = True
+                samples[implementation].append(sample)
+                if cleanup_failed:
+                    break
+            if cleanup_failed:
+                break
+            if any(samples[implementation][-1]["status"] != "pass" for implementation in ("go", "rust")):
+                rust_samples = samples["rust"]
+                if (
+                    not diagnostic_only
+                    and samples["go"][-1].get("status") == "pass"
+                    and rust_samples
+                    and rust_samples[-1].get("status") != "pass"
+                ):
+                    diagnostic_root = Path(tempfile.mkdtemp(prefix="p3-diagnostic-r-"))
+                    try:
+                        diagnostic = flow(
+                            args.rust, "rust", args.chrome, args.chrome_launcher, url,
+                            diagnostic_root, index, diagnostics=True,
+                        )
+                    finally:
+                        remove_owned_tempdir(
+                            diagnostic_root,
+                            timeout=30.0 if args.target.startswith("windows-") else 5.0,
+                        )
+                    diagnostic["diagnostic_only"] = True
+                    report["windows_amd64_rust_failure_diagnostic"] = diagnostic
+                break
+    finally:
+        server.shutdown()
+        thread.join(timeout=3)
+        server.server_close()
+
+    for implementation in ("go", "rust"):
+        passing = [int(item["duration_ns"]) for item in samples[implementation] if item.get("status") == "pass"]
+        report["binaries"][implementation]["chrome_flow"] = {
+            "status": "pass" if len(passing) == args.runs else "error",
+            "samples": samples[implementation], "sample_count": len(passing),
+            "p95_duration_ns": nearest_rank(passing) if passing else None,
+            "median_duration_ns": int(statistics.median(passing)) if passing else None,
+            "stages": {
+                "open_cli": summarize_stage(samples[implementation], "open_cli_duration_ns"),
+                "read_cli": summarize_stage(samples[implementation], "read_cli_duration_ns"),
+            },
+        }
+    go_p95 = report["binaries"]["go"]["chrome_flow"]["p95_duration_ns"]
+    rust_p95 = report["binaries"]["rust"]["chrome_flow"]["p95_duration_ns"]
+    if diagnostic_only:
+        report["gate"] = "not_evaluated"
+        report["status"] = "diagnostic_only"
+        report["reason"] = "primary Rust samples are instrumented; PERF-003 gate not evaluated"
+        return report
+    report["gate"] = "pass" if paired_gate_passes(
+        [int(item["duration_ns"]) for item in samples["go"] if item.get("status") == "pass"],
+        [int(item["duration_ns"]) for item in samples["rust"] if item.get("status") == "pass"],
+        args.runs,
+    ) else "blocked"
+    report["status"] = "measured" if go_p95 is not None and rust_p95 is not None else "error"
+    if cleanup_failed:
+        report["status"] = "error"
+        report["reason"] = "owned Chrome profile cleanup failed; see sample cleanup_error"
+    elif report["gate"] != "pass":
+        report["reason"] = "paired Chrome flow failed or Rust p95 exceeds 110% of Go"
+    return report
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", required=True, choices=sorted(TARGETS))
+    parser.add_argument("--go", type=Path, required=True)
+    parser.add_argument("--rust", type=Path, required=True)
+    parser.add_argument("--chrome", type=Path)
+    parser.add_argument("--chrome-launcher", type=Path)
+    parser.add_argument("--chrome-version")
+    parser.add_argument("--chrome-archive-sha256")
+    parser.add_argument("--expected-source-revision")
+    parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--runs", type=int, default=30)
+    parser.add_argument("--diagnostic-only", action="store_true",
+                        help="instrument primary Rust samples and do not evaluate the PERF gate")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+    if args.runs < 1:
+        parser.error("--runs must be positive")
+    report = measure(args)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report, indent=2))
+    return 0 if report.get("gate") == "pass" or report.get("status") in {"unsupported", "diagnostic_only"} else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

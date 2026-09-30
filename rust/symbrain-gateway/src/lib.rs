@@ -130,7 +130,6 @@ impl Gateway {
             .exposed
             .iter()
             .any(|name| name == "get_ai_usage");
-        let usage = usage_allowed.then(|| Arc::new(Service::new()));
         // A supplied memory backend is the legacy/fixture transport. Prefer it
         // over the embedded store so a connection never publishes or routes two
         // implementations of the same unnamespaced core tools. Production
@@ -177,7 +176,7 @@ impl Gateway {
             version: version.into(),
             identity_injection: true,
             audit: None,
-            usage,
+            usage: None,
             usage_allowed,
             memory,
             memory_tool_names,
@@ -231,8 +230,7 @@ impl Gateway {
         self
     }
 
-    /// Replaces the production usage service with an injected deterministic
-    /// service while retaining the profile policy decision.
+    /// Injects a deterministic usage service while retaining profile policy.
     #[must_use]
     pub fn with_usage_service(mut self, service: Arc<Service>) -> Self {
         if self.usage_allowed {
@@ -257,7 +255,7 @@ impl Gateway {
     #[must_use]
     pub fn tools(&self) -> Vec<ListedTool> {
         let mut tools = vec![builtin_tool("bootstrap"), builtin_tool("patterns")];
-        if self.usage_allowed && self.usage.is_some() {
+        if self.usage_allowed {
             tools.push(usage_tool());
         }
         tools.extend(self.catalog.exposed().map(ListedTool::from_entry));

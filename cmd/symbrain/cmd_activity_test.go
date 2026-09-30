@@ -15,6 +15,7 @@ import (
 
 func newCLIActivityTestDB(t *testing.T, base time.Time) string {
 	t.Helper()
+	expiresAt := time.Now().UTC().Add(time.Hour)
 	cfg := config.Defaults()
 	cfg.Database.Path = t.TempDir() + "/activity.db"
 	database, err := db.Open(cfg)
@@ -30,7 +31,7 @@ func newCLIActivityTestDB(t *testing.T, base time.Time) string {
 		ID: "cli-segment", Source: "symcockpit", Granularity: activity.Granularity10Min,
 		StartedAt: base, EndedAt: base.Add(10 * time.Minute),
 		Applications: []string{"Editor"}, RedactedSummary: "edited activity summary",
-		RawRef: "/opaque/cli.ref", ExpiresAt: base.Add(365 * 24 * time.Hour),
+		RawRef: "/opaque/cli.ref", ExpiresAt: expiresAt,
 	}); err != nil {
 		_ = database.Close()
 		t.Fatalf("save activity segment: %v", err)
@@ -38,7 +39,7 @@ func newCLIActivityTestDB(t *testing.T, base time.Time) string {
 	if err := store.SaveEpisode(activity.Episode{
 		ID: "cli-episode", Title: "Editor episode", Scope: "project-a",
 		StartedAt: base.Add(time.Hour), EndedAt: base.Add(2 * time.Hour),
-		Confidence: 0.8, SegmentIDs: []string{"cli-segment"},
+		Confidence: 0.8, SegmentIDs: []string{"cli-segment"}, ExpiresAt: expiresAt,
 	}); err != nil {
 		_ = database.Close()
 		t.Fatalf("save activity episode: %v", err)

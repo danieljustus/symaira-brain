@@ -355,5 +355,5 @@ Working, early release. Implemented: the `version`, `doctor`, `scan`,
 policy, capability, grant, approval, audit, discovery, and spawn subsystems
 under `internal/` (run `ls internal/` for the current list). The MCP proxy,
 schema pinning, and remote access (sections 3, 4, and 6 above) are design
-intent only. See [CHANGELOG.md](CHANGELOG.md) for release history (absorbed
+intent only. See [CHANGELOG.md](../CHANGELOG.md) for release history (absorbed
 into the root module on 2026-08-27).

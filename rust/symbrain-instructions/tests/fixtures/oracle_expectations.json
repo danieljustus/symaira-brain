@@ -2,7 +2,7 @@
   "schema_version": 1,
   "rollback_baseline": "4b6be3b0e55212af630bb5cc57637a2ea6e31e62",
   "go_toolchain": "go1.26.7",
-  "generator_sha256": "3a1045ddb720f287f0636c2a1ef6dcc965838805457289258b774a1df14bd34a",
+  "generator_sha256": "82748c2121067b40f6ca4c97889bcbda54d79d9a3b61a22ea0c2399fbe36c4b7",
   "provenance": [
     {
       "path": "internal/instructions/block.go",

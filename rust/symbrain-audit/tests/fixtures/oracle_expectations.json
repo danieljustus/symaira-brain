@@ -31,6 +31,42 @@
       "verbose": true,
       "arg_keys": "content",
       "arg_values": "content=[redacted]"
+    },
+    {
+      "id": "number-integral",
+      "server": "memory",
+      "tool": "memory_set",
+      "args": "{\"count\":1.0}",
+      "verbose": true,
+      "arg_keys": "count",
+      "arg_values": "count=1"
+    },
+    {
+      "id": "number-large",
+      "server": "memory",
+      "tool": "memory_set",
+      "args": "{\"count\":1e20}",
+      "verbose": true,
+      "arg_keys": "count",
+      "arg_values": "count=1e+20"
+    },
+    {
+      "id": "number-rounded",
+      "server": "memory",
+      "tool": "memory_set",
+      "args": "{\"count\":9007199254740993}",
+      "verbose": true,
+      "arg_keys": "count",
+      "arg_values": "count=9.007199254740992e+15"
+    },
+    {
+      "id": "number-nested",
+      "server": "memory",
+      "tool": "memory_set",
+      "args": "{\"count\":[1.0,2]}",
+      "verbose": true,
+      "arg_keys": "count",
+      "arg_values": "count=[1 2]"
     }
   ],
   "tail": {
@@ -77,11 +113,12 @@
     {
       "timestamp": "",
       "profile": "chain",
-      "server": "",
-      "tool": "",
-      "duration_ms": 0,
-      "status": "",
-      "retryable": false
+      "server": "memory",
+      "tool": "memory_search",
+      "duration_ms": 1,
+      "status": "ok",
+      "retryable": false,
+      "arg_keys": "query"
     }
   ]
 }

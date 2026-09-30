@@ -13,8 +13,8 @@ concurrency:
   group: rust-${{ github.ref }}
   cancel-in-progress: true
 
-# This workspace currently contains only guard-core. These checks do not
-# establish native MCP process/stdio evidence or cross-platform runtime parity.
+# These checks and the unpublished Linux candidate do not establish native
+# MCP process/stdio evidence or cross-platform runtime parity.
 jobs:
   guard-parity:
     name: Rust guard and pinned Go oracle
@@ -103,3 +103,90 @@ jobs:
 
       - name: Check dependency policy against Cargo.lock
         run: make rust-deny
+
+  hybrid-release-candidate:
+    name: Unpublished Linux Rust and Go candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Go oracle
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: rust-hybrid-candidate-v1-${{ runner.os }}-${{ runner.arch }}-toolchain-${{ hashFiles('rust-toolchain.toml') }}-lock-${{ hashFiles('Cargo.lock') }}
+
+      - name: Check Browse CLI help and completion parity
+        run: cargo test --manifest-path browse/Cargo.toml -p symbrowse-cli --locked --test help_oracle
+
+      - name: Determine unpublished candidate version
+        id: candidate
+        run: |
+          set -euo pipefail
+          base_version="$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["workspace"]["package"]["version"])')"
+          version="${base_version}-candidate.${GITHUB_SHA:0:12}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Building unpublished candidate $version"
+
+      - name: Build Rust CLI
+        env:
+          SYMBRAIN_VERSION: ${{ steps.candidate.outputs.version }}
+        run: cargo build --locked --release -p symbrain-cli
+
+      - name: Build Go fallback oracle
+        env:
+          VERSION: ${{ steps.candidate.outputs.version }}
+        run: CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=$VERSION" -o "$RUNNER_TEMP/symbrain-go" ./cmd/symbrain
+
+      - name: Package Linux hybrid candidate and SHA-256 manifest
+        env:
+          VERSION: ${{ steps.candidate.outputs.version }}
+        run: |
+          set -euo pipefail
+          assets="$RUNNER_TEMP/symbrain-hybrid-assets"
+          contents="$RUNNER_TEMP/symbrain-hybrid-contents"
+          mkdir -p "$assets" "$contents"
+          install -m 755 target/release/symbrain "$contents/symbrain"
+          install -m 755 "$RUNNER_TEMP/symbrain-go" "$contents/symbrain-go"
+          install -m 644 AGENTS.md LICENSE README.md "$contents/"
+          archive="symbrain_${VERSION}_linux_amd64.tar.gz"
+          source_epoch="$(git show -s --format=%ct "$GITHUB_SHA")"
+          tar --sort=name --mtime="@$source_epoch" --owner=0 --group=0 --numeric-owner \
+            -C "$contents" -cf - AGENTS.md LICENSE README.md symbrain symbrain-go \
+            | gzip -n > "$assets/$archive"
+          (cd "$assets" && sha256sum "$archive" > checksums.txt)
+
+      - name: Verify exact candidate archive and checksums
+        env:
+          VERSION: ${{ steps.candidate.outputs.version }}
+        run: go run ./scripts/dist-oracle -hybrid-candidate-check -version "$VERSION" -assets "$RUNNER_TEMP/symbrain-hybrid-assets"
+
+      - name: Compare the real Rust fallback with the Go oracle
+        env:
+          VERSION: ${{ steps.candidate.outputs.version }}
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/symbrain-hybrid-assets/symbrain_${VERSION}_linux_amd64.tar.gz"
+          extracted="$RUNNER_TEMP/symbrain-hybrid-extracted"
+          mkdir -p "$extracted"
+          tar -xzf "$archive" -C "$extracted"
+          bash scripts/dist-oracle/smoke-hybrid-fallback.sh "$extracted"
+
+      - name: Upload unpublished candidate for review
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: symbrain-${{ steps.candidate.outputs.version }}-linux-amd64-candidate
+          path: |
+            ${{ runner.temp }}/symbrain-hybrid-assets/*.tar.gz
+            ${{ runner.temp }}/symbrain-hybrid-assets/checksums.txt
+          if-no-files-found: error
+          retention-days: 14

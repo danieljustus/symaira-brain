@@ -148,6 +148,19 @@ func TestClaudeKeychainBlobWithoutExpiry(t *testing.T) {
 	}
 }
 
+func TestClaudeKeychainReadUsesTypedCaseFoldedFieldsThroughFakeSecurity(t *testing.T) {
+	blob := `{"CLAUDEAiOAUTH":{"ACCEſsToken":"synthetic-keychain-case-token","EXPIREſAT":4102444800000}}`
+	fakeSecurity(t, map[string]string{"find-generic-password": blob})
+
+	token, expiresAt := readClaudeKeychainCredential()
+	if token != "synthetic-keychain-case-token" {
+		t.Fatalf("token = %q, want the synthetic subscription token", token)
+	}
+	if expiresAt == nil || expiresAt.UnixMilli() != 4102444800000 {
+		t.Errorf("expiresAt = %v, want the decoded millisecond timestamp", expiresAt)
+	}
+}
+
 func TestKeychainServiceNameParsesAttributeLines(t *testing.T) {
 	line := `    "svce"<blob>="Claude Code-credentials-552ffa86"`
 	if name, ok := keychainServiceName(line); !ok || name != "Claude Code-credentials-552ffa86" {

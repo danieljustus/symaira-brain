@@ -76,7 +76,11 @@ type Suite struct {
 
 func main() {
 	check := flag.Bool("check", false, "fail if generated output does not match existing file")
-	output := flag.String("output", "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json", "output path")
+	defaultOutput := os.Getenv("SYMBRAIN_CLI_TREE_ORACLE_FIXTURE")
+	if defaultOutput == "" {
+		defaultOutput = "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json"
+	}
+	output := flag.String("output", defaultOutput, "output path")
 	goBinary := flag.String("go-binary", "", "path to Go binary (defaults to building via run-go-oracle.sh)")
 	flag.Parse()
 
@@ -306,7 +310,25 @@ func buildCases(goBinary string) ([]TestCase, error) {
 	// harness
 	cases = append(cases, runCase(bin, []string{"harness"}, "harness missing subcommand"))
 	cases = append(cases, runCase(bin, []string{"harness", "list"}, "harness list"))
+	malformedHarness := filepath.Join(oracleRoot, "home", ".claude.json")
+	if err := os.WriteFile(malformedHarness, []byte("{not-json"), 0o600); err != nil {
+		return nil, err
+	}
+	malformedTable := runCase(bin, []string{"harness", "list"}, "harness list malformed JSON table")
+	malformedTable.ID = "go harness list malformed JSON table"
+	cases = append(cases, malformedTable)
+	malformedJSON := runCase(bin, []string{"harness", "list", "--json"}, "harness list malformed JSON response")
+	malformedJSON.ID = "go harness list malformed JSON response"
+	cases = append(cases, malformedJSON)
+	if err := os.Remove(malformedHarness); err != nil {
+		return nil, err
+	}
 	cases = append(cases, runCase(bin, []string{"harness", "health"}, "harness health"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--unknown"}, "harness health rejects unknown flag"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--project"}, "harness health rejects missing project value"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "extra"}, "harness health rejects positional"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--", "extra"}, "harness health rejects positional after terminator"))
+	cases = append(cases, runCase(bin, []string{"harness", "health", "--help"}, "harness health help flag"))
 
 	// usage
 	cases = append(cases, runCase(bin, []string{"usage"}, "usage"))
@@ -458,6 +480,9 @@ func normalizeStdout(s, root string) string {
 	}
 	s = strings.ReplaceAll(s, "/private"+root, "<root>")
 	s = strings.ReplaceAll(s, root, "<root>")
+	if runtime.GOOS == "windows" {
+		s = normalizeWindowsOracleRoot(s, root)
+	}
 	// Cases that report project-scoped paths embed the checkout location, which
 	// differs per machine and per CI runner.
 	if oracleCwd != "" && oracleCwd != root {
@@ -475,6 +500,19 @@ func normalizeStdout(s, root string) string {
 		return claudeDesktopPath.ReplaceAllString(s, "<claude-desktop-dir>")
 	}
 	return s
+}
+
+func normalizeWindowsOracleRoot(s, root string) string {
+	if root == "" {
+		return s
+	}
+	// Windows can expose the same temp directory through its long user
+	// profile name in the child process and an 8.3 alias in the parent. The
+	// generated root basename is unique to this oracle invocation, so only
+	// paths containing that exact basename are normalized.
+	rootBase := regexp.QuoteMeta(root[strings.LastIndexAny(root, `/\\`)+1:])
+	windowsRoot := regexp.MustCompile(`(?i)[A-Z]:\\[^\"]*?\\` + rootBase)
+	return windowsRoot.ReplaceAllString(s, "<root>")
 }
 
 // normalizeStderr removes toolchain identifiers and absolute paths from

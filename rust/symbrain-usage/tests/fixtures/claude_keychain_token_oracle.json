@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "canonical-token-with-future-expiry",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-keychain-token\",\"expiresAt\":4102444800000}}",
+      "token": "synthetic-keychain-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "case-insensitive-root-and-fields",
+      "blob": "{\"CLAUDEAiOAUTH\":{\"ACCESSTOKEN\":\"synthetic-case-token\",\"EXPIRESAT\":4102444800000}}",
+      "token": "synthetic-case-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "unicode-simple-fold-long-s-field",
+      "blob": "{\"claudeAiOauth\":{\"acceſsToken\":\"synthetic-long-s-token\",\"expiresAt\":4102444800000}}",
+      "token": "synthetic-long-s-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "unicode-simple-fold-kelvin-field",
+      "blob": "{\"claudeAiOauth\":{\"accessToKen\":\"synthetic-kelvin-token\",\"expiresAt\":4102444800000}}",
+      "token": "synthetic-kelvin-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "unicode-simple-fold-expiry-field",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-fold-expiry-token\",\"expireſAt\":4102444800000}}",
+      "token": "synthetic-fold-expiry-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "duplicate-token-field-last-wins",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"first-token\",\"ACCESSTOKEN\":\"synthetic-last-token\",\"expiresAt\":4102444800000}}",
+      "token": "synthetic-last-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "duplicate-token-field-reversed-last-wins",
+      "blob": "{\"claudeAiOauth\":{\"ACCESSTOKEN\":\"synthetic-first-token\",\"accessToken\":\"synthetic-last-token\",\"expiresAt\":4102444800000}}",
+      "token": "synthetic-last-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "duplicate-root-object-merges-fields",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-merged-token\"},\"CLAUDEAiOAUTH\":{\"expiresAt\":4102444800000}}",
+      "token": "synthetic-merged-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "null-token-keeps-previous-scalar",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"accessToken\":null,\"expiresAt\":4102444800000}}",
+      "token": "synthetic-token",
+      "expires_at_unix_milli": 4102444800000,
+      "accepted": true
+    },
+    {
+      "id": "null-expiry-clears-previous-pointer",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"expiresAt\":4102444800000,\"EXPIRESAT\":null}}",
+      "token": "synthetic-token",
+      "accepted": true
+    },
+    {
+      "id": "null-root-is-not-a-credential",
+      "blob": "{\"claudeAiOauth\":null}",
+      "accepted": false
+    },
+    {
+      "id": "mcp-only-entry-is-not-a-credential",
+      "blob": "{\"mcpOAuth\":{\"server\":{\"accessToken\":\"mcp-token\"}}}",
+      "accepted": false
+    },
+    {
+      "id": "empty-token-is-not-a-credential",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"\"}}",
+      "accepted": false
+    },
+    {
+      "id": "zero-expiry-means-no-expiry",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"expiresAt\":0}}",
+      "token": "synthetic-token",
+      "accepted": true
+    },
+    {
+      "id": "negative-expiry-means-no-expiry",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"expiresAt\":-1}}",
+      "token": "synthetic-token",
+      "accepted": true
+    },
+    {
+      "id": "wrong-typed-token-rejects-whole-blob",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":42,\"expiresAt\":4102444800000}}",
+      "accepted": false
+    },
+    {
+      "id": "wrong-typed-expiry-rejects-whole-blob",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"expiresAt\":\"4102444800000\"}}",
+      "accepted": false
+    },
+    {
+      "id": "fractional-expiry-rejects-whole-blob",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"expiresAt\":1.5}}",
+      "accepted": false
+    },
+    {
+      "id": "duplicate-alias-wrong-type-rejects-whole-blob",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-token\",\"ACCESS_TOKEN\":42}}",
+      "token": "synthetic-token",
+      "accepted": true
+    },
+    {
+      "id": "invalid-utf8-token-byte-replaced",
+      "blob": "",
+      "blob_hex": "7b22636c6175646541694f61757468223a7b22616363657373546f6b656e223a2273796e7468657469632dff2d746f6b656e227d7d",
+      "token": "synthetic-�-token",
+      "accepted": true
+    },
+    {
+      "id": "invalid-utf8-continuation-bytes-replaced-individually",
+      "blob": "",
+      "blob_hex": "7b22636c6175646541694f61757468223a7b22616363657373546f6b656e223a2273796e7468657469632de1802d746f6b656e227d7d",
+      "token": "synthetic-��-token",
+      "accepted": true
+    },
+    {
+      "id": "lone-surrogate-escape-replaced",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-\\ud800-token\"}}",
+      "token": "synthetic-�-token",
+      "accepted": true
+    },
+    {
+      "id": "valid-surrogate-pair-preserved",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"synthetic-\\ud83d\\ude00-token\"}}",
+      "token": "synthetic-😀-token",
+      "accepted": true
+    },
+    {
+      "id": "empty-blob",
+      "blob": "",
+      "accepted": false
+    },
+    {
+      "id": "malformed-blob",
+      "blob": "{\"claudeAiOauth\":{\"accessToken\":\"partial-token\"}",
+      "accepted": false
+    }
+  ]
+}

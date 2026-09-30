@@ -17,10 +17,15 @@ import (
 	"github.com/danieljustus/symaira-corekit/exitcodes"
 )
 
-// isolatedPATH points $PATH at dir only, so exec.LookPath cannot find any
-// real binary installed on the machine running the test.
+// isolatedPATH excludes both PATH binaries and higher-priority config/managed
+// binaries so discovery cannot reach tools installed on the test host.
 func isolatedPATH(t *testing.T, dir string) {
 	t.Helper()
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	t.Setenv("SYMBRAIN_SERVERS_VAULT_BINARY_PATH", "")
 	t.Setenv("PATH", dir)
 }
 
@@ -427,8 +432,8 @@ func TestCmdDoctor_HumanOutput_ReportsHarnessBindings(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	installed := harnessByName(t, "cursor")
 	writeHarnessConfig(t, installed, "personal")
@@ -459,8 +464,8 @@ func TestCmdDoctor_HumanOutput_ReportsSupersededBesideSymbrain(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	h := harnessByName(t, "claude")
 	path, err := h.ConfigPath()
@@ -504,8 +509,8 @@ func TestCmdDoctor_JSON_HarnessesIncludeProfileBindingFields(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	home := harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	home := harnessSandbox(t)
 
 	h := harnessByName(t, "codex")
 	writeHarnessConfig(t, h, "personal")
@@ -549,8 +554,8 @@ func TestRunDoctorChecks_FlagsMissingProfileBinding(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("fake binary is a POSIX shell script")
 	}
-	harnessSandbox(t)
 	isolatedPATH(t, t.TempDir())
+	harnessSandbox(t)
 
 	h := harnessByName(t, "antigravity")
 	writeHarnessConfig(t, h, "ghost")

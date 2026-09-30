@@ -8,6 +8,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+async-tungstenite.workspace = true
 chromiumoxide.workspace = true
 futures.workspace = true
 symbrowse-engine.workspace = true
