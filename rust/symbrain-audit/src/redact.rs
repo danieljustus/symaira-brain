@@ -1,6 +1,12 @@
-use serde_json::{Map, Value};
+use std::fmt;
+
+use serde::de::{MapAccess, Visitor};
+use serde::{Deserialize, Deserializer};
+use serde_json::value::RawValue;
+use serde_json::{Map, Number, Value};
 
 const MAX_ARG_VALUE_LEN: usize = 256;
+const MAX_JSON_DEPTH: usize = 128;
 const SENSITIVE_KEYS: &[&str] = &[
     "password",
     "passwd",
@@ -38,7 +44,10 @@ pub fn redact_args(server: &str, tool: &str, args: &[u8], verbose: bool) -> (Str
     if args.is_empty() || server == "vault" || tool.starts_with("vault_") {
         return (String::new(), String::new());
     }
-    let Ok(Value::Object(values)) = serde_json::from_slice::<Value>(args) else {
+    let Ok(raw) = serde_json::from_slice::<Box<RawValue>>(args) else {
+        return (String::new(), String::new());
+    };
+    let Ok(Value::Object(values)) = parse_go_value(&raw, 0) else {
         return (String::new(), String::new());
     };
     if values.is_empty() {
@@ -65,6 +74,79 @@ pub fn redact_args(server: &str, tool: &str, args: &[u8], verbose: bool) -> (Str
         .collect::<Vec<_>>()
         .join(",");
     (key_list, rendered)
+}
+
+/// Parses numbers as Go's `encoding/json` does without interpreting real
+/// object keys as `serde_json`'s `arbitrary_precision` internal number marker.
+fn parse_go_value(raw: &RawValue, depth: usize) -> Result<Value, ()> {
+    let json = raw.get();
+    let first = json.trim_start().as_bytes().first().copied().ok_or(())?;
+    match first {
+        b'{' => {
+            if depth >= MAX_JSON_DEPTH {
+                return Err(());
+            }
+            let RawObject(entries) = serde_json::from_str(json).map_err(|_| ())?;
+            let mut values = Map::new();
+            for (key, value) in entries {
+                // Parse each value before insertion so an overflowing earlier
+                // duplicate key is still rejected, as in Go's JSON decoder.
+                values.insert(key, parse_go_value(&value, depth + 1)?);
+            }
+            Ok(Value::Object(values))
+        }
+        b'[' => {
+            if depth >= MAX_JSON_DEPTH {
+                return Err(());
+            }
+            let values: Vec<Box<RawValue>> = serde_json::from_str(json).map_err(|_| ())?;
+            values
+                .iter()
+                .map(|value| parse_go_value(value, depth + 1))
+                .collect::<Result<Vec<_>, _>>()
+                .map(Value::Array)
+        }
+        b'-' | b'0'..=b'9' => {
+            let number = json.parse::<f64>().map_err(|_| ())?;
+            if !number.is_finite() {
+                return Err(());
+            }
+            Number::from_f64(number).map(Value::Number).ok_or(())
+        }
+        _ => serde_json::from_str(json).map_err(|_| ()),
+    }
+}
+
+struct RawObject(Vec<(String, Box<RawValue>)>);
+
+impl<'de> Deserialize<'de> for RawObject {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct RawObjectVisitor;
+
+        impl<'de> Visitor<'de> for RawObjectVisitor {
+            type Value = RawObject;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a JSON object")
+            }
+
+            fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                let mut entries = Vec::new();
+                while let Some(key) = map.next_key::<String>()? {
+                    entries.push((key, map.next_value::<Box<RawValue>>()?));
+                }
+                Ok(RawObject(entries))
+            }
+        }
+
+        deserializer.deserialize_map(RawObjectVisitor)
+    }
 }
 
 fn is_sensitive_key(key: &str) -> bool {
@@ -235,6 +317,68 @@ mod tests {
             values,
             "fixed_high=1e+06,fixed_low=0.0001,large=1e+20,lossy=9.007199254740992e+15,negative_zero=-0,nested=[1 2],one=1,small=1e-05"
         );
+    }
+
+    #[test]
+    fn negative_zero_survives_feature_unified_json_parsing_without_touching_strings() {
+        let (_, values) = redact_args(
+            "foreign",
+            "call",
+            br#"{"values":[-0,"-0","escaped quote: \" then -0",-0.0,-0e0,0]}"#,
+            true,
+        );
+
+        assert_eq!(values, "values=[-0 -0 escaped quote: \" then -0 -0 -0 0]");
+    }
+
+    #[test]
+    fn arbitrary_precision_internal_number_key_remains_a_user_object_key() {
+        let (_, values) = redact_args(
+            "foreign",
+            "call",
+            br#"{"$serde_json::private::Number":"1","nested":{"$serde_json::private::Number":"-0"}}"#,
+            true,
+        );
+
+        assert_eq!(
+            values,
+            "$serde_json::private::Number=1,nested=map[$serde_json::private::Number:-0]"
+        );
+    }
+
+    #[test]
+    fn raw_value_recursion_keeps_the_json_depth_bound() {
+        let nested_json = |levels: usize| {
+            format!(
+                "{{\"nested\":{}0{}}}",
+                "[".repeat(levels),
+                "]".repeat(levels)
+            )
+        };
+
+        let (keys, values) = redact_args("foreign", "call", nested_json(48).as_bytes(), true);
+        assert_eq!(keys, "nested");
+        assert!(values.starts_with("nested=[[["));
+        assert_eq!(
+            redact_args("foreign", "call", nested_json(256).as_bytes(), true),
+            (String::new(), String::new())
+        );
+    }
+
+    #[test]
+    fn overflowing_nested_numbers_match_go_json_decode_failure() {
+        let huge_integer = format!("{{\"nested\":[{{\"number\":{}}}]}}", "9".repeat(400));
+        for args in [
+            br#"{"number":1e400}"#.as_slice(),
+            huge_integer.as_bytes(),
+            br#"{"number":1e400,"number":1}"#.as_slice(),
+            br#"{"number":[1e400],"number":[]}"#.as_slice(),
+        ] {
+            assert_eq!(
+                redact_args("foreign", "call", args, true),
+                (String::new(), String::new())
+            );
+        }
     }
 
     #[test]

@@ -22,6 +22,11 @@ Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash
 fallback; CoreKit owns the OpenAI-compatible HTTP request and response decoding.
 CoreKit's one-result-per-input validation also matches the Go `llmkit` behavior.
 This does not move memory-specific embedding policy or the Go cutover gate.
+The adoption allows only CoreKit's repository in the dependency source policy.
+Audit argument decoding explicitly preserves Go's float64 number semantics
+under the shared JSON feature graph: negative zero, numeric overflow rejection
+including overwritten duplicate keys, and ordinary object keys that resemble
+serde_json's internal number marker. The existing JSON nesting bound remains.
 
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
