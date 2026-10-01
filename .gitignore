@@ -6,6 +6,10 @@
 # path whose parent directory is itself excluded.
 /docs/*
 !/docs/adr/
+# Public continuation instructions; all other local handoffs remain private.
+!/docs/handoffs/
+/docs/handoffs/*
+!/docs/handoffs/end-work-cloud.md
 .DS_Store
 /symbrain
 coverage.out
