@@ -15,6 +15,14 @@ for binding checks, fails closed on unsafe/unreadable/malformed configs unless
 `--force` is explicitly supplied, and retains capability-rooted profile parents
 through no-follow removal. The Go implementation remains the source-bound oracle
 for this seam until all release gates pass.
+
+The native memory embedding adapter uses CoreKit's Rust `symaira-core-llm`
+transport at the exact Git revision pinned in `Cargo.toml`. Brain retains its
+Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash
+fallback; CoreKit owns the OpenAI-compatible HTTP request and response decoding.
+CoreKit's one-result-per-input validation also matches the Go `llmkit` behavior.
+This does not move memory-specific embedding policy or the Go cutover gate.
+
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
 implementation's 1 MiB bounds. Gateway dispatch is implemented natively;
