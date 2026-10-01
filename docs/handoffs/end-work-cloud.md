@@ -1,4 +1,6 @@
-# Code continuation: symaira-brain
+# Historical code continuation checkpoint: symaira-brain (2026-09-30)
+
+> This record describes the `handoff/20260930-cloud` checkpoint at `f40974a274555015450de9a9a601d34411740807`, published on 2026-09-30. As of 2026-10-01, PRs #753, #754, and #755 have merged; current `main` at `8a56f124678432069850634e90f7c597ea07d747` is the integration base. The publication constraints and PR states below are historical. The recorded scoped checks are preserved as evidence and have not been expanded or rerun against the current integration base.
 
 ## Goal and immutable starting point
 
