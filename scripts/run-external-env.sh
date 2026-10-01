@@ -99,7 +99,10 @@ external_env() {
   validate_external_path "GUARD_DECIDE_EVIDENCE" "$evidence"
   validate_external_path "GUARD_REPAIR_OUTPUT" "$repair_output"
 
-  export TMPDIR="$base/tmp" TMP="$base/tmp" TEMP="$base/tmp"
+  # Socket fixtures use private MkdirTemp directories below TMPDIR. The build
+  # base is too long for macOS AF_UNIX paths even with short fixture names;
+  # use the already validated runtime root without falling back off the NVMe.
+  export TMPDIR="$runtime_root" TMP="$runtime_root" TEMP="$runtime_root"
   export GOTMPDIR="$base/go-tmp" GOPATH="$base/gopath"
   export GOTELEMETRYDIR="$base/go-telemetry" GOCACHE="$base/go-cache"
   export GOMODCACHE="$base/go-mod-cache" CARGO_HOME="$base/cargo-home"
