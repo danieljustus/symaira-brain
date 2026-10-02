@@ -26,6 +26,67 @@ public enum MCPDiscovery: Sendable {
         return discoverViaSymbrain(inventory)
     }
 
+    /// Returns the additive typed view of Brain's inventory. Free-form parser
+    /// errors are reduced to stable generic messages; config contents and
+    /// resolved environment values are never included.
+    public static func diagnose(
+        harnessService: any HarnessInventoryProviding = SymBrainHarnessService()
+    ) -> (MCPDiscoveryDiagnostics?, [String]) {
+        guard harnessService.isAvailable,
+              let inventory = harnessService.list(projectDir: nil) else {
+            return (nil, [requiresSymbrainNote])
+        }
+        guard inventory.schemaVersion == 2 else {
+            return (
+                nil,
+                ["mcp: requires symbrain schema 2; upgrade symbrain and try again"]
+            )
+        }
+
+        let (servers, _) = discoverViaSymbrain(inventory)
+        let configurations = inventory.harnesses.flatMap { harness in
+            [
+                diagnostic(for: harness.global, client: harness.name, scope: .global),
+                harness.project.map {
+                    diagnostic(for: $0, client: harness.name, scope: .project)
+                },
+            ].compactMap { $0 }
+        }
+        return (
+            MCPDiscoveryDiagnostics(servers: servers, configurations: configurations),
+            ["mcp: source=symbrain (\(inventory.harnesses.count) harnesses)"]
+        )
+    }
+
+    private static func diagnostic(
+        for config: HarnessConfigInventory,
+        client: String,
+        scope: MCPConfigDiagnosticScope
+    ) -> MCPConfigDiagnostic {
+        let status: MCPConfigDiagnosticStatus
+        let message: String?
+        if !config.exists {
+            status = .unavailable
+            message = "Configuration is not present."
+        } else if !config.parsed || !(config.error ?? "").isEmpty {
+            status = .invalid
+            message = "Brain could not parse this configuration."
+        } else if config.servers.isEmpty {
+            status = .empty
+            message = "No MCP servers are configured."
+        } else {
+            status = .ready
+            message = nil
+        }
+        return MCPConfigDiagnostic(
+            client: client,
+            configScope: scope,
+            status: status,
+            path: config.path,
+            message: message
+        )
+    }
+
     private static func discoverViaSymbrain(_ inventory: HarnessInventory) -> ([MCPServer], [String]) {
         var servers: [MCPServer] = []
         var notes: [String] = ["mcp: source=symbrain (\(inventory.harnesses.count) harnesses)"]

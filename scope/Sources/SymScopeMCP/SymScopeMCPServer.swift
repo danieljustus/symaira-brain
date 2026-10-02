@@ -6,8 +6,10 @@ import SymairaMCP
 /// over stdio JSON-RPC. Zero stdout pollution: only JSON-RPC frames.
 public final class SymScopeMCPServer: @unchecked Sendable {
     private let server: SymairaMCP.MCPServer
+    private let harnessService: any HarnessInventoryProviding
 
-    public init() {
+    public init(harnessService: any HarnessInventoryProviding = SymBrainHarnessService()) {
+        self.harnessService = harnessService
         self.server = SymairaMCP.MCPServer(name: "symscope", version: Version.version)
         registerHandlers()
     }
@@ -109,8 +111,13 @@ public final class SymScopeMCPServer: @unchecked Sendable {
             ],
             [
                 "name": "mcp_list",
-                "description": "List MCP servers configured across AI clients",
-                "inputSchema": ["type": "object", "properties": [:]],
+                "description": "List MCP servers configured across AI clients; optionally include Brain configuration diagnostics",
+                "inputSchema": [
+                    "type": "object",
+                    "properties": [
+                        "diagnostics": ["type": "boolean", "description": "include per-configuration discovery status"]
+                    ],
+                ],
             ],
             [
                 "name": "conflicts",
@@ -152,7 +159,17 @@ public final class SymScopeMCPServer: @unchecked Sendable {
             return toolResult(try encoder.encode(ports))
 
         case "mcp_list":
-            let (servers, notes) = MCPDiscovery.discover()
+            if arguments["diagnostics"] as? Bool == true {
+                let (diagnostics, notes) = MCPDiscovery.diagnose(harnessService: harnessService)
+                if let note = notes.first(where: { $0.contains("requires symbrain") }) {
+                    throw MCPServerError.unavailable(note)
+                }
+                guard let diagnostics else {
+                    throw MCPServerError.unavailable("mcp: symbrain harness inventory unavailable")
+                }
+                return toolResult(try encoder.encode(diagnostics))
+            }
+            let (servers, notes) = MCPDiscovery.discover(harnessService: harnessService)
             if let note = notes.first(where: { $0.contains("requires symbrain") }) {
                 throw MCPServerError.unavailable(note)
             }
