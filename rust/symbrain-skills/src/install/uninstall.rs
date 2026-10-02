@@ -55,15 +55,15 @@ pub(crate) fn uninstall_inner(
     destination: &Path,
     options: &InstallOptions,
 ) -> Result<bool, SkillError> {
-    let metadata = entry_metadata(destination)?;
-    let Some(_metadata) = metadata else {
+    // Preserve no-op/refusal behavior without initializing lock directories.
+    // Repeat these checks below after locking to cover concurrent replacement.
+    if entry_metadata(destination)?.is_none() {
         return Ok(false);
-    };
+    }
     if is_unmanaged(destination, target, name)? {
         return Err(SkillError("refusing to remove unmanaged skill".to_owned()));
     }
-    // A dry run is deliberately side-effect free: do not remove the
-    // destination, mutate the base, create a tombstone, or append an event.
+    // A dry run must not create lock files or otherwise mutate state.
     if options.dry_run {
         return Ok(true);
     }
@@ -93,7 +93,21 @@ pub(crate) fn uninstall_inner(
             lock_paths.push(legacy.clone());
         }
     }
+    for path in lock_paths.clone() {
+        if let Some(parent) = path.parent() {
+            lock_paths.push(parent.to_path_buf());
+        }
+    }
     let _locks = lock::acquire(&lock_paths)?;
+
+    // Re-check after acquiring the directory and per-skill locks. Another
+    // installer/uninstaller may have replaced this path while locks queued.
+    if entry_metadata(destination)?.is_none() {
+        return Ok(false);
+    }
+    if is_unmanaged(destination, target, name)? {
+        return Err(SkillError("refusing to remove unmanaged skill".to_owned()));
+    }
 
     // Move all old state aside first. Nothing is destroyed until the
     // tombstone has been durably published. This includes the pre-identity
