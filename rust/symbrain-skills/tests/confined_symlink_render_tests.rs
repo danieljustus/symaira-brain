@@ -253,10 +253,16 @@ fn trusted_root_alias_preserves_parent_directory_alias_spellings() {
     link_directory(&source.join("real"), &source.join("linked"));
     let alias = parent_alias.join("root-alias");
     link_directory(&source, &alias);
-    let bundle = load_bundle(&alias).unwrap();
-    let output = materialize(&bundle, &rendered(&bundle), &temp.path().join("rendered")).unwrap();
-    assert_eq!(
-        fs::read(output.root.join("linked/nested/data.bin")).unwrap(),
-        b"SAFE"
-    );
+    for (name, root) in [
+        ("plain", alias.clone()),
+        ("slash", alias.join("")),
+        ("dot", alias.join(".")),
+    ] {
+        let bundle = load_bundle(&root).unwrap_or_else(|error| panic!("{name}: {error}"));
+        let output = materialize(&bundle, &rendered(&bundle), &temp.path().join(name)).unwrap();
+        assert_eq!(
+            fs::read(output.root.join("linked/nested/data.bin")).unwrap(),
+            b"SAFE"
+        );
+    }
 }

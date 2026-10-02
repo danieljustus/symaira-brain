@@ -85,6 +85,8 @@ fn trusted_root_spellings(root: &Path) -> Result<Vec<PathBuf>, SkillError> {
     let mut spelling = root.to_path_buf();
     let mut links = 0;
     loop {
+        // A trailing separator would make lstat follow the root link itself.
+        spelling = spelling.components().collect();
         let metadata = std::fs::symlink_metadata(&spelling)
             .map_err(|error| SkillError(format!("stat trusted root spelling: {error}")))?;
         if !metadata.file_type().is_symlink() {
