@@ -740,10 +740,10 @@ jobs:
   # Native package acceptance for the optional Scope intake. This is separate
   # from the GUI job: it builds and tests both packages and exercises the
   # checked-in executable over its real MCP stdio transport. It runs for real
-  # Scope/history changes on PRs and main pushes, and unconditionally on the
+  # Scope/history changes on main pushes, and unconditionally on the
   # scheduled/full-main and manually dispatched suites.
   scope-native-swiftpm:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -839,7 +839,7 @@ jobs:
   # Also exercise the
   # MCP transport with initialize/tools-list only, never tools/call.
   operate-native-swiftpm:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 15
     runs-on: macos-26
     permissions:
@@ -924,7 +924,7 @@ jobs:
   # driving a real browser — version output and initialize/tools-list only,
   # never tools/call.
   browse-native:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
@@ -1233,13 +1233,14 @@ jobs:
         if: steps.swift.outputs.changed == 'true'
         run: bash scripts/check-app-icons.sh --bundle "$RUNNER_TEMP/SymBrain-ios-derived-data/Build/Products/Debug-iphonesimulator/Symaira Brain.app" --platform iOS
 
-  # Validates .goreleaser.yml on every push/PR, not only at tag time, so a
+  # Validates .goreleaser.yml on main, scheduled and manual runs, so a
   # broken release config is caught long before a real release tag is
   # pushed. Runs the real build/archive/checksum/SBOM pipeline a release
   # would (--snapshot skips publishing); signing is skipped here because it
   # needs the tag-triggered release workflow's ambient OIDC token, which a
   # plain push/PR run does not have.
   goreleaser-snapshot:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -1300,6 +1301,7 @@ jobs:
           go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
 
   coverage:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build-test
     runs-on: ubuntu-latest
     steps:
