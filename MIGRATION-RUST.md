@@ -135,6 +135,29 @@ Classified input rejections stay native even with a library-directory override,
 so they cannot re-enter the legacy Go reader. Other unsupported CLI shapes still
 retain their existing fallback until #764 is complete.
 
+Rust resource rendering (#490) accepts both relative and absolute directory
+links confined to the trusted bundle. Absolute link text is mapped to a
+root-relative path using the original trusted-root spellings; it is never
+reopened with ambient authority. Bootstrap captures the canonical root, the
+caller-supplied root, and a bounded trusted-root link chain including raw link
+text. That preserves ancestor-alias spellings lost during canonicalization.
+Those ambient metadata reads are limited to trusted-root bootstrap; resource
+targets and subsequent reads never use them as ambient paths.
+Resolution follows links through the retained
+directory capability with finite depth/link limits. Inventory, Markdown reads,
+hashing and copy use the same resolver and retain the shared actual-read budget.
+Outside targets, parent traversal, link cycles and outside-target replacements
+remain rejected; replacing the ambient root path cannot redirect the retained
+source handle. This is a separate Rust-only contract deviation (SKL-006), with
+native Windows link evidence pending rather than implied by Unix tests.
+Windows ordinary and extended drive/UNC prefixes are equivalent only for
+lexical root comparison; device namespaces remain distinct and no ambient
+resource access is added. Cap-std's Windows directory handles deliberately
+exclude `FILE_SHARE_DELETE`, so a live source-root rename is refused with a
+sharing violation rather than permitted as on Unix. The regression asserts
+that refusal and continued same-source hashing/copying; handle protections
+are not loosened to make the Unix replacement scenario work on Windows.
+
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.
 SKL-001 remains fixture-ready until the corrected contracts have current native

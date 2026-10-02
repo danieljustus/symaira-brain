@@ -9,13 +9,14 @@ pub(crate) fn read_bundle_bytes(
         .iter()
         .find(|resource| Path::new(&resource.path) == relative)
         .ok_or_else(|| SkillError(format!("resource {name} changed since inventory")))?;
+    let resolved = resource_path(&root.root_cap, &root.root_spellings, relative)?;
     let mut budget = root
         .read_budget
         .lock()
         .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
     read_limited_expected(
         &root.root_cap,
-        relative,
+        &resolved,
         name,
         limit,
         resource.size,
@@ -29,7 +30,8 @@ pub(crate) fn read_bundle_optional_bytes(
     name: &str,
     limit: u64,
 ) -> Result<Option<Vec<u8>>, SkillError> {
-    if !optional_entry_exists(&root.root_cap, relative, name)? {
+    let resolved = resource_path(&root.root_cap, &root.root_spellings, relative)?;
+    if !optional_entry_exists(&root.root_cap, &resolved, name)? {
         return Ok(None);
     }
     read_bundle_bytes(root, relative, name, limit).map(Some)
@@ -37,14 +39,15 @@ pub(crate) fn read_bundle_optional_bytes(
 
 fn load_overrides(
     root: &Dir,
-    _anchor: &Path,
+    anchors: &[PathBuf],
     resources: &[Resource],
     budget: &mut ReadBudget,
 ) -> Result<
     std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>>,
     SkillError,
 > {
-    let Some(mut targets) = read_optional_dir(root, Path::new("overlays"), "overlays")? else {
+    let Some(mut targets) = read_optional_dir(root, anchors, Path::new("overlays"), "overlays")?
+    else {
         return Ok(std::collections::BTreeMap::new());
     };
     targets.sort_by_key(cap_std::fs::DirEntry::file_name);
@@ -60,7 +63,7 @@ fn load_overrides(
         let blocks = PathBuf::from("overlays")
             .join(&target_name)
             .join(variant::BLOCKS_DIR);
-        let Some(mut files) = read_optional_dir(root, &blocks, "overlay blocks")? else {
+        let Some(mut files) = read_optional_dir(root, anchors, &blocks, "overlay blocks")? else {
             continue;
         };
         files.sort_by_key(cap_std::fs::DirEntry::file_name);
@@ -83,9 +86,10 @@ fn load_overrides(
                 .find(|resource| resource.path == path)
                 .map(|resource| resource.size)
                 .ok_or_else(|| SkillError(format!("resource {path} changed since inventory")))?;
+            let resolved = resource_path(root, anchors, &relative)?;
             let bytes = read_limited_expected(
                 root,
-                &relative,
+                &resolved,
                 &path,
                 MAX_INPUT_SIZE,
                 resource_size,

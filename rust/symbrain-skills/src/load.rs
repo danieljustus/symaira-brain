@@ -20,7 +20,7 @@ use crate::variant;
 ///
 /// The root is opened once and retained by the bundle. Every file read is then
 /// resolved by the capability API and consumed from that already-open handle;
-/// no canonicalized pathname is reopened after validation.
+/// no resource is reopened through an ambient pathname after validation.
 ///
 /// # Errors
 ///
@@ -76,6 +76,9 @@ fn load_bundle_with_budget(
         return Err(SkillError("skill root is not a directory".into()));
     }
 
+    let root_spellings = trusted_root_spellings(&logical_root)?;
+    let anchors = root_spellings.as_slice();
+
     let mut retained_budget = read_budget
         .lock()
         .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
@@ -112,13 +115,14 @@ fn load_bundle_with_budget(
             .clone_from(&parsed.frontmatter.version);
     }
 
-    let resources = load_resources(&root_cap, root)?;
+    let resources = load_resources(&root_cap, anchors)?;
     let mut markdown = std::collections::BTreeMap::new();
     for resource in &resources {
         if !is_overlay_path(&resource.path) && is_markdown(&resource.path) {
+            let resolved = resource_path(&root_cap, anchors, Path::new(&resource.path))?;
             let bytes = read_limited_expected(
                 &root_cap,
-                Path::new(&resource.path),
+                &resolved,
                 &format!("resource {}", resource.path),
                 MAX_INPUT_SIZE,
                 resource.size,
@@ -133,11 +137,12 @@ fn load_bundle_with_budget(
             markdown.insert(resource.path.clone(), bytes);
         }
     }
-    let block_overrides = load_overrides(&root_cap, root, &resources, &mut retained_budget)?;
+    let block_overrides = load_overrides(&root_cap, anchors, &resources, &mut retained_budget)?;
     drop(retained_budget);
     let bundle = Bundle {
         root: logical_root,
         root_cap,
+        root_spellings,
         read_budget,
         frontmatter: parsed.frontmatter,
         manifest,
@@ -170,6 +175,7 @@ fn slash(path: &Path) -> String {
 }
 
 include!("load_read.rs");
+include!("load_paths.rs");
 
 fn collect_bounded_entries<T>(
     entries: impl IntoIterator<Item = std::io::Result<T>>,
@@ -210,15 +216,17 @@ fn optional_entry_exists(root: &Dir, relative: &Path, name: &str) -> Result<bool
 }
 fn read_optional_dir(
     root: &Dir,
+    anchors: &[PathBuf],
     relative: &Path,
     name: &str,
 ) -> Result<Option<Vec<cap_std::fs::DirEntry>>, SkillError> {
-    if !optional_entry_exists(root, relative, name)? {
+    let resolved = resource_path(root, anchors, relative)?;
+    if !optional_entry_exists(root, &resolved, name)? {
         return Ok(None);
     }
     read_dir(
         root,
-        relative,
+        &resolved,
         name,
         MAX_RESOURCE_ENTRIES,
         &format!("resource tree exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}"),
@@ -226,7 +234,7 @@ fn read_optional_dir(
     .map(Some)
 }
 
-fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillError> {
+fn load_resources(root: &Dir, anchors: &[PathBuf]) -> Result<Vec<Resource>, SkillError> {
     let mut resources = Vec::new();
     let mut total_bytes = 0_u64;
     let mut entries_seen = 0;
@@ -245,9 +253,10 @@ fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillErro
         let overflow =
             format!("resource tree exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}");
         let remaining_entries = MAX_RESOURCE_ENTRIES.saturating_sub(entries_seen);
+        let resolved_directory = resource_path(root, anchors, directory)?;
         let mut entries = read_dir(
             root,
-            directory,
+            &resolved_directory,
             "bundle directory",
             remaining_entries,
             &overflow,
@@ -274,7 +283,8 @@ fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillErro
             if relative == Path::new("SKILL.md") {
                 continue;
             }
-            let metadata = match root.metadata(&relative) {
+            let resolved = resource_path(root, anchors, &relative)?;
+            let metadata = match root.metadata(&resolved) {
                 Ok(metadata) => metadata,
                 Err(error) if file_type.is_symlink() => {
                     return Err(SkillError(format!(
