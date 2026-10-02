@@ -164,15 +164,32 @@ fn renamed_source_root_keeps_hashing_and_copying_the_retained_directory() {
     let bundle = load_bundle(&source).unwrap();
     let render = rendered(&bundle);
     let initial = materialize(&bundle, &render, &temp.path().join("before")).unwrap();
-    fs::rename(&source, temp.path().join("retained-source")).unwrap();
-    fs::create_dir_all(source.join("real/nested")).unwrap();
-    fs::write(source.join("real/nested/data.bin"), b"EVIL").unwrap();
-    let result = materialize(&bundle, &render, &temp.path().join("after")).unwrap();
-    assert_eq!(result.source_hash, initial.source_hash);
-    assert_eq!(
-        fs::read(result.root.join("linked/nested/data.bin")).unwrap(),
-        b"SAFE"
-    );
+    let rename = fs::rename(&source, temp.path().join("retained-source"));
+    #[cfg(windows)]
+    {
+        // Cap-std deliberately denies FILE_SHARE_DELETE on directory handles:
+        // do not weaken that protection to mimic Unix root replacement.
+        let error = rename.unwrap_err();
+        assert_eq!(error.raw_os_error(), Some(32));
+        let result = materialize(&bundle, &render, &temp.path().join("after")).unwrap();
+        assert_eq!(result.source_hash, initial.source_hash);
+        assert_eq!(
+            fs::read(result.root.join("linked/nested/data.bin")).unwrap(),
+            b"SAFE"
+        );
+    }
+    #[cfg(unix)]
+    {
+        rename.unwrap();
+        fs::create_dir_all(source.join("real/nested")).unwrap();
+        fs::write(source.join("real/nested/data.bin"), b"EVIL").unwrap();
+        let result = materialize(&bundle, &render, &temp.path().join("after")).unwrap();
+        assert_eq!(result.source_hash, initial.source_hash);
+        assert_eq!(
+            fs::read(result.root.join("linked/nested/data.bin")).unwrap(),
+            b"SAFE"
+        );
+    }
 }
 
 #[test]

@@ -145,6 +145,13 @@ Outside targets, parent traversal, link cycles and outside-target replacements
 remain rejected; replacing the ambient root path cannot redirect the retained
 source handle. This is a separate Rust-only contract deviation (SKL-006), with
 native Windows link evidence pending rather than implied by Unix tests.
+Windows ordinary and extended drive/UNC prefixes are equivalent only for
+lexical root comparison; device namespaces remain distinct and no ambient
+resource access is added. Cap-std's Windows directory handles deliberately
+exclude `FILE_SHARE_DELETE`, so a live source-root rename is refused with a
+sharing violation rather than permitted as on Unix. The regression asserts
+that refusal and continued same-source hashing/copying; handle protections
+are not loosened to make the Unix replacement scenario work on Windows.
 
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.
