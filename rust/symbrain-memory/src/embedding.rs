@@ -8,11 +8,7 @@
 //! space as rows written by the shipped implementation, which is what makes
 //! their search scores comparable.
 
-/// Narrows a JSON number to the `float32` the store keeps.
-#[allow(clippy::cast_possible_truncation)]
-fn narrow(value: f64) -> f32 {
-    value as f32
-}
+use symaira_core_llm::{ClientBuilder, lookup};
 
 /// Dimension count of the shipped hash embedding.
 pub(crate) const DIMENSIONS: usize = 768;
@@ -96,36 +92,19 @@ impl EmbeddingGenerator {
     /// unreachable host, timeout, non-2xx, an unparseable body — is `None`, so
     /// the caller degrades to the hash fallback exactly like the shipped code.
     fn query_ollama(&self, text: &str) -> Option<Vec<f32>> {
-        let endpoint = format!("{}/embeddings", self.base_url()?);
-        let body = serde_json::json!({ "model": self.model, "input": [text] }).to_string();
-        let config = ureq::Agent::config_builder()
-            .timeout_global(Some(OLLAMA_TIMEOUT))
-            .max_redirects(0)
-            .build();
-        let agent = ureq::Agent::new_with_config(config);
-        let request = ureq::http::Request::builder()
-            .method("POST")
-            .uri(endpoint.as_str())
-            .header("content-type", "application/json")
-            .body(body)
+        let descriptor = lookup("ollama")?;
+        let client = ClientBuilder::new(descriptor.clone(), "")
+            .base_url(self.base_url()?)
+            .timeout(OLLAMA_TIMEOUT)
+            .build()
             .ok()?;
-        let mut response = agent.run(request).ok()?;
-        if !response.status().is_success() {
-            return None;
-        }
-        let raw = response.body_mut().read_to_string().ok()?;
-        let parsed: serde_json::Value = serde_json::from_str(&raw).ok()?;
-        let values = parsed
-            .get("data")?
-            .as_array()?
-            .first()?
-            .get("embedding")?
-            .as_array()?;
-        let vector: Vec<f32> = values
-            .iter()
-            .map(|value| value.as_f64().map(narrow))
-            .collect::<Option<Vec<f32>>>()?;
-        Some(vector)
+        // CoreKit requires one response item per input. The Go llmkit transport
+        // applies the same cardinality check before Brain reads the first item.
+        let embeddings = client.embed(&self.model, &[text.to_owned()], None).ok()?;
+        embeddings
+            .into_iter()
+            .next()
+            .map(|embedding| embedding.vector)
     }
 
     /// Reduces the configured endpoint to its `scheme://host` root and appends
@@ -196,7 +175,95 @@ fn fnv1a32(value: &str) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use super::local_hash_vector;
+    use super::{EmbeddingGenerator, HASH_FALLBACK_SOURCE, OLLAMA_SOURCE, local_hash_vector};
+    use serde_json::Value;
+    use std::io::{BufRead, BufReader, Read, Write};
+    use std::net::{TcpListener, TcpStream};
+    use std::thread;
+    use std::time::Duration;
+
+    struct MockServer {
+        url: String,
+        join: Option<thread::JoinHandle<(String, Vec<u8>)>>,
+    }
+
+    impl MockServer {
+        fn reply(status: &str, body: &str, delay: Duration) -> Self {
+            let listener = TcpListener::bind(("127.0.0.1", 0)).expect("bind mock server");
+            let address = listener.local_addr().expect("mock server address");
+            let status = status.to_owned();
+            let body = body.as_bytes().to_vec();
+            let join = thread::spawn(move || {
+                let (stream, _) = listener.accept().expect("accept request");
+                Self::serve(stream, &status, &body, delay)
+            });
+            Self {
+                url: format!("http://{address}/api/embeddings"),
+                join: Some(join),
+            }
+        }
+
+        fn serve(
+            mut stream: TcpStream,
+            status: &str,
+            body: &[u8],
+            delay: Duration,
+        ) -> (String, Vec<u8>) {
+            stream
+                .set_read_timeout(Some(Duration::from_secs(2)))
+                .expect("set read timeout");
+            let mut reader = BufReader::new(stream.try_clone().expect("clone stream"));
+            let mut first_line = String::new();
+            reader
+                .read_line(&mut first_line)
+                .expect("read request line");
+            let mut content_length = 0;
+            loop {
+                let mut line = String::new();
+                reader.read_line(&mut line).expect("read request header");
+                if line == "\r\n" || line.is_empty() {
+                    break;
+                }
+                if let Some(value) = line
+                    .split_once(':')
+                    .filter(|(name, _)| name.eq_ignore_ascii_case("content-length"))
+                    .map(|(_, value)| value.trim())
+                {
+                    content_length = value.parse().expect("content length");
+                }
+            }
+            let mut request_body = vec![0; content_length];
+            reader
+                .read_exact(&mut request_body)
+                .expect("read request body");
+            if !delay.is_zero() {
+                thread::sleep(delay);
+            }
+            let response = format!(
+                "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                body.len()
+            );
+            let _ = stream.write_all(response.as_bytes());
+            let _ = stream.write_all(body);
+            (first_line, request_body)
+        }
+
+        fn request(&mut self) -> (String, Vec<u8>) {
+            self.join
+                .take()
+                .expect("mock server joined")
+                .join()
+                .expect("mock server")
+        }
+    }
+
+    fn embedding_response(count: usize, dimensions: usize) -> String {
+        let vector = vec![0.25_f32; dimensions];
+        let data = (0..count)
+            .map(|_| serde_json::json!({"embedding": vector}))
+            .collect::<Vec<_>>();
+        serde_json::json!({"data": data}).to_string()
+    }
 
     #[test]
     fn hash_fallback_is_normalized_and_deterministic() {
@@ -224,5 +291,61 @@ mod tests {
         // An all-stop-word text has no direction at all.
         let empty = local_hash_vector("the and of");
         assert!(empty.iter().all(|value| *value == 0.0));
+    }
+
+    #[test]
+    fn shared_llm_client_keeps_ollama_openai_request_contract() {
+        let mut server = MockServer::reply("200 OK", &embedding_response(1, 768), Duration::ZERO);
+        let result = EmbeddingGenerator::new(&server.url, "model-test").generate("query text");
+        let (request_line, body) = server.request();
+        let request: Value = serde_json::from_slice(&body).expect("request JSON");
+
+        assert_eq!(result.source, OLLAMA_SOURCE);
+        assert_eq!(result.vector, vec![0.25_f32; 768]);
+        assert_eq!(request_line, "POST /v1/embeddings HTTP/1.1\r\n");
+        assert_eq!(request["model"], "model-test");
+        assert_eq!(request["input"], serde_json::json!(["query text"]));
+        assert!(request.get("prompt").is_none());
+    }
+
+    #[test]
+    fn shared_llm_client_rejects_extra_embedding_items_like_go_llmkit() {
+        let mut server = MockServer::reply("200 OK", &embedding_response(2, 768), Duration::ZERO);
+        let result = EmbeddingGenerator::new(&server.url, "model-test").generate("query text");
+        let _ = server.request();
+
+        assert_eq!(result.source, HASH_FALLBACK_SOURCE);
+        assert_eq!(result.vector, local_hash_vector("query text"));
+    }
+
+    #[test]
+    fn shared_llm_client_rejects_wrong_dimension_and_http_errors() {
+        let mut wrong_dimensions =
+            MockServer::reply("200 OK", &embedding_response(1, 767), Duration::ZERO);
+        let wrong =
+            EmbeddingGenerator::new(&wrong_dimensions.url, "model-test").generate("query text");
+        let _ = wrong_dimensions.request();
+        assert_eq!(wrong.source, HASH_FALLBACK_SOURCE);
+
+        let mut error = MockServer::reply("503 Service Unavailable", "{}", Duration::ZERO);
+        let failed = EmbeddingGenerator::new(&error.url, "model-test").generate("query text");
+        let _ = error.request();
+        assert_eq!(failed.source, HASH_FALLBACK_SOURCE);
+    }
+
+    #[test]
+    fn shared_llm_client_times_out_to_hash_fallback() {
+        let mut server = MockServer::reply(
+            "200 OK",
+            &embedding_response(1, 768),
+            Duration::from_millis(2300),
+        );
+        let started = std::time::Instant::now();
+        let result = EmbeddingGenerator::new(&server.url, "model-test").generate("query text");
+        let elapsed = started.elapsed();
+        let _ = server.request();
+
+        assert_eq!(result.source, HASH_FALLBACK_SOURCE);
+        assert!(elapsed < Duration::from_secs(3), "timeout took {elapsed:?}");
     }
 }
